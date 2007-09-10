@@ -26,10 +26,12 @@
 #include "atermpp/vector.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
+#include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/free_variables.h"
 
 namespace lps {
@@ -287,7 +289,7 @@ class pbes
     bool save(const std::string& filename, bool binary = true) const
     {
       if (!is_well_typed())
-        throw std::runtime_error("Error in pbes::load(): term is not well typed");
+        throw std::runtime_error("Error in pbes::save(): term is not well typed");
 
       aterm t = ATermAppl(*this);
       if (binary)
@@ -393,7 +395,7 @@ class pbes
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
     /// <li>the sorts occurring in the quantifier variables of the equations are declared in the data specification </li>
     ///
-    /// <li>the free variables of the equations have unique sorts</li>
+    /// <li>instances of free variables in the equations with the same name are identical</li>
     /// <li>the binding variables of the equations have unique names (well formedness)</li>
     ///
     /// <li>the data specification is well typed</li>
@@ -404,29 +406,67 @@ class pbes
     /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
     bool is_well_typed() const
     {
-      std::set<lps::sort> sorts = detail::make_set(data().sorts());
+      std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
 
-      // check )
-      if (!(detail::check_variable_sorts(equations().free_variables(), sorts)))
+      // check 1)
+      if (!detail::is_subset_of(boost::make_transform_iterator(equations().free_variables().begin(), detail::data_variable_sort()),
+                                boost::make_transform_iterator(equations().free_variables().end()  , detail::data_variable_sort()),
+                                declared_sorts
+                               )
+         )
       {
         data_variable_list free_variables(equations().free_variables().begin(), equations().free_variables().end());
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables " << pp(free_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
-      // check )
+      // check 2)
+      for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        const data_variable_list& variables = i->variable().parameters();
+        if (!detail::is_subset_of(boost::make_transform_iterator(variables.begin(), detail::data_variable_sort()),
+                                  boost::make_transform_iterator(variables.end()  , detail::data_variable_sort()),
+                                  declared_sorts
+                                 )
+           )
+        {
+          std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable " << pp(i->variable()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+          return false;
+        }
+      }
+
+      // check 3)
+      // collect the set of all quantifier variables in qvisitor
+      detail::quantifier_visitor qvisitor;
+      for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        qvisitor.visit(i->formula());
+      }
+      // check the existence of the sorts
+      if (!detail::is_subset_of(boost::make_transform_iterator(qvisitor.variables.begin(), detail::data_variable_sort()),
+                                boost::make_transform_iterator(qvisitor.variables.end()  , detail::data_variable_sort()),
+                                declared_sorts
+                               )
+         )
+      {
+        data_variable_list quantifier_variables(qvisitor.variables.begin(), qvisitor.variables.end());
+        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables " << pp(quantifier_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        return false;
+      }
+
+      // check 6)
       if (!data().is_well_typed())
       {
         return false;
       }
 
-      // check )
+      // check 7)
       if (!equations().is_well_typed())
       {
         return false;
       }
 
-      // check )
+      // check 8)
       if (!initial_state().is_well_typed())
       {
         return false;

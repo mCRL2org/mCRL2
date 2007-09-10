@@ -68,14 +68,6 @@ class pbes_initializer: public aterm_appl
       return m_variable;
     }
 
-/*
-    /// Returns the initial state of the LPS.
-    ///
-    data_expression_list state() const
-    {
-      return detail::compute_initial_state(m_variable);
-    }
-*/
     /// Applies a substitution to this pbes initializer and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///

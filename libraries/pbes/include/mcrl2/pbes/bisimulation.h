@@ -4,6 +4,7 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/make_list.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
@@ -67,16 +68,16 @@ linear_process rename_summation_variables(const linear_process& lps, const std::
   {
     std::set<data_variable> summand_variables = find_variables(*i);     
     std::vector<identifier_string> src;
-    std::set_intersection(boost::make_transform_iterator(summand_variables.begin(), variable_name()),
-                          boost::make_transform_iterator(summand_variables.end(), variable_name()),
+    std::set_intersection(boost::make_transform_iterator(summand_variables.begin(), detail::data_variable_name()),
+                          boost::make_transform_iterator(summand_variables.end(), detail::data_variable_name()),
                           forbidden_names.begin(),
                           forbidden_names.end(),
                           std::back_inserter(src)
                          );
 
     std::set<identifier_string> all;
-    std::set_union(boost::make_transform_iterator(summand_variables.begin(), variable_name()),
-                   boost::make_transform_iterator(summand_variables.end(), variable_name()),
+    std::set_union(boost::make_transform_iterator(summand_variables.begin(), detail::data_variable_name()),
+                   boost::make_transform_iterator(summand_variables.end(), detail::data_variable_name()),
                    forbidden_names.begin(),
                    forbidden_names.end(),
                    std::inserter(all, all.end())

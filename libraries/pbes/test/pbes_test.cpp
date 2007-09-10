@@ -128,6 +128,8 @@ void test_pbes()
   catch (std::runtime_error e)
   {
   }
+  p.save("pbes_test_file.pbes");
+  p.load("pbes_test_file.pbes");
 }
 
 void test_normalize()

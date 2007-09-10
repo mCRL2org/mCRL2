@@ -13,6 +13,7 @@
 #include <cassert>
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 
 namespace lps {
@@ -100,7 +101,7 @@ bool equal_signatures(const action& a, const action& b)
   if (a_args.size() != b_args.size())
     return false;
 
-  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), equal_data_expression_sort());
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), detail::equal_data_expression_sort());
 }
 
 } // namespace lps

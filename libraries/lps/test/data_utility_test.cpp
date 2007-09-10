@@ -66,6 +66,8 @@ int test_main(int, char*[])
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("d_01:D")) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("e_01:E")) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("f_01:F")) != w1.end());
+    
+  bool bb = (d < d0);
 
   return 0;
 }

@@ -31,24 +31,6 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_traits;
 
-/// Returns true if the expressions x and y have the same sort.
-struct equal_data_expression_sort
-{
-  bool operator()(const data_expression& x, const data_expression& y) const
-  {
-    return x.sort() == y.sort();
-  }
-};
-
-/// \brief Function object that returns the name of a data variable
-struct variable_name: public std::unary_function<data_variable, identifier_string>
-{
-  identifier_string operator()(const data_variable& v) const
-  {
-    return v.name();
-  }
-};
-
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
 std::set<identifier_string> identifiers(Term t)

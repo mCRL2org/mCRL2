@@ -183,13 +183,14 @@ class specification: public aterm_appl
     /// </ul>
     ///
     bool is_well_typed() const
-    { return true;
-      std::set<lps::sort> sorts = detail::make_set(data().sorts());
+    {
+      std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
+      std::set<action_label> declared_labels = detail::make_set(action_labels());
 
       // check 1)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
       {
-        if (!(detail::check_variable_sorts(i->summation_variables(), sorts)))
+        if (!(detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
         {
           std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << pp(i->summation_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
           return false;
@@ -197,27 +198,25 @@ class specification: public aterm_appl
       }
 
       // check 2)
-      if (!(detail::check_variable_sorts(process().process_parameters(), sorts)))
+      if (!(detail::check_variable_sorts(process().process_parameters(), declared_sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << pp(process().process_parameters()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 3)
-      if (!(detail::check_variable_sorts(process().free_variables(), sorts)))
+      if (!(detail::check_variable_sorts(process().free_variables(), declared_sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << pp(process().free_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 4)
-      if (!(detail::check_action_label_sorts(action_labels(), sorts)))
+      if (!(detail::check_action_label_sorts(action_labels(), declared_sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
       }
-
-      std::set<action_label> declared_labels = detail::make_set(action_labels());
 
       // check 5)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
@@ -229,19 +228,19 @@ class specification: public aterm_appl
         }
       }
 
-      // check 7)
+      // check 6)
       if (!process().is_well_typed())
       {
         return false;
       }
 
-      // check 8)
+      // check 7)
       if (!data().is_well_typed())
       {
         return false;
       }
 
-      // check 9)
+      // check 8)
       if (!initial_process().is_well_typed())
       {
         return false;

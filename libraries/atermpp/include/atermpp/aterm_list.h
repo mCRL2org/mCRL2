@@ -149,12 +149,12 @@ namespace atermpp {
       /// The assignment operator                                                                                                                                                        
       ///
 
-      /// Returns an iterator pointing to the end of the term_list.     
+      /// Returns a const_iterator pointing to the beginning of the term_list.
       ///
       const_iterator begin() const
       { return const_iterator(list()); } 
 
-      /// Returns a const_iterator pointing to the beginning of the term_list.
+      /// Returns a const_iterator pointing to the end of the term_list.     
       ///
       const_iterator end() const
       { return const_iterator(ATmakeList0()); }

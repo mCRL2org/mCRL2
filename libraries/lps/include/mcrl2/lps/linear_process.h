@@ -156,10 +156,10 @@ class linear_process: public aterm_appl
 
     /// Returns true if
     /// <ul>
-    /// <li>the free variables occurring in the process are contained in free_variables()        </li>
+    /// <li>the free variables occurring in the process are declared in free_variables()</li>
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
-    /// <li>the names of the process parameters do not appear as the name of a summation variable</li>
+    /// <li>process parameters and summation variables have different names</li>
     /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
     ///
     /// <li>the summands are well typed</li>
@@ -167,7 +167,7 @@ class linear_process: public aterm_appl
     ///
     bool is_well_typed() const
     {
-      // check 6)
+      // check 1)
       std::set<data_variable> declared_free_variables  = detail::make_set(free_variables());
       std::set<data_variable> occurring_free_variables = compute_free_variables(*this);
       if (!(std::includes(declared_free_variables.begin(),
@@ -190,13 +190,6 @@ class linear_process: public aterm_appl
         }
         std::cerr << std::endl;
         return false;
-      }
-
-      // check 1)
-      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
-      {
-        if (!i->is_well_typed())
-          return false;
       }
 
       // check 2)
@@ -236,6 +229,13 @@ class linear_process: public aterm_appl
           std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
         }
+      }
+
+      // check 6)
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
       }
 
       return true;
