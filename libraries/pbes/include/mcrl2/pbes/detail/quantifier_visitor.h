@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file free_variables.h
+/// \file quantifier_visitor.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_DETAIL_QUANTIFIER_VISITOR_H

@@ -24,41 +24,65 @@ struct pbes_expression_visitor
     return true;
   }
 
+  virtual void leave_data_expression()
+  {}
+
   virtual bool visit_true(const pbes_expression& e)
   {
     return true;
   }
+
+  virtual void leave_true()
+  {}
 
   virtual bool visit_false(const pbes_expression& e)
   {
     return true;
   }
 
+  virtual void leave_false()
+  {}
+
   virtual bool visit_and(const pbes_expression& e, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return true;
   }
+
+  virtual void leave_and()
+  {}
 
   virtual bool visit_or(const pbes_expression& e, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return true;
   }    
 
+  virtual void leave_or()
+  {}
+
   virtual bool visit_forall(const pbes_expression& e, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return true;
   }
+
+  virtual void leave_forall()
+  {}
 
   virtual bool visit_exists(const pbes_expression& e, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return true;
   }
 
+  virtual void leave_exists()
+  {}
+
   virtual bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& /* v */)
   {
     return true;
   }
   
+  virtual void leave_propositional_variable()
+  {}
+
   /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
@@ -68,10 +92,13 @@ struct pbes_expression_visitor
 
     if (is_data(e)) {
       visit_data_expression(e, val(e));
+      leave_data_expression();
     } else if (is_true(e)) {
       visit_true(e);
+      leave_true();
     } else if (is_false(e)) {
       visit_false(e);
+      leave_false();
     } else if (is_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
@@ -80,6 +107,7 @@ struct pbes_expression_visitor
         visit(left);
         visit(right);
       }
+      leave_and();
     } else if (is_or(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
@@ -88,6 +116,7 @@ struct pbes_expression_visitor
         visit(left);
         visit(right);
       }
+      leave_or();
     } else if (is_forall(e)) {
       const data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
@@ -95,6 +124,7 @@ struct pbes_expression_visitor
       if (result) {
         visit(qexpr);
       }
+      leave_forall();
     } else if (is_exists(e)) {
       const data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
@@ -102,9 +132,11 @@ struct pbes_expression_visitor
       if (result) {
         visit(qexpr);
       }
+      leave_exists();
     }
     else if(is_propositional_variable_instantiation(e)) {
       visit_propositional_variable(e, propositional_variable_instantiation(e));
+      leave_propositional_variable();
     }
   }
 };

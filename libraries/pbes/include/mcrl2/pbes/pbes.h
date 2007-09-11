@@ -15,12 +15,13 @@
 #include <utility>
 #include <string>
 #include <cassert>
+#include <map>
 #include <set>
 #include <iterator>
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
-
+#include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/aterm_list.h"
 #include "atermpp/set.h"
 #include "atermpp/vector.h"
@@ -32,7 +33,8 @@
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
-#include "mcrl2/pbes/detail/free_variables.h"
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/pbes_functional.h"
 
 namespace lps {
 
@@ -49,7 +51,7 @@ class equation_system: public atermpp::vector<pbes_equation>
 {
   protected:
     atermpp::set<data_variable> m_free_variables;
-    
+
   public:
     equation_system()
     {}
@@ -66,7 +68,7 @@ class equation_system: public atermpp::vector<pbes_equation>
       : atermpp::vector<pbes_equation>(l.begin(), l.end()),
         m_free_variables(free_variables)
     {}
-  
+
     /// Applies a substitution to this equation system.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -74,7 +76,7 @@ class equation_system: public atermpp::vector<pbes_equation>
     void substitute(Substitution f)
     {
       std::transform(begin(), end(), begin(), f);
-    }     
+    }
 
     /// Returns a equation_system which is the concatenation of the equations
     /// of this equation_system and the other.
@@ -148,7 +150,7 @@ class equation_system: public atermpp::vector<pbes_equation>
       }
       return true;
     }
-    
+
     /// Returns the free variables of this equation system.
     const atermpp::set<data_variable>& free_variables() const
     {
@@ -158,7 +160,7 @@ class equation_system: public atermpp::vector<pbes_equation>
     /// Returns the free variables of this equation system.
     atermpp::set<data_variable>& free_variables()
     {
-      return m_free_variables;     
+      return m_free_variables;
     }
 
     /// Returns true if
@@ -190,7 +192,16 @@ class equation_system: public atermpp::vector<pbes_equation>
 inline
 std::set<data_variable> compute_free_variables(const equation_system& eqn)
 {
-  return detail::free_pbes_variables(eqn.begin(), eqn.end());
+  // return detail::free_pbes_variables(eqn.begin(), eqn.end());
+  detail::free_variable_visitor visitor;
+
+  for (equation_system::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+  {
+    visitor.bound_variables = i->variable().parameters();
+    visitor.visit(i->formula());
+  }
+
+  return visitor.result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,7 +245,7 @@ class pbes
     {}
 
     pbes(data_specification data,
-         equation_system equations, 
+         equation_system equations,
          pbes_initializer initial_state)
       :
         m_data(data),
@@ -245,7 +256,7 @@ class pbes
     }
 
     pbes(data_specification data,
-         equation_system equations, 
+         equation_system equations,
          propositional_variable_instantiation initial_state)
       :
         m_data(data),
@@ -356,7 +367,7 @@ class pbes
     {
       // collect the free variables of the equations
       atermpp::set<data_variable> result = m_equations.free_variables();
-        
+
       // add the (free) variables appearing in the initial state
       const data_expression_list parameters = m_initial_state.variable().parameters();
       for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
@@ -451,6 +462,35 @@ class pbes
       {
         data_variable_list quantifier_variables(qvisitor.variables.begin(), qvisitor.variables.end());
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables " << pp(quantifier_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        return false;
+      }
+
+      // check 4)
+      std::set<data_variable> free_variables = compute_free_variables(equations());
+      std::map<identifier_string, data_variable> free_variable_map;
+      for (std::set<data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+      {
+        std::map<identifier_string, data_variable>::iterator j = free_variable_map.find(i->name());
+        if (j == free_variable_map.end())
+        {
+          free_variable_map[i->name()] == *i;
+        }
+        else
+        {
+          if (j->second != *i)
+          {
+            std::cerr << "pbes::is_well_typed() failed: the free variables " << pp(*i) << " and " << pp(j->second) << " have different types" << std::endl;
+          }
+        }
+      }
+
+      // check 5)
+      if (detail::contains_duplicates(boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
+                                      boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
+                                     )
+         )
+      {
+        std::cerr << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
         return false;
       }
 

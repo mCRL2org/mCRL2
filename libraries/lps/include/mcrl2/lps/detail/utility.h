@@ -18,16 +18,14 @@ namespace lps {
 
 namespace detail {
 
-/*
 /// Returns true if the sequence [first, last[ contains duplicates.
 // TODO: this implementation is not particularly efficient
 template <typename Iterator>
 bool contains_duplicates(Iterator first, Iterator last)
 {
-  std::set<std::iterator_traits<Iterator>::value_type> s(first, last);
+  std::set<typename std::iterator_traits<Iterator>::value_type> s(first, last);
   return s.size() < std::distance(first, last);
 }
-*/
 
 /// Returns true if all elements of the range [first, last[ are element of s.
 template <typename Iterator, typename T>
