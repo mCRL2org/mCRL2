@@ -16,13 +16,14 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/pbes/pbes_expression_builder.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
-const std::string SPECIFICATION = 
+const std::string SPECIFICATION =
 "act a:Nat;                               \n"
 "                                         \n"
 "map smaller: Nat#Nat -> Bool;            \n"
@@ -35,7 +36,7 @@ const std::string SPECIFICATION =
 "                                         \n"
 "init P(0);                               \n";
 
-const std::string MPSU_SPECIFICATION = 
+const std::string MPSU_SPECIFICATION =
 "% This file describes a controller for a simplified Movable Patient                   \n"
 "% Support Unit. It is described in Fokkink, Groote and Reniers,                       \n"
 "% Modelling reactive systems.                                                         \n"
@@ -103,7 +104,7 @@ void test_pbes()
 
   BOOST_CHECK(!p.equations().is_bes());
   BOOST_CHECK(!e.is_bes());
-  
+
   data_expression d  = pbes2data(e, spec);
   // pbes_expression e1 = data2pbes(d);
   // BOOST_CHECK(e == e1);
@@ -116,7 +117,7 @@ void test_pbes()
   catch (std::runtime_error e)
   {
   }
-  
+
   try
   {
     aterm t = make_term("f(x)");
@@ -149,7 +150,7 @@ void test_normalize()
   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
   bool timed = false;
-  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed); 
+  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 }
 
 void test_xyz_generator()
@@ -195,7 +196,25 @@ void test_free_variables()
   {
     cout << e.what() << endl;
     BOOST_CHECK(false); // loading is expected to succeed
-  }  
+  }
+}
+
+void test_pbes_expression_builder()
+{
+  specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
+  state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
+  bool timed = false;
+  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed);
+
+  for (equation_system::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  {
+    const pbes_expression& q = i->formula();
+    pbes_expression_builder builder;
+    pbes_expression q1 = builder.visit(q);
+    std::cout << "<q> " << pp(q)  << std::endl;
+    std::cout << "<q1>" << pp(q1) << std::endl;
+    BOOST_CHECK(q == q1);
+  }
 }
 
 int test_main(int argc, char* argv[])
@@ -209,6 +228,7 @@ int test_main(int argc, char* argv[])
   test_state_formula();
   test_xyz_generator();
   // test_free_variables();
-  
+  test_pbes_expression_builder();
+
   return 0;
 }
