@@ -37,7 +37,7 @@
 				  | ParStat(<Statement>,<Statement>)
   				  | StarStat(<Statement>)
 			      | GuardedStarStat(<Expr>,<Statement>)
-				  | DeltaStat
+				  | DeltaStat(OptGuard,Delta)
 					
 <OptGuard>		::= <Expr> 
 				  |	Nil

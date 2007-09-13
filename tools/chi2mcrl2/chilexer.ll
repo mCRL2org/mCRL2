@@ -133,6 +133,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "^"		{ process_string(); return POWER; }
 "mod"	{ process_string(); return MOD; }
 "div"	{ process_string(); return DIV; }
+"/"     { process_string(); return DIVIDE; } 
  
 proc    { process_string(); return PROC; }
 var		{ process_string(); return VAR; }

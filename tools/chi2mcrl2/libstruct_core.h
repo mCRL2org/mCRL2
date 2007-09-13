@@ -229,11 +229,33 @@ bool gsIsDataVarID(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunDataVarID();
 }
 
+// Delta
+inline
+AFun initAFunDelta(AFun& f)
+{
+  f = ATmakeAFun("Delta", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunDelta()
+{
+  static AFun AFunDelta = initAFunDelta(AFunDelta);
+  return AFunDelta;
+}
+
+inline
+bool gsIsDelta(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunDelta();
+}
+
 // DeltaStat
 inline
 AFun initAFunDeltaStat(AFun& f)
 {
-  f = ATmakeAFun("DeltaStat", 0, ATfalse);
+  f = ATmakeAFun("DeltaStat", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -702,9 +724,15 @@ ATermAppl gsMakeDataVarID(ATermList String_0, ATermAppl TypeExp_1)
 }
 
 inline
-ATermAppl gsMakeDeltaStat()
+ATermAppl gsMakeDelta()
 {
-  return ATmakeAppl0(gsAFunDeltaStat());
+  return ATmakeAppl0(gsAFunDelta());
+}
+
+inline
+ATermAppl gsMakeDeltaStat(ATermAppl OptGuard_0, ATermAppl Delta_1)
+{
+  return ATmakeAppl2(gsAFunDeltaStat(), (ATerm) OptGuard_0, (ATerm) Delta_1);
 }
 
 inline

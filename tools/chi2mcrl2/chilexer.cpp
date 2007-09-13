@@ -325,8 +325,8 @@ typedef unsigned char YY_CHAR;
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 69
-#define YY_END_OF_BUFFER 70
+#define YY_NUM_RULES 70
+#define YY_END_OF_BUFFER 71
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -336,22 +336,22 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[145] =
     {   0,
-        0,    0,   70,   68,    1,    2,   68,   31,    3,   68,
-       42,   34,   35,    9,   18,   13,   17,   36,   68,   66,
-       66,   14,    8,   68,   15,   68,   37,   65,   68,   68,
-       43,   65,   65,   65,   65,   65,   65,   65,   65,   65,
-       65,   65,   65,   65,   65,   65,   32,    7,   33,    2,
-       40,   39,    3,   23,   10,   28,   20,   25,   67,   66,
-       12,   16,   21,   19,   29,   22,   11,   38,   41,   65,
-       27,    5,   65,   65,   65,   65,   65,   65,   65,   65,
-       65,   65,   65,   65,   65,   65,   65,   26,   65,   65,
-       65,   65,   65,   65,   65,    4,    6,   67,   24,   65,
+        0,    0,   71,   69,    1,    2,   69,   31,    3,   69,
+       42,   34,   35,    9,   18,   13,   17,   36,   46,   67,
+       67,   14,    8,   69,   15,   69,   37,   66,   69,   69,
+       43,   66,   66,   66,   66,   66,   66,   66,   66,   66,
+       66,   66,   66,   66,   66,   66,   32,    7,   33,    2,
+       40,   39,    3,   23,   10,   28,   20,   25,   68,   67,
+       12,   16,   21,   19,   29,   22,   11,   38,   41,   66,
+       27,    5,   66,   66,   66,   66,   66,   66,   66,   66,
+       66,   66,   66,   66,   66,   66,   66,   26,   66,   66,
+       66,   66,   66,   66,   66,    4,    6,   68,   24,   66,
 
-       65,   65,   65,   65,   45,   65,   65,   59,   54,   53,
-       44,   58,   30,   64,   65,   65,   65,   65,   65,   65,
-       47,   57,   52,   65,   65,   65,   48,   65,   46,   60,
-       49,   65,   56,   50,   55,   65,   63,   51,   65,   65,
-       61,   65,   62,    0
+       66,   66,   66,   66,   45,   66,   66,   60,   55,   54,
+       44,   59,   30,   65,   66,   66,   66,   66,   66,   66,
+       48,   58,   53,   66,   66,   66,   49,   66,   47,   61,
+       50,   66,   57,   51,   56,   66,   64,   52,   66,   66,
+       62,   66,   63,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -988,73 +988,73 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 137 "chilexer.ll"
-{ process_string(); return PROC; }
+#line 136 "chilexer.ll"
+{ process_string(); return DIVIDE; } 
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 138 "chilexer.ll"
-{ process_string(); return VAR; }
+{ process_string(); return PROC; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 139 "chilexer.ll"
-{ process_string(); return ENUM; }
+{ process_string(); return VAR; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 140 "chilexer.ll"
-{ process_string(); return SKIP; }
+{ process_string(); return ENUM; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 141 "chilexer.ll"
-{ process_string(); return TRUE; }
+{ process_string(); return SKIP; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 142 "chilexer.ll"
-{ process_string(); return FALSE; }
+{ process_string(); return TRUE; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 143 "chilexer.ll"
-{ process_string(); return CHAN; }
+{ process_string(); return FALSE; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 144 "chilexer.ll"
-{ process_string(); return MIN; }
+{ process_string(); return CHAN; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 145 "chilexer.ll"
-{ process_string(); return MAX; }
+{ process_string(); return MIN; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 147 "chilexer.ll"
-{ process_string(); return CONST; }
+#line 146 "chilexer.ll"
+{ process_string(); return MAX; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 148 "chilexer.ll"
-{ process_string(); return TIME; }
+{ process_string(); return CONST; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 151 "chilexer.ll"
-{ process_string(); return BOOL; }
+#line 149 "chilexer.ll"
+{ process_string(); return TIME; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 152 "chilexer.ll"
-{ process_string(); return NAT; }
+{ process_string(); return BOOL; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 153 "chilexer.ll"
-{ process_string(); return TYPE; }
+{ process_string(); return NAT; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
@@ -1068,8 +1068,8 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 157 "chilexer.ll"
-{ process_string();return DEADLOCK; }
+#line 156 "chilexer.ll"
+{ process_string(); return TYPE; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
@@ -1079,34 +1079,39 @@ YY_RULE_SETUP
 case 64:
 YY_RULE_SETUP
 #line 159 "chilexer.ll"
-{ process_string(); return OLD;}
+{ process_string();return DEADLOCK; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 161 "chilexer.ll"
-{ process_string(); return ID; }
+#line 160 "chilexer.ll"
+{ process_string(); return OLD;}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 162 "chilexer.ll"
-{ process_string(); return NUMBER; }
+{ process_string(); return ID; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 163 "chilexer.ll"
-{ process_string(); return REALNUMBER; }
+{ process_string(); return NUMBER; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 164 "chilexer.ll"
-{ col_nr += YYLeng(); yyerror("unknown character"); }
+{ process_string(); return REALNUMBER; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 167 "chilexer.ll"
+#line 165 "chilexer.ll"
+{ col_nr += YYLeng(); yyerror("unknown character"); }
+	YY_BREAK
+case 70:
+YY_RULE_SETUP
+#line 168 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1110 "chilexer.cpp"
+#line 1115 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1988,7 +1993,7 @@ void chiyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 167 "chilexer.ll"
+#line 168 "chilexer.ll"
 
 
 

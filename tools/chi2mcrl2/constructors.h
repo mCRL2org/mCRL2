@@ -56,6 +56,7 @@ ATermAppl constructAssignmentGGStat();
 ATermAppl constructParStat();
 ATermAppl constructAssignmentStat();
 ATermAppl constructProcDecl();
+ATermAppl constructDelta();
 ATermAppl constructParenthesisedStat();
 ATermAppl constructSkipStat();
 ATermAppl constructBinaryExpression();
@@ -130,7 +131,7 @@ ATermAppl constructChannelID()
 inline
 ATermAppl initConstructDeltaStat(ATermAppl& t)
 {
-  t = ATmakeAppl0(gsAFunDeltaStat());
+  t = ATmakeAppl2(gsAFunDeltaStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructDelta()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -331,6 +332,22 @@ inline
 ATermAppl constructProcDecl()
 {
   static ATermAppl t = initConstructProcDecl(t);
+  return t;
+}
+
+// Delta
+inline
+ATermAppl initConstructDelta(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunDelta());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructDelta()
+{
+  static ATermAppl t = initConstructDelta(t);
   return t;
 }
 

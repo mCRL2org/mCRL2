@@ -1,0 +1,5 @@
+proc Test( var r, k: nat, z: bool  ) =
+|[ var a, b : bool = false,
+   var    c    : nat ,
+       d    : bool 
+:: (a, c := true,  4 ^ (15 + 4) | skip) ; skip ;(a := false) ]|

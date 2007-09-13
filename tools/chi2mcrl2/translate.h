@@ -70,7 +70,9 @@ class CAsttransform
     std::vector<RVT> manipulateDeclaredProcessVariable(ATermAppl input); 
     std::string manipulateExpression(ATermAppl input);
     int manipulateStatements(ATermAppl input, int current, int next);
-
+    std::map<std::string, std::string> manipulateAssignmentStat(ATermList input_id, ATermList input_exp);
+    std::vector<std::string> getExpressionsFromList(ATermList input);
+    bool onlyIdentifiersInExpression(ATermList input );
 
     //Future implementation
     std::string manipulateExplicitTemplates(ATermList input);

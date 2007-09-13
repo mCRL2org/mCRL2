@@ -69,10 +69,9 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 
 %left ALT SEP
-%left '-' '+'
-%left '*' '/'       /* order '+','-','*','/' */
-%right '^'          /* exponentiation        */
-%nonassoc MINUS     /* negation--unary minus */
+%left MINUS PLUS 
+%left STAR DIVIDE       /* order '+','-','*','/' */
+%right POWER          /* exponentiation        */
 %start ChiProgram
 %glr-parser
 %debug
@@ -89,10 +88,10 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %type <appl> LocalVariables Identifier AssignmentStatement 
 %type <appl> ProcessBody OptGuard BasicStatement OptChannel Statement BinaryStatement UnaryStatement
 %type <appl> AdvancedStatement //IdentifierChannelDefinition ChannelDefinition
-%type <appl> ChiProgram ProcessDefinition FormalParameter 
+%type <appl> ChiProgram ProcessDefinition FormalParameter ExpressionIdentifier
 
 %type <list> Identifier_csp Expression_csp FormalParameter_csp 
-%type <list> IdentifierTypeExpression_csp IdentifierType_csp
+%type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
 %type <list> LocalVariables_csp //ChannelDefinition_csp IdentifierChannelDefinition_csp
 
 /* 
@@ -386,8 +385,23 @@ BasicStatement:
 	;
 
 AssignmentStatement:
-	  OptGuard OptChannel Expression_csp ASSIGNMENT Expression_csp
-     	{ safe_assign($$, gsMakeAssignmentStat($1, $2, $3, $5) );
+	  OptGuard OptChannel ExpressionIdentier_csp ASSIGNMENT Expression_csp
+     	{
+          ATermList ids = $3;
+          ATermList exprs = $5;
+
+          while(!ATisEmpty(ids))
+          { 
+            if (ATgetArgument(ATgetFirst(ids), 1) != ATgetArgument(ATgetFirst(exprs), 1))
+		    { 
+              gsErrorMsg("Incompatible Types Checking failed\n");
+		      exit(1);
+            }
+            ids = ATgetNext(ids);
+            exprs = ATgetNext(exprs);
+          }  
+ 
+          safe_assign($$, gsMakeAssignmentStat($1, $2, ATreverse($3), ATreverse($5) ) );
       	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
 		}
 	|
@@ -497,8 +511,8 @@ UnaryStatement:
 	;
 
 AdvancedStatement:
-	  DEADLOCK
-      	{ safe_assign($$, gsMakeDeltaStat());
+	  OptGuard DEADLOCK
+      	{ safe_assign($$, gsMakeDeltaStat($1, gsMakeDelta()));
       	  gsDebugMsg("parsed deadlock statement \n  %T\n", $$);	
 		}
 	;
@@ -540,6 +554,41 @@ Expression: //NUMBER
 //	| DistributionExpression
 //	| FunctionExpression
 	;	
+ExpressionIdentier_csp: //NUMBER
+	  ExpressionIdentifier
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+		}
+	| ExpressionIdentier_csp COMMA ExpressionIdentifier
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("parsed expression-element\n  %T\n", $$);	
+		}
+	;
+ExpressionIdentifier:
+	 Identifier
+		{
+		  /**  
+		    * Lookup Identifier Type
+		    *
+		    * TODO: Add scope
+		    *
+		    **/
+		  
+		  // Determine if the expression is defined already 
+		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
+		    {
+		      gsErrorMsg("Variable %T is not defined!\n", $1 );
+		      exit(1);
+		    };
+		  
+		  //Type the expression
+ 	  	  safe_assign($$, 
+			gsMakeExpression( $1, 
+			  (ATermAppl) var_type_map[(ATerm) $1] 
+			)
+		  );
+      	  gsDebugMsg("parsed Identifier's\n  %T\n", $$);
+		}
 
 
 BasicExpression:
@@ -565,7 +614,7 @@ BasicExpression:
 			  (ATermAppl) var_type_map[(ATerm) $1] 
 			)
 		  );
-      	  gsDebugMsg("parsed Expression's\n  %T\n", $$);
+      	  gsDebugMsg("parsed Identifier's\n  %T\n", $$);
 		}
 //	  OLD LBRACKET Expression RBRACKET 
 //	  Identifier DOT Identifier
@@ -724,7 +773,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Expression's\n  %T\n", $$);
 		}
-	| PLUS NUMBER
+	| PLUS Expression 
 		{ 
 			/**
 			  * Type Checking
@@ -744,7 +793,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
-	| MINUS NUMBER
+	| MINUS Expression 
 		{ 
 			/**
 			  * Type Checking
@@ -764,7 +813,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
 		}
-	| Expression '^' Expression
+	| Expression POWER Expression
 		{ 
 			/**
 			  * Type Checking
@@ -790,7 +839,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '*' Expression
+	| Expression STAR Expression
 		{ 
 			/**
 			  * Type Checking
@@ -816,7 +865,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '/' Expression
+	| Expression DIVIDE Expression
 		{ 
 			/**
 			  * Type Checking
@@ -842,7 +891,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '+' Expression
+	| Expression PLUS Expression
 		{ 
 			/**
 			  * Type Checking
@@ -868,7 +917,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '-' Expression
+	| Expression MINUS Expression
 		{ 
 			/**
 			  * Type Checking

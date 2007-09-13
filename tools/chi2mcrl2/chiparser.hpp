@@ -97,7 +97,8 @@
      RRECV = 314,
      STAR = 315,
      GUARD_REP = 316,
-     DERIVATIVE = 317
+     DERIVATIVE = 317,
+     DIVIDE = 318
    };
 #endif
 
@@ -158,7 +159,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 162 "chiparser.hpp"
+#line 163 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

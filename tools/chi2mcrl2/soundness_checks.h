@@ -116,6 +116,7 @@ template <typename Term> bool check_term_AssignmentGGStat(Term t);
 template <typename Term> bool check_term_ParStat(Term t);
 template <typename Term> bool check_term_AssignmentStat(Term t);
 template <typename Term> bool check_term_ProcDecl(Term t);
+template <typename Term> bool check_term_Delta(Term t);
 template <typename Term> bool check_term_ParenthesisedStat(Term t);
 template <typename Term> bool check_term_SkipStat(Term t);
 template <typename Term> bool check_term_BinaryExpression(Term t);
@@ -322,7 +323,7 @@ bool check_term_ChannelID(Term t)
   return true;
 }
 
-// DeltaStat()
+// DeltaStat(OptGuard, Delta)
 template <typename Term>
 bool check_term_DeltaStat(Term t)
 {
@@ -335,8 +336,20 @@ bool check_term_DeltaStat(Term t)
     return false;
 
   // check the children
-  if (a.size() != 0)
+  if (a.size() != 2)
     return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_term_OptGuard<aterm>))
+    {
+      std::cerr << "check_term_OptGuard" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_term_Delta<aterm>))
+    {
+      std::cerr << "check_term_Delta" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -690,6 +703,25 @@ bool check_term_ProcDecl(Term t)
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// Delta()
+template <typename Term>
+bool check_term_Delta(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsDelta(a))
+    return false;
+
+  // check the children
+  if (a.size() != 0)
+    return false;
 
   return true;
 }
