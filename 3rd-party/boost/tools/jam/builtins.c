@@ -23,6 +23,7 @@
 # include "compile.h"
 # include "native.h"
 # include "variable.h"
+# include "timestamp.h"
 # include <ctype.h>
 
 /*
@@ -58,7 +59,6 @@ LIST* builtin_system_registry_names( PARSE *parse, FRAME *frame );
 
 int glob( char *s, char *c );
 
-void lol_build( LOL* lol, char** elements );
 void backtrace( FRAME *frame );
 void backtrace_line( FRAME *frame );
 void print_source_line( PARSE* p );
@@ -1693,6 +1693,27 @@ bjam_import_rule(PyObject* self, PyObject* args)
 
     r->python_function = func;
     return Py_None;
+}
+
+
+/* Accepts two arguments -- an action name and an action body.
+   Defines an action on bjam side.  
+   
+   This interface does not (yet) support the list of bound
+   variables of the action flags (together/piecemeal/etc).  */
+PyObject*
+bjam_define_action(PyObject* self, PyObject *args)
+{
+    char* name;
+    char* body;
+    module_t* m;
+
+    if (!PyArg_ParseTuple(args, "ss:define_action", &name, &body))
+        return NULL;
+
+    new_rule_actions(root_module(), name, newstr(body), L0, 0);
+
+    return Py_None;    
 }
 
 #endif

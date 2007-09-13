@@ -218,6 +218,7 @@
 
 # ifdef _AIX
 # define unix
+# define MAXLINE 23552 /* 24k - 1k, longest 'together' actions */
 # define OSMINOR "OS=AIX"
 # define OS_AIX
 # define NO_VFORK
@@ -522,9 +523,11 @@ struct globs {
 	int	jobs;
 	int	quitquick;
 	int	newestfirst;		/* build newest sources first */
+        int     pipe_action;
 	char	debug[DEBUG_MAX];
 	FILE	*cmdout;		/* print cmds, not run them */
-    long timeout; /* number of seconds to limit actions to, default 0 for no limit. */
+    long timeout;           /* number of seconds to limit actions to, default 0 for no limit. */
+    int dart;               /* output build and test results formatted for Dart */
 } ;
 
 extern struct globs globs;

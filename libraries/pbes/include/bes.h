@@ -15,6 +15,7 @@
 #include "atermpp/aterm_access.h"
 #include "atermpp/aterm_appl.h"
 #include "atermpp/aterm_int.h"
+#include "atermpp/indexed_set.h"
 #include "atermpp/table.h"
 #include "mcrl2/pbes/pbes.h"
 #include <algorithm>

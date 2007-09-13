@@ -1,18 +1,19 @@
-#~ Copyright 2002-2005 Rene Rivera.
+#~ Copyright 2002-2007 Rene Rivera.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 # Platform related specifics.
-if $(NT) { rule .path { return "$(<:J=\\)" ; } }
-else if $(OS2) { rule .path { return "$(<:J=\\)" ; } }
+if $(NT) { rule .path { return "$(<:J=\\)" ; } ./ = "/" ; }
+else if $(OS2) { rule .path { return "$(<:J=\\)" ; } ./ = "/" ; }
 else if $(VMS) { rule .path { return "[.$(<:J=/)]" ; } }
 else if $(MAC) { rule .path { return ":$(<:J=\:)" ; } }
 else { rule .path { return "$(<:J=/)" ; } }
 if $(VMS) { . = "_" ; }
 else { . = "." ; }
+./ ?= "" ; 
 
 # Info about what we are building.
-_VERSION_ = 3 1 14 ;
+_VERSION_ = 3 1 15 ;
 NAME = boost-jam ;
 VERSION = $(_VERSION_:J=$(.)) ;
 RELEASE = 1 ;
@@ -243,7 +244,7 @@ toolset mipspro cc : "-o " : -D
     -I$(--python-include) -I$(--extra-include)
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
 ## Microsoft Visual Studio C++ 6.x
-toolset msvc cl : /Fe : -D
+toolset msvc cl : /Fe /Fe /Fd /Fo : -D
     : /nologo
     [ opt --release : /ML /O2 /Ob2 /Gy /GF /GA /GB ]
     [ opt --debug : /MLd /DEBUG /Z7 /Od /Ob0 ]
@@ -256,7 +257,29 @@ toolset qcc qcc : "-o " : -D
     [ opt --debug : -g -O0 -Wc,-fno-inline ]
     -I$(--python-include) -I$(--extra-include)
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
+## Qlogic Pathscale 2.4
+toolset pathscale pathcc : "-o " : -D
+    :
+    [ opt --release : -s -Ofast -O3 ]
+    [ opt --debug : -g ]
+    -I$(--python-include) -I$(--extra-include)
+    : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
+## Portland Group Pgi 6.2
+toolset pgi pgcc : "-o " : -D
+    :
+    [ opt --release : -s -O3 ]
+    [ opt --debug : -g ]
+    -I$(--python-include) -I$(--extra-include)
+    : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
 ## Sun Workshop 6 C++
+toolset sun cc : "-o " : -D
+    :
+    [ opt --release : -s -fast -xO4 ]
+    [ opt --debug : -g ]
+    -xarch=generic
+    -I$(--python-include) -I$(--extra-include)
+    : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
+## Sun Workshop 6 C++ (old alias)
 toolset sunpro cc : "-o " : -D
     :
     [ opt --release : -s -fast -xO4 ]
@@ -279,14 +302,14 @@ toolset vacpp xlc : "-o " : -D
     -I$(--python-include) -I$(--extra-include)
     : -L$(--python-lib[1]) -l$(--python-lib[2]) -bmaxdata:0x40000000 ;
 ## Microsoft Visual C++ .NET 7.x
-toolset vc7 cl : /Fe : -D
+toolset vc7 cl : /Fe /Fe /Fd /Fo : -D
     : /nologo
     [ opt --release : /ML /O2 /Ob2 /Gy /GF /GA /GB ]
     [ opt --debug : /MLd /DEBUG /Z7 /Od /Ob0 ]
     -I$(--python-include) -I$(--extra-include)
     : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
 ## Microsoft Visual C++ 2005
-toolset vc8 cl : /Fe : -D
+toolset vc8 cl : /Fe /Fe /Fd /Fo : -D
     : /nologo
     [ opt --release : /MT /O2 /Ob2 /Gy /GF /GA /wd4996 ]
     [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 /wd4996 ]
@@ -328,8 +351,16 @@ if ! $(toolset) in $(toolsets)
 --cc = $(tool.$(toolset).cc) ;
 if $(tool.$(toolset).opt.out[2])
 {
-    --bin = $(tool.$(toolset).opt.out[1]) ;
-    --dir = $(tool.$(toolset).opt.out[2]) ;
+    if $(tool.$(toolset).opt.out[1]) = $(tool.$(toolset).opt.out[2])
+    {
+        --out = $(tool.$(toolset).opt.out[1]) ;
+        --dir = $(tool.$(toolset).opt.out[3-]) ;
+    }
+    else
+    {
+        --bin = $(tool.$(toolset).opt.out[1]) ;
+        --dir = $(tool.$(toolset).opt.out[2-]) ;
+    }
 }
 else
 {
@@ -344,8 +375,16 @@ if $(tool.$(toolset).link.cc)
     --link = $(tool.$(toolset).link.cc) ;
     if $(tool.$(toolset).link.opt.out[2])
     {
-        --link-bin = $(tool.$(toolset).link.opt.out[1]) ;
-        --link-dir = $(tool.$(toolset).link.opt.out[2]) ;
+        if $(tool.$(toolset).link.opt.out[1]) = $(tool.$(toolset).link.opt.out[2])
+        {
+            --link-out = $(tool.$(toolset).link.opt.out[1]) ;
+            --link-dir = $(tool.$(toolset).link.opt.out[3-]) ;
+        }
+        else
+        {
+            --link-bin = $(tool.$(toolset).link.opt.out[1]) ;
+            --link-dir = $(tool.$(toolset).link.opt.out[2-]) ;
+        }
     }
     else
     {
@@ -404,7 +443,7 @@ jam.source =
     hash.c hcache.c headers.c hdrmacro.c
     jam.c jambase.c jamgram.c
     lists.c make.c make1.c mem.c newstr.c
-    option.c parse.c regexp.c rules.c
+    option.c output.c parse.c regexp.c rules.c
     scan.c search.c subst.c w32_getreg.c
     timestamp.c variable.c modules.c strings.c filesys.c 
     builtins.c pwd.c class.c native.c modules/set.c 
@@ -456,6 +495,10 @@ if ! $(debug) || --noassert in $(ARGV)
 if $(--boehm-gc)
 {
     --defs += OPT_BOEHM_GC ;
+    if $(debug)
+    {
+        --defs += GC_DEBUG ;
+    }
 }
 
 if $(--duma)
@@ -567,16 +610,16 @@ rule .exe
     return $(exe) ;
 }
 if ! $(--def[2]) { actions [COMPILE] {
-    "$(--cc)" $(--bin)$(<:D=) $(--dir)$(<:D) $(--out)$(<) $(--def)$(--defs) $(--flags) "$(--libs)" $(>)
+    "$(--cc)" $(--bin)$(<:D=) $(--dir)$(<:D)$(./) $(--out)$(<) $(--def)$(--defs) $(--flags) "$(--libs)" $(>)
 } }
 else { actions [COMPILE] {
-    "$(--cc)" $(--bin)$(<:D=) $(--dir)$(<:D) $(--out)$(<) $(--def[1])$(--defs:J=$(--def[2]))$(--def[3]) $(--flags) "$(--libs)" $(>)
+    "$(--cc)" $(--bin)$(<:D=) $(--dir)$(<:D)$(./) $(--out)$(<) $(--def[1])$(--defs:J=$(--def[2]))$(--def[3]) $(--flags) "$(--libs)" $(>)
 } }
 if $(VMS) { actions [COMPILE.LINK] {
-    "$(--link)" $(--link-bin)$(<:D=) $(--link-dir)$(<:D) $(--link-out)$(<) $(--link-def)$(--link-defs) $(--link-flags) "$(--link-libs)" $(>J=", ")
+    "$(--link)" $(--link-bin)$(<:D=) $(--link-dir)$(<:D)$(./) $(--link-out)$(<) $(--link-def)$(--link-defs) $(--link-flags) "$(--link-libs)" $(>J=", ")
 } }
 else { actions [COMPILE.LINK] {
-    "$(--link)" $(--link-bin)$(<:D=) $(--link-dir)$(<:D) $(--link-out)$(<) $(--link-def)$(--link-defs) $(--link-flags) "$(--link-libs)" $(>)
+    "$(--link)" $(--link-bin)$(<:D=) $(--link-dir)$(<:D)$(./) $(--link-out)$(<) $(--link-def)$(--link-defs) $(--link-flags) "$(--link-libs)" $(>)
 } }
 
 rule .link
