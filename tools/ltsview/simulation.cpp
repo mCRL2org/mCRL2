@@ -17,8 +17,13 @@ Simulation::Simulation()
   started=false;
   chosenTrans = -1;
 }
-  
-void Simulation::start(State* initialState) {
+ 
+void Simulation::setInitialState(State* init)
+{
+  initialState = init;
+}
+
+void Simulation::start() {
   stateHis.push_back(initialState);
   initialState->setSimulated(true);
   currState = initialState;
@@ -55,9 +60,17 @@ void Simulation::stop()
   {
     stateHis[i]->setSimulated(false);
   }
+
+  for(size_t i = 0; i < posTrans.size(); ++i)
+  {
+    posTrans[i]->getEndState()->setSimulated(false);
+  }
+
   // Clear history
   stateHis.clear();
   transHis.clear();
+  posTrans.clear();
+  currState = NULL;
   // Fire signal
   signal();
   
@@ -112,52 +125,55 @@ bool Simulation::getStarted() const {
 }
 
 void Simulation::followTrans() {
-  Transition* toFollow = posTrans[chosenTrans];
-  State* nextState = toFollow->getEndState();
-  vector< Transition* > selfLoops;
-  
-  transHis.push_back(posTrans[chosenTrans]);
- 
-  for(size_t i = 0; i < posTrans.size(); ++i)
+  if (chosenTrans != -1)
   {
-    posTrans[i]->getEndState()->setSimulated(false);
-  }
+    Transition* toFollow = posTrans[chosenTrans];
+    State* nextState = toFollow->getEndState();
+    vector< Transition* > selfLoops;
+  
+    transHis.push_back(posTrans[chosenTrans]);
+   
+    for(size_t i = 0; i < posTrans.size(); ++i)
+    {
+      posTrans[i]->getEndState()->setSimulated(false);
+    }
 
 
-  for(size_t i = 0; i < stateHis.size(); ++i)
-  {
-    stateHis[i]->setSimulated(true);
-  }
+    for(size_t i = 0; i < stateHis.size(); ++i)
+    {
+      stateHis[i]->setSimulated(true);
+    }
 
-  nextState->setSimulated(true);
+    nextState->setSimulated(true);
   
-  stateHis.push_back(nextState);
-  currState = nextState;
+    stateHis.push_back(nextState);
+    currState = nextState;
   
-  nextState->getOutTransitions(posTrans);
-  nextState->getLoops(selfLoops);
+    nextState->getOutTransitions(posTrans);
+    nextState->getLoops(selfLoops);
   
-  size_t totalSize = posTrans.size() + selfLoops.size();
+    size_t totalSize = posTrans.size() + selfLoops.size();
   
-  for(size_t i = 0; i < posTrans.size(); ++i)
-  {
-    posTrans[i]->getEndState()->setSimulated(true);
-  }
+    for(size_t i = 0; i < posTrans.size(); ++i)
+    {
+      posTrans[i]->getEndState()->setSimulated(true);
+    }
 
-  for(size_t i = 0; i < selfLoops.size(); ++i)
-  {
-    selfLoops[i]->getEndState()->setSimulated(true);
-  }
+    for(size_t i = 0; i < selfLoops.size(); ++i)
+    { 
+      selfLoops[i]->getEndState()->setSimulated(true);
+    }
   
-  posTrans.reserve(totalSize);
+    posTrans.reserve(totalSize);
 
-  posTrans.insert< vector<Transition*>::iterator > (posTrans.end(), 
+    posTrans.insert< vector<Transition*>::iterator > (posTrans.end(), 
                                                     selfLoops.begin(),
                                                     selfLoops.end());
-  chosenTrans = -1;
+    chosenTrans = -1;
 
-  //Fire signal
-  signal();
+    //Fire signal
+    signal();
+  }
 }
 void Simulation::chooseTrans(int i) {
   chosenTrans = i;

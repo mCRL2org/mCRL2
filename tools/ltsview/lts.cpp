@@ -25,10 +25,85 @@ LTS::LTS(Mediator* owner) {
   lastCluster = NULL;
   previousLevel = NULL;
   lastWasAbove = false;
+  zoomLevel = 0;
+}
+
+LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
+{
+  // Copied/initial information
+  lastWasAbove = fromAbove;
+  previousLevel  = parent;
+  selectedState = NULL;
+  zoomLevel = previousLevel->getZoomLevel() + 1;
+  selectedCluster = previousLevel->getSelectedCluster();
+  markRules = previousLevel->getMarkRules();
+  matchAny = previousLevel->getMatchAnyMarkRule();
+  mediator = owner;
+
+  // simulation = new Simulation();
+  simulation = previousLevel->getSimulation();
+
+  for (int i = 0; i < previousLevel->getNumParameters(); ++i)
+  {
+    parameterNames.push_back(previousLevel->getParameterName(i));
+    parameterTypes.push_back(previousLevel->getParameterType(i));
+    
+    vector< string > values;
+
+    for (int j = 0; j < previousLevel->getNumParameterValues(i); ++j)
+    {
+      values.push_back(previousLevel->getParameterValue(i,j));
+    }
+
+    valueTable.push_back(values);
+  }
+  
+  previousLevel->getActionLabels(labels);
+
+  for(size_t i = 0; i < labels.size(); ++i)
+  {
+    pair<string, int> invLabel(labels[i], i);
+    labels_inv.insert(invLabel);
+
+    label_marks.push_back(previousLevel->getActionMarked(i));
+  }
+
+  // TODO: Derived information
+  if (lastWasAbove)
+  {
+    initialState = previousLevel->getInitialState();
+
+    lastCluster = selectedCluster;
+
+    Cluster* child = NULL; 
+    Cluster* parent = selectedCluster;
+
+    do
+    {
+      for (int i = 0; i < parent->getNumDescendants(); ++i)
+      {
+        if ( child == NULL || parent->getDescendant(i) != child)
+        {
+          parent->severDescendant(i);
+        }
+      }
+
+      addCluster(parent);
+      child = parent;
+      parent = child->getAncestor();
+    } while (child != initialState->getCluster());
+
+  }
+  else
+  {
+    initialState = selectedCluster->getState(0);
+    addClusterAndBelow(selectedCluster);
+  }
 }
 
 LTS::~LTS()
 {
+  // TODO: If not previouslevel, some contents need to be removed
   if (previousLevel == NULL)
   {
     // This LTS is the top level LTS, so delete all its contents.
@@ -159,6 +234,7 @@ void LTS::selectCluster(const int rank, const int pos)
 void LTS::deselect() {
   if (selectedState != NULL) {
     selectedState->deselect();
+    simulation->setInitialState(initialState);
     selectedState = NULL;
   }
 
@@ -189,6 +265,7 @@ int LTS::addLabel(string label) {
 
 void LTS::setInitialState(State* s) {
   initialState = s;
+  simulation->setInitialState(s);
 }
 
 void LTS::addCluster(Cluster* c)
@@ -209,6 +286,7 @@ void LTS::addCluster(Cluster* c)
 
   clustersInRank[rank][pos] = c;
 
+
   if (statesInRank.size() <= rank)
   {
     statesInRank.resize(rank + 1);
@@ -228,6 +306,7 @@ void LTS::addCluster(Cluster* c)
     }
 
     statesInRank[rank].push_back(s);
+    s->setZoomLevel(zoomLevel);
   }
 }
 
@@ -1173,57 +1252,7 @@ LTS* LTS::zoomIntoAbove()
 {
   if (selectedCluster != NULL)
   {
-    LTS* newLTS = new LTS(mediator);
-    newLTS->setPreviousLevel(this);
-    newLTS->setInitialState(initialState);
-    newLTS->setLastCluster(selectedCluster); 
-    
-    Cluster* child = NULL;
-    Cluster* parent = selectedCluster;
-    
-    do {      
-      for (int i = 0; i < parent->getNumDescendants(); ++i)
-      {
-        if (child == NULL || parent->getDescendant(i) != child)
-        {
-          parent->severDescendant(i);
-        }
-      }
-      newLTS->addCluster(parent);
-      child = parent;
-      parent = child->getAncestor();
-    } while (child != initialState->getCluster());
-
-    newLTS->fromAbove();
-
-    for(size_t i = 0; i < markRules.size(); ++i)
-    {
-      newLTS->addMarkRule(markRules[i], i);
-    }
-
-    newLTS->setMatchAnyMarkRule(matchAny);
-
-    for(size_t i = 0; i < parameterNames.size(); ++i)
-    {
-      int par = newLTS->addParameter(parameterNames[i], parameterTypes[i]);
-
-      for(size_t j = 0; j < valueTable[i].size(); ++j)
-      {
-        newLTS->addParameterValue(par, valueTable[i][j]);
-      }
-    }
-
-    for(size_t i = 0; i < labels.size(); ++i)
-    {
-      newLTS->addLabel(labels[i]);
-      
-      if(*label_marks[i])
-      {
-        newLTS->markAction(labels[i]);
-      }
-    }
-
-
+    LTS* newLTS = new LTS(mediator, this, true);
 
     return newLTS;
   }
@@ -1236,39 +1265,8 @@ LTS* LTS::zoomIntoBelow()
 {
   if (selectedCluster != NULL) 
   {
-    LTS* newLTS = new LTS(mediator);
-    newLTS->setPreviousLevel(this);
-    
-    newLTS->addClusterAndBelow(selectedCluster);
-    
-    newLTS->setInitialState(selectedCluster->getState(0));
-    
-    for(size_t i = 0; i < markRules.size(); ++i)
-    {
-      newLTS->addMarkRule(markRules[i], i);
-    }
+    LTS* newLTS = new LTS(mediator, this, false);
 
-    newLTS->setMatchAnyMarkRule(matchAny);
-
-    for(size_t i = 0; i < parameterNames.size(); ++i)
-    {
-      int par = newLTS->addParameter(parameterNames[i], parameterTypes[i]);
-
-      for(size_t j = 0; j < valueTable[i].size(); ++j)
-      {
-        newLTS->addParameterValue(par, valueTable[i][j]);
-      }
-    }
-
-    for(size_t i = 0; i < labels.size(); ++i)
-    {
-      newLTS->addLabel(labels[i]);
-      
-      if(*label_marks[i])
-      {
-        newLTS->markAction(labels[i]);
-      }
-    }
     return newLTS;
   }
   else 
@@ -1297,6 +1295,16 @@ LTS* LTS::zoomOut()
       } while (child != initialState->getCluster());
 
     }
+    
+    for (size_t i = 0; i < markedStates.size(); ++i)
+    {
+      markedStates[i]->setZoomLevel(zoomLevel - 1);
+    }
+
+    for (size_t i = 0; i < unmarkedStates.size(); ++i)
+    {
+      unmarkedStates[i]->setZoomLevel(zoomLevel - 1);
+    }
 
     return previousLevel;
   }
@@ -1324,4 +1332,30 @@ void LTS::fromAbove()
 Simulation* LTS::getSimulation() const
 {
   return simulation;
+}
+
+Cluster* LTS::getSelectedCluster() const
+{
+  return selectedCluster;
+}
+
+std::vector<Utils::MarkRule*> LTS::getMarkRules() const
+{
+  return markRules;
+}
+
+bool* LTS::getActionMarked(int i) const
+{
+  return label_marks[i];
+}
+
+
+int LTS::getZoomLevel() const
+{
+  return zoomLevel;
+}
+
+void LTS::setZoomLevel(const int level)
+{
+  zoomLevel = level;
 }

@@ -21,6 +21,7 @@ State::State() {
   id = 0;
   simulated = false;
   selected = false;
+  zoomLevel = 0;
 }
 
 State::~State() {
@@ -263,3 +264,15 @@ bool State::isSimulated() const
 {
   return simulated;
 }
+
+int State::getZoomLevel() const
+{
+  return zoomLevel;
+}
+
+
+void State::setZoomLevel(const int level)
+{
+  zoomLevel = level;
+}
+

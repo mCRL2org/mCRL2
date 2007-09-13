@@ -34,7 +34,8 @@ class Visualizer: public Subscriber {
     bool update_abs;
 
     void clearDFSStates(State* root);
-    void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
+    void computeAbsPos();
+    void computeStateAbsPos(State* root,int rot);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);
     void drawBackPointer(State* startState,State* endState);

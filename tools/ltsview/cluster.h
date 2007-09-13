@@ -68,7 +68,6 @@ class Cluster {
     int       getNumDescendants() const;
     bool      hasDescendants() const;
     
-
     // Lets the cluster pretend that it does not have descendant i (for
     // zooming)
     void      severDescendant(int i);

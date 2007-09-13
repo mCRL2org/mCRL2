@@ -83,11 +83,14 @@ class State {
     void      setRank( int r );
     void      setSimulated(bool simulated);
     void      unmark();
+    void      setZoomLevel(const int i);
+    int       getZoomLevel() const;
    
   private:
     Cluster*      cluster;
     std::set< State* >    comrades;
     int                    id;
+    int           zoomLevel;
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
     bool      marked;

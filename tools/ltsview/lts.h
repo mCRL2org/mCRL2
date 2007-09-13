@@ -53,8 +53,8 @@ class LTS {
     int		getNumTransitions() const;
     int		getNumParameters() const;
     int		getNumParameterValues(int parindex) const;
-    std::string getParameterName(int parindex);
-    std::string getParameterType(int parindex);
+    std::string getParameterName(int parindex) ;
+    std::string getParameterType(int parindex) ;
     std::string getParameterValue(int parindex,int valindex);
     State*      selectStateByID(int id);
     void        selectCluster(const int rank, const int pos);
@@ -72,6 +72,8 @@ class LTS {
     void	setMatchAnyMarkRule(bool b);
     void	unmarkAction(std::string label);
 
+    int         getZoomLevel() const;
+    void        setZoomLevel(const int level);
     // Zooming procedures.
     // Zooms into the structure starting from the initial cluster/state and upto
     // selectedCluster, if any. 
@@ -90,9 +92,19 @@ class LTS {
     // Method for simulation
     Simulation* getSimulation() const;
 
+
+    // Methods getting information from parents while zooming in
+    Cluster* getSelectedCluster() const;
+    std::vector<Utils::MarkRule*> getMarkRules() const; 
+    bool* getActionMarked(const int i) const;
+
   private:
+    // Constructor for zooming
+    LTS(Mediator* owner, LTS* parent, bool fromAbove);
+
     // Variables
     bool lastWasAbove;
+    int zoomLevel;
     std::vector< std::vector< Cluster* > >	clustersInRank;
     int	deadlockCount;
     LTS*        previousLevel;

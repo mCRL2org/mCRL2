@@ -104,12 +104,13 @@ bool Cluster::hasDescendants() const {
   return descendants.size() != 0;
 }
 
+
 void Cluster::severDescendant( int i ) 
 {
-
   severedDescendants[i].push_back(true);
   ++severedDescendantsC;
 }
+
 
 void Cluster::healSeverance(int i)
 {

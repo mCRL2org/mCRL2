@@ -35,8 +35,9 @@ class Simulation {
     Simulation();
     ~Simulation();
    
-    void start(State* initialState);
+    void start();
     void stop();
+    void setInitialState(State* initialState);
 
     std::vector< Transition* > const&   getTransHis()         const;
     std::vector< State*>       const&   getStateHis()         const;
@@ -59,6 +60,7 @@ class Simulation {
   private:
     bool                        started;
     int                         chosenTrans;
+    State*                      initialState;
     State*                      currState;
     std::vector< Transition* >  posTrans;
     std::vector< State* >       stateHis;

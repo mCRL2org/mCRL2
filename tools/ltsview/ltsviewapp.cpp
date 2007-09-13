@@ -392,8 +392,7 @@ void LTSViewApp::notifyRenderingFinished() {
 }
 
 void LTSViewApp::startSim() {
-  State* firstState = lts->getInitialState();
-  lts->getSimulation()->start(firstState);
+  lts->getSimulation()->start();
 }
 
 int LTSViewApp::getNumberOfParams() const {
@@ -444,6 +443,7 @@ void LTSViewApp::selectStateByID(const int id) {
   if (lts != NULL)
   {
     State* s = lts->selectStateByID(id);
+    lts->getSimulation()->setInitialState(s);
 
     for(int i = 0; i < lts->getNumParameters(); ++i)
     {
@@ -486,6 +486,9 @@ void LTSViewApp::zoomInBelow()
   deselect();
   lts = newLTS;
   visualizer->setLTS(lts);
+
+  glCanvas->setSim(lts->getSimulation());
+  mainFrame->setSim(lts->getSimulation());
 }
 
 void LTSViewApp::zoomInAbove()
@@ -494,6 +497,9 @@ void LTSViewApp::zoomInAbove()
   deselect();
   lts = newLTS;
   visualizer->setLTS(lts);
+  
+  glCanvas->setSim(lts->getSimulation());
+  mainFrame->setSim(lts->getSimulation());
 }
 
 void LTSViewApp::zoomOut()
@@ -502,6 +508,9 @@ void LTSViewApp::zoomOut()
   lts = oldLTS->zoomOut();
   oldLTS->deselect();
   visualizer->setLTS(lts);
+
+  glCanvas->setSim(lts->getSimulation());
+  mainFrame->setSim(lts->getSimulation());
 
   if (oldLTS != lts) 
   {
