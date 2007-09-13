@@ -474,8 +474,6 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     ok = ok || lgopts.error_trace_saved;
 
     ok &= finalise_lts_generation();
-
-    m_communicator.send_accept_configuration();
   }
 
   return ok;

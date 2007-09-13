@@ -71,6 +71,7 @@ if ! squadt in [ MATCH "--disable-(squadt)-support" : $(FULL_COMMAND_LINE) ] {
 
   feature.compose <squadt-connectivity>implemented
         : <squadt-interface>enabled
+          <threading>multi
           <library>/libraries/utilities//squadt_interface
         ;
 }

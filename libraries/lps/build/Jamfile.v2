@@ -59,4 +59,4 @@ alias data-specification
 # This target must not be used, it exists solely for the parser library which should not depend on the lps framework
 alias headers ;
 
-explicit dataelm.main dataelm.alias lps.alias ;
+explicit lps.main lps.alias dataelm.main dataelm.alias ;

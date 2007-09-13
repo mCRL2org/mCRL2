@@ -117,16 +117,21 @@ namespace mcrl2 {
                     }
            
                     /* Signal that the configuration is acceptable */
-                    m_communicator.send_accept_configuration();
+                    m_communicator.send_configuration(configuration);
                   }
                   break;
                 case tipi::message_task_start:
                   if (valid_configuration_present) {
+                    tipi::configuration& configuration = m_communicator.get_configuration();
+
                     /* Signal that the job is finished */
-                    bool result = perform_task(m_communicator.get_configuration());
+                    bool result = perform_task(configuration);
   
                     if (!result) {
                       send_error("Operation failed; tool may have crashed!");
+                    }
+                    else {
+                      m_communicator.send_configuration(configuration);
                     }
   
                     m_communicator.send_signal_done(result);

@@ -107,7 +107,7 @@ namespace tipi {
     }
  
     /* Send a specification of the current configuration (it may change during tool execution) */
-    void communicator::send_accept_configuration() {
+    void communicator::send_configuration() {
       boost::shared_ptr < configuration > c(boost::static_pointer_cast < communicator_impl > (impl)->current_configuration);
 
       c->set_fresh(false);
@@ -120,7 +120,7 @@ namespace tipi {
     /**
      * \param[in] c the configuration object that specifies the accepted configuration
      **/
-    void communicator::send_accept_configuration(tipi::configuration& c) {
+    void communicator::send_configuration(tipi::configuration& c) {
       c.set_fresh(false);
 
       message m(tipi::visitors::store(c), tipi::message_configuration);
