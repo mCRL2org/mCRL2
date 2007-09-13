@@ -55,6 +55,7 @@ tags:
 
 doxy:
 	@cd libraries/atermpp/doc; doxygen
+	@cd libraries/data/doc; doxygen
 	@cd libraries/lps/doc; doxygen
 	@cd libraries/lts/doc; doxygen
 	@cd libraries/mcrl2_basic/doc; doxygen
