@@ -169,7 +169,7 @@ void test_state_formula()
   specification spec    = mcrl22lps(SPECIFICATION);
   state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
   std::map<identifier_string, identifier_string> replacements;
-  fresh_identifier_generator generator(make_list(formula, spec));
+  set_identifier_generator generator(make_list(formula, spec));
   formula = remove_name_clashes_impl(formula, generator, replacements);
   std::cout << "formula: " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");

@@ -19,6 +19,7 @@
 #include "atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace lps {
@@ -78,7 +79,7 @@ struct data_variable_replacer
   {
     if (!is_data_variable(t))
     {
-      return std::make_pair(t, true); // continue the recursion
+      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
     }
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
@@ -86,10 +87,10 @@ struct data_variable_replacer
     {
       if (t == *i)
       {
-        return std::make_pair(*j, false); // don't continue the recursion
+        return std::pair<aterm_appl, bool>(*j, false); // don't continue the recursion
       }
     }
-    return std::make_pair(t, false); // don't continue the recursion
+    return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
   }
 };
 
@@ -118,7 +119,7 @@ struct data_variable_name_replacer
   {
     if (!is_data_variable(t))
     {
-      return std::make_pair(t, true); // continue the recursion
+      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
     }
     data_variable v(t);
     typename SrcList::const_iterator i = src_.begin();
@@ -127,10 +128,10 @@ struct data_variable_name_replacer
     {
       if (v.name() == *i)
       {
-        return std::make_pair(data_variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<aterm_appl, bool>(data_variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
-    return std::make_pair(t, false); // don't continue the recursion
+    return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
   }
 };
 
@@ -154,7 +155,7 @@ linear_process remove_parameter_clashes(const linear_process& proc1, const linea
 
   std::vector<data_variable> src;  // contains the variables that need to be renamed
   std::vector<data_variable> dest; // contains the corresponding replacements
-  lps::fresh_identifier_generator generator(atermpp::make_list(proc1, proc2));
+  lps::set_identifier_generator generator(atermpp::make_list(proc1, proc2));
 
   for (data_variable_list::iterator i = proc1.process_parameters().begin(); i != proc1.process_parameters().end(); ++i)
   {

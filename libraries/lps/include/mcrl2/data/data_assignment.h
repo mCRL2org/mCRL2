@@ -172,16 +172,16 @@ struct assignment_list_substitution
     {
       if (!is_data_variable(t))
       {
-        return std::make_pair(t, true); // continue the recursion
+        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
       }
       data_assignment_list::iterator i = std::find_if(l.begin(), l.end(), compare_assignment_lhs(t));
       if (i == l.end())
       {
-        return std::make_pair(t, false); // don't continue the recursion
+        return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
       }
       else
       {
-        return std::make_pair(i->rhs(), false); // don't continue the recursion
+        return std::pair<aterm_appl, bool>(i->rhs(), false); // don't continue the recursion
       }
     }
   };

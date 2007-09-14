@@ -12,11 +12,15 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
+#include "atermpp/make_list.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/detail/tools.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/detail/quantifier_rename_builder.h"
+#include "mcrl2/pbes/rename.h"
 
 using namespace std;
 using namespace atermpp;
@@ -171,7 +175,7 @@ void test_state_formula()
   specification spec    = mcrl22lps(SPECIFICATION);
   state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
   std::map<identifier_string, identifier_string> replacements;
-  fresh_identifier_generator generator(make_list(formula, spec));
+  set_identifier_generator generator(make_list(formula, spec));
   formula = remove_name_clashes_impl(formula, generator, replacements);
   std::cout << "formula: " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
@@ -211,10 +215,43 @@ void test_pbes_expression_builder()
     const pbes_expression& q = i->formula();
     pbes_expression_builder builder;
     pbes_expression q1 = builder.visit(q);
-    std::cout << "<q> " << pp(q)  << std::endl;
-    std::cout << "<q1>" << pp(q1) << std::endl;
     BOOST_CHECK(q == q1);
   }
+}
+
+void test_quantifier_rename_builder()
+{
+  using namespace pbes_expr;
+  namespace d = lps::data_expr; 
+
+  data_variable mN("m:N");
+  data_variable nN("n:N");
+
+  pbes_expression f = d::equal_to(mN, nN);
+  pbes_expression g = d::not_equal_to(mN, nN);
+
+  multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
+
+  pbes_expression p1 = 
+  and_(
+    forall(make_list(nN), exists(make_list(nN), f)),
+    forall(make_list(mN), exists(make_list(mN, nN), g))
+  );
+  pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1); 
+  std::cout << "p1 = " << pp(p1) << std::endl;
+  std::cout << "q1 = " << pp(q1) << std::endl;
+
+  pbes_expression p2 = 
+  and_(
+    forall(make_list(nN), exists(make_list(nN), p1)),
+    forall(make_list(mN), exists(make_list(mN, nN), q1))
+  );
+  // pbes_expression q2 = make_quantifier_rename_builder(generator).visit(p2); 
+  pbes_expression q2 = rename_quantifier_variables(p2, make_list(data_variable("n00:N"), data_variable("n01:N")));
+  std::cout << "p2 = " << pp(p2) << std::endl;
+  std::cout << "q2 = " << pp(q2) << std::endl;
+
+  // BOOST_CHECK(false);
 }
 
 int test_main(int argc, char* argv[])
@@ -229,6 +266,7 @@ int test_main(int argc, char* argv[])
   test_xyz_generator();
   // test_free_variables();
   test_pbes_expression_builder();
+  test_quantifier_rename_builder();
 
   return 0;
 }

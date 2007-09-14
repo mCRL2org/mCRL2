@@ -24,7 +24,8 @@ template <typename Iterator>
 bool contains_duplicates(Iterator first, Iterator last)
 {
   std::set<typename std::iterator_traits<Iterator>::value_type> s(first, last);
-  return s.size() < std::distance(first, last);
+  int ssize = s.size();
+  return ssize < std::distance(first, last);
 }
 
 /// Returns true if all elements of the range [first, last[ are element of s.
