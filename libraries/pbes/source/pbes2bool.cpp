@@ -96,30 +96,43 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
 static void print_counter_example_rec(bes::variable_type current_var,
                                       std::string indent,
                                       bes::equations &bes_equations,
-                                      atermpp::indexed_set &variable_index)
+                                      atermpp::indexed_set &variable_index,
+                                      vector<bool> &already_printed)
 {
-  for(std::deque < bes::variable_type>::iterator walker=bes_equations.counter_example_begin(current_var);
-      walker!=bes_equations.counter_example_end(current_var) ; walker++)
-  { 
-    propositional_variable_instantiation X(variable_index.get(*walker));
-    cerr << indent << X.name() ; 
-    data_expression_list tl=X.parameters();
-    for(data_expression_list::iterator t=tl.begin();
+  propositional_variable_instantiation X(variable_index.get(current_var));
+
+  data_expression_list tl=X.parameters();
+  cerr << X.name();
+  for(data_expression_list::iterator t=tl.begin();
         t!=tl.end(); t++)
-    { cerr << (t==tl.begin()?"(":",") << pp(*t);
+  { cerr << (t==tl.begin()?"(":",") << pp(*t);
+  }
+  cerr << ")";
+
+  if (already_printed[current_var])
+  { cerr << "*\n";
+  }
+  else
+  { cerr << "\n";
+    already_printed[current_var]=true;
+
+    for(std::deque < bes::counter_example>::iterator walker=bes_equations.counter_example_begin(current_var);
+        walker!=bes_equations.counter_example_end(current_var) ; walker++)
+    { 
+      cerr << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
+      print_counter_example_rec((*walker).get_variable(),indent+"  ",
+                            bes_equations,variable_index,already_printed);
     }
-    cerr << ")" << endl;
-    // ATfprintf(stderr,"%t\n",(ATerm)variable_index.get(*walker));
-    print_counter_example_rec(*walker,indent+"  ",bes_equations,variable_index);
   }
 }
 
 static void print_counter_example(bes::equations &bes_equations,
                                   atermpp::indexed_set &variable_index)
 {
-  cerr << "Here is your much desired counter example\n";
-  
-  print_counter_example_rec(1,"",bes_equations,variable_index);
+  cerr << "Below the justification for this outcome is listed\n";
+  vector <bool> already_printed(bes_equations.nr_of_variables()+1,false);
+  cerr << "1: ";
+  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed);
 }
 
 static void do_lazy_algorithm(pbes pbes_spec, 
@@ -162,10 +175,10 @@ bool process(t_tool_options const& tool_options)
   else 
   { 
     gsMessage("The pbes is %svalid\n", solve_bes(tool_options,bes_equations,variable_index) ? "" : "not ");
-  }
 
-  if (tool_options.opt_construct_counter_example)
-  { print_counter_example(bes_equations,variable_index);
+    if (tool_options.opt_construct_counter_example)
+    { print_counter_example(bes_equations,variable_index);
+    }
   }
 
   return true;
@@ -225,7 +238,8 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
         if (bes::is_true(b) || bes::is_false(b))
         { // fprintf(stderr,"*");
           if (construct_counter_example)
-          { bes_equations.counter_example_queue(current_variable).push_front(pr.first);
+          { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION));
           }
 
           return b;
@@ -462,13 +476,19 @@ static void do_lazy_algorithm(pbes pbes_spec,
 
         if (current_pbeq.symbol()==fixpoint_symbol::mu())
         { 
-          if (bes_equations.find_mu_loop(new_bes_expression,variable_to_be_processed))
+          if (bes_equations.find_mu_loop(
+                               new_bes_expression,
+                               variable_to_be_processed,
+                               bes_equations.get_rank(variable_to_be_processed)))
           { new_bes_expression=bes::false_();
           }
         }
         else           
         { 
-          if (bes_equations.find_nu_loop(new_bes_expression,variable_to_be_processed))
+          if (bes_equations.find_nu_loop(
+                               new_bes_expression,
+                               variable_to_be_processed,
+                               bes_equations.get_rank(variable_to_be_processed)))
           { new_bes_expression=bes::true_();
           }
         }
@@ -561,7 +581,9 @@ static bes_expression substitute_rank(
                 const atermpp::vector<bes_expression> &approximation,
                 bes::equations &bes_equations,
                 const bool use_hashtable,
-                atermpp::table &hashtable)
+                atermpp::table &hashtable,
+                bool store_counter_example=false,
+                bes::variable_type current_variable=0)
 { /* substitute variables with rank larger and equal
      than current_rank with their approximations. */
      
@@ -582,6 +604,10 @@ static bes_expression substitute_rank(
     if (bes_equations.get_rank(v)==current_rank)
     {
       result=approximation[v];
+      if (store_counter_example)
+      { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION));
+      }
     }
     else
     {
@@ -590,12 +616,13 @@ static bes_expression substitute_rank(
   }
 
   else if (is_and(b))
-  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
     if (is_false(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,
+                                          use_hashtable,hashtable,store_counter_example,current_variable);
       if (is_false(b2))
       { result=b2;
       }
@@ -611,12 +638,13 @@ static bes_expression substitute_rank(
     }
   }
   else if (is_or(b))
-  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+  { bes_expression b1=substitute_rank(lhs(b),current_rank,approximation,bes_equations,use_hashtable,
+                                          hashtable,store_counter_example,current_variable);
     if (is_true(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+    { bes_expression b2=substitute_rank(rhs(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
       if (is_true(b2))
       { result=b2;
       }
@@ -639,25 +667,33 @@ static bes_expression substitute_rank(
     if (bes_equations.get_rank(v)==current_rank)
     {
       if (bes::is_true(approximation[v]))
-      { result=substitute_rank(then_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+      { result=substitute_rank(then_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
+        if (store_counter_example)
+        { bes_equations.counter_example_queue(current_variable).
+                     push_front(bes::counter_example(v,bes::APPROXIMATION));
+        }
       }
       else if (bes::is_false(approximation[v]))
-      { result=substitute_rank(else_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable);
+      { result=substitute_rank(else_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
+        if (store_counter_example)
+        { bes_equations.counter_example_queue(current_variable).
+                     push_front(bes::counter_example(v,bes::APPROXIMATION));
+        }
       }
       else
       { bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,
-                                          bes_equations,use_hashtable,hashtable);
+                                          bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
         bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,
-                                          bes_equations,use_hashtable,hashtable);
+                                          bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
         result=BDDif(approximation[v],b1,b2);
       }
     }
     else
     { /* the condition is not equal to v */
       bes_expression b1=substitute_rank(then_branch(b),current_rank,approximation,
-                                        bes_equations,use_hashtable,hashtable);
+                                        bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
       bes_expression b2=substitute_rank(else_branch(b),current_rank,approximation,
-                                        bes_equations,use_hashtable,hashtable);
+                                        bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
@@ -894,7 +930,21 @@ bool solve_bes(const t_tool_options &tool_options,
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v))
       { if (bes_equations.get_rank(v)==current_rank)
-        { bes_equations.set_rhs(v,approximation[v]);
+        { if (tool_options.opt_construct_counter_example)
+          { bes_equations.set_rhs(
+                         v,
+                         substitute_rank(
+                                   bes_equations.get_rhs(v),
+                                   current_rank,
+                                   approximation,
+                                   bes_equations,
+                                   tool_options.opt_use_hashtables,
+                                   bex_hashtable,
+                                   true,v));
+          }
+          else 
+          { bes_equations.set_rhs(v,approximation[v]);
+          }
         }
         else 
         { bes_equations.set_rhs(
@@ -905,7 +955,8 @@ bool solve_bes(const t_tool_options &tool_options,
                                    approximation,
                                    bes_equations,
                                    tool_options.opt_use_hashtables,
-                                   bex_hashtable));
+                                   bex_hashtable,
+                                   tool_options.opt_construct_counter_example,v));
         }
       }
     }
