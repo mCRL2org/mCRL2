@@ -15,6 +15,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/sequence_substitution.h"

@@ -51,6 +51,16 @@ class identifier_generator
       }
     }
 
+    /// Adds identifiers of term t to the context.
+    template <typename Container>
+    void add_identifiers(const Container& c)
+    {
+      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+      {
+        add_identifier(*i);
+      }
+    }
+
     /// Removes identifiers of term t from the context.
     template <typename Term>
     void remove_from_context(Term t)

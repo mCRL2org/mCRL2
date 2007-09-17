@@ -16,6 +16,12 @@ namespace lps {
 
 struct pbes_expression_visitor
 {
+  enum return_type
+  {
+    stop_recursion = false,
+    continue_recursion = true
+  };
+  
   virtual ~pbes_expression_visitor()
   { }
   

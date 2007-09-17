@@ -4,12 +4,14 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/make_list.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/data/utility.h"
 
 namespace lps {
 
@@ -58,71 +60,55 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
   return p::multi_and(terms.begin(), terms.end());
 }
 
-/// Rename all summation variables in lps that occur in forbidden_names.
-inline
-linear_process rename_summation_variables(const linear_process& lps, const std::set<identifier_string>& forbidden_names)
-{
-  atermpp::vector<summand> new_summands;
-
-  for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
-  {
-    std::set<data_variable> summand_variables = find_variables(*i);     
-    std::vector<identifier_string> src;
-    std::set_intersection(boost::make_transform_iterator(summand_variables.begin(), detail::data_variable_name()),
-                          boost::make_transform_iterator(summand_variables.end(), detail::data_variable_name()),
-                          forbidden_names.begin(),
-                          forbidden_names.end(),
-                          std::back_inserter(src)
-                         );
-
-    std::set<identifier_string> all;
-    std::set_union(boost::make_transform_iterator(summand_variables.begin(), detail::data_variable_name()),
-                   boost::make_transform_iterator(summand_variables.end(), detail::data_variable_name()),
-                   forbidden_names.begin(),
-                   forbidden_names.end(),
-                   std::inserter(all, all.end())
-                  );
-
-    std::vector<std::string> dest;
-    for (std::vector<identifier_string>::const_iterator j = src.begin(); j != src.end(); ++j)
-    {
-      dest.push_back(fresh_identifier(all, *j, postfix_identifier_creator("_S")));
-    }
-
-    new_summands.push_back(atermpp::partial_replace(*i, detail::make_data_variable_name_replacer(src, dest)));
-  }
-  
-  return set_summands(lps, summand_list(new_summands.begin(), new_summands.end()));
-}
-
 inline
 pbes strong_bisimulation(const specification& M, const specification& S)
 { 
   using atermpp::make_list;
   namespace p = lps::pbes_expr;
+
+  linear_process m = M.process();
+  linear_process s = S.process();
     
-  // First we resolve name clashes between process parameters of m1 and s.
-  linear_process m = detail::remove_parameter_clashes(M.process(), S.process());
-
-  // Second we resolve name clashes between summation variables in s and
-  // (process parameters + free variables + summation variables) of m.
-  // We do this by renaming the summation variables of the summands in s.
+  // Resolve name clashes between m and s
   std::set<identifier_string> used_names;
-
-  // add process parameters of m to used_names
-  for (data_variable_list::iterator i = m.process_parameters().begin(); i != m.process_parameters().end(); ++i)
-    used_names.insert(i->name());
-  
-  // add free variables of m to used_names
-  for (data_variable_list::iterator i = m.free_variables().begin(); i != m.free_variables().end(); ++i)
-    used_names.insert(i->name());
-  
-  // add summation variables of m to used_names
+  used_names.insert(boost::make_transform_iterator(m.process_parameters().begin(), detail::data_variable_name()),
+                    boost::make_transform_iterator(m.process_parameters().end()  , detail::data_variable_name())
+                   );
+  used_names.insert(boost::make_transform_iterator(m.free_variables().begin(), detail::data_variable_name()),
+                    boost::make_transform_iterator(m.free_variables().end()  , detail::data_variable_name())
+                   );
   for (summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
-    for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
-      used_names.insert(j->name());
+  {
+    used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), detail::data_variable_name()),
+                      boost::make_transform_iterator(i->summation_variables().end()  , detail::data_variable_name())
+                     );
+  }
+std::cout << "<1>" << pp(s) << std::endl;
+  s = rename_process_parameters(s, used_names, "_S");
+std::cout << "<2>" << pp(s) << std::endl;
+  s = rename_free_variables(s, used_names, "_S");
+std::cout << "<3>" << pp(s) << std::endl;
+  s = rename_summation_variables(s, used_names, "_S");
+std::cout << "<4>" << pp(s) << std::endl;
 
-  linear_process s = rename_summation_variables(S.process(), used_names);
+  //// Second we resolve name clashes between summation variables in s and
+  //// (process parameters + free variables + summation variables) of m.
+  //// We do this by renaming the summation variables of the summands in s.
+  //std::set<identifier_string> used_names;
+  //
+  //// add process parameters of m to used_names
+  //for (data_variable_list::iterator i = m.process_parameters().begin(); i != m.process_parameters().end(); ++i)
+  //  used_names.insert(i->name());
+  //
+  //// add free variables of m to used_names
+  //for (data_variable_list::iterator i = m.free_variables().begin(); i != m.free_variables().end(); ++i)
+  //  used_names.insert(i->name());
+  //
+  //// add summation variables of m to used_names
+  //for (summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
+  //  for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
+  //    used_names.insert(j->name());
+  //linear_process s = rename_summation_variables(S.process(), used_names);
 
   identifier_string ms_name = fresh_identifier(make_list(M, S), "Xms");
   identifier_string sm_name = fresh_identifier(make_list(S, M), "Xsm");
@@ -140,10 +126,14 @@ pbes strong_bisimulation(const specification& M, const specification& S)
   lps::equation_system eqn;
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xms, ms_formula));
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xsm, sm_formula));
-  
+
+  atermpp::set<data_variable> free_variables;
+  std::copy(m.free_variables().begin(), m.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
+  std::copy(s.free_variables().begin(), s.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
+
   data_specification data = M.data();
   propositional_variable_instantiation init(ms_name, M.initial_process().state() + S.initial_process().state());
-  return pbes(data, eqn, init);
+  return pbes(data, eqn, free_variables, init);
 }
 
 } // namespace lps

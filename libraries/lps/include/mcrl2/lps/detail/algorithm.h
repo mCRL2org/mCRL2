@@ -142,34 +142,6 @@ data_variable_name_replacer<T1, T2> make_data_variable_name_replacer(const T1& t
   return data_variable_name_replacer<T1, T2>(t1, t2);
 }
 
-/// Renames the parameters in proc1 that occur in the process parameters of proc1 and proc2.
-/// The given postfix is appended to the name of the variables, if needed digits are added.
-inline
-linear_process remove_parameter_clashes(const linear_process& proc1, const linear_process& proc2, const std::string& postfix = "_S")
-{
-  std::set<std::string> names2;
-  for (data_variable_list::iterator i = proc2.process_parameters().begin(); i != proc2.process_parameters().end(); ++i)
-  {
-    names2.insert(i->name());
-  }
-
-  std::vector<data_variable> src;  // contains the variables that need to be renamed
-  std::vector<data_variable> dest; // contains the corresponding replacements
-  lps::set_identifier_generator generator(atermpp::make_list(proc1, proc2));
-
-  for (data_variable_list::iterator i = proc1.process_parameters().begin(); i != proc1.process_parameters().end(); ++i)
-  {
-    if (names2.find(i->name()) != names2.end()) // name clash!
-    {
-      // save the old and new value in the src and dest arrays
-      src.push_back(*i);
-      std::string name = generator(std::string(i->name()) + postfix);
-      dest.push_back(data_variable(name, i->sort()));
-    }
-  }
-  return atermpp::partial_replace(proc1, make_data_variable_replacer(src, dest));
-}
-
 } // namespace detail
 
 } // namespace lps

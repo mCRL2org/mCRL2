@@ -29,7 +29,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/basic/pretty_print.h"
-#include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/sequence_algorithm.h"
+#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
@@ -49,24 +50,19 @@ using atermpp::read_from_named_file;
 ///
 class equation_system: public atermpp::vector<pbes_equation>
 {
-  protected:
-    atermpp::set<data_variable> m_free_variables;
-
   public:
     equation_system()
     {}
 
     /// Constructs an equation_system containing equation e.
     ///
-    equation_system(const pbes_equation& e, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
-      : m_free_variables(free_variables)
+    equation_system(const pbes_equation& e)
     {
       push_back(e);
     }
 
-    equation_system(const pbes_equation_list& l, atermpp::set<data_variable> free_variables = atermpp::set<data_variable>())
-      : atermpp::vector<pbes_equation>(l.begin(), l.end()),
-        m_free_variables(free_variables)
+    equation_system(const pbes_equation_list& l)
+      : atermpp::vector<pbes_equation>(l.begin(), l.end())
     {}
 
     /// Applies a substitution to this equation system.
@@ -150,41 +146,6 @@ class equation_system: public atermpp::vector<pbes_equation>
       }
       return true;
     }
-
-    /// Returns the free variables of this equation system.
-    const atermpp::set<data_variable>& free_variables() const
-    {
-      return m_free_variables;
-    }
-
-    /// Returns the free variables of this equation system.
-    atermpp::set<data_variable>& free_variables()
-    {
-      return m_free_variables;
-    }
-
-    /// Returns true if
-    /// <ul>
-    /// <li>all binding predicate variables of the equation_system are unique. Note that this does not imply that the names of the binding predicate variables are unique.</li>
-    /// <li>the free variables occurring in the equations are contained in free_variables()       </li>
-    /// <li></li>
-    /// </ul>
-    ///
-    bool is_well_typed() const
-    {
-      // check )
-      atermpp::set<propositional_variable> variables;
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        propositional_variable p = i->variable();
-        atermpp::set<propositional_variable>::iterator j = variables.find(p);
-        if (j != variables.end())
-          return false;
-        variables.insert(p);
-      }
-
-      return true;
-    }
 };
 
 /// Computes the free variables that occur in the pbes equation system.
@@ -204,6 +165,20 @@ std::set<data_variable> compute_free_variables(const equation_system& eqn)
   return visitor.result;
 }
 
+/// Computes the quantifier variables that occur in the pbes equation system.
+///
+inline
+std::set<data_variable> compute_quantifier_variables(const equation_system& eqn)
+{
+  // collect the set of all quantifier variables in visitor
+  detail::quantifier_visitor visitor;
+  for (equation_system::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+  {
+    visitor.visit(i->formula());
+  }
+  return visitor.variables;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // pbes
 /// \brief parameterized boolean equation system
@@ -218,6 +193,7 @@ class pbes
   protected:
     data_specification m_data;
     equation_system m_equations;
+    atermpp::set<data_variable> m_free_variables;
     pbes_initializer m_initial_state;
 
     ATerm term() const
@@ -232,12 +208,12 @@ class pbes
       aterm_appl::iterator i = t.begin();
       m_data          = aterm_appl(*i++);
       aterm_appl eqn_spec = *i++;
+      m_initial_state = pbes_initializer(*i);
+
       data_variable_list freevars = eqn_spec(0);
       pbes_equation_list eqn = eqn_spec(1);
-      atermpp::set<data_variable> v;
-      std::copy(freevars.begin(), freevars.end(), std::inserter(v, v.begin()));
-      m_equations     = equation_system(eqn, v);
-      m_initial_state = pbes_initializer(*i);
+      m_free_variables = atermpp::set<data_variable>(freevars.begin(), freevars.end());
+      m_equations = equation_system(eqn);
     }
 
   public:
@@ -245,22 +221,26 @@ class pbes
     {}
 
     pbes(data_specification data,
-         equation_system equations,
+         const equation_system& equations,
+         const atermpp::set<data_variable>& free_variables,
          pbes_initializer initial_state)
       :
         m_data(data),
         m_equations(equations),
+        m_free_variables(free_variables),
         m_initial_state(initial_state)
     {
       assert(detail::check_rule_PBES(term()));
     }
 
     pbes(data_specification data,
-         equation_system equations,
+         const equation_system& equations,
+         const atermpp::set<data_variable>& free_variables,
          propositional_variable_instantiation initial_state)
       :
         m_data(data),
         m_equations(equations),
+        m_free_variables(free_variables),
         m_initial_state(pbes_initializer(data_variable_list(), initial_state))
     {
       assert(detail::check_rule_PBES(term()));
@@ -270,6 +250,32 @@ class pbes
     data_specification data() const
     {
       return m_data;
+    }
+
+    /// Returns the equations.
+    ///
+    const equation_system& equations() const
+    {
+      return m_equations;
+    }
+
+    /// Returns the equations.
+    ///
+    equation_system& equations()
+    {
+      return m_equations;
+    }
+
+    /// Returns the declared free variables of the pbes.
+    const atermpp::set<data_variable>& free_variables() const
+    {
+      return m_free_variables;
+    }
+
+    /// Returns the declared free variables of the pbes.
+    atermpp::set<data_variable>& free_variables()
+    {
+      return m_free_variables;
     }
 
     /// Returns the initial state.
@@ -313,26 +319,12 @@ class pbes
       }
     }
 
-    /// Returns the equations.
-    ///
-    const equation_system& equations() const
-    {
-      return m_equations;
-    }
-
-    /// Returns the equations.
-    ///
-    equation_system& equations()
-    {
-      return m_equations;
-    }
-
     /// Conversion to ATermAppl.
     ///
     operator ATermAppl() const
     {
       // convert the equation system to ATerm format
-      data_variable_list free_variables(m_equations.free_variables().begin(), m_equations.free_variables().end());
+      data_variable_list free_variables(m_free_variables.begin(), m_free_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
       return gsMakePBES(m_data, gsMakePBEqnSpec(free_variables, equations), m_initial_state);
     }
@@ -406,11 +398,12 @@ class pbes
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
     /// <li>the sorts occurring in the quantifier variables of the equations are declared in the data specification </li>
     ///
-    /// <li>instances of free variables in the equations with the same name are identical</li>
     /// <li>the binding variables of the equations have unique names (well formedness)</li>
+    /// <li>the free variables occurring in the equations are declared in free_variables()</li>
+    /// <li>the free variables occurring in the equations with the same name are identical</li>
+    /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
     ///
     /// <li>the data specification is well typed</li>
-    /// <li>the equations are well typed</li>
     /// <li>the initial state is well typed</li>
     /// </ul>
     ///
@@ -418,16 +411,23 @@ class pbes
     bool is_well_typed() const
     {
       std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
+      const atermpp::set<data_variable>& declared_free_variables = free_variables();
+      std::set<data_variable> occurring_free_variables = compute_free_variables(equations());
+      std::set<data_variable> quantifier_variables = compute_quantifier_variables(equations());
 
       // check 1)
-      if (!detail::is_subset_of(boost::make_transform_iterator(equations().free_variables().begin(), detail::data_variable_sort()),
-                                boost::make_transform_iterator(equations().free_variables().end()  , detail::data_variable_sort()),
-                                declared_sorts
-                               )
+      if (!detail::sequence_is_subset_of_set(
+              boost::make_transform_iterator(declared_free_variables.begin(), detail::data_variable_sort()),
+              boost::make_transform_iterator(declared_free_variables.end()  , detail::data_variable_sort()),
+              declared_sorts
+             )
          )
       {
-        data_variable_list free_variables(equations().free_variables().begin(), equations().free_variables().end());
-        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables " << pp(free_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables "
+                  << pp(data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
+                  << " are not declared in the data specification "
+                  << pp(data().sorts())
+                  << std::endl;
         return false;
       }
 
@@ -435,78 +435,89 @@ class pbes
       for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         const data_variable_list& variables = i->variable().parameters();
-        if (!detail::is_subset_of(boost::make_transform_iterator(variables.begin(), detail::data_variable_sort()),
-                                  boost::make_transform_iterator(variables.end()  , detail::data_variable_sort()),
-                                  declared_sorts
-                                 )
+        if (!detail::sequence_is_subset_of_set(
+               boost::make_transform_iterator(variables.begin(), detail::data_variable_sort()),
+               boost::make_transform_iterator(variables.end()  , detail::data_variable_sort()),
+               declared_sorts
+              )
            )
         {
-          std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable " << pp(i->variable()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+          std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
+                    << pp(i->variable())
+                    << " are not declared in the data specification "
+                    << pp(data().sorts())
+                    << std::endl;
           return false;
         }
       }
 
       // check 3)
-      // collect the set of all quantifier variables in qvisitor
-      detail::quantifier_visitor qvisitor;
-      for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        qvisitor.visit(i->formula());
-      }
-      // check the existence of the sorts
-      if (!detail::is_subset_of(boost::make_transform_iterator(qvisitor.variables.begin(), detail::data_variable_sort()),
-                                boost::make_transform_iterator(qvisitor.variables.end()  , detail::data_variable_sort()),
-                                declared_sorts
-                               )
+      if (!detail::sequence_is_subset_of_set(
+              boost::make_transform_iterator(quantifier_variables.begin(), detail::data_variable_sort()),
+              boost::make_transform_iterator(quantifier_variables.end()  , detail::data_variable_sort()),
+              declared_sorts
+             )
          )
       {
-        data_variable_list quantifier_variables(qvisitor.variables.begin(), qvisitor.variables.end());
-        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables " << pp(quantifier_variables) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
+                  << pp(data_variable_list(quantifier_variables.begin(), quantifier_variables.end()))
+                  << " are not declared in the data specification "
+                  << pp(data().sorts())
+                  << std::endl;
         return false;
       }
 
       // check 4)
-      std::set<data_variable> free_variables = compute_free_variables(equations());
-      std::map<identifier_string, data_variable> free_variable_map;
-      for (std::set<data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
-      {
-        std::map<identifier_string, data_variable>::iterator j = free_variable_map.find(i->name());
-        if (j == free_variable_map.end())
-        {
-          free_variable_map[i->name()] == *i;
-        }
-        else
-        {
-          if (j->second != *i)
-          {
-            std::cerr << "pbes::is_well_typed() failed: the free variables " << pp(*i) << " and " << pp(j->second) << " have different types" << std::endl;
-          }
-        }
-      }
-
-      // check 5)
-      if (detail::contains_duplicates(boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
-                                      boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
-                                     )
+      if (detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
+               boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
+              )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
         return false;
       }
 
+      // check 5)
+      if (!std::includes(declared_free_variables.begin(),
+                         declared_free_variables.end(),
+                         occurring_free_variables.begin(),
+                         occurring_free_variables.end()
+                        )
+         )
+      {
+        std::cerr << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
+                  << "free variables: " << pp(data_variable_list(occurring_free_variables.begin(), occurring_free_variables.end())) << "\n"
+                  << "declared free variables: " << pp(data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
+                  << std::endl;
+        return false;
+      }
+
       // check 6)
+      if (detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(occurring_free_variables.begin(), detail::data_variable_name()),
+               boost::make_transform_iterator(occurring_free_variables.end()  , detail::data_variable_name())
+              )
+         )
+      {
+        std::cerr << "pbes::is_well_typed() failed: the free variables have no unique names" << std::endl;
+        return false;
+      }
+
+      // check 7)
+      if (!detail::set_intersection(declared_free_variables, quantifier_variables).empty())
+      {
+        std::cerr << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
+        return false;
+      }
+
+      // check 8)
       if (!data().is_well_typed())
       {
         return false;
       }
 
-      // check 7)
-      if (!equations().is_well_typed())
-      {
-        return false;
-      }
-
-      // check 8)
+      // check 9)
       if (!initial_state().is_well_typed())
       {
         return false;

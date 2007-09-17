@@ -12,9 +12,11 @@
 
 #include "atermpp/algorithm.h"
 #include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/detail/quantifier_visitor.h"
 
 namespace lps {
 
@@ -103,11 +105,46 @@ class pbes_equation: public aterm_appl
     /// <ul>
     /// <li>the binding variable parameters have unique names</li>
     /// <li>the names of the quantifier variables in the equation are disjoint with the binding variable parameter names</li>
-    /// <li>within the scope of a quantifier variable in the formula, no other quantifier variables or free variables with the same name may occur</li>
+    /// <li>within the scope of a quantifier variable in the formula, no other quantifier variables with the same name may occur</li>
     /// </ul>
     ///
     bool is_well_typed() const
     {
+      // check 1)
+      if (detail::sequence_contains_duplicates(
+             boost::make_transform_iterator(variable().parameters().begin(), detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , detail::data_variable_name())
+            )
+         )
+      {
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
+        return false;
+      }
+
+      // check 2)
+      detail::quantifier_visitor qvisitor;
+      qvisitor.visit(formula());
+      if (detail::sequences_do_overlap(
+             boost::make_transform_iterator(variable().parameters().begin(), detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.begin()     , detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.end()       , detail::data_variable_name())
+           )
+         )
+      {
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pp(*this) << std::endl;
+        return false;
+      }
+
+      // check 3)
+      detail::quantifier_name_clash_visitor nvisitor;
+      nvisitor.visit(formula());
+      if (nvisitor.result)
+      {
+        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+        return false;
+      }
+
       return true;
     }
 };

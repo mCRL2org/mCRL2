@@ -18,7 +18,7 @@
 #include "mcrl2/data/function.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/data_utility.h"
-#include "mcrl2/lps/detail/utility.h"
+#include "mcrl2/lps/detail/sequence_algorithm.h"
 
 namespace lps {
 

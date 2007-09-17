@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file utility.h
+/// \file sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_UTILITY_H
-#define MCRL2_LPS_DETAIL_UTILITY_H
+#ifndef MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H
+#define MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
@@ -21,16 +21,29 @@ namespace detail {
 /// Returns true if the sequence [first, last[ contains duplicates.
 // TODO: this implementation is not particularly efficient
 template <typename Iterator>
-bool contains_duplicates(Iterator first, Iterator last)
+bool sequence_contains_duplicates(Iterator first, Iterator last)
 {
   std::set<typename std::iterator_traits<Iterator>::value_type> s(first, last);
   int ssize = s.size();
   return ssize < std::distance(first, last);
 }
 
+/// Returns true if the two sequences [first1, last1[ and [first2, last2[ have
+/// a non empty intersection.
+template <typename Iterator1, typename Iterator2>
+bool sequences_do_overlap(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
+{
+  typedef typename std::iterator_traits<Iterator1>::value_type value_type;
+  std::set<value_type> s1(first1, last1);
+  std::set<value_type> s2(first2, last2);
+  std::vector<value_type> intersection;
+  std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), std::back_inserter(intersection));
+  return !intersection.empty();
+}
+
 /// Returns true if all elements of the range [first, last[ are element of s.
 template <typename Iterator, typename T>
-bool is_subset_of(Iterator first, Iterator last, const std::set<T>& s)
+bool sequence_is_subset_of_set(Iterator first, Iterator last, const std::set<T>& s)
 {
   for (Iterator i = first; i != last; ++i)
   {
@@ -51,24 +64,8 @@ std::set<typename Container::value_type> make_set(const Container& c)
   return result;
 }
 
-template <typename T>
-std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
-{
-  std::set<T> result;
-  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
-  return result;
-}
-
-template <typename T>
-std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
-{
-  std::set<T> result;
-  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
-  return result;
-}
-
 } // namespace detail
 
 } // namespace lps
 
-#endif // MCRL2_LPS_DETAIL_UTILITY_H
+#endif // MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H

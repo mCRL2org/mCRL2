@@ -68,16 +68,17 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
   identifier_string Xf = mu_name(f);
   data_expression_list fi = mu_expressions(f);
   data_expression_list pi = spec.initial_process().state();
+  atermpp::set<data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
 
   if (!timed)
   {   
     propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, f));
-    return pbes(spec.data(), e, init);
+    return pbes(spec.data(), e, free_variables, init);
   }
   else
   {
     propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));
-    return pbes(spec.data(), e, init);
+    return pbes(spec.data(), e, free_variables, init);
   }
 }
 
