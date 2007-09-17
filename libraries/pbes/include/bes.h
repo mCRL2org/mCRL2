@@ -100,7 +100,7 @@ namespace bes
   // wrap global variables in a class, to enable multiple inclusion of this header file
   // note, T is only a dummy
 
-  // template <class T>
+  template <class T>
   struct bes_global_variables
   {
     static std::deque<counter_example> COUNTER_EXAMPLE_NULL_QUEUE;
@@ -108,12 +108,14 @@ namespace bes
     static bool opt_use_hashtables;
   };
 
-  // template <class T>
-  bool bes_global_variables::opt_use_hashtables = false;
+  template <class T>
+  bool bes_global_variables<T>::opt_use_hashtables = false;
 
-  // template <class T>
-  std::deque<counter_example> bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE;
-  std::deque<variable_type> bes_global_variables::TODO_NULL_QUEUE;
+  template <class T>
+  std::deque<counter_example> bes_global_variables<T>::COUNTER_EXAMPLE_NULL_QUEUE;
+
+  template <class T>
+  std::deque<variable_type> bes_global_variables<T>::TODO_NULL_QUEUE;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,7 +162,7 @@ namespace bes
 
   inline
   void use_hashtables(void)
-  { bes_global_variables::opt_use_hashtables=true;
+  { bes_global_variables<int>::opt_use_hashtables=true;
   }
 
 /*
@@ -439,7 +441,7 @@ namespace bes
                       const variable_type v, 
                       const bes_expression b_subst,
                       atermpp::table &hashtable,
-                      std::deque < counter_example > &counter_example_queue=bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+                      std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
     if (is_true(b)||is_false(b)||is_dummy(b))
@@ -448,7 +450,7 @@ namespace bes
     
     bes_expression result;
 
-    if (bes_global_variables::opt_use_hashtables)
+    if (bes_global_variables<int>::opt_use_hashtables)
     { result=hashtable.get(b);
       if (result!=NULL)
       { return result;
@@ -457,7 +459,7 @@ namespace bes
     
     if (is_if(b))
     { if (v==get_variable(condition(b)))
-      { if (&counter_example_queue!=&bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+      { if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
         { counter_example_queue.push_front(counter_example(v,SUBSTITUTION));
         }
         if (is_true(b_subst))
@@ -477,7 +479,7 @@ namespace bes
     else if (is_variable(b))
     { if (v==get_variable(b))
       { result=b_subst;
-        if (&counter_example_queue!=&bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+        if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
         { counter_example_queue.push_front(counter_example(v,SUBSTITUTION));
         }
 
@@ -531,7 +533,7 @@ namespace bes
       }
     }
 
-    if (bes_global_variables::opt_use_hashtables)
+    if (bes_global_variables<int>::opt_use_hashtables)
     { hashtable.put(b,result); 
     }
     return result;
@@ -542,7 +544,7 @@ namespace bes
                       bes_expression b, 
                       const variable_type v, 
                       const bes_expression b_subst,
-                      std::deque < counter_example > &counter_example_queue=bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+                      std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
     if (is_true(b)||is_false(b)||is_dummy(b))
@@ -553,7 +555,7 @@ namespace bes
 
     bes_expression result=substitute_true_false_rec(b,v,b_subst,hashtable1,counter_example_queue);
 
-    if (bes_global_variables::opt_use_hashtables) 
+    if (bes_global_variables<int>::opt_use_hashtables) 
     { hashtable1.reset();
     }
     return result;
@@ -825,7 +827,7 @@ namespace bes
                         fixpoint_symbol sigma,
                         unsigned long rank,
                         bes_expression rhs,
-                        std::deque <variable_type> &todo=bes_global_variables::TODO_NULL_QUEUE)
+                        std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
         assert(v>0);     // variables are represented by numbers >0.
         // std::cerr << "Add equation " << v << std::endl;
@@ -852,7 +854,7 @@ namespace bes
       inline void set_rhs(variable_type v,
                           bes_expression b,
                           variable_type v_except=0,
-                          std::deque <variable_type> &todo=bes_global_variables::TODO_NULL_QUEUE)
+                          std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { /* set the right hand side of v to b. Update the variable occurrences
            of v in the variables occurrence sets of variables occurring in b, but
            do not update the variable occurrence sets of v_except */
@@ -960,8 +962,8 @@ namespace bes
                       bes_expression b)
       { static atermpp::indexed_set indexed_set1(10,50);
 
-        add_variables_to_occurrence_sets(v,b,bes_global_variables::opt_use_hashtables,indexed_set1);
-        if (bes_global_variables::opt_use_hashtables)
+        add_variables_to_occurrence_sets(v,b,bes_global_variables<int>::opt_use_hashtables,indexed_set1);
+        if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set1.reset();
         }
       }
@@ -1020,8 +1022,8 @@ namespace bes
       {
         static atermpp::indexed_set indexed_set2(10,50);
 
-        remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables::opt_use_hashtables,indexed_set2);
-        if (bes_global_variables::opt_use_hashtables)
+        remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables<int>::opt_use_hashtables,indexed_set2);
+        if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set2.reset();
         }
       }
@@ -1057,14 +1059,14 @@ namespace bes
 
       void set_variable_relevance_rec(
                     bes_expression b,
-                    std::deque <variable_type> &todo=bes_global_variables::TODO_NULL_QUEUE)
+                    std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { 
         assert(count_variable_relevance);
         if (is_true(b)||is_false(b)||is_dummy(b))
         { return;
         }
 
-        if (bes_global_variables::opt_use_hashtables)
+        if (bes_global_variables<int>::opt_use_hashtables)
         { if (!(variable_relevance_indexed_set.put(b)).second)
           { /* The relevance for the variables in this term has already been set */
             return;
@@ -1079,7 +1081,7 @@ namespace bes
           { control_info[v]=control_info[v]|RELEVANCE_MASK;  // Make relevant
             if (get_rhs(v)==dummy()) // v is relevant an unprocessed. Put in on the todo stack.
             { 
-              if (&todo!=&bes_global_variables::TODO_NULL_QUEUE)
+              if (&todo!=&bes_global_variables<int>::TODO_NULL_QUEUE)
               { 
                 todo.push_back(v);
               }
@@ -1109,13 +1111,13 @@ namespace bes
         assert(0); // do not expect other term formats.
       }
 
-      void refresh_relevances(std::deque <variable_type> &todo=bes_global_variables::TODO_NULL_QUEUE)
+      void refresh_relevances(std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { if (count_variable_relevance)
         { reset_variable_relevance();
-          if (bes_global_variables::opt_use_hashtables)
+          if (bes_global_variables<int>::opt_use_hashtables)
           { variable_relevance_indexed_set.reset();
           }
-          if (&todo!=&bes_global_variables::TODO_NULL_QUEUE)
+          if (&todo!=&bes_global_variables<int>::TODO_NULL_QUEUE)
           { todo.clear();
           }
           set_variable_relevance_rec(variable(1),todo);
@@ -1175,7 +1177,7 @@ namespace bes
              bes_expression b,
              variable_type v,
              unsigned long current_rank,
-             std::deque < counter_example > &counter_example_queue=bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+             std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
       { if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
         }
@@ -1229,7 +1231,7 @@ namespace bes
              bes_expression b,
              variable_type v,
              unsigned long current_rank,
-             std::deque < counter_example > &counter_example_queue=bes_global_variables::COUNTER_EXAMPLE_NULL_QUEUE)
+             std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
       { ATfprintf(stderr," Search loop: %d %t\n",v,(ATerm)b);
         if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
