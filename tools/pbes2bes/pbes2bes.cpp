@@ -344,7 +344,7 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 	}
 
 	// Instantiate free variables in the system
-	atermpp::set< data_variable > freevars = pbes_spec.equations().free_variables();
+	atermpp::set< data_variable > freevars = pbes_spec.free_variables();
 	if (freevars.size() > 0)
 	{
 		gsVerboseMsg("Instantiating free variables\n");

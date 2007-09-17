@@ -235,6 +235,18 @@ class pbes
 
     pbes(data_specification data,
          const equation_system& equations,
+         propositional_variable_instantiation initial_state)
+      :
+        m_data(data),
+        m_equations(equations),
+        m_initial_state(pbes_initializer(data_variable_list(), initial_state))
+    {
+      m_free_variables = compute_free_variables(equations);
+      assert(detail::check_rule_PBES(term()));
+    }
+
+    pbes(data_specification data,
+         const equation_system& equations,
          const atermpp::set<data_variable>& free_variables,
          propositional_variable_instantiation initial_state)
       :
