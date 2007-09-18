@@ -11,10 +11,18 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <list>
+#include <set>
+#include "CArray.h"
+#include <stack>
 
 #define RPV RecProcessVariable
 #define RVT RecVariableType
 #define RAT RecActionTransition
+#define RS RecStreams
+#define RSP RecStreamPos
+
+typedef CArray<int> IntArray ; 
 
 typedef struct
   {
@@ -29,15 +37,34 @@ typedef struct
      std::string Type;
    } RecVariableType;
 
+typedef struct
+   {
+     int state;
+     int holdsForState;
+   } RecStreams;
+
+typedef struct
+   {
+     int stream;
+     int position;
+   } RecStreamPos;
 
 typedef struct
   {
     int state;
+    int stream;
+    bool terminate;
+    int parenthesis_level;
+  //  std::vector<RSP> proceedAfterSteams;
+    std::set<int> procedingStreams;
+    int proceedStreamState;
     std::string guard;
     std::string action;
-    std::map<std::string, std::string> vectorUpdate;
+    std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
+                                                     // Second: Expression
     int nextstate;
   } RecActionTransition;
+
 
 template <class T>
 inline std::string to_string (const T& t)
@@ -60,6 +87,7 @@ class CAsttransform
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix;
     int scope_level;
+    int parenthesis_level;
     std::vector<RVT> manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
@@ -69,22 +97,49 @@ class CAsttransform
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
     std::vector<RVT> manipulateDeclaredProcessVariable(ATermAppl input); 
     std::string manipulateExpression(ATermAppl input);
-    int manipulateStatements(ATermAppl input, int current, int next);
+    void manipulateStatements(ATermAppl input);
     std::map<std::string, std::string> manipulateAssignmentStat(ATermList input_id, ATermList input_exp);
     std::vector<std::string> getExpressionsFromList(ATermList input);
     bool onlyIdentifiersInExpression(ATermList input );
+    std::map<int, std::set<int> > affectedStreamMap;
 
     //Future implementation
     std::string manipulateExplicitTemplates(ATermList input);
     std::string manipulateDeclaredProcessChannels(ATermList input);
     std::map<std::string, RecProcessVariable> ProcessVariableMap;
 
-    std::vector<RAT> transitionSystem ;
+    int max_stream_lvl;  //Maximal number of streams
+    int local_max_stream_lvl;  //Maximal number of streams
+    int stream_lvl;      //Variable to indicate the number of steams
+    int concurrent_streams; 
+
+    IntArray streams_per_parenthesis_level;
+    std::map<int, std::set<int> > bypass_per_parenthesis_level;
+
+    std::map<int, std::list<int> >postProcessVector;
+    std::map<int, int> postProcessGuards;
+
+    std::vector<RAT> transitionSystem;
+
+    std::vector<RS> holdsForStreamVector;
 
     int statementorder;
     int statementlevel;
 
-    std::vector<int> bypass;
+    bool terminate;  //terminate per parenthesis level
+    int state;
+    int next_state;
+    std::map<int, int> begin_state; //first:  parenthesis level
+                                    //second: begin state
+    std::map<int, int> end_state;   //first:  parenthesis level
+                                    //second: end state
+
+    std::map<int, std::set<int> > endstates_per_parenthesis_level;
+    std::map<int, std::vector<std::set<int> > > endstates_per_parenthesis_level_per_parenthesis;
+ 
+   int determineEndState(std::set<int> org_set, int lvl); 
+
+    // std::vector<int> bypass;
 }
 ;
 

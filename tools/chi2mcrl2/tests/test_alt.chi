@@ -1,5 +1,4 @@
-proc Test( var r, k: nat, z: bool  ) =
-|[ var a, b : bool = false,
-   var    c    : nat ,
-       d    : bool 
-:: skip ; delta; skip | skip ; skip; delta | skip | skip ; skip ]|
+proc Test( ) =
+|[ 
+( skip | skip ) ; skip  
+]|

@@ -68,10 +68,10 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %token <appl> NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 
-%left ALT SEP
+%left BARS 
 %left MINUS PLUS 
 %left STAR DIVIDE       /* order '+','-','*','/' */
-%right POWER          /* exponentiation        */
+%right POWER SEP ALT          /* exponentiation        */
 %start ChiProgram
 %glr-parser
 %debug
