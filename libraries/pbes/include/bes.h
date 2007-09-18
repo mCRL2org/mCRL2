@@ -1207,13 +1207,13 @@ namespace bes
 
         if (is_variable(b))
         { variable_type w=get_variable(b);
-          if ((get_rank(w)!=current_rank)||(w>v))
+          if (w==v)
           { if ( construct_counter_example)
             { counter_example_queue.push_front(counter_example(w,NU_CYCLE));
             }
             return true;
           }
-          if (w>v)
+          if ((get_rank(w)!=current_rank)||(w>v))
           { return false;
           }
           return find_nu_loop(get_rhs(w),v,current_rank,counter_example_queue);
@@ -1232,7 +1232,7 @@ namespace bes
              variable_type v,
              unsigned long current_rank,
              std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
-      { ATfprintf(stderr," Search loop: %d %t\n",v,(ATerm)b);
+      { 
         if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
         }
@@ -1264,14 +1264,13 @@ namespace bes
 
         if (is_variable(b))
         { variable_type w=get_variable(b);
-          if ((get_rank(w)!=current_rank)||(w>v))
+          if (w==v)
           { if ( construct_counter_example)
             { counter_example_queue.push_front(counter_example(w,MU_CYCLE));
             }
-            std::cerr << "Mu loop found: " << v << std::endl;
             return true;
           }
-          if (w>v)
+          if ((get_rank(w)!=current_rank)||(w>v))
           { return false;
           }
           return find_mu_loop(get_rhs(w),v,current_rank,counter_example_queue);
