@@ -423,6 +423,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
           Elts = ATinsert(Elts, (ATerm) Arg0);
           Part = ATAelementAt(Args, 1);
         }
+        Elts = ATreverse(Elts);
         ATermAppl Sort = gsMakeSortExprList(gsGetSort(ATAgetFirst(Elts)));
         Part = gsMakeDataExprListEnum(Elts, Sort);
       }
