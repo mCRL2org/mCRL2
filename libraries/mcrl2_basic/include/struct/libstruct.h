@@ -1268,6 +1268,18 @@ bool gsIsDataExprCReal(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a CReal
 
+bool gsIsDataExprPos2Nat(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Pos2Nat
+
+bool gsIsDataExprNat2Int(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Nat2Int
+
+bool gsIsDataExprInt2Real(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Int2Real
+
 bool gsIsDataExprCNeg(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a CNeg
@@ -1372,9 +1384,17 @@ bool gsIsDataExprNumber(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the data expression is a number
 
+bool gsIsDataExprEmptyList(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is an expression for an empty list
+
 bool gsIsDataExprListEnum(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the data expression is a list enumeration
+
+bool gsIsDataExprCons(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the data expression is a cons list.
 
 bool gsIsDataExprSetEnum(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression

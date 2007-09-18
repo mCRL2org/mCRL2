@@ -72,6 +72,22 @@ ATermList subtract_list(ATermList l, ATermList m)
   return l;
 }
 
+bool is_list_enum_impl(ATermAppl data_expr)
+{
+  if (!gsIsDataAppl(data_expr) && !gsIsOpId(data_expr)) return false;
+  ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(data_expr), 0);
+  if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
+    ATermList Args = gsGetDataExprArgs(data_expr);
+    if (ATgetLength(Args) == 2) {
+      return is_list_enum_impl(ATAelementAt(Args, 1));
+    } else {
+      return false;
+    }
+  } else {
+    return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
+  }
+}
+
 ATermList get_free_vars(ATermAppl data_expr)
 {
   ATermList result = ATmakeList0();

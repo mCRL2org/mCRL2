@@ -649,14 +649,9 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     //DataExpr is a product data application; return the result sort of the
     //first argument
     ATermAppl Expr = ATAgetArgument(DataExpr, 0);
-    // If Expr is again a DataAppl the recursive call of gsGetSort will
-    // return a SortId instead of a SortArrow,
-    // this gives rise to the second case distinction!
     ATermAppl HeadSort = gsGetSort(Expr);
     if (gsIsSortArrow(HeadSort)) {
       Result = ATAgetArgument(HeadSort, 1);
-    } else if (gsIsSortId(HeadSort)) {
-      Result = HeadSort;
     } else {
       Result = gsMakeSortUnknown();
     }
@@ -2195,7 +2190,6 @@ ATermAppl gsMakeDataExprGTESubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
 ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
-  //assert(ATisEqual(gsGetSortExprResult(gsGetSort(DataExprLHS)), gsGetSortExprResult(gsGetSort(DataExprRHS))));
   return gsMakeDataAppl2(gsMakeOpIdMult(gsGetSort(DataExprLHS)),
     DataExprLHS, DataExprRHS);
 }
@@ -2909,6 +2903,36 @@ bool gsIsDataExprCReal(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprPos2Nat(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Nat();
+  }
+  return false;
+}
+
+bool gsIsDataExprNat2Int(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNameNat2Int();
+  }
+  return false;
+}
+
+bool gsIsDataExprInt2Real(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNameInt2Real();
+  }
+  return false;
+}
+
 bool gsIsDataExprCNeg(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
@@ -3162,10 +3186,17 @@ bool gsIsDataExprEven(ATermAppl DataExpr)
 bool gsIsDataExprNumber(ATermAppl DataExpr)
 {
   if (!gsIsOpId(DataExpr)) return false;
-  ATermAppl Name = ATAgetArgument(DataExpr, 0);
+  ATermAppl Name = gsGetName(DataExpr);
   char* s = gsATermAppl2String(Name);
   if (s == NULL) return false;
   return gsIsNumericString(s);
+}
+
+bool gsIsDataExprEmptyList(ATermAppl DataExpr)
+{
+  if (!gsIsOpId(DataExpr)) return false;
+  ATermAppl Name = gsGetName(DataExpr);
+  return ATisEqual(Name, gsMakeOpIdNameEmptyList());
 }
 
 bool gsIsDataExprListEnum(ATermAppl DataExpr)
@@ -3174,6 +3205,17 @@ bool gsIsDataExprListEnum(ATermAppl DataExpr)
     DataExpr = ATAgetArgument(DataExpr, 0);
     if (gsIsOpId(DataExpr)) {
       return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameListEnum());
+    }
+  }
+  return false;
+}
+
+bool gsIsDataExprCons(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    DataExpr = ATAgetArgument(DataExpr, 0);
+    if (gsIsOpId(DataExpr)) {
+      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameCons());
     }
   }
   return false;

@@ -91,7 +91,7 @@ static ATermAppl capture_avoiding_substs(ATermAppl Part,
 //     this is the top-level function, which should be used when
 //     there is no appropriate context.
 //ret: Term with beta reduction performed on it.
-static ATerm beta_reduce_term(ATerm Term);
+//static ATerm beta_reduce_term(ATerm Term);
 
 //pre: DataExpr is a data expression,
 //     Context is the substitution context to use.
@@ -283,18 +283,51 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
         Part = reconstruct_pos_mult(Part, "1");
       }
     } else if (gsIsDataExprC0(Part)) {
+      gsDebugMsg("Reconstructing implementation of %T\n", Part);
       Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
-    } else if (gsIsDataExprCNat(Part)) {
-      Part = gsMakeDataExprPos2Nat(ATAgetFirst(ATLgetArgument(Part, 1)));
+    } else if (gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part)) {
+      gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
+      ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+      value = reconstruct_exprs_appl(value, Spec);
+      recursive = false;
+      Part = gsMakeDataExprPos2Nat(value);
+      if (gsIsOpId(value)) {
+        ATermAppl name = ATAgetArgument(value, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeOpId(name, gsMakeSortExprNat());
+        }
+      }
     } else if (gsIsDataExprCPair(Part)) {
-      // TODO What can we do with this?
+      gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
     } else if (gsIsDataExprCNeg(Part)) {
+      gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
       Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
-    } else if (gsIsDataExprCInt(Part)) {
-      Part = gsMakeDataExprNat2Int(ATAgetFirst(ATLgetArgument(Part, 1)));
-    } else if (gsIsDataExprCReal(Part)) {
-      Part = gsMakeDataExprInt2Real(ATAgetFirst(ATLgetArgument(Part, 1)));
+    } else if (gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part)) {
+      gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
+      ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+      value = reconstruct_exprs_appl(value, Spec);
+      recursive = false;
+      Part = gsMakeDataExprNat2Int(value);
+      if (gsIsOpId(value)) {
+        ATermAppl name = ATAgetArgument(value, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeOpId(name, gsMakeSortExprInt());
+        } 
+      }
+    } else if (gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part)) {
+      gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
+      ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+      value = reconstruct_exprs_appl(value, Spec);
+      recursive = false;
+      Part = gsMakeDataExprInt2Real(value);
+      if (gsIsOpId(value)) {
+        ATermAppl name = ATAgetArgument(value, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeOpId(name, gsMakeSortExprReal());
+        } 
+      }
     } else if (gsIsDataExprDub(Part)) {
+      gsDebugMsg("Reconstructing implementation of Dub (%T)\n", Part);
       ATermList Args = ATLgetArgument(Part, 1);
       ATermAppl BoolArg = ATAelementAt(Args, 0);
       ATermAppl PosArg = ATAelementAt(Args, 1);
@@ -308,29 +341,91 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
         Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, Sort));
       }
     } else if (gsIsDataExprAddC(Part)) {
-      // TODO
+      gsDebugMsg("Reconstructing implementation of AddC (%T)\n", Part);
+      ATermList Args = ATLgetArgument(Part, 1);
+      ATermAppl BoolArg = ATAelementAt(Args, 0);
+      ATermAppl LHS = ATAelementAt(Args, 1);
+      ATermAppl RHS = ATAelementAt(Args, 2);
+      ATermAppl Sum = gsMakeDataExprAdd(LHS, RHS);
+      ATermAppl Sort = gsGetSortExprResult(gsGetSort(LHS));
+      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+        Part = gsMakeDataExprAdd(Sum, gsMakeOpId(gsString2ATermAppl("1"), Sort));
+      } else if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+        Part = Sum;
+      } else {
+        Part = gsMakeDataExprAdd(Sum, bool_to_numeric(BoolArg, Sort));
+      }
     } else if (gsIsDataExprGTESubt(Part)) {
-      // TODO
+      gsDebugMsg("Reconstructing implementation of GTESubt (%T)\n", Part);
+      ATermList Args = ATLgetArgument(Part, 1);
+      ATermAppl LHS = ATAelementAt(Args, 0);
+      ATermAppl RHS = ATAelementAt(Args, 1);
+      Part = gsMakeDataExprSubt(LHS, RHS);
+      // Subt always has at least type Int
+      if (ATisEqual(gsGetSort(Part), gsMakeSortExprInt())) {
+        Part = gsMakeDataExprInt2Nat(gsMakeDataExprSubt(LHS, RHS));
+      } else {
+        Part = gsMakeDataExprReal2Nat(gsMakeDataExprSubt(LHS, RHS));
+      }
     } else if (gsIsDataExprGTESubtB(Part)) {
-      // TODO
+      gsDebugMsg("Reconstructing implementation of GTESubtB (%T)\n", Part);
+      ATermList Args = ATLgetArgument(Part, 1);
+      ATermAppl BoolArg = ATAelementAt(Args, 0);
+      ATermAppl LHS = ATAelementAt(Args, 1);
+      ATermAppl RHS = ATAelementAt(Args, 2);
+      // LHS and RHS are always of type Pos, so LHS - RHS has type Int
+      Part = gsMakeDataExprSubt(LHS, RHS);
+      ATermAppl Sort = gsGetSort(Part);
+      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+        Part = gsMakeDataExprSubt(Part, gsMakeOpId(gsString2ATermAppl("1"), Sort));
+      } else if (!ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+        Part = gsMakeDataExprSubt(Part, bool_to_numeric(BoolArg, Sort));
+      }
+      Part = gsMakeDataExprInt2Nat(Part);
     } else if (gsIsDataExprMultIR(Part)) {
-      // TODO
+      gsDebugMsg("Reconstructing implementation of MultIR (%T)\n", Part);
+      ATermList Args = ATLgetArgument(Part, 1);
+      ATermAppl Bit = ATAelementAt(Args, 0);
+      ATermAppl IR = ATAelementAt(Args, 1);
+      ATermAppl LHS = ATAelementAt(Args, 2);
+      ATermAppl RHS = ATAelementAt(Args, 3);
+      ATermAppl Mult = gsMakeDataExprMult(LHS, RHS);
+      if (gsIsDataExprTrue(Bit)) {
+        Part = gsMakeDataExprAdd(IR, Mult);
+      } else if (gsIsDataExprFalse(Bit)) {
+        Part = Mult;
+      } else {
+        Part = gsMakeDataExprAdd(
+                 gsMakeDataExprMult(bool_to_numeric(Bit, gsMakeSortExprPos()), IR),
+                 Mult);
+      }
     } else if (gsIsDataExprDivMod(Part)) {
+      gsDebugMsg("Currently not reconstructing implementation of DivMod (%T)\n", Part);
       // TODO
     } else if (gsIsDataExprGDivMod(Part)) {
+      gsDebugMsg("Currently not reconstructing implementation of GDivMod (%T)\n", Part);
       // TODO
     } else if (gsIsDataExprGGDivMod(Part)) {
+      gsDebugMsg("Currently not reconstructing implementation of GGDivMod (%T)\n", Part);
       // TODO
     } else if (gsIsDataExprEven(Part)) {
-      // TODO
-    /*
-    } else if (gsIsDataExprListEnum(Part)) {
-      // TODO
-    } else if (gsIsDataExprSetEnum(Part)) {
-      // TODO
-    } else if (gsIsDataExprBagEnum(Part)) {
-      // TODO
-    */
+      gsDebugMsg("Reconstructing implementation of even (%T)\n", Part);
+      ATermAppl Arg = ATAgetFirst(ATLgetArgument(Part, 1));
+      Part = gsMakeDataExprEq(gsMakeDataExprMod(Arg, 
+                 gsMakeOpId(gsString2ATermAppl("2"),gsMakeSortExprPos())),
+               gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat()));
+    } else if (is_list_enum_impl(Part)) {
+      if(!gsIsDataExprEmptyList(Part)) {
+        ATermList Elts = ATmakeList0();
+        while (gsIsDataExprCons(Part)) {
+          ATermList Args = ATLgetArgument(Part, 1);
+          ATermAppl Arg0 = ATAgetFirst(Args);
+          Elts = ATinsert(Elts, (ATerm) Arg0);
+          Part = ATAelementAt(Args, 1);
+        }
+        ATermAppl Sort = gsMakeSortExprList(gsGetSort(ATAgetFirst(Elts)));
+        Part = gsMakeDataExprListEnum(Elts, Sort);
+      }
     }
   } else if (gsIsSortExpr(Part)) {
     // Reconstruct sort expressions if needed
@@ -353,7 +448,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
       ATermAppl map_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 2);
       ATermList ops = ATLgetArgument(map_spec, 0);
       bool found = false;
-      while (!ATisEmpty(ops)) {
+      while (!ATisEmpty(ops) && !found) {
         ATermAppl op = ATAgetFirst(ops);
         if (ATisEqual(gsGetName(op), gsMakeOpIdNameSetComp())) {
           ATermAppl op_sort = gsGetSort(op);
@@ -370,7 +465,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, const ATermAppl Spec)
       ATermAppl map_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 2);
       ATermList ops = ATLgetArgument(map_spec, 0);
       bool found = false;
-      while (!ATisEmpty(ops)) {
+      while (!ATisEmpty(ops) && !found) {
         ATermAppl op = ATAgetFirst(ops);
         if (ATisEqual(gsGetName(op), gsMakeOpIdNameBagComp())) {
           ATermAppl op_sort = gsGetSort(op);
@@ -860,6 +955,7 @@ ATermAppl capture_avoiding_substs(ATermAppl Part, ATermList Substs,
   return Part;
 }
 
+/*
 ATerm beta_reduce_term(ATerm Term)
 {
   if (ATgetType(Term) == AT_APPL) {
@@ -871,6 +967,7 @@ ATerm beta_reduce_term(ATerm Term)
     return (ATerm) beta_reduce_list((ATermList) Term, &Context);
   }
 }
+*/
 
 ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive)
 {

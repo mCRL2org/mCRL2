@@ -101,6 +101,9 @@ inline bool is_lambda_op_id(ATermAppl data_expr)
   }
 }
 
+bool is_list_enum_impl(ATermAppl data_expr);
+//Ret: data_expr is the implementation of a list enumeration
+
 ATermList get_free_vars(ATermAppl data_expr);
 //Pre: data_expr is a data expression that adheres to the internal syntax after
 //     type checking

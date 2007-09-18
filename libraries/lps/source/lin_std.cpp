@@ -4829,60 +4829,57 @@ static enumeratedtype *create_enumeratedtype
         w->elementnames=ATinsertA(w->elementnames,constructor);
       }
       
+      /* Lists with equation variables */
+      ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+      ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), w->sortId);
+      ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), w->sortId);
+      ATermList emptyl = ATmakeList0();
+      ATermList xl = ATmakeList1((ATerm) x);
+      ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
+      ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
+      ATermList eqns = ATmakeList0();
+
       equalitymapping=gsMakeOpIdEq(w->sortId);
       insertmapping(equalitymapping,spec);
-      { /* Generate equations */
-        ATermList l1=NULL, l2=NULL;
-        ATermAppl v=getfreshvariable("v_enum",w->sortId);
 
-        declare_equation_variables(ATinsertA(ATempty,v));
-        newequation(NULL,
-                    gsMakeDataExprEq(v,v),
-                    gsMakeDataExprTrue(),spec);
-        for(l1=w->elementnames ; l1!=ATempty ; l1=ATgetNext(l1))
-        { for(l2=w->elementnames ; l2!=ATempty ; l2=ATgetNext(l2))
-          { ATermAppl el1=ATAgetFirst(l1);
-            ATermAppl el2=ATAgetFirst(l2);
-            if (el1!=el2)
-            { 
-              newequation(NULL,
-                          gsMakeDataExprEq(el1,el2),
-                          gsMakeDataExprFalse(),spec);
-            }
-          }
+      eqns = ATinsertA(eqns, gsMakeDataEqn(xl, gsMakeNil(),
+                               gsMakeDataExprEq(x, x), gsMakeDataExprTrue()));
+      for(ATermList l1=w->elementnames ; l1!=ATempty ; l1=ATgetNext(l1))
+      { for(ATermList l2=w->elementnames ; l2!=ATempty ; l2=ATgetNext(l2))
+        { ATermAppl el1=ATAgetFirst(l1);
+          ATermAppl el2=ATAgetFirst(l2);
+          eqns = ATinsertA(eqns, gsMakeDataEqn(emptyl, gsMakeNil(),
+                                 gsMakeDataExprEq(el1, el2),
+                                 ATisEqual(el1,el2)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
         }
-        end_equation_section();
       }
 
       ATermAppl nonequalitymapping=gsMakeOpIdNeq(w->sortId);
       insertmapping(nonequalitymapping,spec);
-      ATermAppl v1=getfreshvariable("v",w->sortId);
-      ATermAppl v2=getfreshvariable("v",w->sortId);
-      ATermAppl b=getfreshvariable("b",gsMakeSortExprBool());
 
-      declare_equation_variables(ATinsertA(ATinsertA(ATinsertA(ATempty,v1),v2),b));
-      newequation(NULL,
-                   gsMakeDataExprNeq(v1,v2),
-                   gsMakeDataExprNot(gsMakeDataExprEq(v1,v2)),spec);
+      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
+                               gsMakeDataExprNeq(x,y),
+                               gsMakeDataExprNot(gsMakeDataExprEq(x,y))));
 
       ATermAppl ifmapping=gsMakeOpIdIf(w->sortId);
       insertmapping(ifmapping,spec);
 
-      newequation(NULL,
-                   gsMakeDataExprIf(gsMakeDataExprTrue(),v1,v2),
-                   v1,spec);
+      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
+                             gsMakeDataExprIf(gsMakeDataExprTrue(),x,y),
+                             x));
+      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
+                             gsMakeDataExprIf(gsMakeDataExprFalse(),x,y),
+                             y));
+      eqns = ATinsertA(eqns, gsMakeDataEqn(bxl, gsMakeNil(),
+                             gsMakeDataExprIf(b,x,x),
+                             x));
 
-      newequation(NULL,
-                   gsMakeDataExprIf(gsMakeDataExprFalse(),v1,v2),
-                   v2,spec);
-
-      newequation(NULL,
-                   gsMakeDataExprIf(b,v1,v1),
-                   v1,spec);
-      end_equation_section();
-
-      
-      
+      while(!ATisEmpty(eqns)) {
+        ATermAppl eqn = ATAgetFirst(eqns);
+        if (mayrewrite) rewr->addRewriteRule(eqn);
+        spec->eqns = ATinsertA(spec->eqns,eqn);
+        eqns = ATgetNext(eqns);
+      }
     }
     w->functions=ATempty;
     w->next=enumeratedtypelist;
@@ -5312,8 +5309,7 @@ static ATermAppl construct_binary_case_tree_rec(
   if (t==t1)
   { return t; 
   }
-  return gsMakeDataAppl1(gsMakeDataAppl1(gsMakeDataAppl1(
-              getcasefunction(termsort,e),casevar),t),t1);
+  return gsMakeDataAppl3(getcasefunction(termsort,e), casevar, t, t1);
 }
 
 static ATermAppl construct_binary_case_tree(
@@ -7165,7 +7161,6 @@ static ATermList makeMultiActionConditionList(
     comm_table[i].tmp = NULL;
     l = ATgetNext(l);
   }
-
   return makeMultiActionConditionList_aux(multiaction);
 }
 

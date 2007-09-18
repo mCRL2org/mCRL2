@@ -259,18 +259,6 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
          otherwise, sorts are only shown when necessary
 */
 
-static void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
-  const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts);
-/*Pre: OutStream points to a stream to which can be written
-       DataExpr is the implementation of a list enumeration
-       pp_format != ppInternal
-       ShowSorts indicates if the sorts of DataExpr should be shown
-  Post:A textual representation of the expression is written to OutStream, in
-       which:
-       - ShowSorts is taken into account
-       - the elements of the list are printed as a comma-separated list
-*/
-
 static void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   const ATermAppl LinearProcessSummand, const ATermList VarDecls,
   t_pp_format pp_format, bool ShowSorts);
@@ -340,9 +328,6 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
   Ret: all operations occurring in Parts are consistent with the variables from
        the context
  */
-
-static bool gsIsListEnumImpl(ATermAppl DataExpr);
-//Ret: DataExpr is the implementation of a list enumeration
 
 static bool gsIsOpIdPrefix(ATermAppl Term);
 //Ret: DataExpr is a prefix operation identifier
@@ -1125,27 +1110,21 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       int ArgsLength = ATgetLength(Args);
-      if (gsIsListEnumImpl(DataExpr)) {
-        //list enumeration
-        PRINT_FUNC(fprints)(OutStream, "[");
-        PRINT_FUNC(PrintListEnumElts)(OutStream, DataExpr, pp_format, ShowSorts);
-        PRINT_FUNC(fprints)(OutStream, "]");
-
-      } else if (gsIsDataExprListEnum(Head)) {
+      if (gsIsDataExprListEnum(DataExpr)) {
         //print list enumeration
         PRINT_FUNC(dbg_prints)("printing list enumeration\n");
         PRINT_FUNC(fprints)(OutStream, "[");
         PRINT_FUNC(PrintPart_List)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "]");
-      } else if (gsIsDataExprSetEnum(Head)) {
+      } else if (gsIsDataExprSetEnum(DataExpr)) {
         //print set/bag enumeration
         PRINT_FUNC(dbg_prints)("printing set enumeration\n");
         PRINT_FUNC(fprints)(OutStream, "{");
         PRINT_FUNC(PrintPart_List)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
-      } else if (gsIsDataExprBagEnum(Head)) {
+      } else if (gsIsDataExprBagEnum(DataExpr)) {
         //print bag enumeration
         PRINT_FUNC(fprints)(OutStream, "{");
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
@@ -1727,24 +1706,6 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
   }
 }
 
-void PRINT_FUNC(PrintListEnumElts)(PRINT_OUTTYPE OutStream,
-  const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts)
-{
-  ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
-  if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
-    ATermList Args = gsGetDataExprArgs(DataExpr);
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
-      pp_format, ShowSorts, 0);
-    ATermAppl Arg1 = ATAelementAt(Args, 1);
-    if (ATisEqual(ATAgetArgument(gsGetDataExprHead(Arg1), 0),
-      gsMakeOpIdNameCons()))
-    {
-      PRINT_FUNC(fprints)(OutStream, ", ");
-      PRINT_FUNC(PrintListEnumElts)(OutStream, Arg1, pp_format, ShowSorts);
-    }
-  }
-}
-
 void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   const ATermAppl Summand, const ATermList VarDecls,
   t_pp_format pp_format, bool ShowSorts)
@@ -1916,22 +1877,6 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
     l = ATgetNext(l);
   }
   return Result;
-}
-
-bool gsIsListEnumImpl(ATermAppl DataExpr)
-{
-  if (!gsIsDataAppl(DataExpr) && !gsIsOpId(DataExpr)) return false;
-  ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
-  if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
-    ATermList Args = gsGetDataExprArgs(DataExpr);
-    if (ATgetLength(Args) == 2) {
-      return gsIsListEnumImpl(ATAelementAt(Args, 1));
-    } else {
-      return false;
-    }
-  } else {
-    return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
-  }
 }
 
 bool gsIsOpIdPrefix(ATermAppl Term)
