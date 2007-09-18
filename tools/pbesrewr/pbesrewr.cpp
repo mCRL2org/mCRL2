@@ -188,6 +188,7 @@ int main(int argc, char** argv)
     pbes new_pbes_specification(
              old_pbes_specification.data(),
              new_eqsys,
+             old_pbes_specification.free_variables(),
              old_pbes_specification.initial_state());
     new_pbes_specification.save(tool_options.outfile_name);
     
