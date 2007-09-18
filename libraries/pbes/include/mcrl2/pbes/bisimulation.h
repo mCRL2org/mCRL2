@@ -83,32 +83,9 @@ pbes strong_bisimulation(const specification& M, const specification& S)
                       boost::make_transform_iterator(i->summation_variables().end()  , detail::data_variable_name())
                      );
   }
-std::cout << "<1>" << pp(s) << std::endl;
   s = rename_process_parameters(s, used_names, "_S");
-std::cout << "<2>" << pp(s) << std::endl;
   s = rename_free_variables(s, used_names, "_S");
-std::cout << "<3>" << pp(s) << std::endl;
   s = rename_summation_variables(s, used_names, "_S");
-std::cout << "<4>" << pp(s) << std::endl;
-
-  //// Second we resolve name clashes between summation variables in s and
-  //// (process parameters + free variables + summation variables) of m.
-  //// We do this by renaming the summation variables of the summands in s.
-  //std::set<identifier_string> used_names;
-  //
-  //// add process parameters of m to used_names
-  //for (data_variable_list::iterator i = m.process_parameters().begin(); i != m.process_parameters().end(); ++i)
-  //  used_names.insert(i->name());
-  //
-  //// add free variables of m to used_names
-  //for (data_variable_list::iterator i = m.free_variables().begin(); i != m.free_variables().end(); ++i)
-  //  used_names.insert(i->name());
-  //
-  //// add summation variables of m to used_names
-  //for (summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
-  //  for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
-  //    used_names.insert(j->name());
-  //linear_process s = rename_summation_variables(S.process(), used_names);
 
   identifier_string ms_name = fresh_identifier(make_list(M, S), "Xms");
   identifier_string sm_name = fresh_identifier(make_list(S, M), "Xsm");

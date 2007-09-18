@@ -111,6 +111,19 @@ inline bool check_sort(lps::sort s, const std::set<lps::sort>& sorts)
   return std::includes(sorts.begin(), sorts.end(), s_sorts.begin(), s_sorts.end());
 }
 
+/// Returns true if the domain sorts and the range sort of the sorts in the sequence [first, last[
+/// are contained in sorts.
+template <typename Iterator>
+bool check_sorts(Iterator first, Iterator last, const std::set<lps::sort>& sorts)
+{
+  for (Iterator i = first; i != last; ++i)
+  {
+    if (!check_sort(*i, sorts))
+      return false;
+  }
+  return true;
+}
+
 /// Returns true if the domain sorts and the range sort of the given variables are contained
 /// in sorts.
 template <typename VariableContainer>

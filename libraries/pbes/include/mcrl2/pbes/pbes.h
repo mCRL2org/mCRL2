@@ -29,6 +29,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/basic/pretty_print.h"
+#include "mcrl2/lps/detail/data_utility.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_equation.h"
@@ -364,23 +365,6 @@ class pbes
       return m_equations.is_closed();
     }
 
-/*
-    /// Computes the set of free variables.
-    ///
-    atermpp::set<data_variable> free_variables() const
-    {
-      // collect the free variables of the equations
-      atermpp::set<data_variable> result = m_equations.free_variables();
-
-      // add the (free) variables appearing in the initial state
-      const data_expression_list parameters = m_initial_state.variable().parameters();
-      for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
-        atermpp::for_each(*i, data_variable_collector(data_variable_list(), atermpp::vector<data_variable>(), result));
-
-      return result;
-    }
-*/
-
     /// Protects the term from being freed during garbage collection.
     ///
     void protect()
@@ -428,7 +412,7 @@ class pbes
       std::set<data_variable> quantifier_variables = compute_quantifier_variables(equations());
 
       // check 1)
-      if (!detail::sequence_is_subset_of_set(
+      if (!detail::check_sorts(
               boost::make_transform_iterator(declared_free_variables.begin(), detail::data_variable_sort()),
               boost::make_transform_iterator(declared_free_variables.end()  , detail::data_variable_sort()),
               declared_sorts
@@ -447,7 +431,7 @@ class pbes
       for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         const data_variable_list& variables = i->variable().parameters();
-        if (!detail::sequence_is_subset_of_set(
+        if (!detail::check_sorts(
                boost::make_transform_iterator(variables.begin(), detail::data_variable_sort()),
                boost::make_transform_iterator(variables.end()  , detail::data_variable_sort()),
                declared_sorts
@@ -464,7 +448,7 @@ class pbes
       }
 
       // check 3)
-      if (!detail::sequence_is_subset_of_set(
+      if (!detail::check_sorts(
               boost::make_transform_iterator(quantifier_variables.begin(), detail::data_variable_sort()),
               boost::make_transform_iterator(quantifier_variables.end()  , detail::data_variable_sort()),
               declared_sorts
