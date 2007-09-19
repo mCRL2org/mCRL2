@@ -6,6 +6,8 @@
 //
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
+// TODO: add option to store pbes_variable_instantiations in tree format.
+// Optimise finding MU and NU loops.
 
 // ======================================================================
 //
@@ -68,7 +70,8 @@ namespace po = boost::program_options;
 static void calculate_bes(pbes pbes_spec, 
                           t_tool_options tool_options,
                           bes::equations &bes_equations,
-                          atermpp::indexed_set &variable_index);
+                          atermpp::indexed_set &variable_index,
+                          Rewriter *rewriter);
 
 //Post: tool_options.infilename contains a PBES ("-" indicates stdin)
 //Ret:  The BES generated from the PBES
@@ -97,7 +100,9 @@ static void print_counter_example_rec(bes::variable_type current_var,
                                       std::string indent,
                                       bes::equations &bes_equations,
                                       atermpp::indexed_set &variable_index,
-                                      vector<bool> &already_printed)
+                                      vector<bool> &already_printed,
+                                      bool opt_precompile_pbes,
+                                      Rewriter *rewriter)
 {
   propositional_variable_instantiation X(variable_index.get(current_var));
 
@@ -105,7 +110,15 @@ static void print_counter_example_rec(bes::variable_type current_var,
   cerr << X.name();
   for(data_expression_list::iterator t=tl.begin();
         t!=tl.end(); t++)
-  { cerr << (t==tl.begin()?"(":",") << pp(*t);
+  { cerr << (t==tl.begin()?"(":",");
+    if (opt_precompile_pbes)
+    { // ATerm term=*t;
+      // cerr << pp(rewriter->fromRewriteFormat(term));
+      cerr << "Cannot print in internal format";
+    }
+    else 
+    { cerr << pp(*t);
+    }
   }
   cerr << ")";
 
@@ -121,24 +134,27 @@ static void print_counter_example_rec(bes::variable_type current_var,
     { 
       cerr << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
       print_counter_example_rec((*walker).get_variable(),indent+"  ",
-                            bes_equations,variable_index,already_printed);
+                            bes_equations,variable_index,already_printed,opt_precompile_pbes,rewriter);
     }
   }
 }
 
 static void print_counter_example(bes::equations &bes_equations,
-                                  atermpp::indexed_set &variable_index)
+                                  atermpp::indexed_set &variable_index,
+                                  bool opt_precompile_pbes,
+                                  Rewriter *rewriter)
 {
   cerr << "Below the justification for this outcome is listed\n";
   vector <bool> already_printed(bes_equations.nr_of_variables()+1,false);
   cerr << "1: ";
-  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed);
+  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,opt_precompile_pbes,rewriter);
 }
 
 static void do_lazy_algorithm(pbes pbes_spec, 
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
-                              atermpp::indexed_set &variable_index);
+                              atermpp::indexed_set &variable_index,
+                              Rewriter *rewriter);
 
 static bool solve_bes(const t_tool_options &,
                       bes::equations &,
@@ -159,7 +175,10 @@ bool process(t_tool_options const& tool_options)
   atermpp::indexed_set variable_index(10000, 50); 
   bes::equations bes_equations;
 
-  calculate_bes(pbes_spec, tool_options,bes_equations,variable_index);
+  data_specification data = pbes_spec.data();
+  Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
+  assert(rewriter != 0);
+  calculate_bes(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
   if (!tool_options.opt_construct_counter_example)
   { variable_index.reset();
   }
@@ -177,7 +196,7 @@ bool process(t_tool_options const& tool_options)
     gsMessage("The pbes is %svalid\n", solve_bes(tool_options,bes_equations,variable_index) ? "" : "not ");
 
     if (tool_options.opt_construct_counter_example)
-    { print_counter_example(bes_equations,variable_index);
+    { print_counter_example(bes_equations,variable_index,tool_options.opt_precompile_pbes,rewriter);
     }
   }
 
@@ -189,7 +208,8 @@ bool process(t_tool_options const& tool_options)
 void calculate_bes(pbes pbes_spec, 
                    t_tool_options tool_options,
                    bes::equations &bes_equations,
-                   atermpp::indexed_set &variable_index)
+                   atermpp::indexed_set &variable_index,
+                   Rewriter *rewriter)
 {
   /* if (!pbes_spec.is_well_formed())
   {
@@ -202,7 +222,7 @@ void calculate_bes(pbes pbes_spec,
     exit(1);
   } 
 
-  do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index);
+  do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
   //return new pbes
   return;
 }
@@ -333,7 +353,8 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 static void do_lazy_algorithm(pbes pbes_spec, 
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
-                              atermpp::indexed_set &variable_index)
+                              atermpp::indexed_set &variable_index,
+                              Rewriter *rewriter)
 {
 
   // Verbose msg: doing naive algorithm
@@ -368,8 +389,6 @@ static void do_lazy_algorithm(pbes pbes_spec,
   }
 
   // Data rewriter
-  Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
-  assert(rewriter != 0);
   variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state().variable(),
                      rewriter,
                      tool_options.opt_precompile_pbes));

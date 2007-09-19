@@ -67,7 +67,7 @@ namespace bes
       counter_example(variable_type w, reason s)
         : v(w),
           r(s)
-      { // std::cerr << "Store counterexample " << w << "  " << print_reason() << std::endl;
+      { 
       }
 
       variable_type get_variable(void)
