@@ -235,13 +235,20 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     {
       if (strategy>lazy)
       { bes_expression b=bes_equations.get_rhs(pr.first);
-        if (bes::is_true(b) || bes::is_false(b))
-        { // fprintf(stderr,"*");
+        if (bes::is_true(b) )
+        { 
           if (construct_counter_example)
           { bes_equations.counter_example_queue(current_variable).
-                   push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION));
+                   push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION_TRUE));
           }
-
+          return b;
+        }
+        if (bes::is_false(b))
+        { 
+          if (construct_counter_example)
+          { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION_FALSE));
+          }
           return b;
         }
       }
@@ -605,8 +612,18 @@ static bes_expression substitute_rank(
     {
       result=approximation[v];
       if (store_counter_example)
-      { bes_equations.counter_example_queue(current_variable).
+      { if (bes::is_true(result))
+        { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION_TRUE));
+        }
+        else if (bes::is_false(result))
+        { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION_FALSE));
+        }
+        else
+        { bes_equations.counter_example_queue(current_variable).
                    push_front(bes::counter_example(v,bes::APPROXIMATION));
+        }
       }
     }
     else
@@ -670,14 +687,14 @@ static bes_expression substitute_rank(
       { result=substitute_rank(then_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
         if (store_counter_example)
         { bes_equations.counter_example_queue(current_variable).
-                     push_front(bes::counter_example(v,bes::APPROXIMATION));
+                     push_front(bes::counter_example(v,bes::APPROXIMATION_TRUE));
         }
       }
       else if (bes::is_false(approximation[v]))
       { result=substitute_rank(else_branch(b),current_rank,approximation,bes_equations,use_hashtable,hashtable,store_counter_example,current_variable);
         if (store_counter_example)
         { bes_equations.counter_example_queue(current_variable).
-                     push_front(bes::counter_example(v,bes::APPROXIMATION));
+                     push_front(bes::counter_example(v,bes::APPROXIMATION_FALSE));
         }
       }
       else
@@ -852,7 +869,6 @@ bool solve_bes(const t_tool_options &tool_options,
       { approximation[v]=bes::true_();
       }
     }
-    // ATfprintf(stderr,"APPROX %d   %t\n",v,(ATerm)approximation[v]);
   }
 
   bes_equations.store_variable_occurrences();

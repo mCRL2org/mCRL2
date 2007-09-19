@@ -44,8 +44,12 @@ namespace bes
                         NU_CYCLE,
                         SET_TO_FALSE, 
                         SET_TO_TRUE, 
-                        FORWARD_SUBSTITUTION,
-                        SUBSTITUTION,
+                        FORWARD_SUBSTITUTION_FALSE,
+                        FORWARD_SUBSTITUTION_TRUE,
+                        SUBSTITUTION_FALSE,
+                        SUBSTITUTION_TRUE,
+                        APPROXIMATION_FALSE,
+                        APPROXIMATION_TRUE,
                         APPROXIMATION } reason;
 
   class counter_example
@@ -84,14 +88,18 @@ namespace bes
       
       std::string print_reason(void)
       { switch (r)
-        { case UNKNOWN:              return "Unknown      ";
-          case MU_CYCLE:             return "Mu Cycle     ";
-          case NU_CYCLE:             return "Nu Cycle     ";
-          case SET_TO_FALSE:         return "False        ";
-          case SET_TO_TRUE:          return "True         ";
-          case FORWARD_SUBSTITUTION: return "Fsubstition  ";
-          case SUBSTITUTION:         return "Substitution ";
-          case APPROXIMATION:        return "Approximation";
+        { case UNKNOWN:                    return "Unknown     ";
+          case MU_CYCLE:                   return "Mu Cycle    ";
+          case NU_CYCLE:                   return "Nu Cycle    ";
+          case SET_TO_FALSE:               return "Set:false   ";
+          case SET_TO_TRUE:                return "Set:true    ";
+          case FORWARD_SUBSTITUTION_FALSE: return "FSubst:false";
+          case FORWARD_SUBSTITUTION_TRUE:  return "FSubst:true ";
+          case SUBSTITUTION_FALSE:         return "Subst:false ";
+          case SUBSTITUTION_TRUE:          return "Subst:true  ";
+          case APPROXIMATION_FALSE:        return "Appr:false  ";
+          case APPROXIMATION_TRUE:         return "Appr:true   ";
+          case APPROXIMATION:              return "Approxim    ";
           default: return "ERROR UNKNOWN CASE";
         }
       }
@@ -459,14 +467,18 @@ namespace bes
     
     if (is_if(b))
     { if (v==get_variable(condition(b)))
-      { if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
-        { counter_example_queue.push_front(counter_example(v,SUBSTITUTION));
-        }
+      { 
         if (is_true(b_subst))
         { result=then_branch(b);
+          if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
+          { counter_example_queue.push_front(counter_example(v,SUBSTITUTION_TRUE));
+          }
         }
         else
         { assert(is_false(b_subst));
+          if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
+          { counter_example_queue.push_front(counter_example(v,SUBSTITUTION_FALSE));
+          }
           result=else_branch(b);
         }
       }
@@ -479,10 +491,18 @@ namespace bes
     else if (is_variable(b))
     { if (v==get_variable(b))
       { result=b_subst;
-        if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
-        { counter_example_queue.push_front(counter_example(v,SUBSTITUTION));
+        if (is_true(b_subst))
+        { 
+          if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
+          { counter_example_queue.push_front(counter_example(v,SUBSTITUTION_TRUE));
+          }
         }
-
+        else
+        { assert(is_false(b_subst));
+          if (&counter_example_queue!=&bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
+          { counter_example_queue.push_front(counter_example(v,SUBSTITUTION_FALSE));
+          }
+        }
       }
       else
       { result=b;
@@ -1120,9 +1140,17 @@ namespace bes
           if (&todo!=&bes_global_variables<int>::TODO_NULL_QUEUE)
           { todo.clear();
           }
-          set_variable_relevance_rec(variable(1),todo);
-          // std::cerr << "Reset relevancies of variables. Length of todo list: " << todo.size() << 
-          //        "Nr of vars: " << nr_of_variables() << std::endl;
+          set_variable_relevance_rec(variable(1),bes_global_variables<int>::TODO_NULL_QUEUE);
+          if (&todo!=&bes_global_variables<int>::TODO_NULL_QUEUE)
+          { // We add the variables to the todo queue separately,
+            // to guarantee that lower numbered variables occur earlier in 
+            // the queue. This guarantees shorter counter examples.
+            for(unsigned long v=1; v<=nr_of_variables(); v++)
+            { if ((get_rhs(v)==dummy()) && is_relevant(v))
+              { todo.push_back(v);
+              }
+            }
+          }
         }
       }
 
