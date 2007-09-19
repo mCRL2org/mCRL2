@@ -666,7 +666,7 @@ static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs){
   //ATermIndexedSet m=ATindexedSetCreate(10000,80);
   ATermList m = ATmakeList1((ATerm)ATmakeList0());
   ATermList r=l;
-  while(ATgetLength(r) > 1 ){
+  while(ATgetLength(r) > 0 ){
     ATermAppl a = ATAgetFirst(r);
     r = ATgetNext(r);
     //gsWarningMsg("r: %T\n",r);
