@@ -385,11 +385,13 @@ static unsigned get_max_allowed_length(ATermList V){
 }
 
 static unsigned get_max_comm_length(ATermList C){
-  //returns the length of the longest allowed multiaction (min 1).
+  //returns the length of the longest allowed multiaction (0 if unbounded).
   unsigned m = 1;
   for (; !ATisEmpty(C); C=ATgetNext(C)){
-    unsigned c=ATgetLength(ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0));
-    if(c>m) m=c;
+    ATermAppl c=ATAgetFirst(C);
+    if(gsIsNil(ATAgetArgument(c,1))) return 0;
+    unsigned l=ATgetLength(ATLgetArgument(ATAgetArgument(c,0),0));
+    if(l>m) m=l;
   }
   return m;
 }
@@ -854,7 +856,7 @@ static ATermList filter_rename_list(ATermList l, ATermList R){
 }
 
 static ATermAppl PushBlock(ATermList H, ATermAppl a){
-  //gsWarningMsg("push block: H: %T; a: %T\n\n",H,a);
+  gsDebugMsg("push block: H: %T; a: %T\n\n",H,a);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
   } 
@@ -1056,7 +1058,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
-  //gsWarningMsg("push allow: V: %P; a: %P\n\n",V,a);
+  gsDebugMsg("push allow: V: %P; a: %P\n\n",V,a);
   V=sort_multiactions_allow(V);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
@@ -1198,14 +1200,15 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     if(l)
       V1 = extend_allow_comm_with_alpha(V,C,l);
     
-    //gsWarningMsg("V1: %T\n\n",V1);
     p = PushAllow(V1,p);
     l = ATLtableGet(alphas,(ATerm) p);
     assert(l);
     
     l = filter_comm_list(l,C);
     a = ATsetArgument(a,(ATerm)p,1);
+ 
     a = gsApplyAlpha(a);
+
     ATtablePut(alphas,(ATerm) a,(ATerm)l);
 
     {
@@ -1299,7 +1302,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 
 static ATermAppl PushComm(ATermList C, ATermAppl a){
   C=sort_multiactions_comm(C);
-  //gsWarningMsg("push comm\n");//: C: %P; a:%P\n",C,a);
+  gsDebugMsg("push comm: C: %P; a:%P\n",C,a);
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return a;
   } 
@@ -1351,7 +1354,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
       ATermList lhs=comm_lhs(C); 
       for (ATermList lt=l; !ATisEmpty(lt); lt=ATgetNext(lt) ){
 	ATermList mas=untypeMAL(apply_comms(ATLgetFirst(lt),C,lhs));
-	V2=merge_list(V2,gsaMakeMultActNameL(mas));
+	V2=gsaMakeMultActNameL(mas);
       }
       ATermAppl p=ATAgetArgument(a,1);
       p=PushComm(C,p);
@@ -1485,19 +1488,14 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
   // 
   // XXX ignore parameter not implemented yet
 
-  //gsVerboseMsg("gsaGetAlpha: a: %P; length: %d\n\n", a, length);
+  gsDebugMsg("gsaGetAlpha begin: a: %P; length: %d\n\n", a, length);
 
   ATermList l=NULL; //result
 
   if ( gsIsSync (a)  ){
     //try to apply a special procedure
     l = gsaGetSyncAlpha(a,length,allowed,ignore);
-    if(l){
-      if(!length){
-	ATtablePut(alphas,(ATerm) a,(ATerm) l); 
-      }
-      return l;
-    }
+    if(l) goto l_ok;
   }
 
   if ( gsIsDelta (a) || gsIsTau(a) ){
@@ -1607,14 +1605,15 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     gsWarningMsg("a: %T\n\n", a);
     assert(0);
   }
-  
+
+l_ok:  
   assert(l);
     
   if(!length){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  //gsVerboseMsg("gsaGetAlpha done: a: %P; l:%d, length: %d\n\n", a, ATgetLength(l), length);
+  gsDebugMsg("gsaGetAlpha done: a: %P; l:%T, length: %d\n\n", a, l, length);
   return l;
 }
 
@@ -1662,7 +1661,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  //gsVerboseMsg("gsaGetSyncAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
+  gsDebugMsg("gsaGetSyncAlpha end: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
