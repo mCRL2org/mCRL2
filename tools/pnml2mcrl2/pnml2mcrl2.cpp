@@ -2303,7 +2303,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ticpp::Document doc(InFileName);
    
     try {
-      if (strcmp(InFileName,"-")) {
+      if (std::strcmp(InFileName,"-\0") == 0) {
         std::cin >> doc;
       }
       else {
