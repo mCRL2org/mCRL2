@@ -8,6 +8,9 @@
 /// \brief Add your file description here.
 
 #include "lts.h"
+#include "libtrace.h"
+#include "libprint.h"
+#include "libstruct.h"
 #include <algorithm>
 
 using namespace Utils;
@@ -1358,4 +1361,130 @@ int LTS::getZoomLevel() const
 void LTS::setZoomLevel(const int level)
 {
   zoomLevel = level;
+}
+
+void LTS::loadTrace(std::string const& path)
+{
+  //FIXME: See what to do about initial state of zoomed-in structures.
+  
+  //TODO: No clue if this is the correct way of doing it, might need to move it
+  //      to init of ltsview (0,0... is the argc, argv):
+  ATerm bot;
+  ATinit(0, 0, &bot);
+
+  Trace tr;
+  if (!tr.load(path))
+  {
+    // TODO: Delegate this correctly to user.
+    std::cerr << "Error loading file: " << path << std::endl;
+  }
+  else 
+  {
+    // To satisfy pretty printing preconditions.
+    gsEnableConstructorFunctions();
+
+    Simulation* sim = new Simulation();
+    // Initialize simulation with initial state of the LTS;
+    sim->setInitialState(initialState);
+    sim->start();
+
+    // Get the first state of the trace (as an ATermAppl)
+    ATermAppl currState = tr.currentState();
+    // Now, currState ~ initState. 
+    //
+    // In currState, free variables can occur, instantiate this with the values
+    // of the initial state in the simulation.
+    //
+    // Assumption: The ith parameter in currState is equal to the ith parameter
+    // in initialState.
+    for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState)); ++i)
+    {
+
+      ATerm currVal = ATgetArgument(currState, i);
+      string value = PrintPart_CXX(currVal, ppDefault);
+
+      std::string paramValue = valueTable[i]
+                                         [initialState->getParameterValue(i)];
+
+      if (value != paramValue)
+      {
+        freeVars[value] = paramValue;
+      }
+    }
+
+    // Load the rest of the trace.
+
+    while (tr.getPosition() != tr.getLength())
+    {
+      std::string action = PrintPart_CXX(ATgetArgument(
+                                          ATgetArgument(tr.getAction(),0),0),
+                                         ppDefault);
+
+      std::vector<Transition*> posTrans = sim->getPosTrans();
+      int possibilities = 0;
+      int toChoose = -1;
+
+      for(size_t i = 0; i < posTrans.size(); ++i)
+      { 
+        if (action == labels[posTrans[i]->getLabel()])
+        {
+          ++possibilities;
+          toChoose = i;
+        }
+      }
+
+      if (possibilities > 1)
+      {
+        // More than one possibility, meaning that choosing on action name is
+        // ambiguous. Solve disambiguation by looking at states
+        
+        currState = tr.currentState();
+        
+        for (size_t j = 0; j < posTrans.size(); ++j)
+        {
+          State* s = posTrans[j]->getEndState();
+          bool match = true;
+
+          for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState));
+              ++i)
+          {
+
+          std::string currVal = PrintPart_CXX(ATgetArgument(currState, i), 
+                                              ppDefault);
+
+          std::map<std::string, std::string>::iterator it;
+          if ((it = freeVars.find(currVal)) != freeVars.end())
+          {
+            currVal = it->second;
+          }
+
+          match &= (currVal == valueTable[i][s->getParameterValue(i)]);
+          }
+
+          if (match)
+          {
+            toChoose = j;
+          }
+        }
+      }
+      else if (possibilities == 1)
+      {
+        // Exactly one possibility, so skip
+     }
+      else 
+      {
+        // This cannot occur, unless there was some mismatch between lps and lts
+        // TODO: Delegate this correctly to the user.
+        std::cerr << "You err." << std::endl;
+        toChoose = -1;
+      }
+      
+      sim->chooseTrans(toChoose);
+      sim->followTrans();
+    }
+
+
+    // Set simulation to the LTS
+    simulation = sim;
+  }
 }

@@ -17,7 +17,9 @@ Simulation::Simulation()
   started=false;
   chosenTrans = -1;
 }
- 
+
+
+
 void Simulation::setInitialState(State* init)
 {
   initialState = init;

@@ -40,6 +40,7 @@ class MainFrame : public wxFrame, public simReader {
     void  onDisplay(wxCommandEvent& event);
     void  onExit(wxCommandEvent& event);
     void  onOpen(wxCommandEvent& event);
+    void  onOpenTrace(wxCommandEvent& event);
     void  onSavePic(wxCommandEvent& event);
     void  onRankStyle(wxCommandEvent& event);
     void  onVisStyle(wxCommandEvent& event);

@@ -98,6 +98,9 @@ class LTS {
     std::vector<Utils::MarkRule*> getMarkRules() const; 
     bool* getActionMarked(const int i) const;
 
+    // Loads a trace stored in location path and constructs a simulation from
+    // it.
+    void loadTrace(std::string const& path);
   private:
     // Constructor for zooming
     LTS(Mediator* owner, LTS* parent, bool fromAbove);
@@ -131,6 +134,10 @@ class LTS {
     std::vector< std::string > labels;
     std::map< std::string,int > labels_inv;
     std::vector< bool* > label_marks;
+
+    // Used for translating free variables from a trace to their instantiation 
+    // in the LTS
+    std::map<std::string, std::string> freeVars;
 
     // Methods
     void addComradesToCluster( Cluster* c, State* s );

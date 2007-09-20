@@ -29,6 +29,7 @@ using namespace IDs;
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_TOOL  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
+  EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
   EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)
   EVT_MENU  (wxID_EXIT, MainFrame::onExit)
   EVT_MENU  (wxID_RESET, MainFrame::onResetView)
@@ -105,6 +106,8 @@ void MainFrame::setupMenuBar() {
     wxT("Load an LTS from file"));
   fileMenu->Append(myID_SAVEPIC,wxT("Save &Picture...\tCtrl+P"),
       wxT("Save current picture to file"));
+  fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
+    wxT("Open a trace for this file"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
     
@@ -473,6 +476,20 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/) {
   if (dialog->ShowModal() == wxID_OK) {
     filename.Assign(dialog->GetPath());
     mediator->openFile(string(filename.GetFullPath().fn_str()));
+  }
+  dialog->Destroy();
+}
+
+void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
+{
+  wxString filemask = wxT("Traces (*.trc)|*.trc");
+  wxFileDialog* dialog = new wxFileDialog(this, wxT("Open Trace"),
+    filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
+  dialog->CentreOnParent();
+  if (dialog->ShowModal() == wxID_OK)
+  {
+    std::string path(dialog->GetPath().mb_str());
+    mediator->loadTrace(path);
   }
   dialog->Destroy();
 }

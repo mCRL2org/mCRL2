@@ -67,7 +67,7 @@ class State {
     std::set<State*>::iterator getSubordinatesEnd() const;
     std::set<State*>::iterator getSuperiorsBegin() const;
     std::set<State*>::iterator getSuperiorsEnd() const;
-    int        getParameterValue(int parindex);
+    int       getParameterValue(int parindex);
     bool      isCentered() const;
     bool      isDeadlock() const;
     bool      isMarked() const;

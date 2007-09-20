@@ -58,6 +58,7 @@ class LTSViewApp : public wxApp, public Mediator {
     void          zoomInAbove();
     void          zoomOut();
 
+    void          loadTrace(std::string const& path);
 };
 
 DECLARE_APP(LTSViewApp)

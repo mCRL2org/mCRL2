@@ -36,6 +36,9 @@ class Mediator {
     virtual void      zoomInAbove() = 0;
     virtual void      zoomOut() = 0;
 
+    // Loads a trace from path
+    virtual void      loadTrace(std::string const& path) = 0;
+
 
     // Simulation start. 
     virtual void      startSim() = 0;

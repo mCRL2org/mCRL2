@@ -518,3 +518,10 @@ void LTSViewApp::zoomOut()
   }
 
 }
+
+void LTSViewApp::loadTrace(std::string const& path)
+{
+  lts->loadTrace(path);
+  glCanvas->setSim(lts->getSimulation());
+  mainFrame->setSim(lts->getSimulation());
+}
