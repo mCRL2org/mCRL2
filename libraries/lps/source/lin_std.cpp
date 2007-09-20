@@ -4314,7 +4314,7 @@ static ATermAppl dummyterm(
      found a new dummy constant mapping of the requested sort is made. */
 
   if (allowFreeDataVariablesInProcesses)
-  { ATermAppl newVariable=gsMakeDataVarId(fresh_name("freevar"),targetsort);
+  { ATermAppl newVariable=gsMakeDataVarId(fresh_name("dc"),targetsort);
     spec->procdatavars=ATinsertA(spec->procdatavars,newVariable);
     insertvariable(newVariable,ATtrue);
     return newVariable;
