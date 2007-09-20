@@ -76,9 +76,9 @@ void print_help(FILE *f, char *Name)
 int main(int argc, char **argv)
 {
 	FILE *SpecStream;
-	ATerm stackbot, state;
-	ATermAppl Spec;
-	ATermList states;
+	ATerm stackbot, state = NULL;
+	ATermAppl Spec = NULL;
+	ATermList states = NULL;
 	#define sopts "hqvdyR:"
 	struct option lopts[] = {
 		{ "help",	no_argument,	NULL,	'h' },
@@ -91,6 +91,9 @@ int main(int argc, char **argv)
 	};
 
 	ATinit(argc,argv,&stackbot);
+	ATprotectAppl(&state);
+	ATprotectAppl(&Spec);
+	ATprotectList(&states);
 
 	bool quiet = false;
 	bool verbose = false;

@@ -7063,18 +7063,17 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   {
     ATermAppl tup = ATAgetFirst(S);
 
-    ATermList args = ATLgetArgument(tup,1);
-    ATermAppl arg2 = ATAgetFirst(ATgetNext(args)); 
+    ATermAppl cond = ATAgetArgument(tup,1);
     result=gsMakeDataExprAnd(
-             gsMakeDataExprNot(arg2),result);
+             gsMakeDataExprNot(cond),result);
   }
   return result; 
 }
 
-static ATermList psi(ATermList alpha)
+static ATermAppl psi(ATermList alpha)
 {
   alpha=ATreverse(alpha);
-  ATermList l = ATmakeList0();
+  ATermAppl cond = gsMakeDataExprTrue();
   while ( !ATisEmpty(alpha) )
   {
     ATerm a = ATgetFirst(alpha);
@@ -7085,8 +7084,7 @@ static ATermList psi(ATermList alpha)
       if ( might_communicate(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) && xi(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) )
       {
         // sort and remove duplicates??
-        l = ATinsert(l,
-              (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument((ATermAppl) a,1),ATLgetArgument(ATAgetFirst(beta),1)))
+        cond = gsMakeDataExprAnd(cond,pairwiseMatch(ATLgetArgument((ATermAppl) a,1),ATLgetArgument(ATAgetFirst(beta),1))
             );
       }
       beta = ATgetNext(beta);
@@ -7094,7 +7092,7 @@ static ATermList psi(ATermList alpha)
 
     alpha = ATgetNext(alpha);
   }
-  return l;
+  return cond;
 }
 
 static ATermList makeMultiActionConditionList_aux(
@@ -7106,7 +7104,7 @@ static ATermList makeMultiActionConditionList_aux(
 
   if (multiaction==ATempty)
   {
-    return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r))));
+    return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():psi(r)));
   }
 
   ATermAppl firstaction=ATAgetFirst(multiaction);
