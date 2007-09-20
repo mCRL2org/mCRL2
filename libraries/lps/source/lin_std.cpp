@@ -7122,7 +7122,7 @@ static ATermList makeMultiActionConditionList_aux(
   ATermList T=makeMultiActionConditionList_aux(
                   remainingmultiaction,
                   (r==NULL)?ATmakeList1((ATerm) firstaction):ATinsertA(r,firstaction));
-  return addActionCondition(firstaction,gsMakeDataExprTrue(),T,S);
+  return addActionCondition(firstaction,makeNegatedConjunction(S),T,S);
 
 }
 
