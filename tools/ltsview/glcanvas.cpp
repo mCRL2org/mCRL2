@@ -143,7 +143,7 @@ void GLCanvas::setActiveTool(int t) {
   setMouseCursor();
 }
 
-void GLCanvas::display(bool coll_caller) {
+void GLCanvas::display(bool coll_caller, bool selecting) {
   // coll_caller indicates whether the caller of display() is the 
   // getPictureData() method. While collecting data, only this method is allowed
   // to call display(); else the collected data may be corrupted.
@@ -159,7 +159,10 @@ void GLCanvas::display(bool coll_caller) {
       mediator->notifyRenderingStarted();
     }
 
-    SetCurrent();
+    if (!selecting)
+    {
+      SetCurrent();
+    }
     
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     
@@ -276,7 +279,7 @@ void GLCanvas::display(bool coll_caller) {
       glDisable(GL_BLEND);
       
       // do not show the picture in the canvas if we are collecting data
-      if (!collectingData) {
+      if (!collectingData && !selecting) {
         SwapBuffers();
       }
     glPopMatrix();
@@ -690,25 +693,29 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
     GLint viewport[4];
 
     glGetIntegerv(GL_VIEWPORT, viewport);
-
     glSelectBuffer(bufsize, selectBuf);
     // Swith to selection mode
     glRenderMode(GL_SELECT);
+
     glInitNames();
     // Create new projection transformation
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);    glPushMatrix();
+    
     glLoadIdentity();
+    
     // Create 3x3 pixel picking region near cursor location
     gluPickMatrix((GLdouble) x, (GLdouble)  viewport[3] - y, 
                   3.0, 3.0, viewport);
-
-    int width,height;
+        int width,height;
     GetClientSize(&width,&height);
-    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),0.1, 1000);
+    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),
+                   nearPlane, farPlane);
+    
+
     glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to 
                                 // calculate rotations etc.
-    display();
+
+    display(false, true);
     glPopMatrix();
     glFlush();
 

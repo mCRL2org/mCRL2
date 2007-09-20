@@ -21,7 +21,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
       const wxSize &size=wxDefaultSize, int* attribList=NULL);
     ~GLCanvas();
-    void      display(bool coll_caller=false);
+    void      display(bool coll_caller=false, bool selecting=false);
     void      enableDisplay();
     void      disableDisplay();
     void      getMaxViewportDims(int *w,int *h);
