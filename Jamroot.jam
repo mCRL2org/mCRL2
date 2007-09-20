@@ -13,6 +13,8 @@ use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
 use-project /workarounds               : build/workarounds ;
 
+import path ;
+
 include $(BUILD_TOOLS)/building.jam ;
 
 project toolset
@@ -28,146 +30,141 @@ project toolset
           $(DEFAULT_BUILD_OPTIONS)
        ;
 
-include $(BUILD_TOOLS)/installing.jam ;
+if [ path.exists ./tools ] {
+  import set ;
+  import regex ;
 
-import path ;
+  include $(BUILD_TOOLS)/installing.jam ;
 
-root  = [ path.make $(TOP) ] ; 
-tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
+  root  = [ path.make $(TOP) ] ; 
+  tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
 
-# Register tool projects
-for tool in $(tools) {
-  use-project /tools/$(tool) : tools/$(tool) ;
-}
+  # tools with new directory layout
+  local ftools = [ MATCH $(root)/tools/(.*)/build/.* : [ glob $(TOP)/tools/*/build/Jamfile.v2 ] ] ;
 
-# tools with new directory layout
-local ftools = [ MATCH $(root)/tools/(.*)/build/.* : [ glob $(TOP)/tools/*/build/Jamfile.v2 ] ] ;
+  tools += $(ftools) ;
 
-for tool in $(ftools) {
-  use-project /tools/$(tool) : tools/$(tool)/build ;
-}
+  local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
+  local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
 
-tools += $(ftools) ;
+  if ! $(targets) {
+    targets = $(tools) ;
+  }
+  if $(disabled) {
+    targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
+  }
 
-import set ;
-import regex ;
-
-local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
-local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
-
-if ! $(targets) {
-  targets = $(tools) ;
-}
-if $(disabled) {
-  targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
-}
-
-# Install when requested
-if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  # Register tool projects and introduce tool targets
   for tool in $(targets) {
+    # Register tool projects
+    if ! $(tool) in $(ftools) {
+      use-project /tools/$(tool) : tools/$(tool) ;
+    }
+    else {
+      use-project /tools/$(tool) : tools/$(tool)/build ;
+    }
+
     alias $(tool)
           : /tools/$(tool)
           ;
   }
 
-  if ! $(tools) in $(targets) {
-    ECHO "Building selected tools :" $(targets) ;
+  # Install when requested
+  if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+    if ! $(tools) in $(targets) {
+      ECHO "Building selected tools :" $(targets) ;
 
-    targets = /tools/$(targets) ;
-  }
-  else {
-    ECHO "Complete toolset build in progress!" ;
-
-    targets += /tools/$(targets) build-plugins ;
-  }
-
-  stage build
-          : $(targets)
-          : <location>$(BUILD_TOP)/tools
-            <install-type>EXE
-            <hardcode-dll-paths>true
-          ;
-
-  stage build-plugins
-          : $(plugins)
-          : <location>$(BUILD_TOP)/plugins
-            <install-type>SHARED_LIB
-          ;
-}
-else {
-  feature.set-default install : yes ;
-
-  if ! $(tools) in $(targets) {
-    ECHO "Installing selected tools :" $(targets) ;
-
-    for tool in $(targets) {
-      alias $(tool)
-            : install
-            ;
+      targets = /tools/$(targets) ;
     }
-   
-    alias install
-            : /tools/$(targets)//install
-              install-shared-libraries
-            ;
+    else {
+      ECHO "Complete toolset build in progress!" ;
 
-    targets = /tools/$(targets) ;
+      targets += /tools/$(targets) build-plugins ;
+    }
+
+#    stage build
+#            : $(targets)
+#            : <location>$(BUILD_TOP)/tools
+#              <install-type>EXE
+#              <hardcode-dll-paths>true
+#            ;
+
+    stage build-plugins
+            : $(plugins)
+            : <location>$(BUILD_TOP)/plugins
+              <install-type>SHARED_LIB
+            ;
   }
   else {
-    ECHO "Complete toolset installation in progress!" ;
+    feature.set-default install : yes ;
 
-    # Complete install
-    alias install
-            : /tools/$(targets)//install
-              install-examples
-              install-headers
-            : <os>MACOSX,<wx>yes:<source>install-mac-bundles
-              <dll-path>$(LIB_DIR)
-              <dependency>install-shared-libraries
-            ;
+    if ! $(tools) in $(targets) {
+      ECHO "Installing selected tools :" $(targets) ;
 
-    # General examples
-    stage install-examples
-            : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
-            : <location>$(DATA_DIR)
-              <install-source-root>.
-            ;
+      alias install
+              : /tools/$(targets)//install
+                install-shared-libraries
+              ;
+
+      targets = /tools/$(targets) ;
+    }
+    else {
+      ECHO "Complete toolset installation in progress!" ;
+
+      # Complete install
+      alias install
+              : /tools/$(targets)//install
+                install-examples
+                install-headers
+              : <os>MACOSX,<wx>yes:<source>install-mac-bundles
+                <dll-path>$(LIB_DIR)
+                <dependency>install-shared-libraries
+              ;
+
+      # General examples
+      stage install-examples
+              : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
+              : <location>$(DATA_DIR)
+                <install-source-root>.
+              ;
  
-    stage install-headers
-            : /libraries/aterm//headers
-            : <location>$(INCLUDE_DIR)/aterm
-              <install-source-root>3rd-party/aterm/include
+      stage install-headers
+              : /libraries/aterm//headers
+              : <location>$(INCLUDE_DIR)/aterm
+                <install-source-root>3rd-party/aterm/include
+              ;
+
+      targets = /tools/$(tools) ;
+    }
+
+  #  stage install-static-libraries
+  #          : $(targets)
+  #          : <location>$(LIB_DIR)
+  #            <install-dependencies>on <install-type>STATIC_LIB
+  #          ;
+
+    stage install-shared-libraries
+            : $(targets)//install
+            : <location>$(LIB_DIR)
+              <dll-path>$(LIB_DIR)
+              <install-dependencies>on <install-type>SHARED_LIB
             ;
 
-    targets = /tools/$(tools) ;
+    stage install-shared-libraries
+            : $(targets)
+            : <location>$(BIN_DIR)
+              <dll-path>$(LIB_DIR)
+              <os>NT
+              <install-dependencies>on <install-type>SHARED_LIB
+            ;
+
+    stage install-shared-libraries
+            : $(targets)
+            : <location>$(BIN_DIR)
+              <dll-path>$(LIB_DIR)
+              <os>CYGWIN
+              <install-dependencies>on <install-type>SHARED_LIB
+            ;
   }
-
-#  stage install-static-libraries
-#          : $(targets)
-#          : <location>$(LIB_DIR)
-#            <install-dependencies>on <install-type>STATIC_LIB
-#          ;
-
-  stage install-shared-libraries
-          : $(targets)//install
-          : <location>$(LIB_DIR)
-            <dll-path>$(LIB_DIR)
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
-
-  stage install-shared-libraries
-          : $(targets)
-          : <location>$(BIN_DIR)
-            <dll-path>$(LIB_DIR)
-            <os>NT
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
-
-  stage install-shared-libraries
-          : $(targets)
-          : <location>$(BIN_DIR)
-            <dll-path>$(LIB_DIR)
-            <os>CYGWIN
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
 }
+
