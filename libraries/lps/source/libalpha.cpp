@@ -1354,7 +1354,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
       ATermList lhs=comm_lhs(C); 
       for (ATermList lt=l; !ATisEmpty(lt); lt=ATgetNext(lt) ){
 	ATermList mas=untypeMAL(apply_comms(ATLgetFirst(lt),C,lhs));
-	V2=gsaMakeMultActNameL(mas);
+	V2=merge_list(V2,gsaMakeMultActNameL(mas));
       }
       ATermAppl p=ATAgetArgument(a,1);
       p=PushComm(C,p);
