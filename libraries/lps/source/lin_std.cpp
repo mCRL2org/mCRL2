@@ -7061,11 +7061,9 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   ATermAppl result=gsMakeDataExprTrue();
   for( ; S!=ATempty ; S=ATgetNext(S) )
   {
-    //first(S) is of the form DataAppl(BoolxBool->Bool, [true, expr1])
-    ATermAppl conjunction = ATAgetFirst(S);
-    assert(gsIsDataExprAnd(conjunction));
+    ATermAppl tup = ATAgetFirst(S);
 
-    ATermList args = ATLgetArgument(conjunction,1);
+    ATermList args = ATLgetArgument(tup,1);
     ATermAppl arg2 = ATAgetFirst(ATgetNext(args)); 
     result=gsMakeDataExprAnd(
              gsMakeDataExprNot(arg2),result);
