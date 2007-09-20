@@ -30,11 +30,11 @@ project toolset
           $(DEFAULT_BUILD_OPTIONS)
        ;
 
+include $(BUILD_TOOLS)/installing.jam ;
+
 if [ path.exists ./tools ] {
   import set ;
   import regex ;
-
-  include $(BUILD_TOOLS)/installing.jam ;
 
   root  = [ path.make $(TOP) ] ; 
   tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
@@ -54,7 +54,7 @@ if [ path.exists ./tools ] {
     targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
   }
 
-  # Register tool projects and introduce tool targets
+  # Register tool projects
   for tool in $(targets) {
     # Register tool projects
     if ! $(tool) in $(ftools) {
@@ -63,10 +63,6 @@ if [ path.exists ./tools ] {
     else {
       use-project /tools/$(tool) : tools/$(tool)/build ;
     }
-
-    alias $(tool)
-          : /tools/$(tool)
-          ;
   }
 
   # Install when requested
@@ -82,6 +78,10 @@ if [ path.exists ./tools ] {
       targets += /tools/$(targets) build-plugins ;
     }
 
+    # Introduce tool targets
+    for tool in $(targets) {
+      alias $(tool) : /tools/$(tool) ;
+    }
 #    stage build
 #            : $(targets)
 #            : <location>$(BUILD_TOP)/tools
@@ -100,6 +100,11 @@ if [ path.exists ./tools ] {
 
     if ! $(tools) in $(targets) {
       ECHO "Installing selected tools :" $(targets) ;
+
+      # Introduce tool targets
+      for tool in $(targets) {
+        alias $(tool) : install ;
+      }
 
       alias install
               : /tools/$(targets)//install
