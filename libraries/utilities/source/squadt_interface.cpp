@@ -7,7 +7,10 @@
 /// \file source/squadt_interface.cpp
 /// \brief Add your file description here.
 
+#ifndef NO_MCRL2_TOOL
 #include "print/messaging.h"
+#endif
+
 #include "mcrl2/utilities/squadt_interface.h"
 #include "tipi/utility/logger.hpp"
 
@@ -16,7 +19,7 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-
+#ifndef NO_MCRL2_TOOL
       using ::mcrl2::utilities::messageType;
   
       class message_relay {
@@ -58,7 +61,7 @@ namespace mcrl2 {
       }  
   
       /** \brief Replace standard messaging functions */
-      void initialise(tipi::tool::communicator& t) {
+      inline void initialise(tipi::tool::communicator& t) {
         postman = std::auto_ptr < message_relay > (new message_relay(t));
   
         gsSetCustomMessageHandler(relay_message);
@@ -76,10 +79,21 @@ namespace mcrl2 {
         }
       }
   
-      void finalise() {
+      inline void finalise() {
         gsSetCustomMessageHandler(0);
       }
   
+      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
+  
+      static bool initialise () {
+        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
+        *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
+  
+        return true;
+      }
+  
+      bool initialised = initialise();
+
       void tool_interface::initialise() {
         /* Initialise squadt utility pseudo-library */
         mcrl2::utilities::squadt::initialise(m_communicator);
@@ -89,7 +103,18 @@ namespace mcrl2 {
         /* Unregister message relay */
         mcrl2::utilities::squadt::finalise();
       }
+#else
+      void tool_interface::initialise() {
+        /* Initialise squadt utility pseudo-library */
+        mcrl2::utilities::squadt::initialise(m_communicator);
+      }
   
+      void tool_interface::finalise() {
+        /* Unregister message relay */
+        mcrl2::utilities::squadt::finalise();
+      }
+#endif 
+
       bool tool_interface::try_run() {
         if (active) {
           bool valid_configuration_present = false;
@@ -228,17 +253,6 @@ namespace mcrl2 {
   
         m_communicator.send_display_layout(p);
       }
-  
-      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
-  
-      static bool initialise () {
-        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
-        *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
-  
-        return true;
-      }
-  
-      bool initialised = initialise();
     }
   }
 }

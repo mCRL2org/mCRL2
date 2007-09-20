@@ -112,7 +112,7 @@ namespace mcrl2 {
   
           static bool free_activation(char*);
       };
-  
+
       /** \brief builds a connection with SQuADT */
       template < typename T >
       inline bool interactor< T >::free_activation(char* av) {
@@ -134,7 +134,8 @@ namespace mcrl2 {
   
       inline tool_interface::~tool_interface() {
       }
-  
+
+#ifndef NO_MCRL2_TOOL
       /* Standard type for input validation */
       extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
@@ -159,6 +160,7 @@ namespace mcrl2 {
    
         return o;
       }
+#endif
     }
   }
 }
