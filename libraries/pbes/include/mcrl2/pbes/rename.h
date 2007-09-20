@@ -18,6 +18,7 @@ namespace lps {
 /// Renames quantifier variables in the expression p, such that within the scope
 /// of a quantifier variable, no other quantifier variables or free variables
 /// with the same name occur.
+inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data_variable_list& free_variables)
 {
   multiset_identifier_generator generator(free_variables);

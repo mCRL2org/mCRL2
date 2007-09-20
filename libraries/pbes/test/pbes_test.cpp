@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
+#include "mcrl2/pbes/complement.h"
 
 using namespace std;
 using namespace atermpp;
@@ -254,6 +255,22 @@ void test_quantifier_rename_builder()
   // BOOST_CHECK(false);
 }
 
+void test_complement_method_builder()
+{
+  using namespace pbes_expr;
+  namespace d = data_expr;
+
+  data_variable X("x:X");
+  data_variable Y("y:Y");
+
+  pbes_expression p = or_(and_(X,Y), and_(Y,X));
+  pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
+std::cout << "p             = " << pp(p) << std::endl;
+std::cout << "q             = " << pp(q) << std::endl;
+std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
+  BOOST_CHECK(complement(p) == q);
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
@@ -267,6 +284,7 @@ int test_main(int argc, char* argv[])
   // test_free_variables();
   test_pbes_expression_builder();
   test_quantifier_rename_builder();
+  test_complement_method_builder();
 
   return 0;
 }
