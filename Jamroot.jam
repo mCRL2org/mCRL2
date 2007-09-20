@@ -52,8 +52,8 @@ tools += $(ftools) ;
 import set ;
 import regex ;
 
-local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
-local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
+local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
+local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
 
 if ! $(targets) {
   targets = $(tools) ;
