@@ -7,10 +7,6 @@
 /// \file source/squadt_interface.cpp
 /// \brief Add your file description here.
 
-#ifndef NO_MCRL2_TOOL
-#include "print/messaging.h"
-#endif
-
 #include "mcrl2/utilities/squadt_interface.h"
 #include "tipi/utility/logger.hpp"
 
@@ -19,101 +15,6 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-#ifndef NO_MCRL2_TOOL
-      using ::mcrl2::utilities::messageType;
-  
-      class message_relay {
-        friend void relay_message(messageType t, const char* data);
-   
-        private:
-   
-          /* The communicator object to use */
-          tipi::tool::communicator& tc;
-   
-        public:
-   
-          message_relay(tipi::tool::communicator& t) : tc(t) {
-          }
-      };
-  
-      std::auto_ptr < message_relay > postman;
-  
-      /** \brief Used to relay messages generated using mcrl2_basic::print */
-      void relay_message(messageType t, const char* data) {
-        tipi::report::type report_type;
-  
-        assert(postman.get() != 0);
-      
-        switch (t) {
-          case gs_notice:
-            report_type = tipi::report::notice;
-            break;
-          case gs_warning:
-            report_type = tipi::report::warning;
-            break;
-          case gs_error:
-          default:
-            report_type = tipi::report::error;
-            break;
-        }
-      
-        postman->tc.send_status_report(report_type, std::string(data));
-      }  
-  
-      /** \brief Replace standard messaging functions */
-      inline void initialise(tipi::tool::communicator& t) {
-        postman = std::auto_ptr < message_relay > (new message_relay(t));
-  
-        gsSetCustomMessageHandler(relay_message);
-  
-        tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
-  
-        gsSetNormalMsg();
-  
-        if (1 < l) {
-          gsSetVerboseMsg();
-  
-          if (2 < l) {
-            gsSetDebugMsg();
-          }
-        }
-      }
-  
-      inline void finalise() {
-        gsSetCustomMessageHandler(0);
-      }
-  
-      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
-  
-      static bool initialise () {
-        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
-        *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
-  
-        return true;
-      }
-  
-      bool initialised = initialise();
-
-      void tool_interface::initialise() {
-        /* Initialise squadt utility pseudo-library */
-        mcrl2::utilities::squadt::initialise(m_communicator);
-      }
-  
-      void tool_interface::finalise() {
-        /* Unregister message relay */
-        mcrl2::utilities::squadt::finalise();
-      }
-#else
-      void tool_interface::initialise() {
-        /* Initialise squadt utility pseudo-library */
-        mcrl2::utilities::squadt::initialise(m_communicator);
-      }
-  
-      void tool_interface::finalise() {
-        /* Unregister message relay */
-        mcrl2::utilities::squadt::finalise();
-      }
-#endif 
 
       bool tool_interface::try_run() {
         if (active) {
@@ -253,6 +154,17 @@ namespace mcrl2 {
   
         m_communicator.send_display_layout(p);
       }
+  
+      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
+  
+      static bool initialise () {
+        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
+        *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
+  
+        return true;
+      }
+  
+      bool initialised = initialise();
     }
   }
 }

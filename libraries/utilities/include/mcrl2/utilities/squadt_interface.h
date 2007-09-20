@@ -16,6 +16,10 @@
 
 #include "mcrl2/utilities/tipi_ext.h"
 
+#ifndef NO_MCRL2_TOOL_FACILITIES
+#include "print/messaging.h"
+#endif
+
 /** \brief Helps relaying messages printed through the mcrl2_basic::print */
 namespace mcrl2 {
   namespace utilities {
@@ -129,13 +133,93 @@ namespace mcrl2 {
         return (c.try_interaction(ac, av));
       }
   
+#ifndef NO_MCRL2_TOOL_FACILITIES
+      using ::mcrl2::utilities::messageType;
+  
+      class message_relay {
+        friend void relay_message(messageType t, const char* data);
+   
+        private:
+   
+          /* The communicator object to use */
+          tipi::tool::communicator& tc;
+   
+        public:
+   
+          message_relay(tipi::tool::communicator& t) : tc(t) {
+          }
+      };
+  
+      static std::auto_ptr < message_relay > postman;
+  
+      /** \brief Used to relay messages generated using mcrl2_basic::print */
+      inline void relay_message(messageType t, const char* data) {
+        tipi::report::type report_type;
+  
+        assert(postman.get() != 0);
+      
+        switch (t) {
+          case gs_notice:
+            report_type = tipi::report::notice;
+            break;
+          case gs_warning:
+            report_type = tipi::report::warning;
+            break;
+          case gs_error:
+          default:
+            report_type = tipi::report::error;
+            break;
+        }
+      
+        postman->tc.send_status_report(report_type, std::string(data));
+      }  
+  
+      /** \brief Replace standard messaging functions */
+      inline void initialise(tipi::tool::communicator& t) {
+        postman = std::auto_ptr < message_relay > (new message_relay(t));
+  
+        gsSetCustomMessageHandler(relay_message);
+  
+        tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
+  
+        gsSetNormalMsg();
+  
+        if (1 < l) {
+          gsSetVerboseMsg();
+  
+          if (2 < l) {
+            gsSetDebugMsg();
+          }
+        }
+      }
+  
+      inline void finalise() {
+        gsSetCustomMessageHandler(0);
+      }
+
+      inline void tool_interface::initialise() {
+        /* Initialise squadt utility pseudo-library */
+        mcrl2::utilities::squadt::initialise(m_communicator);
+      }
+  
+      inline void tool_interface::finalise() {
+        /* Unregister message relay */
+        mcrl2::utilities::squadt::finalise();
+      }
+#else
+      inline void tool_interface::initialise() {
+      }
+  
+      inline void tool_interface::finalise() {
+      }
+#endif 
+
       inline tool_interface::tool_interface() {
       }
   
       inline tool_interface::~tool_interface() {
       }
 
-#ifndef NO_MCRL2_TOOL
       /* Standard type for input validation */
       extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
@@ -160,7 +244,6 @@ namespace mcrl2 {
    
         return o;
       }
-#endif
     }
   }
 }
