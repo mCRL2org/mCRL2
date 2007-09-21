@@ -132,7 +132,7 @@ void parse_command_line(int ac, char** av) {
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 
-class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   private:
 

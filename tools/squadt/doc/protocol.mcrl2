@@ -1,5 +1,3 @@
-% The protocol used by SQuADt to communicate with adapted tools
-%
 % Major simplifications:
 %  - message content is not considered
 %  - in reality squadt uses the instance id to determine which of all tools

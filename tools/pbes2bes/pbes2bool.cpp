@@ -81,7 +81,7 @@ static t_tool_options parse_command_line(int argc, char** argv);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor : public mcrl2::utilities::squadt::tool_interface {
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   private:
 

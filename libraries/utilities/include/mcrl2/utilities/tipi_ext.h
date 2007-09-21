@@ -19,49 +19,6 @@ namespace mcrl2 {
   namespace utilities {
     namespace squadt {
 
-#ifdef __WXWINDOWS__
-      /** 
-       * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
-       **/
-      class entry_wrapper {
-#ifdef __WINDOWS__
-      private:
- 
-        HINSTANCE        hInstance;
-        HINSTANCE        hPrevInstance;
-        wxCmdLineArgType lpCmdLine;
-        int              nCmdShow;
- 
-      public:
- 
-        entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
-          hInstance     = hc;
-          hPrevInstance = hp;
-          lpCmdLine     = lp;
-          nCmdShow      = ns;
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
-        }
-#else
-      private:
- 
-        int&    argc;
-        char**& argv;
- 
-      public:
- 
-        entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(argc, argv) == 0);
-        }
-#endif
-      };
-#endif
-
       /** \brief Helper function for showing/hiding an element based on widget state changes */
       template < typename T >
       void change_visibility_on_toggle(T& r, tipi::layout::manager* m, tipi::layout::element*& c);

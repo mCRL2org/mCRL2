@@ -63,7 +63,7 @@ typedef struct{
 //Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);
 
-class squadt_interactor: public mcrl2::utilities::squadt::tool_interface
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
 {
   private:
 

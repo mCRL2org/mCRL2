@@ -16,7 +16,7 @@
 bool        command_line = false;
 std::string lts_file_argument;
 
-class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   private:
     static const char*  fsm_file_for_input;  ///< file containing an LTS that can be imported
     // Wrapper for wxEntry invocation

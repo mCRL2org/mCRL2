@@ -22,7 +22,8 @@ std::string fsm_file_argument("");
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    #include <mcrl2/utilities/squadt_interface.h>
+# define NO_MCRL2_TOOL_FACILITIES
+# include <mcrl2/utilities/squadt_interface.h>
 
     class squadt_interactor: public mcrl2::utilities::squadt::tool_interface 
     {

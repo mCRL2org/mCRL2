@@ -106,7 +106,122 @@ namespace mcrl2 {
           /**  \brief whether or not the communicator is active (connected to SQuADT) */
           bool is_active() const;
       };
+
+#ifdef __WXWINDOWS__
+      /** 
+       * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
+       **/
+      class entry_wrapper {
+#ifdef __WINDOWS__
+      private:
+ 
+        HINSTANCE        hInstance;
+        HINSTANCE        hPrevInstance;
+        wxCmdLineArgType lpCmdLine;
+        int              nCmdShow;
+ 
+      public:
+ 
+        entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
+          hInstance     = hc;
+          hPrevInstance = hp;
+          lpCmdLine     = lp;
+          nCmdShow      = ns;
+        }
+ 
+        bool perform_entry() {
+          return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
+        }
+#else
+      private:
+ 
+        int&    argc;
+        char**& argv;
+ 
+      public:
+ 
+        entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
+        }
+ 
+        bool perform_entry() {
+          return (wxEntry(argc, argv) == 0);
+        }
+#endif
+      };
+#endif
+
+      class mcrl2_tool_interface : public tool_interface {
+        template < typename T >
+        friend void relay_message(const T, const char* data);
+
+        protected:
+
+          static tipi::tool::communicator* communicator;
+
+        protected:
+
+          /** \brief initialisation after connection to SQuADt */
+          void initialise();
   
+          /** \brief finalisation after termination signal has been received */
+          void finalise();
+      };
+  
+#ifndef NO_MCRL2_TOOL_FACILITIES
+      using ::mcrl2::utilities::messageType;
+  
+      /** \brief Used to relay messages generated using mcrl2_basic::print */
+      template < >
+      inline void relay_message(const messageType t, const char* data) {
+        tipi::report::type report_type;
+  
+        switch (t) {
+          case gs_notice:
+            report_type = tipi::report::notice;
+            break;
+          case gs_warning:
+            report_type = tipi::report::warning;
+            break;
+          case gs_error:
+          default:
+            report_type = tipi::report::error;
+            break;
+        }
+      
+        mcrl2_tool_interface::communicator->send_status_report(report_type, std::string(data));
+      }  
+
+      inline void mcrl2_tool_interface::initialise() {
+        /* Initialise squadt utility pseudo-library */
+        gsSetCustomMessageHandler(relay_message<messageType>);
+  
+        tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
+  
+        gsSetNormalMsg();
+  
+        if (1 < l) {
+          gsSetVerboseMsg();
+  
+          if (2 < l) {
+            gsSetDebugMsg();
+          }
+        }
+
+        mcrl2_tool_interface::communicator = &m_communicator;
+      }
+  
+      inline void mcrl2_tool_interface::finalise() {
+        /* Unregister message relay */
+        gsSetCustomMessageHandler(0);
+      }
+#endif
+
+      inline void tool_interface::initialise() {
+      }
+  
+      inline void tool_interface::finalise() {
+      }
+
       template < typename T >
       class interactor {
   
@@ -133,87 +248,6 @@ namespace mcrl2 {
         return (c.try_interaction(ac, av));
       }
   
-#ifndef NO_MCRL2_TOOL_FACILITIES
-      using ::mcrl2::utilities::messageType;
-  
-      class message_relay {
-        friend void relay_message(messageType t, const char* data);
-   
-        private:
-   
-          /* The communicator object to use */
-          tipi::tool::communicator& tc;
-   
-        public:
-   
-          message_relay(tipi::tool::communicator& t) : tc(t) {
-          }
-      };
-  
-      static std::auto_ptr < message_relay > postman;
-  
-      /** \brief Used to relay messages generated using mcrl2_basic::print */
-      inline void relay_message(messageType t, const char* data) {
-        tipi::report::type report_type;
-  
-        assert(postman.get() != 0);
-      
-        switch (t) {
-          case gs_notice:
-            report_type = tipi::report::notice;
-            break;
-          case gs_warning:
-            report_type = tipi::report::warning;
-            break;
-          case gs_error:
-          default:
-            report_type = tipi::report::error;
-            break;
-        }
-      
-        postman->tc.send_status_report(report_type, std::string(data));
-      }  
-  
-      /** \brief Replace standard messaging functions */
-      inline void initialise(tipi::tool::communicator& t) {
-        postman = std::auto_ptr < message_relay > (new message_relay(t));
-  
-        gsSetCustomMessageHandler(relay_message);
-  
-        tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
-  
-        gsSetNormalMsg();
-  
-        if (1 < l) {
-          gsSetVerboseMsg();
-  
-          if (2 < l) {
-            gsSetDebugMsg();
-          }
-        }
-      }
-  
-      inline void finalise() {
-        gsSetCustomMessageHandler(0);
-      }
-
-      inline void tool_interface::initialise() {
-        /* Initialise squadt utility pseudo-library */
-        mcrl2::utilities::squadt::initialise(m_communicator);
-      }
-  
-      inline void tool_interface::finalise() {
-        /* Unregister message relay */
-        mcrl2::utilities::squadt::finalise();
-      }
-#else
-      inline void tool_interface::initialise() {
-      }
-  
-      inline void tool_interface::finalise() {
-      }
-#endif 
-
       inline tool_interface::tool_interface() {
       }
   

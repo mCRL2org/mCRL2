@@ -24,5 +24,4 @@ exe pbes2bool
 install-binaries install
        : pbes2bes pbes2bool
        :
-       : <status>experimental
        ;

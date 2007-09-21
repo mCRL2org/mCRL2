@@ -232,32 +232,32 @@ bool XSim::OnInit()
   this_xsim = this;
   gsSetCustomMessageHandler(xsim_message_handler);
 
-  /* Whether to replace free variables in the LPS with dummies */
-  bool dummies = false;
- 
-  /* The rewrite strategy that will be used */
-  RewriteStrategy rewrite_strategy = GS_REWR_INNER;
- 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!interactor->is_active()) {
 #endif
-    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
-      return (false);
+    /* Whether to replace free variables in the LPS with dummies */
+    bool dummies = false;
+ 
+    /* The rewrite strategy that will be used */
+    RewriteStrategy rewrite_strategy = GS_REWR_INNER;
+ 
+    if (parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
+      XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+      frame->use_dummies = dummies;
+      frame->rewr_strat  = rewrite_strategy;
+      frame->Show(true);
+
+      if (!lps_file_argument.empty()) {
+        frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
+      }
+
+      return true;
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
  
-  XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-  frame->use_dummies = dummies;
-  frame->rewr_strat  = rewrite_strategy;
-  frame->Show(true);
-   
-  if (!lps_file_argument.empty()) {
-    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
-  }
-
-  return true;
+  return false;
 }
 
 int XSim::OnExit()

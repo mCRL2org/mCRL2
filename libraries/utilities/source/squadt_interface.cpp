@@ -7,6 +7,7 @@
 /// \file source/squadt_interface.cpp
 /// \brief Add your file description here.
 
+#define NO_MCRL2_TOOL_FACILITIES
 #include "mcrl2/utilities/squadt_interface.h"
 #include "tipi/utility/logger.hpp"
 
@@ -15,6 +16,7 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
+      tipi::tool::communicator* mcrl2_tool_interface::communicator;
 
       bool tool_interface::try_run() {
         if (active) {
