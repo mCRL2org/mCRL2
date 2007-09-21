@@ -21,6 +21,7 @@
 #define RAT RecActionTransition
 #define RS RecStreams
 #define RSP RecStreamPos
+#define RPI RecParenthesisInfo
 
 typedef CArray<int> IntArray ; 
 
@@ -50,11 +51,21 @@ typedef struct
    } RecStreamPos;
 
 typedef struct
+   {
+     std::set<int> endstates;
+     bool looped;
+     int  begin_state;
+     int  end_state;
+   } RecParenthesisInfo;
+
+
+typedef struct
   {
     int state;
     int stream;
     bool terminate;
     int parenthesis_level;
+    bool looped_state;
   //  std::vector<RSP> proceedAfterSteams;
     std::set<int> procedingStreams;
     int proceedStreamState;
@@ -129,18 +140,25 @@ class CAsttransform
     bool terminate;  //terminate per parenthesis level
     int state;
     int next_state;
+
+    //Begin_state: used to deterime the beginstates per parenthesis level
     std::map<int, int> begin_state; //first:  parenthesis level
                                     //second: begin state
     std::map<int, int> end_state;   //first:  parenthesis level
                                     //second: end state
 
     std::map<int, std::set<int> > endstates_per_parenthesis_level;
-    std::map<int, std::vector<std::set<int> > > endstates_per_parenthesis_level_per_parenthesis;
+    std::map<int, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
  
-   int determineEndState(std::set<int> org_set, int lvl); 
+//    std::map<int, std::vector<bool> > looped_parenthesis_level_per_parenthesis;
+//    std::map<int, std::vector<int> > begin_state_parenthesis_level_per_parenthesis;
+ 
+    int determineEndState(std::set<int> org_set, int lvl);
+    bool loop; 
 
     // std::vector<int> bypass;
 }
 ;
+
 
 #endif
