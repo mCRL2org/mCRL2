@@ -112,9 +112,8 @@ static void print_counter_example_rec(bes::variable_type current_var,
         t!=tl.end(); t++)
   { cerr << (t==tl.begin()?"(":",");
     if (opt_precompile_pbes)
-    { // ATerm term=*t;
-      // cerr << pp(rewriter->fromRewriteFormat(term));
-      cerr << "Cannot print in internal format";
+    { ATermAppl term=*t;
+      cerr << pp(rewriter->fromRewriteFormat((ATerm)term));
     }
     else 
     { cerr << pp(*t);
