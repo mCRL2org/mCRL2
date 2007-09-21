@@ -343,7 +343,6 @@
 <!ENTITY lpsbinary "<command>lpsbinary</command>">
 <!ENTITY lpsconfcheck "<command>lpsconfcheck</command>">
 <!ENTITY lpsconstelm "<command>lpsconstelm</command>">
-<!ENTITY lpsdataelm "<command>lpsdataelm</command>">
 <!ENTITY lpsdecluster "<command>lpsdecluster</command>">
 <!ENTITY lpsformcheck "<command>lpsformcheck</command>">
 <!ENTITY lpsinfo "<command>lpsinfo</command>">
@@ -376,7 +375,6 @@
 <!ENTITY lpsbinary-lnk "<link linkend='lpsbinary'>&lpsbinary;</link>">
 <!ENTITY lpsconfcheck-lnk "<link linkend='lpsconfcheck'>&lpsconfcheck;</link>">
 <!ENTITY lpsconstelm-lnk "<link linkend='lpsconstelm'>&lpsconstelm;</link>">
-<!ENTITY lpsdataelm-lnk "<link linkend='lpsdataelm'>&lpsdataelm;</link>">
 <!ENTITY lpsdecluster-lnk "<link linkend='lpsdecluster'>&lpsdecluster;</link>">
 <!ENTITY lpsformcheck-lnk "<link linkend='lpsformcheck'>&lpsformcheck;</link>">
 <!ENTITY lpsinfo-lnk "<link linkend='lpsinfo'>&lpsinfo;</link>">
@@ -408,7 +406,6 @@
 <!ENTITY flpsbinary SYSTEM "../tools/lpsbinary/lpsbinary.xml">
 <!ENTITY flpsconfcheck SYSTEM "../tools/lpsconfcheck/lpsconfcheck.xml">
 <!ENTITY flpsconstelm SYSTEM "../tools/lpsconstelm/lpsconstelm.xml">
-<!ENTITY flpsdataelm SYSTEM "../tools/lpsdataelm/lpsdataelm.xml">
 <!ENTITY flpsdecluster SYSTEM "../tools/lpsdecluster/lpsdecluster.xml">
 <!ENTITY flpsformcheck SYSTEM "../tools/lpsformcheck/lpsformcheck.xml">
 <!ENTITY flpsinfo SYSTEM "../tools/lpsinfo/lpsinfo.xml">
@@ -446,7 +443,6 @@
     &flpsbinary;
     &flpsconfcheck;
     &flpsconstelm;
-    &flpsdataelm;
     &flpsdecluster;
     &flpsformcheck;
     &flpsinfo;
