@@ -67,6 +67,11 @@ if [ path.exists ./tools ] {
 
   # Install when requested
   if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+    # Introduce tool targets
+    for tool in $(targets) {
+      alias $(tool) : /tools/$(tool) ;
+    }
+
     if ! $(tools) in $(targets) {
       ECHO "Building selected tools :" $(targets) ;
 
@@ -78,10 +83,6 @@ if [ path.exists ./tools ] {
       targets += /tools/$(targets) build-plugins ;
     }
 
-    # Introduce tool targets
-    for tool in $(targets) {
-      alias $(tool) : /tools/$(tool) ;
-    }
 #    stage build
 #            : $(targets)
 #            : <location>$(BUILD_TOP)/tools
