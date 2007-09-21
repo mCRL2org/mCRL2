@@ -54,11 +54,12 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   parenthesis_level = 0;
   terminate = true;
   loop = false;
+  guardedloop=false;
   streams_per_parenthesis_level.append(0); 
   variable_prefix = ATgetName(ATgetAFun(ATgetArgument(input , 0)));
   std::string processName =  ATgetName(ATgetAFun(ATgetArgument(input , 0)));
   scope_level++;
- 
+
   // 
   // WARNING: if ExplicedTemplates are added shift  ATgetArgument(input, +1)
   // manipulateExplicitTemplates(ATgetArgument(input, 1))
@@ -84,11 +85,12 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * + endstates_per_parenthesis_level stores the terminating statemens until they are added to 
     *   endstates_per_parenthesis_level_per_parenthesis
     **/
-
+ 
   RPI info;
   endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
   info.endstates = endstates_per_parenthesis_level[parenthesis_level];
   info.looped = false;
+  info.guardedloop = false;
   info.begin_state = 0;
   info.end_state = transitionSystem.size();
 
@@ -101,7 +103,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     **/
   for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
   {
-    gsDebugMsg("state: %d\t terminate: %d\t plvl: %d\t looped: %d\n", itRAT->state, itRAT->terminate, itRAT->parenthesis_level, itRAT->looped_state);
+    gsDebugMsg("state:%d\t terminate:%d\t plvl:%d\t looped:%d guardedloop:%d\n", itRAT->state, itRAT->terminate, itRAT->parenthesis_level, itRAT->looped_state, itRAT->guardedloop);
   }
 
   /**
@@ -226,17 +228,22 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
             itVecSet != itIntVecSet->second.end();
             ++itVecSet)
         {
-             gsDebugMsg("\t#%d\t:: begin_state:%d\t end_state:%d\t  looped parenthesis:%d\n",++i, itVecSet->begin_state,itVecSet->end_state, itVecSet->looped);
+             gsDebugMsg("\t#%d\t:: begin_state:%d\t end_state:%d\t  looped parenthesis:%d guarded loop:%d\n",++i, itVecSet->begin_state,itVecSet->end_state, itVecSet->looped, itVecSet->guardedloop);
              if (itVecSet->looped)
              {
-               //The parenthesis is looped: Point the end of the brach back to the beginning of the parenthesis
+               //The parenthesis is looped: Point the end of the branch back to the beginning of the parenthesis
                for(std::set<int>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
                {
-                 transitionSystem.at(*itSet-1).nextstate = itVecSet->begin_state; 
+                 if(itVecSet->guardedloop)
+                 {
+                   transitionSystem.at(*itSet-1).nextstate = itVecSet->begin_state-1; 
+                 } else { 
+                   transitionSystem.at(*itSet-1).nextstate = itVecSet->begin_state; 
+                 }
                }
              } else
              { 
-               //The parenthesis is not looped: Point the end of the brach to the end of the parenthesis
+               //The parenthesis is not looped: Point the end of the branch to the end of the parenthesis
                int last_state = determineEndState((*itVecSet).endstates, itIntVecSet->first);
                for(std::set<int>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
                {
@@ -245,7 +252,76 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
              }
         } 
   }
-  
+
+  /** 
+    * Create extra Summands for terminating repetitions 
+    *
+    **/
+  //Create transitions for states
+  vector<RAT> XtraTransitionSystem;
+  for(vector<RAT>::iterator itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
+  {
+    if(itRAT->guardedloop)
+    {
+      RAT transition;
+      vector<RAT>::iterator dubItRAT = itRAT;
+      dubItRAT--;
+      transition = *dubItRAT;
+      if (itRAT->terminate)
+      {
+        for(std::vector<RPI>::iterator itRPI = info_per_parenthesis_level_per_parenthesis[itRAT->parenthesis_level].begin();
+                                   itRPI != info_per_parenthesis_level_per_parenthesis[itRAT->parenthesis_level].end();
+                                   ++itRPI)
+        {
+          if (itRPI->endstates.find(itRAT->state) !=  itRPI->endstates.end());
+           transition.nextstate= determineEndState(itRPI->endstates, itRAT->parenthesis_level);
+        }
+             
+      } else {
+        transition.nextstate= transition.nextstate+1;
+      }
+      transition.guard= "!("+transition.guard+")";
+ 
+      XtraTransitionSystem.push_back(transition); 
+
+    }
+  }
+  //Create transistions for parenthesis levels
+  for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
+      itIntVecSet != info_per_parenthesis_level_per_parenthesis.end();
+      ++itIntVecSet){
+        gsDebugMsg("parenthesis_lvl: %d\n", itIntVecSet->first);
+        int i = 0;
+        for(std::vector<RPI>::iterator itVecSet = itIntVecSet->second.begin();
+            itVecSet != itIntVecSet->second.end();
+            ++itVecSet)
+        {
+             gsDebugMsg("\t#%d\t:: begin_state:%d\t end_state:%d\t  looped parenthesis:%d guarded loop:%d\n",++i, itVecSet->begin_state,itVecSet->end_state, itVecSet->looped, itVecSet->guardedloop);
+             if(itVecSet->guardedloop)
+             {
+               RAT transition;
+               transition = transitionSystem.at(itVecSet->begin_state-1);
+               transition.nextstate = itVecSet->end_state;
+               transition.terminate = transitionSystem.at(itVecSet->end_state-1).terminate;
+               transition.guard= "!("+transition.guard+")";
+               XtraTransitionSystem.push_back(transition);
+//Proper parenthesis level needs to be found
+               for(std::vector<RPI>::iterator itRPI = info_per_parenthesis_level_per_parenthesis[transition.parenthesis_level].begin();
+                                   itRPI != info_per_parenthesis_level_per_parenthesis[transition.parenthesis_level].end();
+                                   ++itRPI)
+               {
+                 if (itRPI->endstates.find(transition.nextstate) !=  itRPI->endstates.end());
+                     transition.nextstate= determineEndState(itRPI->endstates, transition.parenthesis_level);
+               }
+             }
+
+        } 
+  }
+  transitionSystem.insert(transitionSystem.end(),XtraTransitionSystem.begin(),XtraTransitionSystem.end());
+
+
+
+ 
   /**
     * Write the mcrl2 specification
     *
@@ -314,7 +390,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       {
         if (!(itRAT->guard.empty() && i==itRAT->procedingStreams.begin()))
         {
-          result.append(",");
+          result.append(" && ");
         }
         result.append("state_");
         result.append(to_string(*i));
@@ -364,7 +440,12 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
            //Determine if the state is looped
            if(itRAT->looped_state)
            {
-             result.append(to_string(itRAT->state));
+             if(itRAT->guardedloop)
+             {
+               result.append(to_string(itRAT->state-1));
+             } else {
+               result.append(to_string(itRAT->state));
+             }
            } else {
              result.append(to_string(itRAT->nextstate));
            }
@@ -762,12 +843,16 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.nextstate = next_state;
       transition.action = "delta";
       transition.terminate = terminate;
+      transition.looped_state = loop;
+      transition.guardedloop = guardedloop;
       transition.parenthesis_level = parenthesis_level;
       transitionSystem.push_back(transition);
       if(terminate)
       { 
         endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
       }
+      loop = false;
+      guardedloop = false;
       return ;
      }
   if ( StrcmpIsFun( "SkipStat", input ) )
@@ -783,12 +868,14 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.terminate = terminate;
       transition.parenthesis_level = parenthesis_level;
       transition.looped_state = loop;
+      transition.guardedloop = guardedloop;
       transitionSystem.push_back(transition);
       if(terminate)
       { 
         endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
       }
       loop = false;
+      guardedloop = false;
       return;
     }
   if ( StrcmpIsFun( "AssignmentStat", input ) )
@@ -798,6 +885,8 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.nextstate = next_state;
       transition.action = "tau";
       transition.terminate = terminate;
+      transition.looped_state = loop; 
+      transition.guardedloop = guardedloop;
       transition.parenthesis_level = parenthesis_level;
       transition.vectorUpdate = manipulateAssignmentStat((ATermList) ATgetArgument(input, 2), (ATermList) ATgetArgument(input, 3) );
       transitionSystem.push_back(transition);
@@ -805,13 +894,15 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       { 
         endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
       }
+      loop = false;
+      guardedloop = false;
       return ;
     }
   
   if ( StrcmpIsFun( "SepStat", input ) )
     {
       terminate = false;
-   
+
       next_state = transitionSystem.size() + 1;
       manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
       if (StrcmpIsFun("SepStat", (ATermAppl) ATgetArgument(input,1)))
@@ -820,14 +911,9 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       } else {
         terminate = true;
         next_state = -1 ;
-//        endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
       } 
       state = transitionSystem.size();
       manipulateStatements( (ATermAppl) ATgetArgument(input,1) );
-     /* if(terminate)
-      { 
-        endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
-      } */
       return ;
     }
   if ( StrcmpIsFun( "AltStat", input ) )
@@ -842,7 +928,31 @@ void CAsttransform::manipulateStatements(ATermAppl input)
   if ( StrcmpIsFun( "StarStat", input ) )
     {
       loop = true;
+      guardedloop = false;
       manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
+      return ;
+    }
+  if ( StrcmpIsFun( "GuardedStarStat", input ) )
+    {
+      
+      transition.guard =  manipulateExpression( (ATermAppl) ATgetArgument(input,0));
+      transition.stream = stream_lvl;
+      transition.state = state;
+      transition.guardedloop = false;
+      transition.nextstate = transitionSystem.size()+1;
+      transition.action = "tau";
+      transition.terminate = false;
+      transition.parenthesis_level = parenthesis_level;
+      transition.looped_state = false;
+      transitionSystem.push_back(transition);
+      
+      guardedStarBeginState= state;
+      guardedStarExpression = "!";
+      guardedStarExpression.append(transition.guard);        
+      loop = true;
+      guardedloop = true;
+      state = transitionSystem.size();
+      manipulateStatements( (ATermAppl) ATgetArgument(input,1) );
       return ;
     }
 
@@ -852,6 +962,9 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       bool ParenthesisedStatIsTerminating = terminate;
       bool ParenthesisedLoop = loop;
       loop = false;
+      bool PassGuardedLoop = guardedloop;
+      //int  PassGuardedLoopState = guardedStarBeginState;
+      guardedloop = false;
 
       ++parenthesis_level;
       begin_state[parenthesis_level]= transitionSystem.size();
@@ -863,10 +976,13 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       info.looped = ParenthesisedLoop;
       info.begin_state = begin_state[parenthesis_level];
       info.end_state = transitionSystem.size();
+      info.guardedloop = PassGuardedLoop; 
 
       info_per_parenthesis_level_per_parenthesis[parenthesis_level].push_back(info);
       endstates_per_parenthesis_level[parenthesis_level].clear();
-    
+   
+      //guardedloop = PassGuardedLoop; 
+      //guardedStarBeginState = PassGuardedLoopState;
       --parenthesis_level;
       if(ParenthesisedStatIsTerminating)
       {

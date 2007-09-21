@@ -71,7 +71,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %left BARS 
 %left MINUS PLUS 
 %left STAR DIVIDE       /* order '+','-','*','/' */
-%right POWER SEP ALT          /* exponentiation        */
+%right POWER SEP ALT GUARD_REP           /* exponentiation        */
 %start ChiProgram
 %glr-parser
 %debug
@@ -505,7 +505,18 @@ UnaryStatement:
       	  gsDebugMsg("parsed STAR statement \n  %T\n", $$);	
 		}
 	| Expression GUARD_REP Statement
-      	{ safe_assign($$, gsMakeGuardedStarStat( $1, $3));
+      	{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+          safe_assign($$, gsMakeGuardedStarStat( $1, $3));
       	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);	
 		}
 	;

@@ -306,11 +306,11 @@ static const unsigned short int yyrline[] =
      167,   171,   178,   188,   192,   199,   203,   211,   215,   222,
      226,   233,   242,   334,   342,   347,   352,   367,   371,   372,
      373,   377,   384,   388,   408,   416,   418,   437,   439,   448,
-     452,   459,   463,   488,   492,   496,   503,   507,   514,   527,
-     542,   543,   544,   545,   558,   562,   568,   595,   627,   636,
-     645,   664,   683,   710,   737,   767,   776,   796,   816,   842,
-     868,   894,   920,   946,   972,   998,  1024,  1050,  1076,  1102,
-    1128,  1157,  1174
+     452,   459,   463,   488,   492,   496,   503,   507,   525,   538,
+     553,   554,   555,   556,   569,   573,   579,   606,   638,   647,
+     656,   675,   694,   721,   748,   778,   787,   807,   827,   853,
+     879,   905,   931,   957,   983,  1009,  1035,  1061,  1087,  1113,
+    1139,  1168,  1185
 };
 #endif
 
@@ -434,28 +434,28 @@ static const short int yydefgoto[] =
 static const short int yypact[] =
 {
       28,   -30,    39,   -30,    34,   -30,   -30,    21,    -5,    34,
-      33,   -20,   -30,   -30,    46,   -30,    15,    60,    75,    70,
-      34,    73,    34,    66,   -30,   -30,    60,   -30,   -30,   -30,
+      33,   -20,   -30,   -30,    46,   -30,    15,    60,    75,    63,
+      34,    70,    34,    66,   -30,   -30,    60,   -30,   -30,   -30,
      -30,   -30,   -30,   -30,    34,    64,    64,   132,    64,   -30,
      -30,   -30,    64,   134,   -30,    22,   -30,    -7,   -30,   -30,
       -6,   -30,   -30,   -30,   292,   -30,   -30,   -30,   -30,   -30,
-      61,   -30,    86,    64,   931,   953,    12,   251,   369,   405,
-       4,   155,    92,   179,   200,   -30,   202,   -30,   -30,    32,
+      65,   -30,    72,    64,   931,   953,    12,   251,   369,   405,
+       4,   155,    82,   179,   200,   -30,   202,   -30,   -30,    32,
       91,    64,    64,    64,    64,   -30,    64,    64,    64,    64,
       64,    64,    64,    64,    64,    64,    64,   233,    64,    64,
       64,    34,    64,   333,   -30,   -30,    -7,   -30,     4,     4,
        4,   -30,   -30,    23,   -30,   -30,   975,   997,   441,   477,
      513,   549,   585,   621,   657,   693,   729,   765,   801,  1019,
-    1041,    74,  1063,   837,   873,   -30,   909,   -30,    34,    64,
-     -30,    89,   909,    64,   909
+    1041,     4,  1063,   837,   873,   -30,   909,   -30,    34,    64,
+     -30,    71,   909,    64,   909
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-     -30,   -30,   -30,   -30,    87,     6,    -4,   -30,    43,   -30,
-      17,   -30,   -30,   102,     8,   -30,   -30,     3,   -30,   -30,
-     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -29,   -30,   -16,
+     -30,   -30,   -30,   -30,    83,    -8,    -4,   -30,    40,   -30,
+      10,   -30,   -30,    95,     8,   -30,   -30,     3,   -30,   -30,
+     -30,   -30,   -30,   -30,   -30,   -30,   -30,   -29,   -30,   -23,
      -30,   -30,   -30,   -30
 };
 
@@ -474,11 +474,11 @@ static const unsigned char yytable[] =
        6,     8,   116,   117,   118,   119,    17,   120,   121,   122,
      123,   124,   125,   126,   127,   128,   129,   130,    20,   132,
      133,   134,    34,   136,   106,   112,   108,   109,    23,   110,
-       6,     9,     6,   101,    73,    74,    28,    29,    30,    35,
-      36,    35,    36,    26,    63,    76,    37,    13,    34,    38,
-     131,    38,    39,   115,    39,    40,    41,    40,    41,   102,
-     142,   143,   137,    59,   144,   107,    81,    82,   135,    42,
-      25,    42,   140,    83,    84,     0,    43,    86,     0,     0,
+       6,     9,     6,    28,    29,    30,    26,   101,    34,    35,
+      36,    35,    36,   143,    63,   102,    37,    13,   137,    38,
+     131,    38,    39,   115,    39,    40,    41,    40,    41,    59,
+     142,   135,   107,    25,   144,   140,    81,    82,     0,    42,
+       0,    42,     0,    83,    84,     0,    43,    86,     0,     0,
        0,     0,     0,     0,   112,     0,    87,    88,    89,    90,
       91,    92,    93,    94,    95,     0,     0,     0,     6,     0,
        6,    96,     0,     0,    98,    99,   100,    35,    36,    35,
@@ -595,8 +595,8 @@ static const unsigned short int yyconflp[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     1,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     3,    59,   775,   777,     0,     0,     0,     0,
-       0,     5,     7,     0,     0,   779,     9,     0,     0,     0,
+       0,     0,     3,     0,     0,     0,     0,    59,     0,     0,
+       0,     5,     7,     0,     0,     0,     9,     0,     0,     0,
        0,    11,     0,     0,    13,     0,     0,    15,    17,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,    19,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -673,14 +673,14 @@ static const unsigned short int yyconflp[] =
      685,     0,     0,   691,   693,     0,     0,   695,     0,     0,
        0,     0,     0,     0,     0,     0,   697,   699,   701,   703,
      705,   707,   709,   711,   713,     0,     0,     0,     0,     0,
-       0,   715,   807,   809,   717,   719,   721,     0,     0,   811,
-     813,     0,     0,   815,     0,     0,     0,     0,     0,     0,
-       0,     0,   817,   819,   821,   823,   825,   827,   829,   831,
-     833,     0,     0,     0,     0,     0,     0,   835,   843,   845,
-     837,   839,   841,     0,     0,   847,   849,     0,     0,   851,
-       0,     0,     0,     0,     0,     0,     0,     0,   853,   855,
-     857,   859,   861,   863,   865,   867,   869,     0,     0,     0,
-       0,     0,     0,   871,     0,     0,   873,   875,   877,     0,
+       0,   715,   801,   803,   717,   719,   721,     0,     0,   805,
+     807,     0,     0,   809,     0,     0,     0,     0,     0,     0,
+       0,     0,   811,   813,   815,   817,   819,   821,   823,   825,
+     827,     0,     0,     0,     0,     0,     0,   829,   837,   839,
+     831,   833,   835,     0,     0,   841,   843,     0,     0,   845,
+       0,     0,     0,     0,     0,     0,     0,     0,   847,   849,
+     851,   853,   855,   857,   859,   861,   863,     0,     0,     0,
+       0,     0,     0,   865,     0,     0,   867,   869,   871,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,    61,    63,     0,     0,    65,     0,     0,
@@ -696,10 +696,10 @@ static const unsigned short int yyconflp[] =
        0,   323,   325,     0,   729,   731,   733,   735,   737,   739,
      741,   743,     0,   749,   751,     0,     0,   753,     0,     0,
        0,     0,     0,   745,   747,     0,   755,   757,   759,   761,
-     763,   765,   767,   769,     0,   781,   783,     0,     0,   785,
-       0,     0,     0,     0,     0,   771,   773,     0,   787,   789,
-     791,   793,   795,   797,   799,   801,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,   803,   805
+     763,   765,   767,   769,     0,   775,   777,     0,     0,   779,
+       0,     0,     0,     0,     0,   771,   773,     0,   781,   783,
+     785,   787,   789,   791,   793,   795,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,   797,   799
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -783,17 +783,17 @@ static const short int yyconfl[] =
        0,    68,     0,    68,     0,    68,     0,    68,     0,    69,
        0,    69,     0,    69,     0,    69,     0,    69,     0,    69,
        0,    69,     0,    69,     0,    69,     0,    69,     0,    69,
-       0,    69,     0,    69,     0,    47,     0,    47,     0,    47,
+       0,    69,     0,    69,     0,    70,     0,    70,     0,    70,
        0,    70,     0,    70,     0,    70,     0,    70,     0,    70,
        0,    70,     0,    70,     0,    70,     0,    70,     0,    70,
-       0,    70,     0,    70,     0,    70,     0,    77,     0,    77,
        0,    77,     0,    77,     0,    77,     0,    77,     0,    77,
        0,    77,     0,    77,     0,    77,     0,    77,     0,    77,
        0,    77,     0,    77,     0,    77,     0,    77,     0,    77,
-       0,    77,     0,    78,     0,    78,     0,    78,     0,    78,
+       0,    77,     0,    77,     0,    77,     0,    78,     0,    78,
        0,    78,     0,    78,     0,    78,     0,    78,     0,    78,
        0,    78,     0,    78,     0,    78,     0,    78,     0,    78,
-       0,    78,     0,    78,     0,    78,     0,    78,     0
+       0,    78,     0,    78,     0,    78,     0,    78,     0,    78,
+       0,    78,     0
 };
 
 static const short int yycheck[] =
@@ -806,11 +806,11 @@ static const short int yycheck[] =
       16,    30,    81,    82,    83,    84,    23,    86,    87,    88,
       89,    90,    91,    92,    93,    94,    95,    96,    22,    98,
       99,   100,     6,   102,    71,    79,    73,    74,    18,    76,
-      16,     6,    16,    22,    10,    11,    13,    14,    15,    25,
-      26,    25,    26,    23,    30,    21,    30,   101,     6,    35,
-      97,    35,    38,    12,    38,    41,    42,    41,    42,    23,
-     139,    22,   106,    26,   143,    72,    25,    26,   101,    55,
-      18,    55,   138,    32,    33,    -1,    60,    36,    -1,    -1,
+      16,     6,    16,    13,    14,    15,    23,    22,     6,    25,
+      26,    25,    26,    22,    30,    23,    30,   101,   106,    35,
+      97,    35,    38,    12,    38,    41,    42,    41,    42,    26,
+     139,   101,    72,    18,   143,   138,    25,    26,    -1,    55,
+      -1,    55,    -1,    32,    33,    -1,    60,    36,    -1,    -1,
       -1,    -1,    -1,    -1,   138,    -1,    45,    46,    47,    48,
       49,    50,    51,    52,    53,    -1,    -1,    -1,    16,    -1,
       16,    60,    -1,    -1,    63,    64,    65,    25,    26,    25,
@@ -1704,20 +1704,31 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 47:
 #line 508 "chiparser.yy"
-    { safe_assign(((*yyvalp).appl), gsMakeGuardedStarStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
+    { 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1) != gsMakeType(gsString2ATermAppl("Bool")))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+          safe_assign(((*yyvalp).appl), gsMakeGuardedStarStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 48:
-#line 515 "chiparser.yy"
+#line 526 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeDeltaStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeDelta()));
       	  gsDebugMsg("parsed deadlock statement \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 49:
-#line 528 "chiparser.yy"
+#line 539 "chiparser.yy"
     { 
 			/**
 			  * Type Checking inherhit
@@ -1734,21 +1745,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 54:
-#line 559 "chiparser.yy"
+#line 570 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed expression-element \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 55:
-#line 563 "chiparser.yy"
+#line 574 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed expression-element\n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 56:
-#line 569 "chiparser.yy"
+#line 580 "chiparser.yy"
     {
 		  /**  
 		    * Lookup Identifier Type
@@ -1775,7 +1786,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 57:
-#line 596 "chiparser.yy"
+#line 607 "chiparser.yy"
     {
 		  /**  
 		    * Lookup Identifier Type
@@ -1802,7 +1813,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 58:
-#line 628 "chiparser.yy"
+#line 639 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -1814,7 +1825,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 59:
-#line 637 "chiparser.yy"
+#line 648 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -1826,7 +1837,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 60:
-#line 646 "chiparser.yy"
+#line 657 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1848,7 +1859,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 61:
-#line 665 "chiparser.yy"
+#line 676 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1870,7 +1881,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 62:
-#line 684 "chiparser.yy"
+#line 695 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1900,7 +1911,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 63:
-#line 711 "chiparser.yy"
+#line 722 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1930,7 +1941,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 64:
-#line 738 "chiparser.yy"
+#line 749 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1960,7 +1971,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 65:
-#line 768 "chiparser.yy"
+#line 779 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -1972,7 +1983,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 66:
-#line 777 "chiparser.yy"
+#line 788 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -1995,7 +2006,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 67:
-#line 797 "chiparser.yy"
+#line 808 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2018,7 +2029,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 68:
-#line 817 "chiparser.yy"
+#line 828 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2047,7 +2058,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 69:
-#line 843 "chiparser.yy"
+#line 854 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2076,7 +2087,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 70:
-#line 869 "chiparser.yy"
+#line 880 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2105,7 +2116,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 71:
-#line 895 "chiparser.yy"
+#line 906 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2134,7 +2145,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 72:
-#line 921 "chiparser.yy"
+#line 932 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2163,7 +2174,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 73:
-#line 947 "chiparser.yy"
+#line 958 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2192,7 +2203,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 74:
-#line 973 "chiparser.yy"
+#line 984 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2221,7 +2232,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 75:
-#line 999 "chiparser.yy"
+#line 1010 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2250,7 +2261,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 76:
-#line 1025 "chiparser.yy"
+#line 1036 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2279,7 +2290,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 77:
-#line 1051 "chiparser.yy"
+#line 1062 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2308,7 +2319,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 78:
-#line 1077 "chiparser.yy"
+#line 1088 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2337,7 +2348,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 79:
-#line 1103 "chiparser.yy"
+#line 1114 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2366,7 +2377,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 80:
-#line 1129 "chiparser.yy"
+#line 1140 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2395,7 +2406,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 81:
-#line 1158 "chiparser.yy"
+#line 1169 "chiparser.yy"
     {
 			/**
 			  * Type Checking
@@ -2415,7 +2426,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 82:
-#line 1175 "chiparser.yy"
+#line 1186 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2436,7 +2447,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
 
 /* Line 930 of glr.c.  */
-#line 2440 "chiparser.cpp"
+#line 2451 "chiparser.cpp"
       default: break;
     }
 
@@ -4021,7 +4032,7 @@ yyparse (void)
 }
 
 /* DEBUGGING ONLY */
-#ifdef YYDEBUG
+#if YYDEBUG
 static void yypstack (yyGLRStack* yystackp, size_t yyk)
   __attribute__ ((__unused__));
 static void yypdumpstack (yyGLRStack* yystackp) __attribute__ ((__unused__));
@@ -4093,7 +4104,7 @@ yypdumpstack (yyGLRStack* yystackp)
 #endif
 
 
-#line 1219 "chiparser.yy"
+#line 1230 "chiparser.yy"
 
 
 

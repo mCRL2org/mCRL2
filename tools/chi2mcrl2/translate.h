@@ -54,6 +54,7 @@ typedef struct
    {
      std::set<int> endstates;
      bool looped;
+     bool guardedloop;
      int  begin_state;
      int  end_state;
    } RecParenthesisInfo;
@@ -66,6 +67,7 @@ typedef struct
     bool terminate;
     int parenthesis_level;
     bool looped_state;
+    bool guardedloop;
   //  std::vector<RSP> proceedAfterSteams;
     std::set<int> procedingStreams;
     int proceedStreamState;
@@ -154,8 +156,10 @@ class CAsttransform
 //    std::map<int, std::vector<int> > begin_state_parenthesis_level_per_parenthesis;
  
     int determineEndState(std::set<int> org_set, int lvl);
-    bool loop; 
-
+    bool loop;
+    bool guardedloop; 
+    std::string guardedStarExpression;
+    int guardedStarBeginState;
     // std::vector<int> bypass;
 }
 ;

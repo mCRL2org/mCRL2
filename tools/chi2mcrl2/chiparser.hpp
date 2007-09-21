@@ -158,7 +158,7 @@ typedef union YYSTYPE
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
+/* Line 2616 of glr.c.  */
 #line 163 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
