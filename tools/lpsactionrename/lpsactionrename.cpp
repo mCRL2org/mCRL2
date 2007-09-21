@@ -263,10 +263,13 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
 
   lps::data_expression_list new_arguments;
 
-  string delta = "delta";
-  string tau = "tau";
+  aterm_appl new_element;
+  string delta = "Delta";
+  string tau = "Tau";
 
   bool rename;
+  bool to_tau;
+  bool to_delta;
 
   //go through the rename rules of the rename file
   gsVerboseMsg("rename rules found: %i\n", rename_rules.size());
@@ -274,11 +277,21 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
     rename_rule = *i;
     aterm_appl::iterator j =  rename_rule.begin();
     rule_vars = lps::data_variable_list(*j++);
-    cerr<<"rule_condition = data_expression("<< *j<<");\n";
     rule_condition = lps::data_expression(*j++);
     rule_old_action =  lps::action(*j++);
-    rule_new_action =  lps::action(*j);
-    //TODO: check if no variables in the rename file are equal to the process or free variables; if so change names of rename vars.
+    
+    new_element = *j;
+    if(is_action(new_element)){
+      rule_new_action =  lps::action(new_element);
+      to_tau = false;
+      to_delta = false;
+    }
+    else{
+      rule_new_action = lps::action();
+      if(gsIsTau(new_element)){ to_tau = true; to_delta = false;}
+      else if (gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
+      //else assert
+    }
 
     lps_summands = summand_list();
     //go through the summands of the old lps
@@ -305,16 +318,6 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
         if(equal_signatures(lps_old_action, rule_old_action)) {
           gsVerboseMsg("renaming action...\n");
           rename = true;
-          //change the old condition and make the new condition
-          gsVerboseMsg("  condition...\n");
-          if(is_nil(rule_condition) || is_true(rule_condition)){
-            lps_old_summand = set_condition(lps_old_summand, false_());
-          }
-	  else
-          {
-            lps_new_condition = and_(lps_new_condition, rule_condition);
-            lps_old_summand = set_condition(lps_old_summand, and_(lps_old_summand.condition(), lps::data_expr::not_(lps_new_condition)));
-          }
 
           //go through the arguments of the action
           gsVerboseMsg("  arguments...\n");
@@ -325,18 +328,40 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
                                                 ++rule_old_argument_i){
             //add new variables to the summation list and to the condition
             std::set<data_variable> new_vars = find_variables(*rule_old_argument_i);
-            gsVerboseMsg("  vars in arg found: %i\n", new_vars.size());
             for(std::set<data_variable>::iterator sdvi = new_vars.begin(); sdvi != new_vars.end(); sdvi++){
-              lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
-            }
-            lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+              //check if the sum var already exists in lps_new_sum_vars
+              bool exists=false;
+              for(lps::data_variable_list::iterator dvli = lps_new_sum_vars.begin(); dvli != lps_new_sum_vars.end(); dvli++){
+                if(string(dvli->name()).compare(sdvi->name())==0){
+                  exists=true;
+                  break;
+                }
+              }
+              if(!exists){
+                gsVerboseMsg("  new var in arg found: %i\n", new_vars.size());
+                lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
+                lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+              }
+            }//end data var loop
 
             ++lps_old_argument_i;
+          }//end argument loop
+
+          //change the old condition and make the new condition
+          gsVerboseMsg("  condition...\n");
+          if(is_nil(rule_condition) || is_true(rule_condition)){
+            lps_old_summand = set_condition(lps_old_summand, false_());
+          }
+	  else
+          {
+            lps_old_summand = set_condition(lps_old_summand, and_(lps_new_condition, lps::data_expr::not_(rule_condition)));
+            lps_old_summand = set_summation_variables(lps_old_summand, lps_new_sum_vars);
+            lps_new_condition = and_(lps_new_condition, rule_condition);
           }
 
           //add the new action
-          gsVerboseMsg("   new action...\n");
-          if((tau.compare(rule_new_action.label().name())!=0)||(lps_old_actions.size()!=1)){//gives empty action list when lps: a|a, rename: a =>tau
+          gsVerboseMsg("  add new action...\n");
+          if(!to_tau && !to_delta){
             lps_new_actions = push_front(lps_new_actions, rule_new_action);
           }
           //else {skip}
@@ -348,23 +373,22 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
 
       } //end of action list iterator
 
-      if((tau.compare(rule_new_action.label().name())!=0) && (lps_new_actions.size() != 0)){
+      //if((tau.compare(rule_new_action.label().name())!=0) && (lps_new_actions.size() != 0)){
         lps_new_actions = reverse(lps_new_actions);
-      }
-      else{
-        lps_new_actions = push_back(lps_new_actions, lps::action(lps::action_label(tau, lps::sort_list()), lps::data_expression_list()));
-      }
+      //}
+      //else{
+        //lps_new_actions = push_back(lps_new_actions, lps::action(lps::action_label(tau, lps::sort_list()), lps::data_expression_list()));
+      //}
 
       if(rename){
         //create a summand for the new lps
-        if(delta.compare(rule_new_action.label().name()) == 0){
+        if(to_delta){
           gsVerboseMsg("creating delta action for new lps...\n");
-          lps_new_actions = push_back(lps::action_list(), rule_new_action);
           lps_new_summand = lps::summand(
 	     lps_new_sum_vars,
              lps_new_condition,
 	     true,
-  	     lps_new_actions,
+  	     lps::action_list(),
              lps_old_summand.time(),
              lps::data_assignment_list());
         }
@@ -394,6 +418,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
     }
   }
   lps_new_summands = reverse(lps_new_summands);
+  gsVerboseMsg("new lps complete\n");
 
   lps_new_spec = set_lps(lps_new_spec, set_summands(lps_new_spec.process(), lps_new_summands));
   return lps_new_spec;
