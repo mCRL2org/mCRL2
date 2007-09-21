@@ -33,12 +33,13 @@
 using namespace mcrl2::utilities;
 using namespace std;
 using namespace lps;
+using namespace data_expr;
 
 //Type definitions
 //----------------
 
 //t_phase represents the phases at which the program should be able to stop
-typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL } t_phase;
+typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE, PH_RENAME} t_phase;
 
 //t_tool_options represents the options of the tool 
 typedef struct {
@@ -59,21 +60,15 @@ static t_tool_options parse_command_line(int argc, char **argv);
 //      - non-standard behaviour was requested (help or version)
 //Ret:  the parsed command line options
 
-static ATermAppl rename_lps_actions(t_tool_options tool_options); //TODO:change description
-//Pre:  tool_options.action_rename_filename contains an action rename
+static ATermAppl rename_lps_actions(t_tool_options tool_options);
+//Pre:  tool_options.action_rename_filename contains a action rename
 //      specification
 //      tool_options.infilename contains an LPS ("" indicates stdin)
 //      tool_options.end_phase indicates at which phase conversion stops
-//Ret:  if end_phase == PH_NONE, the PBES generated from the state formula and
-//      the LPS
+//Ret:  if end_phase == PH_NONE, the new LPS generated from the action rename 
+//      file and the old LPS
 //      if end_phase != PH_NONE, the state formula after phase end_phase
 //      NULL, if something went wrong
-
-static lps::specification rename(ATermAppl action_rename_spec, lps::specification &lps_spec);
-//Pre: action_rename_spec contains an action rename specification
-//     lps_spec is an LPS specification
-//Ret: lps_spec in which all actions are renamed according to
-//     action_rename_spec
 
 static void print_help(char *name);
 static void print_version(void);
@@ -152,6 +147,10 @@ static t_tool_options parse_command_line(int argc, char **argv)
           opt_end_phase = PH_TYPE_CHECK;
         } else if (strcmp(optarg, "di") == 0) {
           opt_end_phase = PH_DATA_IMPL;
+        } else if (strcmp(optarg, "me") == 0) {
+          opt_end_phase = PH_MERGE;
+        } else if (strcmp(optarg, "re") == 0) {
+          opt_end_phase = PH_RENAME;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
@@ -220,11 +219,185 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
-lps::specification rename(ATermAppl action_rename_spec, lps::specification &lps_spec)
-{
-  //TODO
-  return lps_spec;
+ATermAppl merge_decls(ATermAppl action_rename, ATermAppl lps_newspec){
+// merges the declarations in the data section and the actions declared in the action rename file action_rename
+// with the sections in the lps specification lps_newspec
+  return lps_newspec;
 }
+
+bool compare_action(ATermAppl action1, ATermAppl action2){ //move this function to action class
+//  string name = action1.label().name();
+//  if (name.compare(action2.label().name())!=0) return false;
+//
+//  lps::data_expression_list::iterator arg1 = action1.arguments().begin();
+//  lps::data_expression_list::iterator arg2 = action2.arguments().begin();
+//  if (arg1->size() != arg2->size()) return false;
+//  for(; arg1 != ; ++arg1){
+//    if(arg1->sort() != arg2->sort()) return false;
+//    ++arg2;
+//  }
+  return true;
+}
+
+
+ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::specification lps_new_spec){
+  aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
+  aterm_appl rename_rule;
+  lps::summand_list lps_old_summands = lps_old_spec.process().summands();
+  lps::summand_list lps_new_summands;
+  lps::summand_list lps_summands = lps::summand_list(); //for changes in lps_old_summands
+  lps::summand lps_old_summand;
+  lps::summand lps_new_summand;
+  lps::action_list lps_old_actions;
+  lps::action_list lps_new_actions = lps::action_list();;
+  lps::action lps_old_action;
+  lps::action lps_new_action;
+  lps::data_expression lps_old_condition;
+  lps::data_expression lps_new_condition = lps::data_expression();
+  lps::data_expression rule_condition;
+
+  lps::data_variable_list rule_vars;
+  lps::data_variable_list lps_new_sum_vars = lps::data_variable_list();
+  lps::action rule_old_action;
+  lps::action rule_new_action;
+
+  lps::data_expression_list new_arguments;
+
+  string delta = "delta";
+  string tau = "tau";
+
+  bool rename;
+
+  //go through the rename rules of the rename file
+  gsVerboseMsg("rename rules found: %i\n", rename_rules.size());
+  for(aterm_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i){
+    rename_rule = *i;
+    aterm_appl::iterator j =  rename_rule.begin();
+    rule_vars = lps::data_variable_list(*j++);
+    cerr<<"rule_condition = data_expression("<< *j<<");\n";
+    rule_condition = lps::data_expression(*j++);
+    rule_old_action =  lps::action(*j++);
+    rule_new_action =  lps::action(*j);
+    //TODO: check if no variables in the rename file are equal to the process or free variables; if so change names of rename vars.
+
+    lps_summands = summand_list();
+    //go through the summands of the old lps
+    gsVerboseMsg("summands found: %i\n", lps_old_summands.size());
+    for(lps::summand_list::iterator losi = lps_old_summands.begin(); losi != lps_old_summands.end(); ++losi){
+      lps_old_summand = *losi;
+      lps_old_actions = lps_old_summand.actions();
+      lps_new_sum_vars = lps_old_summand.summation_variables();
+      lps_new_condition = lps_old_summand.condition();
+
+      lps_new_actions = lps::action_list();
+      rename = false;
+      //go through the actions of the summand
+      gsVerboseMsg("actions in summand found: %i\n", lps_old_actions.size());
+      for(lps::action_list::iterator loai = lps_old_actions.begin(); loai != lps_old_actions.end(); ++loai){
+        lps_old_action = *loai;
+
+        for(lps::data_expression_list::iterator rule_old_argument_i = rule_old_action.arguments().begin();
+                                                rule_old_argument_i != rule_old_action.arguments().end();
+                                              ++rule_old_argument_i){
+          
+        }
+
+        if(equal_signatures(lps_old_action, rule_old_action)) {
+          gsVerboseMsg("renaming action...\n");
+          rename = true;
+          //change the old condition and make the new condition
+          gsVerboseMsg("  condition...\n");
+          if(is_nil(rule_condition) || is_true(rule_condition)){
+            lps_old_summand = set_condition(lps_old_summand, false_());
+          }
+	  else
+          {
+            lps_new_condition = and_(lps_new_condition, rule_condition);
+            lps_old_summand = set_condition(lps_old_summand, and_(lps_old_summand.condition(), lps::data_expr::not_(lps_new_condition)));
+          }
+
+          //go through the arguments of the action
+          gsVerboseMsg("  arguments...\n");
+          gsVerboseMsg("  args in action found: %i\n", lps_old_action.arguments().size());
+          lps::data_expression_list::iterator lps_old_argument_i = lps_old_action.arguments().begin();
+          for(lps::data_expression_list::iterator rule_old_argument_i = rule_old_action.arguments().begin();
+                                                  rule_old_argument_i != rule_old_action.arguments().end();
+                                                ++rule_old_argument_i){
+            //add new variables to the summation list and to the condition
+            std::set<data_variable> new_vars = find_variables(*rule_old_argument_i);
+            gsVerboseMsg("  vars in arg found: %i\n", new_vars.size());
+            for(std::set<data_variable>::iterator sdvi = new_vars.begin(); sdvi != new_vars.end(); sdvi++){
+              lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
+            }
+            lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+
+            ++lps_old_argument_i;
+          }
+
+          //add the new action
+          gsVerboseMsg("   new action...\n");
+          if((tau.compare(rule_new_action.label().name())!=0)||(lps_old_actions.size()!=1)){//gives empty action list when lps: a|a, rename: a =>tau
+            lps_new_actions = push_front(lps_new_actions, rule_new_action);
+          }
+          //else {skip}
+        }
+        else{
+          lps_new_actions = push_front(lps_new_actions, lps_old_action);
+        }
+        gsVerboseMsg("action done\n");
+
+      } //end of action list iterator
+
+      if((tau.compare(rule_new_action.label().name())!=0) && (lps_new_actions.size() != 0)){
+        lps_new_actions = reverse(lps_new_actions);
+      }
+      else{
+        lps_new_actions = push_back(lps_new_actions, lps::action(lps::action_label(tau, lps::sort_list()), lps::data_expression_list()));
+      }
+
+      if(rename){
+        //create a summand for the new lps
+        if(delta.compare(rule_new_action.label().name()) == 0){
+          gsVerboseMsg("creating delta action for new lps...\n");
+          lps_new_actions = push_back(lps::action_list(), rule_new_action);
+          lps_new_summand = lps::summand(
+	     lps_new_sum_vars,
+             lps_new_condition,
+	     true,
+  	     lps_new_actions,
+             lps_old_summand.time(),
+             lps::data_assignment_list());
+        }
+        else{
+          gsVerboseMsg("creating summand for new lps...\n");
+          lps_new_summand = lps::summand(
+	     lps_new_sum_vars,
+	     lps_new_condition,
+	     lps_old_summand.is_delta(),
+	     lps_new_actions,
+             lps_old_summand.time(),
+             lps_old_summand.assignments());
+        }
+        lps_new_summands = push_front(lps_new_summands, lps_new_summand);
+      }
+      lps_summands = push_front(lps_summands, lps_old_summand);
+    } //end of summand list iterator
+    lps_old_summands = reverse(lps_summands);
+  }//end of rename rule iterator
+
+  //copy all old summands to the new lps
+  gsVerboseMsg("adding left overs from old lps...\n");
+  for(lps::summand_list::iterator losi = lps_old_summands.begin(); losi != lps_old_summands.end(); ++losi){
+    if(!is_false(losi->condition()))
+    {
+      lps_new_summands = push_front(lps_new_summands, *losi);
+    }
+  }
+  lps_new_summands = reverse(lps_new_summands);
+
+  lps_new_spec = set_lps(lps_new_spec, set_summands(lps_new_spec.process(), lps_new_summands));
+  return lps_new_spec;
+} //end of rename(...)
 
 ATermAppl rename_lps_actions(t_tool_options tool_options)
 {
@@ -233,8 +406,8 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   string action_rename_filename = tool_options.action_rename_filename;
   t_phase end_phase = tool_options.end_phase;
 
-  lps::specification lps_oldspec = lps::specification();
-  lps::specification lps_newspec = lps::specification();
+  lps::specification lps_old_spec = lps::specification();
+  lps::specification lps_new_spec;
   //ATermAppl rename_rules;
 
   //open infilename
@@ -242,7 +415,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   if (infilename == "") {
     try
     {
-      lps_oldspec.load("-");
+      lps_old_spec.load("-");
     }
     catch (std::runtime_error e)
     {
@@ -252,7 +425,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   } else {
     try
     {
-      lps_oldspec.load(infilename);
+      lps_old_spec.load(infilename);
     }
     catch (std::runtime_error e)
     {
@@ -261,6 +434,19 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     }
   }
 
+  //create lps_newspec
+  lps::linear_process lps_old_spec_lp = lps_old_spec.process();
+  lps::linear_process lps_new_spec_lp;
+  lps_new_spec_lp = lps::linear_process(
+			lps_old_spec_lp.free_variables(),
+			lps_old_spec_lp.process_parameters(),
+			lps::summand_list());
+
+  lps_new_spec = lps::specification(
+			lps_old_spec.data(),
+			lps_old_spec.action_labels(),
+			lps_new_spec_lp,
+			lps_old_spec.initial_process());
 
   //parse the action rename file
   gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
@@ -282,7 +468,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
   //type check formula
   gsVerboseMsg("type checking...\n");
-  action_rename_spec = type_check_action_rename_spec(action_rename_spec, lps_oldspec);
+  action_rename_spec = type_check_action_rename_spec(action_rename_spec, lps_old_spec);
   if (action_rename_spec == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
@@ -293,29 +479,43 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  action_rename_spec = implement_data_action_rename_spec(action_rename_spec, lps_oldspec);
-  if (action_rename_spec == NULL) {
+  action_rename_spec = implement_data_action_rename_spec(action_rename_spec, lps_old_spec);
+  if (lps_old_spec == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
   }
   if (end_phase == PH_DATA_IMPL) {
-    return action_rename_spec;
+    return lps_old_spec;
+  }
+  
+  //merge declarations from lps_newspec and action_rename
+  gsVerboseMsg("merging declarations...\n");
+  //lpsnewspec = merge_declarations(action_rename, lps_newspec);
+  if (lps_new_spec == NULL) {
+    return NULL;
+  }
+  if (end_phase == PH_MERGE) {
+    return lps_old_spec;
   }
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  lps_newspec = rename(action_rename_spec, lps_oldspec);
-  if (lps_newspec == NULL) {
+  ATermAppl result = rename(action_rename_spec, lps_old_spec, lps_new_spec);
+  lps_new_spec = lps::specification(result);
+  if (lps_old_spec == NULL) {
     return NULL;
+  }
+  if (end_phase == PH_RENAME) {
+    return lps_new_spec;
   }
  
   //type check the new LPS
   gsVerboseMsg("type checking the new LPS...\n");
-  if (!lps_newspec.is_well_typed()) {
+  if (!lps_new_spec.is_well_typed()) {
     gsVerboseMsg("The newly formed LPS is not well typed!\n");
     return NULL;
   }
-  return lps_newspec;
+  return lps_new_spec;
 }
 
 
@@ -332,7 +532,7 @@ static void print_help(char *name)
     "  -pPHASE, --end-phase=PHASE\n"
     "                        stop conversion after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
-    "                        'di' (data implementation)\n"
+    "                        'di' (data implementation), 'me' (merge), 're' (rename)\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
