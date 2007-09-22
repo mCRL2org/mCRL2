@@ -17,6 +17,7 @@ alias lps.main
          source/libdataelm.cpp
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
+         <use>/libraries/pbes//headers
          <use>/libraries/lps//headers
        : <threading>single
        ;
