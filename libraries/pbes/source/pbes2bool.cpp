@@ -226,6 +226,14 @@ void calculate_bes(pbes pbes_spec,
   return;
 }
 
+static lps::pbes_expression store_as_tree(lps::pbes_expression p)
+{ 
+  // data_expression_list l=p.parameters();
+  // identifier_string s=p.name();
+  // XXX TODO: This still has to be done. 
+  return p;
+}
+
 //function add_propositional_variable_instantiations_to_indexed_set
 //and translate to pbes expression to a bes_expression in BDD format.
 
@@ -237,10 +245,13 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const transformation_strategy strategy,
                    const bool construct_counter_example,
                    bes::equations  &bes_equations,
-                   const bes::variable_type current_variable) 
+                   const bes::variable_type current_variable,
+                   const bool opt_store_as_tree) 
 { 
   if (is_propositional_variable_instantiation(p))
-  { pair<unsigned long,bool> pr=variable_index.put(p);
+  { 
+    pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?p:store_as_tree(p));
+    
     if (pr.second) /* p is added to the indexed set, so it is a new variable */
     { nr_of_generated_variables++;
       if (to_bdd)
@@ -281,12 +292,14 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (is_false(b2))
     { return b2;
     }
@@ -306,13 +319,15 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_or(p))
   { 
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
+                            pbes_expr::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,construct_counter_example,bes_equations,current_variable);
+                            pbes_expr::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -490,7 +505,8 @@ static void do_lazy_algorithm(pbes pbes_spec,
                         tool_options.opt_strategy,
                         tool_options.opt_construct_counter_example,
                         bes_equations,
-                        variable_to_be_processed);
+                        variable_to_be_processed,
+                        tool_options.opt_store_as_tree);
       // ATfprintf(stderr,"HIER4\n");
       // ATfprintf(stderr,"Resulting expression %d\n",AT_calcCoreSize(new_bes_expression));
   

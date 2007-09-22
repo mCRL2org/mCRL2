@@ -289,6 +289,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   bool opt_precompile_pbes=false;
   bool opt_use_hashtables=false;
   bool opt_construct_counter_example=false;
+  bool opt_store_as_tree=false;
 
   string opt_rewriter;
   vector< string > file_names;
@@ -321,6 +322,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
+      ("tree,r", "store state in a tree (for memory efficiency)")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
       ("debug,d",    "turn on the display of detailed intermediate gsMessages")
       ("version",    "display version information")
@@ -366,6 +368,10 @@ t_tool_options parse_command_line(int argc, char** argv)
 
   if (vm.count("counter"))
   { opt_construct_counter_example=true;
+  }
+ 
+  if (vm.count("tree"))
+  { opt_store_as_tree=true;
   }
 
   if (vm.count("version"))
@@ -486,6 +492,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
   tool_options.opt_precompile_pbes=opt_precompile_pbes;
   tool_options.opt_construct_counter_example=opt_construct_counter_example;
+  tool_options.opt_store_as_tree=opt_store_as_tree;
   tool_options.opt_use_hashtables=opt_use_hashtables;
   
   return tool_options;

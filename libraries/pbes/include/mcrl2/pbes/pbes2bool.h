@@ -38,6 +38,7 @@ struct t_tool_options
    RewriteStrategy rewrite_strategy;
    bool opt_use_hashtables;
    bool opt_construct_counter_example;
+   bool opt_store_as_tree;
    std::string infilename;
    std::string outfilename;
     
