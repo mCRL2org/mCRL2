@@ -13,12 +13,14 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "struct/libstruct.h"
+#include <mcrl2/pbes/pbes.h>
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
 #endif
 
 using namespace lps;
+using namespace pbes_expr;
 
 //Prototype
 static bool add_used_sort(ATermAppl expr, ATermIndexedSet s);
@@ -85,6 +87,39 @@ static bool add_used(data_expression_list l, ATermIndexedSet s)
 		b = b || c;
 	}
 	return b;
+}
+
+static bool add_used(data_variable_list l, ATermIndexedSet s)
+{
+	return add_used(data_expression_list((ATermList) l),s);
+}
+
+static bool add_used(propositional_variable_instantiation pvi, ATermIndexedSet s)
+{
+	return add_used(pvi.parameters(),s);
+}
+
+static bool add_used(pbes_expression expr, ATermIndexedSet s)
+{
+	if ( is_data(expr) )
+	{
+		return add_used((ATermAppl) expr,s); // XXX
+	} else if ( is_and(expr) || is_or(expr) )
+	{
+		bool b = add_used(lhs(expr),s);
+		bool c = add_used(rhs(expr),s);
+		return b || c;
+	} else if ( is_forall(expr) || is_exists(expr) )
+	{
+		bool b = add_used(quant_vars(expr),s);
+		bool c = add_used(quant_expr(expr),s);
+		return b || c;
+	} else if ( is_propositional_variable_instantiation(expr) )
+	{
+		return add_used(var_val(expr),s);
+	}
+
+	return false;
 }
 
 //Prototype
@@ -173,12 +208,9 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 	return true;
 }
 
-ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
+static ATermTable initialise_used_data(data_specification dspec, bool keep_basis)
 {
-	specification spec(ATSpec);
-	linear_process l = spec.process();
-	
-	ATermTable used_data = ATtableCreate(2*(spec.data().sorts().size()+spec.data().constructors().size()+spec.data().mappings().size()),50);
+	ATermTable used_data = ATtableCreate(2*(dspec.sorts().size()+dspec.constructors().size()+dspec.mappings().size()),50);
 
 	if ( keep_basis )
 	{
@@ -194,13 +226,110 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 		}
 		for (function_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
 		{
-			add_used(*i,used_data);
+			add_used((ATermAppl) *i,used_data);
 		}
 		for (function_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
 		{
-			add_used(*i,used_data);
+			add_used((ATermAppl) *i,used_data);
 		}
 	}
+
+	return used_data;
+}
+
+data_specification build_reduced_data_spec(data_specification dspec, ATermTable used_data, bool keep_basis)
+{
+	ATermTable used_sorts = ATtableCreate(2*dspec.sorts().size(),50);
+	data_equation_list eqns = dspec.equations();
+	data_equation_list::iterator ee = eqns.end();
+	sort_list sorts = dspec.sorts();
+	sort_list::iterator sse = sorts.end();
+	function_list conss = dspec.constructors();
+	bool not_done = true;
+	while ( not_done )
+	{
+		not_done = false;
+
+		sort_list::iterator ssb = sorts.begin();
+		for (; ssb != sse; ssb++)
+		{
+			if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*ssb))) >= 0 )
+			{
+				bool b = add_sort((ATermAppl) (*ssb),used_data,used_sorts,conss);
+				if ( keep_basis )
+				{
+					add_used(gsMakeOpIdIf(*ssb),used_data);
+					add_used(gsMakeOpIdEq(*ssb),used_data);
+					add_used(gsMakeOpIdNeq(*ssb),used_data);
+				}
+				not_done = not_done || b;
+			}
+		}
+
+		data_equation_list::iterator eb = eqns.begin();
+		for (; eb != ee; eb++)
+		{
+			if ( is_used((ATermAppl) (*eb).lhs(),used_data) )
+			{
+				bool b = add_used((ATermAppl) (*eb).condition(),used_data);
+				bool c = add_used((ATermAppl) (*eb).rhs(),used_data);
+				not_done = not_done || b || c;
+			}
+		}
+	}
+
+	sort_list new_sort;
+	for (sort_list::iterator i=dspec.sorts().begin(); i != dspec.sorts().end(); i++)
+	{
+		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
+		{
+			new_sort = push_front(new_sort,*i);
+		}
+	}
+	new_sort = reverse(new_sort);
+
+	function_list new_cons;
+	for (function_list::iterator i=dspec.constructors().begin(); i != dspec.constructors().end(); i++)
+	{
+		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
+		{
+			new_cons = push_front(new_cons,*i);
+		}
+	}
+	new_cons = reverse(new_cons);
+
+	function_list new_maps;
+	for (function_list::iterator i=dspec.mappings().begin(); i != dspec.mappings().end(); i++)
+	{
+		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
+		{
+			new_maps = push_front(new_maps,*i);
+		}
+	}
+	new_maps = reverse(new_maps);
+
+	data_equation_list new_eqns;
+	for (data_equation_list::iterator i=dspec.equations().begin(); i != dspec.equations().end(); i++)
+	{
+		if ( is_used((ATermAppl) (*i).lhs(),used_data) )
+		{
+			new_eqns = push_front(new_eqns,*i);
+		}
+	}
+	new_eqns = reverse(new_eqns);
+	
+	ATtableDestroy(used_sorts);
+	
+        data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
+
+	return new_data;
+}
+
+specification remove_unused_data(specification spec, bool keep_basis)
+{
+	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
+
+	linear_process l = spec.process();
 
 	action_label_list::iterator ab = spec.action_labels().begin();
 	action_label_list::iterator ae = spec.action_labels().end();
@@ -265,90 +394,52 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis)
 		}
 	}
 
-	ATermTable used_sorts = ATtableCreate(2*spec.data().sorts().size(),50);
-	data_equation_list eqns = spec.data().equations();
-	data_equation_list::iterator ee = eqns.end();
-	sort_list sorts = spec.data().sorts();
-	sort_list::iterator sse = sorts.end();
-	function_list conss = spec.data().constructors();
-	bool not_done = true;
-	while ( not_done )
-	{
-		not_done = false;
+	specification new_spec = set_data_specification(spec, build_reduced_data_spec(spec.data(),used_data,keep_basis));
 
-		sort_list::iterator ssb = sorts.begin();
-		for (; ssb != sse; ssb++)
-		{
-			if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*ssb))) >= 0 )
-			{
-				bool b = add_sort((ATermAppl) (*ssb),used_data,used_sorts,conss);
-				if ( keep_basis )
-				{
-					add_used(gsMakeOpIdIf(*ssb),used_data);
-					add_used(gsMakeOpIdEq(*ssb),used_data);
-					add_used(gsMakeOpIdNeq(*ssb),used_data);
-				}
-				not_done = not_done || b;
-			}
-		}
-
-		data_equation_list::iterator eb = eqns.begin();
-		for (; eb != ee; eb++)
-		{
-			if ( is_used((ATermAppl) (*eb).lhs(),used_data) )
-			{
-				bool b = add_used((ATermAppl) (*eb).condition(),used_data);
-				bool c = add_used((ATermAppl) (*eb).rhs(),used_data);
-				not_done = not_done || b || c;
-			}
-		}
-	}
-
-	sort_list new_sort;
-	for (sort_list::iterator i=spec.data().sorts().begin(); i != spec.data().sorts().end(); i++)
-	{
-		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
-		{
-			new_sort = push_front(new_sort,*i);
-		}
-	}
-	new_sort = reverse(new_sort);
-
-	function_list new_cons;
-	for (function_list::iterator i=spec.data().constructors().begin(); i != spec.data().constructors().end(); i++)
-	{
-		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
-		{
-			new_cons = push_front(new_cons,*i);
-		}
-	}
-	new_cons = reverse(new_cons);
-
-	function_list new_maps;
-	for (function_list::iterator i=spec.data().mappings().begin(); i != spec.data().mappings().end(); i++)
-	{
-		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
-		{
-			new_maps = push_front(new_maps,*i);
-		}
-	}
-	new_maps = reverse(new_maps);
-
-	data_equation_list new_eqns;
-	for (data_equation_list::iterator i=spec.data().equations().begin(); i != spec.data().equations().end(); i++)
-	{
-		if ( is_used((ATermAppl) (*i).lhs(),used_data) )
-		{
-			new_eqns = push_front(new_eqns,*i);
-		}
-	}
-	new_eqns = reverse(new_eqns);
-	
-        data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
-	specification new_spec = set_data_specification(spec, new_data);
-
-	ATtableDestroy(used_sorts);
 	ATtableDestroy(used_data);
 
-	return (ATermAppl) new_spec;
+	return new_spec;
+}
+
+pbes remove_unused_data(pbes spec, bool keep_basis)
+{
+	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
+
+	add_used(spec.initial_state().variable(),used_data);
+
+	atermpp::set<data_variable>::iterator vb = spec.free_variables().begin();
+	atermpp::set<data_variable>::iterator ve = spec.free_variables().end();
+	for (; vb != ve; vb++)
+	{
+		add_used_sort((ATermAppl) vb->sort(),used_data);
+	}
+
+        equation_system eqs = spec.equations();
+
+	atermpp::vector<pbes_equation>::iterator b = eqs.begin();
+	atermpp::vector<pbes_equation>::iterator e = eqs.end();
+	for (; b != e; b++)
+	{
+		data_variable_list::iterator sb = (*b).variable().parameters().begin();
+		data_variable_list::iterator se = (*b).variable().parameters().end();
+		for (; sb != se; sb++)
+		{
+			add_used_sort((ATermAppl) sb->sort(),used_data);
+		}
+
+		add_used((*b).formula(),used_data);
+	}
+
+	pbes new_spec = pbes(build_reduced_data_spec(spec.data(),used_data,keep_basis),spec.equations(),spec.initial_state().variable());
+
+	ATtableDestroy(used_data);
+
+	return new_spec;
+}
+
+ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis) // deprecated
+{
+	specification spec(ATSpec);
+	spec = remove_unused_data(spec,keep_basis);
+	return (ATermAppl) spec;
 }
