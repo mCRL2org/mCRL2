@@ -899,6 +899,10 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 
 	if ( sol != NULL )
 	{
+		if ( *info.current_id != id )
+		{
+			set_substitutions();
+		}
 		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
 		{
 			info.rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
