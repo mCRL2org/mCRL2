@@ -42,6 +42,7 @@
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/pbes/pbes2bool.h"
+#include "mcrl2/libdataelm.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
@@ -165,6 +166,9 @@ bool process(t_tool_options const& tool_options)
 {
   //Load PBES
   pbes pbes_spec = load_pbes(tool_options);
+
+  //Throw away unused parts of data specification
+  pbes_spec = remove_unused_data(pbes_spec);
 
   //Process the pbes
 
