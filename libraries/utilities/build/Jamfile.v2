@@ -61,10 +61,6 @@ alias utilities.main
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
         <use>/libraries/rewrite//headers
-#        <wx>yes:<source>spinctrlfloat.o
-#        <wx>yes:<source>colorbutton.o
-#        <wx>yes:<library>/site-config//wx_base
-        <squadt-support>yes,<link>shared:<source>squadt_interface.main
       ;
 
 lib utilities
@@ -76,7 +72,6 @@ lib utilities
 alias utilities
       : /libraries//mcrl2
       : <link>shared
-        <squadt-support>yes:<use>squadt_interface.main
       ;
 
 alias utilities.alias
