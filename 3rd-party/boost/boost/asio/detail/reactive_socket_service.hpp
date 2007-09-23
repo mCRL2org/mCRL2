@@ -87,7 +87,7 @@ public:
   };
 
   // The maximum number of buffers to support in a single operation.
-  enum { max_buffers = 16 };
+  enum { max_buffers = 64 < max_iov_len ? 64 : max_iov_len };
 
   // Constructor.
   reactive_socket_service(boost::asio::io_service& io_service)
@@ -158,7 +158,7 @@ public:
 
     if (int err = reactor_.register_descriptor(sock.get()))
     {
-      ec = boost::system::error_code(err, boost::system::native_ecat);
+      ec = boost::system::error_code(err, boost::asio::error::system_category);
       return ec;
     }
 
@@ -182,7 +182,7 @@ public:
 
     if (int err = reactor_.register_descriptor(native_socket))
     {
-      ec = boost::system::error_code(err, boost::system::native_ecat);
+      ec = boost::system::error_code(err, boost::asio::error::system_category);
       return ec;
     }
 
@@ -451,7 +451,7 @@ public:
     }
 
     endpoint_type endpoint;
-    socket_addr_len_type addr_len = endpoint.capacity();
+    std::size_t addr_len = endpoint.capacity();
     if (socket_ops::getsockname(impl.socket_, endpoint.data(), &addr_len, ec))
       return endpoint_type();
     endpoint.resize(addr_len);
@@ -469,7 +469,7 @@ public:
     }
 
     endpoint_type endpoint;
-    socket_addr_len_type addr_len = endpoint.capacity();
+    std::size_t addr_len = endpoint.capacity();
     if (socket_ops::getpeername(impl.socket_, endpoint.data(), &addr_len, ec))
       return endpoint_type();
     endpoint.resize(addr_len);
@@ -1074,7 +1074,7 @@ public:
     for (;;)
     {
       // Try to complete the operation without blocking.
-      socket_addr_len_type addr_len = sender_endpoint.capacity();
+      std::size_t addr_len = sender_endpoint.capacity();
       int bytes_recvd = socket_ops::recvfrom(impl.socket_, bufs, i, flags,
           sender_endpoint.data(), &addr_len, ec);
 
@@ -1125,7 +1125,7 @@ public:
     bool operator()(const boost::system::error_code& result)
     {
       // Check whether the operation was successful.
-      if (result != 0)
+      if (result)
       {
         io_service_.post(bind_handler(handler_, result, 0));
         return true;
@@ -1145,7 +1145,7 @@ public:
       }
 
       // Receive some data.
-      socket_addr_len_type addr_len = sender_endpoint_.capacity();
+      std::size_t addr_len = sender_endpoint_.capacity();
       boost::system::error_code ec;
       int bytes = socket_ops::recvfrom(socket_, bufs, i, flags_,
           sender_endpoint_.data(), &addr_len, ec);
@@ -1243,7 +1243,7 @@ public:
       // Try to complete the operation without blocking.
       boost::system::error_code ec;
       socket_holder new_socket;
-      socket_addr_len_type addr_len = 0;
+      std::size_t addr_len = 0;
       if (peer_endpoint)
       {
         addr_len = peer_endpoint->capacity();
@@ -1328,7 +1328,7 @@ public:
       // Accept the waiting connection.
       boost::system::error_code ec;
       socket_holder new_socket;
-      socket_addr_len_type addr_len = 0;
+      std::size_t addr_len = 0;
       if (peer_endpoint_)
       {
         addr_len = peer_endpoint_->capacity();
@@ -1490,7 +1490,7 @@ public:
       if (connect_error)
       {
         ec = boost::system::error_code(connect_error,
-            boost::system::native_ecat);
+            boost::asio::error::system_category);
         io_service_.post(bind_handler(handler_, ec));
         return true;
       }

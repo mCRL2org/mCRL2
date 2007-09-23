@@ -194,7 +194,7 @@ std::size_t read_until(SyncReadStream& s,
 
 template <typename SyncReadStream, typename Allocator>
 inline std::size_t read_until(SyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr)
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr)
 {
   boost::system::error_code ec;
   std::size_t bytes_transferred = read_until(s, b, expr, ec);
@@ -204,9 +204,11 @@ inline std::size_t read_until(SyncReadStream& s,
 
 template <typename SyncReadStream, typename Allocator>
 std::size_t read_until(SyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr,
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr,
     boost::system::error_code& ec)
 {
+  using namespace boost::xpressive;
+
   std::size_t next_search_start = 0;
   for (;;)
   {
@@ -220,9 +222,9 @@ std::size_t read_until(SyncReadStream& s,
     iterator end(buffers, (std::numeric_limits<std::size_t>::max)());
 
     // Look for a match.
-    boost::match_results<iterator> match_results;
-    if (boost::regex_search(begin, end, match_results, expr,
-          boost::match_default | boost::match_partial))
+    match_results<iterator> match_results;
+    if (regex_search(begin, end, match_results, expr,
+          regex_constants::match_default | regex_constants::match_partial))
     {
       if (match_results[0].matched)
       {
@@ -312,7 +314,8 @@ namespace detail
       if (streambuf_.size() == streambuf_.max_size())
       {
         std::size_t bytes = 0;
-        handler_(error::not_found, bytes);
+        boost::system::error_code ec(error::not_found);
+        handler_(ec, bytes);
         return;
       }
 
@@ -389,7 +392,8 @@ void async_read_until(AsyncReadStream& s,
   // No match. Check if buffer is full.
   if (b.size() == b.max_size())
   {
-    s.io_service().post(detail::bind_handler(handler, error::not_found, 0));
+    boost::system::error_code ec(error::not_found);
+    s.io_service().post(detail::bind_handler(handler, ec, 0));
     return;
   }
 
@@ -470,7 +474,8 @@ namespace detail
       if (streambuf_.size() == streambuf_.max_size())
       {
         std::size_t bytes = 0;
-        handler_(error::not_found, bytes);
+        boost::system::error_code ec(error::not_found);
+        handler_(ec, bytes);
         return;
       }
 
@@ -560,7 +565,8 @@ void async_read_until(AsyncReadStream& s,
   // Check if buffer is full.
   if (b.size() == b.max_size())
   {
-    s.io_service().post(detail::bind_handler(handler, error::not_found, 0));
+    boost::system::error_code ec(error::not_found);
+    s.io_service().post(detail::bind_handler(handler, ec, 0));
     return;
   }
 
@@ -581,7 +587,7 @@ namespace detail
   public:
     read_until_expr_handler(AsyncReadStream& stream,
         boost::asio::basic_streambuf<Allocator>& streambuf,
-        const boost::regex& expr, std::size_t next_search_start,
+        const boost::xpressive::sregex& expr, std::size_t next_search_start,
         ReadHandler handler)
       : stream_(stream),
         streambuf_(streambuf),
@@ -594,6 +600,8 @@ namespace detail
     void operator()(const boost::system::error_code& ec,
         std::size_t bytes_transferred)
     {
+      using namespace boost::xpressive;
+
       // Check for errors.
       if (ec)
       {
@@ -615,9 +623,9 @@ namespace detail
       iterator end(buffers, (std::numeric_limits<std::size_t>::max)());
 
       // Look for a match.
-      boost::match_results<iterator> match_results;
-      if (boost::regex_search(begin, end, match_results, expr_,
-            boost::match_default | boost::match_partial))
+      match_results<iterator> match_results;
+      if (regex_search(begin, end, match_results, expr_,
+            regex_constants::match_default | regex_constants::match_partial))
       {
         if (match_results[0].matched)
         {
@@ -642,7 +650,8 @@ namespace detail
       if (streambuf_.size() == streambuf_.max_size())
       {
         std::size_t bytes = 0;
-        handler_(error::not_found, bytes);
+        boost::system::error_code ec(error::not_found);
+        handler_(ec, bytes);
         return;
       }
 
@@ -655,7 +664,7 @@ namespace detail
   //private:
     AsyncReadStream& stream_;
     boost::asio::basic_streambuf<Allocator>& streambuf_;
-    boost::regex expr_;
+    boost::xpressive::sregex expr_;
     std::size_t next_search_start_;
     ReadHandler handler_;
   };
@@ -691,9 +700,11 @@ namespace detail
 
 template <typename AsyncReadStream, typename Allocator, typename ReadHandler>
 void async_read_until(AsyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr,
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr,
     ReadHandler handler)
 {
+  using namespace boost::xpressive;
+
   // Determine the range of the data to be searched.
   typedef typename boost::asio::basic_streambuf<
     Allocator>::const_buffers_type const_buffers_type;
@@ -705,9 +716,9 @@ void async_read_until(AsyncReadStream& s,
 
   // Look for a match.
   std::size_t next_search_start;
-  boost::match_results<iterator> match_results;
-  if (boost::regex_search(begin, end, match_results, expr,
-        boost::match_default | boost::match_partial))
+  match_results<iterator> match_results;
+  if (sregex_search(begin, end, match_results, expr,
+        regex_constants::match_default | regex_constants::match_partial))
   {
     if (match_results[0].matched)
     {
@@ -732,7 +743,8 @@ void async_read_until(AsyncReadStream& s,
   // Check if buffer is full.
   if (b.size() == b.max_size())
   {
-    s.io_service().post(detail::bind_handler(handler, error::not_found, 0));
+    boost::system::error_code ec(error::not_found);
+    s.io_service().post(detail::bind_handler(handler, ec, 0));
     return;
   }
 

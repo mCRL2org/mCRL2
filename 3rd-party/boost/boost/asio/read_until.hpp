@@ -20,7 +20,7 @@
 #include <boost/asio/detail/push_options.hpp>
 #include <cstddef>
 #include <boost/config.hpp>
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 #include <string>
 #include <boost/asio/detail/pop_options.hpp>
 
@@ -209,7 +209,7 @@ std::size_t read_until(SyncReadStream& s,
  */
 template <typename SyncReadStream, typename Allocator>
 std::size_t read_until(SyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr);
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr);
 
 /// Read data into a streambuf until a regular expression is located.
 /**
@@ -240,7 +240,7 @@ std::size_t read_until(SyncReadStream& s,
  */
 template <typename SyncReadStream, typename Allocator>
 std::size_t read_until(SyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr,
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr,
     boost::system::error_code& ec);
 
 /*@}*/
@@ -439,7 +439,7 @@ void async_read_until(AsyncReadStream& s,
  */
 template <typename AsyncReadStream, typename Allocator, typename ReadHandler>
 void async_read_until(AsyncReadStream& s,
-    boost::asio::basic_streambuf<Allocator>& b, const boost::regex& expr,
+    boost::asio::basic_streambuf<Allocator>& b, const boost::xpressive::sregex& expr,
     ReadHandler handler);
 
 /*@}*/

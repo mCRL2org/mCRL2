@@ -1,14 +1,14 @@
-//  Boost Filesystem cerrno.hpp header  --------------------------------------//
+//  Boost cerrno.hpp header  -------------------------------------------------//
 
-//  © Copyright Beman Dawes 2005.
+//  Copyright Beman Dawes 2005.
 //  Use, modification, and distribution is subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
-//  See library home page at http://www.boost.org/libs/filesystem
+//  See library home page at http://www.boost.org/libs/system
 
-#ifndef BOOST_FILESYSTEM_CERRNO_HPP
-#define BOOST_FILESYSTEM_CERRNO_HPP
+#ifndef BOOST_CERRNO_HPP
+#define BOOST_CERRNO_HPP
 
 #include <cerrno>
 
@@ -190,8 +190,142 @@
 #define EILSEQ 9945
 #endif
 
-#define EBADHANDLE   9998  // bad handle
-#define EOTHER       9999  // Other error not translatable
-                           // to a POSIX errno value
+//  Windows Mobile doesn't appear to define these:
+
+#ifndef E2BIG
+#define E2BIG 9946
+#endif
+
+#ifndef EDOM
+#define EDOM 9947
+#endif
+
+#ifndef EFAULT
+#define EFAULT 9948
+#endif
+
+#ifndef EBADF
+#define EBADF 9949
+#endif
+
+#ifndef EPIPE
+#define EPIPE 9950
+#endif
+
+#ifndef EXDEV
+#define EXDEV 9951
+#endif
+
+#ifndef EBUSY
+#define EBUSY 9952
+#endif
+
+#ifndef ENOTEMPTY
+#define ENOTEMPTY 9953
+#endif
+
+#ifndef ENOEXEC
+#define ENOEXEC 9954
+#endif
+
+#ifndef EEXIST
+#define EEXIST 9955
+#endif
+
+#ifndef EFBIG
+#define EFBIG 9956
+#endif
+
+#ifndef ENAMETOOLONG
+#define ENAMETOOLONG 9957
+#endif
+
+#ifndef ENOTTY
+#define ENOTTY 9958
+#endif
+
+#ifndef EINTR
+#define EINTR 9959
+#endif
+
+#ifndef ESPIPE
+#define ESPIPE 9960
+#endif
+
+#ifndef EIO
+#define EIO 9961
+#endif
+
+#ifndef EISDIR
+#define EISDIR 9962
+#endif
+
+#ifndef ECHILD
+#define ECHILD 9963
+#endif
+
+#ifndef ENOLCK
+#define ENOLCK 9964
+#endif
+
+#ifndef ENOSPC
+#define ENOSPC 9965
+#endif
+
+#ifndef ENXIO
+#define ENXIO 9966
+#endif
+
+#ifndef ENODEV
+#define ENODEV 9967
+#endif
+
+#ifndef ENOENT
+#define ENOENT 9968
+#endif
+
+#ifndef ESRCH
+#define ESRCH 9969
+#endif
+
+#ifndef ENOTDIR
+#define ENOTDIR 9970
+#endif
+
+#ifndef ENOMEM
+#define ENOMEM 9971
+#endif
+
+#ifndef EPERM
+#define EPERM 9972
+#endif
+
+#ifndef EACCES
+#define EACCES 9973
+#endif
+
+#ifndef EROFS
+#define EROFS 9974
+#endif
+
+#ifndef EDEADLK
+#define EDEADLK 9975
+#endif
+
+#ifndef EAGAIN
+#define EAGAIN 9976
+#endif
+
+#ifndef ENFILE
+#define ENFILE 9977
+#endif
+
+#ifndef EMFILE
+#define EMFILE 9978
+#endif
+
+#ifndef EMLINK
+#define EMLINK 9979
+#endif
 
 #endif // include guard
