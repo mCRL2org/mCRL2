@@ -161,6 +161,7 @@ class CAsttransform
     std::string guardedStarExpression;
     int guardedStarBeginState;
     // std::vector<int> bypass;
+    bool transitionexists(RAT transition, std::vector<RAT> transitionvector);
 }
 ;
 

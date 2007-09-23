@@ -204,10 +204,11 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                      gsDebugMsg("Found Match\n");
                      if(itRPI2->looped != itRPI->looped)
                      {
+                       //NOTE TO SELF: If the guarded loop is propagated multiple bybasses are created
                        itRPI->looped=true;
                        itRPI->looped=true;
                        again = true;
-                     } 
+                     }
                    }
                 }
              }
@@ -216,9 +217,10 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   }
 
   /**
-    * Determine the end states for branches of the graph that have local terminating inside the graph
+    * Determine the end states for branches of the graph that have local terminating inside a parenthesis
     *
     **/
+  gsDebugMsg("Creating edges for terminating branches inside a parenthesis\n");
   for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
       itIntVecSet != info_per_parenthesis_level_per_parenthesis.end();
       ++itIntVecSet){
@@ -273,8 +275,9 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                                    itRPI != info_per_parenthesis_level_per_parenthesis[itRAT->parenthesis_level].end();
                                    ++itRPI)
         {
-          if (itRPI->endstates.find(itRAT->state) !=  itRPI->endstates.end());
-           transition.nextstate= determineEndState(itRPI->endstates, itRAT->parenthesis_level);
+          if (itRPI->endstates.find(itRAT->state) !=  itRPI->endstates.end())
+           {transition.nextstate= determineEndState(itRPI->endstates, itRAT->parenthesis_level);
+           }
         }
              
       } else {
@@ -286,6 +289,12 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
 
     }
   }
+
+  //Due to the existance of possible multiple nested levels of parenthesis it is possible that multiple
+  //transistions are created.
+  // KNOWN BUG
+
+  gsDebugMsg("Processing parenthesis levels for *>\n");
   //Create transistions for parenthesis levels
   for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
       itIntVecSet != info_per_parenthesis_level_per_parenthesis.end();
@@ -304,15 +313,14 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                transition.nextstate = itVecSet->end_state;
                transition.terminate = transitionSystem.at(itVecSet->end_state-1).terminate;
                transition.guard= "!("+transition.guard+")";
-               XtraTransitionSystem.push_back(transition);
-//Proper parenthesis level needs to be found
-               for(std::vector<RPI>::iterator itRPI = info_per_parenthesis_level_per_parenthesis[transition.parenthesis_level].begin();
-                                   itRPI != info_per_parenthesis_level_per_parenthesis[transition.parenthesis_level].end();
-                                   ++itRPI)
-               {
-                 if (itRPI->endstates.find(transition.nextstate) !=  itRPI->endstates.end());
-                     transition.nextstate= determineEndState(itRPI->endstates, transition.parenthesis_level);
-               }
+               if (itVecSet->endstates.find(transition.nextstate) !=  itVecSet->endstates.end()) 
+               { 
+                 transition.nextstate= determineEndState(itVecSet->endstates, itIntVecSet->first);
+                 //if (!transitionexists(transition, XtraTransitionSystem))
+                 {
+                   XtraTransitionSystem.push_back(transition);
+                 } 
+               }   
              }
 
         } 
@@ -963,9 +971,9 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       bool ParenthesisedLoop = loop;
       loop = false;
       bool PassGuardedLoop = guardedloop;
-      //int  PassGuardedLoopState = guardedStarBeginState;
       guardedloop = false;
-
+      //int  PassGuardedLoopState = guardedStarBeginState;
+    
       ++parenthesis_level;
       begin_state[parenthesis_level]= transitionSystem.size();
 
@@ -973,6 +981,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
 
       RPI info;
       info.endstates = endstates_per_parenthesis_level[parenthesis_level];
+      info.endstates.insert(transitionSystem.size());
       info.looped = ParenthesisedLoop;
       info.begin_state = begin_state[parenthesis_level];
       info.end_state = transitionSystem.size();
@@ -1166,4 +1175,19 @@ int CAsttransform::determineEndState(std::set<int> org_set, int lvl)
   }
   return last_state;      
 }
-      
+     
+bool CAsttransform::transitionexists(RAT transition, std::vector<RAT> transitionvector)
+{
+   bool result = false;
+   for(std::vector<RAT>::iterator itRAT = transitionvector.begin();
+       itRAT != transitionvector.end();
+       ++itRAT 
+      )
+   {
+     result = result || (itRAT->state == transition.state);
+     result = result || (itRAT->nextstate == transition.nextstate);
+     result = result || (itRAT->guard == transition.guard);
+     result = result || (itRAT->stream == transition.stream);
+   }
+   return result;
+} 
