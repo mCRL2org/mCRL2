@@ -35,13 +35,13 @@ namespace transport {
 
       try {
         acceptor.bind(endpoint);
+
+        acceptor.listen();
       }
       catch (std::exception& e) {
         /* This should probably be logged somewhere someday */
-        throw std::runtime_error(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what()));
+//        throw std::runtime_error(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what()));
       }
-
-      acceptor.listen();
     }
 
     /**
@@ -84,7 +84,7 @@ namespace transport {
         using namespace boost;
 
         /* Some other error occurred, abort... */
-        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % boost::system::system_error(e).what()));
+        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % e.message()));
       }
 
       /* Make sure the scheduler is running */

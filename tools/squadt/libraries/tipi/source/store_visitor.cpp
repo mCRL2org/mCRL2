@@ -10,7 +10,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 #include "tipi/visitors.hpp"
 #include "tipi/report.hpp"
@@ -332,7 +332,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::string const& e, std::string const& s) {
-    assert(!boost::regex_search(s, boost::regex("]]>")));
+    using namespace boost::xpressive;
+
+    assert(!regex_search(s, sregex(as_xpr("]]>"))));
 
     out << "<string";
 

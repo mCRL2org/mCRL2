@@ -5,7 +5,7 @@
 /// \file source/mime_type.cpp
 
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 #include "tipi/mime_type.hpp"
 
@@ -16,11 +16,14 @@ namespace tipi {
    * \param[in] s a string that represents a mime type
    **/
   mime_type::mime_type(std::string const& s) : m_main(unknown) {
-    static const boost::regex match_type_and_subtype("([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+)(?:/([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+))?");
+    using namespace boost::xpressive;
 
-    boost::smatch  matches;
+    smatch matches;
 
-    if (boost::regex_match(s, matches, match_type_and_subtype)) {
+    //"([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+)(?:/([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+))?"))) {
+    if (regex_match(s, matches, sregex((+(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))) >>
+                                             (!(+(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))))))) {
+
       if (matches.size() == 3 && !matches[2].str().empty()) {
         m_sub = matches[2];
 

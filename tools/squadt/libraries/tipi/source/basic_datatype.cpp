@@ -6,7 +6,7 @@
 
 #include "tipi/basic_datatype.hpp"
 
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 namespace tipi {
 
@@ -48,7 +48,9 @@ namespace tipi {
      * @param[in] s any string
      **/
     enumeration::enumeration(std::string const& s) : m_default_value(0) {
-      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
+      using namespace boost::xpressive;
+
+      assert(regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\']))));
 
       m_values.push_back(s);
     }
@@ -58,7 +60,9 @@ namespace tipi {
      * @param[in] b whether this element should now be marked as the default
      **/
     void enumeration::add_value(std::string const& s, bool b) {
-      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
+      using namespace boost::xpressive;
+
+      assert(regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\']))));
 
       std::vector< std::string >::iterator i = std::find(m_values.begin(), m_values.end(), s);
 

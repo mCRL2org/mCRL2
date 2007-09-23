@@ -28,17 +28,17 @@ alias squadt_interface.main
       ;
 
 # mCRL2 Tool for SQuADt interface
-lib mtsi
+lib mcrl2_squadt
       : squadt_interface.main
       ;
 
 alias squadt_interface
-      : mtsi
+      : mcrl2_squadt
       : <link>static
       ;
 
 alias squadt_interface
-      : /libraries//utilities
+      : mcrl2_squadt
       : <link>shared
       ;
 

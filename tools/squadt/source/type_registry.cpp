@@ -13,7 +13,7 @@
 #include <algorithm>
 
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 #include <boost/bind.hpp>
 
 #include "tipi/mime_type.hpp"
@@ -204,7 +204,9 @@ namespace squadt {
       command_for_type[t] = command_none;
     }
     else {
-      assert(boost::regex_search(c, boost::regex("\\`[^[:word:]]*([[:word:][:punct:]]+)(?:[^[:word:]]+([[:word:][:punct:]]*))*\\'")));
+      using namespace boost::xpressive;
+
+      assert(regex_search(c, sregex(bos >> *set[~_w] >> +set[_w | punct] >> *(+set[~_w] >> *set[_w | punct]) >> eos)));
 
       command_for_type[t] = c;
     }
@@ -230,6 +232,8 @@ namespace squadt {
    * \param[in] f name of the file to operate on
    **/
   std::auto_ptr < command > type_registry::get_registered_command(mime_type const& t, std::string const& f) const {
+    using namespace boost::xpressive;
+
     std::auto_ptr < command > p;
 
     actions_for_type::const_iterator i = command_for_type.find(t);
@@ -240,7 +244,7 @@ namespace squadt {
     }
 
     if (i != command_for_type.end()) {
-      std::string const& command_string = boost::regex_replace((*i).second, boost::regex("\\b\\$\\b"), f);
+      std::string const& command_string = regex_replace((*i).second, sregex(_b >> '$' >> _b), f);
 
       if (command_string == command_system) {
         wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
@@ -265,7 +269,7 @@ namespace squadt {
       command::argument_sequence s = p->get_arguments();
 
       for (command::argument_sequence::iterator i = s.begin(); i != s.end(); ++i) {
-        *i = boost::regex_replace(*i, boost::regex("\\`\\$\\'"), f);
+        *i = regex_replace(*i, sregex(_b >> '$' >> _b), f);
       }
     }
 
