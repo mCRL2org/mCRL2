@@ -14,7 +14,6 @@
 #include "atermpp/atermpp.h"
 #include "atermpp/make_list.h"
 #include "mcrl2/data/function.h"
-#include "mcrl2/lps/detail/utility.h"
 #include "mcrl2/lps/action.h"
 
 using namespace atermpp;
