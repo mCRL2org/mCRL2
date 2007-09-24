@@ -35,29 +35,3 @@ void solve_equation_interactive(propositional_variable X,
 				pbes_expression approx);
 
 
-
-
-
-
-// enumerates finite sorts
-// i.e., produces all possible instantiations
-// for a given sort, or set of sorts
-
-typedef struct s_del {
-  sort s;
-  data_expression_list del;
-} t_sdel;
-  
-  
-class sort_instantiator {
- private:
-  std::vector<t_sdel> instantiated_sorts;
-  function_list fl;
- public:
-  sort_instantiator() {};
-  void set_function_list(function_list flist);
-  void instantiate_sorts(lps::sort_list sl);
-  data_expression_list get_enumeration(lps::sort s);    
-  bool is_finite(sort s);
-} ;
-

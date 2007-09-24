@@ -11,8 +11,18 @@ obj gauss.o
        : <include>.
        ;
 
+obj sort_instantiator.o
+       : sort_instantiator.h sort_instantiator.cpp
+         /libraries//lps
+         /libraries//pbes
+         /libraries//rewrite
+         /site-config//boost_program_options
+       : <include>.
+       ;
+
 exe pbessolve
        : pbessolve.cpp
+	 sort_instantiator.o
 	 gauss.o
 	 /libraries//lps
          /libraries//pbes
