@@ -290,6 +290,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   bool opt_use_hashtables=false;
   bool opt_construct_counter_example=false;
   bool opt_store_as_tree=false;
+  bool opt_data_elm=true;
 
   string opt_rewriter;
   vector< string > file_names;
@@ -323,6 +324,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                "available outputformats are none, vasy and cwi")
       ("tree,r", "store state in a tree (for memory efficiency)")
+      ("unused-data,u","do not remove unused parts of the data specification")
       ("verbose,v",  "turn on the display of short intermediate gsMessages")
       ("debug,d",    "turn on the display of detailed intermediate gsMessages")
       ("version",    "display version information")
@@ -372,6 +374,10 @@ t_tool_options parse_command_line(int argc, char** argv)
  
   if (vm.count("tree"))
   { opt_store_as_tree=true;
+  }
+
+  if (vm.count("unused-data"))
+  { opt_data_elm=false;
   }
 
   if (vm.count("version"))
@@ -493,6 +499,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   tool_options.opt_precompile_pbes=opt_precompile_pbes;
   tool_options.opt_construct_counter_example=opt_construct_counter_example;
   tool_options.opt_store_as_tree=opt_store_as_tree;
+  tool_options.opt_data_elm=opt_data_elm;
   tool_options.opt_use_hashtables=opt_use_hashtables;
   
   return tool_options;

@@ -168,7 +168,9 @@ bool process(t_tool_options const& tool_options)
   pbes pbes_spec = load_pbes(tool_options);
 
   //Throw away unused parts of data specification
-  pbes_spec = remove_unused_data(pbes_spec);
+  if (tool_options.opt_data_elm)
+  { pbes_spec = remove_unused_data(pbes_spec);
+  }
 
   //Process the pbes
 

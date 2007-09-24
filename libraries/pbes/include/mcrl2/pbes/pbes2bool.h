@@ -39,6 +39,7 @@ struct t_tool_options
    bool opt_use_hashtables;
    bool opt_construct_counter_example;
    bool opt_store_as_tree;
+   bool opt_data_elm;
    std::string infilename;
    std::string outfilename;
     
@@ -48,7 +49,9 @@ struct t_tool_options
        opt_precompile_pbes(false),
        rewrite_strategy(GS_REWR_INNER),
        opt_use_hashtables(false),
-       opt_construct_counter_example(false)
+       opt_construct_counter_example(false),
+       opt_store_as_tree(false),
+       opt_data_elm(true)
    {}
 };
 
