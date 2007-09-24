@@ -15,14 +15,15 @@ namespace tipi {
   /**
    * \param[in] s a string that represents a mime type
    **/
-  mime_type::mime_type(std::string const& s) : m_main(unknown) {
+  mime_type::mime_type(std::string const& s) : m_main(application) {
     using namespace boost::xpressive;
 
     smatch matches;
 
-    //"([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+)(?:/([^ \\n\\(\\)<>@,;:\\\\\"/\\[\\]?.=]+))?"))) {
-    if (regex_match(s, matches, sregex((+(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))) >>
-                                             (!(+(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))))))) {
+    mark_tag main(1), sub(2);
+
+    if (regex_match(s, matches, sregex((main= +(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))) >> !('/' >>
+                                             (sub= +(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))))))) {
 
       if (matches.size() == 3 && !matches[2].str().empty()) {
         m_sub = matches[2];
@@ -44,7 +45,7 @@ namespace tipi {
       }
     }
     else {
-      m_sub = "unknown";
+      m_sub = "application";
     }
   }
 

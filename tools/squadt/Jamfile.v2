@@ -1,7 +1,6 @@
 project toolset/squadt
   : build-dir $(BUILD_TOP)/squadt
-  : source-location ../source
-  : requirements <include>../include
+  : requirements <include>.
   ;
 
 import sequence ;

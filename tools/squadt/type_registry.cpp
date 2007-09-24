@@ -244,7 +244,7 @@ namespace squadt {
     }
 
     if (i != command_for_type.end()) {
-      std::string const& command_string = regex_replace((*i).second, sregex(_b >> '$' >> _b), f);
+      std::string const& command_string = regex_replace((*i).second, sregex(bos >> '$' >> eos), f);
 
       if (command_string == command_system) {
         wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
@@ -269,7 +269,7 @@ namespace squadt {
       command::argument_sequence s = p->get_arguments();
 
       for (command::argument_sequence::iterator i = s.begin(); i != s.end(); ++i) {
-        *i = regex_replace(*i, sregex(_b >> '$' >> _b), f);
+        *i = regex_replace(*i, sregex(bos >> '$' >> eos), f);
       }
     }
 
