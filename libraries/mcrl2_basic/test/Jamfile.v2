@@ -1,11 +1,12 @@
 project libraries/mcrl2_basic/test
    : source-location .
-   : requirements
-       <use>/boost//headers
-       <source>/libraries//mcrl2_basic
    ;
 
-test-suite parser
+obj test_lib.o : test_lib.cpp : <use>/boost//headers <source>/libraries//mcrl2_basic ;
+
+alias mcrl22lps-test-tool : /tools/mcrl22lps//mcrl22lps ;
+
+test-suite mcrl2_basic
     : [ run test_lib.cpp ]
-      [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps parser lps : : $(TOP)/libraries/mcrl2_basic/test : mcrl2 ]
+      [ run_tool_on_examples mcrl22lps-test-tool mcrl2_basic lps : : . : mcrl2 ]
     ;
