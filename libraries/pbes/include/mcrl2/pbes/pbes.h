@@ -260,7 +260,13 @@ class pbes
     }
 
     /// Returns the data specification.
-    data_specification data() const
+    const data_specification& data() const
+    {
+      return m_data;
+    }
+
+    /// Returns the data specification.
+    data_specification& data()
     {
       return m_data;
     }

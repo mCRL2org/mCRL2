@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <string>
+#include "atermpp/aterm_list.h"
 #include "atermpp/aterm_appl.h"
 #include "atermpp/aterm_traits.h"
 #include "mcrl2/basic/identifier_string.h"
@@ -81,6 +82,13 @@ inline
 bool is_data_variable(aterm_appl t)
 {
   return gsIsDataVarId(t);
+}
+
+/// \brief Converts a data_variable_list to a data_expression_list.
+inline
+data_expression_list make_data_expression_list(data_variable_list l)
+{
+  return ATermList(l);
 }
 
 } // namespace lps

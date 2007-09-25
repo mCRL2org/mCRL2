@@ -247,7 +247,6 @@ void test_quantifier_rename_builder()
     forall(make_list(nN), exists(make_list(nN), p1)),
     forall(make_list(mN), exists(make_list(mN, nN), q1))
   );
-  // pbes_expression q2 = make_quantifier_rename_builder(generator).visit(p2); 
   pbes_expression q2 = rename_quantifier_variables(p2, make_list(data_variable("n00:N"), data_variable("n01:N")));
   std::cout << "p2 = " << pp(p2) << std::endl;
   std::cout << "q2 = " << pp(q2) << std::endl;
@@ -265,10 +264,21 @@ void test_complement_method_builder()
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
-std::cout << "p             = " << pp(p) << std::endl;
-std::cout << "q             = " << pp(q) << std::endl;
-std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
+  // std::cout << "p             = " << pp(p) << std::endl;
+  // std::cout << "q             = " << pp(q) << std::endl;
+  // std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
+}
+
+void test_pbes_expression()
+{
+  namespace p = pbes_expr;
+  namespace d = data_expr;
+
+  data_variable x1("x1:X");
+  pbes_expression e = p::val(x1);
+  data_expression x2 = p::val_arg(e);
+  BOOST_CHECK(x1 == x2);
 }
 
 int test_main(int argc, char* argv[])
@@ -285,6 +295,7 @@ int test_main(int argc, char* argv[])
   test_pbes_expression_builder();
   test_quantifier_rename_builder();
   test_complement_method_builder();
+  test_pbes_expression();
 
   return 0;
 }

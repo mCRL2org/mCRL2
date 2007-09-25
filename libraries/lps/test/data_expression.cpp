@@ -11,7 +11,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/data.h"
-#include "struct/libstruct.h"
+#include "atermpp/make_list.h"
 
 using namespace std;
 using namespace atermpp;
@@ -32,6 +32,11 @@ int test_main(int, char*[])
   
   data_variable v("d:D");
   data_expression e(v);
+
+  data_variable x("x:X");
+  data_variable y("y:Y");
+  data_variable_list l = make_list(x, y);
+  data_expression_list m = make_data_expression_list(l);
 
   return 0;
 }

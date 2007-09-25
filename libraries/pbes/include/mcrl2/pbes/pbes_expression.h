@@ -110,12 +110,22 @@ namespace pbes_expr {
   /// \brief Returns true if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t) { return gsIsPropVarInst(t); }
 
-/// Conversion of a data expression to a pbes expression.
-inline
-pbes_expression val(data_expression d)
-{
-  return pbes_expression(aterm_appl(d));
-}
+  /// Conversion of a pbes expression to a data expression.
+  /// \pre The pbes expression must be of the form val(d) for
+  /// some data variable d.
+  inline
+  data_expression val_arg(pbes_expression t)
+  {
+    assert(is_data(t));
+    return aterm_appl(t);
+  }
+
+  /// Conversion of a data expression to a pbes expression.
+  inline
+  pbes_expression val(data_expression d)
+  {
+    return pbes_expression(aterm_appl(d));
+  }
 
   /// \brief Returns the expression true
   inline
