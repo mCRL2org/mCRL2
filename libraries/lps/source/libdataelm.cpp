@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "struct/libstruct.h"
 #include <mcrl2/pbes/pbes.h>
+#include <mcrl2/data/data_variable.h>
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
@@ -76,6 +77,11 @@ static bool add_used(ATermAppl expr, ATermIndexedSet s)
 	return false;
 }
 
+static bool add_used(data_expression expr, ATermIndexedSet s)
+{
+  return add_used((ATermAppl) expr, s);
+}
+
 static bool add_used(data_expression_list l, ATermIndexedSet s)
 {
 	data_expression_list::iterator ib = l.begin();
@@ -89,11 +95,6 @@ static bool add_used(data_expression_list l, ATermIndexedSet s)
 	return b;
 }
 
-static bool add_used(data_variable_list l, ATermIndexedSet s)
-{
-	return add_used(data_expression_list((ATermList) l),s);
-}
-
 static bool add_used(propositional_variable_instantiation pvi, ATermIndexedSet s)
 {
 	return add_used(pvi.parameters(),s);
@@ -103,7 +104,7 @@ static bool add_used(pbes_expression expr, ATermIndexedSet s)
 {
 	if ( is_data(expr) )
 	{
-		return add_used((ATermAppl) expr,s); // XXX
+		return add_used(val_arg(expr),s);
 	} else if ( is_and(expr) || is_or(expr) )
 	{
 		bool b = add_used(lhs(expr),s);
@@ -111,7 +112,7 @@ static bool add_used(pbes_expression expr, ATermIndexedSet s)
 		return b || c;
 	} else if ( is_forall(expr) || is_exists(expr) )
 	{
-		bool b = add_used(quant_vars(expr),s);
+		bool b = add_used(make_data_expression_list(quant_vars(expr)),s);
 		bool c = add_used(quant_expr(expr),s);
 		return b || c;
 	} else if ( is_propositional_variable_instantiation(expr) )
@@ -320,7 +321,7 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	
 	ATtableDestroy(used_sorts);
 	
-        data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
+	data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
 
 	return new_data;
 }
@@ -414,7 +415,7 @@ pbes remove_unused_data(pbes spec, bool keep_basis)
 		add_used_sort((ATermAppl) vb->sort(),used_data);
 	}
 
-        equation_system eqs = spec.equations();
+	equation_system eqs = spec.equations();
 
 	atermpp::vector<pbes_equation>::iterator b = eqs.begin();
 	atermpp::vector<pbes_equation>::iterator e = eqs.end();
@@ -430,11 +431,11 @@ pbes remove_unused_data(pbes spec, bool keep_basis)
 		add_used((*b).formula(),used_data);
 	}
 
-	pbes new_spec = pbes(build_reduced_data_spec(spec.data(),used_data,keep_basis),spec.equations(),spec.initial_state().variable());
+	spec.data() = build_reduced_data_spec(spec.data(),used_data,keep_basis);
 
 	ATtableDestroy(used_data);
 
-	return new_spec;
+	return spec;
 }
 
 ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis) // deprecated
