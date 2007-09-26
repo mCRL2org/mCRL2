@@ -30,6 +30,8 @@
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
  
+void xsim_message_handler(mcrl2::utilities::messageType msg_type, const char *msg);
+
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
@@ -49,6 +51,9 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
     // Constructor
     squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
 
+    // Special initialisation
+    void initialise();
+
     // Configures tool capabilities.
     void set_capabilities(tipi::tool::capabilities&) const;
 
@@ -63,6 +68,10 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
 };
 
 const char* squadt_interactor::lps_file_for_input = "lps_in";
+
+void squadt_interactor::initialise() {
+  gsSetCustomMessageHandler(xsim_message_handler);
+}
 
 squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
 }
@@ -230,34 +239,33 @@ bool XSim::OnInit()
   gsEnableConstructorFunctions();
 
   this_xsim = this;
-  gsSetCustomMessageHandler(xsim_message_handler);
 
+  /* Whether to replace free variables in the LPS with dummies */
+  bool dummies = false;
+ 
+  /* The rewrite strategy that will be used */
+  RewriteStrategy rewrite_strategy = GS_REWR_INNER;
+ 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!interactor->is_active()) {
 #endif
-    /* Whether to replace free variables in the LPS with dummies */
-    bool dummies = false;
- 
-    /* The rewrite strategy that will be used */
-    RewriteStrategy rewrite_strategy = GS_REWR_INNER;
- 
-    if (parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
-      XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-      frame->use_dummies = dummies;
-      frame->rewr_strat  = rewrite_strategy;
-      frame->Show(true);
-
-      if (!lps_file_argument.empty()) {
-        frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
-      }
-
-      return true;
+    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
+      return false;
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
+
+  XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+  frame->use_dummies = dummies;
+  frame->rewr_strat  = rewrite_strategy;
+  frame->Show(true);
+
+  if (!lps_file_argument.empty()) {
+    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
+  }
  
-  return false;
+  return true;
 }
 
 int XSim::OnExit()
