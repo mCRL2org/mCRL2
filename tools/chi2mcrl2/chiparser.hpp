@@ -41,64 +41,65 @@
      PROC = 258,
      MODEL_DEF = 259,
      ENUM = 260,
-     VAR = 261,
-     CONST = 262,
-     CHAN = 263,
-     SKIP = 264,
-     BARS = 265,
-     ALT = 266,
-     COLON = 267,
-     TYPE = 268,
-     BOOL = 269,
-     NAT = 270,
-     ID = 271,
-     TIME = 272,
-     BP = 273,
-     EP = 274,
-     PROC_SEP = 275,
-     SEP = 276,
-     COMMA = 277,
-     DEFINES = 278,
-     ASSIGNMENT = 279,
-     MINUS = 280,
-     PLUS = 281,
-     GG = 282,
-     LBRACE = 283,
-     RBRACE = 284,
-     LBRACKET = 285,
-     RBRACKET = 286,
-     AND = 287,
-     OR = 288,
-     GUARD = 289,
-     NOT = 290,
-     EQUAL = 291,
-     OLD = 292,
-     NUMBER = 293,
-     INT = 294,
-     REALNUMBER = 295,
-     TRUE = 296,
-     FALSE = 297,
-     DOT = 298,
-     DEADLOCK = 299,
-     IMPLIES = 300,
-     NOTEQUAL = 301,
-     GEQ = 302,
-     LEQ = 303,
-     MAX = 304,
-     MIN = 305,
-     DIV = 306,
-     MOD = 307,
-     POWER = 308,
-     RECV = 309,
-     EXCLAMATION = 310,
-     SENDRECV = 311,
-     RECVSEND = 312,
-     SSEND = 313,
-     RRECV = 314,
-     STAR = 315,
-     GUARD_REP = 316,
-     DERIVATIVE = 317,
-     DIVIDE = 318
+     MODEL = 261,
+     VAR = 262,
+     CONST = 263,
+     CHAN = 264,
+     SKIP = 265,
+     BARS = 266,
+     ALT = 267,
+     COLON = 268,
+     TYPE = 269,
+     BOOL = 270,
+     NAT = 271,
+     ID = 272,
+     TIME = 273,
+     BP = 274,
+     EP = 275,
+     PROC_SEP = 276,
+     SEP = 277,
+     COMMA = 278,
+     DEFINES = 279,
+     ASSIGNMENT = 280,
+     MINUS = 281,
+     PLUS = 282,
+     GG = 283,
+     LBRACE = 284,
+     RBRACE = 285,
+     LBRACKET = 286,
+     RBRACKET = 287,
+     AND = 288,
+     OR = 289,
+     GUARD = 290,
+     NOT = 291,
+     EQUAL = 292,
+     OLD = 293,
+     NUMBER = 294,
+     INT = 295,
+     REALNUMBER = 296,
+     TRUE = 297,
+     FALSE = 298,
+     DOT = 299,
+     DEADLOCK = 300,
+     IMPLIES = 301,
+     NOTEQUAL = 302,
+     GEQ = 303,
+     LEQ = 304,
+     MAX = 305,
+     MIN = 306,
+     DIV = 307,
+     MOD = 308,
+     POWER = 309,
+     RECV = 310,
+     EXCLAMATION = 311,
+     SENDRECV = 312,
+     RECVSEND = 313,
+     SSEND = 314,
+     RRECV = 315,
+     STAR = 316,
+     GUARD_REP = 317,
+     DERIVATIVE = 318,
+     DIVIDE = 319
    };
 #endif
 
@@ -119,6 +120,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include <list>
 #include <map>
+#include <set>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -136,6 +138,8 @@ extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
+extern set<ATermAppl> used_process_identifiers;
+extern bool processing_models;
 
 #define YYMAXDEPTH 160000
 
@@ -153,13 +157,13 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 47 "chiparser.yy"
+#line 50 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 163 "chiparser.hpp"
+#line 167 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

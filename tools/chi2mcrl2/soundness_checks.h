@@ -86,6 +86,8 @@ bool check_rule_NumberString(Term t)
 
 //--- begin generated code
 template <typename Term> bool check_rule_SpecChi(Term t);
+template <typename Term> bool check_rule_ModelDef(Term t);
+template <typename Term> bool check_rule_ModelBody(Term t);
 template <typename Term> bool check_rule_ProcDef(Term t);
 template <typename Term> bool check_rule_ProcDecl(Term t);
 template <typename Term> bool check_rule_Decl(Term t);
@@ -100,6 +102,7 @@ template <typename Term> bool check_rule_Expr(Term t);
 template <typename Term> bool check_rule_Statement(Term t);
 template <typename Term> bool check_rule_OptGuard(Term t);
 template <typename Term> bool check_rule_OptChannel(Term t);
+template <typename Term> bool check_term_Instantiation(Term t);
 template <typename Term> bool check_term_ChiSpec(Term t);
 template <typename Term> bool check_term_ChanSpec(Term t);
 template <typename Term> bool check_term_ChannelID(Term t);
@@ -109,6 +112,7 @@ template <typename Term> bool check_term_DataVarExprID(Term t);
 template <typename Term> bool check_term_Type(Term t);
 template <typename Term> bool check_term_SepStat(Term t);
 template <typename Term> bool check_term_OptGuard(Term t);
+template <typename Term> bool check_term_ModelDef(Term t);
 template <typename Term> bool check_term_Nil(Term t);
 template <typename Term> bool check_term_AltStat(Term t);
 template <typename Term> bool check_term_DataVarID(Term t);
@@ -125,6 +129,7 @@ template <typename Term> bool check_term_Expression(Term t);
 template <typename Term> bool check_term_ProcDef(Term t);
 template <typename Term> bool check_term_UnaryExpression(Term t);
 template <typename Term> bool check_term_Skip(Term t);
+template <typename Term> bool check_term_ModelSpec(Term t);
 template <typename Term> bool check_term_VarDecl(Term t);
 template <typename Term> bool check_term_VarSpec(Term t);
 template <typename Term> bool check_term_ProcSpec(Term t);
@@ -133,8 +138,19 @@ template <typename Term> bool check_term_GuardedStarStat(Term t);
 template <typename Term>
 bool check_rule_SpecChi(Term t)
 {
-  return    check_term_ChiSpec(t)
-         || check_term_Nil(t);
+  return    check_term_ChiSpec(t);
+}
+
+template <typename Term>
+bool check_rule_ModelDef(Term t)
+{
+  return    check_term_ModelDef(t);
+}
+
+template <typename Term>
+bool check_rule_ModelBody(Term t)
+{
+  return    check_term_ModelSpec(t);
 }
 
 template <typename Term>
@@ -219,7 +235,8 @@ bool check_rule_Statement(Term t)
          || check_term_ParStat(t)
          || check_term_StarStat(t)
          || check_term_GuardedStarStat(t)
-         || check_term_DeltaStat(t);
+         || check_term_DeltaStat(t)
+         || check_term_Instantiation(t);
 }
 
 template <typename Term>
@@ -235,7 +252,38 @@ bool check_rule_OptChannel(Term t)
   return    check_term_Nil(t);
 }
 
-// ChiSpec(ProcDef*)
+// Instantiation(String, Expr*)
+template <typename Term>
+bool check_term_Instantiation(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsInstantiation(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_Expr<aterm>, 0))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// ChiSpec(ModelDef, ProcDef+)
 template <typename Term>
 bool check_term_ChiSpec(Term t)
 {
@@ -248,10 +296,15 @@ bool check_term_ChiSpec(Term t)
     return false;
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_ProcDef<aterm>, 0))
+  if (!check_term_argument(a(0), check_rule_ModelDef<aterm>))
+    {
+      std::cerr << "check_rule_ModelDef" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_ProcDef<aterm>, 1))
     {
       std::cerr << "check_rule_ProcDef" << std::endl;
       return false;
@@ -483,6 +536,37 @@ bool check_term_OptGuard(Term t)
   // check the children
   if (a.size() != 0)
     return false;
+
+  return true;
+}
+
+// ModelDef(String, ModelBody)
+template <typename Term>
+bool check_term_ModelDef(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsModelDef(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_ModelBody<aterm>))
+    {
+      std::cerr << "check_rule_ModelBody" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -966,6 +1050,37 @@ bool check_term_Skip(Term t)
   // check the children
   if (a.size() != 0)
     return false;
+
+  return true;
+}
+
+// ModelSpec(VarSpec*, Statement)
+template <typename Term>
+bool check_term_ModelSpec(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsModelSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_VarSpec<aterm>, 0))
+    {
+      std::cerr << "check_rule_VarSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Statement<aterm>))
+    {
+      std::cerr << "check_rule_Statement" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }

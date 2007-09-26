@@ -1,3 +1,9 @@
+model y()=
+|[
+  Test()
+]|
+
+
 proc Test( ) =
 |[ 
 ( skip | skip ) ; skip  

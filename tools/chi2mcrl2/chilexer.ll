@@ -8,6 +8,7 @@
 #include <vector>
 #include "print/messaging.h"
 #include <map>
+#include <set>
 
 //fix for newer versions of flex (>= 2.5.31)
 #ifndef yywrap
@@ -23,9 +24,12 @@ int line = 1, col = 1;
 int scope_lvl;
 
 map<ATerm, ATerm> var_type_map;
+set<ATermAppl> used_process_identifiers;
+bool processing_models;
 
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
+
 
 /**
  * yyerror() is invoked when the lexer or the parser encounter an error.
@@ -88,7 +92,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 %%
 [ \t]      { col_nr += YYLeng(); /* whitespace */ }
 \r?\n      { col_nr = 1; ++line_nr; /* newline */ }
-"%".*      { col_nr += YYLeng(); /* comment */ }
+"//".*      { col_nr += YYLeng(); /* comment */ }
 
 "|["    { process_string(); return BP; }
 "]|"    { process_string(); return EP; }
@@ -136,6 +140,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "/"     { process_string(); return DIVIDE; } 
  
 proc    { process_string(); return PROC; }
+model   { process_string(); return MODEL; }
 var		{ process_string(); return VAR; }
 enum    { process_string(); return ENUM; }
 skip	{ process_string(); return SKIP; }

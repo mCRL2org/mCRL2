@@ -11,23 +11,79 @@
 #include <list>
 #include "CArray.h"
 #include <stack>
+#include <iterator>
 
 using namespace ::mcrl2::utilities;
 using namespace std;
-
-bool CAsttransform::translator(ATermAppl ast)
-{
-  if( StrcmpIsFun( "ProcDef", ast ) )
-  {
-    mcrl2_result = manipulateProcess( ast );
-  }
-  return true;
-}
 
 bool CAsttransform::StrcmpIsFun( const char* str, ATermAppl aterm) 
 {
   return ATgetAFun( aterm ) == 
 	ATmakeAFun( str, ATgetArity( ATgetAFun( aterm ) ), ATisQuoted( ATgetAFun( aterm ) ) );
+}
+
+bool CAsttransform::translator(ATermAppl ast)
+{
+  gsDebugMsg("input of translator: %T\n", ast);
+  std::string result;
+
+  /**
+    * Write the special Terminator actions for the mcrl2 specification
+    *
+    **/
+  result = "act Terminator; \n ";
+
+  if( StrcmpIsFun( "ChiSpec", ast ) )
+  {
+ 
+    ATermList to_process = (ATermList) ATgetArgument(ast, 1);
+    while ( ATgetLength(to_process) > 0)
+    {
+      result.append(manipulateProcess((ATermAppl) ATgetFirst(to_process)));
+      to_process = ATgetNext(to_process);
+    }
+ 
+  } else {
+    gsErrorMsg("No valid AST input\n");
+    exit(1);
+  }
+
+  /**
+    * write initialisation
+    *
+    **/
+  manipulateModel((ATermAppl) ATgetArgument(ast, 0 ));
+
+  result.append("\ninit ");
+  result.append(initialisation+";\n");
+
+  mcrl2_result = result;
+  return true;
+
+}
+
+void CAsttransform::manipulateModel(ATermAppl input)
+{
+  gsDebugMsg("input of manipulateModel: %T\n", input);
+  vector<RPV> ModelSpecification;
+  vector<RPV>::iterator itRPV;
+  //Manipulate the procees variables declared and the statements in the model
+  ModelSpecification = manipulateModelSpecification((ATermAppl) ATgetArgument(input, 1 )); 
+  return;
+}
+
+std::vector<RPV> CAsttransform::manipulateModelSpecification(ATermAppl input)  
+{
+  gsDebugMsg("input of manipulateModelSpecification: %T\n", input);
+  //INPUT: ProcSpec( [...] , SepStat ( [...] ))
+  std::vector<RPV> result;
+  std::vector<RPV> tmpRPV;
+  std::vector<RPV>::iterator it;
+	
+  //Process Statements
+  manipulateModelStatements((ATermAppl) ATgetArgument(input, 1));
+
+  return result; 
 }
 
 std::string CAsttransform::manipulateProcess(ATermAppl input)
@@ -45,41 +101,68 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   vector<RPV>::iterator itRPV;
   vector<RAT>::iterator itRAT;
   vector<int>::iterator itint;
-  map<std::string, RPV>::iterator itMap;
   string result;
 
-  int max_state = 0;
-  stream_lvl = 0;
-  max_stream_lvl = 0;
-  parenthesis_level = 0;
+  //Clear global variables that are exclusivly thoughout this process
+  begin_state.clear(); //first:  parenthesis level
+  end_state.clear();   //first:  parenthesis level
+  endstates_per_parenthesis_level.clear();
+  info_per_parenthesis_level_per_parenthesis.clear();
+  streams_per_parenthesis_level.clear();
+  all_streams.clear();
+  ProcessVariableMap.clear();
+  transitionSystem.clear();
+
+  //Set the initial variables for this process
+  parallel = false;
+  alternative = false;
   terminate = true;
   loop = false;
   guardedloop=false;
-  streams_per_parenthesis_level.append(0); 
+  guardedStarBeginState = 0;
+  stream_number = 0;
+  originates_from_stream = 0;
+  parenthesis_level = 0;
+  all_streams.insert(stream_number);
+  streams_per_parenthesis_level.insert(stream_number);
+
+  /**
+    * Start processing the process
+    *
+    **/
+ 
   variable_prefix = ATgetName(ATgetAFun(ATgetArgument(input , 0)));
   std::string processName =  ATgetName(ATgetAFun(ATgetArgument(input , 0)));
-  scope_level++;
-
   // 
   // WARNING: if ExplicedTemplates are added shift  ATgetArgument(input, +1)
   // manipulateExplicitTemplates(ATgetArgument(input, 1))
 
   //Manipulate the process variables declared in the definition
+  vector<RPV> DeclaredProcessDefinitionRPV;
   DeclaredProcessDefinition = manipulateDeclaredProcessDefinition((ATermAppl) ATgetArgument(input, 1 )); 
     for( itRVT = DeclaredProcessDefinition.begin(); itRVT != DeclaredProcessDefinition.end(); itRVT++ ) 
       { tmpRPV.Name = itRVT->Name; 
         tmpRPV.Type = itRVT->Type;
-        //passthrough function needed
         tmpRPV.InitValue = "";
-        ProcessVariableMap[tmpRPV.Name] = tmpRPV;
+        ProcessVariableMap.push_back(tmpRPV);
+        DeclaredProcessDefinitionRPV.push_back(tmpRPV);
       }
   //Manipulate the procees variables declared and the statements in the specification
   ProcessSpecification = manipulateProcessSpecification((ATermAppl) ATgetArgument(input, 2 )); 
     for( itRPV = ProcessSpecification.begin(); itRPV != ProcessSpecification.end(); itRPV++ ) 
       { 
-        ProcessVariableMap[itRPV->Name] = *itRPV;
+        ProcessVariableMap.push_back(*itRPV);
       }
 
+  /**
+    * Create Processes for Instantiation: these are used to match the instantation given in the model
+    *
+    **/
+  
+  ProcessForInstantation[processName].DeclarationVariables =DeclaredProcessDefinitionRPV;
+  ProcessForInstantation[processName].SpecificationVariables =ProcessSpecification;
+  ProcessForInstantation[processName].NumberOfStreams = all_streams.size();
+ 
   /**
     * + endstates_per_parenthesis_level_per_parenthesis stores per parenthesis level the terminating statements
     * + endstates_per_parenthesis_level stores the terminating statemens until they are added to 
@@ -93,6 +176,16 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   info.guardedloop = false;
   info.begin_state = 0;
   info.end_state = transitionSystem.size();
+  info.streams = streams_per_parenthesis_level;
+  info.parallel = parallel;
+  info.alternative = alternative;
+  streams_per_parenthesis_level.clear();
+
+  if (info.parallel && info.alternative)
+  {
+    gsErrorMsg("It is not allowed to use the parallel and alternative operator on the same parenthesis level.");
+    exit(1);
+  }
 
   info_per_parenthesis_level_per_parenthesis[parenthesis_level].push_back(info);
   endstates_per_parenthesis_level[parenthesis_level].clear();
@@ -106,25 +199,6 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     gsDebugMsg("state:%d\t terminate:%d\t plvl:%d\t looped:%d guardedloop:%d\n", itRAT->state, itRAT->terminate, itRAT->parenthesis_level, itRAT->looped_state, itRAT->guardedloop);
   }
 
-  /**
-    * The following lines of code provide a summand of the LPS to continue based on 
-    * the state of a stream
-    *
-    **/
-  for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
-  {
-    max_state = max(max_state, itRAT->nextstate);
-    itRAT->procedingStreams.insert(itRAT->stream);
-    itRAT->proceedStreamState = itRAT->state; 
-    map<int, std::set<int> >::iterator itRAS = affectedStreamMap.find(itRAT->state);
-    if(affectedStreamMap.end() != itRAS )
-    {
-      for(set<int>::iterator i = (itRAS->second).begin(); i != (itRAS->second).end(); ++i )
-      {
-        itRAT->procedingStreams.insert(*i);
-      } 
-    } 
-  } 
 
   /**
     * Add a special terminating state for the transitionSystem
@@ -135,43 +209,6 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   terminate_state.state = transitionSystem.size(); 
   end_state[parenthesis_level] = terminate_state.state;
 
-
-
-// OBSCURE CODE
-
-/*  map<int, set<int> >::iterator itRAS = affectedStreamMap.find(max_state);  
-  if(affectedStreamMap.end() !=  itRAS )
-  {
-    for(set<int>::iterator i = (itRAS->second).begin(); i != (itRAS->second).end(); ++i )
-    {
-      terminate.procedingStreams.insert(*i);
-    } 
-  } 
-*/    
-/*  set<int> copy_procedingStreams;
-  for(std::vector<RS>::iterator it = holdsForStreamVector.begin(); it != holdsForStreamVector.end(); ++it)
-  {
-    for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
-    {
-      if(itRAT->state == it->state)
-      {
-       copy_procedingStreams.clear();
-       copy_procedingStreams = itRAT->procedingStreams;
-       assert(copy_procedingStreams.size() == itRAT->procedingStreams.size());
-      
-      }
-    }
-    for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
-    {
-      if(itRAT->state == it->holdsForState)
-      {
-        itRAT->procedingStreams.clear();
-        itRAT->procedingStreams.insert(copy_procedingStreams.begin(),copy_procedingStreams.end());
-        itRAT->proceedStreamState = it->state;
-      }
-    }
-  }
-  */ 
 
   /**
     * Propegate repetition over parenthesis if different parenthesis_levels have the same begin and end state 
@@ -204,7 +241,6 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                      gsDebugMsg("Found Match\n");
                      if(itRPI2->looped != itRPI->looped)
                      {
-                       //NOTE TO SELF: If the guarded loop is propagated multiple bybasses are created
                        itRPI->looped=true;
                        itRPI->looped=true;
                        again = true;
@@ -230,7 +266,14 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
             itVecSet != itIntVecSet->second.end();
             ++itVecSet)
         {
-             gsDebugMsg("\t#%d\t:: begin_state:%d\t end_state:%d\t  looped parenthesis:%d guarded loop:%d\n",++i, itVecSet->begin_state,itVecSet->end_state, itVecSet->looped, itVecSet->guardedloop);
+             gsDebugMsg("\t#%d\t:: begin_state:%d\t end_state:%d\t  looped parenthesis:%d \n", ++i, itVecSet->begin_state,itVecSet->end_state, itVecSet->looped);
+             gsDebugMsg("\t\t   guarded loop:%d\t number_of_streams:%d:\n",  itVecSet->guardedloop, itVecSet->streams.size());
+             for(std::set<int>::iterator i = itVecSet->streams.begin(); 
+                                         i != itVecSet->streams.end();
+                                         ++i )
+             {
+               gsDebugMsg("\t\t\tstream:%d\n",*i);
+             }
              if (itVecSet->looped)
              {
                //The parenthesis is looped: Point the end of the branch back to the beginning of the parenthesis
@@ -283,17 +326,12 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       } else {
         transition.nextstate= transition.nextstate+1;
       }
-      transition.guard= "!("+transition.guard+")";
+      transition.guard= "!("+transition.guard+") ";
  
       XtraTransitionSystem.push_back(transition); 
 
     }
   }
-
-  //Due to the existance of possible multiple nested levels of parenthesis it is possible that multiple
-  //transistions are created.
-  // KNOWN BUG
-
   gsDebugMsg("Processing parenthesis levels for *>\n");
   //Create transistions for parenthesis levels
   for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
@@ -316,7 +354,6 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                if (itVecSet->endstates.find(transition.nextstate) !=  itVecSet->endstates.end()) 
                { 
                  transition.nextstate= determineEndState(itVecSet->endstates, itIntVecSet->first);
-                 //if (!transitionexists(transition, XtraTransitionSystem))
                  {
                    XtraTransitionSystem.push_back(transition);
                  } 
@@ -327,43 +364,40 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   }
   transitionSystem.insert(transitionSystem.end(),XtraTransitionSystem.begin(),XtraTransitionSystem.end());
 
-
-
- 
   /**
-    * Write the mcrl2 specification
+    * Write the mcrl2 process specification
     *
     **/
-  result = "act Terminator; \n \n proc \n   ";
-  result.append(processName);
-  result.append("(");
+  result.append("\n proc \n  "+processName+"(");
   /**
     * Declare the used variables
     *
     **/
-  
-  for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
+
+  for(std::vector<RPV>::iterator itRVT = ProcessVariableMap.begin(); itRVT != ProcessVariableMap.end(); itRVT++)
     {
-      if (itMap != ProcessVariableMap.begin())
+      if (itRVT != ProcessVariableMap.begin())
         {
           result.append(", ");
         }
-      result.append(itMap->first);
+      result.append(itRVT->Name);
       result.append(": ");
-      result.append((itMap->second).Type);
+      result.append(itRVT->Type);
     }
   /**
     * Declare the number of used streams
     *
     **/
-  for(int i = 0; i <= max_stream_lvl; ++i )
+  for(set<int>::iterator i = all_streams.begin(); 
+    i != all_streams.end(); 
+    ++i )
   {
-    if (!(ProcessVariableMap.empty() && i == 0) )
+    if (!(ProcessVariableMap.empty() && i == all_streams.begin()) )
     {
       result.append(", ");
     }
     result.append("state_");
-    result.append(to_string(i));
+    result.append(to_string(*i));
     result.append(": Nat");
   }
   result.append(")= \n");
@@ -373,6 +407,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * Write the transitionSystem into an LPS with summands
     *
     **/  
+  int index = 0;
   for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ ) 
     { 
       if (itRAT != transitionSystem.begin()){
@@ -389,27 +424,47 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       result.append("( ");
       if (!itRAT->guard.empty())
       {
-        result.append(itRAT->guard);
+        result.append(itRAT->guard+" && ");
       }
       
-      //Write the valuation of the state for a summand
-      map<int, std::set<int> >::iterator itRAS = affectedStreamMap.find(itRAT->state);
-      for(set<int>::iterator i=itRAT->procedingStreams.begin(); i != itRAT->procedingStreams.end() ;++i)
+      /**
+        * Collect ending streams
+        *
+        **/
+      std::set<int> collect_streams;
+      for(std::map<int, std::vector<RPI> >::iterator itMapRPI = info_per_parenthesis_level_per_parenthesis.begin();
+        itMapRPI != info_per_parenthesis_level_per_parenthesis.end();
+        ++itMapRPI)
       {
-        if (!(itRAT->guard.empty() && i==itRAT->procedingStreams.begin()))
+        for(std::vector<RPI>::iterator itRPI = itMapRPI->second.begin();
+            itRPI != itMapRPI->second.end();
+            ++itRPI)
         {
+          if (itRPI->end_state == itRAT->state)
+          { 
+            collect_streams.insert(itRPI->streams.begin(), itRPI->streams.end()); 
+          }
+        }
+      }
+      for(std::set<int>::iterator itSetInt = collect_streams.begin();
+        itSetInt != collect_streams.end();
+        ++itSetInt)
+      {
+        if(itRAT->stream != *itSetInt)
+        {
+          result.append("state_");
+          result.append(to_string(*itSetInt));
+          result.append(" >= ");
+          result.append(to_string(itRAT->state));
           result.append(" && ");
         }
-        result.append("state_");
-        result.append(to_string(*i));
-        if (itRAT->stream == *i)
-        {
-          result.append(" == ");
-        } else {
-          result.append(" >= ");
-        }
-        result.append(to_string(itRAT->proceedStreamState));
-      }
+      }      
+      collect_streams.clear();
+
+      result.append("state_");
+      result.append(to_string(itRAT->stream));
+      result.append(" == ");
+      result.append(to_string(itRAT->state));
       result.append(") -> ");
       
       //Write the valuation of the state for a summand
@@ -422,28 +477,49 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       result.append("(");
 
       //write the variable valuation
-	  for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
+	  for(std::vector<RPV>::iterator itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
 		{
 		  if(itMap != ProcessVariableMap.begin())
           {
             result.append(", ");
           }
-          if( itRAT->vectorUpdate.find(itMap->first) != itRAT->vectorUpdate.end() ) 
+          if( itRAT->vectorUpdate.find(itMap->Name) != itRAT->vectorUpdate.end() ) 
           {
-            result.append(itRAT->vectorUpdate[itMap->first]);
+            result.append(itRAT->vectorUpdate[itMap->Name]);
           } else {
-            result.append(itMap->first);
+            result.append(itMap->Name);
           } 
 		}
-       
+      
+      collect_streams.clear();
+      for(std::vector<RPI>::iterator itRPI = info_per_parenthesis_level_per_parenthesis[itRAT->parenthesis_level].begin()
+           ; itRPI !=  info_per_parenthesis_level_per_parenthesis[itRAT->parenthesis_level].end()
+           ; ++itRPI)
+      {
+         // {all_streams}\{streams} for the states at index of transistion system need to proceed
+         if ( itRPI->begin_state <= index  && index <= itRPI->end_state)
+         {
+           collect_streams.insert(itRPI->streams.begin(), itRPI->streams.end());
+         }  
+      }
+
+      std::set<int> ResultDif;
+      std::insert_iterator<std::set<int> > DifIter( ResultDif, ResultDif.begin() ); 
+      set_difference(all_streams.begin(), all_streams.end(), 
+                       collect_streams.begin(), collect_streams.end(),
+                       DifIter
+                      );
+      
        //write the state valuation  
-       for(int i = 0; i <= max_stream_lvl; ++i)
-       { 
-	     if (!(ProcessVariableMap.empty() && i == 0) )
+       for(set<int>::iterator i = all_streams.begin(); 
+         i != all_streams.end(); 
+         ++i )
+         {
+	     if (!(ProcessVariableMap.empty() && *i == 0) )
          {
            result.append(", ");
          }
-         if (itRAT->stream == i)
+         if (itRAT->stream == *i || ResultDif.find(*i) != ResultDif.end() )
          {
            //Determine if the state is looped
            if(itRAT->looped_state)
@@ -459,68 +535,50 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
            }
          } else {
            result.append("state_");
-           result.append(to_string(i));
+           result.append(to_string(*i));
          }
        }  
        result.append(")\n");
+       ++index;
     }
 
-/*
-    max_state = max(max_state, itRAT->nextstate);
-    result.append("\t+ ( ");
-    map<int, set<int> >::iterator itRAS = affectedStreamMap.find(max_state);  
-    if(affectedStreamMap.end() !=  itRAS )
-      {
-        for(set<int>::iterator i = (itRAS->second).begin(); i != (itRAS->second).end(); ++i )
+     /**
+        * Collect ending streams
+        *
+        **/
+      std::set<int> collect_streams;
+
+      for(vector<RAT>::iterator itRAT = transitionSystem.begin();
+                                itRAT != transitionSystem.end();
+                                ++itRAT)
+      { if (itRAT->nextstate == terminate_state.state)
         {
-          if (i != (itRAS->second).begin())
+          collect_streams.insert(itRAT->stream);
+        }
+      } 
+      if (!collect_streams.empty())
+      {
+        result.append("\t+ ( ");
+        for(std::set<int>::iterator itSetInt = collect_streams.begin();
+          itSetInt != collect_streams.end();
+          ++itSetInt)
+        {
+          if (itSetInt != collect_streams.begin())
           {
             result.append(" && ");
           }
           result.append("state_");
-          result.append(to_string(*i));
+          result.append(to_string(*itSetInt));
           result.append(" == ");
-          result.append(to_string(max_state));
-        }  
-      } else */  
-     {
-       result.append("\t+ ( state_0 == ");
-       result.append( to_string(terminate_state.state) );
-     }
-  result.append(") -> Terminator\n");
+          result.append(to_string(terminate_state.state));
+        }
+      result.append(") -> Terminator\n");
+      }      
+
 
   result.append("\t;\n");
 
 
-  /**
-    * write initialisation
-    *
-    * NOTE: TODO: Should be provided by MODEL()=|[ ]| instead of a process
-    **/
-  result.append("\ninit ");
-  result.append(processName);
-  result.append("(");
-  for( itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
-    { 
-      if ( !(itMap->second).InitValue.empty() ) 
-      { 
-        result.append((itMap->second).InitValue);
-      } else {
-	 //TODO: remove if model is supported and replace code by assertion
-	    if ((itMap->second).Type == "Bool" )
-		  {
-		    result.append("false"); 
-		  };
-	    if ((itMap->second).Type == "Nat" )
-	  	  {
-		    result.append("0"); 
-		  };
-      //end TODO
-	  }
-    result.append(", ");
-    }
-  result.append("0");
-  result.append(");\n");
   return result; 
 }
 
@@ -614,6 +672,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariable(ATermAppl inpu
   return Result;
 }
 
+
 std::vector<std::string> CAsttransform::getVariablesNamesFromList(ATermList input) 
 {
   gsDebugMsg("input of getVariablesNamesFromList: %T\n", input);
@@ -627,6 +686,7 @@ std::vector<std::string> CAsttransform::getVariablesNamesFromList(ATermList inpu
   }
   return result;
 } 
+
 
 std::vector<std::string> CAsttransform::getExpressionsFromList(ATermList input) 
 {
@@ -642,6 +702,7 @@ std::vector<std::string> CAsttransform::getExpressionsFromList(ATermList input)
   }
   return result;
 } 
+
 
 std::vector<RPV> CAsttransform::manipulateProcessSpecification(ATermAppl input)  
 {
@@ -685,44 +746,6 @@ std::vector<RPV> CAsttransform::manipulateProcessSpecification(ATermAppl input)
     begin_state[parenthesis_level] = state;
 
     manipulateStatements((ATermAppl) ATgetArgument(input, 1));
-    //Process bypasses
-    //Succesfull terminating alternative process must be redirected to the end
-    set<int> tmpSINT = bypass_per_parenthesis_level[parenthesis_level];
-    std::set<int>::iterator bypassIt;
-    for( bypassIt = tmpSINT.begin(); bypassIt != tmpSINT.end(); bypassIt++ ) 
-    {
-      transitionSystem.at(*bypassIt).nextstate = next_state;
-    }
-    tmpSINT.clear();
-    bypass_per_parenthesis_level[parenthesis_level] = tmpSINT;
-
-    gsDebugMsg("next %d\n", next_state);
-    gsDebugMsg("affected steam_lvl's: %d ... %d\n", 0 , stream_lvl);
-    std::set<int> stream_lvl_set;
-      
-    // check if there already exists an stream_lvl_set for the current edge
-    std::map<int, std::set<int> >::iterator itIntSet = affectedStreamMap.find(next_state); 
-    if (affectedStreamMap.end() != itIntSet )
-    {
-       stream_lvl_set = itIntSet->second;
-    }
-    for(int i = 0 ; i <= stream_lvl ;++i)
-    {
-      stream_lvl_set.insert(i);
-    }   
-    affectedStreamMap[next_state] = stream_lvl_set;
-
-////////////////////
-    int o = 0;
-    int j = 0;
-    for(int i = 0; i < (int) streams_per_parenthesis_level.length() ; ++i)
-    {
-      j = 0;
-      streams_per_parenthesis_level.get(j, i);
-      o = o + j;
-    }
-    max_stream_lvl = max(max_stream_lvl, o );
-/////////////////////
   }
 
   return result; 
@@ -831,14 +854,99 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
   return "";
 } 
 
+void CAsttransform::manipulateModelStatements(ATermAppl input)
+{
+  gsDebugMsg("input of manipulateModelStatements: %T\n", input);
+  if ( StrcmpIsFun( "ParStat", input ) )
+    {
+      manipulateModelStatements((ATermAppl) ATgetArgument(input,0));
+      initialisation.append(" || ");
+      manipulateModelStatements((ATermAppl) ATgetArgument(input,1));
+      return ;
+    } 
+  if ( StrcmpIsFun( "Instantiation", input ) )
+    {
+      std::string processName;
+      processName = ATgetName(ATgetAFun(ATgetArgument(input,0)));
+      
+      if (ProcessForInstantation.find(processName) == ProcessForInstantation.end())
+      {
+        gsErrorMsg("Instantation of process %s is not declared\n", processName.c_str());
+        exit(1);
+      }
+
+      //Determine the number of arguments of the instantation
+      ATermList to_process = (ATermList) ATgetArgument(input,1);
+       
+      if(ATgetLength(to_process) != ProcessForInstantation[processName].DeclarationVariables.size())   
+      {
+        gsDebugMsg("%T\n",to_process);
+        gsDebugMsg("Declared variables from process\n");
+        for(vector<RPV>::iterator itRPV =ProcessForInstantation[processName].DeclarationVariables.begin();
+             itRPV != ProcessForInstantation[processName].DeclarationVariables.end();
+             ++itRPV
+           )
+        {
+          gsDebugMsg("%s\n,", itRPV->Name.c_str());
+        }
+        gsErrorMsg("Number of arguments does not correspond for %s\n", processName.c_str());
+        exit(1);
+      }
+ 
+      //Determine if the arguments are of the same type 
+      vector<RPV>::iterator itRPV = ProcessForInstantation[processName].DeclarationVariables.begin();
+      ATermList tmp_to_process = to_process;
+      while (ATgetLength(tmp_to_process)>0)
+      {
+        if (strcmp(itRPV->Type.c_str(),
+            ATgetName(ATgetAFun(ATgetArgument(ATgetArgument( ATgetFirst(tmp_to_process), 1 ), 0))))
+            != 0
+           )
+        {
+          gsDebugMsg("%T\n",to_process);
+          gsDebugMsg("Declared Types from process\n");
+          for(vector<RPV>::iterator itRPV =ProcessForInstantation[processName].DeclarationVariables.begin();
+             itRPV != ProcessForInstantation[processName].DeclarationVariables.end();
+             ++itRPV
+             )
+          {
+            gsDebugMsg("%s\n,", itRPV->Type.c_str());
+          }
+          gsErrorMsg("Arguments do not correspond in types for %s\n", processName.c_str());
+          exit(1);
+        }
+        tmp_to_process = ATgetNext(tmp_to_process);
+        ++itRPV;
+      }
+           
+ 
+      //Write state vector
+      initialisation.append(processName);
+      initialisation.append("(");
+      while (ATgetLength(to_process)>0)
+      {
+        initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process))+", ");
+        to_process = ATgetNext(to_process);
+      }
+      for(vector<RPV>::iterator itRPV = ProcessForInstantation[processName].SpecificationVariables.begin();
+          itRPV != ProcessForInstantation[processName].SpecificationVariables.end();
+          ++itRPV)
+      {
+        initialisation.append(itRPV->InitValue+", ");
+      }
+      initialisation.append("0)"); 
+      return ;
+    } 
+  gsErrorMsg("%T operator is not supported yet.\n",  input ) ;
+  exit(1);
+  return;
+}
+
 void CAsttransform::manipulateStatements(ATermAppl input)
 {
   gsDebugMsg("input of manipulateStatements: %T\n", input);
   RAT transition;
-  std::list<int> newStateVector;
 
-
-  //exit(0);
   if ( StrcmpIsFun( "DeltaStat", input ) )
     {
       if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,0) ))
@@ -847,7 +955,8 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       }
       
       transition.state = state;
-      transition.stream = stream_lvl;
+      transition.stream = stream_number;
+      transition.originates_from_stream = originates_from_stream;
       transition.nextstate = next_state;
       transition.action = "delta";
       transition.terminate = terminate;
@@ -869,7 +978,8 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       {
         transition.guard =  manipulateExpression( (ATermAppl) ATgetArgument(input,0));
       }
-      transition.stream = stream_lvl;
+      transition.stream = stream_number;
+      transition.originates_from_stream = originates_from_stream;
       transition.state = state;
       transition.nextstate = next_state;
       transition.action = "tau";
@@ -889,7 +999,8 @@ void CAsttransform::manipulateStatements(ATermAppl input)
   if ( StrcmpIsFun( "AssignmentStat", input ) )
     {
       transition.state = state;
-      transition.stream = stream_lvl;
+      transition.stream = stream_number;
+      transition.originates_from_stream = originates_from_stream;
       transition.nextstate = next_state;
       transition.action = "tau";
       transition.terminate = terminate;
@@ -921,6 +1032,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
         next_state = -1 ;
       } 
       state = transitionSystem.size();
+      originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,1) );
       return ;
     }
@@ -928,8 +1040,11 @@ void CAsttransform::manipulateStatements(ATermAppl input)
     {
       next_state = -1;
       terminate = true;
+      alternative = true;
+      originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
       state = begin_state[parenthesis_level];
+      originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,1) );
       return ;
     }
@@ -937,14 +1052,38 @@ void CAsttransform::manipulateStatements(ATermAppl input)
     {
       loop = true;
       guardedloop = false;
+      originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
       return ;
     }
+  if ( StrcmpIsFun( "ParStat", input ) )
+    {
+      gsErrorMsg("Parallel processes are only supported in at model level\n");
+      exit(0);
+      int bypass_originates_from_stream = stream_number; 
+      terminate = true;
+      parallel = true;
+      originates_from_stream = stream_number;
+      
+      manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
+
+      ++stream_number;
+
+      
+      all_streams.insert(stream_number);
+      
+      originates_from_stream = bypass_originates_from_stream;
+      streams_per_parenthesis_level.insert(stream_number);
+      state = begin_state[parenthesis_level];
+      manipulateStatements( (ATermAppl) ATgetArgument(input,1));
+      
+      return ;
+    } 
   if ( StrcmpIsFun( "GuardedStarStat", input ) )
     {
       
       transition.guard =  manipulateExpression( (ATermAppl) ATgetArgument(input,0));
-      transition.stream = stream_lvl;
+      transition.stream = stream_number;
       transition.state = state;
       transition.guardedloop = false;
       transition.nextstate = transitionSystem.size()+1;
@@ -972,8 +1111,12 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       loop = false;
       bool PassGuardedLoop = guardedloop;
       guardedloop = false;
-      //int  PassGuardedLoopState = guardedStarBeginState;
-    
+      bool PassAlternative = alternative;
+      parallel = false;
+      bool PassParallel = parallel;  
+      alternative = false;    
+      int PassStreamNumber = stream_number; 
+
       ++parenthesis_level;
       begin_state[parenthesis_level]= transitionSystem.size();
 
@@ -986,12 +1129,18 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       info.begin_state = begin_state[parenthesis_level];
       info.end_state = transitionSystem.size();
       info.guardedloop = PassGuardedLoop; 
-
+      info.parallel = PassAlternative;
+      info.alternative = PassAlternative;
+      info.streams = streams_per_parenthesis_level;
+      
       info_per_parenthesis_level_per_parenthesis[parenthesis_level].push_back(info);
       endstates_per_parenthesis_level[parenthesis_level].clear();
-   
-      //guardedloop = PassGuardedLoop; 
-      //guardedStarBeginState = PassGuardedLoopState;
+      streams_per_parenthesis_level.clear();
+
+      parallel = PassParallel;
+      alternative = PassAlternative ;  
+      stream_number = PassStreamNumber ; 
+      streams_per_parenthesis_level.insert(stream_number);
       --parenthesis_level;
       if(ParenthesisedStatIsTerminating)
       {
@@ -999,105 +1148,6 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       }
       return;
     }
-/*
-  if ( StrcmpIsFun( "ParenthesisedStat", input ) )
-    {
-      int old_stream_lvl;
-  
-      terminate = true;
-    
-      old_stream_lvl = stream_lvl;
-
-      ++parenthesis_level; 
-      if( (int) streams_per_parenthesis_level.length() == parenthesis_level )
-      {
-        streams_per_parenthesis_level.append(0);
-      } else {
-        //calculate 
-        int o = 0;
-        int j = 0;
-        for(int i = 0; i < (int) streams_per_parenthesis_level.length() ; ++i)
-        {
-          j = 0;
-          streams_per_parenthesis_level.get(j, i);
-          o = o + j;
-        }
-        max_stream_lvl = max(max_stream_lvl, o );
-        for(int i = parenthesis_level ; i < (int) streams_per_parenthesis_level.length() ; ++i)
-        {
-          streams_per_parenthesis_level.set(0, i);
-        }
-      } 
-
-      gsDebugMsg(">>>>>>>%T\n\n",ATgetArgument(input,0)) ;    
-
-      next = manipulateStatements( (ATermAppl) ATgetArgument(input,0), current, current + 1 );
-      //Process bypasses
-      //Succesfull terminating alternative/parallel process must be redirected to the end
-      set<int> tmpSINT = bypass_per_parenthesis_level[parenthesis_level];
-      std::set<int>::iterator bypassIt;
-      for( bypassIt = tmpSINT.begin(); bypassIt != tmpSINT.end(); bypassIt++ ) 
-      {
-        cout << "bypass state" << *bypassIt << " to " << next << " parenthesis_level " << parenthesis_level << endl;
-        transitionSystem.at(*bypassIt).nextstate = next;
-*/
-       /* for(vector<RAT>::iterator itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); ++itRAT)
-        {
-          if(itRAT->nextstate == *bypassIt && itRAT->parenthesis_level > parenthesis_level)
-          {
-            itRAT->nextstate = next;
-          }
-        }*/
-//      }
-/*      //cout << "blaat" << endl;
-      tmpSINT.clear();
-      bypass_per_parenthesis_level[parenthesis_level] = tmpSINT;
-
-      gsDebugMsg("next %d\n", next);
-      gsDebugMsg("affected steam_lvl's: %d ... %d\n", old_stream_lvl, stream_lvl);
-      std::set<int> stream_lvl_set;
-
-      // check if there already exists an stream_lvl_set for the current edge
-      std::map<int, std::set<int> >::iterator itIntSet = affectedStreamMap.find(next); 
-      if (affectedStreamMap.end() != itIntSet )
-      {
-         stream_lvl_set = itIntSet->second;
-      }
-
-      for(int i = old_stream_lvl ; i <= stream_lvl ;++i)
-      {
-        stream_lvl_set.insert(i);
-      }   
-      affectedStreamMap[next] = stream_lvl_set;
-
-      //streams_per_parenthesis_level.set(0, parenthesis_level); 
-      //Deterimine which streams are affected 
-      //TODO:
-      --parenthesis_level; 
-      stream_lvl= old_stream_lvl;
-      return next;
-    } */
-/*  if ( StrcmpIsFun( "ParStat", input ) )
-    {
-      next = manipulateStatements( (ATermAppl) ATgetArgument(input,0), current, next );
-    
-      set<int> tmpSINT = bypass_per_parenthesis_level[parenthesis_level];
-      tmpSINT.insert(transitionSystem.size()-1);
-      bypass_per_parenthesis_level[parenthesis_level]= tmpSINT; 
-
-      RS tmpRS;
-      tmpRS.state = current ;
-      tmpRS.holdsForState = next;
-      holdsForStreamVector.push_back(tmpRS);
-     
-      int cur;
-      streams_per_parenthesis_level.get(cur, parenthesis_level);
-      streams_per_parenthesis_level.set(cur + 1,parenthesis_level);
-      ++stream_lvl;
-      next = manipulateStatements( (ATermAppl) ATgetArgument(input,1), next, next+1 );
-      
-      return next;
-    } */
 
   gsErrorMsg("%T operator is not supported yet.\n",  input ) ;
   exit(1);

@@ -22,6 +22,7 @@
 #define RS RecStreams
 #define RSP RecStreamPos
 #define RPI RecParenthesisInfo
+#define RPVS RecProcessVectors
 
 typedef CArray<int> IntArray ; 
 
@@ -50,6 +51,7 @@ typedef struct
      int position;
    } RecStreamPos;
 
+//Information per parenthesis
 typedef struct
    {
      std::set<int> endstates;
@@ -57,20 +59,22 @@ typedef struct
      bool guardedloop;
      int  begin_state;
      int  end_state;
+     std::set<int>  streams;
+     bool parallel;
+     bool alternative;
+     
    } RecParenthesisInfo;
 
-
+//Information per transition
 typedef struct
   {
     int state;
     int stream;
+    int originates_from_stream;
     bool terminate;
     int parenthesis_level;
     bool looped_state;
     bool guardedloop;
-  //  std::vector<RSP> proceedAfterSteams;
-    std::set<int> procedingStreams;
-    int proceedStreamState;
     std::string guard;
     std::string action;
     std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
@@ -78,6 +82,12 @@ typedef struct
     int nextstate;
   } RecActionTransition;
 
+typedef struct
+  {
+    std::vector<RPV> DeclarationVariables;
+    std::vector<RPV> SpecificationVariables;
+    int NumberOfStreams;
+  } RecProcessVectors;
 
 template <class T>
 inline std::string to_string (const T& t)
@@ -94,12 +104,9 @@ class CAsttransform
     std::string getResult();
   private:
 	std::string manipulateProcess(ATermAppl input);
-//    std::string manipulateVariables();
-//	string create_model();
     std::string mcrl2_result;
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix;
-    int scope_level;
     int parenthesis_level;
     std::vector<RVT> manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
@@ -116,28 +123,13 @@ class CAsttransform
     bool onlyIdentifiersInExpression(ATermList input );
     std::map<int, std::set<int> > affectedStreamMap;
 
-    //Future implementation
     std::string manipulateExplicitTemplates(ATermList input);
     std::string manipulateDeclaredProcessChannels(ATermList input);
-    std::map<std::string, RecProcessVariable> ProcessVariableMap;
+    std::vector<RecProcessVariable> ProcessVariableMap;
 
-    int max_stream_lvl;  //Maximal number of streams
-    int local_max_stream_lvl;  //Maximal number of streams
-    int stream_lvl;      //Variable to indicate the number of steams
-    int concurrent_streams; 
-
-    IntArray streams_per_parenthesis_level;
-    std::map<int, std::set<int> > bypass_per_parenthesis_level;
-
-    std::map<int, std::list<int> >postProcessVector;
-    std::map<int, int> postProcessGuards;
+    int stream_lvl;      //Variable to indicate the steams lvl
 
     std::vector<RAT> transitionSystem;
-
-    std::vector<RS> holdsForStreamVector;
-
-    int statementorder;
-    int statementlevel;
 
     bool terminate;  //terminate per parenthesis level
     int state;
@@ -152,16 +144,28 @@ class CAsttransform
     std::map<int, std::set<int> > endstates_per_parenthesis_level;
     std::map<int, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
  
-//    std::map<int, std::vector<bool> > looped_parenthesis_level_per_parenthesis;
-//    std::map<int, std::vector<int> > begin_state_parenthesis_level_per_parenthesis;
- 
     int determineEndState(std::set<int> org_set, int lvl);
-    bool loop;
-    bool guardedloop; 
-    std::string guardedStarExpression;
-    int guardedStarBeginState;
-    // std::vector<int> bypass;
+    bool loop;  //Variable to indicate if a parenthesis_level is looped
+    bool guardedloop; //Variable to indicatie if a parenthesis_level is a guarded loop
+    std::string guardedStarExpression; //Variable that contains the guard of *>
+    int guardedStarBeginState; //Variable to indicatie the state where the *> starts
     bool transitionexists(RAT transition, std::vector<RAT> transitionvector);
+
+    int stream_number; //Variable used for indicate the current stream ( Parallel )
+    int originates_from_stream;  //Variable to indicate which stream started the current stream (Parrallel)
+    std::set<int> streams_per_parenthesis_level; // Set that contains the streams for a certain parenthesis_level
+    std::set<int> all_streams; //Set of streams for a certain parenthesis_level
+
+    bool alternative; //Variable used to indicate if a parenthesis_level is alternative
+    bool parallel; //Variable used to indicate if a parenthesis_level is parallel
+
+    void manipulateModel(ATermAppl input);
+    // std::vector<int> bypass;
+    std::vector<RPV> manipulateModelSpecification(ATermAppl input);
+    void manipulateModelStatements(ATermAppl input);
+    
+    std::string initialisation;
+    std::map<std::string, RPVS> ProcessForInstantation;
 }
 ;
 

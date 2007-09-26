@@ -1,5 +1,8 @@
-<SpecChi> 		::= ChiSpec(<ProcDef>*)
-                  | Nil
+<SpecChi> 		::= ChiSpec(<ModelDef>, <ProcDef>+)
+
+<ModelDef>      ::= ModelDef(<String>, <ModelBody>)
+
+<ModelBody>     ::= ModelSpec(<VarSpec>*, <Statement> )
 
 <ProcDef>		::= ProcDef(<String>, <ProcDecl>, <ProcBody>)
 
@@ -25,7 +28,7 @@
 					
 			
 <Expr>			::= Expression(<String>, <TypeID> )
-				  | UnaryExpression(  <String>, <TypeID>, <Expr> )
+				  | UnaryExpression( <String>, <TypeID>, <Expr> )
 				  | BinaryExpression( <String>, <TypeID>, <Expr>, <Expr> )
 
 <Statement>		::= SkipStat(OptGuard,OptChannel,Skip)
@@ -38,6 +41,7 @@
   				  | StarStat(<Statement>)
 			      | GuardedStarStat(<Expr>,<Statement>)
 				  | DeltaStat(OptGuard,Delta)
+                  | Instantiation(<String>,<Expr>*)
 					
 <OptGuard>		::= <Expr> 
 				  |	Nil

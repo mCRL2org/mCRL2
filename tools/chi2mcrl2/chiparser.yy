@@ -12,6 +12,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include <list>
 #include <map>
+#include <set>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -29,6 +30,8 @@ extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
+extern set<ATermAppl> used_process_identifiers;
+extern bool processing_models;
 
 #define YYMAXDEPTH 160000
 
@@ -57,21 +60,20 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
  *  ---------
  */
 
-%token PROC MODEL_DEF ENUM
+%token <appl> PROC MODEL_DEF ENUM MODEL
 %token <appl> VAR CONST CHAN
 %token <appl> SKIP BARS ALT
 %token <appl> COLON TYPE BOOL NAT
 %token <appl> ID TIME 
 %token <appl> BP EP PROC_SEP SEP COMMA DEFINES ASSIGNMENT MINUS PLUS GG 
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
-%token <appl> AND OR GUARD NOT EQUAL OLD
+%token <appl> AND OR GUARD NOT EQUAL OLD 
 %token <appl> NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 
-%left BARS 
 %left MINUS PLUS 
-%left STAR DIVIDE       /* order '+','-','*','/' */
-%right POWER SEP ALT GUARD_REP           /* exponentiation        */
+%left DIVIDE       /* order '+','-','*','/' */
+%right POWER SEP ALT GUARD_REP STAR BARS        /* exponentiation        */
 %start ChiProgram
 %glr-parser
 %debug
@@ -84,13 +86,14 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 %type <appl> Type BasicType
 %type <appl> IdentifierType IdentifierTypeExpression
 %type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
-%type <appl> BoolNatIntExpression 
+%type <appl> BoolNatIntExpression Instantiation ModelStatement
 %type <appl> LocalVariables Identifier AssignmentStatement 
 %type <appl> ProcessBody OptGuard BasicStatement OptChannel Statement BinaryStatement UnaryStatement
 %type <appl> AdvancedStatement //IdentifierChannelDefinition ChannelDefinition
 %type <appl> ChiProgram ProcessDefinition FormalParameter ExpressionIdentifier
+%type <appl> ModelDefinition ModelBody
 
-%type <list> Identifier_csp Expression_csp FormalParameter_csp 
+%type <list> Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
 %type <list> LocalVariables_csp //ChannelDefinition_csp IdentifierChannelDefinition_csp
 
@@ -101,16 +104,71 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
  
 %%
 
-ChiProgram: ProcessDefinition 
+ChiProgram: 
+    ModelDefinition ProcessDefinitions 
 		{ 
     	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
-		  spec_tree = $1;
+          safe_assign($$, gsMakeChiSpec($1,ATreverse($2)));
+		  spec_tree = $$;
 		}
-	; 
+	;
+
+ModelDefinition:
+      ModelOpen Identifier LBRACKET RBRACKET DEFINES ModelBody
+        {
+      	  safe_assign($$, gsMakeModelDef($2, $6));
+      	  gsDebugMsg("parsed Model Def \n  %T\n", $$);
+        }
+      ;
+
+ModelBody:
+      BP ModelStatement ModelClose
+      	{ safe_assign($$, gsMakeModelSpec( ATmakeList0(), $2 ));
+      	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);	
+		}
+	| BP LocalVariables_csp PROC_SEP ModelStatement ModelClose
+      	{ safe_assign($$, gsMakeModelSpec( $2, $4));
+      	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);	
+		}
+	;
+ModelOpen:
+    MODEL
+      {
+        processing_models = true;
+      }
+
+ModelClose:
+    EP
+      {
+        processing_models = false;
+      }
+
+ProcessDefinitions: 
+       ProcessDefinition
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("parsed Process Definition \n  %T\n", $$);	
+		}
+     | ProcessDefinitions ProcessDefinition
+      	{ safe_assign($$, ATinsert($1, (ATerm) $2));
+      	  gsDebugMsg("parsed Process Definition \n  %T\n", $$);	
+		}
+     ;
 
 ProcessDefinition: 
 	  ProcOpenScope Identifier LBRACKET RBRACKET DEFINES ProcessBody
 		{ 
+          /**
+            * Check if Identifier is not already used
+            *
+            **/
+          if(used_process_identifiers.find($2) != used_process_identifiers.end())
+          {
+            gsErrorMsg("Duplicate definition for process %T", $2);
+            exit(1);
+          } else {
+            used_process_identifiers.insert($2);
+          }
+         
       	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATmakeList0()) ,$6));
       	  gsDebugMsg("parsed proc Def \n  %T\n", $$);
 		}
@@ -154,6 +212,7 @@ ProcCloseScope:
 		  assert(scope_lvl > 0);
 		  scope_lvl--;
 		  gsDebugMsg("Decrease Scope to; %d\n",scope_lvl);
+          var_type_map.clear();
 		}
 	;
 
@@ -373,14 +432,21 @@ Statement:
 	| BinaryStatement
 	; 
 
+ModelStatement:
+      Instantiation
+    | ModelStatement BARS ModelStatement 
+      	{ safe_assign($$, gsMakeParStat( $1, $3));
+      	  gsDebugMsg("parsed Parallel statement \n  %T\n", $$);	
+		}
+
 BasicStatement:
+//	  Instantiation
 	  AssignmentStatement
-/*	| CommStatement
+//	| CommStatement
 //	| DelayStatement
-	| Instantiation
 //	| HybridStatement
 //	| ReturnStatement
-//	| FoldStatement */
+//	| FoldStatement 
 	| AdvancedStatement
 	;
 
@@ -478,12 +544,18 @@ Expression_csp:
 	| OptGuard Expression RRECV 
 	| OptGuard RRECV Expression_csp 
 	;*/
-/*	
+	
 Instantiation:
-	  Identifier LBRACE Expression_csp RBRACE
-	| Identifier
+	  Identifier LBRACKET RBRACKET
+      {
+        safe_assign($$, gsMakeInstantiation($1, ATmakeList0()));
+      }
+	| Identifier LBRACKET Expression_csp RBRACKET
+      {
+        safe_assign($$, gsMakeInstantiation($1, ATreverse($3)));
+      }
 	;
-*/
+
 BinaryStatement:
 	  Statement SEP Statement
       	{ safe_assign($$, gsMakeSepStat( $1, $3));
@@ -493,10 +565,10 @@ BinaryStatement:
       	{ safe_assign($$, gsMakeAltStat( $1, $3));
       	  gsDebugMsg("parsed ALT statement \n  %T\n", $$);	
 		}
-	| Statement BARS Statement 
+/*	| Statement BARS Statement 
       	{ safe_assign($$, gsMakeParStat( $1, $3));
       	  gsDebugMsg("parsed Paralell statement \n  %T\n", $$);	
-		}
+		}*/
 	;
 
 UnaryStatement:
@@ -505,7 +577,7 @@ UnaryStatement:
       	  gsDebugMsg("parsed STAR statement \n  %T\n", $$);	
 		}
 	| Expression GUARD_REP Statement
-      	{ 
+      	{
 			/**
 			  * Type Checking
 			  *
@@ -515,7 +587,6 @@ UnaryStatement:
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-
           safe_assign($$, gsMakeGuardedStarStat( $1, $3));
       	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);	
 		}
@@ -588,7 +659,7 @@ ExpressionIdentifier:
 		  // Determine if the expression is defined already 
 		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
 		    {
-		      gsErrorMsg("Variable %T is not defined!\n", $1 );
+		      gsErrorMsg("ExpressionIdentifier: Variable %T is not defined!\n", $1 );
 		      exit(1);
 		    };
 		  
@@ -615,7 +686,7 @@ BasicExpression:
 		  // Determine if the expression is defined already 
 		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
 		    {
-		      gsErrorMsg("Variable %T is not defined!\n", $1 );
+		      gsErrorMsg("BasicExpression: Variable %T is not defined!\n", $1 );
 		      exit(1);
 		    };
 		  

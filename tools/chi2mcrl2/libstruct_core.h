@@ -167,7 +167,7 @@ bool gsIsChannelID(ATermAppl Term)
 inline
 AFun initAFunChiSpec(AFun& f)
 {
-  f = ATmakeAFun("ChiSpec", 1, ATfalse);
+  f = ATmakeAFun("ChiSpec", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -315,6 +315,72 @@ inline
 bool gsIsGuardedStarStat(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunGuardedStarStat();
+}
+
+// Instantiation
+inline
+AFun initAFunInstantiation(AFun& f)
+{
+  f = ATmakeAFun("Instantiation", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunInstantiation()
+{
+  static AFun AFunInstantiation = initAFunInstantiation(AFunInstantiation);
+  return AFunInstantiation;
+}
+
+inline
+bool gsIsInstantiation(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunInstantiation();
+}
+
+// ModelDef
+inline
+AFun initAFunModelDef(AFun& f)
+{
+  f = ATmakeAFun("ModelDef", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunModelDef()
+{
+  static AFun AFunModelDef = initAFunModelDef(AFunModelDef);
+  return AFunModelDef;
+}
+
+inline
+bool gsIsModelDef(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunModelDef();
+}
+
+// ModelSpec
+inline
+AFun initAFunModelSpec(AFun& f)
+{
+  f = ATmakeAFun("ModelSpec", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunModelSpec()
+{
+  static AFun AFunModelSpec = initAFunModelSpec(AFunModelSpec);
+  return AFunModelSpec;
+}
+
+inline
+bool gsIsModelSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunModelSpec();
 }
 
 // Nil
@@ -706,9 +772,9 @@ ATermAppl gsMakeChannelID(ATermAppl VarID_0, ATermAppl SendType_1, ATermAppl Typ
 }
 
 inline
-ATermAppl gsMakeChiSpec(ATermList ProcDef_0)
+ATermAppl gsMakeChiSpec(ATermAppl ModelDef_0, ATermList ProcDef_1)
 {
-  return ATmakeAppl1(gsAFunChiSpec(), (ATerm) ProcDef_0);
+  return ATmakeAppl2(gsAFunChiSpec(), (ATerm) ModelDef_0, (ATerm) ProcDef_1);
 }
 
 inline
@@ -745,6 +811,24 @@ inline
 ATermAppl gsMakeGuardedStarStat(ATermAppl Expr_0, ATermAppl Statement_1)
 {
   return ATmakeAppl2(gsAFunGuardedStarStat(), (ATerm) Expr_0, (ATerm) Statement_1);
+}
+
+inline
+ATermAppl gsMakeInstantiation(ATermAppl String_0, ATermList Expr_1)
+{
+  return ATmakeAppl2(gsAFunInstantiation(), (ATerm) String_0, (ATerm) Expr_1);
+}
+
+inline
+ATermAppl gsMakeModelDef(ATermAppl String_0, ATermAppl ModelBody_1)
+{
+  return ATmakeAppl2(gsAFunModelDef(), (ATerm) String_0, (ATerm) ModelBody_1);
+}
+
+inline
+ATermAppl gsMakeModelSpec(ATermList VarSpec_0, ATermAppl Statement_1)
+{
+  return ATmakeAppl2(gsAFunModelSpec(), (ATerm) VarSpec_0, (ATerm) Statement_1);
 }
 
 inline

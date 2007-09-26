@@ -40,6 +40,7 @@ ATermList constructList()
 }
 
 //--- begin generated code
+ATermAppl constructInstantiation();
 ATermAppl constructChiSpec();
 ATermAppl constructChanSpec();
 ATermAppl constructChannelID();
@@ -49,6 +50,7 @@ ATermAppl constructDataVarExprID();
 ATermAppl constructType();
 ATermAppl constructSepStat();
 ATermAppl constructOptGuard();
+ATermAppl constructModelDef();
 ATermAppl constructNil();
 ATermAppl constructAltStat();
 ATermAppl constructDataVarID();
@@ -65,11 +67,13 @@ ATermAppl constructExpression();
 ATermAppl constructProcDef();
 ATermAppl constructUnaryExpression();
 ATermAppl constructSkip();
+ATermAppl constructModelSpec();
 ATermAppl constructVarDecl();
 ATermAppl constructVarSpec();
 ATermAppl constructProcSpec();
 ATermAppl constructGuardedStarStat();
 ATermAppl constructSpecChi();
+ATermAppl constructModelBody();
 ATermAppl constructDecl();
 ATermAppl constructProcBody();
 ATermAppl constructVarExpID();
@@ -79,11 +83,27 @@ ATermAppl constructTypeID();
 ATermAppl constructExpr();
 ATermAppl constructStatement();
 
+// Instantiation
+inline
+ATermAppl initConstructInstantiation(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunInstantiation(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructInstantiation()
+{
+  static ATermAppl t = initConstructInstantiation(t);
+  return t;
+}
+
 // ChiSpec
 inline
 ATermAppl initConstructChiSpec(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunChiSpec(), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl2(gsAFunChiSpec(), reinterpret_cast<ATerm>(constructModelDef()), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -220,6 +240,22 @@ inline
 ATermAppl constructOptGuard()
 {
   static ATermAppl t = initConstructOptGuard(t);
+  return t;
+}
+
+// ModelDef
+inline
+ATermAppl initConstructModelDef(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunModelDef(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructModelBody()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructModelDef()
+{
+  static ATermAppl t = initConstructModelDef(t);
   return t;
 }
 
@@ -479,6 +515,22 @@ ATermAppl constructSkip()
   return t;
 }
 
+// ModelSpec
+inline
+ATermAppl initConstructModelSpec(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunModelSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructStatement()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructModelSpec()
+{
+  static ATermAppl t = initConstructModelSpec(t);
+  return t;
+}
+
 // VarDecl
 inline
 ATermAppl initConstructVarDecl(ATermAppl& t)
@@ -548,6 +600,13 @@ inline
 ATermAppl constructSpecChi()
 {
   return constructChiSpec();
+}
+
+// ModelBody
+inline
+ATermAppl constructModelBody()
+{
+  return constructModelSpec();
 }
 
 // Decl
