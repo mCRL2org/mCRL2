@@ -25,7 +25,7 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 
-/// INTERNAL ONLY
+/// \internal
 struct has_target_sort
 {
   lps::sort m_target;
@@ -204,7 +204,7 @@ data_specification set_equations(data_specification s, data_equation_list equati
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::data_specification;

@@ -206,7 +206,7 @@ struct assignment_list_substitution
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::data_assignment;

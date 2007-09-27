@@ -311,7 +311,7 @@ typedef term_list<summand> summand_list;
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::summand;

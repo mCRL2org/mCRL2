@@ -80,7 +80,7 @@ class fixpoint_symbol: public aterm_appl
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::fixpoint_symbol;

@@ -50,17 +50,17 @@ class term_list_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// INTERNAL ONLY
+    /// \internal
     bool equal(term_list_iterator const& other) const
     { return this->m_list == other.m_list; }
 
-    /// INTERNAL ONLY
+    /// \internal
     const Value dereference() const
     {
       return Value(typename term_list_iterator_traits<Value>::value_type(ATgetFirst(m_list)));
     }
 
-    /// INTERNAL ONLY
+    /// \internal
     void increment()
     { m_list = ATgetNext(m_list); }
 

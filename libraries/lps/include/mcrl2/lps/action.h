@@ -106,7 +106,7 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::action;

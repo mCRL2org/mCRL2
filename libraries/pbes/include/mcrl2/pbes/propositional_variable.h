@@ -164,7 +164,7 @@ bool is_propositional_variable_instantiation(aterm_appl t)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::propositional_variable;

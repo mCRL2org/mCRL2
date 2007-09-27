@@ -111,7 +111,7 @@ namespace detail {
     typedef typename Container::value_type type;
   };
 
-  /// INTERNAL ONLY
+  /// \internal
   // used to abort the recursive find
   struct found_term_exception
   {

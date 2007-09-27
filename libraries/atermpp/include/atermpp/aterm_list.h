@@ -23,19 +23,19 @@ namespace {
   // #define   ATgetNext(l)  ((l)->tail)
   // #define   ATgetFirst(l) ((l)->head)
   
-  /// INTERNAL ONLY
+  /// \internal
   inline ATermList aterm_get_next(ATermList l)
   {
     return ATgetNext(l);
   }
   
-  /// INTERNAL ONLY
+  /// \internal
   inline ATerm aterm_get_first(ATermList l)
   {
     return ATgetFirst(l);
   }
 
-  /// INTERNAL ONLY
+  /// \internal
   inline
   int aterm_get_length(ATermList l)
   {

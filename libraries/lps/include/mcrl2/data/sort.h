@@ -213,7 +213,7 @@ namespace sort_expr {
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::sort;

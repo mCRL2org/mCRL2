@@ -140,7 +140,7 @@ bool is_data_equation(aterm_appl t)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::data_equation;

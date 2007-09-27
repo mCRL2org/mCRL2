@@ -90,7 +90,7 @@ class pbes_initializer: public aterm_appl
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::pbes_initializer;

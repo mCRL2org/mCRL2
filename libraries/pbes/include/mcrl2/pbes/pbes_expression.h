@@ -308,7 +308,7 @@ bool is_bes(aterm_appl t)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::pbes_expression;

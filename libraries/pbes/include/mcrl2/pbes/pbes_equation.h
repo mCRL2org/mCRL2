@@ -157,7 +157,7 @@ typedef term_list<pbes_equation> pbes_equation_list;
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp {
 
 using lps::pbes_equation;
@@ -170,7 +170,7 @@ struct term_list_iterator_traits<pbes_equation>
 
 } // namespace atermpp
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::pbes_equation;

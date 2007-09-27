@@ -454,7 +454,7 @@ namespace data_expr {
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::data_expression;

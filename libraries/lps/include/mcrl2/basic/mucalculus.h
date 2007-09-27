@@ -709,7 +709,7 @@ using atermpp::list_arg2;
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::state_formula;

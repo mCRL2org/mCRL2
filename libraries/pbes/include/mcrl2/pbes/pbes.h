@@ -539,7 +539,7 @@ std::set<data_variable> compute_free_variables(const pbes& p)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::pbes;

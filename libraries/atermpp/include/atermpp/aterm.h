@@ -18,7 +18,7 @@
 
 namespace atermpp
 {
-  /// INTERNAL ONLY
+  /// \internal
   class aterm_base
   {
     template <typename T>

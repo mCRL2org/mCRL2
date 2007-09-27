@@ -297,7 +297,7 @@ linear_process set_summands(linear_process l, summand_list summands)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::linear_process;

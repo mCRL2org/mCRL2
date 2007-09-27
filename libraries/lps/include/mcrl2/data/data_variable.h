@@ -93,7 +93,7 @@ data_expression_list make_data_expression_list(data_variable_list l)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::data_variable;

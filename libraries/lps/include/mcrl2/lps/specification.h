@@ -296,7 +296,7 @@ specification set_initial_process(specification spec, process_initializer initia
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::specification;

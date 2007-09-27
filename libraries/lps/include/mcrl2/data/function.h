@@ -67,7 +67,7 @@ bool is_function(aterm_appl t)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::function;

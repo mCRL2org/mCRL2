@@ -90,7 +90,7 @@ bool is_action_label(aterm_appl t)
 
 } // namespace lps
 
-/// INTERNAL ONLY
+/// \internal
 namespace atermpp
 {
 using lps::action_label;
