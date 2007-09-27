@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes.h
-/// \brief Add your file description here.
+/// \brief Contains the pbes class.
 
 #ifndef MCRL2_PBES_PBES_H
 #define MCRL2_PBES_PBES_H
