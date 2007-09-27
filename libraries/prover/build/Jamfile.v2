@@ -18,9 +18,9 @@ alias prover.main
 #         <use>/libraries//cvclite
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
 #         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
-#         <toolset>gcc:<define>CVC_LITE_LIB
+         <toolset>gcc:<define>CVC_LITE_LIB
        :
-#       :  <library>/libraries//cvclite
+       :  <library>/libraries//cvc
        ;
 
 lib prover
