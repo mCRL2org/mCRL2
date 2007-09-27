@@ -1,4 +1,4 @@
-project libraries/cvc_lite
+project libraries/cvc
        : build-dir $(BUILD_TOP)
        ;
 
@@ -7,9 +7,9 @@ lib gmp
     : <name>gmp
     ;
 
-lib cvc_lite
+lib cvc
     :
-    : <name>cvclite <search>../
+    : <name>cvc3
       <link>static
     :
     : <define>HAVE___GNU_CXX__EXT_HASH_MAP
