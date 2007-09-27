@@ -60,10 +60,10 @@ a:hover { text-decoration: underline; }
 	width: 100%;
 	background-color: black;
 	border-top: 1px solid #aaa;
-	border-bottom: 1px solid #aaa;
+	border-bottom: 1px solid black;
 	text-align: center;
 	padding: 0;
-	margin: 0 0 3em 0;
+	margin: 0;
 }
 #navmenu ul {
 	list-style: none;
@@ -86,6 +86,41 @@ a:hover { text-decoration: underline; }
 #navmenu li a:hover {
 	text-decoration: none;
 	color: yellow;
+}
+
+#libbar {
+	position: relative;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background-color: #aaa;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	text-align: center;
+	padding: 0;
+	margin: 0 0 3em 0;
+}
+#libmenu ul {
+	list-style: none;
+	margin: 0.2em 0 0.2em 0;
+}
+#libmenu li {
+	display: inline;
+	font-weight: bold;
+}
+#libmenu li a {
+	color: black;
+	position: relative;
+	border-left: 1px solid #777;
+	padding: 0 1em 0 1em;
+	text-decoration: none;
+}
+#libmenu li:first-child a {
+	border: 0;
+}
+#libmenu li a:hover {
+	text-decoration: none;
+	color: #002bb8;
 }
 
 .search     { color: #003399;
