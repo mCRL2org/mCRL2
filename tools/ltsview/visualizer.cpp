@@ -920,7 +920,7 @@ void Visualizer::computeStateAbsPos(State* root, int rot)
 
         Cluster* endCluster = endState->getCluster();
 
-        if (endState->getRank() != root->getRank()) {
+        if (endState->getRank() > root->getRank()) {
           
           if (endCluster->isCentered()) {
             //endCluster is centered, only descend
@@ -941,6 +941,47 @@ void Visualizer::computeStateAbsPos(State* root, int rot)
         }
       }
     }
+
+    // In cyclic ranking, the incoming transitions t which are not backpointers 
+    // and com from a higher rank also lead to calculation of abs. positions
+    for(int i = 0; i != root->getNumInTransitions(); ++i)
+    {
+      Transition* inTransition = root->getInTransition(i);
+      State* beginState = inTransition->getBeginState();
+
+      if (beginState->getVisitState() == DFS_WHITE && 
+          !inTransition->isBackpointer() && 
+          beginState->getRank() > root->getRank())
+      { 
+        int drot = rot + settings->getInt(BranchRotation);
+        if (drot < 0) {
+          drot += 360;
+        }
+        else if (drot >= 360) {
+          drot -=360;
+        }
+
+        Cluster* beginCluster = beginState->getCluster();
+
+        if (beginCluster->isCentered()) {
+          //beginCluster is centered, only descend
+          glTranslatef(0.0f, 0.0f, settings->getFloat(ClusterHeight));
+          computeStateAbsPos(beginState, 
+            (startCluster->getNumDescendants()>1)?drot: rot);
+          glTranslatef(0.0f, 0.0f, -settings->getFloat(ClusterHeight));
+        }
+        else {
+          glRotatef(-beginCluster->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+          glTranslatef(startCluster->getBaseRadius(), 0.0f, settings->getFloat(ClusterHeight));
+          glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          computeStateAbsPos(beginState, drot);
+          glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          glTranslatef(-startCluster->getBaseRadius(), 0.0f, -settings->getFloat(ClusterHeight));
+          glRotatef(beginCluster->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+        }
+      }
+    }
+
     // Finalize this node
     root->DFSfinish();
   }

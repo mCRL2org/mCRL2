@@ -199,6 +199,16 @@ void State::getInTransitions( vector< Transition* > &ts ) const
   ts = inTransitions;
 }
 
+Transition* State::getInTransition( int i ) const
+{
+  return inTransitions[i];
+}
+
+int State::getNumInTransitions() const
+{
+  return inTransitions.size();
+}
+
 void State::getOutTransitions( vector< Transition* > &ts ) const
 {
   ts = outTransitions;

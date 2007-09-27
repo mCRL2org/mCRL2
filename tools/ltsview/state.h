@@ -49,6 +49,8 @@ class State {
     void      getComrades( std::set< State* > &ss ) const;
     int       getID();
     void      getInTransitions( std::vector< Transition* > &ts ) const;
+    Transition* getInTransition(int i) const;
+    int       getNumInTransitions() const;
     void      getOutTransitions( std::vector< Transition* > &ts ) const;
     Transition* getOutTransitioni( int i) const;
     int       getNumOutTransitions() const;

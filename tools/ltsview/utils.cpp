@@ -81,9 +81,18 @@ Utils::HSV_Color operator+(HSV_Color c1,HSV_Color c2) {
 
 Utils::RGB_Color blend_RGB(RGB_Color c1, RGB_Color c2, float factor)
 {
-  RGB_Color result = {c1.r * factor + c2.r * (1 - factor),
-                      c1.g * factor + c2.g * (1 - factor),
-                      c1.b * factor + c2.b * (1 - factor)};
+  RGB_Color result = {static_cast<unsigned char>(
+                        static_cast<float>(c1.r * factor) +
+                        static_cast<float>(c2.r * (1 - factor))
+                      ),
+                      static_cast<unsigned char> (
+                        static_cast<float>(c1.g * factor) + 
+                        static_cast<float>(c2.g * (1 - factor))
+                      ),
+                      static_cast<unsigned char> (
+                        static_cast<float>(c1.b * factor) + 
+                        static_cast<float>(c2.b * (1 - factor))
+                      )};
 
   return result;
 }
