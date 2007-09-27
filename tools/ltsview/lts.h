@@ -87,6 +87,7 @@ class LTS {
     LTS*        zoomOut();
     void        setLastCluster(Cluster* c);
     void        setPreviousLevel(LTS* prev);
+    LTS*        getPreviousLevel() const;
     void        fromAbove();
 
     // Method for simulation

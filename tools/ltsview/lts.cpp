@@ -71,7 +71,6 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
     label_marks.push_back(previousLevel->getActionMarked(i));
   }
 
-  // TODO: Derived information
   if (lastWasAbove)
   {
     initialState = previousLevel->getInitialState();
@@ -174,7 +173,6 @@ string LTS::getParameterValue(int parindex,int valindex) {
 }
 
 State* LTS::selectStateByID(int id) {
-  // FIXME Naive implementation
   for(size_t i = 0; i < unmarkedStates.size(); ++i) {
     if ( unmarkedStates[i]->getID() == id) {
       unmarkedStates[i]->select();
@@ -1327,6 +1325,11 @@ void LTS::setPreviousLevel(LTS* prev)
   previousLevel = prev;
 }
 
+LTS* LTS::getPreviousLevel() const
+{
+  return previousLevel;
+}
+
 void LTS::fromAbove()
 {
   lastWasAbove = true;
@@ -1365,10 +1368,8 @@ void LTS::setZoomLevel(const int level)
 
 void LTS::loadTrace(std::string const& path)
 {
-  //FIXME: See what to do about initial state of zoomed-in structures.
-  
-  //TODO: No clue if this is the correct way of doing it, might need to move it
-  //      to init of ltsview (0,0... is the argc, argv):
+
+  // Initialize ATerms
   ATerm bot;
   ATinit(0, 0, &bot);
 
@@ -1385,7 +1386,17 @@ void LTS::loadTrace(std::string const& path)
 
     Simulation* sim = new Simulation();
     // Initialize simulation with initial state of the LTS;
-    sim->setInitialState(initialState);
+    State* initState;
+    LTS* topLevel = this;
+
+    // Find the initial state of the entire, zoomed out structure
+    while (topLevel->getPreviousLevel() != NULL)
+    {
+      topLevel = topLevel->getPreviousLevel();
+    }
+    initState = topLevel->getInitialState();
+
+    sim->setInitialState(initState);
     sim->start();
 
     // Get the first state of the trace (as an ATermAppl)
@@ -1396,7 +1407,7 @@ void LTS::loadTrace(std::string const& path)
     // of the initial state in the simulation.
     //
     // Assumption: The ith parameter in currState is equal to the ith parameter
-    // in initialState.
+    // in initState.
     for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState)); ++i)
     {
 
@@ -1404,12 +1415,7 @@ void LTS::loadTrace(std::string const& path)
       string value = PrintPart_CXX(currVal, ppDefault);
 
       std::string paramValue = valueTable[i]
-                                         [initialState->getParameterValue(i)];
-
-      if (value != paramValue)
-      {
-        freeVars[value] = paramValue;
-      }
+                                         [initState->getParameterValue(i)];
     }
 
     // Load the rest of the trace.
@@ -1439,30 +1445,39 @@ void LTS::loadTrace(std::string const& path)
         // ambiguous. Solve disambiguation by looking at states
         
         currState = tr.currentState();
-        
+
+
+        // Match is the score keeping track of how well a state matches an LPS
+        // state. The (unique) state with the maximum match will be chosen.
+        // The value of this match should be the number of variables which have
+        // the same value as in the LPS, minus the number of free variables (
+        // which are undetectable).
+        int maxmatch = -1; 
+
         for (size_t j = 0; j < posTrans.size(); ++j)
         {
           State* s = posTrans[j]->getEndState();
-          bool match = true;
+          int match = 0;
 
           for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState));
               ++i)
           {
 
-          std::string currVal = PrintPart_CXX(ATgetArgument(currState, i), 
+            std::string currVal = PrintPart_CXX(ATgetArgument(currState, i), 
                                               ppDefault);
 
-          std::map<std::string, std::string>::iterator it;
-          if ((it = freeVars.find(currVal)) != freeVars.end())
-          {
-            currVal = it->second;
+            std::map<std::string, std::string>::iterator it;
+
+            if (currVal == valueTable[i][s->getParameterValue(i)])
+            {
+              ++match;
+            }
+            
           }
 
-          match &= (currVal == valueTable[i][s->getParameterValue(i)]);
-          }
-
-          if (match)
+          if (match > maxmatch)
           {
+            maxmatch = match;
             toChoose = j;
           }
         }
@@ -1470,7 +1485,7 @@ void LTS::loadTrace(std::string const& path)
       else if (possibilities == 1)
       {
         // Exactly one possibility, so skip
-     }
+      }
       else 
       {
         // This cannot occur, unless there was some mismatch between lps and lts
