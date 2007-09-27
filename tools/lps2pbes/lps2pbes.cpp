@@ -521,7 +521,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPS
   gsVerboseMsg("generating PBES from state formula and LPS...\n");
-  pbes p = lps::pbes_translate(state_formula(result), lps_spec, !tool_options.untimed);
+  pbes<> p = lps::pbes_translate(state_formula(result), lps_spec, !tool_options.untimed);
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;

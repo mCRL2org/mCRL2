@@ -68,7 +68,7 @@ namespace po = boost::program_options;
 
 //Function declarations used by main program
 //------------------------------------------
-static void calculate_bes(pbes pbes_spec, 
+static void calculate_bes(pbes<> pbes_spec, 
                           t_tool_options tool_options,
                           bes::equations &bes_equations,
                           atermpp::indexed_set &variable_index,
@@ -77,7 +77,7 @@ static void calculate_bes(pbes pbes_spec,
 //Post: tool_options.infilename contains a PBES ("-" indicates stdin)
 //Ret:  The BES generated from the PBES
 
-pbes load_pbes(t_tool_options tool_options);
+pbes<> load_pbes(t_tool_options tool_options);
 //Post: tool_options.infilename contains a PBES ("-" indicates stdin)
 //Ret: The pbes loaded from infile
 
@@ -150,7 +150,8 @@ static void print_counter_example(bes::equations &bes_equations,
   print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,opt_precompile_pbes,rewriter);
 }
 
-static void do_lazy_algorithm(pbes pbes_spec, 
+template <typename Container>
+static void do_lazy_algorithm(pbes<Container> pbes_spec, 
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
@@ -165,7 +166,7 @@ static bool solve_bes(const t_tool_options &,
 bool process(t_tool_options const& tool_options) 
 {
   //Load PBES
-  pbes pbes_spec = load_pbes(tool_options);
+  pbes<> pbes_spec = load_pbes(tool_options);
 
   //Throw away unused parts of data specification
   if (tool_options.opt_data_elm)
@@ -210,7 +211,7 @@ bool process(t_tool_options const& tool_options)
 
 //function calculate_bes
 //-------------------
-void calculate_bes(pbes pbes_spec, 
+void calculate_bes(pbes<> pbes_spec, 
                    t_tool_options tool_options,
                    bes::equations &bes_equations,
                    atermpp::indexed_set &variable_index,
@@ -370,7 +371,8 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 //  atermpp::indexed_set variable_index(10000, 50);     
 //  bes::equations bes_equations;
 
-static void do_lazy_algorithm(pbes pbes_spec, 
+template <typename Container>
+static void do_lazy_algorithm(pbes<Container> pbes_spec, 
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
@@ -384,7 +386,6 @@ static void do_lazy_algorithm(pbes pbes_spec,
 
   // Variables in which the result is stored
   propositional_variable_instantiation new_initial_state;
-  equation_system new_equation_system;
   
   // Variables used in whole function
   unsigned long nr_of_processed_variables = 0;
@@ -422,7 +423,7 @@ static void do_lazy_algorithm(pbes pbes_spec,
   }
 
   // Needed hashtables
-  equation_system eqsys = pbes_spec.equations();
+  Container eqsys = pbes_spec.equations();
   atermpp::table pbes_equations(2*eqsys.size(), 50);   // (propvarname, pbes_equation)
 
   // Vector with the order of the variable names used for sorting the result
@@ -437,7 +438,7 @@ static void do_lazy_algorithm(pbes pbes_spec,
 
   unsigned long rank=1;
 
-  for (equation_system::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   { 
     pbes_equations.put(eqi->variable().name(), 
         pbes_equation(eqi->symbol(),eqi->variable(),
@@ -1030,11 +1031,11 @@ bool solve_bes(const t_tool_options &tool_options,
 
 //function load_pbes
 //------------------
-pbes load_pbes(t_tool_options tool_options)
+pbes<> load_pbes(t_tool_options tool_options)
 {
   string infilename = tool_options.infilename;
 
-  pbes pbes_spec;
+  pbes<> pbes_spec;
   if (infilename == "-")
   {
     try

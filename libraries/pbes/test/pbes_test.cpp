@@ -104,10 +104,10 @@ void test_pbes()
   specification spec    = mcrl22lps(SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA2, spec);
   bool timed = false;
-  pbes p = lps2pbes(spec, formula, timed);
+  pbes<> p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
 
-  BOOST_CHECK(!p.equations().is_bes());
+  BOOST_CHECK(!p.is_bes());
   BOOST_CHECK(!e.is_bes());
 
   data_expression d  = pbes2data(e, spec);
@@ -155,7 +155,7 @@ void test_normalize()
   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
   bool timed = false;
-  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed);
+  pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 }
 
 void test_xyz_generator()
@@ -184,7 +184,7 @@ void test_state_formula()
 
 void test_free_variables()
 {
-  pbes p;
+  pbes<> p;
   try {
     p.load("abp_fv.pbes");
     atermpp::set< data_variable > freevars = p.free_variables();
@@ -209,9 +209,9 @@ void test_pbes_expression_builder()
   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
   bool timed = false;
-  pbes p = lps2pbes(mpsu_spec, mpsu_formula, timed);
+  pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 
-  for (equation_system::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     const pbes_expression& q = i->formula();
     pbes_expression_builder builder;

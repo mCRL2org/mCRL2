@@ -418,7 +418,7 @@ lps::data_specification get_minimal_data_spec()
 
 
 //=========================
-pbes pbes_simple_to_pbes(){
+pbes<> pbes_simple_to_pbes(){
 //=========================
 
   int i;
@@ -430,7 +430,7 @@ pbes pbes_simple_to_pbes(){
   cerr << "\nStarting parsing at position " << pos <<"\n";  
 #endif
   
-  equation_system eqs = equation_system(); 
+  atermpp::vector<pbes_equation> eqs; 
   for(i=0; i<ps->nops; i++)
     if (ps->op[i] == 'Q') // new equation
       {
@@ -438,7 +438,7 @@ pbes pbes_simple_to_pbes(){
 	cerr<<"New equation starting at position "<< i <<"\n";
 #endif
 	pbes_equation pbeq = to_pbes_eq(i);
-	eqs = eqs + pbeq;
+	eqs.push_back(pbeq);
       }
 
 
@@ -451,13 +451,13 @@ pbes pbes_simple_to_pbes(){
     propositional_variable_instantiation
     (pv.name(),standard_instance(pv.parameters()));
   
-  pbes pb(data,eqs,ppv);
+  pbes<> pb(data,eqs,ppv);
   return pb;
 }
  
 
 //====================================
-pbes make_pbes(const string fileName){
+pbes<> make_pbes(const string fileName){
 //====================================
 
   //  pbes* newpbes = new pbes();
@@ -616,7 +616,7 @@ int main(int argc, char** argv)
   cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
 
   //Create the pbes from the input text 
-  pbes p = make_pbes(infilename); 
+  pbes<> p = make_pbes(infilename); 
   ATermAppl ap = p;
 
   if (outfilename == "") {

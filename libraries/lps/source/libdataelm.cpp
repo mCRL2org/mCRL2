@@ -402,7 +402,7 @@ specification remove_unused_data(specification spec, bool keep_basis)
 	return new_spec;
 }
 
-pbes remove_unused_data(pbes spec, bool keep_basis)
+pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
 {
 	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
 
@@ -415,10 +415,8 @@ pbes remove_unused_data(pbes spec, bool keep_basis)
 		add_used_sort((ATermAppl) vb->sort(),used_data);
 	}
 
-	equation_system eqs = spec.equations();
-
-	atermpp::vector<pbes_equation>::iterator b = eqs.begin();
-	atermpp::vector<pbes_equation>::iterator e = eqs.end();
+	atermpp::vector<pbes_equation>::iterator b = spec.equations().begin();
+	atermpp::vector<pbes_equation>::iterator e = spec.equations().end();
 	for (; b != e; b++)
 	{
 		data_variable_list::iterator sb = (*b).variable().parameters().begin();

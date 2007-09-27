@@ -17,7 +17,7 @@
 using namespace lps;
 
 
-equation_system solve_pbes(pbes pbes_spec, bool interactive, int bound);
+atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, int bound);
 
 pbes_equation solve_equation(pbes_equation e, 
 			     bool interactive, int bound, BDD_Prover* p);
@@ -25,7 +25,7 @@ pbes_equation solve_equation(pbes_equation e,
 pbes_expression substitute(pbes_expression expr, 
 			   propositional_variable X, pbes_expression solX);
 
-pbes_expression update_expression(pbes_expression e, equation_system es_solution);
+pbes_expression update_expression(pbes_expression e, atermpp::vector<pbes_equation> es_solution);
 
 pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* p);
 

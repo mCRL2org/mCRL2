@@ -61,7 +61,7 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
 }
 
 inline
-pbes strong_bisimulation(const specification& M, const specification& S)
+pbes<> strong_bisimulation(const specification& M, const specification& S)
 { 
   using atermpp::make_list;
   namespace p = lps::pbes_expr;
@@ -100,7 +100,7 @@ pbes strong_bisimulation(const specification& M, const specification& S)
   pbes_expression ms_formula = p::and_(match(m, s, ms_name), match(s, m, sm_name));
   pbes_expression sm_formula = Xms_init;
   
-  lps::equation_system eqn;
+  atermpp::vector<pbes_equation> eqn;
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xms, ms_formula));
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xsm, sm_formula));
 
@@ -110,7 +110,7 @@ pbes strong_bisimulation(const specification& M, const specification& S)
 
   data_specification data = M.data();
   propositional_variable_instantiation init(ms_name, M.initial_process().state() + S.initial_process().state());
-  return pbes(data, eqn, free_variables, init);
+  return pbes<>(data, eqn, free_variables, init);
 }
 
 } // namespace lps

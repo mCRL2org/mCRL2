@@ -53,8 +53,8 @@ int test_main(int argc, char* argv[])
         if (fs::exists(timed_result_file))
         {
           try {
-            pbes result = lps2pbes(SPEC1, formula, true);
-            pbes expected_result;
+            pbes<> result = lps2pbes(SPEC1, formula, true);
+            pbes<> expected_result;
             expected_result.load(timed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)
@@ -69,8 +69,8 @@ int test_main(int argc, char* argv[])
         if (fs::exists(untimed_result_file))
         {
           try {
-            pbes result = lps2pbes(SPEC1, formula, false);
-            pbes expected_result;
+            pbes<> result = lps2pbes(SPEC1, formula, false);
+            pbes<> expected_result;
             expected_result.load(untimed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)

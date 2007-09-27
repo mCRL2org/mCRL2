@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 
   t_tool_options tool_options = parse_command_line(argc, argv);
 
-  pbes old_pbes_specification;
+  pbes<> old_pbes_specification;
 
   /// If PBES can be loaded from file_name, then
   /// - Rewrite all data expressions
@@ -172,20 +172,20 @@ int main(int argc, char** argv)
   {
     old_pbes_specification.load(tool_options.infile_name);
 
-    equation_system old_eqsys = old_pbes_specification.equations();
-    equation_system new_eqsys;
+    atermpp::vector<pbes_equation> old_eqsys = old_pbes_specification.equations();
+    atermpp::vector<pbes_equation> new_eqsys;
   
     Rewriter *r=createRewriter(old_pbes_specification.data(),tool_options.rewrite_strategy);
     
-    for (equation_system::iterator fp_i = old_eqsys.begin(); fp_i != old_eqsys.end(); fp_i++)
+    for (atermpp::vector<pbes_equation>::iterator fp_i = old_eqsys.begin(); fp_i != old_eqsys.end(); fp_i++)
     {
-      new_eqsys=new_eqsys+pbes_equation(
+      new_eqsys.push_back(pbes_equation(
                                fp_i->symbol(),
                                fp_i->variable(),
-                               pbes_expression_rewrite_and_simplify(fp_i->formula(),r));
+                               pbes_expression_rewrite_and_simplify(fp_i->formula(),r)));
     }
     
-    pbes new_pbes_specification(
+    pbes<> new_pbes_specification(
              old_pbes_specification.data(),
              new_eqsys,
              old_pbes_specification.free_variables(),

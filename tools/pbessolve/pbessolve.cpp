@@ -77,9 +77,9 @@ string infilename;
  
 //Local functions ======================== 
 static t_tool_options parse_command_line(int argc, char** argv); 
-pbes load_pbes();
-pbes_expression interpret_solution(pbes pbes_spec, 
-				   equation_system es_solution); 
+pbes<> load_pbes();
+pbes_expression interpret_solution(pbes<> pbes_spec, 
+				   atermpp::vector<pbes_equation> es_solution); 
 //======================================== 
  
  
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
   t_tool_options tool_options = parse_command_line(argc, argv); 
    
   //Load the pbes 
-  pbes pbes_spec = load_pbes(); 
+  pbes<> pbes_spec = load_pbes(); 
    
   //Solve the pbes. 
   //The solution will be returned as an equation system,  
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
   //Every equation is the result of a  
   //(possibly interactive and/or bounded)  
   //approximation process 
-  equation_system es_solution = 
+  atermpp::vector<pbes_equation> es_solution = 
     solve_pbes(pbes_spec, tool_options.interactive, 
 	       tool_options.bound); 
    
@@ -128,9 +128,9 @@ int main(int argc, char** argv)
 //========================================= 
 // Loads a PBES from a file. 
 // (function copied from pbes2bes)
-pbes load_pbes() 
+pbes<> load_pbes() 
 { 
-  pbes pbes_spec; 
+  pbes<> pbes_spec; 
   if (infilename == "-") 
   {
     try
@@ -241,15 +241,15 @@ t_tool_options parse_command_line(int argc, char** argv)
  
 //======================================== 
 // evaluate solution in the initial state
-pbes_expression interpret_solution (pbes pbes_spec, 
-				    equation_system es_solution) 
+pbes_expression interpret_solution (pbes<> pbes_spec, 
+				    atermpp::vector<pbes_equation> es_solution) 
 { 
 
   propositional_variable_instantiation s = pbes_spec.initial_state().variable();
   data_expression_list del = s.parameters();
   
   // find the solution equation for state s
-  equation_system::iterator e;
+  atermpp::vector<pbes_equation>::iterator e;
   for (e = es_solution.begin(); 
        ((e != es_solution.end()) && (s.name() != e->variable().name())); 
        e++);

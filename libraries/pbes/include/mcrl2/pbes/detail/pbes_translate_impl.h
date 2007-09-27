@@ -37,6 +37,23 @@ namespace detail {
 using atermpp::aterm_appl;
 using atermpp::make_substitution;
 
+
+inline
+atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
+{
+  atermpp::vector<pbes_equation> result(p);
+  result.insert(result.end(), q.begin(), q.end());
+  return result;
+}
+
+inline
+atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
+{
+  atermpp::vector<pbes_equation> result(p);
+  result.push_back(e);
+  return result;
+}
+
 /// \brief Visitor that collects the names of propositional variables + instantiations
 struct prop_var_visitor
 {
@@ -826,16 +843,16 @@ namespace pbes_timed
 
   /// f0 is the original formula
   inline
-  equation_system E(state_formula f0, state_formula f, linear_process lps, data_variable T)
+  atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps, data_variable T)
   {
     using namespace lps::state_frm;
   
     if (is_data(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_true(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_false(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_and(f)) {
       return E(f0, lhs(f), lps, T) + E(f0, rhs(f), lps, T);
     } else if (is_or(f)) {
@@ -849,7 +866,7 @@ namespace pbes_timed
     } else if (is_may(f)) {
       return E(f0, mod_form(f), lps, T);
     } else if (is_var(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_mu(f) || (is_nu(f))) {
       identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
@@ -860,14 +877,14 @@ namespace pbes_timed
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, T, context);
       pbes_equation e(sigma, v, expr);
-      return equation_system(e) + E(f0, g, lps, T);
+      return atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
     } else if (is_yaled_timed(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_delay_timed(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     }
     throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
-    return equation_system();
+    return atermpp::vector<pbes_equation>();
   }
 } // namespace pbes_timed
 
@@ -1062,16 +1079,16 @@ namespace pbes_untimed
 
   /// f0 is the original formula
   inline
-  equation_system E(state_formula f0, state_formula f, linear_process lps)
+  atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps)
   {
     using namespace lps::state_frm;
   
     if (is_data(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_true(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_false(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_and(f)) {
       return E(f0, lhs(f), lps) + E(f0, rhs(f), lps);
     } else if (is_or(f)) {
@@ -1085,7 +1102,7 @@ namespace pbes_untimed
     } else if (is_may(f)) {
       return E(f0, mod_form(f), lps);
     } else if (is_var(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_mu(f) || (is_nu(f))) {
       identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
@@ -1096,14 +1113,14 @@ namespace pbes_untimed
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, context);
       pbes_equation e(sigma, v, expr);
-      return equation_system(e) + E(f0, g, lps);
+      return atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
     } else if (is_yaled_timed(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     } else if (is_delay_timed(f)) {
-      return equation_system();
+      return atermpp::vector<pbes_equation>();
     }
     throw std::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
-    return equation_system();
+    return atermpp::vector<pbes_equation>();
   }
 } // namespace pbes_untimed
 

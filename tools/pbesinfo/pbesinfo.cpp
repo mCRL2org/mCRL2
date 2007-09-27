@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 
 	t_tool_options tool_options = parse_command_line(argc, argv);
 
-	pbes pbes_specification;
+	pbes<> pbes_specification;
 
 	/// If PBES can be loaded from file_name, then
 	/// - Show if PBES is closed and if it is well formed
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 	  pbes_specification.load(file_name);
 
 		// Get PBES equations. Makes a lot of function calls more readable.
-		equation_system eqsys;
+		atermpp::vector<pbes_equation> eqsys;
 		eqsys = pbes_specification.equations();
 		
 		bool pbes_well_formed = pbes_specification.is_well_typed();
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 		int nu = 0;
 		int fp_errors = 0;
 		
-		for (equation_system::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
+		for (atermpp::vector<pbes_equation>::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
 		{
 			 // - Store data_variables
 			predvar_data.push_back(fp_i->variable());

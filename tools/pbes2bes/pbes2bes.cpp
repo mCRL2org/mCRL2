@@ -107,23 +107,23 @@ namespace atermpp
 //Functions used by the main program
 //----------------------------------
 static t_tool_options parse_command_line(int argc, char** argv);
-static pbes create_bes(pbes pbes_spec, t_tool_options tool_options);
-pbes load_pbes(t_tool_options tool_options);
-void save_pbes(pbes pbes_spec, t_tool_options tool_options);
-void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename);
+static pbes<> create_bes(pbes<> pbes_spec, t_tool_options tool_options);
+pbes<> load_pbes(t_tool_options tool_options);
+void save_pbes(pbes<> pbes_spec, t_tool_options tool_options);
+void save_pbes_in_cwi_format(pbes<> pbes_spec, string outfilename);
 string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables);
-pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options);
-pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options);
+pbes<> do_lazy_algorithm(pbes<> pbes_spec, t_tool_options tool_options);
+pbes<> do_finite_algorithm(pbes<> pbes_spec, t_tool_options tool_options);
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts);
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list finite_exp);
-equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort);
-ATermAppl FindDummy(ATermAppl sort, lps::pbes current_spec, ATermList no_dummy);
+atermpp::vector<pbes_equation> sort_names(vector< identifier_string > names_order, atermpp::vector<pbes_equation> to_sort);
+ATermAppl FindDummy(ATermAppl sort, lps::pbes<> current_spec, ATermList no_dummy);
 //----------------------------------
 
 
 bool process(t_tool_options const& tool_options) {
   //Load PBES
-  pbes pbes_spec = load_pbes(tool_options);
+  pbes<> pbes_spec = load_pbes(tool_options);
 
   //Process the pbes
   pbes_spec = create_bes(pbes_spec, tool_options);
@@ -330,7 +330,7 @@ int main(int argc, char** argv)
 //function create_bes
 //-------------------
 /// \brief Instantiate free variables and create the (P)BES with the chosen strategy.
-pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
+pbes<> create_bes(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	if (!pbes_spec.is_well_typed())
 	{
@@ -357,9 +357,9 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 	}
 	replace_freevars = reverse(replace_freevars);
 	
-	equation_system es = pbes_spec.equations();
-	equation_system instantiated_es;
-	for (equation_system::iterator i = es.begin(); i != es.end(); i++)
+	atermpp::vector<pbes_equation> es = pbes_spec.equations();
+	atermpp::vector<pbes_equation> instantiated_es;
+	for (atermpp::vector<pbes_equation>::iterator i = es.begin(); i != es.end(); i++)
 	{
 		pbes_expression expr = i->formula().substitute(make_list_substitution(freevars, replace_freevars));
 		instantiated_es.push_back(pbes_equation(i->symbol(), i->variable(), expr));
@@ -368,7 +368,7 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 	pbes_expression instantiated_is_pbe = pbes_expression(pbes_spec.initial_state().variable());
 	propositional_variable_instantiation instantiated_is = propositional_variable_instantiation(instantiated_is_pbe.substitute(make_list_substitution(freevars, replace_freevars)));
 
-	pbes_spec = pbes(pbes_spec.data(), instantiated_es, instantiated_is);
+	pbes_spec = pbes<>(pbes_spec.data(), instantiated_es, instantiated_is);
 	
 	// Depending on the chosen strategy, create the resulting (P)BES
 	if (tool_options.opt_strategy == "finite")
@@ -383,7 +383,7 @@ pbes create_bes(pbes pbes_spec, t_tool_options tool_options)
 //function FindDummy
 //------------------
 /// \brief Find a random instantiation of a sort.
-ATermAppl FindDummy(ATermAppl sort, pbes current_spec, ATermList no_dummy)
+ATermAppl FindDummy(ATermAppl sort, pbes<> current_spec, ATermList no_dummy)
 {
 	ATermList l;
 
@@ -485,16 +485,16 @@ ATermAppl FindDummy(ATermAppl sort, pbes current_spec, ATermList no_dummy)
 //function do_lazy_algorithm
 //--------------------------
 /// \brief Create a BES, using the lazy approach
-pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
+pbes<> do_lazy_algorithm(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	gsVerboseMsg("Using lazy approach...\n");
 	
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state().variable();
-	equation_system eqsys = pbes_spec.equations();
+	atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
 
 	propositional_variable_instantiation new_initial_state;
-	equation_system new_equation_system;
+	atermpp::vector<pbes_equation> new_equation_system;
 	
 	atermpp::set< propositional_variable_instantiation > states_todo;
 	atermpp::set< propositional_variable_instantiation >::iterator current_state_it;
@@ -511,7 +511,7 @@ pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	vector< identifier_string > names_order;
 
 	gsVerboseMsg("Retrieving PBES equations from equation system...\n");
-	for (equation_system::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+	for (atermpp::vector<pbes_equation>::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
 	{
 		pbes_equations.put(eqi->variable().name(), *eqi);
 		names_order.push_back(eqi->variable().name());
@@ -578,7 +578,7 @@ pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	// Rewrite initial state
 	new_initial_state = propositional_variable_instantiation(create_propvar_name(initial_state.name(), initial_state.parameters()), empty_data_expression_list);
 	
-	pbes result = pbes(data, new_equation_system, new_initial_state);
+	pbes<> result = pbes<>(data, new_equation_system, new_initial_state);
 
 	return result;
 }
@@ -586,9 +586,9 @@ pbes do_lazy_algorithm(pbes pbes_spec, t_tool_options tool_options)
 //function sort_names 
 //-------------------
 /// \brief Sort the equation system with respect to the order of predicate variables in the original equation system
-equation_system sort_names(vector< identifier_string > names_order, equation_system to_sort)
+atermpp::vector<pbes_equation> sort_names(vector< identifier_string > names_order, atermpp::vector<pbes_equation> to_sort)
 {
-	equation_system result;
+	atermpp::vector<pbes_equation> result;
 	if (names_order.size() == 1)
 	{
 		result = to_sort;
@@ -597,8 +597,8 @@ equation_system sort_names(vector< identifier_string > names_order, equation_sys
 	{
 		for (vector< identifier_string >::iterator on = names_order.begin(); on != names_order.end(); on++)
 		{
-			equation_system todo;
-			for (equation_system::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
+			atermpp::vector<pbes_equation> todo;
+			for (atermpp::vector<pbes_equation>::iterator eqi = to_sort.begin(); eqi != to_sort.end(); eqi++)
 			{
 				string name = eqi->variable().name();
 				name = name.substr(0, name.find("@"));
@@ -622,15 +622,15 @@ equation_system sort_names(vector< identifier_string > names_order, equation_sys
 //function do_finite_algorithm
 //---------------------------
 /// \brief Create a PBES without finite data sorts, using the finite approach
-pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
+pbes<> do_finite_algorithm(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	gsVerboseMsg("Using finite approach...\n");
 	
 	propositional_variable_instantiation initial_state = pbes_spec.initial_state().variable();
-	equation_system eqsys = pbes_spec.equations();
+	atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
 
-	equation_system result_eqsys;				// resulting equation system
+	atermpp::vector<pbes_equation> result_eqsys;				// resulting equation system
 	int nr_of_equations = 0;					// Nr of equations computed
 	Rewriter *rewriter = createRewriter(data); 	// Data rewriter
 
@@ -642,7 +642,7 @@ pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
 
 	//Populate sort_enumerations with all enumerations for the finite sorts of the system
 	gsVerboseMsg("Enumerating finite data sorts...\n");
-	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+	for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		data_variable_list parameters = eq_i->variable().parameters();
 		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
@@ -660,7 +660,7 @@ pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	}
 
 	gsVerboseMsg("Computing PBES without finite data sorts...\n");
-	for (equation_system::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+	for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
 	{
 		pbes_equation equation = *eq_i;
 		
@@ -750,7 +750,7 @@ pbes do_finite_algorithm(pbes pbes_spec, t_tool_options tool_options)
 	// rewrite initial state
 	propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, &sort_enumerations);
 
-	pbes result = pbes(data, result_eqsys, new_initial_state);
+	pbes<> result = pbes<>(data, result_eqsys, new_initial_state);
 
 	delete rewriter;
 
@@ -836,11 +836,11 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 //function load_pbes
 //------------------
 /// \brief Load a PBES.
-pbes load_pbes(t_tool_options tool_options)
+pbes<> load_pbes(t_tool_options tool_options)
 {
 	string infilename = tool_options.infilename;
 
-	pbes pbes_spec;
+	pbes<> pbes_spec;
 	if (infilename == "-")
 	{
 	  try
@@ -871,13 +871,13 @@ pbes load_pbes(t_tool_options tool_options)
 //function save_pbes
 //------------------
 /// \brief Save a PBES in the format specified.
-void save_pbes(pbes pbes_spec, t_tool_options tool_options)
+void save_pbes(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	string outfilename = tool_options.outfilename;
 
 	// Check if the result is a BES or a PBES
 	bool is_bes = true;
-	if ( (!pbes_spec.equations().is_bes()) && (!pbes_spec.initial_state().variable().parameters().empty() ) )
+	if ( (!pbes_spec.is_bes()) && (!pbes_spec.initial_state().variable().parameters().empty() ) )
 	{
 		is_bes = false;
 		gsVerboseMsg("The result is a PBES.\n");
@@ -928,20 +928,20 @@ void save_pbes(pbes pbes_spec, t_tool_options tool_options)
 //function save_pbes_in_cwi_format
 //--------------------------------
 /// \brief Convert the PBES to the format used at the CWI for their BES solvers
-void save_pbes_in_cwi_format(pbes pbes_spec, string outfilename)
+void save_pbes_in_cwi_format(pbes<> pbes_spec, string outfilename)
 {
 	// Use an indexed set to keep track of the variables and their cwi-representations
-	equation_system eqsys = pbes_spec.equations();
+	atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
 	atermpp::indexed_set *variables = new atermpp::indexed_set(2*eqsys.size(), 50);
 	
 	// Fill the indexed set
-	for (equation_system::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+	for (atermpp::vector<pbes_equation>::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
 	{
 		variables->put(eq->variable());
 	} // because pbes is closed, all variables are done at this point
 
 	vector< string > result;
-	for (equation_system::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+	for (atermpp::vector<pbes_equation>::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
 	{
 		// fixpoint:
 		// 	mu => min

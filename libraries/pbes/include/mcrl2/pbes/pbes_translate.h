@@ -24,8 +24,8 @@ namespace lps {
 /// \param spec the specification
 /// \param determines whether the timed or untimed variant of the algorithm is chosen
 /// \return the resulting pbes
-inline
-pbes pbes_translate(const state_formula& formula, const specification& spec, bool timed = false)
+
+pbes<> pbes_translate(const state_formula& formula, const specification& spec, bool timed = false)
 {
   using namespace detail;
   using namespace state_frm;
@@ -44,7 +44,7 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
     f = nu(X, data_assignment_list(), f);
   }  
   linear_process lps = spec.process();
-  equation_system e;
+  atermpp::vector<pbes_equation> e;
 
   if (!timed)
   {
@@ -73,12 +73,12 @@ pbes pbes_translate(const state_formula& formula, const specification& spec, boo
   if (!timed)
   {   
     propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, f));
-    return pbes(spec.data(), e, free_variables, init);
+    return pbes<>(spec.data(), e, free_variables, init);
   }
   else
   {
     propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));
-    return pbes(spec.data(), e, free_variables, init);
+    return pbes<>(spec.data(), e, free_variables, init);
   }
 }
 

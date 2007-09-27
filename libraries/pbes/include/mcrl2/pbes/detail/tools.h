@@ -37,7 +37,7 @@ namespace lps {
 namespace detail {
 
   inline
-  pbes lps2pbes(const specification& spec, const state_formula& formula, bool timed)
+  pbes<> lps2pbes(const specification& spec, const state_formula& formula, bool timed)
   {
     return lps::pbes_translate(formula, spec, timed);
   }
@@ -56,9 +56,9 @@ namespace detail {
 
   // 
   inline
-  pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
+  pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {
-    pbes result;
+    pbes<> result;
     specification spec = mcrl22lps(spec_text);
     state_formula f = mcf2statefrm(formula_text, spec);
     return lps2pbes(spec, f, timed);

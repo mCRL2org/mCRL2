@@ -45,119 +45,14 @@ using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 
-///////////////////////////////////////////////////////////////////////////////
-// equation_system
-/// \brief equation_system.
-///
-class equation_system: public atermpp::vector<pbes_equation>
+/// Computes the free variables that occur in the sequence [first, last[
+/// of pbes equations.
+template <typename Iterator>
+std::set<data_variable> compute_free_variables(Iterator first, Iterator last)
 {
-  public:
-    equation_system()
-    {}
-
-    /// Constructs an equation_system containing equation e.
-    ///
-    equation_system(const pbes_equation& e)
-    {
-      push_back(e);
-    }
-
-    equation_system(const pbes_equation_list& l)
-      : atermpp::vector<pbes_equation>(l.begin(), l.end())
-    {}
-
-    /// Applies a substitution to this equation system.
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
-    template <typename Substitution>
-    void substitute(Substitution f)
-    {
-      std::transform(begin(), end(), begin(), f);
-    }
-
-    /// Returns a equation_system which is the concatenation of the equations
-    /// of this equation_system and the other.
-    ///
-    equation_system operator+(equation_system other) const
-    {
-      equation_system result(*this);
-      result.insert(result.end(), other.begin(), other.end());
-      return result;
-    }
-
-    /// Returns a equation_system which is the concatenation of the equations
-    /// of this equation_system and the equation e.
-    equation_system operator+(pbes_equation e) const
-    {
-      equation_system result(*this);
-      result.push_back(e);
-      return result;
-    }
-
-    /// Returns the set of binding variables of the equation_system, i.e. the
-    /// variables that occur on the left hand side of an equation.
-    ///
-    atermpp::set<propositional_variable> binding_variables() const
-    {
-      atermpp::set<propositional_variable> result;
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        result.insert(i->variable());
-      }
-      return result;
-    }
-
-    /// Returns the set of occurring variables of the equation_system, i.e. the
-    /// variables that occur in the right hand side of an equation.
-    ///
-    atermpp::set<propositional_variable> occurring_variables() const
-    {
-      atermpp::set<propositional_variable> result;
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        atermpp::find_all_if(i->formula(), state_frm::is_var, std::inserter(result, result.end()));
-      }
-      return result;
-    }
-
-    /// Returns true if all occurring variables are binding variables.
-    ///
-    bool is_closed() const
-    {
-      atermpp::set<propositional_variable> bnd = binding_variables();
-      atermpp::set<propositional_variable> occ = occurring_variables();
-      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
-    }
-
-    /// Returns an ascii representation of the equation system.
-    ///
-    std::string to_string() const
-    {
-      return pbes_equation_list(begin(), end()).to_string();
-    }
-
-    /// Returns true if the equation is a BES (boolean equation system).
-    ///
-    bool is_bes() const
-    {
-      for (const_iterator i = begin(); i != end(); ++i)
-      {
-        if (!i->is_bes())
-          return false;
-      }
-      return true;
-    }
-};
-
-/// Computes the free variables that occur in the pbes equation system.
-///
-inline
-std::set<data_variable> compute_free_variables(const equation_system& eqn)
-{
-  // return detail::free_pbes_variables(eqn.begin(), eqn.end());
   detail::free_variable_visitor visitor;
 
-  for (equation_system::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+  for (Iterator i = first; i != last; ++i)
   {
     visitor.bound_variables = i->variable().parameters();
     visitor.visit(i->formula());
@@ -166,14 +61,15 @@ std::set<data_variable> compute_free_variables(const equation_system& eqn)
   return visitor.result;
 }
 
-/// Computes the quantifier variables that occur in the pbes equation system.
+/// Computes the quantifier variables that occur in the sequence [first, last[
+/// of pbes equations.
 ///
-inline
-std::set<data_variable> compute_quantifier_variables(const equation_system& eqn)
+template <typename Iterator>
+std::set<data_variable> compute_quantifier_variables(Iterator first, Iterator last)
 {
   // collect the set of all quantifier variables in visitor
   detail::quantifier_visitor visitor;
-  for (equation_system::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+  for (Iterator i = first; i != last; ++i)
   {
     visitor.visit(i->formula());
   }
@@ -187,13 +83,14 @@ std::set<data_variable> compute_quantifier_variables(const equation_system& eqn)
 // <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
 
+template <typename Container = atermpp::vector<pbes_equation> >
 class pbes
 {
   friend struct atermpp::aterm_traits<pbes>;
 
   protected:
     data_specification m_data;
-    equation_system m_equations;
+    Container m_equations;
     atermpp::set<data_variable> m_free_variables;
     pbes_initializer m_initial_state;
 
@@ -214,7 +111,7 @@ class pbes
       data_variable_list freevars = eqn_spec(0);
       pbes_equation_list eqn = eqn_spec(1);
       m_free_variables = atermpp::set<data_variable>(freevars.begin(), freevars.end());
-      m_equations = equation_system(eqn);
+      m_equations = Container(eqn.begin(), eqn.end());
     }
 
   public:
@@ -222,7 +119,7 @@ class pbes
     {}
 
     pbes(data_specification data,
-         const equation_system& equations,
+         const Container& equations,
          const atermpp::set<data_variable>& free_variables,
          pbes_initializer initial_state)
       :
@@ -235,19 +132,19 @@ class pbes
     }
 
     pbes(data_specification data,
-         const equation_system& equations,
+         const Container& equations,
          propositional_variable_instantiation initial_state)
       :
         m_data(data),
         m_equations(equations),
         m_initial_state(pbes_initializer(data_variable_list(), initial_state))
     {
-      m_free_variables = compute_free_variables(equations);
+      m_free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
       assert(detail::check_rule_PBES(term()));
     }
 
     pbes(data_specification data,
-         const equation_system& equations,
+         const Container& equations,
          const atermpp::set<data_variable>& free_variables,
          propositional_variable_instantiation initial_state)
       :
@@ -273,14 +170,14 @@ class pbes
 
     /// Returns the equations.
     ///
-    const equation_system& equations() const
+    const Container& equations() const
     {
       return m_equations;
     }
 
     /// Returns the equations.
     ///
-    equation_system& equations()
+    Container& equations()
     {
       return m_equations;
     }
@@ -315,6 +212,18 @@ class pbes
 
       if (!is_well_typed())
         throw std::runtime_error("Error in pbes::load(): term is not well typed");
+    }
+
+    /// Returns true if the PBES is a BES (boolean equation system).
+    ///
+    bool is_bes() const
+    {
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        if (!i->is_bes())
+          return false;
+      }
+      return true;
     }
 
     /// Writes the pbes to file and returns true if the operation succeeded.
@@ -353,7 +262,12 @@ class pbes
     ///
     atermpp::set<propositional_variable> binding_variables() const
     {
-      return m_equations.binding_variables();
+      atermpp::set<propositional_variable> result;
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        result.insert(i->variable());
+      }
+      return result;
     }
 
     /// Returns the set of occurring variables of the pbes, i.e.
@@ -361,14 +275,30 @@ class pbes
     ///
     atermpp::set<propositional_variable> occurring_variables() const
     {
-      return m_equations.occurring_variables();
+      atermpp::set<propositional_variable> result;
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        atermpp::find_all_if(i->formula(), state_frm::is_var, std::inserter(result, result.end()));
+      }
+      return result;
     }
 
     /// Returns true if all occurring variables are binding variables.
     ///
     bool is_closed() const
     {
-      return m_equations.is_closed();
+      atermpp::set<propositional_variable> bnd = binding_variables();
+      atermpp::set<propositional_variable> occ = occurring_variables();
+      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
+    }
+
+    /// Applies a substitution to the pbes equations.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    void substitute(Substitution f)
+    {
+      std::transform(equations().begin(), equations().end(), equations().begin(), f);
     }
 
     /// Protects the term from being freed during garbage collection.
@@ -414,8 +344,8 @@ class pbes
     {
       std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
       const atermpp::set<data_variable>& declared_free_variables = free_variables();
-      std::set<data_variable> occurring_free_variables = compute_free_variables(equations());
-      std::set<data_variable> quantifier_variables = compute_quantifier_variables(equations());
+      std::set<data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
+      std::set<data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
 
       // check 1)
       if (!detail::check_sorts(
@@ -434,7 +364,7 @@ class pbes
       }
 
       // check 2)
-      for (equation_system::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         const data_variable_list& variables = i->variable().parameters();
         if (!detail::check_sorts(
@@ -531,10 +461,10 @@ class pbes
 
 /// Computes the free variables that occur in the pbes.
 ///
-inline
-std::set<data_variable> compute_free_variables(const pbes& p)
+template <typename Container>
+std::set<data_variable> compute_free_variables(const pbes<Container>& p)
 {
-  return compute_free_variables(p.equations());
+  return compute_free_variables(p.equations().begin(), p.equations().end());
 }
 
 } // namespace lps
@@ -544,14 +474,14 @@ namespace atermpp
 {
 using lps::pbes;
 
-template<>
-struct aterm_traits<pbes>
+template<typename Container>
+struct aterm_traits<pbes<Container> >
 {
   typedef ATermAppl aterm_type;
-  static void protect(pbes t)   { t.protect(); }
-  static void unprotect(pbes t) { t.unprotect(); }
-  static void mark(pbes t)      { t.mark(); }
-  static ATerm term(pbes t)     { return t.term(); }
+  static void protect(pbes<Container> t)   { t.protect(); }
+  static void unprotect(pbes<Container> t) { t.unprotect(); }
+  static void mark(pbes<Container> t)      { t.mark(); }
+  static ATerm term(pbes<Container> t)     { return t.term(); }
   // static ATerm* ptr(pbes& t) undefined for pbes!
 };
 

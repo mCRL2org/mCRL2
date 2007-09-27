@@ -47,7 +47,7 @@ const std::string ABP_SPECIFICATION =
 void test_bisimulation()
 {
   specification abp_spec = lps::mcrl22lps(ABP_SPECIFICATION);
-  pbes abp_pbes = strong_bisimulation(abp_spec, abp_spec);
+  pbes<> abp_pbes = strong_bisimulation(abp_spec, abp_spec);
   bool abp_result = pbes2bool(abp_pbes);
   BOOST_CHECK(abp_result);
 }

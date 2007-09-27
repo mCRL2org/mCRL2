@@ -86,17 +86,17 @@ sort_instantiator si;
 // Tries to solve the pbes by solving the predicate variables one by one,
 // starting with the one defined by the last equation.
 
-equation_system solve_pbes(pbes pbes_spec, bool interactive, 
+atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, 
 			   int bound)
 //========================
 
 {
 
 
-  equation_system es_problem;
+  atermpp::vector<pbes_equation> es_problem;
   es_problem = pbes_spec.equations();
  
- equation_system es_solution;
+ atermpp::vector<pbes_equation> es_solution;
  
  Rewriter* rewriter = createRewriter(pbes_spec.data(), GS_REWR_INNER);
  // addrule__b_and_not_b(rewriter);
@@ -133,7 +133,7 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive,
 #endif
 
  // Is using a reverse_iterator correct? inefficient??
- for (equation_system::reverse_iterator eqcrt = 
+ for (atermpp::vector<pbes_equation>::reverse_iterator eqcrt = 
 			 es_problem.rbegin(); eqcrt != es_problem.rend(); eqcrt++)
 	{
 //check!
@@ -152,7 +152,7 @@ equation_system solve_pbes(pbes pbes_spec, bool interactive,
 	   solve_equation(*eqcrt, interactive, bound, prover);
    
 	 // add solution of this equation to the already known solutions
-	 es_solution = equation_system(e_solution) + es_solution;
+	 es_solution.insert(es_solution.begin(), e_solution);
 	}
  
  delete rewriter; 
@@ -344,7 +344,7 @@ pbes_expression substitute(pbes_expression expr,
 // all occurences of binding variables from es_solution
 // with their solutions (i.e., corresponding equations from es_solution)
 
-pbes_expression update_expression(pbes_expression e, equation_system es_solution)
+pbes_expression update_expression(pbes_expression e, atermpp::vector<pbes_equation> es_solution)
 //==================
 
 {
@@ -356,7 +356,7 @@ pbes_expression update_expression(pbes_expression e, equation_system es_solution
  gsVerboseMsg("update_expression.\n");
 #endif
 
- for (equation_system::reverse_iterator s = 
+ for (atermpp::vector<pbes_equation>::reverse_iterator s = 
 			 es_solution.rbegin(); s != es_solution.rend(); s++)	
 {
   //gsVerboseMsg("update_expression: substituting equation %s\n",pp(*s).c_str());

@@ -11,6 +11,6 @@
 #include <mcrl2/pbes/pbes.h>
 
 lps::specification remove_unused_data(lps::specification spec, bool keep_basis = true);
-lps::pbes remove_unused_data(lps::pbes spec, bool keep_basis = true);
+lps::pbes<> remove_unused_data(lps::pbes<> spec, bool keep_basis = true);
 
 ATermAppl removeUnusedData(ATermAppl Spec, bool keep_basis = true); // deprecated
