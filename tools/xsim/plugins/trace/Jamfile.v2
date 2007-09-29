@@ -1,5 +1,6 @@
 project toolset/xsim/plugins/trace
        : build-dir $(BUILD_TOP)/xsim/trace
+       : default-build <threading>multi
        ;
 
 alias xsim_trace_view : : <wx>no ;

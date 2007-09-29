@@ -1,7 +1,7 @@
 project toolset/xsim/plugins/garage
        : build-dir $(BUILD_TOP)/xsim/garage
-       : requirements
-          <include>../..
+       : requirements <include>../..
+       : default-build <threading>multi
        ;
 
 alias xsim_garage_view : : <wx>no ;

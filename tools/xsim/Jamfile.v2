@@ -2,16 +2,17 @@ project toolset/xsim
        : build-dir $(BUILD_TOP)/xsim
        ;
 
-alias xsim_base : : <wx>no ;
-
-lib xsim_base
+lib xsim_base.main
        : xsimbase.cpp
          /libraries//trace
          /libraries//nextstate
          /libraries//mcrl2_basic
          /site-config//wx_base
-       : <wx>yes
+       : <threading>multi
        ;
+
+alias xsim_base : : <wx>no ;
+alias xsim_base : xsim_base.main : <wx>yes ;
 
 alias xsim : : <wx>no ;
 
