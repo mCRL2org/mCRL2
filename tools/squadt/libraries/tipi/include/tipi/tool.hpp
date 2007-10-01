@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/tool.h
+/// \file tipi/tool.hpp
 
 #ifndef TIPI_TOOL_H
 #define TIPI_TOOL_H

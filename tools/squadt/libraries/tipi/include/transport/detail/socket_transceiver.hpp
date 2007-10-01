@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/transport/detail/socket_transceiver.h
+/// \file transport/detail/socket_transceiver.hpp
 
 #ifndef SOCKET_TRANSCEIVER_H__
 #define SOCKET_TRANSCEIVER_H__
@@ -26,7 +26,12 @@
 namespace transport {
   namespace transceiver {
 
-    /* Class that is used internally for direct transmitting/receiving */
+    /**
+     * \brief Transport component
+     *
+     * The component provides transport layer (OSI) functionality. It
+     * essentially is an interface on top of TCP/UDP sockets and pipes.
+     **/
     class socket_transceiver : public basic_transceiver {
       friend class transport::listener::socket_listener;
   

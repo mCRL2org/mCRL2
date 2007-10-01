@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/event_handlers.h
+/// \file tipi/detail/event_handlers.hpp
 
 #ifndef EVENT_HANDLERS_H
 #define EVENT_HANDLERS_H

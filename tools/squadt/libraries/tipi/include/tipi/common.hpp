@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/common.h
+/// \file tipi/common.hpp
 
 #ifndef TIPI_COMMON_H_
 #define TIPI_COMMON_H_
@@ -112,6 +112,22 @@ namespace tipi {
   namespace datatype {
   }
 
+  /** \brief Type for tipi protocol message identification */
+  enum message_identifier_t {
+     message_any,                              ///< \brief matches any of the types below
+     message_capabilities,                     ///< \brief request/response of tool/controller capabilities
+     message_configuration,                    ///< \brief offer/accept tool configuration
+     message_display_layout,                   ///< \brief the controller a layout description for the display
+     message_display_data,                     ///< \brief the controller a data to be displayed using the current display layout
+     message_identification,                   ///< \brief the unique identifier assigned to a tool instance
+     message_report,                           ///< \brief send the controller a report of a tools operation
+     message_task_start,                       ///< \brief signal to a tool for starting a task
+     message_task_done,                        ///< \brief signal to controller that task execution has finished
+     message_termination,                      ///< \brief request/response of tool termination
+     message_unknown                           ///< \brief unspecified or unknown (or should be derived from content)
+  };
+
+  /// \cond INTERNAL_DOCS
   /**
    * \brief Command line part for tool interface
    *
@@ -132,27 +148,13 @@ namespace tipi {
   namespace command_line_interface {
   }
 
-  /** Helper function to invoke the as_string method a type T */
+  /// Helper function to invoke the as_string method a type T */
   template < typename T > std::string as_string(T const& t) {
     return (as_string(t));
   }
 
-  /** \brief Type for tipi protocol message identification */
-  enum message_identifier_t {
-     message_any,                              ///< \brief matches any of the types below
-     message_capabilities,                     ///< \brief request/response of tool/controller capabilities
-     message_configuration,                    ///< \brief offer/accept tool configuration
-     message_display_layout,                   ///< \brief the controller a layout description for the display
-     message_display_data,                     ///< \brief the controller a data to be displayed using the current display layout
-     message_identification,                   ///< \brief the unique identifier assigned to a tool instance
-     message_report,                           ///< \brief send the controller a report of a tools operation
-     message_task_start,                       ///< \brief signal to a tool for starting a task
-     message_task_done,                        ///< \brief signal to controller that task execution has finished
-     message_termination,                      ///< \brief request/response of tool termination
-     message_unknown                           ///< \brief unspecified or unknown (or should be derived from content)
-  };
-
   template <> std::string as_string(message_identifier_t const&);
+  /// \endcond
 
   /** \brief A message type for communication of tipi protocol messages */
   typedef messaging::message < message_identifier_t, message_unknown, message_any > message;

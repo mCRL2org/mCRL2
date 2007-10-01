@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/utility/indirect_iterator.h
+/// \file tipi/utility/indirect_iterator.hpp
 
 #ifndef ITERATORS_H
 #define ITERATORS_H

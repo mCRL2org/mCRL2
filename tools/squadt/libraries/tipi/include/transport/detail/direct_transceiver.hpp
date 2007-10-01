@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/transport/detail/direct_transceiver.h
+/// \file transport/detail/direct_transceiver.hpp
 
 #ifndef DIRECT_TRANSCEIVER_H
 #define DIRECT_TRANSCEIVER_H
@@ -12,6 +12,7 @@
 #include <transport/detail/transceiver.tcc>
 
 namespace transport {
+  /// \cond INTERNAL_DOCS
   namespace transceiver {
 
     /* Class that is used internally for direct transmitting/receiving */
@@ -96,6 +97,7 @@ namespace transport {
     inline direct_transceiver::~direct_transceiver() {
     }
   }
+  /// \endcond
 }
 
 #endif

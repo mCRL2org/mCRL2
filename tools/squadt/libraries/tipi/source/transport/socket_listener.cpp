@@ -11,6 +11,7 @@
 #include "transport/detail/socket_transceiver.hpp"
 
 namespace transport {
+  /// \cond INTERNAL_DOCS
   namespace listener {
 
     using namespace transceiver;
@@ -91,5 +92,6 @@ namespace transport {
       socket_transceiver::scheduler.run();
     }
   }
+  /// \endcond
 }
 

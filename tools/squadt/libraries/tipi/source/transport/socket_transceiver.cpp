@@ -10,6 +10,7 @@
 #include "transport/detail/socket_transceiver.hpp"
 
 namespace transport {
+  /// \cond INTERNAL_DOCS
   namespace transceiver {
 
     unsigned int                   socket_transceiver::input_buffer_size = 8192;
@@ -286,5 +287,6 @@ namespace transport {
       handle_disconnect();
     }
   }
+  /// \endcond
 }
 

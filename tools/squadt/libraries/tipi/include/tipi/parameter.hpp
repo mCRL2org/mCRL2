@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/parameter.h
+/// \file tipi/parameter.hpp
 
 #ifndef PARAMETER_H__
 #define PARAMETER_H__

@@ -20,6 +20,7 @@
 #include "tipi/utility/logger.hpp"
 
 namespace tipi {
+  /// \cond INTERNAL_DOCS
 
   namespace command_line_interface {
 
@@ -270,5 +271,6 @@ namespace tipi {
       argc = j;
     }
   }
+  /// \endcond
 }
 #endif

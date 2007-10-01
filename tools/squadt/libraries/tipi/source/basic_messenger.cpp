@@ -11,6 +11,7 @@ namespace tipi {
 
   namespace messaging {
 
+    /** Standard logger that uses std::clog */
     template < >
     boost::shared_ptr < utility::logger > basic_messenger_impl< tipi::message >::standard_logger(new utility::print_logger(std::clog));
 
@@ -29,7 +30,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] i pointer to an implementation object
+     * \param[in] c pointer to an implementation object
      **/
     template < >
     basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c) : transport::transporter(c) {
@@ -47,7 +48,10 @@ namespace tipi {
       return (basic_messenger_impl< tipi::message >::standard_logger.get());
     }
 
-    /** Sets the standard logger */
+    /**
+     * Sets the standard logger
+     * @param[in] l the logger that is to be used by the messenger
+     **/
     template < >
     void basic_messenger< tipi::message >::set_standard_logger(boost::shared_ptr < utility::logger > l) {
       basic_messenger_impl< tipi::message >::standard_logger = l;

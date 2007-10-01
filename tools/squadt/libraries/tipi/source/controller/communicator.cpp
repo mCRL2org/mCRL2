@@ -21,6 +21,9 @@ namespace tipi {
         tipi::messenger(boost::shared_ptr < tipi::messaging::basic_messenger_impl< tipi::message > > (new communicator_impl)) {
     }
 
+    /**
+     * \param[in] c an implementation object
+     **/
     communicator::communicator(boost::shared_ptr < communicator_impl > const& c) :
         tipi::messenger(boost::static_pointer_cast< tipi::messaging::basic_messenger_impl < tipi::message > > (c)) {
     }

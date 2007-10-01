@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/layout_manager.h
+/// \file tipi/detail/layout_manager.hpp
 
 #ifndef LAYOUT_MANAGER_H
 #define LAYOUT_MANAGER_H
@@ -106,6 +106,7 @@ namespace tipi {
 
       public:
 
+        /// \cond INTERNAL_DOCS
         struct layout_descriptor {
           element*           layout_element;    ///< the element
           properties         layout_properties; ///< the current layout properties
@@ -114,6 +115,7 @@ namespace tipi {
           /** \brief Constructor for an element, identifier and layout properties */
           layout_descriptor(element* e, properties const& p, element_identifier const& id) : layout_element(e), layout_properties(p), identifier(id) { }
         };
+        /// \endcond
 
         /** \brief Type alias to simplify using auto pointers */
         typedef std::auto_ptr < manager > aptr;
@@ -322,6 +324,7 @@ namespace tipi {
     inline manager::~manager() {
     }
 
+    /// \cond INTERNAL_DOCS
     inline properties::properties() : m_alignment_horizontal(center), m_alignment_vertical(middle),
                 m_margin(manager::default_margins), m_visible(manager::default_visibility), m_grow(false) {
     }
@@ -341,6 +344,27 @@ namespace tipi {
     inline void properties::set_growth(bool b) {
       m_grow = b;
     }
+
+    /**
+     * \param[in] c the properties object to compare against
+     **/
+    inline bool properties::operator==(properties const& c) const {
+      return (m_alignment_horizontal == c.m_alignment_horizontal &&
+              m_alignment_vertical == c.m_alignment_vertical &&
+              m_margin == c.m_margin && m_visible == c.m_visible &&
+              m_grow == c.m_grow && m_enabled == c.m_enabled);
+    }
+
+    /**
+     * \param[in] c the properties object to compare against
+     **/
+    inline bool properties::operator!=(properties const& c) const {
+      return (m_alignment_horizontal != c.m_alignment_horizontal ||
+              m_alignment_vertical != c.m_alignment_vertical ||
+              m_margin != c.m_margin || m_visible != c.m_visible ||
+              m_grow != c.m_grow || m_enabled != c.m_enabled);
+    }
+    /// \endcond
 
     /**
      * \param[in] t the top margin
@@ -364,26 +388,6 @@ namespace tipi {
      **/
     inline bool margins::operator!=(margins const& m) const {
       return (top != m.top || left != m.left || bottom != m.bottom || right != m.right);
-    }
-
-    /**
-     * \param[in] c the properties object to compare against
-     **/
-    inline bool properties::operator==(properties const& c) const {
-      return (m_alignment_horizontal == c.m_alignment_horizontal &&
-              m_alignment_vertical == c.m_alignment_vertical &&
-              m_margin == c.m_margin && m_visible == c.m_visible &&
-              m_grow == c.m_grow && m_enabled == c.m_enabled);
-    }
-
-    /**
-     * \param[in] c the properties object to compare against
-     **/
-    inline bool properties::operator!=(properties const& c) const {
-      return (m_alignment_horizontal != c.m_alignment_horizontal ||
-              m_alignment_vertical != c.m_alignment_vertical ||
-              m_margin != c.m_margin || m_visible != c.m_visible ||
-              m_grow != c.m_grow || m_enabled != c.m_enabled);
     }
 
     inline void manager::associate_event_handler(element* e) const {

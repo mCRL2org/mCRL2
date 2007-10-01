@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/command_line_interface.h
+/// \file tipi/detail/command_line_interface.hpp
 
 #ifndef TIPI_COMMAND_LINE_INTERFACE_H
 #define TIPI_COMMAND_LINE_INTERFACE_H
@@ -13,6 +13,7 @@
 #include "tipi/tool.hpp"
 #include "tipi/detail/schemes.hpp"
 
+/// \cond INTERNAL_DOCS
 namespace tipi {
 
   namespace messaging {
@@ -87,4 +88,5 @@ namespace tipi {
     }
   }
 }
+/// \endcond
 #endif

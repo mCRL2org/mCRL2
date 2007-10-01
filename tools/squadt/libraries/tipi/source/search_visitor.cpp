@@ -25,14 +25,15 @@ namespace tipi {
     friend class visitors;
     friend class find_visitor;
   };
-  /// \endcond
 
   /** Default constructor */
   search_visitor::search_visitor() {
   }
+  /// \endcond
 }
 
 namespace utility {
+  /// \cond INTERNAL_DOCS
 
   /**
    * \param o the tipi::object object to search in
@@ -221,4 +222,5 @@ namespace utility {
 
     return true;
   }
+  /// \endcond
 }

@@ -10,6 +10,7 @@
 #include <transport/detail/listener.tcc>
 
 namespace transport {
+  /// \cond INTERNAL_DOCS
   namespace listener {
 
     inline void basic_listener::associate(transceiver::basic_transceiver::ptr t) {
@@ -26,6 +27,7 @@ namespace transport {
     inline basic_listener::~basic_listener() {
     }
   }
+  /// \endcond
 }
 
 #endif

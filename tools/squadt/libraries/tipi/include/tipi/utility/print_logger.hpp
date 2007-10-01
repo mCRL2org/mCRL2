@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/utility/print_logger.h
+/// \file tipi/utility/print_logger.hpp
 
 #ifndef PRINT_LOGGER_H_
 #define PRINT_LOGGER_H_
@@ -42,6 +42,7 @@ namespace tipi {
         inline ~print_logger();
     };
  
+    /** \brief Simple logger that prints to a file */
     class file_print_logger : public print_logger {
  
       private:

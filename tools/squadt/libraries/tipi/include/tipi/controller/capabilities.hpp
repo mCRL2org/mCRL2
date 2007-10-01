@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/controller/capabilities.h
+/// \file tipi/controller/capabilities.hpp
 
 #ifndef TIPI_CONTROLLER_CAPABILITIES_H
 #define TIPI_CONTROLLER_CAPABILITIES_H

@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/utility/logger.h
+/// \file tipi/utility/logger.hpp
 
 #ifndef LOGGER_H_
 #define LOGGER_H_
@@ -46,6 +46,7 @@ namespace tipi {
  
       public:
  
+        /** \brief Constructor */
         inline logger(log_level = default_filter_level);
  
         /** \brief Adds a log message with a string and a log level */

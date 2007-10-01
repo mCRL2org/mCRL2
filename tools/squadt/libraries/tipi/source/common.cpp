@@ -12,6 +12,7 @@
 #include "tipi/common.hpp"
 
 namespace tipi {
+  /// \cond INTERNAL_DOCS
   namespace messaging {
 
     /** The type identifier for messages of which the type is not known */
@@ -42,5 +43,6 @@ namespace tipi {
   std::string as_string(message_identifier_t const& t) {
     return (messaging::message_identifier_strings[t]);
   }
+  /// \endcond
 }
 

@@ -90,7 +90,6 @@ namespace tipi {
 
   inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
   }
-  /// \endcond
   
   /** \brief Maps alignment to a string */
   static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};
@@ -109,9 +108,11 @@ namespace tipi {
   store_visitor::store_visitor(std::ostream& o) :
         ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new ::utility::visitor< store_visitor_impl >(o))) {
   }
+  /// \endcond
 }
 
 namespace utility {
+  /// \cond INTERNAL_DOCS
 
   /**
    * \param[in] o the tipi::message object to store
@@ -647,4 +648,5 @@ namespace utility {
 
     return true;
   }
+  /// \endcond
 }

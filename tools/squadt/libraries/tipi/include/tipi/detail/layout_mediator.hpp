@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/layout_mediator.h
+/// \file tipi/detail/layout_mediator.hpp
 
 #ifndef LAYOUT_MEDIATOR_H
 #define LAYOUT_MEDIATOR_H

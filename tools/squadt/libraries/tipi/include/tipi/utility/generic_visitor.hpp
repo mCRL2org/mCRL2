@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/utility/generic_visitor.h
+/// \file tipi/utility/generic_visitor.hpp
 
 #ifndef UTILITY_GENERIC_VISITOR_H__
 #define UTILITY_GENERIC_VISITOR_H__
@@ -31,6 +31,11 @@ namespace utility {
   template < typename S, typename R >
   class visitor_interface;
 
+  /**
+   * \brief Interface used by visitors to visit
+   * 
+   * A visitable class needs to derive from this class.
+   **/
   class visitable {
 
     public:

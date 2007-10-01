@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/visitors.h
+/// \file tipi/visitors.hpp
 
 #ifndef TIPI_VISITORS_H__
 #define TIPI_VISITORS_H__
@@ -72,15 +72,21 @@ namespace tipi {
       search_visitor();
   };
 
+  /**
+   * \brief Operations on hierarchies using visitors
+   **/
   class visitors {
 
     private:
 
+      /// \cond INTERNAL_DOCS
+      /// Any type that is not std::string or boost::filesystem::path
       template < typename U >
       struct not_string_or_path : public boost::enable_if_c < boost::mpl::not_<
                                            boost::mpl::or_< boost::is_same < U, std::string >,
                                               boost::is_same < U, boost::filesystem::path > > >::value, void > {
       };
+      /// \end
 
     public:
 

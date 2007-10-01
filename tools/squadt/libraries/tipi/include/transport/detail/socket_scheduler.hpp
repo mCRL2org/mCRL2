@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/transport/detail/socket_scheduler.h
+/// \file transport/detail/socket_scheduler.hpp
 
 #ifndef SOCKET_SCHEDULER_H
 #define SOCKET_SCHEDULER_H

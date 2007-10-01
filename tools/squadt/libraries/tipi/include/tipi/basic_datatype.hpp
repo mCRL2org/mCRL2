@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/basic_datatype.h
+/// \file tipi/basic_datatype.hpp
 
 #ifndef TIPI_BASIC_DATATYPE
 #define TIPI_BASIC_DATATYPE
@@ -30,6 +30,7 @@ namespace tipi {
 
   namespace datatype {
 
+    /** \brief Base class for classes that specify types */
     class basic_datatype : public ::utility::visitable {
 
       public:
@@ -150,6 +151,9 @@ namespace tipi {
         inline bool validate(std::string const& value) const;
     };
 
+    /**
+     * \brief Sub range of the integers that makes up the Natural numbers
+     **/
     class natural : public datatype::integer {
       template < typename R, typename S >
       friend class ::utility::visitor;
@@ -160,6 +164,9 @@ namespace tipi {
         natural();
     };
 
+    /**
+     * \brief Sub range of the integers that makes up the positive Natural numbers
+     **/
     class positive_integer : public datatype::integer {
       template < typename R, typename S >
       friend class ::utility::visitor;
@@ -170,6 +177,9 @@ namespace tipi {
         positive_integer();
     };
 
+    /**
+     * \brief Sub range of the integers that makes up the negative integers
+     **/
     class negative_integer : public datatype::integer {
       template < typename R, typename S >
       friend class ::utility::visitor;
@@ -186,6 +196,9 @@ namespace tipi {
      * The range is specified by a minimum and a maximum. The minimum, of
      * course, must be smaller than the maximum. The default value is taken to
      * be the minimum, unless it is specified at construction time.
+     *
+     * \note The current implementation is based on commonly used finite
+     * representations (double).
      **/
     class real : public basic_datatype {
       template < typename R, typename S >
@@ -242,6 +255,9 @@ namespace tipi {
         inline bool validate(std::string const& value) const;
     };
 
+    /**
+     * \brief Sub range of the reals that makes up the positive reals
+     **/
     class positive_real : public datatype::real {
       template < typename R, typename S >
       friend class ::utility::visitor;
@@ -252,6 +268,9 @@ namespace tipi {
         positive_real();
     };
 
+    /**
+     * \brief Sub range of the reals that makes up the negative reals
+     **/
     class negative_real : public datatype::real {
       template < typename R, typename S >
       friend class ::utility::visitor;

@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/controller.h
+/// \file tipi/controller.hpp
 
 #ifndef TIPI_CONTROLLER_H
 #define TIPI_CONTROLLER_H
@@ -29,7 +29,7 @@ namespace tipi {
     class capabilities;
 
     /**
-     * \class communicator controller.h
+     * \class communicator
      * \brief The main interface to the protocol (controller-side)
      **/
     class communicator : public messaging::basic_messenger< tipi::message > {

@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/message.h
+/// \file tipi/detail/message.hpp
 
 #ifndef TIPI_MESSAGE_H
 #define TIPI_MESSAGE_H

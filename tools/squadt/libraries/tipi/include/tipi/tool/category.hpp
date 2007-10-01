@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/tool/category.h
+/// \file tipi/tool/category.hpp
 
 #ifndef TIPI_CATEGORY_H__
 #define TIPI_CATEGORY_H__
@@ -22,6 +22,9 @@ namespace tipi {
 
     class capabilities;
 
+    /**
+     * \brief Category used to classify functionality of tools
+     **/
     class category {
       friend class tipi::tool::capabilities;
       friend class tipi::configuration;

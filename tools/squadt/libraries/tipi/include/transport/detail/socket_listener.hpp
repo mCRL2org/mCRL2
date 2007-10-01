@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/transport/detail/socket_listener.h
+/// \file transport/detail/socket_listener.hpp
 
 #ifndef SOCKET_LISTENER_H
 #define SOCKET_LISTENER_H
@@ -15,6 +15,7 @@
 #include <transport/detail/listener.tcc>
 
 namespace transport {
+  /// \cond INTERNAL_DOCS
   namespace listener {
 
     class socket_listener : public basic_listener {
@@ -54,6 +55,7 @@ namespace transport {
       acceptor.close();
     }
   }
+  /// \endcond
 }
 
 #endif

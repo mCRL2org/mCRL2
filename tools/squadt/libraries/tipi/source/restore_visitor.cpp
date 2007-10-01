@@ -101,7 +101,6 @@ namespace tipi {
 
     return (s);
   }
-  /// \endcond
 
   /**
    * \brief Constructor for reading from a ticpp parse tree
@@ -125,9 +124,11 @@ namespace tipi {
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
         ::utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < ::utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
+  /// \endcond
 }
 
 namespace utility {
+  /// \cond INTERNAL_DOCS
 
   /**
    * \param[in] o the tipi::message object to restore
@@ -645,6 +646,9 @@ namespace utility {
     tree->GetAttribute("enabled", &c.m_enabled, false);
   }
 
+  /**
+   * Restores an element by reference
+   **/
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::box&, tipi::display::element_for_id&);
@@ -676,7 +680,7 @@ namespace utility {
 
   /**
    * \param[in] c a tipi::layout::horizontal_box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
    **/
   template <>
   template <>
@@ -686,7 +690,7 @@ namespace utility {
 
   /**
    * \param[in] c a tipi::layout::vertical_box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
    **/
   template <>
   template <>
@@ -694,6 +698,10 @@ namespace utility {
     visit(static_cast < tipi::layout::box& > (c), element_by_id);
   }
 
+  /**
+   * \param[in] c a pointer to the tipi::layout::manager object to restore
+   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
+   **/
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::element >& c, tipi::display::element_for_id& element_by_id);
@@ -871,4 +879,5 @@ namespace utility {
 
     return true;
   }
+  /// \endcond
 }

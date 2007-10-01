@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/layout_elements.h
+/// \file tipi/detail/layout_elements.hpp
 
 #ifndef LAYOUT_ELEMENTS_H
 #define LAYOUT_ELEMENTS_H

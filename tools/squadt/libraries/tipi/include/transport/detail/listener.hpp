@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/transport/detail/listener.h
+/// \file transport/detail/listener.hpp
 
 #ifndef TRANSPORT_LISTENER_H_
 #define TRANSPORT_LISTENER_H_
