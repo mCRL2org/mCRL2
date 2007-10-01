@@ -84,7 +84,7 @@ namespace mcrl2 {
           /** \brief finalisation after termination signal has been received */
           virtual void finalise();
   
-          /** \void virtual destructor */
+          /** \brief virtual destructor */
           virtual ~tool_interface();
   
         private:

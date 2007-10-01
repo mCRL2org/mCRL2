@@ -21,6 +21,8 @@
 namespace tipi {
 
   /// \cond INTERNAL_DOCS
+
+  /// \cond IMPLEMENTATION_DOCS
   class store_visitor_impl;
   /// \endcond
 
@@ -39,7 +41,7 @@ namespace tipi {
       store_visitor(std::ostream&);
   };
 
-  /// \cond INTERNAL_DOCS
+  /// \cond IMPLEMENTATION_DOCS
   class restore_visitor_impl;
   /// \endcond
 
@@ -59,7 +61,7 @@ namespace tipi {
       restore_visitor(T&);
   };
 
-  /// \cond INTERNAL_DOCS
+  /// \cond IMPLEMENTATION_DOCS
   class search_visitor_impl;
   /// \endcond
 
@@ -71,6 +73,7 @@ namespace tipi {
       /** \brief Constructor */
       search_visitor();
   };
+  /// \endcond
 
   /**
    * \brief Operations on hierarchies using visitors
@@ -79,14 +82,16 @@ namespace tipi {
 
     private:
 
-      /// \cond INTERNAL_DOCS
-      /// Any type that is not std::string or boost::filesystem::path
+      /** \cond INTERNAL_DOCS
+       *
+       * Any type that is not std::string or boost::filesystem::path
+       */
       template < typename U >
       struct not_string_or_path : public boost::enable_if_c < boost::mpl::not_<
                                            boost::mpl::or_< boost::is_same < U, std::string >,
                                               boost::is_same < U, boost::filesystem::path > > >::value, void > {
       };
-      /// \end
+      /// \endcond
 
     public:
 

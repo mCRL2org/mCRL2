@@ -107,6 +107,7 @@ namespace mcrl2 {
       /**
        * \param[in] l the layout manager to which the button should be attached
        * \param[in] v the value to associate the button with
+       * \param[in] s the label of the radio button
        **/
       template < typename T >
       template < typename M >
@@ -132,6 +133,8 @@ namespace mcrl2 {
       /**
        * \param[in] l the layout manager to which the button should be attached
        * \param[in] v the value to associate the button with
+       * \param[in] s the label of the radio button
+       * \param[in] b whether the new button should be selected
        **/
       template < typename T >
       template < typename M >
