@@ -1,0 +1,36 @@
+import doxygen ;
+import quickbook ;
+
+doxygen pbesdoc
+     : [ glob ../include/mcrl2/pbes/*.h ]
+     : <prefix>mcrl2
+       <doxygen:param>EXTRACT_ALL=YES
+       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
+       <doxygen:param>EXTRACT_PRIVATE=NO
+       <doxygen:param>ENABLE_PREPROCESSING=YES
+       <doxygen:param>MACRO_EXPANSION=YES
+       <doxygen:param>EXPAND_ONLY_PREDEF=YES
+       <doxygen:param>SEARCH_INCLUDES=YES
+       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
+     ;
+
+xml manual
+    :
+        manual.qbk
+    ;
+
+boostbook standalone
+    :
+        manual
+    :
+        <xsl:param>nav.layout=none
+        <xsl:param>boost.image.src=images/mcrl2.png
+        <xsl:param>boost.image.alt=mCRL2
+        <xsl:param>boost.image.w=294
+        <xsl:param>boost.image.h=70
+        <xsl:param>boost.root=../..
+        <xsl:param>toc.max.depth=3
+        <xsl:param>toc.section.depth=3
+        <xsl:param>chunk.section.depth=3
+        <dependency>pbesdoc
+    ;

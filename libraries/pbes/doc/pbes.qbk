@@ -1,0 +1,73 @@
+[section: Parameterised Boolean Equation Systems]
+A Parameterised Boolean Equation System (PBES) is a triple ['(E, I, V)],
+with /E/ an ordered sequence of equations of the form
+
+__pbes__
+
+where
+
+* __sigmai is either a least fixpoint symbol __mu or a greatest fixpoint symbol __nu
+* __Xi is a parameterised propositional variable
+* __di is a data variable of sort __Di
+* __phii is a pbes expression
+
+with /I/ an instantiation of a parameterised propositional variable referred to as the ['initial state],
+and with /V/ a set of data variables that are referred to as the ['free variables] of the pbes.
+The free variables are unbound data variables that can have arbitrary values.
+
+A ['pbes expression] is an expression that satisfies the following grammar:
+
+__pbes_expression__
+
+Here /c/ is a data term of sort /Bool/, /X/ is a parameterised propositional variable,
+/x/ is a variable of sort /D/ and /d/ is a data expression.
+
+The variables __Xi ['(i = 1...m)] are called the ['binding variables] of the pbes.
+
+[note
+Free variables have local scope. So if free variables of the same name and
+sort appear in two different PBESses, they must be interpreted as unrelated.
+]
+
+[section: Class overview]
+The following classes are defined for parameterised boolean equation systems
+
+* [^class propositional_variable]
+* [^class propositional_variable_instantiation]
+* [^class pbes_equation]
+* [^class pbes_expression]
+* [^template<typename Container> class pbes]
+
+The template argument =Container= of a =pbes= is the container type of the
+pbes equations. By default it is of type =atermpp::vector<pbes_equation>=. It
+is expected that =Container= satisfies the general interface requirements for
+containers as described in the C++ Standard Library.
+
+[note
+In the interface of the =pbes= class a data specification is present as an
+additional attribute. This is for completeness only. It is assumed that all
+data variables and data expressions that appear in a PBES are defined in
+terms of this data specification.
+]
+ 
+[endsect] [/ Class overview]
+
+[section: Well typedness constraints]
+A PBES must satisfy the following well typedness constraints:
+
+* the sorts occurring in the free variables of the equations are declared in the data specification
+* the sorts occurring in the binding variable parameters are declared in the data specification 
+* the sorts occurring in the quantifier variables of the equations are declared in the data specification 
+* the binding variables of the equations have unique names (well formedness)
+* the free variables occurring in the equations are declared in `free_variables()`
+* the free variables occurring in the equations with the same name are identical
+* the declared free variables and the quantifier variables occurring in the equations have different names
+[/ * the data specification is well typed]
+
+[endsect] [/ Well typedness constraints]
+
+[section: Algorithms]
+
+[endsect] [/ Algorithms]
+
+[endsect] [/ Parameterised Boolean Equation Systems]
