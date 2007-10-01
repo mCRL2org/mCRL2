@@ -89,94 +89,6 @@ std::set<identifier_string> propositional_variable_names(Term t)
   return result;
 }
 
-/// Fresh identifier generator that generates the names X, Y, Z, X0, Y0, Z0, X1, ...
-class XYZ_identifier_generator
-{
-  protected:
-    atermpp::set<identifier_string> m_identifiers;
-    int m_index; // index of last generated identifier
-    char m_char; // character of last generated identifier
-
-    /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
-    std::string next()
-    {
-      switch (m_char) {
-        case 'X' : {
-          m_char = 'Y';
-          break;
-        }
-        case 'Y' : {
-          m_char = 'Z';
-          break;
-        }
-        case 'Z' : {
-          m_char = 'X';
-          m_index++;
-          break;
-        }
-      }
-      return m_index < 0 ? std::string(1, m_char) : str(boost::format("%1%%2%") % m_char % m_index);
-    }
-
-  public:
-    XYZ_identifier_generator()
-     : m_index(-2), m_char('Z')
-    { }
-
-    template <typename Term>
-    XYZ_identifier_generator(Term context)
-     : m_index(-2), m_char('Z')
-    {
-      m_identifiers = propositional_variable_names(context);
-    }
-
-    /// Set a new context.
-    template <typename Term>
-    void set_context(Term context)
-    {
-      m_identifiers = identifiers(context);
-    }
-
-    /// Add term t to the context.
-    template <typename Term>
-    void add_to_context(Term t)
-    {
-      std::set<identifier_string> ids = propositional_variable_names(t);
-      std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
-    }
-
-    /// Add all terms of the sequence [first .. last) to the context.
-    template <typename Iter>
-    void add_to_context(Iter first, Iter last)
-    {
-      for (Iter i = first; i != last; ++i)
-      {
-        std::set<identifier_string> ids = propositional_variable_names(*i);
-        std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
-      }
-    }
-
-    /// \brief Returns the next identifier in the range X, Y, Z, X0, Y0, Z0, X1, ...
-    /// and that doesn't appear in the context. The returned variable is added to
-    /// the context.
-    identifier_string operator()()
-    {
-      std::string name;
-      do {
-        name = next();
-      } while (m_identifiers.find(name) != m_identifiers.end());
-      return identifier_string(name);
-    }
-
-    /// \brief Returns the next identifier in the range X, Y, Z, X0, Y0, Z0, X1, ...
-    /// and that doesn't appear in the context. The returned variable is added to
-    /// the context.
-    identifier_string operator()(identifier_string /* dummy */)
-    {
-      return (*this)();
-    }
-};
-
 /// \brief Returns the variables corresponding to mu_params(f)
 inline
 data_variable_list mu_variables(state_formula f)
@@ -654,13 +566,13 @@ namespace pbes_timed
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       return p::exists(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
     } else if (is_exists(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       return p::forall(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_bot[timed] error: unknown action formula ") + b.to_string());
@@ -694,13 +606,13 @@ namespace pbes_timed
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       return p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     } else if (is_exists(b)) {
       data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data_variable_list y = fresh_variables(x, find_variable_names(make_list(a.actions(), a.time(), b)));
+      data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       return p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     }
     throw std::runtime_error(std::string("sat_top[timed] error: unknown action formula ") + b.to_string());
@@ -727,11 +639,11 @@ namespace pbes_timed
     } else if (s::is_or(f)) {
       return or_(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = find_variable_names(s::quant_vars(f));
+      std::set<std::string> names = find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       return forall(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, T, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = find_variable_names(s::quant_vars(f));
+      std::set<std::string> names = find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       return exists(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, T, context));
     } else if (s::is_must(f)) {
@@ -750,7 +662,7 @@ namespace pbes_timed
         data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, T, context);
-        std::set<std::string> rhs_context = find_variable_names(rhs);
+        std::set<std::string> rhs_context = find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -784,7 +696,7 @@ namespace pbes_timed
         data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, T, context);
-        std::set<std::string> rhs_context = find_variable_names(rhs);
+        std::set<std::string> rhs_context = find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -846,27 +758,28 @@ namespace pbes_timed
   atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps, data_variable T)
   {
     using namespace lps::state_frm;
+    atermpp::vector<pbes_equation> result;
   
     if (is_data(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_true(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_false(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_and(f)) {
-      return E(f0, lhs(f), lps, T) + E(f0, rhs(f), lps, T);
+      result = E(f0, lhs(f), lps, T) + E(f0, rhs(f), lps, T);
     } else if (is_or(f)) {
-      return E(f0, lhs(f), lps, T) + E(f0, rhs(f), lps, T);
+      result = E(f0, lhs(f), lps, T) + E(f0, rhs(f), lps, T);
     } else if (is_forall(f)) {
-      return E(f0, quant_form(f), lps, T);
+      result = E(f0, quant_form(f), lps, T);
     } else if (is_exists(f)) {
-      return E(f0, quant_form(f), lps, T);
+      result = E(f0, quant_form(f), lps, T);
     } else if (is_must(f)) {
-      return E(f0, mod_form(f), lps, T);
+      result = E(f0, mod_form(f), lps, T);
     } else if (is_may(f)) {
-      return E(f0, mod_form(f), lps, T);
+      result = E(f0, mod_form(f), lps, T);
     } else if (is_var(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_mu(f) || (is_nu(f))) {
       identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
@@ -877,15 +790,17 @@ namespace pbes_timed
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, T, context);
       pbes_equation e(sigma, v, expr);
-      return atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
+      result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
     } else if (is_yaled_timed(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_delay_timed(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
+    } else {
+      throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
     }
-    throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
-    return atermpp::vector<pbes_equation>();
+    return result;
   }
+
 } // namespace pbes_timed
 
 namespace pbes_untimed
@@ -916,7 +831,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a, b)));
         return p::exists(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -926,7 +841,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a, b)));
         return p::forall(y, sat_bot(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -958,7 +873,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a, b)));
         return p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -968,7 +883,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data_variable_list y = fresh_variables(x, find_variable_names(make_list(a, b)));
+        data_variable_list y = fresh_variables(x, find_variable_name_strings(make_list(a, b)));
         return p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -997,11 +912,11 @@ namespace pbes_untimed
     } else if (s::is_or(f)) {
       return or_(RHS(f0, s::lhs(f), lps, context), RHS(f0, s::rhs(f), lps, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = find_variable_names(s::quant_vars(f));
+      std::set<std::string> names = find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       return forall(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = find_variable_names(s::quant_vars(f));
+      std::set<std::string> names = find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       return exists(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, context));
     } else if (s::is_must(f)) {
@@ -1019,7 +934,7 @@ namespace pbes_untimed
         data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, context);
-        std::set<std::string> rhs_context = find_variable_names(rhs);
+        std::set<std::string> rhs_context = find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -1048,7 +963,7 @@ namespace pbes_untimed
         data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, context);
-        std::set<std::string> rhs_context = find_variable_names(rhs);
+        std::set<std::string> rhs_context = find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -1082,27 +997,28 @@ namespace pbes_untimed
   atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps)
   {
     using namespace lps::state_frm;
-  
+    atermpp::vector<pbes_equation> result;
+
     if (is_data(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_true(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_false(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_and(f)) {
-      return E(f0, lhs(f), lps) + E(f0, rhs(f), lps);
+      result = E(f0, lhs(f), lps) + E(f0, rhs(f), lps);
     } else if (is_or(f)) {
-      return E(f0, lhs(f), lps) + E(f0, rhs(f), lps);
+      result = E(f0, lhs(f), lps) + E(f0, rhs(f), lps);
     } else if (is_forall(f)) {
-      return E(f0, quant_form(f), lps);
+      result = E(f0, quant_form(f), lps);
     } else if (is_exists(f)) {
-      return E(f0, quant_form(f), lps);
+      result = E(f0, quant_form(f), lps);
     } else if (is_must(f)) {
-      return E(f0, mod_form(f), lps);
+      result = E(f0, mod_form(f), lps);
     } else if (is_may(f)) {
-      return E(f0, mod_form(f), lps);
+      result = E(f0, mod_form(f), lps);
     } else if (is_var(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_mu(f) || (is_nu(f))) {
       identifier_string X = mu_name(f);
       data_variable_list xf = mu_variables(f);
@@ -1113,110 +1029,18 @@ namespace pbes_untimed
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, context);
       pbes_equation e(sigma, v, expr);
-      return atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
+      result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
     } else if (is_yaled_timed(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
     } else if (is_delay_timed(f)) {
-      return atermpp::vector<pbes_equation>();
+      // do nothing
+    } else {
+      throw std::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
     }
-    throw std::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
-    return atermpp::vector<pbes_equation>();
+    return result;
   }
+
 } // namespace pbes_untimed
-
-/// Removes name clashes in nested fix point variables like in the formula mu X. mu X. ...
-/// @param generator Generates names for fresh variables.
-/// @param replacements replacements for previous occurrences of propositional variables.
-template <typename IdentifierGenerator>
-state_formula remove_name_clashes_impl(state_formula f, IdentifierGenerator& generator, std::map<identifier_string, identifier_string>& replacements)
-{
-  using namespace lps::state_frm;
-
-  if (is_data(f)) {
-    return f;
-  } else if (is_true(f)) {
-    return f;
-  } else if (is_false(f)) {
-    return f;
-  } else if (is_not(f)) {
-    return not_(remove_name_clashes_impl(not_arg(f), generator, replacements));
-  } else if (is_and(f)) {
-    return and_(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
-  } else if (is_or(f)) {
-    return or_(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
-  } else if (is_imp(f)) {
-    return imp(remove_name_clashes_impl(lhs(f), generator, replacements), remove_name_clashes_impl(rhs(f), generator, replacements));
-  } else if (is_forall(f)) {
-    return forall(quant_vars(f), remove_name_clashes_impl(quant_form(f), generator, replacements));
-  } else if (is_exists(f)) {
-    return exists(quant_vars(f), remove_name_clashes_impl(quant_form(f), generator, replacements));
-  } else if (is_must(f)) {
-    return must(mod_act(f), remove_name_clashes_impl(mod_form(f), generator, replacements));
-  } else if (is_may(f)) {
-    return may(mod_act(f), remove_name_clashes_impl(mod_form(f), generator, replacements));
-  } else if (is_yaled(f)) {
-    return f;
-  } else if (is_delay(f)) {
-    return f;
-  } else if (is_yaled_timed(f)) {
-    return f;
-  } else if (is_delay_timed(f)) {
-    return f;
-  } else if (is_var(f)) {
-    assert(replacements.find(var_name(f)) != replacements.end());
-    return var(replacements[var_name(f)], var_val(f));
-  } else if (is_mu(f) || is_nu(f)) {
-    identifier_string X = mu_name(f);
-    identifier_string X1 = (replacements.find(X) == replacements.end() ? X : generator(X));
-    replacements[X] = X1;
-    state_formula f1 = remove_name_clashes_impl(mu_form(f), generator, replacements);
-    data_assignment_list p1 = mu_params(f);
-    return is_mu(f) ? mu(X1, p1, f1) : nu(X1, p1, f1);
-  }
-  assert(false);
-  return f;  
-}
-
-/// Returns a formula that is equivalent to f and uses no variables occurring in spec.
-inline
-state_formula remove_name_clashes(specification spec, state_formula f)
-{
-  // find all data variables in spec
-  std::set<data_variable> variables = lps::find_variables(spec);
-   
-  // find all data variables in f
-  std::set<data_variable> formula_variables = lps::find_variables(f);
-
-  // compute the intersection and put it in x
-  std::vector<data_variable> x;
-  std::set_intersection(variables.begin(),
-                        variables.end(),
-                        formula_variables.begin(),
-                        formula_variables.end(),
-                        std::back_inserter(x)
-                       );
-
-  // generate a vector y with replacements
-  fresh_variable_generator generator;
-  for (std::set<data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    generator.add_to_context(*i);
-  }
-  for (std::set<data_variable>::iterator i = formula_variables.begin(); i != formula_variables.end(); ++i)
-  {
-    generator.add_to_context(*i);
-  }
-  std::vector<data_variable> y;
-  for (std::vector<data_variable>::iterator i = x.begin(); i != x.end(); ++i)
-  {
-    y.push_back(generator(*i));
-  }
-
-  state_formula formula = f.substitute(make_list_substitution(x, y));
-  std::map<identifier_string, identifier_string> replacements;
-  XYZ_identifier_generator generator1(make_list(formula, spec));
-  return remove_name_clashes_impl(formula, generator1, replacements);
-}
 
 } // namespace detail
 

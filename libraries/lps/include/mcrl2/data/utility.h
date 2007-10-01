@@ -142,9 +142,25 @@ std::set<data_variable> find_variables(Term t)
   return variables;
 }
 
-/// \brief Returns all names data variables that occur in the term t
+/// \brief Returns all names of data variables that occur in the term t
 template <typename Term>
-std::set<std::string> find_variable_names(Term t)
+std::set<identifier_string> find_variable_names(Term t)
+{
+  // find all data variables in t
+  std::set<data_variable> variables;
+  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
+
+  std::set<identifier_string> result;
+  for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+  {
+    result.insert(j->name());
+  }
+  return result;
+}
+
+/// \brief Returns all names of data variables that occur in the term t
+template <typename Term>
+std::set<std::string> find_variable_name_strings(Term t)
 {
   // find all data variables in t
   std::set<data_variable> variables;

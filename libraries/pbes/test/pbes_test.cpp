@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "atermpp/make_list.h"
+#include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
@@ -40,6 +41,48 @@ const std::string SPECIFICATION =
 "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
 "                                         \n"
 "init P(0);                               \n";
+
+const std::string ABP_SPECIFICATION =
+"% This file contains the alternating bit protocol, as described in W.J.    \n"
+"% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
+"%                                                                          \n"
+"% The only exception is that the domain D consists of two data elements to \n"
+"% facilitate simulation.                                                   \n"
+"                                                                           \n"
+"sort                                                                       \n"
+"  D     = struct d1 | d2;                                                  \n"
+"  Error = struct e;                                                        \n"
+"                                                                           \n"
+"act                                                                        \n"
+"  r1,s4: D;                                                                \n"
+"  s2,r2,c2: D # Bool;                                                      \n"
+"  s3,r3,c3: D # Bool;                                                      \n"
+"  s3,r3,c3: Error;                                                         \n"
+"  s5,r5,c5: Bool;                                                          \n"
+"  s6,r6,c6: Bool;                                                          \n"
+"  s6,r6,c6: Error;                                                         \n"
+"  i;                                                                       \n"
+"                                                                           \n"
+"proc                                                                       \n"
+"  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
+"  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
+"                                                                           \n"
+"  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
+"                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
+"                                                                           \n"
+"  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
+"                                                                           \n"
+"  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
+"                                                                           \n"
+"init                                                                       \n"
+"  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
+"    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
+"        S(true) || K || L || R(true)                                       \n"
+"    )                                                                      \n"
+"  );                                                                       \n"
+;
+
+const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 const std::string MPSU_SPECIFICATION =
 "% This file describes a controller for a simplified Movable Patient                   \n"
@@ -158,26 +201,27 @@ void test_normalize()
   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 }
 
-void test_xyz_generator()
-{
-  XYZ_identifier_generator generator(propositional_variable("X1(d:D)"));
-  identifier_string x;
-  x = generator(); BOOST_CHECK(std::string(x) == "X");
-  x = generator(); BOOST_CHECK(std::string(x) == "Y");
-  x = generator(); BOOST_CHECK(std::string(x) == "Z");
-  x = generator(); BOOST_CHECK(std::string(x) == "X0");
-  x = generator(); BOOST_CHECK(std::string(x) == "Y0");
-  x = generator(); BOOST_CHECK(std::string(x) == "Z0");
-  x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
-}
+// void test_xyz_generator()
+// {
+//   XYZ_identifier_generator generator(propositional_variable("X1(d:D)"));
+//   identifier_string x;
+//   x = generator(); BOOST_CHECK(std::string(x) == "X");
+//   x = generator(); BOOST_CHECK(std::string(x) == "Y");
+//   x = generator(); BOOST_CHECK(std::string(x) == "Z");
+//   x = generator(); BOOST_CHECK(std::string(x) == "X0");
+//   x = generator(); BOOST_CHECK(std::string(x) == "Y0");
+//   x = generator(); BOOST_CHECK(std::string(x) == "Z0");
+//   x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
+// }
 
 void test_state_formula()
 {
   specification spec    = mcrl22lps(SPECIFICATION);
   state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
-  std::map<identifier_string, identifier_string> replacements;
-  set_identifier_generator generator(make_list(formula, spec));
-  formula = remove_name_clashes_impl(formula, generator, replacements);
+  set_identifier_generator generator;
+  generator.add_identifiers(identifiers(spec));
+  generator.add_identifiers(find_variable_names(formula));
+  formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
 }
@@ -281,16 +325,26 @@ void test_pbes_expression()
   BOOST_CHECK(x1 == x2);
 }
 
+void test_trivial()
+{
+  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed); 
+  BOOST_CHECK(p.is_well_typed());
+}
+
 int test_main(int argc, char* argv[])
 {
   aterm bottom_of_stack;
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
 
+  test_trivial();
   test_pbes();
   test_normalize();
   test_state_formula();
-  test_xyz_generator();
+  // test_xyz_generator();
   // test_free_variables();
   test_pbes_expression_builder();
   test_quantifier_rename_builder();

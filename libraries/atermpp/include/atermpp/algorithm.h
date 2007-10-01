@@ -115,6 +115,49 @@ namespace atermpp
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
 
+  /// \internal
+  template <typename ReplaceFunction, typename CheckFunction>
+  struct checked_replace_helper
+  {
+    const CheckFunction& f_;
+    const ReplaceFunction& r_;
+    
+    checked_replace_helper(const CheckFunction& f, const ReplaceFunction& r)
+      : f_(f), r_(r)
+    {}
+    
+    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    {
+      if (f_(t))
+      {
+        return std::pair<aterm_appl, bool>(r_(t), false); // do not continue the recursion
+      }
+      else
+      {
+        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      }
+    }
+  };
+
+  /// Replaces subterms in the term t. Each subterm for which f(s) returns true
+  /// is replaced by r(s).
+  ///
+  /// The CheckFunction f and the ReplaceFunction r have the following signature:
+  ///
+  /// aterm_appl x;
+  /// bool b = f(x);
+  /// std::pair<aterm_appl, bool> result = r(x);
+  ///
+  /// result.first  is the result r(x) of the replacement
+  /// result.second denotes if the recursion should be continued
+  ///
+  template <typename Term, typename ReplaceFunction, typename CheckFunction>
+  Term checked_replace(Term t, CheckFunction f, ReplaceFunction r)
+  {
+    ATerm x = detail::partial_replace_impl(aterm_traits<Term>::term(t), checked_replace_helper<ReplaceFunction, CheckFunction>(f, r));
+    return Term(reinterpret_cast<ATermAppl>(x));   
+  }
+
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ALGORITHM_H

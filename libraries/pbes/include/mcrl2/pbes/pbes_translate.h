@@ -11,11 +11,14 @@
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
 #include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
+#include "mcrl2/data/xyz_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace lps {
   
@@ -30,8 +33,21 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   using namespace detail;
   using namespace state_frm;
 
-  // rename variables in f, to prevent name clashes with variables in spec
-  state_formula f = remove_name_clashes(spec, formula);
+  state_formula f = formula;
+  std::set<identifier_string> formula_variable_names = find_variable_names(formula);
+  std::set<identifier_string> spec_variable_names = find_variable_names(spec);
+  std::set<identifier_string> spec_names = identifiers(spec);
+
+  // rename data variables in f, to prevent name clashes with data variables in spec 
+  set_identifier_generator generator;
+  generator.add_identifiers(spec_variable_names);
+  f = rename_data_variables(f, generator);
+
+  // rename predicate variables in f, to prevent name clashes
+  xyz_identifier_generator xyz_generator;
+  xyz_generator.add_identifiers(spec_names);  
+  xyz_generator.add_identifiers(formula_variable_names);  
+  f = rename_predicate_variables(f, xyz_generator);
 
   // remove occurrences of ! and =>
   f = normalize(f);

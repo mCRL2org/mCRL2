@@ -11,7 +11,7 @@
 #define MCRL2_DATA_IDENTIFIER_GENERATOR_H
 
 #include <string>
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 #include "mcrl2/basic/identifier_string.h"
 
 namespace lps {

@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/utility.h
+/// \file mcrl2/lps/detail/data_utility.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_LPS_DETAIL_DATA_UTILITY_H
