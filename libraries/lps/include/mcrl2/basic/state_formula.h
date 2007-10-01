@@ -16,7 +16,9 @@
 #include <cassert>
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
+#include "atermpp/algorithm.h"
 #include "mcrl2/basic/regular_formula.h"
+#include "mcrl2/basic/action_formula.h"
 #include "mcrl2/data/data.h"
 
 namespace lps {
@@ -66,6 +68,10 @@ class state_formula: public aterm_appl
     {
       assert(detail::check_rule_StateFrm(m_term));
     }
+
+    /// Returns true if the formula is timed.
+    ///
+    bool has_time() const;
 
     /// \brief Applies a substitution to this state formula and returns the result
     /// The Substitution object must supply the method aterm operator()(aterm).
@@ -381,7 +387,22 @@ using atermpp::list_arg2;
     return arg2(t);
   }
 
+  /// \internal
+  struct is_timed_subterm
+  {
+    bool operator()(aterm_appl t) const
+    {
+      return is_delay_timed(t) || is_yaled_timed(t) || act_frm::is_at(t);
+    }
+  };
+
 } // namespace state_frm
+
+  inline
+  bool state_formula::has_time() const
+  {
+    return atermpp::find_if(*this, state_frm::is_timed_subterm()) != aterm();
+  }
 
 } // namespace lps
 

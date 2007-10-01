@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
+#include <algorithm>
 #include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/data/utility.h"
@@ -62,6 +63,11 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   linear_process lps = spec.process();
   atermpp::vector<pbes_equation> e;
 
+  if (formula.has_time() || spec.process().has_time())
+  {
+    timed = true;
+  }
+
   if (!timed)
   {
     using namespace pbes_untimed;
@@ -93,8 +99,16 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   }
   else
   {
-    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));
-    return pbes<>(spec.data(), e, free_variables, init);
+    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));  
+    data_specification data_spec = spec.data();   
+
+    // add sort real to data_spec (if needed)
+    if (std::find(spec.data().sorts().begin(), spec.data().sorts().end(), sort_expr::real()) == spec.data().sorts().end())
+    {
+      data_spec = set_sorts(data_spec, push_front(data_spec.sorts(), sort_expr::real()));
+    }
+
+    return pbes<>(data_spec, e, free_variables, init);
   }
 }
 

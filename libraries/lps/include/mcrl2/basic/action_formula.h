@@ -162,37 +162,37 @@ using atermpp::list_arg2;
   }
 
   /// \brief Returns true if the term t is a multi action
-  inline bool is_mult_act(action_formula t) { return gsIsMultAct(t); }
+  inline bool is_mult_act(aterm_appl t) { return gsIsMultAct(t); }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(action_formula t) { return gsIsDataExpr(t); }
+  inline bool is_data(aterm_appl t) { return gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(action_formula t) { return gsIsActTrue(t); }
+  inline bool is_true(aterm_appl t) { return gsIsActTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(action_formula t) { return gsIsActFalse(t); }
+  inline bool is_false(aterm_appl t) { return gsIsActFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(action_formula t) { return gsIsActNot(t); }
+  inline bool is_not(aterm_appl t) { return gsIsActNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(action_formula t) { return gsIsActAnd(t); }
+  inline bool is_and(aterm_appl t) { return gsIsActAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(action_formula t) { return gsIsActOr(t); }
+  inline bool is_or(aterm_appl t) { return gsIsActOr(t); }
 
   /// \brief Returns true if the term t is an implication expression
-  inline bool is_imp(action_formula t) { return gsIsActImp(t); }
+  inline bool is_imp(aterm_appl t) { return gsIsActImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(action_formula t) { return gsIsActForall(t); }
+  inline bool is_forall(aterm_appl t) { return gsIsActForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(action_formula t) { return gsIsActExists(t); }
+  inline bool is_exists(aterm_appl t) { return gsIsActExists(t); }
 
   /// \brief Returns true if the term t is an at expression
-  inline bool is_at(action_formula t) { return gsIsActAt(t); }
+  inline bool is_at(aterm_appl t) { return gsIsActAt(t); }
 
   /// \brief Returns the parameters of an action formula
   inline
