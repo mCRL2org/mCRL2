@@ -4,7 +4,11 @@
 //
 /// \file ./gauss.h
 
+#include <cstdio>
 #include <string>
+#include <iostream> 
+#include <sstream> 
+#include <fstream> 
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -17,7 +21,7 @@
 using namespace lps;
 
 
-atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, int bound);
+atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, int bound, std::string solver, std::string rewriter);
 
 pbes_equation solve_equation(pbes_equation e, 
 			     bool interactive, int bound, BDD_Prover* p);

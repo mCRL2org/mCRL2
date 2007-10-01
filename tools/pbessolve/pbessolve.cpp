@@ -28,6 +28,7 @@
 
 //LPS-Framework 
 #include "mcrl2/pbes/pbes.h" 
+#include "mcrl2/pbes/utility.h" 
 
 //#include "mcrl2/pbes/utility.h" 
 #include "mcrl2/data/data_operators.h" 
@@ -63,6 +64,8 @@ namespace po = boost::program_options;
 typedef struct{ 
   bool interactive; 
   int bound; 
+  string solver;
+  string rewriter;
 } t_tool_options; 
  
  
@@ -79,7 +82,7 @@ string infilename;
 static t_tool_options parse_command_line(int argc, char** argv); 
 pbes<> load_pbes();
 pbes_expression interpret_solution(pbes<> pbes_spec, 
-				   atermpp::vector<pbes_equation> es_solution); 
+				   atermpp::vector<pbes_equation> es_solution, string solver, string rewriter); 
 //======================================== 
  
  
@@ -110,13 +113,13 @@ int main(int argc, char** argv)
   //approximation process 
   atermpp::vector<pbes_equation> es_solution = 
     solve_pbes(pbes_spec, tool_options.interactive, 
-	       tool_options.bound); 
+	       tool_options.bound, tool_options.solver, tool_options.rewriter); 
    
   //Interpret the solution in the initial state
   pbes_expression sol_initial_state = 
-    interpret_solution(pbes_spec, es_solution); 
+    interpret_solution(pbes_spec, es_solution, tool_options.solver, tool_options.rewriter); 
    
-  cout << "PBES solution: " << pp(sol_initial_state).c_str() << "\n";
+  cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
 
   return 0; 
 } 
@@ -168,13 +171,16 @@ t_tool_options parse_command_line(int argc, char** argv)
 { 
   t_tool_options tool_options; 
   int opt_bound = 0; 
- 
+  string opt_solver;
+  string opt_rewriter;
   tool_options.interactive = false; 
    
   po::options_description desc; 
   desc.add_options() 
     ("interactive,i","turn on the manual guidance of the approximation process") 
     ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n")
+    ("solver,s",po::value<string>(&opt_solver)->default_value("lite"), "specify the solver to be used by the prover\nOptions are: ario, lite, fast")
+    ("rewriter,r",po::value<string>(&opt_rewriter)->default_value("inner"), "specify the rewriting strategy to be used by the prover\nOptions are: inner, innerc, jitty, jittyc")
     ("verbose,v",	"turn on the display of short intermediate messages") 
     ("debug,d",		"turn on the display of detailed intermediate messages") 
     ("version",		"display version information") 
@@ -225,8 +231,17 @@ t_tool_options parse_command_line(int argc, char** argv)
   if (vm.count("bound")) 
     opt_bound = vm["bound"].as<int>(); 
    
+  if (vm.count("solver")) 
+    opt_solver = vm["solver"].as<string>(); 
+
+  if (vm.count("rewriter")) 
+    opt_rewriter = vm["rewriter"].as<string>(); 
+
   infilename = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-"; 
   tool_options.bound = opt_bound; 
+  tool_options.solver = opt_solver;
+  tool_options.rewriter = opt_rewriter;
+
   return tool_options; 
 } 
 //======================================== 
@@ -242,7 +257,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 //======================================== 
 // evaluate solution in the initial state
 pbes_expression interpret_solution (pbes<> pbes_spec, 
-				    atermpp::vector<pbes_equation> es_solution) 
+				    atermpp::vector<pbes_equation> es_solution, string solver, string rewriter) 
 { 
 
   propositional_variable_instantiation s = pbes_spec.initial_state().variable();
@@ -263,11 +278,15 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
   data_variable_list dvl = e->variable().parameters();
   pbes_expression p = 
     e->formula().substitute(make_list_substitution(dvl,del));
-  
-  SMT_Solver_Type sol = solver_type_cvc_lite_fast;
-  BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), GS_REWR_INNER, 0, false, sol, false);
-  result = rewrite_pbes_expression(p, prover);
 
+
+  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_lite_fast:solver_type_cvc_lite);
+  RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
+    ((rewriter == "innerc") ? GS_REWR_INNERC : 
+     ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
+  BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), rew, 0, false, sol, false);
+
+  result = rewrite_pbes_expression(p, prover);
 
   // in the resulting expression, the predicate instances should
   // be further replaced with their solutions, etc.

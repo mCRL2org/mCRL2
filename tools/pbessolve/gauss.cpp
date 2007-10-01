@@ -85,9 +85,9 @@ sort_instantiator si;
 //======================================================================
 // Tries to solve the pbes by solving the predicate variables one by one,
 // starting with the one defined by the last equation.
-
+// The parameter 'rewriter' is in fact a rewriting strategy
 atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, 
-			   int bound)
+					  int bound, std::string solver, std::string rewriter)
 //========================
 
 {
@@ -98,12 +98,13 @@ atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive,
  
  atermpp::vector<pbes_equation> es_solution;
  
- Rewriter* rewriter = createRewriter(pbes_spec.data(), GS_REWR_INNER);
- // addrule__b_and_not_b(rewriter);
-
  lps::data_specification ds = pbes_spec.data();
- SMT_Solver_Type sol = solver_type_cvc_lite_fast;
- BDD_Prover* prover = new BDD_Prover(ds, GS_REWR_INNER, 0, false, sol, false);
+ SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_lite_fast:solver_type_cvc_lite);
+ RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
+   ((rewriter == "innerc") ? GS_REWR_INNERC : 
+    ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
+ 
+ BDD_Prover* prover = new BDD_Prover(ds, rew, 0, false, sol, false);
 
 
  // instantiate all finite sorts from the specification
@@ -155,7 +156,7 @@ atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive,
 	 es_solution.insert(es_solution.begin(), e_solution);
 	}
  
- delete rewriter; 
+ // delete rewriter; 
  // ~BDD_Prover(prover);
 
  return es_solution;
@@ -632,18 +633,26 @@ pbes_expression rewrite_pbes_expression_via_data(pbes_expression e, BDD_Prover* 
   gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
 #endif
 
+  
   if (is_data(e))
     {
 #ifdef debug
-      if (is_data(e)) gsVerboseMsg("data expression already!");
+      if (is_data(e)) gsVerboseMsg("data expression already!\n");
 #endif
       
       prover->set_formula((data_expression) e);
-      data_expression d = prover->get_bdd();
+      data_expression dd = prover->get_bdd();
+
+      // why is calling the rewriter again this needed?
+      // (i.e., why doesn't the prover already do this?)
+
+      Rewriter* r = prover->get_rewriter();;
+      data_expression d = r->rewrite(dd);
+
       // translate back to a pbes_expression
       return val(d);    
     }
-
+  
       
  data_expression de = pbes_to_data(e); 
  prover->set_formula(de); 
@@ -740,7 +749,9 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
   BDD_Prover* prover)
 {
   PESdeep++;
+#ifdef debug
   gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d start:     %s\n",PESdeep,pp(expr).c_str());
+#endif
 
   *fv = data_variable_list();
   *nq = 0;
@@ -847,8 +858,10 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
       expr_simplified = expr;
     }
 
+#ifdef debug
   gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d end:     %s\n %d quantifiers, free vars: %s\n",
 	       PESdeep,pp(expr_simplified).c_str(),*nq, pp(*fv).c_str());
+#endif
 
   PESdeep--;
    return expr_simplified; 
