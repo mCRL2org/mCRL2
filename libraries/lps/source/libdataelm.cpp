@@ -406,7 +406,7 @@ pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
 {
 	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
 
-	add_used(spec.initial_state().variable(),used_data);
+	add_used(spec.initial_state(),used_data);
 
 	atermpp::set<data_variable>::iterator vb = spec.free_variables().begin();
 	atermpp::set<data_variable>::iterator ve = spec.free_variables().end();

@@ -260,7 +260,7 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
 				    atermpp::vector<pbes_equation> es_solution, string solver, string rewriter) 
 { 
 
-  propositional_variable_instantiation s = pbes_spec.initial_state().variable();
+  propositional_variable_instantiation s = pbes_spec.initial_state();
   data_expression_list del = s.parameters();
   
   // find the solution equation for state s

@@ -365,7 +365,7 @@ pbes<> create_bes(pbes<> pbes_spec, t_tool_options tool_options)
 		instantiated_es.push_back(pbes_equation(i->symbol(), i->variable(), expr));
 	}
 
-	pbes_expression instantiated_is_pbe = pbes_expression(pbes_spec.initial_state().variable());
+	pbes_expression instantiated_is_pbe = pbes_expression(pbes_spec.initial_state());
 	propositional_variable_instantiation instantiated_is = propositional_variable_instantiation(instantiated_is_pbe.substitute(make_list_substitution(freevars, replace_freevars)));
 
 	pbes_spec = pbes<>(pbes_spec.data(), instantiated_es, instantiated_is);
@@ -489,7 +489,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	gsVerboseMsg("Using lazy approach...\n");
 	
-	propositional_variable_instantiation initial_state = pbes_spec.initial_state().variable();
+	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
 	atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
 
@@ -626,7 +626,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, t_tool_options tool_options)
 {
 	gsVerboseMsg("Using finite approach...\n");
 	
-	propositional_variable_instantiation initial_state = pbes_spec.initial_state().variable();
+	propositional_variable_instantiation initial_state = pbes_spec.initial_state();
 	atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
 	data_specification data = pbes_spec.data();
 
@@ -877,7 +877,7 @@ void save_pbes(pbes<> pbes_spec, t_tool_options tool_options)
 
 	// Check if the result is a BES or a PBES
 	bool is_bes = true;
-	if ( (!pbes_spec.is_bes()) && (!pbes_spec.initial_state().variable().parameters().empty() ) )
+	if ( (!pbes_spec.is_bes()) && (!pbes_spec.initial_state().parameters().empty() ) )
 	{
 		is_bes = false;
 		gsVerboseMsg("The result is a PBES.\n");

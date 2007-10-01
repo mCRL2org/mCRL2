@@ -92,7 +92,7 @@ class pbes
     data_specification m_data;
     Container m_equations;
     atermpp::set<data_variable> m_free_variables;
-    pbes_initializer m_initial_state;
+    propositional_variable_instantiation m_initial_state;
 
     ATerm term() const
     {
@@ -106,11 +106,18 @@ class pbes
       aterm_appl::iterator i = t.begin();
       m_data          = aterm_appl(*i++);
       aterm_appl eqn_spec = *i++;
-      m_initial_state = pbes_initializer(*i);
+      pbes_initializer init = pbes_initializer(*i);
 
+      m_initial_state = init.variable();
       data_variable_list freevars = eqn_spec(0);
+      data_variable_list init_freevars = init.free_variables();
       pbes_equation_list eqn = eqn_spec(1);
-      m_free_variables = atermpp::set<data_variable>(freevars.begin(), freevars.end());
+
+      // combine the free variables of the equations and the initial state
+      m_free_variables.clear();
+      m_free_variables.insert(freevars.begin(), freevars.end());
+      m_free_variables.insert(init_freevars.begin(), init_freevars.end());
+
       m_equations = Container(eqn.begin(), eqn.end());
     }
 
@@ -120,24 +127,11 @@ class pbes
 
     pbes(data_specification data,
          const Container& equations,
-         const atermpp::set<data_variable>& free_variables,
-         pbes_initializer initial_state)
-      :
-        m_data(data),
-        m_equations(equations),
-        m_free_variables(free_variables),
-        m_initial_state(initial_state)
-    {
-      assert(detail::check_rule_PBES(term()));
-    }
-
-    pbes(data_specification data,
-         const Container& equations,
          propositional_variable_instantiation initial_state)
       :
         m_data(data),
         m_equations(equations),
-        m_initial_state(pbes_initializer(data_variable_list(), initial_state))
+        m_initial_state(initial_state)
     {
       m_free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
       assert(detail::check_rule_PBES(term()));
@@ -151,7 +145,7 @@ class pbes
         m_data(data),
         m_equations(equations),
         m_free_variables(free_variables),
-        m_initial_state(pbes_initializer(data_variable_list(), initial_state))
+        m_initial_state(initial_state)
     {
       assert(detail::check_rule_PBES(term()));
     }
@@ -195,7 +189,7 @@ class pbes
     }
 
     /// Returns the initial state.
-    pbes_initializer initial_state() const
+    propositional_variable_instantiation initial_state() const
     {
       return m_initial_state;
     }
@@ -254,7 +248,7 @@ class pbes
       // convert the equation system to ATerm format
       data_variable_list free_variables(m_free_variables.begin(), m_free_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
-      return gsMakePBES(m_data, gsMakePBEqnSpec(free_variables, equations), m_initial_state);
+      return gsMakePBES(m_data, gsMakePBEqnSpec(free_variables, equations), pbes_initializer(free_variables, m_initial_state));
     }
 
     /// Returns the set of binding variables of the pbes, i.e. the
@@ -336,7 +330,6 @@ class pbes
     /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
     ///
     /// <li>the data specification is well typed</li>
-    /// <li>the initial state is well typed</li>
     /// </ul>
     ///
     /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
@@ -445,12 +438,6 @@ class pbes
 
       // check 8)
       if (!data().is_well_typed())
-      {
-        return false;
-      }
-
-      // check 9)
-      if (!initial_state().is_well_typed())
       {
         return false;
       }

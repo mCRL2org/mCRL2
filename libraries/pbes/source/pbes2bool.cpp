@@ -410,7 +410,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   }
 
   // Data rewriter
-  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state().variable(),
+  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
                      rewriter,
                      tool_options.opt_precompile_pbes));
   if (tool_options.opt_strategy>=on_the_fly)
