@@ -46,7 +46,7 @@ typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS 
 //t_tool_options represents the options of the tool
 typedef struct {
   bool pretty;
-  bool untimed;
+  bool timed;
   t_phase end_phase;
   string formfilename;
   string infilename;
@@ -123,7 +123,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static const char* option_selected_output_format;
     static const char* option_end_phase;
-    static const char* option_special_untimed_conversion;
+    static const char* option_timed;
 
   private:
 
@@ -153,7 +153,7 @@ const char* squadt_interactor::pbes_file_for_output   = "pbes_out";
 
 const char* squadt_interactor::option_selected_output_format     = "selected_output_format";
 const char* squadt_interactor::option_end_phase                  = "stop_after_phase";
-const char* squadt_interactor::option_special_untimed_conversion = "special_untimed_conversion";
+const char* squadt_interactor::option_timed                      = "use_timed_algorithm";
 
 squadt_interactor::squadt_interactor() {
   output_format_enumeration.reset(new tipi::datatype::enumeration("normal"));
@@ -170,8 +170,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  if (!c.option_exists(option_special_untimed_conversion)) {
-    c.add_option(option_special_untimed_conversion, false).
+  if (!c.option_exists(option_timed)) {
+    c.add_option(option_timed, false).
         set_argument_value< 0, tipi::datatype::boolean >(false, false);
   }
 
@@ -226,7 +226,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   checkbox* special_untimed_conversion = new checkbox("special untimed conversion",
-      c.get_option_argument< bool >(option_special_untimed_conversion));
+      c.get_option_argument< bool >(option_timed));
 
   top->add(special_untimed_conversion, margins(0,5,0,5));
 
@@ -258,7 +258,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     }
   }
 
-  c.add_option(option_special_untimed_conversion).set_argument_value< 0, tipi::datatype::boolean >(special_untimed_conversion->get_status());
+  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(special_untimed_conversion->get_status());
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
   c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (format_selector.get_selection()));
@@ -273,7 +273,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
   result &= c.input_exists(formula_file_for_input);
   result &= c.output_exists(pbes_file_for_output);
   result &= c.option_exists(option_end_phase);
-  result &= c.option_exists(option_special_untimed_conversion);
+  result &= c.option_exists(option_timed);
 
   return (result);
 }
@@ -282,7 +282,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
   tool_options.pretty           = static_cast < pbes_output_format > (c.get_option_argument< size_t >(option_selected_output_format)) != normal;
-  tool_options.untimed          = c.get_option_argument< bool >(option_special_untimed_conversion);
+  tool_options.timed            = c.get_option_argument< bool >(option_timed);
   tool_options.end_phase        = static_cast < t_phase > (c.get_option_argument< long int >(option_end_phase));
   tool_options.formfilename     = c.get_input(formula_file_for_input).get_location();
   tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
@@ -331,14 +331,14 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //declarations for getopt
   t_phase opt_end_phase = PH_NONE;
   bool opt_pretty = false;
-  bool opt_untimed = false;
+  bool opt_timed = false;
   string formfilename = "";
-  #define SHORT_OPTIONS "f:p:ehquvd"
+  #define SHORT_OPTIONS "f:p:ehqtvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
     { "end-phase", required_argument,  NULL,  'p' },
-    { "untimed",   no_argument,        NULL,  'u' },
+    { "timed",     no_argument,        NULL,  't' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -368,8 +368,8 @@ static t_tool_options parse_command_line(int argc, char **argv)
           exit(1);
         }
         break;
-      case 'u': /* untimed */
-        opt_untimed = true;
+      case 't': /* timed */
+        opt_timed = true;
         break;
       case 'e': /* pretty */
         opt_pretty = true;
@@ -428,7 +428,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   }
   tool_options.end_phase    = opt_end_phase;
   tool_options.pretty       = opt_pretty;
-  tool_options.untimed      = opt_untimed;
+  tool_options.timed        = opt_timed;
   tool_options.formfilename = formfilename;
   tool_options.infilename   = infilename;
   tool_options.outfilename  = outfilename;
@@ -521,7 +521,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPS
   gsVerboseMsg("generating PBES from state formula and LPS...\n");
-  pbes<> p = lps::pbes_translate(state_formula(result), lps_spec, !tool_options.untimed);
+  pbes<> p = lps::pbes_translate(state_formula(result), lps_spec, tool_options.timed);
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;
@@ -546,7 +546,7 @@ static void print_help(char *name)
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'di' (data implementation) or 'rft' (regular formula\n"
     "                        translation)\n"
-    "  -u, --untimed         apply special conversion for untimed LPS's\n"
+    "  -t, --timed           use the timed version of the algorithm, even for untimed LPS's\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
