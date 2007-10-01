@@ -784,7 +784,8 @@ int main(int argc, char *argv[])
       }
 
       //initialise spec to check if it well-typed
-      if (lin_options.opt_end_phase == phNone) {
+      if (lin_options.opt_end_phase == phNone) 
+      {
         lps::specification spec(result);
       }
 

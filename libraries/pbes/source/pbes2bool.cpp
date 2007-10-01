@@ -108,7 +108,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
   propositional_variable_instantiation X(variable_index.get(current_var));
 
   data_expression_list tl=X.parameters();
-  cerr << X.name();
+  cerr << pp(X.name());
   for(data_expression_list::iterator t=tl.begin();
         t!=tl.end(); t++)
   { cerr << (t==tl.begin()?"(":",");

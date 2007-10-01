@@ -1042,7 +1042,7 @@ static void initialize_symbols(void)
   insertProcDeclaration(
            terminatedProcId,
            ATempty,
-// XXXXX           gsMakeSeq(terminationAction,gsMakeDeltaAtZero()), /* Changed to DeltaAtZero on 24/12/2006 */
+// XXXXX           gsMakeSeq(terminationAction,gsMakeDeltaAtZero()), /* Changed to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
            gsMakeSeq(terminationAction,gsMakeDelta()), 
            pCRL,0,false);
 }
@@ -5900,6 +5900,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId,
   pCRLprocs=ATinsertA(ATempty,procId);
 
   pCRLprocs=makepCRLprocs(objectdata[n].processbody,pCRLprocs);
+  // ATfprintf(stderr,"XXXXX  PCRLPROCS: %t\n",pCRLprocs);
   /* now pCRLprocs contains a list of all process id's in this
      pCRL process */
  
@@ -6265,7 +6266,8 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     { 
       resultactionsumlist=ATinsertA(
                     resultactionsumlist,
-                    summand); }
+                    summand); 
+    }
     else
     { /* first remove free variables from sumvars */
 
@@ -6287,7 +6289,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
                              condition,
                              gsMakeDelta(),
                              actiontime,
-                             nextstate));
+                             ATempty)); // We are not interested in the nextstate after delta.
       }
       else
       { resultdeltasumlist=ATinsertA(
@@ -6297,7 +6299,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
                              condition,
                              gsMakeDelta(),
                              actiontime,
-                             nextstate));
+                             ATempty)); // We are not interested in the nextstate after delta.
       }
     }
   }
@@ -6389,7 +6391,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
                            condition,
                            resultmultiaction,
                            actiontime,
-                           nextstate));
+                           ATempty)); // We are not interested in the nextstate after Delta.
     }
     else 
     { 
@@ -6400,7 +6402,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
                            condition,
                            resultmultiaction,
                            actiontime,
-                           nextstate));
+                           ATempty));  // We are not interested in the nextstate after Delta.
     }
   }
 
