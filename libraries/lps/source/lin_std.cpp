@@ -266,9 +266,9 @@ static void newobject(int n)
 
 }
 
-// static ATermAppl gsMakeDeltaAtZero(void)
-// { return gsMakeAtTime(gsMakeDelta(),gsMakeDataExprNat2Real(gsMakeDataExprNat_int(0)));
-// }
+static ATermAppl gsMakeDeltaAtZero(void)
+{ return gsMakeAtTime(gsMakeDelta(),gsMakeDataExprNat2Real(gsMakeDataExprNat_int(0)));
+}
 
 static bool isDeltaAtZero(ATermAppl t)
 {
@@ -2014,14 +2014,28 @@ static ATermAppl substitute_pCRLproc(
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)));
   }
   if (gsIsIfThen(p))
-  { return gsMakeIfThen(
-                substitute_data(terms,vars,ATAgetArgument(p,0)),
+  { ATermAppl condition=RewriteTerm(substitute_data(terms,vars,ATAgetArgument(p,0)));
+    if (gsIsDataExprFalse(condition))
+    { return gsMakeDeltaAtZero();
+    }
+    if (gsIsDataExprTrue(condition))
+    { return substitute_pCRLproc(terms,vars,ATAgetArgument(p,1));
+    }
+    return gsMakeIfThen(
+                condition,
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)));
   }
   if (gsIsIfThenElse(p))
   { 
+    ATermAppl condition=RewriteTerm(substitute_data(terms,vars,ATAgetArgument(p,0)));
+    if (gsIsDataExprFalse(condition))
+    { return substitute_pCRLproc(terms,vars,ATAgetArgument(p,2));
+    }
+    if (gsIsDataExprTrue(condition))
+    { return substitute_pCRLproc(terms,vars,ATAgetArgument(p,1));
+    }
     return gsMakeIfThenElse(
-                substitute_data(terms,vars,ATAgetArgument(p,0)),
+                condition,
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)),
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,2)));
   }
@@ -2351,7 +2365,7 @@ static ATermAppl bodytovarheadGNF(
       alphaconvert(&sumvars,&renamevars,&renameterms,freevars,ATempty);
       body1=substitute_pCRLproc(renameterms,renamevars,body1);
       body1=bodytovarheadGNF(body1,sum,ATconcat(sumvars,freevars),first);
-      /* Due to the optimisation below, suggested by Yaroslav, bodytovarheadGNF(...,sum,...)
+      /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum,...)
          can deliver a process of the form c -> x + !c -> y. In this case, the
          sumvars must be distributed over both summands. */
       if (gsIsChoice(body1))
@@ -5900,7 +5914,6 @@ static ATermAppl generateLPEpCRL(ATermAppl procId,
   pCRLprocs=ATinsertA(ATempty,procId);
 
   pCRLprocs=makepCRLprocs(objectdata[n].processbody,pCRLprocs);
-  // ATfprintf(stderr,"XXXXX  PCRLPROCS: %t\n",pCRLprocs);
   /* now pCRLprocs contains a list of all process id's in this
      pCRL process */
  
@@ -6260,7 +6273,6 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     ATermAppl multiaction=linGetMultiAction(summand);
     ATermAppl actiontime=linGetActionTime(summand);
     ATermAppl condition=linGetCondition(summand);
-    ATermList nextstate=linGetNextState(summand);
 
     if (allow(allowlist,multiaction))
     { 
@@ -6373,7 +6385,6 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
     ATermAppl multiaction=linGetMultiAction(summand);
     ATermAppl actiontime=linGetActionTime(summand);
     ATermAppl condition=linGetCondition(summand);
-    ATermList nextstate=linGetNextState(summand);
  
     ATermAppl resultmultiaction=encap(encaplist,multiaction);
 

@@ -8,6 +8,7 @@
 /// \brief Add your file description here.
 // TODO: add option to store pbes_variable_instantiations in tree format.
 // Optimise finding MU and NU loops.
+// Improve the quality of counterexamples when using approximation.
 
 // ======================================================================
 //
@@ -108,7 +109,8 @@ static void print_counter_example_rec(bes::variable_type current_var,
   propositional_variable_instantiation X(variable_index.get(current_var));
 
   data_expression_list tl=X.parameters();
-  cerr << pp(X.name());
+  string s=X.name();
+  cerr << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
   for(data_expression_list::iterator t=tl.begin();
         t!=tl.end(); t++)
   { cerr << (t==tl.begin()?"(":",");
