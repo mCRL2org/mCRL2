@@ -8868,6 +8868,8 @@ static ATermAppl transform(
            objectdata[objectIndex(init)].canterminate,
            spec,
            regular);
+  t3=encapcomposition(ATempty,t3); // This removes superfluous delta
+                                   // summands.
   if (cluster)
      t3=clusterfinalresult(t3,spec);
 
