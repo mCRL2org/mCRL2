@@ -1,37 +1,33 @@
 project libraries/lps/example
    : requirements
        <use>/boost//headers
-       <source>/libraries//parser
-       <source>/libraries/parser//alpha
        <source>/libraries//rewrite
        <source>/libraries//mcrl2_basic
        <source>/libraries//lps
        <source>/site-config//boost_program_options
-       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <source>/site-config//boost_filesystem
    ;
 
+exe parelm          : parelm.cpp : ;
 exe garbage         : garbage.cpp : ;
-exe constructors    : constructors.cpp    ../../../tools/mcrl22lps/lin_std.cpp : ;
-exe spec            : spec.cpp            ../../../tools/mcrl22lps/lin_std.cpp : ;
-exe filter_template : filter_template.cpp                                                               : ;
-exe find            : find.cpp            ../../../tools/mcrl22lps/lin_std.cpp : ;
-exe pbes_test       : pbes_test.cpp       ../../../tools/mcrl22lps/lin_std.cpp : ;
+exe constructors    : constructors.cpp : ;
+#exe spec            : spec.cpp : ;
+#exe filter_template : filter_template.cpp : ;
+exe find            : find.cpp : ;
 exe term_replace    : term_replace.cpp : ;
-exe mcrl22lps       : mcrl22lps.cpp       ../../../tools/mcrl22lps/lin_std.cpp : ;
-exe utility1        : utility1.cpp : ;
-exe bisimulation    : bisimulation.cpp : ;
+exe mcrl22lps       : mcrl22lps.cpp : ;
+#exe utility1        : utility1.cpp : ;
 
 install dist
    :
+     parelm
      term_replace
      garbage
      constructors
-     spec
-     filter_template
+#     spec
+#     filter_template
      find
-     pbes_test
      mcrl22lps
-     utility1
-     bisimulation
+#     utility1
    :
    ;
