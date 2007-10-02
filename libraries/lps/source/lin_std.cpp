@@ -8066,16 +8066,22 @@ static ATermAppl replaceArgumentsByAssignmentsIPS(ATermAppl ips)
     assert(gsIsLinearProcessSummand(summand));
     ATermList DataVarIds=linGetSumVars(summand); // ATLgetArgument(summand,0);
     ATermAppl BoolExpr=ATAgetArgument(summand,1);
-    ATermAppl MultAcOrDelta=ATAgetArgument(summand,2);
+    ATermAppl MultActOrDelta=ATAgetArgument(summand,2);
     ATermAppl TimeExprOrNil=ATAgetArgument(summand,3);
-    ATermList Assignments=replaceArgumentsByAssignments(
+    ATermList Assignments;
+    if (gsIsDelta(MultActOrDelta))
+    { Assignments=ATempty;
+    }
+    else 
+    { Assignments=replaceArgumentsByAssignments(
                         ATLgetArgument(summand,4),
                         parameters);
+    }
     resultsums=ATinsertA(resultsums,
                       gsMakeLinearProcessSummand(
                           DataVarIds,
                           BoolExpr,
-                          MultAcOrDelta,
+                          MultActOrDelta,
                           TimeExprOrNil,
                           Assignments));     
   }
@@ -8786,6 +8792,7 @@ static ATermList SieveProcDataVarsSummands(
 
   for( ; vars!=ATempty ; vars=ATgetNext(vars))
   { ATermAppl var=ATAgetFirst(vars);
+    ATfprintf(stderr,"ATEMPTTOADD %t\n",var);
     for(ATermList smds=summands ;
         smds!=ATempty ;
         smds=ATgetNext(smds))
@@ -8799,8 +8806,23 @@ static ATermList SieveProcDataVarsSummands(
               (occursinmultiaction(var,multiaction)))||
           (((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime))))||
           (occursinterm(var,condition))||
-          (occursinassignmentlist(var,nextstate,parameters)))
+          ((multiaction!=gsMakeDelta()) &&
+              (occursinassignmentlist(var,nextstate,parameters))))
       { result=ATinsertA(result,var);
+        if ((multiaction!=gsMakeDelta()) &&
+              (occursinmultiaction(var,multiaction)))
+        { ATfprintf(stderr,"ADDMULTIACTION %t \n",multiaction);
+        }
+        else if ((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime)))
+        { ATfprintf(stderr,"ADDTIME %t \n",actiontime);
+        }
+        else if (occursinterm(var,condition))
+        { ATfprintf(stderr,"ADDCONDITION %t \n",condition);
+        }
+        else if ((multiaction!=gsMakeDelta()) &&
+                  occursinassignmentlist(var,nextstate,parameters))
+        { ATfprintf(stderr,"ADDASSIGN %t\n%t \n",multiaction,nextstate);
+        }
         break;
       }
     }
