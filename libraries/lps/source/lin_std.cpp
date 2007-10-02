@@ -8792,7 +8792,6 @@ static ATermList SieveProcDataVarsSummands(
 
   for( ; vars!=ATempty ; vars=ATgetNext(vars))
   { ATermAppl var=ATAgetFirst(vars);
-    ATfprintf(stderr,"ATEMPTTOADD %t\n",var);
     for(ATermList smds=summands ;
         smds!=ATempty ;
         smds=ATgetNext(smds))
@@ -8809,20 +8808,6 @@ static ATermList SieveProcDataVarsSummands(
           ((multiaction!=gsMakeDelta()) &&
               (occursinassignmentlist(var,nextstate,parameters))))
       { result=ATinsertA(result,var);
-        if ((multiaction!=gsMakeDelta()) &&
-              (occursinmultiaction(var,multiaction)))
-        { ATfprintf(stderr,"ADDMULTIACTION %t \n",multiaction);
-        }
-        else if ((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime)))
-        { ATfprintf(stderr,"ADDTIME %t \n",actiontime);
-        }
-        else if (occursinterm(var,condition))
-        { ATfprintf(stderr,"ADDCONDITION %t \n",condition);
-        }
-        else if ((multiaction!=gsMakeDelta()) &&
-                  occursinassignmentlist(var,nextstate,parameters))
-        { ATfprintf(stderr,"ADDASSIGN %t\n%t \n",multiaction,nextstate);
-        }
         break;
       }
     }
