@@ -196,7 +196,7 @@ int round_to_int(double f) {
 float vec_to_deg(Utils::Vect v) {
   float r = atan2(v.y,v.x);
   if (r < 0.0f) {
-    r += 2*PI;
+    r += 2.0*PI;
   }
   return rad_to_deg(r);
 }

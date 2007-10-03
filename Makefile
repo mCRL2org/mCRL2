@@ -1,4 +1,4 @@
-ifneq ($(filter all bjam install tools test man web, ${MAKECMDGOALS}),)
+ifneq ($(filter all bjam install tools test, ${MAKECMDGOALS}),)
 include build/Makefile
 endif
 ifeq (${MAKECMDGOALS},)
@@ -13,8 +13,6 @@ build/Makefile:
 clean:
 	@$(RM) -r autom4te.cache core core.* tags
 	$(RM) -rf build/bin/*
-	$(RM) -rf build/man
-	$(RM) -rf build/web
 
 distclean: clean
 	@$(RM) -r build/Makefile config.log config.status build/config.jam tools/setup.h

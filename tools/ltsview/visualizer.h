@@ -57,8 +57,8 @@ class Visualizer: public Subscriber {
     ~Visualizer();
     
     void computeBoundsInfo(float &bcw,float &bch);
-    float	getHalfStructureHeight() const;
-    Utils::VisStyle	getVisStyle() const;
+    float getHalfStructureHeight() const;
+    Utils::VisStyle getVisStyle() const;
     void notify(SettingID s);
     void setLTS(LTS *l);
     void setMarkStyle(Utils::MarkStyle ms);
@@ -77,9 +77,6 @@ class Visualizer: public Subscriber {
 
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
-
-    
-    
 };
 
 #endif

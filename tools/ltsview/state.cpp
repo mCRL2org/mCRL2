@@ -116,7 +116,7 @@ void State::setRank( int r )
 }
 
 bool State::isCentered() const {
-  return positionAngle < -0.9f;
+  return (positionAngle < -0.9f);
 }
 
 void State::center() {

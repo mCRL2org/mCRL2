@@ -164,11 +164,6 @@ class LTS {
     //      possible.
     //Ret:  states that could not be placed by this phase, sorted top-down.
 
-    void nodeDistanceBottomUp( std::vector < std::vector< State* > > ss );
-    //Phase 3: Process states bottom-up, maximizing node distance
-    //Pre:  ss is correctly sorted by rank.
-    //Post: states in ss are positioned bottom-up, maximizing node distance per
-    //      rank.
     void resolveClusterSlots();
 };
 

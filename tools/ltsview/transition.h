@@ -25,11 +25,9 @@ class Transition
     int			getLabel() const;
     bool		isBackpointer() const;
     bool		isMarked() const;
-    void		setBackpointer(bool b);
     void		setMarkedPointer(bool* bp);
 
   private:
-    bool    backpointer;
     State*  beginState;
     State*  endState;
     int   label;

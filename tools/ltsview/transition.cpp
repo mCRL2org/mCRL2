@@ -16,7 +16,6 @@ Transition::Transition(State* bs,State* es,int lbl) {
   beginState = bs;
   endState = es;
   label = lbl;
-  backpointer = false;
   marked = NULL;
 }
 
@@ -40,12 +39,7 @@ int Transition::getLabel() const
 
 bool Transition::isBackpointer() const
 {
-  return backpointer;
-}
-
-void Transition::setBackpointer( bool b )
-{
-  backpointer = b;
+  return (beginState->getRank() > endState->getRank());
 }
 
 bool Transition::isMarked() const

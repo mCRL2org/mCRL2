@@ -427,7 +427,6 @@ void LTS::applyIterativeRanking()
       vector< Transition* >::iterator tit;
       for ( tit = outTrans.begin() ; tit != outTrans.end() ; ++tit )
       {
-        (**tit).setBackpointer( false );
         State* endState = (**tit).getEndState();
         
         if ( endState->getRank() == -1 )
@@ -446,10 +445,6 @@ void LTS::applyIterativeRanking()
         {
           begState->addComrade( endState );
           endState->addComrade( begState );
-        }
-        else // 0 <= endState->getRank() < currRank
-        {
-          (**tit).setBackpointer( true );
         }
       }
     }
@@ -490,7 +485,6 @@ void LTS::applyCyclicRanking()
       
       for ( transit = trans.begin() ; transit != trans.end() ; ++transit )
       {
-        (**transit).setBackpointer( false );
         State* begState = (**transit).getBeginState();
         if ( begState->getRank() == -1 )
         {
