@@ -6407,13 +6407,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
     else 
     { 
       resultactionsumlist=ATinsertA(
-                    resultactionsumlist,
-                    gsMakeLinearProcessSummand(
-                           sumvars,
-                           condition,
-                           resultmultiaction,
-                           actiontime,
-                           ATempty));  // We are not interested in the nextstate after Delta.
+                    resultactionsumlist,summand);
     }
   }
 
