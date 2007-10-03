@@ -18,7 +18,7 @@
 #include "libnextstate.h"
 #include "libenum.h"
 #include "librewrite.h"
-#include "libtrace.h"
+#include "mcrl2/libtrace.h"
 #include "squadt_interactor.h"
 #include "exploration.h"
 #include "lts.h"

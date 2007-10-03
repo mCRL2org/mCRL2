@@ -33,7 +33,7 @@ using namespace lps;
 using namespace atermpp;
 using namespace mcrl2::utilities;
 
-const char* version = "0.5.2";
+const char* version = "July 2007";
 
 class lpsConstElm {
   private:

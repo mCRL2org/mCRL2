@@ -8,9 +8,9 @@
 
 #include <vector>
 #include "print/messaging.h"
-#include "lts/liblts.h"
-#include "lts/detail/tree_set.h"
-//#include "lts/detail/liblts_private.h"
+#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/detail/tree_set.h"
+//#include "mcrl2/lts/detail/liblts_private.h"
 
 using namespace std;
 using namespace mcrl2::utilities;

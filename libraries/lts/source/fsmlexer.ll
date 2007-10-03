@@ -11,9 +11,9 @@
 #include <cstdio>
 #include <aterm2.h>
 #include "print/messaging.h"
-#include <lts/liblts.h>
+#include <mcrl2/lts/liblts.h>
 #include "fsmlexer.h"
-#include "fsmparser.hpp"
+#include "mcrl2/fsmparser.hpp"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;

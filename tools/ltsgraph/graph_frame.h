@@ -37,10 +37,10 @@
 #include <ctime> 
 
 //LTS
-#include "lts/liblts.h"
+#include <mcrl2/lts/liblts.h>
 #include "libstruct.h"
 
-#include "mcrl2/utilities/spinctrlfloat.h"
+#include <mcrl2/utilities/spinctrlfloat.h>
 
 #include "node.h"
 #include "edge.h"

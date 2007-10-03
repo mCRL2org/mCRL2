@@ -7,7 +7,7 @@
 /// \file tracepp.cpp
 
 #define NAME "tracepp"
-#define VERSION "0.1"
+#define VERSION "July 2007"
 
 #include <iostream>
 #include <fstream>
@@ -16,7 +16,7 @@
 #include <aterm2.h>
 #include "libstruct.h"
 #include "libprint.h"
-#include "libtrace.h"
+#include "mcrl2/libtrace.h"
 #include "print/messaging.h"
 
 using namespace std;

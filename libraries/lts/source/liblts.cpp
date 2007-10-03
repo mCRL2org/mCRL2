@@ -13,7 +13,7 @@
 #include <cassert>
 #include <cstdlib>
 #include "libstruct.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "print/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "setup.h"

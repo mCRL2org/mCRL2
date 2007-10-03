@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #define  NAME      "lpsinvelm"
-#define  VERSION   "0.0.1"
+#define  VERSION   "July 2007"
 #define  AUTHOR    "Luc Engelen"
 
 #include "invariant_eliminator.h"

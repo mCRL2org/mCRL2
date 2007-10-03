@@ -17,7 +17,7 @@
 //
 // ======================================================================
 #define NAME "pbesrewr"
-#define VERSION "0.1.0"
+#define VERSION "July 2007"
 #define AUTHOR "Jan Friso Groote"
 
 //C++

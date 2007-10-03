@@ -13,7 +13,7 @@
 #include <string>
 #include "libstruct.h"
 #include "libprint.h"
-#include "libtrace.h"
+#include "mcrl2/libtrace.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 

@@ -27,7 +27,7 @@ liblts-fsmparser:
 	cd libraries/lts/source; \
 	flex -Pfsm -ofsmlexer.cpp fsmlexer.ll; \
 	bison -p fsm -d -o fsmparser.cpp fsmparser.yy; \
-	mv fsmparser.hpp ../include
+	mv fsmparser.hpp ../include/mcrl2
 
 ltsview-fsmparser:
 	cd tools/ltsview; \

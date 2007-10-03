@@ -10,12 +10,12 @@
 #include <getopt.h>
 #include "aterm2.h"
 #include "libstruct.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "setup.h"
 #include "print/messaging.h"
 
 #define NAME "ltscompare"
-#define VERSION "0.1"
+#define VERSION "July 2007"
 
 using namespace std;
 using namespace ::mcrl2::lts;

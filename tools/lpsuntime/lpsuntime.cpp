@@ -47,7 +47,7 @@ using namespace mcrl2::utilities;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.31"
+#define VERSION "July 2007"
 
 typedef struct
 {

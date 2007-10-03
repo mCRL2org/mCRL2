@@ -50,7 +50,7 @@ using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.5"
+#define VERSION "July 2007"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.

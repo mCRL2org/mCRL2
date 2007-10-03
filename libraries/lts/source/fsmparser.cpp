@@ -106,7 +106,7 @@
 /* Copy the first part of user declarations.  */
 #line 9 "fsmparser.yy"
 
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "fsmparser.h"
 #include "fsmlexer.h"
 

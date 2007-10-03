@@ -31,7 +31,7 @@
 //#include "mcrl2/dataimpl.h"
 
 #define NAME "chi2mcrl2"
-#define VERSION "0.0"
+#define VERSION "July 2007"
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
 

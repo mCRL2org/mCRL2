@@ -28,7 +28,7 @@
 #include "mcrl2/dataimpl.h"
 
 #define NAME "mcrl22lps"
-#define VERSION "0.2.1"
+#define VERSION "July 2007"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
 

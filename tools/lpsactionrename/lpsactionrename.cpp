@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "lpsactionrename"
-#define VERSION "0.0"
+#define VERSION "July 2007"
 
 #include <cstdio>
 #include <cerrno>

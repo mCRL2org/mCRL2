@@ -10,7 +10,7 @@
 #include <getopt.h>
 #include "aterm2.h"
 #include "libstruct.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "setup.h"
 #include "print/messaging.h"
 
@@ -19,7 +19,7 @@
 using namespace mcrl2::utilities;
 
 #define NAME "ltsinfo"
-#define VERSION "0.1"
+#define VERSION "July 2007"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY

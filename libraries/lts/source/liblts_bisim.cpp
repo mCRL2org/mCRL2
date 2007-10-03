@@ -8,8 +8,8 @@
 
 #include "print/messaging.h"
 #include "libstruct.h"
-#include "lts/liblts.h"
-#include "lts/detail/bsim.h"
+#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/detail/bsim.h"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;

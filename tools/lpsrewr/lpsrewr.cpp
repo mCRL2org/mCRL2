@@ -7,7 +7,7 @@
 /// \file lpsrewr.cpp
 
 #define NAME "lpsrewr"
-#define VERSION "0.2"
+#define VERSION "July 2007"
 
 #include <stdio.h>
 #include <errno.h>

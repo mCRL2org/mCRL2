@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #include "lts.h"
-#include "libtrace.h"
+#include "mcrl2/libtrace.h"
 #include "libprint.h"
 #include "libstruct.h"
 #include <algorithm>

@@ -10,7 +10,7 @@
 #include "ltsgraph_version.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include "lts/liblts.h"
+#include <mcrl2/lts/liblts.h>
 
 std::string lts_file_argument;
 

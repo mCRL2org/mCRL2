@@ -7,7 +7,7 @@
 /// \file lpspp.cpp
 
 #define  NAME      "lpspp"
-#define  VERSION   "0.4.4"
+#define  VERSION   "July 2007"
 #define  AUTHOR    "Aad Mathijssen"
 
 #include <stdio.h>

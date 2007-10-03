@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "pnml2mcrl2"
-#define VERSION "1.1"
+#define VERSION "July 2007"
 
 #include <sstream>
 #include <cstdio>

@@ -11,7 +11,7 @@
 #include <fstream>
 #include <assert.h>
 #include <aterm2.h>
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "print/messaging.h"
 
 using namespace mcrl2::utilities;

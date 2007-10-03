@@ -7,7 +7,7 @@
 /// \file fsmparser.yy
 
 %{
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "fsmparser.h"
 #include "fsmlexer.h"
 

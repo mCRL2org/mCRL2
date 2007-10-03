@@ -33,7 +33,7 @@
 #include <wx/msgdlg.h>
 
 const char* program_name    = "squadt";
-const char* program_version = "1.0.0";
+const char* program_version = "July 2007";
 
 /**
  * \namespace squadt

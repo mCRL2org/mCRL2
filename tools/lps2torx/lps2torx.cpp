@@ -7,7 +7,7 @@
 /// \file lps2torx.cpp
 
 #define NAME "lps2torx"
-#define VERSION "0.1"
+#define VERSION "July 2007"
 
 #include <stdio.h>
 #include <errno.h>

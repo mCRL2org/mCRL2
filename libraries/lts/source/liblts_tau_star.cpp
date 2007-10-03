@@ -7,7 +7,7 @@
 /// \file liblts_tau_star.cpp
 
 #include <print/messaging.h>
-#include <lts/liblts.h>
+#include <mcrl2/lts/liblts.h>
 
 using namespace std;
 

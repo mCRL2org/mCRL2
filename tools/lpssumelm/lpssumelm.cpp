@@ -49,7 +49,7 @@ using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
-#define VERSION "0.4"
+#define VERSION "July 2007"
 
 typedef struct{
   std::string input_file; ///< Name of the file to read input from

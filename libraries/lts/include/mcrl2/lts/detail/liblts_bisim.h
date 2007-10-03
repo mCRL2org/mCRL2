@@ -8,7 +8,7 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 
 namespace mcrl2
 {

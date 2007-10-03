@@ -12,7 +12,7 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
 #include "libparse.h"
 #include "typecheck.h"

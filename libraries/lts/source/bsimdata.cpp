@@ -11,7 +11,7 @@
 #include <string>
 #include "libprint.h"
 #include "libstruct.h"
-#include "lts/detail/bsim.h"
+#include "mcrl2/lts/detail/bsim.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)

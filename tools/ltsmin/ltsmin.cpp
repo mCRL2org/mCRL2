@@ -8,7 +8,7 @@
 /// \brief Based on bsim.c (revision 1.1.1.1) from the muCRL toolset
 
 #define NAME     "ltsmin"
-#define VERSION  "0.1"
+#define VERSION  "July 2007"
 
 #include <getopt.h>
 #include "libstruct.h"

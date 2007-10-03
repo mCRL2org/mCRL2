@@ -20,7 +20,7 @@
 
 
 #define NAME "pbes2bool"
-#define VERSION "0.1.3"
+#define VERSION "July 2007"
 #define AUTHOR "Alexander van Dam and Jan Friso Groote"
 
 

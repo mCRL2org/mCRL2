@@ -17,7 +17,7 @@
 //
 // ======================================================================
 #define NAME "pbesinfo"
-#define VERSION "0.1.0"
+#define VERSION "July 2007"
 #define AUTHOR "Alexander van Dam"
 
 //C++

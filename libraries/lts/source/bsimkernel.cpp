@@ -7,7 +7,7 @@
 /// \file bsimkernel.cpp
 /// \brief Based on bsimkernel.c (revision 1.1.1.1) from the muCRL toolset
 
-#include "lts/detail/bsim.h"
+#include "mcrl2/lts/detail/bsim.h"
 
 static ATbool RefineBranching(int action, int splitter);
 

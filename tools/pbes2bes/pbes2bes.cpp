@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "pbes2bes"
-#define VERSION "0.1.4"
+#define VERSION "July 2007"
 #define AUTHOR "Alexander van Dam"
 
 

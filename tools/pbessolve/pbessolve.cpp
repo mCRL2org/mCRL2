@@ -6,7 +6,7 @@
 
  
 #define NAME "pbessolve" 
-#define VERSION "0.0.1" 
+#define VERSION "July 2007" 
  
  
  

@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <vector>
 #include "print/messaging.h"
-#include "lts/detail/tree_set.h"
+#include "mcrl2/lts/detail/tree_set.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

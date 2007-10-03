@@ -18,7 +18,7 @@
 #include "typecheck.h"
 #include "mcrl2/dataimpl.h"
 #include "libprint.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
 #include "fsmparser.h"
 

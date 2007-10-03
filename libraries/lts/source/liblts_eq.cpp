@@ -11,8 +11,8 @@
 #include <stack>
 #include <string>
 #include "print/messaging.h"
-#include "lts/liblts.h"
-#include "lts/detail/liblts_bisim.h"
+#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/detail/liblts_bisim.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;

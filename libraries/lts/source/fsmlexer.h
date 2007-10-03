@@ -2,7 +2,7 @@
 #define __FSMLEXER_H
 
 #include <aterm2.h>
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 
 class fsm_lexer
 {

@@ -30,7 +30,7 @@
 #include "librewrite.h"
 #include "libprint_types.h"
 #include "libprint.h"
-#include "libtrace.h"
+#include "mcrl2/libtrace.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 // For PLUGIN_DIRECTORY

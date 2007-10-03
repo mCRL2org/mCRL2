@@ -7,7 +7,7 @@
 /// \file pbespp.cpp
 
 #define  NAME      "pbespp"
-#define  VERSION   "0.4.5"
+#define  VERSION   "July 2007"
 #define  AUTHOR    "Aad Mathijssen"
 
 #include <stdio.h>

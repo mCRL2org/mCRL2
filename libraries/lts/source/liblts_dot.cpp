@@ -13,7 +13,7 @@
 #include "libprint.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "lts/liblts.h"
+#include "mcrl2/lts/liblts.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
