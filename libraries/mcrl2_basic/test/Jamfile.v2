@@ -4,9 +4,9 @@ project libraries/mcrl2_basic/test
 
 obj test_lib.o : test_lib.cpp : <use>/boost//headers <source>/libraries//mcrl2_basic ;
 
-alias mcrl22lps-test-tool : /tools/mcrl22lps//mcrl22lps ;
+alias mcrl22lps-test-tool : $(TOP)/tools/mcrl22lps//mcrl22lps ;
 
 test-suite mcrl2_basic
-    : [ run test_lib.cpp ]
+    : [ run test_lib.o ]
       [ run_tool_on_examples mcrl22lps-test-tool mcrl2_basic lps : : . : mcrl2 ]
     ;

@@ -57,6 +57,13 @@ const std::string case_6(
   "     Y(i,j: Nat) = act2(j).Y(i,j+1);\n\n"
   "init X(0);\n");
 
+const std::string case_7(
+  "act act1, act2, act3: Nat;\n\n"
+  "proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +\n"
+  "                       (i == 5) -> act3(i).X(i, j, 4);\n\n"
+  "init X(0,5, 1);\n"
+);
+
 int test_main(int, char*[])
 {
   using namespace lps;
@@ -93,6 +100,14 @@ int test_main(int, char*[])
 
   // case 6
   in  = mcrl22lps(case_6).process();
+  out = parelm(in);
+
+  BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
+  BOOST_CHECK(in.summands().size() == out.summands().size());
+  BOOST_CHECK(in.free_variables().size() == out.free_variables().size());
+
+  // case 7
+  in  = mcrl22lps(case_7).process();
   out = parelm(in);
 
   BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
