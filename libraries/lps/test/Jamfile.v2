@@ -23,4 +23,5 @@ test-suite lps
       [ run operators.cpp ]
       [ run sort_test.cpp ]
       [ run replace_test.cpp ]
+      [ run parelm_test.cpp ]
     ;
