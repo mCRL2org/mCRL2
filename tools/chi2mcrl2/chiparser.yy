@@ -13,6 +13,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <utility>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -30,8 +31,12 @@ extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
+extern map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
 extern set<ATermAppl> used_process_identifiers;
-extern bool processing_models;
+//extern bool processing_models;
+
+enum { UNDEFINEDPARSING, CHANNELPARSING, VARIABLEPARSING };
+extern int parsing_mode;
 
 #define YYMAXDEPTH 160000
 
@@ -84,18 +89,19 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
  */
 
 %type <appl> Type BasicType
-%type <appl> IdentifierType IdentifierTypeExpression
 %type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
 %type <appl> BoolNatIntExpression Instantiation ModelStatement
-%type <appl> LocalVariables Identifier AssignmentStatement 
+%type <appl> LocalVariables Identifier AssignmentStatement CommStatement
 %type <appl> ProcessBody OptGuard BasicStatement OptChannel Statement BinaryStatement UnaryStatement
-%type <appl> AdvancedStatement //IdentifierChannelDefinition ChannelDefinition
+%type <appl> AdvancedStatement IdentifierChannelDefinition  IdentifierChannelDeclaration
 %type <appl> ChiProgram ProcessDefinition FormalParameter ExpressionIdentifier
-%type <appl> ModelDefinition ModelBody
+%type <appl> ModelDefinition ModelBody 
 
-%type <list> Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions
+%type <list> IdentifierTypeExpression IdentifierType Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions ChannelDeclaration ChannelDefinition
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
-%type <list> LocalVariables_csp //ChannelDefinition_csp IdentifierChannelDefinition_csp
+%type <list> LocalVariables_csp ChannelDefinition_csp IdentifierChannelDefinition_csp
+%type <list> ChannelDeclaration_csp IdentifierChannelDeclaration_csp
+
 
 /* 
  *  GRAMMER 
@@ -114,7 +120,7 @@ ChiProgram:
 	;
 
 ModelDefinition:
-      ModelOpen Identifier LBRACKET RBRACKET DEFINES ModelBody
+      MODEL Identifier LBRACKET RBRACKET DEFINES ModelBody
         {
       	  safe_assign($$, gsMakeModelDef($2, $6));
       	  gsDebugMsg("parsed Model Def \n  %T\n", $$);
@@ -122,26 +128,15 @@ ModelDefinition:
       ;
 
 ModelBody:
-      BP ModelStatement ModelClose
+      BP ModelStatement EP
       	{ safe_assign($$, gsMakeModelSpec( ATmakeList0(), $2 ));
       	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);	
 		}
-	| BP LocalVariables_csp PROC_SEP ModelStatement ModelClose
+	| BP LocalVariables_csp PROC_SEP ModelStatement EP
       	{ safe_assign($$, gsMakeModelSpec( $2, $4));
       	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);	
 		}
 	;
-ModelOpen:
-    MODEL
-      {
-        processing_models = true;
-      }
-
-ModelClose:
-    EP
-      {
-        processing_models = false;
-      }
 
 ProcessDefinitions: 
        ProcessDefinition
@@ -174,7 +169,7 @@ ProcessDefinition:
 		}
 	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody
 		{ 
-      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATreverse($4)), $7));
+      	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl( ATreverse($4)), $7));
       	  gsDebugMsg("parsed proc Def\n  %T\n", $$);
 		}
 //	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET DEFINES ProcessBody  
@@ -201,7 +196,7 @@ ProcessBody:
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
 		}
 	| BP LocalVariables_csp PROC_SEP Statement ProcCloseScope
-      	{ safe_assign($$, gsMakeProcSpec( $2, $4));
+      	{ safe_assign($$, gsMakeProcSpec( ATreverse($2), $4));
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);	
 		}
 	;
@@ -225,32 +220,46 @@ Identifier: ID
 LocalVariables_csp: 
 	  LocalVariables 
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed localvariables  \n  %T\n", $$);	
+      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", $$);	
 		}
 	| LocalVariables_csp COMMA LocalVariables
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed localvariables \n  %T\n", $$);	
+      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", $$);	
 		}
 	;
 
 LocalVariables: 
 	  VAR IdentifierTypeExpression_csp
 		{
-		  safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );
-		  gsDebugMsg("parsed VariableList \n %T\n", $$);
+		  safe_assign($$, gsMakeVarSpec( $2 ) );
+		  gsDebugMsg("LocalVariables: parsed \n %T\n", $$);
 		}
-/*	| CHAN ChannelDefinition_csp */
+	| CHAN ChannelDefinition_csp 
+		{
+		  //safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );  //<-- gsMakeVarSpec aanpassen
+		  gsDebugMsg("LocalVariables: parsed \n %T\n", $$);
+		}
 //	| RecursionDefinition
 	;
 
 IdentifierTypeExpression_csp:
 	  IdentifierTypeExpression
-      	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{ safe_assign($$, $1);
+		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", $$);
 		}
 	| IdentifierTypeExpression_csp COMMA IdentifierTypeExpression 
-      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{ 
+          ATermList new_list = $3;
+          ATermList list = ATreverse($1);
+          while (!ATisEmpty(list)) 
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert( new_list , ATgetFirst(list));
+             list = ATgetNext( list ) ;
+          }
+          
+          safe_assign($$, new_list);
+		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", $$);
 		}
 	;
 
@@ -258,33 +267,56 @@ IdentifierTypeExpression:
 	  IdentifierType 
 		{
 		  safe_assign($$, $1 );
+		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
 		}
 	| IdentifierType DEFINES Expression
 		{
-		  safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
-		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+          ATermList list = $1;
+          ATermList new_list = ATmakeList0();
+
+          while (!ATisEmpty(list)) 
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert( new_list , (ATerm) gsMakeDataVarExprID( (ATermAppl) ATgetFirst(list), $3));
+             list = ATgetNext( list ) ;
+          }
+          
+          safe_assign($$, new_list);
+
+		  //safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
+		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
 		}
 	;
 
 IdentifierType_csp:
 	  IdentifierType
-      	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{ safe_assign($$, $1);
+		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", $$);
 		}
 	| IdentifierType_csp COMMA IdentifierType
-      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{
+          ATermList new_list = $1;
+          ATermList list = ATreverse($3);
+          while (!ATisEmpty(list)) 
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert( new_list , ATgetFirst(list));
+             list = ATgetNext( list ) ;
+          }
+          
+          safe_assign($$, new_list);
+		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", $$);
 		}
 	;
 
 FormalParameter_csp: 
 	  FormalParameter 
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed formalparameter variables  \n  %T\n", $$);	
+		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", $$);
 		}
 	| FormalParameter_csp COMMA FormalParameter
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed formalparameter variables \n  %T\n", $$);	
+		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", $$);
 		}
 	;
 
@@ -292,9 +324,13 @@ FormalParameter:
 	  VAR IdentifierType_csp
 		{
 		  safe_assign($$, gsMakeVarDecl( ATreverse($2) ) );
-		  gsDebugMsg("parsed VariableList \n %T\n", $$);
+		  gsDebugMsg("FormalParameter: parsed \n %T\n", $$);
 		}
- // 	| CHAN ChannelDeclaration_csp
+  	| CHAN ChannelDeclaration_csp
+		{
+		  safe_assign($$, gsMakeChanDecl( ATreverse($2) ) );
+		  gsDebugMsg("FormalParameter: parsed \n %T\n", $$);
+		}
 	;
 
 IdentifierType:
@@ -306,8 +342,20 @@ IdentifierType:
 			* TODO: Add scope
 			*
 			**/
-		  ATermList list = $1;
+          ATermList list = $1;
 		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i )
+          {
+			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
+			 {
+			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+
+		  list = $1;
+		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
 			 if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
 			 {
@@ -317,77 +365,189 @@ IdentifierType:
 			 var_type_map[ATgetFirst( list )]= (ATerm) $3;
 			 list = ATgetTail( list, 1 ) ;
 		  }	;
-		  safe_assign($$, gsMakeDataVarID (ATreverse($1), $3 ) );
-		  gsDebugMsg("parsed IdentifierType\n %T\n", $$);
+         
+          list = $1;
+          ATermList new_list = ATmakeList0();
+
+          while (!ATisEmpty(list)) 
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert( new_list , (ATerm) gsMakeDataVarID( (ATermAppl) ATgetFirst(list), $3));
+             list = ATgetNext( list ) ;
+          }
+          
+          safe_assign($$, ATreverse(new_list));
+		  gsDebugMsg("IdentifierType: parsed \n %T\n", $$);
 		  gsDebugMsg("Typecheck Table %d\n", var_type_map.size()); 
   		}
 	;
 
-/*ChannelDeclaration_csp:
+ChannelDeclaration_csp:
 	  ChannelDeclaration
+      	{ safe_assign($$, $1 );
+      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);	
+		}
 	| ChannelDeclaration_csp COMMA ChannelDeclaration
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", $$);	
+		}
 	;
 
 ChannelDeclaration:
 	  IdentifierChannelDeclaration_csp COLON Type
+		{
+		  ATermList list = $1;
+		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+          gsDebugMsg("\n%T\n", $1);
+		  
+          list = $1;
+		  n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+
+		  list = $1;
+          ATermList new_list = ATmakeList0();
+		  while(!ATisEmpty(list))
+          {
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3) );
+			 list = ATgetNext( list ) ;
+		  }
+
+		  safe_assign($$, new_list );
+		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		}
 	;
 	
 IdentifierChannelDeclaration_csp:
 	  IdentifierChannelDeclaration
+      	{ safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);	
+		}
 	| IdentifierChannelDeclaration_csp COMMA IdentifierChannelDeclaration
+      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", $$);	
+		}
 	;
 
 IdentifierChannelDeclaration: 
 	  Identifier RECV
+        {
+          safe_assign($$, gsMakeChannelID($1, gsMakeRecv()));
+		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+        } 
 	| Identifier EXCLAMATION
-	| Identifier SENDRECV
+        {
+          safe_assign($$, gsMakeChannelID($1, gsMakeSend()));
+		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+        } 
+/*	| Identifier SENDRECV
+        {
+          safe_assign($$, gsMakeChannelID($1, $2));
+		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+        } 
 	| Identifier RECVSEND
+        {
+          safe_assign($$, gsMakeChannelID($1, $2));
+		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+        } */
 	;
-*/
-/* ChannelDefinition_csp:
+
+ChannelDefinition_csp:
 	  ChannelDefinition
-      	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{ //safe_assign($$, ATmakeList1((ATerm) $1));
+      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", $$);	
 		}
 	| ChannelDefinition_csp COMMA ChannelDefinition
-      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	{ //safe_assign($$, ATinsert($1, (ATerm) $3));
+      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", $$);	
 		}
 	;
 
 ChannelDefinition:
 	  IdentifierChannelDefinition_csp COLON Type
 		{
-		  safe_assign($$, gsMakeChannelDefID ( $1, $3 ) );
-		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+          gsDebugMsg("ChannelDefinition\n");
+		  ATermList list = $1;
+		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+		  
+          list = $1;
+		  n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+
+		  list = $1;
+          ATermList new_list = ATmakeList0();
+		  while(!ATisEmpty(list))
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3) );
+			 list = ATgetNext( list ) ;
+		  }
+
+		  safe_assign($$, new_list );
+		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
 		}
 	;
 			
 IdentifierChannelDefinition_csp:
 	  IdentifierChannelDefinition
-	  ChannelDefinition
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", $$);	
 		}
 	| IdentifierChannelDefinition_csp COMMA IdentifierChannelDefinition
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", $$);	
 		}
 	;
 	  
 IdentifierChannelDefinition:
-	  Identifier SENDRECV
+	  Identifier
+        {
+          safe_assign($$, gsMakeChannelID($1, gsMakeNil()));
+		  gsDebugMsg("IdentifierChannelDefinition: parsed \n %T\n", $$);
+        } 
+/*	| Identifier SENDRECV
 		{
-		  safe_assign($$, gsMakeChannelID ( $1, gsString2ATermAppl("sendrecv", gsString2ATermAppl("unknown") ) );
-		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
+          safe_assign($$, gsMakeChannelID($1, gsMakeNil));
+		  gsDebugMsg("IdentifierChannelDefinition: parsed Identifier Type With Expression \n %T\n", $$);
 		}
 	| Identifier RECVSEND
 		{
-		  safe_assign($$, gsMakeChannelID ( $1, gsString2ATermAppl("recvsend",gsString2ATermAppl("unknown") ) );
-		  gsDebugMsg("parsed Identifier Type With Expression \n %T\n", $$);
-		}
+          safe_assign($$, gsMakeChannelID($1, gsMakeNil));
+		  gsDebugMsg("IdentifierChannelDefinition: parsed Identifier Type With Expression \n %T\n", $$);
+		}*/
 	;
-*/
+
 
 Type: 
 	  BasicType
@@ -401,17 +561,17 @@ BasicType:
  	  BOOL 
 		{ 
           safe_assign($$, gsMakeType( gsString2ATermAppl( "Bool" ) ) );
-      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
 		}
  	| NAT
 		{ 
           safe_assign($$, gsMakeType( gsString2ATermAppl("Nat" ) ) );
-      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
 		}
  	| TYPE
 		{ 
           safe_assign($$, gsMakeType( $1 ) );
-      	  gsDebugMsg("parsed Type \n  %T\n", $$);
+      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
 		}
 //	| Identifier
 //	| Identifier DOT Identier
@@ -425,7 +585,7 @@ BasicType:
 Statement: 
 	  LBRACKET Statement RBRACKET
       	{ safe_assign($$, gsMakeParenthesisedStat( $2));
-      	  gsDebugMsg("parsed id-element \n  %T\n", $$);	
+      	  gsDebugMsg("Statement: parsed \n  %T\n", $$);	
 		}
 	| BasicStatement
 	| UnaryStatement
@@ -436,13 +596,13 @@ ModelStatement:
       Instantiation
     | ModelStatement BARS ModelStatement 
       	{ safe_assign($$, gsMakeParStat( $1, $3));
-      	  gsDebugMsg("parsed Parallel statement \n  %T\n", $$);	
+      	  gsDebugMsg("ModelStatement: parsed \n  %T\n", $$);	
 		}
 
 BasicStatement:
 //	  Instantiation
 	  AssignmentStatement
-//	| CommStatement
+	| CommStatement
 //	| DelayStatement
 //	| HybridStatement
 //	| ReturnStatement
@@ -468,12 +628,12 @@ AssignmentStatement:
           }  
  
           safe_assign($$, gsMakeAssignmentStat($1, $2, ATreverse($3), ATreverse($5) ) );
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);	
 		}
 	|
 	  OptGuard OptChannel SKIP
       	{ safe_assign($$, gsMakeSkipStat( $1, $2, gsMakeSkip() ));
-      	  gsDebugMsg("parsed skip statement \n  %T\n", $$);	
+      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);	
 		}
 //	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
 	;
@@ -495,7 +655,7 @@ OptGuard: /* empty */
 
 
 			safe_assign($$, $1 );
-      	  	gsDebugMsg("parsed OptGuard \n  %T\n", $$);	
+      	  	gsDebugMsg("OptGuard: parsed \n  %T\n", $$);	
 		}
 	;
 
@@ -506,44 +666,66 @@ OptChannel: /* empty */
       	{ safe_assign($$, $1);
 		  gsErrorMsg("OptChannel not yet implemented");
 		  assert(false);
-      	  gsDebugMsg("parsed OptChannel \n  %T\n", $$);	
+      	  gsDebugMsg("OptChannel: parsed \n  %T\n", $$);	
 		}
 	;
 
 Identifier_csp: 
 	  Identifier 
-      	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed id's \n  %T\n", $$);	
+      	{ safe_assign($$, ATmakeList1( (ATerm) $1));
+      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", $$);	
 		}
 	| Identifier_csp COMMA Identifier
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed id's\n  %T\n", $$);	
+      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", $$);	
 		}
 	;
 
 Expression_csp:
 	  Expression
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", $$);	
 		}
 	| Expression_csp COMMA Expression
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed expression-element\n  %T\n", $$);	
+      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", $$);	
 		}
 	;
 
-/*CommStatement:
+CommStatement:
 	  OptGuard Expression EXCLAMATION Expression_csp
-	| OptGuard Expression SSEND Expression_csp
-	| OptGuard Expression EXCLAMATION
-	| OptGuard Expression SSEND 
-	| OptGuard SSEND Expression_csp 
+        {
+          //Check if $2 is properly typed
+          //Check if $4 is properly typed
+          //Check if $2 can send
+
+          ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument($2,0),0);   
+
+          safe_assign($$, gsMakeSendStat($1,  channel, ATreverse( $4) ) );
+      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+        }
+//	| OptGuard Expression SSEND Expression_csp
+//	| OptGuard Expression EXCLAMATION
+//	| OptGuard Expression SSEND 
+//	| OptGuard SSEND Expression_csp 
 	| OptGuard Expression RECV Expression_csp
-	| OptGuard Expression RRECV Expression_csp
-	| OptGuard Expression RECV
-	| OptGuard Expression RRECV 
-	| OptGuard RRECV Expression_csp 
-	;*/
+        {
+          //Check if $2 is properly typed
+          //Check if $4 is properly typed
+          //Check if $2 can receive
+
+          gsDebugMsg("%T",$2);
+ 
+          ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);   
+
+          safe_assign($$, gsMakeRecvStat($1, channel, ATreverse( $4) ) );
+      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+        }
+//	| OptGuard Expression RRECV Expression_csp
+//	| OptGuard Expression RECV
+//	| OptGuard Expression RRECV 
+//	| OptGuard RRECV Expression_csp 
+	;
 	
 Instantiation:
 	  Identifier LBRACKET RBRACKET
@@ -682,21 +864,48 @@ BasicExpression:
 		    * TODO: Add scope
 		    *
 		    **/
-		  
-		  // Determine if the expression is defined already 
-		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
-		    {
-		      gsErrorMsg("BasicExpression: Variable %T is not defined!\n", $1 );
-		      exit(1);
-		    };
-		  
-		  //Type the expression
- 	  	  safe_assign($$, 
-			gsMakeExpression( $1, 
-			  (ATermAppl) var_type_map[(ATerm) $1] 
-			)
-		  );
-      	  gsDebugMsg("parsed Identifier's\n  %T\n", $$);
+
+          bool channel_exists = false;
+          bool variable_exists = false;
+          if (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) $1))
+            {
+                
+//              gsErrorMsg("BasicExpression: Channel %T is not defined!\n", $1 );
+//              exit(1);
+            } else {
+              channel_exists = true;
+              safe_assign($$, 
+                gsMakeChannelTypedID(
+                  gsMakeChannelID($1, gsMakeNil()),
+                  (ATermAppl) chan_type_direction_map[(ATerm) $1].first
+                )
+              );
+            }
+          /* safe_assign($$, 
+            gsMakeExpression( $1, 
+              (ATermAppl) chan_type_direction_map[(ATerm) $1] 
+            )
+          ); */
+          // Determine if the expression is defined already 
+          if (var_type_map.end() == var_type_map.find( (ATerm) $1))
+            {
+            } else {
+              variable_exists = true;
+              //Type the expression
+              safe_assign($$, 
+              gsMakeExpression( $1, 
+                (ATermAppl) var_type_map[(ATerm) $1] 
+              )
+             );
+          }
+ 
+          if(!channel_exists && !variable_exists)
+          {
+              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              exit(1);
+          }
+  
+          gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
 		}
 //	  OLD LBRACKET Expression RBRACKET 
 //	  Identifier DOT Identifier
@@ -713,7 +922,7 @@ BooleanExpression:
 					gsMakeType( gsString2ATermAppl("Bool" )) 
 				)
 			);
-      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", $$);
 		}
 	| TRUE
 		{ 
@@ -722,7 +931,7 @@ BooleanExpression:
 					gsMakeType( gsString2ATermAppl("Bool" )) 
 				)
 			);
-      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", $$);
 		}
 	| NOT Expression
 		{ 

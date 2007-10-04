@@ -9,6 +9,7 @@
 #include "print/messaging.h"
 #include <map>
 #include <set>
+#include <utility>
 
 //fix for newer versions of flex (>= 2.5.31)
 #ifndef yywrap
@@ -25,7 +26,8 @@ int scope_lvl;
 
 map<ATerm, ATerm> var_type_map;
 set<ATermAppl> used_process_identifiers;
-bool processing_models;
+map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
+int parsing_mode;
 
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
@@ -139,30 +141,30 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "div"	{ process_string(); return DIV; }
 "/"     { process_string(); return DIVIDE; } 
  
-proc    { process_string(); return PROC; }
-model   { process_string(); return MODEL; }
-var		{ process_string(); return VAR; }
-enum    { process_string(); return ENUM; }
-skip	{ process_string(); return SKIP; }
-true	{ process_string(); return TRUE; }
-false	{ process_string(); return FALSE; }
-chan	{ process_string(); return CHAN; }
-min		{ process_string(); return MIN; }
-max		{ process_string(); return MAX; }
+"proc"    { process_string(); return PROC; }
+"model"   { process_string(); return MODEL; }
+"var"		{ process_string(); return VAR; }
+"enum"    { process_string(); return ENUM; }
+"skip"	{ process_string(); return SKIP; }
+"true"	{ process_string(); return TRUE; }
+"false"	{ process_string(); return FALSE; }
+"chan"	{ process_string(); return CHAN; }
+"min"		{ process_string(); return MIN; }
+"max"		{ process_string(); return MAX; }
 
-const   { process_string(); return CONST; }
-time	{ process_string(); return TIME; }
+"const"   { process_string(); return CONST; }
+"time"	{ process_string(); return TIME; }
 
 
-bool	{ process_string(); return BOOL; }
-nat     { process_string(); return NAT; }
-int		{ process_string(); return TYPE; }
-real	{ process_string(); return TYPE; }
-string  { process_string(); return TYPE; }
+"bool"	{ process_string(); return BOOL; }
+"nat"    { process_string(); return NAT; }
+"int"	{ process_string(); return TYPE; }
+"real"	{ process_string(); return TYPE; }
+"string" { process_string(); return TYPE; }
 
-deadlock { process_string();return DEADLOCK; }
-delta 	{ process_string();return DEADLOCK; }
-old		{ process_string(); return OLD;}
+"deadlock" { process_string();return DEADLOCK; }
+"delta" 	{ process_string();return DEADLOCK; }
+"old"		{ process_string(); return OLD;}
 
 {identifier}    { process_string(); return ID; }
 {Number} { process_string(); return NUMBER; }

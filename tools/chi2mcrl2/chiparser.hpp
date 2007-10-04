@@ -121,6 +121,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <utility>
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -138,8 +139,12 @@ extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
+extern map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
 extern set<ATermAppl> used_process_identifiers;
-extern bool processing_models;
+//extern bool processing_models;
+
+enum { UNDEFINEDPARSING, CHANNELPARSING, VARIABLEPARSING };
+extern int parsing_mode;
 
 #define YYMAXDEPTH 160000
 
@@ -157,13 +162,13 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 50 "chiparser.yy"
+#line 55 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
-#line 167 "chiparser.hpp"
+/* Line 2616 of glr.c.  */
+#line 172 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

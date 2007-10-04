@@ -54,8 +54,75 @@ bool CAsttransform::translator(ATermAppl ast)
     **/
   manipulateModel((ATermAppl) ATgetArgument(ast, 0 ));
 
+  /**
+    * Write chi channel ends as actions
+    *
+    **/
+
+  result.append("\n");
+  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
+        itMap != Channels.end();
+        ++itMap
+  )
+  {
+     result.append("act "+
+                   itMap->second.send_end+", "+
+                   itMap->second.recv_end+", "+
+                   itMap->first+": "+
+                   itMap->second.Type+";\n"     
+                   );
+  }
+
+
   result.append("\ninit ");
-  result.append(initialisation+";\n");
+  result.append("\n hide({");
+  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
+        itMap != Channels.end();
+        ++itMap
+  )
+  {
+    if (itMap != Channels.begin())
+    {
+      result.append(", ");
+    }
+    result.append(itMap->second.send_end);
+    result.append(", "+itMap->second.recv_end);
+
+  }
+  result.append("},");
+  result.append("\n  allow({");
+  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
+        itMap != Channels.end();
+        ++itMap
+  )
+  {
+    if (itMap != Channels.begin())
+    {
+      result.append(", ");
+    }
+    result.append(itMap->second.send_end);
+    result.append(", "+itMap->second.recv_end);
+    result.append(", "+itMap->first);
+  }
+  result.append("},");
+
+  result.append("\n  comm({");
+  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
+        itMap != Channels.end();
+        ++itMap
+  )
+  {
+    if (itMap != Channels.begin())
+    {
+      result.append("\n");
+    }
+    result.append(itMap->second.send_end);
+    result.append("| "+itMap->second.recv_end);
+    result.append("-> "+itMap->first);
+  }
+  result.append("},\n    ");
+
+  result.append(initialisation+"\n)  \n) \n);\n");
 
   mcrl2_result = result;
   return true;
@@ -125,6 +192,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   parenthesis_level = 0;
   all_streams.insert(stream_number);
   streams_per_parenthesis_level.insert(stream_number);
+  ChiDeclParameters.clear();
 
   /**
     * Start processing the process
@@ -158,7 +226,10 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * Create Processes for Instantiation: these are used to match the instantation given in the model
     *
     **/
-  
+
+  Chi_interfaces[processName] = ChiDeclParameters;
+  gsDebugMsg("Added %d ChiDeclParameters for %s\n", ChiDeclParameters.size(), processName.c_str() );
+ 
   ProcessForInstantation[processName].DeclarationVariables =DeclaredProcessDefinitionRPV;
   ProcessForInstantation[processName].SpecificationVariables =ProcessSpecification;
   ProcessForInstantation[processName].NumberOfStreams = all_streams.size();
@@ -368,7 +439,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * Write the mcrl2 process specification
     *
     **/
-  result.append("\n proc \n  "+processName+"(");
+  result.append("\nproc \n  "+processName+"(");
   /**
     * Declare the used variables
     *
@@ -538,7 +609,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
            result.append(to_string(*i));
          }
        }  
-       result.append(")\n");
+       result.append(") <> delta\n");
        ++index;
     }
 
@@ -586,7 +657,8 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
 
 std::vector<RVT> CAsttransform::manipulateDeclaredProcessDefinition(ATermAppl input)
 {
-  vector<RVT> result; 
+  vector<RVT> result;
+  vector<RVT> tmpRVT;  
   gsDebugMsg("input of manipulateDeclaredProcessDefinition: %T\n", input);
   // INPUT: ProcDecl( ... )
   // Arity is 1 because VarDecl the argument is of the form list*
@@ -601,14 +673,13 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessDefinition(ATermAppl in
     while (!ATisEmpty(to_process)){
 	  if ( StrcmpIsFun( "VarDecl", (ATermAppl) ATgetFirst(to_process) ) )
 	  {
-	   result =	manipulateDeclaredProcessVariables((ATermList) ATgetFirst(to_process));
-      };
-	/* TODO: Channel declaration not yet implemented
-	  if ( StrcmpisFun( "ChanDecl", ATgetFirst(to_process) ) )
+       tmpRVT = manipulateDeclaredProcessVariables((ATermList) ATgetFirst(to_process));
+	   result.insert(result.end(), tmpRVT.begin(), tmpRVT.end());	
+      } 
+	  if ( StrcmpIsFun( "ChanDecl", (ATermAppl) ATgetFirst(to_process) ) )
 	  {
-        manipulateDeclaredProcessChannels(ATgetFirst(to_process))
+        manipulateDeclaredProcessChannels((ATermList) ATgetFirst(to_process));
       }
-	*/
 	  to_process = ATgetNext(to_process);
 	}
   }
@@ -619,28 +690,58 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariables(ATermList inp
 {
   std::vector<RVT>::iterator it;
   std::vector<RVT> result;
-  std::vector<RVT> tmpRVT;
+  RVT tmpRVT;
   gsDebugMsg("input of manipulateDeclaredProcessVariables: %T\n", input);
   // INPUT: VarDecl( ... ),VarDecl( ... ),... 
  
-  ATermList to_process = (ATermList) ATgetFirst(input);
-  //input cannot be empty
-  assert(!ATisEmpty(to_process)); 
-  while (!ATisEmpty(to_process)){
-    if ( StrcmpIsFun( "DataVarID", (ATermAppl) ATgetFirst(to_process) ) )
-	{
-      //Merge vector with previous vector
-      tmpRVT = manipulateDeclaredProcessVariable((ATermAppl) ATgetFirst(to_process));
-	  for( it = tmpRVT.begin(); it != tmpRVT.end(); it++ ) 
-	    { result.push_back(*it); 
-		}
-    };
-	to_process = ATgetNext(to_process);
+  ATermList to_process = (ATermList) ATgetArgument(input, 0);
+  while (!ATisEmpty(to_process))
+  {
+    ATerm element = ATgetFirst(to_process);
+    if ( !StrcmpIsFun( "DataVarID", (ATermAppl) element) )
+    {
+      gsErrorMsg("Expcted DataVarID: %T", element);
+      exit(1); 
+    }
+    
+    tmpRVT.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
+    tmpRVT.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+    result.push_back(tmpRVT); 
+
+    //Add to table for higherlevel lookup
+    ChiDeclParameters.push_back(element);
+    to_process = ATgetNext(to_process);
   }
   return result;
 }
 
-std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariable(ATermAppl input)
+void CAsttransform::manipulateDeclaredProcessChannels(ATermList input)
+{
+  std::vector<RVT>::iterator it;
+  std::vector<RVT> result;
+  RVT tmpRVT;
+  gsDebugMsg("input of manipulateDeclaredProcessVariables: %T\n", input);
+  // INPUT: ChanDecl( ... ), ChanDecl( ... ),... 
+   
+  ATermList to_process = (ATermList) ATgetArgument(input, 0);
+  while (!ATisEmpty(to_process))
+  {
+    ATerm element = ATgetFirst(to_process);
+    if ( !StrcmpIsFun( "ChannelTypedID", (ATermAppl) element) )
+    {
+      gsErrorMsg("Expected ChannelTypedID: %T", element);
+      exit(1); 
+    }
+    
+    //Add to table for higherlevel lookup
+    ChiDeclParameters.push_back(element);
+    to_process = ATgetNext(to_process);
+  }
+  return;
+}
+
+
+/* std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariable(ATermAppl input)
 {
   std::vector<RVT> Result;
   std::string Type;
@@ -662,7 +763,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariable(ATermAppl inpu
 		 { 
 			tmpRVT.Name = *it;
             tmpRVT.Type = Type;
-			/* TODO: construct passthrough */
+			// TODO: construct passthrough //
 			Result.push_back(tmpRVT);
 		 }  
   	} else {
@@ -670,7 +771,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariable(ATermAppl inpu
     exit(1);
   }
   return Result;
-}
+}*/
 
 
 std::vector<std::string> CAsttransform::getVariablesNamesFromList(ATermList input) 
@@ -755,7 +856,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
 {
   vector<RVT>::iterator it;
   RPV tmpRPV;
-  vector<RVT> tmpRVT;
+  RVT tmpRVT;
   vector<RPV> result;
   string InitValue;
   gsDebugMsg("input of manipulateProcessVariableDeclarations: %T\n", input);
@@ -767,49 +868,45 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
 	gsDebugMsg("No variables/channels are declare in the process definition");
 	return result;
   } else {
-    //Get first argument
     ATermList to_process = (ATermList) ATgetArgument(input, 0);
-    while (!ATisEmpty(to_process)){
-      if ( StrcmpIsFun( "DataVarID", (ATermAppl) ATgetFirst(to_process) ) )
-	  {
-        tmpRVT = manipulateDeclaredProcessVariable((ATermAppl) ATgetFirst(to_process));
-		for( it =  tmpRVT.begin(); 
-		     it != tmpRVT.end(); it++ ) 
-		 	{ 
-			  tmpRPV.Name = it->Name;
-              tmpRPV.Type = it->Type;
-			  /* Set Initial Value -- See Future NOTE */
-			  if (tmpRPV.Type == "Bool" )
-			    {
-			  	  tmpRPV.InitValue = "false"; 
-				};
-			  if (tmpRPV.Type == "Nat" )
-			    {
-			      tmpRPV.InitValue = "0"; 
-				};
-			   /*
-			    *  Future NOTE: Use mapping when using self defined data types
-			    */ 
-			 result.push_back(tmpRPV);
-		 	}	  
-      };
-      if ( StrcmpIsFun( "DataVarExprID", (ATermAppl) ATgetFirst(to_process) ) )
-	  {
-		//First Argument of DataVarExprID is a DataVarID 
-        tmpRVT = manipulateDeclaredProcessVariable( (ATermAppl) ATgetArgument(ATgetFirst(to_process), 0 ));
-		//Second Argument of DataVarExprID is an expression
-        InitValue = manipulateExpression( (ATermAppl) ATgetArgument(ATgetFirst(to_process), 1 ));
-		for( it =  tmpRVT.begin(); 
-		     it != tmpRVT.end(); it++ ) 
-		 	{ 
-			  tmpRPV.Name = it->Name;
-              tmpRPV.Type = it->Type;
-			  tmpRPV.InitValue = InitValue;
-			  result.push_back(tmpRPV);
-		 	}	  
-	  };
-	  to_process = ATgetNext(to_process);
-	}
+    while (!ATisEmpty(to_process))
+    {
+      ATerm element = ATgetFirst(to_process);
+      if ( StrcmpIsFun( "DataVarID", (ATermAppl) element) )
+      {
+        tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
+        tmpRPV.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+	    if (tmpRPV.Type == "Bool" )
+	    {
+	  	  tmpRPV.InitValue = "false"; 
+	    }
+	    if (tmpRPV.Type == "Nat" )
+	    {
+		  tmpRPV.InitValue = "0"; 
+		}
+		//
+		//  Future NOTE: Use mapping when using self defined data types
+		/// 
+        result.push_back(tmpRPV); 
+      }
+      if ( StrcmpIsFun( "DataVarExprID", (ATermAppl) element) )
+      {
+        ATerm sub_element = ATgetArgument(element, 0); 
+        tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(sub_element,0)));
+        tmpRPV.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(sub_element,1),0)));
+             
+        tmpRPV.InitValue = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+        result.push_back(tmpRPV); 
+      }
+
+      if ( !StrcmpIsFun( "DataVarExprID", (ATermAppl) element) && 
+           !StrcmpIsFun( "DataVarID", (ATermAppl) element) )
+      {
+        gsErrorMsg("Expected DataVarID or DataVarExprID: %T", element);
+        exit(1); 
+      }
+      to_process = ATgetNext(to_process);
+    }
   }
   return result; 
   
@@ -849,7 +946,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
      }  
      return result;
   }
-  gsErrorMsg("Encounterd unknown expressions %T", input);
+  gsErrorMsg("Encounterd unknown expression: %T\n", input);
   exit(1);
   return "";
 } 
@@ -877,28 +974,34 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
       //Determine the number of arguments of the instantation
       ATermList to_process = (ATermList) ATgetArgument(input,1);
-       
-      if(ATgetLength(to_process) != ProcessForInstantation[processName].DeclarationVariables.size())   
+ 
+      //Determine if the number of arguments match between instantations
+      if(ATgetLength(to_process) != Chi_interfaces[processName].size())
       {
-        gsDebugMsg("%T\n",to_process);
-        gsDebugMsg("Declared variables from process\n");
-        for(vector<RPV>::iterator itRPV =ProcessForInstantation[processName].DeclarationVariables.begin();
-             itRPV != ProcessForInstantation[processName].DeclarationVariables.end();
-             ++itRPV
-           )
-        {
-          gsDebugMsg("%s\n,", itRPV->Name.c_str());
-        }
         gsErrorMsg("Number of arguments does not correspond for %s\n", processName.c_str());
         exit(1);
       }
- 
-      //Determine if the arguments are of the same type 
-      vector<RPV>::iterator itRPV = ProcessForInstantation[processName].DeclarationVariables.begin();
-      ATermList tmp_to_process = to_process;
-      while (ATgetLength(tmp_to_process)>0)
+       
+/*      if(ATgetLength(to_process) != (ProcessForInstantation[processName].DeclarationVariables.size() + 
+                                     ProcessForInstantation[processName].ChannelDeclarations.size()) )   
       {
-        if (strcmp(itRPV->Type.c_str(),
+        gsErrorMsg("Number of arguments does not correspond for %s\n", processName.c_str());
+        exit(1);
+      }
+      gsDebugMsg("%T\n",to_process);
+      gsDebugMsg("Declared variables for process:\n");
+      for(vector<RPV>::iterator itRPV =ProcessForInstantation[processName].DeclarationVariables.begin();
+           itRPV != ProcessForInstantation[processName].DeclarationVariables.end();
+           ++itRPV
+         )
+      {
+        gsDebugMsg("%s\n,", itRPV->Name.c_str());
+      }
+//
+//
+//
+   
+     if (strcmp(itRPV->Type.c_str(),
             ATgetName(ATgetAFun(ATgetArgument(ATgetArgument( ATgetFirst(tmp_to_process), 1 ), 0))))
             != 0
            )
@@ -915,17 +1018,94 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
           gsErrorMsg("Arguments do not correspond in types for %s\n", processName.c_str());
           exit(1);
         }
+*/
+
+
+      //Determine if the arguments are of the same type 
+      ATermList tmp_to_process = to_process;
+      int i = 0;
+      while (!ATisEmpty(tmp_to_process))
+      {
+        bool known = false;
+        ATerm element = ATgetFirst(tmp_to_process);
+        gsDebugMsg("%T  --  %T\n", Chi_interfaces[processName].at(i), element);
+        if(StrcmpIsFun("ChannelTypedID", (ATermAppl) Chi_interfaces[processName].at(i)) && 
+           StrcmpIsFun("ChannelTypedID", (ATermAppl) ATgetFirst(tmp_to_process))
+        )
+        {
+          string channelID = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 0),0)));
+          ATerm direction = ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),1);
+          string local_string =ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),0))); 
+          string type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 1),0)));
+  
+          // Set Receiving end for a channel 
+          if(StrcmpIsFun("Recv", (ATermAppl) direction))
+          { 
+            if (Channels[channelID].recv_end.empty() )
+            {
+              RC tmpRC = Channels[channelID];
+              tmpRC.recv_end = processName + "_" + local_string;
+              tmpRC.Type = type; 
+              known = true;
+              Channels[channelID]= tmpRC; 
+            } else {
+              gsErrorMsg("Multiple Receiving ends for %s\n", Channels[channelID].recv_end.c_str());
+              exit(1);
+            }
+          }
+
+          // Set Sending end for a channel
+          if(StrcmpIsFun("Send", (ATermAppl) direction))
+          { 
+            if (Channels[channelID].send_end.empty() )
+            {
+              RC tmpRC = Channels[channelID];
+              tmpRC.send_end = processName + "_" + local_string;
+              tmpRC.Type = type; 
+              known = true;
+              Channels[channelID]= tmpRC; 
+            } else {
+              gsErrorMsg("Multiple Sending ends for %s\n", Channels[channelID].recv_end.c_str());
+              exit(1);
+            }
+          }
+        }
+
+        if(StrcmpIsFun("DataVarID", (ATermAppl) Chi_interfaces[processName].at(i))) 
+        {
+          //Need to do some work here, related to checking of checking for expressions for
+          // tmp_to_process  
+          known = true;
+        }
+
+        if(!known)
+        {
+          gsErrorMsg("Interfaces for %T and %T\n do not match", 
+            Chi_interfaces[processName].at(i), 
+            ATgetFirst(tmp_to_process));
+          exit(1);
+        }
+
         tmp_to_process = ATgetNext(tmp_to_process);
-        ++itRPV;
+        ++i;
       }
-           
- 
+
       //Write state vector
       initialisation.append(processName);
       initialisation.append("(");
       while (ATgetLength(to_process)>0)
       {
-        initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process))+", ");
+        //Check if the paramter is either a Expression or a Channel
+        if (  StrcmpIsFun( "BinaryExpression", (ATermAppl) ATgetFirst(to_process)) 
+           || StrcmpIsFun( "Expression", (ATermAppl) ATgetFirst(to_process) )
+           || StrcmpIsFun( "UnaryExpression", (ATermAppl) ATgetFirst(to_process) ) 
+           ) 
+        { 
+          initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process))+", ");
+        }
+        if (  StrcmpIsFun( "TypedChannels", (ATermAppl) ATgetFirst(to_process))) 
+        {};
+
         to_process = ATgetNext(to_process);
       }
       for(vector<RPV>::iterator itRPV = ProcessForInstantation[processName].SpecificationVariables.begin();
@@ -935,6 +1115,8 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
         initialisation.append(itRPV->InitValue+", ");
       }
       initialisation.append("0)"); 
+
+
       return ;
     } 
   gsErrorMsg("%T operator is not supported yet.\n",  input ) ;
@@ -946,7 +1128,10 @@ void CAsttransform::manipulateStatements(ATermAppl input)
 {
   gsDebugMsg("input of manipulateStatements: %T\n", input);
   RAT transition;
-
+  /**
+    * Basic Statements
+    *
+    **/
   if ( StrcmpIsFun( "DeltaStat", input ) )
     {
       if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,0) ))
@@ -1017,7 +1202,111 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       guardedloop = false;
       return ;
     }
-  
+  /**
+    * Communication Statements
+    *
+    **/
+  if ( StrcmpIsFun( "RecvStat", input ) )
+    {
+      if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,0) ))
+      {
+        transition.guard =  manipulateExpression( (ATermAppl) ATgetArgument(input,0));
+      }
+      
+      transition.state = state;
+      transition.stream = stream_number;
+      transition.originates_from_stream = originates_from_stream;
+      transition.nextstate = next_state;
+      transition.terminate = terminate;
+      transition.looped_state = loop;
+      transition.guardedloop = guardedloop;
+      transition.parenthesis_level = parenthesis_level;
+
+      ATermList to_process = (ATermList) ATgetArgument(input, 2);
+
+      //gsDebugMsg("%T\n",to_process);
+
+      assert(ATgetLength(to_process) <= 1);
+      int i = 0;
+      transition.action = "";
+      while ( ATgetLength(to_process) > 0)
+      {
+        transition.action.append("sum " + 
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+
+                                 to_string(i)+ ":" + 
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(to_process),1),0)))+
+                                 ". "+
+                                 variable_prefix + "_" +
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+"("+
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+
+                                 to_string(i)+ ")"  
+                                 )
+                                 ;
+        transition.vectorUpdate[(std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(to_process),0)))]= 
+                (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1))) + to_string(i);
+        to_process = ATgetNext(to_process);
+        i++;
+   
+      }
+//      transition.vectorUpdate = manipulateAssignmentStat((ATermList) ATgetArgument(input, 1), (ATermList) ATgetArgument(input, 3) );
+      transitionSystem.push_back(transition);
+      if(terminate)
+      { 
+        endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
+      }
+      loop = false;
+      guardedloop = false;
+      return ;
+     }
+  if ( StrcmpIsFun( "SendStat", input ) )
+    {
+      if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,0) ))
+      {
+        transition.guard =  manipulateExpression( (ATermAppl) ATgetArgument(input,0));
+      }
+      
+      transition.state = state;
+      transition.stream = stream_number;
+      transition.originates_from_stream = originates_from_stream;
+      transition.nextstate = next_state;
+      transition.terminate = terminate;
+      transition.looped_state = loop;
+      transition.guardedloop = guardedloop;
+      transition.parenthesis_level = parenthesis_level;
+
+      ATermList to_process = (ATermList) ATgetArgument(input, 2);
+      assert(ATgetLength(to_process) <= 1);
+      int i = 0;
+      transition.action = "";
+      while ( ATgetLength(to_process) > 0)
+      {
+        transition.action.append( 
+                                // (std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(to_process),1),0)))+
+                                 //". "+
+                                 variable_prefix + "_" +
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+"("+
+                                 manipulateExpression( (ATermAppl) ATgetFirst(to_process))+")"
+                                 )
+                                 ;
+//        transition.vectorUpdate[(std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(to_process),0)))]= 
+//                (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1))) + to_string(i);
+        to_process = ATgetNext(to_process);
+        i++;
+   
+      }
+      transitionSystem.push_back(transition);
+      if(terminate)
+      { 
+        endstates_per_parenthesis_level[parenthesis_level].insert(transitionSystem.size()); 
+      }
+      loop = false;
+      guardedloop = false;
+      return ;
+     }
+  /**
+    * Control Statements
+    *
+    **/
   if ( StrcmpIsFun( "SepStat", input ) )
     {
       terminate = false;

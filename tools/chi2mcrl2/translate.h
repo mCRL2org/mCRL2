@@ -23,6 +23,8 @@
 #define RSP RecStreamPos
 #define RPI RecParenthesisInfo
 #define RPVS RecProcessVectors
+#define RPC RecProcessChannels
+#define RC  RecChannel
 
 typedef CArray<int> IntArray ; 
 
@@ -32,6 +34,12 @@ typedef struct
     std::string Type; 
     std::string InitValue;
   } RecProcessVariable;
+
+typedef struct
+  {
+    std::string Name;
+    std::string Type;
+  } RecProcessChannels;
 
 typedef struct
    {
@@ -86,8 +94,16 @@ typedef struct
   {
     std::vector<RPV> DeclarationVariables;
     std::vector<RPV> SpecificationVariables;
+    std::vector<RPC> ChannelDeclarations;
     int NumberOfStreams;
   } RecProcessVectors;
+
+typedef struct
+  {
+     std::string send_end;
+     std::string recv_end;
+     std::string Type;
+  } RecChannel;
 
 template <class T>
 inline std::string to_string (const T& t)
@@ -106,7 +122,7 @@ class CAsttransform
 	std::string manipulateProcess(ATermAppl input);
     std::string mcrl2_result;
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
-    std::string variable_prefix;
+    std::string variable_prefix; //prefix stores the name of the process globally
     int parenthesis_level;
     std::vector<RVT> manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
@@ -115,7 +131,8 @@ class CAsttransform
     std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
     
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
-    std::vector<RVT> manipulateDeclaredProcessVariable(ATermAppl input); 
+    void manipulateDeclaredProcessChannels(ATermList input);
+
     std::string manipulateExpression(ATermAppl input);
     void manipulateStatements(ATermAppl input);
     std::map<std::string, std::string> manipulateAssignmentStat(ATermList input_id, ATermList input_exp);
@@ -124,7 +141,6 @@ class CAsttransform
     std::map<int, std::set<int> > affectedStreamMap;
 
     std::string manipulateExplicitTemplates(ATermList input);
-    std::string manipulateDeclaredProcessChannels(ATermList input);
     std::vector<RecProcessVariable> ProcessVariableMap;
 
     int stream_lvl;      //Variable to indicate the steams lvl
@@ -166,6 +182,16 @@ class CAsttransform
     
     std::string initialisation;
     std::map<std::string, RPVS> ProcessForInstantation;
+
+    //Variable that constructs paramteres for a Chi Process
+    std::vector<ATerm> ChiDeclParameters;
+
+    //Variable that constructs paramters for an entire Chi model
+    std::map<std::string, std::vector<ATerm> > Chi_interfaces;
+
+    //These channels will form define the multi-actions for mCRL2-specification
+    std::map<std::string, RC> Channels; 
+
 }
 ;
 

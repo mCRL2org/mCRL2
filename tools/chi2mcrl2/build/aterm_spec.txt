@@ -8,8 +8,9 @@
 
 <ProcDecl>		::= ProcDecl(<Decl>*) 
 
-<Decl>			::=VarDecl(<VarID>+)
-
+<Decl>			::= VarDecl(<VarID>+)
+                  | ChanDecl(<TypedChannels>+)
+ 
 <ProcBody>		::= ProcSpec(<VarSpec>*, <Statement>)
 
 <VarSpec>		::= VarSpec(<VarExpID>+)
@@ -18,14 +19,19 @@
 <VarExpID>		::= DataVarExprID( <VarID>, <Expr> ) 
 				  |	<VarID> 
 
-<VarID>			::= DataVarID(<String>+, <TypeExp>)
+<VarID>			::= DataVarID(<String>, <TypeExp>)
 
 <TypeExp>		::= <TypeID>
 
 <TypeID>		::= Type(<String>)
 
-<ChannelID>		::= ChannelID(<VarID>, <SendType>, <TypeID>)
+<ChannelTypedID>::= ChannelTypedID(<ChannelID>,<TypeID>)
+
+<ChannelID>     ::= ChannelID(<VarID>, <ComType>)
 					
+<ComTyp>        ::= Nil 
+                  | Send
+                  | Recv
 			
 <Expr>			::= Expression(<String>, <TypeID> )
 				  | UnaryExpression( <String>, <TypeID>, <Expr> )
@@ -42,6 +48,8 @@
 			      | GuardedStarStat(<Expr>,<Statement>)
 				  | DeltaStat(OptGuard,Delta)
                   | Instantiation(<String>,<Expr>*)
+                  | SendStat(OptGuard, <Expr>, <Expr>+)
+                  | RecvStat(OptGuard, <Expr>, <Expr>+)
 					
 <OptGuard>		::= <Expr> 
 				  |	Nil

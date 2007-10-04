@@ -1,0 +1,14 @@
+model blaat()=
+|[ blaak() || test(false, true) 
+]|
+
+proc blaak()=
+|[ var a: bool 
+:: skip ;*( a := false )
+]|
+
+proc test(var b,a:bool, c: nat)=
+|[ 
+a *> ( a -> skip ; delta | skip ; skip ; a := false ) ; skip 
+]|
+

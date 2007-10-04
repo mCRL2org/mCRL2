@@ -119,6 +119,28 @@ bool gsIsBinaryExpression(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBinaryExpression();
 }
 
+// ChanDecl
+inline
+AFun initAFunChanDecl(AFun& f)
+{
+  f = ATmakeAFun("ChanDecl", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChanDecl()
+{
+  static AFun AFunChanDecl = initAFunChanDecl(AFunChanDecl);
+  return AFunChanDecl;
+}
+
+inline
+bool gsIsChanDecl(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChanDecl();
+}
+
 // ChanSpec
 inline
 AFun initAFunChanSpec(AFun& f)
@@ -145,7 +167,7 @@ bool gsIsChanSpec(ATermAppl Term)
 inline
 AFun initAFunChannelID(AFun& f)
 {
-  f = ATmakeAFun("ChannelID", 3, ATfalse);
+  f = ATmakeAFun("ChannelID", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -161,6 +183,28 @@ inline
 bool gsIsChannelID(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunChannelID();
+}
+
+// ChannelTypedID
+inline
+AFun initAFunChannelTypedID(AFun& f)
+{
+  f = ATmakeAFun("ChannelTypedID", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChannelTypedID()
+{
+  static AFun AFunChannelTypedID = initAFunChannelTypedID(AFunChannelTypedID);
+  return AFunChannelTypedID;
+}
+
+inline
+bool gsIsChannelTypedID(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChannelTypedID();
 }
 
 // ChiSpec
@@ -559,6 +603,94 @@ bool gsIsProcSpec(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunProcSpec();
 }
 
+// Recv
+inline
+AFun initAFunRecv(AFun& f)
+{
+  f = ATmakeAFun("Recv", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunRecv()
+{
+  static AFun AFunRecv = initAFunRecv(AFunRecv);
+  return AFunRecv;
+}
+
+inline
+bool gsIsRecv(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunRecv();
+}
+
+// RecvStat
+inline
+AFun initAFunRecvStat(AFun& f)
+{
+  f = ATmakeAFun("RecvStat", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunRecvStat()
+{
+  static AFun AFunRecvStat = initAFunRecvStat(AFunRecvStat);
+  return AFunRecvStat;
+}
+
+inline
+bool gsIsRecvStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunRecvStat();
+}
+
+// Send
+inline
+AFun initAFunSend(AFun& f)
+{
+  f = ATmakeAFun("Send", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSend()
+{
+  static AFun AFunSend = initAFunSend(AFunSend);
+  return AFunSend;
+}
+
+inline
+bool gsIsSend(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSend();
+}
+
+// SendStat
+inline
+AFun initAFunSendStat(AFun& f)
+{
+  f = ATmakeAFun("SendStat", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSendStat()
+{
+  static AFun AFunSendStat = initAFunSendStat(AFunSendStat);
+  return AFunSendStat;
+}
+
+inline
+bool gsIsSendStat(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSendStat();
+}
+
 // SepStat
 inline
 AFun initAFunSepStat(AFun& f)
@@ -760,15 +892,27 @@ ATermAppl gsMakeBinaryExpression(ATermAppl String_0, ATermAppl TypeID_1, ATermAp
 }
 
 inline
+ATermAppl gsMakeChanDecl(ATermList TypedChannels_0)
+{
+  return ATmakeAppl1(gsAFunChanDecl(), (ATerm) TypedChannels_0);
+}
+
+inline
 ATermAppl gsMakeChanSpec(ATermList ChanID_0)
 {
   return ATmakeAppl1(gsAFunChanSpec(), (ATerm) ChanID_0);
 }
 
 inline
-ATermAppl gsMakeChannelID(ATermAppl VarID_0, ATermAppl SendType_1, ATermAppl TypeID_2)
+ATermAppl gsMakeChannelID(ATermAppl VarID_0, ATermAppl ComType_1)
 {
-  return ATmakeAppl3(gsAFunChannelID(), (ATerm) VarID_0, (ATerm) SendType_1, (ATerm) TypeID_2);
+  return ATmakeAppl2(gsAFunChannelID(), (ATerm) VarID_0, (ATerm) ComType_1);
+}
+
+inline
+ATermAppl gsMakeChannelTypedID(ATermAppl ChannelID_0, ATermAppl TypeID_1)
+{
+  return ATmakeAppl2(gsAFunChannelTypedID(), (ATerm) ChannelID_0, (ATerm) TypeID_1);
 }
 
 inline
@@ -784,7 +928,7 @@ ATermAppl gsMakeDataVarExprID(ATermAppl VarID_0, ATermAppl Expr_1)
 }
 
 inline
-ATermAppl gsMakeDataVarID(ATermList String_0, ATermAppl TypeExp_1)
+ATermAppl gsMakeDataVarID(ATermAppl String_0, ATermAppl TypeExp_1)
 {
   return ATmakeAppl2(gsAFunDataVarID(), (ATerm) String_0, (ATerm) TypeExp_1);
 }
@@ -877,6 +1021,30 @@ inline
 ATermAppl gsMakeProcSpec(ATermList VarSpec_0, ATermAppl Statement_1)
 {
   return ATmakeAppl2(gsAFunProcSpec(), (ATerm) VarSpec_0, (ATerm) Statement_1);
+}
+
+inline
+ATermAppl gsMakeRecv()
+{
+  return ATmakeAppl0(gsAFunRecv());
+}
+
+inline
+ATermAppl gsMakeRecvStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermList Expr_2)
+{
+  return ATmakeAppl3(gsAFunRecvStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2);
+}
+
+inline
+ATermAppl gsMakeSend()
+{
+  return ATmakeAppl0(gsAFunSend());
+}
+
+inline
+ATermAppl gsMakeSendStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermList Expr_2)
+{
+  return ATmakeAppl3(gsAFunSendStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2);
 }
 
 inline
