@@ -13,6 +13,7 @@
 #define MCRL2_DATA_RECONSTRUCT_H
 
 #include <aterm2.h>
+#include "libstruct.h"
 
 ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 
