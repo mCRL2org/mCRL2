@@ -73,23 +73,23 @@ namespace squadt {
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
-    s >> in;
+    std::ostringstream l;
+
+    l << s.rdbuf();
+
+    in.Parse(l.str());
 
     tree = in.FirstChildElement();
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
-    std::istringstream ins(s);
-
-    ins >> in;
+    in.Parse(s);
 
     tree = in.FirstChildElement();
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
-    std::ifstream ins(p.native_file_string().c_str());
-
-    ins >> in;
+    in.LoadFile(p.native_file_string().c_str());
 
     tree = in.FirstChildElement();
   }
@@ -189,7 +189,6 @@ namespace utility {
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(executor_impl& o) {
-    /** FIXME temporary measure until xml2pp is phased out */
     if (tree->Value() == "squadt-preferences") {
       tree = tree->FirstChildElement();
     }

@@ -20,6 +20,7 @@
 namespace tipi {
   namespace controller {
 
+    /// \internal
     class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi:: message > {
       friend class communicator;
       

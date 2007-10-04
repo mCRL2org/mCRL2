@@ -71,23 +71,23 @@ namespace tipi {
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
-    s >> in;
+    std::ostringstream l;
+
+    l << s.rdbuf();
+
+    in.Parse(l.str());
 
     tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
-    std::istringstream ins(s);
-
-    ins >> in;
+    in.Parse(s, false);
 
     tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
-    std::ifstream ins(p.native_file_string().c_str());
-
-    ins >> in;
+    in.LoadFile(p.native_file_string().c_str());
 
     tree = in.FirstChildElement(false);
   }
@@ -144,9 +144,7 @@ namespace utility {
 
     for (ticpp::Node* e = tree->FirstChild(false); e != 0; e = e->NextSibling(false)) {
       if (e->Type() == TiXmlNode::TEXT) {
-        static_cast < ticpp::Text* > (e)->SetCDATA(false);
-
-        o.m_content += e->ToString(*e);
+        o.m_content += e->Value();
       }
     }
   }
