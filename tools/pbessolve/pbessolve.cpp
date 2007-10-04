@@ -81,8 +81,10 @@ string infilename;
 //Local functions ======================== 
 static t_tool_options parse_command_line(int argc, char** argv); 
 pbes<> load_pbes();
+
 pbes_expression interpret_solution(pbes<> pbes_spec, 
-				   atermpp::vector<pbes_equation> es_solution, string solver, string rewriter); 
+				   atermpp::vector<pbes_equation> es_solution, 
+				   string solver, string rewriter); 
 //======================================== 
  
  
@@ -111,16 +113,19 @@ int main(int argc, char** argv)
   //Every equation is the result of a  
   //(possibly interactive and/or bounded)  
   //approximation process 
-  atermpp::vector<pbes_equation> es_solution = 
-    solve_pbes(pbes_spec, tool_options.interactive, 
-	       tool_options.bound, tool_options.solver, tool_options.rewriter); 
+  pbes_solver* ps = new pbes_solver
+    (pbes_spec, tool_options.solver, tool_options.rewriter,
+     tool_options.bound, tool_options.interactive);
+  
+  atermpp::vector<pbes_equation> es_solution = ps->solve(); 
    
   //Interpret the solution in the initial state
   pbes_expression sol_initial_state = 
-    interpret_solution(pbes_spec, es_solution, tool_options.solver, tool_options.rewriter); 
+    interpret_solution(pbes_spec, es_solution, 
+		       tool_options.solver, tool_options.rewriter); 
    
   cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
-
+  
   return 0; 
 } 
 //======================================== 
@@ -286,7 +291,7 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
      ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
   BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), rew, 0, false, sol, false);
 
-  result = rewrite_pbes_expression(p, prover);
+  result = pbes_expression_prove(p, prover);
 
   // in the resulting expression, the predicate instances should
   // be further replaced with their solutions, etc.

@@ -37,10 +37,14 @@
 #include "print/messaging.h"
 
 
-//#define debug
-//#define rewrite_pbes_expression_in_enumerate_rec
-//#define rewrite_pbes_expression_with_quantifiers
 
+//#define debug
+//#define debug2
+//#define pbes_expression_prove_in_enumerate_rec
+//#define pbes_expression_prove_with_quantifiers
+
+//#define use_prover
+#define use_rewriter
 
 int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 
@@ -49,34 +53,30 @@ using namespace pbes_expr;
 using namespace mcrl2::utilities;
 
 
-pbes_expression pbes_expression_simplify
-(pbes_expression p, int *nq, data_variable_list *fv ,
- BDD_Prover *prover);
-
-pbes_expression enumerate_finite_domains
-(bool forall, data_variable_list *quant_vars, pbes_expression p, BDD_Prover *prover);
-
-data_expression data_expression_simplify
-(data_expression d, int *nq, data_variable_list *fv, BDD_Prover *prover);
-
-
-bool pbes_expression_compare
-(pbes_expression p, pbes_expression q, BDD_Prover* prover);
-
-
-// some extra needed functions on data_variable_lists and data_expressions
- bool var_in_list(data_variable vx, data_variable_list y);
- data_variable_list intersect(data_variable_list x, data_variable_list y);
- data_variable_list substract(data_variable_list x, data_variable_list y);
- data_variable_list dunion(data_variable_list x, data_variable_list y);
- void dunion(data_variable_list *x, data_variable_list y);
-
-void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv);
-
 
 sort_instantiator si;
 
-
+pbes_solver::pbes_solver(pbes<> p_pbes_spec,
+			 std::string solver, 
+			 std::string rew_strategy, 
+			 int p_bound, bool p_interactive)
+{
+  pbes_spec = p_pbes_spec;
+  
+  lps::data_specification ds = pbes_spec.data();
+  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: 
+    ((solver=="fast")?solver_type_cvc_lite_fast:
+     solver_type_cvc_lite);
+  RewriteStrategy rew = (rew_strategy == "inner") ? GS_REWR_INNER:
+    ((rew_strategy == "innerc") ? GS_REWR_INNERC : 
+     ((rew_strategy == "jitty") ? GS_REWR_JITTY : 
+      GS_REWR_JITTYC));
+  
+  prover = new BDD_Prover(ds, rew, 0, false, sol, false);
+  
+  bound = p_bound;
+  interactive = p_interactive;
+}
 
 
 
@@ -86,80 +86,70 @@ sort_instantiator si;
 // Tries to solve the pbes by solving the predicate variables one by one,
 // starting with the one defined by the last equation.
 // The parameter 'rewriter' is in fact a rewriting strategy
-atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive, 
-					  int bound, std::string solver, std::string rewriter)
+// Algorithm:
+//
+atermpp::vector<pbes_equation> pbes_solver::solve()
 //========================
 
 {
 
-
   atermpp::vector<pbes_equation> es_problem;
   es_problem = pbes_spec.equations();
- 
- atermpp::vector<pbes_equation> es_solution;
- 
- lps::data_specification ds = pbes_spec.data();
- SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_lite_fast:solver_type_cvc_lite);
- RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
-   ((rewriter == "innerc") ? GS_REWR_INNERC : 
-    ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
- 
- BDD_Prover* prover = new BDD_Prover(ds, rew, 0, false, sol, false);
-
-
+  
+  atermpp::vector<pbes_equation> es_solution;
+  
  // instantiate all finite sorts from the specification
  // (better: instantiate later, when needed...)
- sort_list finite_sorts;
- sort_list sl = ds.sorts();
- si.set_function_list(ds.constructors());
- for (sort_list::iterator i = sl.begin(); i != sl.end(); i++)
-   if (is_finite(ds.constructors(), (*i)))
-     finite_sorts = push_front(finite_sorts,(*i));
- si.instantiate_sorts(finite_sorts);
-
-#ifdef debug
- gsVerboseMsg("SORT_INSTANTIATOR check!\n");
- for (sort_list::iterator i = finite_sorts.begin(); i != finite_sorts.end(); i++)
-   {
-     gsVerboseMsg("sort %s:  enumeration %s\n",
-		  pp(*i).c_str(), pp(si.get_enumeration(*i)).c_str());
-   } 
+  lps::data_specification ds = pbes_spec.data();
+  sort_list finite_sorts;
+  sort_list sl = ds.sorts();
+  si.set_function_list(ds.constructors());
+  for (sort_list::iterator i = sl.begin(); i != sl.end(); i++)
+    if (is_finite(ds.constructors(), (*i)))
+      finite_sorts = push_front(finite_sorts,(*i));
+  si.instantiate_sorts(finite_sorts);
+  
+#ifdef debug2
+  gsVerboseMsg("SORT_INSTANTIATOR check!\n");
+  for (sort_list::iterator i = finite_sorts.begin(); i != finite_sorts.end(); i++)
+    {
+      gsVerboseMsg("sort %s:  enumeration %s\n",
+		   pp(*i).c_str(), pp(si.get_enumeration(*i)).c_str());
+    } 
 #endif
-
-
-
-
+  
+  
 #ifdef debug
- gsVerboseMsg("starting loop\n"); 
+  gsVerboseMsg("starting loop\n"); 
 #endif
-
- // Is using a reverse_iterator correct? inefficient??
- for (atermpp::vector<pbes_equation>::reverse_iterator eqcrt = 
-			 es_problem.rbegin(); eqcrt != es_problem.rend(); eqcrt++)
-	{
-//check!
-//gsVerboseMsg("checking");gsVerboseMsg(" %s\n",pp(eqcrt->formula()).c_str());
-//if (detail::check_rule_PBExpr(eqcrt->formula()))	
-//gsVerboseMsg("checked!\n");
-
-	 // replace already solved variables with their solutions
-	 pbes_expression newrhs = update_expression(eqcrt->formula(), es_solution);
-	 *eqcrt = pbes_equation(eqcrt->symbol(), eqcrt->variable(), newrhs);
-	 gsVerboseMsg("\n*****************\nEquation to solve: %s\n*****************\n",
-		      pp(*eqcrt).c_str());
-	 
-	 // solve this equation
-	 pbes_equation e_solution = 
-	   solve_equation(*eqcrt, interactive, bound, prover);
-   
-	 // add solution of this equation to the already known solutions
-	 es_solution.insert(es_solution.begin(), e_solution);
-	}
- 
- // delete rewriter; 
- // ~BDD_Prover(prover);
-
- return es_solution;
+  
+  // Is using a reverse_iterator correct? inefficient??
+  for (atermpp::vector<pbes_equation>::reverse_iterator eqcrt = 
+	 es_problem.rbegin(); eqcrt != es_problem.rend(); eqcrt++)
+    {
+      //check!
+      //gsVerboseMsg("checking");gsVerboseMsg(" %s\n",pp(eqcrt->formula()).c_str());
+      //if (detail::check_rule_PBExpr(eqcrt->formula()))	
+      //gsVerboseMsg("checked!\n");
+      
+      // replace already solved variables with their solutions
+      pbes_expression newrhs = update_expression(eqcrt->formula(), es_solution);
+      *eqcrt = pbes_equation(eqcrt->symbol(), eqcrt->variable(), newrhs);
+      gsVerboseMsg("\n*****************\nEquation to solve: %s\n*****************\n",
+		   pp(*eqcrt).c_str());
+      
+      // solve this equation
+      pbes_equation e_solution = 
+	solve_equation(*eqcrt);
+      
+      // add solution of this equation to the already known solutions
+      es_solution.insert(es_solution.begin(), e_solution);
+    }
+  
+  // delete rewriter; 
+  // ~BDD_Prover(prover);
+  
+  return es_solution;
 }
 //======================================================================
 
@@ -176,79 +166,76 @@ atermpp::vector<pbes_equation> solve_pbes(pbes<> pbes_spec, bool interactive,
 // If _interactive_ is turned on, then, after _bound_ approximation steps,
 // the control will be given to the user.
 
-pbes_equation solve_equation
-(pbes_equation e, 
- bool interactive, int bound, BDD_Prover* prover)
+pbes_equation pbes_solver::solve_equation(pbes_equation e) 
 //==========================
- 
+  
 {
 #ifdef debug
- gsVerboseMsg("solve_equation:start\n");
+  gsVerboseMsg("solve_equation:start\n");
 #endif
- 
- pbes_expression defX = e.formula();
- propositional_variable X = e.variable();
- pbes_expression approx;
- pbes_expression approx_;
- bool stable = false;
- int no_iterations;
- 
- // init approx
- if (e.symbol().is_mu()) approx = false_(); else approx = true_();
- 
- no_iterations = (bound==0);
- // iteration
- while ( (!stable) && (bound - no_iterations != 0) )
-	{
-	 gsVerboseMsg("Approximation %3d: %s\n-----------------\n",
-				 no_iterations,pp(approx).c_str());
-   
-	 // substitute approx for X in defX, store result in approx_
-	 //	 	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
-	 approx_ = defX;
-	 approx_ = substitute(approx_, X, approx);  
-#ifdef debug
-	 gsVerboseMsg("SUBSTITUTE result %s\n",pp(approx_).c_str());	 	 
+  
+  pbes_expression defX = e.formula();
+  propositional_variable X = e.variable();
+  pbes_expression approx;
+  pbes_expression approx_;
+  bool stable = false;
+  int no_iterations;
+  
+  // init approx
+  if (e.symbol().is_mu()) approx = false_(); else approx = true_();
+  
+  no_iterations = (bound == 0);
+  // iteration
+  while ( (!stable) && (bound - no_iterations != 0) )
+    {
+      gsVerboseMsg("Approximation %3d: %s\n-----------------\n",
+		   no_iterations,pp(approx).c_str());
+      
+      // substitute approx for X in defX, store result in approx_
+      //	 	 gsVerboseMsg("SUBSTITUTE in %s\n",pp(defX).c_str());
+      approx_ = defX;
+      approx_ = substitute(approx_, X, approx);  
+#ifdef debug2
+      gsVerboseMsg("SUBSTITUTE result %s\n",pp(approx_).c_str());	 	 
 #endif
+      
+      // rewrite approx_...
+      //	 approx_ = pbes_expression_prove(approx_,rewriter,prover);
+      int nq = 0;
+      data_variable_list fv;
+      approx_ = pbes_expression_simplify(approx_, &nq, &fv, prover);
 
-	 // rewrite approx_...
-	 //	 approx_ = rewrite_pbes_expression(approx_,rewriter,prover);
-	 int nq = 0;
-	 data_variable_list fv;
-	 approx_ = pbes_expression_simplify(approx_, &nq, &fv, prover);
-	 
-#ifdef rewrite_pbes_expression_with_quantifiers
-	   approx_ = rewrite_pbes_expression(approx_,prover);
+#ifdef pbes_expression_prove_with_quantifiers
+      approx_ = pbes_expression_prove(approx_,prover);
 #else
-	 if (nq == 0)
-	   approx_ = rewrite_pbes_expression(approx_,prover);
-
+      if (nq == 0)
+	approx_ = pbes_expression_prove(approx_,prover);
+      
 #endif
-
+      
 #ifdef debug
-	 gsVerboseMsg("REWRITTEN: %s\n%d quantifiers left\n",pp(approx_).c_str(),nq);
+      gsVerboseMsg("REWRITTEN: %s\n%d quantifiers left\n",pp(approx_).c_str(),nq);
 #endif
-
-	 // decide whether it's stable
-	 // pbes_expression_compare is not reliable
-	 // stable = pbes_expression_compare(approx_,approx,prover);
-	 stable = (approx_ == approx);
-
+      // decide whether it's stable
+      // pbes_expression_compare is not reliable
+      // stable = pbes_expression_compare(approx_,approx,prover);
+      stable = (approx_ == approx);
+      
 #ifdef debug
-	 if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
+      if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
 #endif
-
-	 // continue
-	 approx = approx_;
-	 no_iterations++;
-	}
- 
- if (stable) gsVerboseMsg("Stabilized (in %d iterations) at %s\n", no_iterations-1, pp(approx).c_str());
- // interactive behaviour
- if (interactive) solve_equation_interactive(X,defX,approx);
- 
- // make solution and return it
- return pbes_equation(e.symbol(), X, approx);
+      
+      // continue
+      approx = approx_;
+      no_iterations++;
+    }
+  
+  if (stable) gsVerboseMsg("Stabilized (in %d iterations) at %s\n", no_iterations-1, pp(approx).c_str());
+  // interactive behaviour
+  if (interactive) solve_equation_interactive(X,defX,approx);
+  
+  // make solution and return it
+  return pbes_equation(e.symbol(), X, approx);
 }
 //======================================================================
 
@@ -261,13 +248,13 @@ pbes_equation solve_equation
 // Replaces, in solX, all occurrences of variables 
 // from generic_parameters with the corresponding data expressions 
 // from actual_parameters
- pbes_expression pbes_expression_instantiate(pbes_expression solX, 
+pbes_expression pbes_expression_instantiate(pbes_expression solX, 
 						   data_variable_list generic_parameters, 
 						   data_expression_list actual_parameters)
 //================================================
 {
 
-#ifdef debug
+#ifdef debug2
  gsVerboseMsg("PBES_EXPRESSION_INSTANTIATE\n");
  gsVerboseMsg("  solX: %s\n  generic parameters: %s\n  actual parameters:  %s\n",
 						pp(solX).c_str(), pp(generic_parameters).c_str(), 
@@ -277,7 +264,7 @@ pbes_equation solve_equation
  pbes_expression result = 
 	solX.substitute(make_list_substitution(generic_parameters, actual_parameters));
 
-#ifdef debug 
+#ifdef debug2 
  gsVerboseMsg("  Result: %s\n", pp(result).c_str());
 #endif
 
@@ -392,7 +379,7 @@ data_expression pbes_to_data(pbes_expression e)
  namespace dname = lps::data_expr;
  namespace sname = lps::sort_expr;
  
- if (is_data(e)) return data_expression(aterm_appl(e));
+ if (is_data(e)) return e; //  of data_expression(aterm_appl(e)) ??;
  else if (is_true(e)) return dname::true_();
  else if(is_false(e)) return dname::false_();
  else if (is_and(e))
@@ -620,39 +607,37 @@ data_expression pbes_to_data(pbes_expression e)
 
 
 
+
+
+
+
+
 //======================================================================
 // Rewrites (simplifies) e according to the
 // rewriting rules of first-order logic.
 // only works for quantifier-free expressions.
-pbes_expression rewrite_pbes_expression_via_data(pbes_expression e, BDD_Prover* prover)
-//=====================================
-
+pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 {
 
 #ifdef debug
-  gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
+  gsVerboseMsg("PBES_EXPRESSION_PROVE %s\n", pp(e).c_str());
 #endif
 
   
+  /*
   if (is_data(e))
     {
 #ifdef debug
       if (is_data(e)) gsVerboseMsg("data expression already!\n");
 #endif
-      
-      prover->set_formula((data_expression) e);
-      data_expression dd = prover->get_bdd();
-
-      // why is calling the rewriter again this needed?
-      // (i.e., why doesn't the prover already do this?)
 
       Rewriter* r = prover->get_rewriter();;
-      data_expression d = r->rewrite(dd);
+      data_expression d = r->rewrite((data_expression) e);
 
       // translate back to a pbes_expression
       return val(d);    
     }
-  
+  */
       
  data_expression de = pbes_to_data(e); 
  prover->set_formula(de); 
@@ -662,69 +647,13 @@ pbes_expression rewrite_pbes_expression_via_data(pbes_expression e, BDD_Prover* 
  e = data_to_pbes_lazy(d);
  
  return e;
+
 }
-//======================================================================
 
 
 
 
-//======================================================================
-// Rewrites (simplifies) e according to the
-// rewriting rules of first-order logic.
-// only works for quantifier-free expressions.
-data_expression rewrite_data_expression(data_expression e, BDD_Prover* prover)
-//=====================================
 
-{
-  //  gsVerboseMsg("REWRITE_DATA_EXPRESSION %s\n", pp(e).c_str());
-  // simplify using the prover
-#ifdef debug
-  gsVerboseMsg(" ->prover: %s\n",pp(e).c_str());
-#endif
-  
-  prover->set_formula(e); 
-  data_expression d = prover->get_bdd();
- 
-#ifdef debug 
-  gsVerboseMsg("got %s\n", pp(d).c_str());
-#endif
-  
-  return d;
-}
-//======================================================================
-
-
-
-
-//======================================================================
-// Rewrites (simplifies) e according to the
-// rewriting rules of first-order logic.
-// only works for quantifier-free expressions.
-pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
-//=====================================
-
-{
-
-  return rewrite_pbes_expression_via_data(e,prover);
-
-  // This function should implement 
-  // a direct prover-based simplification of pbes_expressions,
-  // i.e. not via data_expressions 
-
-#ifdef debug
-  gsVerboseMsg("REWRITE_PBES_EXPRESSION %s\n", pp(e).c_str());
-  if (is_data(e)) gsVerboseMsg("data expression!");
-#endif
-
- // simplify using the prover
-
- prover->set_formula(e); 
-
- e = prover->get_bdd();
-
-  return e;
-}
-//======================================================================
 
 
 
@@ -750,12 +679,14 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 {
   PESdeep++;
 #ifdef debug
-  gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d start:     %s\n",PESdeep,pp(expr).c_str());
+  gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d start:     %s\n",
+	       PESdeep,pp(expr).c_str());
 #endif
 
   *fv = data_variable_list();
   *nq = 0;
   pbes_expression expr_simplified;
+
   if (is_and(expr))
     {
       // simplify left and right
@@ -764,8 +695,9 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
       pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
       pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
       *nq = nqlhs + nqrhs;
-      *fv = dunion(fvlhs,fvrhs);
-      expr_simplified = and_(slhs,srhs);	
+      *fv = fvlhs+fvrhs;
+      expr_simplified = and_(slhs,srhs); 
+      // (and_ already checks whether one of the sides is trivial T/F)	
     }
   else if (is_or(expr)) 
     {
@@ -787,13 +719,13 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 	pbes_expression_simplify(quant_expr(expr),&nq_under,&fv_under, prover);
       // dit heeft waarschijnlijk geen zin:
       //      if (nq_under==0)
-      //s_under = rewrite_pbes_expression(s_under,prover);
-
+      //s_under = pbes_expression_prove(s_under,prover);
+      
       // compute the list of actually bounded variables 
       // (i.e., eliminate from the quant_vars those vars that do not occur free in s_under)
       data_variable_list new_quant_vars = intersect(quant_vars(expr),fv_under);
       // if any quantified vars left, try to eliminate them by enumeration
-
+      
       if (!new_quant_vars.empty()){
 #ifdef debug
 	gsVerboseMsg("\n**********PBES_EXPRESSION_SIMPLIFY: calling enumerate_finite_domains for %s ******** new_quant_vars=%s\n",
@@ -829,6 +761,7 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
     }
   else if (is_data(expr))
     {
+      /*
       // Sending to the prover.
       // !! don't know what happens if expr contains quantifiers.
       data_expression dexpr = data_expression(aterm_appl(expr));
@@ -845,18 +778,17 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 		   pp(expr_simplified).c_str());
 #endif
       //std::cerr<<" \nCCC ";
-
-      free_vars_and_no_quants(expr_simplified,nq,fv);
-      //std::cerr<<" \nDDD ";
-#ifdef debug
-      gsVerboseMsg("\nPBES_EXPRESSION_SIMPLIFY: nq=%d, fv=%s ",*nq,pp(*fv).c_str());
-#endif
+      */
+      data_expression data_simplified = 
+	data_expression_simplify(expr, fv, prover);
+      expr_simplified = val(data_simplified);
     }
-  //  else // expr is true, false or a variable
+  //  else // expr is true, false or a propositional variable
   else
     {
       expr_simplified = expr;
     }
+
 
 #ifdef debug
   gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d end:     %s\n %d quantifiers, free vars: %s\n",
@@ -870,69 +802,59 @@ pbes_expression rewrite_pbes_expression(pbes_expression e, BDD_Prover* prover)
 
 
 
+//======================================================================
+// Rewrites (simplifies) e according to the
+// rewriting rules of first-order logic.
+// only works for quantifier-free expressions.
+data_expression data_expression_simplify
+(data_expression d, data_variable_list *fv, BDD_Prover *prover)
 
-//======================================================================
-void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
-// fills in the number of quantifiers and the list of free vars in expression d  
-//!! can be more efficient if we assume there are no quantifiers in data expressions
-//======================================================================
 {
+  namespace dname = lps::data_expr;
   
-  using namespace data_expr;
+  data_expression e = d;
   
-  data_expression head = d.head();
-  data_expression_list args = d.arguments();
-  
-  //  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: data expr is %s, head is %s, args are %s\n",
-  //       pp(d).c_str(),pp(head).c_str(),pp(args).c_str());
-  
-  // data variable?
-  if (is_data_variable(d)) {
-    *fv = push_back((*fv),(data_variable)head);
-    *nq = 0;
-  } 
-  // quantifier?
-  else if (gsIsBinder(head))
+  // first, test whether it's a trivial if expression
+  // apparently, this is a popular case (seen in examples)
+  if (gsIsDataExprIf(d))  // is this the right test?
     {
-      int nq_under;
-      data_variable_list fv_under;
-      data_variable_list qvars = list_arg1(head);
-      free_vars_and_no_quants(arg2(d),&nq_under, &fv_under);
-      *nq = nq_under + 1;
-      *fv = substract(fv_under,qvars);
-    }
-  
-  // number, function or operator?
-  else if (!args.empty())
-    {
-      // collect free variables from all subexpressions
-      *nq = 0;
-      int nqsub;
-      data_variable_list fvsub;
-      while (!args.empty()){
-	free_vars_and_no_quants(args.front(),&nqsub,&fvsub);
-	args = pop_front(args);
-	dunion(fv,fvsub);
-	*nq = *nq + nqsub;
-      }
-      /*
-      int nqlhs, nqrhs;
-      data_variable_list fvlhs,fvrhs;
-      free_vars_and_no_quants(args.front(),&nqlhs,&fvlhs);
-      args = pop_front(args);
-      if (!args.empty())
-	free_vars_and_no_quants(args.front(),&nqrhs,&fvrhs);
-      else nqrhs = 0;
-      *nq = nqlhs + nqrhs;
-      *fv = dunion(fvlhs,fvrhs);     
-      */
+#ifdef debug
+      gsVerboseMsg("DATA_EXPRESSION_SIMPLIFY: IS IF!\n");
+#endif
+      data_expression_list::iterator i = d.arguments().begin();
+      data_expression d1 = *i;
+      i++;
+      data_expression d2 = *i;
+      i++;
+      data_expression d3 = *i;
+      if (dname::is_true(d1)) return data_expression_simplify(d2,fv,prover);
+      if (dname::is_false(d1)) return data_expression_simplify(d3,fv,prover);
+      if ((dname::is_true(d2)) && (dname::is_false(d3)))
+	return data_expression_simplify(d1,fv,prover);
+      if ((dname::is_true(d3)) && (dname::is_false(d2)))
+	return (dname::not_(data_expression_simplify(d1,fv,prover)));
     }
 
-  // number, boolean
-  else
-    {
-      *nq = 0;
-    }
+     // call prover
+#ifdef use_prover
+  prover->set_formula(d); 
+  e = prover->get_bdd();
+#endif 
+
+
+  // call rewriter
+  data_expression f = e;
+  // rewrite
+#ifdef use_rewriter
+  Rewriter* r = prover->get_rewriter();
+  f = r->rewrite(e);
+#endif
+  
+  // fill in the list of occuring variables
+  std::set<data_variable> setfv = find_variables(d);
+  for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
+    *fv = push_back(*fv,*i);
+  return f;
 }
 
 
@@ -966,6 +888,7 @@ data_variable_list intersect(data_variable_list x, data_variable_list y)
 //======================================================================
 {
   data_variable_list result;
+
   for (data_variable_list::iterator vx = x.begin(); vx != x.end(); vx++)
     if (var_in_list(*vx,y))
       result = push_back(result,*vx);
@@ -1032,11 +955,12 @@ pbes_expression enumerate_rec(bool forall,
 #endif
 
     pbes_expression p_instance = pbes_expression_instantiate(p, vars, instance);    
-#ifdef rewrite_pbes_expression_in_enumerate_rec
+
+#ifdef pbes_expression_prove_in_enumerate_rec
 #ifdef debug
     gsVerboseMsg("ENUMERATE_REC: p_instance: %s\n",pp(p_instance).c_str());
 #endif
-      p_instance = rewrite_pbes_expression(p_instance,prover);
+      p_instance = pbes_expression_prove(p_instance,prover);
 #ifdef debug
     gsVerboseMsg("ENUMERATE_REC: rewritten: %s\n",pp(p_instance).c_str());
 #endif
@@ -1126,8 +1050,11 @@ pbes_expression enumerate_finite_domains
 
   // instantiate the finite vars
   data_expression_list dl;
-  return enumerate_rec(forall, finite_domain_vars, finite_domain_vars.begin(), 
-		       dl,p, prover);
+  pbes_expression p_enumeration= 
+    enumerate_rec(forall, finite_domain_vars, finite_domain_vars.begin(), 
+		  dl,p, prover);
+  return p_enumeration;
+  //  return (pbes_expression_prove(p_enumeration,prover));
 }
 //======================================================================
 
@@ -1141,9 +1068,9 @@ pbes_expression enumerate_finite_domains
 
 
 //======================================================================
-void solve_equation_interactive(propositional_variable X, 
-			   pbes_expression defX, 
-			   pbes_expression approx)
+void pbes_solver::solve_equation_interactive(propositional_variable X, 
+					     pbes_expression defX, 
+					     pbes_expression approx)
 {
   // To implement later. 
 }
@@ -1245,5 +1172,118 @@ bool pbes_expression_compare
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//======================================================================
+//======================================================================
+//======================================================================
+//======================================================================
+//======================================================================
+//======================================================================
+
+// not used anymore:::::::
+
+
+//======================================================================
+void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
+// fills in the number of quantifiers and the list of free vars in expression d  
+//!! can be more efficient if we assume there are no quantifiers in data expressions
+//======================================================================
+{
+  
+  using namespace data_expr;
+  
+  data_expression head = d.head();
+  data_expression_list args = d.arguments();
+  
+  //  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: data expr is %s, head is %s, args are %s\n",
+  //       pp(d).c_str(),pp(head).c_str(),pp(args).c_str());
+  
+  // data variable?
+  if (is_data_variable(d)) {
+    *fv = push_back((*fv),(data_variable)head);
+    *nq = 0;
+  } 
+  // quantifier?
+  else if (gsIsBinder(head))
+    {
+      int nq_under;
+      data_variable_list fv_under;
+      data_variable_list qvars = list_arg1(head);
+      free_vars_and_no_quants(arg2(d),&nq_under, &fv_under);
+      *nq = nq_under + 1;
+      *fv = substract(fv_under,qvars);
+    }
+  
+  // number, function or operator?
+  else if (!args.empty())
+    {
+      // collect free variables from all subexpressions
+      *nq = 0;
+      int nqsub;
+      data_variable_list fvsub;
+      while (!args.empty()){
+	free_vars_and_no_quants(args.front(),&nqsub,&fvsub);
+	args = pop_front(args);
+	dunion(fv,fvsub);
+	*nq = *nq + nqsub;
+      }
+      /*
+      int nqlhs, nqrhs;
+      data_variable_list fvlhs,fvrhs;
+      free_vars_and_no_quants(args.front(),&nqlhs,&fvlhs);
+      args = pop_front(args);
+      if (!args.empty())
+	free_vars_and_no_quants(args.front(),&nqrhs,&fvrhs);
+      else nqrhs = 0;
+      *nq = nqlhs + nqrhs;
+      *fv = dunion(fvlhs,fvrhs);     
+      */
+    }
+
+  // number, boolean
+  else
+    {
+      *nq = 0;
+    }
+}
 
 
