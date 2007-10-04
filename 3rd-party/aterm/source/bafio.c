@@ -48,6 +48,9 @@
 #define SYM_COMMAND(n)    ((n)*2 + SYMBOL_OFFSET)
 #define PLAIN_CMD(n)      ((n) & ~1)
 
+/* Maximum # of arguments to reserve space for on the stack in read_term */
+#define MAX_STACK_ARGS    4
+
 /*}}}  */
 /*{{{  types */
 
@@ -114,7 +117,7 @@ typedef struct
 /*}}}  */
 /*{{{  variables */
 
-char bafio_id[] = "$Id: bafio.c 23131 2007-07-13 13:19:14Z eriks $";
+char bafio_id[] = "$Id: bafio.c 23464 2007-08-27 09:22:35Z eriks $";
 
 static int nr_unique_symbols = -1;
 static sym_read_entry *read_symbols;
@@ -1359,45 +1362,39 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   unsigned int val;
   int i, arity = sym->arity;
   sym_read_entry *arg_sym;
-  ATerm *args;
-  ATerm result=NULL;
+  ATerm stack_args[MAX_STACK_ARGS];
+  ATerm *args = stack_args;
+  ATerm result;
 
-  args = AT_alloc_protected(arity);
-  if(!args)
-    ATerror("could not allocate space for %d arguments.\n", arity);
+  if(arity > MAX_STACK_ARGS) {
+    args = AT_alloc_protected(arity);
+    if(!args)
+      ATerror("could not allocate space for %d arguments.\n", arity);
+    /* !!! leaks memory on the "return NULL" paths */
+  }
 
   /*ATfprintf(stderr, "reading term over symbol %y\n", sym->sym);*/
   for(i=0; i<arity; i++) {
     /*ATfprintf(stderr, "  reading argument %d (%d)", i, sym->sym_width[i]);*/
-    if(readBits(&val, sym->sym_width[i], reader) < 0) {
-      AT_free_protected(args);
+    if(readBits(&val, sym->sym_width[i], reader) < 0)
       return NULL;
-    }
-    if(val >= sym->nr_topsyms[i]) {
-      AT_free_protected(args);
+    if(val >= sym->nr_topsyms[i])
       return NULL;
-    }
     arg_sym = &read_symbols[sym->topsyms[i][val]];
     /*		ATfprintf(stderr, "argument %d, symbol index = %d, symbol = %y\n", 
 		i, val, arg_sym->sym);*/
 
     /*ATfprintf(stderr, "  argsym = %y (term width = %d)\n",
       arg_sym->sym, arg_sym->term_width);*/
-    if(readBits(&val, arg_sym->term_width, reader) < 0){
-      AT_free_protected(args);
+    if(readBits(&val, arg_sym->term_width, reader) < 0)
       return NULL;
-    }
     /*		ATfprintf(stderr, "arg term index = %d\n", val);*/
-    if(val >= arg_sym->nr_terms){
-      AT_free_protected(args);
+    if(val >= arg_sym->nr_terms)
       return NULL;
-    }
     if(!arg_sym->terms[val]) {
       arg_sym->terms[val] = read_term(arg_sym, reader);
-      if(!arg_sym->terms[val]){
-        AT_free_protected(args);
-        return NULL;
-      }
+      if(!arg_sym->terms[val])
+	return NULL;
       /*ATfprintf(stderr, "sym=%y, index=%d, t=%t\n", arg_sym->sym, 
 	val, arg_sym->terms[val]);				*/
     }
@@ -1409,8 +1406,10 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   case AS_INT:
     /*{{{  Read an integer */
 
-    if(readBits(&val, INT_SIZE_IN_BAF, reader) >= 0)
-      result = (ATerm)ATmakeInt((int)val);
+    if(readBits(&val, INT_SIZE_IN_BAF, reader) < 0)
+      return NULL;
+
+    result = (ATerm)ATmakeInt((int)val);
 
     /*}}}  */
     break;
@@ -1422,9 +1421,9 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
       int len;
 
       if(flushBitsFromReader(reader) < 0)
-        break;
+	return NULL;
       if((len = readString(reader)) < 0)
-        break;
+	return NULL;
 
       text_buffer[len] = '\0';
 
@@ -1442,9 +1441,9 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
       char *data;
 
       if(flushBitsFromReader(reader) < 0)
-        break;
+	return NULL;
       if((len = readString(reader)) < 0)
-        break;
+	return NULL;
 
       data = AT_malloc(len);
       if(!data)
@@ -1482,7 +1481,9 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
     */
   }
 
-  AT_free_protected(args);
+  if(arity > MAX_STACK_ARGS) {
+    AT_free_protected(args);
+  }
 
   return result;
 }

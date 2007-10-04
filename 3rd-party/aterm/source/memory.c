@@ -62,7 +62,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c 23071 2007-07-02 10:06:17Z eriks $";
+char memory_id[] = "$Id: memory.c 23465 2007-08-27 09:35:50Z eriks $";
 
 unsigned int maxTermSize = INITIAL_MAX_TERM_SIZE;
 
@@ -385,7 +385,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
               TERM_CHECK_OPT);
 #endif
       fprintf(stderr, "    %-20s: initial maximum term size " 
-              "(minimum=%ld, default=%d)\n", TERM_SIZE_OPT " <size>", MIN_TERM_SIZE, maxTermSize);
+              "(minimum=%lud, default=%lud)\n", TERM_SIZE_OPT " <size>", (unsigned long) MIN_TERM_SIZE, (unsigned long) maxTermSize);
     } 
   }
 

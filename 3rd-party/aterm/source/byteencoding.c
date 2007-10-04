@@ -1,5 +1,29 @@
 #include "byteencoding.h"
-//#include "ieee754.h"
+
+union DoubleEncoding{
+	double d;
+
+	struct{
+	#ifdef WORDS_BIGENDIAN
+		unsigned int negative:1;
+		unsigned int exponent:11;
+		unsigned int mantissa0:20;
+		unsigned int mantissa1:32;
+	#else
+	# ifdef FLOAT_WORDS_BIGENDIAN
+		unsigned int mantissa0:20;
+		unsigned int exponent:11;
+		unsigned int negative:1;
+		unsigned int mantissa1:32;
+	# else
+		unsigned int mantissa1:32;
+		unsigned int mantissa0:20;
+		unsigned int exponent:11;
+		unsigned int negative:1;
+	# endif
+	#endif
+	} EncodedDouble;
+};
 
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
@@ -10,7 +34,7 @@
 #endif
 
 /**
- * This file contains some routines for encoding and decoding integers and double in a portable (enough) way.
+ * This file contains some routines for encoding and decoding integers and double in a portable way.
  */
 
 #define SEVENBITS 0x0000007fU
@@ -51,7 +75,7 @@ inline static int unsignedToSignedInt(unsigned int unsignedInt){
  * the down side is that encoding large and negative values will require one extra byte.
  */
 int BEserializeMultiByteInt(int i, char *c){
-/*	unsigned int ui = signedToUnsignedInt(i);
+	unsigned int ui = signedToUnsignedInt(i);
 	
 	if((ui & 0xffffff80U) == 0){
 		c[0] = (char) (ui & SEVENBITS);
@@ -77,7 +101,7 @@ int BEserializeMultiByteInt(int i, char *c){
 	}
 	c[3] = (char) (((ui >> 21) & SEVENBITS) | SIGNBIT);
 	
-	c[4] = (char) ((ui >> 28) & SEVENBITS);*/
+	c[4] = (char) ((ui >> 28) & SEVENBITS);
 	return 5;
 }
 
@@ -85,15 +109,15 @@ int BEserializeMultiByteInt(int i, char *c){
  * Serializes a double value using IEEE 754 encoding.
  */
 void BEserializeDouble(double d, char *c){
-/*	unsigned int negative, exponent, mantissa0, mantissa1;
-	union ieee754_double u;
+	unsigned int negative, exponent, mantissa0, mantissa1;
+	union DoubleEncoding de;
 	
-	u.d = d;
+	de.d = d;
 	
-	negative = u.ieee.negative;
-	exponent = u.ieee.exponent;
-	mantissa0 = u.ieee.mantissa0;
-	mantissa1 = u.ieee.mantissa1;
+	negative = de.EncodedDouble.negative;
+	exponent = de.EncodedDouble.exponent;
+	mantissa0 = de.EncodedDouble.mantissa0;
+	mantissa1 = de.EncodedDouble.mantissa1;
 	
 	c[0] = mantissa1 & 0x000000ffU;
 	c[1] = (mantissa1 & 0x0000ff00U) >> 8;
@@ -103,7 +127,7 @@ void BEserializeDouble(double d, char *c){
 	c[4] = mantissa0 & 0x000000ffU;
 	c[5] = (mantissa0 & 0x0000ff00U) >> 8;
 	c[6] = ((mantissa0 & 0x000f0000U) >> 16) | ((exponent & 0x0000000fU) << 4);
-	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;*/
+	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;
 }
 
 
@@ -151,7 +175,7 @@ int BEdeserializeMultiByteInt(char *c, unsigned int *count){
  * Deserializes a double in IEEE 754 encoding from the given sequence of bytes.
  */
 double BEdeserializeDouble(char *c){
-/*	union ieee754_double u;
+	union DoubleEncoding de;
 	
 	unsigned int mantissa1 = 	(c[0] & 0x000000ffU) |
 								(c[1] & 0x000000ffU) << 8 |
@@ -167,10 +191,10 @@ double BEdeserializeDouble(char *c){
 	
 	unsigned int negative = (c[7] & 0x00000080U) >> 7;
 	
-	u.ieee.negative = negative;
-	u.ieee.exponent = exponent;
-	u.ieee.mantissa0 = mantissa0;
-	u.ieee.mantissa1 = mantissa1;
+	de.EncodedDouble.negative = negative;
+	de.EncodedDouble.exponent = exponent;
+	de.EncodedDouble.mantissa0 = mantissa0;
+	de.EncodedDouble.mantissa1 = mantissa1;
 	
-	return u.d;*/ return 0.0;
+	return de.d;
 }
