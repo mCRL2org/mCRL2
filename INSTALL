@@ -20,7 +20,6 @@ of the packages is mentioned (required, recommended or optional):
 - make >= 3.80: package make [required]
 - wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg [recommended]
    + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
-- xsltproc: package xsltproc [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
 - flex >= 2.5.4a-12: package flex [optional]
@@ -64,9 +63,6 @@ A workaround is to do a manual install after make. The cause of this is a bug
 in Boost Build v2 (build environment) for which no easy workaround seems
 possible at this time. At least no solution that does not bring back problems
 that have been solved with the last significant changes to the build procedure.
-
-The recommended package for xstlproc enables the installation of the
-documentation.
 
 Any of the default icon location packages ensures that any of the above tools
 do not generate warnings on missing icons.
