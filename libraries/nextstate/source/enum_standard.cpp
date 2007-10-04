@@ -46,7 +46,7 @@ void EnumeratorSolutionsStandard::fs_push(ATermList vars, ATermList vals, ATerm 
 		int i = fs_stack_size;
 		if ( fs_stack_size == 0 )
 		{
-			fs_stack_size = 512;
+			fs_stack_size = 4;
 		} else {
 			fs_stack_size = fs_stack_size * 2;
 			ATunprotectArray((ATerm *) fs_stack);
@@ -99,7 +99,7 @@ void EnumeratorSolutionsStandard::ss_push(ATermList s)
 		int i = ss_stack_size;
 		if ( ss_stack_size == 0 )
 		{
-			ss_stack_size = 32;
+			ss_stack_size = 4;
 		} else {
 			ss_stack_size = ss_stack_size * 2;
 			ATunprotectArray((ATerm *) ss_stack);
