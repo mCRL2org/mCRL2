@@ -689,7 +689,7 @@ static ATerm add_to_full_queue(ATerm state)
       return old_state;
     }
   }
-  return NULL;
+  return state;
 }
 
 static ATerm add_to_queue(ATerm state)
@@ -723,10 +723,13 @@ static ATerm add_to_queue(ATerm state)
     tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
     if ( tmp == NULL )
     {
-      gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
-      queue_size = queue_put_count;
-      ATprotectArray(queue_get,queue_size);
-      ATprotectArray(queue_put,queue_size);
+      if ( queue_size != 0 )
+      {
+        gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
+        queue_size = queue_put_count;
+        ATprotectArray(queue_get,queue_size);
+        ATprotectArray(queue_put,queue_size);
+      }
       queue_size_fixed = true;
       return add_to_full_queue(state);
     }
@@ -791,25 +794,19 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
 
   if ( new_state )
   {
-    if ( num_states < lgopts->max_states )
+    num_states++;
+    if ( lgopts->trace )
     {
-            num_states++;
-            if ( lgopts->trace )
-            {
-                    ATtablePut(backpointers, to, (ATerm) ATmakeList2(from,(ATerm) action));
-            }
+            ATtablePut(backpointers, to, (ATerm) ATmakeList2(from,(ATerm) action));
     }
   } else {
     num_found_same++;
   }
 
-  if ( lgopts->bithashing || (i < num_states) )
-  {
-    check_actiontrace(from,action,to);
+  check_actiontrace(from,action,to);
 
-    save_transition(state_index(from),from,action,i,to);
-    trans++;
-  }
+  save_transition(state_index(from),from,action,i,to);
+  trans++;
 
   return new_state;
 }
@@ -831,8 +828,6 @@ bool generate_lts()
     unsigned long long endoflevelat = 1;
     unsigned long long prevtrans = 0;
     unsigned long long prevcurrent = 0;
-    unsigned long long statesskipped = 0;
-    unsigned long long statestobeskipped = 0;
     num_found_same = 0;
     tracecnt = 0;
     gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(lgopts->expl_strat));
@@ -870,15 +865,19 @@ bool generate_lts()
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
         {
-          int i = rand()%len;
-          while ( i > 0 )
+          int r = rand()%len;
+          ATerm new_state = NULL;
+          for (int i=0; i<len; i++)
           {
+            add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+            if ( r == i )
+            {
+              new_state = ATgetFirst(tmp_states);
+            }
             tmp_trans = ATgetNext(tmp_trans);
             tmp_states = ATgetNext(tmp_states);
-            i--;
           }
-          add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
-          state = ATgetFirst(tmp_states);
+          state = new_state;
         } else {
           check_deadlocktrace(state);
           break;
@@ -903,13 +902,22 @@ bool generate_lts()
     } else if ( lgopts->expl_strat == es_breadth )
     {
       NextStateGenerator *nsgen = NULL;
+      unsigned long long int limit = lgopts->max_states;
       if ( lgopts->bithashing )
       {
-        queue_size_max = lgopts->todo_max;
+        lgopts->max_states = ULLONG_MAX;
+        queue_size_max = ((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1;
         srand((unsigned)time(NULL)+getpid());
         add_to_queue(state);
         swap_queues();
       }
+      // E is the set of explored states
+      // S is the set of "seen" states
+      //
+      // normal:     S = [0..num_states), E = [0..current_state)
+      // bithashing: S = { h | get_bithash(h) }, E = S \ "items left in queues"
+      //
+      // both:       |E| <= limit
       while ( current_state < endoflevelat )
       {
         if ( lgopts->bithashing )
@@ -938,9 +946,8 @@ bool generate_lts()
               if ( removed_state != NULL )
               {
                 remove_state_from_bithash(removed_state);
-              }
-              if ( num_states > endoflevelat+lgopts->todo_max )
                 num_states--;
+              }
             }
           }
         }
@@ -965,8 +972,8 @@ bool generate_lts()
           gsVerboseMsg(
             "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
             level,
-            current_state-statesskipped,
-            (current_state-statesskipped==1)?"":"s",
+            current_state,
+            (current_state==1)?"":"s",
             trans,
             (trans==1)?"":"s",
             num_states,
@@ -979,7 +986,6 @@ bool generate_lts()
           {
             swap_queues();
           }
-          current_state = current_state+statestobeskipped;
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           if ( gsVerbose )
           {
@@ -993,14 +999,18 @@ bool generate_lts()
             fflush(stderr);
           }
           level++;
-	  statesskipped = statesskipped+statestobeskipped;
           unsigned long long nextcurrent = endoflevelat;
-          if ( lgopts->bithashing && (current_state+lgopts->todo_max < num_states) )
+          endoflevelat = (limit>num_states)?num_states:limit;
+          if ( lgopts->bithashing )
           {
-            endoflevelat = current_state+lgopts->todo_max;
-	    statestobeskipped = num_states-endoflevelat;
-          } else {
-            endoflevelat = num_states;
+            if ( (limit - num_states) < queue_size_max )
+            {
+              queue_size_max = limit - num_states;
+              if ( queue_size > queue_size_max )
+              {
+                queue_size = queue_size_max;
+              }
+            }
           }
 	  current_state = nextcurrent;
           prevcurrent = current_state;
@@ -1028,13 +1038,14 @@ bool generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ( (nsgens_num > 0) && (current_state < lgopts->max_states) )
+      while ( nsgens_num > 0 )
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
+        bool add_new_states = (current_state < lgopts->max_states);
         bool state_is_deadlock = !top_trans_seen /* && !nsgen->next(...) */ ;
         bool priority;
         if ( nsgen->next(&Transition,&NewState,&priority) )
@@ -1047,31 +1058,34 @@ bool generate_lts()
             state_is_deadlock = false;
             if ( add_transition(state,Transition,NewState) )
             {
-              new_state = true;
-              if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
+              if ( add_new_states )
               {
-                nsgens_size = nsgens_size*2;
-                if ( nsgens_size > lgopts->todo_max )
+                new_state = true;
+                if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
                 {
-                  nsgens_size = lgopts->todo_max;
+                  nsgens_size = nsgens_size*2;
+                  if ( nsgens_size > lgopts->todo_max )
+                  {
+                    nsgens_size = lgopts->todo_max;
+                  }
+                  nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+                  if ( nsgens == NULL )
+                  {
+                    gsErrorMsg("cannot enlarge state stack\n");
+                    exit(1);
+                  }
+                  for (unsigned long i=nsgens_num; i<nsgens_size; i++)
+                  {
+                    nsgens[i] = NULL;
+                  }
                 }
-                nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
-                if ( nsgens == NULL )
+                if ( nsgens_num < nsgens_size )
                 {
-                  gsErrorMsg("cannot enlarge state stack\n");
-                  exit(1);
+                  nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+                  nsgens_num++;
+                  top_trans_seen = false;
+                  // inv
                 }
-                for (unsigned long i=nsgens_num; i<nsgens_size; i++)
-                {
-                  nsgens[i] = NULL;
-                }
-              }
-              if ( nsgens_num < nsgens_size )
-              {
-                nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
-                nsgens_num++;
-                top_trans_seen = false;
-                // inv
               }
             }
           }
