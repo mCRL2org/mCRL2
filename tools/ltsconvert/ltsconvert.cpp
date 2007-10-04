@@ -543,7 +543,7 @@ static void print_help(FILE *f, char *Name)
     "      --none             do not minimise (default)\n"
     "  -s, --strong           minimise using strong bisimulation\n"
     "  -b, --branching        minimise using branching bisimulation\n"
-    "  -t, --trace            determinisation and subsequent reduction using trace equivalence\n"
+    "  -t, --trace            determinise and then minimise using trace equivalence\n"
     "  -u, --weak-trace       determinise and then minimise using weak trace equivalence\n"
     "  -a, --add              do not minimise but save a copy of the original LTS\n"
     "                         extended with a state parameter indicating the\n"
