@@ -30,7 +30,8 @@ void out_action(
     const char * target,
     const char * command,
     const char * out_data,
-    const char * err_data
+    const char * err_data,
+    int exit_reason
     )
 {
     /* print out the action+target line, if the action is quite
@@ -51,6 +52,22 @@ void out_action(
     if ( globs.cmdout )
     {
         fputs(command,globs.cmdout);
+    }
+
+    switch (exit_reason)
+    {
+        case EXIT_OK:
+            break;
+        case EXIT_FAIL:
+            break;
+        case EXIT_TIMEOUT:
+        {
+            /* process expired, make user aware with explicit message */
+            fprintf(bjam_out, "%d second time limit exceeded\n", globs.timeout);
+            break;
+        }
+        default:
+          break;
     }
     
     /* print out the command output, if requested */

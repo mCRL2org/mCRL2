@@ -3,6 +3,8 @@
 # Copyright 2002-2003 Vladimir Prus.
 #  Copyright (c) 2005 Reece H. Dunn.
 # Copyright 2006 Ilya Sokolov.
+# Copyright 2007 Roland Schwarz
+# Copyright 2007 Boris Gubenko.
 #
 # Distributed under the Boost Software License, Version 1.0.
 #    (See accompanying file LICENSE_1_0.txt or copy at
@@ -38,6 +40,27 @@ toolset.inherit-rules gcc : unix ;
 generators.override gcc.prebuilt : builtin.prebuilt ;
 generators.override gcc.searched-lib-generator : searched-lib-generator ;
 
+# Target naming is determined by types/lib.jam and the settings below this
+# comment.
+#
+# On *nix:
+#     libxxx.a     static library
+#     libxxx.so    shared library
+#
+# On windows (mingw):
+#     libxxx.lib   static library
+#     xxx.dll      DLL
+#     xxx.lib      import library
+#
+# On windows (cygwin) i.e. <target-os>cygwin
+#     libxxx.a     static library
+#     xxx.dll      DLL
+#     libxxx.dll.a import library
+# 
+# Note: user can always override by using the <tag>@rule
+#       This settings have been choosen, so that mingw
+#       is in line with msvc naming conventions. For
+#       cygwin the cygwin naming convention has been choosen.
 
 # Make the "o" suffix used for gcc toolset on all
 # platforms
@@ -111,6 +134,10 @@ rule init ( version ? : command * : options * )
         if [ os.name ] = OSF
         {
             linker = osf ;
+        }
+        else if [ os.name ] = HPUX
+        {
+            linker = hpux ;
         }
         else
         {                            
@@ -307,7 +334,7 @@ if [ os.name ] != CYGWIN && [ os.name ] != NT
     # to implement and will increase target path length even more.
     flags gcc.compile OPTIONS <link>shared : -fPIC ;
 }    
-if [ os.name ] != NT && [ os.name ] != OSF
+if [ os.name ] != NT && [ os.name ] != OSF && [ os.name ] != HPUX
 {
     # OSF does have an option called -soname but it doesn't seem to work as
     # expected, therefore it has been disabled.
@@ -453,9 +480,16 @@ flags gcc.link FINDLIBS-ST <find-static-library> ;
 flags gcc.link FINDLIBS-SA <find-shared-library> ;
 flags gcc.link LIBRARIES <library-file> ;
 
-# For <runtime-link>static we made sure there are no dynamic libraries 
-# in the link
-flags gcc.link OPTIONS <runtime-link>static : -static ;
+# For <runtime-link>static we made sure there are no dynamic libraries
+# in the link.
+# On HP-UX not all system libraries exist as archived libraries (for example,
+# there is no libunwind.a), so, on this platform, the -static option cannot
+# be specified.
+
+if [ os.name ] != HPUX
+{
+    flags gcc.link OPTIONS <runtime-link>static : -static ;
+}
 
 # Now, the vendor specific flags
 # The parameter linker can be either gnu or sun
@@ -517,6 +551,15 @@ rule init-link-flags ( toolset linker condition )
         flags $(toolset).link OPTIONS $(condition)/<link>shared : -mimpure-text 
           : unchecked ;
         }
+
+    case hpux :
+        {
+            flags $(toolset).link OPTIONS $(condition)/<debug-symbols>off : -Wl,-s
+              : unchecked ;
+            flags $(toolset).link OPTIONS $(condition)/<link>shared : -fPIC
+              : unchecked ;
+        }
+
     case * :
         {
             errors.user-error

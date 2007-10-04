@@ -8,11 +8,15 @@
 # include "jam.h"
 # include "lists.h"
 # include "execcmd.h"
+# include "output.h"
 # include <errno.h>
 # include <signal.h>
 # include <stdio.h>
 # include <time.h>
 # include <unistd.h> /* needed for vfork(), _exit() prototypes */
+# include <sys/resource.h>
+# include <sys/times.h>
+# include <sys/wait.h>
 
 #if defined(sun) || defined(__sun) || defined(linux)
 #include <wait.h>
@@ -56,9 +60,11 @@
  * 06/02/97 (gsar)    - full async multiprocess support for Win32
  */
 
+static clock_t tps = 0;
+static struct timeval tv;
+static int select_timeout = 0;
 static int intr = 0;
 static int cmdsrunning = 0;
-static void (*istat)( int );
 
 #define OUT 0
 #define ERR 1
@@ -68,6 +74,8 @@ static struct
     int	    pid;              /* on win32, a real process handle */
     int     fd[2];            /* file descriptors for stdout and stderr */
     FILE   *stream[2];        /* child's stdout (0) and stderr (1) file stream */
+    clock_t start_time;       /* start time of child process */
+    int     exit_reason;      /* termination status */
     int     action_length;    /* length of action string */
     int     target_length;    /* length of target string */
     char   *action;           /* buffer to hold action and target invoked */
@@ -105,7 +113,6 @@ execcmd(
         int out[2], err[2];
 	int slot, len;
 	char *argv[ MAXARGC + 1 ];	/* +1 for NULL */
-        FILE *stream;
 
 	/* Find a slot in the running commands table for this one. */
 
@@ -179,6 +186,18 @@ execcmd(
 
 	/* Start the command */
 
+        if (0 < globs.timeout) {
+            /* 
+             * handle hung processes by manually tracking elapsed 
+             * time and signal process when time limit expires
+             */
+            struct tms buf;
+            cmdtab[ slot ].start_time = times(&buf);
+
+            /* make a global, only do this once */
+            if (tps == 0) tps = sysconf(_SC_CLK_TCK);                
+        }
+
 	if ((cmdtab[slot].pid = vfork()) == 0) 
    	{
             close(out[0]);
@@ -193,6 +212,23 @@ execcmd(
             }
             else
                 dup2(err[1], STDERR_FILENO);
+
+            /* Make this process a process group leader
+             * so that when we kill it, all child
+             * processes of this process are terminated
+             * as well.
+             *
+             * we use killpg(pid, SIGKILL) to kill the
+             * process group leader and all its children.
+             */
+             if (0 < globs.timeout)
+             {
+                struct rlimit r_limit;
+                r_limit.rlim_cur = globs.timeout;
+                r_limit.rlim_max = globs.timeout;
+                setrlimit(RLIMIT_CPU, &r_limit);
+            }
+            setpgid(cmdtab[slot].pid, cmdtab[slot].pid);
 
 	    execvp( argv[0], argv );
 	    _exit(127);
@@ -287,7 +323,7 @@ execcmd(
 
 int read_descriptor(int i, int s)
 {
-    int done, ret, len;
+    int ret, len;
     char buffer[BUFSIZ];
 
     while (0 < (ret = fread(buffer, sizeof(char),  BUFSIZ-1, cmdtab[i].stream[s])))
@@ -324,6 +360,46 @@ void close_streams(int i, int s)
     cmdtab[i].fd[s] = 0;
 }
 
+void populate_file_descriptors(int *fmax, fd_set *fds)
+{
+    int i, fd_max = 0;
+    struct tms buf;
+    clock_t current = times(&buf);
+    select_timeout = globs.timeout;
+
+    /* compute max read file descriptor for use in select */
+    FD_ZERO(fds);
+    for (i=0; i<globs.jobs; ++i)
+    {
+        if (0 < cmdtab[i].fd[OUT])
+        {
+            fd_max = fd_max < cmdtab[i].fd[OUT] ? cmdtab[i].fd[OUT] : fd_max;
+            FD_SET(cmdtab[i].fd[OUT], fds);
+        }
+        if (globs.pipe_action != 0)
+        {
+            if (0 < cmdtab[i].fd[ERR])
+            {
+                fd_max = fd_max < cmdtab[i].fd[ERR] ? cmdtab[i].fd[ERR] : fd_max;
+                FD_SET(cmdtab[i].fd[ERR], fds);
+            }
+        }
+
+        if (globs.timeout && cmdtab[i].pid) {
+            clock_t consumed = (current - cmdtab[i].start_time) / tps;
+            clock_t process_timesout = globs.timeout - consumed;
+            if (0 < process_timesout && process_timesout < select_timeout) {
+                select_timeout = process_timesout;
+            }
+            if (globs.timeout <= consumed) {
+                killpg(cmdtab[i].pid, SIGKILL);
+                cmdtab[i].exit_reason = EXIT_TIMEOUT;
+            }
+        }
+    }
+    *fmax = fd_max;
+}
+
 /*
  * execwait() - wait and drive at most one execution completion
  */
@@ -331,14 +407,12 @@ void close_streams(int i, int s)
 int
 execwait()
 {
-    int i, j, len, ret, fd_max;
-    int pid, status, w, finished;
+    int i, ret, fd_max;
+    int pid, status, finished;
     int rstat;
     timing_info time;
     fd_set fds;
     struct tms old_time, new_time;
-    char *tmp;
-    char buffer[BUFSIZ];
 
     /* Handle naive make1() which doesn't know if cmds are running. */
 
@@ -350,27 +424,20 @@ execwait()
     while (!finished && cmdsrunning)
     {
         /* compute max read file descriptor for use in select */
-        fd_max = 0;
-        FD_ZERO(&fds);
-        for (i=0; i<globs.jobs; ++i)
-        {
-            if (0 < cmdtab[i].fd[OUT])
-            {
-                fd_max = fd_max < cmdtab[i].fd[OUT] ? cmdtab[i].fd[OUT] : fd_max;
-                FD_SET(cmdtab[i].fd[OUT], &fds);
-            }
-            if (globs.pipe_action != 0)
-            {
-                if (0 < cmdtab[i].fd[ERR])
-                {
-                    fd_max = fd_max < cmdtab[i].fd[ERR] ? cmdtab[i].fd[ERR] : fd_max;
-                    FD_SET(cmdtab[i].fd[ERR], &fds);
-                }
-            }
-        }
+        populate_file_descriptors(&fd_max, &fds);
 
-        /* select will wait until io on a descriptor or a signal */
-        ret = select(fd_max+1, &fds, 0, 0, 0);
+        if (0 < globs.timeout) {
+            /* force select to timeout so we can terminate expired processes */
+            tv.tv_sec = select_timeout;
+            tv.tv_usec = 0;
+
+            /* select will wait until: io on a descriptor, a signal, or we time out */
+            ret = select(fd_max+1, &fds, 0, 0, &tv);
+        }
+        else {
+            /* select will wait until io on a descriptor or a signal */
+            ret = select(fd_max+1, &fds, 0, 0, 0);
+        }
 
         if (0 < ret)
         {
@@ -400,11 +467,21 @@ execwait()
                         pid = 0;
                         cmdtab[i].pid = 0;
 
+                        /* set reason for exit if not timed out */
+                        if (WIFEXITED(status)) 
+                        {
+                            if (0 == WEXITSTATUS(status)) 
+                                cmdtab[i].exit_reason = EXIT_OK;
+                            else
+                                cmdtab[i].exit_reason = EXIT_FAIL;
+                        }
+
                         times(&old_time);
 
                         /* print out the rule and target name */
                         out_action(cmdtab[i].action, cmdtab[i].target,
-                            cmdtab[i].command, cmdtab[i].buffer[OUT], cmdtab[i].buffer[ERR]);
+                            cmdtab[i].command, cmdtab[i].buffer[OUT], cmdtab[i].buffer[ERR],
+                            cmdtab[i].exit_reason);
 
                         times(&new_time);
 
@@ -417,7 +494,7 @@ execwait()
 
                         if( intr )
                             rstat = EXEC_CMD_INTR;
-                        else if( w == -1 || status != 0 )
+                        else if( status != 0 )
                             rstat = EXEC_CMD_FAIL;
                         else
                             rstat = EXEC_CMD_OK;
@@ -436,6 +513,7 @@ execwait()
 
                         cmdtab[i].func = 0;
                         cmdtab[i].closure = 0;
+                        cmdtab[i].start_time = 0;
                     }
                     else
                     {
