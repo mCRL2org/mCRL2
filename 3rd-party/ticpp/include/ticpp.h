@@ -27,6 +27,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 @author		Ryan Mulder
 @date		04/11/2006
 
+@version	0.04a by edam@waxworlds.org: based Exception based on std::exception; added stream
+					<< and >> support; added Document::Parse(); bug fix; improved THROW() macro.
 @version	0.04 Added NodeImp class. Also made all the classes inherit from NodeImp.
 @version	0.03 Added Declaration class
 @version	0.02 Added Element class
@@ -34,7 +36,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 @todo add UNKNOWN support. See ticpp::NodeFactory.
 @todo add TYPECOUNT support. See ticpp::NodeFactory.
-@todo Add better documentation to explain the different constructors in the ticpp::Iterator class.
 @todo Add a quick reference
 */
 #ifdef TIXML_USE_TICPP
@@ -46,6 +47,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <vector>
 #include <memory>
+#include <exception>
 
 /**
 @subpage ticpp is a TinyXML wrapper that uses a lot more C++ ideals.
@@ -53,7 +55,7 @@ It throws exceptions, uses templates, is in its own name space, and
 <b>requires</b> STL (Standard Template Library). This is done to ease the use
 of getting values in and out of the xml.
 
-If you don't prefer to use some of the concepts just don't use it.
+If you don't perfer to use some of the concepts just don't use it.
 It is just a wrapper that extends TinyXML. It doesn't actually change
 any of TinyXML.
 */
@@ -62,10 +64,17 @@ namespace ticpp
     /**
 	This is a ticpp exception class
 	*/
-	class Exception
+	class Exception : public std::exception
 	{
 	public:
+		/**
+		Construct an exception with a message
+		*/
 		Exception( const std::string& details );
+		~Exception() throw();
+
+		/// Override std::exception::what() to return m_details
+		const char* what() const throw();
 
 		std::string m_details; /**< Exception Details */
 	};
@@ -74,12 +83,66 @@ namespace ticpp
 	This allows you to stream your exceptions in.
 	It will take care of the conversion	and throwing the exception.
 	*/
-	#define THROW( message )																					\
-		std::stringstream hopefullyThisNameWontConflictWithOtherVariables;										\
-		std::string file( __FILE__ );																			\
-		file = file.substr( file.find_last_of( "\\/" ) + 1 );													\
-		hopefullyThisNameWontConflictWithOtherVariables << message << " <" << file << "@" << __LINE__ << ">";	\
-		throw Exception( hopefullyThisNameWontConflictWithOtherVariables.str() );
+	#define TICPPTHROW( message ) 											\
+	{																		\
+		std::ostringstream full_message;									\
+		std::string file( __FILE__ );										\
+		file = file.substr( file.find_last_of( "\\/" ) + 1 );				\
+		full_message << message << " <" << file << "@" << __LINE__ << ">";	\
+		throw Exception( full_message.str() );								\
+	}
+
+	// Forward Declarations for Visitor, and others.
+	class Document;
+	class Element;
+	class Declaration;
+	class StylesheetReference;
+	class Text;
+	class Comment;
+	class Attribute;
+
+	/** Wrapper around TiXmlVisitor */
+	class Visitor : public TiXmlVisitor
+	{
+	public:
+		// Overload the TiXmlVisitor functions, wrap objects, call ticpp::Visitor functions
+		/// @internal
+		virtual bool VisitEnter( const TiXmlDocument& doc );
+		/// @internal
+		virtual bool VisitExit( const TiXmlDocument& doc );
+		/// @internal
+		virtual bool VisitEnter( const TiXmlElement& element, const TiXmlAttribute* firstAttribute );
+		/// @internal
+		virtual bool VisitExit( const TiXmlElement& element );
+		/// @internal
+		virtual bool Visit( const TiXmlDeclaration& declaration );
+		/// @internal
+		virtual bool Visit( const TiXmlStylesheetReference& stylesheet );
+		/// @internal
+		virtual bool Visit( const TiXmlText& text );
+		/// @internal
+		virtual bool Visit( const TiXmlComment& comment );
+
+	public:
+		/// Visit a document.
+		virtual bool VisitEnter( const Document& /*doc*/ )			{ return true; }
+		/// Visit a document.
+		virtual bool VisitExit( const Document& /*doc*/ )			{ return true; }
+
+		/// Visit an element.
+		virtual bool VisitEnter( const Element& /*element*/, const Attribute* /*firstAttribute*/ )	{ return true; }
+		/// Visit an element.
+		virtual bool VisitExit( const Element& /*element*/ )		{ return true; }
+
+		/// Visit a declaration
+		virtual bool Visit( const Declaration& /*declaration*/ )	{ return true; }
+		/// Visit a stylesheet reference
+		virtual bool Visit( const StylesheetReference& /*stylesheet*/ )	{ return true; }
+		/// Visit a text node
+		virtual bool Visit( const Text& /*text*/ )					{ return true; }
+		/// Visit a comment node
+		virtual bool Visit( const Comment& /*comment*/ )			{ return true; }
+	};
 
 	/** Wrapper around TiXmlBase */
 	class Base
@@ -87,23 +150,23 @@ namespace ticpp
 	public:
 
 		/**
-		Converts any class with a proper overload of the << operator to a std::string
+		Converts any class with a proper overload of the << opertor to a std::string
 		@param value The value to be converted
 		@throws Exception When value cannot be converted to a std::string
 		*/
 		template < class T >
-			std::string ToString( const T& value )
+			std::string ToString( const T& value ) const
 		{
 			std::stringstream convert;
 			convert << value;
 			if ( convert.fail() )
 			{
-				THROW( "Could not convert value to text" );
+				TICPPTHROW( "Could not convert value to text" );
 			}
 			return convert.str();
 		}
 
-		std::string ToString( const std::string& value )
+		std::string ToString( const std::string& value ) const
 		{
 			return value;
 		}
@@ -115,14 +178,14 @@ namespace ticpp
 		@throws Exception When temp cannot be converted to the target type
 		*/
 		template < class T >
-			void FromString( const std::string& temp, T* out )
+			void FromString( const std::string& temp, T* out ) const
 		{
 			std::istringstream val( temp );
 			val >> *out;
 
 			if ( val.fail() )
 			{
-				THROW( "Could not convert \"" << temp << "\" to target type" );
+				TICPPTHROW( "Could not convert \"" << temp << "\" to target type" );
 			}
 		}
 
@@ -137,7 +200,7 @@ namespace ticpp
 		/**
 		Specialization for std::string
 		*/
-		void FromString( const std::string& temp, std::string* out )
+		void FromString( const std::string& temp, std::string* out ) const
 		{
 			*out = temp;
 		}
@@ -146,7 +209,7 @@ namespace ticpp
 		Return the position, in the original source file, of this node or attribute.
 		Wrapper around TiXmlBase::Row()
 		*/
-		int Row()
+		int Row() const
 		{
 			return GetBasePointer()->Row();
 		}
@@ -155,7 +218,7 @@ namespace ticpp
 		Return the position, in the original source file, of this node or attribute.
 		Wrapper around TiXmlBase::Row()
 		*/
-		int Column()
+		int Column() const
 		{
 			return GetBasePointer()->Column();
 		}
@@ -169,9 +232,9 @@ namespace ticpp
 		}
 
 	protected:
-		TiCppRCImp* m_impRC;	/**< Holds status of internal TiXmlPointer - use this to determine if object has been deleted already */
+		mutable TiCppRCImp* m_impRC;	/**< Holds status of internal TiXmlPointer - use this to determine if object has been deleted already */
 
-		std::vector< Base* > m_spawnedWrappers; /**< Remember all wrappers that we've created with 'new' - ( e.g. NodeFactory, FirstChildElement, etc. )*/
+		mutable std::vector< Base* > m_spawnedWrappers; /**< Remember all wrappers that we've created with 'new' - ( e.g. NodeFactory, FirstChildElement, etc. )*/
 
 		/**
 		@internal
@@ -188,7 +251,7 @@ namespace ticpp
 		{
 			if ( m_impRC->IsNull() )
 			{
-				THROW( "Internal TiXml Pointer is NULL" );
+				TICPPTHROW( "Internal TiXml Pointer is NULL" );
 			}
 		}
 
@@ -210,7 +273,7 @@ namespace ticpp
 		@internal
 		Get internal TiXmlBase*
 		*/
-		virtual TiXmlBase* GetBasePointer() = 0;
+		virtual TiXmlBase* GetBasePointer() const = 0;
 	};
 
 	/**
@@ -220,7 +283,7 @@ namespace ticpp
 	{
 	private:
 		TiXmlAttribute* m_tiXmlPointer;
-		TiXmlBase* GetBasePointer()
+		TiXmlBase* GetBasePointer() const
 		{
 			ValidatePointer();
 			return m_tiXmlPointer;
@@ -256,7 +319,7 @@ namespace ticpp
 		@param value [OUT] A pointer to fill with the value
 		*/
 		template < class T >
-			void GetValue( T* value )
+			void GetValue( T* value ) const
 		{
 			ValidatePointer();
 			FromString( m_tiXmlPointer->ValueStr(), value );
@@ -268,7 +331,7 @@ namespace ticpp
 
 		@see GetValue
 		*/
-		std::string Value();
+		std::string Value() const;
 
 		/**
 		Set the value of this node.
@@ -291,7 +354,7 @@ namespace ticpp
 		@param name [OUT] A pointer to fill with the name
 		*/
 		template < class T >
-			void GetName( T* name )
+			void GetName( T* name ) const
 		{
 			ValidatePointer();
 			FromString( m_tiXmlPointer->Name(), name );
@@ -303,7 +366,7 @@ namespace ticpp
 
 		@see GetName
 		*/
-		std::string Name();
+		std::string Name() const;
 
 		/**
 		Set the value of this attribute.
@@ -338,12 +401,12 @@ namespace ticpp
 		/**
 		Get the next sibling attribute in the DOM.
 		*/
-		Attribute* Next( bool throwIfNoAttribute = true );
+		Attribute* Next( bool throwIfNoAttribute = true ) const;
 
 		/**
 		Get the previous sibling attribute in the DOM.
 		*/
-		Attribute* Previous( bool throwIfNoAttribute = true );
+		Attribute* Previous( bool throwIfNoAttribute = true ) const;
 
 		/**
 		@internal
@@ -352,7 +415,7 @@ namespace ticpp
 		@param next [OUT] The pointer to the next valid attribute
 		@return true if there is a next attribute, false if not
 		*/
-		void IterateNext( const std::string&, Attribute** next );
+		void IterateNext( const std::string&, Attribute** next ) const;
 
 		/**
 		@internal
@@ -361,12 +424,12 @@ namespace ticpp
 		@param previous [OUT] The pointer to the previous valid attribute
 		@return true if there is a previous attribute, false if not
 		*/
-		void IteratePrevious( const std::string&, Attribute** previous );
+		void IteratePrevious( const std::string&, Attribute** previous ) const;
 
 		/**
 		All TinyXml classes can print themselves to a filestream.
 		*/
-		virtual void Print( FILE* file, int depth );
+		virtual void Print( FILE* file, int depth ) const;
 
 	private:
 
@@ -380,20 +443,11 @@ namespace ticpp
 		void SetTiXmlPointer( TiXmlAttribute* newPointer );
 	};
 
-	// Forward Declaration so Node can return Element* and Document*
-	class Element;
-	class Document;
-	class Text;
-	class Comment;
-	class Declaration;
-
 	/**
 	Wrapper around TiXmlNode
 	*/
 	class Node : public Base
 	{
-          friend std::istream& operator>> (std::istream & in, Node& node);
-          friend std::ostream& operator<< (std::ostream & out, const Node& node);
 
 	public:
 
@@ -405,7 +459,7 @@ namespace ticpp
 		@param value [OUT] A pointer to fill with the value
 		*/
 		template < class T >
-			void GetValue( T* value)
+			void GetValue( T* value) const
 		{
 			FromString( GetTiXmlPointer()->ValueStr(), value );
 		}
@@ -416,7 +470,7 @@ namespace ticpp
 
 		@see GetValue
 		*/
-		std::string Value();
+		std::string Value() const;
 
 		/**
 		Set the value of this node.
@@ -444,7 +498,7 @@ namespace ticpp
 		@return The parent of this node, NULL if there is no Parent.
 		@throws Exception When throwIfNoParent is true, and TiXmlNode::Parent returns Null.
 		*/
-		Node* Parent( bool throwIfNoParent = true );
+		Node* Parent( bool throwIfNoParent = true ) const;
 
 		/**
 		The first child of this node.
@@ -455,7 +509,7 @@ namespace ticpp
 
 		@see TiXmlNode::FirstChild
 		*/
-		Node* FirstChild( bool throwIfNoChildren = true );
+		Node* FirstChild( bool throwIfNoChildren = true ) const;
 
 		/**
 		@internal
@@ -467,7 +521,7 @@ namespace ticpp
 
 		@see FirstChild( bool throwIfNoChildren = true )
 		*/
-		Node* FirstChild( const char* value, bool throwIfNoChildren = true );
+		Node* FirstChild( const char* value, bool throwIfNoChildren = true ) const;
 
 		/**
 		The first child of this node with the matching @a value.
@@ -478,7 +532,7 @@ namespace ticpp
 
 		@see FirstChild( const char* value, bool throwIfNoChildren = true )
 		*/
-		Node* FirstChild( const std::string& value, bool throwIfNoChildren = true );
+		Node* FirstChild( const std::string& value, bool throwIfNoChildren = true ) const;
 
 		/**
 		The last child of this node.
@@ -489,7 +543,7 @@ namespace ticpp
 
 		@see TiXmlNode::LastChild
 		*/
-		Node* LastChild( bool throwIfNoChildren = true );
+		Node* LastChild( bool throwIfNoChildren = true ) const;
 
 		/**
 		@internal
@@ -501,7 +555,7 @@ namespace ticpp
 
 		@see LastChild( bool throwIfNoChildren = true )
 		*/
-		Node* LastChild( const char* value, bool throwIfNoChildren = true );
+		Node* LastChild( const char* value, bool throwIfNoChildren = true ) const;
 
 		/**
 		The last child of this node with the matching @a value.
@@ -512,7 +566,7 @@ namespace ticpp
 
 		@see LastChild( const char* value, bool throwIfNoChildren = true )
 		*/
-		Node* LastChild( const std::string& value, bool throwIfNoChildren = true );
+		Node* LastChild( const std::string& value, bool throwIfNoChildren = true ) const;
 
 		/**
 		An alternate way to walk the children of a node.
@@ -521,7 +575,7 @@ namespace ticpp
 		@param previous The previous Node* that was returned from IterateChildren.
 		@return NULL When there are no more children.
 		*/
-		Node* IterateChildren( Node* previous );
+		Node* IterateChildren( Node* previous ) const;
 
 		/**
 		This flavor of IterateChildren searches for children with a particular @a value.
@@ -531,7 +585,7 @@ namespace ticpp
 		@param previous The previous Node* that was returned from IterateChildren.
 		@return NULL When there are no more children.
 		*/
-		Node* IterateChildren( const std::string& value, Node* previous );
+		Node* IterateChildren( const std::string& value, Node* previous ) const;
 
 		/**
 		Adds a child past the LastChild.
@@ -614,7 +668,7 @@ namespace ticpp
 		@return Pointer to sibling, Null if no siblings and 'throwIfNoSiblings' is false.
 		@throws Exception When TiXmlNode::PreviousSibling returns Null and 'throwIfNoSiblings' is true.
 		*/
-		Node* PreviousSibling( bool throwIfNoSiblings = true );
+		Node* PreviousSibling( bool throwIfNoSiblings = true ) const;
 
 		/**
 		Navigate to a sibling node with the given @a value.
@@ -625,7 +679,7 @@ namespace ticpp
 
 		@see PreviousSibling( bool throwIfNoSiblings )
 		*/
-		Node* PreviousSibling( const std::string& value, bool throwIfNoSiblings = true );
+		Node* PreviousSibling( const std::string& value, bool throwIfNoSiblings = true ) const;
 
 		/**
 		@internal
@@ -637,7 +691,7 @@ namespace ticpp
 
 		@see PreviousSibling( const std::string& value, bool throwIfNoSiblings )
 		*/
-		Node* PreviousSibling( const char* value, bool throwIfNoSiblings = true );
+		Node* PreviousSibling( const char* value, bool throwIfNoSiblings = true ) const;
 
 		/**
 		Navigate to a sibling node.
@@ -647,7 +701,7 @@ namespace ticpp
 		@return Pointer to sibling, Null if no siblings and 'throwIfNoSiblings' is false.
 		@throws Exception When TiXmlNode::NextSibling returns Null and 'throwIfNoSiblings' is true.
 		*/
-		Node* NextSibling( bool throwIfNoSiblings = true );
+		Node* NextSibling( bool throwIfNoSiblings = true ) const;
 
 		/**
 		Navigate to a sibling node with the given @a value.
@@ -658,7 +712,7 @@ namespace ticpp
 
 		@see NextSibling( bool throwIfNoSiblings )
 		*/
-		Node* NextSibling( const std::string& value, bool throwIfNoSiblings = true );
+		Node* NextSibling( const std::string& value, bool throwIfNoSiblings = true ) const;
 
 		/**
 		@internal
@@ -670,7 +724,33 @@ namespace ticpp
 
 		@see NextSibling( const std::string& value, bool throwIfNoSiblings )
 		*/
-		Node* NextSibling( const char* value, bool throwIfNoSiblings = true );
+		Node* NextSibling( const char* value, bool throwIfNoSiblings = true ) const;
+
+		/**
+		@internal
+		Just for Iterator<>
+
+		@param value The value of nodes to iterate through
+		@param next [OUT] The pointer to the first valid node
+		*/
+		template < class T >
+			void IterateFirst( const std::string& value, T** first ) const
+		{
+			*first = 0;
+			for( Node* child = FirstChild( value, false ); child; child = child->NextSibling( value, false ) )
+			{
+				*first = dynamic_cast< T* >( child );
+				if ( 0 != *first )
+				{
+					return;
+				}
+			}
+		}
+
+		virtual	void IterateFirst( const std::string&, Attribute** ) const
+		{
+			TICPPTHROW( "Attributes can only be iterated with Elements." )
+		}
 
 		/**
 		@internal
@@ -680,12 +760,12 @@ namespace ticpp
 		@param next [OUT] The pointer to the next valid node
 		*/
 		template < class T >
-			void IterateNext( const std::string& value, T** next )
+			void IterateNext( const std::string& value, T** next ) const
 		{
 			Node* sibling = NextSibling( value, false );
 			*next = dynamic_cast< T* >( sibling );
 
-			while ( ( NULL != sibling ) && ( NULL == *next ) )
+			while ( ( 0 != sibling ) && ( 0 == *next ) )
 			{
 				sibling = sibling->NextSibling( value, false );
 				*next = dynamic_cast< T* >( sibling );
@@ -700,12 +780,12 @@ namespace ticpp
 		@param previous [OUT] The pointer to the previous valid node
 		*/
 		template < class T >
-			void IteratePrevious( const std::string& value, T** previous  )
+			void IteratePrevious( const std::string& value, T** previous  ) const
 		{
 			Node* sibling = PreviousSibling( value, false );
 			*previous = dynamic_cast< T* >( sibling );
 
-			while ( ( NULL != sibling ) && ( NULL == *previous ) )
+			while ( ( 0 != sibling ) && ( 0 == *previous ) )
 			{
 				sibling = sibling->PreviousSibling( value, false );
 				*previous = dynamic_cast< T* >( sibling );
@@ -720,7 +800,7 @@ namespace ticpp
 		@return Pointer to sibling, Null if no siblings and 'throwIfNoSiblings' is false.
 		@throws Exception When TiXmlNode::NextSibling returns Null and 'throwIfNoSiblings' is true.
 		*/
-		Element* NextSiblingElement( bool throwIfNoSiblings = true );
+		Element* NextSiblingElement( bool throwIfNoSiblings = true ) const;
 
 		/**
 		Navigate to a sibling element with the given @a value.
@@ -730,7 +810,7 @@ namespace ticpp
 		@param throwIfNoSiblings [DEF] If true, will throw an exception if there are no sibling elements.
 		@see NextSiblingElement( bool throwIfNoSiblings )
 		*/
-		Element* NextSiblingElement( const std::string& value, bool throwIfNoSiblings = true );
+		Element* NextSiblingElement( const std::string& value, bool throwIfNoSiblings = true ) const;
 
 		/**
 		@internal
@@ -742,7 +822,7 @@ namespace ticpp
 
 		@see NextSiblingElement( const std::string& value, bool throwIfNoSiblings )
 		*/
-		Element* NextSiblingElement( const char* value, bool throwIfNoSiblings = true );
+		Element* NextSiblingElement( const char* value, bool throwIfNoSiblings = true ) const;
 
 		/**
 		The first child element of this node.
@@ -753,7 +833,7 @@ namespace ticpp
 
 		@see TiXmlNode::FirstChildElement
 		*/
-		Element* FirstChildElement( bool throwIfNoChildren = true );
+		Element* FirstChildElement( bool throwIfNoChildren = true ) const;
 
 		/**
 		@internal
@@ -765,7 +845,7 @@ namespace ticpp
 
 		@see FirstChildElement( bool throwIfNoChildren = true )
 		*/
-		Element* FirstChildElement( const char* value, bool throwIfNoChildren = true );
+		Element* FirstChildElement( const char* value, bool throwIfNoChildren = true ) const;
 
 		/**
 		The first child element of this node with the matching @a value.
@@ -776,12 +856,12 @@ namespace ticpp
 
 		@see FirstChildElement( const char* value, bool throwIfNoChildren = true )
 		*/
-		Element* FirstChildElement( const std::string& value, bool throwIfNoChildren = true );
+		Element* FirstChildElement( const std::string& value, bool throwIfNoChildren = true ) const;
 
 		/**
 		Query the type (as TiXmlNode::NodeType ) of this node.
 		*/
-		int Type();
+		int Type() const;
 
 		/**
 		Return a pointer to the Document this node lives in.
@@ -790,14 +870,14 @@ namespace ticpp
 		@return A pointer to the Document this node lives in, NULL if not linked under a Document, and 'throwIfNoDocument' is false.
 		@throws Exception When this node is not linked under a Document and 'throwIfNoDocument' is true.
 		*/
-		Document* GetDocument( bool throwIfNoDocument = true );
+		Document* GetDocument( bool throwIfNoDocument = true ) const;
 
 		/**
 		Check if this node has no children.
 
 		@return true if this node has no children.
 		*/
-		bool NoChildren();
+		bool NoChildren() const;
 
 		/**
 		Pointer conversion ( NOT OBJECT CONVERSION ) - replaces TiXmlNode::ToElement, TiXmlNode::ToDocument, TiXmlNode::ToComment, etc.
@@ -806,15 +886,15 @@ namespace ticpp
 		@warning Some ancient compilers do not support explicit specification of member template arguments, which this depends on ( e.g. VC6 ).
 		*/
 		template < class T >
-			T* To()
+			T* To() const
 		{
 			T* pointer = dynamic_cast< T* >( this );
-			if ( NULL == pointer )
+			if ( 0 == pointer )
 			{
 				std::string thisType = typeid( this ).name();
 				std::string targetType = typeid( T ).name();
 				std::string thatType = typeid( *this ).name();
-				THROW( "The " << thisType.substr( 6 ) << " could not be casted to a " << targetType.substr( 6 )
+				TICPPTHROW( "The " << thisType.substr( 6 ) << " could not be casted to a " << targetType.substr( 6 )
 					<< " *, because the target object is not a " << targetType.substr( 6 ) << ". (It is a " << thatType.substr( 6 ) << ")" );
 			}
 			return pointer;
@@ -825,35 +905,42 @@ namespace ticpp
 
 		@throws Exception When this node is not a Document.
 		*/
-		Document* ToDocument();
+		Document* ToDocument() const;
 
 		/**
 		Pointer conversion - replaces TiXmlNode::ToElement.
 
 		@throws Exception When this node is not a Element.
 		*/
-		Element* ToElement();
+		Element* ToElement() const;
 
 		/**
 		Pointer conversion - replaces TiXmlNode::ToComment.
 
 		@throws Exception When this node is not a Comment.
 		*/
-		Comment* ToComment();
+		Comment* ToComment() const;
 
 		/**
 		Pointer conversion - replaces TiXmlNode::ToText.
 
 		@throws Exception When this node is not a Text.
 		*/
-		Text* ToText();
+		Text* ToText() const;
 
 		/**
 		Pointer conversion - replaces TiXmlNode::ToDeclaration.
 
 		@throws Exception When this node is not a Declaration.
 		*/
-		Declaration* ToDeclaration();
+		Declaration* ToDeclaration() const;
+
+		/**
+		Pointer conversion - replaces TiXmlNode::ToStylesheetReference.
+
+		@throws Exception When this node is not a StylesheetReference.
+		*/
+		StylesheetReference* ToStylesheetReference() const;
 
 		/**
 		Create an exact duplicate of this node and return it.
@@ -872,23 +959,40 @@ namespace ticpp
 		@endcode
 		@return Pointer the duplicate node.
 		*/
-		std::auto_ptr< Node > Clone();
+		std::auto_ptr< Node > Clone() const;
 
+		/**
+		Accept a hierchical visit the nodes in the TinyXML DOM.
+		@return The boolean returned by the visitor.
+		*/
+		bool Accept( TiXmlVisitor* visitor ) const;
+
+		/**
+ 		Stream input operator.
+ 		*/
+ 		friend std::istream& operator >>( std::istream& in, Node& base )
+ 		{
+ 			in >> *base.GetTiXmlPointer();
+ 			return in;
+ 		}
+
+ 		/**
+ 		Stream output operator.
+ 		*/
+ 		friend std::ostream& operator <<( std::ostream& out, Node const& base )
+ 		{
+ 			out << *base.GetTiXmlPointer();
+ 			return out;
+ 		}
 
 	protected:
 		/**
 		@internal
 		Allows NodeImp to use Node*'s.
 		*/
-		virtual TiXmlNode const* GetTiXmlPointer() const = 0;
+		virtual TiXmlNode* GetTiXmlPointer() const = 0;
 
-		/**
-		@internal
-		Allows NodeImp to use Node*'s.
-		*/
-		virtual TiXmlNode* GetTiXmlPointer() = 0;
-
-		TiXmlBase* GetBasePointer()
+		TiXmlBase* GetBasePointer() const
 		{
 			return GetTiXmlPointer();
 		}
@@ -897,19 +1001,36 @@ namespace ticpp
 		@internal
 		Constructs the correct child of Node, based on the Type of the TiXmlNode*.
 		*/
-		Node* NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull = true, bool rememberSpawnedWrapper = true );
+		Node* NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull = true, bool rememberSpawnedWrapper = true ) const;
 
 	};
 
-        inline std::istream& operator>> (std::istream & in, Node& node) {
-          return (in >> *(node.GetTiXmlPointer()));
-        }
+	/** Iterator for conveniently stepping through Nodes and Attributes.
+	TinyXML++ introduces iterators:
+	@code
+	ticpp::Iterator< ticpp::Node > child;
+	for ( child = child.begin( parent ); child != child.end(); child++ )
+	@endcode
 
-        inline std::ostream& operator<< (std::ostream & out, const Node& node) {
-          return (out << *(node.GetTiXmlPointer()));
-        }
+	Iterators have the added advantage of filtering by type:
+	@code
+	// Only iterates through Comment nodes
+	ticpp::Iterator< ticpp::Comment > child;
+	for ( child = child.begin( parent ); child != child.end(); child++ )
+	@endcode
 
-	/** Iterator for conveniently stepping through Nodes and Attributes */
+	@code
+	// Only iterates through Element nodes with value "ElementValue"
+	ticpp::Iterator< ticpp::Element > child( "ElementValue" );
+	for ( child = child.begin( parent ); child != child.end(); child++ )
+	@endcode
+
+	Finally, Iterators also work with Attributes
+	@code
+	ticpp::Iterator< ticpp::Attribute > attribute;
+	for ( attribute = attribute.begin( element ); attribute != attribute.end(); attribute++ )
+	@endcode
+	*/
 	template < class T = Node >
 		class Iterator
 	{
@@ -921,25 +1042,53 @@ namespace ticpp
 
 		/**
 		For for loop comparisons.
+		@param parent The parent of the nodes to iterate.
+		@return The first child of type T.
+		@code
+		ticpp::Iterator< ticpp::Node > child;
+		for ( child = child.begin( parent ); child != child.end(); child++ )
+		@endcode
 		*/
-		T* end()
+		T* begin( const Node* parent ) const
 		{
-			return NULL;
+			T* pointer;
+			parent->IterateFirst( m_value, &pointer );
+			return pointer;
 		}
 
-		/** Constructor */
+		/**
+		For for loop comparisons.
+		@return NULL
+		@code
+		ticpp::Iterator< ticpp::Node > child;
+		for ( child = child.begin( parent ); child != child.end(); child++ )
+		@endcode
+		*/
+		T* end() const
+		{
+			return 0;
+		}
+
+		/** Constructor.
+		@param value If not empty, this iterator will only visit nodes with matching value.
+		@code
+		// Only iterates through Element nodes with value "ElementValue"
+		ticpp::Iterator< ticpp::Element > child( "ElementValue" );
+		for ( child = child.begin( parent ); child != child.end(); child++ )
+		@endcode
+		*/
 		Iterator( const std::string& value = "" )
-			: m_p( NULL ), m_value( value )
+			: m_p( 0 ), m_value( value )
 		{
 		}
 
-		/** Constructor */
+		/// Constructor
 		Iterator( T* node, const std::string& value = "" )
 			: m_p( node ), m_value( value )
 		{
 		}
 
-		/** Constructor */
+		/// Constructor
 		Iterator( const Iterator& it, const std::string& value  = "" )
 			: m_p( it.m_p ), m_value( value )
 		{
@@ -949,7 +1098,7 @@ namespace ticpp
 		Gets internal pointer.
 		@return The internal pointer.
 		*/
-		T* Get()
+		T* Get() const
 		{
 			return m_p;
 		}
@@ -995,37 +1144,37 @@ namespace ticpp
 		}
 
 		/** Compares internal pointer */
-		bool operator!=( T* p )
+		bool operator!=( T* p ) const
 		{
 			return m_p != p;
 		}
 
 		/** Compares internal pointer */
-		bool operator!=( const Iterator& it )
+		bool operator!=( const Iterator& it ) const
 		{
 			return m_p != it.m_p;
 		}
 
 		/** Compares internal pointer* */
-		bool operator==( T* p )
+		bool operator==( T* p ) const
 		{
 			return m_p == p;
 		}
 
 		/** Compares internal pointer */
-		bool operator==( const Iterator& it )
+		bool operator==( const Iterator& it ) const
 		{
 			return m_p == it.m_p;
 		}
 
 		/** So Iterator behaves like a STL iterator */
-		T* operator->()
+		T* operator->() const
 		{
 			return m_p;
 		}
 
 		/** So Iterator behaves like a STL iterator */
-		T& operator*()
+		T& operator*() const
 		{
 			return *m_p;
 		}
@@ -1045,19 +1194,7 @@ namespace ticpp
 
 		@returns The internal TiXmlNode*.
 		*/
-		TiXmlNode const* GetTiXmlPointer() const
-		{
-			ValidatePointer();
-			return m_tiXmlPointer;
-		}
-
-		/**
-		@internal
-		Gets the internal TinyXML pointer.
-
-		@returns The internal TiXmlNode*.
-		*/
-		TiXmlNode* GetTiXmlPointer()
+		TiXmlNode* GetTiXmlPointer() const
 		{
 			ValidatePointer();
 			return m_tiXmlPointer;
@@ -1083,9 +1220,9 @@ namespace ticpp
 		NodeImp( T* tiXmlPointer )
 		{
 			// Check for NULL pointers
-			if ( NULL == tiXmlPointer )
+			if ( 0 == tiXmlPointer )
 			{
-				THROW( "Can not create a " << typeid( T ).name() );
+				TICPPTHROW( "Can not create a " << typeid( T ).name() );
 			}
 			SetTiXmlPointer( tiXmlPointer );
 			m_impRC->IncRef();
@@ -1115,13 +1252,8 @@ namespace ticpp
 		Updates the reference count for the old and new pointers.
 		In addition, the spawnedWrappers must be cleared out before a new TiXml object is loaded in
 		*/
-		NodeImp( const NodeImp<T>& copy ) : Node()
+		NodeImp( const NodeImp<T>& copy ) : Node( copy )
 		{
-			DeleteSpawnedWrappers();
-
-			// Dropping the reference to the old object
-			this->m_impRC->DecRef();
-
 			// Pointing to the new Object
 			SetTiXmlPointer( copy.m_tiXmlPointer );
 
@@ -1236,12 +1368,6 @@ namespace ticpp
 		Document( const std::string& documentName );
 
 		/**
-		Write the document to a string using formatted printing ("pretty print").
-		@return the document as a formatted standard string.
-		*/
-		void Print(std::ostream&);
-
-		/**
 		Load a file using the current document value. Throws if load is unsuccessful.
 
 		@param encoding Sets the documents encoding.
@@ -1268,6 +1394,11 @@ namespace ticpp
 		void LoadFile( const std::string& filename, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
 
 		/**
+		@copydoc Document::LoadFile( const std::string&, TiXmlEncoding )
+		*/
+		void LoadFile( const char* filename, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
+
+		/**
 		Save a file using the given filename. Throws if it can't save the file.
 
 		@param filename File to save.
@@ -1275,6 +1406,15 @@ namespace ticpp
 		*/
 		void SaveFile( const std::string& filename ) const;
 
+		/**
+		Parse the given xml data.
+
+		@param xml Xml to parse.
+		@param throwIfParseError [DEF] If true, throws when there is a parse error.
+		@param encoding Sets the documents encoding.
+		@throws Exception
+		*/
+		void Parse( const std::string& xml, bool throwIfParseError = true, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
 	};
 
 	/** Wrapper around TiXmlElement */
@@ -1288,8 +1428,15 @@ namespace ticpp
 
 		/**
 		Default	Constructor. Initializes all the variables.
+		@param value The value of the element.
 		*/
 		Element( const std::string& value );
+
+		/**
+		Default	Constructor. Initializes all the variables.
+		@param value The value of the element.
+		*/
+		Element( const char* value );
 
 		/**
 		Constructor.
@@ -1297,12 +1444,25 @@ namespace ticpp
 		Element( TiXmlElement* element );
 
 		/**
+		Constructor that allows you to set the element text
+		@param value The value of the element.
+		@param text The text to set.
+		*/
+		template < class T >
+			Element( const std::string& value, const T& text )
+			: NodeImp< TiXmlElement >( new TiXmlElement( value ) )
+		{
+			m_impRC->InitRef();
+			SetText( text );
+		}
+
+		/**
 		Access the first attribute in this element.
 
 		@param throwIfNoAttributes [DEF] If true, throws when there are no attributes
 		@return The first attribute, NULL if there are none and @a throwIfNoAttributes is true
 		*/
-		Attribute* FirstAttribute( bool throwIfNoAttributes = true );
+		Attribute* FirstAttribute( bool throwIfNoAttributes = true ) const;
 
 		/**
 		Access the last attribute in this element.
@@ -1310,7 +1470,27 @@ namespace ticpp
 		@param throwIfNoAttributes [DEF] If true, throws when there are no attributes
 		@return The last attribute, NULL if there are none and @a throwIfNoAttributes is true
 		*/
-		Attribute* LastAttribute( bool throwIfNoAttributes = true );
+		Attribute* LastAttribute( bool throwIfNoAttributes = true ) const;
+
+		/**
+		@internal
+		Just for Iterator<>
+
+		@param value The value of nodes to iterate through
+		@param next [OUT] The pointer to the first valid node
+		*/
+		void IterateFirst( const std::string&, Attribute** first ) const
+		{
+			*first = 0;
+			for( Attribute* child = FirstAttribute( false ); child; child = child->Next( false ) )
+			{
+				*first = dynamic_cast< Attribute* >( child );
+				if ( 0 != *first )
+				{
+					return;
+				}
+			}
+		}
 
 		/**
 		Sets an attribute of name to a given value.
@@ -1338,7 +1518,7 @@ namespace ticpp
 		@see GetTextOrDefault( T* value, const DefaultT& defaultValue )
 		@see TiXmlElement::GetText
 		*/
-		std::string GetText( bool throwIfNotFound = true )
+		std::string GetText( bool throwIfNotFound = true ) const
 		{
 			// Get the element's text value as a std::string
 			std::string temp;
@@ -1346,7 +1526,7 @@ namespace ticpp
 			{
 				if ( throwIfNotFound )
 				{
-					THROW( "Text does not exists in the current element" );
+					TICPPTHROW( "Text does not exists in the current element" );
 				}
 			}
 
@@ -1364,7 +1544,7 @@ namespace ticpp
 		@see GetTextOrDefault( T* value, const DefaultT& defaultValue )
 		@see TiXmlElement::GetText
 		*/
-		std::string GetTextOrDefault( const std::string& defaultValue )
+		std::string GetTextOrDefault( const std::string& defaultValue ) const
 		{
 			// Get the element's text value as a std::string
 			std::string temp;
@@ -1391,7 +1571,7 @@ namespace ticpp
 		@see TiXmlElement::GetText
 		*/
 		template < class T, class DefaultT >
-			void GetTextOrDefault( T* value, const DefaultT& defaultValue )
+			void GetTextOrDefault( T* value, const DefaultT& defaultValue ) const
 		{
 			// Get the element's text value as a std::string
 			std::string temp;
@@ -1422,7 +1602,7 @@ namespace ticpp
 		@see TiXmlElement::GetText
 		*/
 		template< class T >
-			void GetText( T* value, bool throwIfNotFound = true )
+			void GetText( T* value, bool throwIfNotFound = true ) const
 		{
 			// Get the element's text value as a std::string
 			std::string temp;
@@ -1430,7 +1610,7 @@ namespace ticpp
 			{
 				if ( throwIfNotFound )
 				{
-					THROW( "Text does not exists in the current element" );
+					TICPPTHROW( "Text does not exists in the current element" );
 				}
 				else
 				{
@@ -1461,7 +1641,7 @@ namespace ticpp
 			}
 			else
 			{
-				if ( NULL == m_tiXmlPointer->GetText() )
+				if ( 0 == m_tiXmlPointer->GetText() )
 				{
 					m_tiXmlPointer->InsertBeforeChild( m_tiXmlPointer->FirstChild(), TiXmlText( temp ) );
 				}
@@ -1485,7 +1665,7 @@ namespace ticpp
 		@see GetAttribute
 		*/
 		template < class T, class DefaulT >
-			void GetAttributeOrDefault( const std::string& name, T* value, const DefaulT& defaultValue )
+			void GetAttributeOrDefault( const std::string& name, T* value, const DefaulT& defaultValue ) const
 		{
 			// Get the attribute's value as a std::string
 			std::string temp;
@@ -1501,6 +1681,16 @@ namespace ticpp
 		}
 
 		/**
+		Gets an attribute of @a name from an element, if it doesn't exist it will return the defaultValue.
+
+		@param name			The name of the attribute you are querying.
+		@param defaultValue	What to put in @a value if there is no attribute in this element.
+
+		@see GetAttribute
+		*/
+		std::string GetAttributeOrDefault( const std::string& name, const std::string& defaultValue ) const;
+
+		/**
 		Gets an attribute of @a name from an element.
 		Uses FromString to convert the string to the type of choice.
 
@@ -1512,7 +1702,7 @@ namespace ticpp
 		@see GetAttributeOrDefault
 		*/
 		template< class T >
-			void GetAttribute( const std::string& name, T* value, bool throwIfNotFound = true )
+			void GetAttribute( const std::string& name, T* value, bool throwIfNotFound = true ) const
 		{
 			// Get the attribute's value as a std::string
 			std::string temp;
@@ -1520,7 +1710,7 @@ namespace ticpp
 			{
 				if ( throwIfNotFound )
 				{
-					THROW( "Attribute does not exist" );
+					TICPPTHROW( "Attribute does not exist" );
 				}
 				else
 				{
@@ -1534,61 +1724,40 @@ namespace ticpp
 
 		/**
 		Gets an attribute of @a name from an element.
-		Uses FromString to convert the string to the type of choice.
+		Returns an empty string if the attribute does not exist.
 
-		@param name				The name of the attribute you are querying.
-		@param throwIfNotFound	[DEF]	If true, will throw an exception if the attribute doesn't exist
-		@throws Exception When the attribute doesn't exist and throwIfNotFound is true
+		@param name	The name of the attribute you are querying.
+		@return The value of the attribute, or an empty string if it does not exist.
 
+		@see GetAttributeOrDefault
 		*/
-		std::string GetAttributeValue( const std::string& name, bool throwIfNotFound = true )
-		{
-			// Get the attribute's value as a std::string
-			std::string temp;
-			if ( !GetAttributeImp( name, &temp ) )
-			{
-				if ( throwIfNotFound )
-				{
-					THROW( "Attribute does not exist" );
-				}
-			}
-
-                        return (temp);
-		}
+		std::string GetAttribute( const std::string& name ) const;
 
 		/**
 		Gets an attribute of @a name from an element.
-		Uses FromString to convert the string to the type of choice.
+		Returns an empty string if the attribute does not exist.
 
-		@param name				The name of the attribute you are querying.
-		@param defaultValue	What to put in @a value if there is no attribute in this element.
-		@throws Exception When the attribute doesn't exist and throwIfNotFound is true
+		@param name	The name of the attribute you are querying.
+		@return The value of the attribute, or an empty string if it does not exist.
+		@param throwIfNotFound	[DEF]	If true, will throw an exception if the attribute doesn't exist
 
+		@see GetAttributeOrDefault
 		*/
-		std::string GetAttributeValueOrDefault( const std::string& name, std::string defaultValue )
-		{
-			// Get the attribute's value as a std::string
-			std::string temp;
-			if ( !GetAttributeImp( name, &temp ) )
-			{
-                                return (defaultValue);
-			}
+		std::string GetAttribute( const std::string& name, bool throwIfNotFound ) const;
 
-                        return (temp);
-		}
 	private:
 
 		/**
 		@internal
-		Implementation of the GetAttribute and GetAttributeOrDefault template methods.
+		Implimentation of the GetAttribute and GetAttributeOrDefault template methods.
 		*/
-		bool GetAttributeImp( const std::string& name, std::string* value );
+		bool GetAttributeImp( const std::string& name, std::string* value ) const;
 
 		/**
 		@internal
-		Implementation of the GetText, GetTextOrDefault, GetTextValue, and GetTextValueOrDefault template methods.
+		Implimentation of the GetText, GetTextOrDefault, GetTextValue, and GetTextValueOrDefault template methods.
 		*/
-		bool GetTextImp( std::string* value );
+		bool GetTextImp( std::string* value ) const;
 	};
 
 	/** Wrapper around TiXmlDeclaration */
@@ -1598,7 +1767,7 @@ namespace ticpp
 		/**
 		Default	Constructor. Construct an empty declaration.
 		*/
-		Declaration( void );
+		Declaration();
 
 		/**
 		Constructor.
@@ -1613,17 +1782,47 @@ namespace ticpp
 		/**
 		Version. Will return an empty string if none was found.
 		*/
-		std::string Version( void );
+		std::string Version() const;
 
 		/**
 		Encoding. Will return an empty string if none was found.
 		*/
-		std::string Encoding( void );
+		std::string Encoding() const;
 
 		/**
 		StandAlone. Is this a standalone document?
 		*/
-		std::string Standalone( void );
+		std::string Standalone() const;
+	};
+
+	/** Wrapper around TiXmlStylesheetReference */
+	class StylesheetReference : public NodeImp< TiXmlStylesheetReference >
+	{
+	public:
+		/**
+		Default	Constructor. Construct an empty declaration.
+		*/
+		StylesheetReference();
+
+		/**
+		Constructor.
+		*/
+		StylesheetReference( TiXmlStylesheetReference* stylesheetReference );
+
+		/**
+		Constructor.
+		*/
+		StylesheetReference( const std::string& type, const std::string& href );
+
+		/**
+		Type. Will return an empty string if none was found.
+		*/
+		std::string Type() const;
+
+		/**
+		Href. Will return an empty string if none was found.
+		*/
+		std::string Href() const;
 	};
 }
 

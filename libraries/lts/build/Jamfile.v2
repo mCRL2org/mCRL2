@@ -3,9 +3,7 @@ project lts
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <include>$(SETUP)
        : usage-requirements
-          <include>$(SETUP)
           <include>../include
        ;
 

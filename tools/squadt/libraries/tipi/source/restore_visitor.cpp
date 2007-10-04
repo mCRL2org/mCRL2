@@ -160,7 +160,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::boolean& e, std::string& s) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
 
-    s = tree->GetAttributeValue("value", false);
+    s = tree->GetAttribute("value", false);
 
     if (s != tipi::datatype::boolean::true_string) {
       s = tipi::datatype::boolean::false_string;
@@ -234,7 +234,7 @@ namespace utility {
 
     for (ticpp::Element* ae = tree->FirstChildElement(false); ae != 0; ae = ae->NextSiblingElement(false)) {
       if (ae->Value() == "element") {
-        e.add_value(ae->GetAttributeValue("value"));
+        e.add_value(ae->GetAttribute("value"));
       }
     }
 
@@ -304,7 +304,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::object& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
-    o.m_mime_type = tipi::mime_type(tree->GetAttributeValue("format"));
+    o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
     
     tree->GetAttribute("location", &o.m_location, false);
   }
@@ -347,7 +347,7 @@ namespace utility {
     tree->GetAttribute("category", &c.m_category);
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      std::string identifier = e->GetAttributeValue("id");
+      std::string identifier = e->GetAttribute("id");
      
       if (e->Value() == "option") {
         boost::shared_ptr < tipi::option > o(new tipi::option);
@@ -361,7 +361,7 @@ namespace utility {
 
         visitor< tipi::restore_visitor_impl >(e).visit(*o);
 
-        if (e->GetAttributeValue("type") == "input") {
+        if (e->GetAttribute("type") == "input") {
           c.add_input(identifier, o);
         }
         else {
@@ -383,19 +383,19 @@ namespace utility {
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
      
         if (e->Value() == "protocol-version") {
-          c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("major")));
-          c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("minor")));
+          c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("major")));
+          c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
         }
         else if (e->Value() == "input-configuration") {
           c.m_input_combinations.insert(
               tipi::tool::capabilities::input_combination(
-                  tipi::tool::category::fit(e->GetAttributeValue("category")),
-                  tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("id")));
+                  tipi::tool::category::fit(e->GetAttribute("category")),
+                  tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id")));
         }
         else if (e->Value() == "output-configuration") {
           c.m_output_combinations.insert(
               tipi::tool::capabilities::output_combination(
-                      tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("id")));
+                      tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id")));
         }
       }
     }
@@ -427,7 +427,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::report& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "report");
 
-    c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttributeValue("type")));
+    c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttribute("type")));
 
     c.description.clear();
 
@@ -634,9 +634,9 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::properties& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
 
-    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeValueOrDefault("alignment-horizontal", "right"));
-    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeValueOrDefault("alignment-vertical", "bottom"));
-    c.m_visible              = text_to_visibility(tree->GetAttributeValueOrDefault("visibility", "visible"));
+    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeOrDefault("alignment-horizontal", "right"));
+    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeOrDefault("alignment-vertical", "bottom"));
+    c.m_visible              = text_to_visibility(tree->GetAttributeOrDefault("visibility", "visible"));
 
     tree->GetAttribute("margin-top", &c.m_margin.top, false);
     tree->GetAttribute("margin-left", &c.m_margin.left, false);
@@ -663,7 +663,7 @@ namespace utility {
     std::string name(tree->Value());
 
     if (name == "box-layout-manager") {
-      if (tree->GetAttributeValue("variant", false) == "vertical") {
+      if (tree->GetAttribute("variant", false) == "vertical") {
         c.reset(new tipi::layout::vertical_box());
 
       }
@@ -835,7 +835,7 @@ namespace utility {
     if (c.m_manager.get() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
-          tipi::layout::element const* t = c.find(boost::lexical_cast < tipi::layout::element_identifier > (e->GetAttributeValue("id")));
+          tipi::layout::element const* t = c.find(boost::lexical_cast < tipi::layout::element_identifier > (e->GetAttribute("id")));
 
           if (t != 0) {
             visitor< tipi::restore_visitor_impl >(e).do_visit(*t);

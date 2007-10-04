@@ -2,7 +2,6 @@ path-constant TOP             : . ;
 path-constant BUILD_TOOLS     : ./build/boost_build.v2 ; # Common build directory
 path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
 path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (packaged sources)
-path-constant SETUP           : ./tools ;                # Header file for run-time configuration
 
 # Activate header cache
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;

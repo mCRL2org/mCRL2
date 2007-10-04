@@ -11,7 +11,7 @@
 #include "aterm2.h"
 #include "libstruct.h"
 #include "mcrl2/lts/liblts.h"
-#include "setup.h"
+#include "mcrl2/setup.h"
 #include "print/messaging.h"
 
 #define NAME "ltscompare"

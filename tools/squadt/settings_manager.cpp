@@ -11,7 +11,7 @@
 #include <exception>
 #include <cstdio>
 
-#include <setup.h>
+#include <mcrl2/setup.h>
 
 #include "settings_manager.hpp"
 

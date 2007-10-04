@@ -96,7 +96,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <print/messaging.h>
 #include <mcrl2/utilities/aterm_ext.h>
 #include <mcrl2/data/data_specification.h>
-#include "setup.h"
+#include "mcrl2/setup.h"
 #include "rewr_jittyc.h"
 
 using namespace ::mcrl2::utilities;

@@ -18,7 +18,6 @@ exe squadt
         <use>/libraries/utilities//headers
         <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
-        <include>$(SETUP)
         <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
       :

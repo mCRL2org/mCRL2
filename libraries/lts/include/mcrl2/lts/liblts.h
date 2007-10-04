@@ -14,7 +14,7 @@
 #include <iostream>
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
-#include "setup.h"
+#include "mcrl2/setup.h"
 
 #ifdef MCRL2_BCG
 #include "bcg_user.h"

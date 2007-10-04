@@ -32,7 +32,6 @@ alias mcrl2_basic.main
          <use>/libraries/utilities//headers
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
-         <include>$(SETUP)
        : <threading>single
        : <os>LINUX:<library>/site-config//m
          <os>LINUX:<library>/site-config//dl

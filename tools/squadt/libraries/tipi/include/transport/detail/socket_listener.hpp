@@ -15,9 +15,10 @@
 #include <transport/detail/listener.tcc>
 
 namespace transport {
-  /// \cond INTERNAL_DOCS
+  /// \internal
   namespace listener {
 
+    /// \internal
     class socket_listener : public basic_listener {
 
       private:
@@ -55,7 +56,6 @@ namespace transport {
       acceptor.close();
     }
   }
-  /// \endcond
 }
 
 #endif

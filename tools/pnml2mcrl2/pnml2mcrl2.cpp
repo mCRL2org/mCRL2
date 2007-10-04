@@ -406,7 +406,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     gsDebugMsg("> Start examining a place...  \n");
     // first, we want to retrieve the id of the place
     ATermAppl Aid;
-    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+    if (char const* id = cur->GetAttribute("id", false).c_str()) {
       // the place has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
@@ -538,7 +538,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     gsDebugMsg("> Start examining a transition...  \n");
     // first, we want to retrieve the id of the transition
     ATermAppl Aid;
-    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+    if (char const* id = cur->GetAttribute("id", false).c_str()) {
       // the transition has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
@@ -626,7 +626,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     gsDebugMsg("> Start examining an arc...  \n");
     // first, we want to retrieve the id of the arc
     ATermAppl Aid;
-    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+    if (char const* id = cur->GetAttribute("id", false).c_str()) {
       // the arc has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
       gsDebugMsg("    id: '%T'\n", Aid); 
@@ -639,7 +639,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     
     // second, we want to retrieve the source and the target of the arc
     ATermAppl Asource;
-    if (char const* source = cur->GetAttributeValue("source", false).c_str()) {
+    if (char const* source = cur->GetAttribute("source", false).c_str()) {
       Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(source))));
       gsDebugMsg("    source: '%T'\n", Asource);
     } else {
@@ -649,7 +649,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     }
     
     ATermAppl Atarget;
-    if (char const* target = cur->GetAttributeValue("target", false).c_str()) {
+    if (char const* target = cur->GetAttribute("target", false).c_str()) {
       Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(target)));
       gsDebugMsg("    target: '%T'\n", Atarget);
     } else {
@@ -776,7 +776,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     //==================================================
     // retrieve the ID of the Petri net
     ATermAppl ANetID;
-    if (char const* id = cur->GetAttributeValue("id", false).c_str()) {
+    if (char const* id = cur->GetAttribute("id", false).c_str()) {
       // the net has an id, put it in ANetID
       ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(id))));
     } else {

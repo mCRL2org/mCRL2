@@ -29,7 +29,7 @@
 #include "processor.hpp"
 #include "executor.hpp"
 
-#include <setup.h>
+#include <mcrl2/setup.h>
 
 namespace squadt {
 

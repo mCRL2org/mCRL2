@@ -85,7 +85,7 @@ namespace transport {
         using namespace boost;
 
         /* Some other error occurred, abort... */
-        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % e.message()));
+        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % "msg"));
       }
 
       /* Make sure the scheduler is running */

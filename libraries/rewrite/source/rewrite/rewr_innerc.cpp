@@ -85,7 +85,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <libstruct.h>
 #include <libprint_c.h>
 #include <mcrl2/data/data_specification.h>
-#include "setup.h"
+#include "mcrl2/setup.h"
 #include "rewr_innerc.h"
 
 using namespace ::mcrl2::utilities;

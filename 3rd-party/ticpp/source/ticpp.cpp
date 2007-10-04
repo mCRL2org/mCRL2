@@ -29,6 +29,55 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using namespace ticpp;
 
+// In the following Visitor functions, casting away const should be safe, as the object can only be referred to by a const &
+bool Visitor::VisitEnter( const TiXmlDocument& doc )
+{
+	return VisitEnter( Document( const_cast< TiXmlDocument* >( &doc ) ) );
+}
+
+bool Visitor::VisitExit( const TiXmlDocument& doc )
+{
+	return VisitEnter( Document( const_cast< TiXmlDocument* >( &doc ) ) );
+}
+
+bool Visitor::VisitEnter( const TiXmlElement& element, const TiXmlAttribute* firstAttribute )
+{
+	if ( 0 != firstAttribute )
+	{
+		Attribute attribute( const_cast< TiXmlAttribute* >( firstAttribute ) );
+		return VisitEnter( Element( const_cast< TiXmlElement* >( &element ) ), &attribute );
+	}
+	else
+	{
+		return VisitEnter( Element( const_cast< TiXmlElement* >( &element ) ), 0 );
+	}
+}
+
+bool Visitor::VisitExit( const TiXmlElement& element )
+{
+	return VisitExit( Element( const_cast< TiXmlElement* >( &element ) ) );
+}
+
+bool Visitor::Visit( const TiXmlDeclaration& declaration )
+{
+	return Visit( Declaration( const_cast< TiXmlDeclaration* >( &declaration ) ) );
+}
+
+bool Visitor::Visit( const TiXmlStylesheetReference& stylesheet )
+{
+	return Visit( StylesheetReference( const_cast< TiXmlStylesheetReference* >( &stylesheet ) ) );
+}
+
+bool Visitor::Visit( const TiXmlText& text )
+{
+	return Visit( Text( const_cast< TiXmlText* >( &text ) ) );
+}
+
+bool Visitor::Visit( const TiXmlComment& comment )
+{
+	return Visit( Comment( const_cast< TiXmlComment* >( &comment ) ) );
+}
+
 Attribute::Attribute()
 {
 	SetTiXmlPointer( new TiXmlAttribute() );
@@ -76,31 +125,31 @@ Attribute::~Attribute()
 	m_impRC->DecRef();
 }
 
-std::string Attribute::Value()
+std::string Attribute::Value() const
 {
 	ValidatePointer();
 	return m_tiXmlPointer->ValueStr();
 }
 
-std::string Attribute::Name()
+std::string Attribute::Name() const
 {
 	ValidatePointer();
 	return m_tiXmlPointer->Name();
 }
 
-Attribute* Attribute::Next( bool throwIfNoAttribute )
+Attribute* Attribute::Next( bool throwIfNoAttribute ) const
 {
 	ValidatePointer();
 	TiXmlAttribute* attribute = m_tiXmlPointer->Next();
-	if ( NULL == attribute )
+	if ( 0 == attribute )
 	{
 		if ( throwIfNoAttribute )
 		{
-			THROW( "No more attributes found" )
+			TICPPTHROW( "No more attributes found" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -110,19 +159,19 @@ Attribute* Attribute::Next( bool throwIfNoAttribute )
 	return temp;
 }
 
-Attribute* Attribute::Previous( bool throwIfNoAttribute )
+Attribute* Attribute::Previous( bool throwIfNoAttribute ) const
 {
 	ValidatePointer();
 	TiXmlAttribute* attribute = m_tiXmlPointer->Previous();
-	if ( NULL == attribute )
+	if ( 0 == attribute )
 	{
 		if ( throwIfNoAttribute )
 		{
-			THROW( "No more attributes found" )
+			TICPPTHROW( "No more attributes found" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -132,17 +181,17 @@ Attribute* Attribute::Previous( bool throwIfNoAttribute )
 	return temp;
 }
 
-void Attribute::IterateNext( const std::string&, Attribute** next )
+void Attribute::IterateNext( const std::string&, Attribute** next ) const
 {
 	*next = Next( false );
 }
 
-void Attribute::IteratePrevious( const std::string&, Attribute** previous )
+void Attribute::IteratePrevious( const std::string&, Attribute** previous ) const
 {
 	*previous = Previous( false );
 }
 
-void Attribute::Print( FILE* file, int depth )
+void Attribute::Print( FILE* file, int depth ) const
 {
 	ValidatePointer();
 	m_tiXmlPointer->Print( file, depth );
@@ -156,17 +205,17 @@ void Attribute::SetTiXmlPointer( TiXmlAttribute* newPointer )
 
 //*****************************************************************************
 
-Node* Node::NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull, bool rememberSpawnedWrapper )
+Node* Node::NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull, bool rememberSpawnedWrapper ) const
 {
-	if ( NULL == tiXmlNode )
+	if ( 0 == tiXmlNode )
 	{
 		if ( throwIfNull )
 		{
-			THROW( "tiXmlNode is NULL" )
+			TICPPTHROW( "tiXmlNode is NULL" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -193,8 +242,12 @@ Node* Node::NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull, bool rememberSp
 			temp = new Declaration( tiXmlNode->ToDeclaration() );
 			break;
 
+		case TiXmlNode::STYLESHEETREFERENCE:
+			temp = new StylesheetReference( tiXmlNode->ToStylesheetReference() );
+			break;
+
 		default:
-			THROW( "Type is unsupported" )
+			TICPPTHROW( "Type is unsupported" )
 	}
 
 	if ( rememberSpawnedWrapper )
@@ -205,7 +258,7 @@ Node* Node::NodeFactory( TiXmlNode* tiXmlNode, bool throwIfNull, bool rememberSp
 }
 
 
-std::string Node::Value()
+std::string Node::Value() const
 {
 	return GetTiXmlPointer()->ValueStr();
 }
@@ -215,28 +268,28 @@ void Node::Clear()
 	GetTiXmlPointer()->Clear();
 }
 
-Node* Node::Parent( bool throwIfNoParent )
+Node* Node::Parent( bool throwIfNoParent ) const
 {
 	TiXmlNode* parent = GetTiXmlPointer()->Parent();
-	if ( ( NULL == parent ) && throwIfNoParent )
+	if ( ( 0 == parent ) && throwIfNoParent )
 	{
-		THROW( "No parent exists" );
+		TICPPTHROW( "No parent exists" );
 	}
 
 	return NodeFactory( parent, false );
 }
 
-Node* Node::FirstChild( bool throwIfNoChildren )
+Node* Node::FirstChild( bool throwIfNoChildren ) const
 {
 	return FirstChild( "", throwIfNoChildren );
 }
 
-Node* Node::FirstChild( const std::string& value, bool throwIfNoChildren )
+Node* Node::FirstChild( const std::string& value, bool throwIfNoChildren ) const
 {
 	return FirstChild( value.c_str(), throwIfNoChildren );
 }
 
-Node* Node::FirstChild( const char* value, bool throwIfNoChildren )
+Node* Node::FirstChild( const char* value, bool throwIfNoChildren ) const
 {
 	TiXmlNode* childNode;
 	if ( 0 == strlen( value ) )
@@ -248,25 +301,25 @@ Node* Node::FirstChild( const char* value, bool throwIfNoChildren )
 		childNode = GetTiXmlPointer()->FirstChild( value );
 	}
 
-	if ( ( NULL == childNode ) && throwIfNoChildren )
+	if ( ( 0 == childNode ) && throwIfNoChildren )
 	{
-		THROW( "Child with the value of \"" << value << "\" not found" );
+		TICPPTHROW( "Child with the value of \"" << value << "\" not found" );
 	}
 
 	return NodeFactory( childNode, false );
 }
 
-Node* Node::LastChild( bool throwIfNoChildren )
+Node* Node::LastChild( bool throwIfNoChildren ) const
 {
 	return LastChild( "", throwIfNoChildren );
 }
 
-Node* Node::LastChild( const std::string& value, bool throwIfNoChildren )
+Node* Node::LastChild( const std::string& value, bool throwIfNoChildren ) const
 {
 	return LastChild( value.c_str(), throwIfNoChildren );
 }
 
-Node* Node::LastChild( const char* value, bool throwIfNoChildren )
+Node* Node::LastChild( const char* value, bool throwIfNoChildren ) const
 {
 	TiXmlNode* childNode;
 	if ( 0 == strlen( value ) )
@@ -278,20 +331,20 @@ Node* Node::LastChild( const char* value, bool throwIfNoChildren )
 		childNode = GetTiXmlPointer()->LastChild( value );
 	}
 
-	if ( ( NULL == childNode ) && throwIfNoChildren )
+	if ( ( 0 == childNode ) && throwIfNoChildren )
 	{
-		THROW( "Child with the value of \"" << value << "\" not found" );
+		TICPPTHROW( "Child with the value of \"" << value << "\" not found" );
 	}
 
 	return NodeFactory( childNode, false );
 }
 
-Node* Node::IterateChildren ( Node* previous )
+Node* Node::IterateChildren ( Node* previous ) const
 {
 	TiXmlNode* pointer;
-	if ( NULL == previous )
+	if ( 0 == previous )
 	{
-		pointer = GetTiXmlPointer()->IterateChildren( NULL );
+		pointer = GetTiXmlPointer()->IterateChildren( 0 );
 	}
 	else
 	{
@@ -301,12 +354,12 @@ Node* Node::IterateChildren ( Node* previous )
 	return NodeFactory( pointer, false );
 }
 
-Node* Node::IterateChildren( const std::string& value, Node* previous )
+Node* Node::IterateChildren( const std::string& value, Node* previous ) const
 {
 	TiXmlNode* pointer;
-	if ( NULL == previous )
+	if ( 0 == previous )
 	{
-		pointer = GetTiXmlPointer()->IterateChildren( value, NULL );
+		pointer = GetTiXmlPointer()->IterateChildren( value, 0 );
 	}
 	else
 	{
@@ -320,16 +373,16 @@ Node* Node::InsertEndChild( Node& addThis )
 {
 	if ( addThis.Type() == TiXmlNode::DOCUMENT )
 	{
-		THROW( "Node is a Document and can't be inserted" );
+		TICPPTHROW( "Node is a Document and can't be inserted" );
 	}
 
 	// Increment reference count when adding to the tree
 	addThis.m_impRC->IncRef();
 
 	TiXmlNode* pointer = GetTiXmlPointer()->InsertEndChild( *addThis.GetTiXmlPointer() );
-	if ( NULL == pointer )
+	if ( 0 == pointer )
 	{
-		THROW( "Node can't be inserted" );
+		TICPPTHROW( "Node can't be inserted" );
 	}
 
 	return NodeFactory( pointer );
@@ -339,15 +392,15 @@ Node* Node::LinkEndChild( Node* childNode )
 {
 	if ( childNode->Type() == TiXmlNode::DOCUMENT )
 	{
-		THROW( "Node is a Document and can't be linked" );
+		TICPPTHROW( "Node is a Document and can't be linked" );
 	}
 
 	// Increment reference count when adding to the tree
 	childNode->m_impRC->IncRef();
 
-	if ( NULL == GetTiXmlPointer()->LinkEndChild( childNode->GetTiXmlPointer() ) )
+	if ( 0 == GetTiXmlPointer()->LinkEndChild( childNode->GetTiXmlPointer() ) )
 	{
-		THROW( "Node can't be linked" );
+		TICPPTHROW( "Node can't be linked" );
 	}
 
 	return childNode;
@@ -357,16 +410,16 @@ Node* Node::InsertBeforeChild( Node* beforeThis, Node& addThis )
 {
 	if ( addThis.Type() == TiXmlNode::DOCUMENT )
 	{
-		THROW( "Node is a Document and can't be inserted" );
+		TICPPTHROW( "Node is a Document and can't be inserted" );
 	}
 
 	// Increment reference count when adding to the tree
 	addThis.m_impRC->IncRef();
 
 	TiXmlNode* pointer = GetTiXmlPointer()->InsertBeforeChild( beforeThis->GetTiXmlPointer(), *addThis.GetTiXmlPointer() );
-	if ( NULL == pointer )
+	if ( 0 == pointer )
 	{
-		THROW( "Node can't be inserted" );
+		TICPPTHROW( "Node can't be inserted" );
 	}
 
 	return NodeFactory( pointer );
@@ -376,16 +429,16 @@ Node* Node::InsertAfterChild( Node* afterThis, Node& addThis )
 {
 	if ( addThis.Type() == TiXmlNode::DOCUMENT )
 	{
-		THROW( "Node is a Document and can't be inserted" );
+		TICPPTHROW( "Node is a Document and can't be inserted" );
 	}
 
 	// Increment reference count when adding to the tree
 	addThis.m_impRC->IncRef();
 
 	TiXmlNode* pointer = GetTiXmlPointer()->InsertAfterChild( afterThis->GetTiXmlPointer(), *addThis.GetTiXmlPointer() );
-	if ( NULL == pointer )
+	if ( 0 == pointer )
 	{
-		THROW( "Node can't be inserted" );
+		TICPPTHROW( "Node can't be inserted" );
 	}
 
 	return NodeFactory( pointer );
@@ -395,16 +448,16 @@ Node* Node::ReplaceChild( Node* replaceThis, Node& withThis )
 {
 	if ( withThis.Type() == TiXmlNode::DOCUMENT )
 	{
-		THROW( "Node is a Document and can't be inserted" );
+		TICPPTHROW( "Node is a Document and can't be inserted" );
 	}
 
 	// Increment reference count when adding to the tree
 	withThis.m_impRC->IncRef();
 
 	TiXmlNode* pointer = GetTiXmlPointer()->ReplaceChild( replaceThis->GetTiXmlPointer(), *withThis.GetTiXmlPointer() );
-	if ( NULL == pointer )
+	if ( 0 == pointer )
 	{
-		THROW( "Node can't be inserted" );
+		TICPPTHROW( "Node can't be inserted" );
 	}
 
 	return NodeFactory( pointer );
@@ -414,21 +467,21 @@ void Node::RemoveChild( Node* removeThis )
 {
 	if  ( !GetTiXmlPointer()->RemoveChild( removeThis->GetTiXmlPointer() ) )
 	{
-		THROW( "Node to remove (" << removeThis->Value() << ") is not a child of this Node (" << Value() << ")" )
+		TICPPTHROW( "Node to remove (" << removeThis->Value() << ") is not a child of this Node (" << Value() << ")" )
 	}
 }
 
-Node* Node::PreviousSibling( bool throwIfNoSiblings )
+Node* Node::PreviousSibling( bool throwIfNoSiblings ) const
 {
 	return PreviousSibling( "", throwIfNoSiblings );
 }
 
-Node* Node::PreviousSibling( const std::string& value, bool throwIfNoSiblings )
+Node* Node::PreviousSibling( const std::string& value, bool throwIfNoSiblings ) const
 {
 	return PreviousSibling( value.c_str(), throwIfNoSiblings );
 }
 
-Node* Node::PreviousSibling( const char* value, bool throwIfNoSiblings )
+Node* Node::PreviousSibling( const char* value, bool throwIfNoSiblings ) const
 {
 	TiXmlNode* sibling;
 	if ( 0 == strlen( value ) )
@@ -440,25 +493,25 @@ Node* Node::PreviousSibling( const char* value, bool throwIfNoSiblings )
 		sibling = GetTiXmlPointer()->PreviousSibling( value );
 	}
 
-	if ( ( NULL == sibling ) && throwIfNoSiblings )
+	if ( ( 0 == sibling ) && throwIfNoSiblings )
 	{
-		THROW( "No Siblings found with value, '" << value << "', Prior to this Node (" << Value() << ")" )
+		TICPPTHROW( "No Siblings found with value, '" << value << "', Prior to this Node (" << Value() << ")" )
 	}
 
 	return NodeFactory( sibling, false );
 }
 
-Node* Node::NextSibling( bool throwIfNoSiblings )
+Node* Node::NextSibling( bool throwIfNoSiblings ) const
 {
 	return NextSibling( "", throwIfNoSiblings );
 }
 
-Node* Node::NextSibling( const std::string& value, bool throwIfNoSiblings )
+Node* Node::NextSibling( const std::string& value, bool throwIfNoSiblings ) const
 {
 	return NextSibling( value.c_str(), throwIfNoSiblings );
 }
 
-Node* Node::NextSibling( const char* value, bool throwIfNoSiblings )
+Node* Node::NextSibling( const char* value, bool throwIfNoSiblings ) const
 {
 	TiXmlNode* sibling;
 	if ( 0 == strlen( value ) )
@@ -470,25 +523,25 @@ Node* Node::NextSibling( const char* value, bool throwIfNoSiblings )
 		sibling = GetTiXmlPointer()->NextSibling( value );
 	}
 
-	if ( ( NULL == sibling ) && throwIfNoSiblings )
+	if ( ( 0 == sibling ) && throwIfNoSiblings )
 	{
-		THROW( "No Siblings found with value, '" << value << "', After this Node (" << Value() << ")" )
+		TICPPTHROW( "No Siblings found with value, '" << value << "', After this Node (" << Value() << ")" )
 	}
 
 	return NodeFactory( sibling, false );
 }
 
-Element* Node::NextSiblingElement( bool throwIfNoSiblings )
+Element* Node::NextSiblingElement( bool throwIfNoSiblings ) const
 {
 	return NextSiblingElement( "", throwIfNoSiblings );
 }
 
-Element* Node::NextSiblingElement( const std::string& value, bool throwIfNoSiblings )
+Element* Node::NextSiblingElement( const std::string& value, bool throwIfNoSiblings ) const
 {
 	return NextSiblingElement( value.c_str(), throwIfNoSiblings );
 }
 
-Element* Node::NextSiblingElement( const char* value, bool throwIfNoSiblings )
+Element* Node::NextSiblingElement( const char* value, bool throwIfNoSiblings ) const
 {
 	TiXmlElement* sibling;
 	if ( 0 == strlen( value ) )
@@ -500,15 +553,15 @@ Element* Node::NextSiblingElement( const char* value, bool throwIfNoSiblings )
 		sibling = GetTiXmlPointer()->NextSiblingElement( value );
 	}
 
-	if ( NULL == sibling )
+	if ( 0 == sibling )
 	{
 		if ( throwIfNoSiblings )
 		{
-			THROW( "No Element Siblings found with value, '" << value << "', After this Node (" << Value() << ")" )
+			TICPPTHROW( "No Element Siblings found with value, '" << value << "', After this Node (" << Value() << ")" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -518,17 +571,17 @@ Element* Node::NextSiblingElement( const char* value, bool throwIfNoSiblings )
 	return temp;
 }
 
-Element* Node::FirstChildElement( bool throwIfNoChildren )
+Element* Node::FirstChildElement( bool throwIfNoChildren ) const
 {
 	return FirstChildElement( "", throwIfNoChildren );
 }
 
-Element* Node::FirstChildElement( const std::string& value, bool throwIfNoChildren )
+Element* Node::FirstChildElement( const std::string& value, bool throwIfNoChildren ) const
 {
 	return FirstChildElement( value.c_str(), throwIfNoChildren );
 }
 
-Element* Node::FirstChildElement( const char* value, bool throwIfNoChildren )
+Element* Node::FirstChildElement( const char* value, bool throwIfNoChildren ) const
 {
 	TiXmlElement* element;
 	if ( 0 == strlen( value ) )
@@ -540,15 +593,15 @@ Element* Node::FirstChildElement( const char* value, bool throwIfNoChildren )
 		element = GetTiXmlPointer()->FirstChildElement( value );
 	}
 
-	if ( NULL == element )
+	if ( 0 == element )
 	{
 		if( throwIfNoChildren )
 		{
-			THROW( "Element (" << Value() << ") does NOT contain a child with the value of '" << value << "'" )
+			TICPPTHROW( "Element (" << Value() << ") does NOT contain a child with the value of '" << value << "'" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -558,23 +611,23 @@ Element* Node::FirstChildElement( const char* value, bool throwIfNoChildren )
 	return temp;
 }
 
-int Node::Type()
+int Node::Type() const
 {
 	return GetTiXmlPointer()->Type();
 }
 
-Document* Node::GetDocument( bool throwIfNoDocument )
+Document* Node::GetDocument( bool throwIfNoDocument ) const
 {
 	TiXmlDocument* doc = GetTiXmlPointer()->GetDocument();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
 		if( throwIfNoDocument )
 		{
-			THROW( "This node (" << Value() << ") is not linked under a document" )
+			TICPPTHROW( "This node (" << Value() << ") is not linked under a document" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 	Document* temp = new Document( doc );
@@ -583,17 +636,17 @@ Document* Node::GetDocument( bool throwIfNoDocument )
 	return temp;
 }
 
-bool Node::NoChildren()
+bool Node::NoChildren() const
 {
 	return GetTiXmlPointer()->NoChildren();
 }
 
-Document* Node::ToDocument()
+Document* Node::ToDocument() const
 {
 	TiXmlDocument* doc = GetTiXmlPointer()->ToDocument();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
-		THROW( "This node (" << Value() << ") is not a Document" )
+		TICPPTHROW( "This node (" << Value() << ") is not a Document" )
 	}
 	Document* temp = new Document( doc );
 	m_spawnedWrappers.push_back( temp );
@@ -601,12 +654,12 @@ Document* Node::ToDocument()
 	return temp;
 }
 
-Element* Node::ToElement()
+Element* Node::ToElement() const
 {
 	TiXmlElement* doc = GetTiXmlPointer()->ToElement();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
-		THROW( "This node (" << Value() << ") is not a Element" )
+		TICPPTHROW( "This node (" << Value() << ") is not a Element" )
 	}
 	Element* temp = new Element( doc );
 	m_spawnedWrappers.push_back( temp );
@@ -614,12 +667,12 @@ Element* Node::ToElement()
 	return temp;
 }
 
-Comment* Node::ToComment()
+Comment* Node::ToComment() const
 {
 	TiXmlComment* doc = GetTiXmlPointer()->ToComment();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
-		THROW( "This node (" << Value() << ") is not a Comment" )
+		TICPPTHROW( "This node (" << Value() << ") is not a Comment" )
 	}
 	Comment* temp = new Comment( doc );
 	m_spawnedWrappers.push_back( temp );
@@ -627,12 +680,12 @@ Comment* Node::ToComment()
 	return temp;
 }
 
-Text* Node::ToText()
+Text* Node::ToText() const
 {
 	TiXmlText* doc = GetTiXmlPointer()->ToText();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
-		THROW( "This node (" << Value() << ") is not a Text" )
+		TICPPTHROW( "This node (" << Value() << ") is not a Text" )
 	}
 	Text* temp = new Text( doc );
 	m_spawnedWrappers.push_back( temp );
@@ -640,12 +693,12 @@ Text* Node::ToText()
 	return temp;
 }
 
-Declaration* Node::ToDeclaration()
+Declaration* Node::ToDeclaration() const
 {
 	TiXmlDeclaration* doc = GetTiXmlPointer()->ToDeclaration();
-	if ( NULL == doc )
+	if ( 0 == doc )
 	{
-		THROW( "This node (" << Value() << ") is not a Declaration" )
+		TICPPTHROW( "This node (" << Value() << ") is not a Declaration" )
 	}
 	Declaration* temp = new Declaration( doc );
 	m_spawnedWrappers.push_back( temp );
@@ -653,12 +706,25 @@ Declaration* Node::ToDeclaration()
 	return temp;
 }
 
-std::auto_ptr< Node > Node::Clone()
+StylesheetReference* Node::ToStylesheetReference() const
+{
+	TiXmlStylesheetReference* doc = GetTiXmlPointer()->ToStylesheetReference();
+	if ( 0 == doc )
+	{
+		TICPPTHROW( "This node (" << Value() << ") is not a StylesheetReference" )
+	}
+	StylesheetReference* temp = new StylesheetReference( doc );
+	m_spawnedWrappers.push_back( temp );
+
+	return temp;
+}
+
+std::auto_ptr< Node > Node::Clone() const
 {
 	TiXmlNode* node = GetTiXmlPointer()->Clone();
-	if ( NULL == node )
+	if ( 0 == node )
 	{
-		THROW( "Node could not be cloned" );
+		TICPPTHROW( "Node could not be cloned" );
 	}
 	std::auto_ptr< Node > temp( NodeFactory( node, false, false ) );
 
@@ -666,6 +732,11 @@ std::auto_ptr< Node > Node::Clone()
 	temp->m_impRC->InitRef();
 
 	return temp;
+}
+
+bool Node::Accept( TiXmlVisitor* visitor ) const
+{
+	return GetTiXmlPointer()->Accept( visitor );
 }
 
 //*****************************************************************************
@@ -734,20 +805,11 @@ Document::Document( const std::string& documentName )
 	m_impRC->InitRef();
 }
 
-void Document::Print(std::ostream& o)
-{
-	TiXmlPrinter printer;
-        printer.SetIndent(" ");
-	GetTiXmlPointer()->Accept( &printer );
-
-        o << printer.Str();
-}
-
 void Document::LoadFile( TiXmlEncoding encoding )
 {
 	if ( !m_tiXmlPointer->LoadFile( encoding ) )
 	{
-		THROW( "Couldn't load " << m_tiXmlPointer->Value() );
+		TICPPTHROW( "Couldn't load " << m_tiXmlPointer->Value() );
 	}
 }
 
@@ -755,7 +817,7 @@ void Document::SaveFile( void ) const
 {
 	if ( !m_tiXmlPointer->SaveFile() )
 	{
-		THROW( "Couldn't save " << m_tiXmlPointer->Value() );
+		TICPPTHROW( "Couldn't save " << m_tiXmlPointer->Value() );
 	}
 }
 
@@ -763,7 +825,15 @@ void Document::LoadFile( const std::string& filename, TiXmlEncoding encoding )
 {
 	if ( !m_tiXmlPointer->LoadFile( filename.c_str(), encoding ) )
 	{
-		THROW( "Couldn't load " << filename );
+		TICPPTHROW( "Couldn't load " << filename );
+	}
+}
+
+void Document::LoadFile( const char* filename, TiXmlEncoding encoding )
+{
+	if ( !m_tiXmlPointer->LoadFile( filename, encoding ) )
+	{
+		TICPPTHROW( "Couldn't load " << filename );
 	}
 }
 
@@ -771,7 +841,16 @@ void Document::SaveFile( const std::string& filename ) const
 {
 	if ( !m_tiXmlPointer->SaveFile( filename.c_str() ) )
 	{
-		THROW( "Couldn't save " << filename );
+		TICPPTHROW( "Couldn't save " << filename );
+	}
+}
+
+void Document::Parse( const std::string& xml, bool throwIfParseError, TiXmlEncoding encoding )
+{
+	m_tiXmlPointer->Parse( xml.c_str(), 0, encoding );
+	if( throwIfParseError && m_tiXmlPointer->Error() )
+	{
+		TICPPTHROW( "Error parsing xml: " << m_tiXmlPointer->ErrorDesc() );
 	}
 }
 
@@ -789,29 +868,35 @@ Element::Element( const std::string& value )
 	m_impRC->InitRef();
 }
 
+Element::Element( const char* value )
+: NodeImp< TiXmlElement >( new TiXmlElement( value ) )
+{
+	m_impRC->InitRef();
+}
+
 Element::Element( TiXmlElement* element )
 : NodeImp< TiXmlElement >( element )
 {
 }
 
-Attribute* Element::FirstAttribute( bool throwIfNoAttributes )
+Attribute* Element::FirstAttribute( bool throwIfNoAttributes ) const
 {
 	ValidatePointer();
 	TiXmlAttribute* attribute = m_tiXmlPointer->FirstAttribute();
-	if ( ( NULL == attribute ) && throwIfNoAttributes )
+	if ( ( 0 == attribute ) && throwIfNoAttributes )
 	{
-		THROW( "This Element (" << Value() << ") has no attributes" )
+		TICPPTHROW( "This Element (" << Value() << ") has no attributes" )
 	}
 
-	if ( NULL == attribute )
+	if ( 0 == attribute )
 	{
 		if( throwIfNoAttributes )
 		{
-			THROW( "Element (" << Value() << ") has no attributes" )
+			TICPPTHROW( "Element (" << Value() << ") has no attributes" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -821,24 +906,24 @@ Attribute* Element::FirstAttribute( bool throwIfNoAttributes )
 	return temp;
 }
 
-Attribute* Element::LastAttribute( bool throwIfNoAttributes )
+Attribute* Element::LastAttribute( bool throwIfNoAttributes ) const
 {
 	ValidatePointer();
 	TiXmlAttribute* attribute = m_tiXmlPointer->LastAttribute();
-	if ( ( NULL == attribute ) && throwIfNoAttributes )
+	if ( ( 0 == attribute ) && throwIfNoAttributes )
 	{
-		THROW( "This Element (" << Value() << ") has no attributes" )
+		TICPPTHROW( "This Element (" << Value() << ") has no attributes" )
 	}
 
-	if ( NULL == attribute )
+	if ( 0 == attribute )
 	{
 		if( throwIfNoAttributes )
 		{
-			THROW( "Element (" << Value() << ") has no attributes" )
+			TICPPTHROW( "Element (" << Value() << ") has no attributes" )
 		}
 		else
 		{
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -848,7 +933,33 @@ Attribute* Element::LastAttribute( bool throwIfNoAttributes )
 	return temp;
 }
 
-bool Element::GetAttributeImp( const std::string& name, std::string* value )
+std::string Element::GetAttributeOrDefault( const std::string& name, const std::string& defaultValue ) const
+{
+	std::string value;
+	if ( !GetAttributeImp( name, &value ) )
+	{
+		return defaultValue;
+	}
+	return value;
+}
+
+std::string Element::GetAttribute( const std::string& name ) const
+{
+	return GetAttributeOrDefault( name, std::string() );
+}
+
+std::string Element::GetAttribute( const std::string& name, bool throwIfNotFound ) const
+{
+	std::string value = GetAttributeOrDefault( name, std::string() );
+
+        if (value.empty()) {
+          TICPPTHROW( "Attribute " << name << " not found!" )
+        }
+
+        return value;
+}
+
+bool Element::GetAttributeImp( const std::string& name, std::string* value ) const
 {
 	ValidatePointer();
 
@@ -856,7 +967,7 @@ bool Element::GetAttributeImp( const std::string& name, std::string* value )
 	const char* retVal = m_tiXmlPointer->Attribute( name.c_str() );
 
 	// TinyXML returns NULL if the attribute doesn't exist
-	if ( NULL == retVal )
+	if ( 0 == retVal )
 	{
 		return false;
 	}
@@ -867,7 +978,7 @@ bool Element::GetAttributeImp( const std::string& name, std::string* value )
 	}
 }
 
-bool Element::GetTextImp( std::string* value )
+bool Element::GetTextImp( std::string* value ) const
 {
 	ValidatePointer();
 
@@ -875,7 +986,7 @@ bool Element::GetTextImp( std::string* value )
 	const char* retVal = m_tiXmlPointer->GetText();
 
 	// TinyXML returns NULL if the attribute doesn't exist
-	if ( NULL == retVal )
+	if ( 0 == retVal )
 	{
 		return false;
 	}
@@ -905,27 +1016,66 @@ Declaration::Declaration( const std::string& version, const std::string& encodin
 	m_impRC->InitRef();
 }
 
-std::string Declaration::Version( void )
+std::string Declaration::Version() const
 {
 	return m_tiXmlPointer->Version();
 }
 
-std::string Declaration::Encoding( void )
+std::string Declaration::Encoding() const
 {
 	return m_tiXmlPointer->Encoding();
 }
 
-std::string Declaration::Standalone( void )
+std::string Declaration::Standalone() const
 {
 	return m_tiXmlPointer->Standalone();
 }
 
 //*****************************************************************************
 
+StylesheetReference::StylesheetReference()
+: NodeImp< TiXmlStylesheetReference >( new TiXmlStylesheetReference() )
+{
+	m_impRC->InitRef();
+}
+
+StylesheetReference::StylesheetReference( TiXmlStylesheetReference* stylesheetReference )
+: NodeImp< TiXmlStylesheetReference >( stylesheetReference )
+{
+}
+
+StylesheetReference::StylesheetReference( const std::string& type, const std::string& href )
+: NodeImp< TiXmlStylesheetReference >( new TiXmlStylesheetReference( type, href ) )
+{
+	m_impRC->InitRef();
+}
+
+std::string StylesheetReference::Type() const
+{
+	return m_tiXmlPointer->Type();
+}
+
+std::string StylesheetReference::Href() const
+{
+	return m_tiXmlPointer->Href();
+}
+
+//*****************************************************************************
+
 Exception::Exception(const std::string &details)
-	: m_details( details )
+:
+m_details( details )
 {
 
+}
+
+Exception::~Exception() throw()
+{
+}
+
+const char* Exception::what() const throw()
+{
+	return m_details.c_str();
 }
 
 //*****************************************************************************
@@ -974,7 +1124,7 @@ void TiCppRCImp::InitRef()
 
 void TiCppRCImp::Nullify()
 {
-	m_tiCppRC = NULL;
+	m_tiCppRC = 0;
 }
 
 TiCppRC* TiCppRCImp::Get()
@@ -984,7 +1134,7 @@ TiCppRC* TiCppRCImp::Get()
 
 bool TiCppRCImp::IsNull()
 {
-	return NULL == m_tiCppRC;
+	return 0 == m_tiCppRC;
 }
 
 #endif // TIXML_USE_TICPP

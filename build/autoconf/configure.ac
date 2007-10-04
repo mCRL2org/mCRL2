@@ -443,21 +443,6 @@ else
 fi
 AC_SUBST([OPENGL_NAME],[])
 
-# Check for xsltproc
-AC_ARG_WITH(
-  [xsltproc],
-  AS_HELP_STRING([--with-xsltproc=prefix],[try this for the xsltproc prefix install directory])
-)
-if test $with_xsltproc; then
-  AC_CHECK_PROG([XSLTPROC],[xsltproc],[$with_xsltproc/xsltproc],[],[$with_xsltproc])
-else 
-  AC_CHECK_PROG([XSLTPROC],[xsltproc],[xsltproc])
-fi
-if test -z $XSLTPROC; then
-  AC_MSG_NOTICE(documentation cannot be built because xsltproc was not found.)
-fi
-AC_SUBST([XSLTPROC],[])
-
 # Check for wxWidgets
 AC_ARG_WITH(
   [wx],
@@ -575,6 +560,6 @@ fi
 
 AC_CONFIG_FILES([build/Makefile:build/autoconf/Makefile.in
                  build/config.jam:build/autoconf/config.jam.in
-                 tools/setup.h:build/autoconf/setup.h.in])
+                 libraries/utilities/include/mcrl2/setup.h:build/autoconf/setup.h.in])
 AC_OUTPUT
 

@@ -107,21 +107,12 @@ linear_process parelm(const linear_process& p)
     }
   }
 
-  // create a map with indices of process parameters
-  std::map<data_variable, int> index_of;
-  int m = 0;
-  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
-  {
-    index_of[*i] = m++;
-  }
-  
   // recursively extend the set of significant variables
   std::set<data_variable> todo = significant_variables;
   while (!todo.empty())
   {
     data_variable x = *todo.begin();
     todo.erase(todo.begin());
-    int index = index_of[x];
 
     for (std::vector<variable_map>::iterator i = next_state_parameters.begin(); i != next_state_parameters.end(); ++i)
     {

@@ -34,7 +34,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 // For PLUGIN_DIRECTORY
-#include <setup.h>
+#include <mcrl2/setup.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)

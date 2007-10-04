@@ -227,7 +227,7 @@ namespace utility {
     if (tree->Value() == "default-actions") {
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
         if (e->Value() == "associate-commands") {
-          mime_type t(e->GetAttributeValue("mime-type"));
+          mime_type t(e->GetAttribute("mime-type"));
 
           ticpp::Element* command_element = e->FirstChildElement(false);
     
@@ -280,10 +280,10 @@ namespace utility {
 
     try {
       p.tool_descriptor            = global_build_system.get_tool_manager()->
-                                       get_tool_by_name(h.tree->GetAttributeValue("tool-name"));
+                                       get_tool_by_name(h.tree->GetAttribute("tool-name"));
       p.selected_input_combination = p.tool_descriptor->find_input_combination(
-                                       tipi::tool::category::fit(h.tree->GetAttributeValue("category")),
-                                       tipi::mime_type(h.tree->GetAttributeValue("format")));
+                                       tipi::tool::category::fit(h.tree->GetAttribute("category")),
+                                       tipi::mime_type(h.tree->GetAttribute("format")));
     }
     catch (...) {
     }
@@ -309,7 +309,7 @@ namespace utility {
 
         assert(h.cmap.find(id) == h.cmap.end());
        
-        h.cmap[id] = processor::object_descriptor::sptr(new processor::object_descriptor(tipi::mime_type(e->GetAttributeValue("format"))));
+        h.cmap[id] = processor::object_descriptor::sptr(new processor::object_descriptor(tipi::mime_type(e->GetAttribute("format"))));
         
         p.outputs.push_back(h.cmap[id]);
        

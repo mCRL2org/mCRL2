@@ -4,11 +4,9 @@ project libraries/rewrite
        : requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
-          <include>$(SETUP)
        : usage-requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
-          <include>$(SETUP)
        ;
 
 alias rewrite.main

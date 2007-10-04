@@ -10,7 +10,7 @@
 #include "transport/detail/socket_transceiver.hpp"
 
 namespace transport {
-  /// \cond INTERNAL_DOCS
+  /// \internal
   namespace transceiver {
 
     unsigned int                   socket_transceiver::input_buffer_size = 8192;
@@ -21,11 +21,11 @@ namespace transport {
 
     short int socket_transceiver::default_port = 10947;
 
-    boost::asio::socket_base::keep_alive  option_keep_alive(true);
-    boost::asio::socket_base::linger      option_linger(false, 0);
-
     /* Start listening */
     void socket_transceiver::activate(boost::weak_ptr < socket_transceiver > w) {
+      boost::asio::socket_base::keep_alive  option_keep_alive(true);
+      boost::asio::socket_base::linger      option_linger(false, 0);
+
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
@@ -287,6 +287,5 @@ namespace transport {
       handle_disconnect();
     }
   }
-  /// \endcond
 }
 

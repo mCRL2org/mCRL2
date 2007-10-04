@@ -71,9 +71,15 @@ namespace tipi {
         virtual ~logger() = 0;
     };
  
+    /**
+     * \param[in] l log level
+     **/
     inline logger::logger(log_level l) : filter_level(l) {
     }
  
+    /**
+     * \param[in] l log level
+     **/
     inline void logger::set_default_filter_level(log_level l) {
       default_filter_level = l;
     }
@@ -82,6 +88,9 @@ namespace tipi {
       return (default_filter_level);
     }
  
+    /**
+     * \param[in] l log level
+     **/
     inline void logger::set_filter_level(log_level l) {
       filter_level = l;
     }
