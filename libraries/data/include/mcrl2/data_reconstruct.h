@@ -17,8 +17,8 @@
 ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
-  assert(gsIsSpecV1(Spec));
-  return reconstruct_exprs(spec, spec);
+  assert(gsIsSpecV1(spec));
+  return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
 
 #endif
