@@ -550,17 +550,33 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 }
 
 static long insertconstructor(
-               ATermAppl constructor, 
+               ATermAppl constructor,
                specificationbasictype *spec)
 { spec->funcs=ATinsertA(spec->funcs,constructor);
-  return insertConstructorOrFunction(constructor,func); 
+  return insertConstructorOrFunction(constructor,func);
 }
+
+static bool hasif(ATermAppl sort,
+               specificationbasictype *spec)
+{
+  /* A system defined sort always has a constructor */
+  if (ATisEqual(sort, gsMakeSortExprBool()) ||
+      ATisEqual(sort, gsMakeSortExprPos())  ||
+      ATisEqual(sort, gsMakeSortExprNat())  ||
+      ATisEqual(sort, gsMakeSortExprInt())  ||
+      ATisEqual(sort, gsMakeSortExprReal()))
+    return true;
+
+  /* sort is not system defined, see if there is an if on sort in spec */
+  return (ATindexOf(spec->maps, (ATerm) gsMakeOpIdIf(sort), 0) != -1);
+}
+
 
 static long insertmapping(
                ATermAppl mapping,
                specificationbasictype *spec)
 { spec->maps=ATinsertA(spec->maps,mapping);
-  return insertConstructorOrFunction(mapping,map); 
+  return insertConstructorOrFunction(mapping,map);
 }
 
 static ATermList getnames(ATermAppl multiAction)
@@ -4977,7 +4993,7 @@ static void create_case_function_on_enumeratedtype(
                    specificationbasictype *spec)
 { ATermList w=NULL;
   int j=0;
-  
+
   /* first find out whether the function exists already, in which
      case nothing needs to be done */
 
@@ -4997,14 +5013,8 @@ static void create_case_function_on_enumeratedtype(
   /* The function does not exist;
      Create a new function of enumeratedtype e, on sort */
 
-  if (((e->sortId==gsMakeSortIdBool()) && (e->size==2)) &&
-      (( sort==gsMakeSortIdBool()) ||
-       ( sort==gsMakeSortIdPos()) ||
-       ( sort==gsMakeSortIdNat()) ||
-       ( sort==gsMakeSortIdInt()) ||
-       ( sort==gsMakeSortIdReal())))
-      
-  { /* take the if function on sort 'sort' */ 
+  if ((e->sortId==gsMakeSortIdBool()) && hasif(sort, spec))
+  { /* take the if function on sort 'sort' */
 
     e->functions=ATinsertA(e->functions,gsMakeOpIdIf(sort));
     return;

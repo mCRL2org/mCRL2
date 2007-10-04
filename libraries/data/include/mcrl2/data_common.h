@@ -15,6 +15,10 @@
 
 using namespace ::mcrl2::utilities;
 
+// --------------------------
+// Auxiliary list operations
+// --------------------------
+
 ATermList merge_list(ATermList l, ATermList m);
 //Pre: l and m are two lists without duplicates
 //Ret: a list with all elements of l and m precisely once
@@ -23,7 +27,10 @@ ATermList subtract_list(ATermList l, ATermList m);
 //Pre: l and m are two lists
 //Ret: a copy of l without elements that occur in m
 
-// Prefixes for system defined sorts
+// ---------------------------------------------
+// Auxiliary functions for system defined sorts
+// ---------------------------------------------
+
 inline const char* struct_prefix() { return "Struct@"; }
 inline const char* list_prefix()   { return "List@";   }
 inline const char* set_prefix()    { return "Set@";    }
@@ -103,16 +110,11 @@ inline bool is_lambda_op_id(ATermAppl data_expr)
 
 bool is_list_enum_impl(ATermAppl data_expr);
 //Ret: data_expr is the implementation of a list enumeration
+// Prefixes for system defined sorts
 
-ATermList get_free_vars(ATermAppl data_expr);
-//Pre: data_expr is a data expression that adheres to the internal syntax after
-//     type checking
-//Ret: The free variables in data_expr
-
-ATermList get_function_sorts(ATerm term);
-//Pre: term adheres to the internal format
-//Ret: a list of all function sorts occurring in term, where each element is
-//     unique
+// ---------------------------------------------------------
+// Definition and auxiliary functions for data declarations
+// ---------------------------------------------------------
 
 typedef struct {
   ATermList sorts;
@@ -136,12 +138,6 @@ void inline initialize_data_decls(t_data_decls *p_data_decls)
 (data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&\
  data_decls.ops   != NULL && data_decls.data_eqns != NULL)
 //Ret: indicates whether the elements of data_decls are initialised
-
-ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
-//Pre: spec is a specification that adheres to the internal syntax of an
-//     arbitary phase
-//Ret: spec in which the data declarations from data_decls are added
-
 
 //Pre: substs is a list of substitutions
 //     recursive denotes wheter to apply substitutions recursively through the terms
@@ -175,6 +171,74 @@ void inline subtract_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_da
   p_data_decls_1->ops       = subtract_list(p_data_decls_1->ops,       p_data_decls_2->ops);
   p_data_decls_1->data_eqns = subtract_list(p_data_decls_1->data_eqns, p_data_decls_2->data_eqns);
 }
+
+//Ret: data_decls1 is equal to data_decls2
+inline bool data_decls_equal(t_data_decls data_decls1,
+  t_data_decls data_decls2)
+{
+  return
+    ATisEqual(data_decls1.sorts, data_decls2.sorts) &&
+    ATisEqual(data_decls1.cons_ops, data_decls2.cons_ops) &&
+    ATisEqual(data_decls1.ops, data_decls2.ops) &&
+    ATisEqual(data_decls1.data_eqns, data_decls2.data_eqns);
+}
+
+//Ret: data declarations of lps_spec
+inline t_data_decls get_data_decls(lps::specification &lps_spec)
+{
+  t_data_decls data_decls;
+  data_decls.sorts     = (ATermList) lps_spec.data().sorts();
+  data_decls.cons_ops  = (ATermList) lps_spec.data().constructors();
+  data_decls.ops       = (ATermList) lps_spec.data().mappings();
+  data_decls.data_eqns = (ATermList) lps_spec.data().equations();
+  return data_decls;
+}
+
+//Ret: lps_spec in which the data declarations are replaced by data_decls
+inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
+{
+  assert(data_decls_is_initialised(data_decls));
+  if (!data_decls_equal(data_decls, get_data_decls(lps_spec))) {
+    lps::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
+    lps_spec = lps::set_data_specification(lps_spec, data);
+  }
+}
+
+ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
+//Pre: spec is a specification that adheres to the internal syntax of an
+//     arbitary phase
+//Ret: spec in which the data declarations from data_decls are added
+
+// --------------------
+// Auxiliary functions
+// --------------------
+
+//pre: BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
+//     Real.
+//ret: if(BoolExpr, 1, 0) of sort SortExpr
+inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
+{
+  // TODO Maybe enforce that SortExpr is a PNIR sort
+  return gsMakeDataExprIf(BoolExpr,
+           gsMakeOpId(gsString2ATermAppl("1"), SortExpr),
+           gsMakeOpId(gsString2ATermAppl("0"), SortExpr));
+}
+
+ATermList get_free_vars(ATermAppl data_expr);
+//Pre: data_expr is a data expression that adheres to the internal syntax after
+//     type checking
+//Ret: The free variables in data_expr
+
+ATermList get_function_sorts(ATerm term);
+//Pre: term adheres to the internal format
+//Ret: a list of all function sorts occurring in term, where each element is
+//     unique
+
+//pre: Term to perform beta reduction on,
+//     this is the top-level function, which should be used when
+//     there is no appropriate context.
+//ret: Term with beta reduction performed on it.
+ATerm beta_reduce_term(ATerm Term);
 
 #endif //MCRL2_DATA_COMMON_H
 

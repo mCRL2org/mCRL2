@@ -14,7 +14,12 @@
 
 #include <aterm2.h>
 
-ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec = NULL);
+ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
+
+inline ATermAppl reconstruct_spec(ATermAppl spec) {
+  assert(gsIsSpecV1(Spec));
+  return reconstruct_exprs(spec, spec);
+}
 
 #endif
 

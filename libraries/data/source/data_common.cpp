@@ -47,8 +47,61 @@ static void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts);
 //Post:*p_funct_sorts is extended with the function sorts in parts that did not
 //     already occur in *p_func_sorts
 
+//pre: DataExpr is a data expression,
+//     Context is the substitution context to use.
+//ret: The beta reduced version of DataExpr, if !recursive, then only
+//     the highest level expression is evaluated, otherwise beta reduction
+//     is performed recursively on sub expressions.
+static ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive);
+
+//pre: Context is the substitution context to use.
+//ret: List with beta reduction performed on the parts for which it is appropriate.
+static ATermList beta_reduce_list(ATermList List, ATermList* Context);
+
+//pre: Context is the substitution context to use.
+//ret: Part with beta reduction performed on the parts for which it is appropriate.
+static ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context);
+//pre: Part is data expression,
+//     OldValue is a data variable,
+//     NewValue is a data expression,
+//     Context is the context used for creating fresh variables
+//ret: if Part is an OpId, Part,
+//     if Part is a DataVarId: if Part == OldValue, then NewValue,
+//                             otherwise, Part
+//     if Part is a DataAppl LHS(RHS):
+//         capture_avoiding_subst(LHS)(capture_avoiding_subst(RHS,...))
+//     if Part is a Binder(BindingOp, Vars, Expr):
+//         if OldValue is a Bound variable: Part,
+//         if !(Vars in free variables of NewValue):
+//             Binder(BindingOp, Vars, capture_avoiding_subst(Expr,...)
+//         else: Fresh variables are introduced for the bound variables occurring in
+//               the free variables of NewValue, and then substitution is performed, i.e.
+//               Binder(BindingOp, NewVars,
+//                      capture_avoiding_subst(
+//                        capture_avoiding_subst(Expr,BoundVar,NewBoundVar,...),...)
+
+static ATermAppl capture_avoiding_subst(ATermAppl Part,
+                                        ATermAppl OldValue,
+                                        ATermAppl NewValue,
+                                        ATermList* Context);
+
+//pre: Part is a data expression,
+//     Substs is a list containing lists of length 2,
+//       for each of these lists in Substs it holds that the first
+//       argument is a data variable, and the second argument is a data expression.
+//     Context is the substitution context to use.
+//ret: Part in which all substitutions in Substs have been performed using
+//     capture avoiding substitution.
+static ATermAppl capture_avoiding_substs(ATermAppl Part,
+                                             ATermList Substs,
+                                             ATermList* Context);
 // implementation
 // -------------------------------------------------------------
+
+// --------------------------
+// Auxiliary list operations
+// --------------------------
+
 ATermList merge_list(ATermList l, ATermList m)
 {
   for (; !ATisEmpty(m); m=ATgetNext(m))
@@ -72,6 +125,10 @@ ATermList subtract_list(ATermList l, ATermList m)
   return l;
 }
 
+// ---------------------------------------------
+// Auxiliary functions for system defined sorts
+// ---------------------------------------------
+
 bool is_list_enum_impl(ATermAppl data_expr)
 {
   if (!gsIsDataAppl(data_expr) && !gsIsOpId(data_expr)) return false;
@@ -87,6 +144,48 @@ bool is_list_enum_impl(ATermAppl data_expr)
     return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
   }
 }
+
+// ------------------------------------------
+// Auxiliary functions for data declarations
+// ------------------------------------------
+
+ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
+{
+  assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
+  assert(data_decls_is_initialised(data_decls));
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  //add sort declarations
+  ATermAppl sort_spec  = ATAgetArgument(data_spec, 0);
+  ATermList sort_decls = ATLgetArgument(sort_spec, 0);
+  sort_decls = ATconcat(data_decls.sorts, sort_decls);
+  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_decls, 0);  
+  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
+  //add constructor operation declarations
+  ATermAppl cons_spec  = ATAgetArgument(data_spec, 1);
+  ATermList cons_decls = ATLgetArgument(cons_spec, 0);
+  cons_decls = ATconcat(data_decls.cons_ops, cons_decls);
+  cons_spec = ATsetArgument(cons_spec, (ATerm) cons_decls, 0);  
+  data_spec = ATsetArgument(data_spec, (ATerm) cons_spec, 1);
+  //add operation declarations
+  ATermAppl map_spec  = ATAgetArgument(data_spec, 2);
+  ATermList map_decls = ATLgetArgument(map_spec, 0);
+  map_decls = ATconcat(data_decls.ops, map_decls);
+  map_spec = ATsetArgument(map_spec, (ATerm) map_decls, 0);  
+  data_spec = ATsetArgument(data_spec, (ATerm) map_spec, 2);
+  //add data equation declarations
+  ATermAppl data_eqn_spec  = ATAgetArgument(data_spec, 3);
+  ATermList data_eqn_decls = ATLgetArgument(data_eqn_spec, 0);
+  data_eqn_decls = ATconcat(data_decls.data_eqns, data_eqn_decls);
+  data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);  
+  data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
+  //return the new specification
+  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  return spec;
+}
+
+// --------------------
+// Auxiliary functions
+// --------------------
 
 ATermList get_free_vars(ATermAppl data_expr)
 {
@@ -192,9 +291,9 @@ void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
   if (gsIsSortArrow(part)) {
     if (ATindexOf(*p_func_sorts, (ATerm) part, 0) == -1) {
       *p_func_sorts = ATinsert(*p_func_sorts, (ATerm) part);
-    }    
+    }
   }
-  int nr_args = ATgetArity(ATgetAFun(part));      
+  int nr_args = ATgetArity(ATgetAFun(part));
   for (int i = 0; i < nr_args; i++) {
     ATerm arg = ATgetArgument(part, i);
     if (ATgetType(arg) == AT_APPL)
@@ -203,7 +302,7 @@ void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
       get_function_sorts_list((ATermList) arg, p_func_sorts);
   }
 }
- 
+
 void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts)
 {
   while (!ATisEmpty(parts))
@@ -213,37 +312,211 @@ void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts)
   }
 }
 
-ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
+ATerm beta_reduce_term(ATerm Term)
 {
-  assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
-  assert(data_decls_is_initialised(data_decls));
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
-  //add sort declarations
-  ATermAppl sort_spec  = ATAgetArgument(data_spec, 0);
-  ATermList sort_decls = ATLgetArgument(sort_spec, 0);
-  sort_decls = ATconcat(data_decls.sorts, sort_decls);
-  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_decls, 0);  
-  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
-  //add constructor operation declarations
-  ATermAppl cons_spec  = ATAgetArgument(data_spec, 1);
-  ATermList cons_decls = ATLgetArgument(cons_spec, 0);
-  cons_decls = ATconcat(data_decls.cons_ops, cons_decls);
-  cons_spec = ATsetArgument(cons_spec, (ATerm) cons_decls, 0);  
-  data_spec = ATsetArgument(data_spec, (ATerm) cons_spec, 1);
-  //add operation declarations
-  ATermAppl map_spec  = ATAgetArgument(data_spec, 2);
-  ATermList map_decls = ATLgetArgument(map_spec, 0);
-  map_decls = ATconcat(data_decls.ops, map_decls);
-  map_spec = ATsetArgument(map_spec, (ATerm) map_decls, 0);  
-  data_spec = ATsetArgument(data_spec, (ATerm) map_spec, 2);
-  //add data equation declarations
-  ATermAppl data_eqn_spec  = ATAgetArgument(data_spec, 3);
-  ATermList data_eqn_decls = ATLgetArgument(data_eqn_spec, 0);
-  data_eqn_decls = ATconcat(data_decls.data_eqns, data_eqn_decls);
-  data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);  
-  data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
-  //return the new specification
-  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
-  return spec;
+  if (ATgetType(Term) == AT_APPL) {
+    ATermList Context = ATmakeList1(Term);
+    return (ATerm) beta_reduce_part((ATermAppl) Term, &Context);
+  } else {
+    // ATgetType(Term) == AT_LIST
+    ATermList Context = (ATermList) Term;
+    return (ATerm) beta_reduce_list((ATermList) Term, &Context);
+  }
+}
+
+ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive)
+{
+  assert(gsIsDataExpr(DataExpr));
+  if (gsIsDataAppl(DataExpr)) {
+    ATermAppl LHS = ATAgetArgument(DataExpr, 0);
+    if (gsIsBinder(LHS)) {
+      ATermAppl BindingOp = ATAgetArgument(LHS, 0);
+      if (gsIsLambda(BindingOp)) {
+        ATermList Vars = ATLgetArgument(LHS, 1);
+        ATermAppl Expr = ATAgetArgument(LHS, 2);
+        ATermList RHS = ATLgetArgument(DataExpr, 1);
+        // Note that first the right hand side needs to be done because of the
+        // substitution order!
+        if (recursive) {
+          RHS = beta_reduce_list(RHS, Context);
+        }
+        assert(ATgetLength(RHS) == ATgetLength(Vars));
+        ATermList Substs = ATmakeList0();
+        while(!ATisEmpty(RHS)) {
+          Substs = ATinsert(Substs, (ATerm) ATmakeList2(ATgetFirst(Vars),
+                                                        ATgetFirst(RHS)));
+          Vars = ATgetNext(Vars);
+          RHS = ATgetNext(RHS);
+        }
+        Substs = ATreverse(Substs);
+        DataExpr = capture_avoiding_substs(Expr, Substs, Context);
+      }
+    }
+  }
+
+  if (recursive) {
+    // Recursively handle all parts of the expression.
+    AFun head = ATgetAFun(DataExpr);
+    int nr_args = ATgetArity(head);
+    if (nr_args > 0) {
+      DECL_A(args,ATerm,nr_args);
+      for (int i = 0; i < nr_args; i++) {
+        ATerm arg = ATgetArgument(DataExpr, i);
+        if (ATgetType(arg) == AT_APPL)
+          args[i] = (ATerm) beta_reduce_part((ATermAppl) arg, Context);
+        else //ATgetType(arg) == AT_LIST
+          args[i] = (ATerm) beta_reduce_list((ATermList) arg, Context);
+      }
+      DataExpr = ATmakeApplArray(head, args);
+      FREE_A(args);
+    }
+  }
+
+  return DataExpr;
+}
+
+ATermList beta_reduce_list(ATermList List, ATermList* Context)
+{
+  ATermList result = ATmakeList0();
+  while(!ATisEmpty(List)) {
+    result = ATinsert(result, (ATerm) beta_reduce_part(ATAgetFirst(List), Context));
+    List = ATgetNext(List);
+  }
+  result = ATreverse(result);
+  return result;
+}
+
+ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context)
+{
+  if (gsIsDataExpr(Part)) {
+    Part = beta_reduce(Part, Context, true);
+  }
+
+  //reconstruct expressions in the arguments of part
+  AFun head = ATgetAFun(Part);
+  int nr_args = ATgetArity(head);
+  if (nr_args > 0) {
+    DECL_A(args,ATerm,nr_args);
+    for (int i = 0; i < nr_args; i++) {
+      ATerm arg = ATgetArgument(Part, i);
+      if (ATgetType(arg) == AT_APPL)
+        args[i] = (ATerm) beta_reduce_part((ATermAppl) arg, Context);
+      else //ATgetType(arg) == AT_LIST
+        args[i] = (ATerm) beta_reduce_list((ATermList) arg, Context);
+    }
+    Part = ATmakeApplArray(head, args);
+    FREE_A(args);
+  }
+
+  return Part;
+}
+
+ATermAppl capture_avoiding_subst(ATermAppl Part, ATermAppl OldValue,
+                                 ATermAppl NewValue, ATermList* Context)
+{
+  gsDebugMsg("Performing capture avoiding substitution on %T with OldValue %T and NewValue %T\n",
+             Part, OldValue, NewValue);
+
+  // Slight performance enhancement
+  if (ATisEqual(OldValue, NewValue)) {
+    return Part;
+  }
+
+  // Substitute NewValue for OldValue (return Part[NewValue / OldValue])
+  if(gsIsOpId(Part)) {
+    return Part;
+  } else if (gsIsDataVarId(Part)) {
+    if (ATisEqual(Part, OldValue)) {
+      return NewValue;
+    } else {
+      return Part;
+    }
+  } else if (gsIsDataAppl(Part)) {
+    // Part is a data application, distribute substitution over LHS and RHS.
+    // Recurse on left hand side of the expression.
+    ATermAppl LHS = ATAgetArgument(Part, 0);
+    LHS = capture_avoiding_subst(LHS, OldValue, NewValue, Context);
+
+    // Recurse on all parts in right hand side of the expression.
+    ATermList RHS = ATLgetArgument(Part, 1);
+    ATermList NewRHS = ATmakeList0();
+    while (!ATisEmpty(RHS)) {
+      ATermAppl First = ATAgetFirst(RHS);
+      First = capture_avoiding_subst(First, OldValue, NewValue, Context);
+      NewRHS = ATinsert(NewRHS, (ATerm) First);
+      RHS = ATgetNext(RHS);
+    }
+    NewRHS = ATreverse(NewRHS);
+    // Construct new application.
+    Part = gsMakeDataAppl(LHS, NewRHS);
+
+    if (gsIsBinder(LHS)) {
+      Part = beta_reduce(Part, Context, false);
+    }
+
+    return Part;
+    //return gsMakeDataAppl(LHS, NewRHS);
+  } else if (gsIsBinder(Part)) {
+    if (ATindexOf(ATLgetArgument(Part, 1), (ATerm) OldValue, 0) != -1) {
+      // OldValue occurs as a bound variable
+      return Part;
+    } else {
+      ATermAppl BindingOp = ATAgetArgument(Part, 0);
+      ATermList BoundVars = ATLgetArgument(Part, 1);
+      ATermAppl Expr = ATAgetArgument(Part, 2);
+      ATermList FreeVars = get_free_vars(Expr);
+      ATermList NewVars = BoundVars; // List to contain the new bound variables
+
+      // Resolve name conflicts by substituting bound variables for fresh ones
+      while(!ATisEmpty(BoundVars)) {
+        ATermAppl Var = ATAgetFirst(BoundVars);
+        if (ATindexOf(FreeVars, (ATerm) Var, 0) != -1) {
+          // Bound variable also occurs as free variable in Expr,
+          // resolve the conflict by renaming the bound variable.
+          // Introduce fresh variable
+          ATermAppl Name = ATAgetArgument(Var, 0);
+          ATermAppl Sort = ATAgetArgument(Var, 1);
+          Name = gsFreshString2ATermAppl(gsATermAppl2String(Name),
+                                         (ATerm) *Context, true);
+          ATermAppl NewVar = gsMakeDataVarId(Name, Sort);
+          *Context = ATinsert(*Context, (ATerm) NewVar);
+          // Substitute: Vars[NewVar/Var]
+          ATermList Vars = NewVars; // Temp list for traversal
+          NewVars = ATmakeList0();
+          while(!ATisEmpty(Vars)) {
+            ATermAppl FirstVar = ATAgetFirst(Vars);
+            FirstVar = capture_avoiding_subst(FirstVar, Var, NewVar, Context);
+            NewVars = ATinsert(NewVars, (ATerm) FirstVar);
+            Vars = ATgetNext(Vars);
+          }
+          // Expr[NewVar/Var]
+          Expr = capture_avoiding_subst(Expr, Var, NewVar, Context);
+        }
+        BoundVars = ATgetNext(BoundVars);
+      }
+      Expr = capture_avoiding_subst(Expr, OldValue, NewValue, Context);
+      return gsMakeBinder(BindingOp, NewVars, Expr);
+    }
+  } else if (gsIsWhr(Part)) {
+    // After data implementation Whr does not occur,
+    // therefore we do not handle this case.
+    gsWarningMsg("Currently not substituting Whr expression\n");
+    return Part;
+  } else {
+    gsWarningMsg("Unknown part %T\n");
+    return Part;
+  }
+}
+
+ATermAppl capture_avoiding_substs(ATermAppl Part, ATermList Substs,
+                                  ATermList* Context)
+{
+  while(!ATisEmpty(Substs)) {
+    ATermList Subst = ATLgetFirst(Substs);
+    Part = capture_avoiding_subst(Part, ATAelementAt(Subst, 0),
+                                  ATAelementAt(Subst, 1), Context);
+    Substs = ATgetNext(Substs);
+  }
+  return Part;
 }
 
