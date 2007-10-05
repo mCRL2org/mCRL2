@@ -65,8 +65,8 @@ pbes_solver::pbes_solver(pbes<> p_pbes_spec,
   
   lps::data_specification ds = pbes_spec.data();
   SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: 
-    ((solver=="fast")?solver_type_cvc_lite_fast:
-     solver_type_cvc_lite);
+    ((solver=="fast")?solver_type_cvc_fast:
+     solver_type_cvc);
   RewriteStrategy rew = (rew_strategy == "inner") ? GS_REWR_INNER:
     ((rew_strategy == "innerc") ? GS_REWR_INNERC : 
      ((rew_strategy == "jitty") ? GS_REWR_JITTY : 

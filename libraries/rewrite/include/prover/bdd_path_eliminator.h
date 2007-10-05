@@ -7,16 +7,16 @@
 #include "aterm2.h"
 #include "prover/bdd_simplifier.h"
 #include "prover/smt_solver_ario.h"
-#include "prover/smt_solver_cvc_lite.h"
-#include "prover/smt_solver_cvc_lite_fast.h"
+#include "prover/smt_solver_cvc.h"
+#include "prover/smt_solver_cvc_fast.h"
 #include "mcrl2/utilities/bdd_manipulator.h"
 #include "mcrl2/utilities/bdd_info.h"
 
   /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers. 
 enum SMT_Solver_Type {
   solver_type_ario,
-  solver_type_cvc_lite,
-  solver_type_cvc_lite_fast
+  solver_type_cvc,
+  solver_type_cvc_fast
 };
 
   /// \brief The class BDD_Path_Eliminator is a base class for classes that eliminate inconsistent paths from BDDs.

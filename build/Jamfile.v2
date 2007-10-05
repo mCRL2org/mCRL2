@@ -104,3 +104,25 @@ if $(CADP_HEADERS) {
 else {
   alias BCG : : : : ;
 }
+
+if $(USE_CVC) {
+  lib gmp
+      :
+      : <name>gmp
+      ;
+
+  lib cvc
+      :
+      : <name>cvc3
+        <search>$(USE_CVC)/lib
+      :
+      : <define>HAVE_CVC
+#        <define>HAVE___GNU_CXX__EXT_HASH_MAP
+#        <define>HAVE___GNU_CXX__EXT_HASH_SET
+        <library>gmp
+        <include>$(USE_CVC)/include/cvc3
+      ;
+}
+else {
+  alias cvc ;
+}

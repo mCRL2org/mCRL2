@@ -952,7 +952,7 @@ std::string Element::GetAttribute( const std::string& name, bool throwIfNotFound
 {
 	std::string value = GetAttributeOrDefault( name, std::string() );
 
-        if (value.empty()) {
+        if (value.empty() && throwIfNotFound) {
           TICPPTHROW( "Attribute " << name << " not found!" )
         }
 

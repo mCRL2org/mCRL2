@@ -184,7 +184,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   desc.add_options() 
     ("interactive,i","turn on the manual guidance of the approximation process") 
     ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n")
-    ("solver,s",po::value<string>(&opt_solver)->default_value("lite"), "specify the solver to be used by the prover\nOptions are: ario, lite, fast")
+    ("solver,s",po::value<string>(&opt_solver)->default_value("cvc"), "specify the solver to be used by the prover\nOptions are: ario, cvc, fast")
     ("rewriter,r",po::value<string>(&opt_rewriter)->default_value("inner"), "specify the rewriting strategy to be used by the prover\nOptions are: inner, innerc, jitty, jittyc")
     ("verbose,v",	"turn on the display of short intermediate messages") 
     ("debug,d",		"turn on the display of detailed intermediate messages") 
@@ -285,7 +285,7 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
     e->formula().substitute(make_list_substitution(dvl,del));
 
 
-  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_lite_fast:solver_type_cvc_lite);
+  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_fast:solver_type_cvc);
   RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
     ((rewriter == "innerc") ? GS_REWR_INNERC : 
      ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));

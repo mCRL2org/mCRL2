@@ -358,6 +358,51 @@ if test ${with_cadp}; then
   AC_MSG_RESULT($USE_BCG)
 fi
 
+AC_ARG_WITH(
+  [cvc],
+  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])  
+)
+USE_CVC3=no
+if test ${with_cvc}; then
+  AC_MSG_CHECKING([for CVC3 (with GMP) in $with_cvc])
+  CPPFLAGS="-I${with_cvc}/include/cvc3"
+  AC_LANG_PUSH(C++)
+  AC_COMPILE_IFELSE(
+     [
+      #include <$with_cvc/include/cvc3/vc.h>
+     ],
+     [
+       LIBS="-L${with_cvc}/lib -lcvc3"
+       AC_LINK_IFELSE(
+       [
+        #include <$with_cvc/include/cvc3/vc.h>
+     
+        int main() {
+          return (0);
+        }
+       ],
+       [],
+       [
+         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
+         AC_LINK_IFELSE(
+         [
+          #include <$with_cvc/include/cvc3/vc.h>
+      
+          int main() {
+            return (0);
+          }
+         ],
+         [
+           USE_CVC="$with_cvc"
+           USE_CVC3=yes
+         ])
+       ])
+     ])
+  AC_LANG_POP()
+  AC_MSG_RESULT($USE_CVC3)
+fi
+AC_SUBST([USE_CVC],[])
+
 # Check for Boost C++ library
 AC_ARG_WITH(
   [boost],
@@ -546,6 +591,7 @@ AC_MSG_RESULT([
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
+     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
      

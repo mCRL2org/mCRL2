@@ -198,10 +198,10 @@ using namespace ::mcrl2::utilities;
         "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
         "                                  inconsistent paths from BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
-        "                                  - 'cvc-lite' for the SMT solver CVC Lite.\n"
-#ifdef CVC_LITE_LIB
-        "                                  - 'cvc-lite-fast' for the fast implementation\n"
-        "                                    of the SMT solver CVC Lite.\n"
+        "                                  - 'cvc' for the SMT solver CVC.\n"
+#ifdef HAVE_CVC
+        "                                  - 'cvc-fast' for the fast implementation\n"
+        "                                    of the SMT solver CVC.\n"
 #endif
         "                                  By default, no path elimination is applied.\n"
         " -o, --induction                  Apply induction on lists.\n",
@@ -360,13 +360,13 @@ using namespace ::mcrl2::utilities;
             if (strcmp(optarg, "ario") == 0) {
               f_path_eliminator = true;
               f_solver_type = solver_type_ario;
-            } else if (strcmp(optarg, "cvc-lite") == 0) {
+            } else if (strcmp(optarg, "cvc") == 0) {
               f_path_eliminator = true;
-              f_solver_type = solver_type_cvc_lite;
+              f_solver_type = solver_type_cvc;
 #ifdef CVC_LITE_LIB
-            } else if (strcmp(optarg, "cvc-lite-fast") == 0) {
+            } else if (strcmp(optarg, "cvc-fast") == 0) {
               f_path_eliminator = true;
-              f_solver_type = solver_type_cvc_lite_fast;
+              f_solver_type = solver_type_cvc_fast;
 #endif
             } else {
               gsErrorMsg("option -z has illegal argument '%s'\n", optarg);

@@ -15,12 +15,9 @@ alias prover.main
          formula_checker.cpp
        : <use>headers
          <use>/libraries/utilities//headers
-#         <use>/libraries//cvclite
-#         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_MAP
-#         <toolset>gcc:<define>HAVE___GNU_CXX__EXT_HASH_SET
-#         <toolset>gcc:<define>CVC_LITE_LIB
-#       :
-#       :  <library>/libraries//cvc
+         <use>/site-config//cvc
+       :
+       :  <library>/site-config//cvc
        ;
 
 lib prover

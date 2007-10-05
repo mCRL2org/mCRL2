@@ -686,6 +686,7 @@ ATERM_LDFLAGS
 ATERM_NAME
 CADP_HEADERS
 CADP_LIBRARIES
+USE_CVC
 BOOST_INCLUDE_PATH
 BOOST_LIBRARY_PATH
 OPENGL_IPATH
@@ -1328,6 +1329,8 @@ Optional Packages:
                           ATerm library from dir/lib[/suf]
 
   --with-cadp=prefix      try this for the CADP prefix directory
+
+  --with-cvc=prefix       try this for the CVC3 prefix directory
 
   --with-boost=prefix     try this for the boost prefix install directory
 
@@ -4849,6 +4852,146 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$USE_BCG" >&6; }
 fi
 
+
+# Check whether --with-cvc was given.
+if test "${with_cvc+set}" = set; then
+  withval=$with_cvc;
+fi
+
+USE_CVC3=no
+if test ${with_cvc}; then
+  { echo "$as_me:$LINENO: checking for CVC3 (with GMP) in $with_cvc" >&5
+echo $ECHO_N "checking for CVC3 (with GMP) in $with_cvc... $ECHO_C" >&6; }
+  CPPFLAGS="-I${with_cvc}/include/cvc3"
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  cat >conftest.$ac_ext <<_ACEOF
+
+      #include <$with_cvc/include/cvc3/vc.h>
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+       LIBS="-L${with_cvc}/lib -lcvc3"
+       cat >conftest.$ac_ext <<_ACEOF
+
+        #include <$with_cvc/include/cvc3/vc.h>
+
+        int main() {
+          return (0);
+        }
+
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  :
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
+         cat >conftest.$ac_ext <<_ACEOF
+
+          #include <$with_cvc/include/cvc3/vc.h>
+
+          int main() {
+            return (0);
+          }
+
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+
+           USE_CVC="$with_cvc"
+           USE_CVC3=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  { echo "$as_me:$LINENO: result: $USE_CVC3" >&5
+echo "${ECHO_T}$USE_CVC3" >&6; }
+fi
+
+
 # Check for Boost C++ library
 
 # Check whether --with-boost was given.
@@ -6330,6 +6473,7 @@ R_SLDFLAGS="$R_SLDFLAGS"
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
+     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
@@ -6341,6 +6485,7 @@ echo "${ECHO_T}
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
+     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
@@ -7057,6 +7202,7 @@ ATERM_LDFLAGS!$ATERM_LDFLAGS$ac_delim
 ATERM_NAME!$ATERM_NAME$ac_delim
 CADP_HEADERS!$CADP_HEADERS$ac_delim
 CADP_LIBRARIES!$CADP_LIBRARIES$ac_delim
+USE_CVC!$USE_CVC$ac_delim
 BOOST_INCLUDE_PATH!$BOOST_INCLUDE_PATH$ac_delim
 BOOST_LIBRARY_PATH!$BOOST_LIBRARY_PATH$ac_delim
 OPENGL_IPATH!$OPENGL_IPATH$ac_delim
@@ -7083,7 +7229,6 @@ R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
-R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7125,13 +7270,14 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+R_CPPFLAGS!$R_CPPFLAGS$ac_delim
 R_LDFLAGS!$R_LDFLAGS$ac_delim
 R_SLDFLAGS!$R_SLDFLAGS$ac_delim
 USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 4; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 5; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -132,11 +132,11 @@ using namespace ::mcrl2::utilities;
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
       if (a_solver_type == solver_type_ario) {
         f_smt_solver = new SMT_Solver_Ario();
-      } else if (a_solver_type == solver_type_cvc_lite) {
-        f_smt_solver = new SMT_Solver_CVC_Lite();
-      } else if (a_solver_type == solver_type_cvc_lite_fast) {
-#ifdef CVC_LITE_LIB
-        f_smt_solver = new SMT_Solver_CVC_Lite_Fast();
+      } else if (a_solver_type == solver_type_cvc) {
+        f_smt_solver = new SMT_Solver_CVC();
+      } else if (a_solver_type == solver_type_cvc_fast) {
+#ifdef HAVE_CVC
+        f_smt_solver = new SMT_Solver_CVC_Fast();
 #else
         gsErrorMsg("The fast implementation of CVC Lite is not available.\n");
         exit(1);

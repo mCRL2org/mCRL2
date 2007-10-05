@@ -1,12 +1,16 @@
-// Implementation of class SMT_Solver_CVC_Lite_Fast
+// Implementation of class SMT_Solver_CVC_Fast
 // file: smt_solver_cvc_lite_fast.cpp
 
-#ifdef CVC_LITE_LIB
+#ifdef HAVE_CVC
 
-#include "smt_solver_cvc_lite_fast.h"
+#include "prover/smt_solver_cvc_fast.h"
+#include "print/messaging.h"
 #include "libprint_c.h"
 #include "libstruct.h"
-#include "utilities.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/utilities/utilities.h"
+
+using namespace ::mcrl2::utilities;
 
 // Class Sort_And_Type ----------------------------------------------------------------------------
   // Class Sort_And_Type - Functions declared public ----------------------------------------------
@@ -66,23 +70,23 @@
       return v_dummy;
     }
 
-// Class SMT_Solver_CVC_Lite_Fast -----------------------------------------------------------------
-  // Class SMT_Solver_CVC_Lite_Fast - Functions declared private ----------------------------------
+// Class SMT_Solver_CVC_Fast -----------------------------------------------------------------
+  // Class SMT_Solver_CVC_Fast - Functions declared private ----------------------------------
 
-    CVCL::Type SMT_Solver_CVC_Lite_Fast::translate_sort(ATermAppl a_sort_expression) {
+    CVC3::Type SMT_Solver_CVC_Fast::translate_sort(ATermAppl a_sort_expression) {
       ATermAppl v_type;
       ATermAppl v_result_type;
-      CVCL::Type v_translated_type;
-      CVCL::Type v_translated_result_type;
+      CVC3::Type v_translated_type;
+      CVC3::Type v_translated_result_type;
       std::string v_sort_id;
-      std::vector<CVCL::Type> v_translated_domain;
+      std::vector<CVC3::Type> v_translated_domain;
       int v_number_of_arguments;
 
       if (f_list_of_types.element_in_list(a_sort_expression)) {
         v_translated_type = f_list_of_types.get_element(a_sort_expression);
         return v_translated_type;
       } else {
-        if (f_sort_info.is_sort_arrow(a_sort_expression)) {
+        if (f_sort_info.is_sort_arrow_prod(a_sort_expression)) {
           v_number_of_arguments = f_sort_info.get_number_of_arguments(a_sort_expression);
           for (int i = 0; i < v_number_of_arguments; ++i) {
             v_type = f_sort_info.get_type_of_argument(a_sort_expression, i);
@@ -126,58 +130,60 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_clause(ATermAppl a_clause) {
-      if (f_expression_info.is_not(a_clause)) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_clause(ATermAppl a_clause) {
+      using namespace lps::data_expr;
+
+      if (is_not(a_clause)) {
         return translate_not(a_clause);
-      } else if (f_expression_info.is_equality(a_clause)) {
+      } else if (is_equality(a_clause)) {
         return translate_equality(a_clause);
-      } else if (f_expression_info.is_inequality(a_clause)) {
+      } else if (is_inequality(a_clause)) {
         return translate_inequality(a_clause);
-      } else if (f_expression_info.is_greater_than(a_clause)) {
+      } else if (is_greater_than(a_clause)) {
         return translate_greater_than(a_clause);
-      } else if (f_expression_info.is_greater_than_or_equal(a_clause)) {
+      } else if (is_greater_than_or_equal(a_clause)) {
         return translate_greater_than_or_equal(a_clause);
-      } else if (f_expression_info.is_less_than(a_clause)) {
+      } else if (is_less_than(a_clause)) {
         return translate_less_than(a_clause);
-      } else if (f_expression_info.is_less_than_or_equal(a_clause)) {
+      } else if (is_less_than_or_equal(a_clause)) {
         return translate_less_than_or_equal(a_clause);
-      } else if (f_expression_info.is_plus(a_clause)) {
+      } else if (is_plus(a_clause)) {
         return translate_plus(a_clause);
-      } else if (f_expression_info.is_unary_minus(a_clause)) {
+      } else if (is_unary_minus(a_clause)) {
         return translate_unary_minus(a_clause);
-      } else if (f_expression_info.is_binary_minus(a_clause)) {
+      } else if (is_binary_minus(a_clause)) {
         return translate_binary_minus(a_clause);
-      } else if (f_expression_info.is_multiplication(a_clause)) {
+      } else if (is_multiplication(a_clause)) {
         return translate_multiplication(a_clause);
-      } else if (f_expression_info.is_max(a_clause)) {
+      } else if (is_max(a_clause)) {
         return translate_max(a_clause);
-      } else if (f_expression_info.is_min(a_clause)) {
+      } else if (is_min(a_clause)) {
         return translate_min(a_clause);
-      } else if (f_expression_info.is_abs(a_clause)) {
+      } else if (is_abs(a_clause)) {
         return translate_abs(a_clause);
-      } else if (f_expression_info.is_succ(a_clause)) {
+      } else if (is_succ(a_clause)) {
         return translate_succ(a_clause);
-      } else if (f_expression_info.is_pred(a_clause)) {
+      } else if (is_pred(a_clause)) {
         return translate_pred(a_clause);
-      } else if (f_expression_info.is_add_c(a_clause)) {
+      } else if (is_add_c(a_clause)) {
         return translate_add_c(a_clause);
-      } else if (f_expression_info.is_c_nat(a_clause)) {
+      } else if (is_c_nat(a_clause)) {
         return translate_c_nat(a_clause);
-      } else if (f_expression_info.is_c_int(a_clause)) {
+      } else if (is_c_int(a_clause)) {
         return translate_c_int(a_clause);
-      } else if (f_expression_info.is_c_real(a_clause)) {
+      } else if (is_c_real(a_clause)) {
         return translate_c_real(a_clause);
-      } else if (f_expression_info.is_int_constant(a_clause)) {
+      } else if (is_int_constant(a_clause)) {
         return translate_int_constant(a_clause);
-      } else if (f_expression_info.is_nat_constant(a_clause)) {
+      } else if (is_nat_constant(a_clause)) {
         return translate_nat_constant(a_clause);
-      } else if (f_expression_info.is_pos_constant(a_clause)) {
+      } else if (is_pos_constant(a_clause)) {
         return translate_pos_constant(a_clause);
-      } else if (f_expression_info.is_true(a_clause)) {
+      } else if (is_true(a_clause)) {
         return translate_true();
-      } else if (f_expression_info.is_false(a_clause)) {
+      } else if (is_false(a_clause)) {
         return translate_false();
-      } else if (f_expression_info.is_variable(a_clause)) {
+      } else if (is_variable(a_clause)) {
         if (f_sort_info.is_sort_nat(f_expression_info.get_sort_of_variable(a_clause))) {
           return translate_nat_variable(a_clause);
         } else if (f_sort_info.is_sort_pos(f_expression_info.get_sort_of_variable(a_clause))) {
@@ -197,9 +203,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_not(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_not(ATermAppl a_clause) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
+      CVC3::Expr v_expression;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       v_expression = translate_clause(v_clause);
@@ -208,9 +214,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_equality(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_equality(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -221,9 +227,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_inequality(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_inequality(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -234,9 +240,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_greater_than(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_greater_than(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -247,9 +253,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_greater_than_or_equal(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_greater_than_or_equal(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -260,9 +266,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_less_than(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_less_than(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -273,9 +279,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_less_than_or_equal(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_less_than_or_equal(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -286,9 +292,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_plus(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_plus(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -299,9 +305,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_unary_minus(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_unary_minus(ATermAppl a_clause) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
+      CVC3::Expr v_expression;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       v_expression = translate_clause(v_clause);
@@ -310,9 +316,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_binary_minus(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_binary_minus(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -323,9 +329,9 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_multiplication(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_multiplication(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_expression_1, v_expression_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -336,10 +342,10 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_max(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_max(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
-      CVCL::Expr v_guard;
+      CVC3::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_guard;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -352,10 +358,10 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_min(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_min(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2;
-      CVCL::Expr v_expression_1, v_expression_2;
-      CVCL::Expr v_guard;
+      CVC3::Expr v_expression_1, v_expression_2;
+      CVC3::Expr v_guard;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -368,12 +374,12 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_abs(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_abs(ATermAppl a_clause) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
-      CVCL::Expr v_guard;
-      CVCL::Expr v_zero;
-      CVCL::Expr v_minus_expression;
+      CVC3::Expr v_expression;
+      CVC3::Expr v_guard;
+      CVC3::Expr v_zero;
+      CVC3::Expr v_minus_expression;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       v_expression = translate_clause(v_clause);
@@ -386,10 +392,10 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_succ(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_succ(ATermAppl a_clause) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
-      CVCL::Expr v_one;
+      CVC3::Expr v_expression;
+      CVC3::Expr v_one;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       v_expression = translate_clause(v_clause);
@@ -399,10 +405,10 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_pred(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_pred(ATermAppl a_clause) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
-      CVCL::Expr v_one;
+      CVC3::Expr v_expression;
+      CVC3::Expr v_one;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       v_expression = translate_clause(v_clause);
@@ -412,12 +418,12 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_add_c(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_add_c(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2, v_clause_3;
-      CVCL::Expr v_expression_1, v_expression_2, v_expression_3;
-      CVCL::Expr v_one;
-      CVCL::Expr v_plus;
-      CVCL::Expr v_plus_one;
+      CVC3::Expr v_expression_1, v_expression_2, v_expression_3;
+      CVC3::Expr v_one;
+      CVC3::Expr v_plus;
+      CVC3::Expr v_plus_one;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
       v_clause_2 = f_expression_info.get_argument(a_clause, 1);
@@ -433,7 +439,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_c_nat(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_c_nat(ATermAppl a_clause) {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -442,7 +448,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_c_int(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_c_int(ATermAppl a_clause) {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -451,7 +457,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_c_real(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_c_real(ATermAppl a_clause) {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -460,15 +466,15 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_unknown_operator(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_unknown_operator(ATermAppl a_clause) {
       ATermAppl v_operator;
       int v_number_of_arguments;
       std::string v_name;
-      CVCL::Type v_type;
-      CVCL::Op v_translated_operator;
+      CVC3::Type v_type;
+      CVC3::Op v_translated_operator;
       ATermAppl v_clause;
-      CVCL::Expr v_translated_clause;
-      std::vector<CVCL::Expr> v_translated_clauses;
+      CVC3::Expr v_translated_clause;
+      std::vector<CVC3::Expr> v_translated_clauses;
 
       v_operator = f_expression_info.get_operator(a_clause);
       v_number_of_arguments = f_expression_info.get_number_of_arguments(a_clause);
@@ -491,10 +497,10 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_variable(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_variable(ATermAppl a_clause) {
       std::string v_name;
       ATermAppl v_type;
-      CVCL::Type v_translated_type;
+      CVC3::Type v_translated_type;
 
       v_name = f_expression_info.get_name_of_variable(a_clause);
       v_type = f_expression_info.get_sort_of_variable(a_clause);
@@ -504,7 +510,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_nat_variable(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_nat_variable(ATermAppl a_clause) {
       std::string v_name;
 
       v_name = f_expression_info.get_name_of_variable(a_clause);
@@ -514,7 +520,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_pos_variable(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_pos_variable(ATermAppl a_clause) {
       std::string v_name;
 
       v_name = f_expression_info.get_name_of_variable(a_clause);
@@ -524,7 +530,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_int_constant(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_int_constant(ATermAppl a_clause) {
       int v_value;
 
       v_value = gsIntValue_int(a_clause);
@@ -533,7 +539,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_nat_constant(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_nat_constant(ATermAppl a_clause) {
       int v_value;
 
       v_value = gsNatValue_int(a_clause);
@@ -542,7 +548,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_pos_constant(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_pos_constant(ATermAppl a_clause) {
       int v_value;
 
       v_value = gsPosValue_int(a_clause);
@@ -551,22 +557,22 @@
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_true() {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_true() {
       return f_validity_checker->trueExpr();
     }
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_false() {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_false() {
       return f_validity_checker->falseExpr();
     }
 
     // --------------------------------------------------------------------------------------------
 
-    CVCL::Expr SMT_Solver_CVC_Lite_Fast::translate_constant(ATermAppl a_clause) {
+    CVC3::Expr SMT_Solver_CVC_Fast::translate_constant(ATermAppl a_clause) {
       std::string v_name;
       ATermAppl v_type;
-      CVCL::Type v_translated_type;
+      CVC3::Type v_translated_type;
 
       v_name = f_expression_info.get_name_of_constant(a_clause);
       v_type = f_expression_info.get_sort_of_constant(a_clause);
@@ -576,13 +582,13 @@
 
     // --------------------------------------------------------------------------------------------
 
-    void SMT_Solver_CVC_Lite_Fast::add_nat_clauses(std::vector<CVCL::Expr>& a_expressions) {
+    void SMT_Solver_CVC_Fast::add_nat_clauses(std::vector<CVC3::Expr>& a_expressions) {
       ATermList v_variables;
       ATermAppl v_variable;
       std::string v_name;
-      CVCL::Expr v_translated_variable;
-      CVCL::Expr v_clause;
-      CVCL::Expr v_zero;
+      CVC3::Expr v_translated_variable;
+      CVC3::Expr v_clause;
+      CVC3::Expr v_zero;
 
       v_zero = f_validity_checker->ratExpr(0);
       v_variables = ATindexedSetElements(f_nat_variables);
@@ -600,13 +606,13 @@
 
     // --------------------------------------------------------------------------------------------
 
-    void SMT_Solver_CVC_Lite_Fast::add_pos_clauses(std::vector<CVCL::Expr>& a_expressions) {
+    void SMT_Solver_CVC_Fast::add_pos_clauses(std::vector<CVC3::Expr>& a_expressions) {
       ATermList v_variables;
       ATermAppl v_variable;
       std::string v_name;
-      CVCL::Expr v_translated_variable;
-      CVCL::Expr v_clause;
-      CVCL::Expr v_zero;
+      CVC3::Expr v_translated_variable;
+      CVC3::Expr v_clause;
+      CVC3::Expr v_zero;
 
       v_zero = f_validity_checker->ratExpr(0);
       v_variables = ATindexedSetElements(f_pos_variables);
@@ -624,10 +630,10 @@
 
   // ----------------------------------------------------------------------------------------------
 
-    void SMT_Solver_CVC_Lite_Fast::translate(ATermList a_formula) {
+    void SMT_Solver_CVC_Fast::translate(ATermList a_formula) {
       ATermAppl v_clause;
-      CVCL::Expr v_expression;
-      std::vector<CVCL::Expr> v_expressions;
+      CVC3::Expr v_expression;
+      std::vector<CVC3::Expr> v_expressions;
 
       ATindexedSetReset(f_nat_variables);
       ATindexedSetReset(f_pos_variables);
@@ -646,17 +652,17 @@
       gsVerboseMsg("Formula in CVC Lite format: %s\n", f_formula.toString().c_str());
     }
 
-  // Class SMT_Solver_CVC_Lite_Fast - Functions declared public -----------------------------------
+  // Class SMT_Solver_CVC_Fast - Functions declared public -----------------------------------
 
-    SMT_Solver_CVC_Lite_Fast::SMT_Solver_CVC_Lite_Fast() {
-      f_validity_checker = CVCL::ValidityChecker::create();
+    SMT_Solver_CVC_Fast::SMT_Solver_CVC_Fast() {
+      f_validity_checker = CVC3::ValidityChecker::create();
       f_nat_variables = ATindexedSetCreate(100, 75);
       f_pos_variables = ATindexedSetCreate(100, 75);
     }
 
     // --------------------------------------------------------------------------------------------
 
-    SMT_Solver_CVC_Lite_Fast::~SMT_Solver_CVC_Lite_Fast() {
+    SMT_Solver_CVC_Fast::~SMT_Solver_CVC_Fast() {
       delete f_validity_checker;
       f_validity_checker = 0;
       ATindexedSetDestroy(f_nat_variables);
@@ -665,7 +671,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool SMT_Solver_CVC_Lite_Fast::is_satisfiable(ATermList a_formula) {
+    bool SMT_Solver_CVC_Fast::is_satisfiable(ATermList a_formula) {
       f_validity_checker->poptoScope(0);
       translate(a_formula);
       if (f_validity_checker->checkUnsat(f_formula)) {
@@ -677,4 +683,4 @@
       }
     }
 
-#endif // CVC_LITE_LIB
+#endif // HAVE_CVC
