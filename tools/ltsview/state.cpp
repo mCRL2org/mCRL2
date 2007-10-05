@@ -27,21 +27,6 @@ State::State() {
 State::~State() {
 }
 
-void State::addSuperior( State* s )
-{
-  superiors.insert( s );
-}
-
-void State::addSubordinate( State* s )
-{
-  subordinates.insert( s );
-}
-
-void State::addComrade( State* s )
-{
-  comrades.insert( s );
-}
-
 void State::addInTransition( Transition* trans )
 {
   inTransitions.push_back( trans );
@@ -173,77 +158,30 @@ void State::setCluster( Cluster* c )
   cluster = c;
 }
 
-std::set<State*>::iterator State::getSubordinatesBegin() const {
-  return subordinates.begin();
-}
-
-std::set<State*>::iterator State::getSubordinatesEnd() const {
-  return subordinates.end();
-}
-
-std::set<State*>::iterator State::getSuperiorsBegin() const {
-  return superiors.begin();
-}
-
-std::set<State*>::iterator State::getSuperiorsEnd() const {
-  return superiors.end();
-}
-
-void State::getComrades( set< State* > &ss ) const
-{
-  ss = comrades;
-}
-
-void State::getInTransitions( vector< Transition* > &ts ) const
-{
-  ts = inTransitions;
-}
-
-Transition* State::getInTransition( int i ) const
-{
+Transition* State::getInTransition(int i) const {
   return inTransitions[i];
 }
 
-int State::getNumInTransitions() const
-{
+int State::getNumInTransitions() const {
   return inTransitions.size();
 }
 
-void State::getOutTransitions( vector< Transition* > &ts ) const
-{
-  ts = outTransitions;
-}
-
-Transition* State::getOutTransitioni( int i ) const
-{
+Transition* State::getOutTransition(int i) const {
   return outTransitions[i];
 }
 
-int State::getNumOutTransitions( ) const 
-{
+int State::getNumOutTransitions() const {
   return outTransitions.size();
 }
 
-void State::getLoops( vector< Transition* > & ls ) const
-{
-  ls = loops;
-}
-
-Transition* State::getLoopi(int i) const 
-{
+Transition* State::getLoop(int i) const {
   return loops[i];
 }
 
-int State::getNumberOfLoops() const
-{
+int State::getNumLoops() const {
   return loops.size();
 }
-void State::clearHierarchyInfo()
-{
-  superiors.clear();
-  subordinates.clear();
-  comrades.clear();
-}
+
 void State::DFSfinish() {
   visitState = DFS_BLACK;
 }

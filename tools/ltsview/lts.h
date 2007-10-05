@@ -28,13 +28,11 @@ class LTS {
     void	addMarkRule(Utils::MarkRule* r,int index=-1);
     int		addParameter(std::string parname,std::string partype);
     void	addParameterValue(int parindex,std::string parvalue);
-    void        addCluster(Cluster* c);
-    void        addClusterAndBelow(Cluster* c);
+    void  addCluster(Cluster* c);
+    void  addClusterAndBelow(Cluster* c);
     void	addState(State* s);
     void	addTransition(Transition* t);
-    void	applyIterativeRanking();
-    void	applyCyclicRanking();
-    void	clusterComrades();
+    void	applyRanking(Utils::RankStyle rs);
     void	computeClusterLabelInfo();
     void	getActionLabels(std::vector<std::string> &ls) const;
     Cluster*    getClusterAtRank(int r, int c) const;
@@ -107,24 +105,23 @@ class LTS {
     LTS(Mediator* owner, LTS* parent, bool fromAbove);
 
     // Variables
+    Mediator*	mediator;
+    Simulation* simulation;
     bool lastWasAbove;
+    bool	matchAny;
     int zoomLevel;
-    std::vector< std::vector< Cluster* > >	clustersInRank;
     int	deadlockCount;
+    int	transitionCount;
+    int	markedTransitionCount;
     LTS*        previousLevel;
-    State*	initialState;
+    State*	    initialState;
     State*      selectedState;
     Cluster*    selectedCluster;
     Cluster*    lastCluster;
     std::vector< State* >	markedStates;
-    int	markedTransitionCount;
-    std::vector< Utils::MarkRule* >	markRules;
-    bool	matchAny;
-    Mediator*	mediator;
-    std::vector< std::vector< State* > >	statesInRank;
-    std::vector< Transition* >	transitions;
     std::vector< State* >	unmarkedStates;
-    Simulation*                 simulation;
+    std::vector< Utils::MarkRule* >	markRules;
+    std::vector< std::vector< Cluster* > >	clustersInRank;
 
     // State vector info
     std::vector< std::string > parameterNames;
@@ -145,9 +142,6 @@ class LTS {
     void clearRanksAndClusters();
     void processAddedMarkRule( Utils::MarkRule* r );
     void processRemovedMarkRule( Utils::MarkRule* r );
-    void updateMarksAll();  //Not implemented (?)
-    void updateMarksAny();  //Not implemented (?)
-
 
     // Methods for positioning states based on Frank van Ham's heuristics
     void edgeLengthBottomUp(std::vector< State* > &undecided); 

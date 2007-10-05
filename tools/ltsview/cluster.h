@@ -28,34 +28,6 @@ class Comp_ClusterVolume {
 };
 
 class Cluster {
-  private:
-    std::map< int, int > actionLabelCounts;
-    Cluster* ancestor;
-    float baseRadius;
-    bool deadlock;
-    std::vector< Cluster* > descendants;
-    std::vector<std::vector<bool> > severedDescendants;
-    unsigned int severedDescendantsC;
-    int markedState;
-    int markedTransitionCount;
-    float position;
-    int rank;
-    int positionInRank;
-    float size;
-    std::vector< State* > states;
-    float topRadius;
-    float volume;
-
-    std::vector< State* > undecidedStates;
-    std::vector< std::vector< std::vector< State* > > > slots;
-
-    int visObject;
-    int visObjectTop;
-
-    bool selected;
-
-    void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
-    void spreadSlots(unsigned int ring);
 
   public:
     // Constructor & destructor.
@@ -74,10 +46,7 @@ class Cluster {
 
     // Restores the severance
     void      healSeverance( int i);
-
-
     bool      hasSeveredDescendants();
-
     void      setAncestor(Cluster* c);
     Cluster*  getAncestor() const;
 
@@ -128,6 +97,31 @@ class Cluster {
     void  select();
     void  deselect();
     bool  isSelected() const;
+
+  private:
+    std::map< int, int > actionLabelCounts;
+    Cluster*             ancestor;
+    float                baseRadius;
+    bool                 deadlock;
+    std::vector< Cluster* > descendants;
+    std::vector<std::vector<bool> > severedDescendants;
+    unsigned int severedDescendantsC;
+    int markedState;
+    int markedTransitionCount;
+    float position;
+    int rank;
+    int positionInRank;
+    float size;
+    std::vector< State* > states;
+    float topRadius;
+    float volume;
+    std::vector< State* > undecidedStates;
+    std::vector< std::vector< std::vector< State* > > > slots;
+    int visObject;
+    int visObjectTop;
+    bool selected;
+    void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
+    void spreadSlots(unsigned int ring);
 };
 
 #endif

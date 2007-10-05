@@ -183,24 +183,21 @@ void LTSViewApp::openFile(string fileName) {
   if (lts!=NULL) delete lts;
   lts = newlts;
   
-  mainFrame->updateProgressDialog(14,"Applying ranking");
-  applyRanking(rankStyle);
+  mainFrame->updateProgressDialog(17,"Applying ranking");
+  lts->applyRanking(rankStyle);
   
-  mainFrame->updateProgressDialog(28,"Clustering comrades");
-  lts->clusterComrades();
-  
-  mainFrame->updateProgressDialog(42,"Merging superiors");
+  mainFrame->updateProgressDialog(33,"Merging superiors");
   lts->mergeSuperiorClusters();
 
-  mainFrame->updateProgressDialog(57,"Setting mark info");
+  mainFrame->updateProgressDialog(50,"Setting mark info");
   lts->computeClusterLabelInfo();
   
-  mainFrame->updateProgressDialog(71,"Positioning clusters");
+  mainFrame->updateProgressDialog(67,"Positioning clusters");
   lts->positionClusters();
 
-  visualizer->setLTS(lts);
+  visualizer->setLTS(lts,true);
   
-  mainFrame->updateProgressDialog(85,"Positioning states");
+  mainFrame->updateProgressDialog(83,"Positioning states");
   lts->positionStates();
   
   mainFrame->updateProgressDialog(100,"Done");
@@ -227,19 +224,6 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->setMarkedTransitionsInfo(0);
 }
 
-void LTSViewApp::applyRanking(RankStyle rs) {
-  switch (rs) {
-    case ITERATIVE:
-      lts->applyIterativeRanking();
-      break;
-    case CYCLIC:
-      lts->applyCyclicRanking();
-      break;
-    default:
-      break;
-  }
-}
-
 void LTSViewApp::setRankStyle(RankStyle rs) {
   if (rankStyle != rs) {
     rankStyle = rs;
@@ -249,24 +233,21 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
 
       mainFrame->updateProgressDialog(0,"Applying ranking");
-      applyRanking(rankStyle);
+      lts->applyRanking(rankStyle);
       
-      mainFrame->updateProgressDialog(17,"Clustering comrades");
-      lts->clusterComrades();
-      
-      mainFrame->updateProgressDialog(33,"Merging superiors");
+      mainFrame->updateProgressDialog(20,"Merging superiors");
       lts->mergeSuperiorClusters();
 
-      mainFrame->updateProgressDialog(50,"Setting mark info");
+      mainFrame->updateProgressDialog(40,"Setting mark info");
       lts->computeClusterLabelInfo();
       lts->markClusters();
       
-      mainFrame->updateProgressDialog(67,"Positioning clusters");
+      mainFrame->updateProgressDialog(60,"Positioning clusters");
       lts->positionClusters();
 
-      visualizer->setLTS(lts);
+      visualizer->setLTS(lts,true);
 
-      mainFrame->updateProgressDialog(84,"Positioning states");
+      mainFrame->updateProgressDialog(80,"Positioning states");
       lts->positionStates();
 
       mainFrame->updateProgressDialog(100,"Done");
@@ -485,7 +466,7 @@ void LTSViewApp::zoomInBelow()
   LTS* newLTS = lts->zoomIntoBelow();
   deselect();
   lts = newLTS;
-  visualizer->setLTS(lts);
+  visualizer->setLTS(lts,false);
 
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
@@ -496,7 +477,7 @@ void LTSViewApp::zoomInAbove()
   LTS* newLTS = lts->zoomIntoAbove();
   deselect();
   lts = newLTS;
-  visualizer->setLTS(lts);
+  visualizer->setLTS(lts,false);
   
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
@@ -507,7 +488,7 @@ void LTSViewApp::zoomOut()
   LTS* oldLTS = lts;
   lts = oldLTS->zoomOut();
   oldLTS->deselect();
-  visualizer->setLTS(lts);
+  visualizer->setLTS(lts,false);
 
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());

@@ -60,7 +60,7 @@ class Visualizer: public Subscriber {
     float getHalfStructureHeight() const;
     Utils::VisStyle getVisStyle() const;
     void notify(SettingID s);
-    void setLTS(LTS *l);
+    void setLTS(LTS *l,bool compute_ratio);
     void setMarkStyle(Utils::MarkStyle ms);
     void setVisStyle(Utils::VisStyle vs);
 

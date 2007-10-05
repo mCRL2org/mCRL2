@@ -30,7 +30,7 @@ class Transition
   private:
     State*  beginState;
     State*  endState;
-    int   label;
+    int     label;
     bool*   marked;
 };
 

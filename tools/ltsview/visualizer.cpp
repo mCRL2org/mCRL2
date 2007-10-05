@@ -50,12 +50,9 @@ float Visualizer::getHalfStructureHeight() const {
   return settings->getFloat(ClusterHeight)*(lts->getNumRanks()-1) / 2.0f;
 }
 
-void Visualizer::setLTS(LTS* l) {
-  LTS* oldLTS = lts;
+void Visualizer::setLTS(LTS* l,bool compute_ratio) {
   lts = l;
-  
-  if (oldLTS == NULL)
-  {
+  if (compute_ratio) {
     float ratio = lts->getInitialState()->getCluster()->getSize() / 
                   (lts->getNumRanks() - 1);
     settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 
@@ -581,16 +578,13 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   RGB_Color hisStateColor = settings->getRGB(SimPrevColor);
   RGB_Color markStateColor = settings->getRGB(MarkedColor);
   
-  vector<Transition*> transs;
-  currState->getOutTransitions(transs);
-
   vector<State*> posStates;
 
-  for(size_t i = 0; i < transs.size(); ++i) {
-    posStates.push_back(transs[i]->getEndState());
+  for(int i = 0; i < currState->getNumOutTransitions(); ++i) {
+    posStates.push_back(currState->getOutTransition(i)->getEndState());
   }
 
-  if(currState->getNumberOfLoops() > 0) {
+  if(currState->getNumLoops() > 0) {
     posStates.push_back(currState);
   }
   
@@ -690,9 +684,9 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
 
   // Draw the future states
 
-  for (size_t i = 0; i < transs.size(); ++i)
+  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
   {
-    State* endState = transs[i]->getEndState();
+    State* endState = currState->getOutTransition(i)->getEndState();
 
     if (lts->getZoomLevel() == endState->getZoomLevel())
     {
@@ -700,7 +694,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
 
       glPushName(endState->getID());
 
-      if (transs[i] != chosenTrans) {
+      if (currState->getOutTransition(i) != chosenTrans) {
         RGB_Color c;
         if (!isMarked(endState))
         {
@@ -788,7 +782,7 @@ void Visualizer::drawSimMarkedStates(Cluster* root, int rot) {
 void Visualizer::clearDFSStates(State* root) {
   root->DFSclear();
   for(int i=0; i!=root->getNumOutTransitions(); ++i) {
-    Transition* outTransition = root->getOutTransitioni(i);
+    Transition* outTransition = root->getOutTransition(i);
     if (!outTransition->isBackpointer()) {
       State* endState = outTransition->getEndState();
       if (endState->getVisitState() != DFS_WHITE) {
@@ -904,7 +898,7 @@ void Visualizer::computeStateAbsPos(State* root, int rot)
     }
 
     for(int i = 0; i != root->getNumOutTransitions(); ++i) {
-      Transition* outTransition = root->getOutTransitioni(i);
+      Transition* outTransition = root->getOutTransition(i);
       State* endState = outTransition->getEndState();
 
       if (endState->getVisitState() == DFS_WHITE &&
@@ -1080,7 +1074,7 @@ void Visualizer::drawTransitions(State* root,bool disp_fp,bool disp_bp) {
   root->DFSvisit();
 
   for (int i = 0; i != root->getNumOutTransitions(); ++i) {
-    Transition* outTransition = root->getOutTransitioni(i);
+    Transition* outTransition = root->getOutTransition(i);
 
     State* endState = outTransition->getEndState();
 
