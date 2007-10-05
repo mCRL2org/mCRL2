@@ -235,12 +235,74 @@ void calculate_bes(pbes<> pbes_spec,
   return;
 }
 
-static lps::pbes_expression store_as_tree(lps::pbes_expression p)
+/* Declare a protected PAIR symbol */
+inline AFun initAFunPair(AFun& f)
+{ f = ATmakeAFun("PAIR", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline AFun PAIR()
+{ static AFun PAIR = initAFunPair(PAIR);
+  return PAIR;
+}
+
+static ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
+{
+  return ATmakeAppl2(PAIR(),(ATerm)t1,(ATerm)t2);
+}
+
+static unsigned int largest_power_of_2_smaller_than(int i)
+{ unsigned int j=0; 
+  i=i>>1;
+  while (i>0)
+  { i=i>>1;
+    j++;
+  };
+  return j;
+}
+
+// static ATermAppl store_as_tree(lps::pbes_expression p)
+static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
+/* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3 
+ * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
+ * returned, which is a balanced tree flushed to the right. For each input the resulting
+ * tree is unique.
+ */
 { 
-  // data_expression_list l=p.parameters();
-  // identifier_string s=p.name();
-  // XXX TODO: This still has to be done. 
+  data_expression_list args=p.parameters();
+
+  if ( p.size() < 3 )
   return p;
+
+  unsigned int n=largest_power_of_2_smaller_than(p.size());
+  atermpp::vector<ATermAppl> tree_store(n);
+
+  /* put the arguments in the intermediate tree_store. The last elements are stored as
+   * pairs, such that the p.size() elements are stored in n positions. */
+  unsigned int i=0;
+  for(data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
+  { if (i<2*n-p.size())
+    { tree_store[i]= (*t);
+      i++;
+    }
+    else
+    { ATermAppl t1(*t);
+      t++;
+      ATermAppl t2(*t);
+      tree_store[i]= apply_pair_symbol(t1,t2);
+      i++;
+    }
+  }
+
+  while (n>1)
+  { n=n>>1; // n=n/2;
+    for (unsigned int i=0; i<n; i++)
+    { tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
+    }
+  }
+  return ATmakeAppl1(ATmakeAFun(ATgetName(ATgetAFun(ATermAppl(p.name()))),1,ATfalse),
+                     (ATerm)tree_store[0]);
 }
 
 //function add_propositional_variable_instantiations_to_indexed_set
