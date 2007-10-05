@@ -124,7 +124,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   #define SHORT_OPTIONS "f:p:ehqvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
-    { "file",      required_argument,  NULL,  'f' },
+    { "rename",    required_argument,  NULL,  'r' },
     { "end-phase", required_argument,  NULL,  'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
@@ -138,7 +138,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //parse options
   while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
     switch (option) {
-      case 'f': /* formula */
+      case 'r': /* rename file */
         action_rename_filename = optarg;
         break;
       case 'p': /* end-phase */
@@ -220,32 +220,61 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
-ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_new){
+ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spec){
 // merges the declarations in the data section and the actions declared in the action rename file action_rename
-// with the sections in the lps specification lps_newspec and resolves variable name conflicts
-  lps::linear_process lp_new = lps_new.process();
-/*  lps::data_specification lps_data =  lps_new.data();
+// with the sections in the lps specification lps_wspec and resolves variable name conflicts
+  lps::data_specification lps_data = lps_spec.data();
+  lps::data_specification new_data = lps::data_specification(ATAgetArgument(action_rename, 0));
+  lps::specification result;
+  lps::linear_process result_lp = lps_spec.process();
+  lps::data_specification result_data;
+
+  gsVerboseMsg("  Merging data declarations...\n");
 
   //merge sort_spec
   lps::sort_list lps_sort = lps_data.sorts();
+  lps::sort_list new_sort = new_data.sorts();
+  for(lps::sort_list::iterator i=new_sort.begin(); i!=new_sort.end(); i++){
+    lps_sort = push_front(lps_sort, *i);
+  }
 
   //merge cons_spec
   lps::function_list lps_cons = lps_data.constructors();
+  lps::function_list new_cons = new_data.constructors();
+  for(lps::function_list::iterator i=new_cons.begin(); i!=new_cons.end(); i++){
+    lps_cons = push_front(lps_cons, *i);
+  }
 
   //merge map_spec
   lps::function_list lps_map = lps_data.mappings();
+  lps::function_list new_map = new_data.mappings();
+  for(lps::function_list::iterator i=new_map.begin(); i!=new_map.end(); i++){
+    lps_map = push_front(lps_map, *i);
+  }
 
   //merge eqn_spec
   data_equation_list lps_eqn = lps_data.equations();
-
-  //merge act_spec
-  aterm_list new_actions = ATLgetArgument(ATAgetArgument(action_rename, 1), 0);
-  lps::action_label_list lps_actions = lps_new.action_labels();
-  for(aterm_list::iterator i=lps_actions.begin(); i!=lps_actions.end(); i++){
-    
+  data_equation_list new_eqn = new_data.equations();
+  for(lps::data_equation_list::iterator i=new_eqn.begin(); i!=new_eqn.end(); i++){
+    lps_eqn = push_front(lps_eqn, *i);
   }
-*/
-  // Resolve name clashes between the rename rule variables and lps_new
+
+  result_data = lps::data_specification(lps_sort, lps_cons, lps_map, lps_eqn);
+
+  gsVerboseMsg("  Merging action labels...\n");
+
+  //merge action labes
+  lps::action_label_list lps_actions = lps_spec.action_labels();
+  lps::action_label_list new_actions = lps::action_label_list(ATLgetArgument(ATAgetArgument(action_rename, 1),0));
+  lps_actions = reverse(lps_actions);
+  for(lps::action_label_list::iterator i=new_actions.begin(); i!=new_actions.end(); i++){
+    lps_actions = push_front(lps_actions, *i);
+  }
+  lps_actions = reverse(lps_actions);
+
+  gsVerboseMsg("  Resolving naming conflicts...\n");
+
+  // Resolve name clashes between the rename rule variables and lps_spec
   aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
   aterm_appl rename_rule = *rename_rules.begin();
   aterm_appl::iterator j = rename_rule.begin();
@@ -255,16 +284,14 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_new
   used_names.insert(boost::make_transform_iterator(rule_vars.begin(), detail::data_variable_name()),
                     boost::make_transform_iterator(rule_vars.end()  , detail::data_variable_name())
                    );
-  lp_new = rename_process_parameters(lp_new, used_names, "_S");
-  lp_new = rename_free_variables(lp_new, used_names, "_S");
-  lp_new = rename_summation_variables(lp_new, used_names, "_S");
+  result_lp = rename_free_variables(result_lp, used_names, "_S");
+  result_lp = rename_process_parameters(result_lp, used_names, "_S");
+  result_lp = rename_summation_variables(result_lp, used_names, "_S");
 
-  lps_new = set_lps(lps_new, lp_new);
-  return lps_new;
+  result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
+
+  return result;
 }
-
-
-
 
 ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::specification lps_new_spec){
   aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
@@ -287,11 +314,8 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   aterm_appl new_element;
 
   bool rename;
-  bool to_tau;
-  bool to_delta;
-
-
-
+  bool to_tau=false;
+  bool to_delta=false;
 
   //go through the rename rules of the rename file
   gsVerboseMsg("rename rules found: %i\n", rename_rules.size());
@@ -312,7 +336,6 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
       rule_new_action = lps::action();
       if(gsIsTau(new_element)){ to_tau = true; to_delta = false;}
       else if (gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
-      //else assert
     }
 
     lps_summands = summand_list();
@@ -358,8 +381,8 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
                 if(!exists){
                   gsVerboseMsg("  new var in arg found: %i\n", new_vars.size());
                   lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
-                  lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
                 }
+                lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
               }//end data var loop
   
               ++lps_old_argument_i;
@@ -473,19 +496,7 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
     }
   }
 
-  //create lps_newspec
-  lps::linear_process lps_old_spec_lp = lps_old_spec.process();
-  lps::linear_process lps_new_spec_lp;
-  lps_new_spec_lp = lps::linear_process(
-			lps_old_spec_lp.free_variables(),
-			lps_old_spec_lp.process_parameters(),
-			lps::summand_list());
 
-  lps_new_spec = lps::specification(
-			lps_old_spec.data(),
-			lps_old_spec.action_labels(),
-			lps_new_spec_lp,
-			lps_old_spec.initial_process());
 
   //parse the action rename file
   gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
@@ -529,14 +540,28 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   
   //merge declarations from lps_newspec and action_rename
   gsVerboseMsg("merging declarations...\n");
-  aterm_appl result = merge_declarations(action_rename_spec, lps_new_spec);
+  aterm_appl result = merge_declarations(action_rename_spec, lps_old_spec);
   if (result == NULL) {
     return NULL;
   }
-  lps_new_spec = lps::specification(result);
+  lps_old_spec = lps::specification(result);
   if (end_phase == PH_MERGE) {
-    return lps_new_spec;
+    return lps_old_spec;
   }
+
+  //create lps_newspec
+  lps::linear_process lps_old_spec_lp = lps_old_spec.process();
+  lps::linear_process lps_new_spec_lp;
+  lps_new_spec_lp = lps::linear_process(
+			lps_old_spec_lp.free_variables(),
+			lps_old_spec_lp.process_parameters(),
+			lps::summand_list());
+
+  lps_new_spec = lps::specification(
+			lps_old_spec.data(),
+			lps_old_spec.action_labels(),
+			lps_new_spec_lp,
+			lps_old_spec.initial_process());
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
@@ -544,13 +569,14 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   if (result == NULL) {
     return NULL;
   }
-  lps_new_spec = lps::specification(result);
   if (end_phase == PH_RENAME) {
-    return lps_new_spec;
+    return result;
   }
+
  
   //type check the new LPS
   gsVerboseMsg("type checking the new LPS...\n");
+  lps_new_spec = lps::specification(result);
   if (!lps_new_spec.is_well_typed()) {
     gsVerboseMsg("The newly formed LPS is not well typed!\n");
     return NULL;
@@ -568,7 +594,8 @@ static void print_help(char *name)
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
     "used.\n"
     "\n"
-    "  -fFILE, --file=FILE   use the rename rules from FILE\n"
+    "  -rRENAMEFILE, --rename=RENAMEFILE\n"
+    "                        use the rename rules from FILE\n"
     "  -pPHASE, --end-phase=PHASE\n"
     "                        stop conversion after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
