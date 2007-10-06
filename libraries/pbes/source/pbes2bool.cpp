@@ -95,8 +95,20 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
                                      vector<unsigned long> &variable_index,
                                      const unsigned long current_rank, 
                                      bes::equations &bes_equations);
+static bool is_pair(ATerm t);
 
 // Function used to convert a pbes_expression to the variant used by the cwi-output
+
+static void print_tree_rec(const char c,ATerm t)
+{
+  if (is_pair(t))
+  { print_tree_rec(',',ATgetArgument(t,0));
+    print_tree_rec(',',ATgetArgument(t,1));
+  }
+  else
+  { ATfprintf(stderr,"%c%t",c,t);
+  }
+}
 
 static void print_counter_example_rec(bes::variable_type current_var,
                                       std::string indent,
@@ -104,25 +116,39 @@ static void print_counter_example_rec(bes::variable_type current_var,
                                       atermpp::indexed_set &variable_index,
                                       vector<bool> &already_printed,
                                       bool opt_precompile_pbes,
-                                      Rewriter *rewriter)
+                                      Rewriter *rewriter,
+                                      const bool opt_store_as_tree)
 {
-  propositional_variable_instantiation X(variable_index.get(current_var));
-
-  data_expression_list tl=X.parameters();
-  string s=X.name();
-  cerr << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
-  for(data_expression_list::iterator t=tl.begin();
-        t!=tl.end(); t++)
-  { cerr << (t==tl.begin()?"(":",");
-    if (opt_precompile_pbes)
-    { ATermAppl term=*t;
-      cerr << pp(rewriter->fromRewriteFormat((ATerm)term));
+  if (opt_store_as_tree)
+  { ATerm t=variable_index.get(current_var);
+    if (!is_pair(t))
+    { ATfprintf(stderr,"%t",t);
     }
-    else 
-    { cerr << pp(*t);
+    else
+    { ATfprintf(stderr,"%t",ATgetArgument(t,0));
+      print_tree_rec('(',ATgetArgument(t,1));
     }
   }
-  cerr << ")";
+  else
+  {
+    propositional_variable_instantiation X(variable_index.get(current_var));
+
+    data_expression_list tl=X.parameters();
+    string s=X.name();
+    cerr << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
+    for(data_expression_list::iterator t=tl.begin();
+          t!=tl.end(); t++)
+    { cerr << (t==tl.begin()?"(":",");
+      if (opt_precompile_pbes)
+      { ATermAppl term=*t;
+        cerr << pp(rewriter->fromRewriteFormat((ATerm)term));
+      }
+      else 
+      { cerr << pp(*t);
+      }
+    }
+    cerr << ")";
+  }
 
   if (already_printed[current_var])
   { cerr << "*\n";
@@ -136,20 +162,25 @@ static void print_counter_example_rec(bes::variable_type current_var,
     { 
       cerr << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
       print_counter_example_rec((*walker).get_variable(),indent+"  ",
-                            bes_equations,variable_index,already_printed,opt_precompile_pbes,rewriter);
+                            bes_equations,variable_index,already_printed,
+                            opt_precompile_pbes,
+                            rewriter,
+                            opt_store_as_tree);
     }
   }
 }
 
 static void print_counter_example(bes::equations &bes_equations,
                                   atermpp::indexed_set &variable_index,
-                                  bool opt_precompile_pbes,
-                                  Rewriter *rewriter)
+                                  const bool opt_precompile_pbes,
+                                  Rewriter *rewriter,
+                                  const bool opt_store_as_tree)
 {
   cerr << "Below the justification for this outcome is listed\n";
   vector <bool> already_printed(bes_equations.nr_of_variables()+1,false);
   cerr << "1: ";
-  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,opt_precompile_pbes,rewriter);
+  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
+                       opt_precompile_pbes,rewriter,opt_store_as_tree);
 }
 
 template <typename Container>
@@ -204,7 +235,11 @@ bool process(t_tool_options const& tool_options)
     gsMessage("The pbes is %svalid\n", solve_bes(tool_options,bes_equations,variable_index) ? "" : "not ");
 
     if (tool_options.opt_construct_counter_example)
-    { print_counter_example(bes_equations,variable_index,tool_options.opt_precompile_pbes,rewriter);
+    { print_counter_example(bes_equations,
+                            variable_index,
+                            tool_options.opt_precompile_pbes,
+                            rewriter,
+                            tool_options.opt_store_as_tree);
     }
   }
 
@@ -252,6 +287,10 @@ static ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
   return ATmakeAppl2(PAIR(),(ATerm)t1,(ATerm)t2);
 }
 
+static bool is_pair(ATerm t)
+{ return ATgetAFun(t)==PAIR();
+}
+
 static unsigned int largest_power_of_2_smaller_than(int i)
 { unsigned int j=0; 
   i=i>>1;
@@ -261,6 +300,28 @@ static unsigned int largest_power_of_2_smaller_than(int i)
   };
   return j;
 }
+
+static void assign_variables_in_tree(
+                      ATerm t,
+                      data_variable_list::iterator &var_iter,
+                      Rewriter *rewriter,
+                      const bool opt_precompile_pbes)
+{ if (is_pair(t))
+  { assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes);
+    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
+  }
+  else
+  { 
+    if (opt_precompile_pbes)
+    { rewriter->setSubstitution(*var_iter,t);
+    }
+    else
+    { rewriter->setSubstitution(*var_iter,rewriter->toRewriteFormat((ATermAppl)t));
+    }
+    var_iter++;
+  }
+}
+
 
 // static ATermAppl store_as_tree(lps::pbes_expression p)
 static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
@@ -272,8 +333,8 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
 { 
   data_expression_list args=p.parameters();
 
-  if ( p.size() < 3 )
-  return p;
+  if ( p.size() ==0 )
+  return p.name();
 
   unsigned int n=largest_power_of_2_smaller_than(p.size());
   atermpp::vector<ATermAppl> tree_store(n);
@@ -301,8 +362,7 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
     { tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
     }
   }
-  return ATmakeAppl1(ATmakeAFun(ATgetName(ATgetAFun(ATermAppl(p.name()))),1,ATfalse),
-                     (ATerm)tree_store[0]);
+  return apply_pair_symbol(p.name(),(ATermAppl)tree_store[0]);
 }
 
 //function add_propositional_variable_instantiations_to_indexed_set
@@ -538,34 +598,60 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     { 
       // fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
 
-      propositional_variable_instantiation current_variable_instantiation =
-            propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+      pbes_equation current_pbeq;
       
-      // Get equation which belongs to the current propvarinst
-      pbes_equation current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
-  
       // Add the required substitutions
-      data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-      // ATfprintf(stderr,"HIER1\n");
-      for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
-             vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-      { 
-        assert(elist!=current_variable_instantiation.parameters().end());
-        
-        if (tool_options.opt_precompile_pbes)
-        { rewriter->setSubstitution(*vlist,(aterm)*elist);
-        }
-        else
-        { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
-        }
-        elist++;
+      if (tool_options.opt_store_as_tree)
+      {  // The current varable instantiation is stored as a tree, and this tree must be unfolded. 
+         ATerm t=variable_index.get(variable_to_be_processed);
+         if (!is_pair(t))
+         { // Then t is the name of the current_variable_instantiation, and it has 
+           // no arguments.
+           current_pbeq = pbes_equation(pbes_equations.get(t));
+           assert(current_pbeq.variable().parameters().size()==0);
+         }
+         else
+         { // t is a pair, with a name as its left hand side.
+           current_pbeq = pbes_equation(pbes_equations.get(ATgetArgument(t,0)));
+           // the right hand side of t are the parameters, in a tree structure.
+
+           t=ATgetArgument(t,1);
+           data_variable_list::iterator iter=current_pbeq.variable().parameters().begin();
+           assign_variables_in_tree(t,iter,
+                                    rewriter,tool_options.opt_precompile_pbes);
+         }
+
       }
-      // ATfprintf(stderr,"HIER2\n");
-      assert(elist==current_variable_instantiation.parameters().end());
+      else // The current variable instantiation is a propositional_variable_instantiation
+      { 
+
+        propositional_variable_instantiation current_variable_instantiation =
+            propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+
+        current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
+  
+        data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
+      
+        for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+               vlist!=current_pbeq.variable().parameters().end() ; vlist++)
+        { 
+          assert(elist!=current_variable_instantiation.parameters().end());
+          
+          if (tool_options.opt_precompile_pbes)
+          { rewriter->setSubstitution(*vlist,(aterm)*elist);
+          }
+          else
+          { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+          }
+          elist++;
+        }
+        assert(elist==current_variable_instantiation.parameters().end());
+      }
+      
       lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       
-      // ATfprintf(stderr,"HIER3 \n");
+     
       // cerr << pp(new_pbes_expression);
       bes::bes_expression new_bes_expression=
            add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -951,7 +1037,7 @@ bool solve_bes(const t_tool_options &tool_options,
                bes::equations &bes_equations,
                atermpp::indexed_set &variable_index)
 { 
-  gsVerboseMsg("Solving BES... %d\n",bes_equations.nr_of_variables());
+  gsVerboseMsg("Solving the BES with %d equations.\n",bes_equations.nr_of_variables());
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   atermpp::table bex_hashtable(10,5);
