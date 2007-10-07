@@ -208,6 +208,7 @@ ProcCloseScope:
 		  scope_lvl--;
 		  gsDebugMsg("Decrease Scope to; %d\n",scope_lvl);
           var_type_map.clear();
+          chan_type_direction_map.clear();
 		}
 	;
 
@@ -388,7 +389,16 @@ ChannelDeclaration_csp:
       	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);	
 		}
 	| ChannelDeclaration_csp COMMA ChannelDeclaration
-      	{ safe_assign($$, ATinsert($1, (ATerm) $3));
+      	{ 
+          ATermList new_list = $1;
+          ATermList list = ATreverse($3);
+          while (!ATisEmpty(list)) 
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert( new_list , ATgetFirst(list));
+             list = ATgetNext( list ) ;
+          }
+          safe_assign($$, new_list);
       	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", $$);	
 		}
 	;

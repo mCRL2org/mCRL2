@@ -94,7 +94,7 @@ typedef struct
   {
     std::vector<RPV> DeclarationVariables;
     std::vector<RPV> SpecificationVariables;
-    std::vector<RPC> ChannelDeclarations;
+    std::vector<RVT> DeclarationChannels;
     int NumberOfStreams;
   } RecProcessVectors;
 
@@ -124,14 +124,14 @@ class CAsttransform
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
     int parenthesis_level;
-    std::vector<RVT> manipulateDeclaredProcessDefinition(ATermAppl input);
+    pair<vector<RVT>, vector<RVT> > manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
-    std::vector<RPV> manipulateProcessSpecification(ATermAppl input);
+    pair<std::vector<RPV>, std::vector<RVT> > manipulateProcessSpecification(ATermAppl input);
     std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
     
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
-    void manipulateDeclaredProcessChannels(ATermList input);
+    std::vector<RVT> manipulateDeclaredProcessChannels(ATermList input);
 
     std::string manipulateExpression(ATermAppl input);
     void manipulateStatements(ATermAppl input);
@@ -142,6 +142,7 @@ class CAsttransform
 
     std::string manipulateExplicitTemplates(ATermList input);
     std::vector<RecProcessVariable> ProcessVariableMap;
+    std::vector<RVT> ProcessChannelMap;
 
     int stream_lvl;      //Variable to indicate the steams lvl
 
@@ -192,6 +193,7 @@ class CAsttransform
     //These channels will form define the multi-actions for mCRL2-specification
     std::map<std::string, RC> Channels; 
 
+    std::map<std::string, int > instantation_counter;
 }
 ;
 
