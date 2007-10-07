@@ -337,7 +337,7 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
   return p.name();
 
   unsigned int n=largest_power_of_2_smaller_than(args.size());
-  ATfprintf(stderr,"P: %t\nSIZE %d POWEROFTWO %d\n",(ATermList)args,args.size(),n);
+  // ATfprintf(stderr,"P: %t\nSIZE %d POWEROFTWO %d\n",(ATermList)args,args.size(),n);
   atermpp::vector<ATermAppl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
@@ -615,7 +615,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
          if (!is_pair(t))
          { // Then t is the name of the current_variable_instantiation, and it has 
            // no arguments.
-           ATfprintf(stderr,"TTTTT %t\n",t);
+           // ATfprintf(stderr,"TTTTT %t\n",t);
            current_pbeq = pbes_equation(pbes_equations.get(t));
            assert(current_pbeq.variable().parameters().size()==0);
          }
