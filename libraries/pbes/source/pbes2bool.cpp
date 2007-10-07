@@ -292,11 +292,11 @@ static bool is_pair(ATerm t)
 }
 
 static unsigned int largest_power_of_2_smaller_than(int i)
-{ unsigned int j=0; 
+{ unsigned int j=1; 
   i=i>>1;
   while (i>0)
   { i=i>>1;
-    j++;
+    j=j*2;
   };
   return j;
 }
@@ -333,18 +333,20 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
 { 
   data_expression_list args=p.parameters();
 
-  if ( p.size() ==0 )
+  if ( args.size() ==0 )
   return p.name();
 
-  unsigned int n=largest_power_of_2_smaller_than(p.size());
+  unsigned int n=largest_power_of_2_smaller_than(args.size());
+  ATfprintf(stderr,"P: %t\nSIZE %d POWEROFTWO %d\n",(ATermList)args,args.size(),n);
   atermpp::vector<ATermAppl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
-   * pairs, such that the p.size() elements are stored in n positions. */
+   * pairs, such that the args.size() elements are stored in n positions. */
   unsigned int i=0;
   for(data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
-  { if (i<2*n-p.size())
+  { if (i<2*n-args.size())
     { tree_store[i]= (*t);
+      // ATfprintf(stderr,"ITEM %d  %t\n",i,tree_store[i]);
       i++;
     }
     else
@@ -352,6 +354,7 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
       t++;
       ATermAppl t2(*t);
       tree_store[i]= apply_pair_symbol(t1,t2);
+      // ATfprintf(stderr,"PAIR %d  %t\n",i,tree_store[i]);
       i++;
     }
   }
@@ -359,7 +362,9 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
   while (n>1)
   { n=n>>1; // n=n/2;
     for (unsigned int i=0; i<n; i++)
-    { tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
+    { 
+      // ATfprintf(stderr,"COMBINE %d  %t %t\n",i,tree_store[2*i],tree_store[2*i+1]);
+      tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
     }
   }
   return apply_pair_symbol(p.name(),(ATermAppl)tree_store[0]);
@@ -381,7 +386,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 { 
   if (is_propositional_variable_instantiation(p))
   { 
-    pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?p:store_as_tree(p));
+    pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?store_as_tree(p):p);
     
     if (pr.second) /* p is added to the indexed set, so it is a new variable */
     { nr_of_generated_variables++;
@@ -528,15 +533,18 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
      as in the other case the variables to be investigated are those
      with indices between nre_of_processed_variables and nr_of_generated
      variables. */
+
   deque < bes::variable_type> todo;
   if (tool_options.opt_strategy>=on_the_fly)
   { todo.push_front(1);
   }
 
   // Data rewriter
-  variable_index.put(pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
+  pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
                      rewriter,
-                     tool_options.opt_precompile_pbes));
+                     tool_options.opt_precompile_pbes);
+  variable_index.put((tool_options.opt_store_as_tree)?store_as_tree(p):p);
+
   if (tool_options.opt_strategy>=on_the_fly)
   { bes_equations.store_variable_occurrences();
     bes_equations.count_variable_relevance_on();
@@ -607,6 +615,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
          if (!is_pair(t))
          { // Then t is the name of the current_variable_instantiation, and it has 
            // no arguments.
+           ATfprintf(stderr,"TTTTT %t\n",t);
            current_pbeq = pbes_equation(pbes_equations.get(t));
            assert(current_pbeq.variable().parameters().size()==0);
          }
@@ -624,7 +633,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
       }
       else // The current variable instantiation is a propositional_variable_instantiation
       { 
-
         propositional_variable_instantiation current_variable_instantiation =
             propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
 
