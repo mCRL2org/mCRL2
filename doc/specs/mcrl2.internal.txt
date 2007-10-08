@@ -320,8 +320,10 @@
 <PBExpr>       ::= <DataExpr>
                  | PBESTrue
                  | PBESFalse
+                 | PBESNot(<PBExpr>)
                  | PBESAnd(<PBExpr>, <PBExpr>)
                  | PBESOr(<PBExpr>, <PBExpr>)
+                 | PBESImp(<PBExpr>, <PBExpr>)
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
