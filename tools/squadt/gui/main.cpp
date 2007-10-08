@@ -9,7 +9,6 @@
 
 #include "gui/main.hpp"
 #include "gui/about.hpp"
-#include "gui/manual.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
 #include "gui/dialog/project_settings.hpp"
@@ -17,6 +16,7 @@
 #include "tool_manager.hpp"
 
 #include <wx/menu.h>
+#include <wx/utils.h>
 
 /* Some custom identifiers for use with event handlers */
 #define cmID_UPDATE             (wxID_HIGHEST)
@@ -37,10 +37,7 @@ namespace squadt {
     }
 
     void main::manual() {
-      squadt::GUI::manual* manual_window = new squadt::GUI::manual(this);
-
-      manual_window->CentreOnParent();
-      manual_window->Show();
+      wxLaunchDefaultBrowser(wxString(wxT("http://www.mcrl2.org/wiki/index.php/DeskSQuADT")));
     }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),

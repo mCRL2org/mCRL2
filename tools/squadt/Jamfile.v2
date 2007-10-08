@@ -20,13 +20,6 @@ exe squadt
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
-      :
-      : <install>yes:<dependency>install-user-manual-data
-      ;
-
-install-data user-manual
-      : gui/manual.html
-      : squadt
       ;
 
 install-binaries install
