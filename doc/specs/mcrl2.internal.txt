@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// Date: 04-09-2007
+// Date: 08-10-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
