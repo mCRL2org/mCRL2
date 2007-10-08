@@ -893,7 +893,7 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(tipi::layout::tool_display::sptr l) {
-      /** Register handler for updates */
+      /* Register handler for updates */
       event_handler.clear();
       event_handler.get_monitor()->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
 

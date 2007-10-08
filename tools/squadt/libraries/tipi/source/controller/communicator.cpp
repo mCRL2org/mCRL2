@@ -158,7 +158,7 @@ namespace tipi {
       if (g.get() != 0) {
         tipi::layout::tool_display::sptr d(new layout::tool_display);
  
-        // Make sure the global event handler (the default event handler) does not have a global event is empty
+        // Make sure the global event handler (the default event handler does not have a global event) is empty
         tipi::layout::element::global_event_handler.remove();
 
         try {
@@ -166,9 +166,9 @@ namespace tipi {
       
           if (d->get_manager()) {
             d->get_manager()->get_event_handler()->add(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
-      
-            h(d);
           }
+
+          h(d);
         }
         catch (std::runtime_error& e) {
           logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
