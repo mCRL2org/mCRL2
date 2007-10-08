@@ -290,8 +290,9 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
     ((rewriter == "innerc") ? GS_REWR_INNERC : 
      ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
   BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), rew, 0, false, sol, false);
-
-  result = pbes_expression_prove(p, prover);
+  int nq = 0;
+  data_variable_list fv;
+  result = pbes_expression_simplify(p, &nq, &fv, prover);
 
   // in the resulting expression, the predicate instances should
   // be further replaced with their solutions, etc.

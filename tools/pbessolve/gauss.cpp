@@ -220,7 +220,17 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
       // pbes_expression_compare is not reliable
       // stable = pbes_expression_compare(approx_,approx,prover);
       stable = (approx_ == approx);
-      
+
+      // the approximation process should 
+      // be stopped if all predicate variables have disappeared
+      if (!stable) 
+	{
+	  std::set<propositional_variable_instantiation> setpred =
+	    find_propositional_variable_instantiations(approx_);
+	  stable = (setpred.empty());
+	}
+
+
 #ifdef debug
       if (!stable) gsVerboseMsg("Not"); gsVerboseMsg(" stable\n");
 #endif
