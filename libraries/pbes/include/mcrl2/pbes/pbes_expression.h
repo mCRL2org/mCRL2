@@ -35,8 +35,10 @@ bool is_bes(aterm_appl t);
 // <PBExpr>       ::= <DataExpr>
 //                  | PBESTrue
 //                  | PBESFalse
+//                  | PBESNot(<PBExpr>)
 //                  | PBESAnd(<PBExpr>, <PBExpr>)
 //                  | PBESOr(<PBExpr>, <PBExpr>)
+//                  | PBESImp(<PBExpr>, <PBExpr>)
 //                  | PBESForall(<DataVarId>+, <PBExpr>)
 //                  | PBESExists(<DataVarId>+, <PBExpr>)
 //                  | <PropVarInst>
@@ -95,11 +97,17 @@ namespace pbes_expr {
   /// \brief Returns true if the term t is equal to false
   inline bool is_false(pbes_expression t) { return gsIsPBESFalse(t); }
 
+  /// \brief Returns true if the term t is a not expression
+  inline bool is_not(pbes_expression t) { return gsIsPBESNot(t); }
+
   /// \brief Returns true if the term t is an and expression
   inline bool is_and(pbes_expression t) { return gsIsPBESAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
   inline bool is_or(pbes_expression t) { return gsIsPBESOr(t); }
+
+  /// \brief Returns true if the term t is an imp expression
+  inline bool is_imp(pbes_expression t) { return gsIsPBESImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
   inline bool is_forall(pbes_expression t) { return gsIsPBESForall(t); }
@@ -141,6 +149,18 @@ namespace pbes_expr {
     return pbes_expression(gsMakePBESFalse());
   }
   
+  /// \brief Returns not applied to p
+  inline
+  pbes_expression not_(pbes_expression p)
+  {
+    if(is_true(p))
+      return false_();
+    else if(is_false(p))
+      return true_();
+    else
+      return pbes_expression(gsMakePBESNot(p));
+  }
+  
   /// \brief Returns and applied to p and q
   inline
   pbes_expression and_(pbes_expression p, pbes_expression q)
@@ -171,6 +191,18 @@ namespace pbes_expr {
       return p;
     else
       return pbes_expression(gsMakePBESOr(p,q));
+  }
+  
+  /// \brief Returns imp applied to p and q
+  inline
+  pbes_expression imp_(pbes_expression p, pbes_expression q)
+  {
+    if(is_true(p))
+      return q;
+    else if(is_true(q))
+      return true_();
+    else
+      return pbes_expression(gsMakePBESImp(p,q));
   }
   
   /// \brief Returns the universal quantification of the expression p over the variables in l.
@@ -225,11 +257,19 @@ namespace pbes_expr {
     return result;
   }
   
+  /// \brief Returns the argument of an expression of type not
+  inline
+  pbes_expression not_arg(pbes_expression t)
+  {
+    assert(gsIsPBESNot(t));
+    return arg1(t);
+  }
+  
   /// \brief Returns the left hand side of an expression of type and/or
   inline
   pbes_expression lhs(pbes_expression t)
   {
-    assert(gsIsPBESAnd(t) || gsIsPBESOr(t));
+    assert(gsIsPBESAnd(t) || gsIsPBESOr(t) || gsIsPBESImp(t));
     return arg1(t);
   }
   

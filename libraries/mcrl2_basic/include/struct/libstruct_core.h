@@ -1263,6 +1263,50 @@ bool gsIsPBESForall(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunPBESForall();
 }
 
+// PBESImp
+inline
+AFun initAFunPBESImp(AFun& f)
+{
+  f = ATmakeAFun("PBESImp", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunPBESImp()
+{
+  static AFun AFunPBESImp = initAFunPBESImp(AFunPBESImp);
+  return AFunPBESImp;
+}
+
+inline
+bool gsIsPBESImp(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunPBESImp();
+}
+
+// PBESNot
+inline
+AFun initAFunPBESNot(AFun& f)
+{
+  f = ATmakeAFun("PBESNot", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunPBESNot()
+{
+  static AFun AFunPBESNot = initAFunPBESNot(AFunPBESNot);
+  return AFunPBESNot;
+}
+
+inline
+bool gsIsPBESNot(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunPBESNot();
+}
+
 // PBESOr
 inline
 AFun initAFunPBESOr(AFun& f)
@@ -2895,6 +2939,18 @@ inline
 ATermAppl gsMakePBESForall(ATermList DataVarId_0, ATermAppl PBExpr_1)
 {
   return ATmakeAppl2(gsAFunPBESForall(), (ATerm) DataVarId_0, (ATerm) PBExpr_1);
+}
+
+inline
+ATermAppl gsMakePBESImp(ATermAppl PBExpr_0, ATermAppl PBExpr_1)
+{
+  return ATmakeAppl2(gsAFunPBESImp(), (ATerm) PBExpr_0, (ATerm) PBExpr_1);
+}
+
+inline
+ATermAppl gsMakePBESNot(ATermAppl PBExpr_0)
+{
+  return ATmakeAppl1(gsAFunPBESNot(), (ATerm) PBExpr_0);
 }
 
 inline

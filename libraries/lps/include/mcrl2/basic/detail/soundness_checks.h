@@ -146,6 +146,7 @@ template <typename Term> bool check_term_StateNot(Term t);
 template <typename Term> bool check_term_IfThen(Term t);
 template <typename Term> bool check_term_StateImp(Term t);
 template <typename Term> bool check_term_PBESExists(Term t);
+template <typename Term> bool check_term_PBESImp(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_SortId(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
@@ -212,6 +213,7 @@ template <typename Term> bool check_term_LMerge(Term t);
 template <typename Term> bool check_term_LinearProcess(Term t);
 template <typename Term> bool check_term_ActAt(Term t);
 template <typename Term> bool check_term_DataEqn(Term t);
+template <typename Term> bool check_term_PBESNot(Term t);
 template <typename Term> bool check_term_StateExists(Term t);
 template <typename Term> bool check_term_StateMay(Term t);
 template <typename Term> bool check_term_ParamId(Term t);
@@ -597,8 +599,10 @@ bool check_rule_PBExpr(Term t)
   return    check_rule_DataExpr(t)
          || check_term_PBESTrue(t)
          || check_term_PBESFalse(t)
+         || check_term_PBESNot(t)
          || check_term_PBESAnd(t)
          || check_term_PBESOr(t)
+         || check_term_PBESImp(t)
          || check_term_PBESForall(t)
          || check_term_PBESExists(t)
          || check_rule_PropVarInst(t);
@@ -882,6 +886,37 @@ bool check_term_PBESExists(Term t)
   if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+    {
+      std::cerr << "check_rule_PBExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// PBESImp(PBExpr, PBExpr)
+template <typename Term>
+bool check_term_PBESImp(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsPBESImp(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+    {
+      std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
     }
   if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
@@ -2795,6 +2830,32 @@ bool check_term_DataEqn(Term t)
   if (!check_term_argument(a(3), check_rule_DataExpr<aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// PBESNot(PBExpr)
+template <typename Term>
+bool check_term_PBESNot(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsPBESNot(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+    {
+      std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

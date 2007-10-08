@@ -49,6 +49,14 @@ struct pbes_expression_visitor
   virtual void leave_false()
   {}
 
+  virtual bool visit_not(const pbes_expression& e, const pbes_expression& /* arg */)
+  {
+    return true;
+  }
+
+  virtual void leave_not()
+  {}
+
   virtual bool visit_and(const pbes_expression& e, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return true;
@@ -63,6 +71,14 @@ struct pbes_expression_visitor
   }    
 
   virtual void leave_or()
+  {}
+
+  virtual bool visit_imp(const pbes_expression& e, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  {
+    return true;
+  }
+
+  virtual void leave_imp()
   {}
 
   virtual bool visit_forall(const pbes_expression& e, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
@@ -105,6 +121,13 @@ struct pbes_expression_visitor
     } else if (is_false(e)) {
       visit_false(e);
       leave_false();
+    } else if (is_not(e)) {
+      const pbes_expression& arg = not_arg(e);
+      bool result = visit_not(e, arg);
+      if (result) {
+        visit(arg);
+      }
+      leave_not();
     } else if (is_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
@@ -123,6 +146,15 @@ struct pbes_expression_visitor
         visit(right);
       }
       leave_or();
+    } else if (is_imp(e)) {
+      const pbes_expression& left  = lhs(e);
+      const pbes_expression& right = rhs(e);
+      bool result = visit_imp(e, left, right);
+      if (result) {
+        visit(left);
+        visit(right);
+      }
+      leave_imp();
     } else if (is_forall(e)) {
       const data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);

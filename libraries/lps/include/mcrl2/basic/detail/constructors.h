@@ -49,6 +49,7 @@ ATermAppl constructStateNot();
 ATermAppl constructIfThen();
 ATermAppl constructStateImp();
 ATermAppl constructPBESExists();
+ATermAppl constructPBESImp();
 ATermAppl constructBinder();
 ATermAppl constructSortsPossible();
 ATermAppl constructSortRef();
@@ -129,6 +130,7 @@ ATermAppl constructActionRenameRule();
 ATermAppl constructLinearProcess();
 ATermAppl constructActAt();
 ATermAppl constructDataEqn();
+ATermAppl constructPBESNot();
 ATermAppl constructStateExists();
 ATermAppl constructStateMay();
 ATermAppl constructParamId();
@@ -315,6 +317,22 @@ inline
 ATermAppl constructPBESExists()
 {
   static ATermAppl t = initConstructPBESExists(t);
+  return t;
+}
+
+// PBESImp
+inline
+ATermAppl initConstructPBESImp(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunPBESImp(), reinterpret_cast<ATerm>(constructPBExpr()), reinterpret_cast<ATerm>(constructPBExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructPBESImp()
+{
+  static ATermAppl t = initConstructPBESImp(t);
   return t;
 }
 
@@ -1595,6 +1613,22 @@ inline
 ATermAppl constructDataEqn()
 {
   static ATermAppl t = initConstructDataEqn(t);
+  return t;
+}
+
+// PBESNot
+inline
+ATermAppl initConstructPBESNot(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunPBESNot(), reinterpret_cast<ATerm>(constructPBExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructPBESNot()
+{
+  static ATermAppl t = initConstructPBESNot(t);
   return t;
 }
 
