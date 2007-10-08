@@ -1,0 +1,30 @@
+\documentclass{article}
+
+\begin{document}
+
+Let the linear process $p$ be defined as%
+\[
+X(d:D)=\sum_{i\in I}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow a_{i}(d,e)\circ
+t_{i}(d,e)X(g_{i}(d,e)),
+\]%
+with $d=[d_{1},\ldots ,d_{n}]$. For an arbitrary term $t$ we define $Var(t)$
+as the set of data variables that occur as a subterm of $t$.
+
+\bigskip
+
+Let $G^{0}$ be defined as
+\[
+G^{0}=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in
+Var(c_{i}(d,e)\rightarrow a_{i}(d,e)\circ t_{i}(d,e))\}.
+\]%
+We define for $m\geq 0$:%
+\[
+G^{m+1}=G^{m}\cup \{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in
+G^{m}}\exists _{i\in I}:d_{k}\in Var(g_{i}(d,e)_{l}\}.
+\]%
+Let $M$ be the minimal value for which $G^{M}=G^{M+1}$. The parelm algorithm
+eliminates all variables $d_{k}$ with $k\notin G^{M}$ from the process $p$.
+The claim is that the resulting process is strongly bisimulation equivalent
+to $p$.
+
+\end{document}
