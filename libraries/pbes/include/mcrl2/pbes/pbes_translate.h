@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/basic/normalize.h"
 #include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/specification.h"

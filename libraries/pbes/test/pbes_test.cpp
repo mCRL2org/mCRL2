@@ -187,7 +187,7 @@ void test_normalize()
 
   state_formula x = var(identifier_string("X"), data_expression_list());
   state_formula y = var(identifier_string("Y"), data_expression_list());
-  state_formula f = imp(not_(x), y);
+  state_formula f = imp(x, not_(y));
   state_formula f1 = normalize(f);
   state_formula f2 = or_(x, y);
   std::cout << "f  = " << pp(f) << std::endl;
@@ -323,6 +323,10 @@ void test_pbes_expression()
   pbes_expression e = p::val(x1);
   data_expression x2 = p::val_arg(e);
   BOOST_CHECK(x1 == x2);
+  
+  pbes_expression v_expr = propositional_variable_instantiation("v:V");
+  propositional_variable_instantiation v1 = v_expr;
+  propositional_variable_instantiation v2(v_expr);
 }
 
 void test_trivial()
