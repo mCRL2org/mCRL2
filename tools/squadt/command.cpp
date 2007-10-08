@@ -70,11 +70,11 @@ namespace squadt {
       std::string s;
 
       if (b) {
-        s.append(executable).append(" ");
+        s = executable;
       }
   
       for (std::deque < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
-        s.append(*i).append(" ");
+        s.append(" " + *i);
       }
   
       return (s);

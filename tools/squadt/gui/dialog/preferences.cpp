@@ -180,9 +180,19 @@ namespace squadt {
       try {
         if (format_dialog.ShowModal() == wxID_OK) {
           long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
+
+          mime_type mt(std::string(format_dialog.GetValue().fn_str()));
       
-          formats_and_actions->SetItem(row, 0, wxString(mime_type(std::string(format_dialog.GetValue().fn_str())).to_string().c_str(), wxConvLocal));
-          formats_and_actions->SetItem(row, 1, wxEmptyString);
+          formats_and_actions->SetItem(row, 0, wxString(mt.to_string().c_str(), wxConvLocal));
+
+          std::auto_ptr< command > c = global_build_system.get_type_registry()->get_registered_command(mt, "$");
+
+          if (c.get()) {
+            formats_and_actions->SetItem(row, 1, wxString(c->as_string().c_str(), wxConvLocal));
+          }
+          else {
+            formats_and_actions->SetItem(row, 1, wxEmptyString);
+          }
 
           return;
         }
