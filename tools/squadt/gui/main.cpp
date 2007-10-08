@@ -37,7 +37,7 @@ namespace squadt {
     }
 
     void main::manual() {
-      wxLaunchDefaultBrowser(wxString(wxT("http://www.mcrl2.org/wiki/index.php/DeskSQuADT")));
+      wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/DeskSQuADT"));
     }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),

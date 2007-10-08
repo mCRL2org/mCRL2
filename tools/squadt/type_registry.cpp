@@ -141,7 +141,9 @@ namespace squadt {
     }
 
     for (actions_for_type::const_iterator i = command_for_type.begin(); i != command_for_type.end(); ++i) {
-      formats.insert((*i).first);
+      if (i->second != command_none) {
+        formats.insert((*i).first);
+      }
     }
 
     BOOST_FOREACH(tool::sptr t, global_build_system.get_tool_manager()->get_tools()) {
@@ -200,7 +202,7 @@ namespace squadt {
         command_for_type[t] = c;
       }
     }
-    else if (c.empty()) {
+    else if (c.empty() || &c == &command_none) {
       command_for_type[t] = command_none;
     }
     else {

@@ -39,12 +39,12 @@ namespace squadt {
 
       private:
 
-        /* \brief The maximum number of tool instances that are not active for a configuration operation */
+        /** \brief The maximum number of tool instances that are not active for a configuration operation */
         wxSlider* maximum_concurrent;
 
       private:
 
-        /* \brief Event handler for changes to the maximum */
+        /** \brief Event handler for changes to the maximum */
         void maximum_changed(wxCommandEvent&);
 
       public:
@@ -57,7 +57,7 @@ namespace squadt {
 
       private:
 
-        wxListView*                        formats_and_actions;
+        wxListView* formats_and_actions;
 
       private:
 
@@ -65,17 +65,20 @@ namespace squadt {
 
       private:
 
-        /* \brief Function that is used for getting columns with decent widths */
+        /** \brief Function that is used for getting columns with decent widths */
         void activate();
 
-        /* \brief Event handler for when the new button is pressed */
+        /** \brief Event handler for when the new button is pressed */
         void new_association(wxCommandEvent&);
 
-        /* \brief Event handler for when the delete button is pressed */
+        /** \brief Event handler for when the delete button is pressed */
         void remove_association(wxCommandEvent&);
 
-        /* \brief Event handler for command changes */
+        /** \brief Event handler for command changes */
         void edit_command(wxCommandEvent&);
+
+        /** \brief Event handler for selection changes */
+        void item_selected(wxCommandEvent&);
 
       public:
 
@@ -214,6 +217,9 @@ namespace squadt {
                 mime_type(std::string(s.GetText().fn_str())), type_registry::command_none);
 
       formats_and_actions->DeleteItem(selected);
+
+      wxWindow::FindWindowById(wxID_EDIT, this)->Disable();
+      wxWindow::FindWindowById(wxID_DELETE, this)->Disable();
     }
 
     void edit_preferences::activate() {
@@ -221,6 +227,11 @@ namespace squadt {
 
       formats_and_actions->SetColumnWidth(0, (width + 2) / 3);
       formats_and_actions->SetColumnWidth(1, (width * 2 + 2) / 3);
+    }
+
+    void edit_preferences::item_selected(wxCommandEvent&) {
+      wxWindow::FindWindowById(wxID_EDIT, this)->Enable();
+      wxWindow::FindWindowById(wxID_DELETE, this)->Enable();
     }
 
     edit_preferences::edit_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
@@ -263,9 +274,13 @@ namespace squadt {
 
       GetSizer()->Add(current_sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
 
+      wxWindow::FindWindowById(wxID_EDIT, this)->Disable();
+      wxWindow::FindWindowById(wxID_DELETE, this)->Disable();
+
       Connect(wxID_NEW, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::new_association));
       Connect(wxID_EDIT, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::edit_command));
       Connect(wxID_DELETE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(edit_preferences::remove_association));
+      Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxCommandEventHandler(edit_preferences::item_selected));
     }
 
     void debug_preferences::filter_level_changed(wxCommandEvent&) {
