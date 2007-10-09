@@ -40,6 +40,11 @@ struct pbes_expression_builder
     return pbes_expression();
   }
 
+  virtual pbes_expression visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
+  {
+    return pbes_expression();
+  }
+
   virtual pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
@@ -49,6 +54,11 @@ struct pbes_expression_builder
   {
     return pbes_expression();
   }    
+
+  virtual pbes_expression visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  {
+    return pbes_expression();
+  }
 
   virtual pbes_expression visit_forall(const pbes_expression& /* e */, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
@@ -82,6 +92,10 @@ struct pbes_expression_builder
     } else if (is_false(e)) {
       pbes_expression result = visit_false(e);
       return (result == pbes_expression()) ? e : result;
+    } else if (is_not(e)) {
+      const pbes_expression& arg = not_arg(e);
+      pbes_expression result = visit_not(e, arg);
+      return (result == pbes_expression()) ? not_(visit(arg)) : result;
     } else if (is_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
@@ -92,6 +106,11 @@ struct pbes_expression_builder
       const pbes_expression& right = rhs(e);
       pbes_expression result = visit_or(e, left, right);
       return (result == pbes_expression()) ? or_(visit(left), visit(right)) : result;
+    } else if (is_imp(e)) {
+      const pbes_expression& left  = lhs(e);
+      const pbes_expression& right = rhs(e);
+      pbes_expression result = visit_imp(e, left, right);
+      return (result == pbes_expression()) ? imp(visit(left), visit(right)) : result;
     } else if (is_forall(e)) {
       const data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);

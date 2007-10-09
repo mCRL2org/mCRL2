@@ -308,9 +308,9 @@ void test_complement_method_builder()
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
-  // std::cout << "p             = " << pp(p) << std::endl;
-  // std::cout << "q             = " << pp(q) << std::endl;
-  // std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
+  std::cout << "p             = " << pp(p) << std::endl;
+  std::cout << "q             = " << pp(q) << std::endl;
+  std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
 }
 
@@ -334,7 +334,8 @@ void test_trivial()
   specification spec    = mcrl22lps(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed); 
+  pbes<> p = lps2pbes(spec, formula, timed);
+std::cout << "<p>" << pp(p) << std::endl;
   BOOST_CHECK(p.is_well_typed());
 }
 

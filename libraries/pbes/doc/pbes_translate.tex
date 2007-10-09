@@ -198,7 +198,9 @@ $}
 % StateFalse
 {\mathbf{E}} (\sfalse) & \isdef  & \epsilon \\
 
-% StateNot (not supported)
+% StateNot
+{\mathbf{E}} (\neg \varphi) & \isdef &
+   {\mathbf{E}} (\varphi) \\
 
 % StateAnd
 {\mathbf{E}} (\varphi \wedge \psi) & \isdef &
@@ -210,7 +212,10 @@ $}
    {\mathbf{E}} (\varphi)
     {\mathbf{E}} (\psi) \\
 
-% StateImp (not supported)
+% StateImp
+{\mathbf{E}} (\varphi \Rightarrow \psi) & \isdef &
+   {\mathbf{E}} (\varphi)
+   {\mathbf{E}} (\psi) \\
 
 % StateForall
 {\mathbf{E}} (\forall{x {:} D}. \varphi) & \isdef &
@@ -268,16 +273,20 @@ $}
 
 %{\mathbf{RHS}} (\sfalse) & \isdef  &  \sfalse \\
 
-%{\mathbf{RHS}} (\neg \varphi) & \isdef &
-%   \neg~ \mathbf{RHS}(\varphi) \\
+{\mathbf{RHS}} (\neg \varphi) & \isdef &
+   \neg~ \mathbf{RHS}(\varphi) \\
 
-%%% AND/OR
+%%% AND/OR/IMP
 {\mathbf{RHS}} (\varphi \wedge \psi) & \isdef &
    {\mathbf{RHS}} (\varphi) \wedge
     {\mathbf{RHS}} (\psi) \\
 
 {\mathbf{RHS}} (\varphi \vee \psi) &\isdef &
    {\mathbf{RHS}} (\varphi) \vee
+    {\mathbf{RHS}} (\psi)\\
+
+{\mathbf{RHS}} (\varphi \Rightarrow \psi) &\isdef &
+   {\mathbf{RHS}} (\varphi) \Rightarrow
     {\mathbf{RHS}} (\psi)\\
 
 %%% QUANTIFIERS
@@ -289,10 +298,10 @@ $}
 
 %%% BOX
 {\mathbf{RHS}} ([ \alpha ] \varphi) & \isdef &
-   \bigwedge_{i {\in} I} \forall_{y {:} E_i}(
-        \mathbf{Sat}_\bot(a_i(f_i(x_p,y)) \at t_i(x_p,y), \alpha)\ \vee \\
+   \bigwedge_{i {\in} I} \forall_{y {:} E_i}((
+        \mathbf{Sat}_\top(a_i(f_i(x_p,y)) \at t_i(x_p,y), \alpha)\ \wedge \\
 & & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}
-         \neg c_i(x_p,y) \vee t_i(x_p,y) \le T\ \vee\\
+         c_i(x_p,y) \wedge t_i(x_p,y) > T\ ) \Rightarrow \\
 & & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}
         {\mathbf{RHS}} (\varphi)[T := t_i(x_p,y)][x_p := g_i(x_p,y)]) \\
 
@@ -356,39 +365,41 @@ $
 & \isdef & \mathbf{Sat}_\top(a \at t, \alpha)
   \wedge t \approx u\\
 \mathbf{Sat}_\top(a \at t, \neg \alpha)
-& \isdef & \mathbf{Sat}_\bot(a \at t, \alpha)\\
+& \isdef & \neg \mathbf{Sat}_\top(a \at t, \alpha)\\
 \mathbf{Sat}_\top(a \at t, \alpha \wedge \beta)
 & \isdef & \mathbf{Sat}_\top(a \at t, \alpha) \wedge \mathbf{Sat}_\top(a \at t, \beta)\\
 \mathbf{Sat}_\top(a \at t, \alpha \vee \beta)
 & \isdef & \mathbf{Sat}_\top(a \at t, \alpha) \vee \mathbf{Sat}_\top(a \at t, \beta)\\
+\mathbf{Sat}_\top(a \at t, \alpha \Rightarrow \beta)
+& \isdef & \mathbf{Sat}_\top(a \at t, \alpha) \Rightarrow \mathbf{Sat}_\top(a \at t, \beta)\\
 \mathbf{Sat}_\top(a \at t, \forall{x {:} D}. \alpha)
 & \isdef & \forall{y {:} D}. (\mathbf{Sat}_\top(a \at t, \alpha[x := y])\\
 \mathbf{Sat}_\top(a \at t, \exists{x {:} D}. \alpha)
 & \isdef & \exists{y {:} D}. (\mathbf{Sat}_\top(a \at t, \alpha[x := y])\\
-\\
-\mathbf{Sat}_\bot(a \at t, b)
-& \isdef & \left\{%
-\begin{array}{cc}
-\dbigwedge\limits_{\lbrack i_{1},\ldots ,i_{n}]\in
-A}\dbigvee\limits_{k=1\ldots n}(a_{k}\neq b_{i_{k}}) & \text{if }A\neq
-\emptyset  \\
-true & \text{otherwise}%
-\end{array}%
-\right.\\
-\mathbf{Sat}_\bot(a \at t, c)
-& \isdef & \neg c\\
-\mathbf{Sat}_\bot(a \at t, \alpha \at u)
-& \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \vee t \not\approx u\\
-\mathbf{Sat}_\bot(a \at t, \neg \alpha)
-& \isdef & \mathbf{Sat}_\top(a \at t, \alpha)\\
-\mathbf{Sat}_\bot(a \at t, \alpha \wedge \beta)
-& \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \vee \mathbf{Sat}_\bot(a \at t, \beta)\\
-\mathbf{Sat}_\bot(a \at t, \alpha \vee \beta)
-& \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \wedge \mathbf{Sat}_\bot(a \at t, \beta)\\
-\mathbf{Sat}_\bot(a \at t, \forall{x {:} D}. \alpha)
-& \isdef & \exists{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
-\mathbf{Sat}_\bot(a \at t, \exists{x {:} D}. \alpha)
-& \isdef & \forall{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
+% \\
+% \mathbf{Sat}_\bot(a \at t, b)
+% & \isdef & \left\{%
+% \begin{array}{cc}
+% \dbigwedge\limits_{\lbrack i_{1},\ldots ,i_{n}]\in
+% A}\dbigvee\limits_{k=1\ldots n}(a_{k}\neq b_{i_{k}}) & \text{if }A\neq
+% \emptyset  \\
+% true & \text{otherwise}%
+% \end{array}%
+% \right.\\
+% \mathbf{Sat}_\bot(a \at t, c)
+% & \isdef & \neg c\\
+% \mathbf{Sat}_\bot(a \at t, \alpha \at u)
+% & \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \vee t \not\approx u\\
+% \mathbf{Sat}_\bot(a \at t, \neg \alpha)
+% & \isdef & \mathbf{Sat}_\top(a \at t, \alpha)\\
+% \mathbf{Sat}_\bot(a \at t, \alpha \wedge \beta)
+% & \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \vee \mathbf{Sat}_\bot(a \at t, \beta)\\
+% \mathbf{Sat}_\bot(a \at t, \alpha \vee \beta)
+% & \isdef & \mathbf{Sat}_\bot(a \at t, \alpha) \wedge \mathbf{Sat}_\bot(a \at t, \beta)\\
+% \mathbf{Sat}_\bot(a \at t, \forall{x {:} D}. \alpha)
+% & \isdef & \exists{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
+% \mathbf{Sat}_\bot(a \at t, \exists{x {:} D}. \alpha)
+% & \isdef & \forall{y {:} D}. \mathbf{Sat}_\bot(a \at t, \alpha[x := y])\\
 \end{tightarray}
 $
 }
@@ -406,9 +417,13 @@ $
 %& \isdef & []\\
 %\mathbf{Par}_X(\sfalse)
 %& \isdef & []\\
+\mathbf{Par}_X(\neg \varphi)
+& \isdef & \mathbf{Par}_X(\varphi)\\
 \mathbf{Par}_X(\varphi \wedge \psi)
 & \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi)\\
 \mathbf{Par}_X(\varphi \vee \psi)
+& \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi) \\
+\mathbf{Par}_X(\varphi \Rightarrow \psi)
 & \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi) \\
 \mathbf{Par}_X([\alpha]\varphi)
 & \isdef & \mathbf{Par}_X(\varphi) \\

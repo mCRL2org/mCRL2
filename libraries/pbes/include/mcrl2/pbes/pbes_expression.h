@@ -55,13 +55,6 @@ class pbes_expression: public aterm_appl
       assert(detail::check_rule_PBExpr(m_term));
     }
 
-    // allow assignment to aterms
-    pbes_expression& operator=(aterm t)
-    {
-      m_term = t;
-      return *this;
-    }
-
     /// Applies a substitution to this pbes expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -195,7 +188,7 @@ namespace pbes_expr {
   
   /// \brief Returns imp applied to p and q
   inline
-  pbes_expression imp_(pbes_expression p, pbes_expression q)
+  pbes_expression imp(pbes_expression p, pbes_expression q)
   {
     if(is_true(p))
       return q;
@@ -277,7 +270,7 @@ namespace pbes_expr {
   inline
   pbes_expression rhs(pbes_expression t)
   {
-    assert(gsIsPBESAnd(t) || gsIsPBESOr(t));
+    assert(gsIsPBESAnd(t) || gsIsPBESOr(t) || gsIsPBESImp(t));
     return arg2(t);
   }
   
