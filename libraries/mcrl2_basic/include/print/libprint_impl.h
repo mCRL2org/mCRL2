@@ -1689,20 +1689,38 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsPBESAnd(PBExpr) || gsIsPBESOr(PBExpr)) {
-    //print conjunction or disjunction
-    PRINT_FUNC(dbg_prints)("printing conjunction or disjunction\n");
+  } else if (gsIsStateImp(PBExpr)) {
+    //print implication
+    PRINT_FUNC(dbg_prints)("printing implication\n");
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 0),
       pp_format, ShowSorts, 2);
+    PRINT_FUNC(fprints)(OutStream, " => ");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
+      pp_format, ShowSorts, 1);
+    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsPBESAnd(PBExpr) || gsIsPBESOr(PBExpr)) {
+    //print conjunction or disjunction
+    PRINT_FUNC(dbg_prints)("printing conjunction or disjunction\n");
+    if (PrecLevel > 2) PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 0),
+      pp_format, ShowSorts, 3);
     if (gsIsPBESAnd(PBExpr)) {
       PRINT_FUNC(fprints)(OutStream, " && ");
     } else {
       PRINT_FUNC(fprints)(OutStream, " || ");
     }
     PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
-      pp_format, ShowSorts, 1);
-    if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
+      pp_format, ShowSorts, 2);
+    if (PrecLevel > 2) PRINT_FUNC(fprints)(OutStream, ")");
+  } else if (gsIsPBESNot(PBExpr)) {
+    //print negation
+    PRINT_FUNC(dbg_prints)("printing negation\n");
+    if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(fprints)(OutStream, "!");
+    PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 0),
+      pp_format, ShowSorts, 3);
+    if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, ")");
   }
 }
 
