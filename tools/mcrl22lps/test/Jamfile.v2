@@ -2,7 +2,7 @@ project toolset/mcrl22lps/test
      : source-location .
      ;
 
-alias mcrl22lps-test-tool : /tools/mcrl22lps//mcrl22lps ;
+alias mcrl22lps-test-tool : $(TOP)/tools/mcrl22lps//mcrl22lps ;
 
 # run mcrl22lps on all mcrl2 files located somewhere in $(TOP)/examples
 #

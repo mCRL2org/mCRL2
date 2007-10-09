@@ -94,8 +94,6 @@ int test_main(int, char*[])
   linear_process in(mcrl22lps(case_5).process());
   linear_process out(parelm(in));
 
-std::cout << "<case5>" << "<in>" << pp(in) << "\n<out>" << pp(out) << std::endl;
-
   BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
   BOOST_CHECK(in.summands().size() == out.summands().size());
   BOOST_CHECK(in.free_variables().size() == out.free_variables().size());

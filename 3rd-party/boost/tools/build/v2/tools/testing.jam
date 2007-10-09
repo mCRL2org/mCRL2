@@ -177,15 +177,17 @@ local rule get-library-name ( path )
 {
     # Path is in normalized form, so all slashes are forward.
 
-    local match1 = [ MATCH /src/libraries/(.*)/(test|example) : $(path) ] ;
-    local match2 = [ MATCH /src/libraries/(.*)$ : $(path) ] ;
-    local match3 = [ MATCH /src/(.*)$/(test|example) : $(path) ] ;
-    local match4 = [ MATCH (/status$) : $(path) ] ;
+    local match1 = [ MATCH /libraries/(.*)/(test|example) : $(path) ] ;
+    local match2 = [ MATCH /libraries/(.*)$ : $(path) ] ;
+    local match3 = [ MATCH /3rd-party/(.*)/(test|example)$ : $(path) ] ;
+    local match4 = [ MATCH /tools/(.*)$/(test|example) : $(path) ] ;
+    local match5 = [ MATCH (/status$) : $(path) ] ;
 
     if $(match1) { return $(match1[0]) ; }
     else if $(match2) { return $(match2[0]) ; }
     else if $(match3) { return $(match3[0]) ; }
-    else if $(match4) { return "" ; }
+    else if $(match4) { return $(match4[0]) ; }
+    else if $(match5) { return "" ; }
     else if --dump-tests in [ modules.peek : ARGV ] 
     { 
         # The 'run' rule and others might be used outside
