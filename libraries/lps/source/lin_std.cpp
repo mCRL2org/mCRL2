@@ -103,7 +103,7 @@ static ATermAppl storeinit(ATermAppl init);
 static void storeprocs(ATermList procs);
 static ATermList getsorts(ATermList l);
 static ATermList sortActionLabels(ATermList actionlabels);
-static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec);
+static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec,int max_nesting_depth=3);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
 static ATermAppl getfreshvariable(char *s,ATermAppl sort);
@@ -4337,7 +4337,8 @@ static int occursin(ATermAppl name,ATermList pars)
 
 static ATermAppl dummyterm(
                     ATermAppl targetsort, 
-                    specificationbasictype *spec)
+                    specificationbasictype *spec,
+                    int max_nesting_depth)
 { /* This procedure yields a term of the requested sort.
      First, it tries to find a constant constructor. If it cannot
      be found, a constant mapping is sought. If this cannot be
@@ -4353,7 +4354,8 @@ static ATermAppl dummyterm(
   /* First search for a constant constructor */
 
   for (int i=0 ; (i<maxobject) ; i++ )
-  { if ((objectdata[i].object==func)&&
+  { 
+    if ((objectdata[i].object==func)&&
         (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
     { return objectdata[i].objectname;
     }
@@ -4367,6 +4369,34 @@ static ATermAppl dummyterm(
     { return objectdata[i].objectname;
     }
   }
+
+  /* Third search for a function or constructor applied to
+     dummyterms of the appropriate sort, with a smaller nesting
+     depth */
+
+  if (max_nesting_depth>0)
+  { for (int i=0 ; (i<maxobject) ; i++ )
+    { if (((objectdata[i].object==func)||(objectdata[i].object==map))&&
+           (objectdata[i].targetsort==targetsort))
+      { /* The function found cannot be a constant */
+        ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
+        unsigned int arity=ATgetLength(argumentsorts);
+        ATermList arguments;
+        for(unsigned int j=0; j<arity; j++)
+        { ATerm t=(ATerm)dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1);
+          if (t==NULL)
+          { goto FAIL;
+          }
+          arguments=ATinsert(arguments,t);
+          argumentsorts=ATgetNext(argumentsorts);
+        }
+        arguments=ATreverse(arguments);
+        return gsMakeDataApplList(objectdata[i].objectname,arguments);
+      }
+    }
+  } 
+
+  FAIL:
 
   /* Third construct a new constant, and yield it. */
 
