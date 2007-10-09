@@ -182,6 +182,8 @@ void LTSViewApp::openFile(string fileName) {
   }
   if (lts!=NULL) delete lts;
   lts = newlts;
+  // first remove all unreachable states
+  lts->trim();
   
   mainFrame->updateProgressDialog(17,"Applying ranking");
   lts->applyRanking(rankStyle);

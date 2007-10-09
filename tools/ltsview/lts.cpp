@@ -1259,6 +1259,32 @@ void LTS::setZoomLevel(const int level)
   zoomLevel = level;
 }
 
+void LTS::trim() {
+  // removes unreachable parts from the LTS
+  visit(initialState);
+  vector<State*> new_unmarked;
+  vector<State*>::iterator li = unmarkedStates.begin();
+  while (li != unmarkedStates.end()) {
+    if ((*li)->isMarked()) {
+      (*li)->unmark();
+      new_unmarked.push_back(*li);
+    } else {
+      delete (*li);
+    }
+    ++li;
+  }
+  unmarkedStates.swap(new_unmarked);
+}
+
+void LTS::visit(State* s) {
+  if (!s->isMarked()) {
+    s->mark();
+    for (int i = 0; i < s->getNumOutTransitions(); ++i) {
+      visit(s->getOutTransition(i)->getEndState());
+    }
+  }
+}
+
 void LTS::loadTrace(std::string const& path)
 {
 

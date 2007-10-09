@@ -69,6 +69,8 @@ class LTS {
     void	setInitialState(State* s);
     void	setMatchAnyMarkRule(bool b);
     void	unmarkAction(std::string label);
+    
+    void trim();
 
     int         getZoomLevel() const;
     void        setZoomLevel(const int level);
@@ -159,6 +161,7 @@ class LTS {
     //Ret:  states that could not be placed by this phase, sorted top-down.
 
     void resolveClusterSlots();
+    void visit(State* s);
 };
 
 #endif // LTS_H
