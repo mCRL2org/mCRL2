@@ -16,7 +16,7 @@
 
 #include <boost/function.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/thread.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 
