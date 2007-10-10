@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
   {
     M.load(argv[1]);
     S.load(argv[2]);
-    pbes result = strong_bisimulation(M, S);
+    pbes<> result = strong_bisimulation(M, S);
     result.save(argv[3]);
   }
   catch (std::runtime_error e)

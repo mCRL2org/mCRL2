@@ -1,0 +1,19 @@
+project libraries/pbes/example
+   : requirements
+       <use>/boost//headers
+       <source>/libraries//rewrite
+       <source>/libraries//mcrl2_basic
+       <source>/libraries//lps
+       <source>/libraries//pbes
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+exe bisimulation    : bisimulation.cpp : ;
+
+install dist
+   :
+     bisimulation
+   :
+   ;

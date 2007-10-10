@@ -15,6 +15,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/make_list.h"
 #include "atermpp/algorithm.h"
+#include "atermpp/vector.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
