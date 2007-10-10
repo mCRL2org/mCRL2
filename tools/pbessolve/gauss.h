@@ -71,53 +71,85 @@ class pbes_solver {
 
 
 
-
 /// This function transforms a pbes_expression without quantifiers
 /// into a data expression, then sends it to the prover
-/// and transforms the simplified result back to a pbes expression
+/// and transforms the simplified result back to a pbes expression.
 ///
 /// todo: find a way to deal with quantifiers
 /// todo: make a dedicated prover for pbes expressions
-pbes_expression pbes_expression_prove(pbes_expression e, 
-					BDD_Prover* p);
+pbes_expression pbes_expression_prove
+(pbes_expression e, BDD_Prover* p);
 
 
-/// 
-pbes_expression substitute(pbes_expression expr, 
-			   propositional_variable X, 
-			   pbes_expression solX);
-
-pbes_expression update_expression(pbes_expression e, 
-				  atermpp::vector<pbes_equation> es_solution);
-
-
+/// Applies various heuristics in order to simplify
+/// a pbes_expression.
+/// OUT nq  := the number of quantifiers left in expr after simplification
+/// OUT fv := the set of names of the data variables occuring FREE in expr, 
+///        after simplification
 pbes_expression pbes_expression_simplify
-(pbes_expression p, int *nq, data_variable_list *fv ,
- BDD_Prover *prover);
-
-pbes_expression enumerate_finite_domains
-(bool forall, data_variable_list *quant_vars, pbes_expression p, BDD_Prover *prover);
+(pbes_expression p, int *nq, data_variable_list *fv , BDD_Prover *prover);
 
 
-
-
-/// This function assumes there are no quantifiers in 
-/// data expressions.
+/// This function assumes there are no quantifiers in data expressions.
 /// The simplification is done by the prover and/or/rewriter
 data_expression data_expression_simplify
 (data_expression d, data_variable_list *fv, BDD_Prover *prover);
 
 
+/// This is a customized variant of pbes2data from pbes_utility.h
+/// All operators become data operators.
+/// Predicate variables become data variables, with 
+/// the same arguments but a marked name (+PREDVAR_MARK at the end)
+
+/// It doesn't work for quantifiers!
+/// (if we translate PBES quantifiers to DATA quantifiers,
+/// then there is no way back, because of the data implementation part)
+///
+/// todo: check whether data implementation can be avoided
+data_expression pbes_to_data(pbes_expression e);
+
+
+/// This is a customized variant of data2pbes from pbes_utility.h
+/// It keeps the logical operators in the data world,
+/// unless there is an obvious need to translate them to pbes operators.
+pbes_expression data_to_pbes_lazy(data_expression d);
+
+
+/// This translates as much as possible of the logical operators
+/// to pbes operators. Unfinished.
+pbes_expression data_to_pbes_greedy(data_expression d);
+
+
+/// Returns expr [X <- solX].
+pbes_expression substitute(pbes_expression expr, 
+			   propositional_variable X, 
+			   pbes_expression solX);
+
+
+/// Substitutes, in e, all predicate variables with their respective 
+/// solutions as given by es_solution.
+pbes_expression update_expression(pbes_expression e, 
+				  atermpp::vector<pbes_equation> es_solution);
+
+
+/// Instantiates p for all possible values of the variables 
+/// in quant_vars (assumed from finite domains).
+/// Out of these instances, a big /\ (if forall==true) or 
+/// \/ (if forall==false) is produced.
+/// The 'forall' parameter should be set on true if this enumeration
+/// is done for an universal quantifier and false if it's for 
+/// an existential quantifier.
+pbes_expression enumerate_finite_domains
+(bool forall, data_variable_list *quant_vars, pbes_expression p, BDD_Prover *prover);
+
+
+/// Compares two pbes expressions using the prover.
+/// It only works for quantifier-free expressions.
 bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover* prover);
 
 
-// some extra needed functions on data_variable_lists and data_expressions
- bool var_in_list(data_variable vx, data_variable_list y);
-data_variable_list intersect(data_variable_list x, data_variable_list y);
- data_variable_list substract(data_variable_list x, data_variable_list y);
- data_variable_list dunion(data_variable_list x, data_variable_list y);
- void dunion(data_variable_list *x, data_variable_list y);
+
 
 
 

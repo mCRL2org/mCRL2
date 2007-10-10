@@ -38,8 +38,8 @@
 
 
 
-//#define debug
-//#define debug2
+#define debug
+#define debug2
 //#define pbes_expression_prove_in_enumerate_rec
 //#define pbes_expression_prove_with_quantifiers
 
@@ -56,10 +56,26 @@ using namespace mcrl2::utilities;
 
 sort_instantiator si;
 
+// some extra needed functions on data_variable_lists and data_expressions
+bool var_in_list(data_variable vx, data_variable_list y);
+data_variable_list intersect(data_variable_list x, data_variable_list y);
+data_variable_list substract(data_variable_list x, data_variable_list y);
+data_variable_list dunion(data_variable_list x, data_variable_list y);
+void dunion(data_variable_list *x, data_variable_list y);
+
+
+
+
+
+// Implementation of pbes_solver  
+//*********************************
+
+//=================================================
 pbes_solver::pbes_solver(pbes<> p_pbes_spec,
 			 std::string solver, 
 			 std::string rew_strategy, 
 			 int p_bound, bool p_interactive)
+//=================================================
 {
   pbes_spec = p_pbes_spec;
   
@@ -82,14 +98,9 @@ pbes_solver::pbes_solver(pbes<> p_pbes_spec,
 
 
 
-//======================================================================
-// Tries to solve the pbes by solving the predicate variables one by one,
-// starting with the one defined by the last equation.
-// The parameter 'rewriter' is in fact a rewriting strategy
-// Algorithm:
-//
+//=================================================
 atermpp::vector<pbes_equation> pbes_solver::solve()
-//========================
+//=================================================
 
 {
 
@@ -151,24 +162,14 @@ atermpp::vector<pbes_equation> pbes_solver::solve()
   
   return es_solution;
 }
-//======================================================================
 
 
 
 
-
-//======================================================================
-// Tries to solve equation e.
-// If succesful, the result will be an equation without
-// e's predicate variable on the right hand side.
-// The approximation process will stop within _bound_ steps 
-// (but if _bound_=0, then it will continue indefinetely).
-// If _interactive_ is turned on, then, after _bound_ approximation steps,
-// the control will be given to the user.
-
+//=================================================
 pbes_equation pbes_solver::solve_equation(pbes_equation e) 
-//==========================
-  
+//=================================================
+ 
 {
 #ifdef debug
   gsVerboseMsg("solve_equation:start\n");
@@ -247,14 +248,12 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
   // make solution and return it
   return pbes_equation(e.symbol(), X, approx);
 }
-//======================================================================
 
 
 
 
 
-
-//======================================================================
+//================================================
 // Replaces, in solX, all occurrences of variables 
 // from generic_parameters with the corresponding data expressions 
 // from actual_parameters
@@ -331,7 +330,7 @@ pbes_expression substitute(pbes_expression expr,
  // it is bounded in all approximations of E.
  // (So, subtituting an approx. of E in E does not introduce name clashes).
 }
-//======================================================================
+
 
 
 
@@ -341,8 +340,8 @@ pbes_expression substitute(pbes_expression expr,
 // Replaces, in e,
 // all occurences of binding variables from es_solution
 // with their solutions (i.e., corresponding equations from es_solution)
-
-pbes_expression update_expression(pbes_expression e, atermpp::vector<pbes_equation> es_solution)
+pbes_expression update_expression
+(pbes_expression e, atermpp::vector<pbes_equation> es_solution)
 //==================
 
 {
@@ -363,15 +362,14 @@ pbes_expression update_expression(pbes_expression e, atermpp::vector<pbes_equati
  }
  return ee; 
 }
+
+
+
+
+
+
+
 //======================================================================
-
-
-
-
-
-
-//======================================================================
-
 data_expression pbes_to_data(pbes_expression e)
 
 // This is a customized variant of pbes2data from pbes_utility.h
@@ -473,11 +471,8 @@ data_expression pbes_to_data(pbes_expression e)
 
 
 //======================================================================
-// This is a customized variant of data2pbes from pbes_utility.h
-// It keeps the logical operators in the data world,
-// unless there is an obvious need to translate them to pbes operators.
-
  pbes_expression data_to_pbes_lazy(data_expression d)
+//======================================================================
 {
  
  // if d doesn't contain any predicate variables, 
@@ -569,7 +564,7 @@ data_expression pbes_to_data(pbes_expression e)
  exit(1);
  return pbes_expression(); // to prevent compiler warnings
 }
-//======================================================================
+
 
 
 
@@ -577,7 +572,6 @@ data_expression pbes_to_data(pbes_expression e)
 //======================================================================
 // This translates as much as possible of the logical operators
 // to pbes operators. Unfinished.
-
  pbes_expression data_to_pbes_greedy(data_expression d)
 {
  
@@ -632,28 +626,10 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 #ifdef debug
   gsVerboseMsg("PBES_EXPRESSION_PROVE %s\n", pp(e).c_str());
 #endif
-
   
-  /*
-  if (is_data(e))
-    {
-#ifdef debug
-      if (is_data(e)) gsVerboseMsg("data expression already!\n");
-#endif
-
-      Rewriter* r = prover->get_rewriter();;
-      data_expression d = r->rewrite((data_expression) e);
-
-      // translate back to a pbes_expression
-      return val(d);    
-    }
-  */
-      
  data_expression de = pbes_to_data(e); 
  prover->set_formula(de); 
  data_expression d = prover->get_bdd();
-
- // translate back to a pbes_expression
  e = data_to_pbes_lazy(d);
  
  return e;
@@ -679,13 +655,9 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 
 
 //======================================================================
-// eliminates some quantifiers
-// OUT nq  := the number of quantifiers left in expr after simplification
-// OUT fv := the set of names of the data variables occuring FREE in expr, 
-//        after simplification
  pbes_expression pbes_expression_simplify
- (pbes_expression expr, int* nq, data_variable_list *fv, 
-  BDD_Prover* prover)
+ (pbes_expression expr, int* nq, data_variable_list *fv, BDD_Prover* prover)
+//======================================================================
 {
   PESdeep++;
 #ifdef debug
@@ -734,8 +706,9 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
       // compute the list of actually bounded variables 
       // (i.e., eliminate from the quant_vars those vars that do not occur free in s_under)
       data_variable_list new_quant_vars = intersect(quant_vars(expr),fv_under);
-      // if any quantified vars left, try to eliminate them by enumeration
-      
+      *fv = substract(fv_under, new_quant_vars); // !! too inefficient?
+
+      // if any quantified vars left, try to eliminate them by enumeration   
       if (!new_quant_vars.empty()){
 #ifdef debug
 	gsVerboseMsg("\n**********PBES_EXPRESSION_SIMPLIFY: calling enumerate_finite_domains for %s ******** new_quant_vars=%s\n",
@@ -812,13 +785,14 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 
 
 
+
+
+
+
 //======================================================================
-// Rewrites (simplifies) e according to the
-// rewriting rules of first-order logic.
-// only works for quantifier-free expressions.
 data_expression data_expression_simplify
 (data_expression d, data_variable_list *fv, BDD_Prover *prover)
-
+//======================================================================
 {
   namespace dname = lps::data_expr;
   
@@ -1032,6 +1006,8 @@ pbes_expression enumerate_rec(bool forall,
 //======================================================================
 pbes_expression enumerate_finite_domains
 (bool forall, data_variable_list *quant_vars, pbes_expression p, BDD_Prover *prover)
+//======================================================================
+
 // - instantiate all finite domain variables from quant_vars
 // with their domain's elements
 // - return the \/ composition of the resulting p's
