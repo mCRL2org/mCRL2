@@ -4381,7 +4381,7 @@ static ATermAppl dummyterm(
       { /* The function found cannot be a constant */
         ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
         unsigned int arity=ATgetLength(argumentsorts);
-        ATermList arguments;
+        ATermList arguments=ATempty;
         for(unsigned int j=0; j<arity; j++)
         { ATerm t=(ATerm)dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1);
           if (t==NULL)
