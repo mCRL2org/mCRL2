@@ -29,6 +29,22 @@
 #include "tipi/detail/basic_messenger.hpp"
 #include "tipi/common.hpp"
 
+/** \internal
+ * Workaround for older compilers to force instantiation of
+ * boost::recursive_mutex::scoped_lock::unlock\
+ * 
+ *  The problem is that the indirect use of this method through boost::bind
+ *  does not cause some compilers to instantiate this method
+ */
+inline bool workaround() {
+  boost::recursive_mutex              l;
+  boost::recursive_mutex::scoped_lock c(l); 
+
+  c.unlock();
+
+  return true;
+}
+
 namespace tipi {
 
   namespace messaging {
