@@ -1295,8 +1295,8 @@ void LTS::loadTrace(std::string const& path)
   Trace tr;
   if (!tr.load(path))
   {
-    // TODO: Delegate this correctly to user.
-    std::cerr << "Error loading file: " << path << std::endl;
+    std::string error = "Error loading file: " + path;
+    mediator->reportError(error);
   }
   else 
   {
@@ -1408,9 +1408,10 @@ void LTS::loadTrace(std::string const& path)
       else 
       {
         // This cannot occur, unless there was some mismatch between lps and lts
-        // TODO: Delegate this correctly to the user.
-        std::cerr << "You err." << std::endl;
+        std::string error = "Could not regenerate trace, does it belong to the loaded LTS?";
+        mediator->reportError(error);
         toChoose = -1;
+        return;
       }
       
       sim->chooseTrans(toChoose);

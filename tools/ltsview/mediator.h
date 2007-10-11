@@ -36,6 +36,10 @@ class Mediator {
     virtual void      zoomInAbove() = 0;
     virtual void      zoomOut() = 0;
 
+    // Reports an error to the user through a message box.
+    virtual void      reportError(std::string const& error) = 0;
+
+
     // Loads a trace from path
     virtual void      loadTrace(std::string const& path) = 0;
 

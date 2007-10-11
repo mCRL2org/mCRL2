@@ -469,7 +469,9 @@ void LTSViewApp::zoomInBelow()
   deselect();
   lts = newLTS;
   visualizer->setLTS(lts,false);
-
+  mainFrame->setNumberInfo(lts->getNumStates(),
+      lts->getNumTransitions(),lts->getNumClusters(),
+      lts->getNumRanks());
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -480,7 +482,9 @@ void LTSViewApp::zoomInAbove()
   deselect();
   lts = newLTS;
   visualizer->setLTS(lts,false);
-  
+  mainFrame->setNumberInfo(lts->getNumStates(),
+     lts->getNumTransitions(),lts->getNumClusters(),
+     lts->getNumRanks()); 
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -491,7 +495,10 @@ void LTSViewApp::zoomOut()
   lts = oldLTS->zoomOut();
   oldLTS->deselect();
   visualizer->setLTS(lts,false);
-
+  mainFrame->setNumberInfo(lts->getNumStates(),
+    lts->getNumTransitions(),lts->getNumClusters(),
+    lts->getNumRanks()); 
+  
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 
@@ -507,4 +514,9 @@ void LTSViewApp::loadTrace(std::string const& path)
   lts->loadTrace(path);
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
+}
+
+void LTSViewApp::reportError(std::string const& error) 
+{
+  mainFrame->reportError(error);
 }

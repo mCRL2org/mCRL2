@@ -81,6 +81,8 @@ class MainFrame : public wxFrame, public simReader {
     void  updateProgressDialog(int val,std::string msg);
     void  addParameter(std::string par);
     void  setParameterValue(std::string par, std::string value);
+    
+    void reportError(std::string const& error);
 
     // Implemented for simReader interface
     virtual void refresh();
@@ -127,6 +129,7 @@ class MainFrame : public wxFrame, public simReader {
     void setupRightPanel(wxSplitterWindow* panel);
     void setupMarkPanel(wxPanel* panel);
     void setupSimPanel(wxPanel* panel);
+
 //    void setupSettingsPanel(wxPanel* panel);
 
     std::map<std::string, wxStaticText*> parameters;

@@ -243,7 +243,6 @@ void MainFrame::setupRightPanel(wxSplitterWindow* panel) {
 
   topNotebook->AddPage(infoPanel, wxT("LTS information"), false);
 
-  // TODO: Layout page with selection information
   selectionInfo = new wxScrolledWindow(topNotebook);
   selectionInfo->SetScrollRate(0,5);
   
@@ -482,7 +481,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/) {
 
 void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 {
-  wxString filemask = wxT("Traces (*.trc)|*.trc");
+  wxString filemask = wxT("Traces (*.trc)|*.trc|All files (*.*)|*.*");
   wxFileDialog* dialog = new wxFileDialog(this, wxT("Open Trace"),
     filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
   dialog->CentreOnParent();
@@ -924,3 +923,11 @@ void MainFrame::selChange() {
     simTriggerButton->Disable();
   }
 }
+
+void MainFrame::reportError(std::string const& error)
+{
+  wxString err(error.c_str(), wxConvLocal);
+
+  wxMessageBox(err, wxT("LTSView - An error occured"), wxICON_ERROR|wxOK, this);
+}
+
