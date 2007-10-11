@@ -2,7 +2,7 @@ project toolset/xsim
        : build-dir $(BUILD_TOP)/xsim
        ;
 
-lib xsim_base.main
+alias xsim_base.main
        : xsimbase.cpp
          /libraries//trace
          /libraries//nextstate
@@ -12,7 +12,7 @@ lib xsim_base.main
        ;
 
 alias xsim_base : : <wx>no ;
-alias xsim_base : xsim_base.main : <wx>yes ;
+lib xsim_base : xsim_base.main : <wx>yes ;
 
 alias xsim : : <wx>no ;
 
