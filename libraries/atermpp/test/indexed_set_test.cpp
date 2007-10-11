@@ -11,6 +11,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
+#include <map>
 #include "atermpp/atermpp.h"
 #include "atermpp/indexed_set.h"
 
@@ -26,6 +27,11 @@ void test_indexed_set()
   BOOST_CHECK(t.elements().size() == 1);
   p = t.put(make_term("b"));
   BOOST_CHECK(t.elements().size() == 2);
+
+  {
+    indexed_set t1 = t;
+  }
+  indexed_set t2 = t;
 
   BOOST_CHECK(t.index(make_term("a")) == 0);
   BOOST_CHECK(t.index(make_term("b")) == 1);
@@ -45,6 +51,9 @@ void test_indexed_set()
 
   t.reset();
   BOOST_CHECK(t.elements().size() == 0);
+  
+  std::map<int, indexed_set> x;
+  x[2] = t;
 }
 
 int test_main( int, char*[] )

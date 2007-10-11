@@ -10,33 +10,34 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 
 namespace atermpp
 {
+  struct indexed_set_deleter
+  {
+    void operator()(ATermIndexedSet s)
+    {
+      ATindexedSetDestroy(s);
+    }
+  }; 
+  
   //---------------------------------------------------------//
   //                     indexed_set
   //---------------------------------------------------------//
-  class indexed_set: boost::noncopyable
+  class indexed_set
   {
    protected:
-      ATermIndexedSet m_set;
+     boost::shared_ptr<_ATermTable> m_set;
 
    public:
       /// Create a new indexed_set.
       ///
-      indexed_set(unsigned int initial_size, unsigned int max_load_pct)
-        : m_set(ATindexedSetCreate(initial_size, max_load_pct))
+      indexed_set(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
+        : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
       {}
-      
-      /// This function releases all memory occupied by the indexed_set..
-      ///
-      ~indexed_set()
-      {
-        ATindexedSetDestroy(m_set);
-      }
       
       /// Clear the hash table in the set.
       /// This function clears the hash table in the set, but does not release the memory.
@@ -45,7 +46,7 @@ namespace atermpp
       ///
       void reset()
       {
-        ATindexedSetReset(m_set);
+        ATindexedSetReset(m_set.get());
       }
       
       /// Enter elem into the set.
@@ -58,7 +59,7 @@ namespace atermpp
       std::pair<long, bool> put(aterm elem)
       {
         ATbool b;
-        long l = ATindexedSetPut(m_set, elem, &b);
+        long l = ATindexedSetPut(m_set.get(), elem, &b);
         return std::make_pair(l, b == ATtrue);
       }
       
@@ -68,7 +69,7 @@ namespace atermpp
       ///
       long index(aterm elem)
       {
-        return ATindexedSetGetIndex(m_set, elem);
+        return ATindexedSetGetIndex(m_set.get(), elem);
       }
       
       /// Retrieve the element at index in set.
@@ -77,7 +78,7 @@ namespace atermpp
       ///
       aterm get(long index)
       {
-        return ATindexedSetGetElem(m_set, index);
+        return ATindexedSetGetElem(m_set.get(), index);
       }
       
       /// Remove elem from set.
@@ -86,7 +87,7 @@ namespace atermpp
       ///
       void remove(aterm elem)
       {
-        ATindexedSetRemove(m_set, elem);
+        ATindexedSetRemove(m_set.get(), elem);
       }
       
       /// Retrieve all elements in set.
@@ -95,7 +96,7 @@ namespace atermpp
       ///
       aterm_list elements()
       {
-        return aterm_list(ATindexedSetElements(m_set));
+        return aterm_list(ATindexedSetElements(m_set.get()));
       }
   };
 
