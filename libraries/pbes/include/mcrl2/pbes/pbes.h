@@ -303,6 +303,21 @@ class pbes
       std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
     }
 
+    /// Returns true if the pbes is normalized.
+    bool is_normalized() const
+    {
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        is_normalized_visitor visitor;
+        visitor.visit(i->formula());
+        if (visitor.result == false)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     /// Applies a substitution to the pbes equations.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///

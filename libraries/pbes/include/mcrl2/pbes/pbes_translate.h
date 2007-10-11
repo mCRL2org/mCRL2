@@ -114,6 +114,7 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
     result = pbes<>(data_spec, e, free_variables, init);
   } 
   result.normalize();
+  assert(result.is_normalized());
   return result;
 }
 

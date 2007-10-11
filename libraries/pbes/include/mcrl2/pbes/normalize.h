@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_NORMALIZE_H
 #define MCRL2_PBES_NORMALIZE_H
 
+#include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
@@ -97,7 +98,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   {
     using namespace lps::pbes_expr;
     return inside_not ? and_(visit(left), visit(not_(right)))
-                      : or_(not_(visit(left)), visit(right));
+                      : or_(visit(not_(left)), visit(right));
   }    
 
   pbes_expression visit_forall(const pbes_expression& /* f */, const data_variable_list& variables, const pbes_expression& expression)
@@ -122,6 +123,28 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
       throw std::runtime_error(std::string("normalize error: illegal expression ") + f.to_string());
     }
     return f;
+  }
+};
+
+/// Visitor for checking if a pbes expression is normalized.
+struct is_normalized_visitor : public pbes_expression_visitor
+{
+  bool result;
+  
+  is_normalized_visitor()
+    : result(true)
+  {}
+  
+  bool visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
+  {
+    result = false;
+    return stop_recursion;
+  }
+
+  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */) 
+  {
+    result = false;
+    return stop_recursion;
   }
 };
 
