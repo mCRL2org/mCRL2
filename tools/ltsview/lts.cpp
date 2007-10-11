@@ -1452,3 +1452,18 @@ void LTS::loadTrace(std::string const& path)
     simulation = sim;
   }
 }
+
+void LTS::generateBackTrace()
+{
+  State* initState;
+  LTS* topLevel = this;
+
+  // Find the initial state of the entire, zoomed out structure
+  while (topLevel->getPreviousLevel() != NULL)
+  {
+    topLevel = topLevel->getPreviousLevel();
+  }
+  initState = topLevel->getInitialState();
+  
+  simulation->traceBack(initState);
+}

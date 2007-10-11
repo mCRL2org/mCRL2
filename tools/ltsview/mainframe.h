@@ -65,7 +65,7 @@ class MainFrame : public wxFrame, public simReader {
     void        onSimTransitionActivated(wxListEvent& event);
     void        onSimTriggerButton(wxCommandEvent& event);
     void        onSimUndoButton(wxCommandEvent& event);
-    void        onSimStateSelected(wxListEvent& event);
+    void        onGenerateBackTraceButton(wxCommandEvent& event);
   
 
     void  replaceMarkRule(int index, wxString str);
@@ -115,6 +115,7 @@ class MainFrame : public wxFrame, public simReader {
 
     // Buttons for simulation
     wxButton* simStartButton;
+    wxButton* simBTButton;
     wxButton* simResetButton;
     wxButton* simStopButton;
     wxButton* simTriggerButton;

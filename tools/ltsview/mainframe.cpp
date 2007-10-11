@@ -70,7 +70,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
                           MainFrame::onSimTransitionActivated)
   EVT_BUTTON(myID_SIM_TRIGGER_BUTTON, MainFrame::onSimTriggerButton)
   EVT_BUTTON(myID_SIM_UNDO_BUTTON, MainFrame::onSimUndoButton)
-  EVT_LIST_ITEM_SELECTED(myID_SIM_STATE_VIEW, MainFrame::onSimStateSelected)
+  EVT_BUTTON(myID_SIM_BT_BUTTON, MainFrame::onGenerateBackTraceButton)
 //  EVT_IDLE(MainFrame::onIdle)
 END_EVENT_TABLE()
 
@@ -361,15 +361,17 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int border = 3;
 
-  // Buttons for general simulation control: start, reset, stop
-  wxFlexGridSizer* simButtonSizer = new wxFlexGridSizer(1, 3, 0, 0);
+  // Buttons for general simulation control: start, backtrace, reset, stop
+  wxFlexGridSizer* simButtonSizer = new wxFlexGridSizer(2, 2, 0, 0);
   simButtonSizer->AddGrowableCol(0);
   simButtonSizer->AddGrowableCol(1);
-  simButtonSizer->AddGrowableCol(2);
 
-  simStartButton = new wxButton(panel, myID_SIM_START_BUTTON,
-                                          wxT("Start"));
+  simStartButton = new wxButton(panel, myID_SIM_START_BUTTON, wxT("Start"));
   simStartButton->Disable();
+
+  // TODO: Rephrase button label?
+  simBTButton = new wxButton(panel, myID_SIM_BT_BUTTON, wxT("Backtrace"));
+  simBTButton->Disable();
 
   simResetButton = new wxButton(panel, myID_SIM_RESET_BUTTON,
                                           wxT("Reset"));
@@ -380,8 +382,10 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
   simStopButton->Disable();
 
   simButtonSizer->Add(simStartButton, 0, flags, border);
-  simButtonSizer->Add(simResetButton, 0, flags, border);
   simButtonSizer->Add(simStopButton,  0, flags, border);
+  simButtonSizer->Add(simBTButton, 0, flags, border);
+  simButtonSizer->Add(simResetButton, 0, flags, border);
+  
 
   simSizer->Add(simButtonSizer, 1, flags, border);
 
@@ -664,8 +668,9 @@ void MainFrame::onSimUndoButton(wxCommandEvent& event) {
   sim->undoStep();
 }
 
-void MainFrame::onSimStateSelected(wxListEvent& event) {
-  // Is this one necessary?
+void MainFrame::onGenerateBackTraceButton(wxCommandEvent& event)
+{
+  mediator->generateBackTrace();
 }
 
 void MainFrame::createProgressDialog(const string title,const string text) {
@@ -814,6 +819,7 @@ void MainFrame::refresh() {
       simStartButton->Enable();
       simResetButton->Disable();
       simStopButton->Disable();
+      simBTButton->Disable();
 
       // Clear the list view
       simTransView->DeleteAllItems();
@@ -825,6 +831,7 @@ void MainFrame::refresh() {
 
       simResetButton->Enable();
       simStopButton->Enable();
+      simBTButton->Enable();
 
 
       // Refresh the transition list

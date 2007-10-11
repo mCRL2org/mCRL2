@@ -103,6 +103,8 @@ class LTS {
     // Loads a trace stored in location path and constructs a simulation from
     // it.
     void loadTrace(std::string const& path);
+
+    void generateBackTrace();
   private:
     // Constructor for zooming
     LTS(Mediator* owner, LTS* parent, bool fromAbove);

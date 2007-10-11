@@ -526,3 +526,10 @@ void LTSViewApp::reportError(std::string const& error)
 {
   mainFrame->reportError(error);
 }
+
+
+void LTSViewApp::generateBackTrace()
+{
+  lts->generateBackTrace();
+}
+

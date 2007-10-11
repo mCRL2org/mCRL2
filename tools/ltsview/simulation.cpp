@@ -118,6 +118,29 @@ bool Simulation::getStarted() const {
   return started;
 }
 
+void Simulation::traceBack(State* initState)
+{
+  // First, reverse the vectors, so we can push each new transition at the back
+  reverse(stateHis.begin(), stateHis.end());
+  reverse(transHis.begin(), transHis.end());
+
+  State* currPos = stateHis.back();
+
+  while(currPos != initState)
+  {
+    transHis.push_back(currPos->getInTransition(0));
+    currPos = currPos->getInTransition(0)->getBeginState();
+    currPos->setSimulated(true);
+    stateHis.push_back(currPos);
+  }
+
+  // Undo reversion
+  reverse(transHis.begin(), transHis.end());
+  reverse(stateHis.begin(), stateHis.end());
+
+  signal();
+}
+
 void Simulation::followTrans() {
   if (chosenTrans != -1)
   {

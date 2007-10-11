@@ -26,6 +26,8 @@
 #include <boost/signal.hpp>
 #include <boost/bind.hpp>
 
+#include <algorithm>
+
 class Simulation {
   public:
     typedef boost::signal<void ()>      simulationSignal;
@@ -46,6 +48,10 @@ class Simulation {
     Transition*                         getChosenTrans()      const;
     int                                 getChosenTransi()     const;
     bool                                getStarted()          const;
+   
+    // Generates a back trace to initState. 
+    // Pre: initState is the initial state for the entire (top level) LTS
+    void                                traceBack(State* initState);
     
     
     void                                chooseTrans(int i);

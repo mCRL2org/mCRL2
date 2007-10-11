@@ -27,7 +27,7 @@ namespace IDs
     // Simulation event identifiers
     myID_SIM_START_BUTTON, myID_SIM_RESET_BUTTON, myID_SIM_STOP_BUTTON, 
     myID_SIM_TRANSITIONS_VIEW, myID_SIM_TRIGGER_BUTTON, myID_SIM_UNDO_BUTTON, 
-    myID_SIM_STATE_VIEW,
+    myID_SIM_STATE_VIEW, myID_SIM_BT_BUTTON,
     };
 }
 #endif

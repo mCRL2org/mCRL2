@@ -59,6 +59,9 @@ class Mediator {
     // Returns the value of the parameter with index i in the state with index 
     // j.
     virtual std::string getParValue(const int i, const int j) const = 0;
+
+
+    virtual void generateBackTrace() = 0;
     
 };
 
