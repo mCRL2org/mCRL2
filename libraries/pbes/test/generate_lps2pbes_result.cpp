@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
       std::cout << formula_file << "[timed] ";
       pbes<> p = lps2pbes(spec, formula, true);
       pbes_equation_list eqn(p.equations().begin(), p.equations().end());
-      std::cout << pp(eqn) << std::endl;
+      // std::cout << pp(eqn) << std::endl;
       result_file = formula_file.substr(0, formula_file.size() - 4) + "expected_timed_result";
       p.save(result_file);
     }
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
       cout << formula_file << "[untimed] ";
       pbes<> p = lps2pbes(spec, formula, false);
       pbes_equation_list eqn(p.equations().begin(), p.equations().end());
-      std::cout << pp(eqn) << std::endl;
+      // std::cout << pp(eqn) << std::endl;
       result_file = formula_file.substr(0, formula_file.size() - 4) + "expected_untimed_result";
       p.save(result_file);
     }

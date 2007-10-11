@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
 
 namespace lps {
 
@@ -38,6 +39,19 @@ namespace detail {
 using atermpp::aterm_appl;
 using atermpp::make_substitution;
 
+inline
+std::string pp(std::set<data_variable> s)
+{
+  return pp(data_variable_list(s.begin(), s.end()));
+}
+
+inline
+std::set<data_variable> compute_free_pbes_expression_variables(const pbes_expression& e)
+{
+  free_variable_visitor visitor;
+  visitor.visit(e);
+  return visitor.result;
+}
 
 inline
 atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
@@ -374,7 +388,7 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
 }
 
 inline
-data_variable_list Par(identifier_string x, state_formula f)
+data_variable_list Par(identifier_string x, data_variable_list l, state_formula f)
 {
   using namespace lps::state_frm;
 
@@ -385,33 +399,33 @@ data_variable_list Par(identifier_string x, state_formula f)
   } else if (is_false(f)) {
     return data_variable_list();
   } else if (is_not(f)) {
-    return Par(x, not_arg(f));
+    return Par(x, l, not_arg(f));
   } else if (is_and(f)) {
-    return Par(x, lhs(f)) + Par(x, rhs(f));
+    return Par(x, l, lhs(f)) + Par(x, l, rhs(f));
   } else if (is_or(f)) {
-    return Par(x, lhs(f)) + Par(x, rhs(f));
+    return Par(x, l, lhs(f)) + Par(x, l, rhs(f));
   } else if (is_imp(f)) {
-    return Par(x, lhs(f)) + Par(x, rhs(f));
+    return Par(x, l, lhs(f)) + Par(x, l, rhs(f));
   } else if (is_must(f)) {
-    return Par(x, mod_form(f));
+    return Par(x, l, mod_form(f));
   } else if (is_may(f)) {
-    return Par(x, mod_form(f));
+    return Par(x, l, mod_form(f));
   } else if (is_forall(f)) {
-    return quant_vars(f) + Par(x, quant_form(f));
+    return Par(x, l + quant_vars(f), quant_form(f));
   } else if (is_exists(f)) {
-    return quant_vars(f) + Par(x, quant_form(f));
+    return Par(x, l + quant_vars(f), quant_form(f));
   } else if (is_var(f)) {
     return data_variable_list();
   } else if (is_mu(f) || (is_nu(f))) {
     if (mu_name(f) == x)
     {
-      return data_variable_list();
+      return l;
     }
     else
     {
       data_variable_list xf = mu_variables(f);
       state_formula g = arg3(f);
-      return xf + Par(x, g);
+      return xf + Par(x, l + xf, g);
     }
   } else if (is_yaled_timed(f)) {
     return data_variable_list();
@@ -598,16 +612,15 @@ namespace pbes_timed
       identifier_string X = s::var_name(f);
       data_expression_list d = s::var_val(f);
       data_variable_list xp = lps.process_parameters();
-      result = propositional_variable_instantiation(X, T + d + xp + Par(X, f0));
+      result = propositional_variable_instantiation(X, T + d + xp + Par(X, data_variable_list(), f0));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
       identifier_string X = s::mu_name(f);
       data_expression_list d = mu_expressions(f);
       data_variable_list xp = lps.process_parameters();
-      result = propositional_variable_instantiation(X, T + d + xp + Par(X, f0));
+      result = propositional_variable_instantiation(X, T + d + xp + Par(X, data_variable_list(), f0));
     } else {
       throw std::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
     }
-result = normalize(result);
     return result;
   }
 
@@ -648,7 +661,7 @@ result = normalize(result);
       data_variable_list xp = lps.process_parameters();
       state_formula g = mu_form(f);
       fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
-      propositional_variable v(X, T + xf + xp + Par(X, f0));
+      propositional_variable v(X, T + xf + xp + Par(X, data_variable_list(), f0));
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, T, context);
       pbes_equation e(sigma, v, expr);
@@ -808,16 +821,15 @@ namespace pbes_untimed
       identifier_string X = s::var_name(f);
       data_expression_list d = s::var_val(f);
       data_variable_list xp = lps.process_parameters();
-      result = propositional_variable_instantiation(X, d + xp + Par(X, f0));
+      result = propositional_variable_instantiation(X, d + xp + Par(X, data_variable_list(), f0));
     } else if (s::is_mu(f) || (s::is_nu(f))) {
       identifier_string X = s::mu_name(f);
       data_expression_list d = mu_expressions(f);
       data_variable_list xp = lps.process_parameters();
-      result = propositional_variable_instantiation(X, d + xp + Par(X, f0));
+      result = propositional_variable_instantiation(X, d + xp + Par(X, data_variable_list(), f0));
     } else {
       throw std::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
     }
-result = normalize(result);
     return result;
   }
 
@@ -858,7 +870,7 @@ result = normalize(result);
       data_variable_list xp = lps.process_parameters();
       state_formula g = mu_form(f);
       fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
-      propositional_variable v(X, xf + xp + Par(X, f0));
+      propositional_variable v(X, xf + xp + Par(X, data_variable_list(), f0));
       std::set<std::string> context;
       pbes_expression expr = RHS(f0, g, lps, context);
       pbes_equation e(sigma, v, expr);

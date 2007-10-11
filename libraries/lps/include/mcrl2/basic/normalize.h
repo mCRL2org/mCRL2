@@ -48,7 +48,7 @@ struct state_formula_normalize_builder: public state_formula_builder
     : inside_not(false)
   {}
 
-  state_formula visit_data_expression(const state_formula& /* f */, const data_expression& d)
+  state_formula visit_data_expression(const state_formula& f, const data_expression& d)
   {
     using namespace lps::state_frm;
     return inside_not ? data_expr::not_(d)

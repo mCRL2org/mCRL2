@@ -280,7 +280,7 @@ using atermpp::list_arg2;
   data_expression data_arg(state_formula t)
   {
     assert(gsIsDataExpr(t));
-    return arg1(t);
+    return t;
   }
   
   /// \brief Returns the argument of a not expression

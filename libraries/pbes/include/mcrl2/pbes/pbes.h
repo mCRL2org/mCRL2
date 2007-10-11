@@ -32,6 +32,7 @@
 #include "mcrl2/lps/detail/data_utility.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
@@ -44,6 +45,15 @@ using namespace std::rel_ops; // for definition of operator!= in terms of operat
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
+
+/// \internal
+struct normalize_pbes_equation
+{
+  pbes_equation operator()(const pbes_equation& e) const
+  {
+    return normalize(e);
+  }
+};
 
 /// Computes the free variables that occur in the sequence [first, last[
 /// of pbes equations.
@@ -284,6 +294,13 @@ class pbes
       atermpp::set<propositional_variable> bnd = binding_variables();
       atermpp::set<propositional_variable> occ = occurring_variables();
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
+    }
+
+    /// Applies normalization to the equations of the pbes.
+    /// 
+    void normalize()
+    {
+      std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
     }
 
     /// Applies a substitution to the pbes equations.

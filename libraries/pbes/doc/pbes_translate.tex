@@ -132,7 +132,7 @@ h (\varphi) \vee h (\psi) \\
 
 % StateImp
 h (\varphi \Rightarrow \psi) & \isdef &
-h (\varphi) \vee h (\neg \psi) \\
+h (\neg \varphi) \vee h (\psi) \\
 
 % StateForall
 h (\forall{x {:} D}. \varphi) & \isdef &
@@ -255,7 +255,7 @@ $}
 % StateMu / StateNu
 {\mathbf{E}} (\sigma X(x_f {:}D_f:=d).~ \varphi)~~~ & \isdef~~~ &
         (\sigma \tilde X(T: \snnreal, x_f {:}D_f, x_p {:} D_p,
-            \mathbf{Par}_X(\varphi_0)) =
+            \mathbf{Par}_{X,[]}(\varphi_0)) =
            {\mathbf{RHS}} (\varphi)~ )~ {\mathbf{E}} (\varphi) \\
 
 \end{tightarray}\]}
@@ -316,12 +316,12 @@ $}
 
 %%% PROPOSITIONAL VARIABLES
 {\mathbf{RHS}} (X(d)) & \isdef & \tilde{X}(T,d,x_p,
-                                 \mathbf{Par}_X(\varphi_0)) \\
+                                 \mathbf{Par}_{X,[]}(\varphi_0)) \\
 
 %%% FIXPOINTS
 {\mathbf{RHS}}(\sigma X(x_f \ap D_f := d) .~ \varphi) &
      \isdef~~~ &
-     \tilde X(T, d,x_p, \mathbf{Par}_X(\varphi_0)) \\
+     \tilde X(T, d,x_p, \mathbf{Par}_{X,[]}(\varphi_0)) \\
 
 %%% DELAY
 {\mathbf{RHS}}(\nabla(t)) & \isdef &
@@ -411,40 +411,40 @@ $
 \begin{table}[htb]
 {\small $
 \begin{tightarray}{lll}
-\mathbf{Par}_X(c)
+\mathbf{Par}_{X,l}(c)
 & \isdef & [] \\
-%\mathbf{Par}_X(\strue)
+%\mathbf{Par}_{X,l}(\strue)
 %& \isdef & []\\
-%\mathbf{Par}_X(\sfalse)
+%\mathbf{Par}_{X,l}(\sfalse)
 %& \isdef & []\\
-\mathbf{Par}_X(\neg \varphi)
-& \isdef & \mathbf{Par}_X(\varphi)\\
-\mathbf{Par}_X(\varphi \wedge \psi)
-& \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi)\\
-\mathbf{Par}_X(\varphi \vee \psi)
-& \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi) \\
-\mathbf{Par}_X(\varphi \Rightarrow \psi)
-& \isdef & \mathbf{Par}_X(\varphi) \concat \mathbf{Par}_X(\psi) \\
-\mathbf{Par}_X([\alpha]\varphi)
-& \isdef & \mathbf{Par}_X(\varphi) \\
-\mathbf{Par}_X(\langle \alpha \rangle \varphi)
-& \isdef & \mathbf{Par}_X(\varphi)\\
-\mathbf{Par}_X(\forall{x \ap D}. \varphi)
-& \isdef & [x \ap D] \concat \mathbf{Par}_X(\varphi) \\
-\mathbf{Par}_X(\exists{x \ap D}. \varphi)
-& \isdef & [x \ap D] \concat \mathbf{Par}_X(\varphi) \\
-\mathbf{Par}_X(Y(d_f))
+\mathbf{Par}_{X,l}(\neg \varphi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi)\\
+\mathbf{Par}_{X,l}(\varphi \wedge \psi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi) \concat \mathbf{Par}_{X,l}(\psi)\\
+\mathbf{Par}_{X,l}(\varphi \vee \psi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi) \concat \mathbf{Par}_{X,l}(\psi) \\
+\mathbf{Par}_{X,l}(\varphi \Rightarrow \psi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi) \concat \mathbf{Par}_{X,l}(\psi) \\
+\mathbf{Par}_{X,l}([\alpha]\varphi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi) \\
+\mathbf{Par}_{X,l}(\langle \alpha \rangle \varphi)
+& \isdef & \mathbf{Par}_{X,l}(\varphi)\\
+\mathbf{Par}_{X,l}(\forall{x \ap D}. \varphi)
+& \isdef & \mathbf{Par}_{X,l \concat [x \ap D]}(\varphi) \\
+\mathbf{Par}_{X,l}(\exists{x \ap D}. \varphi)
+& \isdef & \mathbf{Par}_{X,l \concat [x \ap D]}(\varphi) \\
+\mathbf{Par}_{X,l}(Y(d_f))
 & \isdef & [] \\
-\mathbf{Par}_X(\sigma Y(x_f \ap D_f:= d). \varphi)
+\mathbf{Par}_{X,l}(\sigma Y(x_f \ap D_f:= d). \varphi)
 & \isdef & \left\{%
   \begin{tightarray}{l@{\quad}L}
-    []                                            & if $Y =    X$\\[0ex]
+    l                                            & if $Y =    X$\\[0ex]
     %appending [0ex] is a LaTeX hack to make sure the beginning of the next is not parsed as an optional argument
-    [x_f \ap D_f] \concat \mathbf{Par}_X(\varphi) & if $Y \neq X$\\
+    \mathbf{Par}_{X,l \concat [x_f \ap D_f]}(\varphi) & if $Y \neq X$\\
   \end{tightarray}\right.\\
-\mathbf{Par}_X(\nabla(t))
+\mathbf{Par}_{X,l}(\nabla(t))
 & \isdef & [] \\
-\mathbf{Par}_X(\Delta(t))
+\mathbf{Par}_{X,l}(\Delta(t))
 & \isdef & [] \\
 \end{tightarray}
 $}

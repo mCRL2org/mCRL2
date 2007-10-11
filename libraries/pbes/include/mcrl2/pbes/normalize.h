@@ -11,6 +11,7 @@
 #define MCRL2_PBES_NORMALIZE_H
 
 #include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_equation.h"
 
 namespace lps {
 
@@ -96,7 +97,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   {
     using namespace lps::pbes_expr;
     return inside_not ? and_(visit(left), visit(not_(right)))
-                      : or_(visit(left), visit(not_(right)));
+                      : or_(not_(visit(left)), visit(right));
   }    
 
   pbes_expression visit_forall(const pbes_expression& /* f */, const data_variable_list& variables, const pbes_expression& expression)
@@ -126,10 +127,20 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
 
 /// The function normalize brings a pbes expression into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
+/// \ret The result of the normalization.
 inline
-pbes_expression normalize(pbes_expression f)
+pbes_expression normalize(const pbes_expression& f)
 {
   return pbes_expression_normalize_builder().visit(f);
+}
+
+/// Applies normalization to the right hand side of the equation.
+/// \ret The result of the normalization.
+/// 
+inline
+pbes_equation normalize(const pbes_equation& e)
+{
+  return pbes_equation(e.symbol(), e.variable(), normalize(e.formula()));
 }
 
 } // namespace lps

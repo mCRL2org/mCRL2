@@ -14,6 +14,7 @@
 #include "mcrl2/basic/mucalculus.h"
 #include "mcrl2/basic/normalize.h"
 #include "mcrl2/basic/state_formula_rename.h"
+#include "mcrl2/basic/free_variables.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -93,14 +94,15 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   data_expression_list pi = spec.initial_process().state();
   atermpp::set<data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
 
+  pbes<> result;
   if (!timed)
   {   
-    propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, f));
-    return pbes<>(spec.data(), e, free_variables, init);
+    propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data_variable_list(), f));
+    result = pbes<>(spec.data(), e, free_variables, init);
   }
   else
   {
-    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, f));  
+    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, data_variable_list(), f));  
     data_specification data_spec = spec.data();   
 
     // add sort real to data_spec (if needed)
@@ -109,8 +111,10 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
       data_spec = set_sorts(data_spec, push_front(data_spec.sorts(), sort_expr::real()));
     }
 
-    return pbes<>(data_spec, e, free_variables, init);
-  }
+    result = pbes<>(data_spec, e, free_variables, init);
+  } 
+  result.normalize();
+  return result;
 }
 
 } // namespace lps

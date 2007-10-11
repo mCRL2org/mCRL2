@@ -153,7 +153,7 @@ void test_pbes()
   BOOST_CHECK(!p.is_bes());
   BOOST_CHECK(!e.is_bes());
 
-  data_expression d  = pbes2data(e, spec);
+  // data_expression d  = pbes2data(e, spec);
   // pbes_expression e1 = data2pbes(d);
   // BOOST_CHECK(e == e1);
 
@@ -335,7 +335,29 @@ void test_trivial()
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-std::cout << "<p>" << pp(p) << std::endl;
+  BOOST_CHECK(p.is_well_typed());
+}
+
+void test_lps2pbes()
+{
+  std::string SPECIFICATION =
+  "act a;         \n"
+  "proc X = a. X; \n"
+  "init X;        \n"
+  ;
+  
+  std::string FORMULA =
+  "(                                 \n"
+  "  ( mu A. [!a]A)                  \n"
+  "||                                \n"
+  "  ( mu B. exists t3:Pos . [!a]B ) \n"
+  ")                                 \n"
+  ;
+
+  specification spec    = mcrl22lps(SPECIFICATION);
+  state_formula formula = mcf2statefrm(FORMULA, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 }
 
@@ -355,6 +377,7 @@ int test_main(int argc, char* argv[])
   test_quantifier_rename_builder();
   test_complement_method_builder();
   test_pbes_expression();
+  test_lps2pbes();
 
   return 0;
 }
