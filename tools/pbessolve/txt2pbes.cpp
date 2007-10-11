@@ -625,7 +625,7 @@ int main(int argc, char** argv)
     cout << endl;
   } else 
     if(!p.save(outfilename, false)){
-      gsErrorMsg("writing to %s failed\n",outfilename);
+      gsErrorMsg("writing to %s failed\n",outfilename.c_str());
       exit(1);
     }
   
