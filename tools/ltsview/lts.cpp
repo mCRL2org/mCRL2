@@ -72,6 +72,7 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
     label_marks.push_back(previousLevel->getActionMarked(i));
   }
 
+
   if (lastWasAbove)
   {
     initialState = previousLevel->getInitialState();
@@ -102,11 +103,12 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
     initialState = selectedCluster->getState(0);
     addClusterAndBelow(selectedCluster);
   }
+
+  markedTransitionCount = countMarkedTransitions();
 }
 
 LTS::~LTS()
 {
-  // TODO: If not previouslevel, some contents need to be removed
   if (previousLevel == NULL)
   {
     // This LTS is the top level LTS, so delete all its contents.
@@ -140,6 +142,14 @@ LTS::~LTS()
    
     simulation->stop();
     delete simulation;
+  }
+  else
+  {
+    unmarkedStates.clear();
+    markedStates.clear();
+    label_marks.clear();
+    clustersInRank.clear();
+    markRules.clear();
   }
 }
 
@@ -248,6 +258,25 @@ int LTS::getNumParameterValues(int parindex) const {
   return valueTable[parindex].size();
 }
 
+int LTS::countMarkedTransitions() 
+{
+  int result = 0;
+  
+  for(vector< vector< Cluster* > >::iterator it = clustersInRank.begin();
+      it != clustersInRank.end(); ++it)
+  {
+    for(vector<Cluster*>::iterator it1 = it->begin(); it1 != it->end(); ++it1)
+    {
+      if (*it1 != NULL)
+      {
+        result += (*it1)->getMarkedTransitionCount();
+      }
+    }
+  }
+
+  return result;
+
+}
 string LTS::getLabel(int labindex) {
   return labels[labindex];
 }

@@ -98,6 +98,8 @@ class Cluster {
     void  deselect();
     bool  isSelected() const;
 
+    int getMarkedTransitionCount() const;
+
   private:
     std::map< int, int > actionLabelCounts;
     Cluster*             ancestor;

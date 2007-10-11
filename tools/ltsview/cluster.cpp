@@ -611,3 +611,9 @@ bool Cluster::isSelected() const
 {
   return selected;
 }
+
+
+int Cluster::getMarkedTransitionCount() const
+{
+  return markedTransitionCount;
+}

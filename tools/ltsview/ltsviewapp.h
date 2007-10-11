@@ -26,6 +26,7 @@ class LTSViewApp : public wxApp, public Mediator {
     Settings *settings;
     Visualizer *visualizer;
     Utils::RankStyle rankStyle;
+    Utils::MarkStyle markStyle;
 
   public:
     void	  activateMarkRule(const int index,const bool activate);

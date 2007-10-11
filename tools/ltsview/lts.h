@@ -51,6 +51,7 @@ class LTS {
     int		getNumTransitions() const;
     int		getNumParameters() const;
     int		getNumParameterValues(int parindex) const;
+    
     std::string getParameterName(int parindex) ;
     std::string getParameterType(int parindex) ;
     std::string getParameterValue(int parindex,int valindex);
@@ -115,6 +116,7 @@ class LTS {
     int	deadlockCount;
     int	transitionCount;
     int	markedTransitionCount;
+    int countMarkedTransitions();
     LTS*        previousLevel;
     State*	    initialState;
     State*      selectedState;

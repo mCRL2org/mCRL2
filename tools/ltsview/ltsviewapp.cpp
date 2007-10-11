@@ -81,6 +81,7 @@ IMPLEMENT_APP_NO_MAIN(LTSViewApp)
 
 bool LTSViewApp::OnInit() {
   lts = NULL;
+  markStyle = NO_MARKS;
   settings = new Settings();
   rankStyle = ITERATIVE;
   mainFrame = new MainFrame(this,settings);
@@ -340,10 +341,13 @@ void LTSViewApp::unmarkAction(string label) {
 }
 
 void LTSViewApp::applyMarkStyle(MarkStyle ms) {
+
   if (lts == NULL) {
-		return;
-	}
-  switch (ms) {
+    return;
+  }
+
+  markStyle = ms;
+  switch (markStyle) {
     case MARK_DEADLOCKS:
       mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
       mainFrame->setMarkedTransitionsInfo(0);
@@ -362,7 +366,7 @@ void LTSViewApp::applyMarkStyle(MarkStyle ms) {
       mainFrame->setMarkedTransitionsInfo(0);
       break;
   }
-  visualizer->setMarkStyle(ms);
+  visualizer->setMarkStyle(markStyle);
   glCanvas->display();
 }
 
@@ -472,6 +476,7 @@ void LTSViewApp::zoomInBelow()
   mainFrame->setNumberInfo(lts->getNumStates(),
       lts->getNumTransitions(),lts->getNumClusters(),
       lts->getNumRanks());
+  applyMarkStyle(markStyle);
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -485,6 +490,7 @@ void LTSViewApp::zoomInAbove()
   mainFrame->setNumberInfo(lts->getNumStates(),
      lts->getNumTransitions(),lts->getNumClusters(),
      lts->getNumRanks()); 
+  applyMarkStyle(markStyle);
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -498,7 +504,7 @@ void LTSViewApp::zoomOut()
   mainFrame->setNumberInfo(lts->getNumStates(),
     lts->getNumTransitions(),lts->getNumClusters(),
     lts->getNumRanks()); 
-  
+  applyMarkStyle(markStyle);
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 
