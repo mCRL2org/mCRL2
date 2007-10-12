@@ -18,8 +18,7 @@
 namespace lps {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
-/// \post in the generated formula, predicate variables within the same scope have
-/// different names
+/// \post In the generated formula, all predicate variables have different names.
 template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formula_builder
 {
@@ -39,15 +38,10 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     return new_name;
   }
 
-  /// Removes the last added replacement, and if a new name was introduced
-  /// it is removed from generator.
+  /// Removes the last added replacement.
   void pop()
   {
     std::pair<identifier_string, identifier_string> p = replacements.front();
-    if (p.first != p.second)
-    {
-      generator.remove_identifier(p.second);
-    }
     replacements.pop_front();
   }
 

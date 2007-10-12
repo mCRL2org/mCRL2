@@ -214,18 +214,6 @@ void test_normalize()
 //   x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
 // }
 
-void test_state_formula()
-{
-  specification spec    = mcrl22lps(SPECIFICATION);
-  state_formula formula = mcf2statefrm("mu X. mu X. X", spec);
-  set_identifier_generator generator;
-  generator.add_identifiers(identifiers(spec));
-  generator.add_identifiers(find_variable_names(formula));
-  formula = rename_predicate_variables(formula, generator);
-  std::cout << "formula: " << pp(formula) << std::endl;
-  BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
-}
-
 void test_free_variables()
 {
   pbes<> p;
@@ -370,7 +358,6 @@ int test_main(int argc, char* argv[])
   test_trivial();
   test_pbes();
   test_normalize();
-  test_state_formula();
   // test_xyz_generator();
   // test_free_variables();
   test_pbes_expression_builder();
