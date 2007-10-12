@@ -65,6 +65,7 @@ class Cluster {
     void         occupySlot(unsigned int ring,float pos,State* s);
     void         occupyCenterSlot(State* s);
     void         resolveSlots();
+    void         clearSlots();
 
     // Methods on transitions
     void      addActionLabel(int l);

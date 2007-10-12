@@ -36,10 +36,6 @@ class State {
     void      addParameterValue(int valindex);
     void      center();
     void      deselect();
-    void      DFSfinish();
-    void      DFSclear();
-    void      DFSvisit();
-    Utils::DFSState  getVisitState() const;
 
     Cluster*    getCluster() const;
     int         getID();
@@ -65,17 +61,25 @@ class State {
     void mark();
     void select();
     void setCluster(Cluster* c);
-    void setPosition(float r,float a);
-    void setPositionAbs(Utils::Point3D p);
-    void setOutgoingControl(Utils::Point3D p);
-    void setIncomingControl(Utils::Point3D p);
+    void setPositionAngle(float a);
+    void setPositionRadius(float r);
+    void setPositionAbs(Utils::Point3D &p);
+    void setOutgoingControl(Utils::Point3D &p);
+    void setIncomingControl(Utils::Point3D &p);
     void setID(int id);
     void setRank(int r);
     void setSimulated(bool simulated);
     void unmark();
     void setZoomLevel(const int i);
     int  getZoomLevel() const;
-   
+
+    void addForce(Utils::Point3D f);
+    Utils::Point3D getForce();
+    void resetForce();
+    void addVelocity(Utils::Vect v);
+    Utils::Vect getVelocity();
+    void resetVelocity();
+
   private:
     Cluster*                   cluster;
     int                        id;
@@ -92,8 +96,9 @@ class State {
     int                        rank;
     bool                       simulated;
     std::vector< int >         stateVector;
-    Utils::DFSState            visitState;
     bool                       selected;
+    Utils::Point3D             force;
+    Utils::Vect                velocity;
 };
 
 #endif //STATE_H

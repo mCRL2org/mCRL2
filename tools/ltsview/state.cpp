@@ -17,7 +17,6 @@ State::State() {
   positionRadius = 0.0f;
   positionAngle = -1.0f;
   marked = false;
-  visitState = DFS_WHITE;
   id = 0;
   simulated = false;
   selected = false;
@@ -129,21 +128,24 @@ Point3D State::getIncomingControl() const {
   return incomingControl;
 }
 
-void State::setPosition(float r,float a) {
+void State::setPositionRadius(float r) {
   positionRadius = r;
+}
+
+void State::setPositionAngle(float a) {
   positionAngle = a;
 }
 
-void State::setPositionAbs(Point3D p) {
+void State::setPositionAbs(Point3D &p) {
   positionAbs = p;
 }
 
-void State::setOutgoingControl(Point3D p) 
+void State::setOutgoingControl(Point3D &p) 
 {
   outgoingControl = p;
 }
 
-void State::setIncomingControl(Point3D p) 
+void State::setIncomingControl(Point3D &p) 
 {
   incomingControl = p;
 }
@@ -182,23 +184,6 @@ int State::getNumLoops() const {
   return loops.size();
 }
 
-void State::DFSfinish() {
-  visitState = DFS_BLACK;
-}
-
-void State::DFSclear() {
-  visitState = DFS_WHITE;
-}
-
-void State::DFSvisit() {
-  visitState = DFS_GREY;
-}
-
-
-DFSState State::getVisitState() const {
-  return visitState;
-}
-
 int State::getParameterValue(int parindex) {
   return stateVector[parindex];
 }
@@ -224,3 +209,29 @@ void State::setZoomLevel(const int level)
   zoomLevel = level;
 }
 
+Point3D State::getForce() {
+  return force;
+}
+
+void State::resetForce() {
+  force.x = 0;
+  force.y = 0;
+  force.z = 0;
+}
+
+void State::addForce(Point3D f) {
+  force = force + f;
+}
+
+Vect State::getVelocity() {
+  return velocity;
+}
+
+void State::resetVelocity() {
+  velocity.x = 0;
+  velocity.y = 0;
+}
+
+void State::addVelocity(Vect v) {
+  velocity = velocity + v;
+}

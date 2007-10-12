@@ -13,7 +13,7 @@
 #include "utils.h"
 
 enum SettingID {
-  NodeSize,
+  StateSize,
   BranchRotation,
   ClusterHeight,
   BranchTilt,
@@ -42,7 +42,9 @@ enum SettingID {
   SimSelColor,
   SimPosColor,
   BackgroundColor,
-  Zoom,
+  TransitionAttraction,
+  TransitionLength,
+  StateRepulsion,
   NUM_OF_SETTINGID /* should always be last! */
 };
 

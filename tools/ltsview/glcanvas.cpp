@@ -214,7 +214,6 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
         if (settings->getBool(DisplayStates)) {         
           // Identify that we are drawing states
           glPushName(STATE);
-
           visualizer->drawStates(simulating);
           glPopName();
         }
@@ -725,4 +724,26 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
     mediator->deselect();
     processHits(hits, selectBuf, doubleC);
   }
+}
+
+void GLCanvas::startForceDirected() {
+  stop_force_directed = false;
+  visualizer->forceDirectedInit();
+  while (!stop_force_directed) {
+    if (GetContext()) {
+      SetCurrent();
+    }
+    visualizer->forceDirectedStep();
+    display();
+    wxTheApp->Yield(true);
+  }
+}
+
+void GLCanvas::stopForceDirected() {
+  stop_force_directed = true;
+}
+
+void GLCanvas::resetStatePositions() {
+  visualizer->resetStatePositions();
+  display();
 }

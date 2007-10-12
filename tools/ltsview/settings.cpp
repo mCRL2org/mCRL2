@@ -224,11 +224,14 @@ Settings::Settings() {
   RGB_Color sel = {255, 255, 0};
   RGB_Color pos = {0, 255, 255};
   RGB_Color bg = {150,150,150};
-  settings[NodeSize]            = new Setting_Float(NodeSize,0.1f);
+  settings[StateSize]           = new Setting_Float(StateSize,0.1f);
   settings[BranchRotation]      = new Setting_Int(BranchRotation,111);
   settings[ClusterHeight]       = new Setting_Float(ClusterHeight,0.0f);
   settings[BranchTilt]          = new Setting_Int(BranchTilt,30);
   settings[Quality]             = new Setting_Int(Quality,12);
+  settings[TransitionAttraction]= new Setting_Int(TransitionAttraction,100);
+  settings[TransitionLength]    = new Setting_Int(TransitionLength,0);
+  settings[StateRepulsion]      = new Setting_Int(StateRepulsion,100);
   settings[Alpha]               = new Setting_UByte(Alpha,178);
   settings[LongInterpolation]   = new Setting_Bool(LongInterpolation,false);
   settings[DisplayBackpointers] = new Setting_Bool(DisplayBackpointers,false);

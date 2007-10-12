@@ -221,7 +221,8 @@ void Cluster::slotUndecided(unsigned int ring,unsigned int from,unsigned int to)
     sp = 0.0f;
     diff = 360.0f / remainingStates;
     for (i = from; i < to; ++i) {
-      undecidedStates[i]->setPosition(radius,sp);
+      undecidedStates[i]->setPositionRadius(radius);
+      undecidedStates[i]->setPositionAngle(sp);
       occupySlot(ring,sp,undecidedStates[i]);
       sp += diff; 
     }
@@ -263,7 +264,8 @@ void Cluster::slotUndecided(unsigned int ring,unsigned int from,unsigned int to)
       sp = lGapBegin * slotDiff;
       diff = lGapSize * slotDiff / M;
       for (i = s; i < s+M; ++i) {
-        undecidedStates[i]->setPosition(radius,sp);
+        undecidedStates[i]->setPositionRadius(radius);
+        undecidedStates[i]->setPositionAngle(sp);
         occupySlot(ring,sp,undecidedStates[i]);
         sp += diff; 
         if (sp >= 360.0f) {
@@ -322,7 +324,8 @@ void Cluster::spreadSlots(unsigned int ring) {
     slot_angle = s*slot_diff;
     numStates = slots[ring][s].size();
     if (numStates == 1) {
-      slots[ring][s][0]->setPosition(radius,slot_angle);
+      slots[ring][s][0]->setPositionAngle(slot_angle);
+      slots[ring][s][0]->setPositionRadius(radius);
     }
     if (numStates > 1) {
       i = 0;
@@ -330,7 +333,8 @@ void Cluster::spreadSlots(unsigned int ring) {
       while (r > 0.15f && i < numStates) {
         a = slot_angle - slot_space_cw[s];
         while ((a < slot_angle + slot_space_ccw[s]) && i < numStates) {
-          slots[ring][s][i]->setPosition(r,a);
+          slots[ring][s][i]->setPositionAngle(a);
+          slots[ring][s][i]->setPositionRadius(r);
           ++i;
           a += rad_to_deg(0.25f/r);
         }
@@ -340,11 +344,22 @@ void Cluster::spreadSlots(unsigned int ring) {
       // states in this slot, so put all of the remaining states in the slot
       // position (this is a panic situation, that should occur very rarely)
       while (i < numStates) {
-        slots[ring][s][i]->setPosition(radius,slot_angle);
+        slots[ring][s][i]->setPositionAngle(slot_angle);
+        slots[ring][s][i]->setPositionRadius(radius);
         ++i;
       }
     }
   }
+}
+
+void Cluster::clearSlots() {
+  unsigned int i,j;
+  for (i = 0; i < slots.size(); ++i) {
+    for (j = 0; j < slots[i].size(); ++j) {
+      slots[i][j].clear();
+    }
+  }
+  undecidedStates.clear();
 }
 
 void Cluster::computeSizeAndDescendantPositions() {

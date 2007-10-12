@@ -50,6 +50,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
   EVT_MENU  (myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
   EVT_MENU  (myID_ZOOM_OUT, MainFrame::onZoomOut)
+  EVT_MENU  (myID_START_FORCE_DIRECTED, MainFrame::onStartForceDirected)
+  EVT_MENU  (myID_STOP_FORCE_DIRECTED, MainFrame::onStopForceDirected)
+  EVT_MENU  (myID_RESET_STATE_POSITIONS, MainFrame::onResetStatePositions)
 
   EVT_BUTTON(wxID_RESET, MainFrame::onResetButton)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
@@ -72,6 +75,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(myID_SIM_UNDO_BUTTON, MainFrame::onSimUndoButton)
   EVT_BUTTON(myID_SIM_BT_BUTTON, MainFrame::onGenerateBackTraceButton)
 //  EVT_IDLE(MainFrame::onIdle)
+  EVT_CLOSE(MainFrame::onClose)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(Mediator* owner,Settings* ss)
@@ -99,7 +103,7 @@ void MainFrame::setupMenuBar() {
   wxMenuBar* menuBar = new wxMenuBar;
   wxMenu* fileMenu = new wxMenu;
   wxMenu* viewMenu = new wxMenu;
-  wxMenu* toolMenu = new wxMenu;
+  toolMenu = new wxMenu;
   wxMenu* helpMenu = new wxMenu;
   
   fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
@@ -155,6 +159,14 @@ void MainFrame::setupMenuBar() {
   toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tD"),wxT("Pan tool"));
   toolMenu->AppendRadioItem(myID_ZOOM,wxT("&Zoom\tA"),wxT("Zoom tool"));
   toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tF"),wxT("Rotate tool"));
+  toolMenu->AppendSeparator();
+  toolMenu->Append(myID_START_FORCE_DIRECTED,wxT("Start &force directed"),
+    wxT("Starts force directed state positioning algorithm"));
+  toolMenu->Append(myID_STOP_FORCE_DIRECTED,wxT("Stop f&orce directed"),
+    wxT("Stops force directed state positioning algorithm"));
+  toolMenu->Append(myID_RESET_STATE_POSITIONS,wxT("R&eset state positions"),
+    wxT("Assign states to their default positions"));
+  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
 
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   
@@ -471,6 +483,7 @@ void MainFrame::onIdle(wxIdleEvent &event) {
   glCanvas->display();
 }
 */
+
 void MainFrame::onOpen(wxCommandEvent& /*event*/) {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
   wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),
@@ -505,10 +518,15 @@ void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {
+  Close();
+}
+
+void MainFrame::onClose(wxCloseEvent &event) {
   if (settingsDialog != NULL) {
     settingsDialog->Destroy();
   }
-  Close();
+  glCanvas->stopForceDirected();
+  event.Skip();
 }
 
 void MainFrame::onActivateTool(wxCommandEvent& event) {
@@ -630,6 +648,22 @@ void MainFrame::onZoomOut(wxCommandEvent& event)
 {
   mediator->zoomOut();
   glCanvas->display();
+}
+
+void MainFrame::onStartForceDirected(wxCommandEvent& /*event*/) {
+  toolMenu->Enable(myID_START_FORCE_DIRECTED,false);
+  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,true);
+  glCanvas->startForceDirected();
+}
+
+void MainFrame::onStopForceDirected(wxCommandEvent& /*event*/) {
+  glCanvas->stopForceDirected();
+  toolMenu->Enable(myID_START_FORCE_DIRECTED,true);
+  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
+}
+
+void MainFrame::onResetStatePositions(wxCommandEvent& /*event*/) {
+  glCanvas->resetStatePositions();
 }
 
 // Simulation event handlers implementations
@@ -766,7 +800,7 @@ void MainFrame::setActionLabels(vector< string > &labels) {
 
 void MainFrame::startRendering() {
   SetStatusText(wxT("Rendering..."),0);
-  GetStatusBar()->Update();
+  //GetStatusBar()->Update();
 }
 
 void MainFrame::stopRendering() {

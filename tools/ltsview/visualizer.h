@@ -33,15 +33,15 @@ class Visualizer: public Subscriber {
     bool update_matrices;
     bool update_abs;
 
-    void clearDFSStates(State* root);
     void computeAbsPos();
-    void computeStateAbsPos(State* root,int rot);
+    void computeStateAbsPos(Cluster* root,int rot);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);
     void drawBackPointer(State* startState,State* endState);
     void drawForwardPointer(State* startState,State* endState);
-    void drawStates(Cluster* root,int rot, bool simulating);
-    void drawTransitions(State* root,bool disp_fp,bool disp_bp);
+    void drawLoop(State* state);
+    void drawStates(Cluster* root,bool simulating);
+    void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
     bool isMarked(Transition* s);
@@ -51,6 +51,10 @@ class Visualizer: public Subscriber {
     void traverseTreeT(Cluster *root,int rot);
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
+    void computeForces(Cluster* root);
+    void applyForces(Cluster* root, int rot);
+    void resetForces(Cluster* root);
+    void resetVelocities(Cluster* root);
   
   public:
     Visualizer(Mediator* owner,Settings* ss);
@@ -67,7 +71,6 @@ class Visualizer: public Subscriber {
     void drawStates(bool simulating);
     void drawSimStates(std::vector<State*> historicStates, State* currState,
                        Transition* chosenTrans);
-    void drawSimMarkedStates(Cluster* root, int rot);
     
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp, 
@@ -77,6 +80,9 @@ class Visualizer: public Subscriber {
 
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
+    void forceDirectedInit();
+    void forceDirectedStep();
+    void resetStatePositions();
 };
 
 #endif

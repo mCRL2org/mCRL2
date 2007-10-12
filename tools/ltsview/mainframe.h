@@ -39,6 +39,7 @@ class MainFrame : public wxFrame, public simReader {
     void  onAddMarkRuleButton(wxCommandEvent& event);
     void  onDisplay(wxCommandEvent& event);
     void  onExit(wxCommandEvent& event);
+    void  onClose(wxCloseEvent& event);
     void  onOpen(wxCommandEvent& event);
     void  onOpenTrace(wxCommandEvent& event);
     void  onSavePic(wxCommandEvent& event);
@@ -66,6 +67,9 @@ class MainFrame : public wxFrame, public simReader {
     void        onSimTriggerButton(wxCommandEvent& event);
     void        onSimUndoButton(wxCommandEvent& event);
     void        onGenerateBackTraceButton(wxCommandEvent& event);
+    void onStartForceDirected(wxCommandEvent& event);
+    void onStopForceDirected(wxCommandEvent& event);
+    void onResetStatePositions(wxCommandEvent& event);
   
 
     void  replaceMarkRule(int index, wxString str);
@@ -112,6 +116,7 @@ class MainFrame : public wxFrame, public simReader {
     SettingsDialog*   settingsDialog;
     Settings*         settings;
     wxFlexGridSizer*  selSizer;
+    wxMenu*           toolMenu;
 
     // Buttons for simulation
     wxButton* simStartButton;

@@ -7,7 +7,6 @@
 /// \file ltsviewapp.cpp
 /// \brief Add your file description here.
 
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <wx/wx.h>
 //SQuADT protocol interface
@@ -74,6 +73,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 #include "markstateruledialog.h"
 #include "fileloader.h"
 #include "settings.h"
+#include "aterm1.h"
 
 using namespace std;
 using namespace Utils;
@@ -129,6 +129,9 @@ bool LTSViewApp::OnInit() {
 
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
                               wxCmdLineArgType lpCmdLine,int nCmdShow) {
+  // Initialize ATerms
+  ATerm bot;
+  ATinit(0,0,&bot);
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   mcrl2::utilities::squadt::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
       nCmdShow);
@@ -144,6 +147,9 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
 }
 #else
 int main(int argc, char **argv) {
+  // Initialize ATerms
+  ATerm bot;
+  ATinit(argc,argv,&bot);
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
   squadt_interactor c(starter);

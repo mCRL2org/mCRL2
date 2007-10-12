@@ -47,6 +47,10 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     void      refresh();
     void      selChange();
 
+    void      startForceDirected();
+    void      stopForceDirected();
+    void      resetStatePositions();
+
   private:
     int	      activeTool;
     float     angleX;
@@ -66,6 +70,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     Settings  *settings;
     Visualizer *visualizer;
     Utils::PickState selectedType;
+    bool      stop_force_directed;
     
     void      determineCurrentTool(wxMouseEvent& event);
     void      setMouseCursor();

@@ -10,6 +10,7 @@
 #ifndef LTS_H
 #define LTS_H
 #include <vector>
+#include <list>
 #include <map>
 #include "mediator.h"
 #include "state.h"
@@ -40,7 +41,6 @@ class LTS {
     std::string getLabel(int labindex);
     bool	getMatchAnyMarkRule() const;
     Utils::MarkRule*	getMarkRule(const int index) const;
-    State*      getMarkedState(const int index) const;
     int		getNumClusters() const;
     int		getNumClustersAtRank(int r) const;
     int		getNumDeadlocks();
@@ -63,6 +63,7 @@ class LTS {
     void	mergeSuperiorClusters();
     void	positionClusters();
     void	positionStates();
+    void	clearStatePositions();
 //    void  	printStructure();
 //    void	printClusterSizesPositions();
     void	removeMarkRule(const int index);
@@ -124,8 +125,8 @@ class LTS {
     State*      selectedState;
     Cluster*    selectedCluster;
     Cluster*    lastCluster;
-    std::vector< State* >	markedStates;
-    std::vector< State* >	unmarkedStates;
+    std::list< State* >	markedStates;
+    std::list< State* >	unmarkedStates;
     std::vector< Utils::MarkRule* >	markRules;
     std::vector< std::vector< Cluster* > >	clustersInRank;
 

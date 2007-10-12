@@ -19,8 +19,6 @@ namespace Utils {
   enum RankStyle      {ITERATIVE,CYCLIC};
   enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
   enum VisStyle	      {CONES,TUBES};
-  enum DFSState       {DFS_WHITE,DFS_GREY,DFS_BLACK};
-  enum SimState       {UNSEEN, HISTORY, NOW, FUTURE};
   // Allows picking processor to identify type of item picked.
   enum PickState      {STATE, CLUSTER, SIMSTATE, PICKNONE}; 
 
@@ -34,6 +32,7 @@ namespace Utils {
   const RGB_Color RGB_BLUE  = {0,0,255};
   const RGB_Color RGB_RED   = {255,0,0};
   const RGB_Color RGB_YELLOW= {255,255,0};
+  const RGB_Color RGB_ORANGE= {255,122,0};
 
   struct HSV_Color {
     int h;

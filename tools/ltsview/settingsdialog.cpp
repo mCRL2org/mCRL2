@@ -9,6 +9,9 @@
 
 #include "settingsdialog.h"
 #include <wx/notebook.h>
+#include <wx/spinctrl.h>
+#include <wx/slider.h>
+#include "mcrl2/utilities/colorbutton.h"
 #include "ids.h"
 #include "utils.h"
 
@@ -16,9 +19,37 @@ using namespace IDs;
 using namespace Utils;
 
 BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
-  EVT_BUTTON(myID_ANY,SettingsDialog::onButton)
-  EVT_SPINCTRL(myID_ANY,SettingsDialog::onSpin)
-  EVT_CHECKBOX(myID_ANY,SettingsDialog::onCheck)
+  EVT_BUTTON(myID_BACKGROUND_CLR,SettingsDialog::onBackgroundClrButton)
+  EVT_BUTTON(myID_DOWN_EDGE_CLR,SettingsDialog::onDownEdgeClrButton)
+  EVT_BUTTON(myID_INTERPOLATE_CLR_1,SettingsDialog::onInterpolateClr1Button)
+  EVT_BUTTON(myID_INTERPOLATE_CLR_2,SettingsDialog::onInterpolateClr2Button)
+  EVT_BUTTON(myID_MARK_CLR,SettingsDialog::onMarkClrButton)
+  EVT_BUTTON(myID_STATE_CLR,SettingsDialog::onStateClrButton)
+  EVT_BUTTON(myID_UP_EDGE_CLR,SettingsDialog::onUpEdgeClrButton)
+  EVT_BUTTON(myID_SIM_CURR_CLR,SettingsDialog::onSimCurrClrButton)
+  EVT_BUTTON(myID_SIM_POS_CLR,SettingsDialog::onSimPosClrButton)
+  EVT_BUTTON(myID_SIM_SEL_CLR,SettingsDialog::onSimSelClrButton)
+  EVT_BUTTON(myID_SIM_PREV_CLR,SettingsDialog::onSimPrevClrButton)
+  EVT_SPINCTRL(myID_BRANCH_ROTATION,SettingsDialog::onBranchRotationSpin)
+  EVT_SPINCTRL(myID_STATE_SIZE,SettingsDialog::onStateSizeSpin)
+  EVT_SPINCTRL(myID_BRANCH_TILT,SettingsDialog::onBranchTiltSpin)
+  EVT_SPINCTRL(myID_QUALITY,SettingsDialog::onQualitySpin)
+  EVT_SPINCTRL(myID_TRANSPARENCY,SettingsDialog::onTransparencySpin)
+  EVT_CHECKBOX(myID_LONG_INTERPOLATION,SettingsDialog::onLongInterpolationCheck)
+  EVT_CHECKBOX(myID_NAV_SHOW_BACKPOINTERS,
+      SettingsDialog::onNavShowBackpointersCheck)
+  EVT_CHECKBOX(myID_NAV_SHOW_STATES,SettingsDialog::onNavShowStatesCheck)
+  EVT_CHECKBOX(myID_NAV_SHOW_TRANSITIONS,
+      SettingsDialog::onNavShowTransitionsCheck)
+  EVT_CHECKBOX(myID_NAV_SMOOTH_SHADING,SettingsDialog::onNavSmoothShadingCheck)
+  EVT_CHECKBOX(myID_NAV_LIGHTING,SettingsDialog::onNavLightingCheck)
+  EVT_CHECKBOX(myID_NAV_TRANSPARENCY,SettingsDialog::onNavTransparencyCheck)
+  EVT_COMMAND_SCROLL(myID_TRANSITION_ATTRACTION,
+      SettingsDialog::onTransitionAttractionSlider)
+  EVT_COMMAND_SCROLL(myID_STATE_REPULSION,
+      SettingsDialog::onStateRepulsionSlider)
+  EVT_COMMAND_SCROLL(myID_TRANSITION_LENGTH,
+      SettingsDialog::onTransitionLengthSlider)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
@@ -53,36 +84,55 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
   wxSize spinSize(65,-1);
+  wxSize sliderSize(200,-1);
   long spinStyle = wxSP_ARROW_KEYS;
+  long sliderStyle = wxSL_HORIZONTAL|wxSL_AUTOTICKS|wxSL_LABELS;
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(8,2,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(4);
+  sizer->AddGrowableRow(7);
 
-  nsSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-      spinSize,spinStyle,0,1000,int(10*settings->getFloat(NodeSize)));
-  //nsSpin->SetSizeHints(spinSize,spinSize);
+  wxSpinCtrl *ssSpin = new wxSpinCtrl(panel,myID_STATE_SIZE,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle,0,1000,
+      int(10*settings->getFloat(StateSize)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State size:")),0,lf,bd);
-  sizer->Add(nsSpin,0,rf,bd);
+  sizer->Add(ssSpin,0,rf,bd);
   
-  brSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-      spinSize,spinStyle|wxSP_WRAP,0,359,settings->getInt(BranchRotation));
-  //brSpin->SetSizeHints(spinSize,spinSize);
+  wxSpinCtrl *brSpin = new wxSpinCtrl(panel,myID_BRANCH_ROTATION,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle|wxSP_WRAP,0,359,
+      settings->getInt(BranchRotation));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch rotation:")),0,lf,bd);
   sizer->Add(brSpin,0,rf,bd);
 
-  obSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-      spinSize,spinStyle,0,90,settings->getInt(BranchTilt));
-  //obSpin->SetSizeHints(spinSize,spinSize);
+  wxSpinCtrl *btSpin = new wxSpinCtrl(panel,myID_BRANCH_TILT,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle,0,90,settings->getInt(BranchTilt));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch tilt:")),0,lf,bd);
-  sizer->Add(obSpin,0,rf,bd);
+  sizer->Add(btSpin,0,rf,bd);
   
-  qlSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-      spinSize,spinStyle,2,50,settings->getInt(Quality)/2);
-  //qlSpin->SetSizeHints(spinSize,spinSize);
+  wxSpinCtrl *qlSpin = new wxSpinCtrl(panel,myID_QUALITY,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle,2,50,settings->getInt(Quality)/2);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
   sizer->Add(qlSpin,0,rf,bd);
   
+  wxSlider *srSlider = new wxSlider(panel,myID_STATE_REPULSION,
+      settings->getInt(StateRepulsion),0,10000,wxDefaultPosition,sliderSize,
+      sliderStyle);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State repulsion:")),0,lf,bd);
+  sizer->Add(srSlider,0,rf,bd);
+
+  wxSlider *taSlider = new wxSlider(panel,myID_TRANSITION_ATTRACTION,
+      settings->getInt(TransitionAttraction),0,10000,wxDefaultPosition,
+      sliderSize,sliderStyle);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition attraction:")),0,
+      lf,bd);
+  sizer->Add(taSlider,0,rf,bd);
+
+  wxSlider *tlSlider = new wxSlider(panel,myID_TRANSITION_LENGTH,
+      settings->getInt(TransitionLength),0,10000,wxDefaultPosition,sliderSize,
+      sliderStyle);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition length:")),0,lf,bd);
+  sizer->Add(tlSlider,0,rf,bd);
+
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
@@ -100,60 +150,60 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   sizer->AddGrowableCol(0);
   sizer->AddGrowableRow(8);
  
-  trSpin = new wxSpinCtrl(panel,myID_ANY,wxEmptyString,wxDefaultPosition,
-      spinSize,spinStyle,0,100,
+  wxSpinCtrl *trSpin = new wxSpinCtrl(panel,myID_TRANSPARENCY,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle,0,100,
       static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
-  //trSpin->SetSizeHints(spinSize,spinSize);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transparency:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(trSpin,0,rf,bd);
 
-  bgButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //bgButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *bgButton = new wxColorButton(panel,this,myID_BACKGROUND_CLR,
+      wxDefaultPosition,btnSize);
   bgButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(BackgroundColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Background:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(bgButton,0,rf,bd);
 
-  ndButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //ndButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *ndButton = new wxColorButton(panel,this,myID_STATE_CLR,
+      wxDefaultPosition,btnSize);
   ndButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(StateColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ndButton,0,rf,bd);
 
-  deButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //deButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *deButton = new wxColorButton(panel,this,myID_DOWN_EDGE_CLR,
+      wxDefaultPosition,btnSize);
   deButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(DownEdgeColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(deButton,0,rf,bd);
 
-  ueButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //ueButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *ueButton = new wxColorButton(panel,this,myID_UP_EDGE_CLR,
+      wxDefaultPosition,btnSize);
   ueButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(UpEdgeColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Backpointer:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ueButton,0,rf,bd);
   
-  mkButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //mkButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *mkButton = new wxColorButton(panel,this,myID_MARK_CLR,
+      wxDefaultPosition,btnSize);
   mkButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(MarkedColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Mark:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(mkButton,0,rf,bd);
 
-  i1Button = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //i1Button->SetSizeHints(btnSize,btnSize);
-  i1Button->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor1)));
-  i2Button = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //i2Button->SetSizeHints(btnSize,btnSize);
-  i2Button->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor2)));
+  wxColorButton *i1Btn = new wxColorButton(panel,this,myID_INTERPOLATE_CLR_1,
+      wxDefaultPosition,btnSize);
+  wxColorButton *i2Btn = new wxColorButton(panel,this,myID_INTERPOLATE_CLR_2,
+      wxDefaultPosition,btnSize);
+  i1Btn->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor1)));
+  i2Btn->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor2)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,lf,bd);
-  sizer->Add(i1Button,0,rf,bd);
-  sizer->Add(i2Button,0,rf,bd);
+  sizer->Add(i1Btn,0,rf,bd);
+  sizer->Add(i2Btn,0,rf,bd);
   
-  liCheck = new wxCheckBox(panel,myID_ANY,wxT("Long interpolation"));
+  wxCheckBox *liCheck = new wxCheckBox(panel,myID_LONG_INTERPOLATION,
+      wxT("Long interpolation"));
   liCheck->SetValue(settings->getBool(LongInterpolation));
   sizer->Add(liCheck,0,lf,bd);
   sizer->AddSpacer(0);
@@ -174,28 +224,31 @@ void SettingsDialog::setupSimPanel(wxPanel* panel) {
   sizer->AddGrowableCol(0);
   sizer->AddGrowableRow(4);  
    
-  shButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //shButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *shButton = new wxColorButton(panel,this,myID_SIM_PREV_CLR,
+      wxDefaultPosition,btnSize);
   shButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPrevColor)));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Previous states/transitions:")),0,lf,bd);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,
+        wxT("Previous states/transitions:")),0,lf,bd);
   sizer->Add(shButton,0,rf,bd); 
   
-  scButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //scButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *scButton = new wxColorButton(panel,this,myID_SIM_CURR_CLR,
+      wxDefaultPosition,btnSize);
   scButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimCurrColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state:")),0,lf,bd);
   sizer->Add(scButton,0,rf,bd);
   
-  ssButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //ssButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *ssButton = new wxColorButton(panel,this,myID_SIM_SEL_CLR,
+      wxDefaultPosition,btnSize);
   ssButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelColor)));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),0,lf,bd);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),
+      0,lf,bd);
   sizer->Add(ssButton,0,rf,bd);
   
-  spButton = new wxColorButton(panel,this,myID_ANY,wxDefaultPosition,btnSize);
-  //spButton->SetSizeHints(btnSize,btnSize);
+  wxColorButton *spButton = new wxColorButton(panel,this,myID_SIM_POS_CLR,
+      wxDefaultPosition,btnSize);
   spButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosColor)));
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Possible states/transitions:")),0,lf,bd);
+  sizer->Add(new wxStaticText(panel,wxID_ANY,
+        wxT("Possible states/transitions:")),0,lf,bd);
   sizer->Add(spButton,0,rf,bd);
 
   panel->SetSizer(sizer);
@@ -208,23 +261,35 @@ void SettingsDialog::setupPfmPanel(wxPanel* panel) {
   int bd = 5;
 
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL); 
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("While zooming/panning/rotating:")),0,lf,bd);
-  nsbCheck = new wxCheckBox(panel,myID_ANY,wxT("Show backpointers"));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,
+        wxT("While zooming/panning/rotating:")),0,lf,bd);
+
+  wxCheckBox *nsbCheck = new wxCheckBox(panel,myID_NAV_SHOW_BACKPOINTERS,
+      wxT("Show backpointers"));
   nsbCheck->SetValue(settings->getBool(NavShowBackpointers));
   sizer->Add(nsbCheck,0,lf,bd);
-  nssCheck = new wxCheckBox(panel,myID_ANY,wxT("Show states"));
+
+  wxCheckBox *nssCheck = new wxCheckBox(panel,myID_NAV_SHOW_STATES,
+      wxT("Show states"));
   nssCheck->SetValue(settings->getBool(NavShowStates));
   sizer->Add(nssCheck,0,lf,bd);
-  nstCheck = new wxCheckBox(panel,myID_ANY,wxT("Show transitions"));
+
+  wxCheckBox *nstCheck = new wxCheckBox(panel,myID_NAV_SHOW_TRANSITIONS,
+      wxT("Show transitions"));
   nstCheck->SetValue(settings->getBool(NavShowTransitions));
   sizer->Add(nstCheck,0,lf,bd);
-  nshCheck = new wxCheckBox(panel,myID_ANY,wxT("Enable smooth shading"));
+
+  wxCheckBox *nshCheck = new wxCheckBox(panel,myID_NAV_SMOOTH_SHADING,
+      wxT("Enable smooth shading"));
   nshCheck->SetValue(settings->getBool(NavSmoothShading));
   sizer->Add(nshCheck,0,lf,bd);
-  nliCheck = new wxCheckBox(panel,myID_ANY,wxT("Enable lighting"));
+
+  wxCheckBox *nliCheck = new wxCheckBox(panel,myID_NAV_LIGHTING,
+      wxT("Enable lighting"));
   nliCheck->SetValue(settings->getBool(NavLighting));
   sizer->Add(nliCheck,0,lf,bd);
-  ntrCheck = new wxCheckBox(panel,myID_ANY,
+
+  wxCheckBox *ntrCheck = new wxCheckBox(panel,myID_NAV_TRANSPARENCY,
 			wxT("Render transparent objects correctly"));
   ntrCheck->SetValue(settings->getBool(NavTransparency));
   sizer->Add(ntrCheck,0,lf,bd);
@@ -234,76 +299,136 @@ void SettingsDialog::setupPfmPanel(wxPanel* panel) {
   panel->Layout();
 }
 
-void SettingsDialog::onButton(wxCommandEvent& event) {
-  if (event.GetEventObject() == bgButton) {
-    settings->setRGB(BackgroundColor,
-      wxC_to_RGB(bgButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == deButton) {
-    settings->setRGB(DownEdgeColor,
-      wxC_to_RGB(deButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == i1Button) {
-    settings->setRGB(InterpolateColor1,
-      wxC_to_RGB(i1Button->GetBackgroundColour()));
-  } else if (event.GetEventObject() == i2Button) {
-    settings->setRGB(InterpolateColor2,
-      wxC_to_RGB(i2Button->GetBackgroundColour()));
-  } else if (event.GetEventObject() == mkButton) {
-    settings->setRGB(MarkedColor,
-      wxC_to_RGB(mkButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == ndButton) {
-    settings->setRGB(StateColor,
-      wxC_to_RGB(ndButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == ueButton) {
-    settings->setRGB(UpEdgeColor,
-      wxC_to_RGB(ueButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == scButton) {
-    settings->setRGB(SimCurrColor, wxC_to_RGB(scButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == spButton) {
-    settings->setRGB(SimPosColor, wxC_to_RGB(spButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == ssButton) {
-    settings->setRGB(SimSelColor, wxC_to_RGB(ssButton->GetBackgroundColour()));
-  } else if (event.GetEventObject() == shButton) {
-    settings->setRGB(SimPrevColor, wxC_to_RGB(shButton->GetBackgroundColour()));
-  } else {
-    return;
-  }
+void SettingsDialog::onBackgroundClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(BackgroundColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onCheck(wxCommandEvent& event) {
-  if (event.GetEventObject() == liCheck) {
-    settings->setBool(LongInterpolation,liCheck->GetValue());
-    glCanvas->display();
-  } else if (event.GetEventObject() == nsbCheck) {
-    settings->setBool(NavShowBackpointers,nsbCheck->GetValue());
-  } else if (event.GetEventObject() == nssCheck) {
-    settings->setBool(NavShowStates,nssCheck->GetValue());
-  } else if (event.GetEventObject() == nstCheck) {
-    settings->setBool(NavShowTransitions,nstCheck->GetValue());
-  } else if (event.GetEventObject() == nshCheck) {
-    settings->setBool(NavSmoothShading,nshCheck->GetValue());
-  } else if (event.GetEventObject() == nliCheck) {
-    settings->setBool(NavLighting,nliCheck->GetValue());
-  } else if (event.GetEventObject() == ntrCheck) {
-    settings->setBool(NavTransparency,ntrCheck->GetValue());
-  }
+void SettingsDialog::onDownEdgeClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(DownEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
 }
 
-void SettingsDialog::onSpin(wxSpinEvent& event) {
-  if (event.GetEventObject() == brSpin) {
-    settings->setInt(BranchRotation,brSpin->GetValue());
-  } else if (event.GetEventObject() == nsSpin) {
-    settings->setFloat(NodeSize,nsSpin->GetValue()/10.0f);
-  } else if (event.GetEventObject() == obSpin) {
-    settings->setInt(BranchTilt,obSpin->GetValue());
-  } else if (event.GetEventObject() == qlSpin) {
-    settings->setInt(Quality,2*qlSpin->GetValue());
-  } else if (event.GetEventObject() == trSpin) {
-    settings->setUByte(Alpha,
-     static_cast<unsigned char>((100-trSpin->GetValue())*2.55f));
-  } else {
-    return;
-  }
+void SettingsDialog::onInterpolateClr1Button(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(InterpolateColor1,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onInterpolateClr2Button(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(InterpolateColor2,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onMarkClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(MarkedColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onStateClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(StateColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onUpEdgeClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(UpEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onSimCurrClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(SimCurrColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onSimPosClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(SimPosColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onSimSelClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(SimSelColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onSimPrevClrButton(wxCommandEvent& event) {
+  wxColorButton *btn = (wxColorButton*)event.GetEventObject();
+  settings->setRGB(SimPrevColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  glCanvas->display();
+}
+
+void SettingsDialog::onLongInterpolationCheck(wxCommandEvent& event) {
+  settings->setBool(LongInterpolation,event.IsChecked());
+  glCanvas->display();
+}
+
+void SettingsDialog::onNavShowBackpointersCheck(wxCommandEvent& event) {
+  settings->setBool(NavShowBackpointers,event.IsChecked());
+}
+
+void SettingsDialog::onNavShowStatesCheck(wxCommandEvent& event) {
+  settings->setBool(NavShowStates,event.IsChecked());
+}
+
+void SettingsDialog::onNavShowTransitionsCheck(wxCommandEvent& event) {
+  settings->setBool(NavShowTransitions,event.IsChecked());
+}
+
+void SettingsDialog::onNavSmoothShadingCheck(wxCommandEvent& event) {
+  settings->setBool(NavSmoothShading,event.IsChecked());
+}
+
+void SettingsDialog::onNavLightingCheck(wxCommandEvent& event) {
+  settings->setBool(NavLighting,event.IsChecked());
+}
+
+void SettingsDialog::onNavTransparencyCheck(wxCommandEvent& event) {
+  settings->setBool(NavTransparency,event.IsChecked());
+}
+
+void SettingsDialog::onBranchRotationSpin(wxSpinEvent& event) {
+  settings->setInt(BranchRotation,event.GetPosition());
+  glCanvas->display();
+}
+
+void SettingsDialog::onStateSizeSpin(wxSpinEvent& event) {
+  settings->setFloat(StateSize,event.GetPosition()/10.0f);
+  glCanvas->display();
+}
+
+void SettingsDialog::onBranchTiltSpin(wxSpinEvent& event) {
+  settings->setInt(BranchTilt,event.GetPosition());
+  glCanvas->display();
+}
+
+void SettingsDialog::onQualitySpin(wxSpinEvent& event) {
+  settings->setInt(Quality,2*event.GetPosition());
+  glCanvas->display();
+}
+
+void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event) {
+  settings->setInt(TransitionAttraction,event.GetPosition());
+}
+
+void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event) {
+  settings->setInt(TransitionLength,event.GetPosition());
+}
+
+void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event) {
+  settings->setInt(StateRepulsion,event.GetPosition());
+}
+
+void SettingsDialog::onTransparencySpin(wxSpinEvent& event) {
+  settings->setUByte(Alpha,
+      static_cast<unsigned char>((100-event.GetPosition())*2.55f));
   glCanvas->display();
 }
 
