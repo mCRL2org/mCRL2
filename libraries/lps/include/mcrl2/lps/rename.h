@@ -125,7 +125,7 @@ linear_process rename_summation_variables(const linear_process& p, const std::se
         dest.push_back(data_variable(name, j->sort()));
       }
     }
-    new_summands.push_back(atermpp::partial_replace(*i, detail::make_data_variable_name_replacer(src, dest)));
+    new_summands.push_back(atermpp::partial_replace(*i, detail::make_data_variable_replacer(src, dest)));
   }
   
   return set_summands(p, summand_list(new_summands.begin(), new_summands.end()));
