@@ -547,7 +547,7 @@ public:
 
       // Operation failed.
       if ((impl.flags_ & implementation_type::user_set_non_blocking)
-          || (ec != boost::asio::error::would_block
+          || (ec.value() != 35 || ec != boost::asio::error::would_block
             && ec != boost::asio::error::try_again))
         return 0;
 
@@ -600,7 +600,7 @@ public:
       int bytes = socket_ops::send(socket_, bufs, i, flags_, ec);
 
       // Check if we need to run the operation again.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
         return false;
 
@@ -722,7 +722,7 @@ public:
 
       // Operation failed.
       if ((impl.flags_ & implementation_type::user_set_non_blocking)
-          || (ec != boost::asio::error::would_block
+          || (ec.value() != 35 || ec != boost::asio::error::would_block
             && ec != boost::asio::error::try_again))
         return 0;
 
@@ -777,7 +777,7 @@ public:
           destination_.data(), destination_.size(), ec);
 
       // Check if we need to run the operation again.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
         return false;
 
@@ -895,7 +895,7 @@ public:
 
       // Operation failed.
       if ((impl.flags_ & implementation_type::user_set_non_blocking)
-          || (ec != boost::asio::error::would_block
+          || (ec.value() != 35 || ec != boost::asio::error::would_block
             && ec != boost::asio::error::try_again))
         return 0;
 
@@ -950,7 +950,7 @@ public:
         ec = boost::asio::error::eof;
 
       // Check if we need to run the operation again.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
         return false;
 
@@ -1094,7 +1094,7 @@ public:
 
       // Operation failed.
       if ((impl.flags_ & implementation_type::user_set_non_blocking)
-          || (ec != boost::asio::error::would_block
+          || (ec.value() != 35 || ec != boost::asio::error::would_block
             && ec != boost::asio::error::try_again))
         return 0;
 
@@ -1153,7 +1153,7 @@ public:
         ec = boost::asio::error::eof;
 
       // Check if we need to run the operation again.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
         return false;
 
@@ -1267,7 +1267,7 @@ public:
       }
 
       // Operation failed.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
       {
         if (impl.flags_ & implementation_type::user_set_non_blocking)
@@ -1341,7 +1341,7 @@ public:
       }
 
       // Check if we need to run the operation again.
-      if (ec == boost::asio::error::would_block
+      if (ec.value() == 35 || ec == boost::asio::error::would_block
           || ec == boost::asio::error::try_again)
         return false;
       if (ec == boost::asio::error::connection_aborted
@@ -1546,7 +1546,7 @@ public:
             boost::system::error_code()));
     }
     else if (ec == boost::asio::error::in_progress
-        || ec == boost::asio::error::would_block)
+        || ec.value() == 35 || ec == boost::asio::error::would_block)
     {
       // The connection is happening in the background, and we need to wait
       // until the socket becomes writeable.
