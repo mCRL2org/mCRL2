@@ -144,6 +144,8 @@ class CAsttransform
     std::vector<RecProcessVariable> ProcessVariableMap;
     std::vector<RVT> ProcessChannelMap;
 
+    std::string processType(ATermAppl input);
+
     int stream_lvl;      //Variable to indicate the steams lvl
 
     std::vector<RAT> transitionSystem;
@@ -194,7 +196,11 @@ class CAsttransform
     std::map<std::string, RC> Channels; 
 
     std::map<std::string, int > instantation_counter;
-}
+   
+    std::map<ATermAppl, std::string> structset;
+    std::string printStructset(ATermAppl input);
+    std::string initialValueVariable(std::string Type);
+} 
 ;
 
 

@@ -22,6 +22,9 @@
 <VarID>			::= DataVarID(<String>, <TypeExp>)
 
 <TypeExp>		::= <TypeID>
+                  | SetType(<TypeExpr>)
+                  | ListType(<TypeExpr>)
+                  | TupleType(<TypeExpr>+)
 
 <TypeID>		::= Type(<String>)
 

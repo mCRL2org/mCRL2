@@ -123,6 +123,7 @@ template <typename Term> bool check_term_ParStat(Term t);
 template <typename Term> bool check_term_RecvStat(Term t);
 template <typename Term> bool check_term_AssignmentStat(Term t);
 template <typename Term> bool check_term_Recv(Term t);
+template <typename Term> bool check_term_SetType(Term t);
 template <typename Term> bool check_term_ProcDecl(Term t);
 template <typename Term> bool check_term_Delta(Term t);
 template <typename Term> bool check_term_ParenthesisedStat(Term t);
@@ -130,8 +131,10 @@ template <typename Term> bool check_term_ChannelTypedID(Term t);
 template <typename Term> bool check_term_ChanDecl(Term t);
 template <typename Term> bool check_term_StarStat(Term t);
 template <typename Term> bool check_term_SkipStat(Term t);
+template <typename Term> bool check_term_ListType(Term t);
 template <typename Term> bool check_term_BinaryExpression(Term t);
 template <typename Term> bool check_term_OptChannel(Term t);
+template <typename Term> bool check_term_TupleType(Term t);
 template <typename Term> bool check_term_Expression(Term t);
 template <typename Term> bool check_term_ProcDef(Term t);
 template <typename Term> bool check_term_UnaryExpression(Term t);
@@ -209,7 +212,10 @@ bool check_rule_VarID(Term t)
 template <typename Term>
 bool check_rule_TypeExp(Term t)
 {
-  return    check_rule_TypeID(t);
+  return    check_rule_TypeID(t)
+         || check_term_SetType(t)
+         || check_term_ListType(t)
+         || check_term_TupleType(t);
 }
 
 template <typename Term>
@@ -833,6 +839,32 @@ bool check_term_Recv(Term t)
   return true;
 }
 
+// SetType(TypeExpr)
+template <typename Term>
+bool check_term_SetType(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsSetType(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_TypeExpr<aterm>))
+    {
+      std::cerr << "check_rule_TypeExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
 // ProcDecl(Decl*)
 template <typename Term>
 bool check_term_ProcDecl(Term t)
@@ -1023,6 +1055,32 @@ bool check_term_SkipStat(Term t)
   return true;
 }
 
+// ListType(TypeExpr)
+template <typename Term>
+bool check_term_ListType(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsListType(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_TypeExpr<aterm>))
+    {
+      std::cerr << "check_rule_TypeExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
 // BinaryExpression(String, TypeID, Expr, Expr)
 template <typename Term>
 bool check_term_BinaryExpression(Term t)
@@ -1079,6 +1137,32 @@ bool check_term_OptChannel(Term t)
   // check the children
   if (a.size() != 0)
     return false;
+
+  return true;
+}
+
+// TupleType(TypeExpr+)
+template <typename Term>
+bool check_term_TupleType(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsTupleType(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_TypeExpr<aterm>, 1))
+    {
+      std::cerr << "check_rule_TypeExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }

@@ -99,7 +99,9 @@
      STAR = 316,
      GUARD_REP = 317,
      DERIVATIVE = 318,
-     DIVIDE = 319
+     SQLBRACKET = 319,
+     SQRBRACKET = 320,
+     DIVIDE = 321
    };
 #endif
 
@@ -158,17 +160,20 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 
 #define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
+void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
+void UnaryTypeCheck(ATermAppl arg1, std::string type);
+
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 55 "chiparser.yy"
+#line 58 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 172 "chiparser.hpp"
+#line 177 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

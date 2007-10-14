@@ -140,6 +140,8 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "mod"	{ process_string(); return MOD; }
 "div"	{ process_string(); return DIV; }
 "/"     { process_string(); return DIVIDE; } 
+"["     { process_string(); return SQLBRACKET; }
+"]"		{ process_string(); return SQRBRACKET; }
  
 "proc"    { process_string(); return PROC; }
 "model"   { process_string(); return MODEL; }

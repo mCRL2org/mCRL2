@@ -59,6 +59,7 @@ ATermAppl constructParStat();
 ATermAppl constructRecvStat();
 ATermAppl constructAssignmentStat();
 ATermAppl constructRecv();
+ATermAppl constructSetType();
 ATermAppl constructProcDecl();
 ATermAppl constructDelta();
 ATermAppl constructParenthesisedStat();
@@ -66,8 +67,10 @@ ATermAppl constructChannelTypedID();
 ATermAppl constructChanDecl();
 ATermAppl constructStarStat();
 ATermAppl constructSkipStat();
+ATermAppl constructListType();
 ATermAppl constructBinaryExpression();
 ATermAppl constructOptChannel();
+ATermAppl constructTupleType();
 ATermAppl constructExpression();
 ATermAppl constructProcDef();
 ATermAppl constructUnaryExpression();
@@ -394,6 +397,22 @@ ATermAppl constructRecv()
   return t;
 }
 
+// SetType
+inline
+ATermAppl initConstructSetType(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunSetType(), reinterpret_cast<ATerm>(constructTypeExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSetType()
+{
+  static ATermAppl t = initConstructSetType(t);
+  return t;
+}
+
 // ProcDecl
 inline
 ATermAppl initConstructProcDecl(ATermAppl& t)
@@ -506,6 +525,22 @@ ATermAppl constructSkipStat()
   return t;
 }
 
+// ListType
+inline
+ATermAppl initConstructListType(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunListType(), reinterpret_cast<ATerm>(constructTypeExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructListType()
+{
+  static ATermAppl t = initConstructListType(t);
+  return t;
+}
+
 // BinaryExpression
 inline
 ATermAppl initConstructBinaryExpression(ATermAppl& t)
@@ -535,6 +570,22 @@ inline
 ATermAppl constructOptChannel()
 {
   static ATermAppl t = initConstructOptChannel(t);
+  return t;
+}
+
+// TupleType
+inline
+ATermAppl initConstructTupleType(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunTupleType(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTupleType()
+{
+  static ATermAppl t = initConstructTupleType(t);
   return t;
 }
 

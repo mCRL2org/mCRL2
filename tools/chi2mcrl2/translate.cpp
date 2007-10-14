@@ -15,6 +15,7 @@
 #include <gc.h>
 #include <map>
 
+
 using namespace ::mcrl2::utilities;
 using namespace std;
 
@@ -55,6 +56,18 @@ bool CAsttransform::translator(ATermAppl ast)
     **/
   manipulateModel((ATermAppl) ATgetArgument(ast, 0 ));
 
+  /**
+    * write structs 
+    *
+    **/
+  
+  for(std::map<ATermAppl, std::string>::iterator itSet = structset.begin(); 
+      itSet != structset.end();
+      ++itSet                                      
+     )
+  {
+    result.append("\nsort "+ itSet->second+ " " + printStructset(itSet->first)+";");
+  }
   /**
     * Write chi channel ends as actions
     *
@@ -152,7 +165,7 @@ bool CAsttransform::translator(ATermAppl ast)
   result.append(initialisation+"\n   )\n  )\n );\n");
 
   mcrl2_result = result;
-  return true;
+  return true; 
 
 }
 
@@ -161,6 +174,8 @@ void CAsttransform::manipulateModel(ATermAppl input)
   gsDebugMsg("input of manipulateModel: %T\n", input);
   vector<RPV> ModelSpecification;
   vector<RPV>::iterator itRPV;
+  ChiDeclParameters.clear();
+
   //Manipulate the procees variables declared and the statements in the model
   ModelSpecification = manipulateModelSpecification((ATermAppl) ATgetArgument(input, 1 )); 
   return;
@@ -239,7 +254,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   for( itRVT = DeclaredProcessDefinition.first.begin(); itRVT != DeclaredProcessDefinition.first.end(); itRVT++ ) 
       { tmpRPV.Name = itRVT->Name; 
         tmpRPV.Type = itRVT->Type;
-        tmpRPV.InitValue = "";
+        //tmpRPV.InitValue = "";
         ProcessVariableMap.push_back(tmpRPV);
         DeclaredProcessDefinitionRPV.push_back(tmpRPV);
       }
@@ -709,6 +724,66 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   return result; 
 }
 
+std::string CAsttransform::printStructset(ATermAppl input)
+{
+  std::string result;
+  gsDebugMsg("input of printStructset: %T\n", input);
+  if ( StrcmpIsFun( "Type", (ATermAppl) input) )
+  {
+      gsDebugMsg("%T", input);
+      return ATgetName(ATgetAFun(ATgetArgument(input,0)));
+  }
+  if ( StrcmpIsFun( "TupleType", (ATermAppl) input) )
+  {
+    result.append(" =  struct tuple_"+structset[input]+"(");
+    ATermList to_process =(ATermList) ATgetArgument(input,0); 
+    int i = 0;
+    while(!ATisEmpty(to_process))
+    {
+      result.append("get_"+structset[input]+"_"+to_string(i++)+": ");
+      if(structset.find((ATermAppl) ATgetFirst(to_process)) == structset.end())
+      {
+        result.append(printStructset((ATermAppl) ATgetFirst(to_process)));
+      } else {
+        result.append(structset[(ATermAppl) ATgetFirst(to_process)]);
+      }
+      to_process = ATgetNext(to_process);
+      if(!ATisEmpty(to_process))
+      {
+        result.append(", ");
+      }
+    }
+    result.append(")");
+    return result;
+  }
+  if ( StrcmpIsFun( "ListType", (ATermAppl) input) )
+  {
+    result.append(" =  List(");
+    ATermAppl element = (ATermAppl) ATgetArgument(input, 0);  
+    if(structset.find(element) == structset.end())
+      {
+        result.append(printStructset(element));
+      } else {
+        result.append(structset[element]);
+      }
+    result.append(")");
+    return result;
+  }
+  if ( StrcmpIsFun( "SetType", (ATermAppl) input) )
+  {
+    result.append(" =  Set(");
+    ATermAppl element = (ATermAppl) ATgetArgument(input, 0);  
+    if(structset.find(element) == structset.end())
+      {
+        result.append(printStructset(element));
+      } else {
+        result.append(structset[element]);
+      }
+    result.append(")");
+    return result;
+  }
+  return result;
+}
 
 
 pair< vector<RVT>, vector<RVT> > CAsttransform::manipulateDeclaredProcessDefinition(ATermAppl input)
@@ -764,7 +839,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariables(ATermList inp
     }
     
     tmpRVT.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
-    tmpRVT.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+    tmpRVT.Type = processType((ATermAppl) ATgetArgument(element,1));
     result.push_back(tmpRVT); 
 
     //Add to table for higherlevel lookup
@@ -779,8 +854,8 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessChannels(ATermList inpu
   std::vector<RVT>::iterator it;
   std::vector<RVT> result;
   RVT tmpRVT;
-  gsDebugMsg("input of manipulateDeclaredProcessVariables: %T\n", input);
-  // INPUT: ChanDecl( ... ), ChanDecl( ... ),... 
+  gsDebugMsg("input of manipulateDeclaredProcessChannels: %T\n", input);
+  // INPUT: ChanDecl( ... ),... 
    
   ATermList to_process = (ATermList) ATgetArgument(input, 0);
   while (!ATisEmpty(to_process))
@@ -793,7 +868,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessChannels(ATermList inpu
     }
  
     tmpRVT.Name = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,0),0)));
-    tmpRVT.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+    tmpRVT.Type = processType((ATermAppl) ATgetArgument(element,1));
     result.push_back(tmpRVT); 
     
     //Add to table for higherlevel lookup
@@ -884,6 +959,114 @@ pair< std::vector<RPV>, std::vector<RVT> > CAsttransform::manipulateProcessSpeci
   return make_pair(result_var, result_chan); 
 }
 
+std::string CAsttransform::processType(ATermAppl input)
+{
+  gsDebugMsg("input of processType: %T\n", input);
+  if ( StrcmpIsFun( "Type", (ATermAppl) input) )
+  {
+      return ATgetName(ATgetAFun(ATgetArgument(input,0)));
+  }
+  if ( StrcmpIsFun( "TupleType", (ATermAppl) input) )
+  {
+    if (structset.find(input) == structset.end())
+    {
+       ATermList to_process =(ATermList) ATgetArgument(input,0); 
+       while(!ATisEmpty(to_process))
+       {
+         processType((ATermAppl) ATgetFirst(to_process));
+         to_process = ATgetNext(to_process);
+       }
+       structset[input] = "s"+to_string(structset.size()) ;
+    } 
+    return structset[input];
+  }
+  if ( StrcmpIsFun( "ListType", (ATermAppl) input) )
+  {
+    if (structset.find(input) == structset.end())
+    {
+       structset[input] = "s"+to_string(structset.size()); 
+    } 
+    return structset[input];
+  }
+  if ( StrcmpIsFun( "SetType", (ATermAppl) input) )
+  {
+    if (structset.find(input) == structset.end())
+    {
+       structset[input] = "s"+to_string(structset.size()); 
+    } 
+    return structset[input];
+  }
+  
+  gsErrorMsg("Type is not supported %T\n", input);
+  exit(1);
+  return "";
+}
+
+std::string CAsttransform::initialValueVariable(string Type)
+{
+  /**
+    * TODO: should eventually be replaced by free variables 
+    *
+    **/
+  gsDebugMsg("initialValueVariable: %s", Type.c_str());
+  for(std::map<ATermAppl, std::string>::iterator itSet=structset.begin();
+         itSet != structset.end();
+         ++itSet )
+  {  
+    if(itSet->second == Type)
+    {
+      if( StrcmpIsFun("ListType", itSet->first))
+      { 
+        return "[]";
+      }
+      if( StrcmpIsFun("SetType", itSet->first))
+      {
+        return "{}";
+      }
+      if( StrcmpIsFun("TupleType", itSet->first))
+      {
+        string result;
+        result.append("tuple_"+Type+"(");
+
+        ATermList to_process =(ATermList) ATgetArgument(itSet->first,0); 
+        while(!ATisEmpty(to_process))
+        {
+          ATermAppl element = (ATermAppl) ATgetFirst(to_process);
+          if(structset.find(element) != structset.end())
+          {
+            result.append(initialValueVariable(structset[element]));
+          } else { 
+            result.append(initialValueVariable(ATgetName(ATgetAFun(ATgetArgument(element,0)))));
+          }
+          to_process = ATgetNext(to_process);
+          if(!ATisEmpty(to_process))
+          {
+            result.append(", ");
+          }
+        }
+        result.append(")");
+        return result;
+      }
+    }
+  }  
+
+  if (Type == "Bool" )
+  {
+    return "false"; 
+  }
+  if (Type == "Nat" )
+  {
+    return "0"; 
+  }
+  if (Type == "Real" )
+  {
+    return "0.0"; 
+  }
+  gsErrorMsg("Cannot set initial value for Type %s\n", Type.c_str());
+  exit(0);
+  return ""; 
+}
+
 std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList input)
 {
   vector<RVT>::iterator it;
@@ -907,18 +1090,8 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       if ( StrcmpIsFun( "DataVarID", (ATermAppl) element) )
       {
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
-        tmpRPV.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
-	    if (tmpRPV.Type == "Bool" )
-	    {
-	  	  tmpRPV.InitValue = "false"; 
-	    }
-	    if (tmpRPV.Type == "Nat" )
-	    {
-		  tmpRPV.InitValue = "0"; 
-		}
-		//
-		//  Future NOTE: Use mapping when using self defined data types
-		/// 
+        tmpRPV.Type = processType((ATermAppl) ATgetArgument(element,1));
+        tmpRPV.InitValue = initialValueVariable(tmpRPV.Type);
         result.push_back(tmpRPV); 
       }
       if ( StrcmpIsFun( "DataVarExprID", (ATermAppl) element) )
@@ -955,9 +1128,62 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
   }
   if ( StrcmpIsFun( "BinaryExpression", input ) ) 
   {
-     result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
-     result.append( ATgetName ( ATgetAFun( ATgetArgument(input , 0) ) ) );
-     result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+     /**   
+       * rewriting the syntax of mathematical expressions
+       *
+       **/
+     bool processed = false;
+     if (StrcmpIsFun("MIN",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("min(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(",");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        processed = true;
+     }
+     if (StrcmpIsFun("MAX",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("max(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(",");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        processed = true;
+     }
+     if (StrcmpIsFun("MOD",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" mod ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        processed = true;
+     }
+     if (StrcmpIsFun("DIV",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" div ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        processed = true;
+     }
+     if (StrcmpIsFun("^",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("exp(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(",");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        processed = true;
+     }
+     if (!processed)
+     {
+       result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+       result.append( ATgetName ( ATgetAFun( ATgetArgument(input , 0) ) ) );
+       result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+     }
      return result;
   }
   if ( StrcmpIsFun( "UnaryExpression", input ) ) 
@@ -1030,7 +1256,8 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
           string channelID = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 0),0)));
           ATerm direction = ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),1);
           string local_string =ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),0))); 
-          string type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 1),0)));
+          //string type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 1),0)));
+          string type = processType((ATermAppl) ATgetArgument(element, 1));
           local_channels.push_back(channelID);
  
           // Set Receiving end for a channel 
@@ -1068,8 +1295,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
         if(StrcmpIsFun("DataVarID", (ATermAppl) Chi_interfaces[processName].at(i))) 
         {
-          //Need to do some work here, related to checking of checking for expressions for
-          // tmp_to_process  
+          //Need to do some work here, related to checking expression type 
           known = true;
         }
 

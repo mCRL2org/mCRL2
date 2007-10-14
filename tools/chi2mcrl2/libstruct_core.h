@@ -383,6 +383,28 @@ bool gsIsInstantiation(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunInstantiation();
 }
 
+// ListType
+inline
+AFun initAFunListType(AFun& f)
+{
+  f = ATmakeAFun("ListType", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunListType()
+{
+  static AFun AFunListType = initAFunListType(AFunListType);
+  return AFunListType;
+}
+
+inline
+bool gsIsListType(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunListType();
+}
+
 // ModelDef
 inline
 AFun initAFunModelDef(AFun& f)
@@ -713,6 +735,28 @@ bool gsIsSepStat(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSepStat();
 }
 
+// SetType
+inline
+AFun initAFunSetType(AFun& f)
+{
+  f = ATmakeAFun("SetType", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSetType()
+{
+  static AFun AFunSetType = initAFunSetType(AFunSetType);
+  return AFunSetType;
+}
+
+inline
+bool gsIsSetType(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSetType();
+}
+
 // Skip
 inline
 AFun initAFunSkip(AFun& f)
@@ -777,6 +821,28 @@ inline
 bool gsIsStarStat(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunStarStat();
+}
+
+// TupleType
+inline
+AFun initAFunTupleType(AFun& f)
+{
+  f = ATmakeAFun("TupleType", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunTupleType()
+{
+  static AFun AFunTupleType = initAFunTupleType(AFunTupleType);
+  return AFunTupleType;
+}
+
+inline
+bool gsIsTupleType(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunTupleType();
 }
 
 // Type
@@ -964,6 +1030,12 @@ ATermAppl gsMakeInstantiation(ATermAppl String_0, ATermList Expr_1)
 }
 
 inline
+ATermAppl gsMakeListType(ATermAppl TypeExpr_0)
+{
+  return ATmakeAppl1(gsAFunListType(), (ATerm) TypeExpr_0);
+}
+
+inline
 ATermAppl gsMakeModelDef(ATermAppl String_0, ATermAppl ModelBody_1)
 {
   return ATmakeAppl2(gsAFunModelDef(), (ATerm) String_0, (ATerm) ModelBody_1);
@@ -1054,6 +1126,12 @@ ATermAppl gsMakeSepStat(ATermAppl Statement_0, ATermAppl Statement_1)
 }
 
 inline
+ATermAppl gsMakeSetType(ATermAppl TypeExpr_0)
+{
+  return ATmakeAppl1(gsAFunSetType(), (ATerm) TypeExpr_0);
+}
+
+inline
 ATermAppl gsMakeSkip()
 {
   return ATmakeAppl0(gsAFunSkip());
@@ -1069,6 +1147,12 @@ inline
 ATermAppl gsMakeStarStat(ATermAppl Statement_0)
 {
   return ATmakeAppl1(gsAFunStarStat(), (ATerm) Statement_0);
+}
+
+inline
+ATermAppl gsMakeTupleType(ATermList TypeExpr_0)
+{
+  return ATmakeAppl1(gsAFunTupleType(), (ATerm) TypeExpr_0);
 }
 
 inline
