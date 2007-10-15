@@ -1514,7 +1514,7 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
         while (!ATisEmpty(cons_sort_domain)) {
           ATermAppl proj_name = gsMakeNil();
           if (projects.count(std::make_pair(constructor, index)) > 0) {
-            proj_name = projects[std::make_pair(constructor, index)];
+            proj_name = gsGetName(projects[std::make_pair(constructor, index)]);
           }
           struct_projs = ATinsert(struct_projs, (ATerm) gsMakeStructProj(proj_name, ATAgetFirst(cons_sort_domain)));
           cons_sort_domain = ATgetNext(cons_sort_domain);
