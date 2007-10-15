@@ -83,39 +83,49 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   pbes_expression visit_and(const pbes_expression& /* f */, const pbes_expression& left, const pbes_expression& right)
   {
     using namespace lps::pbes_expr;
-    return inside_not ? or_(visit(not_(left)), visit(not_(right)))
-                      : and_(visit(left), visit(right));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? or_(visit(not_(left)), visit(not_(right)))
+             : and_(visit(left), visit(right));
   }
 
   pbes_expression visit_or(const pbes_expression& /* f */, const pbes_expression& left, const pbes_expression& right)
   {
     using namespace lps::pbes_expr;
-    return inside_not ? and_(visit(not_(left)), visit(not_(right)))
-                      : or_(visit(left), visit(right));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? and_(visit(not_(left)), visit(not_(right)))
+             : or_(visit(left), visit(right));
   }    
 
   pbes_expression visit_imp(const pbes_expression& /* f */, const pbes_expression& left, const pbes_expression& right)
   {
     using namespace lps::pbes_expr;
-    return inside_not ? and_(visit(left), visit(not_(right)))
-                      : or_(visit(not_(left)), visit(right));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? and_(visit(left), visit(not_(right)))
+             : or_(visit(not_(left)), visit(right));
   }    
 
   pbes_expression visit_forall(const pbes_expression& /* f */, const data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace lps::pbes_expr;
-    return inside_not ? exists(variables, visit(not_(expression)))
-                      : forall(variables, visit(expression));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? exists(variables, visit(not_(expression)))
+             : forall(variables, visit(expression));
   }
 
   pbes_expression visit_exists(const pbes_expression& /* f */, const data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace lps::pbes_expr;
-    return inside_not ? forall(variables, visit(not_(expression)))
-                      : exists(variables, visit(expression));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? forall(variables, visit(not_(expression)))
+             : exists(variables, visit(expression));
   }
 
-  pbes_expression visit_var(const pbes_expression& f, const identifier_string& /* n */, const data_expression_list& /* l */)
+  pbes_expression visit_propositional_variable(const pbes_expression& f, const propositional_variable_instantiation& /* v */)
   {
     using namespace lps::pbes_expr;
     if (inside_not)

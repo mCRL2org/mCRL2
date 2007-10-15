@@ -13,7 +13,6 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "atermpp/make_list.h"
-#include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
@@ -23,6 +22,7 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/pbes/normalize.h"
 
 using namespace std;
 using namespace atermpp;
@@ -183,22 +183,66 @@ void test_pbes()
 
 void test_normalize()
 {
-  using namespace state_frm;
+  using namespace pbes_expr;
 
-  state_formula x = var(identifier_string("X"), data_expression_list());
-  state_formula y = var(identifier_string("Y"), data_expression_list());
-  state_formula f = imp(x, not_(y));
-  state_formula f1 = normalize(f);
-  state_formula f2 = or_(x, y);
-  std::cout << "f  = " << pp(f) << std::endl;
-  std::cout << "f1 = " << pp(f1) << std::endl;
+  pbes_expression x = propositional_variable_instantiation("x:X");
+  pbes_expression y = propositional_variable_instantiation("y:Y");
+  pbes_expression z = propositional_variable_instantiation("z:Z");
+  pbes_expression f; 
+  pbes_expression f1;
+  pbes_expression f2;
+
+  f = not_(not_(x));
+  f1 = normalize(f);
+  f2 = x;
+  std::cout << "f  = " << f  << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
+  f = imp(not_(x), y);
+  f1 = normalize(f);
+  f2 = or_(x, y);
+  std::cout << "f  = " << f  << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
+  BOOST_CHECK(f1 == f2);
 
-  specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
-  state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
-  bool timed = false;
-  pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
+  f  = not_(and_(not_(x), not_(y)));
+  f1 = normalize(f);
+  f2 = or_(x, y);
+  std::cout << "f  = " << f << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
+  BOOST_CHECK(f1 == f2);
+
+  f  = imp(and_(not_(x), not_(y)), z);
+  f1 = normalize(f);
+  f2 = or_(or_(x, y), z);
+  std::cout << "f  = " << f << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
+  BOOST_CHECK(f1 == f2);
+
+  x = data_variable("x:X");
+  y = data_variable("y:Y");
+  z = data_variable("z:Z");
+
+  f  = not_(x);
+  f1 = normalize(f);
+  f2 = data_expr::not_(x);
+  std::cout << "f  = " << f << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
+  BOOST_CHECK(f1 == f2);
+
+  f  = imp(and_(x, y), z);
+  f1 = normalize(f);
+  f2 = or_(or_(data_expr::not_(x), data_expr::not_(y)), z);
+  std::cout << "f  = " << f << std::endl;
+  std::cout << "f1 = " << f1 << std::endl;
+  std::cout << "f2 = " << f2 << std::endl;
+  BOOST_CHECK(f1 == f2);
 }
 
 // void test_xyz_generator()
@@ -355,9 +399,9 @@ int test_main(int argc, char* argv[])
   aterm_init(bottom_of_stack);
   gsEnableConstructorFunctions();
 
+  test_normalize();
   test_trivial();
   test_pbes();
-  test_normalize();
   // test_xyz_generator();
   // test_free_variables();
   test_pbes_expression_builder();

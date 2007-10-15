@@ -81,50 +81,64 @@ struct state_formula_normalize_builder: public state_formula_builder
   state_formula visit_and(const state_formula& /* f */, const state_formula& left, const state_formula& right)
   {
     using namespace lps::state_frm;
-    return inside_not ? or_(visit(not_(left)), visit(not_(right)))
-                      : and_(visit(left), visit(right));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? or_(visit(not_(left)), visit(not_(right)))
+             : and_(visit(left), visit(right));
   }
 
   state_formula visit_or(const state_formula& /* f */, const state_formula& left, const state_formula& right)
   {
     using namespace lps::state_frm;
-    return inside_not ? and_(visit(not_(left)), visit(not_(right)))
-                      : or_(visit(left), visit(right));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? and_(visit(not_(left)), visit(not_(right)))
+             : or_(visit(left), visit(right));
   }    
 
   state_formula visit_imp(const state_formula& /* f */, const state_formula& left, const state_formula& right)
   {
     using namespace lps::state_frm;
-    return inside_not ? and_(visit(left), visit(not_(right)))
-                      : or_(visit(left), visit(not_(right)));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? and_(visit(left), visit(not_(right)))
+             : or_(visit(left), visit(not_(right)));
   }    
 
   state_formula visit_forall(const state_formula& /* f */, const data_variable_list& variables, const state_formula& expression)
   {
     using namespace lps::state_frm;
-    return inside_not ? exists(variables, visit(not_(expression)))
-                      : forall(variables, visit(expression));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? exists(variables, visit(not_(expression)))
+             : forall(variables, visit(expression));
   }
 
   state_formula visit_exists(const state_formula& /* f */, const data_variable_list& variables, const state_formula& expression)
   {
     using namespace lps::state_frm;
-    return inside_not ? forall(variables, visit(not_(expression)))
-                      : exists(variables, visit(expression));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? forall(variables, visit(not_(expression)))
+             : exists(variables, visit(expression));
   }
 
   state_formula visit_must(const state_formula& /* f */, const regular_formula& r, const state_formula& formula)
   {
     using namespace lps::state_frm;
-    return inside_not ? must(r, visit(not_(formula)))
-                      : must(r, visit(formula));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? must(r, visit(not_(formula)))
+             : must(r, visit(formula));
   }
 
   state_formula visit_may(const state_formula& /* f */, const regular_formula& r, const state_formula& formula)
   {
     using namespace lps::state_frm;
-    return inside_not ? may(r, visit(not_(formula)))
-                      : may(r, visit(formula));
+    bool b = inside_not;
+    inside_not = false;
+    return b ? may(r, visit(not_(formula)))
+             : may(r, visit(formula));
   }
 
   state_formula visit_yaled(const state_formula& /* f */)
@@ -168,15 +182,19 @@ struct state_formula_normalize_builder: public state_formula_builder
   state_formula visit_mu(const state_formula& /* f */, const identifier_string& name, const data_assignment_list& a, const state_formula& formula)
   {
     using namespace lps::state_frm;
-    return inside_not ? nu(name, a, visit(not_(formula.substitute(state_variable_negation(name)))))
-                      : mu(name, a, visit(formula));   
+    bool b = inside_not;
+    inside_not = false;
+    return b ? nu(name, a, visit(not_(formula.substitute(state_variable_negation(name)))))
+             : mu(name, a, visit(formula));   
   }
 
   state_formula visit_nu(const state_formula& /* f */, const identifier_string& name, const data_assignment_list& a, const state_formula& formula)
   {
     using namespace lps::state_frm;
-    return inside_not ? mu(name, a, visit(not_(formula.substitute(state_variable_negation(name)))))
-                      : nu(name, a, visit(formula));   
+    bool b = inside_not;
+    inside_not = false;
+    return b ? mu(name, a, visit(not_(formula.substitute(state_variable_negation(name)))))
+             : nu(name, a, visit(formula));   
   }
 };
 
