@@ -976,7 +976,7 @@ std::string CAsttransform::processType(ATermAppl input)
          processType((ATermAppl) ATgetFirst(to_process));
          to_process = ATgetNext(to_process);
        }
-       structset[input] = "s"+to_string(structset.size()) ;
+       structset[input] = "S"+to_string(structset.size()) ;
     } 
     return structset[input];
   }
@@ -1067,6 +1067,36 @@ std::string CAsttransform::initialValueVariable(string Type)
   return ""; 
 }
 
+std::string CAsttransform::processValue(ATermAppl input)
+{
+  gsDebugMsg("input of processDataVarIDValue: %T\n", input);
+  std::string result;
+  if( StrcmpIsFun("Expression", input ))
+  { 
+    return ATgetName(ATgetAFun(ATgetArgument(input,0)));
+  }
+  if( StrcmpIsFun("ListLiteral", input ))
+  { 
+    ATermList to_process =(ATermList) ATgetArgument(input,0); 
+    result = "[";
+    while(!ATisEmpty(to_process))
+    {
+      ATermAppl element = (ATermAppl) ATgetFirst(to_process);
+      result.append(processValue(element));
+      to_process = ATgetNext(to_process);
+      if(!ATisEmpty(to_process))
+      {
+        result.append(", ");
+      }
+    }
+    result.append("]");
+    return result;
+  }
+  gsErrorMsg("processDataVarIDValue %T not defined", input);
+  exit(1);
+  return "";
+}
+
 std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList input)
 {
   vector<RVT>::iterator it;
@@ -1098,9 +1128,8 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       {
         ATerm sub_element = ATgetArgument(element, 0); 
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(sub_element,0)));
-        tmpRPV.Type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(sub_element,1),0)));
-             
-        tmpRPV.InitValue = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,1),0)));
+        tmpRPV.Type = processType((ATermAppl) ATgetArgument(sub_element,1));
+        tmpRPV.InitValue = processValue((ATermAppl) ATgetArgument(element,1));
         result.push_back(tmpRPV); 
       }
 
@@ -1203,6 +1232,21 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
        result.append(")");
      }  
      return result;
+  }
+  if ( StrcmpIsFun( "ListLiteral", input ) ) 
+  {
+     return processValue(input); 
+  }
+
+  if ( StrcmpIsFun( "BinaryListExpression", input))
+  {
+     if (StrcmpIsFun("in",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" in ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        return result;
+     }
   }
   gsErrorMsg("Encounterd unknown expression: %T\n", input);
   exit(1);

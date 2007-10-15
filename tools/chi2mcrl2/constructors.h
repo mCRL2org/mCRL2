@@ -56,11 +56,12 @@ ATermAppl constructAltStat();
 ATermAppl constructDataVarID();
 ATermAppl constructAssignmentGGStat();
 ATermAppl constructParStat();
-ATermAppl constructRecvStat();
+ATermAppl constructListLiteral();
 ATermAppl constructAssignmentStat();
 ATermAppl constructRecv();
 ATermAppl constructSetType();
 ATermAppl constructProcDecl();
+ATermAppl constructRecvStat();
 ATermAppl constructDelta();
 ATermAppl constructParenthesisedStat();
 ATermAppl constructChannelTypedID();
@@ -74,11 +75,12 @@ ATermAppl constructTupleType();
 ATermAppl constructExpression();
 ATermAppl constructProcDef();
 ATermAppl constructUnaryExpression();
-ATermAppl constructSkip();
+ATermAppl constructBinaryListExpression();
 ATermAppl constructModelSpec();
 ATermAppl constructVarDecl();
 ATermAppl constructVarSpec();
 ATermAppl constructSendStat();
+ATermAppl constructSkip();
 ATermAppl constructProcSpec();
 ATermAppl constructGuardedStarStat();
 ATermAppl constructSpecChi();
@@ -349,19 +351,19 @@ ATermAppl constructParStat()
   return t;
 }
 
-// RecvStat
+// ListLiteral
 inline
-ATermAppl initConstructRecvStat(ATermAppl& t)
+ATermAppl initConstructListLiteral(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunRecvStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl2(gsAFunListLiteral(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructTypeID()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructRecvStat()
+ATermAppl constructListLiteral()
 {
-  static ATermAppl t = initConstructRecvStat(t);
+  static ATermAppl t = initConstructListLiteral(t);
   return t;
 }
 
@@ -426,6 +428,22 @@ inline
 ATermAppl constructProcDecl()
 {
   static ATermAppl t = initConstructProcDecl(t);
+  return t;
+}
+
+// RecvStat
+inline
+ATermAppl initConstructRecvStat(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunRecvStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructRecvStat()
+{
+  static ATermAppl t = initConstructRecvStat(t);
   return t;
 }
 
@@ -637,19 +655,19 @@ ATermAppl constructUnaryExpression()
   return t;
 }
 
-// Skip
+// BinaryListExpression
 inline
-ATermAppl initConstructSkip(ATermAppl& t)
+ATermAppl initConstructBinaryListExpression(ATermAppl& t)
 {
-  t = ATmakeAppl0(gsAFunSkip());
+  t = ATmakeAppl4(gsAFunBinaryListExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructSkip()
+ATermAppl constructBinaryListExpression()
 {
-  static ATermAppl t = initConstructSkip(t);
+  static ATermAppl t = initConstructBinaryListExpression(t);
   return t;
 }
 
@@ -714,6 +732,22 @@ inline
 ATermAppl constructSendStat()
 {
   static ATermAppl t = initConstructSendStat(t);
+  return t;
+}
+
+// Skip
+inline
+ATermAppl initConstructSkip(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunSkip());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSkip()
+{
+  static ATermAppl t = initConstructSkip(t);
   return t;
 }
 

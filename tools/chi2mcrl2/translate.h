@@ -200,6 +200,8 @@ class CAsttransform
     std::map<ATermAppl, std::string> structset;
     std::string printStructset(ATermAppl input);
     std::string initialValueVariable(std::string Type);
+
+    std::string processValue(ATermAppl input);
 } 
 ;
 

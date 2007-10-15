@@ -120,11 +120,12 @@ template <typename Term> bool check_term_AltStat(Term t);
 template <typename Term> bool check_term_DataVarID(Term t);
 template <typename Term> bool check_term_AssignmentGGStat(Term t);
 template <typename Term> bool check_term_ParStat(Term t);
-template <typename Term> bool check_term_RecvStat(Term t);
+template <typename Term> bool check_term_ListLiteral(Term t);
 template <typename Term> bool check_term_AssignmentStat(Term t);
 template <typename Term> bool check_term_Recv(Term t);
 template <typename Term> bool check_term_SetType(Term t);
 template <typename Term> bool check_term_ProcDecl(Term t);
+template <typename Term> bool check_term_RecvStat(Term t);
 template <typename Term> bool check_term_Delta(Term t);
 template <typename Term> bool check_term_ParenthesisedStat(Term t);
 template <typename Term> bool check_term_ChannelTypedID(Term t);
@@ -138,11 +139,12 @@ template <typename Term> bool check_term_TupleType(Term t);
 template <typename Term> bool check_term_Expression(Term t);
 template <typename Term> bool check_term_ProcDef(Term t);
 template <typename Term> bool check_term_UnaryExpression(Term t);
-template <typename Term> bool check_term_Skip(Term t);
+template <typename Term> bool check_term_BinaryListExpression(Term t);
 template <typename Term> bool check_term_ModelSpec(Term t);
 template <typename Term> bool check_term_VarDecl(Term t);
 template <typename Term> bool check_term_VarSpec(Term t);
 template <typename Term> bool check_term_SendStat(Term t);
+template <typename Term> bool check_term_Skip(Term t);
 template <typename Term> bool check_term_ProcSpec(Term t);
 template <typename Term> bool check_term_GuardedStarStat(Term t);
 
@@ -249,7 +251,9 @@ bool check_rule_Expr(Term t)
 {
   return    check_term_Expression(t)
          || check_term_UnaryExpression(t)
-         || check_term_BinaryExpression(t);
+         || check_term_BinaryExpression(t)
+         || check_term_ListLiteral(t)
+         || check_term_BinaryListExpression(t);
 }
 
 template <typename Term>
@@ -743,35 +747,30 @@ bool check_term_ParStat(Term t)
   return true;
 }
 
-// RecvStat(OptGuard, Expr, Expr+)
+// ListLiteral(Expr*, TypeID)
 template <typename Term>
-bool check_term_RecvStat(Term t)
+bool check_term_ListLiteral(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsRecvStat(a))
+  if (!gsIsListLiteral(a))
     return false;
 
   // check the children
-  if (a.size() != 3)
+  if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_term_OptGuard<aterm>))
-    {
-      std::cerr << "check_term_OptGuard" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(1), check_rule_Expr<aterm>))
+  if (!check_list_argument(a(0), check_rule_Expr<aterm>, 0))
     {
       std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(2), check_rule_Expr<aterm>, 1))
+  if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
     {
-      std::cerr << "check_rule_Expr" << std::endl;
+      std::cerr << "check_rule_TypeID" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -884,6 +883,42 @@ bool check_term_ProcDecl(Term t)
   if (!check_list_argument(a(0), check_rule_Decl<aterm>, 0))
     {
       std::cerr << "check_rule_Decl" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// RecvStat(OptGuard, Expr, Expr+)
+template <typename Term>
+bool check_term_RecvStat(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsRecvStat(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_term_OptGuard<aterm>))
+    {
+      std::cerr << "check_term_OptGuard" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(2), check_rule_Expr<aterm>, 1))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1270,21 +1305,43 @@ bool check_term_UnaryExpression(Term t)
   return true;
 }
 
-// Skip()
+// BinaryListExpression(String, TypeID, Expr, Expr)
 template <typename Term>
-bool check_term_Skip(Term t)
+bool check_term_BinaryListExpression(Term t)
 {
   // check the type of the term
   aterm term(aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
   aterm_appl a(term);
-  if (!gsIsSkip(a))
+  if (!gsIsBinaryListExpression(a))
     return false;
 
   // check the children
-  if (a.size() != 0)
+  if (a.size() != 4)
     return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }
@@ -1404,6 +1461,25 @@ bool check_term_SendStat(Term t)
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// Skip()
+template <typename Term>
+bool check_term_Skip(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsSkip(a))
+    return false;
+
+  // check the children
+  if (a.size() != 0)
+    return false;
 
   return true;
 }

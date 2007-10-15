@@ -157,6 +157,10 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "const"   { process_string(); return CONST; }
 "time"	{ process_string(); return TIME; }
 
+"in"	{ process_string(); return IN; }
+"++"	{ process_string(); return CONCAT; }
+"--"    { process_string(); return LSUBTRACT; }
+
 
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }

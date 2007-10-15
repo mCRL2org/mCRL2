@@ -101,7 +101,10 @@
      DERIVATIVE = 318,
      SQLBRACKET = 319,
      SQRBRACKET = 320,
-     DIVIDE = 321
+     LSUBTRACT = 321,
+     CONCAT = 322,
+     IN = 323,
+     DIVIDE = 324
    };
 #endif
 
@@ -162,18 +165,19 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
+bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 58 "chiparser.yy"
+#line 59 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 177 "chiparser.hpp"
+#line 181 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

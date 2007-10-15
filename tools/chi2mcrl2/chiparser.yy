@@ -52,6 +52,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
+bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 
 %}
 
@@ -79,6 +80,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type);
 %token <appl> NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 %token <appl> SQLBRACKET SQRBRACKET 
+%token <appl> LSUBTRACT CONCAT IN
 
 %left MINUS PLUS 
 %left DIVIDE       /* order '+','-','*','/' */
@@ -101,6 +103,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type);
 %type <appl> ChiProgram ProcessDefinition FormalParameter ExpressionIdentifier
 %type <appl> ModelDefinition ModelBody 
 %type <appl> ContainerType
+%type <appl> ListExpression ListLiteral
 
 %type <list> IdentifierTypeExpression IdentifierType Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions ChannelDeclaration ChannelDefinition
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
@@ -680,9 +683,9 @@ AssignmentStatement:
 
           while(!ATisEmpty(ids))
           { 
-            if (ATgetArgument(ATgetFirst(ids), 1) != ATgetArgument(ATgetFirst(exprs), 1))
+            if (!ContainerTypeChecking((ATermAppl) ATgetArgument(ATgetFirst(ids), 1), (ATermAppl) ATgetArgument(ATgetFirst(exprs), 1)))
 		    { 
-              gsErrorMsg("Incompatible Types Checking failed\n");
+              gsErrorMsg("Incompatible Types Checking failed %T and %T\n", ids, exprs);
 		      exit(1);
             }
             ids = ATgetNext(ids);
@@ -861,10 +864,10 @@ Expression: //NUMBER
 	| BooleanExpression
 	| NatIntExpression
 	| BoolNatIntExpression 
+	| ListExpression
 /*	| IntExpression
 	| RealExpression */
 //	| StringExpression
-//	| ListExpression
 //	| SetExpression
 //	| DictExpression
 //	| VectorExpression
@@ -1271,7 +1274,7 @@ BoolNatIntExpression:
 			safe_assign($$, gsMakeBinaryExpression( $2,  
 					gsMakeType( gsString2ATermAppl("Bool" )), 
 			$1, $3));
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+      		gsDebugMsg("BoolNatIntExpression parsed: \n  %T\n", $$);
 		}
 	| Expression NOTEQUAL Expression
 		{ 
@@ -1288,10 +1291,130 @@ BoolNatIntExpression:
  	  		safe_assign($$, gsMakeBinaryExpression( $2,  
 					gsMakeType( gsString2ATermAppl("Bool" )), 
 			$1, $3));
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+      		gsDebugMsg("BoolNatIntExpression parsed: \n  %T\n", $$);
 		}
 	;	
 
+ListExpression:
+      ListLiteral
+      {
+        safe_assign($$, $$);
+      }
+    | Expression IN Expression 
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(gsMakeListType(ATAgetArgument($1,1)) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					gsMakeType( gsString2ATermAppl("Bool" )), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    | ListLiteral CONCAT ListLiteral
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					ATAgetArgument($1,1), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    | ListLiteral LSUBTRACT ListLiteral
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					ATAgetArgument($1,1), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    | ListLiteral EQUAL ListLiteral
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					gsMakeType( gsString2ATermAppl("Bool" )), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    | ListLiteral NOTEQUAL ListLiteral  
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+				{
+				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					gsMakeType( gsString2ATermAppl("Bool" )), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    ;
+
+ListLiteral:
+    SQLBRACKET SQRBRACKET
+      {
+          safe_assign($$, gsMakeListLiteral( ATmakeList0(), gsMakeListType(gsMakeType(gsMakeNil()))));
+      }
+  | SQLBRACKET Expression_csp SQRBRACKET
+      {
+          ATerm type; 
+		  ATermList to_process = $2;
+		  while(!ATisEmpty(to_process))
+          {
+             ATerm elementType = ATgetArgument(ATgetFirst(to_process),1);
+             if (ATgetLength(to_process) == ATgetLength($2))
+             {
+               type = elementType;
+             }
+             gsDebugMsg("%T",ATgetFirst(to_process));
+             if (type != elementType )
+             {
+               gsErrorMsg("ListLiteral contains mixed types %T and %T\n"
+                         , type, elementType);
+               exit(1);
+             }
+			 to_process = ATgetNext( to_process) ;
+		  }
+          safe_assign($$, gsMakeListLiteral( ATreverse($2), gsMakeListType((ATermAppl) type)));
+      }
+;
 
 /* Precedence for '+','-' vs '*',  '/' is NOT defined here.
  * Instead, the two %left commands above perform that role.
@@ -1344,3 +1467,34 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
         };
   return;
 }
+
+bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
+{
+  gsDebugMsg("ContainerTypeChecking: %T, %T\n",arg1, arg2);
+cout << ATgetName(ATgetAFun(arg1)) << endl;
+cout << ATgetName(ATgetAFun(arg2)) << endl;
+
+
+  if((strcmp(ATgetName(ATgetAFun(arg1)), ATgetName(ATgetAFun(arg2)))==0)  
+     && (strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ))
+    {
+      if(((ATermAppl) ATgetArgument(arg2,0) == gsMakeType(gsMakeNil())) || 
+         ((ATermAppl) ATgetArgument(arg1,0) == gsMakeType(gsMakeNil()))
+        )
+      {
+        return true;
+      }
+      return ContainerTypeChecking((ATermAppl) ATgetArgument(arg1,0), ATermAppl (ATgetArgument(arg2,0))); 
+    }
+
+  if( (strcmp(ATgetName(ATgetAFun(arg1)),ATgetName(ATgetAFun(arg2)))==0) && (strcmp(ATgetName(ATgetAFun(arg1)), "Type") == 0 ))
+  {
+    if(arg1 != arg2)
+    { 
+      return false;
+    } else {
+      return true;
+    }
+  } 
+}    
+
