@@ -23,7 +23,9 @@
 namespace tipi {
   namespace controller {
 
+    /// \cond INTERNAL_DOCS
     class communicator_impl;
+    /// \endcond
 
     /** \brief Specifies controller capabilities */
     class capabilities;
@@ -33,7 +35,9 @@ namespace tipi {
      * \brief The main interface to the protocol (controller-side)
      **/
     class communicator : public messaging::basic_messenger< tipi::message > {
+    /// \cond INTERNAL_DOCS
       friend class communicator_impl;
+    /// \endcond
 
       protected:
  
@@ -51,13 +55,17 @@ namespace tipi {
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (tipi::report::sptr) >                                   status_message_handler_function;
 
+      protected:
+
+      /// \cond INTERNAL_DOCS
+        /** \brief Constructor for derived implementation objects */
+        communicator(boost::shared_ptr < tipi::controller::communicator_impl > const&);
+      /// \endcond
+
       public:
 
         /** \brief Default constructor */
         communicator();
-
-        /** \brief Constructor for derived implementation objects */
-        communicator(boost::shared_ptr < tipi::controller::communicator_impl > const&);
 
         /** \brief Get the controller_capabilities object that is send to tools */
         const controller::capabilities& get_controller_capabilities();

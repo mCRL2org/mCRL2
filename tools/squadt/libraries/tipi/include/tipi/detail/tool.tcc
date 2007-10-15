@@ -16,6 +16,7 @@
 namespace tipi {
   namespace tool {
 
+    /// \cond INTERNAL_DOCS
     class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi::message > {
       friend class communicator;
       friend class messaging::scheme< tipi::message >;
@@ -167,5 +168,6 @@ namespace tipi {
         current_configuration = c;
       }
     }
+    /// \endcond
   } 
 }

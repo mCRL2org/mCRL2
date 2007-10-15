@@ -25,7 +25,9 @@ namespace tipi {
 
   namespace tool {
 
+    /// \cond INTERNAL_DOCS
     class communicator_impl;
+    /// \endcond
 
     /** \brief Specifies capabilities */
     class capabilities;
@@ -33,7 +35,10 @@ namespace tipi {
     /** \brief The main interface to the protocol implementation (tool-side) */
     class communicator : public tipi::messenger {
       friend class layout::element;
+
+    /// \cond INTERNAL_DOCS
       friend class communicator_impl;
+    /// \endcond
 
       private:
 
@@ -43,13 +48,17 @@ namespace tipi {
         /** \brief Set the current tool configuration object */
         inline void set_configuration(boost::shared_ptr < configuration >);
 
+      protected:
+
+      /// \cond INTERNAL_DOCS
+        /** \brief Constructor for derived implementation object */
+        communicator(boost::shared_ptr < tipi::tool::communicator_impl > const&);
+      /// \endcond
+ 
       public:
  
         /** \brief Default constructor */
         communicator();
- 
-        /** \brief Constructor for derived implementation object */
-        communicator(boost::shared_ptr < tipi::tool::communicator_impl > const&);
  
         /** \brief Activate the communicator via connection arguments from the command line */
         bool activate(int&, char** const);
