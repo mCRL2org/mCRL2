@@ -66,7 +66,7 @@ void test_lps_rename()
   forbidden_names.insert(identifier_string("x"));
   forbidden_names.insert(identifier_string("y"));
   forbidden_names.insert(identifier_string("z"));
-  linear_process q = rename_summation_variables(p, forbidden_names);
+  linear_process q = rename_summation_variables(p, forbidden_names, "_S");
 
   for (summand_list::iterator i = q.summands().begin(); i != q.summands().end(); ++i)
   {
