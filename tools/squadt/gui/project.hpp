@@ -16,14 +16,14 @@
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include "../processor.hpp"
+
 #include <wx/wx.h>
 #include <wx/string.h>
 #include <wx/splitter.h>
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
 #include <wx/timer.h>
-
-#include "../processor.hpp"
 
 namespace squadt {
 

@@ -14,6 +14,9 @@
 
 #include <boost/foreach.hpp>
 
+#include <tipi/controller.hpp>
+#include <tipi/utility/logger.hpp>
+
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/listctrl.h>
@@ -22,9 +25,6 @@
 #include <wx/version.h>
 #include <wx/slider.h>
 #include <wx/sizer.h>
-
-#include "tipi/controller.hpp"
-#include "tipi/utility/logger.hpp"
 
 // Compatibility with wx 2.6.*
 #if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION < 8)

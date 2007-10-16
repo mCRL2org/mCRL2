@@ -10,10 +10,13 @@
 #include <deque>
 #include <utility>
 
-#include "gui/project.hpp"
-#include "gui/tool_display.hpp"
+#include <tipi/detail/layout_mediator.hpp>
+#include <tipi/detail/layout_manager.hpp>
 
 #include <boost/foreach.hpp>
+
+#include "gui/project.hpp"
+#include "gui/tool_display.hpp"
 
 #include <wx/button.h>
 #include <wx/colour.h>
@@ -25,9 +28,6 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/datetime.h>
-
-#include "tipi/detail/layout_mediator.hpp"
-#include "tipi/detail/layout_manager.hpp"
 
 namespace squadt {
   namespace GUI {

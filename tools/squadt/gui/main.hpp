@@ -12,13 +12,13 @@
 
 #include <map>
 
-#include <wx/wx.h>
-#include <wx/menu.h>
-#include <wx/frame.h>
-
 #include "project.hpp"
 #include "../type_registry.hpp"
 #include "../tool.hpp"
+
+#include <wx/wx.h>
+#include <wx/menu.h>
+#include <wx/frame.h>
 
 namespace squadt {
   namespace GUI {

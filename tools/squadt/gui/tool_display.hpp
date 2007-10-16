@@ -12,15 +12,15 @@
 
 #include <map>
 
+#include <tipi/report.hpp>
+#include <tipi/tool_display.hpp>
+
+#include "../processor.hpp"
+
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/event.h>
 #include <wx/textctrl.h>
-
-#include "tipi/report.hpp"
-#include "tipi/tool_display.hpp"
-
-#include "../processor.hpp"
 
 namespace squadt {
   namespace GUI {
