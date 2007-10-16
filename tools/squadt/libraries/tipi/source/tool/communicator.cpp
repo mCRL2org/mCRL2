@@ -136,7 +136,7 @@ namespace tipi {
      * The last communicated display layout is stored internally and is updated
      * accordingly when data is received.
      **/
-    void communicator::send_display_layout(layout::tool_display::sptr d) {
+    void communicator::send_display_layout(boost::shared_ptr< layout::tool_display > d) {
       struct trampoline {
         inline static void send_display_data(boost::shared_ptr< communicator_impl > impl, void const* e) {
           std::string c;
@@ -144,16 +144,14 @@ namespace tipi {
           {
             tipi::store_visitor v(c);
 
-            v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < tipi::layout::element_identifier > (e));
+            v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < ::tipi::display::element_identifier > (e));
           }
 
           boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
         }
       };
 
-      if (d->get_manager()) {
-        d->get_manager()->get_event_handler()->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), _1));
-      }
+      d->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), _1));
 
       boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
@@ -202,7 +200,7 @@ namespace tipi {
       {
         tipi::store_visitor v(c);
 
-        v.visit(*e,reinterpret_cast < tipi::layout::element_identifier> (e));
+        v.visit(*e,reinterpret_cast < ::tipi::display::element_identifier> (e));
       }
 
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));

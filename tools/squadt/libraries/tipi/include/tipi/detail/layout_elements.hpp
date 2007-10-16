@@ -39,17 +39,14 @@ namespace tipi {
      
         public:
      
-          /** \brief Constructor for a label */
-          label(std::string const&);
-     
           /** \brief Change the text */
-          void set_text(std::string const&);
-     
+          std::string get_text() const;
+
+          /** \brief Change the text */
+          label& set_text(std::string const&);
+
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
      
       /** \brief A basic button widget */
@@ -71,20 +68,17 @@ namespace tipi {
      
         public:
      
-          /** \brief Constructor for a button */
-          button(std::string const&);
+          /** \brief Change the text */
+          std::string get_label() const;
 
           /** \brief Change the label */
-          void set_label(std::string const&);
+          button& set_label(std::string const&);
 
           /** \brief Activates the button */
           void activate();
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
      
       /**
@@ -105,6 +99,7 @@ namespace tipi {
         friend class ::utility::visitor;
 
         private:
+
           /** \brief The caption */
           std::string          m_label;
      
@@ -119,40 +114,34 @@ namespace tipi {
      
         private:
      
-          /** \brief Default constructor */
-          radio_button();
-     
           /** \brief Set state of the radio button */
           void set_selected(bool = false);
 
+          /** \brief Constructor */
+          radio_button();
+
         public:
      
-          /** \brief Alternative constructor for a radio button */
-          radio_button(std::string const&);
-
-          /** \brief Alternative constructor for a radio button */
-          radio_button(std::string const&, radio_button*, bool = false);
+          /** \brief sets the label for the radio button */
+          radio_button& set_label(std::string const&);
 
           /** \brief Returns the current label */
           std::string get_label() const;
 
+          /** \brief Connects the button to another group */
+          radio_button& connect(radio_button&);
+
           /** \brief set radio button */
-          void select();
+          radio_button& select();
 
           /** \brief Gets a pointer to the radio button in the group that is selected */
-          radio_button const* get_selected() const;
+          radio_button const& get_selected() const;
 
           /** \brief Whether the radion button is selected or not */
           bool is_selected() const;
      
-          /** \brief Whether the radio button is the first in a group */
-          bool is_first_in_group() const;
-
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
      
       /**
@@ -179,20 +168,20 @@ namespace tipi {
 
         public:
      
-          /** \brief Alternative constructor for a checkbox */
-          checkbox(std::string const&, bool = false);
-     
           /** \brief Set the status */
-          void set_status(bool);
+          checkbox& set_status(bool);
+
+          /** \brief sets the label for the radio button */
+          checkbox& set_label(std::string const&);
+
+          /** \brief Returns the current label */
+          std::string get_label() const;
 
           /** \brief Gets the status */
           bool get_status() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
      
       /** \brief A basic progress bar widget */
@@ -220,26 +209,26 @@ namespace tipi {
 
         public:
      
-          /** \brief Constructor for a progress bar */
-          progress_bar(const unsigned int, const unsigned int, const unsigned int);
-
           /** \brief Sets the current value of the progress bar */
-          void set_value(unsigned int);
-     
-          /** \brief Sets the minimum value of the progress bar */
-          void set_minimum(unsigned int);
-     
-          /** \brief Sets the minimum value of the progress bar */
-          void set_maximum(unsigned int);
+          progress_bar& set_value(unsigned int);
      
           /** \brief Gets the current value of the progress bar */
           unsigned int get_value() const;
      
+          /** \brief Sets the minimum value of the progress bar */
+          progress_bar& set_minimum(unsigned int);
+     
+          /** \brief Sets the minimum value of the progress bar */
+          unsigned int get_minimum() const;
+     
+          /** \brief Sets the minimum value of the progress bar */
+          progress_bar& set_maximum(unsigned int);
+
+          /** \brief Sets the minimum value of the progress bar */
+          unsigned int get_maximum() const;
+     
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
      
       /**
@@ -269,23 +258,17 @@ namespace tipi {
 
         public:
      
-          /** \brief Constructor */
-          text_field(std::string const& i);
-
-          /** \brief Constructor */
-          text_field(std::string const& i, basic_datatype::sptr&);
-
-          /** \brief Set the text */
-          void set_text(std::string const&);
+          /** \brief Sets the text */
+          text_field& set_text(std::string const&);
      
+          /** \brief Sets the type */
+          text_field& set_type(boost::shared_ptr < basic_datatype >&);
+
           /** \brief Get the text */
           std::string get_text() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
-
-          /** \brief Synchronise with instantiation that is part of a (G)UI */
-          void update(layout::mediator*, layout::mediator::wrapper*) const;
       };
     }
   }

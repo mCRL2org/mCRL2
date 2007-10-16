@@ -144,7 +144,7 @@ namespace squadt {
      * \param[in] n the number of categories
      **/
     inline splash::splash(wxImage* i, unsigned char n) :
-            wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR),
+            wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxFRAME_NO_TASKBAR),
             number_of_categories(n), current_category(0), new_amount(0), changed(false) {
 
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);

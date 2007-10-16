@@ -11,14 +11,24 @@
 
 #include <boost/function.hpp>
 
+#include <tipi/detail/layout_mediator.hpp>
+
 namespace tipi {
   namespace layout {
+    namespace elements {
+      class label;
+      class button;
+      class checkbox;
+      class radio_button;
+      class progress_bar;
+      class text_field;
+    }
 
     class manager;
     class element;
     class properties;
 
-    /**
+    /** \internal
      * \brief Abstract base class for interaction with a structure of connected
      * layout elements
      *
@@ -32,7 +42,9 @@ namespace tipi {
 
       public:
 
-        /** \brief Wrapper for data that needs to be passed between build and attach members */
+        /** \internal
+         * \brief Wrapper for data that needs to be passed between build and attach members
+         **/
         class wrapper {
         };
 
@@ -77,40 +89,22 @@ namespace tipi {
         virtual aptr build_horizontal_box() = 0;
 
         /** \brief Instantiates a label (static text) */
-        virtual wrapper_aptr build_label(layout::element const*, std::string const&) = 0;
-
-        /** \brief Updates a label, (G)UI part */
-        virtual void update_label(wrapper*, std::string const&) = 0;
+        virtual wrapper_aptr build(layout::elements::label const&) = 0;
 
         /** \brief Instantiates a label */
-        virtual wrapper_aptr build_button(layout::element const*, std::string const&) = 0;
-
-        /** \brief Updates a button, (G)UI part */
-        virtual void update_button(wrapper*, std::string const&) = 0;
+        virtual wrapper_aptr build(layout::elements::button const&) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual wrapper_aptr build_radio_button(layout::element const*, std::string const&, bool) = 0;
-
-        /** \brief Updates a radio button, (G)UI part */
-        virtual void update_radio_button(wrapper*, std::string const&, bool) = 0;
+        virtual wrapper_aptr build(layout::elements::radio_button const&) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual wrapper_aptr build_checkbox(layout::element const*, std::string const&, bool status) = 0;
-
-        /** \brief Updates a checkbox, (G)UI part */
-        virtual void update_checkbox(wrapper*, std::string const&, bool status) = 0;
+        virtual wrapper_aptr build(layout::elements::checkbox const&) = 0;
 
         /** \brief Instantiates a progress bar */
-        virtual wrapper_aptr build_progress_bar(layout::element const*, unsigned int const&, unsigned int const&, unsigned int const&) = 0;
-
-        /** \brief Updates a checkbox, (G)UI part */
-        virtual void update_progress_bar(wrapper*, unsigned int const&, unsigned int const&, unsigned int const&) = 0;
+        virtual wrapper_aptr build(layout::elements::progress_bar const&) = 0;
 
         /** \brief Instantiates a single line text input control */
-        virtual wrapper_aptr build_text_field(layout::element const*, std::string const&) = 0;
-
-        /** \brief Updates a radio button, (G)UI part */
-        virtual void update_text_field(wrapper*, std::string const&) = 0;
+        virtual wrapper_aptr build(layout::elements::text_field const&) = 0;
 
         /** \brief Destructor */
         virtual ~mediator() = 0;

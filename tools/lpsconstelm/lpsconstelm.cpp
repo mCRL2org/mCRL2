@@ -184,42 +184,41 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         set_argument_value< 0, tipi::datatype::boolean >(true, false);
   }
 
-  /* Create and add the top layout manager */
-  layout::manager::aptr top(layout::horizontal_box::create());
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  /* First column */
-  layout::vertical_box* column = new layout::vertical_box();
+  layout::horizontal_box& m = d.create< horizontal_box >();
 
-  checkbox* remove_single_element_sorts = new checkbox("remove single element sorts",
-        c.get_option_argument< bool >(option_remove_single_element_sorts));
-  checkbox* remove_unvisited_summands   = new checkbox("remove summands that are not visited",
-        c.get_option_argument< bool >(option_remove_unvisited_summands));
-  checkbox* ignore_summand_conditions   = new checkbox("take summand conditions into account",
-        c.get_option_argument< bool >(option_ignore_summand_conditions));
+  checkbox& remove_single_element_sorts = d.create< checkbox >().
+                        set_status(c.get_option_argument< bool >(option_remove_single_element_sorts));
+  checkbox& remove_unvisited_summands   = d.create< checkbox >().
+                        set_status(c.get_option_argument< bool >(option_remove_unvisited_summands));
+  checkbox& ignore_summand_conditions   = d.create< checkbox >().
+                        set_status(c.get_option_argument< bool >(option_ignore_summand_conditions));
 
-  column->add(remove_single_element_sorts, layout::left);
-  column->add(remove_unvisited_summands, layout::left);
-  column->add(ignore_summand_conditions, layout::left);
+  m.append(d.create< vertical_box >().set_default_alignment(layout::left).
+      append(remove_single_element_sorts.set_label("remove single element sorts")).
+      append(remove_unvisited_summands.set_label("remove summands that are not visited")).
+      append(ignore_summand_conditions.set_label("take summand conditions into account")),
+    margins(0,5,0,5));
 
-  button* okay_button = new button("OK");
+  button& okay_button = d.create< button >().set_label("OK");
 
-  column->add(okay_button, layout::right);
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
 
-  /* Attach columns*/
-  top->add(column, margins(0,5,0,5));
-
-  send_display_layout(top);
+  send_display_layout(d.set_manager(m));
 
   /* Wait until the ok button was pressed */
-  okay_button->await_change();
+  okay_button.await_change();
 
   /* Update configuration */
   c.get_option(option_remove_single_element_sorts).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_single_element_sorts->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(remove_single_element_sorts.get_status());
   c.get_option(option_remove_unvisited_summands).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands.get_status());
   c.get_option(option_ignore_summand_conditions).
-      set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions->get_status());
+      set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions.get_status());
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {

@@ -28,20 +28,17 @@ namespace transport {
       using namespace boost;
       using namespace boost::asio;
 
-      ip::address address(a);
-      ip::tcp::endpoint endpoint(address, (p == 0) ? socket_transceiver::default_port : p);
-
-      acceptor.open(endpoint.protocol());
-      acceptor.set_option(socket_base::reuse_address(true));
+      ip::tcp::endpoint endpoint(a, (p == 0) ? socket_transceiver::default_port : p);
 
       try {
+        acceptor.open(endpoint.protocol());
+        acceptor.set_option(socket_base::reuse_address(true));
         acceptor.bind(endpoint);
-
         acceptor.listen();
       }
       catch (std::exception& e) {
         /* This should probably be logged somewhere someday */
-//        throw std::runtime_error(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what()));
+        throw std::runtime_error(str(format("Socket setup on %s:%u failed with error `%s'") % endpoint.address().to_string() % endpoint.port() % e.what()));
       }
     }
 
@@ -85,7 +82,7 @@ namespace transport {
         using namespace boost;
 
         /* Some other error occurred, abort... */
-        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % "msg"));
+        throw std::runtime_error(str(format("Socket connection failed with error `%s'") % e.message()));
       }
 
       /* Make sure the scheduler is running */

@@ -14,54 +14,45 @@ namespace tipi {
       label::label() {
       }
 
-      /**
-       * \param[in] c the text of the label
-       **/
-      label::label(std::string const& c) : m_text(c) {
+      std::string label::get_text() const {
+        return m_text;
       }
 
       /**
        * \param[in] t the text of the label
        **/
-      void label::set_text(std::string const& t) {
+      label& label::set_text(std::string const& t) {
         m_text = t;
 
         activate_handlers();
+
+        return *this;
       }
      
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
-        return (m->build_label(this, m_text));
+        return (m->build(*this));
       }
      
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void label::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_label(t, m_text);
-      }
-
       button::button() {
         set_grow(false);
       }
-
-      /**
-       * \param[in] c the label for the button
-       **/
-      button::button(std::string const& c) : m_label(c) {
-        set_grow(false);
-      }
      
+      std::string button::get_label() const {
+        return m_label;
+      }
+
       /**
        * \param[in] l the label for the button
        **/
-      void button::set_label(std::string const& l) {
+      button& button::set_label(std::string const& l) {
         m_label = l;
 
         activate_handlers();
+
+        return *this;
       }
 
       void button::activate() {
@@ -72,48 +63,53 @@ namespace tipi {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
-        return (m->build_button(this, m_label));
+        return (m->build(*this));
       }
      
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_button(t, m_label);
-      }
-
-      radio_button::radio_button() : m_connection(this), m_selected(true), m_first(false) {
+      radio_button::radio_button() : m_connection(this), m_selected(true), m_first(true) {
       }
 
       /**
-       * \param[in] c the label for the button
+       * \param[in] r the button in the group to connect with
        **/
-      radio_button::radio_button(std::string const& c) : m_label(c), m_connection(this), m_selected(true), m_first(true) {
-      }
+      radio_button& radio_button::connect(radio_button& r) {
 
-      /**
-       * \param[in] c the label for the button
-       * \param[in] r pointer to a connected radio button (may not be 0)
-       * \param[in] s whether the button is selected or not
-       **/
-      radio_button::radio_button(std::string const& c, radio_button* r, bool s) :
-                        m_label(c), m_selected(s), m_first(false) {
+        if (&r != this) {
+          m_first    = false;
+          m_selected = false;
 
-        radio_button* n = r;
+          radio_button* n = this;
 
-        while (!n->m_connection->m_first) {
-          n = n->m_connection;
+          // disconnect from this group
+          while (n->m_connection != this) {
+            n = n->m_connection;
+          }
+
+          n->m_connection = m_connection;
+
+          n = &r;
+
+          // find first in other group
+          while (!n->m_connection->m_first) {
+            n = n->m_connection;
+          }
+
+          m_connection = n->m_connection;
+          n->m_connection = this;
         }
 
-        m_connection = n->m_connection;
-        n->m_connection = this;
-
-        if (m_selected) {
-          set_selected(true);
-        }
+        return *this;
       }
 
+      /**
+       * \param[in] l the new text of the label for the radio button
+       **/
+      radio_button& radio_button::set_label(std::string const& l) {
+        m_label = l;
+
+        return *this;
+      }
+     
       std::string radio_button::get_label() const {
         return (m_label);
       }
@@ -135,22 +131,20 @@ namespace tipi {
         activate_handlers(b);
       }
 
-      void radio_button::select() {
+      radio_button& radio_button::select() {
         set_selected(true);
+
+        return *this;
       }
 
-      radio_button const* radio_button::get_selected() const {
+      radio_button const& radio_button::get_selected() const {
         radio_button const* r = this;
 
         while (!r->m_selected) {
           r = r->m_connection;
         }
 
-        return (r);
-      }
-
-      bool radio_button::is_first_in_group() const {
-        return (m_first);
+        return *r;
       }
 
       bool radio_button::is_selected() const {
@@ -161,34 +155,34 @@ namespace tipi {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
-        return (m->build_radio_button(this, m_label, m_selected));
+        return (m->build(*this));
       }
      
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void radio_button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_radio_button(t, m_label, m_selected);
-      }
-
       checkbox::checkbox() {
       }
 
       /**
-       * \param[in] c the label for the button
-       * \param[in] s the status of the checkbox
+       * \param[in] l the new text of the label for the radio button
        **/
-      checkbox::checkbox(std::string const& c, bool s) : m_label(c), m_status(s) {
-      }
+      checkbox& checkbox::set_label(std::string const& l) {
+        m_label = l;
 
+        return *this;
+      }
+     
+      std::string checkbox::get_label() const {
+        return (m_label);
+      }
+     
       /**
        * \param[in] b the new status
        **/
-      void checkbox::set_status(bool b) {
+      checkbox& checkbox::set_status(bool b) {
         m_status = b;
 
         activate_handlers();
+
+        return *this;
       }
 
       bool checkbox::get_status() const {
@@ -199,27 +193,10 @@ namespace tipi {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m){
-        return (m->build_checkbox(this, m_label, m_status));
-      }
-
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void checkbox::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_checkbox(t, m_label, m_status);
+        return (m->build(*this));
       }
 
       progress_bar::progress_bar() {
-      }
-
-      /**
-       * \param[in] min the minimum position
-       * \param[in] max the maximum position
-       * \param[in] c the current position
-       **/
-      progress_bar::progress_bar(const unsigned int min, const unsigned int max, const unsigned int c)
-              : m_minimum(min), m_maximum(max), m_current(c) {
       }
 
       /**
@@ -227,68 +204,78 @@ namespace tipi {
        *
        * \pre minimum <= v <= maximum
        **/
-      void progress_bar::set_value(unsigned int v) {
+      progress_bar& progress_bar::set_value(unsigned int v) {
         m_current = v;
 
         activate_handlers();
-      }
 
-      /**
-       * \param[in] v the new value
-       **/
-      void progress_bar::set_minimum(unsigned int v) {
-        m_minimum = v;
-
-        activate_handlers();
-      }
-      /**
-       * \param[in] v the new value
-       **/
-      void progress_bar::set_maximum(unsigned int v) {
-        m_maximum = v;
-
-        activate_handlers();
+        return *this;
       }
 
       unsigned int progress_bar::get_value() const {
         return (m_current);
+      }
+
+      /**
+       * \param[in] v the new value
+       **/
+      progress_bar& progress_bar::set_minimum(unsigned int v) {
+        m_minimum = v;
+
+        activate_handlers();
+
+        return *this;
+      }
+
+      unsigned int progress_bar::get_minimum() const {
+        return (m_minimum);
+      }
+     
+      /**
+       * \param[in] v the new value
+       **/
+      progress_bar& progress_bar::set_maximum(unsigned int v) {
+        m_maximum = v;
+
+        activate_handlers();
+
+        return *this;
+      }
+
+      unsigned int progress_bar::get_maximum() const {
+        return (m_maximum);
       }
      
       /**
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
-        return (m->build_progress_bar(this, m_minimum, m_maximum, m_current));
-      }
-     
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void progress_bar::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_progress_bar(t, m_minimum, m_maximum, m_current);
+        return (m->build(*this));
       }
 
-      text_field::text_field() : m_type(new tipi::datatype::string()) {
-      }
-
-      text_field::text_field(std::string const& s) : m_text(s), m_type(new tipi::datatype::string()) {
+      text_field::text_field() : m_text(""), m_type(new tipi::datatype::string()) {
       }
 
       /**
-       * \param[in] s the initial content of the text control
-       * \param[in] t the a type description object for validation purposes
+       * \param[in] t the new type to validate against
        **/
-      text_field::text_field(std::string const& s, basic_datatype::sptr& t) : m_text(s), m_type(t) {
+      text_field& text_field::set_type(boost::shared_ptr < basic_datatype >& t) {
+        m_type = t;
+
+        activate_handlers();
+
+        return *this;
       }
-     
+
       /**
        * \param[in] s the new text
        **/
-      void text_field::set_text(std::string const& s) {
+      text_field& text_field::set_text(std::string const& s) {
         m_text = s;
 
         activate_handlers();
+
+        return *this;
       }
 
       std::string text_field::get_text() const {
@@ -299,15 +286,7 @@ namespace tipi {
        * \param[in] m the mediator object to use
        **/
       layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) {
-        return (m->build_text_field(this, m_text));
-      }
-
-      /**
-       * \param[in] m the mediator object to use
-       * \param[in] t pointer to the associated (G)UI object
-       **/
-      void text_field::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-        m->update_text_field(t, m_text);
+        return (m->build(*this));
       }
     }
   }

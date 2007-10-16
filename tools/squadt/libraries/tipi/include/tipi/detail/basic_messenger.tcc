@@ -29,7 +29,8 @@
 #include "tipi/detail/basic_messenger.hpp"
 #include "tipi/common.hpp"
 
-/** \internal
+/// \cond INTERNAL_DOCS
+/**
  * Workaround for older compilers to force instantiation of
  * boost::recursive_mutex::scoped_lock::unlock\
  * 
@@ -687,6 +688,7 @@ namespace tipi {
     }
   }
 }
+/// \endcond
 
 #endif
 

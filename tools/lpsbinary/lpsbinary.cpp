@@ -129,38 +129,42 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
+  /* Set defaults where the supplied configuration does not have values */
   if (!configuration.output_exists(lps_file_for_output)) {
     configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
   }
-
   if (!configuration.option_exists(option_rewrite_strategy)) {
     configuration.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, 0);
   }
 
-  layout::manager::aptr top(layout::vertical_box::create());
-  layout::manager* current_box = new horizontal_box();
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy >
-                                        strategy_selector(current_box, GS_REWR_INNER, "Inner");
-  strategy_selector.associate(current_box, GS_REWR_INNERC, "Innerc");
-  strategy_selector.associate(current_box, GS_REWR_JITTY,  "Jitty");
-  strategy_selector.associate(current_box, GS_REWR_JITTYC, "Jittyc");
+  // Helper for strategy selection
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
+
+  layout::vertical_box& m = d.create< vertical_box >();
+
+  m.append(d.create< label >().set_text("Rewrite strategy")).
+    append(d.create< horizontal_box >().
+                append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
+                append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+
+  button& okay_button = d.create< button >().set_label("OK");
+
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
 
   if (configuration.option_exists(option_rewrite_strategy)) {
     strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0))));
+        configuration.get_option_argument< size_t >(option_rewrite_strategy, 0)));
   }
 
-  top->add(new label("Rewrite strategy"));
-  top->add(current_box);
+  send_display_layout(d.set_manager(m));
 
-  button* okay_button = new button("OK");
-  top->add(new label(" "));
-  top->add(okay_button, layout::right);
-
-  send_display_layout(top);
-
-  okay_button->await_change();
+  okay_button.await_change();
 
   configuration.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
 }
@@ -185,32 +189,22 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
-  bool result = true;
-
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).get_location();
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
   options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
 
-  layout::manager::aptr top(layout::vertical_box::create());
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  top->add(new label("Binary in progress"), layout::left);
-  send_display_layout(top);
+  send_display_layout(d.set_manager(d.create< vertical_box >().
+                append(d.create< label >().set_text("Binary in progress"), layout::left)));
 
   //Perform declustering
-  top = layout::vertical_box::create();
-  int binary_result = do_binary(options);
-  if (binary_result == 0) {
-    top->add(new label("Binary succeeded"));
-    result = true;
-  }
-  else
-  {
-    top->add(new label("Binary failed"));
-    result = false;
-  }
+  bool result = do_binary(options) == 0;
 
-  send_display_layout(top);
+  send_display_layout(d.set_manager(d.create< vertical_box >().
+                append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
   return result;
 }

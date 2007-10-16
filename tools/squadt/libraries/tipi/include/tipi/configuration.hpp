@@ -219,7 +219,7 @@ namespace tipi {
 
       /** \brief Get the value of an option argument */
       template < typename T >
-      T const& get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
+      T get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
 
       /** \brief Establishes whether an input object is known by this identifier (by identifier) */
       bool input_exists(parameter_identifier const&) const;
@@ -475,7 +475,7 @@ namespace tipi {
    *      option_exists member to establish this
    **/
   template < typename T >
-  inline T const& configuration::get_option_argument(std::string const& id, size_t const& n) const {
+  inline T configuration::get_option_argument(std::string const& id, size_t const& n) const {
     return boost::any_cast < T const& > (get_option_argument(id, n));
   }
 }

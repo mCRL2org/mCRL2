@@ -50,12 +50,14 @@ namespace tipi {
     /**
      * \param[in] e event handler object that will dispatch events for this object
      **/
-    void element::set_event_handler(basic_event_handler* e) {
-      m_event_handler->transfer(*e, this);
+    void element::set_event_handler(basic_event_handler& e) {
+      m_event_handler->transfer(e, this);
+
+      m_event_handler = &e;
     }
 
-    basic_event_handler* element::get_event_handler() const {
-      return m_event_handler;
+    basic_event_handler& element::get_event_handler() const {
+      return *m_event_handler;
     }
 
     /**

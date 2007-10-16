@@ -140,9 +140,20 @@ namespace mcrl2 {
       void tool_interface::send_error(std::string const& m) const {
         m_communicator.send_status_report(tipi::report::error, m);
       }
+
+      /// \internal
+      class trivial_deleter {
+
+        public:
+
+          void operator() (::tipi::layout::tool_display*) {
+          }
+      };
   
-      void tool_interface::send_display_layout(std::auto_ptr < tipi::layout::manager >& p) {
-        m_communicator.send_display_layout(tipi::layout::tool_display::create(p));
+      void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
+        boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d, trivial_deleter());
+
+        m_communicator.send_display_layout(dsp);
       }
   
       void tool_interface::send_clear_display() {

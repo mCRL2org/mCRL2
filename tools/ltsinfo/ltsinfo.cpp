@@ -78,61 +78,52 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   tipi::object& input_object = c.get_input(lts_file_for_input);
 
-  /* Create and add the top layout manager */
-  layout::manager::aptr top(layout::vertical_box::create());
-
-  /* First column */
-  layout::vertical_box* left_column = new layout::vertical_box();
-
-  layout::vertical_box::alignment a = layout::left;
-
   lts l;
   lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
 
   if (l.read_from(input_object.get_location(), t)) {
-    left_column->add(new label("States (#):"), a);
-    left_column->add(new label("Labels (#):"), a);
-    left_column->add(new label("Transitions (#):"), a);
-    left_column->add(new label(""), a);
-    left_column->add(new label("State information:"), a);
-    left_column->add(new label("Label information:"), a);
-    left_column->add(new label(""), a);
-    left_column->add(new label("Created by:"), a);
-   
-    a = layout::right;
+    /* Create and add the top layout manager */
+    tipi::layout::tool_display d;
+ 
+    layout::horizontal_box& m = d.create< horizontal_box >();
 
+    m.append(d.create< vertical_box >().set_default_alignment(layout::left).
+                append(d.create< label >().set_text("States (#):")).
+                append(d.create< label >().set_text("Labels (#):")).
+                append(d.create< label >().set_text("Transitions (#):")).
+                append(d.create< label >().set_text("")).
+                append(d.create< label >().set_text("State information:")).
+                append(d.create< label >().set_text("Label information:")).
+                append(d.create< label >().set_text("")).
+                append(d.create< label >().set_text("Created by:")),
+             margins(0,5,0,5));
+   
     /* Second column */
-    layout::vertical_box* right_column = new layout::vertical_box();
+    m.append(d.create< vertical_box >().set_default_alignment(layout::right).
+                append(d.create< label >().set_text(boost::lexical_cast < std::string > (l.num_states()))).
+                append(d.create< label >().set_text(boost::lexical_cast < std::string > (l.num_labels()))).
+                append(d.create< label >().set_text(boost::lexical_cast < std::string > (l.num_transitions()))).
+                append(d.create< label >().set_text("")).
+                append(d.create< label >().set_text(l.has_state_info() ? "present" : "not present")).
+                append(d.create< label >().set_text(l.has_label_info() ? "present" : "not present")).
+                append(d.create< label >().set_text("")).
+                append(d.create< label >().set_text(l.get_creator())),
+             margins(0,5,0,5));
    
-    right_column->add(new label(boost::lexical_cast < std::string > (l.num_states())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (l.num_labels())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (l.num_transitions())), a);
-    right_column->add(new label(""), a);
-    right_column->add(new label(l.has_state_info() ? "present" : "not present"), a);
-    right_column->add(new label(l.has_label_info() ? "present" : "not present"), a);
-    right_column->add(new label(""), a);
-    right_column->add(new label(l.get_creator()), a);
+    layout::vertical_box& n = d.create< vertical_box >();
 
-    /* Create and add a layout manager for the columns */
-    layout::manager* columns = new layout::horizontal_box();
+    n.append(m).
+        append(d.create< label >().
+             set_text("Input read from " + input_object.get_location() + " (" + lts::string_for_type(t) + " format)"),
+                        margins(5,0,5,20));
 
-    /* Attach columns */
-    columns->add(left_column, margins(0,5,0,5));
-    columns->add(right_column, margins(0,5,0,20));
-   
-    boost::format c = boost::format("Input read from `%s' (in %s format)");
-
-    top->add(new label("Input read from " + input_object.get_location() + " (" + lts::string_for_type(t) + " format)"), margins(5,0,5,0));
-    top->add(columns);
     gsVerboseMsg("checking reachability...\n");
-    if ( !l.reachability_check() )
-    {
-        top->add(new label("Warning: some states are not reachable from the initial state!"));
-        top->add(new label("(This might result in unspecificied behaviour of LTS tools.)"));
+    if (!l.reachability_check()) {
+        n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
+          append(d.create< label >().set_text("(This might result in unspecificied behaviour of LTS tools.)"));
     }
-   
 
-    send_display_layout(top);
+    send_display_layout(d.set_manager(n));
   }
   else {
     send_error("Could not read `" + c.get_input(lts_file_for_input).get_location() + "', corruption or incorrect format?\n");

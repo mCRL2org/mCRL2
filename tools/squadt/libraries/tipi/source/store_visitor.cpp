@@ -12,15 +12,15 @@
 #include <boost/foreach.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 
-#include "tipi/visitors.hpp"
-#include "tipi/report.hpp"
-#include "tipi/controller/capabilities.hpp"
-#include "tipi/tool/capabilities.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/detail/layout_manager.hpp"
+#include <tipi/visitors.hpp>
+#include <tipi/report.hpp>
+#include <tipi/controller/capabilities.hpp>
+#include <tipi/tool/capabilities.hpp>
+#include <tipi/detail/layout_elements.hpp>
+#include <tipi/detail/layout_manager.hpp>
 #include <tipi/utility/generic_visitor.tcc>
-#include "tipi/display.hpp"
-#include "tipi/common.hpp"
+#include <tipi/tool_display.hpp>
+#include <tipi/common.hpp>
 
 namespace tipi {
 
@@ -423,7 +423,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::label const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::label const& c, ::tipi::display::element_identifier const& id) {
     out << "<label id=\"" << id << "\"><![CDATA[" << c.m_text << "]]></label>";
   }
 
@@ -433,7 +433,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::button const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::button const& c, ::tipi::display::element_identifier const& id) {
     out << "<button id=\"" << id << "\"><![CDATA[" << c.m_label << "]]></button>";
   }
 
@@ -443,7 +443,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, ::tipi::display::element_identifier const& id) {
     out << "<radio-button id=\"" << id 
         << "\" connected=\"" << c.m_connection;
 
@@ -460,7 +460,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::checkbox const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::checkbox const& c, ::tipi::display::element_identifier const& id) {
     out << "<checkbox id=\"" << id << "\" checked=\"" << c.m_status << "\"><![CDATA[" << c.m_label << "]]></checkbox>";
   }
 
@@ -470,7 +470,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::progress_bar const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::progress_bar const& c, ::tipi::display::element_identifier const& id) {
     out << "<progress-bar id=\"" << id << "\" minimum=\"" << c.m_minimum
         << "\" maximum=\"" << c.m_maximum << "\" current=\"" << c.m_current <<  "\"/>";
   }
@@ -481,7 +481,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::text_field const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::text_field const& c, ::tipi::display::element_identifier const& id) {
     out << "<text-field id=\"" << id << "\">"
         << "<text><![CDATA[" << c.m_text << "]]></text>";
 
@@ -556,48 +556,67 @@ namespace utility {
   }
 
   /**
+   * \internal
    * \param[in] c a tipi::layout::box object as reference
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::box const& c) {
-    tipi::layout::properties const* current_properties = &tipi::layout::manager::default_properties;
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::vertical_box const& c, ::tipi::display const& d) {
+    static tipi::layout::properties default_properties;
+
+    tipi::layout::properties const* current_properties = &default_properties;
+
+    out << "<box-layout-manager variant=\"vertical\" id=\"" << d.find(&c) << "\">";
 
     for (tipi::layout::vertical_box::children_list::const_iterator i = c.m_children.begin(); i != c.m_children.end(); ++i) {
       if ((i->layout_properties) != *current_properties) {
-        visit(*current_properties, (i->layout_properties));
+        visit((i->layout_properties), *current_properties);
 
         current_properties = &(i->layout_properties);
       }
 
-      do_visit(*(i->layout_element), (i->identifier));
+      try {
+        do_visit(*(i->layout_element), d.find(i->layout_element));
+      }
+      catch (...) {
+        // Assume element is a layout manager
+        do_visit(*(i->layout_element), d);
+      }
     }
-  }
-
-  /**
-   * \param[in] c a tipi::layout::vertical_box object as reference
-   * \param[in] id the identifier for the manager
-   **/
-  template <>
-  template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::vertical_box const& c, tipi::layout::element_identifier const& id) {
-    out << "<box-layout-manager variant=\"vertical\" id=\"" << id << "\">";
-
-    visit(static_cast < tipi::layout::box const& > (c));
 
     out << "</box-layout-manager>";
   }
 
   /**
-   * \param[in] c a tipi::layout::vertical_box object to store
-   * \param[in] id the identifier for the manager
+   * \internal
+   * \param[in] c a tipi::layout::box object as reference
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::horizontal_box const& c, tipi::layout::element_identifier const& id) {
-    out << "<box-layout-manager variant=\"horizontal\" id=\"" << id << "\">";
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::horizontal_box const& c, ::tipi::display const& d) {
+    static tipi::layout::properties default_properties;
 
-    visit(static_cast < tipi::layout::box const& > (c));
+    tipi::layout::properties const* current_properties = &default_properties;
+
+    out << "<box-layout-manager variant=\"horizontal\" id=\"" << d.find(&c) << "\">";
+
+    for (tipi::layout::horizontal_box::children_list::const_iterator i = c.m_children.begin(); i != c.m_children.end(); ++i) {
+      if ((i->layout_properties) != *current_properties) {
+        visit((i->layout_properties), *current_properties);
+
+        current_properties = &(i->layout_properties);
+      }
+
+      try {
+        do_visit(*(i->layout_element), d.find(i->layout_element));
+      }
+      catch (...) {
+        // Assume element is a layout manager
+        do_visit(*(i->layout_element), d);
+      }
+    }
 
     out << "</box-layout-manager>";
   }
@@ -612,7 +631,7 @@ namespace utility {
         << "<layout-manager>";
 
     if (c.m_manager.get() != 0) {
-      do_visit(*c.m_manager, static_cast < tipi::layout::element_identifier const& > (0));
+      do_visit(*c.m_manager, static_cast < tipi::display const& > (c));
     }
 
     out << "</layout-manager>"
@@ -635,15 +654,14 @@ namespace utility {
     register_visit_method< const tipi::tool::capabilities >();
     register_visit_method< const tipi::report >();
     register_visit_method< const tipi::layout::tool_display >();
-    register_visit_method< const tipi::layout::elements::button, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::checkbox, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::label, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::progress_bar, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::radio_button, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::text_field, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::horizontal_box, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::vertical_box, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::box >();
+    register_visit_method< const tipi::layout::elements::button, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::checkbox, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::label, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::progress_bar, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::radio_button, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::text_field, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::horizontal_box, const ::tipi::display >();
+    register_visit_method< const tipi::layout::vertical_box, const ::tipi::display >();
     register_visit_method< const tipi::layout::properties >();
 
     return true;

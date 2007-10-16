@@ -18,7 +18,7 @@
 #include <wx/textctrl.h>
 
 #include "tipi/report.hpp"
-#include "tipi/display.hpp"
+#include "tipi/tool_display.hpp"
 
 #include "../processor.hpp"
 
@@ -26,71 +26,6 @@ namespace squadt {
   namespace GUI {
 
     class project;
-
-    /// \cond INTERNAL_DOCS
-    namespace detail {
-
-      class tool_display;
-      class tool_display_mediator;
-
-      /** \brief Handles state events of widgets */
-      class state_change_handler : public wxEvtHandler {
-        friend class squadt::GUI::tool_display;
-        friend class detail::tool_display_mediator;
-
-        private:
-     
-          /** \brief Associates a tipi layout element with a wxWidgets control */
-          typedef std::map < wxObject*, tipi::layout::element const* > element_for_window_map;
-     
-        private:
-     
-          /** \brief Associated processor */
-          boost::shared_ptr < processor::monitor >               monitor;
-
-          /** \brief Associates a tipi layout element with a wxWidgets control */
-          element_for_window_map                                 element_for_window;
-     
-          /** \brief Delegate to actually send a display update */
-          boost::function < void (tipi::layout::element const&) > send_display_update;
-
-        public:
-
-          /** \brief Constructor */
-          state_change_handler(boost::shared_ptr < processor::monitor >&);
-
-          /** \brief Clears the element_for_window map */
-          inline void clear();
-
-          /** \brief Associate a tipi layout element pointer with a wxWindow pointer */
-          inline void associate(wxObject*, tipi::layout::element const*);
-
-          /** \brief Update the (G)UI state for a specific element */
-          void update(tipi::layout::mediator* m, tipi::layout::element const*);
-
-          /** \brief Gets the monitor for the associated process */
-          boost::shared_ptr < processor::monitor >& get_monitor();
-      };
-
-      /**
-       * @param[in] s the processor associated with this display
-       **/
-      inline state_change_handler::state_change_handler(boost::shared_ptr < processor::monitor >& s) : monitor(s) {
-      }
-
-      inline void state_change_handler::clear() {
-        element_for_window.clear();
-      }
-
-      inline void state_change_handler::associate(wxObject* o, tipi::layout::element const* e) {
-        element_for_window[o] = e;
-      }
-
-      inline boost::shared_ptr < processor::monitor >& state_change_handler::get_monitor() {
-        return (monitor);
-      }
-    }
-    /// \endcond
 
     /**
      * @brief Display window associated with a tool
@@ -102,22 +37,25 @@ namespace squadt {
       private:
 
         /** \brief The GUI project view to which this display `belongs' */
-        GUI::project*                   context;
+        GUI::project*                            m_project;
 
-        /** \brief The event handler */
-        detail::state_change_handler    event_handler;
-
-        /** \brief Abstract description of the layout of this panel */
-        tipi::layout::tool_display::sptr current_layout;
+        /** \brief Abstract description of the current layout of this panel */
+        tipi::layout::tool_display::sptr         m_layout;
 
         /** \brief Sizer that contains the content part */
-        wxSizer*                        content;
+        wxSizer*                                 m_content;
 
         /** \brief Sizer of the tool display control buttons */
-        wxSizer*                        control_bar;
+        wxSizer*                                 m_control_bar;
+
+        /** \brief Connected monitor */
+        boost::shared_ptr < processor::monitor > m_monitor;
 
         /** \brief Sizer of the tool display control buttons */
-        wxTextCtrl*                     log;
+        wxTextCtrl*                              m_log;
+
+        /** \brief Sizer of the tool display control buttons */
+        tipi::layout::basic_event_handler        m_event_handler;
 
       private:
 

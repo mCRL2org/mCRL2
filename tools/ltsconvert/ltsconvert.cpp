@@ -131,94 +131,59 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  layout::tool_display::sptr display(new layout::tool_display);
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  /* Create and add the top layout manager */
-  layout::vertical_box::aptr top(new layout::vertical_box);
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0, 5, 0, 5));
 
-  /* First column */
-  layout::manager* h = new layout::horizontal_box();
+  /* Helper for format selection */
+  mcrl2::utilities::squadt::radio_button_helper < lts_output_format > format_selector(d);
 
-  h->add(new label("Output format : "));
-  
-  mcrl2::utilities::squadt::radio_button_helper < lts_output_format >
-        format_selector(h, aldebaran, "Aldebaran");
-
-  format_selector.associate(h, svc_mcrl, "SVC/mCRL");
-  format_selector.associate(h, svc_mcrl2, "SVC/mCRL2");
+  m.append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("Output format : ")).
+                append(format_selector.associate(aldebaran, "Aldebaran")).
+                append(format_selector.associate(svc_mcrl, "SVC/mCRL")).
+                append(format_selector.associate(svc_mcrl2, "SVC/mCRL2")).
 #ifdef MCRL2_BCG
-  format_selector.associate(h, bcg, "BCG");
+                append(format_selector.associate(bcg, "SVC/BCG")).
 #endif
-  format_selector.associate(h, fsm, "FSM");
-  format_selector.associate(h, dot, "dot");
-
-  if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(static_cast < lts_output_format > (
-        c.get_option_argument< size_t >(option_selected_output_format, 0)));
-  }
+                append(format_selector.associate(fsm, "SVC/FSM")).
+                append(format_selector.associate(dot, "SVC/dot")),
+           margins(0,5,0,5));
   
-  /* Attach row */
-  top->add(h, margins(0,5,0,5));
+  text_field& lps_file_field        = d.create< text_field >();
+  checkbox&   check_reachability    = d.create< checkbox >();
+  checkbox&   add_state_information = d.create< checkbox >();
 
-  h = new layout::horizontal_box();
+  m.append(d.create< label >()).
+    append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("LPS file name : ")).
+                append(lps_file_field)).
+    append(check_reachability.set_label("Perform reachability check").set_status(true)).
+    append(add_state_information.set_label("Add state information").set_status(true));
 
-  h->add(new label("LPS file name : "));
-  text_field* lps_file_field = static_cast < text_field* > (h->add(new text_field("")));
-  top->add(h);
+//  mcrl2::utilities::squadt::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), add_state_information);
+//  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), add_state_information));
 
-  checkbox* do_not_check_reachability = new checkbox("Perform reachability check", true);
-  top->add(do_not_check_reachability);
+  /* Helper for transformation selection */
+  mcrl2::utilities::squadt::radio_button_helper < transformation_options > transformation_selector(d);
 
-  checkbox* do_not_omit_state_information = new checkbox("Add state information", true);
-  top->add(do_not_omit_state_information);
-
-//  mcrl2::utilities::squadt::change_visibility_on_toggle(format_selector.get_button(dot), top.get(), do_not_omit_state_information);
-//  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), do_not_omit_state_information));
-
-  top->add(new label("LTS transformation:"));
-
-  mcrl2::utilities::squadt::radio_button_helper < transformation_options >
-        transformation_selector(top, no_transformation, "none");
-
-  transformation_selector.associate(top, minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation");
-  transformation_selector.associate(top, minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation");
-  transformation_selector.associate(top, minimisation_modulo_trace_equivalence, "determinisation modulo trace equivalence");
-  transformation_selector.associate(top, minimisation_modulo_weak_trace_equivalence, "determinisation modulo weak trace equivalence");
-  transformation_selector.associate(top, determinisation, "determinisation");
-
-  if (c.option_exists(option_selected_transformation)) {
-    transformation_selector.set_selection(static_cast < transformation_options > (
-        c.get_option_argument< size_t >(option_selected_transformation, 0)));
-  }
+  m.append(d.create< label >().set_text("LTS transformation:")).
+    append(transformation_selector.associate(no_transformation, "none")).
+    append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation")).
+    append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation")).
+    append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence")).
+    append(transformation_selector.associate(minimisation_modulo_weak_trace_equivalence, "reduction modulo weak trace equivalence")).
+    append(transformation_selector.associate(determinisation, "determinisation"));
   
-  checkbox* bisimulation_add_eq_classes = new checkbox("Add equivalence classes to state instead of reducing LTS");
+  checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
+  text_field& tau_field                   = d.create< text_field >();
 
-  if (c.input_exists(lps_file_auxiliary)) {
-      lps_file_field->set_text(c.get_input(lps_file_auxiliary).get_location());
-  }
-  if (c.option_exists(option_no_reachability_check)) {
-    do_not_check_reachability->set_status(c.get_option_argument< bool >(option_no_reachability_check));
-  }
-  if (c.option_exists(option_no_state_information)) {
-    do_not_omit_state_information->set_status(c.get_option_argument< bool >(option_no_state_information));
-  }
-  if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-    bisimulation_add_eq_classes->set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
-  }
-
-  top->add(bisimulation_add_eq_classes);
-
-  h = new layout::horizontal_box();
-  h->add(new label("Internal (tau) actions : "));
-
-  text_field* tau_field = new text_field("tau");
-
-  if (c.option_exists(option_tau_actions)) {
-    tau_field->set_text(c.get_option_argument< std::string >(option_tau_actions));
-  }
-
-  h->add(tau_field);
-  top->add(h);
+  m.append(d.create< label >()).
+    append(bisimulation_add_eq_classes.set_label("Add equivalence classes to state instead of reducing LTS")).
+    append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("Internal (tau) actions : ")).
+                append(tau_field.set_text("tau")));
 
   /* Attach events */
 //  transformation_selector.get_button(no_transformation).
@@ -231,17 +196,38 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 //        on_change(boost::bind(mcrl2::utilities::squadt::change_visibility_on_toggle,
 //              transformation_selector.get_button(minimisation_modulo_branching_bisimulation), top.get(), bisimulation_add_eq_classes));
 
-  button* okay_button = new button("OK");
+  button& okay_button = d.create< button >().set_label("OK");
 
-  top->add(okay_button, layout::top);
+  // Add some default values for existing options in the current configuration
+  if (c.option_exists(option_selected_output_format)) {
+    format_selector.set_selection(static_cast < lts_output_format > (
+        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+  }
+  if (c.option_exists(option_selected_transformation)) {
+    transformation_selector.set_selection(static_cast < transformation_options > (
+        c.get_option_argument< size_t >(option_selected_transformation, 0)));
+  }
+  if (c.input_exists(lps_file_auxiliary)) {
+      lps_file_field.set_text(c.get_input(lps_file_auxiliary).get_location());
+  }
+  if (c.option_exists(option_no_reachability_check)) {
+    check_reachability.set_status(c.get_option_argument< bool >(option_no_reachability_check));
+  }
+  if (c.option_exists(option_no_state_information)) {
+    add_state_information.set_status(c.get_option_argument< bool >(option_no_state_information));
+  }
+  if (c.option_exists(option_add_bisimulation_equivalence_class)) {
+    bisimulation_add_eq_classes.set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
+  }
+  if (c.option_exists(option_tau_actions)) {
+    tau_field.set_text(c.get_option_argument< std::string >(option_tau_actions));
+  }
 
-  display->set_manager(top);
-
-  m_communicator.send_display_layout(display);
+  send_display_layout(d.set_manager(m.append(okay_button, layout::top)));
 
   /* Wait until the ok button was pressed */
-  okay_button->await_change();
-
+  okay_button.await_change();
+  
   static char const* extensions[6] = {
     lts::extension_for_type(lts_aut),
     lts::extension_for_type(lts_mcrl),
@@ -278,10 +264,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
          c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc+mcrl"))) {
 
     if (c.input_exists(lps_file_auxiliary)) {
-      c.get_input(lps_file_auxiliary).set_location(lps_file_field->get_text());
+      c.get_input(lps_file_auxiliary).set_location(lps_file_field.get_text());
     }
     else {
-      c.add_input(lps_file_auxiliary, tipi::mime_type("lps", tipi::mime_type::application), lps_file_field->get_text());
+      c.add_input(lps_file_auxiliary, tipi::mime_type("lps", tipi::mime_type::application), lps_file_field.get_text());
     }
   }
   else {
@@ -297,24 +283,24 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
        selected_transformation == minimisation_modulo_branching_bisimulation)) {
 
     c.add_option(option_add_bisimulation_equivalence_class).
-        set_argument_value< 0, tipi::datatype::boolean >(bisimulation_add_eq_classes->get_status());
+        set_argument_value< 0, tipi::datatype::boolean >(bisimulation_add_eq_classes.get_status());
   }
   else {
     c.remove_option(option_add_bisimulation_equivalence_class);
   }
 
-  c.add_option(option_no_reachability_check).set_argument_value< 0, tipi::datatype::boolean >(do_not_check_reachability->get_status());
+  c.add_option(option_no_reachability_check).set_argument_value< 0, tipi::datatype::boolean >(check_reachability.get_status());
 
   if (format_selector.get_selection() == dot) {
     c.add_option(option_no_state_information).
-       set_argument_value< 0, tipi::datatype::boolean >(do_not_omit_state_information->get_status());
+       set_argument_value< 0, tipi::datatype::boolean >(add_state_information.get_status());
   }
   else {
     c.remove_option(option_no_state_information);
   }
 
-  if (!tau_field->get_text().empty()) {
-    c.add_option(option_tau_actions).set_argument_value< 0, tipi::datatype::string >(tau_field->get_text());
+  if (!tau_field.get_text().empty()) {
+    c.add_option(option_tau_actions).set_argument_value< 0, tipi::datatype::string >(tau_field.get_text());
   }
   else {
     c.remove_option(option_tau_actions);

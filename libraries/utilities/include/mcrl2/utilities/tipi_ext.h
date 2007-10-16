@@ -56,6 +56,9 @@ namespace mcrl2 {
           std::map < radio_button const*, T > selector;
   
         public:
+
+          /** \brief The display for which to create the radio button objects */
+          tipi::display& display;
   
           /** \brief The first button in the group */
           radio_button* first;
@@ -63,20 +66,10 @@ namespace mcrl2 {
         public:
   
           /** \brief constructor */
-          template < typename M >
-          radio_button_helper(M const&, T const&, radio_button*);
-  
-          /** \brief constructor */
-          template < typename M >
-          radio_button_helper(M const&, T const&, std::string const&);
+          radio_button_helper(tipi::display&);
   
           /** \brief associate a radio button with a layout manager and a value */
-          template < typename M >
-          void associate(M const&, T const&, radio_button*);
-  
-          /** \brief associate a radio button with a layout manager and a value */
-          template < typename M >
-          radio_button& associate(M const&, T const&, std::string const&, bool = false);
+          radio_button& associate(T const&, std::string const&, bool = false);
   
           /** \brief gets the button associated with a value */
           radio_button& get_button(T const&);
@@ -92,60 +85,33 @@ namespace mcrl2 {
       };
   
       /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] r pointer to the radio button to attach
-       * \param[in] v the value to associate the button with
+       * \param[in] d the display for which the radio button objects will be created
        **/
       template < typename T >
-      template < typename M >
-      inline radio_button_helper< T >::radio_button_helper(M const& l, T const& v, radio_button* r) {
-        first = r;
-  
-        associate(l, v, r);
+      inline radio_button_helper< T >::radio_button_helper(tipi::display& d) : display(d), first(0) {
       }
   
       /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] v the value to associate the button with
-       * \param[in] s the label of the radio button
-       **/
-      template < typename T >
-      template < typename M >
-      inline radio_button_helper< T >::radio_button_helper(M const& l, T const& v, std::string const& s) {
-        first = new radio_button(s);
-  
-        associate(l, v, first);
-      }
-  
-      /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] r pointer to the radio button to attach
-       * \param[in] v the value to associate the button with
-       **/
-      template < typename T >
-      template < typename M >
-      inline void radio_button_helper< T >::associate(M const& l, T const& v, radio_button* r) {
-        l->add(r);
-  
-        selector[r] = v;
-      }
-  
-      /**
-       * \param[in] l the layout manager to which the button should be attached
        * \param[in] v the value to associate the button with
        * \param[in] s the label of the radio button
        * \param[in] b whether the new button should be selected
        **/
       template < typename T >
-      template < typename M >
-      inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(M const& l, T const& v, std::string const& s, bool b) {
-        radio_button* button = new radio_button(s, first, b);
+      inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(T const& v, std::string const& s, bool b) {
+        radio_button& button = display.create< tipi::layout::elements::radio_button >();;
   
-        l->add(button);
+        if (first == 0) {
+          first = &button;
+        }
+        if (b) {
+          button.select();
+        }
+
+        button.set_label(s);
+
+        selector[&button] = v;
   
-        selector[button] = v;
-  
-        return (*button);
+        return button;
       }
   
       template < typename T >
@@ -156,7 +122,7 @@ namespace mcrl2 {
           }
         }
   
-        return *this;
+        return *first;
       }
   
       template < typename T >
@@ -170,12 +136,12 @@ namespace mcrl2 {
   
       template < typename T >
       inline T radio_button_helper< T >::get_selection() {
-        return (selector[first->get_selected()]);
+        return selector[&first->get_selected()];
       }
   
       template < typename T >
       std::string radio_button_helper< T >::get_selection_label() const {
-        return (first->get_selected()->get_label());
+        return first->get_selected().get_label();
       }
     }
   }

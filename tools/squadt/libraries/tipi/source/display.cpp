@@ -4,64 +4,44 @@
 //
 /// \file source/display.cpp
 
-#include <iostream>
-#include <functional>
 #include <utility>
 
-#include <boost/bind.hpp>
-
-#include "tipi/detail/layout_manager.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/display.hpp"
-#include "tipi/object.hpp"
-#include "tipi/tool.hpp"
+#include "tipi/detail/display.hpp"
 
 namespace tipi {
 
   void display::disassociate(tipi::layout::element const* e) {
-    element_for_id::iterator i = std::find_if(m_element_by_id.begin(), m_element_by_id.end(),
-                boost::bind(std::equal_to< tipi::layout::element const* >(), e, boost::bind(&element_for_id::value_type::second, _1)));
+    for (element_by_id::iterator i = m_element_by_id.begin(); i != m_element_by_id.end(); ++i) {
+      if (i->second.get() == e) {
+        m_element_by_id.erase(i);
 
+        break;
+      }
+    }
+  }
+
+  void display::disassociate(tipi::display::element_identifier const& id) {
+    element_by_id::iterator i = m_element_by_id.find(id);
+   
     if (i != m_element_by_id.end()) {
       m_element_by_id.erase(i);
     }
   }
 
-  namespace layout {
+  /**
+   * \pre the element should be in the list
+   * \throw false, when the element is not present
+   **/
+  const ::tipi::display::element_identifier display::find(tipi::layout::element const* e) const {
+    for (element_by_id::const_iterator i = m_element_by_id.begin(); i != m_element_by_id.end(); ++i) {
+      if (i->second.get() == e) {
+        return i->first;
 
-    const margins       manager::default_margins;
-
-    const visibility    manager::default_visibility = visible;
-
-    const properties    manager::default_properties(middle, left, manager::default_margins, manager::default_visibility);
-
-    /**
-     * \param[in] m a mediator to synchronise an element with the associated element in a (G)UI
-     **/
-    mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
-      if (m_manager.get() != 0) {
-        return (m_manager->instantiate(m));
-      }
-
-      return mediator::wrapper_aptr();
-    }
-
-    /**
-     * \param[in] s string data with state descriptions
-     * \param[in] elements a vector with the elements that should be updated
-     *
-     * Looks up an element by its id and calls the read_structure on this
-     * member to read its new state from the text reader.
-     *
-     * \return vector of pointers to elements that have been updated
-     **/
-    void tool_display::update(std::string const& s, std::vector < tipi::layout::element const* >& elements) {
-
-      /* Find the element that is to be changed */
-      if (m_manager.get() != 0) {
-        tipi::visitors::restore(*this, elements, s);
+        break;
       }
     }
+
+    throw false;
   }
 }
 

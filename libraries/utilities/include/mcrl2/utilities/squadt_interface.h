@@ -56,7 +56,7 @@ namespace mcrl2 {
           void send_error(std::string const&) const;
   
           /** \brief sends a layout for the tool display */
-          void send_display_layout(std::auto_ptr < tipi::layout::manager >&);
+          void send_display_layout(::tipi::layout::tool_display&);
   
           /** \brief sends a clear display layout signal */
           void send_clear_display();

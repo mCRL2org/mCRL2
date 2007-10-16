@@ -61,20 +61,6 @@ namespace tipi {
       restore_visitor(T&);
   };
 
-  /// \cond IMPLEMENTATION_DOCS
-  class search_visitor_impl;
-  /// \endcond
-
-  /** \brief Visitor type for searching within object hierarchies */
-  class search_visitor : public ::utility::visitor_interface< tipi::search_visitor_impl, bool > {
-
-    public:
-
-      /** \brief Constructor */
-      search_visitor();
-  };
-  /// \endcond
-
   /**
    * \brief Operations on hierarchies using visitors
    **/
@@ -126,14 +112,6 @@ namespace tipi {
       /** \brief Reads from stream */
       template < typename T, typename U >
       static typename not_string_or_path< U >::type restore(T&, U&);
-
-      /** \brief Searches a layout hierarchy for an element by its id */
-      template < typename T >
-      static typename T::element const* search(T const&, typename T::element_identifier const&);
-
-      /** \brief Searches a layout hierarchy for an element and returns its identifier */
-      template < typename T >
-      static typename T::element_identifier search(T const&, typename T::element const*);
   };
 
   template < typename T >
@@ -192,42 +170,6 @@ namespace tipi {
     tipi::restore_visitor  v(s);
 
     v.visit(t);
-  }
-
-  /**
-   * \brief Searches for an element by its id
-   * \throws false if not found
-   **/
-  template < typename T >
-  inline typename T::element const* visitors::search(T const& d, typename T::element_identifier const& id) {
-
-    tipi::search_visitor v;
-
-    boost::tuple < typename T::element const*, typename T::element_identifier const& > t(0, id);
-
-    if (!v.visit(d, t)) {
-      throw false;
-    }
-    
-    return boost::get< 0 >(t);
-  }
-
-  /**
-   * \brief Searches a hierarchy for an element and returns its identifier
-   * \throws false if not found
-   **/
-  template < typename T >
-  inline typename T::element_identifier visitors::search(T const& d, typename T::element const* e) {
-
-    tipi::search_visitor v;
-
-    boost::tuple < typename T::element_identifier, typename T::element const* > t(0, e);
-
-    if (!v.visit(d, t)) {
-      throw false;
-    }
-    
-    return boost::get< 0 >(t);
   }
 }
 

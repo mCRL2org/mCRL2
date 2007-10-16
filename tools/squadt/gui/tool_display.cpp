@@ -16,6 +16,7 @@
 #include <boost/foreach.hpp>
 
 #include <wx/button.h>
+#include <wx/colour.h>
 #include <wx/checkbox.h>
 #include <wx/event.h>
 #include <wx/gauge.h>
@@ -41,7 +42,7 @@ namespace squadt {
 
       /** \brief Translates a tipi layout to a functional wxWidgets layout */
       class tool_display_mediator : public tipi::layout::mediator {
-        
+
         public:
      
           /**
@@ -94,13 +95,13 @@ namespace squadt {
           };
 
         private:
+
+          /** \brief Handler for events to translate changes in the tipi hierarchy to the wxWidgets hierarchy */
+          tipi::layout::basic_event_handler& m_event_handler;
      
           /** \brief The sizer to which the elements will be attached */
-          wxWindow*             current_window;
+          wxWindow*                          current_window;
 
-          /** \brief The object to which change event handlers are connected */
-          state_change_handler* change_event_handler;
-     
         private:
      
           /** \brief Helper function for layout managers to attach widgets */
@@ -112,10 +113,10 @@ namespace squadt {
         public:
      
           /** \brief Constructor */
-          inline tool_display_mediator(wxWindow* w, state_change_handler* s);
+          inline tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w);
      
           /** \brief Constructor */
-          inline tool_display_mediator(wxWindow* w, wrapper_aptr d, state_change_handler* s);
+          inline tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w, wrapper_aptr d);
      
           /** \brief Instantiates a vertically aligned box layout manager */
           inline mediator::aptr build_vertical_box();
@@ -124,73 +125,78 @@ namespace squadt {
           inline mediator::aptr build_horizontal_box();
         
           /** \brief Instantiates a label (static text) */
-          inline mediator::wrapper_aptr build_label(layout::element const*, std::string const&);
+          inline mediator::wrapper_aptr build(layout::elements::label const&);
 
           /** \brief Updates a label, (G)UI part */
-          void update_label(mediator::wrapper*, std::string const&);
+          static void update(layout::elements::label const&, wxStaticText&);
 
-          /** \brief Instantiates a label */
-          inline mediator::wrapper_aptr build_button(layout::element const*, std::string const&);
+          /** \brief Instantiates a button */
+          inline mediator::wrapper_aptr build(layout::elements::button const&);
         
           /** \brief Updates a button, (G)UI part */
-          void update_button(mediator::wrapper*, std::string const&);
+          void update(layout::elements::button const&, wxButton&);
 
           /** \brief Instantiates a single radio button */
-          inline mediator::wrapper_aptr build_radio_button(layout::element const*, std::string const&, bool);
+          inline mediator::wrapper_aptr build(layout::elements::radio_button const&);
         
           /** \brief Updates a radio button, (G)UI part */
-          void update_radio_button(mediator::wrapper*, std::string const&, bool);
+          static void update(layout::elements::radio_button const&, wxRadioButton&);
 
           /** \brief Instantiates a single checkbox */
-          inline mediator::wrapper_aptr build_checkbox(layout::element const*, std::string const&, bool);
+          inline mediator::wrapper_aptr build(layout::elements::checkbox const&);
      
           /** \brief Updates a checkbox, (G)UI part */
-          void update_checkbox(mediator::wrapper*, std::string const&, bool status);
+          static void update(layout::elements::checkbox const&, wxCheckBox&);
 
           /** \brief Instantiates a progress bar */
-          inline mediator::wrapper_aptr build_progress_bar(layout::element const*, unsigned int const&, unsigned int const&, unsigned int const&);
+          inline mediator::wrapper_aptr build(layout::elements::progress_bar const&);
         
           /** \brief Updates a checkbox, (G)UI part */
-          void update_progress_bar(mediator::wrapper*, unsigned int const&, unsigned int const&, unsigned int const&);
+          static void update(layout::elements::progress_bar const&, wxGauge&);
 
           /** \brief Instantiates a single line text input control */
-          inline mediator::wrapper_aptr build_text_field(layout::element const*, std::string const&);
+          inline mediator::wrapper_aptr build(layout::elements::text_field const&);
      
           /** \brief Updates a radio button, (G)UI part */
-          void update_text_field(mediator::wrapper*, std::string const&);
-
-          /** \brief Destructor */
-          inline ~tool_display_mediator();
+          static void update(layout::elements::text_field const&, wxTextCtrl&);
       };
 
       /**
+       * \internal
        * Helper class for associating objects of tipi::layout::element with
        * their wxWidgets counterpart
        *
-       * This class would not have been necessary if wxWidgets provided
+       * This class exists purely because wxWidgets does not provide
        * functionality to register function objects as event handlers
        **/
-      template < typename S >
+      template < typename S, typename W >
       class event_helper : public wxEvtHandler, public wxClientData {
 
         protected:
 
           S& tipi_element;
+          W& wx_element;
 
         public:
 
-          event_helper(tipi::layout::element& s) : tipi_element(static_cast < S& > (s)) {
+          event_helper(S const& s, W& w) : tipi_element(const_cast < S& > (s)), wx_element(w) {
           }
 
-          void do_changes(wxCommandEvent&);
+          // if seperate handling of more than one event per control is interesting more variants of this function can be introduced
+          void connect(wxEventType const& e) {
+            // For processing updates to the display that originate from local user interaction
+            wx_element.Connect(e, wxCommandEventHandler(event_helper::export_wx_changes), this, this);
+          }
+
+          void export_wx_changes(wxCommandEvent&);
       };
 
       /**
        * \param w the window to which to attach elements
        * \param s the event handler that deals with change events
        **/
-      tool_display_mediator::tool_display_mediator(wxWindow* w, state_change_handler* s) :
-                                                        current_window(w), change_event_handler(s) {
+      tool_display_mediator::tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w) :
+                                                        m_event_handler(e), current_window(w) {
       }
      
       /**
@@ -198,8 +204,8 @@ namespace squadt {
        * \param d the sizer to which elements should be attached
        * \param s the event handler that deals with change events
        **/
-      tool_display_mediator::tool_display_mediator(wxWindow* w, wrapper_aptr d, state_change_handler* s) :
-                                                        mediator(d), current_window(w), change_event_handler(s) {
+      tool_display_mediator::tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w, wrapper_aptr d) :
+                                                        mediator(d), m_event_handler(e), current_window(w) {
       }
      
       /**
@@ -360,8 +366,8 @@ namespace squadt {
        **/
       mediator::aptr tool_display_mediator::build_vertical_box() {
         wxSizer* t = new wxBoxSizer(wxVERTICAL);
-     
-        tipi::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr(new wrapper(t)), change_event_handler));
+
+        tipi::layout::mediator::aptr m(new tool_display_mediator(m_event_handler, current_window, wrapper_aptr(new wrapper(t))));
      
         m->set_attach(boost::bind(&tool_display_mediator::attach_to_vertical_box,
                                                   static_cast < tool_display_mediator* > (m.get()), _1, _2));
@@ -374,8 +380,8 @@ namespace squadt {
        **/
       mediator::aptr tool_display_mediator::build_horizontal_box() {
         wxSizer* t = new wxBoxSizer(wxHORIZONTAL);
-     
-        tipi::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr (new wrapper(t)), change_event_handler));
+
+        tipi::layout::mediator::aptr m(new tool_display_mediator(m_event_handler, current_window, wrapper_aptr (new wrapper(t))));
      
         m->set_attach(boost::bind(&tool_display_mediator::attach_to_horizontal_box,
                                                   static_cast < tool_display_mediator* > (m.get()), _1, _2));
@@ -385,29 +391,24 @@ namespace squadt {
      
       /**
        * \param[in] e the element that is associated with the new control
-       * \param[in] s the text of the label
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_label(layout::element const* e, std::string const& s) {
-        wxStaticText* t = new wxStaticText(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::label const& e) {
+        struct trampoline {
+          static void import(layout::elements::label const& tipi_element, wxStaticText& wx_element) {
+            wx_element.SetLabel(wxString(tipi_element.get_text().c_str(), wxConvLocal));
+          }
+        };
 
-        /* Connect change event */
-        change_event_handler->associate(t, e);
-     
+        wxStaticText* t = new wxStaticText(current_window, wxID_ANY, wxString(e.get_text().c_str(), wxConvLocal));
+
+        // For processing updates to the display that originate at the tool side (with scheduler)
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
+
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
      
-      /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] s the text of the label
-       **/
-      void tool_display_mediator::update_label(mediator::wrapper* w, std::string const& s) {
-        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetLabel(wxString(s.c_str(), wxConvLocal));
-      }
-
       template <>
-      void event_helper< layout::elements::button >::do_changes(wxCommandEvent& e) {
+      void event_helper< layout::elements::button, wxButton >::export_wx_changes(wxCommandEvent& e) {
         tipi_element.activate();
       }
      
@@ -415,200 +416,152 @@ namespace squadt {
        * \param[in] e the element that is associated with the new control
        * \param[in] s the text of the label
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_button(layout::element const* e, std::string const& s) {
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::button const& e) {
+        struct trampoline {
+          static void import(layout::elements::button const& tipi_element, wxButton& wx_element) {
+            wx_element.SetLabel(wxString(tipi_element.get_label().c_str(), wxConvLocal));
+          }
+        };
+
         wxButton* t;
      
-        if (s == "OK") {
+        if (e.get_label() == "OK") {
           t = new wxButton(current_window, wxID_OK);
         }
-        else if (s == "Cancel") {
+        else if (e.get_label() == "Cancel") {
           t = new wxButton(current_window, wxID_CANCEL);
         }
         else {
-          t = new wxButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, wxButton::GetDefaultSize());
+          t = new wxButton(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal), wxDefaultPosition, wxButton::GetDefaultSize());
         }
-     
-        /* Connect change event */
-        change_event_handler->associate(t, e);
 
-        event_helper< layout::elements::button >* l = new event_helper< layout::elements::button >(const_cast < tipi::layout::element& > (*e));
+        // For processing updates to the display that originate at the tool side
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
+     
+        event_helper< layout::elements::button, wxButton >* l =
+                new event_helper< layout::elements::button, wxButton >(e, *t);
 
-        t->Connect(t->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-                  wxCommandEventHandler(event_helper< layout::elements::button >::do_changes), l, l);
-     
-     
+        l->connect(wxEVT_COMMAND_BUTTON_CLICKED);
+
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
 
-      /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] s the text of the label
-       **/
-      void tool_display_mediator::update_button(mediator::wrapper* w, std::string const& s) {
-        wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetLabel(wxString(s.c_str(), wxConvLocal));
-      }
-
       template <>
-      void event_helper< layout::elements::radio_button >::do_changes(wxCommandEvent& e) {
+      void event_helper< layout::elements::radio_button, wxRadioButton >::export_wx_changes(wxCommandEvent& e) {
         tipi_element.select();
       }
 
       /**
        * \param[in] e the element that is associated with the new control
-       * \param[in] s the text of the label
-       * \param[in] b whether the button is selected or not
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_radio_button(layout::element const* e, std::string const& s, bool b) {
-        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, 
-                wxDefaultSize, static_cast < layout::elements::radio_button const* > (e)->is_first_in_group() ? wxRB_GROUP : 0);
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::radio_button const& e) {
+        struct trampoline {
+          static void import(layout::elements::radio_button const& tipi_element, wxRadioButton& wx_element) {
+            wx_element.SetLabel(wxString(tipi_element.get_label().c_str(), wxConvLocal));
+            wx_element.SetValue(tipi_element.is_selected());
+          }
+        };
 
-        if (static_cast < layout::elements::radio_button const* > (e)->is_selected()) {
+//        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal), wxDefaultPosition, 
+//                wxDefaultSize, e.is_first_in_group() ? wxRB_GROUP : 0);
+wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+
+        if (e.is_selected()) {
           t->SetValue(true);
         }
+
+        // For processing updates to the display that originate at the tool side
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
      
-        /* Connect change event */
-        change_event_handler->associate(t, e);
+        event_helper< layout::elements::radio_button, wxRadioButton >* l =
+                new event_helper< layout::elements::radio_button, wxRadioButton >(e, *t);
 
-        event_helper< layout::elements::radio_button >* l = new event_helper< layout::elements::radio_button >(const_cast < tipi::layout::element& > (*e));
-
-        t->Connect(t->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED,
-                  wxCommandEventHandler(event_helper< layout::elements::radio_button >::do_changes), l, l);
+        // For processing updates to the display that originate from local user interaction
+        l->connect(wxEVT_COMMAND_RADIOBUTTON_SELECTED);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
-      }
-     
-      /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] s the text of the label
-       * \param[in] b whether the button is selected or not
-       **/
-      void tool_display_mediator::update_radio_button(mediator::wrapper* w, std::string const& s, bool b) {
-        wxRadioButton* t = static_cast < wxRadioButton* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetLabel(wxString(s.c_str(), wxConvLocal));
-        t->SetValue(b);
       }
 
       template <>
-      void event_helper< layout::elements::checkbox >::do_changes(wxCommandEvent& e) {
-        tipi_element.set_status(static_cast < wxCheckBox* > (e.GetEventObject())->GetValue());
+      void event_helper< layout::elements::checkbox, wxCheckBox >::export_wx_changes(wxCommandEvent& e) {
+        tipi_element.set_status(wx_element.GetValue());
       }
 
       /**
        * \param[in] e the element that is associated with the new control
-       * \param[in] s the text of the label
-       * \param[in] b the status of the checkbox
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_checkbox(layout::element const* e, std::string const& s, bool b) {
-        wxCheckBox* t = new wxCheckBox(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
-     
-        t->SetValue(b);
-     
-        /* Connect change event */
-        change_event_handler->associate(t, e);
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::checkbox const& e) {
+        struct trampoline {
+          static void import(layout::elements::checkbox const& tipi_element, wxCheckBox& wx_element) {
+            wx_element.SetLabel(wxString(tipi_element.get_label().c_str(), wxConvLocal));
+            wx_element.SetValue(tipi_element.get_status());
+          }
+        };
 
-        event_helper< layout::elements::checkbox >* l = new event_helper< layout::elements::checkbox >(const_cast < tipi::layout::element& > (*e));
+        wxCheckBox* t = new wxCheckBox(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal));
+     
+        t->SetValue(e.get_status());
+     
+        // For processing updates to the display that originate at the tool side
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
+     
+        event_helper< layout::elements::checkbox, wxCheckBox >* l =
+                new event_helper< layout::elements::checkbox, wxCheckBox >(e, *t);
 
-        t->Connect(t->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-                  wxCommandEventHandler(event_helper< layout::elements::checkbox >::do_changes), l, l);
+        l->connect(wxEVT_COMMAND_CHECKBOX_CLICKED);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
      
       /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] s the text of the label
-       * \param[in] b whether the button is selected or not
-       **/
-      void tool_display_mediator::update_checkbox(mediator::wrapper* w, std::string const& s, bool b) {
-        wxCheckBox* t = static_cast < wxCheckBox* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetLabel(wxString(s.c_str(), wxConvLocal));
-        t->SetValue(b);
-      }
-
-      /**
        * \param[in] e the element that is associated with the new control
-       * \param[in] min the minimum value (if supported)
-       * \param[in] max the maximum value (if supported)
-       * \param[in] c the current value
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_progress_bar(layout::element const* e, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
-        wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL);
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::progress_bar const& e) {
+        struct trampoline {
+          static void import(layout::elements::progress_bar const& tipi_element, wxGauge& wx_element) {
+            wx_element.SetRange(tipi_element.get_maximum() - tipi_element.get_minimum());
+            wx_element.SetValue(tipi_element.get_value() - tipi_element.get_minimum());
+          }
+        };
+
+        wxGauge* t = new wxGauge(current_window, wxID_ANY, e.get_maximum() - e.get_minimum(), wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL);
      
         // SetRange() avoids a bug with range setting in the constructor (wx-2.8)
-        t->SetRange(max - min);
-        t->SetValue(c - min);
+        t->SetRange(e.get_maximum() - e.get_minimum());
+        t->SetValue(e.get_value() - e.get_minimum());
      
-        /* Connect change event */
-        change_event_handler->associate(t, e);
-
+        // For processing updates to the display that originate at the tool side
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
+     
         return (mediator::wrapper_aptr(new wrapper(t)));
       }
      
-      /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] min the minimum value (if supported)
-       * \param[in] max the maximum value (if supported)
-       * \param[in] c the current value
-       **/
-      void tool_display_mediator::update_progress_bar(mediator::wrapper* w, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
-        wxGauge* t = static_cast < wxGauge* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetRange(max - min);
-        t->SetValue(c - min);
-      }
-
       template <>
-      void event_helper< layout::elements::text_field >::do_changes(wxCommandEvent& e) {
-        tipi_element.set_text(std::string(static_cast < wxTextCtrl* > (e.GetEventObject())->GetValue().fn_str()));
+      void event_helper< layout::elements::text_field, wxTextCtrl >::export_wx_changes(wxCommandEvent& e) {
+        tipi_element.set_text(std::string(wx_element.GetValue().fn_str()));
       }
 
       /**
        * \param[in] e the element that is associated with the new control
-       * \param[in] s the text of the label
        **/
-      mediator::wrapper_aptr tool_display_mediator::build_text_field(layout::element const* e, std::string const& s) {
-        wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, wxSize(200,-1));
+      mediator::wrapper_aptr tool_display_mediator::build(layout::elements::text_field const& e) {
+        struct trampoline {
+          static void import(layout::elements::text_field const& tipi_element, wxTextCtrl& wx_element) {
+            wx_element.SetLabel(wxString(tipi_element.get_text().c_str(), wxConvLocal));
+          }
+        };
+
+        wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(e.get_text().c_str(), wxConvLocal), wxDefaultPosition, wxSize(200,-1));
      
-        /* Connect change event */
-        change_event_handler->associate(t, e);
+        // For processing updates to the display that originate at the tool side
+        m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
+     
+        event_helper< layout::elements::text_field, wxTextCtrl >* l =
+                new event_helper< layout::elements::text_field, wxTextCtrl >(e, *t);
 
-        event_helper< layout::elements::text_field >* l = new event_helper< layout::elements::text_field >(const_cast < tipi::layout::element& > (*e));
-
-        t->Connect(t->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-                  wxCommandEventHandler(event_helper< layout::elements::text_field >::do_changes), l, l);
+        l->connect(wxEVT_COMMAND_TEXT_UPDATED);
      
         return (mediator::wrapper_aptr(new wrapper(t)));
-      }
-     
-      /**
-       * \param[in] w the element that is associated with the control to update
-       * \param[in] s the text of the label
-       **/
-      void tool_display_mediator::update_text_field(mediator::wrapper* w, std::string const& s) {
-        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
-
-        t->SetLabel(wxString(s.c_str(), wxConvLocal));
-      }
-
-      tool_display_mediator::~tool_display_mediator() {
-      }
-
-      /**
-       * \param[in] m pointer to a mediator for translation to wxWidgets controls
-       * \param[in] e pointer to the element of which the status was changed
-       **/
-      void state_change_handler::update(tipi::layout::mediator* m, tipi::layout::element const* e) {
-        for (element_for_window_map::const_iterator i = element_for_window.begin(); i != element_for_window.end(); ++i) {
-          if (i->second == e) {
-            tool_display_mediator::wrapper w(static_cast < wxWindow* > ((*i).first));
-         
-            (*i).second->update(m, &w);
-          }
-        }
       }
     }
 
@@ -619,32 +572,34 @@ namespace squadt {
      **/
     tool_display::tool_display(wxWindow* p, GUI::project* c, boost::shared_ptr < processor::monitor >& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c), event_handler(s), current_layout(new tipi::layout::tool_display), content(0), log(0) {
+                                m_project(c), m_layout(new tipi::layout::tool_display), m_content(0), m_monitor(s), m_log(0) {
 
       build();
 
       /* Connect event handlers */
-      s->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
-      s->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
-      event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update, boost::static_pointer_cast < tipi::controller::communicator > (s).get(), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
+      m_monitor->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
+      m_monitor->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
     }
 
     void tool_display::build() {
       wxSizer* root(new wxBoxSizer(wxVERTICAL));
+
+      SetBackgroundColour(*wxWHITE);
 
       /* Set minimum dimensions */
       root->SetMinSize(GetClientSize().GetWidth(), 110);
 
       wxWindow* titlepanel(new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER));
 
-      control_bar = new wxBoxSizer(wxHORIZONTAL);
-      control_bar->AddSpacer(4);
-      control_bar->Add(new wxStaticText(titlepanel, wxID_ANY, wxT("")), 0, wxTOP|wxBOTTOM|wxLEFT, 2);
-      control_bar->AddStretchSpacer(1);
-      control_bar->Add(new wxButton(titlepanel, cmID_MINIMISE, wxT("-"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
-      control_bar->Add(new wxButton(titlepanel, cmID_CLOSE, wxT("x"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
+      m_control_bar = new wxBoxSizer(wxHORIZONTAL);
+      m_control_bar->AddSpacer(4);
+      m_control_bar->Add(new wxStaticText(titlepanel, wxID_ANY, wxT("")), 0, wxTOP|wxBOTTOM|wxLEFT, 2);
+      m_control_bar->AddStretchSpacer(1);
+      m_control_bar->Add(new wxButton(titlepanel, cmID_MINIMISE, wxT("-"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
+      m_control_bar->Add(new wxButton(titlepanel, cmID_CLOSE, wxT("x"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
 
-      titlepanel->SetSizer(control_bar);
+      titlepanel->SetBackgroundColour(*wxLIGHT_GREY);
+      titlepanel->SetSizer(m_control_bar);
       root->Add(titlepanel, 0, wxEXPAND);
 
       // Set state to minimised
@@ -656,30 +611,30 @@ namespace squadt {
     }
 
     void tool_display::set_title(wxString s) {
-      control_bar->GetItem(1)->GetWindow()->SetLabel(s);
+      m_control_bar->GetItem(1)->GetWindow()->SetLabel(s);
     }
 
     void tool_display::on_panel_button_clicked(wxCommandEvent& e) {
       if (e.GetId() == cmID_MINIMISE) {
-        if (content != 0) {
+        if (m_content != 0) {
           wxSizer* root = GetSizer();
 
-          if (root->IsShown(content)) {
+          if (root->IsShown(m_content)) {
             root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
 
-            content->Show(false);
+            m_content->Show(false);
 
-            if (log != 0) {
-              log->Show(false);
+            if (m_log != 0) {
+              m_log->Show(false);
             }
           }
           else {
             root->SetMinSize(GetClientSize().GetWidth(), 110);
 
-            content->Show(true);
+            m_content->Show(true);
 
-            if (log != 0) {
-              log->Show(true);
+            if (m_log != 0) {
+              m_log->Show(true);
             }
           }
 
@@ -703,7 +658,7 @@ namespace squadt {
     void tool_display::remove(bool u) {
       struct local {
         static void trampoline(tool_display* display) {
-          display->current_layout.reset();
+          display->m_layout.reset();
 
           wxSizer* s = display->GetParent()->GetSizer();
 
@@ -718,17 +673,19 @@ namespace squadt {
         }
       };
 
+      m_event_handler.clear();
+
       /* Ignore all scheduled updates to the tool display */
-      event_handler.get_monitor()->reset_display_update_handler();
-      event_handler.get_monitor()->reset_display_layout_handler();
-      event_handler.get_monitor()->reset_status_message_handler();
+      m_monitor->reset_display_update_handler();
+      m_monitor->reset_display_layout_handler();
+      m_monitor->reset_status_message_handler();
 
       if (u) {
-        context->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
+        m_project->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
       }
 
       /* End tool execution, if it was still running */
-      event_handler.get_monitor()->finish();
+      m_monitor->finish();
     }
 
       /* Toggle scrollbar availability on demand */
@@ -750,7 +707,7 @@ namespace squadt {
       boost::shared_ptr < tipi::layout::tool_display > g(w.lock());
 
       if (g.get() != 0) {
-        if (content != 0) {
+        if (m_content != 0) {
           /* Forcibly refresh display to prevent a crash on Mac OS X */
           Refresh();
           Update();
@@ -759,13 +716,13 @@ namespace squadt {
           Freeze();
 
           /* Delete controls */
-          content->Clear(true);
+          m_content->Clear(true);
 
-          GetSizer()->Detach(content);
+          GetSizer()->Detach(m_content);
 
-          delete content;
+          delete m_content;
 
-          content = 0;
+          m_content = 0;
 
           Layout();
 
@@ -777,27 +734,23 @@ namespace squadt {
           wxTheApp->Yield();
         }
 
-        current_layout = l;
-
-        // Tie handler to the new layout object
-        event_handler.send_display_update = boost::bind(&tipi::controller::communicator::send_display_update,
-                boost::static_pointer_cast < tipi::controller::communicator > (event_handler.monitor).get(), _1, boost::static_pointer_cast < tipi::display const > (current_layout));
+        m_layout = l;
 
         std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 
-        tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())), &event_handler);
+        tool_display_mediator m(m_event_handler, this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())));
 
         try {
-          mediator::wrapper_aptr new_layout(current_layout->instantiate(&m));
+          mediator::wrapper_aptr new_layout(m_layout->instantiate(&m));
 
           if (new_layout.get() != 0) {
-            content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
+            m_content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
 
-            GetSizer()->Insert(1, content, 1, wxALL|wxALIGN_LEFT, 2);
+            GetSizer()->Insert(1, m_content, 1, wxALL|wxALIGN_LEFT, 2);
 
             Layout();
 
-            if (!current_layout->get_visibility()) {
+            if (!m_layout->get_visibility()) {
               // Show minimised
               root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
             }
@@ -805,7 +758,7 @@ namespace squadt {
             Show(true);
           }
           else {
-            content = 0;
+            m_content = 0;
           }
 
           GetParent()->Layout();
@@ -833,10 +786,10 @@ namespace squadt {
     void tool_display::update(boost::weak_ptr < tipi::layout::tool_display > w, std::vector < tipi::layout::element const* > l) {
       using namespace detail;
 
-      tool_display_mediator m(this, &event_handler);
+      tool_display_mediator m(m_event_handler, this);
 
       BOOST_FOREACH(tipi::layout::element const* i, l) {
-        event_handler.update(&m, i);
+        m_event_handler.execute_handlers(i, false);
       }
 
       if (w.lock().get()) {
@@ -854,13 +807,13 @@ namespace squadt {
       if (g.get() != 0) {
         wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
 
-        if (log == 0) {
+        if (m_log == 0) {
           wxSizer* sizer = GetSizer();
 
-          log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
-          log->SetSize(-1, 40);
+          m_log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+          m_log->SetSize(-1, 40);
 
-          sizer->Add(log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
+          sizer->Add(m_log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
 
           GetParent()->Layout();
 
@@ -872,12 +825,12 @@ namespace squadt {
           GetParent()->GetParent()->ProcessEvent(size_event);
 
           /* Show the log */
-          log->Show(true);
+          m_log->Show(true);
         }
         else {
-          log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
+          m_log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
 
-          log->ShowPosition(log->GetLastPosition());
+          m_log->ShowPosition(m_log->GetLastPosition());
         }
       }
     }
@@ -886,22 +839,23 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(tipi::report::sptr l) {
-      context->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, current_layout, l));
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, m_layout, l));
     }
 
     /**
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(tipi::layout::tool_display::sptr l) {
-      /* Register handler for updates */
-      event_handler.clear();
-      event_handler.get_monitor()->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
+      m_event_handler.clear();
 
-      context->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, current_layout, l));
+      /* Register handler for updates */
+      m_monitor->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
+
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, m_layout, l));
     }
 
     void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
-      context->gui_builder.schedule_update(boost::bind(&tool_display::update, this, current_layout, l));
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update, this, m_layout, l));
     }
   }
 }

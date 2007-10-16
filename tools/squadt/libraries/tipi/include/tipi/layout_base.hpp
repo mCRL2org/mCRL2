@@ -11,6 +11,7 @@
 #include <map>
 
 #include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "tipi/utility/generic_visitor.hpp"
 
@@ -24,21 +25,21 @@ namespace tipi {
     class communicator_impl;
   }
 
-  namespace layout {
+  class display;
 
+  namespace layout {
     class basic_event_handler;
 
     class element;
 
     /** \brief Abstract base class for layout elements */
-    class element : public ::utility::visitable {
+    class element : public ::utility::visitable, public boost::noncopyable {
 
       template < typename R, typename S >
       friend class ::utility::visitor;
 
-      friend class ::tipi::tool::communicator;
-      friend class ::tipi::controller::communicator_impl;
       friend class ::tipi::layout::manager;
+      friend class ::tipi::display;
 
       public:
 
@@ -64,16 +65,24 @@ namespace tipi {
         /** \brief Whether or not the element is active */
         bool                        m_enabled;
 
+      private:
+
+        /** 
+         * \ brief Factory function for elements
+         **/
+        template < typename T >
+        static boost::shared_ptr < T > create();
+
       protected:
 
         /** \brief Activate all handlers */
         void activate_handlers(bool = true);
 
         /** \brief Set the event handler object that will dispatch the events for this object */
-        void set_event_handler(basic_event_handler* e);
+        void set_event_handler(basic_event_handler& e);
 
         /** \brief Get the event handler object that will dispatch the events for this object */
-        basic_event_handler* get_event_handler() const;
+        basic_event_handler& get_event_handler() const;
 
       public:
 
@@ -107,6 +116,13 @@ namespace tipi {
         /** \brief Abstract destructor */
         virtual ~element() = 0;
     };
+
+    template < typename T >
+    inline boost::shared_ptr < T > element::create() {
+      boost::shared_ptr < ::tipi::layout::element > p(new T());
+
+      return boost::static_pointer_cast< T > (p);
+    }
 
     inline void element::set_enabled(bool b) {
       m_enabled = b;

@@ -9,7 +9,7 @@
 
 #include <set>
 
-#include "tipi/display.hpp"
+#include "tipi/tool_display.hpp"
 #include "tipi/detail/layout_elements.hpp"
 #include "tipi/utility/logger.hpp"
 #include "tipi/report.hpp"
@@ -79,7 +79,7 @@ namespace tipi {
         void send_configuration(tipi::configuration&);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(layout::tool_display::sptr);
+        void send_display_layout(boost::shared_ptr < layout::tool_display >);
  
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();

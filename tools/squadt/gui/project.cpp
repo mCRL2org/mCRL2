@@ -439,7 +439,7 @@ namespace squadt {
                                     wxString(i.second->get_name().c_str(), wxConvLocal),
                                     i.second, i.second->find_input_combination(i.first, n.get_object()->mime_type));
 
-          target_menu->Append(new_menu_item);
+          target_menu->Append(new_menu_item)->Enable(show_update_operations);
         }
       }
 

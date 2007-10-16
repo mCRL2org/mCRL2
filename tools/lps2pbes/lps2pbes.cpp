@@ -170,78 +170,66 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
+  // Set default values for configuration
   if (!c.option_exists(option_timed)) {
     c.add_option(option_timed, false).
         set_argument_value< 0, tipi::datatype::boolean >(false, false);
   }
 
-  layout::tool_display::sptr display(new layout::tool_display);
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  // Helper for end phase selection
+  mcrl2::utilities::squadt::radio_button_helper < t_phase > phase_selector(d);
+
+  // Helper for output format selection
+  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
+
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
   /* Create and add the top layout manager */
-  layout::vertical_box::aptr top(new layout::vertical_box);
+  m.append(d.create< label >().set_text("Phase after which to stop: ")).
+    append(d.create< horizontal_box >().
+        append(phase_selector.associate(PH_NONE, "none")).
+        append(phase_selector.associate(PH_PARSE, "parsing")).
+        append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
+        append(phase_selector.associate(PH_DATA_IMPL, "data implementation")).
+        append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
+    append(d.create< label >().set_text("Output format : ")).
+    append(d.create< horizontal_box >().
+        append(format_selector.associate(normal, "normal")).
+        append(format_selector.associate(readable, "readable")));
 
-  layout::manager* h = new layout::horizontal_box();
+  text_field& formula_field              = d.create< text_field >();
+  checkbox&   special_untimed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_timed));
+  button&     okay_button                = d.create< button >().set_label("OK");
 
-  top->add(new label("Phase after which to stop: "), margins(0,5,0,5));
+  m.append(d.create< horizontal_box >().
+        append(d.create< label >().set_text("Formula file name : ")).
+        append(formula_field)).
+    append(special_untimed_conversion.set_label("special untimed conversion")).
+    append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
 
-  mcrl2::utilities::squadt::radio_button_helper < t_phase > phase_selector(h, PH_NONE, "none");
-
-  phase_selector.associate(h, PH_PARSE, "parsing");
-  phase_selector.associate(h, PH_TYPE_CHECK, "type checking");
-  phase_selector.associate(h, PH_DATA_IMPL, "data implementation");
-  phase_selector.associate(h, PH_REG_FRM_TRANS, "formula translation");
-
-  if (c.option_exists(option_end_phase)) {
-    phase_selector.set_selection(static_cast < t_phase > (
-        c.get_option_argument< long int >(option_end_phase)));
-  }
-
-  /* Attach row */
-  top->add(h, margins(0,5,0,5));
-
-  top->add(new label("Output format : "), margins(0,5,0,5));
-
-  h = new layout::horizontal_box();
-
-  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(h, normal, "normal");
-
-  format_selector.associate(h, readable, "readable");
-
+  // Set default values if the configuration specifies them
   if (c.option_exists(option_selected_output_format)) {
     format_selector.set_selection(static_cast < pbes_output_format > (
         c.get_option_argument< size_t >(option_selected_output_format, 0)));
   }
-
-  /* Attach row */
-  top->add(h, margins(0,5,0,5));
-
-  h = new layout::horizontal_box();
-
-  h->add(new label("Formula file name : "));
-  text_field* formula_field = static_cast < text_field* > (h->add(new text_field("")));
-  top->add(h);
-
+  if (c.option_exists(option_end_phase)) {
+    phase_selector.set_selection(static_cast < t_phase > (
+        c.get_option_argument< long int >(option_end_phase)));
+  }
   if (c.input_exists(formula_file_for_input)) {
-    formula_field->set_text(c.get_input(formula_file_for_input).get_location());
+    formula_field.set_text(c.get_input(formula_file_for_input).get_location());
   }
 
-  checkbox* special_untimed_conversion = new checkbox("special untimed conversion",
-      c.get_option_argument< bool >(option_timed));
-
-  top->add(special_untimed_conversion, margins(0,5,0,5));
-
-  button* okay_button = new button("OK");
-
-  top->add(okay_button, layout::top);
-
-  display->set_manager(top);
-
-  m_communicator.send_display_layout(display);
+  send_display_layout(d.set_manager(m));
 
   /* Wait until the ok button was pressed */
-  okay_button->await_change();
-
-  c.add_input(formula_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), formula_field->get_text());
+  okay_button.await_change();
+  
+  c.add_input(formula_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), formula_field.get_text());
 
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
@@ -258,7 +246,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     }
   }
 
-  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(special_untimed_conversion->get_status());
+  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(special_untimed_conversion.get_status());
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
   c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (format_selector.get_selection()));

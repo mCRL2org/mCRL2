@@ -124,7 +124,7 @@ namespace tipi {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
     }
 
-    /**
+    /** \internal
      * \param[in] impl weak pointer to this object (for life check)
      * \param[in] m pointer to the message
      * \param[in] h the function that is called when a new layout for the display has been received
@@ -159,14 +159,12 @@ namespace tipi {
         tipi::layout::tool_display::sptr d(new layout::tool_display);
  
         // Make sure the global event handler (the default event handler does not have a global event) is empty
-        tipi::layout::element::global_event_handler.remove();
+        d->remove();
 
         try {
           visitors::restore(*d, m->to_string());
       
-          if (d->get_manager()) {
-            d->get_manager()->get_event_handler()->add(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
-          }
+          d->add(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
 
           h(d);
         }

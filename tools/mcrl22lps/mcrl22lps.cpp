@@ -172,102 +172,84 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(false);
   }
 
-  layout::manager::aptr top(layout::vertical_box::create());
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  // Linearisation method selection
-  layout::manager* current_box      = new horizontal_box();
+  // Helper for linearisation method selection
+  mcrl2::utilities::squadt::radio_button_helper < t_lin_method > method_selector(d);
 
-  mcrl2::utilities::squadt::radio_button_helper < t_lin_method >
-                                        method_selector(current_box, lmStack, "Stack");
+  // Helper for end phase selection
+  mcrl2::utilities::squadt::radio_button_helper < t_phase >      phase_selector(d); 
 
-  method_selector.associate(current_box, lmRegular, "Regular", true);
-  method_selector.associate(current_box, lmRegular2, "Regular2");
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
+  m.append(d.create< label >().set_text("Method: ")).
+    append(d.create< horizontal_box >().
+        append(method_selector.associate(lmStack, "Stack")).
+        append(method_selector.associate(lmRegular, "Regular", true)).
+        append(method_selector.associate(lmRegular2, "Regular2")));
+
+  checkbox& clusterintermediate = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_intermediate_cluster));
+  checkbox& clusterfinal        = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_final_cluster));
+  checkbox& newstate            = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_newstate));
+  checkbox& binary              = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_binary));
+  checkbox& statenames          = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_statenames));
+  checkbox& add_delta           = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_add_delta));
+  checkbox& rewrite             = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_rewrite));
+  checkbox& alpha               = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_alpha));
+  checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
+  checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
+  checkbox& freevars            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_freevars));
+
+  // two columns to select the linearisation options of the tool
+  m.append(d.create< label >().set_text(" ")).
+    append(d.create< horizontal_box >().
+        append(d.create< vertical_box >().set_default_alignment(layout::right).
+            append(clusterintermediate.set_label("Intermediate clustering")).
+            append(clusterfinal.set_label("Final clustering")).
+            append(newstate.set_label("Use enumerations for state variables")).
+            append(binary.set_label("Encode enumerations by booleans")).
+            append(statenames.set_label("Derive state names from specification")).
+            append(add_delta.set_label("Add delta summands"))).
+        append(d.create< vertical_box >().set_default_alignment(layout::left).
+            append(rewrite.set_label("Use rewriting")).
+            append(alpha.set_label("Apply alphabet axioms")).
+            append(sumelm.set_label("Apply sum elimination")).
+            append(deltaelm.set_label("Apply delta elimination")).
+            append(freevars.set_label("Generate free variables"))));
+
+  // Determine which phases the linearizer will go through. Default is all.
+  m.append(d.create< label >().set_text(" ")).
+    append(d.create< label >().set_text("Stop after: ")).
+    append(d.create< horizontal_box >().
+        append(phase_selector.associate(phParse, "Parsing")).
+        append(phase_selector.associate(phTypeCheck, "Type checking")).
+        append(phase_selector.associate(phDataImpl, "Data implementation")).
+        append(phase_selector.associate(phAlphaRed, "Alphabet reduction")).
+        append(phase_selector.associate(phNone, "Linearisation", true)));
+
+  // Add okay button
+  button& okay_button = d.create< button >().set_label("OK");
+
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
+
+  // Set default values for options if the configuration specifies them
+  if (c.option_exists(option_end_phase)) {
+    phase_selector.set_selection(static_cast < t_phase > (
+        c.get_option_argument< size_t >(option_end_phase, 0)));
+  }
   if (c.option_exists(option_linearisation_method)) {
     method_selector.set_selection(static_cast < t_lin_method > (
         c.get_option_argument< size_t >(option_linearisation_method, 0)));
   }
 
-  top->add(new label(" "));
-  top->add(current_box);
-
-  // two columns to select the linearisation options of the tool
-  layout::manager* columns = new layout::horizontal_box();
-
-  // left option column
-  current_box = new vertical_box();
-
-  checkbox* clusterintermediate   = new checkbox("Intermediate clustering", !c.get_option_argument< bool >(option_no_intermediate_cluster));
-  checkbox* clusterfinal          = new checkbox("Final clustering", c.get_option_argument< bool >(option_final_cluster));
-  checkbox* newstate              = new checkbox("Use enumerations for state variables", c.get_option_argument< bool >(option_newstate));
-  checkbox* binary                = new checkbox("Encode enumerations by booleans", c.get_option_argument< bool >(option_binary));
-  checkbox* statenames            = new checkbox("Derive state names from specification  ", c.get_option_argument< bool >(option_statenames));
-  checkbox* add_delta             = new checkbox("Add delta summands", c.get_option_argument< bool >(option_add_delta));
-
-  current_box->add(clusterintermediate);
-  current_box->add(clusterfinal);
-  current_box->add(newstate);
-  current_box->add(binary);
-  current_box->add(statenames);
-  current_box->add(add_delta);
-
-  columns->add(current_box);
-
-  // right option column
-  current_box = new vertical_box();
-
-  checkbox* rewrite  = new checkbox("Use rewriting", !c.get_option_argument< bool >(option_no_rewrite));
-  checkbox* alpha    = new checkbox("Apply alphabet axioms", !c.get_option_argument< bool >(option_no_alpha));
-  checkbox* sumelm   = new checkbox("Apply sum elimination", !c.get_option_argument< bool >(option_no_sumelm));
-  checkbox* deltaelm = new checkbox("Apply delta elimination", !c.get_option_argument< bool >(option_no_deltaelm));
-  checkbox* freevars = new checkbox("Generate free variables", !c.get_option_argument< bool >(option_no_freevars));
-
-  current_box->add(rewrite,layout::left);
-  current_box->add(alpha,layout::left);
-  current_box->add(sumelm,layout::left);
-  current_box->add(deltaelm,layout::left);
-  current_box->add(freevars,layout::left);
-
-  columns->add(current_box);
-
-  top->add(new label(" "));
-  top->add(columns);
-
-  // Determine which phases the linearizer will go through. Default is all.
-  current_box = new horizontal_box();
-
-  mcrl2::utilities::squadt::radio_button_helper < t_phase >
-                                        phase_selector(current_box, phParse, "Parsing");
-
-  phase_selector.associate(current_box, phTypeCheck, "Type checking");
-  phase_selector.associate(current_box, phDataImpl, "Data implementation");
-  phase_selector.associate(current_box, phAlphaRed, "Alphabet reduction");
-  phase_selector.associate(current_box, phNone, "Linearisation", true);
-
-  if (c.option_exists(option_end_phase)) {
-    phase_selector.set_selection(static_cast < t_phase > (
-        c.get_option_argument< size_t >(option_end_phase, 0)));
-  }
-
-  top->add(new label(" "));
-  top->add(new label("Stop after"),layout::left);
-  top->add(current_box);
-
-  // Add okay button
-  button* okay_button = new button("OK");
-
-  top->add(new label(" "));
-  top->add(okay_button, layout::right);
-
-  send_display_layout(top);
+  send_display_layout(d.set_manager(m));
 
   /* Wait for the OK button to be pressed */
-  okay_button->await_change();
+  okay_button.await_change();
 
-  /* set the squadt configuration to be sent back, such
-   * that mcrl22lps can be restarted later with exactly
-   * the same parameters
-   */
+  // Update configuration
   if (!c.output_exists(lps_file_for_output)) {
     c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
@@ -284,17 +266,17 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   using tipi::datatype::boolean;
 
-  c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal->get_status());
-  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, boolean >(!clusterintermediate->get_status());
-  c.get_option(option_no_alpha).set_argument_value< 0, boolean >(!alpha->get_status());
-  c.get_option(option_newstate).set_argument_value< 0, boolean >(newstate->get_status());
-  c.get_option(option_binary).set_argument_value< 0, boolean >(binary->get_status());
-  c.get_option(option_statenames).set_argument_value< 0, boolean >(statenames->get_status());
-  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite->get_status());
-  c.get_option(option_no_freevars).set_argument_value< 0, boolean >(!freevars->get_status());
-  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm->get_status());
-  c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm->get_status());
-  c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta->get_status());
+  c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal.get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, boolean >(!clusterintermediate.get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0, boolean >(!alpha.get_status());
+  c.get_option(option_newstate).set_argument_value< 0, boolean >(newstate.get_status());
+  c.get_option(option_binary).set_argument_value< 0, boolean >(binary.get_status());
+  c.get_option(option_statenames).set_argument_value< 0, boolean >(statenames.get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite.get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0, boolean >(!freevars.get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm.get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm.get_status());
+  c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta.get_status());
 
   send_clear_display();
 }
@@ -372,23 +354,26 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   // Extract configuration
   extract_task_options(c, task_options);
 
-  layout::manager::aptr top(layout::vertical_box::create());
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  top->add(new label("Linearisation in progress"),layout::left);
-  send_display_layout(top);
+  label& message = d.create< label >();
+ 
+  d.set_manager(d.create< vertical_box >().
+                        append(message.set_text("Linearisation in progress"), layout::left));
+
+  send_display_layout(d);
 
   // Perform linearisation
-  top = layout::vertical_box::create();
-
   ATermAppl linearisation_result = linearise_file(task_options);
- 
+
   if (linearisation_result == 0) {
-    top->add(new label("Linearisation failed"));
+    message.set_text("Linearisation in failed");
 
     result = false;
   }
   else if (task_options.opt_check_only) {
-    top->add(new label(str(format("%s contains a well-formed mCRL2 specification.") % task_options.infilename)));
+    message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % task_options.infilename));
   }
   else {
     //store the result
@@ -406,11 +391,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     }
 
     if (result) {
-      top->add(new label("Linearisation is finished"));
+      message.set_text("Linearisation finished");
     }
   }
 
-  send_display_layout(top);
+  send_display_layout(d);
 
   return (result);
 }

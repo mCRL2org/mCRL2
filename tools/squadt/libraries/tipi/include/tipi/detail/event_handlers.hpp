@@ -61,9 +61,6 @@ namespace tipi {
         /** \brief Wakes up all waiters that match an identifier or all waiters if the identifier is 0 */
         void wake(const void* = 0);
    
-        /** \brief Execute handlers for a specific object */
-        void execute_handlers(const void*, bool);
-   
       public:
 
         /** \brief Set a global handler */
@@ -84,8 +81,14 @@ namespace tipi {
         /** \brief Process an event for a specific object */
         void process(const void*, bool = true);
    
+        /** \brief Execute handlers for a specific object */
+        void execute_handlers(const void*, bool);
+   
         /** \brief Block until the next event has been processed */
         void await_change(const void*);
+
+        /** \brief Remove all stored non-global handlers */
+        void clear();
    
         /** \brief Destructor */
         ~basic_event_handler();
@@ -178,7 +181,7 @@ namespace tipi {
       }
    
       std::pair < handler_map::const_iterator, handler_map::const_iterator > range(handlers.equal_range(id));
-   
+
       BOOST_FOREACH(handler_map::value_type p, range) {
         p.second(id);
       }
@@ -233,6 +236,10 @@ namespace tipi {
       anchor->wait(l);
     }
    
+    inline void basic_event_handler::clear() {
+      handlers.clear();
+    }
+
     inline basic_event_handler::~basic_event_handler() {
       boost::mutex::scoped_lock l(lock);
 

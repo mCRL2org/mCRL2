@@ -18,7 +18,7 @@
 #include "tipi/basic_datatype.hpp"
 #include "tipi/detail/layout_elements.hpp"
 #include "tipi/detail/layout_manager.hpp"
-#include "tipi/display.hpp"
+#include "tipi/tool_display.hpp"
 #include "tipi/detail/event_handlers.hpp"
 #include "tipi/common.hpp"
 
@@ -490,12 +490,13 @@ namespace utility {
 
   /**
    * \param[in] c a tipi::layout::elements::radio_button object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::radio_button& c, tipi::display::element_for_id& element_by_id) {
-    using tipi::layout::elements::radio_button;
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::radio_button& c, tipi::display& d) {
+    using ::tipi::layout::elements::radio_button;
+    using ::tipi::display;
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
 
@@ -505,31 +506,32 @@ namespace utility {
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (c.m_connection != &c) {
-      if (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (c.m_connection))) {
+      try {
         radio_button* i = &c;
 
-        static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (c.m_connection)])->m_first = true;
+        d.find< radio_button >(reinterpret_cast < display::element_identifier > (c.m_connection))->m_first = true;
 
-        while (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (i->m_connection))) {
-          if (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)] == &c) {
-            i->m_connection = &c;
-            i               = i->m_connection;
-
-            while (i->m_connection != &c) {
-              i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)]);
-              i               = i->m_connection;
-            }
-
-            if (c.m_selected) {
-              /* Make sure all associated radio buttons are unselected */
-              c.set_selected();
-            }
-         
-            break;
-          }
-
-          i = static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)]);
+        while (d.find< radio_button >(reinterpret_cast < display::element_identifier > (c.m_connection)) != &c) {
+          i = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
         }
+
+        i->m_connection = &c;
+        i               = i->m_connection;
+
+        radio_button* j = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+
+        while (j != &c) {
+          i->m_connection = j;
+          i               = i->m_connection;
+          j               = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+        }
+
+        if (c.m_selected) {
+          /* Make sure all associated radio buttons are unselected */
+          c.set_selected();
+        }
+      }
+      catch (...) {
       }
     }
      
@@ -645,75 +647,23 @@ namespace utility {
   }
 
   /**
-   * Restores an element by reference
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::box&, tipi::display::element_for_id&);
-
-  /**
-   * \param[in] c an STL auto pointer to a tipi::layout::manager object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::manager >& c, tipi::display::element_for_id& element_by_id) {
-    std::string name(tree->Value());
-
-    if (name == "box-layout-manager") {
-      if (tree->GetAttribute("variant", false) == "vertical") {
-        c.reset(new tipi::layout::vertical_box());
-
-      }
-      else {
-        c.reset(new tipi::layout::horizontal_box());
-      }
-
-      visit(static_cast < tipi::layout::box& > (*c), element_by_id);
-    }
-    else {
-      throw std::runtime_error("Layout manager: '" + name + "' unknown");
-    }
-  }
-
-  /**
-   * \param[in] c a tipi::layout::horizontal_box object to restore
-   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::horizontal_box& c, tipi::display::element_for_id& element_by_id) {
-    visit(static_cast < tipi::layout::box& > (c), element_by_id);
-  }
-
-  /**
-   * \param[in] c a tipi::layout::vertical_box object to restore
-   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::vertical_box& c, tipi::display::element_for_id& element_by_id) {
-    visit(static_cast < tipi::layout::box& > (c), element_by_id);
-  }
-
-  /**
    * \param[in] c a pointer to the tipi::layout::manager object to restore
-   * \param[in,out] element_by_id map for resolving element identifiers to pointers to actual corresponding objects
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::element >& c, tipi::display::element_for_id& element_by_id);
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::element >&, tipi::display&);
 
   /**
    * \param[in] c a tipi::layout::box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::box& c, tipi::display::element_for_id& element_by_id) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::vertical_box& c, tipi::display& d) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
 
-    tipi::layout::properties current_properties = tipi::layout::manager::default_properties;
+    tipi::layout::properties current_properties;
 
     c.clear();
 
@@ -722,79 +672,144 @@ namespace utility {
         visitor< tipi::restore_visitor_impl >(e).visit(current_properties);
       }
       else {
-        tipi::layout::element_identifier id;
+        boost::shared_ptr < tipi::layout::element > p;
 
-        e->GetAttribute("id", &id, false);
-       
-        std::auto_ptr < tipi::layout::element > p;
-
-        visitor< tipi::restore_visitor_impl >(e).visit(p, element_by_id);
+        visitor< tipi::restore_visitor_impl >(e).visit(p, d);
 
         if (p.get() != 0) {
           tipi::layout::properties cn = current_properties;
 
-          element_by_id[id] = p.get();
-
           cn.set_growth(p->get_grow());
 
-          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.release(), cn, id));
+          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.get(), cn));
         }
       }
     }
   }
 
   /**
-   * \param[in] c an STL auto pointer to a tipi::layout::element object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in] c a tipi::layout::box object to restore
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::element >& c, tipi::display::element_for_id& element_by_id) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::horizontal_box& c, tipi::display& d) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+
+    tipi::layout::properties current_properties;
+
+    c.clear();
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "properties") {
+        visitor< tipi::restore_visitor_impl >(e).visit(current_properties);
+      }
+      else {
+        boost::shared_ptr < tipi::layout::element > p;
+
+        visitor< tipi::restore_visitor_impl >(e).visit(p, d);
+
+        if (p.get() != 0) {
+          tipi::layout::properties cn(current_properties);
+
+          cn.set_growth(p->get_grow());
+
+          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.get(), cn));
+        }
+      }
+    }
+  }
+
+  /**
+   * \param[in] c a shared pointer to a tipi::layout::manager object to restore
+   * \param[in,out] d display with which the element is associated
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::manager >& c, tipi::display& d) {
+    std::string name(tree->Value());
+
+    if (name == "box-layout-manager") {
+      ::tipi::display::element_identifier id;
+
+      tree->GetAttributeOrDefault("id", &id, 0);
+
+      boost::shared_ptr < tipi::layout::element > m;
+
+      if (tree->GetAttribute("variant", false) == "vertical") {
+        d.create< tipi::layout::vertical_box >(m, id);
+
+        visit(static_cast < tipi::layout::vertical_box& > (*m), d);
+      }
+      else {
+        d.create< tipi::layout::horizontal_box >(m, id);
+
+        visit(static_cast < tipi::layout::horizontal_box& > (*m), d);
+      }
+
+      c = boost::static_pointer_cast < tipi::layout::manager > (m);
+    }
+    else {
+      throw std::runtime_error("Layout manager: '" + name + "' unknown");
+    }
+  }
+
+  /**
+   * \param[in] c a shared pointer to a tipi::layout::element object to restore
+   * \param[in,out] d display with which the element is associated
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::element >& c, ::tipi::display& d) {
     using namespace tipi::layout::elements;
+
+    ::tipi::display::element_identifier id;
+
+    tree->GetAttributeOrDefault("id", &id, 0);
 
     std::string name(tree->Value());
 
     if (name == "radio-button") {
-      tipi::layout::element_identifier id;
-
-      tree->GetAttribute("id", &id, false);
-      
-      c.reset(new radio_button());
-
-      element_by_id[id] = c.get();
+      d.create< radio_button >(c, id);
 
       // Read concrete element data
-      do_visit(*c, element_by_id);
+      do_visit(*c, d);
     }
     else {
       if (name == "label") {
-        c.reset(new label());
+        d.create< label >(c, id);
       }
       else if (name == "button") {
-        c.reset(new button());
+        d.create< button >(c, id);
       }
       else if (name == "checkbox") {
-        c.reset(new checkbox());
+        d.create< checkbox >(c, id);
       }
       else if (name == "progress-bar") {
-        c.reset(new progress_bar());
+        d.create< progress_bar >(c, id);
       }
       else if (name == "text-field") {
-        c.reset(new text_field());
+        d.create< text_field >(c, id);
       }
 
       if (c.get()) {
-        // Read concrete element data
         do_visit(*c);
       }
-      else {
-        // Assume the element is a layout manager
-        std::auto_ptr< tipi::layout::manager > m;
-         
-        visit(m, element_by_id);
-     
-        if (m.get()) {
-          c.reset(m.release()); 
+      else  {
+        if (name == "box-layout-manager") {
+          if (tree->GetAttribute("variant", false) == "vertical") {
+            d.create< tipi::layout::vertical_box >(c, id);
+       
+            visit(static_cast < tipi::layout::vertical_box& > (*c), d);
+          }
+          else {
+            d.create< tipi::layout::horizontal_box >(c, id);
+       
+            visit(static_cast < tipi::layout::horizontal_box& > (*c), d);
+          }
+        }
+        else {
+          throw std::runtime_error("Layout manager: '" + name + "' unknown");
         }
       }
     }
@@ -815,7 +830,7 @@ namespace utility {
      
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
         if (e->Value() == "layout-manager" && !e->NoChildren()) {
-          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
+          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, static_cast < tipi::display& > (c));
         }
       }
     }
@@ -833,9 +848,11 @@ namespace utility {
     if (c.m_manager.get() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
-          tipi::layout::element const* t = c.find(boost::lexical_cast < tipi::layout::element_identifier > (e->GetAttribute("id")));
+          ::tipi::display::element_identifier id;
 
-          if (t != 0) {
+          e->GetAttribute("id", &id, false);
+
+          if (tipi::layout::element const* t = c.find< tipi::layout::element >(id)) {
             visitor< tipi::restore_visitor_impl >(e).do_visit(*t);
 
             elements.push_back(t);
@@ -869,10 +886,10 @@ namespace utility {
     register_visit_method< tipi::layout::elements::label >();
     register_visit_method< tipi::layout::elements::progress_bar >();
     register_visit_method< tipi::layout::elements::radio_button >();
-    register_visit_method< tipi::layout::elements::radio_button, tipi::display::element_for_id >();
+    register_visit_method< tipi::layout::elements::radio_button, ::tipi::display >();
     register_visit_method< tipi::layout::elements::text_field >();
-    register_visit_method< tipi::layout::horizontal_box, tipi::display::element_for_id >();
-    register_visit_method< tipi::layout::vertical_box, tipi::display::element_for_id >();
+    register_visit_method< tipi::layout::horizontal_box, ::tipi::display >();
+    register_visit_method< tipi::layout::vertical_box, ::tipi::display >();
     register_visit_method< tipi::layout::properties >();
 
     return true;

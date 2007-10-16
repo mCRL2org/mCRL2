@@ -208,53 +208,47 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  layout::tool_display::sptr display(new layout::tool_display);
+  /* Create display */
+  tipi::layout::tool_display d;
 
-  /* Create and add the top layout manager */
-  layout::vertical_box::aptr top(new layout::vertical_box);
+  // Helper for format selection
+  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
 
-  /* First column */
-  layout::manager* h = new layout::horizontal_box();
+  // Helper for strategy selection
+  mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
 
-  h->add(new label("Output format : "));
-  
-  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format >
-        format_selector(h, binary, "binary");
+  layout::vertical_box& m = d.create< vertical_box >();
 
-  format_selector.associate(h, internal, "internal");
-  format_selector.associate(h, cwi, "cwi");
+  m.append(d.create< label >().set_text("Output format : ")).
+    append(d.create< horizontal_box >().
+                append(format_selector.associate(binary, "binary")).
+                append(format_selector.associate(internal, "internal")).
+                append(format_selector.associate(cwi, "cwi")),
+          margins(0,5,0,5)).
+    append(d.create< label >().set_text("Transformation stragey : ")).
+    append(strategy_selector.associate(lazy, "lazy: only boolean equations reachable from the initial state")).
+    append(strategy_selector.associate(finite, "finite: all possible boolean equations"));
 
+  button& okay_button = d.create< button >().set_label("OK");
+
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
+
+  /// Copy values from options specified in the configuration
+  if (c.option_exists(option_transformation_strategy)) {
+    strategy_selector.set_selection(static_cast < transformation_strategy > (
+        c.get_option_argument< size_t >(option_transformation_strategy, 0)));
+  }
   if (c.option_exists(option_selected_output_format)) {
     format_selector.set_selection(static_cast < pbes_output_format > (
         c.get_option_argument< size_t >(option_selected_output_format, 0)));
   }
   
-  /* Attach row */
-  top->add(h, margins(0,5,0,5));
-
-  top->add(new label("Transformation strategy :"));
-
-  mcrl2::utilities::squadt::radio_button_helper < transformation_strategy >
-        transformation_selector(top, lazy, "lazy: only boolean equations reachable from the initial state");
-
-  transformation_selector.associate(top, finite, "all possible boolean equations");
-
-  if (c.option_exists(option_transformation_strategy)) {
-    transformation_selector.set_selection(static_cast < transformation_strategy > (
-        c.get_option_argument< size_t >(option_transformation_strategy, 0)));
-  }
-  
-  button* okay_button = new button("OK");
-
-  top->add(okay_button, layout::top);
-
-  display->set_manager(top);
-
-  m_communicator.send_display_layout(display);
+  send_display_layout(d.set_manager(m));
 
   /* Wait until the ok button was pressed */
-  okay_button->await_change();
-
+  okay_button.await_change();
+  
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
     tipi::object& output_file = c.get_output(pbes_file_for_output);
@@ -266,7 +260,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
-                                static_cast < transformation_strategy > (transformation_selector.get_selection()));
+                                static_cast < transformation_strategy > (strategy_selector.get_selection()));
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
 

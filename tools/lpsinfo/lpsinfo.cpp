@@ -171,62 +171,46 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  bool result = true;
-
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
+ 
   lps::specification lps_specification;
 
-  try
-  {
-    lps_specification.load(c.get_input(lps_file_for_input).get_location());
-    using namespace tipi;
-    using namespace tipi::layout;
-    using namespace tipi::layout::elements;
-   
-    lps::linear_process lps = lps_specification.process();
-  
-    /* Create and add the top layout manager */
-    layout::manager::aptr top(layout::horizontal_box::create());
-  
-    /* First column */
-    layout::vertical_box* left_column = new layout::vertical_box();
-  
-    layout::vertical_box::alignment a = layout::left;
-  
-    left_column->add(new label("Input read from:"), a);
-    left_column->add(new label("Summands (#):"), a);
-    left_column->add(new label("Tau-summands (#):"), a);
-    left_column->add(new label("Free variables (#):"), a);
-    left_column->add(new label("Process parameters (#):"), a);
-    left_column->add(new label("Action labels (#):"), a);
-    left_column->add(new label("Used actions: (#):"), a);
-    left_column->add(new label("Sorts (#):"), a);
-  
-    /* Second column */
-    layout::vertical_box* right_column = new layout::vertical_box();
- 
-    right_column->add(new label(c.get_input(lps_file_for_input).get_location()), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lps.summands().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (get_number_of_tau_summands(lps))), a);
-    right_column->add(new label(boost::lexical_cast < std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size()))), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lps.process_parameters().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lps_specification.action_labels().size())), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (get_number_of_used_actions(lps))), a);
-    right_column->add(new label(boost::lexical_cast < std::string > (lps_specification.data().sorts().size())), a);
-  
-    /* Attach columns*/
-    top->add(left_column, margins(0,5,0,5));
-    top->add(right_column, margins(0,5,0,20));
-  
-    send_display_layout(top);
-  }
-  catch (std::runtime_error e)
-  {
-    send_error("Failure reading input from file: `" + file_name + "'\n");
+  lps_specification.load(c.get_input(lps_file_for_input).get_location());
 
-    result = false;
-  }
+  lps::linear_process lps = lps_specification.process();
 
-  return (result);
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  layout::horizontal_box& m = d.create< horizontal_box >().set_default_margins(margins(0, 5, 0, 5));
+
+  /* First column */
+  m.append(d.create< vertical_box >().set_default_alignment(layout::left).
+                append(d.create< label >().set_text("Input read from:")).
+                append(d.create< label >().set_text("Summands (#):")).
+                append(d.create< label >().set_text("Tau-summands (#):")).
+                append(d.create< label >().set_text("Free variables (#):")).
+                append(d.create< label >().set_text("Process parameters (#):")).
+                append(d.create< label >().set_text("Action labels (#):")).
+                append(d.create< label >().set_text("Used actions: (#):")).
+                append(d.create< label >().set_text("Sorts (#):")));
+
+  /* Second column */
+  m.append(d.create< vertical_box >().set_default_alignment(layout::left).
+                append(d.create< label >().set_text(c.get_input(lps_file_for_input).get_location())).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.summands().size()))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_tau_summands(lps)))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.process_parameters().size()))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.action_labels().size()))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_used_actions(lps)))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
+
+  send_display_layout(d.set_manager(m));
+
+  return true;
 }
 #endif
 
