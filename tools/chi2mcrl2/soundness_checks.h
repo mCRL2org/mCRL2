@@ -114,6 +114,7 @@ template <typename Term> bool check_term_DataVarExprID(Term t);
 template <typename Term> bool check_term_Type(Term t);
 template <typename Term> bool check_term_SepStat(Term t);
 template <typename Term> bool check_term_OptGuard(Term t);
+template <typename Term> bool check_term_Function(Term t);
 template <typename Term> bool check_term_ModelDef(Term t);
 template <typename Term> bool check_term_Nil(Term t);
 template <typename Term> bool check_term_AltStat(Term t);
@@ -253,7 +254,8 @@ bool check_rule_Expr(Term t)
          || check_term_UnaryExpression(t)
          || check_term_BinaryExpression(t)
          || check_term_ListLiteral(t)
-         || check_term_BinaryListExpression(t);
+         || check_term_BinaryListExpression(t)
+         || check_term_Function(t);
 }
 
 template <typename Term>
@@ -559,6 +561,42 @@ bool check_term_OptGuard(Term t)
   // check the children
   if (a.size() != 0)
     return false;
+
+  return true;
+}
+
+// Function(String, TypeID, Expr)
+template <typename Term>
+bool check_term_Function(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsFunction(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
   return true;
 }

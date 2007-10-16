@@ -81,8 +81,9 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 %token <appl> SQLBRACKET SQRBRACKET 
 %token <appl> LSUBTRACT CONCAT IN
+%token <appl> HEAD TAIL RHEAD RTAIL LENGTH TAKE DROP SORT INSERT
 
-%left MINUS PLUS 
+%left MINUS PLUS LSUBTRACT CONCAT IN EQUAL NOTEQUAL 
 %left DIVIDE       /* order '+','-','*','/' */
 %right POWER SEP ALT GUARD_REP STAR BARS        /* exponentiation        */
 %start ChiProgram
@@ -104,6 +105,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %type <appl> ModelDefinition ModelBody 
 %type <appl> ContainerType
 %type <appl> ListExpression ListLiteral
+%type <appl> Functions
 
 %type <list> IdentifierTypeExpression IdentifierType Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions ChannelDeclaration ChannelDefinition
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
@@ -685,7 +687,7 @@ AssignmentStatement:
           { 
             if (!ContainerTypeChecking((ATermAppl) ATgetArgument(ATgetFirst(ids), 1), (ATermAppl) ATgetArgument(ATgetFirst(exprs), 1)))
 		    { 
-              gsErrorMsg("Incompatible Types Checking failed %T and %T\n", ids, exprs);
+              gsErrorMsg("Assignment failed: Incompatible Types Checking failed %T and %T\n", ids, exprs);
 		      exit(1);
             }
             ids = ATgetNext(ids);
@@ -714,7 +716,7 @@ OptGuard: /* empty */
 			  **/
 			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  gsErrorMsg("OptGaurd failed: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
 
@@ -1265,7 +1267,9 @@ BoolNatIntExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+              )
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1282,7 +1286,9 @@ BoolNatIntExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+              )
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1306,7 +1312,9 @@ ListExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(gsMakeListType(ATAgetArgument($1,1)) != ATAgetArgument($3,1))
+			if(  !((ContainerTypeChecking(gsMakeListType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
+              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+              )
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1317,13 +1325,34 @@ ListExpression:
 			$1, $3));
       		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
 		} 
-    | ListLiteral CONCAT ListLiteral
+    | Expression CONCAT Expression
 		{ 
 			/**
 			  * Type Checking
 			  *
 			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+              )
+				{
+				  gsErrorMsg("Concatination failed: Incompatible Types Checking failed:\n %T and %T\n", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
+					ATAgetArgument($1,1), 
+			$1, $3));
+      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+		} 
+    | Expression LSUBTRACT Expression
+		{ 
+			/**
+			  * Type Checking
+			  *
+			  **/	
+			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+              )
 				{
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
@@ -1334,58 +1363,101 @@ ListExpression:
 			$1, $3));
       		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
 		} 
-    | ListLiteral LSUBTRACT ListLiteral
-		{ 
-			/**
-			  * Type Checking
-			  *
-			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
-				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
-				  exit(1);
-				};
-
- 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
-					ATAgetArgument($1,1), 
-			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
-		} 
-    | ListLiteral EQUAL ListLiteral
-		{ 
-			/**
-			  * Type Checking
-			  *
-			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
-				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
-				  exit(1);
-				};
-
- 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
-					gsMakeType( gsString2ATermAppl("Bool" )), 
-			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
-		} 
+      // Equality and NOTequal handled by BoolNatIntExpression
+/*  | ListLiteral EQUAL ListLiteral
     | ListLiteral NOTEQUAL ListLiteral  
-		{ 
-			/**
-			  * Type Checking
-			  *
-			  **/	
-			if(ATAgetArgument($1,1) != ATAgetArgument($3,1))
+}*/
+    | Functions
+    ;
+
+Functions:
+      LENGTH LBRACKET  Expression RBRACKET
+      {
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
 
- 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
-					gsMakeType( gsString2ATermAppl("Bool" )), 
-			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
-		} 
-    ;
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+					gsMakeType( gsString2ATermAppl("Nat" )), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+    | HEAD LBRACKET  Expression RBRACKET
+      {
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+				  (ATermAppl) ATgetArgument(ATgetArgument($3,1),0), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+    | TAIL LBRACKET  Expression RBRACKET
+      {
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+			     (ATermAppl) ATgetArgument($3,1), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+    | RHEAD LBRACKET  Expression RBRACKET
+      {
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+				  (ATermAppl) ATgetArgument(ATgetArgument($3,1),0), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+    | RTAIL LBRACKET  Expression RBRACKET
+      {
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+			       (ATermAppl) ATgetArgument($3,1), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+/* List functions that are not supported */
+    | TAKE LBRACKET Expression RBRACKET
+      {
+        gsErrorMsg("%T is not supported", $1);
+        exit(1);
+      }
+    | DROP LBRACKET  Expression RBRACKET
+      {
+        gsErrorMsg("%T is not supported", $1);
+        exit(1);
+      }
+    | SORT LBRACKET  Expression RBRACKET
+      {
+        gsErrorMsg("%T is not supported", $1);
+        exit(1);
+      }
+    | INSERT LBRACKET  Expression RBRACKET
+      {
+        gsErrorMsg("%T is not supported", $1);
+        exit(1);
+      }
+    ;     
 
 ListLiteral:
     SQLBRACKET SQRBRACKET
@@ -1394,6 +1466,7 @@ ListLiteral:
       }
   | SQLBRACKET Expression_csp SQRBRACKET
       {
+      	  gsDebugMsg("Entering ListLiteral\n");
           ATerm type; 
 		  ATermList to_process = $2;
 		  while(!ATisEmpty(to_process))
@@ -1403,7 +1476,7 @@ ListLiteral:
              {
                type = elementType;
              }
-             gsDebugMsg("%T",ATgetFirst(to_process));
+             gsDebugMsg("%T\n",ATgetFirst(to_process));
              if (type != elementType )
              {
                gsErrorMsg("ListLiteral contains mixed types %T and %T\n"
@@ -1413,6 +1486,7 @@ ListLiteral:
 			 to_process = ATgetNext( to_process) ;
 		  }
           safe_assign($$, gsMakeListLiteral( ATreverse($2), gsMakeListType((ATermAppl) type)));
+      	  gsDebugMsg("ListLiteral parsed: \n  %T\n", $$);
       }
 ;
 
@@ -1470,11 +1544,12 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
+  if(arg1 == arg2)
+  {
+    return true;
+  }
+  
   gsDebugMsg("ContainerTypeChecking: %T, %T\n",arg1, arg2);
-cout << ATgetName(ATgetAFun(arg1)) << endl;
-cout << ATgetName(ATgetAFun(arg2)) << endl;
-
-
   if((strcmp(ATgetName(ATgetAFun(arg1)), ATgetName(ATgetAFun(arg2)))==0)  
      && (strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ))
     {
@@ -1487,14 +1562,17 @@ cout << ATgetName(ATgetAFun(arg2)) << endl;
       return ContainerTypeChecking((ATermAppl) ATgetArgument(arg1,0), ATermAppl (ATgetArgument(arg2,0))); 
     }
 
-  if( (strcmp(ATgetName(ATgetAFun(arg1)),ATgetName(ATgetAFun(arg2)))==0) && (strcmp(ATgetName(ATgetAFun(arg1)), "Type") == 0 ))
+  if(  (strcmp(ATgetName(ATgetAFun(arg1)),ATgetName(ATgetAFun(arg2)))==0) 
+    && (strcmp(ATgetName(ATgetAFun(arg1)), "Type") == 0 )
+    )
   {
-    if(arg1 != arg2)
+    if(arg1 == arg2)
     { 
-      return false;
-    } else {
       return true;
+    } else {
+      return false;
     }
   } 
+  return false;
 }    
 

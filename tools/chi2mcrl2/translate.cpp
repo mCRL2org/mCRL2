@@ -1247,8 +1247,53 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
         return result;
      }
+     if (StrcmpIsFun("++",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" ++ ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        return result;
+     }
   }
-  gsErrorMsg("Encounterd unknown expression: %T\n", input);
+
+  if ( StrcmpIsFun( "Function", input))
+  {
+     if (StrcmpIsFun("len",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("#");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        return result;
+     }
+     if (StrcmpIsFun("hd",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("head(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(")");
+        return result;
+     }
+     if (StrcmpIsFun("tl",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("tail(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(")");
+        return result;
+     }
+     if (StrcmpIsFun("hr",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("rhead(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(")");
+        return result;
+     }
+     if (StrcmpIsFun("tr",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append("rtail(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(")");
+        return result;
+     }
+  }
+  gsErrorMsg("%d: Encounterd unknown expression: %T\n",__LINE__, input);
   exit(1);
   return "";
 } 

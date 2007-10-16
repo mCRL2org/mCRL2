@@ -50,6 +50,7 @@ ATermAppl constructDataVarExprID();
 ATermAppl constructType();
 ATermAppl constructSepStat();
 ATermAppl constructOptGuard();
+ATermAppl constructFunction();
 ATermAppl constructModelDef();
 ATermAppl constructNil();
 ATermAppl constructAltStat();
@@ -252,6 +253,22 @@ inline
 ATermAppl constructOptGuard()
 {
   static ATermAppl t = initConstructOptGuard(t);
+  return t;
+}
+
+// Function
+inline
+ATermAppl initConstructFunction(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunFunction(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructFunction()
+{
+  static ATermAppl t = initConstructFunction(t);
   return t;
 }
 

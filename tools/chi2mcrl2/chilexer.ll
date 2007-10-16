@@ -161,6 +161,15 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "++"	{ process_string(); return CONCAT; }
 "--"    { process_string(); return LSUBTRACT; }
 
+"len"   { process_string(); return LENGTH; }
+"hd"    { process_string(); return HEAD; }
+"tl"    { process_string(); return TAIL; }
+"hr"    { process_string(); return RHEAD; }
+"tr"    { process_string(); return RTAIL; }
+"take"  { process_string(); return TAKE; }
+"drop"  { process_string(); return DROP; }
+"sort"  { process_string(); return SORT; }
+"insert" { process_string(); return INSERT; }
 
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }

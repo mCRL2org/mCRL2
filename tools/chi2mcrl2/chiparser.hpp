@@ -104,7 +104,16 @@
      LSUBTRACT = 321,
      CONCAT = 322,
      IN = 323,
-     DIVIDE = 324
+     HEAD = 324,
+     TAIL = 325,
+     RHEAD = 326,
+     RTAIL = 327,
+     LENGTH = 328,
+     TAKE = 329,
+     DROP = 330,
+     SORT = 331,
+     INSERT = 332,
+     DIVIDE = 333
    };
 #endif
 
@@ -177,7 +186,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 181 "chiparser.hpp"
+#line 190 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
