@@ -61,6 +61,7 @@ ATermAppl constructListLiteral();
 ATermAppl constructAssignmentStat();
 ATermAppl constructRecv();
 ATermAppl constructSetType();
+ATermAppl constructFunction2();
 ATermAppl constructProcDecl();
 ATermAppl constructRecvStat();
 ATermAppl constructDelta();
@@ -429,6 +430,22 @@ inline
 ATermAppl constructSetType()
 {
   static ATermAppl t = initConstructSetType(t);
+  return t;
+}
+
+// Function2
+inline
+ATermAppl initConstructFunction2(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunFunction2(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructFunction2()
+{
+  static ATermAppl t = initConstructFunction2(t);
   return t;
 }
 

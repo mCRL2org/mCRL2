@@ -383,6 +383,28 @@ bool gsIsFunction(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunFunction();
 }
 
+// Function2
+inline
+AFun initAFunFunction2(AFun& f)
+{
+  f = ATmakeAFun("Function2", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunFunction2()
+{
+  static AFun AFunFunction2 = initAFunFunction2(AFunFunction2);
+  return AFunFunction2;
+}
+
+inline
+bool gsIsFunction2(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunFunction2();
+}
+
 // GuardedStarStat
 inline
 AFun initAFunGuardedStarStat(AFun& f)
@@ -1093,6 +1115,12 @@ inline
 ATermAppl gsMakeFunction(ATermAppl String_0, ATermAppl TypeID_1, ATermAppl Expr_2)
 {
   return ATmakeAppl3(gsAFunFunction(), (ATerm) String_0, (ATerm) TypeID_1, (ATerm) Expr_2);
+}
+
+inline
+ATermAppl gsMakeFunction2(ATermAppl String_0, ATermAppl TypeID_1, ATermAppl Expr_2, ATermAppl Expr_3)
+{
+  return ATmakeAppl4(gsAFunFunction2(), (ATerm) String_0, (ATerm) TypeID_1, (ATerm) Expr_2, (ATerm) Expr_3);
 }
 
 inline

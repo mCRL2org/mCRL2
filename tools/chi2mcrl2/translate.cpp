@@ -50,6 +50,9 @@ bool CAsttransform::translator(ATermAppl ast)
     gsErrorMsg("No valid AST input\n");
     exit(1);
   }
+  
+  result.append(prefixmCRL2spec);
+
   /**
     * write initialisation
     *
@@ -1289,6 +1292,73 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
      {
         result.append("rtail(");
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(")");
+        return result;
+     }
+  }
+  if ( StrcmpIsFun( "Function2", input))
+  {
+     if (StrcmpIsFun("take",(ATermAppl) ATgetArgument(input, 0)))
+     {
+         
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (takeTypes.find(type) == takeTypes.end())
+        {       
+          takeTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          } 
+          prefixmCRL2spec.append("\nmap take_"+type+": "+type+"#Nat ->"+type+";\n");
+
+          prefixmCRL2spec.append("var xs_"+type+" :"+type+";\n");
+          prefixmCRL2spec.append("    n_"+type+" :Nat;\n");
+          prefixmCRL2spec.append("    e_"+type+" :"+sub_type+";\n");
+        
+          prefixmCRL2spec.append("eqn take_"+type+"(xs_"+type+", 0)= [];\n");
+          prefixmCRL2spec.append("    n_"+type+">0 -> take_"+type+"( e_"+type+"|> xs_"+type+", n_"+type+") = e_"+type+" |> take_"+type+"(xs_"+type+", Int2Nat(n_"+type+" - 1 ));\n");
+        }
+        result.append("take_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        return result;
+     }
+     if (StrcmpIsFun("drop",(ATermAppl) ATgetArgument(input, 0)))
+     {
+         
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (dropTypes.find(type) == dropTypes.end())
+        {       
+          dropTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          } 
+          prefixmCRL2spec.append("\nmap drop_"+type+": "+type+"#Nat ->"+type+";\n");
+
+          prefixmCRL2spec.append("var xs_"+type+" :"+type+";\n");
+          prefixmCRL2spec.append("    n_"+type+" :Nat;\n");
+          prefixmCRL2spec.append("    e_"+type+" :"+sub_type+";\n");
+        
+          prefixmCRL2spec.append("eqn drop_"+type+"(xs_"+type+", 0)= xs_"+type+";\n");
+          prefixmCRL2spec.append("    n_"+type+">0 -> drop_"+type+"( e_"+type+"|> xs_"+type+", n_"+type+") = drop_"+type+"(xs_"+type+", Int2Nat(n_"+type+" - 1 ));\n");
+        }
+        result.append("drop_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
         result.append(")");
         return result;
      }

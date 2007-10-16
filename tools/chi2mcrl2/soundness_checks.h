@@ -125,6 +125,7 @@ template <typename Term> bool check_term_ListLiteral(Term t);
 template <typename Term> bool check_term_AssignmentStat(Term t);
 template <typename Term> bool check_term_Recv(Term t);
 template <typename Term> bool check_term_SetType(Term t);
+template <typename Term> bool check_term_Function2(Term t);
 template <typename Term> bool check_term_ProcDecl(Term t);
 template <typename Term> bool check_term_RecvStat(Term t);
 template <typename Term> bool check_term_Delta(Term t);
@@ -255,7 +256,8 @@ bool check_rule_Expr(Term t)
          || check_term_BinaryExpression(t)
          || check_term_ListLiteral(t)
          || check_term_BinaryListExpression(t)
-         || check_term_Function(t);
+         || check_term_Function(t)
+         || check_term_Function2(t);
 }
 
 template <typename Term>
@@ -895,6 +897,47 @@ bool check_term_SetType(Term t)
   if (!check_term_argument(a(0), check_rule_TypeExpr<aterm>))
     {
       std::cerr << "check_rule_TypeExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+  return true;
+}
+
+// Function2(String, TypeID, Expr, Expr)
+template <typename Term>
+bool check_term_Function2(Term t)
+{
+  // check the type of the term
+  aterm term(aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  aterm_appl a(term);
+  if (!gsIsFunction2(a))
+    return false;
+
+  // check the children
+  if (a.size() != 4)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
+    {
+      std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

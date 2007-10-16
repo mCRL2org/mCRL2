@@ -42,6 +42,7 @@
                   | ListLiteral( <Expr>*, <TypeID> )
 				  | BinaryListExpression( <String>, <TypeID>, <Expr>, <Expr> )
                   | Function(<String>, <TypeID>, <Expr>)
+                  | Function2(<String>, <TypeID>, <Expr>, <Expr> )
 
 <Statement>		::= SkipStat(OptGuard,OptChannel,Skip)
 				  | AssignmentStat(OptGuard,OptChannel,<Expr>+,<Expr>+)

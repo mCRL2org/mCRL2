@@ -1437,15 +1437,47 @@ Functions:
       		gsDebugMsg("Functions parsed: \n  %T\n", $$);
       }
 /* List functions that are not supported */
-    | TAKE LBRACKET Expression RBRACKET
+    | TAKE LBRACKET Expression COMMA Expression RBRACKET
       {
-        gsErrorMsg("%T is not supported", $1);
-        exit(1);
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
+				  exit(1);
+				};
+
+			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
+				{
+				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
+				  gsErrorMsg("Type checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction2( $1,  
+			       (ATermAppl) ATgetArgument($3,1), 
+			       $3, 
+                   $5));
+      		gsDebugMsg("Functions parsed: \n%T\n", $$);
       }
-    | DROP LBRACKET  Expression RBRACKET
+    | DROP LBRACKET  Expression COMMA Expression RBRACKET
       {
-        gsErrorMsg("%T is not supported", $1);
-        exit(1);
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
+				  exit(1);
+				};
+
+			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
+				{
+				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
+				  gsErrorMsg("Type checking failed\n");
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction2( $1,  
+			       (ATermAppl) ATgetArgument($3,1), 
+			       $3, 
+                   $5));
+      		gsDebugMsg("Functions parsed: \n%T\n", $$);
       }
     | SORT LBRACKET  Expression RBRACKET
       {

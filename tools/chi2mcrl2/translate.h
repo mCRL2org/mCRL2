@@ -202,6 +202,11 @@ class CAsttransform
     std::string initialValueVariable(std::string Type);
 
     std::string processValue(ATermAppl input);
+
+    std::string prefixmCRL2spec;
+
+    std::set<std::string> takeTypes;
+    std::set<std::string> dropTypes;
 } 
 ;
 
