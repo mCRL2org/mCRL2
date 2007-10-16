@@ -187,6 +187,28 @@ namespace mcrl2 {
         }
         return Result;
       }
+
+      int gsCountAFun(AFun fun, ATerm term)
+      {
+        int result = 0;
+        if (ATgetType(term) == AT_APPL) {
+          AFun head = ATgetAFun((ATermAppl) term);
+          if (fun == head) {
+            result += 1;
+          }
+          int nr_args = ATgetArity(head);
+          for (int i = 0; i < nr_args; i++) {
+            result += gsCountAFun(fun, ATgetArgument((ATermAppl) term, i));
+          }
+        } else if (ATgetType(term) == AT_LIST) {
+          while (!ATisEmpty((ATermList) term))
+          {
+            result += gsCountAFun(fun, ATgetFirst((ATermList) term));
+            term = (ATerm) ATgetNext((ATermList) term);
+          }
+        }
+        return result;
+      }
 #ifdef __cplusplus
     }
   }

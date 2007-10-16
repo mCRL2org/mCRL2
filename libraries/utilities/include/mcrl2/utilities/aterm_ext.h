@@ -227,16 +227,19 @@ ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs);
 //Occurrences of ATerm's
 //----------------------
 
-bool gsOccurs(ATerm Elt, ATerm Term);
-//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: Elt occurs in Term
-//Note that this is a faster implementation than gsCount(Elt, Term) > 0 because
+bool gsOccurs(ATerm elt, ATerm term);
+//Pre: term is an ATerm containing ATermAppl's and ATermList's only
+//Ret: elt occurs in term
+//Note that this is a faster implementation than gsCount(elt, term) > 0 because
 //it is used at a crucial point in the rewriter
 
-int gsCount(ATerm Elt, ATerm Term);
-//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: the number of times Elt occurs in Term
+int gsCount(ATerm elt, ATerm term);
+//Pre: term is an ATerm containing ATermAppl's and ATermList's only
+//Ret: the number of times elt occurs in term
 
+int gsCountAFun(AFun fun, ATerm term);
+//Pre: term is an ATerm containing ATermAppl's and ATermList's only
+//Ret: the number of fun occurs in term (as an AFun)
 #ifdef __cplusplus
     }
   }

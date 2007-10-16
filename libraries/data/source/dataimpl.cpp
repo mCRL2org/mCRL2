@@ -146,9 +146,11 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 ATermAppl implement_data_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
-  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec);
+  int occ =
+    gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
+    gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);
   if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
   }
   //implement system sort and data expressions occurring in spec
