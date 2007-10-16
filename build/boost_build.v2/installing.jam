@@ -67,7 +67,7 @@ rule install-plugins ( name : targets * : requirements * : condition ? ) {
 
 if [ modules.peek : OS ] = MACOSX {
   if $(install_requested) && $(WX_CPPFLAGS) {
-    import $(TOP)/build/macosx/mac-bundle ;
+    import build/macosx/mac-bundle ;
  
     local mac_application_bundles = [ MATCH $(TOP)/tools/(.*/.*).plist : [ glob $(TOP)/tools/*/*.plist ] ] ;
  
