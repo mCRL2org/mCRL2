@@ -198,14 +198,6 @@ struct state_formula_normalize_builder: public state_formula_builder
   }
 };
 
-/// The function normalize brings a state formula into positive normal form,
-/// i.e. a formula without any occurrences of ! or =>.
-inline
-state_formula normalize(state_formula f)
-{
-  return state_formula_normalize_builder().visit(f);
-}
-
 /// \internal
 /// The function normalize_old brings a state formula into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
@@ -297,6 +289,14 @@ state_formula normalize_old(state_formula f)
   }
   throw std::runtime_error(std::string("normalize_old error: unknown argument ") + f.to_string());
   return state_formula();
+}
+
+/// The function normalize brings a state formula into positive normal form,
+/// i.e. a formula without any occurrences of ! or =>.
+inline
+state_formula normalize(state_formula f)
+{
+  return normalize_old(f);
 }
 
 } // namespace lps

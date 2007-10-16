@@ -53,6 +53,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   pbes_expression visit_data_expression(const pbes_expression& /* f */, const data_expression& d)
   {
     using namespace lps::pbes_expr;
+    inside_not = false;
     return inside_not ? data_expr::not_(d)
                       : d;
   }
@@ -60,6 +61,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   pbes_expression visit_true(const pbes_expression& /* f */)
   {
     using namespace lps::pbes_expr;
+    inside_not = false;
     return inside_not ? data_expr::false_()
                       : data_expr::true_();
   }
@@ -67,6 +69,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   pbes_expression visit_false(const pbes_expression& /* f */)
   {
     using namespace lps::pbes_expr;
+    inside_not = false;
     return inside_not ? data_expr::true_()
                       : data_expr::false_();
   }
@@ -76,7 +79,6 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
     using namespace lps::pbes_expr;
     inside_not = !inside_not;
     pbes_expression result = visit(arg);
-    inside_not = !inside_not;
     return result;
   }
 
@@ -128,6 +130,7 @@ struct pbes_expression_normalize_builder: public pbes_expression_builder
   pbes_expression visit_propositional_variable(const pbes_expression& f, const propositional_variable_instantiation& /* v */)
   {
     using namespace lps::pbes_expr;
+    inside_not = false;
     if (inside_not)
     {
       throw std::runtime_error(std::string("normalize error: illegal expression ") + f.to_string());
@@ -158,11 +161,73 @@ struct is_normalized_visitor : public pbes_expression_visitor
   }
 };
 
+
 /// The function normalize brings a pbes expression into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \ret The result of the normalization.
 inline
-pbes_expression normalize(const pbes_expression& f)
+pbes_expression normalize(pbes_expression f)
+{
+  using namespace lps::pbes_expr;
+
+  if (is_not(f))
+  {
+    f = not_arg(f); // remove the not
+    if (is_data(f)) {
+      return data_expr::not_(f);
+    } else if (is_true(f)) {
+      return false_();
+    } else if (is_false(f)) {
+      return true_();
+    } else if (is_not(f)) {
+      return normalize(not_arg(f));
+    } else if (is_and(f)) {
+      return or_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+    } else if (is_or(f)) {
+      return and_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+    } else if (is_imp(f)) {
+      return and_(normalize(lhs(f)), normalize(not_(rhs(f))));
+    } else if (is_forall(f)) {
+      return exists(quant_vars(f), normalize(not_(quant_expr(f))));
+    } else if (is_exists(f)) {
+      return forall(quant_vars(f), normalize(not_(quant_expr(f))));
+    } else if (is_propositional_variable_instantiation(f)) {
+      throw std::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
+    }
+  }
+  else // !is_not(f)
+  {
+    if (is_data(f)) {
+      return f;
+    } else if (is_true(f)) {
+      return f;
+    } else if (is_false(f)) {
+      return f;
+    //} else if (is_not(f)) {
+    // ;
+    } else if (is_and(f)) {
+      return and_(normalize(lhs(f)), normalize(rhs(f)));
+    } else if (is_or(f)) {
+      return or_(normalize(lhs(f)), normalize(rhs(f)));
+    } else if (is_imp(f)) {
+      return or_(normalize(not_(lhs(f))), normalize(rhs(f)));
+    } else if (is_forall(f)) {
+      return forall(quant_vars(f), normalize(quant_expr(f)));
+    } else if (is_exists(f)) {
+      return exists(quant_vars(f), normalize(quant_expr(f)));
+    } else if (is_propositional_variable_instantiation(f)) {
+      return f;
+    }
+  }
+  throw std::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
+  return pbes_expression();
+}
+
+/// The function normalize brings a pbes expression into positive normal form,
+/// i.e. a formula without any occurrences of ! or =>.
+/// \ret The result of the normalization.
+inline
+pbes_expression normalize_old(const pbes_expression& f)
 {
   return pbes_expression_normalize_builder().visit(f);
 }

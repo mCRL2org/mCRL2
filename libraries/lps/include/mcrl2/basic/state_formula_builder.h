@@ -166,7 +166,7 @@ struct state_formula_builder
       const state_formula& left  = lhs(e);
       const state_formula& right = rhs(e);
       state_formula result = visit_imp(e, left, right);
-      return (result == state_formula()) ? or_(visit(left), visit(right)) : result;
+      return (result == state_formula()) ? imp(visit(left), visit(right)) : result;
     } else if (is_forall(e)) {
       const data_variable_list& qvars = quant_vars(e);
       const state_formula& qexpr = quant_form(e);

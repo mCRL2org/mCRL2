@@ -53,7 +53,7 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   f = rename_predicate_variables(f, xyz_generator);
 
   // remove occurrences of ! and =>
-  f = normalize(f);
+  // f = normalize(f);
 
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))
@@ -112,7 +112,7 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
     }
 
     result = pbes<>(data_spec, e, free_variables, init);
-  } 
+  }
   result.normalize();
   assert(result.is_normalized());
   return result;
