@@ -6419,6 +6419,9 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
   ATermList resultdeltasumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
 
+  gsVerboseMsg(
+          "- calculating the block operator on %d summands\n",
+                          ATgetLength(sourcesumlist));
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
     ATermList sumvars=linGetSumVars(summand);
@@ -7354,8 +7357,11 @@ static ATermAppl communicationcomposition(
 { /* We follow the implementation of Muck van Weerdenburg, described in 
      a note: Calculation of communication with open terms. */
 
+
   /* first we sort the multiactions in communications */
   int s = ATgetLength(linGetSums(ips));
+
+  gsVerboseMsg("- calculating the communication operator on %d summands",s);
 
   ATermList resultingDeltaSummands=ATempty;
   ATermList resultingCommunications=ATempty;
@@ -7494,8 +7500,7 @@ static ATermAppl communicationcomposition(
     }
   }
   
-  gsVerboseMsg("- calculating the communication operator on %d summands"
-               " resulting in %d summands\n", s, ATgetLength(resultsumlist));
+  gsVerboseMsg(" resulting in %d summands\n", ATgetLength(resultsumlist));
 
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
