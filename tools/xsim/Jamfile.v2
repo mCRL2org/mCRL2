@@ -10,8 +10,7 @@ obj xsim_base
          /libraries//nextstate
          /libraries//mcrl2_basic
          /site-config//wx_base
-       : <threading>multi
-         <wx>yes
+       : <wx>yes
        ;
 
 alias xsim : : <wx>no ;

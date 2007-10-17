@@ -163,7 +163,6 @@ class GraphApp : public wxApp
         frame->Init(wxString(lts_file_argument.c_str(), wxConvLocal));
       }
     }
-  
 };
 
 

@@ -5,10 +5,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file include/mcrl2/utilities/squadt_interface.h
-/// \brief Add your file description here.
 
 #ifndef MCRL2_SQUADT_INTERFACE_H_
 #define MCRL2_SQUADT_INTERFACE_H_
+
+// Undefine wxWidgets defined macro _
+//
+// it conflicts with boost::thread and is unneeded because the macro wxT does the same
+#if defined(_)
+# undef _
+#endif
 
 #include <boost/cstdint.hpp>
 
