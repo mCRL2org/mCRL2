@@ -47,11 +47,13 @@ namespace transport {
       /** \brief Pointer to implementation object (handle/body idiom) */
       boost::shared_ptr < transporter_impl > impl;
 
-    public:
-  
+    protected:
+
       /** \brief Default constructor with no initial connections */
       transporter(boost::shared_ptr < transporter_impl > const&);
  
+    public:
+  
       /** \brief Creates direct connection to another transporter object */
       void connect(transporter&);
 

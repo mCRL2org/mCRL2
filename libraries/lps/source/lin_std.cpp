@@ -106,11 +106,11 @@ static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec,int max_nesting_depth=3);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
-static ATermAppl getfreshvariable(char *s,ATermAppl sort);
+static ATermAppl getfreshvariable(char const* s,ATermAppl sort);
 static ATermList construct_renaming(ATermList pars1, ATermList pars2,
                 ATermList *pars3, ATermList *pars4);
 static void alphaconversion(ATermAppl procId, ATermList parameters);
-static ATermAppl fresh_name(char *name);
+static ATermAppl fresh_name(char const* name);
 static void declare_equation_variables(ATermList t1);
 static void end_equation_section(void);
 static void newequation(
@@ -326,7 +326,7 @@ static void release_string(localstring *c)
   strncpy(&c->s[0],"",STRINGLENGTH);
 } 
 
-static localstring *new_string(char *s)
+static localstring *new_string(char const*s)
 {
   localstring *c;
   
@@ -1555,7 +1555,7 @@ static ATermList collectPcrlProcesses(
 /************ correctopenterm ********************************************/ 
 
 
-static ATermAppl fresh_name(char *name)
+static ATermAppl fresh_name(char const* name)
 { /* it still has to be checked whether a name is already being used 
      in that case a new name has to be generated. The result
      is of type ATermAppl, because the string is generally used
@@ -2233,7 +2233,7 @@ static ATermAppl wraptime(
 
 typedef enum { alt, sum, /* cond,*/ seq, name, multiaction } state;
 
-static ATermAppl getfreshvariable(char *s, ATermAppl sort)
+static ATermAppl getfreshvariable(char const*s, ATermAppl sort)
 { ATermAppl variable=NULL;
   variable=gsMakeDataVarId(fresh_name(s),sort);
   insertvariable(variable,ATtrue);
@@ -3681,7 +3681,7 @@ static stacklisttype *new_stack(
   ATermAppl t1=NULL;
   ATermList t2=NULL;
   
-  char* s3;
+  char const* s3;
   stacklisttype *stack;
   int no_of_states=0,i=0;
   ATermList last=ATempty;

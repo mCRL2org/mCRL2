@@ -21,7 +21,7 @@
 namespace transport {
 
   /**
-   * @param d the data to be sent
+   * \param[in] d the data to be sent
    **/
   void transporter_impl::send(const std::string& d) {
     boost::recursive_mutex::scoped_lock l(lock);
@@ -32,7 +32,7 @@ namespace transport {
   }
 
   /**
-   * @param s stream that contains the data to be sent
+   * \param[in] s stream that contains the data to be sent
    **/
   void transporter_impl::send(std::istream& s) {
     boost::recursive_mutex::scoped_lock l(lock);
@@ -43,8 +43,8 @@ namespace transport {
   }
 
   /**
-   * @param[in,out] t the transporter to relay the connection to
-   * @param[in] c the transceiver that represents the local end point of the connection
+   * \param[in,out] t the transporter to relay the connection to
+   * \param[in] c the transceiver that represents the local end point of the connection
    **/
   void transporter_impl::relay_connection(transporter* t, basic_transceiver* c) {
     assert(t != 0);
@@ -70,8 +70,8 @@ namespace transport {
   }
 
   /**
-   * \param t shared pointer for the local object
-   * \param p the peer to connect to
+   * \param[in] t shared pointer for the local object
+   * \param[in] p the peer to connect to
    **/
   void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, boost::shared_ptr < transporter_impl >& p) {
     boost::recursive_mutex::scoped_lock pl(p->lock);
@@ -82,8 +82,8 @@ namespace transport {
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in] a an address
+   * \param[in] p a port
    **/
   void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const boost::asio::ip::address& a, short int const& p) {
     boost::recursive_mutex::scoped_lock l(lock);
@@ -94,8 +94,8 @@ namespace transport {
   }
 
   /**
-   * \param h a hostname
-   * \param p a port
+   * \param[in] h a hostname
+   * \param[in] p a port
    **/
   void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const std::string& h, short int const& p) {
     boost::recursive_mutex::scoped_lock l(lock);
@@ -106,7 +106,7 @@ namespace transport {
   }
 
   /**
-   * \param t the connection to associate with this transporter
+   * \param[in] t the connection to associate with this transporter
    **/
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, const basic_transceiver::ptr& t) {
     assert(c.get() == this);
@@ -127,7 +127,7 @@ namespace transport {
   }
 
   /**
-   * \param t the transceiver that identifies the connection to be severed
+   * \param[in] t the transceiver that identifies the connection to be severed
    *
    * \return a shared pointer to the transceiver that is removed
    **/
@@ -156,7 +156,7 @@ namespace transport {
   }
 
   /**
-   * \param t the transceiver that identifies the connection to be associated
+   * \param[in] t the transceiver that identifies the connection to be associated
    * \pre t->owner != 0 && t->owner != this
    **/
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, basic_transceiver* t) {
@@ -199,7 +199,7 @@ namespace transport {
   }
 
   /**
-   * \param n the number of the connection that is to be closed
+   * \param[in] n the number of the connection that is to be closed
    **/
   void transporter_impl::disconnect(size_t n) {
     assert(n < connections.size());
@@ -223,7 +223,7 @@ namespace transport {
   }
 
   /**
-   * \param m the directly connected peer
+   * \param[in] m the directly connected peer
    **/
   void transporter_impl::disconnect(transporter_impl const* m) {
     using namespace boost;
@@ -243,8 +243,8 @@ namespace transport {
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in] a an address
+   * \param[in] p a port
    **/
   void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, const boost::asio::ip::address& a, short int const& p) {
     basic_listener::ptr new_listener(new socket_listener(c, a, p));
@@ -255,8 +255,8 @@ namespace transport {
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in] a an address
+   * \param[in] p a port
    **/
   void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, std::string const& a, short int const& p) {
     basic_listener::ptr new_listener(new socket_listener(c, boost::asio::ip::address_v4::from_string(a), p));
@@ -267,7 +267,7 @@ namespace transport {
   }
 
   /**
-   * \param n the number of the listener that is to be removed
+   * \param[in] n the number of the listener that is to be removed
    **/
   void transporter_impl::remove_listener(size_t n) {
     assert(n < listeners.size());
@@ -301,7 +301,7 @@ namespace transport {
   }
 
   /**
-   * \param p the peer to connect to
+   * \param[in] p the peer to connect to
    **/
   void transporter::connect(transporter& p) {
     boost::shared_ptr < basic_transceiver > c(new direct_transceiver(impl));
@@ -310,8 +310,8 @@ namespace transport {
   }
 
   /**
-   * \param a a hostname or IP address
-   * \param p a port
+   * \param[in] a a hostname or IP address
+   * \param[in] p a port
    **/
   void transporter::connect(std::string const& a, short int const& p) {
     basic_transceiver::ptr c(socket_transceiver::create(impl));
@@ -342,8 +342,8 @@ namespace transport {
   }
 
   /**
-   * \param a a hostname or IP address
-   * \param p a port
+   * \param[in] a a hostname or IP address
+   * \param[in] p a port
    **/
   void transporter::add_listener(std::string const& a, short int const& p) {
     try {
@@ -360,29 +360,29 @@ namespace transport {
   }
 
   /**
-   * \param n the number of the listener that is to be removed
+   * \param[in] n the number of the listener that is to be removed
    **/
   void transporter::remove_listener(size_t n) {
     impl->remove_listener(n);
   }
 
   /**
-   * @param d the data to be sent
+   * \param[in] d the data to be sent
    **/
   void transporter::send(const std::string& d) {
     impl->send(d);
   }
 
   /**
-   * @param s stream that contains the data to be sent
+   * \param[in] s stream that contains the data to be sent
    **/
   void transporter::send(std::istream& s) {
     impl->send(s);
   }
 
   /**
-   * @param[in,out] t the transporter to relay the connection to
-   * @param[in] c the transceiver that represents the local end point of the connection
+   * \param[in,out] t the transporter to relay the connection to
+   * \param[in] c the transceiver that represents the local end point of the connection
    **/
   void transporter::relay_connection(transporter* t, basic_transceiver* c) {
     impl->relay_connection(t,c);

@@ -109,9 +109,6 @@ namespace tipi {
           /** \brief Whether the radio button is selected or not */
           bool                 m_selected;
 
-          /** \brief Whether the radio button is the first in the group */
-          bool                 m_first;
-     
         private:
      
           /** \brief Set state of the radio button */
@@ -130,6 +127,12 @@ namespace tipi {
 
           /** \brief Connects the button to another group */
           radio_button& connect(radio_button&);
+
+          /** \brief The next radio button in the group */
+          radio_button const& connected_to() const;
+
+          /** \brief The next radio button in the group */
+          radio_button& connected_to();
 
           /** \brief set radio button */
           radio_button& select();

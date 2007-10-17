@@ -198,7 +198,6 @@ namespace mcrl2 {
       }  
 
       inline void mcrl2_tool_interface::initialise() {
-        /* Initialise squadt utility pseudo-library */
         gsSetCustomMessageHandler(relay_message<messageType>);
   
         tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();

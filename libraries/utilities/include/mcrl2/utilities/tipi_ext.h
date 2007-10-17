@@ -103,6 +103,10 @@ namespace mcrl2 {
         if (first == 0) {
           first = &button;
         }
+        else {
+          first->connect(button);
+        }
+
         if (b) {
           button.select();
         }

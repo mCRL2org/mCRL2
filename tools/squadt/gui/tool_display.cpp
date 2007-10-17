@@ -102,63 +102,37 @@ namespace squadt {
           /** \brief The sizer to which the elements will be attached */
           wxWindow*                          current_window;
 
-        private:
-     
-          /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_vertical_box(mediator::wrapper_aptr, tipi::layout::properties const*);
-     
-          /** \brief Helper function for layout managers to attach widgets */
-          void attach_to_horizontal_box(mediator::wrapper_aptr, tipi::layout::properties const*);
-     
         public:
      
           /** \brief Constructor */
-          inline tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w);
+          tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w);
      
           /** \brief Constructor */
-          inline tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w, wrapper_aptr d);
+          tool_display_mediator(tipi::layout::basic_event_handler& e, wxWindow* w, wrapper_aptr d);
      
           /** \brief Instantiates a vertically aligned box layout manager */
-          inline mediator::aptr build_vertical_box();
+          mediator::aptr build_vertical_box();
         
-          /** \brief Instantiates a horizonally aligned box layout manager */
-          inline mediator::aptr build_horizontal_box();
+          /** \brief Instantiates a horizontally aligned box layout manager */
+          mediator::aptr build_horizontal_box();
         
           /** \brief Instantiates a label (static text) */
-          inline mediator::wrapper_aptr build(layout::elements::label const&);
-
-          /** \brief Updates a label, (G)UI part */
-          static void update(layout::elements::label const&, wxStaticText&);
+          mediator::wrapper_aptr build(layout::elements::label const&);
 
           /** \brief Instantiates a button */
-          inline mediator::wrapper_aptr build(layout::elements::button const&);
+          mediator::wrapper_aptr build(layout::elements::button const&);
         
-          /** \brief Updates a button, (G)UI part */
-          void update(layout::elements::button const&, wxButton&);
-
           /** \brief Instantiates a single radio button */
-          inline mediator::wrapper_aptr build(layout::elements::radio_button const&);
+          mediator::wrapper_aptr build(layout::elements::radio_button const&);
         
-          /** \brief Updates a radio button, (G)UI part */
-          static void update(layout::elements::radio_button const&, wxRadioButton&);
-
           /** \brief Instantiates a single checkbox */
-          inline mediator::wrapper_aptr build(layout::elements::checkbox const&);
+          mediator::wrapper_aptr build(layout::elements::checkbox const&);
      
-          /** \brief Updates a checkbox, (G)UI part */
-          static void update(layout::elements::checkbox const&, wxCheckBox&);
-
           /** \brief Instantiates a progress bar */
-          inline mediator::wrapper_aptr build(layout::elements::progress_bar const&);
+          mediator::wrapper_aptr build(layout::elements::progress_bar const&);
         
-          /** \brief Updates a checkbox, (G)UI part */
-          static void update(layout::elements::progress_bar const&, wxGauge&);
-
           /** \brief Instantiates a single line text input control */
-          inline mediator::wrapper_aptr build(layout::elements::text_field const&);
-     
-          /** \brief Updates a radio button, (G)UI part */
-          static void update(layout::elements::text_field const&, wxTextCtrl&);
+          mediator::wrapper_aptr build(layout::elements::text_field const&);
       };
 
       /**
@@ -262,115 +236,60 @@ namespace squadt {
       }
      
       /**
-       * \param p pointer to the data that represent the window to be attached
-       * \param c layout properties
-       **/
-      void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, tipi::layout::properties const* c) {
-        wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxLEFT|wxRIGHT;
-     
-        layout::properties const& cr = *(static_cast < layout::properties const* > (c));
-     
-        if (cr.m_grow) {
-          flags |= wxEXPAND;
-        }
-
-        switch (cr.m_alignment_horizontal) {
-          case layout::right:
-            flags |= wxALIGN_RIGHT;
-            break;
-          case layout::center:
-            flags |= wxALIGN_CENTER_HORIZONTAL;
-            break;
-          default:
-            flags |= wxALIGN_LEFT;
-            break;
-        }
-     
-        wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
-     
-        if (0 < cr.m_margin.top) {
-          sizer->AddSpacer(cr.m_margin.bottom);
-        }
-     
-        wxSizerItem* new_sizer_item;
-     
-        if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
-        }
-        else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.left + cr.m_margin.right) >> 1);
-        }
-     
-        if (0 < cr.m_margin.bottom) {
-          sizer->AddSpacer(cr.m_margin.bottom);
-        }
-     
-        if (cr.m_visible == tipi::layout::hidden) {
-          new_sizer_item->Show(false);
-        }
-      }
-     
-      /**
-       * \param p pointer to the data that represent the window to be attached
-       * \param c layout properties
-       **/
-      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, tipi::layout::properties const* c) {
-        wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxTOP|wxBOTTOM;
-
-        tipi::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
-
-        if (cr.m_grow) {
-          flags |= wxEXPAND;
-        }
-
-        switch (cr.m_alignment_vertical) {
-          case tipi::layout::top:
-            flags |= wxALIGN_TOP;
-            break;
-          case tipi::layout::bottom:
-            flags |= wxALIGN_BOTTOM;
-            break;
-          default: /* center */
-            flags |= wxALIGN_CENTER_VERTICAL;
-            break;
-        }
-
-        wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
-
-        if (0 < cr.m_margin.left) {
-          sizer->AddSpacer(cr.m_margin.left);
-        }
-
-        wxSizerItem* new_sizer_item;
-
-        if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
-        }
-        else {
-          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
-        }
-
-        if (0 < cr.m_margin.right) {
-          sizer->AddSpacer(cr.m_margin.right);
-        }
-
-        if (cr.m_visible == tipi::layout::hidden) {
-          new_sizer_item->Show(false);
-        }
-      }
-     
-      /**
        * \return a standard auto pointer to a mediator object with current the mediator with which to attach the children
        **/
       mediator::aptr tool_display_mediator::build_vertical_box() {
+        struct trampoline {
+          static void attach(wxSizer* sizer, mediator::wrapper_aptr d, tipi::layout::properties const* c) {
+            wrapper* sd     = static_cast < wrapper* > (d.get());
+            int      flags  = wxLEFT|wxRIGHT;
+           
+            layout::properties const& cr = *(static_cast < layout::properties const* > (c));
+           
+            if (cr.m_grow) {
+              flags |= wxEXPAND;
+            }
+           
+            switch (cr.m_alignment_horizontal) {
+              case layout::right:
+                flags |= wxALIGN_RIGHT;
+                break;
+              case layout::center:
+                flags |= wxALIGN_CENTER_HORIZONTAL;
+                break;
+              default:
+                flags |= wxALIGN_LEFT;
+                break;
+            }
+           
+            if (0 < cr.m_margin.top) {
+              sizer->AddSpacer(cr.m_margin.bottom);
+            }
+           
+            wxSizerItem* new_sizer_item;
+           
+            if (sd->wraps_window()) {
+              new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
+            }
+            else {
+              new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.left + cr.m_margin.right) >> 1);
+            }
+           
+            if (0 < cr.m_margin.bottom) {
+              sizer->AddSpacer(cr.m_margin.bottom);
+            }
+           
+            if (cr.m_visible == tipi::layout::hidden) {
+              new_sizer_item->Show(false);
+            }
+          }
+        };
+
         wxSizer* t = new wxBoxSizer(wxVERTICAL);
 
         tipi::layout::mediator::aptr m(new tool_display_mediator(m_event_handler, current_window, wrapper_aptr(new wrapper(t))));
      
-        m->set_attach(boost::bind(&tool_display_mediator::attach_to_vertical_box,
-                                                  static_cast < tool_display_mediator* > (m.get()), _1, _2));
+        m->set_attach(boost::bind(&trampoline::attach, t, _1, _2));
      
         return (m);
       }
@@ -379,12 +298,58 @@ namespace squadt {
        * \return a standard auto pointer to a mediator object with current the mediator with which to attach the children
        **/
       mediator::aptr tool_display_mediator::build_horizontal_box() {
+        struct trampoline {
+          static void attach(wxSizer* sizer, mediator::wrapper_aptr d, tipi::layout::properties const* c) {
+            int      flags  = wxTOP|wxBOTTOM;
+           
+            tipi::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
+           
+            if (cr.m_grow) {
+              flags |= wxEXPAND;
+            }
+           
+            switch (cr.m_alignment_vertical) {
+              case tipi::layout::top:
+                flags |= wxALIGN_TOP;
+                break;
+              case tipi::layout::bottom:
+                flags |= wxALIGN_BOTTOM;
+                break;
+              default: /* center */
+                flags |= wxALIGN_CENTER_VERTICAL;
+                break;
+            }
+           
+            if (0 < cr.m_margin.left) {
+              sizer->AddSpacer(cr.m_margin.left);
+            }
+           
+            wrapper* sd = static_cast < wrapper* > (d.get());
+
+            wxSizerItem* new_sizer_item;
+           
+            if (sd->wraps_window()) {
+              new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+            }
+            else {
+              new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+            }
+           
+            if (0 < cr.m_margin.right) {
+              sizer->AddSpacer(cr.m_margin.right);
+            }
+           
+            if (cr.m_visible == tipi::layout::hidden) {
+              new_sizer_item->Show(false);
+            }
+          }
+        };
+
         wxSizer* t = new wxBoxSizer(wxHORIZONTAL);
 
         tipi::layout::mediator::aptr m(new tool_display_mediator(m_event_handler, current_window, wrapper_aptr (new wrapper(t))));
      
-        m->set_attach(boost::bind(&tool_display_mediator::attach_to_horizontal_box,
-                                                  static_cast < tool_display_mediator* > (m.get()), _1, _2));
+        m->set_attach(boost::bind(&trampoline::attach, t, _1, _2));
      
         return (m);
       }
@@ -455,6 +420,8 @@ namespace squadt {
        * \param[in] e the element that is associated with the new control
        **/
       mediator::wrapper_aptr tool_display_mediator::build(layout::elements::radio_button const& e) {
+        using layout::elements::radio_button;
+
         struct trampoline {
           static void import(layout::elements::radio_button const& tipi_element, wxRadioButton& wx_element) {
             wx_element.SetLabel(wxString(tipi_element.get_label().c_str(), wxConvLocal));
@@ -462,9 +429,19 @@ namespace squadt {
           }
         };
 
-//        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal), wxDefaultPosition, 
-//                wxDefaultSize, e.is_first_in_group() ? wxRB_GROUP : 0);
-wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+        bool first_in_group = true;
+
+        // Establish whether this is the first radio button in the group that is instantiated
+        for (radio_button const* i = &e.connected_to(); i != &e; i = &i->connected_to()) {
+          if (m_event_handler.has_handler(i)) {
+            first_in_group = false;
+
+            break;
+          }
+        }
+
+        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY,
+                wxString(e.get_label().c_str(), wxConvLocal),wxDefaultPosition, wxDefaultSize, (first_in_group) ? wxRB_GROUP : 0);
 
         if (e.is_selected()) {
           t->SetValue(true);
@@ -473,8 +450,7 @@ wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(e.get_la
         // For processing updates to the display that originate at the tool side
         m_event_handler.add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*t)));
      
-        event_helper< layout::elements::radio_button, wxRadioButton >* l =
-                new event_helper< layout::elements::radio_button, wxRadioButton >(e, *t);
+        event_helper< radio_button, wxRadioButton >* l = new event_helper< radio_button, wxRadioButton >(e, *t);
 
         // For processing updates to the display that originate from local user interaction
         l->connect(wxEVT_COMMAND_RADIOBUTTON_SELECTED);

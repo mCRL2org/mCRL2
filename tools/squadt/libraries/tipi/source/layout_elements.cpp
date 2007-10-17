@@ -66,7 +66,7 @@ namespace tipi {
         return (m->build(*this));
       }
      
-      radio_button::radio_button() : m_connection(this), m_selected(true), m_first(true) {
+      radio_button::radio_button() : m_connection(this), m_selected(true) {
       }
 
       /**
@@ -75,30 +75,32 @@ namespace tipi {
       radio_button& radio_button::connect(radio_button& r) {
 
         if (&r != this) {
-          m_first    = false;
-          m_selected = false;
+          r.set_selected(false);
 
-          radio_button* n = this;
+          // disconnect from group if it contains more than one button
+          if (r.m_connection != r.m_connection) {
+            radio_button* n = r.m_connection;
 
-          // disconnect from this group
-          while (n->m_connection != this) {
-            n = n->m_connection;
+            while (n->m_connection != r.m_connection) {
+              n = n->m_connection;
+            }
+
+            n->m_connection = r.m_connection;
           }
 
-          n->m_connection = m_connection;
-
-          n = &r;
-
-          // find first in other group
-          while (!n->m_connection->m_first) {
-            n = n->m_connection;
-          }
-
-          m_connection = n->m_connection;
-          n->m_connection = this;
+          r.m_connection = m_connection;
+          m_connection   = &r;
         }
 
         return *this;
+      }
+
+      radio_button& radio_button::connected_to() {
+        return *m_connection;
+      }
+
+      radio_button const& radio_button::connected_to() const {
+        return *m_connection;
       }
 
       /**

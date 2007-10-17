@@ -502,38 +502,33 @@ namespace utility {
 
     c.m_label = tree->GetText(false);
 
-    tree->GetAttributeOrDefault("connected", &c.m_connection, &c);
-    tree->GetAttributeOrDefault("selected", &c.m_selected, false);
+    display::element_identifier id = reinterpret_cast < display::element_identifier > (&c);
+    
+    tree->GetAttribute("connected", &id, false);
 
-    if (c.m_connection != &c) {
-      try {
-        radio_button* i = &c;
+    c.m_connection = reinterpret_cast < radio_button* > (id);
 
-        d.find< radio_button >(reinterpret_cast < display::element_identifier > (c.m_connection))->m_first = true;
-
-        while (d.find< radio_button >(reinterpret_cast < display::element_identifier > (c.m_connection)) != &c) {
-          i = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
-        }
-
-        i->m_connection = &c;
-        i               = i->m_connection;
-
-        radio_button* j = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
-
-        while (j != &c) {
-          i->m_connection = j;
-          i               = i->m_connection;
-          j               = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
-        }
-
-        if (c.m_selected) {
-          /* Make sure all associated radio buttons are unselected */
-          c.set_selected();
-        }
+    try {
+      // Check whether the group is complete
+      for (radio_button* i = &c; i != &c; d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection))) {
       }
-      catch (...) {
+
+      radio_button* i = &c;
+
+      do {
+        i->m_connection = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+        i               = i->m_connection;
+      } while (i != &c);
+
+      if (c.m_selected) {
+        /* Make sure all associated radio buttons are unselected */
+        c.set_selected();
       }
     }
+    catch (...) {
+    }
+
+    tree->GetAttributeOrDefault("selected", &c.m_selected, false);
      
     c.m_event_handler->process(&c, false);
   }
