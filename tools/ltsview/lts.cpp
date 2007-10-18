@@ -436,7 +436,6 @@ void LTS::clearRanksAndClusters() {
     }
   }
   
-  vector< vector< State* > > temp1;
   vector< vector< Cluster* > > temp2;
   clustersInRank.swap(temp2);
 }
@@ -496,6 +495,11 @@ void LTS::addComradesToCluster(Cluster* c, State* s) {
   if (s->getCluster() == NULL) {
     c->addState(s);
     s->setCluster(c);
+    for (int t = 0; t < s->getNumInTransitions(); ++t) {
+      if (s->getInTransition(t)->getBeginState()->getRank() == s->getRank()) {
+        addComradesToCluster(c,s->getInTransition(t)->getBeginState());
+      }
+    }
     for (int t = 0; t < s->getNumOutTransitions(); ++t) {
       if (s->getOutTransition(t)->getEndState()->getRank() == s->getRank()) {
         addComradesToCluster(c,s->getOutTransition(t)->getEndState());
@@ -504,64 +508,78 @@ void LTS::addComradesToCluster(Cluster* c, State* s) {
   }
 }
 
-void LTS::mergeSuperiorClusters() {
-  State *s;
-  set< Cluster* > mergeSet;
-  set< Cluster* >::iterator clusit1;
+void LTS::mergeSuperiorClusters(Utils::RankStyle rs) {
+  State *s,*sup;
+  Cluster *c,*mc;
+  set< Cluster* > mergeSet,descSet;
+  set< Cluster* >::iterator c_it1;
   vector< Cluster* > *prevRank;
-  vector< Cluster* >::iterator clusit;
+  vector< Cluster* >::iterator c_it;
   int i,r,t;
   // iterate over the ranks in reverse order (bottom-up)
   for (r = clustersInRank.size()-1; r > 0; --r) {
     prevRank = &(clustersInRank[r-1]);
     // iterate over the clusters in this rank
-    for (clusit  = clustersInRank[r].begin();
-         clusit != clustersInRank[r].end(); ++clusit) {
+    for (c_it  = clustersInRank[r].begin();
+         c_it != clustersInRank[r].end(); ++c_it) {
+      c = *c_it;
       mergeSet.clear();
       // iterate over the states in this cluster
-      for (i = 0; i < (**clusit).getNumStates(); ++i) {
-        s = (**clusit).getState(i);
+      for (i = 0; i < c->getNumStates(); ++i) {
+        s = c->getState(i);
         // set deadlock information
-        (**clusit).setDeadlock((**clusit).hasDeadlock() || s->isDeadlock());
+        c->setDeadlock(c->hasDeadlock() || s->isDeadlock());
         // iterate over the superiors of s
+        if (rs == CYCLIC) {
+          for (t = 0; t < s->getNumOutTransitions(); ++t) {
+            sup = s->getOutTransition(t)->getEndState();
+            if (s->getRank()-1 == sup->getRank()) {
+              // add the superior's cluster to the merge set
+              mergeSet.insert(sup->getCluster());
+            }
+          }
+        }
         for (t = 0; t < s->getNumInTransitions(); ++t) {
-          if (s->getRank()-1 ==
-              s->getInTransition(t)->getBeginState()->getRank()) {
+          sup = s->getInTransition(t)->getBeginState();
+          if (s->getRank()-1 == sup->getRank()) {
             // add the superior's cluster to the merge set
-            mergeSet.insert(s->getInTransition(t)->getBeginState()->getCluster());
+            mergeSet.insert(sup->getCluster());
           }
         }
       }
       
-      Cluster* c;
       if (mergeSet.size() > 1) {
-        c = new Cluster(r-1);
-        // Give c a preliminary positionInRank
-        c->setPositionInRank(prevRank->size());
+        mc = new Cluster(r-1);
+        // Give mc a preliminary positionInRank
+        mc->setPositionInRank(prevRank->size());
+        descSet.clear();
         // iterate over the clusters in the mergeSet
-        for (clusit1  = mergeSet.begin();
-             clusit1 != mergeSet.end(); ++clusit1) {
-          // add the cluster's states to c
-          for (i = 0; i < (**clusit1).getNumStates(); ++i) {
-            s = (**clusit1).getState(i);
-            c->addState(s);
-            s->setCluster(c);
+        for (c_it1 = mergeSet.begin(); c_it1 != mergeSet.end(); ++c_it1) {
+          // add the cluster's states to mc
+          for (i = 0; i < (**c_it1).getNumStates(); ++i) {
+            s = (**c_it1).getState(i);
+            mc->addState(s);
+            s->setCluster(mc);
           }
-          // update hierarchy info
-          for (i = 0; i < (**clusit1).getNumDescendants(); ++i) {
-            c->addDescendant((**clusit1).getDescendant(i));
-            (**clusit1).getDescendant(i)->setAncestor(c);
+          for (i = 0; i < (**c_it1).getNumDescendants(); ++i) {
+            descSet.insert((**c_it1).getDescendant(i));
           }
           // delete the cluster
-          prevRank->erase(std::find(prevRank->begin(),prevRank->end(),*clusit1));
-          delete *clusit1;
+          prevRank->erase(std::find(prevRank->begin(),prevRank->end(),*c_it1));
+          delete *c_it1;
         }
-        prevRank->push_back(c);
+        // update hierarchy info
+        descSet.insert(c);
+        for (c_it1 = descSet.begin(); c_it1 != descSet.end(); ++c_it1) {
+          mc->addDescendant(*c_it1);
+          (**c_it1).setAncestor(mc);
+        }
+        prevRank->push_back(mc);
       } else {
-        c = *(mergeSet.begin());
-      }
-      c->addDescendant(*clusit);
-      (**clusit).setAncestor(c);
+        mc = *(mergeSet.begin());
+        mc->addDescendant(c);
+        c->setAncestor(mc);
+      } 
     }
 
     // This rank is stable, add rank location information to clusters.

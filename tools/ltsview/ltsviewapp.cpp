@@ -196,7 +196,7 @@ void LTSViewApp::openFile(string fileName) {
   lts->applyRanking(rankStyle);
   
   mainFrame->updateProgressDialog(33,"Merging superiors");
-  lts->mergeSuperiorClusters();
+  lts->mergeSuperiorClusters(rankStyle);
 
   mainFrame->updateProgressDialog(50,"Setting mark info");
   lts->computeClusterLabelInfo();
@@ -245,7 +245,7 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       lts->applyRanking(rankStyle);
       
       mainFrame->updateProgressDialog(20,"Merging superiors");
-      lts->mergeSuperiorClusters();
+      lts->mergeSuperiorClusters(rankStyle);
 
       mainFrame->updateProgressDialog(40,"Setting mark info");
       lts->computeClusterLabelInfo();

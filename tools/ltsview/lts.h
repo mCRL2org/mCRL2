@@ -60,7 +60,7 @@ class LTS {
     void        deselect();
     void	markAction(std::string label);
     void	markClusters();
-    void	mergeSuperiorClusters();
+    void	mergeSuperiorClusters(Utils::RankStyle rs);
     void	positionClusters();
     void	positionStates();
     void	clearStatePositions();
