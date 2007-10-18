@@ -173,7 +173,7 @@ void Simulation::followTrans() {
       posTrans.push_back(nextState->getLoop(i));
     }
   
-    chosenTrans = -1;
+    chosenTrans = 0;
 
     //Fire signal
     signal();
