@@ -7,7 +7,7 @@ proc blaak()=
 :: skip ;*( a := false )
 ]|
 
-proc test(var b,a:bool, c: nat)=
+proc test(var b,a:bool)=
 |[ 
 a *> ( a -> skip ; delta | skip ; skip ; a := false ) ; skip 
 ]|

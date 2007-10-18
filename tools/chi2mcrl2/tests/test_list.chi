@@ -12,9 +12,9 @@ proc dummy()=
  ; b in [] -> skip
  ; b := 10
  ; a := a ++ a ++ [b]
- ; ([] == a) -> skip
- ; ([b] == a) -> skip
- ; [1,2] == [1,23] -> skip
+ ; ([] = a) -> skip
+ ; ([b] = a) -> skip
+ ; [1,2] = [1,23] -> skip
  ; b := len([1,2])
  ; b := hd([4,2])
  ; a := tl([4,2])

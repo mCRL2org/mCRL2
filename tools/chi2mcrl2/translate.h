@@ -39,6 +39,7 @@ typedef struct
   {
     std::string Name;
     std::string Type;
+    std::string HashCount;
   } RecProcessChannels;
 
 typedef struct
@@ -94,7 +95,7 @@ typedef struct
   {
     std::vector<RPV> DeclarationVariables;
     std::vector<RPV> SpecificationVariables;
-    std::vector<RVT> DeclarationChannels;
+    std::vector<RPC> DeclarationChannels;
     int NumberOfStreams;
   } RecProcessVectors;
 
@@ -124,14 +125,14 @@ class CAsttransform
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
     int parenthesis_level;
-    pair<vector<RVT>, vector<RVT> > manipulateDeclaredProcessDefinition(ATermAppl input);
+    pair<vector<RVT>, vector<RPC> > manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
-    pair<std::vector<RPV>, std::vector<RVT> > manipulateProcessSpecification(ATermAppl input);
+    pair<std::vector<RPV>, std::vector<RPC> > manipulateProcessSpecification(ATermAppl input);
     std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
     
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
-    std::vector<RVT> manipulateDeclaredProcessChannels(ATermList input);
+    std::vector<RPC> manipulateDeclaredProcessChannels(ATermList input);
 
     std::string manipulateExpression(ATermAppl input);
     void manipulateStatements(ATermAppl input);
@@ -141,8 +142,8 @@ class CAsttransform
     std::map<int, std::set<int> > affectedStreamMap;
 
     std::string manipulateExplicitTemplates(ATermList input);
-    std::vector<RecProcessVariable> ProcessVariableMap;
-    std::vector<RVT> ProcessChannelMap;
+    std::vector<RPV> ProcessVariableMap;
+    std::vector<RPC> ProcessChannelMap;
 
     std::string processType(ATermAppl input);
 
@@ -207,6 +208,7 @@ class CAsttransform
 
     std::set<std::string> takeTypes;
     std::set<std::string> dropTypes;
+    bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
 } 
 ;
 

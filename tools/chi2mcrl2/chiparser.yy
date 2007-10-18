@@ -74,19 +74,22 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %token <appl> SKIP BARS ALT
 %token <appl> COLON TYPE BOOL NAT
 %token <appl> ID TIME 
-%token <appl> BP EP PROC_SEP SEP COMMA DEFINES ASSIGNMENT MINUS PLUS GG 
+%token <appl> BP EP PROC_SEP SEP COMMA IS ASSIGNMENT MINUS PLUS GG 
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
-%token <appl> AND OR GUARD NOT EQUAL OLD 
+%token <appl> AND OR GUARD NOT OLD 
 %token <appl> NUMBER INT REALNUMBER TRUE FALSE DOT DEADLOCK IMPLIES NOTEQUAL GEQ LEQ MAX MIN DIV MOD POWER
 %token <appl> RECV EXCLAMATION SENDRECV RECVSEND SSEND RRECV STAR GUARD_REP DERIVATIVE
 %token <appl> SQLBRACKET SQRBRACKET 
 %token <appl> LSUBTRACT CONCAT IN
-%token <appl> HEAD TAIL RHEAD RTAIL LENGTH TAKE DROP SORT INSERT
+%token <appl> HEAD TAIL RHEAD RTAIL LENGTH TAKE DROP SORT INSERT LESS GREATER HASH
 
-%left MINUS PLUS LSUBTRACT CONCAT IN EQUAL NOTEQUAL 
+%left MINUS PLUS LSUBTRACT CONCAT IN NOTEQUAL 
 %left DIVIDE       /* order '+','-','*','/' */
 %right POWER SEP ALT GUARD_REP STAR BARS        /* exponentiation        */
 %start ChiProgram
+
+%left LEQ GEQ GREATER LESS COMMA MIN DIV MOD MAX IMPLIES IS 
+
 %glr-parser
 %debug
 %verbose
@@ -124,6 +127,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 ChiProgram: 
     ModelDefinition ProcessDefinitions 
 		{ 
+          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
     	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
           safe_assign($$, gsMakeChiSpec($1,ATreverse($2)));
 		  spec_tree = $$;
@@ -131,7 +135,7 @@ ChiProgram:
 	;
 
 ModelDefinition:
-      MODEL Identifier LBRACKET RBRACKET DEFINES ModelBody
+      MODEL Identifier LBRACKET RBRACKET IS ModelBody
         {
       	  safe_assign($$, gsMakeModelDef($2, $6));
       	  gsDebugMsg("parsed Model Def \n  %T\n", $$);
@@ -168,7 +172,7 @@ ProcessDefinitions:
      ;
 
 ProcessDefinition: 
-	  ProcOpenScope Identifier LBRACKET RBRACKET DEFINES ProcessBody
+	  ProcOpenScope Identifier LBRACKET RBRACKET IS ProcessBody
 		{ 
           /**
             * Check if Identifier is not already used
@@ -185,16 +189,16 @@ ProcessDefinition:
       	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATmakeList0()) ,$6));
       	  gsDebugMsg("parsed proc Def \n  %T\n", $$);
 		}
-	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody
+	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET IS ProcessBody
 		{ 
       	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl( ATreverse($4)), $7));
       	  gsDebugMsg("parsed proc Def\n  %T\n", $$);
 		}
-//	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET DEFINES ProcessBody  
+//	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET IS ProcessBody  
 /*     When adding these lines don't forget to:
        + update the aterm_spec.txt and translator function
        + update the translator function with ExplicedTemplates */ 
-//	| PROC Identifier ExplicitTemplates LBRACKET FormalParameter_csp RBRACKET DEFINES ProcessBody 
+//	| PROC Identifier ExplicitTemplates LBRACKET FormalParameter_csp RBRACKET IS ProcessBody 
 /*     When adding these lines don't forget to:
        + update the aterm_spec.txt and translator function
        + update the translator function with ExplicedTemplates */ 
@@ -288,7 +292,7 @@ IdentifierTypeExpression:
 		  safe_assign($$, $1 );
 		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
 		}
-	| IdentifierType DEFINES Expression
+	| IdentifierType IS Expression
 		{
           ATermList list = $1;
           ATermList new_list = ATmakeList0();
@@ -424,6 +428,7 @@ ChannelDeclaration_csp:
 ChannelDeclaration:
 	  IdentifierChannelDeclaration_csp COLON Type
 		{
+          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
@@ -451,8 +456,52 @@ ChannelDeclaration:
 		  list = $1;
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
+
           {
-             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3) );
+             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, one ) );
+			 list = ATgetNext( list ) ;
+		  }
+
+		  safe_assign($$, new_list );
+		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		}
+	| IdentifierChannelDeclaration_csp COLON Expression HASH Type
+		{
+          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+
+          //Make sure that Expression is a number 
+          UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
+        
+		  ATermList list = $1;
+		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+		  
+          list = $1;
+		  n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+
+		  list = $1;
+          ATermList new_list = ATmakeList0();
+		  while(!ATisEmpty(list))
+          {
+             gsDebugMsg("%T",ATgetFirst(list));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $5, $3 ) );
 			 list = ATgetNext( list ) ;
 		  }
 
@@ -509,6 +558,7 @@ ChannelDefinition_csp:
 ChannelDefinition:
 	  IdentifierChannelDefinition_csp COLON Type
 		{
+          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
           gsDebugMsg("ChannelDefinition\n");
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
@@ -537,8 +587,50 @@ ChannelDefinition:
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
+             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, one) );
+			 list = ATgetNext( list ) ;
+		  }
+
+		  safe_assign($$, new_list );
+		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		}
+	| IdentifierChannelDefinition_csp COLON Expression HASH Type
+		{
+          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+
+          //Make sure that Expression is a number 
+          UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
+        
+		  ATermList list = $1;
+		  int n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+		  
+          list = $1;
+		  n = ATgetLength( list );
+		  for(int i = 0; i < n ; ++i ){
+			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			 {
+			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			   exit(1);
+			 };
+			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
+			 list = ATgetTail( list, 1 ) ;
+		  }	;
+
+		  list = $1;
+          ATermList new_list = ATmakeList0();
+		  while(!ATisEmpty(list))
+          {
              gsDebugMsg("%T",ATgetFirst(list));
-             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3) );
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $5, $3 ) );
 			 list = ATgetNext( list ) ;
 		  }
 
@@ -767,8 +859,11 @@ CommStatement:
           //Check if $2 can send
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument($2,0),0);   
+          ATermAppl hash    = (ATermAppl) ATgetArgument($2,2); 
+          gsDebugMsg("%T\n",$2);
+          gsDebugMsg("%T\n",hash);
 
-          safe_assign($$, gsMakeSendStat($1,  channel, ATreverse( $4) ) );
+          safe_assign($$, gsMakeSendStat($1, channel, hash , ATreverse( $4) ) );
       	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
         }
 //	| OptGuard Expression SSEND Expression_csp
@@ -784,8 +879,9 @@ CommStatement:
           gsDebugMsg("%T",$2);
  
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);   
+          ATermAppl hash    = (ATermAppl) ATgetArgument($2,2); 
 
-          safe_assign($$, gsMakeRecvStat($1, channel, ATreverse( $4) ) );
+          safe_assign($$, gsMakeRecvStat($1, channel, hash, ATreverse( $4) ) );
       	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
         }
 //	| OptGuard Expression RRECV Expression_csp
@@ -822,11 +918,14 @@ BinaryStatement:
 
 UnaryStatement:
 	  STAR Statement
-      	{ safe_assign($$, gsMakeStarStat( $2));
+        { 
+          gsDebugMsg("%d\n", __LINE__);
+      	  safe_assign($$, gsMakeStarStat( $2));
       	  gsDebugMsg("parsed STAR statement \n  %T\n", $$);	
 		}
 	| Expression GUARD_REP Statement
       	{
+          gsDebugMsg("%d\n", __LINE__);
           UnaryTypeCheck(ATAgetArgument($1,1), "Bool");
           safe_assign($$, gsMakeGuardedStarStat( $1, $3));
       	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);	
@@ -926,29 +1025,22 @@ BasicExpression:
 
           bool channel_exists = false;
           bool variable_exists = false;
-          if (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) $1))
-            {
-                
-//              gsErrorMsg("BasicExpression: Channel %T is not defined!\n", $1 );
-//              exit(1);
-            } else {
-              channel_exists = true;
+          if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
+          {
+             channel_exists = true;
+             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
               safe_assign($$, 
                 gsMakeChannelTypedID(
                   gsMakeChannelID($1, gsMakeNil()),
-                  (ATermAppl) chan_type_direction_map[(ATerm) $1].first
+                  (ATermAppl) chan_type_direction_map[(ATerm) $1].first,
+                  one
                 )
               );
             }
-          /* safe_assign($$, 
-            gsMakeExpression( $1, 
-              (ATermAppl) chan_type_direction_map[(ATerm) $1] 
-            )
-          ); */
+
           // Determine if the expression is defined already 
-          if (var_type_map.end() == var_type_map.find( (ATerm) $1))
-            {
-            } else {
+          if (var_type_map.end() != var_type_map.find( (ATerm) $1))
+          {
               variable_exists = true;
               //Type the expression
               safe_assign($$, 
@@ -966,8 +1058,42 @@ BasicExpression:
   
           gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
 		}
+	| Identifier DOT Expression 
+		{
+		  /**  
+		    * Lookup Identifier Type
+		    *
+		    * TODO: Add scope
+		    *
+		    **/
+
+          bool channel_exists = false;
+          bool variable_exists = false;
+          if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
+          {
+            channel_exists = true;
+          }
+ 
+          if(!channel_exists)
+          {
+              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              exit(1);
+          }
+
+          //Check if # of channel is a Natural number
+          UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
+
+          safe_assign($$, 
+            gsMakeChannelTypedID(
+              gsMakeChannelID($1, gsMakeNil()),
+              (ATermAppl) chan_type_direction_map[(ATerm) $1].first,
+              $3  
+            )
+          );
+  
+          gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
+		}
 //	  OLD LBRACKET Expression RBRACKET 
-//	  Identifier DOT Identifier
 //	| Identifier DERIVATIVE
 //	| Expression LANGLE TemplateValue RANGLE
 //	| FoldExpression
@@ -1206,7 +1332,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '<' Expression
+	| Expression LESS Expression
 		{ 
             BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
 
@@ -1219,7 +1345,7 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression '>' Expression
+	| Expression GREATER Expression
 		{ 
             BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
 
@@ -1261,17 +1387,16 @@ NatIntExpression:
 	;
 
 BoolNatIntExpression:
-	  Expression EQUAL Expression
+	  Expression IS Expression
 		{
 			/**
 			  * Type Checking
 			  *
 			  **/	
-			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
-              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+			if(  !(ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
               )
 				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  gsErrorMsg("BoolNatIntExpression: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
 		
@@ -1290,7 +1415,7 @@ BoolNatIntExpression:
               && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
               )
 				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  gsErrorMsg("BoolNatIntExpression: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
 
@@ -1364,7 +1489,7 @@ ListExpression:
       		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
 		} 
       // Equality and NOTequal handled by BoolNatIntExpression
-/*  | ListLiteral EQUAL ListLiteral
+/*  | ListLiteral IS ListLiteral
     | ListLiteral NOTEQUAL ListLiteral  
 }*/
     | Functions
@@ -1399,6 +1524,7 @@ Functions:
       }
     | TAIL LBRACKET  Expression RBRACKET
       {
+            gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
@@ -1412,6 +1538,7 @@ Functions:
       }
     | RHEAD LBRACKET  Expression RBRACKET
       {
+            gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
@@ -1425,6 +1552,7 @@ Functions:
       }
     | RTAIL LBRACKET  Expression RBRACKET
       {
+            gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
@@ -1436,9 +1564,9 @@ Functions:
 			$3));
       		gsDebugMsg("Functions parsed: \n  %T\n", $$);
       }
-/* List functions that are not supported */
     | TAKE LBRACKET Expression COMMA Expression RBRACKET
       {
+            gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
 				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
@@ -1460,6 +1588,7 @@ Functions:
       }
     | DROP LBRACKET  Expression COMMA Expression RBRACKET
       {
+            gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
 				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
@@ -1479,10 +1608,20 @@ Functions:
                    $5));
       		gsDebugMsg("Functions parsed: \n%T\n", $$);
       }
+    /* List functions that are not supported */
     | SORT LBRACKET  Expression RBRACKET
       {
-        gsErrorMsg("%T is not supported", $1);
-        exit(1);
+            gsDebugMsg("R:%d\n",__LINE__);
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  exit(1);
+				};
+
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+			       (ATermAppl) ATgetArgument($3,1), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
       }
     | INSERT LBRACKET  Expression RBRACKET
       {
@@ -1542,7 +1681,7 @@ ListLiteral:
 	| exp OR exp       		{ }
 	| exp BARS exp     		{ }
 	| exp GUARD exp 		{ }
-	| exp EQUAL exp			{ }
+	| exp IS exp			{ }
 	| NOT exp				{ }
 	| TRUE					{ }
     | FALSE					{ }
@@ -1553,7 +1692,7 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 {
     if(arg1 != arg2)
         {
-          gsErrorMsg("Incompatible Types Checking failed\n");
+          gsErrorMsg("BinTypeCheck: Incompatible Types Checking failed\n");
           exit(1);
         };
     if(arg1 != gsMakeType(gsString2ATermAppl(type.c_str())))
@@ -1566,9 +1705,14 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 
 void UnaryTypeCheck(ATermAppl arg1, std::string type)
 {
-    if(arg1 == gsMakeType(gsString2ATermAppl(type.c_str())))
+    gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+    gsDebugMsg("arg1: %T\n", arg1);
+    ATermAppl arg2 = gsMakeType(gsString2ATermAppl(type.c_str()));
+    gsDebugMsg("arg2: %T\n", arg2);
+
+    if( arg1 != arg2 )
         {
-          gsErrorMsg("Incompatible Type, expected %s\n", type.c_str());
+          gsErrorMsg("UnaryTypeCheck: Incompatible Type, expected %s\n", type.c_str());
           exit(1);
         };
   return;
@@ -1576,6 +1720,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
+  gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
   if(arg1 == arg2)
   {
     return true;

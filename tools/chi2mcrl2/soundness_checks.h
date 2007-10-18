@@ -971,7 +971,7 @@ bool check_term_ProcDecl(Term t)
   return true;
 }
 
-// RecvStat(OptGuard, Expr, Expr+)
+// RecvStat(OptGuard, Expr, Expr, Expr+)
 template <typename Term>
 bool check_term_RecvStat(Term t)
 {
@@ -984,7 +984,7 @@ bool check_term_RecvStat(Term t)
     return false;
 
   // check the children
-  if (a.size() != 3)
+  if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_term_OptGuard<aterm>))
@@ -997,7 +997,12 @@ bool check_term_RecvStat(Term t)
       std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(2), check_rule_Expr<aterm>, 1))
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(3), check_rule_Expr<aterm>, 1))
     {
       std::cerr << "check_rule_Expr" << std::endl;
       return false;
@@ -1052,7 +1057,7 @@ bool check_term_ParenthesisedStat(Term t)
   return true;
 }
 
-// ChannelTypedID(ChannelID, TypeID)
+// ChannelTypedID(ChannelID, TypeID, Expr)
 template <typename Term>
 bool check_term_ChannelTypedID(Term t)
 {
@@ -1065,7 +1070,7 @@ bool check_term_ChannelTypedID(Term t)
     return false;
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_ChannelID<aterm>))
@@ -1076,6 +1081,11 @@ bool check_term_ChannelTypedID(Term t)
   if (!check_term_argument(a(1), check_rule_TypeID<aterm>))
     {
       std::cerr << "check_rule_TypeID" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1510,7 +1520,7 @@ bool check_term_VarSpec(Term t)
   return true;
 }
 
-// SendStat(OptGuard, Expr, Expr+)
+// SendStat(OptGuard, Expr, Expr, Expr+)
 template <typename Term>
 bool check_term_SendStat(Term t)
 {
@@ -1523,7 +1533,7 @@ bool check_term_SendStat(Term t)
     return false;
 
   // check the children
-  if (a.size() != 3)
+  if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_term_OptGuard<aterm>))
@@ -1536,7 +1546,12 @@ bool check_term_SendStat(Term t)
       std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(2), check_rule_Expr<aterm>, 1))
+  if (!check_term_argument(a(2), check_rule_Expr<aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(3), check_rule_Expr<aterm>, 1))
     {
       std::cerr << "check_rule_Expr" << std::endl;
       return false;

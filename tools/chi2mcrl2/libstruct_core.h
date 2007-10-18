@@ -211,7 +211,7 @@ bool gsIsChannelID(ATermAppl Term)
 inline
 AFun initAFunChannelTypedID(AFun& f)
 {
-  f = ATmakeAFun("ChannelTypedID", 2, ATfalse);
+  f = ATmakeAFun("ChannelTypedID", 3, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -739,7 +739,7 @@ bool gsIsRecv(ATermAppl Term)
 inline
 AFun initAFunRecvStat(AFun& f)
 {
-  f = ATmakeAFun("RecvStat", 3, ATfalse);
+  f = ATmakeAFun("RecvStat", 4, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -783,7 +783,7 @@ bool gsIsSend(ATermAppl Term)
 inline
 AFun initAFunSendStat(AFun& f)
 {
-  f = ATmakeAFun("SendStat", 3, ATfalse);
+  f = ATmakeAFun("SendStat", 4, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1070,9 +1070,9 @@ ATermAppl gsMakeChannelID(ATermAppl VarID_0, ATermAppl ComType_1)
 }
 
 inline
-ATermAppl gsMakeChannelTypedID(ATermAppl ChannelID_0, ATermAppl TypeID_1)
+ATermAppl gsMakeChannelTypedID(ATermAppl ChannelID_0, ATermAppl TypeID_1, ATermAppl Expr_2)
 {
-  return ATmakeAppl2(gsAFunChannelTypedID(), (ATerm) ChannelID_0, (ATerm) TypeID_1);
+  return ATmakeAppl3(gsAFunChannelTypedID(), (ATerm) ChannelID_0, (ATerm) TypeID_1, (ATerm) Expr_2);
 }
 
 inline
@@ -1214,9 +1214,9 @@ ATermAppl gsMakeRecv()
 }
 
 inline
-ATermAppl gsMakeRecvStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermList Expr_2)
+ATermAppl gsMakeRecvStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermAppl Expr_2, ATermList Expr_3)
 {
-  return ATmakeAppl3(gsAFunRecvStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2);
+  return ATmakeAppl4(gsAFunRecvStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2, (ATerm) Expr_3);
 }
 
 inline
@@ -1226,9 +1226,9 @@ ATermAppl gsMakeSend()
 }
 
 inline
-ATermAppl gsMakeSendStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermList Expr_2)
+ATermAppl gsMakeSendStat(ATermAppl OptGuard_0, ATermAppl Expr_1, ATermAppl Expr_2, ATermList Expr_3)
 {
-  return ATmakeAppl3(gsAFunSendStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2);
+  return ATmakeAppl4(gsAFunSendStat(), (ATerm) OptGuard_0, (ATerm) Expr_1, (ATerm) Expr_2, (ATerm) Expr_3);
 }
 
 inline

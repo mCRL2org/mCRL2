@@ -469,7 +469,7 @@ ATermAppl constructProcDecl()
 inline
 ATermAppl initConstructRecvStat(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunRecvStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl4(gsAFunRecvStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -517,7 +517,7 @@ ATermAppl constructParenthesisedStat()
 inline
 ATermAppl initConstructChannelTypedID(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunChannelTypedID(), reinterpret_cast<ATerm>(constructChannelID()), reinterpret_cast<ATerm>(constructTypeID()));
+  t = ATmakeAppl3(gsAFunChannelTypedID(), reinterpret_cast<ATerm>(constructChannelID()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -757,7 +757,7 @@ ATermAppl constructVarSpec()
 inline
 ATermAppl initConstructSendStat(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunSendStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl4(gsAFunSendStat(), reinterpret_cast<ATerm>(constructOptGuard()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }

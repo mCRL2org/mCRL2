@@ -28,7 +28,7 @@
 
 <TypeID>		::= Type(<String>)
 
-<ChannelTypedID>::= ChannelTypedID(<ChannelID>,<TypeID>)
+<ChannelTypedID>::= ChannelTypedID(<ChannelID>,<TypeID>, <Expr>)
 
 <ChannelID>     ::= ChannelID(<VarID>, <ComType>)
 					
@@ -55,8 +55,8 @@
 			      | GuardedStarStat(<Expr>,<Statement>)
 				  | DeltaStat(OptGuard,Delta)
                   | Instantiation(<String>,<Expr>*)
-                  | SendStat(OptGuard, <Expr>, <Expr>+)
-                  | RecvStat(OptGuard, <Expr>, <Expr>+)
+                  | SendStat(OptGuard, <Expr>, <Expr>, <Expr>+)
+                  | RecvStat(OptGuard, <Expr>, <Expr>, <Expr>+)
 					
 <OptGuard>		::= <Expr> 
 				  |	Nil
