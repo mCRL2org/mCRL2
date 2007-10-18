@@ -111,13 +111,35 @@ static void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* 
 //ret: true if data_expr is of the form v_1 == w_1 && ... && v_n == w_n, where
 //     v_i, w_j are data variables,
 //     false, otherwise
-bool is_and_of_data_var_equalities(ATermAppl data_expr);
+static bool is_and_of_data_var_equalities(ATermAppl data_expr);
 
 //ret: true if all elements of l are DataVarIds,
 //     false otherwise
-bool is_list_of_data_var_ids(ATermList l);
+static bool is_list_of_data_var_ids(ATermList l);
 
-ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t);
+static ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t);
+
+//pre: data_expr is a data expression
+//ret: true if data_expr is a function on lists
+static bool is_list_operator(ATermAppl data_expr);
+
+//pre: data_eqn is a data equation, sort_constructors holds the constructors
+//     for all relevant sorts.
+//ret: true if data_eqn has the form such that it belongs to a constructor
+//     false otherwise.
+static bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors);
+
+static bool is_list_equation(ATermAppl data_eqn);
+
+static bool is_recogniser_equation(ATermAppl data_eqn);
+
+static bool is_projection_equation(ATermAppl data_eqn);
+
+static void remove_mapping_not_list(ATermAppl op,
+                        ATermAppl sort,
+                        atermpp::map<ATermAppl, atermpp::indexed_set>& sort_mappings,
+                        atermpp::map<ATermAppl, atermpp::indexed_set>& map_equations,
+                        atermpp::map<ATermAppl, int>& num_map_equations);
 
 // implementation
 // ----------------------------------------------
@@ -847,6 +869,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   // on the fly.
 
   // Additional processing of Sorts
+  /*
   for (ATermList sorts = data_decls.sorts; !ATisEmpty(sorts); sorts = ATgetNext(sorts))
   {
     ATermAppl sort = ATAgetFirst(sorts);
@@ -854,6 +877,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
       remove_list_sort_from_data_decls(sort, &data_decls);
     }
   }
+  */
 
   reconstruct_structured_sorts(&data_decls, p_substs);
 
@@ -1097,11 +1121,7 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
   {
     ATermAppl constructor = ATAgetFirst(l);
     ATermAppl sort = gsGetSortExprResult(gsGetSort(constructor));
-    // Hack to not reconstruct things of the form sort S = List(struct pair(A,
-    // B))
-    if((struct_sorts_table.get(sort) != NULL)
-      && !ATisEqual(gsGetName(constructor), gsMakeOpIdNameEmptyList())
-      && !ATisEqual(gsGetName(constructor), gsMakeOpIdNameCons())) {
+    if((struct_sorts_table.get(sort) != NULL)) {
       // Else we are dealing with a system defined sort
       assert(gsIsOpId(constructor));
       put_result = sort_constructors[sort].put(constructor);
@@ -1120,13 +1140,15 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
       ATermList sort_domain = ATLgetArgument(sort, 0);
       ATermAppl sort_range = gsGetSortExprResult(sort);
       ATermAppl dom_sort = ATAgetFirst(sort_domain);
-      if (ATisEqual(gsMakeOpIdNameIf(), gsGetName(op))) {
+      if (ATisEqual(gsMakeOpIdNameIf(), gsGetName(op)) ||
+          ATisEqual(gsMakeOpIdNameEltIn(), gsGetName(op))) {
         dom_sort = ATAgetFirst(ATgetNext(sort_domain));
       }
       if (gsIsOpId(op) && (struct_sorts_table.get(dom_sort) != NULL)) {
         if (ATisEqual(gsMakeOpIdIf(dom_sort), op)
           || ATisEqual(gsMakeOpIdEq(dom_sort), op)
           || ATisEqual(gsMakeOpIdNeq(dom_sort), op)
+          || is_list_operator(op)
           || (ATgetLength(sort_domain) == 1 && sort_range == gsMakeSortExprBool())
           || (ATgetLength(sort_domain) == 1  /*TODO: strengthen condition for projs*/)) {
           put_result = sort_mappings[dom_sort].put(op);
@@ -1203,67 +1225,12 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
       ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
       assert(gsIsDataExpr(arg0) && gsIsDataExpr(arg1));
       // Special case, data_eqn is of the form var == var = true;
-      if (gsIsDataVarId(arg0) && gsIsDataVarId(arg1) && ATisEqual(arg0, arg1) &&
-          ATisEqual(data_eqn_rhs, gsMakeDataExprTrue())) {
-        assert(gsIsDataEqn(data_eqn));
+      if ((gsIsDataVarId(arg0) && gsIsDataVarId(arg1) && ATisEqual(arg0, arg1) &&
+          ATisEqual(data_eqn_rhs, gsMakeDataExprTrue()))
+        || is_constructor_induced_equation(data_eqn, sort_constructors)) {
         put_result = sort_cons_equations[sort].put(data_eqn);
         if (put_result.second) {
           num_sort_cons_equations[sort]++;
-        }
-      } else if (gsIsDataAppl(arg0)) {
-        if (gsIsDataAppl(arg1)) {
-          if (ATisEqual(ATAgetArgument(arg0, 0), ATAgetArgument(arg1, 0)) &&
-              ATgetLength(ATLgetArgument(arg0, 1)) == ATgetLength(ATLgetArgument(arg1, 1))) {
-            if (is_and_of_data_var_equalities(data_eqn_rhs) &&
-                (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0)) {
-              assert(gsIsDataEqn(data_eqn));
-              put_result = sort_cons_equations[sort].put(data_eqn);
-              if (put_result.second) {
-                num_sort_cons_equations[sort]++;
-              }
-            }
-          } else {
-            if (ATisEqual(data_eqn_rhs, gsMakeDataExprFalse()) &&
-                (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0) &&
-                (sort_constructors[sort].index(ATgetArgument(arg1, 0)) >= 0)) {
-              assert(gsIsDataEqn(data_eqn));
-              put_result = sort_cons_equations[sort].put(data_eqn);
-              if (put_result.second) {
-                num_sort_cons_equations[sort]++;
-              }
-            }
-          }
-        } else if(gsIsOpId(arg1) &&
-                  gsIsOpId(ATAgetArgument(arg0, 0)) &&
-                  ATisEqual(data_eqn_rhs, gsMakeDataExprFalse()) &&
-                  (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0) &&
-                  (sort_constructors[sort].index(arg1) >= 0)) {
-          assert(gsIsDataEqn(data_eqn));
-          put_result = sort_cons_equations[sort].put(data_eqn);
-          if (put_result.second) {
-            num_sort_cons_equations[sort]++;
-          }
-        }
-      } else if (gsIsOpId(arg0)) {
-        if (gsIsDataAppl(arg1) &&
-            gsIsOpId(ATAgetArgument(arg1, 0)) &&
-            ATisEqual(data_eqn_rhs, gsMakeDataExprFalse()) &&
-            (sort_constructors[sort].index(arg0) >= 0) &&
-            (sort_constructors[sort].index(ATgetArgument(arg1, 0)) >= 0)) {
-          assert(gsIsDataEqn(data_eqn));
-          put_result = sort_cons_equations[sort].put(data_eqn);
-          if (put_result.second) {
-            num_sort_cons_equations[sort]++;
-          }
-        } else if (gsIsOpId(arg1)) {
-          if ((ATisEqual(arg0, arg1) && ATisEqual(data_eqn_rhs, gsMakeDataExprTrue()))
-            ||(!ATisEqual(arg0, arg1) && ATisEqual(data_eqn_rhs, gsMakeDataExprFalse()))) {
-            assert(gsIsDataEqn(data_eqn));
-            put_result = sort_cons_equations[sort].put(data_eqn);
-            if (put_result.second) {
-              num_sort_cons_equations[sort]++;
-            }
-          }
         }
       }
     } else if (gsIsDataAppl(data_eqn_lhs)) {
@@ -1284,54 +1251,29 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
       assert(gsIsSortArrow(head_sort));
       ATermAppl sort = ATAgetFirst(ATLgetArgument(head_sort, 0));
 
-      if (gsIsOpId(head) &&
-          gsIsOpId(arg0) &&
-          (ATgetLength(ATLgetArgument(head_sort, 0)) == 1) &&
-          (struct_sorts_table.get(sort) != NULL) &&
+      if (is_recogniser_equation(data_eqn)) {
+        if((struct_sorts_table.get(sort) != NULL) &&
           (sort_constructors[sort].index(arg0) >= 0) &&
-          (sort_mappings[sort].index(head) >= 0) &&
-          (ATisEqual(data_eqn_rhs, gsMakeDataExprTrue()) ||
-             ATisEqual(data_eqn_rhs, gsMakeDataExprFalse())) &&
-          is_list_of_data_var_ids(args)) {
-        if (ATisEqual(data_eqn_rhs, gsMakeDataExprFalse())) {
-          assert(gsIsDataEqn(data_eqn));
+          (sort_mappings[sort].index(head) >= 0)) {
           put_result = map_equations[head].put(data_eqn);
           if (put_result.second) {
             num_map_equations[head]++;
           }
-        } else if (ATisEqual(data_eqn_rhs, gsMakeDataExprTrue())) {
-          assert(gsIsDataEqn(data_eqn));
-          put_result = map_equations[head].put(data_eqn);
-          if (put_result.second) {
-            num_map_equations[head]++;
+          if (ATisEqual(data_eqn_rhs, gsMakeDataExprTrue())) {
+            recognises[head] = arg0;
           }
-          recognises[head] = arg0;
         } else {
           recognises.erase(head);
-          map_equations.erase(head);
-          num_map_equations.erase(head);
-          if (sort_mappings[sort].index(head) >= 0 ) {
-            sort_mappings[sort].remove(head);
-          }
+          remove_mapping_not_list(head, sort, sort_mappings, map_equations, num_map_equations);
         }
-      } else if (gsIsOpId(head) &&
-                 gsIsOpId(arg0) &&
-                 (ATgetLength(ATLgetArgument(head_sort, 0)) == 1) &&
+      } else if (is_projection_equation(data_eqn) &&
                  (struct_sorts_table.get(sort) != NULL) &&
                  (sort_constructors[sort].index(arg0) >= 0) &&
-                 (sort_mappings[sort].index(head) >= 0) &&
-                 is_list_of_data_var_ids(args) &&
-                 gsIsSortArrow(gsGetSort(arg0)) &&
-                 (ATindexOf(ATLgetArgument(gsGetSort(arg0), 0), (ATerm) gsGetSortExprResult(gsGetSort(head)), 0) != -1) &&
-                 gsIsDataVarId(data_eqn_rhs)) {
+                 (sort_mappings[sort].index(head) >= 0)) {
         /* head could be a projection function for arg0 */
         if (num_map_equations[head] > 0) {
           projects.erase(std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0)));
-          map_equations.erase(head);
-          num_map_equations.erase(head);
-          if (sort_mappings[sort].index(head) >= 0) {
-            sort_mappings[sort].remove(head);
-          }
+          remove_mapping_not_list(head, sort, sort_mappings, map_equations, num_map_equations);
         } else {
           put_result = map_equations[head].put(data_eqn);
           projects[std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0))] = head;
@@ -1339,14 +1281,24 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
             num_map_equations[head]++;
           }
         }
+      } else if (is_list_equation(data_eqn)) {
+        put_result = map_equations[head].put(data_eqn);
+        if (put_result.second) {
+          num_map_equations[head]++;
+        }
       } else {
-          recognises.erase(head);
+        recognises.erase(head);
+        if(!is_list_operator(head)) {
+          remove_mapping_not_list(head, sort, sort_mappings, map_equations, num_map_equations);
+          /*
           map_equations.erase(head);
           num_map_equations.erase(head);
           if ((struct_sorts_table.get(sort) != NULL) &&
             sort_mappings[sort].index(head) >= 0 ) {
             sort_mappings[sort].remove(head);
           }
+          */
+        }
       }
     }
   }
@@ -1394,21 +1346,12 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
         //assert(ATisEqual(ATAgetFirst(ATLgetArgument(gsGetSort(map), 0)), sort));
         if(ATisEqual(gsGetSortExprResult(gsGetSort(map)), gsMakeSortExprBool())) {
           if(num_map_equations[map] != num_sort_constructors[sort]) {
-            num_map_equations.erase(map);
-            map_equations.erase(map);
-
-            if(sort_mappings[sort].index(map) >= 0) {
-              sort_mappings[sort].remove(map);
-            }
+            remove_mapping_not_list(map, sort, sort_mappings, map_equations, num_map_equations);
           } else {
             is_recognised_by[recognises[map]] = map;
           }
         } else if (num_map_equations[map] != 1) {
-          num_map_equations.erase(map);
-          map_equations.erase(map);
-          if(sort_mappings[sort].index(map) >= 0) {
-            sort_mappings[sort].remove(map);
-          }
+          remove_mapping_not_list(map, sort, sort_mappings, map_equations, num_map_equations);
         }
       }
       maps = ATgetNext(maps);
@@ -1492,7 +1435,6 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
   }
   p_data_decls->data_eqns = ATreverse(data_eqns);
 
-
   gsDebugMsg("Building structured sort declarations\n");
 
   // Insert struct sort declarations
@@ -1502,43 +1444,67 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
     ATermList struct_constructors = ATmakeList0();
     ATermAppl sort = ATAgetFirst(l);
     ATermList constructors = sort_constructors[sort].elements();
-    while (!ATisEmpty(constructors)) {
-      ATermAppl constructor = ATAgetFirst(constructors);
-      ATermAppl cons_sort = gsGetSort(constructor);
-      ATermList struct_projs = ATmakeList0();
-      // If a constructor has arguments, add the arguments in the structured
-      // sort.
-      if (gsIsSortArrow(cons_sort)) {
-        ATermList cons_sort_domain = ATLgetArgument(cons_sort, 0);
-        int index = 0;
-        while (!ATisEmpty(cons_sort_domain)) {
-          ATermAppl proj_name = gsMakeNil();
-          if (projects.count(std::make_pair(constructor, index)) > 0) {
-            proj_name = gsGetName(projects[std::make_pair(constructor, index)]);
-          }
-          struct_projs = ATinsert(struct_projs, (ATerm) gsMakeStructProj(proj_name, ATAgetFirst(cons_sort_domain)));
-          cons_sort_domain = ATgetNext(cons_sort_domain);
-          index++;
+
+    if(num_sort_constructors[sort] == 2 &&
+       (ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)) {
+      // sort is a list sort
+      ATermAppl element_sort = NULL;
+      while (!ATisEmpty(constructors)) {
+        ATermAppl constructor = ATAgetFirst(constructors);
+        if (ATisEqual(gsGetName(constructor), gsMakeOpIdNameCons())) {
+          element_sort = ATAgetFirst(ATLgetArgument(gsGetSort(constructor), 0));
         }
-        struct_projs = ATreverse(struct_projs);
+        constructors = ATgetNext(constructors);
       }
-      ATermAppl recogniser = gsMakeNil();
-      if (is_recognised_by.count(constructor) > 0) {
-        recogniser = gsGetName(is_recognised_by[constructor]);
+      if (element_sort != NULL) {
+        if (is_list_sort_id(sort)) {
+          *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
+        } else {
+          ATermAppl sort_name = ATAgetArgument(sort, 0);
+          p_data_decls->sorts = ATinsert(p_data_decls->sorts,
+                                  (ATerm) gsMakeSortRef(sort_name, gsMakeSortExprList(element_sort)));
+        }
       }
-      ATermAppl struct_cons = gsMakeStructCons(gsGetName(constructor), struct_projs, recogniser);
-      struct_constructors = ATinsert(struct_constructors, (ATerm) struct_cons);
-      constructors = ATgetNext(constructors);
-    }
-    struct_constructors = ATreverse(struct_constructors);
-    ATermAppl struct_sort = gsMakeSortStruct(struct_constructors);
-    assert(gsIsSortId(sort));
-    if (is_struct_sort_id(sort)) {
-      *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, struct_sort), *p_substs);
     } else {
-      ATermAppl sort_name = ATAgetArgument(sort, 0);
-      p_data_decls->sorts = ATinsert(p_data_decls->sorts,
-                              (ATerm) gsMakeSortRef(sort_name, struct_sort));
+      // sort is a structured sort
+      while (!ATisEmpty(constructors)) {
+        ATermAppl constructor = ATAgetFirst(constructors);
+        ATermAppl cons_sort = gsGetSort(constructor);
+        ATermList struct_projs = ATmakeList0();
+        // If a constructor has arguments, add the arguments in the structured
+        // sort.
+        if (gsIsSortArrow(cons_sort)) {
+          ATermList cons_sort_domain = ATLgetArgument(cons_sort, 0);
+          int index = 0;
+          while (!ATisEmpty(cons_sort_domain)) {
+            ATermAppl proj_name = gsMakeNil();
+            if (projects.count(std::make_pair(constructor, index)) > 0) {
+              proj_name = gsGetName(projects[std::make_pair(constructor, index)]);
+            }
+            struct_projs = ATinsert(struct_projs, (ATerm) gsMakeStructProj(proj_name, ATAgetFirst(cons_sort_domain)));
+            cons_sort_domain = ATgetNext(cons_sort_domain);
+            index++;
+          }
+          struct_projs = ATreverse(struct_projs);
+        }
+        ATermAppl recogniser = gsMakeNil();
+        if (is_recognised_by.count(constructor) > 0) {
+          recogniser = gsGetName(is_recognised_by[constructor]);
+        }
+        ATermAppl struct_cons = gsMakeStructCons(gsGetName(constructor), struct_projs, recogniser);
+        struct_constructors = ATinsert(struct_constructors, (ATerm) struct_cons);
+        constructors = ATgetNext(constructors);
+      }
+      struct_constructors = ATreverse(struct_constructors);
+      ATermAppl struct_sort = gsMakeSortStruct(struct_constructors);
+      assert(gsIsSortId(sort));
+      if (is_struct_sort_id(sort)) {
+        *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, struct_sort), *p_substs);
+      } else {
+        ATermAppl sort_name = ATAgetArgument(sort, 0);
+        p_data_decls->sorts = ATinsert(p_data_decls->sorts,
+                                (ATerm) gsMakeSortRef(sort_name, struct_sort));
+      }
     }
   }
   gsDebugMsg("Done reconstructing structured sorts\n");
@@ -1585,3 +1551,146 @@ ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t)
   result = ATreverse(result);
   return result;
 }
+
+bool is_list_operator(ATermAppl data_expr)
+{
+  if (!gsIsOpId(data_expr)) return false;
+  ATermAppl name = gsGetName(data_expr);
+  return ATisEqual(name, gsMakeOpIdNameEltIn()) ||
+         ATisEqual(name, gsMakeOpIdNameListSize()) ||
+         ATisEqual(name, gsMakeOpIdNameSnoc()) ||
+         ATisEqual(name, gsMakeOpIdNameConcat()) ||
+         ATisEqual(name, gsMakeOpIdNameEltAt()) ||
+         ATisEqual(name, gsMakeOpIdNameHead()) ||
+         ATisEqual(name, gsMakeOpIdNameTail()) ||
+         ATisEqual(name, gsMakeOpIdNameRHead()) ||
+         ATisEqual(name, gsMakeOpIdNameRTail());
+}
+
+bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors)
+{
+  assert(gsIsDataEqn(data_eqn));
+  ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+  ATermAppl rhs = ATAgetArgument(data_eqn, 3);
+
+  // Look at left hand side
+  if (gsIsDataExprEq(lhs)) {
+    ATermAppl op_sort = gsGetSort(ATAgetArgument(lhs, 0));
+    ATermAppl sort = ATAgetFirst(ATLgetArgument(op_sort, 0));
+    ATermList args = ATLgetArgument(lhs, 1);
+    ATermAppl arg0 = ATAgetFirst(args);
+    ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
+
+    if (gsIsDataAppl(arg0)) {
+      if (gsIsDataAppl(arg1)) {
+        if (ATisEqual(ATAgetArgument(arg0, 0), (ATAgetArgument(arg1, 0)))
+          && (ATgetLength(ATLgetArgument(arg0, 1)) == ATgetLength(ATLgetArgument(arg1, 1)))) {
+          return is_and_of_data_var_equalities(rhs) &&
+            (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0);
+        } else {
+          return ATisEqual(rhs, gsMakeDataExprFalse()) &&
+            (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0) &&
+            (sort_constructors[sort].index(ATgetArgument(arg1, 0)) >= 0);
+        }
+      } else if (gsIsOpId(arg1)) {
+        return gsIsOpId(ATAgetArgument(arg0, 0)) &&
+               ATisEqual(rhs, gsMakeDataExprFalse()) &&
+               (sort_constructors[sort].index(ATgetArgument(arg0, 0)) >= 0) &&
+               (sort_constructors[sort].index(arg1) >= 0);
+      }
+    } else if (gsIsOpId(arg0)) {
+      if (gsIsDataAppl(arg1)) {
+        return gsIsOpId(ATAgetArgument(arg1, 0)) &&
+               ATisEqual(rhs, gsMakeDataExprFalse()) &&
+               (sort_constructors[sort].index(arg0) >= 0) &&
+               (sort_constructors[sort].index(ATgetArgument(arg1, 0)) >= 0);
+      } else if (gsIsOpId(arg1)) {
+        return (ATisEqual(arg0, arg1) && ATisEqual(rhs, gsMakeDataExprTrue())) ||
+               (!ATisEqual(arg0, arg1) && ATisEqual(rhs, gsMakeDataExprFalse()));
+      }
+    }
+  }
+  return false;
+}
+
+bool is_recogniser_equation(ATermAppl data_eqn)
+{
+  assert(gsIsDataEqn(data_eqn));
+  ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+  ATermAppl rhs = ATAgetArgument(data_eqn, 3);
+
+  // lhs is of the form head(args) or head(arg0(args))
+  ATermAppl head = ATAgetArgument(lhs, 0);
+  ATermList args = ATLgetArgument(lhs, 1);
+  ATermAppl arg0 = ATAgetFirst(args);
+  if (gsIsDataAppl(arg0)) {
+    args = ATLgetArgument(arg0, 1);
+    arg0 = ATAgetArgument(arg0, 0);
+  } else if (gsIsOpId(arg0)) {
+    args = ATmakeList0();
+  }
+  ATermAppl head_sort = gsGetSort(head);
+  assert(gsIsSortArrow(head_sort));
+
+  return gsIsOpId(head) && gsIsOpId(arg0) &&
+         (ATgetLength(ATLgetArgument(head_sort, 0)) == 1) &&
+         (ATisEqual(rhs, gsMakeDataExprTrue()) ||
+           ATisEqual(rhs, gsMakeDataExprFalse())) &&
+         is_list_of_data_var_ids(args);
+}
+
+bool is_projection_equation(ATermAppl data_eqn)
+{
+  assert(gsIsDataEqn(data_eqn));
+  ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+  ATermAppl rhs = ATAgetArgument(data_eqn, 3);
+
+    // lhs is of the form head(args) or head(arg0(args))
+  ATermAppl head = ATAgetArgument(lhs, 0);
+  ATermList args = ATLgetArgument(lhs, 1);
+  ATermAppl arg0 = ATAgetFirst(args);
+  if (gsIsDataAppl(arg0)) {
+    args = ATLgetArgument(arg0, 1);
+    arg0 = ATAgetArgument(arg0, 0);
+  } else if (gsIsOpId(arg0)) {
+    args = ATmakeList0();
+  }
+  ATermAppl head_sort = gsGetSort(head);
+  assert(gsIsSortArrow(head_sort));
+
+  return gsIsOpId(head) && gsIsOpId(arg0) &&
+         (ATgetLength(ATLgetArgument(head_sort, 0)) == 1) &&
+         is_list_of_data_var_ids(args) &&
+         gsIsSortArrow(gsGetSort(arg0)) &&
+         (ATindexOf(ATLgetArgument(gsGetSort(arg0), 0), (ATerm) gsGetSortExprResult(gsGetSort(head)), 0) != -1) &&
+         gsIsDataVarId(rhs);
+}
+
+bool is_list_equation(ATermAppl data_eqn)
+{
+  assert(gsIsDataEqn(data_eqn));
+  ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+  if (gsIsDataAppl(lhs)) {
+    ATermAppl head = ATAgetArgument(lhs, 0);
+    if (gsIsOpId(head)) {
+      return is_list_operator(head);
+    }
+  }
+  return false;
+}
+
+void remove_mapping_not_list(ATermAppl op,
+                        ATermAppl sort,
+                        atermpp::map<ATermAppl, atermpp::indexed_set>& sort_mappings,
+                        atermpp::map<ATermAppl, atermpp::indexed_set>& map_equations,
+                        atermpp::map<ATermAppl, int>& num_map_equations)
+{
+  if (!is_list_operator(op)) {
+    map_equations.erase(op);
+    num_map_equations.erase(op);
+    if (sort_mappings[sort].index(op) >= 0) {
+      sort_mappings[sort].remove(op);
+    }
+  }
+}
+
