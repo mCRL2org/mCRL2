@@ -11,7 +11,7 @@
 #include <utility>
 
 #include <tipi/detail/layout_mediator.hpp>
-#include <tipi/detail/layout_manager.hpp>
+#include <tipi/layout_manager.hpp>
 
 #include <boost/foreach.hpp>
 

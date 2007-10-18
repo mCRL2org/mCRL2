@@ -16,8 +16,8 @@
 #include <tipi/report.hpp>
 #include <tipi/controller/capabilities.hpp>
 #include <tipi/tool/capabilities.hpp>
-#include <tipi/detail/layout_elements.hpp>
-#include <tipi/detail/layout_manager.hpp>
+#include <tipi/layout_elements.hpp>
+#include <tipi/layout_manager.hpp>
 #include <tipi/utility/generic_visitor.tcc>
 #include <tipi/tool_display.hpp>
 #include <tipi/common.hpp>

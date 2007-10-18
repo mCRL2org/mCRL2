@@ -10,7 +10,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "transport/detail/socket_transceiver.hpp"
+#include <tipi/transport/detail/socket_transceiver.hpp>
 
 namespace transport {
   namespace listener {

@@ -13,7 +13,9 @@
 #include <memory>
 #include <string>
 
-#include <tipi/tool.hpp>
+#include <tipi/display.hpp>
+#include <tipi/layout_manager.hpp>
+#include <tipi/layout_elements.hpp>
 
 namespace mcrl2 {
   namespace utilities {
@@ -98,7 +100,7 @@ namespace mcrl2 {
        **/
       template < typename T >
       inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(T const& v, std::string const& s, bool b) {
-        radio_button& button = display.create< tipi::layout::elements::radio_button >();;
+        radio_button& button = display.create< tipi::layout::elements::radio_button >();
   
         if (first == 0) {
           first = &button;

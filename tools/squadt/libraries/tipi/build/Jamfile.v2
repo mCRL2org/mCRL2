@@ -50,6 +50,7 @@ alias messenger
       tool_display.cpp
       layout_base.cpp
       layout_elements.cpp
+      event_handlers.cpp
       mime_type.cpp
       transport
       store_visitor.cpp

@@ -12,11 +12,11 @@
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
-#include "transport/detail/transporter.tcc"
-#include "transport/detail/transceiver.tcc"
-#include "transport/detail/socket_listener.hpp"
-#include "transport/detail/direct_transceiver.hpp"
-#include "transport/detail/socket_transceiver.hpp"
+#include <tipi/transport/detail/transporter.tcc>
+#include <tipi/transport/detail/transceiver.tcc>
+#include <tipi/transport/detail/socket_listener.hpp>
+#include <tipi/transport/detail/direct_transceiver.hpp>
+#include <tipi/transport/detail/socket_transceiver.hpp>
 
 namespace transport {
 

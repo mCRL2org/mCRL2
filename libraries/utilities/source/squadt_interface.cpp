@@ -8,6 +8,8 @@
 /// \brief Add your file description here.
 
 #define NO_MCRL2_TOOL_FACILITIES
+#include <tipi/tool.hpp>
+
 #include "mcrl2/utilities/squadt_interface.h"
 #include "tipi/utility/logger.hpp"
 
@@ -16,7 +18,14 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-      tipi::tool::communicator* mcrl2_tool_interface::communicator;
+      boost::function< void (const tipi::report::type, std::string const&) > mcrl2_tool_interface::do_send_report;
+
+      tool_interface::tool_interface() : m_communicator(new tipi::tool::communicator) {
+      }
+  
+      tool_interface::~tool_interface() {
+        delete m_communicator;
+      }
 
       bool tool_interface::try_run() {
         if (active) {
@@ -27,9 +36,9 @@ namespace mcrl2 {
   
           try {
             while (!termination_requested) {
-              switch (m_communicator.await_message(tipi::message_any)->get_type()) {
+              switch (m_communicator->await_message(tipi::message_any)->get_type()) {
                 case tipi::message_configuration: {
-                    tipi::configuration& configuration = m_communicator.get_configuration();
+                    tipi::configuration& configuration = m_communicator->get_configuration();
            
                     /* Insert configuration in tool communicator object */
                     valid_configuration_present = check_configuration(configuration);
@@ -45,12 +54,12 @@ namespace mcrl2 {
                     }
            
                     /* Signal that the configuration is acceptable */
-                    m_communicator.send_configuration(configuration);
+                    m_communicator->send_configuration(configuration);
                   }
                   break;
                 case tipi::message_task_start:
                   if (valid_configuration_present) {
-                    tipi::configuration& configuration = m_communicator.get_configuration();
+                    tipi::configuration& configuration = m_communicator->get_configuration();
 
                     /* Signal that the job is finished */
                     bool result = perform_task(configuration);
@@ -59,10 +68,10 @@ namespace mcrl2 {
                       send_error("Operation failed; tool may have crashed!");
                     }
                     else {
-                      m_communicator.send_configuration(configuration);
+                      m_communicator->send_configuration(configuration);
                     }
   
-                    m_communicator.send_signal_done(result);
+                    m_communicator->send_signal_done(result);
                   }
                   else {
                     send_error("Start signal received without valid configuration!");
@@ -86,9 +95,9 @@ namespace mcrl2 {
   
           finalise();
   
-          m_communicator.send_signal_termination();
+          m_communicator->send_signal_termination();
 
-          m_communicator.disconnect();
+          m_communicator->disconnect();
   
           active = false;
   
@@ -99,9 +108,9 @@ namespace mcrl2 {
       }
   
       bool tool_interface::try_interaction(char* av) {
-        set_capabilities(m_communicator.get_tool_capabilities());
+        set_capabilities(m_communicator->get_tool_capabilities());
   
-        active = m_communicator.activate(av);
+        active = m_communicator->activate(av);
   
         return (try_run());
       }
@@ -118,9 +127,9 @@ namespace mcrl2 {
        **/
       bool tool_interface::try_interaction(int& ac, char** const av) {
   
-        set_capabilities(m_communicator.get_tool_capabilities());
+        set_capabilities(m_communicator->get_tool_capabilities());
   
-        active = m_communicator.activate(ac,av);
+        active = m_communicator->activate(ac,av);
   
         return (try_run());
       }
@@ -130,15 +139,23 @@ namespace mcrl2 {
       }
   
       void tool_interface::send_notification(std::string const& m) const {
-        m_communicator.send_status_report(tipi::report::notice, m);
+        m_communicator->send_status_report(tipi::report::notice, m);
       }
   
       void tool_interface::send_warning(std::string const& m) const {
-        m_communicator.send_status_report(tipi::report::warning, m);
+        m_communicator->send_status_report(tipi::report::warning, m);
       }
   
       void tool_interface::send_error(std::string const& m) const {
-        m_communicator.send_status_report(tipi::report::error, m);
+        m_communicator->send_status_report(tipi::report::error, m);
+      }
+
+      /**
+       * \param[in] m the type of the report
+       * \param[in] d the data
+       **/
+      void tool_interface::send_report(const tipi::report::type m, std::string const& d) {
+        m_communicator->send_status_report(m, d);
       }
 
       /// \internal
@@ -153,11 +170,11 @@ namespace mcrl2 {
       void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
         boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d, trivial_deleter());
 
-        m_communicator.send_display_layout(dsp);
+        m_communicator->send_display_layout(dsp);
       }
   
       void tool_interface::send_clear_display() {
-        m_communicator.send_clear_display();
+        m_communicator->send_clear_display();
       }
   
       void tool_interface::send_hide_display() {
@@ -165,7 +182,7 @@ namespace mcrl2 {
   
         p->show(false);
   
-        m_communicator.send_display_layout(p);
+        m_communicator->send_display_layout(p);
       }
   
       boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;

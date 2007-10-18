@@ -16,7 +16,7 @@
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool_display.hpp"
-#include "tipi/detail/layout_elements.hpp"
+#include "tipi/layout_elements.hpp"
 #include "tipi/detail/basic_messenger.hpp"
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */

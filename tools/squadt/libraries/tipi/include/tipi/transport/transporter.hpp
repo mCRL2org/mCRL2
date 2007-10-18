@@ -12,7 +12,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "transport/detail/transceiver.hpp"
+#include <tipi/transport/detail/transceiver.hpp>
 
 /*
  * Socket/Direct communication abstraction

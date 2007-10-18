@@ -16,8 +16,8 @@
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/basic_datatype.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/detail/layout_manager.hpp"
+#include "tipi/layout_elements.hpp"
+#include "tipi/layout_manager.hpp"
 #include "tipi/tool_display.hpp"
 #include "tipi/detail/event_handlers.hpp"
 #include "tipi/common.hpp"
@@ -505,6 +505,7 @@ namespace utility {
     display::element_identifier id = reinterpret_cast < display::element_identifier > (&c);
     
     tree->GetAttribute("connected", &id, false);
+    tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     c.m_connection = reinterpret_cast < radio_button* > (id);
 
@@ -528,8 +529,6 @@ namespace utility {
     catch (...) {
     }
 
-    tree->GetAttributeOrDefault("selected", &c.m_selected, false);
-     
     c.m_event_handler->process(&c, false);
   }
 

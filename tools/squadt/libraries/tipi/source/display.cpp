@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "tipi/detail/display.hpp"
+#include "tipi/display.hpp"
 
 namespace tipi {
 

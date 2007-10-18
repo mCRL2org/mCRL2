@@ -11,8 +11,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <tipi/detail/display.hpp>
-#include <tipi/detail/layout_manager.hpp>
+#include <tipi/display.hpp>
+#include <tipi/layout_manager.hpp>
 
 namespace tipi {
   namespace layout {

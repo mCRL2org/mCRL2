@@ -5,7 +5,7 @@
 /// \file source/layout_elements.cpp
 
 #include "tipi/layout_base.hpp"
-#include "tipi/detail/layout_elements.hpp"
+#include "tipi/layout_elements.hpp"
 
 namespace tipi {
   namespace layout {
@@ -75,19 +75,22 @@ namespace tipi {
       radio_button& radio_button::connect(radio_button& r) {
 
         if (&r != this) {
-          r.set_selected(false);
-
           // disconnect from group if it contains more than one button
-          if (r.m_connection != r.m_connection) {
+          if (r.m_connection != &r) {
             radio_button* n = r.m_connection;
 
-            while (n->m_connection != r.m_connection) {
+            while (n->m_connection != &r) {
               n = n->m_connection;
             }
 
             n->m_connection = r.m_connection;
+
+            if (r.m_selected) {
+              n->m_selected = true;
+            }
           }
 
+          r.m_selected   = false;
           r.m_connection = m_connection;
           m_connection   = &r;
         }
@@ -119,22 +122,24 @@ namespace tipi {
       /**
        * \param[in] b whether or not to send an event
        **/
-      void radio_button::set_selected(bool b) {
+      inline void radio_button::set_selected(bool b) {
         for (radio_button* r = m_connection; r != this; r = r->m_connection) {
           if (r->m_selected) {
             r->m_selected = false;
-
+       
             break;
           }
         }
-
+       
         m_selected = true;
-
+       
         activate_handlers(b);
       }
 
       radio_button& radio_button::select() {
-        set_selected(true);
+        if (!m_selected) {
+          set_selected(true);
+        }
 
         return *this;
       }

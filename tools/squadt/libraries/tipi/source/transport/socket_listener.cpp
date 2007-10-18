@@ -6,9 +6,9 @@
 
 #include <boost/format.hpp>
 
-#include "transport/transporter.hpp"
-#include "transport/detail/socket_listener.hpp"
-#include "transport/detail/socket_transceiver.hpp"
+#include <tipi/transport/transporter.hpp>
+#include <tipi/transport/detail/socket_listener.hpp>
+#include <tipi/transport/detail/socket_transceiver.hpp>
 
 namespace transport {
   /// \cond INTERNAL_DOCS

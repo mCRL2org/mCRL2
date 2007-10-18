@@ -13,8 +13,8 @@
 
 #include "tipi/layout_base.hpp"
 #include "tipi/object.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/detail/layout_manager.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/layout_elements.hpp"
 #include "tipi/detail/layout_mediator.hpp"
 #include "tipi/detail/event_handlers.hpp"
 

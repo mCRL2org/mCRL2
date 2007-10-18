@@ -150,7 +150,7 @@ namespace tipi {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
-      public:
+      protected:
 
         /// \cond INTERNAL_DOCS
         struct layout_descriptor {
@@ -161,9 +161,6 @@ namespace tipi {
           layout_descriptor(element* e, properties const& p) : layout_element(e), layout_properties(p) { }
         };
         /// \endcond
-
-        /** \brief Type alias to simplify using auto pointers */
-        typedef std::auto_ptr < manager > aptr;
 
       protected:
 
@@ -375,7 +372,7 @@ namespace tipi {
     }
 
     /// \cond INTERNAL_DOCS
-    inline properties::properties() : m_alignment_horizontal(left), m_alignment_vertical(middle), m_margin(0, 0, 0, 0), m_visible(visible), m_grow(false), m_enabled(true) {
+    inline properties::properties() : m_alignment_horizontal(left), m_alignment_vertical(middle), m_margin(0, 0, 0, 0), m_visible(visible), m_grow(true), m_enabled(true) {
     }
 
     inline properties::properties(properties const& p) :
@@ -384,15 +381,15 @@ namespace tipi {
     }
 
     inline properties::properties(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(false), m_enabled(true) {
+                                                m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
     }
 
     inline properties::properties(vertical_alignment const& av, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(false), m_enabled(true) {
+                                                m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
     }
 
     inline properties::properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(ah), m_alignment_vertical(middle), m_margin(m), m_visible(v), m_grow(false), m_enabled(true) {
+                                                m_alignment_horizontal(ah), m_alignment_vertical(middle), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
     }
 
     inline void properties::set_growth(bool b) {

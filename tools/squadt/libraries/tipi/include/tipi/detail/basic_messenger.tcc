@@ -24,10 +24,10 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/xtime.hpp>
 
-#include "transport/detail/transporter.tcc"
+#include <tipi/transport/detail/transporter.tcc>
 
-#include "tipi/detail/basic_messenger.hpp"
-#include "tipi/common.hpp"
+#include <tipi/detail/basic_messenger.hpp>
+#include <tipi/common.hpp>
 
 /// \cond INTERNAL_DOCS
 /**

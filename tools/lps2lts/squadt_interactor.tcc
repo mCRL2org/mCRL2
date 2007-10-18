@@ -195,14 +195,14 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   m.append(d.create< label >().set_text("Exploration strategy")).
     append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
-                append(exploration_strategy_selector.associate(es_breadth, "breath-first")).
+                append(exploration_strategy_selector.associate(es_breadth, "breath-first", true)).
                 append(exploration_strategy_selector.associate(es_depth, "depth-first")).
                 append(exploration_strategy_selector.associate(es_random, "random"))).
     append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
                 append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
                 append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
+                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
 
   if (make_lts) {
@@ -237,10 +237,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
           append(cb_bithashing.set_label("bit hashing; number of states")).
           append(d.create< label >().set_text("initial hash table size:"))).
       append(d.create< vertical_box >().set_default_alignment(layout::right).
-          append(d.create< label >().set_text(" ")).
+          append(d.create< label >().set_text(" "), margins(1,0,0,0)).
           append(tf_actions).
           append(tf_max_traces).
-          append(d.create< label >().set_text(" ")).
+          append(d.create< label >().set_text(" "), margins(1,0,0,0)).
           append(tf_conf_tau).
           append(tf_max_states).
           append(tf_bithashsize).
@@ -259,7 +259,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
     rewrite_strategy_selector.set_selection(static_cast < RewriteStrategy > (
         c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
   }
-  if (c.option_exists(option_rewrite_strategy)) {
+  if (c.option_exists(option_exploration_strategy)) {
     exploration_strategy_selector.set_selection(static_cast < exploration_strategy > (
         c.get_option_argument< size_t >(option_exploration_strategy, 0)));
   }

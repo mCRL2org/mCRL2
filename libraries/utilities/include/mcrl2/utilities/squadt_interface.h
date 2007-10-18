@@ -9,22 +9,30 @@
 #ifndef MCRL2_SQUADT_INTERFACE_H_
 #define MCRL2_SQUADT_INTERFACE_H_
 
-// Undefine wxWidgets defined macro _
-//
-// it conflicts with boost::thread and is unneeded because the macro wxT does the same
-#if defined(_)
-# undef _
-#endif
-
 #include <boost/cstdint.hpp>
 
-#include <tipi/tool.hpp>
+#include <tipi/report.hpp>
+#include <tipi/tool_display.hpp>
+#include <tipi/configuration.hpp>
+#include <tipi/tool/capabilities.hpp>
 
 #include "mcrl2/utilities/tipi_ext.h"
 
 #ifndef NO_MCRL2_TOOL_FACILITIES
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include "print/messaging.h"
 #endif
+
+namespace tipi {
+  class configuration;
+
+  namespace tool {
+
+    class communicator;
+    class capabilities;
+  }
+}
 
 /** \brief Helps relaying messages printed through the mcrl2_basic::print */
 namespace mcrl2 {
@@ -48,13 +56,16 @@ namespace mcrl2 {
         protected:
   
           /** \brief communicator object through which all communication with SQuADT will take place */
-          tipi::tool::communicator m_communicator;
+          tipi::tool::communicator* m_communicator;
   
         protected:
   
           /** \brief send notification message */
           void send_notification(std::string const&) const;
   
+          /** \brief send status message */
+          void send_report(const tipi::report::type, std::string const&);
+
           /** \brief send warning message */
           void send_warning(std::string const&) const;
   
@@ -156,13 +167,25 @@ namespace mcrl2 {
       };
 #endif
 
+      /**
+       * \brief mCRL2 tool specific squadt interface
+       *
+       * In addition to the interface above, the message system used by most
+       * tools in the mCRL2 toolset is initialised such that messages are
+       * relayed.
+       *
+       * \note only works for one object at a time
+       **/
       class mcrl2_tool_interface : public tool_interface {
         template < typename T >
         friend void relay_message(const T, const char* data);
 
-        protected:
+        private:
 
-          static tipi::tool::communicator* communicator;
+          /** \brief send status message, used only to relay messages */
+          static boost::function< void (const tipi::report::type, std::string const&) > do_send_report;
+
+          using tool_interface::send_report;
 
         protected:
 
@@ -194,25 +217,25 @@ namespace mcrl2 {
             break;
         }
       
-        mcrl2_tool_interface::communicator->send_status_report(report_type, std::string(data));
+        mcrl2_tool_interface::do_send_report(report_type, std::string(data));
       }  
 
       inline void mcrl2_tool_interface::initialise() {
-        gsSetCustomMessageHandler(relay_message<messageType>);
+        gsSetCustomMessageHandler(relay_message< messageType >);
   
         tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
   
         gsSetNormalMsg();
   
-        if (1 < l) {
+        if (2 < l) {
           gsSetVerboseMsg();
   
-          if (2 < l) {
+          if (3 < l) {
             gsSetDebugMsg();
           }
         }
 
-        mcrl2_tool_interface::communicator = &m_communicator;
+        mcrl2_tool_interface::do_send_report = boost::bind(&mcrl2_tool_interface::send_report, this, _1, _2);
       }
   
       inline void mcrl2_tool_interface::finalise() {
@@ -253,12 +276,6 @@ namespace mcrl2 {
         return (c.try_interaction(ac, av));
       }
   
-      inline tool_interface::tool_interface() {
-      }
-  
-      inline tool_interface::~tool_interface() {
-      }
-
       /* Standard type for input validation */
       extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
