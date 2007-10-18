@@ -38,8 +38,14 @@ void Simulation::start() {
   for (int i = 0; i < currState->getNumLoops(); ++i) {
     posTrans.push_back(currState->getLoop(i));
   }
-
-  chosenTrans = -1;
+  if (posTrans.size() > 0)
+  {
+    chosenTrans = 0;
+  }
+  else 
+  {
+    chosenTrans = -1;
+  }
   
   started = true;
   //Fire signal
@@ -108,7 +114,14 @@ vector< Transition* > const& Simulation::getPosTrans() const {
 }
 
 Transition* Simulation::getChosenTrans() const {
-  return posTrans[chosenTrans];
+  if (chosenTrans >= 0)
+  {
+    return posTrans[chosenTrans];
+  }
+  else
+  {
+    return NULL;
+  }
 }
 
 int Simulation::getChosenTransi() const {
@@ -172,8 +185,15 @@ void Simulation::followTrans() {
     for (int i = 0; i < nextState->getNumLoops(); ++i) {
       posTrans.push_back(nextState->getLoop(i));
     }
-  
-    chosenTrans = 0;
+
+    if (posTrans.size() > 0)
+    {
+      chosenTrans = 0;
+    }
+    else
+    {
+      chosenTrans = -1;
+    }
 
     //Fire signal
     signal();
@@ -214,8 +234,15 @@ void Simulation::undoStep() {
   for (int i = 0; i < currState->getNumLoops(); ++i) {
     posTrans.push_back(currState->getLoop(i));
   }
-
-  chosenTrans = -1;
+  
+  if (posTrans.size() > 0)
+  {
+    chosenTrans = 0;
+  }
+  else
+  {
+    chosenTrans = -1;
+  }
 
   // Fire signal
   signal();
@@ -247,8 +274,15 @@ void Simulation::resetSim() {
   for (int i = 0; i < currState->getNumLoops(); ++i) {
     posTrans.push_back(currState->getLoop(i));
   }
-
-  chosenTrans = -1;
+  
+  if (posTrans.size() > 0)
+  {
+    chosenTrans = 0;
+  }
+  else 
+  {
+    chosenTrans = -1;
+  }
 
   // Fire signal
   signal();
