@@ -122,7 +122,7 @@ namespace tipi {
       /**
        * \param[in] b whether or not to send an event
        **/
-      inline void radio_button::set_selected(bool b) {
+      void radio_button::set_selected(bool b) {
         for (radio_button* r = m_connection; r != this; r = r->m_connection) {
           if (r->m_selected) {
             r->m_selected = false;
