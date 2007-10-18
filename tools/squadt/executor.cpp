@@ -17,6 +17,7 @@
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread/thread.hpp>
 
 #include "tipi/utility/generic_visitor.hpp"
 

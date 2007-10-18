@@ -12,7 +12,6 @@
 
 #include <cstdio>
 
-#include <boost/thread/thread.hpp>
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
 

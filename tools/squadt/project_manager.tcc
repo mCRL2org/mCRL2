@@ -10,6 +10,8 @@
 #ifndef PROJECT_MANAGER_TCC_
 #define PROJECT_MANAGER_TCC_
 
+#include <boost/thread/mutex.hpp>
+
 #include "project_manager.hpp"
 
 namespace squadt {
