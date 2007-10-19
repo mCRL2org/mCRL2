@@ -237,10 +237,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
           append(cb_bithashing.set_label("bit hashing; number of states")).
           append(d.create< label >().set_text("initial hash table size:"))).
       append(d.create< vertical_box >().set_default_alignment(layout::right).
-          append(d.create< label >().set_text(" "), margins(1,0,0,0)).
+          append(d.create< checkbox >(), layout::hidden).
           append(tf_actions).
           append(tf_max_traces).
-          append(d.create< label >().set_text(" "), margins(1,0,0,0)).
+          append(d.create< checkbox >(), layout::hidden).
           append(tf_conf_tau).
           append(tf_max_states).
           append(tf_bithashsize).

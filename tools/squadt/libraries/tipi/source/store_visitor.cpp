@@ -497,8 +497,8 @@ namespace utility {
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::properties const& c) {
     out << "<properties "
-        << "alignment-horizontal=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
-        << "\" alignment-vertical=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
+        << "horizontal-alignment=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
+        << "\" vertical-alignment=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
         << "\" margin-top=\"" << c.m_margin.top
         << "\" margin-left=\"" << c.m_margin.left
         << "\" margin-bottom=\"" << c.m_margin.bottom
@@ -542,13 +542,13 @@ namespace utility {
     if (c0.m_margin.right != c1.m_margin.right) {
       out << " margin-right=\"" << c0.m_margin.right << "\"";
     }
-    if (!c1.m_grow && c0.m_grow) {
+    if (c1.m_grow != c0.m_grow) {
       out << " grow=\"" << c0.m_grow << "\"";
     }
-    if (!c1.m_enabled && c0.m_enabled) {
+    if (c1.m_enabled != c0.m_enabled) {
       out << " enabled=\"" << c0.m_enabled << "\"";
     }
-    if (!c1.m_visible && c0.m_visible) {
+    if (c1.m_visible != c0.m_visible) {
       out << " visibility=\"" << tipi::visibility_to_text[c0.m_visible] << "\"";
     }
 

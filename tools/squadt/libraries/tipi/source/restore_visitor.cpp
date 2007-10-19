@@ -608,6 +608,7 @@ namespace utility {
 
   /** \brief Finds a member of the visibility domain for a string */
   static tipi::layout::horizontal_alignment text_to_horizontal_alignment(std::string const& s) {
+  std::cerr << "HORIZONTAL_ALIGNMENT(" << s << ")" << std::endl;
     if (s == "left") {
       return (tipi::layout::left);
     }
@@ -628,9 +629,29 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::properties& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
 
-    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeOrDefault("alignment-horizontal", "right"));
-    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeOrDefault("alignment-vertical", "bottom"));
-    c.m_visible              = text_to_visibility(tree->GetAttributeOrDefault("visibility", "visible"));
+    std::string s;
+
+    tree->GetAttribute("horizontal-alignment", &s, false);
+
+    if (!s.empty()) {
+      c.m_alignment_horizontal = text_to_horizontal_alignment(s); 
+    } else {
+      s.clear();
+    }
+
+    tree->GetAttribute("vertical-alignment", &s, false);
+
+    if (!s.empty()) {
+      c.m_alignment_vertical = text_to_vertical_alignment(s); 
+    } else {
+      s.clear();
+    }
+
+    tree->GetAttribute("visibility",&s , false);
+
+    if (!s.empty()) {
+      c.m_visible = text_to_visibility(s); 
+    }
 
     tree->GetAttribute("margin-top", &c.m_margin.top, false);
     tree->GetAttribute("margin-left", &c.m_margin.left, false);

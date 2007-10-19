@@ -241,12 +241,12 @@ namespace squadt {
       mediator::aptr tool_display_mediator::build_vertical_box() {
         struct trampoline {
           static void attach(wxSizer* sizer, mediator::wrapper_aptr d, tipi::layout::properties const* c) {
-            wrapper* sd     = static_cast < wrapper* > (d.get());
+            wrapper& target = static_cast < wrapper& > (*d);
             int      flags  = wxLEFT|wxRIGHT;
            
             layout::properties const& cr = *(static_cast < layout::properties const* > (c));
            
-            if (cr.m_grow) {
+            if (cr.m_grow || !target.wraps_window()) {
               flags |= wxEXPAND;
             }
            
@@ -263,24 +263,35 @@ namespace squadt {
             }
            
             if (0 < cr.m_margin.top) {
-              sizer->AddSpacer(cr.m_margin.bottom);
+              sizer->AddSpacer(cr.m_margin.top);
             }
-           
+
             wxSizerItem* new_sizer_item;
-           
-            if (sd->wraps_window()) {
-              new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
+
+            if (cr.m_visible != tipi::layout::hidden) {
+              if (target.wraps_window()) {
+                 new_sizer_item = sizer->Add(target.release_window(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
+              }
+              else {
+                 new_sizer_item = sizer->Add(target.release_sizer(), 0, flags, (cr.m_margin.left + cr.m_margin.right) >> 1);
+              }
             }
             else {
-              new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.left + cr.m_margin.right) >> 1);
+              // Window is not connected and will be deleted when the auto pointer goes out of scope
+              if (target.wraps_window()) {
+                sizer->AddSpacer(target.get_window()->GetBestSize().GetHeight());
+
+                m_event_handler.remove(target.get_sizer());
+              }
+              else {
+                sizer->AddSpacer(target.get_sizer()->CalcMin().GetHeight());
+
+                m_event_handler.remove(target.get_window());
+              }
             }
            
             if (0 < cr.m_margin.bottom) {
               sizer->AddSpacer(cr.m_margin.bottom);
-            }
-           
-            if (cr.m_visible == tipi::layout::hidden) {
-              new_sizer_item->Show(false);
             }
           }
         };
@@ -300,19 +311,20 @@ namespace squadt {
       mediator::aptr tool_display_mediator::build_horizontal_box() {
         struct trampoline {
           static void attach(wxSizer* sizer, mediator::wrapper_aptr d, tipi::layout::properties const* c) {
+            wrapper& target = static_cast < wrapper& > (*d);
             int      flags  = wxTOP|wxBOTTOM;
            
-            tipi::layout::properties const& cr = *(static_cast < layout::properties const* > (c));
+            tipi::layout::properties const& cr(*(static_cast < layout::properties const* > (c)));
            
-            if (cr.m_grow) {
+            if (cr.m_grow || !target.wraps_window()) {
               flags |= wxEXPAND;
             }
            
             switch (cr.m_alignment_vertical) {
-              case tipi::layout::top:
+              case layout::top:
                 flags |= wxALIGN_TOP;
                 break;
-              case tipi::layout::bottom:
+              case layout::bottom:
                 flags |= wxALIGN_BOTTOM;
                 break;
               default: /* center */
@@ -324,23 +336,32 @@ namespace squadt {
               sizer->AddSpacer(cr.m_margin.left);
             }
            
-            wrapper* sd = static_cast < wrapper* > (d.get());
-
             wxSizerItem* new_sizer_item;
-           
-            if (sd->wraps_window()) {
-              new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+
+            if (cr.m_visible != tipi::layout::hidden) {
+              if (target.wraps_window()) {
+                 new_sizer_item = sizer->Add(target.release_window(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+              }
+              else {
+                 new_sizer_item = sizer->Add(target.release_sizer(), 0, flags, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+              }
             }
             else {
-              new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags|wxEXPAND, (cr.m_margin.top + cr.m_margin.bottom) >> 1);
+              // Window is not connected and will be deleted when the auto pointer goes out of scope
+              if (target.wraps_window()) {
+                sizer->AddSpacer(target.get_window()->GetBestSize().GetWidth());
+
+                m_event_handler.remove(target.get_window());
+              }
+              else {
+                sizer->AddSpacer(target.get_sizer()->CalcMin().GetWidth());
+
+                m_event_handler.remove(target.get_sizer());
+              }
             }
            
             if (0 < cr.m_margin.right) {
               sizer->AddSpacer(cr.m_margin.right);
-            }
-           
-            if (cr.m_visible == tipi::layout::hidden) {
-              new_sizer_item->Show(false);
             }
           }
         };

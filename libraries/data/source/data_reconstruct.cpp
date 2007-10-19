@@ -43,7 +43,7 @@ static ATermAppl reconstruct_data_expr(ATermAppl Part, const ATermAppl Spec);
 static ATermAppl reconstruct_sort_expr(ATermAppl Part, const ATermAppl Spec);
 
 //TODO: Describe prototype
-static ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult);
+static ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult);
 
 //pre: OpId is an OpId of the form lambda@x (with x a natural number),
 //     Spec is a SpecV1
@@ -566,7 +566,7 @@ ATermAppl reconstruct_sort_expr(ATermAppl Part, const ATermAppl Spec)
   return Part;
 }
 
-ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char* Mult)
+ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult)
 {
   ATermAppl Head = gsGetDataExprHead(PosExpr);
   ATermList Args = gsGetDataExprArgs(PosExpr);

@@ -20,9 +20,9 @@ namespace tipi {
 
     /** \brief Type for element visibility */
     enum visibility {
-      visible = 10,  ///< the element is visible
-      hidden = 11,   ///< the element is not visible but still has effect on the layout
-      none = 12      ///< the element is invisible and has no effect on the layout
+      visible,  ///< the element is visible
+      hidden,   ///< the element is not visible but still has effect on the layout
+      none      ///< the element is invisible and has no effect on the layout
     };
 
     /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
@@ -372,7 +372,7 @@ namespace tipi {
     }
 
     /// \cond INTERNAL_DOCS
-    inline properties::properties() : m_alignment_horizontal(left), m_alignment_vertical(middle), m_margin(0, 0, 0, 0), m_visible(visible), m_grow(true), m_enabled(true) {
+    inline properties::properties() : m_alignment_horizontal(left), m_alignment_vertical(top), m_margin(0, 0, 0, 0), m_visible(visible), m_grow(true), m_enabled(true) {
     }
 
     inline properties::properties(properties const& p) :
@@ -389,7 +389,7 @@ namespace tipi {
     }
 
     inline properties::properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(ah), m_alignment_vertical(middle), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
+                                                m_alignment_horizontal(ah), m_alignment_vertical(top), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
     }
 
     inline void properties::set_growth(bool b) {
@@ -427,7 +427,7 @@ namespace tipi {
                                                                 top(t), right(r), bottom(b), left(l) {
     }
 
-    inline manager::manager() : m_default_properties(middle, left, margins(0,0,0,0), visible) {
+    inline manager::manager() : m_default_properties(top, left, margins(0,0,0,0), visible) {
     }
 
     /**
@@ -565,7 +565,7 @@ namespace tipi {
     template < typename A >
     template < typename T >
     inline box< A >& box< A >::append(T& e, margins const& m, visibility const& v) {
-      add(static_cast < element& > (e), properties(middle, manager::get_default_horizontal_alignment(), manager::get_default_vertical_alignment(), m, v));
+      add(static_cast < element& > (e), properties(manager::get_default_vertical_alignment(), manager::get_default_horizontal_alignment(), m, v));
 
       return *this;
     }
@@ -579,7 +579,7 @@ namespace tipi {
     template < typename A >
     template < typename T >
     inline box< A >& box< A >::append(T& e, visibility const& v) {
-      add(static_cast < element& > (e), properties(middle, manager::get_default_horizontal_alignment(), manager::get_default_vertical_alignment(), manager::get_default_margins(), v));
+      add(static_cast < element& > (e), properties(manager::get_default_vertical_alignment(), manager::get_default_horizontal_alignment(), manager::get_default_margins(), v));
 
       return *this;
     }
