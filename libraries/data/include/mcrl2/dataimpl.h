@@ -118,6 +118,12 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
  * Detailed data implementation, this is used by data reconstruction only!
  * ============================================================================
  */
+
+ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list);
+//Pre: sort_elt and sort_list are sorts
+//Ret: the list of data equations belonging to the list sort sort_list, with
+//     elements sort_elt.
+
 ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
   t_data_decls *p_data_decls);
 //Pre: sort_list is a list sort

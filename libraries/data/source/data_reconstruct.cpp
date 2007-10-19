@@ -83,10 +83,6 @@ static ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermL
 //ret: Spec from which set and bag functions have been removed.
 static ATermAppl remove_headers_with_binders_from_spec(ATermAppl Spec, ATermAppl OrigSpec, ATermList* p_substs);
 
-//pre: list_sort is a sort for a list implementation
-//post:p_data_decls from which the implementation of list_sort has been removed
-static void remove_list_sort_from_data_decls(ATermAppl list_sort, t_data_decls* p_data_decls);
-
 //pre: set_sort is a sort for a set implementation
 //     spec is a Specification
 //post:p_data_decls from which the implementation of set_sort has been removed
@@ -96,10 +92,6 @@ static void remove_set_sort_from_data_decls(ATermAppl set_sort, t_data_decls* p_
 //     spec is a Specification
 //post:p_data_decls from which the implementation of bag_sort has been removed
 static void remove_bag_sort_from_data_decls(ATermAppl bag_sort, t_data_decls* p_data_decls, ATermAppl spec);
-
-//pre: list_impl_sort is a sort expression for a list implementation
-//ret: The sort of the elements of list_impl_sort.
-static ATermAppl find_elt_sort_for_list_impl(ATermAppl list_impl_sort, t_data_decls* p_data_decls);
 
 //post: p_data_decls constains the reconstructed versions of the structured
 //      sorts in p_data_decls.
@@ -129,7 +121,7 @@ static bool is_list_operator(ATermAppl data_expr);
 //     false otherwise.
 static bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors);
 
-static bool is_list_equation(ATermAppl data_eqn);
+static bool is_list_equation(ATermAppl data_eqn, ATermList generic_list_equations);
 
 static bool is_recogniser_equation(ATermAppl data_eqn);
 
@@ -140,6 +132,12 @@ static void remove_mapping_not_list(ATermAppl op,
                         atermpp::map<ATermAppl, atermpp::indexed_set>& sort_mappings,
                         atermpp::map<ATermAppl, atermpp::indexed_set>& map_equations,
                         atermpp::map<ATermAppl, int>& num_map_equations);
+
+static bool match(ATerm aterm_ann, ATerm aterm, ATermList* p_substs);
+
+static bool match_appl(ATermAppl aterm_ann, ATermAppl aterm, ATermList* p_substs);
+
+static bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs);
 
 // implementation
 // ----------------------------------------------
@@ -490,22 +488,7 @@ ATermAppl reconstruct_sort_expr(ATermAppl Part, const ATermAppl Spec)
   assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
 
   // Reconstruct sort expressions
-  if (is_list_sort_id(Part) && Spec != NULL) {
-    ATermAppl cons_spec = ATAgetArgument(ATAgetArgument(Spec,0), 1);
-    ATermList cons_ops = ATLgetArgument(cons_spec, 0);
-    bool found = false;
-    while (!ATisEmpty(cons_ops) && !found) {
-      ATermAppl cons_op = ATAgetFirst(cons_ops);
-      if (ATisEqual(gsGetName(cons_op), gsMakeOpIdNameCons())) {
-        ATermList sort_domain = ATLgetArgument(gsGetSort(cons_op), 0);
-        if (ATisEqual(Part, ATAelementAt(sort_domain, 1))) {
-          Part = gsMakeSortExprList(ATAgetFirst(sort_domain));
-          found = true;
-        }
-      }
-      cons_ops = ATgetNext(cons_ops);
-    }
-  } else if (is_set_sort_id(Part) && Spec != NULL) {
+  if (is_set_sort_id(Part) && Spec != NULL) {
     ATermAppl map_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 2);
     ATermList ops = ATLgetArgument(map_spec, 0);
     bool found = false;
@@ -539,30 +522,7 @@ ATermAppl reconstruct_sort_expr(ATermAppl Part, const ATermAppl Spec)
       }
       ops = ATgetNext(ops);
     }
-  } /*
-  else if (gsIsSortId(Part)) {
-    ATermAppl cons_spec = ATAgetArgument(ATAgetArgument(Spec, 0), 1);
-    ATermList cons_ops = ATLgetArgument(cons_spec, 0);
-    bool empty_list = false;
-    bool cons = false;
-    ATermList sort_domain = ATmakeList0();
-    while (!ATisEmpty(cons_ops) && !empty_list && !cons) {
-      ATermAppl cons_op = ATAgetFirst(cons_ops);
-      if (ATisEqual(cons_op, gsMakeOpIdEmptyList(Part))) {
-        empty_list = true;
-      } else if (ATisEqual(gsGetName(cons_op), gsMakeOpIdNameCons())) {
-        sort_domain = ATLgetArgument(gsGetSort(cons_op), 0);
-        if (ATisEqual(Part, ATAelementAt(sort_domain, 1))) {
-          cons = true;
-        }
-        cons_ops = ATgetNext(cons_ops);
-      }
-    }
-    if (cons && empty_list) {
-      Part = gsMakeSortExprList(ATAgetFirst(ATgetNext(sort_domain)));
-    }
   }
-  */
   return Part;
 }
 
@@ -868,17 +828,6 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   // these are removed from their respective parts of the data declarations
   // on the fly.
 
-  // Additional processing of Sorts
-  /*
-  for (ATermList sorts = data_decls.sorts; !ATisEmpty(sorts); sorts = ATgetNext(sorts))
-  {
-    ATermAppl sort = ATAgetFirst(sorts);
-    if (is_list_sort_id(sort)) {
-      remove_list_sort_from_data_decls(sort, &data_decls);
-    }
-  }
-  */
-
   reconstruct_structured_sorts(&data_decls, p_substs);
 
   // Additional processing of ops
@@ -986,24 +935,6 @@ ATermAppl remove_headers_with_binders_from_spec(ATermAppl Spec, ATermAppl OrigSp
   return Spec;
 }
 
-
-void remove_list_sort_from_data_decls(ATermAppl list_sort, t_data_decls* p_data_decls)
-{
-  assert(is_list_sort_id(list_sort));
-  gsDebugMsg("Removing implementation of list sort %T from specification\n", list_sort);
-  ATermAppl elt_sort = find_elt_sort_for_list_impl(list_sort, p_data_decls);
-
-  ATermAppl sort_list = gsMakeSortExprList(elt_sort);
-  t_data_decls list_decls;
-  initialize_data_decls(&list_decls);
-  ATermList dummy_substs = ATmakeList0(); // Needed in order to use impl_sort_list,
-                                          // but not used in this function
-  ATermAppl impl_sort = impl_sort_list(sort_list, &dummy_substs, &list_decls);
-  ATermList substs = ATmakeList1((ATerm) gsMakeSubst_Appl(impl_sort, list_sort));
-  subst_values_list_data_decls(substs, &list_decls, true);
-  subtract_data_decls(p_data_decls, &list_decls);
-}
-
 void remove_set_sort_from_data_decls(ATermAppl set_sort, t_data_decls* p_data_decls, ATermAppl spec)
 {
   gsDebugMsg("Removing implementation of set sort %T from specification\n", set_sort);
@@ -1052,27 +983,6 @@ void remove_bag_sort_from_data_decls(ATermAppl bag_sort, t_data_decls* p_data_de
   subtract_data_decls(p_data_decls, &bag_decls);
 }
 
-ATermAppl find_elt_sort_for_list_impl(ATermAppl list_impl_sort, t_data_decls* p_data_decls)
-{
-  gsDebugMsg("Finding element sort for list implementation %T\n", list_impl_sort);
-  assert(is_list_sort_id(list_impl_sort));
-  ATermAppl result = NULL;
-  ATermList cons_ops = p_data_decls->cons_ops;
-  while(result == NULL && !ATisEmpty(cons_ops))
-  {
-    ATermAppl cons_op = ATAgetFirst(cons_ops);
-    assert(gsIsOpId(cons_op));
-    if (ATisEqual(gsGetName(cons_op), gsMakeOpIdNameCons())) {
-      ATermList sort_domain = ATLgetArgument(gsGetSort(cons_op), 0);
-      if (ATisEqual(list_impl_sort, ATAelementAt(sort_domain, 1))) {
-        result = ATAgetFirst(sort_domain);
-      }
-    }
-    cons_ops = ATgetNext(cons_ops);
-  }
-  return result;
-}
-
 void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_substs)
 {
   assert(p_substs != NULL);
@@ -1100,6 +1010,13 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
   atermpp::map<ATermAppl, ATermAppl>       recognises;
   atermpp::map<std::pair<ATermAppl, int>, ATermAppl> projects;
   std::pair<long, bool> put_result; // result of atermpp::indexed_set::put()
+
+  /* for matching against list equations */
+  ATermAppl elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt"));
+  ATermAppl list_sort = gsMakeSortId(gsString2ATermAppl("sort_list"));
+  elt_sort = (ATermAppl) ATsetAnnotation((ATerm) elt_sort, (ATerm) gsString2ATermAppl("@dummy"), (ATerm) ATtrue);
+  list_sort = (ATermAppl) ATsetAnnotation((ATerm) list_sort, (ATerm) gsString2ATermAppl("@dummy"), (ATerm) ATtrue);
+  ATermList generic_list_equations = build_list_equations(elt_sort, list_sort);
 
   // Initialisation
   for (ATermList l = p_data_decls->sorts; !ATisEmpty(l); l = ATgetNext(l))
@@ -1281,7 +1198,7 @@ void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_subst
             num_map_equations[head]++;
           }
         }
-      } else if (is_list_equation(data_eqn)) {
+      } else if (is_list_equation(data_eqn, generic_list_equations)) {
         put_result = map_equations[head].put(data_eqn);
         if (put_result.second) {
           num_map_equations[head]++;
@@ -1666,17 +1583,17 @@ bool is_projection_equation(ATermAppl data_eqn)
          gsIsDataVarId(rhs);
 }
 
-bool is_list_equation(ATermAppl data_eqn)
+bool is_list_equation(ATermAppl data_eqn, ATermList generic_list_equations)
 {
   assert(gsIsDataEqn(data_eqn));
-  ATermAppl lhs = ATAgetArgument(data_eqn, 2);
-  if (gsIsDataAppl(lhs)) {
-    ATermAppl head = ATAgetArgument(lhs, 0);
-    if (gsIsOpId(head)) {
-      return is_list_operator(head);
-    }
+  bool result = false;
+  while (!result && !ATisEmpty(generic_list_equations))
+  {
+    ATermList substs = ATmakeList0();
+    result = match_appl(ATAgetFirst(generic_list_equations), data_eqn, &substs);
+    generic_list_equations = ATgetNext(generic_list_equations);
   }
-  return false;
+  return result;
 }
 
 void remove_mapping_not_list(ATermAppl op,
@@ -1692,5 +1609,60 @@ void remove_mapping_not_list(ATermAppl op,
       sort_mappings[sort].remove(op);
     }
   }
+}
+
+bool match(ATerm aterm_ann, ATerm aterm, ATermList* p_substs)
+{
+  if (ATisEqual(aterm_ann, aterm)) return true;
+
+  if (ATgetType(aterm_ann) == ATgetType(aterm)) {
+    if (ATgetType(aterm) == AT_APPL) {
+      return match_appl((ATermAppl) aterm_ann, (ATermAppl) aterm, p_substs);
+    } else { //ATgetType(arg) == AT_LIST
+      return match_list((ATermList) aterm_ann, (ATermList) aterm, p_substs);
+    }
+  }
+  return false;
+}
+
+bool match_appl(ATermAppl aterm_ann, ATermAppl aterm, ATermList* p_substs)
+{
+  aterm_ann = gsSubstValues_Appl(*p_substs, aterm_ann, false);
+
+  if (ATisEqual(aterm_ann, aterm)) return true;
+
+  if (gsIsSortId(aterm_ann) && gsIsSortId(aterm)) {
+    if (ATgetAnnotation((ATerm) aterm_ann, (ATerm) gsString2ATermAppl("@dummy")) != NULL) {
+      *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(aterm_ann, aterm), *p_substs);
+      return true;
+    }
+  }
+
+  AFun head_ann = ATgetAFun(aterm_ann);
+  AFun head = ATgetAFun(aterm);
+  if (ATgetArity(head_ann) == ATgetArity(head)) {
+    int nr_args = ATgetArity(head);
+    if (nr_args > 0) {
+      bool result = true;
+      for (int i = 0; (i < nr_args) && result; i++) {
+        ATerm arg_ann = ATgetArgument(aterm_ann, i);
+        ATerm arg = ATgetArgument(aterm, i);
+        result = match(arg_ann, arg, p_substs);
+      }
+      return result;
+    }
+  }
+  return false;
+}
+
+bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs)
+{
+  bool result = true;
+  while(!ATisEmpty(aterm_ann) && !ATisEmpty(aterm) && result) {
+    result = match(ATgetFirst(aterm_ann), ATgetFirst(aterm), p_substs);
+    aterm_ann = ATgetNext(aterm_ann);
+    aterm = ATgetNext(aterm);
+  }
+  return result && ATisEmpty(aterm_ann) && ATisEmpty(aterm);
 }
 

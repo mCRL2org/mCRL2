@@ -915,32 +915,8 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
   return sort_id;
 }
 
-ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
-  t_data_decls *p_data_decls)
+ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
 {
-  assert(gsIsSortExprList(sort_list));
-  ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
-
-  //declare constructors for sort sort_id
-  ATermList new_cons_ops = ATmakeList2(
-      (ATerm) gsMakeOpIdEmptyList(sort_list),
-      (ATerm) gsMakeOpIdCons(sort_elt, sort_list));
-
-  //Declare operations for sort sort_id
-  ATermList new_ops = ATmakeList(12,
-      (ATerm) gsMakeOpIdEq(sort_list),
-      (ATerm) gsMakeOpIdNeq(sort_list),
-      (ATerm) gsMakeOpIdIf(sort_list),
-      (ATerm) gsMakeOpIdEltIn(sort_elt, sort_list),
-      (ATerm) gsMakeOpIdListSize(sort_list),
-      (ATerm) gsMakeOpIdSnoc(sort_list, sort_elt),
-      (ATerm) gsMakeOpIdConcat(sort_list),
-      (ATerm) gsMakeOpIdEltAt(sort_list, sort_elt),
-      (ATerm) gsMakeOpIdHead(sort_list, sort_elt),
-      (ATerm) gsMakeOpIdTail(sort_list),
-      (ATerm) gsMakeOpIdRHead(sort_list, sort_elt),
-      (ATerm) gsMakeOpIdRTail(sort_list));
-
   //Declare data equations for sort sort_id
   ATermList el = ATmakeList0();
   ATermAppl el_sort_id = gsMakeDataExprEmptyList(sort_list);
@@ -969,7 +945,7 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
     (ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dspl = ATmakeList3((ATerm) d_sort_elt, (ATerm) s_sort_id, (ATerm) p);
   ATermList bsl = ATmakeList2((ATerm) b, (ATerm) s_sort_id);
-  
+
   ATermList new_data_eqns = ATmakeList(26,
       //equality (sort_id -> sort_id -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(el_sort_id, el_sort_id), t),
@@ -983,7 +959,7 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
       (ATerm) gsMakeDataEqn(sl, nil, gsMakeDataExprEq(s_sort_id, s_sort_id), t),
       //inequality (sort_id -> sort_id -> Bool)
       (ATerm) gsMakeDataEqn(stl,nil,
-        gsMakeDataExprNeq(s_sort_id, t_sort_id), 
+        gsMakeDataExprNeq(s_sort_id, t_sort_id),
         gsMakeDataExprNot(gsMakeDataExprEq(s_sort_id, t_sort_id))),
       //conditional (Bool -> sort_id -> sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(stl,nil,
@@ -1061,6 +1037,37 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
           gsMakeDataExprCons(e_sort_elt, s_sort_id))),
         gsMakeDataExprCons(d_sort_elt,
           gsMakeDataExprRTail(gsMakeDataExprCons(e_sort_elt, s_sort_id)))));
+
+  return new_data_eqns;
+}
+
+ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
+  t_data_decls *p_data_decls)
+{
+  assert(gsIsSortExprList(sort_list));
+  ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
+
+  //declare constructors for sort sort_id
+  ATermList new_cons_ops = ATmakeList2(
+      (ATerm) gsMakeOpIdEmptyList(sort_list),
+      (ATerm) gsMakeOpIdCons(sort_elt, sort_list));
+
+  //Declare operations for sort sort_id
+  ATermList new_ops = ATmakeList(12,
+      (ATerm) gsMakeOpIdEq(sort_list),
+      (ATerm) gsMakeOpIdNeq(sort_list),
+      (ATerm) gsMakeOpIdIf(sort_list),
+      (ATerm) gsMakeOpIdEltIn(sort_elt, sort_list),
+      (ATerm) gsMakeOpIdListSize(sort_list),
+      (ATerm) gsMakeOpIdSnoc(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdConcat(sort_list),
+      (ATerm) gsMakeOpIdEltAt(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdHead(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdTail(sort_list),
+      (ATerm) gsMakeOpIdRHead(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdRTail(sort_list));
+
+  ATermList new_data_eqns = build_list_equations(sort_elt, sort_list);
 
   //declare fresh sort identifier for sort_list
   ATermAppl sort_id = make_fresh_list_sort_id((ATerm) p_data_decls->sorts);
