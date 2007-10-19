@@ -82,6 +82,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %token <appl> SQLBRACKET SQRBRACKET 
 %token <appl> LSUBTRACT CONCAT IN
 %token <appl> HEAD TAIL RHEAD RTAIL LENGTH TAKE DROP SORT INSERT LESS GREATER HASH
+%token <appl> UNION SUB INTERSECTION PICK
 
 %left MINUS PLUS LSUBTRACT CONCAT IN NOTEQUAL 
 %left DIVIDE       /* order '+','-','*','/' */
@@ -100,7 +101,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 
 %type <appl> Type BasicType
 %type <appl> NatIntExpression BasicExpression BooleanExpression Expression 
-%type <appl> BoolNatIntExpression Instantiation ModelStatement
+%type <appl> EqualityExpression Instantiation ModelStatement
 %type <appl> LocalVariables Identifier AssignmentStatement CommStatement
 %type <appl> ProcessBody OptGuard BasicStatement OptChannel Statement BinaryStatement UnaryStatement
 %type <appl> AdvancedStatement IdentifierChannelDefinition  IdentifierChannelDeclaration
@@ -109,6 +110,8 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %type <appl> ContainerType
 %type <appl> ListExpression ListLiteral
 %type <appl> Functions
+%type <appl> SetExpression MemberTest MinusExpression
+
 
 %type <list> IdentifierTypeExpression IdentifierType Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions ChannelDeclaration ChannelDefinition
 %type <list> IdentifierTypeExpression_csp IdentifierType_csp ExpressionIdentier_csp 
@@ -963,13 +966,15 @@ Expression: //NUMBER
 		
 	| BasicExpression
 	| BooleanExpression
+    | MinusExpression
 	| NatIntExpression
-	| BoolNatIntExpression 
+	| EqualityExpression 
 	| ListExpression
+	| SetExpression
+    | MemberTest
 /*	| IntExpression
 	| RealExpression */
 //	| StringExpression
-//	| SetExpression
 //	| DictExpression
 //	| VectorExpression
 //	| RecordExpression
@@ -1068,7 +1073,6 @@ BasicExpression:
 		    **/
 
           bool channel_exists = false;
-          bool variable_exists = false;
           if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
           {
             channel_exists = true;
@@ -1267,19 +1271,6 @@ NatIntExpression:
 			);
       		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
 		}
-	| Expression MINUS Expression
-		{ 
-            BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
-
- 	  		safe_assign($$, 
-				gsMakeBinaryExpression( gsString2ATermAppl("-" ),
-				gsMakeType( gsString2ATermAppl("Nat" ) ),
-				$1 , 
-				$3  
-				) 
-			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
-		}
 	| Expression MOD Expression
 		{ 
             BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
@@ -1386,7 +1377,80 @@ NatIntExpression:
 		}
 	;
 
-BoolNatIntExpression:
+MinusExpression:
+	 Expression MINUS Expression
+	 { 
+       gsDebugMsg("Expression 1: %T\n", $1);
+       gsDebugMsg("Expression 2: %T\n", $3);
+ 
+       bool processed = false;
+       /**
+         *  Minus operaton on naturals
+         *
+         **/
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument($3,1),0))), "Nat") == 0 ||
+           strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument($1,1),0))), "Nat") == 0 
+          )
+       {	  
+            
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("-" ),
+				gsMakeType( gsString2ATermAppl("Nat" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+         gsDebugMsg("MinusExpression - Nat Expression parsed: \n%T\n", $$);
+         processed = true;
+       } 
+       /**
+         *  Minus operaton on lists
+         *
+         **/
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ||
+           strcmp(ATgetName(ATgetAFun(ATAgetArgument($1,1))), "ListType") == 0 
+          )
+       {	  
+         if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+	     {
+		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   exit(1);
+		 }
+   		 safe_assign($$, gsMakeBinaryListExpression( $2,  
+				         ATAgetArgument($1,1), 
+                	$1, $3));
+         gsDebugMsg("MinusExpression - Literal Expression parsed: \n  %T\n", $$);
+         processed = true;
+       } 
+       /**
+         *  Minus operaton on sets
+         *
+         **/
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ||
+           strcmp(ATgetName(ATgetAFun(ATAgetArgument($1,1))), "SetType") == 0 
+          )
+       {	  
+         if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+	     {
+		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   exit(1);
+		 }
+   		 safe_assign($$, gsMakeBinarySetExpression( $2,  
+				         ATAgetArgument($1,1), 
+                	$1, $3));
+         gsDebugMsg("MinusExpression - Set Expression parsed: \n  %T\n", $$);
+         processed = true;
+       } 
+         if (!processed)
+         {
+           gsErrorMsg("Expressions %T and %T cannot be used with \"-\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+           exit(1);
+         }
+
+	 }
+   ;
+
+EqualityExpression:
 	  Expression IS Expression
 		{
 			/**
@@ -1396,14 +1460,24 @@ BoolNatIntExpression:
 			if(  !(ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
               )
 				{
-				  gsErrorMsg("BoolNatIntExpression: Incompatible Types Checking failed\n");
+				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
-		
-			safe_assign($$, gsMakeBinaryExpression( $2,  
-					gsMakeType( gsString2ATermAppl("Bool" )), 
-			$1, $3));
-      		gsDebugMsg("BoolNatIntExpression parsed: \n  %T\n", $$);
+            
+            if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 )
+		    {
+			  safe_assign($$, gsMakeBinarySetExpression(   
+                                  gsString2ATermAppl("=="),  
+			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
+			  $1, $3));
+      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+            } else {
+			  safe_assign($$, gsMakeBinaryExpression(  
+                                  gsString2ATermAppl("=="),  
+			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
+			  $1, $3));
+      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+            }
 		}
 	| Expression NOTEQUAL Expression
 		{ 
@@ -1411,45 +1485,178 @@ BoolNatIntExpression:
 			  * Type Checking
 			  *
 			  **/	
-			if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
-              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+			if(  !(ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
               )
 				{
-				  gsErrorMsg("BoolNatIntExpression: Incompatible Types Checking failed\n");
+				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
+				  exit(1);
+				};
+            
+            if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 )
+		    {
+			  safe_assign($$, gsMakeBinarySetExpression( 
+                                  gsString2ATermAppl("/="),  
+			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
+			  $1, $3));
+      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+            } else {
+			  safe_assign($$, gsMakeBinaryExpression( $2,  
+			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
+			  $1, $3));
+      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+            }
+		}
+	;
+
+/* Membertest is used for tests and sets
+ */
+MemberTest:
+    Expression IN Expression
+    {
+       bool processed = false;
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 )
+       {	  
+         if(!ContainerTypeChecking(gsMakeSetType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
+	     {
+		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   exit(1);
+		 }
+   		 safe_assign($$, gsMakeBinarySetExpression( $2,  
+					gsMakeType( gsString2ATermAppl("Bool" )), 
+                	$1, $3));
+         gsDebugMsg("MemberTest - SetLiteral parsed: \n  %T\n", $$);
+         processed = true;
+       } 
+
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 )
+         {
+         if(!ContainerTypeChecking(gsMakeListType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
+	       {
+		     gsErrorMsg("Incompatible Types Checking failed\n");
+		     exit(1);
+		   }
+ 	  	 safe_assign($$, gsMakeBinaryListExpression( $2,  
+					gsMakeType( gsString2ATermAppl("Bool" )), 
+			        $1, $3));
+      	 gsDebugMsg("MemberTest - ListExpression parsed: \n  %T\n", $$);
+         processed = true;
+         }
+      
+         if (!processed)
+         {
+           gsErrorMsg("Experrsions %T and %T cannot be used with \"in\"", ATAgetArgument($1,0), ATAgetArgument($3,0));
+           exit(1); 
+        }
+    } 
+    ;
+	
+SetExpression:
+      LBRACE RBRACE
+      {
+          safe_assign($$, gsMakeSetLiteral( ATmakeList0(), gsMakeSetType(gsMakeType(gsMakeNil()))));
+      }
+    | LBRACE Expression_csp RBRACE
+      {
+      	  gsDebugMsg("R:%d",__LINE__);
+          ATerm type; 
+		  ATermList to_process = $2;
+		  while(!ATisEmpty(to_process))
+          {
+             ATerm elementType = ATgetArgument(ATgetFirst(to_process),1);
+             if (ATgetLength(to_process) == ATgetLength($2))
+             {
+               type = elementType;
+             }
+             gsDebugMsg("%T\n",ATgetFirst(to_process));
+             if (type != elementType )
+             {
+               gsErrorMsg("SetLiteral contains mixed types %T and %T\n"
+                         , type, elementType);
+               exit(1);
+             }
+			 to_process = ATgetNext( to_process) ;
+		  }
+          safe_assign($$, gsMakeSetLiteral( ATreverse($2), gsMakeSetType((ATermAppl) type)));
+      	  gsDebugMsg("SetLiteral parsed: \n  %T\n", $$);
+      }
+    | Expression UNION Expression
+		{ 
+	   	  /**
+		    * Type Checking
+		    *
+		    **/	
+		  if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+             && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
+             )
+			{
+			  gsErrorMsg("r%d: Union failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+			  exit(1);
+			};
+
+  		  safe_assign($$, gsMakeBinarySetExpression( $2,  
+				ATAgetArgument($1,1), 
+		        $1, $3));
+   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+		} 
+    | Expression INTERSECTION Expression
+		{ 
+	   	  /**
+		    * Type Checking
+		    *
+		    **/	
+		  if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+             && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
+             )
+			{
+			  gsErrorMsg("r%d: Intersection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+			  exit(1);
+			};
+
+  		  safe_assign($$, gsMakeBinarySetExpression( $2,  
+				ATAgetArgument($1,1), 
+		        $1, $3));
+   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+		} 
+    | Expression SUB Expression 
+		{ 
+	   	  /**
+		    * Type Checking
+		    *
+		    **/	
+		  if(  !((ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+             && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
+             )
+			{
+			  gsErrorMsg("r%d: Subsection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+			  exit(1);
+			};
+
+  		  safe_assign($$, gsMakeBinarySetExpression( $2,  
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
+		        $1, $3));
+   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+		} 
+    | PICK LBRACKET Expression RBRACKET 
+      {
+            gsDebugMsg("R:%d\n",__LINE__);
+			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
+				{
+				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
 
- 	  		safe_assign($$, gsMakeBinaryExpression( $2,  
-					gsMakeType( gsString2ATermAppl("Bool" )), 
-			$1, $3));
-      		gsDebugMsg("BoolNatIntExpression parsed: \n  %T\n", $$);
-		}
-	;	
+ 	  		safe_assign($$, gsMakeFunction( $1,  
+			     (ATermAppl) ATgetArgument($3,1), 
+			$3));
+      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      }
+    ;
 
 ListExpression:
       ListLiteral
       {
         safe_assign($$, $$);
       }
-    | Expression IN Expression 
-		{ 
-			/**
-			  * Type Checking
-			  *
-			  **/	
-			if(  !((ContainerTypeChecking(gsMakeListType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
-              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
-              )
-				{
-				  gsErrorMsg("Incompatible Types Checking failed\n");
-				  exit(1);
-				};
-
- 	  		safe_assign($$, gsMakeBinaryListExpression( $2,  
-					gsMakeType( gsString2ATermAppl("Bool" )), 
-			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
-		} 
     | Expression CONCAT Expression
 		{ 
 			/**
@@ -1721,6 +1928,8 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
   gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+  gsDebugMsg("arg1: %T\n", arg1);
+  gsDebugMsg("arg2: %T\n", arg2);
   if(arg1 == arg2)
   {
     return true;
@@ -1728,7 +1937,11 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
   
   gsDebugMsg("ContainerTypeChecking: %T, %T\n",arg1, arg2);
   if((strcmp(ATgetName(ATgetAFun(arg1)), ATgetName(ATgetAFun(arg2)))==0)  
-     && (strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ))
+     && ( ( strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ) ||
+          ( strcmp(ATgetName(ATgetAFun(arg1)), "SetType") == 0  )
+        )
+
+    )
     {
       if(((ATermAppl) ATgetArgument(arg2,0) == gsMakeType(gsMakeNil())) || 
          ((ATermAppl) ATgetArgument(arg1,0) == gsMakeType(gsMakeNil()))

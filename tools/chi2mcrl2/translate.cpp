@@ -34,7 +34,7 @@ bool CAsttransform::translator(ATermAppl ast)
     * Write the special Terminator actions for the mcrl2 specification
     *
     **/
-  result = "act Terminator; \n ";
+  result = "\nact Terminator; \n ";
 
   if( StrcmpIsFun( "ChiSpec", ast ) )
   {
@@ -51,7 +51,7 @@ bool CAsttransform::translator(ATermAppl ast)
     exit(1);
   }
   
-  result.append(prefixmCRL2spec);
+  result.insert(0, prefixmCRL2spec);
 
   /**
     * write initialisation
@@ -63,14 +63,15 @@ bool CAsttransform::translator(ATermAppl ast)
     * write structs 
     *
     **/
-  
+  string prefix;     
   for(std::map<ATermAppl, std::string>::iterator itSet = structset.begin(); 
       itSet != structset.end();
       ++itSet                                      
      )
   {
-    result.append("\nsort "+ itSet->second+ " " + printStructset(itSet->first)+";");
+    prefix.append("sort "+ itSet->second+ " " + printStructset(itSet->first)+";\n");
   }
+
   /**
     * Write chi channel ends as actions
     *
@@ -78,7 +79,7 @@ bool CAsttransform::translator(ATermAppl ast)
 
   if (!Channels.empty())
   {
-  result.append("\nmap ");
+  prefix.append("\nmap ");
   for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
         itMap != Channels.end();
         ++itMap
@@ -86,11 +87,11 @@ bool CAsttransform::translator(ATermAppl ast)
     {
       if(itMap != Channels.begin())
       {
-        result.append(", ");
+        prefix.append(", ");
       }
-      result.append(itMap->first);
+      prefix.append(itMap->first);
     }
-    result.append(": Nat;\n");
+    prefix.append(": Nat;\n");
   }
 
   int i = 0;
@@ -99,7 +100,7 @@ bool CAsttransform::translator(ATermAppl ast)
         ++itMap
   )
   {
-    result.append("eqn "+itMap->first+"="+to_string(i)+";\n");
+    prefix.append("eqn "+itMap->first+"="+to_string(i)+";\n");
     ++i;
   }
 
@@ -119,10 +120,12 @@ bool CAsttransform::translator(ATermAppl ast)
         ++itSet
   )
   {
-    result.append("act Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet+": Nat#Nat#"+*itSet+";\n");
+    prefix.append("act Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet+": Nat#Nat#"+*itSet+";\n");
   }
+  
+  result.insert(0, prefix);
  
-  result.append("\ninit ");
+  result.append("init ");
   result.append("\n hide({");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
@@ -774,7 +777,19 @@ std::string CAsttransform::printStructset(ATermAppl input)
   }
   if ( StrcmpIsFun( "SetType", (ATermAppl) input) )
   {
+    /* SHOULD BE
     result.append(" =  Set(");
+    ATermAppl element = (ATermAppl) ATgetArgument(input, 0);  
+    if(structset.find(element) == structset.end())
+      {
+        result.append(printStructset(element));
+      } else {
+        result.append(structset[element]);
+      }
+    result.append(")");
+    return result;
+    */
+    result.append(" =  List(");
     ATermAppl element = (ATermAppl) ATgetArgument(input, 0);  
     if(structset.find(element) == structset.end())
       {
@@ -1097,6 +1112,33 @@ std::string CAsttransform::processValue(ATermAppl input)
     result.append("]");
     return result;
   }
+  if( StrcmpIsFun("SetLiteral", input ))
+  { 
+    set<ATermAppl> UsedATerms;   
+    ATermList to_process =(ATermList) ATgetArgument(input,0); 
+    while(!ATisEmpty(to_process))
+    {
+      ATermAppl element = (ATermAppl) ATgetFirst(to_process);
+      UsedATerms.insert(element);
+      to_process = ATgetNext(to_process);
+    }
+
+    to_process =(ATermList) ATgetArgument(input,0); 
+    result = "[";
+    for(set<ATermAppl>::iterator itSet = UsedATerms.begin();
+                                 itSet != UsedATerms.end();
+                                 ++itSet)
+    {
+      if (itSet != UsedATerms.begin()) 
+      {
+        result.append(", ");
+      }
+      result.append(processValue(*itSet));
+      to_process = ATgetNext(to_process);
+    }
+    result.append("]");
+    return result;
+  }
   gsErrorMsg("processDataVarIDValue %T not defined", input);
   exit(1);
   return "";
@@ -1242,6 +1284,10 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
   {
      return processValue(input); 
   }
+  if ( StrcmpIsFun( "SetLiteral", input ) ) 
+  {
+     return processValue(input); 
+  }
 
   if ( StrcmpIsFun( "BinaryListExpression", input))
   {
@@ -1257,6 +1303,283 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
         result.append(" ++ ");
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        return result;
+     }
+     if (StrcmpIsFun("--",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (union_setTypes.find(type) == union_setTypes.end())
+        {       
+          union_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+
+          prefixmCRL2spec.append("\nmap sub_list_"+type+": "+type+"#"+type+" -> "+type+";\n");
+          prefixmCRL2spec.append("    sub_list_"+type+"': "+type+"#"+type+"#"+type+" -> "+type+";\n");
+          prefixmCRL2spec.append("var xs,ys,zs: "+type+";\n");
+          prefixmCRL2spec.append("    x, y: "+sub_type+";\n");
+          prefixmCRL2spec.append("eqn sub_list_"+type+"(xs, ys) = sub_list_"+type+"'(xs, ys, []);\n");
+          prefixmCRL2spec.append("    x == y -> sub_list_"+type+"'(x |> xs, y |> ys, zs ) = sub_list_"+type+"'(zs++xs, ys, []);\n");
+          prefixmCRL2spec.append("    x != y -> sub_list_"+type+"'(x |> xs, y |> ys, zs ) = sub_list_"+type+"'(xs, y|> ys, zs <| x );\n");
+          prefixmCRL2spec.append("    sub_list_"+type+"'([], y |> ys, zs ) = sub_list_"+type+"'(zs, ys, []);\n");
+          prefixmCRL2spec.append("    sub_list_"+type+"'(xs, [], zs ) = zs++xs;\n");
+        }
+        result.append("sub_list_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+        return result;
+     }
+  }
+
+  if ( StrcmpIsFun( "BinarySetExpression", input))
+  {
+     if (StrcmpIsFun("in",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" in ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        return result;
+     }
+     if (StrcmpIsFun("\\/",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" + ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (union_setTypes.find(type) == union_setTypes.end())
+        {       
+          union_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+ 
+          prefixmCRL2spec.append("\nmap union_set_"+type+": "+type+"#"+type+" ->"+type+";\n");
+          prefixmCRL2spec.append("var xs, ys :"+type+";\n");
+          prefixmCRL2spec.append("         x :"+sub_type+";\n");
+          prefixmCRL2spec.append("eqn union_set_"+type+"( [] , ys) = ys;\n");
+          prefixmCRL2spec.append("    x in ys    -> union_set_"+type+"( x |> xs, ys ) = union_set_"+type+"(xs , ys );\n");
+          prefixmCRL2spec.append("    !(x in ys) -> union_set_"+type+"( x |> xs, ys ) = x |> union_set_"+type+"(xs , ys );\n");
+        }
+ 
+        result.append("union_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
+        return result;
+     }
+     if (StrcmpIsFun("/\\",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" - ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (intersection_setTypes.find(type) == intersection_setTypes.end())
+        {       
+          intersection_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+ 
+          prefixmCRL2spec.append("\nmap intersection_set_"+type+": "+type+"#"+type+" ->"+type+";\n");
+          prefixmCRL2spec.append("var xs, ys :"+type+";\n");
+          prefixmCRL2spec.append("         x :"+sub_type+";\n");
+          prefixmCRL2spec.append("eqn intersection_set_"+type+"( [] , ys) = [];\n");
+          prefixmCRL2spec.append("    x in ys    -> intersection_set_"+type+"( x |> xs, ys ) = x |> intersection_set_"+type+"(xs , ys );\n");
+          prefixmCRL2spec.append("    !(x in ys) -> intersection_set_"+type+"( x |> xs, ys ) = intersection_set_"+type+"(xs , ys );\n");
+        }
+ 
+        result.append("intersection_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
+        return result;
+     }
+     if (StrcmpIsFun("sub",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" <= ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (sub_setTypes.find(type) == sub_setTypes.end())
+        {       
+          sub_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+ 
+          prefixmCRL2spec.append("\nmap sub_set_"+type+": "+type+"#"+type+" -> Bool;\n");
+          prefixmCRL2spec.append("var xs, ys :"+type+";\n");
+          prefixmCRL2spec.append("         x :"+sub_type+";\n");
+          prefixmCRL2spec.append("eqn sub_set_"+type+"( [] , ys) = true;\n");
+          prefixmCRL2spec.append("    (x in ys)  -> sub_set_"+type+"( x |> xs, ys ) = sub_set_"+type+"(xs , ys );\n");
+          prefixmCRL2spec.append("    !(x in ys) -> sub_set_"+type+"( x |> xs, ys ) = false;\n");
+        }
+        result.append("sub_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
+        return result;
+     }
+     if (StrcmpIsFun("-",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" <= ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (dif_setTypes.find(type) == dif_setTypes.end())
+        {       
+          dif_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+ 
+          prefixmCRL2spec.append("\nmap dif_set_"+type+": "+type+"#"+type+" -> "+type+";\n");
+          prefixmCRL2spec.append("var xs, ys :"+type+";\n");
+          prefixmCRL2spec.append("         x :"+sub_type+";\n");
+          prefixmCRL2spec.append("eqn dif_set_"+type+"( [] , ys) = [];\n");
+          prefixmCRL2spec.append("    (x in ys)  -> dif_set_"+type+"( x |> xs, ys ) = dif_set_"+type+"(xs , ys );\n");
+          prefixmCRL2spec.append("    !(x in ys) -> dif_set_"+type+"( x |> xs, ys ) = x |> dif_set_"+type+"(xs , ys );\n");
+        }
+ 
+        result.append("dif_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
+        return result;
+     }
+     if (StrcmpIsFun("==",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" = ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (equal_setTypes.find(type) == equal_setTypes.end())
+        {       
+          equal_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+         
+          prefixmCRL2spec.append("\nmap equal_set_"+type+": "+type+"#"+type+" -> Bool;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"': "+type+"#"+type+"#"+type+" -> Bool;\n");
+          prefixmCRL2spec.append("var xs, ys, zs: "+type+";\n");
+          prefixmCRL2spec.append("    x, y: "+sub_type+";\n");
+          prefixmCRL2spec.append("eqn equal_set_"+type+"(xs, ys) = equal_set_"+type+"'(xs, ys, []);\n");
+          prefixmCRL2spec.append("    x == y -> equal_set_"+type+"'(x |> xs, y |> ys, zs) = equal_set_"+type+"'(xs, ys++zs, []);\n");
+          prefixmCRL2spec.append("    x != y -> equal_set_"+type+"'(x |> xs, y |> ys, zs) = equal_set_"+type+"'(x |> xs, ys, y |> zs);\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'([],[],[]) = true;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'(x |> xs,[],[]) = false;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'(x |> xs,[],y |> zs) = false;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'([],y |> ys,[]) = false;\n");
+ 
+        }
+ 
+        result.append("equal_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
+        return result;
+     }
+     if (StrcmpIsFun("/=",(ATermAppl) ATgetArgument(input, 0)))
+     {
+        /* ::SHOULD BE::       
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" = ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        */
+        string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
+        if (equal_setTypes.find(type) == equal_setTypes.end())
+        {       
+          equal_setTypes.insert(type);
+          string sub_type;
+          for(std::map<ATermAppl, std::string>::iterator itMap = structset.begin() ;
+            itMap != structset.end();
+            ++itMap)
+          { if (itMap->second == type)
+            {
+              sub_type =processType( (ATermAppl) ATgetArgument(itMap->first, 0));
+            } 
+          }
+         
+          prefixmCRL2spec.append("\nmap equal_set_"+type+": "+type+"#"+type+" -> Bool;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"': "+type+"#"+type+"#"+type+" -> Bool;\n");
+          prefixmCRL2spec.append("var xs, ys, zs: "+type+";\n");
+          prefixmCRL2spec.append("    x, y: "+sub_type+";\n");
+          prefixmCRL2spec.append("eqn equal_set_"+type+"(xs, ys) = equal_set_"+type+"'(xs, ys, []);\n");
+          prefixmCRL2spec.append("    x == y -> equal_set_"+type+"'(x |> xs, y |> ys, zs) = equal_set_"+type+"'(xs, ys++zs, []);\n");
+          prefixmCRL2spec.append("    x != y -> equal_set_"+type+"'(x |> xs, y |> ys, zs) = equal_set_"+type+"'(x |> xs, ys, y |> zs);\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'([],[],[]) = true;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'(x |> xs,[],[]) = false;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'(x |> xs,[],y |> zs) = false;\n");
+          prefixmCRL2spec.append("    equal_set_"+type+"'([],y |> ys,[]) = false;\n");
+ 
+        }
+ 
+        result.append("!equal_set_"+type+"(");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
+        result.append(" , ");
+        result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
+        result.append(")");
+
         return result;
      }
   }
@@ -1384,7 +1707,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
         return result;
      }
   }
-  gsErrorMsg("%d: Encounterd unknown expression: %T\n",__LINE__, input);
+  gsErrorMsg("%s:%d: Encounterd unknown expression: %T\n",__FILE__,__LINE__, input);
   exit(1);
   return "";
 } 

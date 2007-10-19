@@ -1,8 +1,9 @@
 model tst()=
-|[ dummy() 
+|[ chan a: bool
+:: dummy(a) 
 ]|
 
-proc dummy()=
+proc dummy(chan k!: bool)=
 |[ var a: [nat] = [0,2,3], 
        b: nat = 0 
 :: a := []
@@ -21,5 +22,6 @@ proc dummy()=
  ; b := hr([1,2,3])
  ; a := tr([1,2,3])
  ; a := take([1,2,3],2)
+ ; a := [1,2,3,4,4] -- [1,2,4]
 ]|
 

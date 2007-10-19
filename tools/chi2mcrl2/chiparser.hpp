@@ -115,7 +115,11 @@
      LESS = 332,
      GREATER = 333,
      HASH = 334,
-     DIVIDE = 335
+     UNION = 335,
+     SUB = 336,
+     INTERSECTION = 337,
+     PICK = 338,
+     DIVIDE = 339
    };
 #endif
 
@@ -188,7 +192,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 192 "chiparser.hpp"
+#line 196 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

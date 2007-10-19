@@ -40,7 +40,9 @@
 				  | UnaryExpression( <String>, <TypeID>, <Expr> )
 				  | BinaryExpression( <String>, <TypeID>, <Expr>, <Expr> )
                   | ListLiteral( <Expr>*, <TypeID> )
+                  | SetLiteral( <Expr>*, <TypeID> )
 				  | BinaryListExpression( <String>, <TypeID>, <Expr>, <Expr> )
+                  | BinarySetExpression( <String>, <TypeID>, <Expr>, <Expr> ) 
                   | Function(<String>, <TypeID>, <Expr>)
                   | Function2(<String>, <TypeID>, <Expr>, <Expr> )
 

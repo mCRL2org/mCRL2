@@ -47,6 +47,7 @@ ATermAppl constructChannelID();
 ATermAppl constructDeltaStat();
 ATermAppl constructSend();
 ATermAppl constructDataVarExprID();
+ATermAppl constructBinarySetExpression();
 ATermAppl constructType();
 ATermAppl constructSepStat();
 ATermAppl constructOptGuard();
@@ -84,6 +85,7 @@ ATermAppl constructVarSpec();
 ATermAppl constructSendStat();
 ATermAppl constructSkip();
 ATermAppl constructProcSpec();
+ATermAppl constructSetLiteral();
 ATermAppl constructGuardedStarStat();
 ATermAppl constructSpecChi();
 ATermAppl constructModelBody();
@@ -206,6 +208,22 @@ inline
 ATermAppl constructDataVarExprID()
 {
   static ATermAppl t = initConstructDataVarExprID(t);
+  return t;
+}
+
+// BinarySetExpression
+inline
+ATermAppl initConstructBinarySetExpression(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunBinarySetExpression(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBinarySetExpression()
+{
+  static ATermAppl t = initConstructBinarySetExpression(t);
   return t;
 }
 
@@ -798,6 +816,22 @@ inline
 ATermAppl constructProcSpec()
 {
   static ATermAppl t = initConstructProcSpec(t);
+  return t;
+}
+
+// SetLiteral
+inline
+ATermAppl initConstructSetLiteral(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunSetLiteral(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructTypeID()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSetLiteral()
+{
+  static ATermAppl t = initConstructSetLiteral(t);
   return t;
 }
 

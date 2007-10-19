@@ -141,6 +141,28 @@ bool gsIsBinaryListExpression(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBinaryListExpression();
 }
 
+// BinarySetExpression
+inline
+AFun initAFunBinarySetExpression(AFun& f)
+{
+  f = ATmakeAFun("BinarySetExpression", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBinarySetExpression()
+{
+  static AFun AFunBinarySetExpression = initAFunBinarySetExpression(AFunBinarySetExpression);
+  return AFunBinarySetExpression;
+}
+
+inline
+bool gsIsBinarySetExpression(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBinarySetExpression();
+}
+
 // ChanDecl
 inline
 AFun initAFunChanDecl(AFun& f)
@@ -823,6 +845,28 @@ bool gsIsSepStat(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSepStat();
 }
 
+// SetLiteral
+inline
+AFun initAFunSetLiteral(AFun& f)
+{
+  f = ATmakeAFun("SetLiteral", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSetLiteral()
+{
+  static AFun AFunSetLiteral = initAFunSetLiteral(AFunSetLiteral);
+  return AFunSetLiteral;
+}
+
+inline
+bool gsIsSetLiteral(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSetLiteral();
+}
+
 // SetType
 inline
 AFun initAFunSetType(AFun& f)
@@ -1052,6 +1096,12 @@ ATermAppl gsMakeBinaryListExpression(ATermAppl String_0, ATermAppl TypeID_1, ATe
 }
 
 inline
+ATermAppl gsMakeBinarySetExpression(ATermAppl String_0, ATermAppl TypeID_1, ATermAppl Expr_2, ATermAppl Expr_3)
+{
+  return ATmakeAppl4(gsAFunBinarySetExpression(), (ATerm) String_0, (ATerm) TypeID_1, (ATerm) Expr_2, (ATerm) Expr_3);
+}
+
+inline
 ATermAppl gsMakeChanDecl(ATermList TypedChannels_0)
 {
   return ATmakeAppl1(gsAFunChanDecl(), (ATerm) TypedChannels_0);
@@ -1235,6 +1285,12 @@ inline
 ATermAppl gsMakeSepStat(ATermAppl Statement_0, ATermAppl Statement_1)
 {
   return ATmakeAppl2(gsAFunSepStat(), (ATerm) Statement_0, (ATerm) Statement_1);
+}
+
+inline
+ATermAppl gsMakeSetLiteral(ATermList Expr_0, ATermAppl TypeID_1)
+{
+  return ATmakeAppl2(gsAFunSetLiteral(), (ATerm) Expr_0, (ATerm) TypeID_1);
 }
 
 inline

@@ -119,9 +119,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "<"     { process_string(); return LESS; }
 "&&"    { process_string(); return AND; }
 "and"	{ process_string(); return AND; }
-"/\\"	{ process_string(); return AND; }
 "or"	{ process_string(); return OR; }
-"\\/"	{ process_string(); return OR; }
 "->"	{ process_string(); return GUARD; }
 "=>"	{ process_string(); return IMPLIES; }
 "not"	{ process_string(); return NOT;}
@@ -173,6 +171,11 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "sort"  { process_string(); return SORT; }
 "insert" { process_string(); return INSERT; }
 
+"pick"  { process_string(); return PICK;}
+"/\\"	{ process_string(); return INTERSECTION; }
+"\\/"	{ process_string(); return UNION; }
+"sub"   { process_string(); return SUB; }
+ 
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }
 "int"	{ process_string(); return TYPE; }

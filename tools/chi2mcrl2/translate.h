@@ -208,6 +208,12 @@ class CAsttransform
 
     std::set<std::string> takeTypes;
     std::set<std::string> dropTypes;
+    std::set<std::string> union_setTypes;  
+    std::set<std::string> intersection_setTypes;  
+    std::set<std::string> sub_setTypes;  
+    std::set<std::string> dif_setTypes;  
+    std::set<std::string> equal_setTypes;
+
     bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
 } 
 ;
