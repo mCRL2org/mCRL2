@@ -280,13 +280,9 @@ namespace squadt {
               // Window is not connected and will be deleted when the auto pointer goes out of scope
               if (target.wraps_window()) {
                 sizer->AddSpacer(target.get_window()->GetBestSize().GetHeight());
-
-                m_event_handler.remove(target.get_sizer());
               }
               else {
                 sizer->AddSpacer(target.get_sizer()->CalcMin().GetHeight());
-
-                m_event_handler.remove(target.get_window());
               }
             }
            
@@ -350,13 +346,9 @@ namespace squadt {
               // Window is not connected and will be deleted when the auto pointer goes out of scope
               if (target.wraps_window()) {
                 sizer->AddSpacer(target.get_window()->GetBestSize().GetWidth());
-
-                m_event_handler.remove(target.get_window());
               }
               else {
                 sizer->AddSpacer(target.get_sizer()->CalcMin().GetWidth());
-
-                m_event_handler.remove(target.get_sizer());
               }
             }
            
