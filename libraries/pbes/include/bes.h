@@ -764,8 +764,49 @@ namespace bes
     hashtable.put(b1b2b3,result);
     return result;
   }
+ 
+  static bes_expression toBDD_rec(bes_expression b1,atermpp::table &hashtable)
+  { 
+    if ((b1==true_()) || (b1==false_()))
+    {return b1;
+    }
 
+    bes_expression result;
+    bes_expression b(hashtable.get(b1));
+    if (b!=NULL)
+    { return b;
+    }
+  
+    if (is_variable(b1))
+    { result=if_(b1,true_(),false_());
+    }
+    else if (is_and(b1))
+    { result=BDDif_rec(toBDD_rec(lhs(b1),hashtable),toBDD_rec(rhs(b1),hashtable),false_(),hashtable);
+    }
+    else if (is_or(b1))
+    { result=BDDif_rec(toBDD_rec(lhs(b1),hashtable),true_(),toBDD_rec(rhs(b1),hashtable),hashtable);
+    }
+    else if (is_if(b1))
+    { result=BDDif_rec(toBDD_rec(condition(b1),hashtable),
+                       toBDD_rec(then_branch(b1),hashtable),
+                       toBDD_rec(else_branch(b1),hashtable),
+                       hashtable);
+    }
+    else 
+    { std::cerr << "Unexpected expression\n";
+      assert(0);
+    }
+  
+    hashtable.put(b1,result);
+    return result;
+  }
+ 
 
+  inline bes_expression toBDD(bes_expression b)
+  {
+    static atermpp::table hashtable(100,75);
+    return toBDD_rec(b,hashtable);
+  }
 
   class equations
   { 

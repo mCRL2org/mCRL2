@@ -6,7 +6,7 @@
 //
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
-// TODO: add option to store pbes_variable_instantiations in tree format.
+// TODO: 
 // Optimise finding MU and NU loops.
 // Improve the quality of counterexamples when using approximation.
 
@@ -384,6 +384,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bes::variable_type current_variable,
                    const bool opt_store_as_tree) 
 { 
+  // cerr << "HOHAAAA" << pp(p) << "\n";
   if (is_propositional_variable_instantiation(p))
   { 
     pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?store_as_tree(p):p);
@@ -509,7 +510,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 {
 
   // Verbose msg: doing naive algorithm
-  gsVerboseMsg("Computing BES from PBES ...\n");
   
   data_specification data = pbes_spec.data();
 
@@ -586,7 +586,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   unsigned long relevance_counter_limit=100;
   #define RELEVANCE_DIVIDE_FACTOR 100
 
-  gsVerboseMsg("Computing BES....\n");
+  gsVerboseMsg("Computing a BES from the PBES....\n");
   // As long as there are states to be explored
   while ((tool_options.opt_strategy>=on_the_fly)
              ?todo.size()>0
@@ -649,7 +649,8 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           { rewriter->setSubstitution(*vlist,(aterm)*elist);
           }
           else
-          { rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+          { // cerr << "Set substitution: " << pp(*vlist) << " to " << pp(*elist) << "\n";
+            rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
           }
           elist++;
         }
@@ -940,8 +941,7 @@ static bes_expression evaluate_bex(
                 atermpp::table &hashtable)
 { /* substitute the approximation for variables in b, given
      by approximation, for all those variables that have a 
-     rank higher or equal to the variable rank;
-     IMPROVE USING HASH TABLE */
+     rank higher or equal to the variable rank; */
 
   if (bes::is_true(b)||bes::is_false(b))
   { return b;
@@ -1091,10 +1091,12 @@ bool solve_bes(const t_tool_options &tool_options,
                              tool_options.opt_use_hashtables,
                              bex_hashtable);
         
-        if (t!=approximation[v])
+        // ATfprintf(stderr,"Term: %t \n",(ATerm)t);
+        if (toBDD(t)!=toBDD(approximation[v]))
         {
+          // ATfprintf(stderr,"BDD: %t\n%t\n",(ATerm)toBDD(t),(ATerm)toBDD(approximation[v]));
           if (tool_options.opt_use_hashtables)
-          { bex_hashtable.reset();  /* we change approximation, so the 
+          { bex_hashtable.reset();  /* we change the approximation, so the 
                                        hashtable becomes invalid */
           }
           approximation[v]=t;
@@ -1123,7 +1125,7 @@ bool solve_bes(const t_tool_options &tool_options,
                               bex_hashtable);
         
           // ATfprintf(stderr,"HUH approximation:%t  t:%t\n",(ATerm)approximation[*u],(ATerm)t);
-          if (t!=approximation[*u])
+          if (toBDD(t)!=toBDD(approximation[*u]))
           { // ATfprintf(stderr,"Set approximation[%d]=%t\n",*u,(ATerm)t);
             if (tool_options.opt_use_hashtables)
             { bex_hashtable.reset();  /* we change approximation, so the 
