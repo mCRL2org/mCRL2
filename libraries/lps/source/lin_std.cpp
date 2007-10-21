@@ -6419,9 +6419,15 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
   ATermList resultdeltasumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
 
-  gsVerboseMsg(
+  if (ATgetLength(sourcesumlist)>2)  // This condition prevents this message to be printed
+                                     // when performing data elimination. In this case the
+                                     // term delta is linearised, to determine which data
+                                     // is essential for all processes. In these cases a
+                                     // message about the block operator is very confusing.
+  { gsVerboseMsg(
           "- calculating the block operator on %d summands\n",
                           ATgetLength(sourcesumlist));
+  }
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
     ATermList sumvars=linGetSumVars(summand);
