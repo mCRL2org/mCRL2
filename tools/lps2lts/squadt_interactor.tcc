@@ -450,7 +450,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   }
   
   lgopts.max_states = (configuration.option_exists(option_max_states)) ?
-     boost::lexical_cast < uint64_t > (configuration.get_option_argument< std::string >(option_max_states)) :
+     boost::lexical_cast < boost::uint64_t > (configuration.get_option_argument< std::string >(option_max_states)) :
      DEFAULT_MAX_STATES;
 
   lgopts.bithashing = configuration.get_option_argument< bool >(option_bithashing);
@@ -459,7 +459,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     std::string bithashsize_as_string = configuration.get_option_argument< std::string >(option_bithashsize);
 
     lgopts.bithashsize = (bithashsize_as_string.empty()) ?
-          0 : boost::lexical_cast < uint64_t > (bithashsize_as_string);
+          0 : boost::lexical_cast < boost::uint64_t > (bithashsize_as_string);
   }
   
   lgopts.initial_table_size = strtoul(configuration.get_option_argument< std::string >(option_init_tsize).c_str(),0,0);

@@ -296,7 +296,7 @@ namespace squadt {
         
           d->self_check(*g);
      
-          maximum_input_timestamp = std::max(maximum_input_timestamp, d->timestamp);
+          maximum_input_timestamp = (std::max)(maximum_input_timestamp, d->timestamp);
      
           result |= (d->status != object_descriptor::original) && (d->status != object_descriptor::reproducible_up_to_date);
         }

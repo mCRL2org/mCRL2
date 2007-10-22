@@ -17,17 +17,16 @@
 
 #include <workarounds.h>
 
+#include <tipi/transport/detail/transporter.tcc>
+#include <tipi/detail/basic_messenger.hpp>
+#include <tipi/common.hpp>
+
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/xtime.hpp>
-
-#include <tipi/transport/detail/transporter.tcc>
-
-#include <tipi/detail/basic_messenger.hpp>
-#include <tipi/common.hpp>
 
 /// \cond INTERNAL_DOCS
 /**

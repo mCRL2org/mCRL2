@@ -2720,9 +2720,9 @@ void DiaGraph::setSettingsClustTree(
 {
     if ( arcDgrm != NULL )
     {
-        if ( show != arcDgrm->getShowTree() |
-             annotate != arcDgrm->getAnnotateTree() |
-             colMap != arcDgrm->getColorMap() )
+        if ( (show != arcDgrm->getShowTree()) |
+             (annotate != arcDgrm->getAnnotateTree()) |
+             (colMap != arcDgrm->getColorMap()) )
             arcDgrm->setGeomChanged( true );
     }
 
@@ -2743,8 +2743,8 @@ void DiaGraph::setSettingsBarTree(
 {
     if ( arcDgrm != NULL )
     {
-        if ( show != arcDgrm->getShowBarTree() |
-             magn != arcDgrm->getMagnBarTree() )
+        if ( (show != arcDgrm->getShowBarTree()) |
+             (magn != arcDgrm->getMagnBarTree()) )
             arcDgrm->setGeomChanged( true );
     }
 

@@ -223,7 +223,7 @@ namespace squadt {
           }
 
           if (!k.valid()) {
-            weights[(*i).get()] = 1 + std::max(maximum_weight, number);
+            weights[(*i).get()] = 1 + (std::max)(maximum_weight, number);
           }
         }
       }

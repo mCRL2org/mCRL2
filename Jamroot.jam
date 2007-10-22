@@ -21,6 +21,7 @@ project toolset
        : requirements
           <define>_FILE_OFFSET_BITS=64
           <define>REVISION=\\\"$(BUILD_TAG)\\\"
+          <pch>off
           <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
           <use>/workarounds//configuration
           <link>static,<squadt-support>yes:<threading>multi

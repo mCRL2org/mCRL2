@@ -26,10 +26,18 @@ if $(OPENGL_NAME) {
 }
 
 if $(WX_CPPFLAGS) {
-  libraries_from_string wx_base : $(WX_BASE_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes ;
+  libraries_from_string wx_base : $(WX_BASE_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes <toolset>msvc:<user-interface>gui ;
 
   if $(OPENGL_NAME) {
-    libraries_from_string wx_gl : $(WX_GL_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes <library>opengl ;
+    libraries_from_string wx_gl
+	: $(WX_GL_LDFLAGS)
+        : <threading>multi
+        :
+        : <cxxflags>$(WX_CPPFLAGS)
+          <wx>yes
+          <toolset>msvc:<user-interface>gui
+          <library>opengl
+        ;
   }
 }
 else {
@@ -82,14 +90,14 @@ lib dl : : <name>"dl" ;
 alias winsock
     : winsock32 ws2_32
     : <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0501
       <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>_WIN32_WINNT=0x0501
     :
     : <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0500
+      <os>CYGWIN:<define>_WIN32_WINNT=0x0501
       <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0500
+      <os>NT:<define>_WIN32_WINNT=0x0501
     ;
 
 lib winsock32 : : <name>"wsock32" ;

@@ -12,14 +12,13 @@ alias squadt : : <wx>no ;
 exe squadt
       : [ sequence.insertion-sort $(source_files) ]
         /site-config//wx_base
+        /site-config//boost_md5
+        /libraries//ticpp
+        /libraries/tipi//controller_interface
       : <wx>yes
-        <library>/site-config//boost_md5
-        <library>/libraries/tipi//controller_interface
         <use>/libraries/utilities//headers
-        <library>/libraries//ticpp
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
-        <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
-        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
       ;
 
 install-binaries install

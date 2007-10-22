@@ -19,8 +19,8 @@
 #include "mcrl2/utilities/tipi_ext.h"
 
 #ifndef NO_MCRL2_TOOL_FACILITIES
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include "print/messaging.h"
 #endif
 
@@ -47,6 +47,7 @@ namespace mcrl2 {
        * notably the gs message layer relay mechanism presented above is activated.
        **/
       class tool_interface {
+        friend class mcrl2_tool_interface;
   
         private:
   
@@ -235,7 +236,7 @@ namespace mcrl2 {
           }
         }
 
-        mcrl2_tool_interface::do_send_report = boost::bind(&mcrl2_tool_interface::send_report, this, _1, _2);
+        mcrl2_tool_interface::do_send_report = boost::bind(&tool_interface::send_report, this, _1, _2);
       }
   
       inline void mcrl2_tool_interface::finalise() {

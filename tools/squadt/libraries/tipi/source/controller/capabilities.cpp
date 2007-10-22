@@ -22,7 +22,7 @@ namespace tipi {
      * \param[in,out] s stream to write to
      * \param[in] c the capabilities object to write out
      **/
-    inline std::ostream& operator << (std::ostream& s, controller::capabilities const& c) {
+    std::ostream& operator << (std::ostream& s, controller::capabilities const& c) {
       visitors::store(c, s);
  
       return (s);

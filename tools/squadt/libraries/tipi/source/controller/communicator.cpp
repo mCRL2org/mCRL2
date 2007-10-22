@@ -4,6 +4,7 @@
 //
 /// \file source/controller/communicator.cpp
 
+#include <exception>
 #include <cstdlib>
 #include <sstream>
 
@@ -110,14 +111,14 @@ namespace tipi {
      * \param[in] display the associated tipi::display element
      **/
     void communicator::send_display_update(tipi::layout::element const& e, boost::shared_ptr < tipi::display const >& display) {
-      std::string        c;
+      std::string c;
 
       try {
         tipi::store_visitor v(c);
 
         v.visit(e, display->find(&e));
       }
-      catch (bool b) {
+      catch (bool) {
         // find failed for some reason
       }
 
@@ -144,7 +145,7 @@ namespace tipi {
               v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
                 display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
             } 
-            catch (bool b) {
+            catch (bool) {
               // find failed for some reason
             }
 

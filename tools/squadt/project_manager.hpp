@@ -14,6 +14,7 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/cstdint.hpp>
 
 #include "tipi/utility/indirect_iterator.hpp"
 #include "processor.hpp"
@@ -57,7 +58,7 @@ namespace squadt {
       typedef std::vector < processor::object_descriptor::sptr >       conflict_list;
 
       /** \brief Finite type for counting the number of added processors */
-      typedef uint32_t                                                 processor_count;
+      typedef boost::uint32_t                                          processor_count;
 
     private:
 

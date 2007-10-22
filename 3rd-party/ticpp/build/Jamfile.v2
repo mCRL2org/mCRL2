@@ -1,4 +1,4 @@
-project aterm
+project ticpp
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements

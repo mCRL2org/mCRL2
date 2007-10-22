@@ -5,6 +5,8 @@ project squadt/libraries/tipi
     : requirements
        <use>/boost//headers
        <use>/libraries/utilities//headers
+       <toolset>darwin:<cxxflags>-ftemplate-depth-256
+       <toolset>gcc:<cxxflags>-ftemplate-depth-256
        <include>../include
     : usage-requirements
        <use>/boost//headers
@@ -70,7 +72,6 @@ lib tipi-controller
     : controller_communicator.o
       messenger
     : <threading>multi
-      <cxxflags>-ftemplate-depth-256
       <link>static
     ;
 
@@ -79,7 +80,6 @@ lib tipi
       tool_communicator.o
       messenger
     : <threading>multi
-      <cxxflags>-ftemplate-depth-256
       <link>shared
     ;
 
@@ -87,7 +87,6 @@ lib tipi-tool
     : tool_communicator.o
       messenger
     : <threading>multi
-      <cxxflags>-ftemplate-depth-256
       <link>static
     ;
 

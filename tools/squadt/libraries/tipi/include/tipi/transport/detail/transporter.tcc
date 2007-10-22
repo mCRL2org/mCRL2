@@ -5,12 +5,12 @@
 #include <list>
 #include <istream>
 
-#include <boost/thread/recursive_mutex.hpp>
+#include <tipi/transport/transporter.hpp>
+#include <tipi/transport/detail/listener.hpp>
 
 #include <boost/asio/ip/address.hpp>
 
-#include <tipi/transport/transporter.hpp>
-#include <tipi/transport/detail/listener.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 namespace transport {
   using namespace transceiver;

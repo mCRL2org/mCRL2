@@ -50,7 +50,7 @@ namespace tipi {
 
     /**
      * Sets the standard logger
-     * @param[in] l the logger that is to be used by the messenger
+     * \param[in] l the logger that is to be used by the messenger
      **/
     template < >
     void basic_messenger< tipi::message >::set_standard_logger(boost::shared_ptr < utility::logger > l) {

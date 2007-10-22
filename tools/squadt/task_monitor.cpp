@@ -7,11 +7,11 @@
 /// \file task_monitor.cpp
 /// \brief Add your file description here.
 
+#include "task_monitor.tcc"
+
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
-
-#include "task_monitor.tcc"
 
 namespace squadt {
   namespace execution {

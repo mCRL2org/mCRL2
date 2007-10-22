@@ -76,7 +76,7 @@ namespace tipi {
         display_dimensions get_display_dimensions() const;
     };
  
-     inline controller::capabilities::capabilities(const version v) : m_protocol_version(v) {
+    inline controller::capabilities::capabilities(const version v) : m_protocol_version(v) {
       m_dimensions.x = 0;
       m_dimensions.y = 0;
       m_dimensions.z = 0;

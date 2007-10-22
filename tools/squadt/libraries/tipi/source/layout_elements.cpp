@@ -66,7 +66,8 @@ namespace tipi {
         return (m->build(*this));
       }
      
-      radio_button::radio_button() : m_connection(this), m_selected(true) {
+      radio_button::radio_button() : m_selected(true) {
+        m_connection = this;
       }
 
       /**

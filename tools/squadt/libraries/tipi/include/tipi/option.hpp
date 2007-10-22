@@ -216,7 +216,7 @@ namespace tipi {
   inline void option::append_argument(T const& d) {
     boost::shared_ptr < S > p(new S);
 
-    append_argument(p, d);
+    append_argument< boost::shared_ptr < S >, T >(p, d);
   }
 
   /**
