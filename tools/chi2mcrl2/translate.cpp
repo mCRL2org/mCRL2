@@ -126,7 +126,7 @@ bool CAsttransform::translator(ATermAppl ast)
   result.insert(0, prefix);
  
   result.append("init ");
-  result.append("\n hide({");
+  result.append("\n block({");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
         ++itSet
