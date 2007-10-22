@@ -269,16 +269,15 @@ ATerm readATerm(istream &is)
 {
 #define RAT_INIT_BUF_SIZE (64*1024)
 	unsigned int buf_size = RAT_INIT_BUF_SIZE;
-	char *buf = (char *) malloc(buf_size*sizeof(char));
+	char *buf = NULL;
 	unsigned int len = 0;
 
 	while ( !is.eof() )
 	{
-		buf_size = buf_size * 2;
 		buf = (char *) realloc(buf,buf_size*sizeof(char));
-		is.read(buf+len,RAT_INIT_BUF_SIZE);
+		is.read(buf+len,buf_size-len);
 		len+=is.gcount();
-
+		buf_size = buf_size * 2;
 	}
 
 	ATerm t = ATreadFromBinaryString((unsigned char *) buf,len);
