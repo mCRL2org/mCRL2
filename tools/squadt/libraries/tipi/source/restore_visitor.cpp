@@ -608,7 +608,6 @@ namespace utility {
 
   /** \brief Finds a member of the visibility domain for a string */
   static tipi::layout::horizontal_alignment text_to_horizontal_alignment(std::string const& s) {
-  std::cerr << "HORIZONTAL_ALIGNMENT(" << s << ")" << std::endl;
     if (s == "left") {
       return (tipi::layout::left);
     }

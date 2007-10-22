@@ -284,6 +284,8 @@ namespace squadt {
               else {
                 sizer->AddSpacer(target.get_sizer()->CalcMin().GetHeight());
               }
+
+              d.reset();
             }
            
             if (0 < cr.m_margin.bottom) {
@@ -350,6 +352,8 @@ namespace squadt {
               else {
                 sizer->AddSpacer(target.get_sizer()->CalcMin().GetWidth());
               }
+
+              d.reset();
             }
            
             if (0 < cr.m_margin.right) {

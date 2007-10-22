@@ -52,8 +52,8 @@ namespace squadt {
 
           categories_for_format.insert(std::make_pair(j.m_mime_type,temporary));
 
-          /* Make sure a command is registered */
-          if (!has_registered_command(j.m_mime_type,false)) {
+          /* Make sure the type is registered */
+          if (!has_registered_command(j.m_mime_type,true)) {
             register_command(j.m_mime_type, command_none);
           }
         }
@@ -175,7 +175,9 @@ namespace squadt {
 
     if (i == command_for_type.end()) {
       if (t.known_main_type() && c) {
-        return global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
+        bool result = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
+
+        return result || ((t.is_type(tipi::mime_type::text)) && global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain")) != 0);
       }
     }
     else {
@@ -253,6 +255,13 @@ namespace squadt {
 
         if (wxt != 0) {
           p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
+        }
+        else if (t.is_type(tipi::mime_type::text)) {
+          wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain"));
+
+          if (wxt != 0) {
+            p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
+          }
         }
       }
       else if (command_string != command_none) {

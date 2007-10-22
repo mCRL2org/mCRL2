@@ -403,7 +403,7 @@ namespace squadt {
 
       wxMenu  context_menu;
 
-      bool   editable               = registry->has_registered_command(n.get_object()->mime_type);
+      bool   editable               = registry->has_registered_command(n.get_object()->mime_type, true);
       size_t separator_position     = 3;
 
       context_menu.Append(cmID_EDIT, wxT("edit"))->Enable(show_update_operations && editable);
