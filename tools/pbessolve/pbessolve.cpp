@@ -62,7 +62,8 @@ namespace po = boost::program_options;
  
 // the command line options 
 typedef struct{ 
-  bool interactive; 
+  bool interactive;
+  bool pnf; 
   int bound; 
   string solver;
   string rewriter;
@@ -115,7 +116,7 @@ int main(int argc, char** argv)
   //approximation process 
   pbes_solver* ps = new pbes_solver
     (pbes_spec, tool_options.solver, tool_options.rewriter,
-     tool_options.bound, tool_options.interactive);
+     tool_options.bound, tool_options.pnf, tool_options.interactive);
   
   atermpp::vector<pbes_equation> es_solution = ps->solve(); 
    
@@ -178,6 +179,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   int opt_bound = 0; 
   string opt_solver;
   string opt_rewriter;
+  tool_options.pnf = false; 
   tool_options.interactive = false; 
    
   po::options_description desc; 
@@ -186,6 +188,7 @@ t_tool_options parse_command_line(int argc, char** argv)
     ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n")
     ("solver,s",po::value<string>(&opt_solver)->default_value("cvc"), "specify the solver to be used by the prover\nOptions are: ario, cvc, fast")
     ("rewriter,r",po::value<string>(&opt_rewriter)->default_value("inner"), "specify the rewriting strategy to be used by the prover\nOptions are: inner, innerc, jitty, jittyc")
+    ("pnf,p","use the prenex normal form for the approximation") 
     ("verbose,v",	"turn on the display of short intermediate messages") 
     ("debug,d",		"turn on the display of detailed intermediate messages") 
     ("version",		"display version information") 
@@ -229,6 +232,9 @@ t_tool_options parse_command_line(int argc, char** argv)
    
   if (vm.count("verbose")) 
     gsSetVerboseMsg(); 
+
+  if (vm.count("pnf")) 
+    tool_options.pnf = true;  
    
   if (vm.count("interactive")) 
     tool_options.interactive = true;  

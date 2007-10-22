@@ -34,6 +34,9 @@ class pbes_solver {
   /// (not implemented yet)
   bool interactive;
 
+  /// if set, the approximation process will 
+  /// start with pulling all quantifiers to the front 
+  bool pnf;
   BDD_Prover* prover;
   pbes<> pbes_spec;
   
@@ -62,7 +65,7 @@ class pbes_solver {
   pbes_solver(pbes<> p_pbes_spec,
 	      std::string solver, 
 	      std::string rew_strategy, 
-	      int p_bound, bool p_interactive);
+	      int p_bound, bool p_pnf, bool p_interactive);
   
   /// This function implements the Gauss elimination algorithm.
   atermpp::vector<pbes_equation> solve();
@@ -147,12 +150,5 @@ pbes_expression enumerate_finite_domains
 /// It only works for quantifier-free expressions.
 bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover* prover);
-
-
-
-
-
-
-
 
 
