@@ -319,8 +319,14 @@ namespace utility {
           }
         };
 
-        visitable_types.insert(typeid(T)).insert(typeid(void)).
-            set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, void >(&local::trampoline));
+        if (boost::is_const< T >::value) {
+          visitable_types.insert(typeid(T)).insert(typeid(void)).
+              set(detail::visit_method_wrapper< R, abstract_visitor< R >, const visitable, void >(&local::trampoline));
+        }
+        else {
+          visitable_types.insert(typeid(T)).insert(typeid(void)).
+              set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, void >(&local::trampoline));
+        }
       }
 
       /**
@@ -338,8 +344,14 @@ namespace utility {
           }
         };
 
-        visitable_types.insert(typeid(T)).insert(typeid(U)).
-            set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, U >(&local::trampoline));
+        if (boost::is_const< T >::value) {
+          visitable_types.insert(typeid(T)).insert(typeid(U)).
+              set(detail::visit_method_wrapper< R, abstract_visitor< R >, const visitable, U >(&local::trampoline));
+        }
+        else {
+          visitable_types.insert(typeid(T)).insert(typeid(U)).
+              set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, U >(&local::trampoline));
+        }
       }
 
       /** \brief Visit constant interface function */
