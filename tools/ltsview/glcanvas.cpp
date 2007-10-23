@@ -595,7 +595,7 @@ void GLCanvas::selChange() {
 }
 
 
-void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
+void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
   // This method selects the object clicked.
   //
   // The buffer content per hit is encoded as follows:
@@ -687,7 +687,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6; 
   if(GetContext()) {
-    GLuint selectBuf[bufsize];
+    GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
 
@@ -698,7 +698,8 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
 
     glInitNames();
     // Create new projection transformation
-    glMatrixMode(GL_PROJECTION);    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
     
     glLoadIdentity();
     
@@ -723,6 +724,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
     display();
     mediator->deselect();
     processHits(hits, selectBuf, doubleC);
+    free(selectBuf);
   }
 }
 

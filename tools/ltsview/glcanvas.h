@@ -79,7 +79,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     bool      simulating;
 
     // Functions for processing hits
-    void processHits(const GLint hits, GLuint buffer[], bool doubleC);
+    void processHits(const GLint hits, GLuint *buffer, bool doubleC);
     void pickObjects(int x, int y, bool doubleC);
     
     DECLARE_EVENT_TABLE()
