@@ -200,14 +200,14 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         append(format_selector.associate(normal, "normal")).
         append(format_selector.associate(readable, "readable")));
 
-  text_field& formula_field              = d.create< text_field >();
-  checkbox&   special_untimed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_timed));
-  button&     okay_button                = d.create< button >().set_label("OK");
+  text_field& formula_field    = d.create< text_field >();
+  checkbox&   timed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_timed));
+  button&     okay_button      = d.create< button >().set_label("OK");
 
   m.append(d.create< horizontal_box >().
         append(d.create< label >().set_text("Formula file name : ")).
         append(formula_field)).
-    append(special_untimed_conversion.set_label("special untimed conversion")).
+    append(timed_conversion.set_label("timed conversion")).
     append(d.create< label >().set_text(" ")).
     append(okay_button, layout::right);
 
@@ -246,7 +246,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     }
   }
 
-  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(special_untimed_conversion.get_status());
+  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
   c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (format_selector.get_selection()));
