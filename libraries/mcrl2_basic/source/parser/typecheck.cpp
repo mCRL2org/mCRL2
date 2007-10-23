@@ -3023,9 +3023,13 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
 
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2){
   //Find the minimal type that Unifies the 2. If not possible, return NULL.
-  ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandNumTypesUp(Type2));
-  if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandNumTypesUp(Type1));
-  if(!Res) return NULL;
+  ATermAppl Res=gstcTypeMatchA(Type1,Type2);
+  if(!Res){
+    Res=gstcTypeMatchA(Type1,gstcExpandNumTypesUp(Type2));
+    if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandNumTypesUp(Type1));
+    if(!Res) {gsDebugMsg("gstcUnifyMinType: No match: Type1 %T; Type2 %T; \n",Type1,Type2); return NULL;}
+  }
+ 
   if(gsIsSortsPossible(Res)) Res=ATAgetFirst(ATLgetArgument(Res,0));
   gsDebugMsg("gstcUnifyMinType: Type1 %T; Type2 %T; Res: %T\n",Type1,Type2,Res);    
   return Res;
@@ -3054,7 +3058,7 @@ static ATermAppl gstcMatchEqNeq(ATermAppl Type){
   //If some of the parameters are Pos,Nat, or Int do upcasting.
 
   assert(gsIsSortArrow(Type));
-  //assert(gsIsBool(ATAgetArgument(Type,1)));
+  //assert(gsIsBool(ATAgetFirst(Args)));
   ATermList Args=ATLgetArgument(Type,0);
   assert((ATgetLength(Args)==2));
   ATermAppl Arg1=ATAgetFirst(Args);
