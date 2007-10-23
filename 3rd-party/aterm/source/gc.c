@@ -299,7 +299,7 @@ VOIDCDECL mark_phase()
   }
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
-    mark_memory((ATerm *)prot->start, (ATerm *)(((void *)prot->start) + prot->size));
+    mark_memory((ATerm *)prot->start, (ATerm *)(((void*)prot->start) + prot->size));
   }
   
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {

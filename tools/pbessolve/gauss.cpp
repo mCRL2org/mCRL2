@@ -53,11 +53,8 @@
 
 int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 
-using namespace lps;
 using namespace pbes_expr;
 using namespace mcrl2::utilities;
-
-
 
 sort_instantiator si;
 

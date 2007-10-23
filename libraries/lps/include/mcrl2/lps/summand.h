@@ -23,7 +23,6 @@
 
 namespace lps {
 
-using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm_appl;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,6 +193,8 @@ class summand: public aterm_appl
     ///
     bool is_well_typed() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       // check 1)
       for (data_assignment_list::iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
       {
