@@ -26,7 +26,15 @@ if $(OPENGL_NAME) {
 }
 
 if $(WX_CPPFLAGS) {
-  libraries_from_string wx_base : $(WX_BASE_LDFLAGS) : <threading>multi : : <cxxflags>$(WX_CPPFLAGS) <wx>yes <toolset>msvc:<user-interface>gui ;
+  libraries_from_string wx_base
+	: $(WX_BASE_LDFLAGS)
+        : <threading>multi
+        :
+        : <cxxflags>$(WX_CPPFLAGS)
+          <wx>yes
+          <toolset>msvc:<linkflags>/NODEFAULTLIB:MSVCRTD
+          <toolset>msvc:<user-interface>gui
+        ;
 
   if $(OPENGL_NAME) {
     libraries_from_string wx_gl
@@ -35,6 +43,7 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <wx>yes
+          <toolset>msvc:<linkflags>/NODEFAULTLIB:MSVCRTD
           <toolset>msvc:<user-interface>gui
           <library>opengl
         ;

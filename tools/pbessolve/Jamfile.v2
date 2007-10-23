@@ -36,8 +36,8 @@ exe txt2pbes
          /libraries//lps
          /libraries//pbes
          /libraries//rewrite
-         /site-config//boost_program_options
        : <include>.
+         <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-binaries install

@@ -179,7 +179,7 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
       return NULL;
     }
     
-    block->term = (ATerm*)((void*)block + sizeof(struct _ATprotected_block));
+    block->term = (ATerm*)((char*)block + sizeof(struct _ATprotected_block));
     block->size = blocksize;
   }
   
@@ -204,7 +204,7 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
 ATprotected_block find_block(ATerm* term)
 {
   /* Reconstruct the pointer to the block from the pointer to the terms */
-  ATprotected_block block = (ATprotected_block)((void*)term - sizeof(struct _ATprotected_block));
+  ATprotected_block block = (ATprotected_block)((char*)term - sizeof(struct _ATprotected_block));
   assert(block->term == term);
   return block;
 }
@@ -296,7 +296,7 @@ ATprotected_block resize_block(ATprotected_block block, size_t minsize, size_t m
       return NULL;
     }
     
-    newblock->term = (ATerm*)((void*)newblock + sizeof(struct _ATprotected_block));
+    newblock->term = (ATerm*)((char*)newblock + sizeof(struct _ATprotected_block));
     newblock->size = blocksize;
 
     /* Update the chain links */    

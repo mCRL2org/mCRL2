@@ -61,6 +61,16 @@ namespace utility {
 
     /** \brief Wrapper around std::type_info and a callback function */
     class type_info_callback_wrapper;
+
+    template < typename T, bool b = boost::is_const< T >::value >
+    struct visitable_type_helper {
+      typedef const visitable visitable_type;
+    };
+
+    template < typename T >
+    struct visitable_type_helper< T, false > {
+      typedef visitable visitable_type;
+    };
   }
   /// \endcond
 
@@ -308,50 +318,34 @@ namespace utility {
        * Registers a visit method for objects of type T
        **/
       template < class T >
-      static void register_visit_method() {
-        struct local {
+      static inline void register_visit_method() {
+        struct local : public detail::visitable_type_helper< T > {
         
-          static R trampoline(abstract_visitor< R >& v, visitable const& t) {
-            return static_cast< visitor& > (v).visit(static_cast < const T& > (t));
-          }
-          static R trampoline(abstract_visitor< R >& v, visitable& t) {
+          static R trampoline(abstract_visitor< R >& v, visitable_type& t) {
             return static_cast< visitor& > (v).visit(static_cast < T& > (t));
           }
         };
 
-        if (boost::is_const< T >::value) {
-          visitable_types.insert(typeid(T)).insert(typeid(void)).
-              set(detail::visit_method_wrapper< R, abstract_visitor< R >, const visitable, void >(&local::trampoline));
-        }
-        else {
-          visitable_types.insert(typeid(T)).insert(typeid(void)).
-              set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, void >(&local::trampoline));
-        }
+        visitable_types.insert(typeid(T)).insert(typeid(void)).
+            set(detail::visit_method_wrapper< R, abstract_visitor< R >,
+		local::visitable_type, void >(&local::trampoline));
       }
 
       /**
        * Registers a visit method for objects of type T and an additional argument of type U
        **/
       template < class T, class U >
-      static void register_visit_method() {
-        struct local {
+      static inline void register_visit_method() {
+        struct local : public detail::visitable_type_helper< T > {
         
-          static R trampoline(abstract_visitor< R >& v, visitable const& t, U& u) {
-            return static_cast< visitor& > (v).visit(static_cast < const T& > (t), u);
-          }
-          static R trampoline(abstract_visitor< R >& v, visitable& t, U& u) {
+          static R trampoline(abstract_visitor< R >& v, visitable_type& t, U& u) {
             return static_cast< visitor& > (v).visit(static_cast < T& > (t), u);
           }
         };
 
-        if (boost::is_const< T >::value) {
-          visitable_types.insert(typeid(T)).insert(typeid(U)).
-              set(detail::visit_method_wrapper< R, abstract_visitor< R >, const visitable, U >(&local::trampoline));
-        }
-        else {
-          visitable_types.insert(typeid(T)).insert(typeid(U)).
-              set(detail::visit_method_wrapper< R, abstract_visitor< R >, visitable, U >(&local::trampoline));
-        }
+        visitable_types.insert(typeid(T)).insert(typeid(U)).
+            set(detail::visit_method_wrapper< R, abstract_visitor< R >,
+		local::visitable_type, U >(&local::trampoline));
       }
 
       /** \brief Visit constant interface function */

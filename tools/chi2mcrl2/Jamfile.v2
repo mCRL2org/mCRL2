@@ -10,6 +10,7 @@ exe chi2mcrl2
          /libraries//aterm
          /libraries//mcrl2_basic
        : <include>.
+         <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
