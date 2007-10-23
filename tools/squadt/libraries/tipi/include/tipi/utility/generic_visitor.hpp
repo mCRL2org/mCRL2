@@ -319,16 +319,15 @@ namespace utility {
        **/
       template < class T >
       static inline void register_visit_method() {
-        struct local : public detail::visitable_type_helper< T > {
-        
-          static R trampoline(abstract_visitor< R >& v, visitable_type& t) {
+        struct local {
+          static R trampoline(abstract_visitor< R >& v, typename detail::visitable_type_helper< T >::visitable_type& t) {
             return static_cast< visitor& > (v).visit(static_cast < T& > (t));
           }
         };
 
         visitable_types.insert(typeid(T)).insert(typeid(void)).
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
-		local::visitable_type, void >(&local::trampoline));
+		typename detail::visitable_type_helper< T >::visitable_type, void >(&local::trampoline));
       }
 
       /**
@@ -336,16 +335,15 @@ namespace utility {
        **/
       template < class T, class U >
       static inline void register_visit_method() {
-        struct local : public detail::visitable_type_helper< T > {
-        
-          static R trampoline(abstract_visitor< R >& v, visitable_type& t, U& u) {
+        struct local {
+          static R trampoline(abstract_visitor< R >& v, typename detail::visitable_type_helper< T >::visitable_type& t, U& u) {
             return static_cast< visitor& > (v).visit(static_cast < T& > (t), u);
           }
         };
 
         visitable_types.insert(typeid(T)).insert(typeid(U)).
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
-		local::visitable_type, U >(&local::trampoline));
+		typename detail::visitable_type_helper< T >::visitable_type, U >(&local::trampoline));
       }
 
       /** \brief Visit constant interface function */
