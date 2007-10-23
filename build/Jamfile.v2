@@ -32,7 +32,6 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <wx>yes
-          <toolset>msvc:<linkflags>/NODEFAULTLIB:MSVCRTD
           <toolset>msvc:<user-interface>gui
         ;
 
@@ -43,7 +42,6 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <wx>yes
-          <toolset>msvc:<linkflags>/NODEFAULTLIB:MSVCRTD
           <toolset>msvc:<user-interface>gui
           <library>opengl
         ;
