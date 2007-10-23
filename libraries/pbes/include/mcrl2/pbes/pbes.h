@@ -41,7 +41,6 @@
 
 namespace lps {
 
-using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
@@ -60,6 +59,8 @@ struct normalize_pbes_equation
 template <typename Iterator>
 std::set<data_variable> compute_free_variables(Iterator first, Iterator last)
 {
+  using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
   detail::free_variable_visitor visitor;
 
   for (Iterator i = first; i != last; ++i)
@@ -77,6 +78,8 @@ std::set<data_variable> compute_free_variables(Iterator first, Iterator last)
 template <typename Iterator>
 std::set<data_variable> compute_quantifier_variables(Iterator first, Iterator last)
 {
+  using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
   // collect the set of all quantifier variables in visitor
   detail::quantifier_visitor visitor;
   for (Iterator i = first; i != last; ++i)
@@ -222,6 +225,8 @@ class pbes
     ///
     bool is_bes() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         if (!i->is_bes())
@@ -266,6 +271,8 @@ class pbes
     ///
     atermpp::set<propositional_variable> binding_variables() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       atermpp::set<propositional_variable> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
@@ -279,6 +286,8 @@ class pbes
     ///
     atermpp::set<propositional_variable> occurring_variables() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       atermpp::set<propositional_variable> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
@@ -306,6 +315,8 @@ class pbes
     /// Returns true if the pbes is normalized.
     bool is_normalized() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         is_normalized_visitor visitor;
@@ -367,6 +378,8 @@ class pbes
     /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
     bool is_well_typed() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
       const atermpp::set<data_variable>& declared_free_variables = free_variables();
       std::set<data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
