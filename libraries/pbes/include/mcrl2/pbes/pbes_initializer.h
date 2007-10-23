@@ -20,7 +20,6 @@
 
 namespace lps {
 
-using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm_appl;
 
 /// \brief initial state of a pbes

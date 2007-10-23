@@ -28,7 +28,6 @@
 
 namespace lps {
 
-using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 
@@ -117,6 +116,8 @@ class linear_process: public aterm_appl
     ///
     bool has_time() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       for (summand_list::iterator i = summands().begin(); i != summands().end(); ++i)
       {
         if(i->has_time()) return true;
@@ -141,6 +142,8 @@ class linear_process: public aterm_appl
     ///
     std::set<data_variable> find_free_variables()
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       // TODO: the efficiency of this implementation is not optimal
       std::set<data_variable> result;
       std::set<data_variable> parameters = detail::make_set(process_parameters());
@@ -168,6 +171,8 @@ class linear_process: public aterm_appl
     ///
     bool is_well_typed() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       // check 1)
       std::set<data_variable> declared_free_variables  = detail::make_set(free_variables());
       std::set<data_variable> occurring_free_variables = compute_free_variables(*this);
