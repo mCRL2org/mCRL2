@@ -89,7 +89,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %right POWER SEP ALT GUARD_REP STAR BARS        /* exponentiation        */
 %start ChiProgram
 
-%left LEQ GEQ GREATER LESS COMMA MIN DIV MOD MAX IMPLIES IS 
+%left LEQ GEQ GREATER LESS COMMA MIN DIV MOD MAX IMPLIES IS NOT GUARD SUB UNION INTERSECTION HEAD TAKE TAIL  
 
 %glr-parser
 %debug
@@ -1124,7 +1124,7 @@ BooleanExpression:
 		}
 	| NOT Expression
 		{ 
-            UnaryTypeCheck(ATAgetArgument($1,1), "Bool");
+            UnaryTypeCheck( (ATermAppl) ATgetArgument($2,1), "Bool");
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
@@ -1135,7 +1135,7 @@ BooleanExpression:
 		}
 	| EXCLAMATION Expression
 		{ 
-            UnaryTypeCheck(ATAgetArgument($1,1), "Bool");
+            UnaryTypeCheck( (ATermAppl) ATgetArgument($2,1), "Bool");
 
  	  		safe_assign($$, 
 				gsMakeUnaryExpression( gsString2ATermAppl("!" ),
