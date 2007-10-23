@@ -279,13 +279,20 @@ namespace squadt {
             else {
               // Window is not connected and will be deleted when the auto pointer goes out of scope
               if (target.wraps_window()) {
-                sizer->AddSpacer(target.get_window()->GetBestSize().GetHeight());
+                wxWindow* s = target.release_window();
+
+                sizer->AddSpacer(s->GetBestSize().GetHeight());
+
+                delete s;
               }
               else {
-                sizer->AddSpacer(target.get_sizer()->CalcMin().GetHeight());
-              }
+                wxSizer* s = target.release_sizer();
 
-              d.reset();
+                sizer->AddSpacer(s->CalcMin().GetHeight());
+
+                delete s;
+              }
+              /// d.reset() does not work properly with XCode 2.4.1
             }
            
             if (0 < cr.m_margin.bottom) {
@@ -347,13 +354,20 @@ namespace squadt {
             else {
               // Window is not connected and will be deleted when the auto pointer goes out of scope
               if (target.wraps_window()) {
-                sizer->AddSpacer(target.get_window()->GetBestSize().GetWidth());
+                wxWindow* s = target.release_window();
+
+                sizer->AddSpacer(s->GetBestSize().GetWidth());
+
+                delete s;
               }
               else {
-                sizer->AddSpacer(target.get_sizer()->CalcMin().GetWidth());
-              }
+                wxSizer* s = target.release_sizer();
 
-              d.reset();
+                sizer->AddSpacer(s->CalcMin().GetWidth());
+
+                delete s;
+              }
+              /// d.reset() does not work properly with XCode 2.4.1
             }
            
             if (0 < cr.m_margin.right) {
