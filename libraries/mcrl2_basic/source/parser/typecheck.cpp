@@ -542,6 +542,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
 
   gsDebugMsg ("type checking of action renamings read-in phase started\n");
 
+  ATermTable actions_from_lps=ATtableCreate(63,50);
+
   //XXX read-in from LPS (not finished)
   if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
     if(gstcReadInConstructors()){
@@ -566,6 +568,9 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
            goto failed;
          }
          body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+
+	 //Save the actions from LPS only for the latter use.
+         gstcATermTableCopy(context.actions,actions_from_lps);
          if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(ar_spec,1),0))) {
            goto failed;
          }
@@ -603,8 +608,13 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
 
            ATermAppl Left=ATAgetArgument(Rule,2);
 	   assert(gsIsParamId(Left));
-	   Left=gstcTraverseActProcVarConstP(DeclaredVars,Left);
-	   if(!Left) { b = false; break; }
+           {  //extra check requested by Tom: actions in the LHS can only come from the LPS
+              ATermTable temp=context.actions;
+              context.actions=actions_from_lps;
+	      Left=gstcTraverseActProcVarConstP(DeclaredVars,Left);
+              context.actions=temp;
+	      if(!Left) { b = false; break; }
+           }
 
            ATermAppl Cond=ATAgetArgument(Rule,1);
            if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
@@ -639,6 +649,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
   }
 
 failed:
+  ATtableDestroy(actions_from_lps);
   gstcDataDestroy();
   gsDebugMsg("return NULL\n");
   return Result;
