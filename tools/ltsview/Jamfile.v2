@@ -32,7 +32,7 @@ exe ltsview
         /site-config//boost_signals
         /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <wx>yes
       ;

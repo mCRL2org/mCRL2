@@ -19,6 +19,7 @@ exe squadt
         <use>/libraries/utilities//headers
         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
       ;
 
 install-binaries install
