@@ -2218,13 +2218,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
   gsDebugMsg("gstcTraverseVarConsTypeDN: DataTerm %T with PosType %T, nFactPars %d\n",*DataTerm,PosType,nFactPars);    
   if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
+    bool variable=false;
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if(Type){
-      if(!gstcTypeMatchA(Type,PosType)){
-	gsErrorMsg("The type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm); 
-	return NULL;
-      }
-
+      variable=true;
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
 	gsWarningMsg("The variable %P is not allowed in %P (in the context of an equation)\n",Name,*DataTerm);
       }
@@ -2232,14 +2229,26 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       //Add to free variables list
       if(FreeVars) 
 	ATtablePut(FreeVars, (ATerm)Name, (ATerm)Type);
-
-      *DataTerm=gsMakeDataVarId(Name,Type);
-      return Type;
     }
     ATermList ParList;
     
     if(nFactPars==0){
-      if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+      if((Type=ATAtableGet(DeclaredVars,(ATerm)Name))) {
+        if(!gstcTypeMatchA(Type,PosType)){
+          gsErrorMsg("The type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          return NULL;
+        }
+        *DataTerm=gsMakeDataVarId(Name,Type);
+        return Type;
+      }
+      else if((Type=ATAtableGet(context.constants,(ATerm)Name))) {
+        if(!gstcTypeMatchA(Type,PosType)){
+          gsErrorMsg("The type %P of constant %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          return NULL;
+        }
+        *DataTerm=gsMakeOpId(Name,Type);
+        return Type;
+      }
       else{
 	if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
 	  if(ATgetLength(ParList)==1){
@@ -2260,16 +2269,21 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       }
     }
     
-    ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
-    ParList=ATLtableGet(context.functions,(ATerm)Name);
-    if(!ParList) ParList=ParListS;
-    else if(ParListS) ParList=ATconcat(ParListS,ParList);
+    if(Type) {
+      ParList=ATmakeList1((ATerm)gstcUnwindType(Type));
+    }
+    else {
+      ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
+      ParList=ATLtableGet(context.functions,(ATerm)Name);
+      if(!ParList) ParList=ParListS;
+      else if(ParListS) ParList=ATconcat(ParListS,ParList);
+    }
 
     if(!ParList) {
       gsErrorMsg("unknown operation %P with %d parameters\n",Name,nFactPars);
       return NULL;
     }
-    gsDebugMsg("Possible types for Op %T with %d arguments are (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
+    gsDebugMsg("Possible types for Op/Var %T with %d arguments are (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
 
     { // filter ParList keeping only functions A_0#...#A_nFactPars->A
       ATermList NewParList;
@@ -2335,7 +2349,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 	
     if(ATisEmpty(ParList)) {
-      gsErrorMsg("unknown operation %P with %d arguments that matches type %P\n",Name,nFactPars,PosType);    
+      gsErrorMsg("unknown operation/variable %P with %d arguments that matches type %P\n",Name,nFactPars,PosType);    
       return NULL;
     }
     
@@ -2505,6 +2519,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       }
 
       *DataTerm=gsMakeOpId(Name,Type);
+      if(variable) *DataTerm=gsMakeDataVarId(Name,Type);
+
       assert(Type);
       return Type;
     }
@@ -2513,8 +2529,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsErrorMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars); return NULL;
       }
       else{
-	*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-	return gsMakeSortUnknown();
+        *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+	if(variable) *DataTerm=gsMakeDataVarId(Name,gsMakeSortUnknown());
+        return gsMakeSortUnknown();
       }
     }
   }
@@ -2642,7 +2659,9 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
   //if so return PosTypeList, otherwise return NULL
   if(!gstcIsNotInferredL(PosTypeList)){
     if(gstcInTypesL(PosTypeList,TypeListList)) return PosTypeList;
-    else return NULL;
+    else {
+      return NULL;
+    }
   }
  
   //Filter TypeListList to contain only compatible with TypeList lists of parameters.
@@ -2776,11 +2795,20 @@ static ATbool gstcIsNotInferredL(ATermList TypeList){
 }
 
 static ATermAppl gstcUnwindType(ATermAppl Type){
-  //gsDebugMsg("gstcUnwindType Type: %T\n",Type);
+  gsDebugMsg("gstcUnwindType Type: %T\n",Type);
 
-  if(gsIsSortExprList(Type)) return gsMakeSortExprList(gstcUnwindType(ATAgetArgument(Type,1)));
-  if(gsIsSortExprSet(Type)) return gsMakeSortExprSet(gstcUnwindType(ATAgetArgument(Type,1)));
-  if(gsIsSortExprBag(Type)) return gsMakeSortExprBag(gstcUnwindType(ATAgetArgument(Type,1)));
+  if(gsIsSortCons(Type)) return ATsetArgument(Type,(ATerm)gstcUnwindType(ATAgetArgument(Type,1)),1);
+  if(gsIsSortArrow(Type)){
+    Type=ATsetArgument(Type,(ATerm)gstcUnwindType(ATAgetArgument(Type,1)),1);
+    ATermList Args=ATLgetArgument(Type,0);
+    ATermList NewArgs=ATmakeList0();
+    for(;!ATisEmpty(Args);Args=ATgetNext(Args)){
+      NewArgs=ATinsert(NewArgs,(ATerm)gstcUnwindType(ATAgetFirst(Args)));
+    }
+    NewArgs=ATreverse(NewArgs);
+    Type=ATsetArgument(Type,(ATerm)NewArgs,0);
+    return Type;
+  }
   
   if(gsIsSortId(Type)){
     ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
