@@ -2863,8 +2863,11 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
   if(gsIsSortArrow(PosType)){
     ATermList PosArgTypes=ATLgetArgument(PosType,0);
+ 
+   gsDebugMsg("gstcUnArrowProd: PosArgTypes %T \n",PosArgTypes);
+
     if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) return NULL;
-    if(gstcEqTypesL(PosArgTypes,ArgTypes)) return ATAgetArgument(PosType,1);
+    if(gstcTypeMatchL(PosArgTypes,ArgTypes)) return ATAgetArgument(PosType,1);
   }
   if(gsIsSortUnknown(PosType)) return PosType;
 
@@ -2876,7 +2879,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
       if(gsIsSortArrow(PosType)){
 	ATermList PosArgTypes=ATLgetArgument(PosType,0);
 	if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) continue;
-	if(gstcEqTypesL(PosArgTypes,ArgTypes)) NewPosType=ATAgetArgument(NewPosType,1);
+	if(gstcTypeMatchL(PosArgTypes,ArgTypes)) NewPosType=ATAgetArgument(NewPosType,1);
       }
       else if(!gsIsSortUnknown(NewPosType)) continue;
       NewPosTypes=ATinsertUnique(NewPosTypes,(ATerm)NewPosType);
