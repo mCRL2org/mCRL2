@@ -1570,7 +1570,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
     ATermAppl Par=ATAgetFirst(Pars);
     ATermAppl PosType=ATAgetFirst(PosTypeList);
 
-    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(PosType));
+    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,PosType); //gstcExpandNumTypesDown(PosType));
 
     if(!NewPosType) {gsErrorMsg("Cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
