@@ -1140,7 +1140,37 @@ std::string CAsttransform::processValue(ATermAppl input)
     result.append("]");
     return result;
   }
-  gsErrorMsg("processDataVarIDValue %T not defined", input);
+  if( StrcmpIsFun("TupleLiteral", input ))
+  { 
+    set<ATermAppl> UsedATerms;   
+    ATermList to_process =(ATermList) ATgetArgument(input,0); 
+    while(!ATisEmpty(to_process))
+    {
+      ATermAppl element = (ATermAppl) ATgetFirst(to_process);
+      UsedATerms.insert(element);
+      to_process = ATgetNext(to_process);
+    }
+
+    to_process =(ATermList) ATgetArgument(input,0);
+ 
+    string type = processType( (ATermAppl) ATgetArgument(input,1));
+ 
+    result = "tuple_"+type+"(";
+    for(set<ATermAppl>::iterator itSet = UsedATerms.begin();
+                                 itSet != UsedATerms.end();
+                                 ++itSet)
+    {
+      if (itSet != UsedATerms.begin()) 
+      {
+        result.append(", ");
+      }
+      result.append(processValue(*itSet));
+      to_process = ATgetNext(to_process);
+    }
+    result.append(")");
+    return result;
+  }
+  gsErrorMsg("%s:%d: processDataVarIDValue %T not defined \n",__FILE__,__LINE__, input);
   exit(1);
   return "";
 }
@@ -1286,6 +1316,11 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
      return processValue(input); 
   }
   if ( StrcmpIsFun( "SetLiteral", input ) ) 
+  {
+     return processValue(input); 
+  }
+
+  if ( StrcmpIsFun( "TupleLiteral", input ) ) 
   {
      return processValue(input); 
   }
@@ -1677,7 +1712,6 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
      }
      if (StrcmpIsFun("drop",(ATermAppl) ATgetArgument(input, 0)))
      {
-         
         string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 2),1));
         if (dropTypes.find(type) == dropTypes.end())
         {       
@@ -1708,9 +1742,22 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
         return result;
      }
   }
+
+  if ( StrcmpIsFun( "TupleDot", input))
+  {
+    string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 0),1));
+    string index = ATgetName(ATgetAFun(ATgetArgument(input, 2)));
+   
+    result.append("get_"+type+"_"+index+"(");
+    result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 0) ) );
+    result.append(")");
+    
+    return result;     
+  }
   gsErrorMsg("%s:%d: Encounterd unknown expression: %T\n",__FILE__,__LINE__, input);
   exit(1);
   return "";
+
 } 
 
 void CAsttransform::manipulateModelStatements(ATermAppl input)

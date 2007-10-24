@@ -955,6 +955,50 @@ bool gsIsStarStat(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunStarStat();
 }
 
+// TupleDot
+inline
+AFun initAFunTupleDot(AFun& f)
+{
+  f = ATmakeAFun("TupleDot", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunTupleDot()
+{
+  static AFun AFunTupleDot = initAFunTupleDot(AFunTupleDot);
+  return AFunTupleDot;
+}
+
+inline
+bool gsIsTupleDot(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunTupleDot();
+}
+
+// TupleLiteral
+inline
+AFun initAFunTupleLiteral(AFun& f)
+{
+  f = ATmakeAFun("TupleLiteral", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunTupleLiteral()
+{
+  static AFun AFunTupleLiteral = initAFunTupleLiteral(AFunTupleLiteral);
+  return AFunTupleLiteral;
+}
+
+inline
+bool gsIsTupleLiteral(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunTupleLiteral();
+}
+
 // TupleType
 inline
 AFun initAFunTupleType(AFun& f)
@@ -1315,6 +1359,18 @@ inline
 ATermAppl gsMakeStarStat(ATermAppl Statement_0)
 {
   return ATmakeAppl1(gsAFunStarStat(), (ATerm) Statement_0);
+}
+
+inline
+ATermAppl gsMakeTupleDot(ATermAppl Expr_0, ATermAppl TypeID_1, ATermAppl String_2)
+{
+  return ATmakeAppl3(gsAFunTupleDot(), (ATerm) Expr_0, (ATerm) TypeID_1, (ATerm) String_2);
+}
+
+inline
+ATermAppl gsMakeTupleLiteral(ATermList Expr_0, ATermAppl TypeID_1)
+{
+  return ATmakeAppl2(gsAFunTupleLiteral(), (ATerm) Expr_0, (ATerm) TypeID_1);
 }
 
 inline

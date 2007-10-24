@@ -10,25 +10,14 @@
 #include <cassert>
 #include <stdbool.h>
 #include <getopt.h>
-#include <climits>		//Required by CHAR_MAX
 #include <cstdio>
 #include <fstream>
 #include "aterm2.h"
 #include <string>
-#include <iostream> 	//Required by cin
+#include <iostream>
 #include "chilexer.h"
 #include <print/messaging.h>
 #include "translate.h"
-
-//#include <cstdlib>
-//#include <cstring>
-//#include "lin_types.h"
-//#include "lin_std.h"
-//#include "mcrl2/utilities/aterm_ext.h"
-//#include "libstruct.h"
-//#include "typecheck.h"
-//#include "libalpha.h"
-//#include "mcrl2/dataimpl.h"
 
 #define NAME "chi2mcrl2"
 #define VERSION "July 2007"
@@ -57,7 +46,7 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
   /* empty */
 
   #define ShortOptions   "hqvd"
-  #define VersionOption  CHAR_MAX + 1
+  #define VersionOption   0x1
   struct option LongOptions[] = 
   {
     { "help",        no_argument,       NULL, 'h' },
@@ -185,7 +174,6 @@ void PrintHelp(char *Name)
 
 int main(int argc, char *argv[])
 {
-  //initialise ATerm library
   ATerm         stack_bottom;
   t_options     options;
   std::string mcrl2spec; 
@@ -197,7 +185,6 @@ int main(int argc, char *argv[])
   //gsEnableConstructorFunctions();
 
     if (parse_command_line(argc,argv,options)) {
-      //linearise infilename with options lin_options
       ATermAppl result = translate_file(options);
 
       if (result == NULL) {

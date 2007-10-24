@@ -54,6 +54,7 @@ ATermAppl constructOptGuard();
 ATermAppl constructFunction();
 ATermAppl constructModelDef();
 ATermAppl constructNil();
+ATermAppl constructTupleDot();
 ATermAppl constructAltStat();
 ATermAppl constructDataVarID();
 ATermAppl constructAssignmentGGStat();
@@ -68,6 +69,7 @@ ATermAppl constructRecvStat();
 ATermAppl constructDelta();
 ATermAppl constructParenthesisedStat();
 ATermAppl constructChannelTypedID();
+ATermAppl constructTupleLiteral();
 ATermAppl constructChanDecl();
 ATermAppl constructStarStat();
 ATermAppl constructSkipStat();
@@ -323,6 +325,22 @@ ATermAppl constructNil()
   return t;
 }
 
+// TupleDot
+inline
+ATermAppl initConstructTupleDot(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunTupleDot(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructTypeID()), reinterpret_cast<ATerm>(constructString()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTupleDot()
+{
+  static ATermAppl t = initConstructTupleDot(t);
+  return t;
+}
+
 // AltStat
 inline
 ATermAppl initConstructAltStat(ATermAppl& t)
@@ -544,6 +562,22 @@ inline
 ATermAppl constructChannelTypedID()
 {
   static ATermAppl t = initConstructChannelTypedID(t);
+  return t;
+}
+
+// TupleLiteral
+inline
+ATermAppl initConstructTupleLiteral(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunTupleLiteral(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructTypeID()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTupleLiteral()
+{
+  static ATermAppl t = initConstructTupleLiteral(t);
   return t;
 }
 
