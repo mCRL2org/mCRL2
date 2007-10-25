@@ -99,14 +99,25 @@ static bool is_pair(ATerm t);
 
 // Function used to convert a pbes_expression to the variant used by the cwi-output
 
-static void print_tree_rec(const char c,ATerm t)
+static void print_tree_rec(const char c,
+                           ATerm t,
+                           const bool opt_precompile_pbes, 
+                           Rewriter *rewriter, 
+                           ostream &f)
 {
   if (is_pair(t))
-  { print_tree_rec(',',ATgetArgument(t,0));
-    print_tree_rec(',',ATgetArgument(t,1));
+  { print_tree_rec(',',ATgetArgument(t,0),opt_precompile_pbes,rewriter,f);
+    print_tree_rec(',',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
   }
   else
-  { ATfprintf(stderr,"%c%t",c,t);
+  { if (opt_precompile_pbes)
+    { data_expression t1(rewriter->fromRewriteFormat((ATerm)t));
+      f << c << pp(t1);
+    }
+    else
+    { data_expression t1(t);
+      f << c << pp(t1);   // ATfprintf(f,"%c%t",c,t);
+    }
   }
 }
 
@@ -117,16 +128,17 @@ static void print_counter_example_rec(bes::variable_type current_var,
                                       vector<bool> &already_printed,
                                       bool opt_precompile_pbes,
                                       Rewriter *rewriter,
-                                      const bool opt_store_as_tree)
+                                      const bool opt_store_as_tree,
+                                      ostream &f)
 {
   if (opt_store_as_tree)
   { ATerm t=variable_index.get(current_var);
     if (!is_pair(t))
-    { ATfprintf(stderr,"%t",t);
+    { f << ATgetName(ATgetAFun(t));
     }
     else
-    { ATfprintf(stderr,"%t",ATgetArgument(t,0));
-      print_tree_rec('(',ATgetArgument(t,1));
+    { f << ATgetName(ATgetAFun(ATgetArgument(t,0)));
+      print_tree_rec('(',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
     }
   }
   else
@@ -135,37 +147,37 @@ static void print_counter_example_rec(bes::variable_type current_var,
 
     data_expression_list tl=X.parameters();
     string s=X.name();
-    cerr << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
+    f << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
     for(data_expression_list::iterator t=tl.begin();
           t!=tl.end(); t++)
-    { cerr << (t==tl.begin()?"(":",");
+    { f << (t==tl.begin()?"(":",");
       if (opt_precompile_pbes)
       { ATermAppl term=*t;
-        cerr << pp(rewriter->fromRewriteFormat((ATerm)term));
+        f << pp(rewriter->fromRewriteFormat((ATerm)term));
       }
       else 
-      { cerr << pp(*t);
+      { f << pp(*t);
       }
     }
-    cerr << ")";
+    f << ")";
   }
 
   if (already_printed[current_var])
-  { cerr << "*\n";
+  { f << "*\n";
   }
   else
-  { cerr << "\n";
+  { f << "\n";
     already_printed[current_var]=true;
 
     for(std::deque < bes::counter_example>::iterator walker=bes_equations.counter_example_begin(current_var);
         walker!=bes_equations.counter_example_end(current_var) ; walker++)
     { 
-      cerr << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
+      f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
       print_counter_example_rec((*walker).get_variable(),indent+"  ",
                             bes_equations,variable_index,already_printed,
                             opt_precompile_pbes,
                             rewriter,
-                            opt_store_as_tree);
+                            opt_store_as_tree,f);
     }
   }
 }
@@ -174,13 +186,32 @@ static void print_counter_example(bes::equations &bes_equations,
                                   atermpp::indexed_set &variable_index,
                                   const bool opt_precompile_pbes,
                                   Rewriter *rewriter,
-                                  const bool opt_store_as_tree)
-{
-  cerr << "Below the justification for this outcome is listed\n";
+                                  const bool opt_store_as_tree,
+                                  const string filename)
+{ ofstream f;
   vector <bool> already_printed(bes_equations.nr_of_variables()+1,false);
-  cerr << "1: ";
-  print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
-                       opt_precompile_pbes,rewriter,opt_store_as_tree);
+  if (filename.empty())
+  { // Print the counterexample to cout.
+    cout << "Below the justification for this outcome is listed\n1: ";
+    print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
+                       opt_precompile_pbes,rewriter,opt_store_as_tree,cout);
+  }
+  if (f!=NULL)
+  { 
+    try 
+    { 
+      ofstream f(filename);
+      f << "Below the justification for this outcome is listed\n1: ";
+      print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
+                       opt_precompile_pbes,rewriter,opt_store_as_tree,f);
+      f.close();
+    }
+    catch (std::exception& e)
+    { cerr << "Fail to write counterexample to " << filename << 
+               "(" << e.what() << ")\n";
+
+    }
+  }
 }
 
 template <typename Container>
@@ -239,7 +270,8 @@ bool process(t_tool_options const& tool_options)
                             variable_index,
                             tool_options.opt_precompile_pbes,
                             rewriter,
-                            tool_options.opt_store_as_tree);
+                            tool_options.opt_store_as_tree,
+                            tool_options.opt_counter_example_file);
     }
   }
 
