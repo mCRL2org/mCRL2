@@ -7,6 +7,7 @@
 /// \file mainframe.cpp
 /// \brief Add your file description here.
 
+#include <wx/defs.h>
 #include "mainframe.h"
 #include <wx/bitmap.h>
 #include <wx/event.h>
@@ -71,6 +72,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
                          MainFrame::onSimTransitionSelected)
   EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW, 
                           MainFrame::onSimTransitionActivated)
+  EVT_CHAR(MainFrame::onKeyDown)
   EVT_BUTTON(myID_SIM_TRIGGER_BUTTON, MainFrame::onSimTriggerButton)
   EVT_BUTTON(myID_SIM_UNDO_BUTTON, MainFrame::onSimUndoButton)
   EVT_BUTTON(myID_SIM_BT_BUTTON, MainFrame::onGenerateBackTraceButton)
@@ -685,15 +687,26 @@ void MainFrame::onSimTransitionSelected(wxListEvent& event) {
 
   // Choose trans to be the next transition
   sim->chooseTrans(trans);
-
   
 }
 
 void MainFrame::onSimTransitionActivated(wxListEvent& event) {
   onSimTransitionSelected(event);
-  
   sim->followTrans();
 }
+
+void MainFrame::onKeyDown(wxKeyEvent& event)
+{
+  // Workaround: Catch the space
+  if (event.GetKeyCode() == WXK_SPACE)
+  {
+  }
+  else
+  {
+    event.Skip();
+  }
+}
+
 void MainFrame::onSimTriggerButton(wxCommandEvent& event) {
   sim->followTrans();
 }
@@ -915,7 +928,7 @@ void MainFrame::refresh() {
       }
       
       // Trigger and undo buttons
-      if(sim->getChosenTransi() != -1) {
+      if(chosenTrans != -1) {
         simTriggerButton->Enable();
       }
       else {
@@ -928,23 +941,6 @@ void MainFrame::refresh() {
       else {
         simUndoButton->Disable();
       }
-
-
-      // Refresh the state list with the information about the current state
-      /*simStateView->DeleteAllItems();
-      
-      if (currState != NULL) {
-        for(int i = 0; i < mediator->getNumberOfParams(); ++i) {
-          // Parameter name
-          simStateView->InsertItem(i, wxString(mediator->getParName(i).c_str(),
-                                               wxConvLocal));
-
-          // Parameter value
-          simStateView->SetItem(i, 1, wxString(
-            mediator->getParValue(i, currState->getParameterValue(i)).c_str(), 
-              wxConvLocal));
-        }
-      }*/
     }
   }
   Layout();

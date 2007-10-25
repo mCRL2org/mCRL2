@@ -62,7 +62,10 @@ class LTSViewApp : public wxApp, public Mediator {
 
     void          loadTrace(std::string const& path);
     void          generateBackTrace();
+
+    DECLARE_EVENT_TABLE()
 };
+
 
 DECLARE_APP(LTSViewApp)
 

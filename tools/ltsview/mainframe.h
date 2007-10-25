@@ -64,6 +64,7 @@ class MainFrame : public wxFrame, public simReader {
     void        onSimStopButton(wxCommandEvent& event);
     void        onSimTransitionSelected(wxListEvent& event);
     void        onSimTransitionActivated(wxListEvent& event);
+    void        onKeyDown(wxKeyEvent& event);
     void        onSimTriggerButton(wxCommandEvent& event);
     void        onSimUndoButton(wxCommandEvent& event);
     void        onGenerateBackTraceButton(wxCommandEvent& event);
@@ -87,6 +88,7 @@ class MainFrame : public wxFrame, public simReader {
     void  setParameterValue(std::string par, std::string value);
     
     void reportError(std::string const& error);
+   
 
     // Implemented for simReader interface
     virtual void refresh();

@@ -79,6 +79,10 @@ using namespace std;
 using namespace Utils;
 IMPLEMENT_APP_NO_MAIN(LTSViewApp)
 
+BEGIN_EVENT_TABLE(LTSViewApp, wxApp)
+  EVT_CHAR(MainFrame::onKeyDown)
+END_EVENT_TABLE()
+
 bool LTSViewApp::OnInit() {
   lts = NULL;
   markStyle = NO_MARKS;
