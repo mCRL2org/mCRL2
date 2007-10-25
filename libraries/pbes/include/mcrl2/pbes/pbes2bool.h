@@ -42,6 +42,7 @@ struct t_tool_options
    bool opt_data_elm;
    std::string infilename;
    std::string outfilename;
+   std::string opt_counter_example_file;
     
    t_tool_options()
      : opt_outputformat("none"),

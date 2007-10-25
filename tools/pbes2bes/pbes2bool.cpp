@@ -95,11 +95,17 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     };
 
     static const char* option_transformation_strategy;
+    static const char* option_rewrite_strategy;
     static const char* option_selected_output_format;
+    static const char* option_precompile;
+    static const char* option_counter;
+    static const char* option_hash_table;
+    static const char* option_tree;
+    static const char* option_unused_data;
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > transformation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::enumeration > transformation_strategy_enumeration;
     boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
 
   public:
@@ -125,14 +131,21 @@ const char* squadt_interactor::bes_file_for_output = "bes_out";
 
 const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
 const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
+const char* squadt_interactor::option_rewrite_strategy        = "rewrite_strategy";
+const char* squadt_interactor::option_precompile              = "precompile";
+const char* squadt_interactor::option_counter                 = "counter";
+const char* squadt_interactor::option_hash_table              = "hash_table";
+const char* squadt_interactor::option_tree                    = "tree";
+const char* squadt_interactor::option_unused_data             = "unused_data";
 
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new tipi::datatype::enumeration("lazy"));
+  transformation_strategy_enumeration.reset(new tipi::datatype::enumeration("lazy"));
+
+  *transformation_strategy_enumeration % "optimize" % "on-the-fly" % "on-the-fly-with-fixpoints";
 
   output_format_enumeration.reset(new tipi::datatype::enumeration("none"));
 
-  output_format_enumeration->add_value("vasy");
-  output_format_enumeration->add_value("cwi");
+  *output_format_enumeration % "vasy" % "cwi";
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -144,6 +157,31 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
+  if (!c.option_exists(option_precompile)) {
+    c.add_option(option_precompile).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_counter)) {
+    c.add_option(option_counter).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_hash_table)) {
+    c.add_option(option_hash_table).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_tree)) {
+    c.add_option(option_tree).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_unused_data)) {
+    c.add_option(option_unused_data).set_argument_value< 0, tipi::datatype::boolean >(true);
+  }
+  if (!c.option_exists(option_rewrite_strategy)) {
+    c.add_option(option_rewrite_strategy).append_argument(mcrl2::utilities::squadt::rewrite_strategy_enumeration, 0);
+  }
+  if (!c.option_exists(option_transformation_strategy)) {
+    c.add_option(option_transformation_strategy).append_argument(transformation_strategy_enumeration, lazy);
+  }
+  if (!c.option_exists(option_selected_output_format)) {
+    c.add_option(option_selected_output_format).append_argument(output_format_enumeration, none);
+  }
+
   /* Create display */
   tipi::layout::tool_display d;
 
@@ -151,18 +189,47 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < bes_output_format > format_selector(d);
 
   // Helper for strategy selection
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > rewrite_strategy_selector(d);
+
+  // Helper for strategy selection
   mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
 
-  layout::vertical_box& m = d.create< vertical_box >();
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
-  m.append(d.create< label >().set_text("Output format : ")).
+  checkbox& precompile(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_precompile)));
+  checkbox& counter(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_counter)));
+  checkbox& hash_table(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_hash_table)));
+  checkbox& tree(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_tree)));
+  checkbox& unused_data(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_unused_data)));
+
+  m.append(d.create< label >().set_text("Rewrite strategy")).
+    append(d.create< horizontal_box >().
+                append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
+                append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")),
+          margins(0,5,0,5)).
+    append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
                 append(format_selector.associate(none, "none")).
                 append(format_selector.associate(vasy, "vasy")).
                 append(format_selector.associate(cwi, "cwi")),
           margins(0,5,0,5)).
-    append(d.create< label >().set_text("Transformation stragey : ")).
-    append(strategy_selector.associate(lazy, "lazy: only boolean equations reachable from the initial state"));
+    append(d.create< label >().set_text("Strategy to generate a BES from a PBES: "), margins(8,5,0,5)).
+    append(d.create< vertical_box >().
+        append(strategy_selector.associate(lazy, "0: without optimisation")).
+        append(strategy_selector.associate(optimize, "1: forward substitution of true/false")).
+        append(strategy_selector.associate(on_the_fly, "2: full substitution of true/false")).
+        append(strategy_selector.associate(on_the_fly_with_fixed_points, "3: full substitution and cycle detection")),
+          margins(0,5,8,5)).
+    append(d.create< horizontal_box >().
+        append(d.create< vertical_box >().
+            append(precompile.set_label("precompile for faster rewriting")).
+            append(counter.set_label("produce a counter example")).
+            append(unused_data.set_label("remove unused data"))).
+        append(d.create< vertical_box >().
+            append(hash_table.set_label("use hash tables and translation to BDDs")).
+            append(tree.set_label("store state in a tree (memory efficiency)"))));
 
   button& okay_button = d.create< button >().set_label("OK");
 
@@ -178,16 +245,22 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     format_selector.set_selection(static_cast < bes_output_format > (
         c.get_option_argument< size_t >(option_selected_output_format, 0)));
   }
-  
+  if (c.option_exists(option_rewrite_strategy)) {
+    rewrite_strategy_selector.set_selection(static_cast < RewriteStrategy > (
+        c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+  }
+
   send_display_layout(d.set_manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
 
-  c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
+  c.get_option(option_transformation_strategy).replace_argument(0, transformation_strategy_enumeration,
                                 static_cast < transformation_strategy > (strategy_selector.get_selection()));
-  c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
+  c.get_option(option_selected_output_format).replace_argument(0, output_format_enumeration,
                                 static_cast < bes_output_format > (format_selector.get_selection()));
+  c.get_option(option_rewrite_strategy).replace_argument(0, mcrl2::utilities::squadt::rewrite_strategy_enumeration,
+                                static_cast < RewriteStrategy > (rewrite_strategy_selector.get_selection()));
 
   if (c.get_option_argument< size_t >(option_selected_output_format)!=none)
   {
@@ -202,6 +275,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                    c.get_output_name(".txt"));
     }
   }
+
+  c.get_option(option_precompile).set_argument_value< 0, boolean >(precompile.get_status());
+  c.get_option(option_counter).set_argument_value< 0, boolean >(counter.get_status());
+  c.get_option(option_hash_table).set_argument_value< 0, boolean >(hash_table.get_status());
+  c.get_option(option_tree).set_argument_value< 0, boolean >(tree.get_status());
+  c.get_option(option_unused_data).set_argument_value< 0, boolean >(unused_data.get_status());
 
   send_clear_display();
 }
@@ -227,18 +306,26 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   t_tool_options tool_options;
 
-  tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
-  switch (c.get_option_argument< size_t >(option_transformation_strategy))
-  { case 1: tool_options.opt_strategy=lazy;
-            break;
-    case 2: tool_options.opt_strategy=optimize;
-            break;
-    case 3: tool_options.opt_strategy=on_the_fly;
-            break;
-    case 4: tool_options.opt_strategy=on_the_fly_with_fixed_points;
-            break;
-    default: assert(0); // other options are not possible
+  tool_options.opt_precompile_pbes           = c.get_option_argument< bool >(option_precompile);
+  tool_options.opt_construct_counter_example = c.get_option_argument< bool >(option_counter);
+  tool_options.opt_store_as_tree             = c.get_option_argument< bool >(option_tree);
+  tool_options.opt_data_elm                  = c.get_option_argument< bool >(option_unused_data);;
+  tool_options.opt_use_hashtables            = c.get_option_argument< bool >(option_hash_table);;
+  tool_options.rewrite_strategy              = static_cast < RewriteStrategy > (
+                        c.get_option_argument< size_t >(option_rewrite_strategy, 0));
+
+  if (tool_options.opt_construct_counter_example) {
+    tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
+
+    c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::text), 
+                 tool_options.opt_counter_example_file);
   }
+
+  tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
+
+  tool_options.opt_strategy = static_cast < transformation_strategy > (
+                        c.get_option_argument< size_t >(option_transformation_strategy, 0));
+
   // tool_options.opt_strategy     = c.get_option_argument< size_t >(option_transformation_strategy);
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
 

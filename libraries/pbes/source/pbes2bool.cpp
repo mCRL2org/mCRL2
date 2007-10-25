@@ -200,7 +200,7 @@ static void print_counter_example(bes::equations &bes_equations,
   { 
     try 
     { 
-      ofstream f(filename);
+      ofstream f(filename.c_str());
       f << "Below the justification for this outcome is listed\n1: ";
       print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
                        opt_precompile_pbes,rewriter,opt_store_as_tree,f);
