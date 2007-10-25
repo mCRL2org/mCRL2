@@ -187,9 +187,17 @@ void p_lts::init(lts_type type, bool state_info, bool label_info)
 
 void p_lts::clear(lts_type type, bool state_info, bool label_info)
 {
-  free(state_values);
+  if ( state_values != NULL )
+  {
+    ATunprotectArray(state_values);
+    free(state_values);
+  }
   free(taus);
-  free(label_values);
+  if ( label_values != NULL )
+  {
+    ATunprotectArray(label_values);
+    free(label_values);
+  }
   free(transitions);
 
   init(type,state_info,label_info);

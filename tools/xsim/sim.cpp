@@ -246,7 +246,12 @@ int main(int argc, char **argv)
 					gsMessage(" ]\n\n");
 					break;
 				} else {
-					cout << "invalid transition index " << idx << " (maximum is " << ATgetLength(states)-1 << ")" << endl;
+					cout << "invalid transition index";
+					if ( ATgetLength(states) > 0 )
+					{
+						cout << " " << idx << " (maximum is " << ATgetLength(states)-1 << ")";
+					}
+					cout << endl;
 				}
 			} else {
 				cout << "unknown command (try 'h' for help)" << endl;
