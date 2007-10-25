@@ -190,7 +190,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Create and add the top layout manager */
   m.append(d.create< label >().set_text("Phase after which to stop: ")).
     append(d.create< horizontal_box >().
-        append(phase_selector.associate(PH_NONE, "none")).
+        append(phase_selector.associate(PH_NONE, "none", true)).
         append(phase_selector.associate(PH_PARSE, "parsing")).
         append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
         append(phase_selector.associate(PH_DATA_IMPL, "data implementation")).
@@ -249,7 +249,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
                                 static_cast < pbes_output_format > (format_selector.get_selection()));
-  c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (format_selector.get_selection()));
+  c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (phase_selector.get_selection()));
 
   send_clear_display();
 }
