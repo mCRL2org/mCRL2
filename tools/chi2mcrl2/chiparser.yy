@@ -1074,46 +1074,68 @@ BasicExpression:
 		    **/
           gsDebugMsg("%s:%d",__FILE__, __LINE__ );
 
-          //TYPECHECKING NEEDED TO SEE IF IT IS A TUPLETYPE
+          if (var_type_map.find((ATerm) $1) != var_type_map.end())
+          {
+            ATermAppl tuple_type = (ATermAppl) var_type_map[(ATerm) $1]; 
+            gsDebugMsg("%T\n", tuple_type); 
+
+            //Check if $1 is a tuple 
+            if( strcmp("TupleType", ATgetName( ATgetAFun( tuple_type ) ) ) != 0 )  
+            {
+              gsErrorMsg("%T is not a Tuple", $1);
+              exit(1);
+            }
+ 
+            int index = atoi(ATgetName(ATgetAFun($3)));
+
+            if (index >= ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
+            {
+              gsErrorMsg("BasicExpression: Index value \"%d\" is out of bounds for %T\n", index, $1 );
+              exit(1);
+            }
+
+            ATermList to_process = (ATermList) ATgetArgument(tuple_type, 0 ); 
+            while (index > 0)
+            {
+              to_process = ATgetNext(to_process);
+              --index;
+            }
+            ATerm type = ATgetFirst(to_process); 
+          
+            safe_assign($$, 
+              gsMakeTupleDot(
+			    gsMakeExpression( $1, 
+			      (ATermAppl) var_type_map[(ATerm) $1] 
+			    ),
+                (ATermAppl) type,  
+                $3
+              )
+            ); 
+            gsDebugMsg("BasicExpression (Tuple Selection): parsed \n  %T\n", $$);
+          }
 
           if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
           {
+  	           //Check if # of channel is a Natural number
+  	           //UnaryTypeCheck( (ATermAppl) gsMakeType($3), "Nat");
+  	 
+  	           safe_assign($$,
+  	             gsMakeChannelTypedID(
+  	               gsMakeChannelID($1, gsMakeNil()),
+  	               (ATermAppl) chan_type_direction_map[(ATerm) $1].first,
+  	               (ATermAppl) gsMakeExpression( $3 ,gsMakeType(gsString2ATermAppl("Nat")))
+  	             )
+  	           );
+  	 
+  	           gsDebugMsg("BasicExpression (Hashed Channel): parsed \n  %T\n", $$);  
+          }
+          
+          if ( (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) $1)) &&
+               (var_type_map.find((ATerm) $1) == var_type_map.end()) )
+          {   
               gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
               exit(1);
           }
-
-          gsDebugMsg("%T\n", $3);
-
-          int index = atoi(ATgetName(ATgetAFun($3)));
-
-          ATermAppl tuple_type = (ATermAppl) var_type_map[(ATerm) $1]; 
-
-          gsDebugMsg("%T\n", tuple_type); 
-
-          if (index >= ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
-          {
-            gsErrorMsg("BasicExpression: Index value \"%d\" is out of bounds for %T\n", index, $1 );
-            exit(1);
-          }
-
-          ATermList to_process = (ATermList) ATgetArgument(tuple_type, 0 ); 
-          while (index > 0)
-          {
-            to_process = ATgetNext(to_process);
-            --index;
-          }
-          ATerm type = ATgetFirst(to_process); 
-          
-          safe_assign($$, 
-            gsMakeTupleDot(
-			  gsMakeExpression( $1, 
-			    (ATermAppl) var_type_map[(ATerm) $1] 
-			  ),
-              (ATermAppl) type,  
-              $3
-            )
-          ); 
-          gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
 		}
 //	  OLD LBRACKET Expression RBRACKET 
 //	| Identifier DERIVATIVE
@@ -1569,11 +1591,12 @@ MemberTest:
     ;
 
 RecordExpression:
-     LBRACKET Expression_csp RBRACKET
+     LBRACKET Expression_csp COMMA Expression RBRACKET
      {
       	  gsDebugMsg("R:%d",__LINE__);
           ATermList tuple_type = ATmakeList0(); 
 		  ATermList to_process = $2;
+          to_process = ATinsert(to_process, (ATerm) $4);
 		  while(!ATisEmpty(to_process))
           {
              ATerm elementType = ATgetArgument(ATgetFirst(to_process),1);
