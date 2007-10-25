@@ -44,14 +44,14 @@ using namespace ::mcrl2::utilities;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
 
 //t_tool_options represents the options of the tool
-typedef struct {
+typedef struct t_tool_options {
   bool pretty;
   bool timed;
   t_phase end_phase;
   string formfilename;
   string infilename;
   string outfilename;
-} t_tool_options;
+};
 
 //Functions used by the main program
 //----------------------------------
@@ -197,7 +197,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
     append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
-        append(format_selector.associate(normal, "normal")).
+        append(format_selector.associate(normal, "normal", true)).
         append(format_selector.associate(readable, "readable")));
 
   text_field& formula_field    = d.create< text_field >();
