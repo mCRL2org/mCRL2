@@ -39,7 +39,7 @@ extern ATermIndexedSet parser_protect_table;
  */
 int yyerror(const char *s)
 {
-  printf("error: %s at line: %d col: %d\n",s,line,col);
+  gsErrorMsg("error: %s at line: %d col: %d\n",s,line,col);
   return 0;
 }
 
@@ -52,6 +52,7 @@ extern YYSTYPE chiyylval;      /* declared in parser.cpp */
 //global declarations, used by chiparser.cpp
 int  chiyylex(void);           /* lexer function */
 void chiyyerror(const char *s);/* error function */
+void chigetposition();
 extern "C" int chiyywrap(void);/* wrap function */
 //Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
@@ -65,6 +66,7 @@ public:
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
   ATermAppl parse_stream(std::istream &stream );
+  void getposition();
 protected:
   std::istream *cur_stream;      /* input stream */
   int line_nr;                   /* line number in cur_streams[cur_index] */
@@ -156,6 +158,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 
 "const"   { process_string(); return CONST; }
 "time"	{ process_string(); return TIME; }
+"delay"	{ process_string(); return DELAY; }
 
 "in"	{ process_string(); return IN; }
 "++"	{ process_string(); return CONCAT; }
@@ -178,6 +181,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
  
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }
+"void"  { process_string(); return VOID; }
 "int"	{ process_string(); return TYPE; }
 "real"	{ process_string(); return TYPE; }
 "string" { process_string(); return TYPE; }
@@ -213,6 +217,10 @@ void chiyyerror(const char *s) {
   return lexer->yyerror(s);
 }
 
+void chigetposition() {
+  return lexer->getposition();
+}
+
 int chiyywrap(void) {
   return lexer->yywrap();
 }
@@ -230,9 +238,21 @@ void chiLexer::yyerror(const char *s) {
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
   }
-  printf(
+  gsErrorMsg(
     "token '%s' at position %d, %d caused the following error: %s\n", 
     YYText(), line_nr, oldcol_nr, s
+  ); 
+}
+
+void chiLexer::getposition()
+{
+  int oldcol_nr = col_nr - YYLeng();
+  if (oldcol_nr < 0) {
+    oldcol_nr = 0;
+  }
+  gsErrorMsg(
+    "Near position Line: %d, Column: %d:\n", 
+    line_nr, oldcol_nr 
   ); 
 }
 

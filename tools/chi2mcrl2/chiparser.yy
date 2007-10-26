@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
-//#include "symtab.h"
 #include <iostream>
 #include "libstruct_core.h"
 #include <aterm2.h>
@@ -14,6 +12,9 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <cctype>
+#include <string.h>
+
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -26,6 +27,7 @@ using namespace std;
 
 //external declarations from lexer.l
 void chiyyerror( const char *s );
+extern void chigetposition();
 int chiyylex( void );
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
@@ -53,6 +55,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
+bool is_number(std::string s);
 
 %}
 
@@ -72,7 +75,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %token <appl> PROC MODEL_DEF ENUM MODEL
 %token <appl> VAR CONST CHAN
 %token <appl> SKIP BARS ALT
-%token <appl> COLON TYPE BOOL NAT
+%token <appl> COLON TYPE BOOL NAT VOID
 %token <appl> ID TIME 
 %token <appl> BP EP PROC_SEP SEP COMMA IS ASSIGNMENT MINUS PLUS GG 
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
@@ -82,14 +85,32 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %token <appl> SQLBRACKET SQRBRACKET 
 %token <appl> LSUBTRACT CONCAT IN
 %token <appl> HEAD TAIL RHEAD RTAIL LENGTH TAKE DROP SORT INSERT LESS GREATER HASH
-%token <appl> UNION SUB INTERSECTION PICK
+%token <appl> UNION SUB INTERSECTION PICK DELAY
 
-%left MINUS PLUS LSUBTRACT CONCAT IN NOTEQUAL 
-%left DIVIDE       /* order '+','-','*','/' */
-%right POWER SEP ALT GUARD_REP STAR BARS        /* exponentiation        */
+
+%left  AND
+%left  OR
+%left  IMPLIES 
+
+%nonassoc  GREATER LESS IS NOTEQUAL LEQ GEQ
+%left  PLUS MINUS
+%left  STAR DIVIDE MOD DIV 
+%right POWER NOT
+ 
+%left LSUBTRACT CONCAT IN  
+%left MIN MAX SUB UNION INTERSECTION HEAD TAKE TAIL  
+
+%left SEP
+%right GUARD 
+%right ALT
+%right BARS
+%right ASSIGNMENT
+%right SEND RECV
+
+%left GUARD_REP
+
 %start ChiProgram
 
-%left LEQ GEQ GREATER LESS COMMA MIN DIV MOD MAX IMPLIES IS NOT GUARD SUB UNION INTERSECTION HEAD TAKE TAIL  
 
 %glr-parser
 %debug
@@ -110,7 +131,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
 %type <appl> ContainerType
 %type <appl> ListExpression ListLiteral
 %type <appl> Functions
-%type <appl> SetExpression MemberTest MinusExpression RecordExpression
+%type <appl> SetExpression MemberTest MinusExpression RecordExpression PlusExpression DelayStatement 
 
 
 %type <list> IdentifierTypeExpression IdentifierType Identifier_csp Expression_csp FormalParameter_csp ProcessDefinitions ChannelDeclaration ChannelDefinition
@@ -292,6 +313,19 @@ IdentifierTypeExpression_csp:
 IdentifierTypeExpression:
 	  IdentifierType 
 		{
+          //An expression cannot be of type "Void"
+          ATermList list = $1;
+          while (!ATisEmpty(list)) 
+          {
+            if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
+            {
+              chigetposition();
+              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              exit(1);
+            } 
+            list = ATgetNext( list ) ;
+          }
+
 		  safe_assign($$, $1 );
 		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
 		}
@@ -302,9 +336,14 @@ IdentifierTypeExpression:
 
           while (!ATisEmpty(list)) 
           {
-             gsDebugMsg("%T",ATgetFirst(list));
-             new_list = ATinsert( new_list , (ATerm) gsMakeDataVarExprID( (ATermAppl) ATgetFirst(list), $3));
-             list = ATgetNext( list ) ;
+            //An expression cannot be of type "void"
+            if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
+            {
+              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              exit(1);
+            } 
+            new_list = ATinsert( new_list , (ATerm) gsMakeDataVarExprID( (ATermAppl) ATgetFirst(list), $3));
+            list = ATgetNext( list ) ;
           }
           
           safe_assign($$, new_list);
@@ -372,24 +411,26 @@ IdentifierType:
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i )
           {
-			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
-			 {
-			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 list = ATgetTail( list, 1 ) ;
+			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
+			{
+              chigetposition();
+			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 
 		  list = $1;
 		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
-			 {
-			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 var_type_map[ATgetFirst( list )]= (ATerm) $3;
-			 list = ATgetTail( list, 1 ) ;
+			if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
+			{
+              chigetposition();
+			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			var_type_map[ATgetFirst( list )]= (ATerm) $3;
+			list = ATgetTail( list, 1 ) ;
 		  }	;
          
           list = $1;
@@ -435,25 +476,27 @@ ChannelDeclaration:
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 list = ATgetTail( list, 1 ) ;
+			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			list = ATgetTail( list, 1 ) ;
 		  }	;
           gsDebugMsg("\n%T\n", $1);
 		  
           list = $1;
 		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
-			 list = ATgetTail( list, 1 ) ;
+			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 
 		  list = $1;
@@ -479,24 +522,26 @@ ChannelDeclaration:
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 list = ATgetTail( list, 1 ) ;
+			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 		  
           list = $1;
 		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
-			 list = ATgetTail( list, 1 ) ;
+			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 
 		  list = $1;
@@ -566,24 +611,26 @@ ChannelDefinition:
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 list = ATgetTail( list, 1 ) ;
+			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 		  
           list = $1;
 		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
-			 list = ATgetTail( list, 1 ) ;
+			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 
 		  list = $1;
@@ -608,24 +655,26 @@ ChannelDefinition:
 		  ATermList list = $1;
 		  int n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 list = ATgetTail( list, 1 ) ;
+			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 		  
           list = $1;
 		  n = ATgetLength( list );
 		  for(int i = 0; i < n ; ++i ){
-			 if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
-			 {
-			   gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
-			   exit(1);
-			 };
-			 chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
-			 list = ATgetTail( list, 1 ) ;
+			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
+			{
+              chigetposition();
+			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  exit(1);
+			};
+			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
+			list = ATgetTail( list, 1 ) ;
 		  }	;
 
 		  list = $1;
@@ -694,6 +743,11 @@ BasicType:
  	| NAT
 		{ 
           safe_assign($$, gsMakeType( gsString2ATermAppl("Nat" ) ) );
+      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+		}
+ 	| VOID 
+		{ 
+          safe_assign($$, gsMakeType( gsString2ATermAppl("Void" ) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
 		}
  	| TYPE
@@ -765,12 +819,22 @@ BasicStatement:
 //	  Instantiation
 	  AssignmentStatement
 	| CommStatement
-//	| DelayStatement
+	| DelayStatement
 //	| HybridStatement
 //	| ReturnStatement
 //	| FoldStatement 
 	| AdvancedStatement
 	;
+
+DelayStatement:
+      DELAY Expression
+      {
+        // Ugly Hack :D
+        safe_assign($$, gsMakeSkipStat( gsMakeNil(), gsMakeNil(), gsMakeSkip() ));
+        gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);	
+      }
+    ;
+
 
 AssignmentStatement:
 	  OptGuard OptChannel ExpressionIdentier_csp ASSIGNMENT Expression_csp
@@ -782,6 +846,7 @@ AssignmentStatement:
           { 
             if (!ContainerTypeChecking((ATermAppl) ATgetArgument(ATgetFirst(ids), 1), (ATermAppl) ATgetArgument(ATgetFirst(exprs), 1)))
 		    { 
+              chigetposition();
               gsErrorMsg("Assignment failed: Incompatible Types Checking failed %T and %T\n", ids, exprs);
 		      exit(1);
             }
@@ -794,7 +859,8 @@ AssignmentStatement:
 		}
 	|
 	  OptGuard OptChannel SKIP
-      	{ safe_assign($$, gsMakeSkipStat( $1, $2, gsMakeSkip() ));
+      	{ 
+          safe_assign($$, gsMakeSkipStat( $1, $2, gsMakeSkip() ));
       	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);	
 		}
 //	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
@@ -867,10 +933,19 @@ CommStatement:
           gsDebugMsg("%T\n",hash);
 
           safe_assign($$, gsMakeSendStat($1, channel, hash , ATreverse( $4) ) );
-      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+      	  gsDebugMsg("CommStatement: parsed %T\n", $$);	
         }
 //	| OptGuard Expression SSEND Expression_csp
-//	| OptGuard Expression EXCLAMATION
+	| OptGuard Expression EXCLAMATION
+        {
+          gsDebugMsg("%T",$2);
+ 
+          ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);   
+          ATermAppl hash    = (ATermAppl) ATgetArgument($2,2); 
+
+          safe_assign($$, gsMakeSendStat($1, channel, hash, ATmakeList0() ) );
+      	  gsDebugMsg("CommStatement: parsed %T\n", $$);	
+        }
 //	| OptGuard Expression SSEND 
 //	| OptGuard SSEND Expression_csp 
 	| OptGuard Expression RECV Expression_csp
@@ -885,10 +960,23 @@ CommStatement:
           ATermAppl hash    = (ATermAppl) ATgetArgument($2,2); 
 
           safe_assign($$, gsMakeRecvStat($1, channel, hash, ATreverse( $4) ) );
-      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);	
+      	  gsDebugMsg("CommStatement: parsed %T\n", $$);	
         }
 //	| OptGuard Expression RRECV Expression_csp
-//	| OptGuard Expression RECV
+	| OptGuard Expression RECV
+        {
+          //Check if $2 is properly typed
+          //Check if $4 is properly typed
+          //Check if $2 can receive
+
+          gsDebugMsg("%T",$2);
+ 
+          ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);   
+          ATermAppl hash    = (ATermAppl) ATgetArgument($2,2); 
+
+          safe_assign($$, gsMakeRecvStat($1, channel, hash, ATmakeList0() ) );
+      	  gsDebugMsg("CommStatement: parsed %T\n", $$);	
+        }
 //	| OptGuard Expression RRECV 
 //	| OptGuard RRECV Expression_csp 
 	;
@@ -929,6 +1017,8 @@ UnaryStatement:
 	| Expression GUARD_REP Statement
       	{
           gsDebugMsg("%d\n", __LINE__);
+          gsDebugMsg("%T\n",$1);
+          gsDebugMsg("%T\n",$3);
           UnaryTypeCheck(ATAgetArgument($1,1), "Bool");
           safe_assign($$, gsMakeGuardedStarStat( $1, $3));
       	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);	
@@ -967,7 +1057,8 @@ Expression: //NUMBER
 	| BasicExpression
 	| BooleanExpression
     | MinusExpression
-	| NatIntExpression
+	| PlusExpression
+    | NatIntExpression
 	| EqualityExpression 
 	| ListExpression
 	| SetExpression
@@ -1004,6 +1095,7 @@ ExpressionIdentifier:
 		  // Determine if the expression is defined already 
 		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
 		    {
+              chigetposition();
 		      gsErrorMsg("ExpressionIdentifier: Variable %T is not defined!\n", $1 );
 		      exit(1);
 		    };
@@ -1057,13 +1149,14 @@ BasicExpression:
  
           if(!channel_exists && !variable_exists)
           {
+              chigetposition();
               gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
               exit(1);
           }
   
           gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
 		}
-	| Identifier DOT NUMBER  
+	| Identifier DOT Expression  
  
 		{
 		  /**  
@@ -1072,8 +1165,10 @@ BasicExpression:
 		    * TODO: Add scope
 		    *
 		    **/
-          gsDebugMsg("%s:%d",__FILE__, __LINE__ );
+          gsDebugMsg("%s:%d\n",__FILE__, __LINE__ );
 
+          UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
+          
           if (var_type_map.find((ATerm) $1) != var_type_map.end())
           {
             ATermAppl tuple_type = (ATermAppl) var_type_map[(ATerm) $1]; 
@@ -1082,14 +1177,23 @@ BasicExpression:
             //Check if $1 is a tuple 
             if( strcmp("TupleType", ATgetName( ATgetAFun( tuple_type ) ) ) != 0 )  
             {
+              chigetposition();
               gsErrorMsg("%T is not a Tuple", $1);
               exit(1);
             }
- 
-            int index = atoi(ATgetName(ATgetAFun($3)));
-
-            if (index >= ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
+           
+            if (!is_number(ATgetName(ATgetAFun(ATgetArgument($3,0)))) )
             {
+              chigetposition();
+              gsErrorMsg("BasicExpression: Expected a number after the \".\"\n");
+              exit(1);
+            }
+          
+            int index = atoi(ATgetName(ATgetAFun(ATgetArgument($3,0))));
+
+            if (index >= (int) ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
+            {
+              chigetposition();
               gsErrorMsg("BasicExpression: Index value \"%d\" is out of bounds for %T\n", index, $1 );
               exit(1);
             }
@@ -1123,7 +1227,7 @@ BasicExpression:
   	             gsMakeChannelTypedID(
   	               gsMakeChannelID($1, gsMakeNil()),
   	               (ATermAppl) chan_type_direction_map[(ATerm) $1].first,
-  	               (ATermAppl) gsMakeExpression( $3 ,gsMakeType(gsString2ATermAppl("Nat")))
+  	               $3 
   	             )
   	           );
   	 
@@ -1133,6 +1237,7 @@ BasicExpression:
           if ( (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) $1)) &&
                (var_type_map.find((ATerm) $1) == var_type_map.end()) )
           {   
+              chigetposition();
               gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
               exit(1);
           }
@@ -1270,7 +1375,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary POWER Expression's\n  %T\n", $$);
 		}
 	| Expression STAR Expression
 		{ 
@@ -1283,7 +1388,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary STAR Expression's\n  %T\n", $$);
 		}
 	| Expression DIVIDE Expression
 		{ 
@@ -1296,20 +1401,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
-		}
-	| Expression PLUS Expression
-		{ 
-            BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
-
- 	  		safe_assign($$, 
-				gsMakeBinaryExpression( gsString2ATermAppl("+" ),
-				gsMakeType( gsString2ATermAppl("Nat" ) ),
-				$1 , 
-				$3  
-				) 
-			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary DIVIDE Expression's\n  %T\n", $$);
 		}
 	| Expression MOD Expression
 		{ 
@@ -1322,7 +1414,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary MOD Expression's\n  %T\n", $$);
 		}
 	| Expression DIV Expression
 		{ 
@@ -1335,7 +1427,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary DIV Expression's\n  %T\n", $$);
 		}
 	| Expression MIN Expression
 		{ 
@@ -1348,7 +1440,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary MIN Expression's\n  %T\n", $$);
 		}
 	| Expression MAX Expression
 		{ 
@@ -1361,7 +1453,7 @@ NatIntExpression:
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary MAX Expression's\n  %T\n", $$);
 		}
 	| Expression LESS Expression
 		{ 
@@ -1369,12 +1461,12 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("<" ),
-				gsMakeType( gsString2ATermAppl("Nat" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary LESS Expression's\n  %T\n", $$);
 		}
 	| Expression GREATER Expression
 		{ 
@@ -1382,12 +1474,12 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl(">" ),
-				gsMakeType( gsString2ATermAppl("Nat" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary GREATER Expression's\n  %T\n", $$);
 		}
 	| Expression LEQ Expression
 		{ 
@@ -1395,12 +1487,12 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl("<=" ),
-				gsMakeType( gsString2ATermAppl("Nat" ) ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$1 , 
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		gsDebugMsg("parsed Binary LEQ Expression's\n  %T\n", $$);
 		}
 	| Expression GEQ Expression 
 		{ 
@@ -1408,14 +1500,79 @@ NatIntExpression:
 
  	  		safe_assign($$, 
 				gsMakeBinaryExpression( gsString2ATermAppl(">=" ),
+				gsMakeType( gsString2ATermAppl("Bool" ) ),
+				$1 , 
+				$3  
+				) 
+			);
+      		gsDebugMsg("parsed Binary GEQ Expression's\n  %T\n", $$);
+		}
+	;
+
+PlusExpression:
+	 Expression PLUS Expression
+	 { 
+       gsDebugMsg("Expression 1: %T\n", $1);
+       gsDebugMsg("Expression 2: %T\n", $3);
+ 
+       bool processed = false;
+
+       /**
+         *  Plus operater on naturals
+         *
+         **/
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument($3,1),0))), "Nat") == 0 ||
+           strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument($1,1),0))), "Nat") == 0 
+          )
+       {	  
+
+            BinTypeCheck(ATAgetArgument($1,1), ATAgetArgument($3,1), "Nat");
+
+ 	  		safe_assign($$, 
+				gsMakeBinaryExpression( gsString2ATermAppl("+" ),
 				gsMakeType( gsString2ATermAppl("Nat" ) ),
 				$1 , 
 				$3  
 				) 
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+            gsDebugMsg("PlusExpression - Nat Expression parsed: \n%T\n", $$);
+            processed = true;
 		}
-	;
+
+       /**
+         *  Plus operater on sets
+         *
+         **/
+       if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ||
+           strcmp(ATgetName(ATgetAFun(ATAgetArgument($1,1))), "SetType") == 0 
+          )
+       {	  
+         if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
+	     {
+           chigetposition();
+		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   exit(1);
+		 }
+   		 safe_assign($$, gsMakeBinarySetExpression( $2,  
+				         ATAgetArgument($1,1), 
+                	$1, $3));
+         gsDebugMsg("PlusExpression - Set Expression parsed: \n  %T\n", $$);
+         processed = true;
+       } 
+
+       /**
+         *  For all other types on plus 
+         *
+         **/
+
+       if (!processed)
+       {
+         chigetposition();
+         gsErrorMsg("Expressions %T and %T cannot be used with \"+\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         exit(1);
+       }
+     }
+   ;
 
 MinusExpression:
 	 Expression MINUS Expression
@@ -1425,7 +1582,7 @@ MinusExpression:
  
        bool processed = false;
        /**
-         *  Minus operaton on naturals
+         *  Minus operater on naturals
          *
          **/
        if (strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument($3,1),0))), "Nat") == 0 ||
@@ -1444,7 +1601,7 @@ MinusExpression:
          processed = true;
        } 
        /**
-         *  Minus operaton on lists
+         *  Minus operater on lists
          *
          **/
        if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ||
@@ -1453,6 +1610,7 @@ MinusExpression:
        {	  
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
+           chigetposition();
 		   gsErrorMsg("Incompatible Types Checking failed\n");
 		   exit(1);
 		 }
@@ -1463,7 +1621,7 @@ MinusExpression:
          processed = true;
        } 
        /**
-         *  Minus operaton on sets
+         *  Minus operater on sets
          *
          **/
        if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ||
@@ -1472,6 +1630,7 @@ MinusExpression:
        {	  
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
+           chigetposition();
 		   gsErrorMsg("Incompatible Types Checking failed\n");
 		   exit(1);
 		 }
@@ -1481,11 +1640,14 @@ MinusExpression:
          gsDebugMsg("MinusExpression - Set Expression parsed: \n  %T\n", $$);
          processed = true;
        } 
-         if (!processed)
-         {
-           gsErrorMsg("Expressions %T and %T cannot be used with \"-\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
-           exit(1);
-         }
+       
+
+       if (!processed)
+       {
+         chigetposition();
+         gsErrorMsg("Expressions %T and %T cannot be used with \"-\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         exit(1);
+       }
 
 	 }
    ;
@@ -1500,6 +1662,7 @@ EqualityExpression:
 			if(  !(ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
               )
 				{
+                  chigetposition();
 				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
@@ -1528,6 +1691,7 @@ EqualityExpression:
 			if(  !(ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
               )
 				{
+                  chigetposition();
 				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
 				  exit(1);
 				};
@@ -1558,6 +1722,7 @@ MemberTest:
        {	  
          if(!ContainerTypeChecking(gsMakeSetType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
 	     {
+           chigetposition();
 		   gsErrorMsg("Incompatible Types Checking failed\n");
 		   exit(1);
 		 }
@@ -1584,6 +1749,7 @@ MemberTest:
       
          if (!processed)
          {
+           chigetposition();
            gsErrorMsg("Experrsions %T and %T cannot be used with \"in\"", ATAgetArgument($1,0), ATAgetArgument($3,0));
            exit(1); 
         }
@@ -1604,7 +1770,8 @@ RecordExpression:
 
 			 to_process = ATgetNext( to_process) ;
 		  }
-          safe_assign($$, gsMakeTupleLiteral( ATreverse( $2 ), gsMakeTupleType( tuple_type ) ) );
+          to_process = ATinsert($2, (ATerm) $4 );
+          safe_assign($$, gsMakeTupleLiteral( ATreverse( to_process ), gsMakeTupleType( tuple_type ) ) );
       	  gsDebugMsg("RecordExpression parsed: \n  %T\n", $$);
 
      }
@@ -1630,6 +1797,7 @@ SetExpression:
              gsDebugMsg("%T\n",ATgetFirst(to_process));
              if (type != elementType )
              {
+               chigetposition();
                gsErrorMsg("SetLiteral contains mixed types %T and %T\n"
                          , type, elementType);
                exit(1);
@@ -1649,6 +1817,7 @@ SetExpression:
              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
              )
 			{
+              chigetposition();
 			  gsErrorMsg("r%d: Union failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
 			  exit(1);
 			};
@@ -1668,6 +1837,7 @@ SetExpression:
              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
              )
 			{
+              chigetposition();
 			  gsErrorMsg("r%d: Intersection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
 			  exit(1);
 			};
@@ -1687,6 +1857,7 @@ SetExpression:
              && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 ))
              )
 			{
+              chigetposition();
 			  gsErrorMsg("r%d: Subsection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
 			  exit(1);
 			};
@@ -1701,6 +1872,7 @@ SetExpression:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1727,6 +1899,7 @@ ListExpression:
               && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
               )
 				{
+                  chigetposition();
 				  gsErrorMsg("Concatination failed: Incompatible Types Checking failed:\n %T and %T\n", $1, $3);
 				  exit(1);
 				};
@@ -1746,6 +1919,7 @@ ListExpression:
               && (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
               )
 				{
+                  chigetposition();
 				  gsErrorMsg("Incompatible Types Checking failed\n");
 				  exit(1);
 				};
@@ -1767,6 +1941,7 @@ Functions:
       {
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1780,6 +1955,7 @@ Functions:
       {
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1794,6 +1970,7 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1808,6 +1985,7 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1822,6 +2000,7 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
 				  exit(1);
 				};
@@ -1836,12 +2015,14 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
 				  exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
 				  gsErrorMsg("Type checking failed\n");
 				  exit(1);
@@ -1858,12 +2039,14 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
 				  exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
+                  chigetposition();
 				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
 				  gsErrorMsg("Type checking failed\n");
 				  exit(1);
@@ -1892,6 +2075,7 @@ Functions:
       }
     | INSERT LBRACKET  Expression RBRACKET
       {
+        chigetposition();
         gsErrorMsg("%T is not supported", $1);
         exit(1);
       }
@@ -1917,6 +2101,7 @@ ListLiteral:
              gsDebugMsg("%T\n",ATgetFirst(to_process));
              if (type != elementType )
              {
+               chigetposition();
                gsErrorMsg("ListLiteral contains mixed types %T and %T\n"
                          , type, elementType);
                exit(1);
@@ -1959,12 +2144,14 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 {
     if(arg1 != arg2)
         {
+          chigetposition();
           gsErrorMsg("BinTypeCheck: Incompatible Types Checking failed\n");
           exit(1);
         };
     if(arg1 != gsMakeType(gsString2ATermAppl(type.c_str())))
         {
-          gsErrorMsg("Expected type ", type.c_str());
+          chigetposition();
+          gsErrorMsg("Expected type %s\n", type.c_str());
           exit(1);
         };
   return;
@@ -1979,6 +2166,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
     if( arg1 != arg2 )
         {
+          chigetposition();
           gsErrorMsg("UnaryTypeCheck: Incompatible Type, expected %s\n", type.c_str());
           exit(1);
         };
@@ -2026,3 +2214,12 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
   return false;
 }    
 
+bool is_number(std::string s)
+{
+   for (int i = 0; i < (int) s.length(); i++) {
+       if (!std::isdigit(s[i]))
+           return false;
+   }
+
+   return true;
+}

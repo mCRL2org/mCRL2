@@ -325,8 +325,8 @@ typedef unsigned char YY_CHAR;
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 89
-#define YY_END_OF_BUFFER 90
+#define YY_NUM_RULES 91
+#define YY_END_OF_BUFFER 92
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -334,27 +334,27 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[175] =
+static yyconst flex_int16_t yy_accept[180] =
     {   0,
-        0,    0,   90,   88,    1,    2,   88,   30,   48,   88,
-       41,   33,   34,    9,   18,   13,   17,   35,   45,   86,
-       86,   14,    8,   23,   15,   22,   36,   85,   46,   88,
-       47,   42,   85,   85,   85,   85,   85,   85,   85,   85,
-       85,   85,   85,   85,   85,   85,   85,   85,   85,   31,
-        7,   32,    2,   39,   38,   24,   10,   62,   63,   27,
-        3,   19,   74,   87,   86,   12,   16,   20,   28,   21,
-       11,   37,   40,   85,   75,    5,   85,   85,   85,   85,
-       85,   85,   85,   85,   85,   65,   67,   61,   85,   85,
-       85,   85,   85,   85,   85,   26,   85,   85,   85,   85,
+        0,    0,   92,   90,    1,    2,   90,   30,   48,   90,
+       41,   33,   34,    9,   18,   13,   17,   35,   45,   88,
+       88,   14,    8,   23,   15,   22,   36,   87,   46,   90,
+       47,   42,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   31,
+        7,   32,    2,   39,   38,   24,   10,   63,   64,   27,
+        3,   19,   75,   89,   88,   12,   16,   20,   28,   21,
+       11,   37,   40,   87,   76,    5,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   66,   68,   62,   87,   87,
+       87,   87,   87,   87,   87,   26,   87,   87,   87,   87,
 
-       85,   85,   85,   85,   85,   66,   68,   85,    4,    6,
-        3,   87,   25,   85,   85,   85,   85,   85,   44,   85,
-       85,   85,   85,   79,   64,   58,   57,   43,   78,   29,
-       84,   85,   85,   85,   85,   85,   85,   76,   85,   85,
-       85,   51,   77,   56,   85,   85,   85,   70,   52,   85,
-       85,   85,   73,   49,   80,   53,   71,   85,   69,   60,
-       54,   59,   85,   83,   55,   85,   50,   85,   85,   72,
-       81,   85,   82,    0
+       87,   87,   87,   87,   87,   67,   69,   87,   87,    4,
+        6,    3,   89,   25,   87,   87,   87,   87,   87,   44,
+       87,   87,   87,   87,   81,   65,   58,   57,   43,   79,
+       29,   86,   87,   87,   87,   87,   87,   87,   77,   87,
+       87,   87,   51,   87,   78,   56,   87,   87,   87,   87,
+       71,   52,   87,   87,   87,   74,   49,   82,   53,   72,
+       87,   70,   60,   54,   80,   59,   87,   61,   85,   55,
+       87,   50,   87,   87,   73,   83,   87,   84,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -372,7 +372,7 @@ static yyconst flex_int32_t yy_ec[256] =
 
        35,   36,   37,   38,   39,   25,   40,   41,   42,   43,
        44,   45,   25,   46,   47,   48,   49,   50,   25,   51,
-       25,   25,   52,   53,   54,    1,    1,    1,    1,    1,
+       52,   25,   53,   54,   55,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -389,120 +389,124 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[55] =
+static yyconst flex_int32_t yy_meta[56] =
     {   0,
         1,    1,    2,    1,    1,    1,    1,    3,    1,    1,
         1,    1,    1,    1,    1,    1,    3,    3,    1,    1,
         1,    1,    1,    1,    3,    1,    1,    1,    1,    3,
         3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
         3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    1,    1,    1
+        3,    3,    1,    1,    1
     } ;
 
-static yyconst flex_int16_t yy_base[177] =
+static yyconst flex_int16_t yy_base[182] =
     {   0,
-        0,    0,  185,  186,  186,  186,  181,   50,  186,  176,
-      186,  186,  186,  159,  169,  186,   42,  186,   41,  165,
-       43,   40,  186,  157,  155,   44,   59,    0,  186,  161,
-      123,  186,  132,  130,   31,   38,  130,  141,   36,  128,
-      135,   41,   45,   40,   32,  134,   47,   59,  137,  186,
-       53,  186,  186,  186,  186,  186,  186,  186,  186,  186,
-        0,  186,  186,   75,   84,  186,  186,  186,  186,  186,
-      186,  186,  186,    0,  186,  186,  133,  122,  134,  121,
-       63,  113,  118,  112,  119,    0,    0,   60,  116,  107,
-      114,  122,  107,  106,  119,    0,  119,  107,  119,  110,
+        0,    0,  191,  192,  192,  192,  187,   51,  192,  182,
+      192,  192,  192,  165,  175,  192,   43,  192,   42,  171,
+       44,   41,  192,  163,  161,   45,   60,    0,  192,  167,
+      128,  192,  138,  136,   32,   39,  136,  147,   37,  134,
+      141,   42,   46,   41,   33,  140,   48,   60,   49,  192,
+       63,  192,  192,  192,  192,  192,  192,  192,  192,  192,
+        0,  192,  192,   77,   85,  192,  192,  192,  192,  192,
+      192,  192,  192,    0,  192,  192,  140,  129,  141,  128,
+       67,  120,  125,  119,  126,    0,    0,   57,  123,  114,
+      121,  129,  114,  113,  126,    0,  126,  114,  126,  117,
 
-      102,  101,  114,  105,  102,    0,   94,   96,  186,  186,
-        0,   92,    0,  100,   97,   92,  104,   89,    0,   91,
-       93,   87,   98,    0,    0,    0,    0,   97,    0,    0,
-        0,   91,   97,   88,   83,   79,   87,    0,   90,   89,
-       88,    0,    0,    0,   74,   80,   89,    0,    0,   84,
-       72,   76,    0,    0,    0,    0,    0,   73,    0,    0,
-        0,    0,   71,    0,    0,   66,    0,   75,   70,    0,
-        0,   57,    0,  186,   85,  110
+      109,  108,  121,  112,  109,    0,  101,  103,  109,  192,
+      192,    0,   92,    0,  106,  103,   98,  110,   76,    0,
+       98,  100,   94,  105,    0,    0,    0,    0,  104,    0,
+        0,    0,   98,  104,   95,   90,   86,   94,    0,   97,
+       96,   95,    0,   95,    0,    0,   80,   85,   71,   91,
+        0,    0,   86,   74,   78,    0,    0,    0,    0,    0,
+       75,    0,    0,    0,    0,    0,   72,    0,    0,    0,
+       67,    0,   77,   80,    0,    0,   72,    0,  192,  108,
+      124
     } ;
 
-static yyconst flex_int16_t yy_def[177] =
+static yyconst flex_int16_t yy_def[182] =
     {   0,
-      174,    1,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  175,  174,  174,
-      174,  174,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      176,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  175,  174,  174,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
+      179,    1,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  180,  179,  179,
+      179,  179,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      181,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  180,  179,  179,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
 
-      175,  175,  175,  175,  175,  175,  175,  175,  174,  174,
-      176,  174,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,  175,  175,  175,  175,  175,  175,  175,
-      175,  175,  175,    0,  174,  174
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  179,
+      179,  181,  179,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,  180,  180,
+      180,  180,  180,  180,  180,  180,  180,  180,    0,  179,
+      179
     } ;
 
-static yyconst flex_int16_t yy_nxt[241] =
+static yyconst flex_int16_t yy_nxt[248] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
        14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
        24,   25,   26,   27,   28,   29,   30,   31,   32,    4,
        33,   34,   35,   36,   37,   38,   28,   39,   40,   28,
        41,   42,   43,   44,   45,   46,   47,   48,   28,   49,
-       28,   50,   51,   52,   54,   59,   61,   64,   66,   65,
-       65,   67,   62,   72,   60,   70,   71,   63,   79,   86,
-       97,   90,   81,   55,   80,   93,   82,   98,  109,   91,
-       95,   87,   73,   83,   92,   96,  100,   74,   94,  104,
-      101,  112,  112,  117,  102,  103,  173,  105,   64,  106,
+       28,   28,   50,   51,   52,   54,   59,   61,   64,   66,
+       65,   65,   67,   62,   72,   60,   70,   71,   63,   79,
+       86,   97,   90,   81,   55,   80,   93,   82,   98,  108,
+       91,   95,   87,   73,   83,   92,   96,  100,  110,   94,
+      104,  101,  109,  113,  113,  102,  103,  118,  105,   64,
 
-       65,   65,  172,  118,  107,  110,  123,  124,  112,  112,
-      111,  171,  111,  170,  169,  168,  167,  166,  165,  164,
+      106,   65,   65,  124,  125,  107,  149,  119,  113,  113,
+       74,  178,  177,  176,  175,  174,  111,  173,  172,  171,
+      170,  169,  168,  150,  112,  167,  112,  166,  165,  164,
       163,  162,  161,  160,  159,  158,  157,  156,  155,  154,
-      153,  152,  151,  150,  149,  148,  147,  146,  145,  144,
-      143,  142,  141,  140,  139,  138,  137,  136,  135,  134,
-      133,  132,  131,  130,  129,  128,  127,  126,  125,  122,
-      121,  120,  119,  116,  115,  114,  113,  108,   99,   89,
-       88,   85,   84,   78,   77,   76,   75,   69,   68,   64,
-       58,   57,   56,   53,  174,    3,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
+      153,  152,  151,  148,  147,  146,  145,  144,  143,  142,
+      141,  140,  139,  138,  137,  136,  135,  134,  133,  132,
+      131,  130,  129,  128,  127,  126,  123,  122,  121,  120,
+      117,  116,  115,  114,   99,   89,   88,   85,   84,   78,
+       77,   76,   75,   69,   68,   64,   58,   57,   56,   53,
+      179,    3,  179,  179,  179,  179,  179,  179,  179,  179,
 
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179
     } ;
 
-static yyconst flex_int16_t yy_chk[241] =
+static yyconst flex_int16_t yy_chk[248] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    8,   17,   19,   21,   22,   21,
-       21,   22,   19,   27,   17,   26,   26,   19,   35,   39,
-       45,   42,   36,    8,   35,   43,   36,   45,   51,   42,
-       44,   39,   27,   36,   42,   44,   47,  175,   43,   48,
-       47,   64,   64,   81,   47,   47,  172,   48,   65,   48,
+        1,    1,    1,    1,    1,    8,   17,   19,   21,   22,
+       21,   21,   22,   19,   27,   17,   26,   26,   19,   35,
+       39,   45,   42,   36,    8,   35,   43,   36,   45,   49,
+       42,   44,   39,   27,   36,   42,   44,   47,   51,   43,
+       48,   47,   49,   64,   64,   47,   47,   81,   48,   65,
 
-       65,   65,  169,   81,   48,   51,   88,   88,  112,  112,
-      176,  168,  176,  166,  163,  158,  152,  151,  150,  147,
-      146,  145,  141,  140,  139,  137,  136,  135,  134,  133,
-      132,  128,  123,  122,  121,  120,  118,  117,  116,  115,
-      114,  108,  107,  105,  104,  103,  102,  101,  100,   99,
-       98,   97,   95,   94,   93,   92,   91,   90,   89,   85,
-       84,   83,   82,   80,   79,   78,   77,   49,   46,   41,
-       40,   38,   37,   34,   33,   31,   30,   25,   24,   20,
-       15,   14,   10,    7,    3,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
+       48,   65,   65,   88,   88,   48,  119,   81,  113,  113,
+      180,  177,  174,  173,  171,  167,   51,  161,  155,  154,
+      153,  150,  149,  119,  181,  148,  181,  147,  144,  142,
+      141,  140,  138,  137,  136,  135,  134,  133,  129,  124,
+      123,  122,  121,  118,  117,  116,  115,  109,  108,  107,
+      105,  104,  103,  102,  101,  100,   99,   98,   97,   95,
+       94,   93,   92,   91,   90,   89,   85,   84,   83,   82,
+       80,   79,   78,   77,   46,   41,   40,   38,   37,   34,
+       33,   31,   30,   25,   24,   20,   15,   14,   10,    7,
+        3,  179,  179,  179,  179,  179,  179,  179,  179,  179,
 
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174,
-      174,  174,  174,  174,  174,  174,  174,  174,  174,  174
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179,  179,  179,  179,
+      179,  179,  179,  179,  179,  179,  179
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -554,7 +558,7 @@ extern ATermIndexedSet parser_protect_table;
  */
 int yyerror(const char *s)
 {
-  printf("error: %s at line: %d col: %d\n",s,line,col);
+  gsErrorMsg("error: %s at line: %d col: %d\n",s,line,col);
   return 0;
 }
 
@@ -567,6 +571,7 @@ extern YYSTYPE chiyylval;      /* declared in parser.cpp */
 //global declarations, used by chiparser.cpp
 int  chiyylex(void);           /* lexer function */
 void chiyyerror(const char *s);/* error function */
+void chigetposition();
 extern "C" int chiyywrap(void);/* wrap function */
 //Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
@@ -580,6 +585,7 @@ public:
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
   ATermAppl parse_stream(std::istream &stream );
+  void getposition();
 protected:
   std::istream *cur_stream;      /* input stream */
   int line_nr;                   /* line number in cur_streams[cur_index] */
@@ -594,7 +600,7 @@ int chiyyFlexLexer::yylex(void) { return 1; }
 chiLexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 
-#line 598 "chilexer.cpp"
+#line 604 "chilexer.cpp"
 
 #define INITIAL 0
 
@@ -694,9 +700,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 94 "chilexer.ll"
+#line 96 "chilexer.ll"
 
-#line 700 "chilexer.cpp"
+#line 706 "chilexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -749,13 +755,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 175 )
+				if ( yy_current_state >= 180 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 186 );
+		while ( yy_base[yy_current_state] != 192 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -781,451 +787,461 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 95 "chilexer.ll"
+#line 97 "chilexer.ll"
 { col_nr += YYLeng(); /* whitespace */ }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 96 "chilexer.ll"
+#line 98 "chilexer.ll"
 { col_nr = 1; ++line_nr; /* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 97 "chilexer.ll"
+#line 99 "chilexer.ll"
 { col_nr += YYLeng(); /* comment */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 99 "chilexer.ll"
+#line 101 "chilexer.ll"
 { process_string(); return BP; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 100 "chilexer.ll"
+#line 102 "chilexer.ll"
 { process_string(); return EP; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 101 "chilexer.ll"
+#line 103 "chilexer.ll"
 { process_string(); return BARS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 102 "chilexer.ll"
+#line 104 "chilexer.ll"
 { process_string(); return ALT; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 103 "chilexer.ll"
+#line 105 "chilexer.ll"
 { process_string(); return SEP; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 104 "chilexer.ll"
+#line 106 "chilexer.ll"
 { process_string(); return STAR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 105 "chilexer.ll"
+#line 107 "chilexer.ll"
 { process_string(); return GUARD_REP; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 107 "chilexer.ll"
+#line 109 "chilexer.ll"
 { process_string(); return GG; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 108 "chilexer.ll"
+#line 110 "chilexer.ll"
 { process_string(); return PROC_SEP; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 109 "chilexer.ll"
+#line 111 "chilexer.ll"
 { process_string(); return COMMA; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 110 "chilexer.ll"
+#line 112 "chilexer.ll"
 { process_string(); return COLON; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 111 "chilexer.ll"
+#line 113 "chilexer.ll"
 { process_string(); return IS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 112 "chilexer.ll"
+#line 114 "chilexer.ll"
 { process_string(); return ASSIGNMENT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 113 "chilexer.ll"
+#line 115 "chilexer.ll"
 { process_string(); return MINUS; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 114 "chilexer.ll"
+#line 116 "chilexer.ll"
 { process_string(); return PLUS; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 115 "chilexer.ll"
+#line 117 "chilexer.ll"
 { process_string(); return NOTEQUAL; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 116 "chilexer.ll"
+#line 118 "chilexer.ll"
 { process_string(); return LEQ; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 117 "chilexer.ll"
+#line 119 "chilexer.ll"
 { process_string(); return GEQ; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 118 "chilexer.ll"
+#line 120 "chilexer.ll"
 { process_string(); return GREATER; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 119 "chilexer.ll"
+#line 121 "chilexer.ll"
 { process_string(); return LESS; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 120 "chilexer.ll"
+#line 122 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 121 "chilexer.ll"
+#line 123 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 122 "chilexer.ll"
+#line 124 "chilexer.ll"
 { process_string(); return OR; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 123 "chilexer.ll"
+#line 125 "chilexer.ll"
 { process_string(); return GUARD; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 124 "chilexer.ll"
+#line 126 "chilexer.ll"
 { process_string(); return IMPLIES; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 125 "chilexer.ll"
+#line 127 "chilexer.ll"
 { process_string(); return NOT;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 126 "chilexer.ll"
+#line 128 "chilexer.ll"
 { process_string(); return EXCLAMATION;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 127 "chilexer.ll"
+#line 129 "chilexer.ll"
 { process_string(); return LBRACE; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 128 "chilexer.ll"
+#line 130 "chilexer.ll"
 { process_string(); return RBRACE; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 129 "chilexer.ll"
+#line 131 "chilexer.ll"
 { process_string(); return LBRACKET; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 130 "chilexer.ll"
+#line 132 "chilexer.ll"
 { process_string(); return RBRACKET; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 131 "chilexer.ll"
+#line 133 "chilexer.ll"
 { process_string(); return DOT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 132 "chilexer.ll"
+#line 134 "chilexer.ll"
 { process_string(); return RECV; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 133 "chilexer.ll"
+#line 135 "chilexer.ll"
 { process_string(); return RECVSEND; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 134 "chilexer.ll"
+#line 136 "chilexer.ll"
 { process_string(); return SENDRECV; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 135 "chilexer.ll"
+#line 137 "chilexer.ll"
 { process_string(); return SSEND; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 136 "chilexer.ll"
+#line 138 "chilexer.ll"
 { process_string(); return RRECV; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 137 "chilexer.ll"
+#line 139 "chilexer.ll"
 { process_string(); return DERIVATIVE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 138 "chilexer.ll"
+#line 140 "chilexer.ll"
 { process_string(); return POWER; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 139 "chilexer.ll"
+#line 141 "chilexer.ll"
 { process_string(); return MOD; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 140 "chilexer.ll"
+#line 142 "chilexer.ll"
 { process_string(); return DIV; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 141 "chilexer.ll"
+#line 143 "chilexer.ll"
 { process_string(); return DIVIDE; } 
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 142 "chilexer.ll"
+#line 144 "chilexer.ll"
 { process_string(); return SQLBRACKET; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 143 "chilexer.ll"
+#line 145 "chilexer.ll"
 { process_string(); return SQRBRACKET; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 144 "chilexer.ll"
+#line 146 "chilexer.ll"
 { process_string(); return HASH; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 146 "chilexer.ll"
+#line 148 "chilexer.ll"
 { process_string(); return PROC; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 147 "chilexer.ll"
+#line 149 "chilexer.ll"
 { process_string(); return MODEL; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 148 "chilexer.ll"
+#line 150 "chilexer.ll"
 { process_string(); return VAR; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 149 "chilexer.ll"
+#line 151 "chilexer.ll"
 { process_string(); return ENUM; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 150 "chilexer.ll"
+#line 152 "chilexer.ll"
 { process_string(); return SKIP; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 151 "chilexer.ll"
+#line 153 "chilexer.ll"
 { process_string(); return TRUE; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 152 "chilexer.ll"
+#line 154 "chilexer.ll"
 { process_string(); return FALSE; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 153 "chilexer.ll"
+#line 155 "chilexer.ll"
 { process_string(); return CHAN; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 154 "chilexer.ll"
+#line 156 "chilexer.ll"
 { process_string(); return MIN; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 155 "chilexer.ll"
+#line 157 "chilexer.ll"
 { process_string(); return MAX; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 157 "chilexer.ll"
+#line 159 "chilexer.ll"
 { process_string(); return CONST; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 158 "chilexer.ll"
+#line 160 "chilexer.ll"
 { process_string(); return TIME; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 160 "chilexer.ll"
-{ process_string(); return IN; }
+#line 161 "chilexer.ll"
+{ process_string(); return DELAY; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 161 "chilexer.ll"
-{ process_string(); return CONCAT; }
+#line 163 "chilexer.ll"
+{ process_string(); return IN; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 162 "chilexer.ll"
-{ process_string(); return LSUBTRACT; }
+#line 164 "chilexer.ll"
+{ process_string(); return CONCAT; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 164 "chilexer.ll"
-{ process_string(); return LENGTH; }
+#line 165 "chilexer.ll"
+{ process_string(); return LSUBTRACT; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 165 "chilexer.ll"
-{ process_string(); return HEAD; }
+#line 167 "chilexer.ll"
+{ process_string(); return LENGTH; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 166 "chilexer.ll"
-{ process_string(); return TAIL; }
+#line 168 "chilexer.ll"
+{ process_string(); return HEAD; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 167 "chilexer.ll"
-{ process_string(); return RHEAD; }
+#line 169 "chilexer.ll"
+{ process_string(); return TAIL; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 168 "chilexer.ll"
-{ process_string(); return RTAIL; }
+#line 170 "chilexer.ll"
+{ process_string(); return RHEAD; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 169 "chilexer.ll"
-{ process_string(); return TAKE; }
+#line 171 "chilexer.ll"
+{ process_string(); return RTAIL; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 170 "chilexer.ll"
-{ process_string(); return DROP; }
+#line 172 "chilexer.ll"
+{ process_string(); return TAKE; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 171 "chilexer.ll"
-{ process_string(); return SORT; }
+#line 173 "chilexer.ll"
+{ process_string(); return DROP; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 172 "chilexer.ll"
-{ process_string(); return INSERT; }
+#line 174 "chilexer.ll"
+{ process_string(); return SORT; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 174 "chilexer.ll"
-{ process_string(); return PICK;}
+#line 175 "chilexer.ll"
+{ process_string(); return INSERT; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 175 "chilexer.ll"
-{ process_string(); return INTERSECTION; }
+#line 177 "chilexer.ll"
+{ process_string(); return PICK;}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 176 "chilexer.ll"
-{ process_string(); return UNION; }
+#line 178 "chilexer.ll"
+{ process_string(); return INTERSECTION; }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 177 "chilexer.ll"
-{ process_string(); return SUB; }
+#line 179 "chilexer.ll"
+{ process_string(); return UNION; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 179 "chilexer.ll"
-{ process_string(); return BOOL; }
+#line 180 "chilexer.ll"
+{ process_string(); return SUB; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 180 "chilexer.ll"
-{ process_string(); return NAT; }
+#line 182 "chilexer.ll"
+{ process_string(); return BOOL; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 181 "chilexer.ll"
-{ process_string(); return TYPE; }
+#line 183 "chilexer.ll"
+{ process_string(); return NAT; }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 182 "chilexer.ll"
-{ process_string(); return TYPE; }
+#line 184 "chilexer.ll"
+{ process_string(); return VOID; }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 183 "chilexer.ll"
+#line 185 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 185 "chilexer.ll"
-{ process_string();return DEADLOCK; }
+#line 186 "chilexer.ll"
+{ process_string(); return TYPE; }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 186 "chilexer.ll"
-{ process_string();return DEADLOCK; }
+#line 187 "chilexer.ll"
+{ process_string(); return TYPE; }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 187 "chilexer.ll"
-{ process_string(); return OLD;}
+#line 189 "chilexer.ll"
+{ process_string();return DEADLOCK; }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 189 "chilexer.ll"
-{ process_string(); return ID; }
+#line 190 "chilexer.ll"
+{ process_string();return DEADLOCK; }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 190 "chilexer.ll"
-{ process_string(); return NUMBER; }
+#line 191 "chilexer.ll"
+{ process_string(); return OLD;}
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 191 "chilexer.ll"
-{ process_string(); return REALNUMBER; }
+#line 193 "chilexer.ll"
+{ process_string(); return ID; }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 192 "chilexer.ll"
-{ col_nr += YYLeng(); yyerror("unknown character"); }
+#line 194 "chilexer.ll"
+{ process_string(); return NUMBER; }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
 #line 195 "chilexer.ll"
+{ process_string(); return REALNUMBER; }
+	YY_BREAK
+case 90:
+YY_RULE_SETUP
+#line 196 "chilexer.ll"
+{ col_nr += YYLeng(); yyerror("unknown character"); }
+	YY_BREAK
+case 91:
+YY_RULE_SETUP
+#line 199 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1229 "chilexer.cpp"
+#line 1245 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1591,7 +1607,7 @@ int yyFlexLexer::yy_get_next_buffer()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 175 )
+			if ( yy_current_state >= 180 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1619,11 +1635,11 @@ int yyFlexLexer::yy_get_next_buffer()
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 175 )
+		if ( yy_current_state >= 180 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 174);
+	yy_is_jam = (yy_current_state == 179);
 
 	return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2107,7 +2123,7 @@ void chiyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 195 "chilexer.ll"
+#line 199 "chilexer.ll"
 
 
 
@@ -2130,6 +2146,10 @@ void chiyyerror(const char *s) {
   return lexer->yyerror(s);
 }
 
+void chigetposition() {
+  return lexer->getposition();
+}
+
 int chiyywrap(void) {
   return lexer->yywrap();
 }
@@ -2147,9 +2167,21 @@ void chiLexer::yyerror(const char *s) {
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
   }
-  printf(
+  gsErrorMsg(
     "token '%s' at position %d, %d caused the following error: %s\n", 
     YYText(), line_nr, oldcol_nr, s
+  ); 
+}
+
+void chiLexer::getposition()
+{
+  int oldcol_nr = col_nr - YYLeng();
+  if (oldcol_nr < 0) {
+    oldcol_nr = 0;
+  }
+  gsErrorMsg(
+    "Near position Line: %d, Column: %d:\n", 
+    line_nr, oldcol_nr 
   ); 
 }
 

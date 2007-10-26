@@ -10,5 +10,7 @@ proc Recv(chan d?: bool, var f: bool)=
 ]|
 
 proc Send(chan c!: bool)=
-|[ c!true ]|
+|[ var a,b: nat
+:: c!(a > b) 
+]|
 

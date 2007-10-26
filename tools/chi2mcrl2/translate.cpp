@@ -78,15 +78,28 @@ bool CAsttransform::translator(ATermAppl ast)
     *
     **/
 
-  if (!Channels.empty())
-  {
-  prefix.append("\nmap ");
-  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
+  /**
+    * Reduce Hashed Channels
+    *
+    **/
+  map< string,RC > ReduceChannels;
+  for( std::map< pair< std::string, int >, RC>::iterator itMap = Channels.begin(); 
         itMap != Channels.end();
         ++itMap
   )
+  {
+    ReduceChannels[(itMap->first).first] = itMap->second;
+  }
+
+  if (!ReduceChannels.empty())
+  {
+  prefix.append("\nmap ");
+  for( std::map< std::string, RC>::iterator itMap = ReduceChannels.begin(); 
+        itMap != ReduceChannels.end();
+        ++itMap
+  )
     {
-      if(itMap != Channels.begin())
+      if(itMap != ReduceChannels.begin())
       {
         prefix.append(", ");
       }
@@ -96,8 +109,8 @@ bool CAsttransform::translator(ATermAppl ast)
   }
 
   int i = 0;
-  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
-        itMap != Channels.end();
+  for( std::map<std::string, RC>::iterator itMap = ReduceChannels.begin(); 
+        itMap != ReduceChannels.end();
         ++itMap
   )
   {
@@ -108,8 +121,8 @@ bool CAsttransform::translator(ATermAppl ast)
  
   std::set<std::string> new_channels; 
   result.append("\n");
-  for( std::map<std::string, RC>::iterator itMap = Channels.begin(); 
-        itMap != Channels.end();
+  for( std::map<std::string, RC>::iterator itMap = ReduceChannels.begin(); 
+        itMap != ReduceChannels.end();
         ++itMap
   )
   {
@@ -121,7 +134,12 @@ bool CAsttransform::translator(ATermAppl ast)
         ++itSet
   )
   {
-    prefix.append("act Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet+": Nat#Nat#"+*itSet+";\n");
+    if ( itSet->compare("Void") == 0 )
+    {
+      prefix.append("act Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet+": Nat#Nat;\n");
+    } else {
+      prefix.append("act Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet+": Nat#Nat#"+*itSet+";\n");
+    }
   }
   
   result.insert(0, prefix);
@@ -1154,7 +1172,7 @@ std::string CAsttransform::processValue(ATermAppl input)
     to_process =(ATermList) ATgetArgument(input,0);
  
     string type = processType( (ATermAppl) ATgetArgument(input,1));
- 
+
     result = "tuple_"+type+"(";
     for(set<ATermAppl>::iterator itSet = UsedATerms.begin();
                                  itSet != UsedATerms.end();
@@ -1385,7 +1403,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 3) ) );
         return result;
      }
-     if (StrcmpIsFun("\\/",(ATermAppl) ATgetArgument(input, 0)))
+     if (StrcmpIsFun("\\/",(ATermAppl) ATgetArgument(input, 0)) || StrcmpIsFun("+",(ATermAppl) ATgetArgument(input, 0)))
      {
         /* ::SHOULD BE::       
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
@@ -1746,7 +1764,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
   if ( StrcmpIsFun( "TupleDot", input))
   {
     string type = processType( (ATermAppl) ATgetArgument(ATgetArgument(input, 0),1));
-    string index = ATgetName(ATgetAFun(ATgetArgument(input, 2)));
+    string index = manipulateExpression( (ATermAppl) ATgetArgument(input, 2));
    
     result.append("get_"+type+"_"+index+"(");
     result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 0) ) );
@@ -1793,7 +1811,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
       //Determine if the arguments are of the same type 
       ATermList tmp_to_process = to_process;
-      vector<string> local_channels;
+      vector< string> local_channels;
       int i = 0;
       while (!ATisEmpty(tmp_to_process))
       {
@@ -1806,12 +1824,14 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
            StrcmpIsFun("ChannelTypedID", (ATermAppl) ATgetFirst(tmp_to_process))
         )
         {
-          string channelID = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 0),0)));
+          string first = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 0),0)));
+          int second = atoi(ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 2),0))));
+          pair<string, int > channelID(first, second);
           ATerm direction = ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),1);
           string local_string =ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),0))); 
           //string type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 1),0)));
           string type = processType((ATermAppl) ATgetArgument(element, 1));
-          local_channels.push_back(channelID);
+          local_channels.push_back(channelID.first);
  
           // Set Receiving end for a channel 
           if(StrcmpIsFun("Recv", (ATermAppl) direction))
@@ -1824,7 +1844,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
               known = true;
               Channels[channelID]= tmpRC; 
             } else {
-              gsErrorMsg("Multiple Receiving ends for %s\n", Channels[channelID].recv_end.c_str());
+              gsErrorMsg("Multiple receiving ends for \"%s\"\n", channelID.first.c_str() );
               exit(1);
             }
           }
@@ -1840,7 +1860,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
               known = true;
               Channels[channelID]= tmpRC; 
             } else {
-              gsErrorMsg("Multiple Sending ends for %s\n", Channels[channelID].recv_end.c_str());
+              gsErrorMsg("Multiple sending ends for channel \"%s\"\n", channelID.first.c_str());
               exit(1);
             }
           }
@@ -2021,6 +2041,14 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       assert(ATgetLength(to_process) <= 1);
       int i = 0;
       transition.action = "";
+      if (ATisEmpty(to_process))
+      {
+         transition.action.append("Recv_Void("+
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
+                                  manipulateExpression( (ATermAppl) ATgetArgument(input,2))+
+                                 ")"  
+                                )  ; 
+      }
       while ( ATgetLength(to_process) > 0)
       {
         transition.action.append("sum "+
@@ -2069,9 +2097,19 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.parenthesis_level = parenthesis_level;
 
       ATermList to_process = (ATermList) ATgetArgument(input, 3);
-      assert(ATgetLength(to_process) <= 1);
+
       int i = 0;
       transition.action = "";
+ 
+      if (ATisEmpty(to_process))
+      {
+         transition.action.append("Send_Void("+
+                                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
+                                  manipulateExpression( (ATermAppl) ATgetArgument(input,2))+
+                                 ")"  
+                                )  ; 
+      }
+
       while ( ATgetLength(to_process) > 0)
       {
         transition.action.append("Send_"+
@@ -2083,8 +2121,9 @@ void CAsttransform::manipulateStatements(ATermAppl input)
                                 ); 
         to_process = ATgetNext(to_process);
         i++;
-   
       }
+
+
       transitionSystem.push_back(transition);
       if(terminate)
       { 

@@ -1,13 +1,19 @@
 model z()=
 |[ chan x: 3 # bool 
-:: Send(x) || Recv(x) 
+:: Send1(x.1) || Send2(x.2) || Recv(x) 
 ]|
 
-proc Send(chan c!: 3 # bool)=
-|[ c.1!true ]|
+proc Send1(chan c!: 3 # bool)=
+|[ c.1!true
+]|
+
+proc Send2(chan c!: 3 # bool)=
+|[ c.2!true
+]|
 
 proc Recv(chan c?: 3 # bool)=
 |[ var store: bool
 :: c.1?store
+ ; c.2?store
 ]|
 

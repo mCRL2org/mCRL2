@@ -52,74 +52,77 @@
      TYPE = 269,
      BOOL = 270,
      NAT = 271,
-     ID = 272,
-     TIME = 273,
-     BP = 274,
-     EP = 275,
-     PROC_SEP = 276,
-     SEP = 277,
-     COMMA = 278,
-     IS = 279,
-     ASSIGNMENT = 280,
-     MINUS = 281,
-     PLUS = 282,
-     GG = 283,
-     LBRACE = 284,
-     RBRACE = 285,
-     LBRACKET = 286,
-     RBRACKET = 287,
-     AND = 288,
-     OR = 289,
-     GUARD = 290,
-     NOT = 291,
-     OLD = 292,
-     NUMBER = 293,
-     INT = 294,
-     REALNUMBER = 295,
-     TRUE = 296,
-     FALSE = 297,
-     DOT = 298,
-     DEADLOCK = 299,
-     IMPLIES = 300,
-     NOTEQUAL = 301,
-     GEQ = 302,
-     LEQ = 303,
-     MAX = 304,
-     MIN = 305,
-     DIV = 306,
-     MOD = 307,
-     POWER = 308,
-     RECV = 309,
-     EXCLAMATION = 310,
-     SENDRECV = 311,
-     RECVSEND = 312,
-     SSEND = 313,
-     RRECV = 314,
-     STAR = 315,
-     GUARD_REP = 316,
-     DERIVATIVE = 317,
-     SQLBRACKET = 318,
-     SQRBRACKET = 319,
-     LSUBTRACT = 320,
-     CONCAT = 321,
-     IN = 322,
-     HEAD = 323,
-     TAIL = 324,
-     RHEAD = 325,
-     RTAIL = 326,
-     LENGTH = 327,
-     TAKE = 328,
-     DROP = 329,
-     SORT = 330,
-     INSERT = 331,
-     LESS = 332,
-     GREATER = 333,
-     HASH = 334,
-     UNION = 335,
-     SUB = 336,
-     INTERSECTION = 337,
-     PICK = 338,
-     DIVIDE = 339
+     VOID = 272,
+     ID = 273,
+     TIME = 274,
+     BP = 275,
+     EP = 276,
+     PROC_SEP = 277,
+     SEP = 278,
+     COMMA = 279,
+     IS = 280,
+     ASSIGNMENT = 281,
+     MINUS = 282,
+     PLUS = 283,
+     GG = 284,
+     LBRACE = 285,
+     RBRACE = 286,
+     LBRACKET = 287,
+     RBRACKET = 288,
+     AND = 289,
+     OR = 290,
+     GUARD = 291,
+     NOT = 292,
+     OLD = 293,
+     NUMBER = 294,
+     INT = 295,
+     REALNUMBER = 296,
+     TRUE = 297,
+     FALSE = 298,
+     DOT = 299,
+     DEADLOCK = 300,
+     IMPLIES = 301,
+     NOTEQUAL = 302,
+     GEQ = 303,
+     LEQ = 304,
+     MAX = 305,
+     MIN = 306,
+     DIV = 307,
+     MOD = 308,
+     POWER = 309,
+     RECV = 310,
+     EXCLAMATION = 311,
+     SENDRECV = 312,
+     RECVSEND = 313,
+     SSEND = 314,
+     RRECV = 315,
+     STAR = 316,
+     GUARD_REP = 317,
+     DERIVATIVE = 318,
+     SQLBRACKET = 319,
+     SQRBRACKET = 320,
+     LSUBTRACT = 321,
+     CONCAT = 322,
+     IN = 323,
+     HEAD = 324,
+     TAIL = 325,
+     RHEAD = 326,
+     RTAIL = 327,
+     LENGTH = 328,
+     TAKE = 329,
+     DROP = 330,
+     SORT = 331,
+     INSERT = 332,
+     LESS = 333,
+     GREATER = 334,
+     HASH = 335,
+     UNION = 336,
+     SUB = 337,
+     INTERSECTION = 338,
+     PICK = 339,
+     DELAY = 340,
+     DIVIDE = 341,
+     SEND = 342
    };
 #endif
 
@@ -131,8 +134,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
-//#include "symtab.h"
 #include <iostream>
 #include "libstruct_core.h"
 #include <aterm2.h>
@@ -142,6 +143,9 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <cctype>
+#include <string.h>
+
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
@@ -154,6 +158,7 @@ using namespace std;
 
 //external declarations from lexer.l
 void chiyyerror( const char *s );
+extern void chigetposition();
 int chiyylex( void );
 extern ATermAppl spec_tree;
 extern ATermIndexedSet parser_protect_table;
@@ -181,18 +186,19 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
+bool is_number(std::string s);
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 59 "chiparser.yy"
+#line 62 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2616 of glr.c.  */
-#line 196 "chiparser.hpp"
+#line 202 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

@@ -194,7 +194,8 @@ class CAsttransform
     std::map<std::string, std::vector<ATerm> > Chi_interfaces;
 
     //These channels will form define the multi-actions for mCRL2-specification
-    std::map<std::string, RC> Channels; 
+    // STRING [ChannelID] x INT [HASH] -> RC
+    std::map< pair < std::string, int >, RC> Channels; 
 
     std::map<std::string, int > instantation_counter;
    
