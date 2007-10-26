@@ -117,7 +117,7 @@ bool LtsgraphBackup::Backup(wxString Bfilename) {
 bool LtsgraphBackup::Restore(wxString Rfilename) {
 	
 	Rfilename.Append(wxT(".ltsgraph"));
-	wxString wx_str(Rfilename.c_str(), wxConvLocal);
+	wxString wx_str(Rfilename);
 	wxTextFile RtrFile(wx_str);
 	if (RtrFile.Exists()) {
 		if (!RtrFile.Open(wx_str))

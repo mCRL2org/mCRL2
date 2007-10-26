@@ -103,15 +103,12 @@ bool LTSViewApp::OnInit() {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (command_line) {
 #else
-  std::string lts_file_argument;
+    std::string lts_file_argument;
 #endif
-    // parse command line and check for specified input file
-    wxCmdLineEntryDesc cmdLineDesc[] = {
-      {wxCMD_LINE_PARAM,NULL,NULL,wxT("INFILE"),wxCMD_LINE_VAL_STRING,
-        wxCMD_LINE_PARAM_OPTIONAL},
-      {wxCMD_LINE_NONE,NULL,NULL,NULL,wxCMD_LINE_VAL_NONE,0}
-    };
-    wxCmdLineParser cmdParser(cmdLineDesc,argc,argv);
+    wxCmdLineParser cmdParser(argc,argv);
+
+    cmdParser.AddParam(wxT("INFILE"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL);
+
     if (cmdParser.Parse() == 0) {
       if (cmdParser.GetParamCount() > 0) {
         lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());

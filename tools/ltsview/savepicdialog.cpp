@@ -37,31 +37,44 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   r_text = new wxStaticText(this,-1,wxString::Format(wxT("%dx%d"),w,h));
 
   wxArrayString fts;
-  wxList handlers = wxImage::GetHandlers();
-  wxNode* node = handlers.GetFirst();
+
   int png_id = 0;
-  while (node != NULL) {
-    wxImageHandler* h = (wxImageHandler*)node->GetData();
-    // ignore useless file types
-    if (h->GetExtension() != wxT("ani") && h->GetExtension() != wxT("cur") &&
-        h->GetExtension() != wxT("ico")) {
-      if (h->GetExtension() == wxT("jpg")) {
-        fts.Add(h->GetName() + wxT(" (.jpg .jpeg)"));
+
+  wxList handlers = wxImage::GetHandlers();
+#if (wxUSE_STL == 1)
+  for (wxList::const_iterator i = handlers.begin(); i != handlers.end(); ++i) {
+    const wxString extension = static_cast < wxImageHandler* > (*i)->GetExtension();
+#else
+  for (wxNode* node = handlers.GetFirst(); node != NULL; node = node->GetNext()) {
+    const wxString extension = static_cast < wxImageHandler* > (node->GetData())->GetExtension();
+#endif
+    if (extension != wxT("ani") && extension != wxT("cur") && extension != wxT("ico")) {
+#if (wxUSE_STL == 1)
+      const wxString name = static_cast < wxImageHandler* > (*i)->GetName();
+      const long int type = static_cast < wxImageHandler* > (*i)->GetType();
+#else
+      const wxString name = static_cast < wxImageHandler* > (node->GetData())->GetName();
+      const long int type = static_cast < wxImageHandler* > (node->GetData())->GetType();
+#endif
+
+      if (extension != wxT("jpg")) {
+        fts.Add(name + wxT(" (.jpg .jpeg)"));
       }
-      else if (h->GetExtension() == wxT("tif")) {
-        fts.Add(h->GetName() + wxT(" (.tif .tiff)"));
+      else if (extension == wxT("tif")) {
+        fts.Add(name + wxT(" (.tif .tiff)"));
       }
       else {
-        fts.Add(h->GetName() + wxT(" (.") + h->GetExtension() + wxT(")"));
+        fts.Add(name + wxT(" (.") + extension + wxT(")"));
       }
-      if (h->GetExtension() == wxT("png")) {
+      if (extension == wxT("png")) {
         png_id = f_exts.Count();
       }
-      f_exts.Add(h->GetExtension());
-      f_types.push_back(h->GetType());
+
+      f_exts.Add(extension);
+      f_types.push_back(type);
     }
-    node = node->GetNext();
   }
+
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,wxDefaultSize,
     fts);
   ft_choice->SetSelection(png_id);
