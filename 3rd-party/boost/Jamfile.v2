@@ -62,4 +62,7 @@ for local l in $(libraries) {
   alias $(l) : libs/$(l)/build//boost_$(l) : : : ;
 }
 
+rule boost-install ( libraries * ) {
+}
+
 alias headers : : : : ;

@@ -85,8 +85,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    static const char*  pbes_file_for_input;  ///< file containing an LPS
-    static const char*  bes_file_for_output; ///< file used to write the output to
+    static const char*  pbes_file_for_input;             ///< file containing an LPS
+    static const char*  bes_file_for_output;             ///< file used to write the output to
+    static const char*  counter_example_file_for_output; ///< file used to write the output to
 
     enum bes_output_format {
       none,
@@ -126,8 +127,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::pbes_file_for_input  = "pbes_in";
-const char* squadt_interactor::bes_file_for_output = "bes_out";
+const char* squadt_interactor::pbes_file_for_input             = "pbes_in";
+const char* squadt_interactor::bes_file_for_output             = "bes_out";
+const char* squadt_interactor::counter_example_file_for_output = "counter_example";
 
 const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
 const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
@@ -314,10 +316,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.rewrite_strategy              = static_cast < RewriteStrategy > (
                         c.get_option_argument< size_t >(option_rewrite_strategy, 0));
 
-  if (tool_options.opt_construct_counter_example) {
+  if (tool_options.opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
 
-    c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::text), 
+    c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text), 
                  tool_options.opt_counter_example_file);
   }
 
@@ -326,11 +328,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.opt_strategy = static_cast < transformation_strategy > (
                         c.get_option_argument< size_t >(option_transformation_strategy, 0));
 
-  // tool_options.opt_strategy     = c.get_option_argument< size_t >(option_transformation_strategy);
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
 
   if (c.output_exists(bes_file_for_output)) {
-    tool_options.outfilename      = c.get_output(bes_file_for_output).get_location();
+    tool_options.outfilename = c.get_output(bes_file_for_output).get_location();
   }
 
   send_clear_display();
