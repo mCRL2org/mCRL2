@@ -504,8 +504,9 @@ ChannelDeclaration:
 		  while(!ATisEmpty(list))
 
           {
-             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
-             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, one ) );
+             //Hash channel is set to 0 indicating no hash is used 
+             ATermAppl zero = (ATermAppl) gsMakeExpression(gsString2ATermAppl("0"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, zero ) );
 			 list = ATgetNext( list ) ;
 		  }
 
@@ -617,7 +618,7 @@ ChannelDefinition:
 			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
 			  exit(1);
 			};
-			list = ATgetTail( list, 1 ) ;
+			list = ATgetNext( list ) ;
 		  }	;
 		  
           list = $1;
@@ -630,15 +631,16 @@ ChannelDefinition:
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
-			list = ATgetTail( list, 1 ) ;
+			list = ATgetNext( list ) ;
 		  }	;
 
 		  list = $1;
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
-             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
-             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, one) );
+             //Hash channel is set to 0 indicating no hash is used 
+             ATermAppl zero = (ATermAppl) gsMakeExpression(gsString2ATermAppl("0"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
+             new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $3, zero ) );
 			 list = ATgetNext( list ) ;
 		  }
 
@@ -661,7 +663,7 @@ ChannelDefinition:
 			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
 			  exit(1);
 			};
-			list = ATgetTail( list, 1 ) ;
+			list = ATgetNext( list ) ;
 		  }	;
 		  
           list = $1;
@@ -674,7 +676,7 @@ ChannelDefinition:
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
-			list = ATgetTail( list, 1 ) ;
+			list = ATgetNext( list ) ;
 		  }	;
 
 		  list = $1;
@@ -1125,12 +1127,12 @@ BasicExpression:
           if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
           {
              channel_exists = true;
-             ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("1"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
+             //ATermAppl one = (ATermAppl) gsMakeExpression(gsString2ATermAppl("0"), (ATermAppl) gsMakeType(gsString2ATermAppl("Nat")));
               safe_assign($$, 
                 gsMakeChannelTypedID(
                   gsMakeChannelID($1, gsMakeNil()),
                   (ATermAppl) chan_type_direction_map[(ATerm) $1].first,
-                  one
+                  gsMakeNil()
                 )
               );
             }

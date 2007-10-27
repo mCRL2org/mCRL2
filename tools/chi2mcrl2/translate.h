@@ -13,7 +13,6 @@
 #include <sstream>
 #include <list>
 #include <set>
-#include "CArray.h"
 #include <stack>
 
 #define RPV RecProcessVariable
@@ -25,8 +24,6 @@
 #define RPVS RecProcessVectors
 #define RPC RecProcessChannels
 #define RC  RecChannel
-
-typedef CArray<int> IntArray ; 
 
 typedef struct
   {
@@ -125,10 +122,10 @@ class CAsttransform
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
     int parenthesis_level;
-    pair<vector<RVT>, vector<RPC> > manipulateDeclaredProcessDefinition(ATermAppl input);
+    std::pair<std:: vector<RVT>, std::vector<RPC> > manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
-    pair<std::vector<RPV>, std::vector<RPC> > manipulateProcessSpecification(ATermAppl input);
+    std::pair<std::vector<RPV>, std::vector<RPC> > manipulateProcessSpecification(ATermAppl input);
     std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
     
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
@@ -195,7 +192,7 @@ class CAsttransform
 
     //These channels will form define the multi-actions for mCRL2-specification
     // STRING [ChannelID] x INT [HASH] -> RC
-    std::map< pair < std::string, int >, RC> Channels; 
+    std::map<std::pair < std::string, int >, RC> Channels; 
 
     std::map<std::string, int > instantation_counter;
    
@@ -215,7 +212,10 @@ class CAsttransform
     std::set<std::string> dif_setTypes;  
     std::set<std::string> equal_setTypes;
 
+    std::set<std::string> InstantiatedHashedChannels; 
+
     bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
+
 } 
 ;
 

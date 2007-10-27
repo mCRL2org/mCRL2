@@ -10,12 +10,12 @@
 #include <sstream>
 #include <math.h> 
 #include <list>
-#include "CArray.h"
 #include <stack>
 #include <iterator>
 #include <gc.h>
 #include <map>
 #include "libstruct_core.h"
+#include <limits.h>
 
 using namespace ::mcrl2::utilities;
 using namespace std;
@@ -245,8 +245,9 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   all_streams.clear();
   ProcessVariableMap.clear();
   transitionSystem.clear();
-
-  //Set the initial variables for this process
+  InstantiatedHashedChannels.clear();
+ 
+ //Set the initial variables for this process
   parallel = false;
   alternative = false;
   terminate = true;
@@ -535,6 +536,14 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
         }
       result.append(itRPC->Name);
       result.append(": Nat");
+      if ((atoi(itRPC->HashCount.c_str()) > 0) &&
+          (InstantiatedHashedChannels.find(itRPC->Name) == InstantiatedHashedChannels.end()))
+      {
+        result.append(", ");
+        result.append(itRPC->Name);
+        result.append("_hash");
+        result.append(": Nat");
+      }
 
   }
   /**
@@ -655,6 +664,13 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
          result.append(", ");
        }
        result.append(itRPC->Name);
+       if ((atoi(itRPC->HashCount.c_str()) > 0) &&
+          (InstantiatedHashedChannels.find(itRPC->Name) == InstantiatedHashedChannels.end()))
+       { 
+         result.append(", ");
+         result.append(itRPC->Name);
+         result.append("_hash");
+       }
      }     
       
       collect_streams.clear();
@@ -906,8 +922,9 @@ std::vector<RPC> CAsttransform::manipulateDeclaredProcessChannels(ATermList inpu
 
     tmpRPC.Name = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element,0),0)));
     tmpRPC.Type = processType((ATermAppl) ATgetArgument(element,1));
+    //Number of Channels for a #
+    //If no # is used the value is 0
     tmpRPC.HashCount = manipulateExpression((ATermAppl) ATgetArgument(element,2)); 
-
     result.push_back(tmpRPC); 
     
     //Add to table for higherlevel lookup
@@ -1811,7 +1828,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
       //Determine if the arguments are of the same type 
       ATermList tmp_to_process = to_process;
-      vector< string> local_channels;
+      vector< pair < string, int > > local_channels;
       int i = 0;
       while (!ATisEmpty(tmp_to_process))
       {
@@ -1824,14 +1841,23 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
            StrcmpIsFun("ChannelTypedID", (ATermAppl) ATgetFirst(tmp_to_process))
         )
         {
+          gsDebugMsg("Checking for multiple channel-ends\n");
           string first = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 0),0)));
-          int second = atoi(ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 2),0))));
+          int second; 
+          gsDebugMsg("%T\n", element);
+          if (! StrcmpIsFun("Nil", (ATermAppl) ATgetArgument(element, 2) ) )
+          {
+            second = atoi(ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 2),0))));
+          } else {
+            second = INT_MIN;
+          }
+
           pair<string, int > channelID(first, second);
           ATerm direction = ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),1);
           string local_string =ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i), 0),0))); 
           //string type = ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(element, 1),0)));
           string type = processType((ATermAppl) ATgetArgument(element, 1));
-          local_channels.push_back(channelID.first);
+          local_channels.push_back(channelID);
  
           // Set Receiving end for a channel 
           if(StrcmpIsFun("Recv", (ATermAppl) direction))
@@ -1867,6 +1893,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
         }
 
         //TypeCheck interfaces between processes
+        gsDebugMsg("TypeCheck interfaces between processes\n");
         known = TypeChecking( (ATermAppl) ATgetArgument(element, 1), 
                               (ATermAppl) ATgetArgument(Chi_interfaces[processName].at(i),1));
 
@@ -1921,12 +1948,16 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
         initialisation.append(itRPV->InitValue+", ");
       }
 
-      for(vector<string>::iterator itRVT = local_channels.begin();
+      for(vector< pair <string, int > >::iterator itRVT = local_channels.begin();
           itRVT != local_channels.end();
           ++itRVT)
       {
-        initialisation.append(*itRVT+", ");
-      }
+        initialisation.append(itRVT->first+", ");
+        if(itRVT->second != INT_MIN)
+        { 
+          initialisation.append(to_string(itRVT->second)+", ");
+        } 
+     }
       //Initial State is alway 0
       initialisation.append("0)");
 
@@ -2039,13 +2070,24 @@ void CAsttransform::manipulateStatements(ATermAppl input)
 
 
       assert(ATgetLength(to_process) <= 1);
-      int i = 0;
       transition.action = "";
+
+      std::string ChannelHashValue;
+      if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,2) ))
+      {
+        ChannelHashValue = manipulateExpression( (ATermAppl) ATgetArgument(input,2));
+        InstantiatedHashedChannels.insert(ATgetName(ATgetAFun(ATgetArgument(input,1))));
+      } else {
+        ChannelHashValue = ATgetName(ATgetAFun(ATgetArgument(input,1))) ;
+        ChannelHashValue.append("_hash");
+      }
+
+      int i = 0;
       if (ATisEmpty(to_process))
       {
          transition.action.append("Recv_Void("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
-                                  manipulateExpression( (ATermAppl) ATgetArgument(input,2))+
+                                  ChannelHashValue+
                                  ")"  
                                 )  ; 
       }
@@ -2059,7 +2101,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
                                  "Recv_"+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(to_process),1),0)))+"("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
-                                 manipulateExpression( (ATermAppl) ATgetArgument(input,2))+", "+
+                                 ChannelHashValue+", "+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+
                                  to_string(i)+
                                  ")" 
@@ -2095,17 +2137,25 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.looped_state = loop;
       transition.guardedloop = guardedloop;
       transition.parenthesis_level = parenthesis_level;
-
       ATermList to_process = (ATermList) ATgetArgument(input, 3);
 
-      int i = 0;
       transition.action = "";
+
+      std::string ChannelHashValue;
+      if(!StrcmpIsFun( "Nil", (ATermAppl) ATgetArgument(input,2) ))
+      {
+        ChannelHashValue = manipulateExpression( (ATermAppl) ATgetArgument(input,2));
+        InstantiatedHashedChannels.insert(ATgetName(ATgetAFun(ATgetArgument(input,1))));
+      } else {
+        ChannelHashValue = ATgetName(ATgetAFun(ATgetArgument(input,1))) ;
+        ChannelHashValue.append("_hash");
+      }
  
       if (ATisEmpty(to_process))
       {
          transition.action.append("Send_Void("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
-                                  manipulateExpression( (ATermAppl) ATgetArgument(input,2))+
+                                  ChannelHashValue+
                                  ")"  
                                 )  ; 
       }
@@ -2115,12 +2165,11 @@ void CAsttransform::manipulateStatements(ATermAppl input)
         transition.action.append("Send_"+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(to_process),1),0)))+"("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
-                                 manipulateExpression( (ATermAppl) ATgetArgument(input,2))+", "+
+                                 ChannelHashValue+", "+
                                  manipulateExpression( (ATermAppl) ATgetFirst(to_process))+
                                  ")" 
                                 ); 
         to_process = ATgetNext(to_process);
-        i++;
       }
 
 

@@ -4,11 +4,11 @@ model z()=
 ]|
 
 proc Send1(chan c!: 3 # bool)=
-|[ c.1!true
+|[ c!true
 ]|
 
 proc Send2(chan c!: 3 # bool)=
-|[ c.2!true
+|[ c!true
 ]|
 
 proc Recv(chan c?: 3 # bool)=
