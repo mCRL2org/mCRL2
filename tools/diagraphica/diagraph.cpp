@@ -10,6 +10,7 @@
 
 #include <string>
 #include <wx/wx.h>
+#include <wx/sysopt.h>
 
 // windows debug libraries
 #ifdef _MSC_VER
@@ -203,6 +204,8 @@ bool DiaGraph::OnInit()
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
     //_CrtSetBreakAlloc( 4271 );
     #endif
+
+    wxSystemOptions::SetOption(wxT("mac.listctrl.always_use_generic"), 1);
 
     // set mode
     mode = MODE_ANALYSIS;
