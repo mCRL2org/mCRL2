@@ -1308,6 +1308,13 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
     );
   ATermAppl subt_max0_func =
     gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprIf(
+        gsMakeDataExprGT(gsMakeDataAppl1(f_sort_func, x_sort_elt), gsMakeDataAppl1(g_sort_func, x_sort_elt)),
+          gsMakeDataExprGTESubt(gsMakeDataAppl1(f_sort_func, x_sort_elt), gsMakeDataAppl1(g_sort_func, x_sort_elt)), zero)
+      );
+  /*
+  ATermAppl subt_max0_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeWhr(
         gsMakeDataExprIf(
           gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
@@ -1317,6 +1324,7 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
         )
       )
     );
+  */
   ATermAppl min_func =
     gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
       gsMakeDataExprMin(
