@@ -32,7 +32,7 @@ namespace squadt {
 
     /* General of GUI Icons */
     wxImageList* load_main_icons() {
-      wxImageList* list = new wxImageList(24, 24, false, 7);
+      wxImageList* list = new wxImageList(24, 24, true, 7);
 
       list->Add(wxIcon(file_original_xpm));
       list->Add(wxIcon(file_derived_nonexistent_xpm));
@@ -47,7 +47,7 @@ namespace squadt {
 
     /* General of icons for file formats */
     wxImageList* load_format_icons() {
-      wxImageList* list = new wxImageList(24, 24, false, 4);
+      wxImageList* list = new wxImageList(24, 24, true, 5);
 
       list->Add(wxIcon(file_original_xpm));
       list->Add(wxIcon(file_derived_nonexistent_xpm));
@@ -60,7 +60,7 @@ namespace squadt {
 
     /* General of icons for file formats */
     wxImageList* load_small_format_icons() {
-      wxImageList* list = new wxImageList(16, 16, false, 1);
+      wxImageList* list = new wxImageList(16, 16, true, 1);
 
       list->Add(wxIcon(stock_new_small_xpm));
 

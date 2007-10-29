@@ -31,6 +31,7 @@
 #include <wx/thread.h>
 #include <wx/cmdline.h>
 #include <wx/msgdlg.h>
+#include <wx/sysopt.h>
 
 const char* program_name    = "squadt";
 const char* program_version = "July 2007";
@@ -160,6 +161,8 @@ bool Squadt::OnInit() {
 
   if (c) {
     wxInitAllImageHandlers();
+
+    wxSystemOptions::SetOption(wxT("msw.remap"), 0);
     
     #include "pixmaps/logo.xpm"
     
