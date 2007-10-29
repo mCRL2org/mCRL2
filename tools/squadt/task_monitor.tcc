@@ -65,7 +65,7 @@ namespace squadt {
         inline static bool perpetual_handler_wrapper(boost::function < void () >);
 
         /** \brief Terminate an associated process */
-        inline void terminate_process();
+        inline void terminate_process(boost::shared_ptr < task_monitor_impl >);
 
         /** \brief Blocks until the process has registered */
         inline void await_process() const;
@@ -113,7 +113,7 @@ namespace squadt {
         inline void disconnect();
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        inline void finish(bool = false);
+        inline void finish(bool, boost::shared_ptr < task_monitor_impl > const&);
 
         /** \brief Clears handlers and terminates processes */
         inline void shutdown();
@@ -346,14 +346,15 @@ namespace squadt {
 
     /**
      * \param[in] b whether to wait for the process to terminate (whether or not to block)
+     * \param[in] g shared pointer to this object, to ensure its existence
      **/
-    inline void task_monitor_impl::finish(bool b) {
+    inline void task_monitor_impl::finish(bool b, boost::shared_ptr < task_monitor_impl > const& g) {
       /* Let the tool know that it should prepare for termination */
       if (b) {
-        terminate_process();
+        terminate_process(g);
       }
       else {
-        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this));
+        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g));
       }
     }
 
@@ -373,8 +374,12 @@ namespace squadt {
       connected = false;
     }
 
-    /** \brief Terminates a running process */
-    inline void task_monitor_impl::terminate_process() {
+    /**
+     * \brief Terminates a running process
+     *
+     * \param[in] g shared pointer to this object, to ensure its existence
+     **/
+    inline void task_monitor_impl::terminate_process(boost::shared_ptr < task_monitor_impl > g) {
       if (connected) {
         if (associated_process && associated_process->get_status() == process::running) {
           disconnect();

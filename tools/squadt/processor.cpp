@@ -192,40 +192,34 @@ namespace squadt {
   void processor::monitor::signal_change(const execution::process::status s) {
     using namespace execution;
 
-    if (owner.number_of_inputs() == 0) {
-      switch (s) {
-        case process::running:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::generation_in_progress;
-          }
-          break;
-        case process::completed:
-        case process::stopped:
-        default: /* aborted... */
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::original;
-          }
-          break;
+    if (s == process::running) { // process started execution
+      for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+        (*i)->status = object_descriptor::generation_in_progress;
       }
     }
-    else {
+    else if (owner.number_of_inputs() == 0) { // output does not depend on input
+      for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
+        (*i)->status = object_descriptor::original;
+      }
+    }
+    else { // output depends on input
+      boost::shared_ptr < process > p(get_process());
+
       switch (s) {
         case process::stopped:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::reproducible_out_of_date;
           }
           break;
-        case process::running:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::generation_in_progress;
-          }
-          break;
         case process::completed:
-          for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_up_to_date;
-          }
+          // Task status determines object status
           break;
         default: /* aborted... */
+          if (p.get()) {
+            get_logger()->log(1, boost::format("Process aborted `%s' (process id %u)") % p->get_executable_name() %
+                               p->get_identifier());
+          }
+
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             if ((*i)->status == object_descriptor::generation_in_progress) {
               (*i)->status = object_descriptor::reproducible_nonexistent;
