@@ -182,13 +182,15 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }
 "void"  { process_string(); return VOID; }
-"int"	{ process_string(); return TYPE; }
-"real"	{ process_string(); return TYPE; }
 "string" { process_string(); return TYPE; }
 
 "deadlock" { process_string();return DEADLOCK; }
 "delta" 	{ process_string();return DEADLOCK; }
 "old"		{ process_string(); return OLD;}
+
+"val"		{ process_string(); yyerror("The \"val\" operator is not supported\n");}
+"real"	{ process_string(); yyerror("The \"real\" operator is not supported\n");}
+	
 
 {identifier}    { process_string(); return ID; }
 {Number} { process_string(); return NUMBER; }

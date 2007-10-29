@@ -73,9 +73,9 @@ bool is_number(std::string s);
  */
 
 %token <appl> PROC MODEL_DEF ENUM MODEL
-%token <appl> VAR CONST CHAN
+%token <appl> VAR CONST CHAN VAL
 %token <appl> SKIP BARS ALT
-%token <appl> COLON TYPE BOOL NAT VOID
+%token <appl> COLON TYPE BOOL NAT REAL VOID
 %token <appl> ID TIME 
 %token <appl> BP EP PROC_SEP SEP COMMA IS ASSIGNMENT MINUS PLUS GG 
 %token <appl> LBRACE RBRACE LBRACKET RBRACKET
@@ -286,6 +286,7 @@ LocalVariables:
 		  //safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );  //<-- gsMakeVarSpec aanpassen
 		  gsDebugMsg("LocalVariables: parsed \n %T\n", $$);
 		}
+    | VAL
 //	| RecursionDefinition
 	;
 
@@ -752,6 +753,7 @@ BasicType:
           safe_assign($$, gsMakeType( gsString2ATermAppl("Void" ) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
 		}
+    | REAL
  	| TYPE
 		{ 
           safe_assign($$, gsMakeType( $1 ) );
@@ -1701,12 +1703,12 @@ EqualityExpression:
             if (strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "SetType") == 0 )
 		    {
 			  safe_assign($$, gsMakeBinarySetExpression( 
-                                  gsString2ATermAppl("/="),  
+                                  gsString2ATermAppl("!="),  
 			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
 			  $1, $3));
       		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
             } else {
-			  safe_assign($$, gsMakeBinaryExpression( $2,  
+			  safe_assign($$, gsMakeBinaryExpression( gsString2ATermAppl("!="),  
 			  		  gsMakeType( gsString2ATermAppl("Bool" )), 
 			  $1, $3));
       		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
