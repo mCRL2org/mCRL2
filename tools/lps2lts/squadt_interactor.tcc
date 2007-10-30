@@ -364,7 +364,7 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
   m.append(display.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
         append(display.create< vertical_box >().set_default_alignment(layout::left).
           append(display.create< label >().set_text("Level:")).
-          append(display.create< label >().set_text("States expored:")).
+          append(display.create< label >().set_text("States explored:")).
           append(display.create< label >().set_text("States seen:")).
           append(display.create< label >().set_text("Transitions:"))).
         append(display.create< vertical_box >().set_default_alignment(layout::right).
