@@ -2225,7 +2225,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       alternative = true;
       originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,0) );
-      state = begin_state[parenthesis_level];
+      state =  begin_state[parenthesis_level];
       originates_from_stream = stream_number;
       manipulateStatements( (ATermAppl) ATgetArgument(input,1) );
       return ;
@@ -2300,7 +2300,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       int PassStreamNumber = stream_number; 
 
       ++parenthesis_level;
-      begin_state[parenthesis_level]= transitionSystem.size();
+      begin_state[parenthesis_level]= state;
 
       manipulateStatements( (ATermAppl) ATgetArgument(input,0));
 
