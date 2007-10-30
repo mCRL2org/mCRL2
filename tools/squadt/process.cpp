@@ -15,6 +15,8 @@
 #include <cstring>
 #include <cerrno>
 
+#include "task_monitor.tcc"
+
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
 # include <workarounds.h>
@@ -33,7 +35,6 @@
 #include <boost/format.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "task_monitor.tcc"
 #include "command.hpp"
 #include "mcrl2/setup.h"
 

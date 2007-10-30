@@ -266,7 +266,7 @@ namespace squadt {
       if (s == execution::process::completed || s == execution::process::aborted) {
         /* Unblock any remaining waiters */
         done = true;
- 
+
         /* Service connection handlers */
         if (0 < handlers.count(completion)) {
           task_monitor_impl::service_handlers(m, completion);
@@ -356,13 +356,27 @@ namespace squadt {
      * \param[in] g shared pointer to this object, to ensure its existence
      **/
     inline void task_monitor_impl::finish(bool b, boost::shared_ptr < task_monitor_impl > const& g) {
+      boost::shared_ptr < execution::process > p(associated_process);
+
+      disconnect(p);
+
       /* Let the tool know that it should prepare for termination */
       if (b) {
+        if (p && p->get_status() == execution::process::running) {
+          boost::xtime timeout;
+          boost::xtime_get(&timeout, boost::TIME_UTC);
+          timeout.sec += 1;
+
+          boost::thread::sleep(timeout);
+        }
+
         terminate_process(g, associated_process);
       }
       else {
         boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g, associated_process));
       }
+
+      associated_process.reset();
     }
 
     inline void task_monitor_impl::disconnect(boost::shared_ptr < execution::process > p) {
@@ -391,7 +405,7 @@ namespace squadt {
       if (connected) {
         disconnect(p);
 
-        if (p) {
+        if (p && p->get_status() == execution::process::running) {
           boost::xtime timeout;
           boost::xtime_get(&timeout, boost::TIME_UTC);
           timeout.sec += 1;
@@ -400,19 +414,12 @@ namespace squadt {
         }
       }
 
-      if (p->get_status() == execution::process::running) {
+      if (p && p->get_status() == execution::process::running) {
         logger->log(1, boost::format("forcibly terminating process (tool %s with id %u)\n") %
                       p->get_executable_name() % p->get_identifier());
 
         p->terminate();
       }
-
-      boost::mutex::scoped_lock l(register_lock);
-
-      done = true;
-
-      /* Signal completion to waiters */
-      register_condition.notify_all();
     }
 
     /// \endcond

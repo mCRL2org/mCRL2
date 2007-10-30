@@ -239,9 +239,7 @@ namespace squadt {
 
     owner.check_status(false);
 
-    if (p) {
-      task_monitor::signal_change(p, s);
-    }
+    task_monitor::signal_change(p, s);
 
     /* Update status for known processor outputs */
     if (!status_change_handler.empty()) {
