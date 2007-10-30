@@ -54,7 +54,7 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
 /// Renames the process parameters in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
 inline
-linear_process rename_process_parameters(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix = "_S")
+linear_process rename_process_parameters(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string postfix)
 {
   lps::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
@@ -90,7 +90,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
 /// Renames the free variables in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
 inline
-linear_process rename_free_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix = "_S")
+linear_process rename_free_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix)
 {
   lps::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
@@ -133,7 +133,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 /// Renames the summation variables in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
 inline
-linear_process rename_summation_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix = "_S")
+linear_process rename_summation_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix)
 {
   lps::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);

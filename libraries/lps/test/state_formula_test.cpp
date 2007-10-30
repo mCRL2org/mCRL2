@@ -12,6 +12,7 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/basic/state_formula_rename.h"
+#include "mcrl2/basic/state_formula_normalize.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
@@ -368,8 +369,8 @@ void test_normalize()
   state_formula req1_2 = mcf2statefrm(REQ1_2, model);
   state_formula q1 = normalize(req1_1);
   state_formula q2 = normalize(req1_2);
-  state_formula r1 = normalize_old(req1_1);
-  state_formula r2 = normalize_old(req1_2); 
+  state_formula r1 = normalize(req1_1);
+  state_formula r2 = normalize(req1_2); 
 }
 
 int test_main(int argc, char* argv[])

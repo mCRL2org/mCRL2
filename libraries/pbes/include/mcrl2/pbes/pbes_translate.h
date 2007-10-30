@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include "mcrl2/basic/mucalculus.h"
-#include "mcrl2/basic/normalize.h"
 #include "mcrl2/basic/state_formula_rename.h"
 #include "mcrl2/basic/free_variables.h"
 #include "mcrl2/data/utility.h"
@@ -51,9 +50,6 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   xyz_generator.add_identifiers(spec_names);  
   xyz_generator.add_identifiers(formula_variable_names);  
   f = rename_predicate_variables(f, xyz_generator);
-
-  // remove occurrences of ! and =>
-  // f = normalize(f);
 
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))
