@@ -110,7 +110,7 @@ namespace transport {
         void handle_write(boost::weak_ptr < socket_transceiver >, boost::shared_array < char >, const boost::system::error_code&);
 
         /** \brief Actual disconnection operation */
-        void handle_disconnect();
+        void handle_disconnect(boost::weak_ptr< socket_transceiver >&);
 
       public:
 

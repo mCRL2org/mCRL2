@@ -12,7 +12,6 @@
 //SQuADT protocol interface
 #include <mcrl2/utilities/squadt_interface.h>
 
-bool        command_line = false;
 std::string lts_file_argument;
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
@@ -64,6 +63,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration&) {
   return starter.perform_entry();
 }
+
+std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #include <wx/cmdline.h>
@@ -101,7 +102,7 @@ bool LTSViewApp::OnInit() {
   wxInitAllImageHandlers();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (command_line) {
+  if (!interactor->is_active()) {
 #else
     std::string lts_file_argument;
 #endif
@@ -133,17 +134,19 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
   // Initialize ATerms
   ATerm bot;
   ATinit(0,0,&bot);
+
 # ifdef ENABLE_SQUADT_CONNECTIVITY
-  mcrl2::utilities::squadt::entry_wrapper starter(hInstance,hPrevInstance,lpCmdLine,
-      nCmdShow);
-  squadt_interactor c(starter);
-  if (!c.try_interaction(lpCmdLine)) {
-    return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);    
+  mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+
+  interactor.reset(new squadt_interactor(starter));
+
+  if (!interactor->try_interaction(lpCmdLine)) {
+# endif
+    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+# ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 
   return 0;
-# else
-  return wxEntry(hInstance,hPrevInstance,lpCmdLine,nCmdShow);
 # endif
 }
 #else
@@ -151,17 +154,19 @@ int main(int argc, char **argv) {
   // Initialize ATerms
   ATerm bot;
   ATinit(argc,argv,&bot);
+
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
-  squadt_interactor c(starter);
-  if(!c.try_interaction(argc, argv)) {
-    command_line = true;
 
+  interactor.reset(new squadt_interactor(starter));
+
+  if(!interactor->try_interaction(argc, argv)) {
+# endif
     return wxEntry(argc, argv);
+# ifdef ENABLE_SQUADT_CONNECTIVITY
   }
+
   return 0;
-# else
-  return wxEntry(argc, argv);
 # endif
 }
 #endif

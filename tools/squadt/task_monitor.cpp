@@ -19,10 +19,10 @@ namespace squadt {
     task_monitor::task_monitor() : tipi::controller::communicator(boost::shared_ptr < tipi::controller::communicator_impl > (new task_monitor_impl)) {
     }
 
-    void task_monitor::disconnect(boost::weak_ptr < execution::process >&) {
+    void task_monitor::disconnect(boost::weak_ptr < execution::process >& p) {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->connected = false;
 
-      boost::static_pointer_cast < task_monitor_impl > (impl)->disconnect();
+      boost::static_pointer_cast < task_monitor_impl > (impl)->disconnect(p.lock());
     }
 
     /**
@@ -36,7 +36,7 @@ namespace squadt {
 
     /** \brief Terminates a running process */
     void task_monitor::terminate_process() {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->terminate_process(boost::dynamic_pointer_cast < task_monitor_impl > (impl));
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(false, boost::dynamic_pointer_cast < task_monitor_impl > (impl));
     }
 
     /**
@@ -91,17 +91,17 @@ namespace squadt {
 
       m->signal_connection(m, e);
 
-//      get_logger->log(1, boost::str(boost::format("connection established with %s pid(%u)\n")
-//                % m->associated_process->get_executable_name() % m->associated_process->get_identifier()));
+      get_logger()->log(1, boost::str(boost::format("connection established with `%s' (process id %u)\n")
+                % m->associated_process->get_executable_name() % m->associated_process->get_identifier()));
     }
 
     /**
      * @param[in] s the current status of the process
      **/
-    void task_monitor::signal_change(const execution::process::status s) {
+    void task_monitor::signal_change(boost::shared_ptr < execution::process > p, const execution::process::status s) {
       boost::shared_ptr < task_monitor_impl > m = boost::dynamic_pointer_cast < task_monitor_impl > (impl);
 
-      m->signal_change(m, s);
+      m->signal_change(m, p, s);
     }
 
     /**

@@ -56,7 +56,7 @@ namespace squadt {
         void signal_connection(tipi::message::end_point);
 
         /** \brief Checks the process status and removes */
-        virtual void signal_change(const execution::process::status);
+        virtual void signal_change(boost::shared_ptr < execution::process > p, const execution::process::status);
 
       private:
  

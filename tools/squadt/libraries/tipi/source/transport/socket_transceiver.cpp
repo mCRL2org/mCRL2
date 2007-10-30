@@ -119,22 +119,26 @@ namespace transport {
       }
     }
 
-    void socket_transceiver::handle_disconnect() {
-      boost::mutex::scoped_lock s(send_lock);
+    void socket_transceiver::handle_disconnect(boost::weak_ptr< socket_transceiver >& w) {
+      socket_transceiver::ptr p = w.lock();
 
-      /* Wait until send operations complete */
-      if (0 < send_count) {
-        send_monitor.wait(s);
-      }
-      
-      boost::mutex::scoped_lock ll(operation_lock);
-
-      boost::system::error_code ec;
-
-      socket.close(ec);
-
-      if (ec) {
-        std::cerr << boost::system::system_error(ec).what() << std::endl; // An error occurred.
+      if (!w.expired()) {
+        boost::mutex::scoped_lock s(send_lock);
+       
+        /* Wait until send operations complete */
+        if (0 < send_count) {
+          send_monitor.wait(s);
+        }
+        
+        boost::mutex::scoped_lock ll(operation_lock);
+       
+        boost::system::error_code ec;
+       
+        socket.close(ec);
+       
+        if (ec) {
+          std::cerr << boost::system::system_error(ec).what() << std::endl; // An error occurred.
+        }
       }
     }
 
@@ -284,7 +288,7 @@ namespace transport {
     }
 
     socket_transceiver::~socket_transceiver() {
-      handle_disconnect();
+      handle_disconnect(this_ptr);
     }
   }
 }

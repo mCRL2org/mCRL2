@@ -49,7 +49,7 @@ namespace squadt {
   const boost::shared_ptr < tipi::tool::capabilities > tool::no_capabilities(new tipi::tool::capabilities());
 
   /// \cond INTERNAL_DOCS
-  const long tool_manager_impl::default_port = 10947;
+  const long tool_manager_impl::default_port = 10949;
 
   char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
                                                     "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm", "ltsconvert", "ltsinfo",

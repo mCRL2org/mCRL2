@@ -789,6 +789,13 @@ namespace squadt {
     if (p.get()) {
       boost::shared_ptr < project_manager > m(manager.lock());
 
+      object_descriptor::t_status new_status = (inputs.size() == 0) ?
+                object_descriptor::original : object_descriptor::reproducible_up_to_date;
+
+      for (output_list::iterator i = outputs.begin(); i != outputs.end(); ++i) {
+        (*i)->status = new_status;
+      }
+
       if (m.get()) {
         m->update_status(p.get(), inputs.size() == 0);
       }

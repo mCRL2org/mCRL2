@@ -94,13 +94,11 @@ namespace mcrl2 {
           }
   
           finalise();
-  
+
           m_communicator->send_signal_termination();
 
-          m_communicator->disconnect();
-  
           active = false;
-  
+
           return (true);
         }
   
@@ -109,9 +107,9 @@ namespace mcrl2 {
   
       bool tool_interface::try_interaction(char* av) {
         set_capabilities(m_communicator->get_tool_capabilities());
-  
+
         active = m_communicator->activate(av);
-  
+
         return (try_run());
       }
   

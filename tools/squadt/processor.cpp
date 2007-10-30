@@ -190,6 +190,16 @@ namespace squadt {
    * \param[in] s the new status
    **/
   void processor::monitor::signal_change(const execution::process::status s) {
+    boost::shared_ptr < execution::process > p;
+
+    signal_change(p, s);
+  }
+
+  /**
+   * \param[in] s the new status
+   * \param[in] p the process
+   **/
+  void processor::monitor::signal_change(boost::shared_ptr < execution::process > p, const execution::process::status s) {
     using namespace execution;
 
     if (s == process::running) { // process started execution
@@ -203,8 +213,6 @@ namespace squadt {
       }
     }
     else { // output depends on input
-      boost::shared_ptr < process > p(get_process());
-
       switch (s) {
         case process::stopped:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
@@ -215,8 +223,8 @@ namespace squadt {
           // Task status determines object status
           break;
         default: /* aborted... */
-          if (p.get()) {
-            get_logger()->log(1, boost::format("Process aborted `%s' (process id %u)") % p->get_executable_name() %
+          if (p.get() && p->get_identifier()) {
+            get_logger()->log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
                                p->get_identifier());
           }
 
@@ -231,7 +239,9 @@ namespace squadt {
 
     owner.check_status(false);
 
-    task_monitor::signal_change(s);
+    if (p) {
+      task_monitor::signal_change(p, s);
+    }
 
     /* Update status for known processor outputs */
     if (!status_change_handler.empty()) {
@@ -313,13 +323,13 @@ namespace squadt {
         clear_handlers(tipi::message_task_done);
 
         if (await_completion()) {
+          /* Operation completed successfully */
+          t->impl->process_configuration(get_configuration(), old_outputs);
+
           /* Successful, set new status */
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
             (*i)->status = object_descriptor::reproducible_up_to_date;
           }
-
-          /* Operation completed successfully */
-          t->impl->process_configuration(get_configuration(), old_outputs);
         }
         else {
           /* Task completed unsuccessfully, set new status */

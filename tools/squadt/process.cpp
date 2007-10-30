@@ -33,7 +33,7 @@
 #include <boost/format.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "task_monitor.hpp"
+#include "task_monitor.tcc"
 #include "command.hpp"
 #include "mcrl2/setup.h"
 
@@ -139,7 +139,7 @@ namespace squadt {
     void process_impl::terminate() {
       /* Inform monitor */
       boost::shared_ptr < task_monitor > l = monitor.lock();
-      
+
       if (l.get() != 0) {
         l->disconnect(interface_pointer);
       }
@@ -160,7 +160,11 @@ namespace squadt {
         }
       }
 #else
-      kill(identifier, SIGKILL);
+      if (current_status == process::running) {
+        kill(identifier, SIGKILL);
+
+        current_status = process::aborted;
+      }
 #endif
     }
  
@@ -180,7 +184,7 @@ namespace squadt {
     
         boost::shared_ptr < process > alive(p.lock());
 
-        if (alive.get())  {
+        if (alive.get()) {
           boost::shared_ptr < process_impl >& impl(alive->impl);
 
           impl->current_status = (GetExitCodeProcess(ph, &exit_code) && exit_code == 0) ? process::completed : process::aborted;
@@ -203,7 +207,7 @@ namespace squadt {
 
       boost::shared_ptr < process > alive(p.lock());
 
-      if (alive.get())  {
+      if (alive.get()) {
         boost::shared_ptr < process_impl >& impl(alive->impl);
 
         impl->current_status = (WIFEXITED(exit_code)) ? process::completed : process::aborted;
@@ -220,7 +224,7 @@ namespace squadt {
       boost::shared_ptr < task_monitor > l = monitor.lock();
 
       if (l.get() != 0) {
-        l->signal_change(current_status);
+        l->signal_change(interface_pointer.lock(), current_status);
       }
     }
 

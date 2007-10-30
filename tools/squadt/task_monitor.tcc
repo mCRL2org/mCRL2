@@ -65,7 +65,7 @@ namespace squadt {
         inline static bool perpetual_handler_wrapper(boost::function < void () >);
 
         /** \brief Terminate an associated process */
-        inline void terminate_process(boost::shared_ptr < task_monitor_impl >);
+        inline void terminate_process(boost::shared_ptr < task_monitor_impl >, boost::shared_ptr < execution::process >);
 
         /** \brief Blocks until the process has registered */
         inline void await_process() const;
@@ -86,7 +86,7 @@ namespace squadt {
         inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, tipi::message::end_point);
 
         /** \brief Checks the process status and removes */
-        inline void signal_change(boost::shared_ptr < task_monitor_impl >&, const execution::process::status);
+        inline void signal_change(boost::shared_ptr < task_monitor_impl >&, boost::shared_ptr < execution::process >, const execution::process::status);
 
         /** \brief Execute event handlers */
         static void service_handlers(boost::shared_ptr < task_monitor_impl >&, event_type);
@@ -110,7 +110,7 @@ namespace squadt {
         void attach_process(const process::sptr& p);
 
         /** \brief Terminate communication and reset internal state */
-        inline void disconnect();
+        inline void disconnect(boost::shared_ptr < execution::process > p);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         inline void finish(bool, boost::shared_ptr < task_monitor_impl > const&);
@@ -123,8 +123,8 @@ namespace squadt {
     }
 
     /**
-     * @param[in] n the amount of times that the handler is executed
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] n the amount of times that the handler is executed
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline bool task_monitor_impl::countdown_handler_wrapper(boost::shared_ptr < unsigned int > n, boost::function < void () > h) {
       h();
@@ -133,7 +133,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline bool task_monitor_impl::perpetual_handler_wrapper(boost::function < void () > h) {
       h();
@@ -193,7 +193,7 @@ namespace squadt {
     }
 
     // Declaring this function inline produces unexpected results (at least on Linux with gcc 4)
-    void task_monitor_impl::handle_task_completion(boost::shared_ptr < tipi::message > const& m, bool& result, bool& changed) {
+    inline void task_monitor_impl::handle_task_completion(boost::shared_ptr < tipi::message > const& m, bool& result, bool& changed) {
       changed = true;
 
       result = m.get() && !m->is_empty();
@@ -250,10 +250,12 @@ namespace squadt {
     }
 
     /**
-     * @param[in] m a shared pointer to the current object
-     * @param[in] s the current status of the process
+     * \param[in] m a shared pointer to the current object
+     * \param[in] s the current status of the process
      **/
-    inline void task_monitor_impl::signal_change(boost::shared_ptr < task_monitor_impl >& m, const execution::process::status s) {
+    inline void task_monitor_impl::signal_change(boost::shared_ptr < task_monitor_impl >& m,
+                        boost::shared_ptr < execution::process > p, const execution::process::status s) {
+
       boost::mutex::scoped_lock l(register_lock);
 
       /* Service change handlers */
@@ -270,14 +272,19 @@ namespace squadt {
           task_monitor_impl::service_handlers(m, completion);
         }
 
+        if (p.get()) {
+          logger->log(1, boost::str(boost::format("process ended `%s' (process id %u)\n")
+                    % p->get_executable_name() % p->get_identifier()));
+        }
+
         /* Signal completion to waiters */
         register_condition.notify_all();
       }
     }
 
     /**
-     * @param[in] m a shared pointer to this object
-     * @param[in] e the event type of which to execute the handler
+     * \param[in] m a shared pointer to this object
+     * \param[in] e the event type of which to execute the handler
      **/
     inline void task_monitor_impl::service_handlers(boost::shared_ptr < task_monitor_impl >& m, const event_type e) {
       std::pair < handler_map::iterator, handler_map::iterator > p = m->handlers.equal_range(e);
@@ -290,14 +297,14 @@ namespace squadt {
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline void task_monitor_impl::on_connection(boost::function < void () > h) {
       handlers.insert(std::make_pair(connection, boost::bind(&task_monitor_impl::perpetual_handler_wrapper, h)));
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline void task_monitor_impl::once_on_connection(boost::function < void () > h) {
       boost::shared_ptr < unsigned int > n(new unsigned int);
@@ -308,21 +315,21 @@ namespace squadt {
     }
 
     /**
-     * @param[in] h the function object that is executed after the process status has changed
+     * \param[in] h the function object that is executed after the process status has changed
      **/
     inline void task_monitor_impl::on_status_change(boost::function < void () > h) {
       handlers.insert(std::make_pair(change, boost::bind(&task_monitor_impl::perpetual_handler_wrapper, h)));
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline void task_monitor_impl::on_completion(boost::function < void () > h) {
       handlers.insert(std::make_pair(completion, boost::bind(&task_monitor_impl::perpetual_handler_wrapper, h)));
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * \param[in] h the function object that is executed once a connection is established
      **/
     inline void task_monitor_impl::once_on_completion(boost::function < void () > h) {
       boost::shared_ptr < unsigned int > n(new unsigned int);
@@ -333,7 +340,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p shared pointer to the process
+     * \param[in] p shared pointer to the process
      **/
     inline void task_monitor_impl::attach_process(const process::sptr& p) {
       boost::mutex::scoped_lock l(register_lock);
@@ -351,22 +358,22 @@ namespace squadt {
     inline void task_monitor_impl::finish(bool b, boost::shared_ptr < task_monitor_impl > const& g) {
       /* Let the tool know that it should prepare for termination */
       if (b) {
-        terminate_process(g);
+        terminate_process(g, associated_process);
       }
       else {
-        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g));
+        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g, associated_process));
       }
     }
 
-    inline void task_monitor_impl::disconnect() {
-      if (associated_process.get() && associated_process->get_status() == process::running && connected) {
+    inline void task_monitor_impl::disconnect(boost::shared_ptr < execution::process > p) {
+      boost::mutex::scoped_lock l(register_lock);
+
+      if (p.get() && p->get_status() == process::running && connected) {
         // request termination
         send_message(tipi::message_termination);
 
-        logger->log(1, boost::str(boost::format("termination request sent to %s pid(%u)\n")
-                  % associated_process->get_executable_name() % associated_process->get_identifier()));
-
-        await_message(tipi::message_termination, 1);
+        logger->log(1, boost::str(boost::format("termination request sent to %s (process id %u)\n")
+                  % p->get_executable_name() % p->get_identifier()));
 
         tipi::controller::communicator_impl::disconnect();
       }
@@ -379,11 +386,12 @@ namespace squadt {
      *
      * \param[in] g shared pointer to this object, to ensure its existence
      **/
-    inline void task_monitor_impl::terminate_process(boost::shared_ptr < task_monitor_impl > g) {
-      if (connected) {
-        if (associated_process && associated_process->get_status() == process::running) {
-          disconnect();
+    inline void task_monitor_impl::terminate_process(boost::shared_ptr < task_monitor_impl > g, boost::shared_ptr < execution::process > p) {
 
+      if (connected) {
+        disconnect(p);
+
+        if (p) {
           boost::xtime timeout;
           boost::xtime_get(&timeout, boost::TIME_UTC);
           timeout.sec += 1;
@@ -391,23 +399,17 @@ namespace squadt {
           boost::thread::sleep(timeout);
         }
       }
-      if (associated_process) {
-        std::string log_message(boost::str(
-                boost::format("process terminated (tool %s pid(%u))\n") %
-                        associated_process->get_executable_name() %
-                        associated_process->get_identifier()));
 
-        if (associated_process->terminate()) {
-          logger->log(1,log_message);
-        }
+      if (p->get_status() == execution::process::running) {
+        logger->log(1, boost::format("forcibly terminating process (tool %s with id %u)\n") %
+                      p->get_executable_name() % p->get_identifier());
+
+        p->terminate();
       }
 
       boost::mutex::scoped_lock l(register_lock);
 
-      connected = false;
-      done      = true;
-
-      associated_process.reset();
+      done = true;
 
       /* Signal completion to waiters */
       register_condition.notify_all();

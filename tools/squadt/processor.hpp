@@ -294,6 +294,9 @@ namespace squadt {
       /** \brief Handler function that is called when an associated process changes state */
       void signal_change(const execution::process::status);
 
+      /** \brief Handler function that is called when an associated process changes state */
+      void signal_change(boost::shared_ptr < execution::process >, const execution::process::status);
+
       /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
       void start_tool_configuration(processor::sptr const&, boost::shared_ptr < tipi::configuration > const& c);
 

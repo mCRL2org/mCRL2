@@ -204,7 +204,7 @@ namespace tipi {
         return (m->build(*this));
       }
 
-      progress_bar::progress_bar() {
+      progress_bar::progress_bar() : m_minimum(0), m_maximum(0), m_current(0) {
       }
 
       /**
