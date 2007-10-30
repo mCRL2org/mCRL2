@@ -152,9 +152,9 @@ bool check_variable_names(data_variable_list variables, const std::set<identifie
 /// Returns true if the domain sorts and range sort of the given functions are
 /// contained in sorts.
 inline
-bool check_data_spec_sorts(function_list functions, const std::set<lps::sort>& sorts)
+bool check_data_spec_sorts(data_operation_list functions, const std::set<lps::sort>& sorts)
 {
-  for (function_list::iterator i = functions.begin(); i != functions.end(); ++i)
+  for (data_operation_list::iterator i = functions.begin(); i != functions.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
       return false;

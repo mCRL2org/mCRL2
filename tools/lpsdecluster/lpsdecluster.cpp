@@ -33,7 +33,7 @@
 #include <atermpp/algorithm.h>
 
 //LPS Framework
-#include <mcrl2/data/function.h>
+#include <mcrl2/data/data_operation.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/sort_utility.h>
@@ -283,7 +283,7 @@ lps::data_variable_list filter(const data_variable_list& vl, const data_variable
 
 ///\pre fl is a list of constructors
 ///\ret a list of declusterable sorts in sl
-sort_list get_finite_sorts(const function_list& fl, const sort_list& sl)
+sort_list get_finite_sorts(const data_operation_list& fl, const sort_list& sl)
 {
   sort_list result;
   for(sort_list::iterator i = sl.begin(); i != sl.end(); ++i)

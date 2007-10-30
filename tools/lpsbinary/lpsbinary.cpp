@@ -39,7 +39,7 @@
 //LPS Framework
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/utility.h>
-#include <mcrl2/data/function.h>
+#include <mcrl2/data/data_operation.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/data/sort_utility.h>
 #include <mcrl2/lps/specification.h>
@@ -248,7 +248,7 @@ int powerof2_(int n)
 
 ///\pre cl is a list of constructors
 ///\ret all sorts s in sl that are finite and not bool
-sort_list get_finite_sorts_not_bool(const function_list& cl, const sort_list& sl)
+sort_list get_finite_sorts_not_bool(const data_operation_list& cl, const sort_list& sl)
 {
   sort_list result;
   for(sort_list::iterator i = sl.begin(); i != sl.end(); ++i)

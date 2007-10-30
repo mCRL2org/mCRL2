@@ -100,7 +100,7 @@ pbes_expression data2pbes(data_expression q)
   }
   else // head must be an operation id
   {
-    assert(is_function(head));
+    assert(is_data_operation(head));
     if (d::is_true(head)) {
       return p::true_();
     } else if (d::is_false(head)) {
@@ -528,8 +528,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               { 
-                function_list func=data.constructors(i->sort());
-                for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
+                data_operation_list func=data.constructors(i->sort());
+                for (data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
                   sort_list domain_sorts=(f->sort()).domain_sorts();
                   data_variable_list function_arguments;
@@ -626,8 +626,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               { 
-                function_list func=data.constructors(i->sort());
-                for (function_list::iterator f=func.begin() ; f!=func.end(); f++)
+                data_operation_list func=data.constructors(i->sort());
+                for (data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
                   sort_list domain_sorts=(f->sort()).domain_sorts();
                   // std::cerr << "Function " << f->name() << " Domain sorts " << domain_sorts << std::endl;

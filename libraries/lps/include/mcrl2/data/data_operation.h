@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/function.h
+/// \file mcrl2/data/data_operation.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_FUNCTION_H
-#define MCRL2_DATA_FUNCTION_H
+#ifndef MCRL2_DATA_DATA_OPERATION_H
+#define MCRL2_DATA_DATA_OPERATION_H
 
 #include <cassert>
 #include "atermpp/aterm_appl.h"
@@ -24,27 +24,27 @@ using atermpp::term_list;
 using atermpp::arg1;
 
 ///////////////////////////////////////////////////////////////////////////////
-// function
+// data_operation
 /// \brief operation on data.
 ///
-class function: public data_expression
+class data_operation: public data_expression
 {
   public:
-    function()
+    data_operation()
       : data_expression(detail::constructOpId())
     {}
 
-    function(aterm_appl t)
+    data_operation(aterm_appl t)
      : data_expression(t)
     {
       assert(detail::check_rule_OpId(m_term));
     }
 
-    function(identifier_string name, lps::sort s)
+    data_operation(identifier_string name, lps::sort s)
      : data_expression(gsMakeOpId(name, s))
     {}
 
-    /// Returns the name of the function.
+    /// Returns the name of the data_operation.
     ///
     identifier_string name() const
     {
@@ -53,14 +53,14 @@ class function: public data_expression
   };
                                                             
 ///////////////////////////////////////////////////////////////////////////////
-// function_list
+// data_operation_list
 /// \brief singly linked list of data operations
 ///
-typedef term_list<function> function_list;
+typedef term_list<data_operation> data_operation_list;
 
 /// \brief Returns true if the term t is a data operation
 inline
-bool is_function(aterm_appl t)
+bool is_data_operation(aterm_appl t)
 {
   return gsIsOpId(t);
 }
@@ -70,19 +70,19 @@ bool is_function(aterm_appl t)
 /// \internal
 namespace atermpp
 {
-using lps::function;
+using lps::data_operation;
 
 template<>
-struct aterm_traits<function>
+struct aterm_traits<data_operation>
 {
   typedef ATermAppl aterm_type;
-  static void protect(function t)   { t.protect(); }
-  static void unprotect(function t) { t.unprotect(); }
-  static void mark(function t)      { t.mark(); }
-  static ATerm term(function t)     { return t.term(); }
-  static ATerm* ptr(function& t)    { return &t.term(); }
+  static void protect(data_operation t)   { t.protect(); }
+  static void unprotect(data_operation t) { t.unprotect(); }
+  static void mark(data_operation t)      { t.mark(); }
+  static ATerm term(data_operation t)     { return t.term(); }
+  static ATerm* ptr(data_operation& t)    { return &t.term(); }
 };
 
 } // namespace atermpp
 
-#endif // MCRL2_DATA_FUNCTION_H
+#endif // MCRL2_DATA_DATA_OPERATION_H

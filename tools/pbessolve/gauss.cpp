@@ -117,7 +117,7 @@ atermpp::vector<pbes_equation> pbes_solver::solve()
   lps::data_specification ds = pbes_spec.data();
   sort_list finite_sorts;
   sort_list sl = ds.sorts();
-  si.set_function_list(ds.constructors());
+  si.set_data_operation_list(ds.constructors());
   for (sort_list::iterator i = sl.begin(); i != sl.end(); i++)
     if (is_finite(ds.constructors(), (*i)))
       finite_sorts = push_front(finite_sorts,(*i));

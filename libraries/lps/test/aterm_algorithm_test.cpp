@@ -129,9 +129,9 @@ int test_main(int, char*[])
   find_all_if(lps, is_data_variable, inserter(variables, variables.end()));
 
   // find all functions in spec
-  std::set<function> functions;
-  find_all_if(spec.data().constructors(), is_function, std::inserter(functions, functions.end()));
-  find_all_if(spec.data().mappings(), is_function, std::inserter(functions, functions.end()));
+  std::set<data_operation> functions;
+  find_all_if(spec.data().constructors(), is_data_operation, std::inserter(functions, functions.end()));
+  find_all_if(spec.data().mappings(), is_data_operation, std::inserter(functions, functions.end()));
 
   // find all existential quantifications in lps
   std::set<data_expression> existential_quantifications;

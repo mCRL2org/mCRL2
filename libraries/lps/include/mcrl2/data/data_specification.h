@@ -15,7 +15,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/vector.h"
 #include "mcrl2/data/sort.h"
-#include "mcrl2/data/function.h"
+#include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/data_utility.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
@@ -34,7 +34,7 @@ struct has_target_sort
     : m_target(target)
   {}
 
-  bool operator()(function f)
+  bool operator()(data_operation f)
   {
     return f.sort().target() == m_target;
   }
@@ -51,13 +51,13 @@ class data_specification: public aterm_appl
 
   protected:
     sort_list          m_sorts;
-    function_list      m_constructors;
-    function_list      m_mappings;
+    data_operation_list      m_constructors;
+    data_operation_list      m_mappings;
     data_equation_list m_equations;
 
   public:
     typedef sort_list::iterator          sort_iterator;
-    typedef function_list::iterator      function_iterator;
+    typedef data_operation_list::iterator      function_iterator;
     typedef data_equation_list::iterator equation_iterator;
 
     data_specification()
@@ -70,12 +70,12 @@ class data_specification: public aterm_appl
       assert(detail::check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
       m_sorts        = sort_list(aterm_appl(*i++).argument(0));
-      m_constructors = function_list(aterm_appl(*i++).argument(0));
-      m_mappings     = function_list(aterm_appl(*i++).argument(0));
+      m_constructors = data_operation_list(aterm_appl(*i++).argument(0));
+      m_mappings     = data_operation_list(aterm_appl(*i++).argument(0));
       m_equations    = data_equation_list(aterm_appl(*i++).argument(0));
     }
 
-    data_specification(sort_list sorts, function_list constructors, function_list mappings, data_equation_list equations)
+    data_specification(sort_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
       : aterm_appl(gsMakeDataSpec(
                       gsMakeSortSpec(sorts),
                       gsMakeConsSpec(constructors),
@@ -98,27 +98,27 @@ class data_specification: public aterm_appl
 
     /// Returns the constructors of the data specification.
     ///
-    function_list constructors() const
+    data_operation_list constructors() const
     {
       return m_constructors;
     }
 
     /// Returns the constructors of the data specification that have s as their target.
-    function_list constructors(lps::sort s) const
+    data_operation_list constructors(lps::sort s) const
     {
-      atermpp::vector<lps::function> result;
+      atermpp::vector<lps::data_operation> result;
 
-      typedef boost::filter_iterator<has_target_sort, function_list::iterator> FilterIter;
+      typedef boost::filter_iterator<has_target_sort, data_operation_list::iterator> FilterIter;
       has_target_sort predicate(s);
       FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
       FilterIter last(predicate, m_constructors.end(), m_constructors.end());
       std::copy(first, last, std::back_inserter(result));
-      return function_list(result.begin(), result.end());
+      return data_operation_list(result.begin(), result.end());
     }
 
     /// Returns the mappings of the data specification.
     ///
-    function_list mappings() const
+    data_operation_list mappings() const
     {
       return m_mappings;
     }
@@ -171,7 +171,7 @@ data_specification set_sorts(data_specification s, sort_list sorts)
 
 /// \brief Sets the sequence of constructors
 inline
-data_specification set_constructors(data_specification s, function_list constructors)
+data_specification set_constructors(data_specification s, data_operation_list constructors)
 {
   return data_specification(s.sorts(),
                             constructors,
@@ -182,7 +182,7 @@ data_specification set_constructors(data_specification s, function_list construc
 
 /// \brief Sets the sequence of mappings
 inline
-data_specification set_mappings(data_specification s, function_list mappings)
+data_specification set_mappings(data_specification s, data_operation_list mappings)
 {
   return data_specification(s.sorts(),
                             s.constructors(),

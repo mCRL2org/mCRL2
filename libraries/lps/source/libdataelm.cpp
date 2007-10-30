@@ -124,9 +124,9 @@ static bool add_used(pbes_expression expr, ATermIndexedSet s)
 }
 
 //Prototype
-static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors);
+static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, data_operation_list constructors);
 
-static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
+static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet used_sorts, data_operation_list constructors)
 {
         bool result = false;
         for(ATermList l1 = l; !ATisEmpty(l1); l1=ATgetNext(l1))
@@ -138,7 +138,7 @@ static bool add_sorts(ATermList l, ATermIndexedSet used_data, ATermIndexedSet us
         return result;
 }
 
-static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, function_list constructors)
+static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet used_sorts, data_operation_list constructors)
 {
 	if ( gsIsSortArrow(s) )
 	{
@@ -153,8 +153,8 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 		bool b = false;
 		if ( m == ATtrue )
 		{
-			function_list::iterator fb = constructors.begin();
-			function_list::iterator fe = constructors.end();
+			data_operation_list::iterator fb = constructors.begin();
+			data_operation_list::iterator fe = constructors.end();
 			for (; fb != fe; fb++)
 			{
 				lps::sort range = fb->sort().range_sort();
@@ -225,11 +225,11 @@ static ATermTable initialise_used_data(data_specification dspec, bool keep_basis
 			add_used(gsMakeOpIdEq(*i),used_data);
 			add_used(gsMakeOpIdNeq(*i),used_data);
 		}
-		for (function_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
+		for (data_operation_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
 		{
 			add_used((ATermAppl) *i,used_data);
 		}
-		for (function_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
+		for (data_operation_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
 		{
 			add_used((ATermAppl) *i,used_data);
 		}
@@ -245,7 +245,7 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	data_equation_list::iterator ee = eqns.end();
 	sort_list sorts = dspec.sorts();
 	sort_list::iterator sse = sorts.end();
-	function_list conss = dspec.constructors();
+	data_operation_list conss = dspec.constructors();
 	bool not_done = true;
 	while ( not_done )
 	{
@@ -289,8 +289,8 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	}
 	new_sort = reverse(new_sort);
 
-	function_list new_cons;
-	for (function_list::iterator i=dspec.constructors().begin(); i != dspec.constructors().end(); i++)
+	data_operation_list new_cons;
+	for (data_operation_list::iterator i=dspec.constructors().begin(); i != dspec.constructors().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{
@@ -299,8 +299,8 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	}
 	new_cons = reverse(new_cons);
 
-	function_list new_maps;
-	for (function_list::iterator i=dspec.mappings().begin(); i != dspec.mappings().end(); i++)
+	data_operation_list new_maps;
+	for (data_operation_list::iterator i=dspec.mappings().begin(); i != dspec.mappings().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{

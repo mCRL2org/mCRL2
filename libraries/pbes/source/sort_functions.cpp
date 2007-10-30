@@ -23,26 +23,26 @@ sort_list get_sorts(data_variable_list v)
 	return reverse(result);
 }
 
-bool check_finite(function_list fl, lps::sort s)
+bool check_finite(data_operation_list fl, lps::sort s)
 {
 	return is_finite(fl, s);
 }
 
-bool check_finite_list(function_list fl, sort_list s)
+bool check_finite_list(data_operation_list fl, sort_list s)
 {
 	return is_finite(fl, s);
 }
 
-data_expression_list enumerate_constructors(function_list fl, lps::sort s)
+data_expression_list enumerate_constructors(data_operation_list fl, lps::sort s)
 {
 	// All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
 	assert(is_finite(fl, s));
 	// The resulting data_expression_list.
 	data_expression_list ces;
 	// Get all constructors of sort s
-	function_list cl = get_constructors(fl,s);
+	data_operation_list cl = get_constructors(fl,s);
 	// For each constructor of sort s...
-	for (function_list::iterator i = cl.begin(); i != cl.end(); i++)
+	for (data_operation_list::iterator i = cl.begin(); i != cl.end(); i++)
 	{
 		// Get all domains of the constructor
 		sort_list domains = i->sort().domain_sorts();
@@ -67,7 +67,7 @@ data_expression_list enumerate_constructors(function_list fl, lps::sort s)
 	return ces;
 }
 
-data_expression_list create_data_expression_list(function f, vector< data_expression_list > dess)
+data_expression_list create_data_expression_list(data_operation f, vector< data_expression_list > dess)
 {
 	// Result list
 	data_expression_list result;

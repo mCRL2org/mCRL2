@@ -12,7 +12,7 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort.h"
-#include "mcrl2/data/function.h"
+#include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/sort_utility.h"
 
 using namespace lps;
@@ -31,10 +31,10 @@ typedef struct s_del {
 class sort_instantiator {
  private:
   std::vector<t_sdel> instantiated_sorts;
-  function_list fl;
+  data_operation_list fl;
  public:
   sort_instantiator() {};
-  void set_function_list(function_list flist);
+  void set_data_operation_list(data_operation_list flist);
   void instantiate_sorts(lps::sort_list sl);
   data_expression_list get_enumeration(lps::sort s);    
   bool is_finite(sort s);

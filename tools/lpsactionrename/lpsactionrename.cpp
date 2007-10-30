@@ -239,16 +239,16 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
   }
 
   //merge cons_spec
-  lps::function_list lps_cons = lps_data.constructors();
-  lps::function_list new_cons = new_data.constructors();
-  for(lps::function_list::iterator i=new_cons.begin(); i!=new_cons.end(); i++){
+  lps::data_operation_list lps_cons = lps_data.constructors();
+  lps::data_operation_list new_cons = new_data.constructors();
+  for(lps::data_operation_list::iterator i=new_cons.begin(); i!=new_cons.end(); i++){
     lps_cons = push_front(lps_cons, *i);
   }
 
   //merge map_spec
-  lps::function_list lps_map = lps_data.mappings();
-  lps::function_list new_map = new_data.mappings();
-  for(lps::function_list::iterator i=new_map.begin(); i!=new_map.end(); i++){
+  lps::data_operation_list lps_map = lps_data.mappings();
+  lps::data_operation_list new_map = new_data.mappings();
+  for(lps::data_operation_list::iterator i=new_map.begin(); i!=new_map.end(); i++){
     lps_map = push_front(lps_map, *i);
   }
 

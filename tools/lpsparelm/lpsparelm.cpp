@@ -446,8 +446,8 @@ inline void lpsParElm::output() {
   
   // Rebuild spec
   //
-  //specification(sort_list sorts, function_list constructors, 
-  //            function_list mappings, data_equation_list equations, 
+  //specification(sort_list sorts, data_operation_list constructors, 
+  //            data_operation_list mappings, data_equation_list equations, 
   //            action_label_list action_labels, linear_process lps, 
   //            data_variable_list initial_free_variables, 
   //            data_variable_list initial_variables, 

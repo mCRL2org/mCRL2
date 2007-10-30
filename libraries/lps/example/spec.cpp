@@ -49,16 +49,16 @@ int main()
   }
 
   cout << "--- map ------------" << endl;
-  for (function_list::iterator i = spec.data().mappings().begin(); i != spec.data().mappings().end(); ++i)
+  for (data_operation_list::iterator i = spec.data().mappings().begin(); i != spec.data().mappings().end(); ++i)
   {
-    function f = *i;
+    data_operation f = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
   cout << "--- cons -----------" << endl;
-  for (function_list::iterator i = spec.data().constructors().begin(); i != spec.data().constructors().end(); ++i)
+  for (data_operation_list::iterator i = spec.data().constructors().begin(); i != spec.data().constructors().end(); ++i)
   {
-    function f = *i;
+    data_operation f = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
   cout << endl;

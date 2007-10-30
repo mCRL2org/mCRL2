@@ -15,6 +15,7 @@
 #include <string>
 #include <cassert>
 #include "atermpp/aterm_traits.h"
+#include "atermpp/aterm_access.h"
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
 #include "mcrl2/basic/regular_formula.h"

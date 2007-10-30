@@ -12,7 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/function.h"
+#include "mcrl2/data/data_operation.h"
 
 using namespace std;
 using namespace atermpp;
@@ -47,8 +47,8 @@ int test_main(int, char*[])
   *i = a;
   find_all_if(t, is_data_variable, inserter(variables, variables.end()));
 
-  set<function> functions;
-  find_all_if(t, is_function, inserter(functions, functions.end()));
+  set<data_operation> functions;
+  find_all_if(t, is_data_operation, inserter(functions, functions.end()));
 
 /*
   // assignment

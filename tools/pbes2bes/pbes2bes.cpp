@@ -764,7 +764,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 	{
 		if (enumerated_sorts->get(p->sort()) != NULL)
 		{ //sort is finite
-			if (is_function(*p))
+			if (is_data_operation(*p))
 			{ // If p is a correct data operation
 				finite_expression = push_back(finite_expression, *p);
 			}
@@ -796,7 +796,7 @@ identifier_string create_propvar_name(identifier_string propvar_name, data_expre
 	{
 		for (data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
 		{
-			if (is_function(*del_i))
+			if (is_data_operation(*del_i))
 			{ //If p is a OpId
 				propvar_name_current += "@";
 				propvar_name_current += pp(*del_i);

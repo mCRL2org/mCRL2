@@ -477,7 +477,7 @@ void lpsConstElm::findSingleton() {
     p_singletonSort.insert(*i);
   }
 
-  for(lps::function_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
+  for(lps::data_operation_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
     p_countSort[i->sort().range_sort()]++;
   }
 
@@ -490,7 +490,7 @@ void lpsConstElm::findSingleton() {
 //      assert(p_countSort[*i] != 0);
 
       if (p_countSort[*i] == 1){
-        for(function_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
+        for(data_operation_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
           if (j->sort().range_sort() == *i){
             sort_list sorts = j->sort().domain_sorts();
             for(sort_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
@@ -722,8 +722,8 @@ inline void lpsConstElm::output() {
 
   // Rebuild spec
   //
-  //specification(sort_list sorts, function_list constructors,
-  //            function_list mappings, data_equation_list equations,
+  //specification(sort_list sorts, data_operation_list constructors,
+  //            data_operation_list mappings, data_equation_list equations,
   //            action_label_list action_labels, LPS lps,
   //            data_variable_list initial_free_variables,
   //            data_variable_list initial_variables,

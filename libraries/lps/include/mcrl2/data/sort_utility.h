@@ -40,10 +40,10 @@ bool occurs_in(list_type l, lps::sort s)
 }
 
 ///\ret the list of all functions f of sort s in fl
-inline function_list get_constructors(const function_list& fl, const lps::sort& s)
+inline data_operation_list get_constructors(const data_operation_list& fl, const lps::sort& s)
 {
-  function_list result;
-  for(function_list::iterator i = fl.begin(); i != fl.end(); ++i)
+  data_operation_list result;
+  for(data_operation_list::iterator i = fl.begin(); i != fl.end(); ++i)
   {
     if (i->sort().range_sort() == s)
     {
@@ -55,17 +55,17 @@ inline function_list get_constructors(const function_list& fl, const lps::sort& 
 }
 
 ///\ret true if f has 1 or more arguments, false otherwise
-inline bool has_arguments(const function& f)
+inline bool has_arguments(const data_operation& f)
 {
   return !gsIsSortId(aterm_appl(f.argument(1)));
 }
 
 //prototype
-bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list visited);
+bool is_finite(const data_operation_list& fl, const lps::sort& s, const lps::sort_list visited);
 
 ///\ret true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-inline bool is_finite(const function_list& fl, const lps::sort_list& sl, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const data_operation_list& fl, const lps::sort_list& sl, const lps::sort_list visited = lps::sort_list())
 {
   bool result = true;
   
@@ -89,10 +89,10 @@ inline bool is_finite(const function_list& fl, const lps::sort_list& sl, const l
 
 ///\pre fl is a list of constructors
 ///\ret sort s is finite
-inline bool is_finite(const function_list& fl, const lps::sort& s, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const data_operation_list& fl, const lps::sort& s, const lps::sort_list visited = lps::sort_list())
 {
   bool result = true;
-  function_list cl = get_constructors(fl, s);
+  data_operation_list cl = get_constructors(fl, s);
 
   //If a sort has not got any constructors it is infinite
   if (cl.empty())
@@ -104,7 +104,7 @@ inline bool is_finite(const function_list& fl, const lps::sort& s, const lps::so
   //i.e. the constructors have no arguments, or their arguments are finite.
   //In the recursive call pass s add s to the visited sorts, so that we know
   //it may not occur in a constructor anymore.
-  for (function_list::iterator i = cl.begin(); i != cl.end(); ++i)
+  for (data_operation_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
     result = result && (!(has_arguments(*i)) || is_finite(fl, i->sort().domain_sorts(), push_front(visited, s)));
   }

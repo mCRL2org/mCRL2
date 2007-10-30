@@ -14,6 +14,6 @@
 #include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_assignment.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function.h"
+#include "mcrl2/data/data_operation.h"
 
 #endif // MCRL2_DATA_DATA_H

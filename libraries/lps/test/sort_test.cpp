@@ -13,7 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "atermpp/atermpp.h"
 #include "atermpp/make_list.h"
-#include "mcrl2/data/function.h"
+#include "mcrl2/data/data_operation.h"
 
 using namespace atermpp;
 using namespace lps;
