@@ -444,8 +444,8 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, ::tipi::display::element_identifier const& id) {
-    out << "<radio-button id=\"" << id 
-        << "\" connected=\"" << reinterpret_cast< unsigned long > (c.m_connection);
+    out << "<radio-button id=\"" << id
+        << "\" connected=\"" << reinterpret_cast< tipi::display::element_identifier > (c.m_connection);
 
     if (c.m_selected) {
       out << "\" selected=\"" << c.m_selected;
