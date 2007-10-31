@@ -96,7 +96,7 @@ namespace squadt {
         void disconnect(boost::weak_ptr < execution::process >&);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        void finish(bool = false);
+        void finish();
 
         /** \brief Terminates running processes and deactivates monitor */
         void shutdown();
@@ -106,7 +106,7 @@ namespace squadt {
     };
 
     inline task_monitor::~task_monitor() {
-      finish(true);
+      finish();
     }
   }
 }

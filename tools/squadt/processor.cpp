@@ -279,7 +279,7 @@ namespace squadt {
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(tipi::message_configuration).get() != 0) {
         /* End tool execution */
-        finish(true);
+        finish();
 
         /* Operation completed successfully */
         t->impl->process_configuration(get_configuration(), old_outputs, false);
@@ -290,7 +290,7 @@ namespace squadt {
     }
     else {
       /* End tool execution */
-      finish(true);
+      finish();
     }
   }
 
@@ -337,7 +337,7 @@ namespace squadt {
     }
 
     /* End tool execution */
-    finish(true);
+    finish();
 
     /* Force the project manager to do a status update */
     boost::shared_ptr < project_manager > g(t->impl->manager);

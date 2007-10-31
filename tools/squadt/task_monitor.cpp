@@ -34,7 +34,7 @@ namespace squadt {
 
     /** \brief Terminates a running process */
     void task_monitor::terminate_process() {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(false, boost::dynamic_pointer_cast < task_monitor_impl > (impl));
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(boost::dynamic_pointer_cast < task_monitor_impl > (impl));
     }
 
     /**
@@ -57,8 +57,8 @@ namespace squadt {
     /**
      * \param[in] b whether or not to wait for processes to finish
      **/
-    void task_monitor::finish(bool b) {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(b,
+    void task_monitor::finish() {
+      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->finish(
         boost::dynamic_pointer_cast < task_monitor_impl > (impl));
     }
 

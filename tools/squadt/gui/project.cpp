@@ -256,7 +256,7 @@ namespace squadt {
     void project::build() {
       process_display_view = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
       object_view          = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                        (wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_MULTIPLE|wxSUNKEN_BORDER)&(~wxTR_EDIT_LABELS));
+                                        (wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER)&(~wxTR_EDIT_LABELS));
 
       SetMinimumPaneSize(1);
       SplitVertically(object_view, process_display_view);
@@ -502,6 +502,7 @@ namespace squadt {
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
       wxTreeItemId                       s = object_view->GetSelection();
+
       processor::sptr                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
       processor::object_descriptor::sptr t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
 
