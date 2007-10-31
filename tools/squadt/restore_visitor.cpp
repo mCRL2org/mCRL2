@@ -338,6 +338,15 @@ namespace utility {
         p.current_monitor->set_configuration(new_configuration);
       }
     }
+
+    // Try reconstructing the selected input combination
+    if (p.tool_descriptor && p.selected_input_combination == 0) {
+      if (0 < p.inputs.size()) {
+        // Take the first input as main input and try to find a combination
+        p.selected_input_combination = p.tool_descriptor->find_input_combination(
+        	p.current_monitor->get_configuration()->get_category(), p.inputs[0]->mime_type);
+      }
+    }
   }
   /// \endcond
 

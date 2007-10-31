@@ -87,7 +87,7 @@ namespace squadt {
 
               if (exists(p)) {
                 unsigned long size       = file_size(p);
-                time_t        write_time = last_write_time(p);
+                wxDateTime    write_time(last_write_time(p));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
         
                 size = (unsigned long) (size / pow(1024, magnitude));
@@ -95,7 +95,7 @@ namespace squadt {
                 input_objects->SetItem(row, 1, wxString(str((size_format % size %
                            prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
         
-                input_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+                input_objects->SetItem(row, 2, write_time.Format(wxT("%x %X")));
               }
         
               ++row;
@@ -128,7 +128,7 @@ namespace squadt {
          
               if (exists(p)) {
                 unsigned long size       = file_size(p);
-                time_t        write_time = last_write_time(p);
+                wxDateTime    write_time(last_write_time(p));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
          
                 size = (unsigned long) (size / pow(1024, magnitude));
@@ -136,7 +136,7 @@ namespace squadt {
                 output_objects->SetItem(row, 1, wxString(str((size_format % size %
                           prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
          
-                output_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+                output_objects->SetItem(row, 2, write_time.Format(wxT("%x %X")));
               }
          
               ++row;
