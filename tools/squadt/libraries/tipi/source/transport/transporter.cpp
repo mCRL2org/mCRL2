@@ -55,6 +55,10 @@ namespace transport {
     t->impl->associate(t->impl,c);
   }
 
+  size_t transporter_impl::number_of_connections() const {
+    return connections.size();
+  }
+
   transporter_impl::~transporter_impl() {
     using namespace boost;
 
@@ -200,32 +204,38 @@ namespace transport {
 
   /**
    * \param[in] n the number of the connection that is to be closed
+   * \return whether a connection was broken (otherwise it did not exist)
    **/
-  void transporter_impl::disconnect(size_t n) {
-    assert(n < connections.size());
+  bool transporter_impl::disconnect(size_t n) {
+    if (n < connections.size()) {
+      boost::recursive_mutex::scoped_lock l(lock);
+     
+      connection_list::iterator i = connections.begin();
+   
+      while (0 < n) {
+        assert(i != connections.end());
+     
+        --n;
+     
+        ++i;
+      }
 
-    boost::recursive_mutex::scoped_lock l(lock);
+      (*i)->owner.reset();
+      (*i)->disconnect(*i);
+ 
+      connections.erase(i);
 
-    connection_list::iterator i = connections.begin();
-  
-    while (0 < n) {
-      assert(i != connections.end());
-
-      --n;
-
-      ++i;
+      return true;
     }
 
-    (*i)->owner.reset();
-    (*i)->disconnect(*i);
-
-    connections.erase(i);
+    return false;
   }
 
   /**
    * \param[in] m the directly connected peer
+   * \return whether a connection was broken (otherwise it did not exist)
    **/
-  void transporter_impl::disconnect(transporter_impl const* m) {
+  bool transporter_impl::disconnect(transporter_impl const* m) {
     using namespace boost;
 
     boost::recursive_mutex::scoped_lock l(lock);
@@ -237,9 +247,11 @@ namespace transport {
 
         connections.erase(i);
 
-        break;
+        return true;
       }
     }
+
+    return false;
   }
 
   /**
@@ -333,12 +345,12 @@ namespace transport {
     impl->disconnect();
   }
 
-  void transporter::disconnect(size_t n) {
-    impl->disconnect(n);
+  bool transporter::disconnect(size_t n) {
+    return impl->disconnect(n);
   }
 
-  void transporter::disconnect(transporter& m) {
-    impl->disconnect(m.impl.get());
+  bool transporter::disconnect(transporter& m) {
+    return impl->disconnect(m.impl.get());
   }
 
   /**

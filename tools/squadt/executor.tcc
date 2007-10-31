@@ -9,6 +9,9 @@
 
 #include "executor.hpp"
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 namespace squadt {
   /// \cond INTERNAL_DOCS
 
@@ -23,19 +26,14 @@ namespace squadt {
 
       private:
 
-        /** Convenient short-hand type */
-        typedef std::pair < command, task_monitor::sptr > command_pair;
-
-      private:
-
         /** \brief The maximum number of processes that is allowed to run concurrently */
-        unsigned int                   maximum_instance_count;
+        unsigned int                                                                      maximum_instance_count;
  
         /** \brief List of active processes */
-        std::list < process::sptr >    processes;
+        std::list < boost::shared_ptr < process > >                                       processes;
  
         /** \brief Data of processes that will be started */
-        std::deque < command_pair >    delayed_commands;
+        std::deque < boost::function < void (boost::shared_ptr < executor_impl >&) > >    delayed_commands;
 
       private:
 

@@ -36,7 +36,7 @@ namespace squadt {
       /** \brief SI prefixes for binary multiples */
       const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 
-      boost::format time_format("%s %sB");
+      boost::format size_format("%s %sB");
 
       /**
        * @param o a pointer to the parent window
@@ -92,7 +92,7 @@ namespace squadt {
         
                 size = (unsigned long) (size / pow(1024, magnitude));
         
-                input_objects->SetItem(row, 1, wxString(str((time_format % size %
+                input_objects->SetItem(row, 1, wxString(str((size_format % size %
                            prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
         
                 input_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
@@ -133,7 +133,7 @@ namespace squadt {
          
                 size = (unsigned long) (size / pow(1024, magnitude));
          
-                output_objects->SetItem(row, 1, wxString(str((time_format % size %
+                output_objects->SetItem(row, 1, wxString(str((size_format % size %
                           prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
          
                 output_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
@@ -268,6 +268,7 @@ namespace squadt {
         }
 
         Refresh();
+        Update();
       }
     }
   }

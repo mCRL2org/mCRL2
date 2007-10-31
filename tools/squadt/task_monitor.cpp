@@ -20,8 +20,6 @@ namespace squadt {
     }
 
     void task_monitor::disconnect(boost::weak_ptr < execution::process >& p) {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->connected = false;
-
       boost::static_pointer_cast < task_monitor_impl > (impl)->disconnect(p.lock());
     }
 
@@ -71,12 +69,12 @@ namespace squadt {
     /**
      * \param[in] ts the maximum number of seconds to block
      **/
-    void task_monitor::await_connection(unsigned int const& ts) {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection(ts);
+    bool task_monitor::await_connection(unsigned int const& ts) {
+      return boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection(ts);
     }
 
-    void task_monitor::await_connection() {
-      boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection();
+    bool task_monitor::await_connection() {
+      return boost::dynamic_pointer_cast < task_monitor_impl > (impl)->await_connection();
     }
 
     bool task_monitor::await_completion() {
@@ -137,15 +135,6 @@ namespace squadt {
      **/
     void task_monitor::once_on_completion(boost::function < void () > h) {
       boost::dynamic_pointer_cast < task_monitor_impl > (impl)->once_on_completion(h);
-    }
-
-
-    bool task_monitor::is_connected() const {
-      return (boost::dynamic_pointer_cast < task_monitor_impl > (impl)->connected);
-    }
-
-    bool task_monitor::is_busy() const {
-      return (!boost::dynamic_pointer_cast < task_monitor_impl > (impl)->done);
     }
   }
 }

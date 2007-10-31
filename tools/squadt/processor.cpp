@@ -237,9 +237,11 @@ namespace squadt {
       }
     }
 
-    owner.check_status(false);
-
     task_monitor::signal_change(p, s);
+
+    if (s != process::running) {
+      owner.check_status(false);
+    }
 
     /* Update status for known processor outputs */
     if (!status_change_handler.empty()) {
@@ -270,9 +272,7 @@ namespace squadt {
     }
 
     /* Wait until the tool has connected and identified itself */
-    await_connection();
-
-    if (is_connected()) {
+    if (await_connection()) {
       /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
       send_configuration(c);
 
@@ -307,9 +307,7 @@ namespace squadt {
     }
 
     /* Wait until the tool has connected and identified itself */
-    await_connection();
-
-    if (is_connected()) {
+    if (await_connection()) {
       /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
       send_configuration(c);
 

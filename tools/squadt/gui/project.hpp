@@ -50,36 +50,7 @@ namespace squadt {
          * changes of the processor. These state changes will be visualised
          * through this object.
          **/
-        class tool_data : public wxTreeItemData {
-          friend class project;
-
-          private:
-
-            /** \brief The associated project */
-            project&   parent;
-
-            /** \brief The associated output object */
-            processor::object_descriptor::wptr target;
-
-          private:
-
-            /** \brief Updates the GUI to reflect the change in state */
-            inline void update_state(processor::object_descriptor::t_status);
-
-          public:
-
-            /** \brief Constructor */
-            inline tool_data(project&, processor::object_descriptor::wptr);
-
-            /** \brief Gets the processor that the target object descriptor is a part of */
-            inline processor::sptr get_processor();
-
-            /** \brief Gets a pointer to the target object */
-            inline processor::object_descriptor::sptr get_object();
-
-            /** \brief Sets the associated processor */
-            inline void associate(processor::object_descriptor::wptr);
-        };
+        class tool_data;
 
         /** \brief Performs GUI updates in idle time on behalf of other threads */
         class builder: public wxEvtHandler {
@@ -197,41 +168,6 @@ namespace squadt {
         /** \brief Destructor */
         ~project();
     };
-
-    /**
-     * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
-     * @param[in] t the processor that is to be associated 
-     **/
-    inline project::tool_data::tool_data(project& p, processor::object_descriptor::wptr t) : parent(p), target(t) {
-    }
-
-    /**
-     * @param[in] o the state of the output objects for this processor
-     **/
-    inline void project::tool_data::update_state(processor::object_descriptor::t_status o) {
-    }
-
-    /**
-     * @param p pointer to the process that should be associated with this
-     **/
-    inline void project::tool_data::associate(processor::object_descriptor::wptr p) {
-      target = p;
-    }
-
-    inline processor::sptr project::tool_data::get_processor() {
-      processor::object_descriptor::sptr t = target.lock();
-      processor::sptr                    r;
-
-      if (t.get() != 0) {
-        r = t->generator.lock();
-      }
-
-      return (r);
-    }
-
-    inline processor::object_descriptor::sptr project::tool_data::get_object() {
-      return (target.lock());
-    }
   }
 }
 

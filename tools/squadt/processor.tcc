@@ -266,8 +266,6 @@ namespace squadt {
     if (!is_active()) {
       time_t maximum_input_timestamp  = 0;
      
-      boost::shared_ptr < project_manager > g(manager.lock());
-     
       if (r) {
         /* Check recursively */
         BOOST_FOREACH(object_descriptor::wptr i, inputs) {
@@ -285,9 +283,11 @@ namespace squadt {
         }
       }
        
+      boost::shared_ptr < project_manager > g(manager.lock());
+     
       if (g.get()) {
         /* Find the maximum timestamp of the inputs */
-        BOOST_FOREACH(object_descriptor::wptr i, inputs) {
+        BOOST_FOREACH(boost::weak_ptr < object_descriptor > i, inputs) {
           object_descriptor::sptr d = i.lock();
         
           if (d.get() == 0) {
@@ -783,25 +783,6 @@ namespace squadt {
     }
   }
 
-  inline void processor_impl::edit_completed() {
-    boost::shared_ptr < processor > p(interface_object.lock());
-
-    if (p.get()) {
-      boost::shared_ptr < project_manager > m(manager.lock());
-
-      object_descriptor::t_status new_status = (inputs.size() == 0) ?
-                object_descriptor::original : object_descriptor::reproducible_up_to_date;
-
-      for (output_list::iterator i = outputs.begin(); i != outputs.end(); ++i) {
-        (*i)->status = new_status;
-      }
-
-      if (m.get()) {
-        m->update_status(p.get(), inputs.size() == 0);
-      }
-    }
-  }
-
   /**
    * \param[in] c the edit command to execute
    **/
@@ -809,10 +790,6 @@ namespace squadt {
     assert(c != 0);
 
     c->set_working_directory(make_output_path(output_directory));
-
-    current_monitor->once_on_completion(boost::bind(&processor_impl::edit_completed, this));
-
-    current_monitor->get_logger()->log(1, "executing command `" + c->as_string() + "'\n");
 
     global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }

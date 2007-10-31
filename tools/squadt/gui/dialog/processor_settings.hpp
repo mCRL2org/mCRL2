@@ -114,7 +114,7 @@ namespace squadt {
        * @param p the parent window
        * @param t the title for the window
        **/
-      inline processor::processor(wxWindow* p, wxString t) : dialog::basic(p, t, wxSize(650, 375)) {
+      inline processor::processor(wxWindow* p, wxString t) : dialog::basic(p, t, wxSize(800, 375)) {
       }
 
       inline processor::~processor() {

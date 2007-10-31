@@ -44,10 +44,10 @@ namespace squadt {
       protected:
  
         /** \brief Waits until a connection has been established with the running process */
-        void await_connection(unsigned int const&);
+        bool await_connection(unsigned int const&);
 
         /** \brief Waits until a connection has been established with the running process */
-        void await_connection();
+        bool await_connection();
 
         /** \brief Waits until the current task has been completed */
         bool await_completion();
@@ -91,12 +91,6 @@ namespace squadt {
 
         /** \brief Executes a handler function once status change */
         void on_status_change(boost::function < void () >);
-
-        /** \brief Whether there still exists a connection with the tool */
-        bool is_connected() const;
-
-        /** \brief Whether the tool is still busy performing its task */
-        bool is_busy() const;
 
         /** \brief Disconnects from a running process (or make sure no connection exists) */
         void disconnect(boost::weak_ptr < execution::process >&);

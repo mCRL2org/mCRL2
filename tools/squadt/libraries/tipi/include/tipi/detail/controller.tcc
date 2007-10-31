@@ -21,7 +21,7 @@ namespace tipi {
   namespace controller {
 
     /// \cond INTERNAL_DOCS
-    class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi:: message > {
+    class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi::message > {
       friend class communicator;
       
       private:

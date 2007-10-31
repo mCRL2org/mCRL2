@@ -47,6 +47,46 @@
 namespace squadt {
   namespace GUI {
 
+    class project::tool_data : public wxTreeItemData {
+      friend class project;
+
+      private:
+
+        /** \brief The associated project */
+        project&   parent;
+
+        /** \brief The associated output object */
+        processor::object_descriptor::wptr target;
+
+      public:
+
+        /**
+         * \brief Constructor
+         *
+         * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
+         * @param[in] t the processor that is to be associated
+         **/
+        inline tool_data(project& p, boost::shared_ptr < processor::object_descriptor > const& t) : parent(p), target(t) {
+        }
+
+        /** \brief Gets the processor that the target object descriptor is a part of */
+        inline processor::sptr get_processor() {
+          processor::object_descriptor::sptr t(target.lock());
+          processor::sptr                    r;
+         
+          if (t.get() != 0) {
+            r = t->generator.lock();
+          }
+         
+          return (r);
+        }
+
+        /** \brief Gets a pointer to the target object */
+        inline processor::object_descriptor::sptr get_object() {
+          return target.lock();
+        }
+    };
+
     project::builder::builder() : timer(this, wxID_ANY) {
       Connect(wxEVT_TIMER, wxTimerEventHandler(builder::process));
 
@@ -216,7 +256,7 @@ namespace squadt {
     void project::build() {
       process_display_view = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
       object_view          = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                        (wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER)&(~wxTR_EDIT_LABELS));
+                                        (wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_MULTIPLE|wxSUNKEN_BORDER)&(~wxTR_EDIT_LABELS));
 
       SetMinimumPaneSize(1);
       SplitVertically(object_view, process_display_view);
@@ -263,6 +303,9 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (object_view->GetRootItem() != e.GetItem()) {
+        // Workaround for problem with wxMSW, the problem there is that the selection is changed only visually
+        object_view->SelectItem(e.GetItem());
+
         spawn_context_menu(*(static_cast < tool_data* > (object_view->GetItemData(e.GetItem()))));
       }
       else {

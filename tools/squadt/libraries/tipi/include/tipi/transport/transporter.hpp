@@ -64,10 +64,10 @@ namespace transport {
       void disconnect();
 
       /** \brief Disconnect connection number <|number|> */
-      void disconnect(size_t number);
+      bool disconnect(size_t number);
 
       /** \brief Disconnect from directly connected peer */
-      void disconnect(transporter&);
+      bool disconnect(transporter&);
 
       /** \brief Pass a connection through to another transporter */
       void relay_connection(transporter*, basic_transceiver*);

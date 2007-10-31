@@ -139,7 +139,7 @@ namespace squadt {
  
     void process_impl::terminate() {
       /* Inform monitor */
-      boost::shared_ptr < task_monitor > l = monitor.lock();
+      boost::shared_ptr < task_monitor > l(monitor.lock());
 
       if (l.get() != 0) {
         l->disconnect(interface_pointer);
@@ -222,7 +222,7 @@ namespace squadt {
 
     /** \brief Signals the current state to the monitor */
     void process_impl::signal_status() const {
-      boost::shared_ptr < task_monitor > l = monitor.lock();
+      boost::shared_ptr < task_monitor > l(monitor.lock());
 
       if (l.get() != 0) {
         l->signal_change(interface_pointer.lock(), current_status);

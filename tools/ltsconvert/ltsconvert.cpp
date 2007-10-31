@@ -169,7 +169,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < transformation_options > transformation_selector(d);
 
   m.append(d.create< label >().set_text("LTS transformation:")).
-    append(transformation_selector.associate(no_transformation, "none")).
+    append(transformation_selector.associate(no_transformation, "none", true)).
     append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation")).
     append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation")).
     append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence")).

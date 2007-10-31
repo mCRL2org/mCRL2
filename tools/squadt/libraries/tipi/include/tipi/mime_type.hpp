@@ -95,7 +95,7 @@ namespace tipi {
   }
 
   inline bool mime_type::is_type(tipi::mime_type::main_type const m) const {
-    return (m_main != m);
+    return (m_main == m);
   }
 
   inline std::string mime_type::get_main_type() const {

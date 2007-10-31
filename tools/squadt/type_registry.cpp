@@ -177,7 +177,7 @@ namespace squadt {
       if (t.known_main_type() && c) {
         bool result = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
 
-        return result || ((t.is_type(tipi::mime_type::text)) && global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain")) != 0);
+        return result || ((t.is_type(tipi::mime_type::text)) && (global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain")) != 0));
       }
     }
     else {

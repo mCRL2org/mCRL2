@@ -60,7 +60,7 @@ namespace squadt {
      * \param[in] l reference to a process listener
      * \param[in] w a pointer to the associated implementation object
      **/
-    inline void executor_impl::start_process(const command& c, task_monitor::sptr& l, boost::shared_ptr < executor_impl >& w) {
+    inline void executor_impl::start_process(const command& c, boost::shared_ptr < task_monitor >& l, boost::shared_ptr < executor_impl >& w) {
       process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
 
       if (l.get() != 0) {
@@ -85,7 +85,7 @@ namespace squadt {
       }
       else {
         /* queue command for later execution */
-        delayed_commands.push_back(command_pair(c, l));
+        delayed_commands.push_back(boost::bind(&executor_impl::start_process, this, c, l, _1));
       }
     }
 
@@ -97,11 +97,11 @@ namespace squadt {
       boost::shared_ptr < task_monitor > p;
 
       if (b || processes.size() < maximum_instance_count) {
-        boost::thread t(boost::bind(&executor_impl::start_process, this, c, p, w));
+        boost::thread t(boost::bind(&executor_impl::start_process, this, c, w));
       }
       else {
         /* queue command for later execution */
-        delayed_commands.push_back(std::make_pair(c, p));
+        delayed_commands.push_back(boost::bind(&executor_impl::start_process, this, c, _1));
       }
     }
 
@@ -124,11 +124,11 @@ namespace squadt {
      **/
     inline void executor_impl::start_delayed(boost::shared_ptr < executor_impl >& w) {
       if (0 < delayed_commands.size()) {
-        command_pair c = delayed_commands.front();
+        boost::function < void (boost::shared_ptr < executor_impl >&) > f = delayed_commands.front();
  
         delayed_commands.pop_front();
  
-        start_process(c.first, c.second, w);
+        f(w);
       }
     }
     
