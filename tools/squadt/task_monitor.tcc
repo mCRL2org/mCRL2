@@ -256,6 +256,8 @@ namespace squadt {
                     % p->get_executable_name() % p->get_identifier());
         }
 
+        associated_process.reset();
+
         /* Signal completion to waiters */
         completion_condition.notify_all();
       }
@@ -337,25 +339,27 @@ namespace squadt {
     inline void task_monitor_impl::finish(bool b, boost::shared_ptr < task_monitor_impl > const& g) {
       boost::shared_ptr < execution::process > p(associated_process);
 
-      disconnect(p);
-
-      /* Let the tool know that it should prepare for termination */
-      if (b) {
-        if (p && p->get_status() == execution::process::running) {
-          boost::xtime timeout;
-          boost::xtime_get(&timeout, boost::TIME_UTC);
-          timeout.sec += 1;
-
-          boost::thread::sleep(timeout);
+      if (p) {
+        disconnect(p);
+       
+        /* Let the tool know that it should prepare for termination */
+        if (b) {
+          if (p && p->get_status() == execution::process::running) {
+            boost::xtime timeout;
+            boost::xtime_get(&timeout, boost::TIME_UTC);
+            timeout.sec += 1;
+       
+            boost::thread::sleep(timeout);
+          }
+       
+          terminate_process(g, associated_process);
         }
-
-        terminate_process(g, associated_process);
+        else {
+          boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g, associated_process));
+        }
+       
+        associated_process.reset();
       }
-      else {
-        boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g, associated_process));
-      }
-
-      associated_process.reset();
     }
 
     inline bool task_monitor_impl::disconnect(boost::shared_ptr < execution::process > p) {
