@@ -113,7 +113,7 @@ namespace squadt {
         inline bool disconnect(boost::shared_ptr < execution::process > p);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        inline void finish(bool, boost::shared_ptr < task_monitor_impl > const&);
+        inline void finish(boost::shared_ptr < task_monitor_impl > const&);
 
         /** \brief Clears handlers and terminates processes */
         inline void shutdown();
@@ -256,7 +256,9 @@ namespace squadt {
                     % p->get_executable_name() % p->get_identifier());
         }
 
-        associated_process.reset();
+        if (associated_process == p) {
+          associated_process.reset();
+        }
 
         /* Signal completion to waiters */
         completion_condition.notify_all();
@@ -336,30 +338,11 @@ namespace squadt {
      * \param[in] b whether to wait for the process to terminate (whether or not to block)
      * \param[in] g shared pointer to this object, to ensure its existence
      **/
-    inline void task_monitor_impl::finish(bool b, boost::shared_ptr < task_monitor_impl > const& g) {
-      boost::shared_ptr < execution::process > p(associated_process);
-
-      if (p) {
-        disconnect(p);
-       
-        /* Let the tool know that it should prepare for termination */
-        if (b) {
-          if (p && p->get_status() == execution::process::running) {
-            boost::xtime timeout;
-            boost::xtime_get(&timeout, boost::TIME_UTC);
-            timeout.sec += 1;
-       
-            boost::thread::sleep(timeout);
-          }
-       
-          terminate_process(g, associated_process);
-        }
-        else {
-          boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g, associated_process));
-        }
-       
-        associated_process.reset();
-      }
+    inline void task_monitor_impl::finish(boost::shared_ptr < task_monitor_impl > const& g) {
+      boost::thread t(boost::bind(&task_monitor_impl::terminate_process, this, g,
+			boost::shared_ptr < execution::process > (associated_process)));
+     
+      associated_process.reset();
     }
 
     inline bool task_monitor_impl::disconnect(boost::shared_ptr < execution::process > p) {
@@ -388,13 +371,11 @@ namespace squadt {
     inline void task_monitor_impl::terminate_process(boost::shared_ptr < task_monitor_impl > g, boost::shared_ptr < execution::process > p) {
 
       if (disconnect(p)) {
-        if (p && p->get_status() == execution::process::running) {
-          boost::xtime timeout;
-          boost::xtime_get(&timeout, boost::TIME_UTC);
-          timeout.sec += 1;
+        boost::xtime timeout;
+        boost::xtime_get(&timeout, boost::TIME_UTC);
+        timeout.sec += 5;
 
-          boost::thread::sleep(timeout);
-        }
+        boost::thread::sleep(timeout);
       }
 
       if (p && p->get_status() == execution::process::running) {
