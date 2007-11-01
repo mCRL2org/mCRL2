@@ -141,7 +141,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< horizontal_box >().
                 append(d.create< label >().set_text("Output format : ")).
-                append(format_selector.associate(aldebaran, "Aldebaran")).
+                append(format_selector.associate(aldebaran, "Aldebaran",true)).
                 append(format_selector.associate(svc_mcrl, "SVC/mCRL")).
                 append(format_selector.associate(svc_mcrl2, "SVC/mCRL2")).
 #ifdef MCRL2_BCG
