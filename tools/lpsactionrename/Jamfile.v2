@@ -12,6 +12,4 @@ exe lpsactionrename
 
 install-binaries install
        : lpsactionrename
-       :
-       : <status>experimental
        ;

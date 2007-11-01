@@ -510,11 +510,13 @@ namespace utility {
     c.m_connection = reinterpret_cast < radio_button* > (id);
 
     try {
-      // Check whether the group is complete
-      for (radio_button* i = &c; i != &c; d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection))) {
-      }
-
       radio_button* i = &c;
+
+      // Check whether the group is complete
+      do {
+        i = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+      }
+      while (i != &c);
 
       do {
         i->m_connection = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
