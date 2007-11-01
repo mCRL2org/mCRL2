@@ -119,24 +119,24 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
  * ============================================================================
  */
 
-ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list);
-//Pre: sort_elt and sort_list are sort expressions.
-//Ret: the list of data equations belonging to the list sort sort_list, with
+ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_list);
+//Pre: sort_elt and sort_expression_list are sort expressions.
+//Ret: the list of data equations belonging to the list sort sort_expression_list, with
 //     elements sort_elt.
 
-ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
+ATermAppl impl_sort_list(ATermAppl sort_expression_list, ATermList *p_substs,
   t_data_decls *p_data_decls);
-//Pre: sort_list is a list sort
+//Pre: sort_expression_list is a list sort
 //     p_substs is a pointer to a list of substitutions induced by the context
-//     of sort_list
+//     of sort_expression_list
 //     p_data_decls represents a pointer to new data declarations, induced by
-//     the context of sort_list
-//Post:an implementation of sort_list is added to *p_data_decls and new induced
+//     the context of sort_expression_list
+//Post:an implementation of sort_expression_list is added to *p_data_decls and new induced
 //     substitutions are added *p_substs
-//Ret: a sort identifier which is the implementation of sort_list
+//Ret: a sort identifier which is the implementation of sort_expression_list
 
 ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set);
-//Pre: sort_elt and sort_list are sort expressions
+//Pre: sort_elt and sort_expression_list are sort expressions
 //Ret: the list of data equations belonging to the set sort_set, with elements
 //     of sort_elt
 
@@ -153,7 +153,7 @@ ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
 
 
 ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl sort_set);
-//Pre: sort_elt and sort_list are sort expressions
+//Pre: sort_elt and sort_expression_list are sort expressions
 //Ret: the list of data equations belonging to the set sort_set, with elements
 //     of sort_elt
 

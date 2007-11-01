@@ -58,7 +58,7 @@ class lpsConstElm {
     bool                                  p_reachable;
     std::string                           p_filenamein;
     lps::specification                    p_spec;
-    std::set< lps::sort >                 p_singletonSort;
+    std::set< sort_expression >                 p_singletonSort;
     Rewriter*                             rewr;
 
     //Only used by getDataVarIDs
@@ -470,30 +470,30 @@ inline term_list<Term> lpsConstElm::setToList(std::set<Term> y) {
 //
 void lpsConstElm::findSingleton() {
 
-  std::map< lps::sort, int >     p_countSort;
-  //set< lps::sort > result;
-  for(lps::sort_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
+  std::map< sort_expression, int >     p_countSort;
+  //set< sort_expression > result;
+  for(lps::sort_expression_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
     p_countSort[*i] = 0;
     p_singletonSort.insert(*i);
   }
 
   for(lps::data_operation_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
-    p_countSort[i->sort().range_sort()]++;
+    p_countSort[result_sort(i->sort())]++;
   }
 
   unsigned int n = p_singletonSort.size()+1;
   while (n != p_singletonSort.size()){
     n = p_singletonSort.size();
-    for(sort_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
+    for(sort_expression_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
       int b = 1;
       //if p_countSort[*i] == 0 then there are sorts declared which are never used!!!!
 //      assert(p_countSort[*i] != 0);
 
       if (p_countSort[*i] == 1){
         for(data_operation_list::iterator j = p_spec.data().constructors().begin() ; j != p_spec.data().constructors().end() ;j++){
-          if (j->sort().range_sort() == *i){
-            sort_list sorts = j->sort().domain_sorts();
-            for(sort_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
+          if (result_sort(j->sort()) == *i){
+            sort_expression_list sorts = domain_sorts(j->sort());
+            for(sort_expression_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
               b = std::max(p_countSort[*k], b);
             }
           }
@@ -510,7 +510,7 @@ void lpsConstElm::findSingleton() {
 
   if (p_verbose){
     gsVerboseMsg("lpsconstelm: Sorts which have singleton constructors:\n");
-    for(std::set<lps::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
+    for(std::set<sort_expression>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
       gsVerboseMsg("lpsconstelm:   %s\n", pp(*i).c_str());
     }
     if (p_singletonSort.empty()) {
@@ -582,7 +582,7 @@ inline void lpsConstElm::printCurrentState() {
 void lpsConstElm::removeSingleton(int n)
 {
   bool empty = true;
-  sort_list rebuild_sort = p_spec.data().sorts();
+  sort_expression_list rebuild_sort = p_spec.data().sorts();
   findSingleton();
   gsVerboseMsg("lpsconstelm: Constant process parameters which are not substituted and removed [--no-singleton]:\n");
   for(int i = 0; i < n; i++)
@@ -722,7 +722,7 @@ inline void lpsConstElm::output() {
 
   // Rebuild spec
   //
-  //specification(sort_list sorts, data_operation_list constructors,
+  //specification(sort_expression_list sorts, data_operation_list constructors,
   //            data_operation_list mappings, data_equation_list equations,
   //            action_label_list action_labels, LPS lps,
   //            data_variable_list initial_free_variables,

@@ -115,17 +115,17 @@ atermpp::vector<pbes_equation> pbes_solver::solve()
  // instantiate all finite sorts from the specification
  // (better: instantiate later, when needed...)
   lps::data_specification ds = pbes_spec.data();
-  sort_list finite_sorts;
-  sort_list sl = ds.sorts();
+  sort_expression_list finite_sorts;
+  sort_expression_list sl = ds.sorts();
   si.set_data_operation_list(ds.constructors());
-  for (sort_list::iterator i = sl.begin(); i != sl.end(); i++)
+  for (sort_expression_list::iterator i = sl.begin(); i != sl.end(); i++)
     if (is_finite(ds.constructors(), (*i)))
       finite_sorts = push_front(finite_sorts,(*i));
   si.instantiate_sorts(finite_sorts);
   
 #ifdef debug2
   gsVerboseMsg("SORT_INSTANTIATOR check!\n");
-  for (sort_list::iterator i = finite_sorts.begin(); i != finite_sorts.end(); i++)
+  for (sort_expression_list::iterator i = finite_sorts.begin(); i != finite_sorts.end(); i++)
     {
       gsVerboseMsg("sort %s:  enumeration %s\n",
 		   pp(*i).c_str(), pp(si.get_enumeration(*i)).c_str());
@@ -457,12 +457,12 @@ data_expression pbes_to_data(pbes_expression e)
 	 }
        else
 	 {
-	   sort_list sorts = apply(parameters, gsGetSort);
+	   sort_expression_list sorts = apply(parameters, gsGetSort);
 #ifdef debug2
        gsVerboseMsg("P2D: sorts %s\n", pp(sorts).c_str());
 #endif
 
-	   lps::sort vsort = gsMakeSortArrowList(sorts, sname::bool_());
+	   sort_expression vsort = gsMakeSortArrowList(sorts, sname::bool_());
 #ifdef debug2
        gsVerboseMsg("P2D: new sort %s\n", pp(vsort).c_str());
 #endif
@@ -487,16 +487,16 @@ data_expression pbes_to_data(pbes_expression e)
     data_expression_list parameters = var_val(e);
     if (parameters.empty())
     {
-    lps::sort vsort = gsMakeSortIdBool();
+    sort_expression vsort = gsMakeSortIdBool();
     data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
     return data_expression(v);
     }
     else
     {
     std::cerr<<"A";
-    sort_list sorts = apply(parameters, gsGetSort);
+    sort_expression_list sorts = apply(parameters, gsGetSort);
     std::cerr<<"B";
-    lps::sort vsort = gsMakeSortArrowList(sorts, sname::bool_());
+    sort_expression vsort = gsMakeSortArrowList(sorts, sname::bool_());
     data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
     }
@@ -1084,7 +1084,7 @@ pbes_expression enumerate_finite_domains
   data_variable_list::iterator v = quant_vars->begin();
   for ( ; v != quant_vars->end(); v++)
     {
-      lps::sort vsort = v->sort();
+      sort_expression vsort = v->sort();
       
       //// gsVerboseMsg("enumerate_finite_domains::: v= %s, vsort= %s\n",pp(*v).c_str(), pp(vsort).c_str());
       

@@ -248,10 +248,10 @@ int powerof2_(int n)
 
 ///\pre cl is a list of constructors
 ///\ret all sorts s in sl that are finite and not bool
-sort_list get_finite_sorts_not_bool(const data_operation_list& cl, const sort_list& sl)
+sort_expression_list get_finite_sorts_not_bool(const data_operation_list& cl, const sort_expression_list& sl)
 {
-  sort_list result;
-  for(sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  sort_expression_list result;
+  for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     if (!is_bool(*i) && is_finite(cl, *i))
     {

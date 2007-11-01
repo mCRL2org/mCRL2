@@ -13,7 +13,7 @@
 #include <cassert>
 #include "atermpp/atermpp.h"
 #include "mcrl2/basic/identifier_string.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/basic/detail/soundness_checks.h"
 
 namespace lps {
@@ -30,7 +30,7 @@ class action_label: public aterm_appl
 {
   protected:
     identifier_string m_name;
-    sort_list m_sorts;
+    sort_expression_list m_sorts;
 
   public:
     action_label()
@@ -46,7 +46,7 @@ class action_label: public aterm_appl
       m_sorts = *i;
     }
 
-    action_label(const identifier_string& name, const sort_list &sorts)
+    action_label(const identifier_string& name, const sort_expression_list &sorts)
      : aterm_appl(gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
@@ -61,7 +61,7 @@ class action_label: public aterm_appl
 
     /// Returns the sorts of the action label
     ///
-    sort_list sorts() const
+    sort_expression_list sorts() const
     {
       return m_sorts;
     }

@@ -236,7 +236,7 @@ bool occurs_in(data_type l, lps::data_variable v)
 
 
 ///\ret a list of all data_variables of sort s in vl
-lps::data_variable_list get_occurrences(const data_variable_list& vl, const lps::sort& s)
+lps::data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
@@ -283,10 +283,10 @@ lps::data_variable_list filter(const data_variable_list& vl, const data_variable
 
 ///\pre fl is a list of constructors
 ///\ret a list of declusterable sorts in sl
-sort_list get_finite_sorts(const data_operation_list& fl, const sort_list& sl)
+sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_expression_list& sl)
 {
-  sort_list result;
-  for(sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  sort_expression_list result;
+  for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     if (is_finite(fl, *i))
     {
@@ -298,7 +298,7 @@ sort_list get_finite_sorts(const data_operation_list& fl, const sort_list& sl)
 }
 
 ///\ret a list of all variables of a sort that occurs in sl
-data_variable_list get_variables(const data_variable_list& vl, const sort_list& sl)
+data_variable_list get_variables(const data_variable_list& vl, const sort_expression_list& sl)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)

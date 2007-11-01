@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"
@@ -641,7 +641,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, t_tool_options tool_options)
 		data_variable_list parameters = eq_i->variable().parameters();
 		for (data_variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
 		{
-			lps::sort current_sort = p->sort();
+			sort_expression current_sort = p->sort();
 			if (sort_enumerations.get(current_sort) == NULL)
 			{ 
 				if (check_finite(data.constructors(), current_sort))

@@ -24,65 +24,65 @@ int test_main(int, char*[])
   ATinit(0, 0, &bottom_of_stack);
   gsEnableConstructorFunctions(); 
 
-  sort A("A");
-  sort_list lA = make_list(A);
-  sort B("B");
-  sort_list lB = make_list(B);
-  sort C("C");
-  sort_list lC = make_list(C);
-  sort D("D");
-  sort AB = arrow(lA, B);
-  sort_list lAB = make_list(A,B);
-  sort BC = arrow(lB, C);
-  sort CD = arrow(lC, D);
+  sort_expression A("A");
+  sort_expression_list lA = make_list(A);
+  sort_expression B("B");
+  sort_expression_list lB = make_list(B);
+  sort_expression C("C");
+  sort_expression_list lC = make_list(C);
+  sort_expression D("D");
+  sort_expression AB = arrow(lA, B);
+  sort_expression_list lAB = make_list(A,B);
+  sort_expression BC = arrow(lB, C);
+  sort_expression CD = arrow(lC, D);
 
-  sort s;
-  sort_list domain;
-  sort range;
-  sort_list source;
-  sort target;
+  sort_expression s;
+  sort_expression_list domain;
+  sort_expression range;
+  sort_expression_list src;
+  sort_expression tgt;
   
-  s      = arrow(lA, BC);    // A->(B->C)
-  domain = s.domain_sorts(); // [A,B]
-  range  = s.range_sort();   // C
-  source = s.source();       // [A]
-  target = s.target();       // B->C
+  s      = arrow(lA, BC);   // A->(B->C)
+  domain = domain_sorts(s); // [A,B]
+  range  = result_sort(s);   // C
+  src    = source(s);       // [A]
+  tgt    = target(s);      // B->C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
-  BOOST_CHECK(source.size() == 1);
-  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
-  BOOST_CHECK(target == BC);
+  BOOST_CHECK(src.size() == 1);
+  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
+  BOOST_CHECK(tgt == BC);
 
-  s      = arrow(lAB, C);    // (AxB)->C
-  domain = s.domain_sorts(); // [A,B]
-  range  = s.range_sort();   // C
-  source = s.source();       // [A,B]
-  target = s.target();       // C
+  s      = arrow(lAB, C);   // (AxB)->C
+  domain = domain_sorts(s); // [A,B]
+  range  = result_sort(s);   // C
+  src    = source(s);       // [A,B]
+  tgt    = target(s);      // C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
-  BOOST_CHECK(source.size() == 2);
-  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
-  BOOST_CHECK(std::find(source.begin(), source.end(), B) != source.end());
-  BOOST_CHECK(target == C);
+  BOOST_CHECK(src.size() == 2);
+  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
+  BOOST_CHECK(std::find(src.begin(), src.end(), B) != src.end());
+  BOOST_CHECK(tgt == C);
 
-  s      = arrow(lAB, CD);   // (AxB)->(C->D)
-  domain = s.domain_sorts(); // [A,B,C]
-  range  = s.range_sort();   // D
-  source = s.source();       // [A,B]
-  target = s.target();       // C->D
+  s      = arrow(lAB, CD);  // (AxB)->(C->D)
+  domain = domain_sorts(s); // [A,B,C]
+  range  = result_sort(s);   // D
+  src    = source(s);       // [A,B]
+  tgt    = target(s);      // C->D
   BOOST_CHECK(domain.size() == 3);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), C) != domain.end());
   BOOST_CHECK(range == D);
-  BOOST_CHECK(source.size() == 2);
-  BOOST_CHECK(std::find(source.begin(), source.end(), A) != source.end());
-  BOOST_CHECK(std::find(source.begin(), source.end(), B) != source.end());
-  BOOST_CHECK(target == CD);
+  BOOST_CHECK(src.size() == 2);
+  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
+  BOOST_CHECK(std::find(src.begin(), src.end(), B) != src.end());
+  BOOST_CHECK(tgt == CD);
 
   return 0;
 }

@@ -157,7 +157,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 			data_operation_list::iterator fe = constructors.end();
 			for (; fb != fe; fb++)
 			{
-				lps::sort range = fb->sort().range_sort();
+				sort_expression range = result_sort(fb->sort());
 	
 				if ( range == s )
 				{
@@ -165,9 +165,9 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 				
 					ATindexedSetPut(used_data,(ATerm) ((ATermAppl) (*fb)),&n);
 	
-					sort_list domain = fb->sort().domain_sorts();
-					sort_list::iterator db = domain.begin();
-					sort_list::iterator de = domain.end();
+					sort_expression_list domain = domain_sorts(fb->sort());
+					sort_expression_list::iterator db = domain.begin();
+					sort_expression_list::iterator de = domain.end();
 					for (; db != de; db++)
 					{
 						bool c = add_sort(*db,used_data,used_sorts,constructors);
@@ -218,7 +218,7 @@ static ATermTable initialise_used_data(data_specification dspec, bool keep_basis
 		/* Add sorts/functions that should always be available */
 		specification basis_spec = mcrl22lps("init delta;");
 		data_specification data = basis_spec.data();
-		for (sort_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
+		for (sort_expression_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
 		{
 			add_used_sort(*i,used_data);
 			add_used(gsMakeOpIdIf(*i),used_data);
@@ -243,15 +243,15 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	ATermTable used_sorts = ATtableCreate(2*dspec.sorts().size(),50);
 	data_equation_list eqns = dspec.equations();
 	data_equation_list::iterator ee = eqns.end();
-	sort_list sorts = dspec.sorts();
-	sort_list::iterator sse = sorts.end();
+	sort_expression_list sorts = dspec.sorts();
+	sort_expression_list::iterator sse = sorts.end();
 	data_operation_list conss = dspec.constructors();
 	bool not_done = true;
 	while ( not_done )
 	{
 		not_done = false;
 
-		sort_list::iterator ssb = sorts.begin();
+		sort_expression_list::iterator ssb = sorts.begin();
 		for (; ssb != sse; ssb++)
 		{
 			if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*ssb))) >= 0 )
@@ -279,8 +279,8 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 		}
 	}
 
-	sort_list new_sort;
-	for (sort_list::iterator i=dspec.sorts().begin(); i != dspec.sorts().end(); i++)
+	sort_expression_list new_sort;
+	for (sort_expression_list::iterator i=dspec.sorts().begin(); i != dspec.sorts().end(); i++)
 	{
 		if ( ATindexedSetGetIndex(used_data,(ATerm) ((ATermAppl) (*i))) >= 0 )
 		{
@@ -336,8 +336,8 @@ specification remove_unused_data(specification spec, bool keep_basis)
 	action_label_list::iterator ae = spec.action_labels().end();
 	for (; ab != ae; ab++)
 	{
-		sort_list::iterator sb = ab->sorts().begin();
-		sort_list::iterator se = ab->sorts().end();
+		sort_expression_list::iterator sb = ab->sorts().begin();
+		sort_expression_list::iterator se = ab->sorts().end();
 		for (; sb != se; sb++)
 		{
 			add_used_sort((ATermAppl) *sb,used_data);

@@ -52,9 +52,9 @@ struct data_variable_name: public std::unary_function<data_variable, identifier_
 };
 
 /// \brief Function object that returns the sort of a data variable
-struct data_variable_sort: public std::unary_function<data_variable, lps::sort>
+struct data_variable_sort: public std::unary_function<data_variable, sort_expression>
 {
-  lps::sort operator()(const data_variable& v) const
+  sort_expression operator()(const data_variable& v) const
   {
     return v.sort();
   }

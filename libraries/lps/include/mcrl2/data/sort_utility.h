@@ -19,9 +19,9 @@ namespace lps {
 /// Test is a term is a sort, and if it is equal to s
 struct compare_sort
 {
-  lps::sort s;
+  sort_expression s;
 
-  compare_sort(lps::sort s_)
+  compare_sort(sort_expression s_)
     : s(s_)
   {}
 
@@ -31,21 +31,21 @@ struct compare_sort
   }
 };
 
-///pre: l is a list type of some sort (e.g. sort_list)
+///pre: l is a list type of some sort (e.g. sort_expression_list)
 ///ret: sort s occurs in l.
 template <typename list_type>
-bool occurs_in(list_type l, lps::sort s)
+bool occurs_in(list_type l, sort_expression s)
 {
   return find_if(l, compare_sort(s)) != aterm();
 }
 
 ///\ret the list of all functions f of sort s in fl
-inline data_operation_list get_constructors(const data_operation_list& fl, const lps::sort& s)
+inline data_operation_list get_constructors(const data_operation_list& fl, const sort_expression& s)
 {
   data_operation_list result;
   for(data_operation_list::iterator i = fl.begin(); i != fl.end(); ++i)
   {
-    if (i->sort().range_sort() == s)
+    if (result_sort(i->sort()) == s)
     {
       result = push_front(result, *i);
     }
@@ -61,11 +61,11 @@ inline bool has_arguments(const data_operation& f)
 }
 
 //prototype
-bool is_finite(const data_operation_list& fl, const lps::sort& s, const lps::sort_list visited);
+bool is_finite(const data_operation_list& fl, const sort_expression& s, const lps::sort_expression_list visited);
 
 ///\ret true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-inline bool is_finite(const data_operation_list& fl, const lps::sort_list& sl, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const data_operation_list& fl, const lps::sort_expression_list& sl, const lps::sort_expression_list visited = lps::sort_expression_list())
 {
   bool result = true;
   
@@ -73,7 +73,7 @@ inline bool is_finite(const data_operation_list& fl, const lps::sort_list& sl, c
   // If a sort is in "visited" that means that we have already seen the sort
   // during our calculation. We now get loops of the sort D = d1(E), sort E=e1(D),
   // this makes our sort infinite.
-  for (sort_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  for (sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
     if (!occurs_in(visited, *i))
     {
@@ -89,7 +89,7 @@ inline bool is_finite(const data_operation_list& fl, const lps::sort_list& sl, c
 
 ///\pre fl is a list of constructors
 ///\ret sort s is finite
-inline bool is_finite(const data_operation_list& fl, const lps::sort& s, const lps::sort_list visited = lps::sort_list())
+inline bool is_finite(const data_operation_list& fl, const sort_expression& s, const lps::sort_expression_list visited = lps::sort_expression_list())
 {
   bool result = true;
   data_operation_list cl = get_constructors(fl, s);
@@ -106,7 +106,7 @@ inline bool is_finite(const data_operation_list& fl, const lps::sort& s, const l
   //it may not occur in a constructor anymore.
   for (data_operation_list::iterator i = cl.begin(); i != cl.end(); ++i)
   {
-    result = result && (!(has_arguments(*i)) || is_finite(fl, i->sort().domain_sorts(), push_front(visited, s)));
+    result = result && (!(has_arguments(*i)) || is_finite(fl, domain_sorts(i->sort()), push_front(visited, s)));
   }
 
   return result;
@@ -114,7 +114,7 @@ inline bool is_finite(const data_operation_list& fl, const lps::sort& s, const l
 
 ///\pre s is a sort that occurs in data_specfication data
 ///\ret true iff there exists a constructor function with s as target sort
-inline bool is_constructorsort(const lps::sort &s,const data_specification &data)
+inline bool is_constructorsort(const sort_expression &s,const data_specification &data)
 { // This function is added by Jan Friso Groote on 8/7/2007.
   // cl contains all constructors with target sort s. 
 

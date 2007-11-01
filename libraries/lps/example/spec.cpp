@@ -15,7 +15,7 @@
 
 #include "atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
@@ -42,9 +42,9 @@ int main()
   cout << "check_rule_OpId(f3) = " << check_rule_OpId(f3) << endl;
 
   cout << "--- sort -----------" << endl;
-  for (sort_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
+  for (sort_expression_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
   {
-    lps::sort s = *i;
+    sort_expression s = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
@@ -84,7 +84,7 @@ int main()
   }
   cout << endl;
 
-  lps::sort D("D");
+  sort_expression D("D");
   data_variable v("d1", D);
   cout << "v  = " << pp(v) << " " << v.to_string() << endl;
 

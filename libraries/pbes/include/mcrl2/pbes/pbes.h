@@ -380,7 +380,7 @@ class pbes
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-      std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
+      std::set<sort_expression> declared_sorts = detail::make_set(data().sorts());
       const atermpp::set<data_variable>& declared_free_variables = free_variables();
       std::set<data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
       std::set<data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());

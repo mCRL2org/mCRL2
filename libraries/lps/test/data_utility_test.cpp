@@ -37,7 +37,7 @@ int test_main(int, char*[])
   x = generator();
   BOOST_CHECK(x == data_variable("d02:D"));
 
-  data_variable a = fresh_variable(e, lps::sort("D"), "d");
+  data_variable a = fresh_variable(e, sort_expression("D"), "d");
   BOOST_CHECK(a == data_variable("d01:D")); 
 
   std::set<identifier_string> ids = identifiers(e);

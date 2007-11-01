@@ -41,7 +41,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/libdataelm.h"
 

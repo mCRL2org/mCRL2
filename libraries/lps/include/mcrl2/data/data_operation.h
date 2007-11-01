@@ -40,7 +40,7 @@ class data_operation: public data_expression
       assert(detail::check_rule_OpId(m_term));
     }
 
-    data_operation(identifier_string name, lps::sort s)
+    data_operation(identifier_string name, sort_expression s)
      : data_expression(gsMakeOpId(name, s))
     {}
 

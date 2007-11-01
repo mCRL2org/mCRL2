@@ -260,7 +260,7 @@ int main(int argc, char** argv)
 						nr_sorts++;
 					}
 					else
-						cout << " -> " << pp(lps::sort(sort_bool));
+						cout << " -> " << pp(sort_expression(sort_bool));
 				}
 				cout << endl;
 				nr_predvar++;

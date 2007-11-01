@@ -38,7 +38,7 @@
 
 //======================================================================
 // enumerates all possible data expressions constructed by sort s
-data_expression_list instantiate_sort(data_operation_list fl, lps::sort s)
+data_expression_list instantiate_sort(data_operation_list fl, sort_expression s)
 {
   data_expression_list result;
   data_operation_list constructors = get_constructors(fl,s);
@@ -47,13 +47,13 @@ data_expression_list instantiate_sort(data_operation_list fl, lps::sort s)
   for (data_operation_list::iterator c = constructors.begin(); c != constructors.end(); c++)
     {
       //get the domains of this constructor (=function)
-      sort_list domains = c->sort().domain_sorts();
+      sort_expression_list domains = domain_sorts(c->sort());
       
       data_expression_list domain_instance;
       data_expression dec = data_expression((aterm_appl)(*c));    
       // instantiate each domain, then apply the constructor c
       // to obtain something of sort s
-      for (sort_list::iterator d = domains.begin(); d != domains.end(); d++)
+      for (sort_expression_list::iterator d = domains.begin(); d != domains.end(); d++)
 	{
 	  domain_instance = instantiate_sort(fl,*d);
 	  gsVerboseMsg(".....instaniate_sort %s: constructor %s, domain %s, domain_instance %s\n", 
@@ -81,9 +81,9 @@ void sort_instantiator::set_data_operation_list (data_operation_list flist)
   fl = flist;
 }
 
-void sort_instantiator::instantiate_sorts (lps::sort_list sl)
+void sort_instantiator::instantiate_sorts (lps::sort_expression_list sl)
 {
-  for (sort_list::iterator ss = sl.begin(); ss != sl.end(); ss++){
+  for (sort_expression_list::iterator ss = sl.begin(); ss != sl.end(); ss++){
     t_sdel new_isort;
     new_isort.s = *ss; 
     new_isort.del = instantiate_sort(fl,*ss);
@@ -91,7 +91,7 @@ void sort_instantiator::instantiate_sorts (lps::sort_list sl)
   }
 }
 
-data_expression_list sort_instantiator::get_enumeration (lps::sort ss)
+data_expression_list sort_instantiator::get_enumeration (sort_expression ss)
 {
   data_expression_list leeg;
   for (unsigned short i = 0 ; i < instantiated_sorts.size(); i++)
@@ -100,7 +100,7 @@ data_expression_list sort_instantiator::get_enumeration (lps::sort ss)
   return leeg;
 }
 
-bool sort_instantiator::is_finite(sort s) 
+bool sort_instantiator::is_finite(sort_expression s) 
 {
   return lps::is_finite(fl,s);
 };

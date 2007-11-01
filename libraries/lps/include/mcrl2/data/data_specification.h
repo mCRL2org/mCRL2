@@ -14,7 +14,7 @@
 #include <boost/iterator/filter_iterator.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/vector.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/data_utility.h"
@@ -26,17 +26,17 @@ using atermpp::aterm_appl;
 using atermpp::aterm_list;
 
 /// \internal
-struct has_target_sort
+struct has_result_sort
 {
-  lps::sort m_target;
+  sort_expression m_result;
 
-  has_target_sort(lps::sort target)
-    : m_target(target)
+  has_result_sort(sort_expression target)
+    : m_result(target)
   {}
 
   bool operator()(data_operation f)
   {
-    return f.sort().target() == m_target;
+    return result_sort(f.sort()) == m_result;
   }
 };
 
@@ -50,13 +50,13 @@ class data_specification: public aterm_appl
 {
 
   protected:
-    sort_list          m_sorts;
+    sort_expression_list          m_sorts;
     data_operation_list      m_constructors;
     data_operation_list      m_mappings;
     data_equation_list m_equations;
 
   public:
-    typedef sort_list::iterator          sort_iterator;
+    typedef sort_expression_list::iterator          sort_iterator;
     typedef data_operation_list::iterator      function_iterator;
     typedef data_equation_list::iterator equation_iterator;
 
@@ -69,13 +69,13 @@ class data_specification: public aterm_appl
     {
       assert(detail::check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
-      m_sorts        = sort_list(aterm_appl(*i++).argument(0));
+      m_sorts        = sort_expression_list(aterm_appl(*i++).argument(0));
       m_constructors = data_operation_list(aterm_appl(*i++).argument(0));
       m_mappings     = data_operation_list(aterm_appl(*i++).argument(0));
       m_equations    = data_equation_list(aterm_appl(*i++).argument(0));
     }
 
-    data_specification(sort_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
+    data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
       : aterm_appl(gsMakeDataSpec(
                       gsMakeSortSpec(sorts),
                       gsMakeConsSpec(constructors),
@@ -91,7 +91,7 @@ class data_specification: public aterm_appl
 
     /// Returns the sorts of the data specification.
     ///
-    sort_list sorts() const
+    sort_expression_list sorts() const
     {
       return m_sorts;
     }
@@ -104,12 +104,12 @@ class data_specification: public aterm_appl
     }
 
     /// Returns the constructors of the data specification that have s as their target.
-    data_operation_list constructors(lps::sort s) const
+    data_operation_list constructors(sort_expression s) const
     {
       atermpp::vector<lps::data_operation> result;
 
-      typedef boost::filter_iterator<has_target_sort, data_operation_list::iterator> FilterIter;
-      has_target_sort predicate(s);
+      typedef boost::filter_iterator<has_result_sort, data_operation_list::iterator> FilterIter;
+      has_result_sort predicate(s);
       FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
       FilterIter last(predicate, m_constructors.end(), m_constructors.end());
       std::copy(first, last, std::back_inserter(result));
@@ -138,7 +138,7 @@ class data_specification: public aterm_appl
     ///
     bool is_well_typed() const
     {
-      std::set<lps::sort> sorts = detail::make_set(m_sorts);
+      std::set<sort_expression> sorts = detail::make_set(m_sorts);
 
       // check 1)
       if (!detail::check_data_spec_sorts(constructors(), sorts))
@@ -160,7 +160,7 @@ class data_specification: public aterm_appl
 
 /// \brief Sets the sequence of sorts
 inline
-data_specification set_sorts(data_specification s, sort_list sorts)
+data_specification set_sorts(data_specification s, sort_expression_list sorts)
 {
   return data_specification(sorts,
                             s.constructors(),

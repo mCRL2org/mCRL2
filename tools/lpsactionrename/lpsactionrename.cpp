@@ -232,9 +232,9 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
   gsVerboseMsg("  Merging data declarations...\n");
 
   //merge sort_spec
-  lps::sort_list lps_sort = lps_data.sorts();
-  lps::sort_list new_sort = new_data.sorts();
-  for(lps::sort_list::iterator i=new_sort.begin(); i!=new_sort.end(); i++){
+  lps::sort_expression_list lps_sort = lps_data.sorts();
+  lps::sort_expression_list new_sort = new_data.sorts();
+  for(lps::sort_expression_list::iterator i=new_sort.begin(); i!=new_sort.end(); i++){
     lps_sort = push_front(lps_sort, *i);
   }
 

@@ -12,7 +12,7 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/basic/detail/soundness_checks.h"
 #include "struct/libstruct.h"
@@ -58,11 +58,11 @@ class data_expression: public aterm_appl
 
     /// Returns the sort of the data expression.
     ///
-    lps::sort sort() const
+    sort_expression sort() const
     {
       ATermAppl result = gsGetSort(*this);
       assert(!gsIsSortUnknown(result));
-      return lps::sort(result);
+      return sort_expression(result);
     }     
 
     /// Returns the head of the data expression.

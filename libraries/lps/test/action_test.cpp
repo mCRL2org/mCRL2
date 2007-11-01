@@ -25,8 +25,8 @@ int test_main(int, char*[])
   ATinit(0, 0, &bottom_of_stack);
   gsEnableConstructorFunctions(); 
 
-  sort X("X");
-  sort Y("Y");
+  sort_expression X("X");
+  sort_expression Y("Y");
 
   action_label aX(identifier_string("a"),  make_list(X));
   action_label aY(identifier_string("a"),  make_list(Y));

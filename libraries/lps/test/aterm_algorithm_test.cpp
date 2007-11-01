@@ -14,7 +14,7 @@
 #include "atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 

@@ -32,7 +32,7 @@
 
 //#include "mcrl2/pbes/utility.h" 
 #include "mcrl2/data/data_operators.h" 
-#include "mcrl2/data/sort.h" 
+#include "mcrl2/data/sort_expression.h" 
 //#include "mcrl2/data/sort_utility.h" 
  
 //ATERM-specific 

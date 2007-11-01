@@ -184,7 +184,7 @@ class specification: public aterm_appl
     ///
     bool is_well_typed() const
     {
-      std::set<lps::sort> declared_sorts = detail::make_set(data().sorts());
+      std::set<sort_expression> declared_sorts = detail::make_set(data().sorts());
       std::set<action_label> declared_labels = detail::make_set(action_labels());
 
       // check 1)

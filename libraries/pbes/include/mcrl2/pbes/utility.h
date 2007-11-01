@@ -16,7 +16,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "atermpp/algorithm.h"
 #include "mcrl2/dataimpl.h" // implement_data_data_expr
 
@@ -72,11 +72,11 @@ data_expression pbes2data(const pbes_expression& p, specification& spec)
   } else if (is_propositional_variable_instantiation(p)) {
     identifier_string vname = var_name(p);
     data_expression_list parameters = var_val(p);
-    sort_list sorts = apply(parameters, gsGetSort);
+    sort_expression_list sorts = apply(parameters, gsGetSort);
     // In order to use gsMakeSortArrow sorts must be non-empty
     // else an extra case should be added to just make vsort == s::bool_();
     assert(!sorts.empty());
-    lps::sort vsort = gsMakeSortArrow(sorts, s::bool_());
+    sort_expression vsort = gsMakeSortArrow(sorts, s::bool_());
     data_variable v(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
   }
@@ -531,10 +531,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data_operation_list func=data.constructors(i->sort());
                 for (data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  sort_list domain_sorts=(f->sort()).domain_sorts();
+                  sort_expression_list dsorts=domain_sorts(f->sort());
                   data_variable_list function_arguments;
-                  for( sort_list::iterator s=domain_sorts.begin() ;
-                       s!=domain_sorts.end() ; s++ )
+                  for( sort_expression_list::iterator s=dsorts.begin() ;
+                       s!=dsorts.end() ; s++ )
                   { variable_generator.set_sort(*s);
                     constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
                     data_variable new_data_variable=variable_generator();
@@ -629,11 +629,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data_operation_list func=data.constructors(i->sort());
                 for (data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  sort_list domain_sorts=(f->sort()).domain_sorts();
-                  // std::cerr << "Function " << f->name() << " Domain sorts " << domain_sorts << std::endl;
+                  sort_expression_list dsorts=domain_sorts(f->sort());
+                  // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
                   data_variable_list function_arguments;
-                  for( sort_list::iterator s=domain_sorts.begin() ;
-                       s!=domain_sorts.end() ; s++ )
+                  for( sort_expression_list::iterator s=dsorts.begin() ;
+                       s!=dsorts.end() ; s++ )
                   { variable_generator.set_sort(*s);
                     constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
                     data_variable new_data_variable=variable_generator();

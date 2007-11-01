@@ -98,15 +98,15 @@ struct is_constant_sort
 {
   bool operator()(aterm_appl t) const
   {
-    return is_sort(t) && !lps::sort(t).is_arrow();
+    return is_sort_expression(t) && !sort_expression(t).is_arrow();
   }
 };
 
 /// Returns true if the domain sorts and the range sort of the given sort s are
 /// contained in sorts.
-inline bool check_sort(lps::sort s, const std::set<lps::sort>& sorts)
+inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
 {
-  std::set<lps::sort> s_sorts;
+  std::set<sort_expression> s_sorts;
   atermpp::find_all_if(s, is_constant_sort(), std::inserter(s_sorts, s_sorts.begin()));
   return std::includes(sorts.begin(), sorts.end(), s_sorts.begin(), s_sorts.end());
 }
@@ -114,7 +114,7 @@ inline bool check_sort(lps::sort s, const std::set<lps::sort>& sorts)
 /// Returns true if the domain sorts and the range sort of the sorts in the sequence [first, last[
 /// are contained in sorts.
 template <typename Iterator>
-bool check_sorts(Iterator first, Iterator last, const std::set<lps::sort>& sorts)
+bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>& sorts)
 {
   for (Iterator i = first; i != last; ++i)
   {
@@ -127,7 +127,7 @@ bool check_sorts(Iterator first, Iterator last, const std::set<lps::sort>& sorts
 /// Returns true if the domain sorts and the range sort of the given variables are contained
 /// in sorts.
 template <typename VariableContainer>
-bool check_variable_sorts(const VariableContainer& variables, const std::set<lps::sort>& sorts)
+bool check_variable_sorts(const VariableContainer& variables, const std::set<sort_expression>& sorts)
 {
   for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
@@ -152,7 +152,7 @@ bool check_variable_names(data_variable_list variables, const std::set<identifie
 /// Returns true if the domain sorts and range sort of the given functions are
 /// contained in sorts.
 inline
-bool check_data_spec_sorts(data_operation_list functions, const std::set<lps::sort>& sorts)
+bool check_data_spec_sorts(data_operation_list functions, const std::set<sort_expression>& sorts)
 {
   for (data_operation_list::iterator i = functions.begin(); i != functions.end(); ++i)
   {

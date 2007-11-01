@@ -11,7 +11,7 @@
 #include <string>
 
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/sort_utility.h"
 
@@ -23,7 +23,7 @@ using namespace lps;
 
 
 typedef struct s_del {
-  sort s;
+  sort_expression s;
   data_expression_list del;
 } t_sdel;
   
@@ -35,7 +35,7 @@ class sort_instantiator {
  public:
   sort_instantiator() {};
   void set_data_operation_list(data_operation_list flist);
-  void instantiate_sorts(lps::sort_list sl);
-  data_expression_list get_enumeration(lps::sort s);    
-  bool is_finite(sort s);
+  void instantiate_sorts(lps::sort_expression_list sl);
+  data_expression_list get_enumeration(sort_expression s);    
+  bool is_finite(sort_expression s);
 } ;

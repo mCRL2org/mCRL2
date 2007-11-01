@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/sort.h
+/// \file mcrl2/data/sort_expression.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_DATA_SORT_H
@@ -30,10 +30,10 @@ using atermpp::term_list;
 class sort;
 
 ///////////////////////////////////////////////////////////////////////////////
-// sort_list
+// sort_expression_list
 /// \brief singly linked list of sorts
 ///
-typedef term_list<sort> sort_list;
+typedef term_list<sort> sort_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // sort
@@ -94,7 +94,7 @@ class sort: public aterm_appl
     /// <li>domain_sorts((A -> B) -> (C -> D)) = [A->B,C]</li>
     /// </ul>
     ///
-    lps::sort_list domain_sorts() const
+    lps::sort_expression_list domain_sorts() const
     {
       return gsGetSortExprDomain(*this);
     }
@@ -108,7 +108,7 @@ class sort: public aterm_appl
     /// <li>range((A -> B) -> (C -> D)) = D</li>
     /// </ul>
     ///
-    lps::sort range_sort() const
+    sort_expression result_sort() const
     {
       return gsGetSortExprResult(*this);
     }
@@ -119,7 +119,7 @@ class sort: public aterm_appl
     /// <li>source(A->B) = [A]</li>
     /// </ul>
     ///
-    sort_list source() const
+    sort_expression_list source() const
     {
       if (is_arrow())
         return list_arg1(*this);
@@ -133,7 +133,7 @@ class sort: public aterm_appl
     /// <li>target(A->B) = B</li>
     /// </ul>
     ///
-    lps::sort target() const
+    sort_expression target() const
     {
       if (is_arrow())
         return arg2(*this);
@@ -144,14 +144,14 @@ class sort: public aterm_appl
 
 /// \brief Returns true if the term t is a sort
 inline
-bool is_sort(aterm_appl t)
+bool is_sort_expression(aterm_appl t)
 {
   return gsIsSortId(t) || gsIsSortArrow(t);
 }
 
 /// Returns the sort 'domain -> range'.
 inline
-sort arrow(sort_list domain, sort range)
+sort arrow(sort_expression_list domain, sort range)
 {
   return gsMakeSortArrow(domain, range);
 }
@@ -216,7 +216,7 @@ namespace sort_expr {
 /// \internal
 namespace atermpp
 {
-using lps::sort;
+using sort_expression;
 
 template<>
 struct aterm_traits<sort>

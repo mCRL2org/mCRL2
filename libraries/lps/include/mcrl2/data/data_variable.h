@@ -52,14 +52,14 @@ class data_variable: public data_expression
       assert (idx != std::string::npos);
       std::string name = s.substr(0, idx);
       std::string type = s.substr(idx+1);
-      m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), lps::sort(type)));
+      m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), sort_expression(type)));
     }
 
-    data_variable(identifier_string name, const lps::sort& s)
+    data_variable(identifier_string name, const sort_expression& s)
      : data_expression(gsMakeDataVarId(name, s))
     {}
 
-    data_variable(const std::string& name, const lps::sort& s)
+    data_variable(const std::string& name, const sort_expression& s)
      : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 

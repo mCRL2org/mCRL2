@@ -13,9 +13,9 @@
 using namespace lps;
 using namespace std;
 
-sort_list get_sorts(data_variable_list v)
+sort_expression_list get_sorts(data_variable_list v)
 {
-	sort_list result;
+	sort_expression_list result;
 	for (data_variable_list::iterator i = v.begin(); i != v.end(); i++)
 	{
 		result = push_back(result, i->sort());
@@ -23,17 +23,17 @@ sort_list get_sorts(data_variable_list v)
 	return reverse(result);
 }
 
-bool check_finite(data_operation_list fl, lps::sort s)
+bool check_finite(data_operation_list fl, sort_expression s)
 {
 	return is_finite(fl, s);
 }
 
-bool check_finite_list(data_operation_list fl, sort_list s)
+bool check_finite_list(data_operation_list fl, sort_expression_list s)
 {
 	return is_finite(fl, s);
 }
 
-data_expression_list enumerate_constructors(data_operation_list fl, lps::sort s)
+data_expression_list enumerate_constructors(data_operation_list fl, sort_expression s)
 {
 	// All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
 	assert(is_finite(fl, s));
@@ -45,11 +45,11 @@ data_expression_list enumerate_constructors(data_operation_list fl, lps::sort s)
 	for (data_operation_list::iterator i = cl.begin(); i != cl.end(); i++)
 	{
 		// Get all domains of the constructor
-		sort_list domains = i->sort().domain_sorts();
+		sort_expression_list domains = domain_sorts(i->sort());
 		// Vector for all enumerated constructors
 		vector< data_expression_list > argumentss;
 		// For each sort of the constructor...
-		for (sort_list::iterator j = domains.begin(); j != domains.end(); j++)
+		for (sort_expression_list::iterator j = domains.begin(); j != domains.end(); j++)
 		{
 			// Put all values which the sort can have in a list
 			argumentss.push_back(enumerate_constructors(fl,*j));
