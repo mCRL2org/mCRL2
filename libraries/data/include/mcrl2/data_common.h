@@ -20,26 +20,35 @@ using namespace ::mcrl2::utilities;
 // Auxiliary list operations
 // --------------------------
 
+/// \pre l and m are two lists without duplicates
+/// \ret a list with all elements of l and m precisely once
 ATermList merge_list(ATermList l, ATermList m);
-//Pre: l and m are two lists without duplicates
-//Ret: a list with all elements of l and m precisely once
 
+/// \pre l and m are two lists
+/// \ret a copy of l without elements that occur in m
 ATermList subtract_list(ATermList l, ATermList m);
-//Pre: l and m are two lists
-//Ret: a copy of l without elements that occur in m
 
 // ---------------------------------------------
 // Auxiliary functions for system defined sorts
 // ---------------------------------------------
 
+/// \ret prefix for the name of an implementation of a structured sort.
 inline const char* struct_prefix() { return "Struct@"; }
+
+/// \ret prefix for the name of an implementation of a list sort.
 inline const char* list_prefix()   { return "List@";   }
+
+/// \ret prefix for the name of an implementation of a set sort.
 inline const char* set_prefix()    { return "Set@";    }
+
+/// \ret prefix for the name of an implementation of a bag sort.
 inline const char* bag_prefix()    { return "Bag@";    }
+
+/// \ret prefix for the name of an implementation of a lambda expression.
 inline const char* lambda_prefix() { return "lambda@"; }
 
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a structured sort
+/// \pre sort_expr is sort expression
+/// \ret sort_expr is the implementation of a structured sort
 inline bool is_struct_sort_id(ATermAppl sort_expr)
 {
   if (gsIsSortId(sort_expr)) {
@@ -52,8 +61,8 @@ inline bool is_struct_sort_id(ATermAppl sort_expr)
   }
 }
 
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a list sort
+/// \pre sort_expr is sort expression
+/// \ret sort_expr is the implementation of a list sort
 inline bool is_list_sort_id(ATermAppl sort_expr)
 {
   if (gsIsSortId(sort_expr)) {
@@ -66,8 +75,8 @@ inline bool is_list_sort_id(ATermAppl sort_expr)
   }
 }
 
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a set sort
+/// \pre sort_expr is sort expression
+/// \ret sort_expr is the implementation of a set sort
 inline bool is_set_sort_id(ATermAppl sort_expr)
 {
   if (gsIsSortId(sort_expr)) {
@@ -80,8 +89,8 @@ inline bool is_set_sort_id(ATermAppl sort_expr)
   }
 }
 
-//Pre: sort_expr is sort expression
-//Ret: sort_expr is the implementation of a bag sort
+/// \pre sort_expr is sort expression
+/// \ret sort_expr is the implementation of a bag sort
 inline bool is_bag_sort_id(ATermAppl sort_expr)
 {
   if (gsIsSortId(sort_expr)) {
@@ -94,8 +103,8 @@ inline bool is_bag_sort_id(ATermAppl sort_expr)
   }
 }
 
-//Pre: data_expr is a data expression
-//Ret: data_expr is an operation identifier for the implementation of a lambda
+/// \pre data_expr is a data expression
+/// \ret data_expr is an operation identifier for the implementation of a lambda
 //     abstraction
 inline bool is_lambda_op_id(ATermAppl data_expr)
 {
@@ -109,24 +118,24 @@ inline bool is_lambda_op_id(ATermAppl data_expr)
   }
 }
 
+/// \pre data_expr is a data expression
+/// \ret data_expr is the implementation of a list enumeration
 bool is_list_enum_impl(ATermAppl data_expr);
-//Ret: data_expr is the implementation of a list enumeration
-// Prefixes for system defined sorts
 
 // ---------------------------------------------------------
 // Definition and auxiliary functions for data declarations
 // ---------------------------------------------------------
 
+/// \brief The type t_data_decls represents data declarations, i.e. sort, constructor,
+//         operation and data equation declarations
 typedef struct {
   ATermList sorts;
   ATermList cons_ops;
   ATermList ops;
   ATermList data_eqns;
 } t_data_decls;
-//The type t_data_decls represents data declarations, i.e. sort, constructor,
-//operation and data equation declarations
 
-//Post: all fields of p_data_decls have been initialized with the empty list.
+/// \post all fields of p_data_decls have been initialized with the empty list.
 void inline initialize_data_decls(t_data_decls *p_data_decls)
 {
   p_data_decls->sorts     = ATmakeList0();
@@ -135,14 +144,14 @@ void inline initialize_data_decls(t_data_decls *p_data_decls)
   p_data_decls->data_eqns = ATmakeList0();
 }
 
+/// \ret indicates whether the elements of data_decls are initialised
 #define data_decls_is_initialised(data_decls)\
 (data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&\
  data_decls.ops   != NULL && data_decls.data_eqns != NULL)
-//Ret: indicates whether the elements of data_decls are initialised
 
-//Pre: substs is a list of substitutions
+/// \pre substs is a list of substitutions
 //     recursive denotes wheter to apply substitutions recursively through the terms
-//Post: p_data_decls in which substs have been applied to sorts, cons_ops, ops and data_eqns
+/// \post p_data_decls in which substs have been applied to sorts, cons_ops, ops and data_eqns
 void inline subst_values_list_data_decls(ATermList substs, t_data_decls *p_data_decls, bool recursive)
 {
    p_data_decls->sorts     = gsSubstValues_List(substs, p_data_decls->sorts,     recursive);
@@ -151,8 +160,8 @@ void inline subst_values_list_data_decls(ATermList substs, t_data_decls *p_data_
    p_data_decls->data_eqns = gsSubstValues_List(substs, p_data_decls->data_eqns, recursive);
 }
 
-//Pre: *p_data_decls_1 = v_data_decls_1, *p_data_decls_2 = v_data_decls_2
-//Post: *p_data_decls_1 = v_data_decls_1 + v_data_decls_2, *p_data_decls_2 = v_data_decls_2
+/// \pre *p_data_decls_1 = v_data_decls_1, *p_data_decls_2 = v_data_decls_2
+/// \post *p_data_decls_1 = v_data_decls_1 + v_data_decls_2, *p_data_decls_2 = v_data_decls_2
 void inline concat_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_data_decls_2)
 {
   p_data_decls_1->sorts     = ATconcat(p_data_decls_1->sorts,     p_data_decls_2->sorts);
@@ -161,8 +170,8 @@ void inline concat_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_data
   p_data_decls_1->data_eqns = ATconcat(p_data_decls_1->data_eqns, p_data_decls_2->data_eqns);
 }
 
-//Pre: *p_data_decls_1 = v_data_decls_1, *p_data_decls_2 = v_data_decls_2
-//Post: *p_data_decls_1 = v_data_decls_1 from which everything that is also in v_data_decls_2
+/// \pre *p_data_decls_1 = v_data_decls_1, *p_data_decls_2 = v_data_decls_2
+/// \post *p_data_decls_1 = v_data_decls_1 from which everything that is also in v_data_decls_2
 //      has been removed.
 //      *p_data_decls_2 = v_data_decls_2
 void inline subtract_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_data_decls_2)
@@ -173,7 +182,7 @@ void inline subtract_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_da
   p_data_decls_1->data_eqns = subtract_list(p_data_decls_1->data_eqns, p_data_decls_2->data_eqns);
 }
 
-//Ret: data_decls1 is equal to data_decls2
+/// \ret data_decls1 is equal to data_decls2
 inline bool data_decls_equal(t_data_decls data_decls1,
   t_data_decls data_decls2)
 {
@@ -184,7 +193,7 @@ inline bool data_decls_equal(t_data_decls data_decls1,
     ATisEqual(data_decls1.data_eqns, data_decls2.data_eqns);
 }
 
-//Ret: data declarations of lps_spec
+/// \ret data declarations of lps_spec
 inline t_data_decls get_data_decls(lps::specification &lps_spec)
 {
   t_data_decls data_decls;
@@ -195,7 +204,7 @@ inline t_data_decls get_data_decls(lps::specification &lps_spec)
   return data_decls;
 }
 
-//Ret: lps_spec in which the data declarations are replaced by data_decls
+/// \ret lps_spec in which the data declarations are replaced by data_decls
 inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
 {
   assert(data_decls_is_initialised(data_decls));
@@ -205,18 +214,18 @@ inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls
   }
 }
 
-ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
-//Pre: spec is a specification that adheres to the internal syntax of an
+/// \pre spec is a specification that adheres to the internal syntax of an
 //     arbitary phase
-//Ret: spec in which the data declarations from data_decls are added
+/// \ret spec in which the data declarations from data_decls are added
+ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 
 // --------------------
 // Auxiliary functions
 // --------------------
 
-//pre: BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
+/// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
-//ret: if(BoolExpr, 1, 0) of sort SortExpr
+/// \ret if(BoolExpr, 1, 0) of sort SortExpr
 inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
@@ -225,19 +234,19 @@ inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
            gsMakeOpId(gsString2ATermAppl("0"), SortExpr));
 }
 
-ATermList get_free_vars(ATermAppl data_expr);
-//Pre: data_expr is a data expression that adheres to the internal syntax after
+/// \pre data_expr is a data expression that adheres to the internal syntax after
 //     type checking
-//Ret: The free variables in data_expr
+/// \ret The free variables in data_expr
+ATermList get_free_vars(ATermAppl data_expr);
 
+/// \pre term adheres to the internal format
+/// \ret a list of all sorts occuring in term, where each element is unique
 ATermList get_sorts(ATerm term);
-//Pre: term adheres to the internal format
-//Ret: a list of all sorts occuring in term, where each element is unique
 
-//pre: Term to perform beta reduction on,
+/// \pre Term to perform beta reduction on,
 //     this is the top-level function, which should be used when
 //     there is no appropriate context.
-//ret: Term with beta reduction performed on it.
+/// \ret Term with beta reduction performed on it.
 ATerm beta_reduce_term(ATerm Term);
 
 #endif //MCRL2_DATA_COMMON_H
