@@ -192,12 +192,13 @@ void impl_sort_real(t_data_decls *p_data_decls);
 //Pre: p_data_decls represents a pointer to new data declarations
 //Post:an implementation of sort Real is added to *p_data_decls
 
-void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls);
-//Pre: sort_arrow is an arrow sort that adheres to the internal syntax after
+void impl_sort(ATermAppl sort, t_data_decls *p_data_decls);
+//Pre: sort is a sort that adheres to the internal syntax after
 //     data implementation
 //     p_data_decls represents a pointer to new data declarations, induced by
 //     the context of part
-//Post:an implementation of function sort sort_arrow is added to *p_data_decls
+//Post:an implementation of equality, inequality and if of sort sort
+//     is added to *p_data_decls
 
 ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);

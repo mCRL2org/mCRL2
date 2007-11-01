@@ -230,6 +230,10 @@ ATermList get_free_vars(ATermAppl data_expr);
 //     type checking
 //Ret: The free variables in data_expr
 
+ATermList get_sorts(ATerm term);
+//Pre: term adheres to the internal format
+//Ret: a list of all sorts occuring in term, where each element is unique
+
 ATermList get_function_sorts(ATerm term);
 //Pre: term adheres to the internal format
 //Ret: a list of all function sorts occurring in term, where each element is

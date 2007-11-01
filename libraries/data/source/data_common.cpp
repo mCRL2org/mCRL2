@@ -35,11 +35,23 @@ static void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
 //Post:*p_free_vars is extended with the free variables in data_exprs that did not
 //     already occur in *p_free_vars or bound_vars
 
+static void get_sorts_appl(ATermAppl part, ATermList *p_sorts);
+//Pre: part is a part of a specification
+//     *p_sorts represents the sorts that are already found
+//Post:*p_sorts is extended with the sorts in part that did not
+//     already occur in *p_sorts
+
 static void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts);
 //Pre: part is a part of a specification
 //     *p_func_sorts represents the function sorts that are already found
 //Post:*p_func_sorts is extended with the function sorts in part that did not
 //     already occur in *p_func_sorts
+
+static void get_sorts_list(ATermList parts, ATermList *p_sorts);
+//Pre: parts is a list of parts of a specification
+//     *p_sorts represents the sorts that are already found
+//Post:*p_sorts is extended with the sorts in parts that did not
+//     already occur in *p_sorts
 
 static void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts);
 //Pre: parts is a list of parts of a specification
@@ -275,6 +287,18 @@ void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
   }
 }
 
+ATermList get_sorts(ATerm term)
+{
+  ATermList sorts = ATmakeList0();
+  if (ATgetType(term) == AT_APPL) {
+    get_sorts_appl((ATermAppl) term, &sorts);
+  } else { //ATgetType(term) == AT_LIST
+    get_sorts_list((ATermList) term, &sorts);
+  }
+  return sorts;
+
+}
+
 ATermList get_function_sorts(ATerm term)
 {
   ATermList func_sorts = ATmakeList0();
@@ -284,6 +308,23 @@ ATermList get_function_sorts(ATerm term)
     get_function_sorts_list((ATermList) term, &func_sorts);
   }
   return func_sorts;
+}
+
+void get_sorts_appl(ATermAppl part, ATermList *p_sorts)
+{
+  if (gsIsSortExpr(part)) {
+    if (ATindexOf(*p_sorts, (ATerm) part, 0) == -1) {
+      *p_sorts = ATinsert(*p_sorts, (ATerm) part);
+    }
+  }
+  int nr_args = ATgetArity(ATgetAFun(part));
+  for (int i = 0; i < nr_args; i++) {
+    ATerm arg = ATgetArgument(part, i);
+    if (ATgetType(arg) == AT_APPL)
+      get_sorts_appl((ATermAppl) arg, p_sorts);
+    else //ATgetType(arg) == AT_LIST
+      get_sorts_list((ATermList) arg, p_sorts);
+  }
 }
 
 void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
@@ -300,6 +341,15 @@ void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
       get_function_sorts_appl((ATermAppl) arg, p_func_sorts);
     else //ATgetType(arg) == AT_LIST
       get_function_sorts_list((ATermList) arg, p_func_sorts);
+  }
+}
+
+void get_sorts_list(ATermList parts, ATermList *p_sorts)
+{
+  while (!ATisEmpty(parts))
+  {
+    get_sorts_appl(ATAgetFirst(parts), p_sorts);
+    parts = ATgetNext(parts);
   }
 }
 
@@ -414,8 +464,8 @@ ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context)
 ATermAppl capture_avoiding_subst(ATermAppl Part, ATermAppl OldValue,
                                  ATermAppl NewValue, ATermList* Context)
 {
-  gsDebugMsg("Performing capture avoiding substitution on %T with OldValue %T and NewValue %T\n",
-             Part, OldValue, NewValue);
+  //gsDebugMsg("Performing capture avoiding substitution on %T with OldValue %T and NewValue %T\n",
+  //           Part, OldValue, NewValue);
 
   // Slight performance enhancement
   if (ATisEqual(OldValue, NewValue)) {
