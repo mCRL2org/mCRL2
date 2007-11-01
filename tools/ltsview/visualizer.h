@@ -47,8 +47,8 @@ class Visualizer: public Subscriber {
     bool isMarked(Transition* s);
 
     void traverseTree(bool co);
-    void traverseTreeC(Cluster *root,bool topClosed,int rot);
-    void traverseTreeT(Cluster *root,int rot);
+    void traverseTreeC(Cluster *root, bool topClosed, int rot);
+    void traverseTreeT(Cluster *root, bool topClosed, int rot);
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
     void computeForces(Cluster* root);

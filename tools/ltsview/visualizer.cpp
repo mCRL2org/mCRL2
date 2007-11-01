@@ -187,7 +187,7 @@ void Visualizer::traverseTree(bool co) {
       traverseTreeC(lts->getInitialState()->getCluster(), true, 0);
       break;
     case TUBES:
-      traverseTreeT(lts->getInitialState()->getCluster(), 0);
+      traverseTreeT(lts->getInitialState()->getCluster(), true, 0);
       break;
     default:
       break;
@@ -298,7 +298,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
   }
 }
 
-void Visualizer::traverseTreeT(Cluster *root,int rot) {
+void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
   if (!root->hasDescendants()) {
   // root has no descendants; so draw it as a hemispheroid
     glPushMatrix();
@@ -306,8 +306,11 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
         min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
     
     if (create_objects) {
-      //TODO: Add identifiers to ids.
       vector<int> ids; 
+
+      ids.push_back(root->getRank());
+      ids.push_back(root->getPositionInRank());
+
       if (root == lts->getInitialState()->getCluster()) {
         // exception: draw root as a sphere if it is the initial cluster
         root->setVisObject(visObjectFactory->makeObject(
@@ -341,10 +344,10 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
           glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
     
           if (root->getNumDescendants() > 1) {
-            traverseTreeT(desc,drot);
+            traverseTreeT(desc, false, drot);
           } 
           else {
-            traverseTreeT(desc,rot);
+            traverseTreeT(desc, false, rot);
           }
     
           glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
@@ -370,8 +373,11 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
           glScalef(sz,sz,sz);
       
           if (create_objects) {
-            //TODO Add identifiers to ids
             vector<int> ids;
+
+            ids.push_back(root->getRank());
+            ids.push_back(root->getPositionInRank());
+
             desc->setVisObjectTop(visObjectFactory->makeObject(
             primitiveFactory->makeObliqueCone(alpha,
                   desc->getTopRadius()/sz,sign), ids));
@@ -385,7 +391,7 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
           glTranslatef(root->getBaseRadius(),0.0f,
               settings->getFloat(ClusterHeight));
           glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-          traverseTreeT(desc,drot);
+          traverseTreeT(desc, true, drot);
           glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,
               -settings->getFloat(ClusterHeight));
@@ -394,15 +400,17 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
       }
     }
     
-    if (baserad <= 0.0f) {
+    if (baserad <= 0.0f && !root->hasSeveredDescendants()) {
       // root has no centered descendant, so draw it as a hemispheroid
       glPushMatrix();
       glScalef(root->getTopRadius(),root->getTopRadius(),
             min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
       if (create_objects) {
-        // TODO: Add identifiers to ids
         vector<int> ids;
         
+        ids.push_back(root->getRank());
+        ids.push_back(root->getPositionInRank());
+
         if (root == lts->getInitialState()->getCluster()) {
           // exception: draw root as a sphere if it is the initial cluster
           root->setVisObject(visObjectFactory->makeObject(
@@ -419,8 +427,15 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
       glPopMatrix();
     } 
     else {
+
       // root has centered descendant; so draw it as a truncated cone
       float r = baserad / root->getTopRadius();
+
+      if (root->hasSeveredDescendants())
+      {
+        r = 1.0f;
+      }
+
       glPushMatrix();
       glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
       
@@ -429,21 +444,16 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
         glRotatef(180.0f,1.0f,0.0f,0.0f);
         glScalef(baserad,baserad,settings->getFloat(ClusterHeight));
         if (create_objects) {
-          // TODO: Add identifiers to ids
           vector<int> ids;
-          // draw root with top closed if it is the initial cluster
-          if (root == lts->getInitialState()->getCluster()) {
-            root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r, true, 
-                root->hasSeveredDescendants()), ids));
-          }
-          else
-          {
-            root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r, 
-              root->hasSeveredDescendants(),
-              false), ids));
-          }
+
+
+          ids.push_back(root->getRank());
+          ids.push_back(root->getPositionInRank());
+
+          root->setVisObject(visObjectFactory->makeObject(
+            primitiveFactory->makeTruncatedCone(r, 
+              topClosed,
+              root->hasSeveredDescendants()), ids));
         } 
         else {
           visObjectFactory->updateObjectMatrix(root->getVisObject());
@@ -453,12 +463,13 @@ void Visualizer::traverseTreeT(Cluster *root,int rot) {
         glScalef(root->getTopRadius(),root->getTopRadius(),
                 settings->getFloat(ClusterHeight));
         if (create_objects) {
-          //TODO: Add identifiers to ids
           vector<int> ids;
           
+          ids.push_back(root->getRank());
+          ids.push_back(root->getPositionInRank());
           root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeTruncatedCone(r,false,
-                root->hasSeveredDescendants()), ids));
+              primitiveFactory->makeTruncatedCone(r,
+                root->hasSeveredDescendants(), topClosed), ids));
         } 
         else {
           visObjectFactory->updateObjectMatrix(root->getVisObject());
