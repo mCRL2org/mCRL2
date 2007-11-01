@@ -195,7 +195,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   m.append(d.create< label >().set_text("Exploration strategy")).
     append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
-                append(exploration_strategy_selector.associate(es_breadth, "breath-first", true)).
+                append(exploration_strategy_selector.associate(es_breadth, "breadth-first", true)).
                 append(exploration_strategy_selector.associate(es_depth, "depth-first")).
                 append(exploration_strategy_selector.associate(es_random, "random"))).
     append(d.create< label >().set_text("Rewrite strategy")).
