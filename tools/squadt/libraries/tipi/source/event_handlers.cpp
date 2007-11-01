@@ -44,6 +44,11 @@ namespace tipi {
         /** \brief The synchronisation constructs for waking up waiters */
         waiter_map        waiters;
    
+      public:
+
+        /** \brief Destructor */
+        ~basic_event_handler_impl();
+
       private:
    
         /** \brief Wakes up all waiters that match an identifier or all waiters if the identifier is 0 */
@@ -68,19 +73,16 @@ namespace tipi {
         void remove(const void*);
 
         /** \brief Process an event for a specific object */
-        void process(const void*, bool = true);
+        void process(boost::shared_ptr < basic_event_handler_impl > p, const void*, bool = true);
    
         /** \brief Execute handlers for a specific object */
-        void execute_handlers(const void*, bool);
+        void execute_handlers(boost::shared_ptr < basic_event_handler_impl > p, const void*, bool);
    
         /** \brief Block until the next event has been processed */
         void await_change(const void*);
 
         /** \brief Remove all stored non-global handlers */
         void clear();
-   
-        /** \brief Destructor */
-        ~basic_event_handler_impl();
     };
 
     /**
@@ -151,9 +153,9 @@ namespace tipi {
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
      **/
-    inline void basic_event_handler_impl::process(const void* id, bool b) {
+    inline void basic_event_handler_impl::process(boost::shared_ptr < basic_event_handler_impl > p, const void* id, bool b) {
       if (0 < handlers.count(id) || !global_handler.empty()) {
-        boost::thread t(boost::bind(&basic_event_handler_impl::execute_handlers, this, id, b));
+        boost::thread t(boost::bind(&basic_event_handler_impl::execute_handlers, this, p, id, b));
       }
       else if (0 < waiters.size()) {
         boost::mutex::scoped_lock l(lock);
@@ -166,7 +168,7 @@ namespace tipi {
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
      **/
-    inline void basic_event_handler_impl::execute_handlers(const void* id, bool b) {
+    inline void basic_event_handler_impl::execute_handlers(boost::shared_ptr < basic_event_handler_impl > p, const void* id, bool b) {
       boost::mutex::scoped_lock l(lock);
 
       if (!global_handler.empty() && b) {
@@ -232,13 +234,13 @@ namespace tipi {
     inline void basic_event_handler_impl::clear() {
       handlers.clear();
     }
-    /// \endcond
 
     inline basic_event_handler_impl::~basic_event_handler_impl() {
       boost::mutex::scoped_lock l(lock);
 
       wake();
     }
+    /// \endcond
 
     basic_event_handler::basic_event_handler() : impl(new basic_event_handler_impl) {
     }
@@ -275,7 +277,7 @@ namespace tipi {
      * \param[in] b whether or not to execute the global handler
      **/
     void basic_event_handler::process(const void* id, bool b) {
-      impl->process(id, b);
+      impl->process(impl, id, b);
     }
 
     /**
@@ -283,7 +285,7 @@ namespace tipi {
      * \param[in] b whether or not to execute the global handler
      **/
     void basic_event_handler::execute_handlers(const void* id, bool b) {
-      impl->execute_handlers(id, b);
+      impl->execute_handlers(impl, id, b);
     }
    
     void basic_event_handler::remove() {
@@ -311,7 +313,6 @@ namespace tipi {
     }
 
     basic_event_handler::~basic_event_handler() {
-      delete impl;
     }
   }
 }

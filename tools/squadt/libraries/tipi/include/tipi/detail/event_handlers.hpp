@@ -26,7 +26,7 @@ namespace tipi {
       private:
 
         /** \brief implementation object (handle body idiom) */
-        basic_event_handler_impl* impl;
+        boost::shared_ptr < basic_event_handler_impl > impl;
 
       public:
    
