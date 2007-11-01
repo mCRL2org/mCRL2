@@ -156,7 +156,10 @@ class GraphApp : public wxApp
     void init_frame(std::string lts_file_argument) {
       GraphFrame *frame;
 	
-      frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150), wxSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT));
+      wxSize maximum_size = wxGetClientDisplayRect().GetSize();
+
+      frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150),
+                     wxSize((std::min)(maximum_size.GetWidth(),INITIAL_WIN_WIDTH), (std::min)(maximum_size.GetHeight(),INITIAL_WIN_HEIGHT)));
       frame->Show(true);
       frame->GetSizer()->RecalcSizes();
       if (!lts_file_argument.empty()) {

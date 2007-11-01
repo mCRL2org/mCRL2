@@ -90,7 +90,7 @@ namespace squadt {
 
       wxSize maximum_size = wxGetClientDisplayRect().GetSize();
 
-      SetSize((std::min)(maximum_size.GetWidth(),1024), (std::min)(maximum_size.GetWidth(),768));
+      SetSize((std::min)(maximum_size.GetWidth(),1024), (std::min)(maximum_size.GetHeight(),768));
 
       Raise();
     }

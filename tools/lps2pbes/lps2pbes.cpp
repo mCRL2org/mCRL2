@@ -189,12 +189,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Create and add the top layout manager */
   m.append(d.create< label >().set_text("Phase after which to stop: ")).
-    append(d.create< horizontal_box >().
-        append(phase_selector.associate(PH_NONE, "none", true)).
-        append(phase_selector.associate(PH_PARSE, "parsing")).
-        append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
-        append(phase_selector.associate(PH_DATA_IMPL, "data implementation")).
-        append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
     append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
         append(format_selector.associate(normal, "normal", true)).
@@ -208,6 +202,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         append(d.create< label >().set_text("Formula file name : ")).
         append(formula_field)).
     append(timed_conversion.set_label("timed conversion")).
+    append(d.create< vertical_box >().
+        append(phase_selector.associate(PH_NONE, "none", true)).
+        append(phase_selector.associate(PH_PARSE, "parsing")).
+        append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
+        append(phase_selector.associate(PH_DATA_IMPL, "data implementation")).
+        append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
     append(d.create< label >().set_text(" ")).
     append(okay_button, layout::right);
 
@@ -229,7 +229,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button.await_change();
   
-  c.add_input(formula_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), formula_field.get_text());
+  if (c.output_exists(formula_file_for_input)) {
+    c.get_input(formula_file_for_input).set_location(formula_field.get_text());
+  }
+  else {
+    c.add_input(formula_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), formula_field.get_text());
+  }
 
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
