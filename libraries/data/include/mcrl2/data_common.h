@@ -234,11 +234,6 @@ ATermList get_sorts(ATerm term);
 //Pre: term adheres to the internal format
 //Ret: a list of all sorts occuring in term, where each element is unique
 
-ATermList get_function_sorts(ATerm term);
-//Pre: term adheres to the internal format
-//Ret: a list of all function sorts occurring in term, where each element is
-//     unique
-
 //pre: Term to perform beta reduction on,
 //     this is the top-level function, which should be used when
 //     there is no appropriate context.

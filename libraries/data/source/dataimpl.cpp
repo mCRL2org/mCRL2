@@ -800,8 +800,6 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
   // XXX more intelligent variable names would be nice
   ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort_id);
   ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort_id);
-  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
   ATermList vars = ATmakeList3((ATerm) b, (ATerm) x, (ATerm) y);
   ATermList rhsv = ATmakeList0();
   ATermList lhsv = ATmakeList0();
@@ -908,7 +906,6 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
   ATermAppl d_sort_elt = gsMakeDataVarId(gsString2ATermAppl("d"), sort_elt);
   ATermAppl e_sort_elt = gsMakeDataVarId(gsString2ATermAppl("e"), sort_elt);
   ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   ATermAppl ds = gsMakeDataExprCons(d_sort_elt, s_sort_id);
   ATermAppl es = gsMakeDataExprCons(e_sort_elt, s_sort_id);
   ATermAppl et = gsMakeDataExprCons(e_sort_elt, t_sort_id);
@@ -918,7 +915,6 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
   ATermAppl f = gsMakeDataExprFalse();
   ATermList dl = ATmakeList1((ATerm) d_sort_elt);
   ATermList sl = ATmakeList1((ATerm) s_sort_id);
-  ATermList stl = ATmakeList2((ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dsl = ATmakeList2((ATerm) d_sort_elt, (ATerm) s_sort_id);
   ATermList desl = ATmakeList3((ATerm) d_sort_elt, (ATerm) e_sort_elt,
     (ATerm) s_sort_id);
@@ -927,7 +923,6 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
   ATermList destl = ATmakeList4((ATerm) d_sort_elt, (ATerm) e_sort_elt,
     (ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dspl = ATmakeList3((ATerm) d_sort_elt, (ATerm) s_sort_id, (ATerm) p);
-  ATermList bsl = ATmakeList2((ATerm) b, (ATerm) s_sort_id);
 
   ATermList new_data_eqns = ATmakeList(21,
       //equality (sort_id -> sort_id -> Bool)
@@ -1070,12 +1065,9 @@ ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set)
   ATermAppl g_sort_func = gsMakeDataVarId(gsString2ATermAppl("g"), sort_func);
   ATermAppl d_sort_elt = gsMakeDataVarId(gsString2ATermAppl("d"), sort_elt);
   ATermAppl x_sort_elt = gsMakeDataVarId(gsString2ATermAppl("x"), sort_elt);
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   ATermAppl nil = gsMakeNil();
-  ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   ATermList stl = ATmakeList2((ATerm) s_sort_id, (ATerm) t_sort_id);
-  ATermList bsl = ATmakeList2((ATerm) b, (ATerm) s_sort_id);
   ATermList fl = ATmakeList1((ATerm) f_sort_func);
   ATermList dfl = ATmakeList2((ATerm) d_sort_elt, (ATerm) f_sort_func);
   ATermList fgl = ATmakeList2((ATerm) f_sort_func, (ATerm) g_sort_func);
@@ -1222,20 +1214,12 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
   ATermAppl d_sort_elt = gsMakeDataVarId(gsString2ATermAppl("d"), sort_elt);
   ATermAppl x_sort_elt = gsMakeDataVarId(gsString2ATermAppl("x"), sort_elt);
   ATermAppl u_sort_set = gsMakeDataVarId(gsString2ATermAppl("u"), sort_set);
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
-  ATermAppl m_name = gsString2ATermAppl("m");
-  ATermAppl n_name = gsString2ATermAppl("n");
-  ATermAppl m = gsMakeDataVarId(m_name, gsMakeSortExprNat());
-  ATermAppl n = gsMakeDataVarId(n_name, gsMakeSortExprNat());
   ATermAppl nil = gsMakeNil();
   ATermAppl zero = gsMakeDataExprC0();
-  ATermAppl t = gsMakeDataExprTrue();
-  ATermAppl f = gsMakeDataExprFalse();
   ATermList sl = ATmakeList1((ATerm) s_sort_id);
   ATermList stl = ATmakeList2((ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dsl = ATmakeList2((ATerm) d_sort_elt, (ATerm) s_sort_id);
   ATermList ul = ATmakeList1((ATerm) u_sort_set);
-  ATermList bsl = ATmakeList2((ATerm) b, (ATerm) s_sort_id);
   ATermList dfl = ATmakeList2((ATerm) d_sort_elt, (ATerm) f_sort_func);
   ATermList fgl = ATmakeList2((ATerm) f_sort_func, (ATerm) g_sort_func);
   ATermAppl zero_func =
@@ -1705,7 +1689,6 @@ void impl_sort_nat(t_data_decls *p_data_decls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList nl = ATmakeList1((ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
   p_data_decls->data_eqns = ATconcat(ATmakeList(62,
       //equality (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -1916,7 +1899,6 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls)
   ATermAppl se_bool = gsMakeSortExprBool();
   ATermAppl se_pos = gsMakeSortExprPos();
   ATermAppl se_nat = gsMakeSortExprNat();
-  ATermAppl se_nat_pair = gsMakeSortExprNatPair();
   p_data_decls->ops = ATconcat(ATmakeList(5,
       (ATerm) gsMakeOpIdFirst(),
       (ATerm) gsMakeOpIdLast(),
@@ -1938,12 +1920,7 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls)
   ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), se_nat);
   ATermAppl m_ = gsMakeDataVarId(gsString2ATermAppl("m_"), se_nat);
   ATermAppl n_ = gsMakeDataVarId(gsString2ATermAppl("n_"), se_nat);
-  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), se_nat_pair);
-  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), se_nat_pair);
   ATermList mnm_n_l = ATmakeList4((ATerm) m, (ATerm) n, (ATerm) m_, (ATerm) n_);
-  ATermList xl = ATmakeList1((ATerm) x);
-  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
   ATermList bpl = ATmakeList2((ATerm) b, (ATerm) p);
   ATermList bpql = ATmakeList3((ATerm) b, (ATerm) p, (ATerm) q);
   ATermList bpmnl = ATmakeList4((ATerm) b, (ATerm) p, (ATerm) m, (ATerm) n);
@@ -2054,8 +2031,6 @@ void impl_sort_int(t_data_decls *p_data_decls)
   ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
-  ATermList xl  = ATmakeList1((ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   p_data_decls->data_eqns = ATconcat(ATmakeList(64,
       //equality (Int -> Int -> Bool)
@@ -2312,9 +2287,6 @@ void impl_sort_real(t_data_decls *p_data_decls)
   //Declare data equations for sort Int
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
-  ATermAppl t = gsMakeDataExprTrue();
-  ATermAppl f = gsMakeDataExprFalse();
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
   ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
   ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), gsMakeSortExprInt());
@@ -2323,11 +2295,9 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), gsMakeSortExprReal());
   ATermList pl = ATmakeList1((ATerm) p);
   ATermList nl = ATmakeList1((ATerm) n);
-  ATermList brl = ATmakeList2((ATerm) b, (ATerm) r);
   ATermList xl  = ATmakeList1((ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList nxl = ATmakeList2((ATerm) n, (ATerm) x);
-  ATermList rl  = ATmakeList1((ATerm) r);
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
   p_data_decls->data_eqns = ATconcat(ATmakeList(21,
       //equality (Real -> Real -> Bool)

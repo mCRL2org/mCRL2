@@ -41,23 +41,11 @@ static void get_sorts_appl(ATermAppl part, ATermList *p_sorts);
 //Post:*p_sorts is extended with the sorts in part that did not
 //     already occur in *p_sorts
 
-static void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts);
-//Pre: part is a part of a specification
-//     *p_func_sorts represents the function sorts that are already found
-//Post:*p_func_sorts is extended with the function sorts in part that did not
-//     already occur in *p_func_sorts
-
 static void get_sorts_list(ATermList parts, ATermList *p_sorts);
 //Pre: parts is a list of parts of a specification
 //     *p_sorts represents the sorts that are already found
 //Post:*p_sorts is extended with the sorts in parts that did not
 //     already occur in *p_sorts
-
-static void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts);
-//Pre: parts is a list of parts of a specification
-//     *p_func_sorts represents the function sorts that are already found
-//Post:*p_funct_sorts is extended with the function sorts in parts that did not
-//     already occur in *p_func_sorts
 
 //pre: DataExpr is a data expression,
 //     Context is the substitution context to use.
@@ -299,17 +287,6 @@ ATermList get_sorts(ATerm term)
 
 }
 
-ATermList get_function_sorts(ATerm term)
-{
-  ATermList func_sorts = ATmakeList0();
-  if (ATgetType(term) == AT_APPL) {
-    get_function_sorts_appl((ATermAppl) term, &func_sorts);
-  } else { //ATgetType(term) == AT_LIST
-    get_function_sorts_list((ATermList) term, &func_sorts);
-  }
-  return func_sorts;
-}
-
 void get_sorts_appl(ATermAppl part, ATermList *p_sorts)
 {
   if (gsIsSortExpr(part)) {
@@ -327,37 +304,11 @@ void get_sorts_appl(ATermAppl part, ATermList *p_sorts)
   }
 }
 
-void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts)
-{
-  if (gsIsSortArrow(part)) {
-    if (ATindexOf(*p_func_sorts, (ATerm) part, 0) == -1) {
-      *p_func_sorts = ATinsert(*p_func_sorts, (ATerm) part);
-    }
-  }
-  int nr_args = ATgetArity(ATgetAFun(part));
-  for (int i = 0; i < nr_args; i++) {
-    ATerm arg = ATgetArgument(part, i);
-    if (ATgetType(arg) == AT_APPL)
-      get_function_sorts_appl((ATermAppl) arg, p_func_sorts);
-    else //ATgetType(arg) == AT_LIST
-      get_function_sorts_list((ATermList) arg, p_func_sorts);
-  }
-}
-
 void get_sorts_list(ATermList parts, ATermList *p_sorts)
 {
   while (!ATisEmpty(parts))
   {
     get_sorts_appl(ATAgetFirst(parts), p_sorts);
-    parts = ATgetNext(parts);
-  }
-}
-
-void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts)
-{
-  while (!ATisEmpty(parts))
-  {
-    get_function_sorts_appl(ATAgetFirst(parts), p_func_sorts);
     parts = ATgetNext(parts);
   }
 }
