@@ -27,7 +27,6 @@ Cluster::Cluster(int r) {
   deadlock = false;
   markedState = 0;
   visObject = -1;
-  visObjectTop = -1;
   markedTransitionCount = 0;
   rank = r;
   selected = false;
@@ -600,16 +599,20 @@ void Cluster::setVisObject(int vo) {
   visObject = vo;
 }
 
-int Cluster::getVisObjectTop() const {
-  return visObjectTop;
+int Cluster::getBranchVisObject(int i) const {
+  return branchVisObjects[i];
 }
 
-bool Cluster::hasVisObjectTop() const {
-  return (visObjectTop >= 0);
+int Cluster::getNumBranchVisObjects() const {
+  return branchVisObjects.size();
 }
 
-void Cluster::setVisObjectTop(int vo) {
-  visObjectTop = vo;
+void Cluster::addBranchVisObject(int vo) {
+  branchVisObjects.push_back(vo);
+}
+
+void Cluster::clearBranchVisObjects() {
+  branchVisObjects.clear();
 }
 
 void Cluster::select()

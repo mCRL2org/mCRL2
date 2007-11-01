@@ -89,10 +89,11 @@ class Cluster {
 
     // Methods for visualization
     int   getVisObject() const;
-    int   getVisObjectTop() const;
-    bool  hasVisObjectTop() const;
     void  setVisObject(int vo);
-    void  setVisObjectTop(int vo);
+    int   getBranchVisObject(int i) const;
+    int   getNumBranchVisObjects() const;
+    void  addBranchVisObject(int vo);
+    void  clearBranchVisObjects();
     
     // Methods for selection
     void  select();
@@ -121,7 +122,7 @@ class Cluster {
     std::vector< State* > undecidedStates;
     std::vector< std::vector< std::vector< State* > > > slots;
     int visObject;
-    int visObjectTop;
+    std::vector< int > branchVisObjects;
     bool selected;
     void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
     void spreadSlots(unsigned int ring);

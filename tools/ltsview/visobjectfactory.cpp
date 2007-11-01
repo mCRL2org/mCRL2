@@ -73,20 +73,14 @@ void VisObject::setPrimitive(int p) {
 void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha) {
 	glColor4ub(color.r,color.g,color.b,alpha);
 	glPushMatrix();
-        
 	glMultMatrixf(matrix);
-
-        for(size_t i = 0; i < identifiers.size(); ++i)
-        {
-          glPushName(identifiers[i]);
-        }
-        
+  for(size_t i = 0; i < identifiers.size(); ++i) {
+    glPushName(identifiers[i]);
+  }
 	pf->drawPrimitive(primitive);
-
-        for(size_t i = 0; i < identifiers.size(); ++i)
-        {
-          glPopName();
-        }
+  for(size_t i = 0; i < identifiers.size(); ++i) {
+    glPopName();
+  }
 	glPopMatrix();
 }
 
@@ -137,15 +131,14 @@ void VisObjectFactory::clear() {
 	objects_sorted.clear();
 }
 
-int VisObjectFactory::makeObject(int primitive, vector<int> ids) {
+int VisObjectFactory::makeObject(int primitive, vector<int> &ids) {
 	VisObject *vo = new VisObject();
 	glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
 	vo->setPrimitive(primitive);
-        
-        for(size_t i = 0; i < ids.size(); ++i)
-        {
-          vo->addIdentifier(ids[i]);
-        }
+  
+  for(size_t i = 0; i < ids.size(); ++i) {
+    vo->addIdentifier(ids[i]);
+  }
         
 	objects.push_back(vo);
 	objects_sorted.push_back(vo);
