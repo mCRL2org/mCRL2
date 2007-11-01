@@ -221,7 +221,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   // Determine which phases the linearizer will go through. Default is all.
   m.append(d.create< label >().set_text(" ")).
     append(d.create< label >().set_text("Stop after: ")).
-    append(d.create< horizontal_box >().
+    append(d.create< vertical_box >().
         append(phase_selector.associate(phParse, "Parsing")).
         append(phase_selector.associate(phTypeCheck, "Type checking")).
         append(phase_selector.associate(phDataImpl, "Data implementation")).
