@@ -8,6 +8,8 @@
 #include "librewrite.h"
 #include "lps2lts.h"
 #include "exploration.h"
+#include <stdio.h>
+#include <time.h>
 
 #include "squadt_interactor.h"
 
@@ -409,6 +411,13 @@ std::string add_output_file(tipi::configuration& c, const char* identifier, std:
   return s;
 }
 
+void wait ( int seconds )
+{
+  clock_t endwait;
+  endwait = clock () + seconds * CLOCKS_PER_SEC ;
+  while (clock() < endwait) {}
+}
+
 bool squadt_interactor::perform_task(tipi::configuration &configuration)
 {
   lts_generation_options lgopts;
@@ -475,7 +484,10 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
 
     ok &= finalise_lts_generation();
   }
-
+  
+  wait(1);  // wait one second to give squadt the opportunity to 
+            // update its screen completely, and print the messages
+            // on the size of the generated transition system.
   return ok;
 }
 
