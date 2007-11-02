@@ -17,13 +17,7 @@ test-suite lps
       [ run state_formula_test.cpp ]
       [ run rename_test.cpp ]
       [ run action_test.cpp ]
-      [ run data_expression.cpp ]
-      [ run data_test.cpp ]
       [ run time.cpp ]
-      [ run data_utility_test.cpp ]
       [ run aterm_algorithm_test.cpp ]
-      [ run operators.cpp ]
-      [ run sort_test.cpp ]
-      [ run replace_test.cpp ]
       [ run parelm_test.cpp ]
     ;

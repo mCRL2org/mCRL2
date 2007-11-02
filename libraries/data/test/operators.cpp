@@ -50,7 +50,6 @@ int test_main(int, char*[])
   set<data_operation> functions;
   find_all_if(t, is_data_operation, inserter(functions, functions.end()));
 
-/*
   // assignment
   t = t;
   t = T;
@@ -105,7 +104,6 @@ int test_main(int, char*[])
   set<ATermAppl> sA;
   set<ATermList> sL;
   set<D> sD;
-*/
 
   return 0;
 }
