@@ -256,7 +256,7 @@ namespace squadt {
     public:
 
       /** \brief Type for functions that is used to handle incoming process state changes */
-      typedef boost::function < void () >                                                    status_callback_function;
+      typedef boost::function < void () >                                                     status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
       typedef boost::function < void (tipi::layout::tool_display::sptr) >                     display_layout_callback_function;
@@ -277,15 +277,6 @@ namespace squadt {
 
     private:
  
-      /** \brief Actualisation function for layout changes */
-      display_layout_callback_function layout_change_handler;
- 
-      /** \brief Actualisation function for user interface state changes */
-      display_update_callback_function state_change_handler;
- 
-      /** \brief Actualisation function for incoming change messages */
-      status_message_callback_function message_change_handler;
-
       /** \brief Actualisation function for process state changes */
       status_callback_function         status_change_handler;
  
@@ -304,7 +295,7 @@ namespace squadt {
       void start_tool_operation(processor::sptr const&, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool configuration operation */
-      void tool_configuration(processor::sptr, boost::shared_ptr < tipi::configuration > const&);
+      void tool_configuration(processor::sptr, boost::shared_ptr < tipi::configuration >);
 
       /** \brief Actual tool execution with a configuration */
       void tool_operation(processor::sptr, boost::shared_ptr < tipi::configuration > const&);
@@ -318,19 +309,13 @@ namespace squadt {
       void set_status_handler(status_callback_function);
 
       /** \brief Set the callback handler for display layout changes */
-      void set_display_layout_handler(display_layout_callback_function);
-
-      /** \brief Set the callback handler for display data changes */
-      void set_display_update_handler(tipi::layout::tool_display::sptr, display_update_callback_function);
+      void set_display_layout_handling(display_layout_callback_function const&, display_update_callback_function const&);
 
       /** \brief Set the callback handler for incoming status messages */
       void set_status_message_handler(status_message_callback_function);
 
       /** \brief Set the callback handler for display layout changes to default */
-      void reset_display_layout_handler();
-
-      /** \brief Set the callback handler for display data changes to default */
-      void reset_display_update_handler();
+      void reset_display_layout_handling();
 
       /** \brief Set the callback handler for incoming status messages */
       void reset_status_message_handler();

@@ -63,13 +63,12 @@ namespace squadt {
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < task_monitor >& l, boost::shared_ptr < executor_impl >& w) {
       process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
 
-      if (l.get() != 0) {
+      if (l) {
         l->attach_process(p);
+        l->get_logger()->log(1, "executing command `" + c.as_string() + "'\n");
       }
 
       processes.push_back(p);
-
-      l->get_logger()->log(1, "executing command `" + c.as_string() + "'\n");
 
       p->execute(c);
     }

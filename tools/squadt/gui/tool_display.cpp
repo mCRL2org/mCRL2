@@ -584,7 +584,8 @@ namespace squadt {
       build();
 
       /* Connect event handlers */
-      m_monitor->set_display_layout_handler(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1));
+      m_monitor->set_display_layout_handling(boost::bind(&GUI::tool_display::schedule_layout_change, this, _1),
+                                             boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
       m_monitor->set_status_message_handler(boost::bind(&GUI::tool_display::schedule_log_update, this, _1));
     }
 
@@ -665,8 +666,6 @@ namespace squadt {
     void tool_display::remove(bool u) {
       struct local {
         static void trampoline(tool_display* display) {
-          display->m_layout.reset();
-
           wxSizer* s = display->GetParent()->GetSizer();
 
           s->Show(display, false, true);
@@ -680,12 +679,8 @@ namespace squadt {
         }
       };
 
+      m_layout.reset();
       m_event_handler.clear();
-
-      /* Ignore all scheduled updates to the tool display */
-      m_monitor->reset_display_update_handler();
-      m_monitor->reset_display_layout_handler();
-      m_monitor->reset_status_message_handler();
 
       if (u) {
         m_project->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
@@ -793,14 +788,23 @@ namespace squadt {
     void tool_display::update(boost::weak_ptr < tipi::layout::tool_display > w, std::vector < tipi::layout::element const* > l) {
       using namespace detail;
 
-      tool_display_mediator m(m_event_handler, this);
+      boost::shared_ptr < tipi::layout::tool_display > p(w.lock()); 
 
-      BOOST_FOREACH(tipi::layout::element const* i, l) {
-        m_event_handler.execute_handlers(i, false);
-      }
-
-      if (w.lock().get()) {
+      if (p) {
+        tool_display_mediator m(m_event_handler, this);
+       
+        BOOST_FOREACH(tipi::layout::element const* i, l) {
+          m_event_handler.execute_handlers(i, false);
+        }
+       
         GetParent()->Layout();
+
+        /* Toggle scrollbar availability on demand */
+        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+
+        size_event.SetEventObject(GetParent());
+
+        GetParent()->GetParent()->ProcessEvent(size_event);
       }
     }
 
@@ -846,23 +850,20 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(tipi::report::sptr l) {
-      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, m_layout, l));
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
     }
 
     /**
      * \param[in] l the layout specification
      **/
-    void tool_display::schedule_layout_change(tipi::layout::tool_display::sptr l) {
+    void tool_display::schedule_layout_change(boost::shared_ptr < tipi::layout::tool_display > l) {
       m_event_handler.clear();
 
-      /* Register handler for updates */
-      m_monitor->set_display_update_handler(l, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
-
-      m_project->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, m_layout, l));
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
     }
 
     void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
-      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update, this, m_layout, l));
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
     }
   }
 }

@@ -26,7 +26,7 @@ namespace tipi {
         /** \brief The last received set of controller capabilities */
         boost::shared_ptr < controller::capabilities > current_controller_capabilities;
  
-        /** \brief The object that descibed the capabilities of the current tool */
+        /** \brief The object that described the capabilities of the current tool */
         tool::capabilities                             current_tool_capabilities;
  
         /** \brief This object reflects the current configuration */

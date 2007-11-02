@@ -216,7 +216,12 @@ namespace squadt {
       switch (s) {
         case process::stopped:
           for (processor::output_object_iterator i = owner.get_output_iterator(); i.valid(); ++i) {
-            (*i)->status = object_descriptor::reproducible_out_of_date;
+            if (exists((*i)->location)) {
+              (*i)->status = object_descriptor::reproducible_out_of_date;
+            }
+            else {
+              (*i)->status = object_descriptor::reproducible_nonexistent;
+            }
           }
           break;
         case process::completed:
@@ -259,7 +264,7 @@ namespace squadt {
     return (execution::process::stopped);
   }
 
-  void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < tipi::configuration > const& c) {
+  void processor::monitor::tool_configuration(processor::sptr t, boost::shared_ptr < tipi::configuration > c) {
     assert(t.get() == &owner);
 
     /* collect set of output arguments of the existing configuration */
@@ -350,18 +355,9 @@ namespace squadt {
   /**
    * \param[in] h the function or functor that is invoked at layout change
    **/
-  void processor::monitor::set_display_layout_handler(display_layout_callback_function h) {
+  void processor::monitor::set_display_layout_handling(display_layout_callback_function const& hi, display_update_callback_function const& hu) {
     /* Set the handler for incoming layout messages */
-    activate_display_layout_handler(h);
-  }
-
-  /**
-   * \param[in] d the tool display associated with this monitor
-   * \param[in] h the function or functor that is invoked at layout change
-   **/
-  void processor::monitor::set_display_update_handler(tipi::layout::tool_display::sptr d, display_update_callback_function h) {
-    /* Set the handler for incoming layout messages */
-    activate_display_update_handler(d, h);
+    activate_display_layout_handling(hi, hu);
   }
 
   /**
@@ -372,14 +368,9 @@ namespace squadt {
     activate_status_message_handler(h);
   }
 
-  void processor::monitor::reset_display_layout_handler() {
+  void processor::monitor::reset_display_layout_handling() {
     /* Set the handler for incoming layout messages */
-    deactivate_display_layout_handler();
-  }
-
-  void processor::monitor::reset_display_update_handler() {
-    /* Set the handler for incoming layout messages */
-    deactivate_display_update_handler();
+    deactivate_display_layout_handling();
   }
 
   void processor::monitor::reset_status_message_handler() {
@@ -390,8 +381,7 @@ namespace squadt {
   void processor::monitor::reset_handlers() {
     /* Set the handler for incoming layout messages */
     deactivate_status_message_handler();
-    deactivate_display_layout_handler();
-    deactivate_display_update_handler();
+    deactivate_display_layout_handling();
     status_change_handler.clear();
   }
 

@@ -12,6 +12,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
@@ -219,20 +220,20 @@ namespace squadt {
    * \param[in] m the message that was just delivered
    **/
   void tool_manager_impl::handle_relay_connection(tipi::message_ptr const& m) {
-    instance_identifier id = atol(m->to_string().c_str());
+    instance_identifier id = boost::lexical_cast< instance_identifier > (m->to_string());
 
     if (instances.find(id) == instances.end()) {
-      throw std::runtime_error("Peer provided invalid instance identifier; the connection has been terminated.");
+      get_logger()->log(1, "connection terminated; peer provided invalid instance identifier");
     }
 
     execution::task_monitor::sptr p(instances[id]);
 
     relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
 
+    instances.erase(id);
+
     /* Signal the listener that a connection has been established */
     p->signal_connection(m->get_originator());
-
-    instances.erase(id);
   }
   /// \endcond
 

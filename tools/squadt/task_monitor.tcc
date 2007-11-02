@@ -212,12 +212,15 @@ namespace squadt {
     inline void task_monitor_impl::signal_connection(boost::shared_ptr < task_monitor_impl >& m, tipi::message::end_point) {
       boost::mutex::scoped_lock l(register_lock);
  
-      connection_condition.notify_all();
+      logger->log(1, boost::str(boost::format("connection established with `%s' (process id %u)\n")
+                % associated_process->get_executable_name() % associated_process->get_identifier()));
 
       /* Service connection handlers */
       if (0 < handlers.count(connection)) {
         task_monitor_impl::service_handlers(m, connection);
       }
+
+      connection_condition.notify_all();
     }
 
     inline void task_monitor_impl::shutdown() {

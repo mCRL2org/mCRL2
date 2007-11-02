@@ -67,31 +67,16 @@ namespace tipi {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_task_start);
     }
 
-    void communicator::deactivate_display_layout_handler() {
-      boost::static_pointer_cast < communicator_impl > (impl)->deactivate_display_layout_handler();
-    }
-
     /**
      * \param h the function that is called when a new layout for the display has been received
      **/
-    void communicator::activate_display_layout_handler(display_layout_handler_function h) {
+    void communicator::activate_display_layout_handling(display_layout_handler_function const& hi, display_update_handler_function const& hu) {
       boost::static_pointer_cast < communicator_impl > (impl)->
-        activate_display_layout_handler(boost::static_pointer_cast < communicator_impl > (impl), h);
+        activate_display_layout_handling(boost::static_pointer_cast < communicator_impl > (impl), hi, hu);
     }
 
-    void communicator::deactivate_display_update_handler() {
-      boost::static_pointer_cast < communicator_impl > (impl)->deactivate_display_update_handler();
-    }
-
-    /**
-     * \param d pointer to a tool display
-     * \param h the function that is called when a new layout for the display has been received
-     *
-     * \pre d.get() != 0
-     **/
-    void communicator::activate_display_update_handler(tipi::layout::tool_display::sptr d, display_update_handler_function h) {
-      boost::static_pointer_cast < communicator_impl > (impl)->
-        activate_display_update_handler(boost::static_pointer_cast < communicator_impl > (impl), d, h);
+    void communicator::deactivate_display_layout_handling() {
+      boost::static_pointer_cast < communicator_impl > (impl)->deactivate_display_layout_handling();
     }
 
     void communicator::deactivate_status_message_handler() {
@@ -101,77 +86,138 @@ namespace tipi {
     /**
      * \param h the function that is called when a new layout for the display has been received
      **/
-    void communicator::activate_status_message_handler(status_message_handler_function h) {
+    void communicator::activate_status_message_handler(status_message_handler_function& h) {
       boost::static_pointer_cast < communicator_impl > (impl)->
         activate_status_message_handler(boost::static_pointer_cast < communicator_impl > (impl), h);
     }
 
+    communicator_impl::communicator_impl() {
+      using namespace boost;
+
+      struct trampoline {
+        static void capabilities(const messenger::message_ptr& m, communicator_impl& impl) {
+          if (m->is_empty()) {
+            message m(visitors::store(communicator::m_controller_capabilities), tipi::message_capabilities);
+        
+            impl.send_message(m);
+          }
+        }
+        static void configuration(const messenger::message_ptr& m, communicator_impl& impl) {
+          impl.m_configuration.reset(new tipi::configuration);
+
+          visitors::restore(*impl.m_configuration, m->to_string());
+        }
+      };
+
+      /* set default handlers for delivery events */
+      add_handler(tipi::message_capabilities, bind(&trampoline::capabilities, _1, boost::ref(*this)));
+      add_handler(tipi::message_configuration, bind(&trampoline::configuration, _1, boost::ref(*this)));
+    }
+    
     /**
-     * \param[in] e a tipi layout element of which the data is to be sent
-     * \param[in] display the associated tipi::display element
+     * \param[in] impl a weak pointer to this object (for lifetime check)
+     * \param h the function that is called when a new layout for the display has been received
+     *
+     * \note deactivates event handling if h.empty()
      **/
-    void communicator::send_display_update(tipi::layout::element const& e, boost::shared_ptr < tipi::display const >& display) {
-      std::string c;
+    void communicator_impl::activate_status_message_handler(boost::weak_ptr < communicator_impl > impl, status_message_handler_function& h) {
+      struct trampoline {
+        static void status_message(const messenger::message_ptr& m, status_message_handler_function h) {
+          boost::shared_ptr < tipi::report > r(new tipi::report);
 
-      try {
-        tipi::store_visitor v(c);
+          tipi::visitors::restore(*r, m->to_string());
 
-        v.visit(e, display->find(&e));
-      }
-      catch (bool) {
-        // find failed for some reason
-      }
+          h(r);
+        }
+      };
 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
+      boost::shared_ptr < communicator_impl > g(impl.lock());
+
+      if (g.get() != 0) {
+        /* Remove any previous handlers */
+        clear_handlers(tipi::message_report);
+
+        if (!h.empty()) {
+          add_handler(tipi::message_report, boost::bind(&trampoline::status_message, _1, h));
+        }
+      } 
     }
 
-    /** \internal
-     * \param[in] impl weak pointer to this object (for life check)
-     * \param[in] m pointer to the message
+    /**
+     * \param[in] impl a weak pointer to this object (for lifetime check)
      * \param[in] h the function that is called when a new layout for the display has been received
-     * \pre impl.get() == this
+     *
+     * \note deactivates event handling if h.empty()
      **/
-    void communicator_impl::display_layout_handler(boost::weak_ptr < communicator_impl > impl, messenger::message_ptr const& m, display_layout_handler_function h) {
-      struct trampoline { 
-        inline static void send_display_data(boost::weak_ptr < communicator_impl > impl, void const* e, boost::shared_ptr< tipi::display const > display) { 
-          boost::shared_ptr < communicator_impl > g(impl.lock());
+    void communicator_impl::activate_display_layout_handling(boost::weak_ptr < communicator_impl > impl, display_layout_handler_function const& hi, display_update_handler_function const& hu) {
+      struct trampoline {
+        static void update(const messenger::message_ptr& m, boost::weak_ptr < tipi::layout::tool_display > d, display_update_handler_function h) {
+          boost::shared_ptr < tipi::layout::tool_display > g(d.lock());
 
+          if (g) {
+            std::vector < tipi::layout::element const* > elements;
+     
+            g->update(m->to_string(), elements);
+     
+            h(elements);
+          }
+        }
+
+        static void send_display_data(boost::weak_ptr < communicator_impl > impl, void const* e, boost::shared_ptr< tipi::display const > display) { 
+          boost::shared_ptr < communicator_impl > g(impl.lock());
+      
           if (g.get() != 0) {
             std::string c; 
-
+      
             try { 
               tipi::store_visitor v(c); 
-
+      
               v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
                 display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
             } 
             catch (bool) {
               // find failed for some reason
             }
-
+      
             g->send_message(tipi::message(c, tipi::message_display_data)); 
           }
         } 
-      }; 
+
+        static void instantiate(messenger::message_ptr const& m, boost::weak_ptr < communicator_impl > impl, display_layout_handler_function h1, display_update_handler_function h2) {
+          boost::shared_ptr < communicator_impl > g(impl.lock());
+
+          if (g) {
+            tipi::layout::tool_display::sptr d(new layout::tool_display);
+          
+            // Make sure the global event handler (the default event handler does not have a global event) is empty
+            d->remove();
+          
+            try {
+              visitors::restore(*d, m->to_string());
+            
+              d->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
+           
+              // Register handler function
+              g->clear_handlers(tipi::message_display_data);
+           
+              g->add_handler(tipi::message_display_data, boost::bind(&trampoline::update, _1, d, h2));
+          
+              h1(d);
+            }
+            catch (std::runtime_error& e) {
+              g->logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
+            }
+          }
+        }
+      };
 
       boost::shared_ptr < communicator_impl > g(impl.lock());
 
       if (g.get() != 0) {
-        tipi::layout::tool_display::sptr d(new layout::tool_display);
- 
-        // Make sure the global event handler (the default event handler does not have a global event) is empty
-        d->remove();
+        /* Remove any previous handlers */
+        clear_handlers(tipi::message_display_layout);
 
-        try {
-          visitors::restore(*d, m->to_string());
-      
-          d->add(boost::bind(&trampoline::send_display_data, impl, _1, d)); 
-
-          h(d);
-        }
-        catch (std::runtime_error& e) {
-          logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
-        }
+        add_handler(tipi::message_display_layout, boost::bind(&trampoline::instantiate, _1, g, hi, hu));
       }
     }
   }

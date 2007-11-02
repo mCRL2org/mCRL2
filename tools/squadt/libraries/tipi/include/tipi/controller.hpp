@@ -76,9 +76,6 @@ namespace tipi {
         /** \brief Send a specification of a (perhaps partial) configuration */
         void send_configuration(boost::shared_ptr < tipi::configuration > const&);
  
-        /** \brief Send data to update the state of the last communicated display layout */
-        void send_display_update(tipi::layout::element const&, boost::shared_ptr < tipi::display const >&);
- 
         /** \brief Sends a message to a tool that it may start processing */
         void send_start_signal();
  
@@ -95,22 +92,16 @@ namespace tipi {
         boost::shared_ptr < configuration > get_configuration() const;
 
         /** \brief Clears handlers for display change messages */
-        void deactivate_display_layout_handler();
+        void deactivate_display_layout_handling();
 
         /** \brief Sets a handler for layout messages using a handler function */
-        void activate_display_layout_handler(display_layout_handler_function);
-
-        /** \brief Clears handlers for display update messages */
-        void deactivate_display_update_handler();
-
-        /** \brief Sets a handler for layout messages using a handler function */
-        void activate_display_update_handler(tipi::layout::tool_display::sptr, display_update_handler_function);
+        void activate_display_layout_handling(display_layout_handler_function const&, display_update_handler_function const&);
 
         /** \brief Clears handlers for status messages */
         void deactivate_status_message_handler();
 
         /** \brief Sets a handler for layout messages using a handler function */
-        void activate_status_message_handler(status_message_handler_function);
+        void activate_status_message_handler(status_message_handler_function&);
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {

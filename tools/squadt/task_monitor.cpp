@@ -87,10 +87,9 @@ namespace squadt {
     void task_monitor::signal_connection(tipi::message::end_point e) {
       boost::shared_ptr < task_monitor_impl > m = boost::dynamic_pointer_cast < task_monitor_impl > (impl);
 
-      m->signal_connection(m, e);
-
-      get_logger()->log(1, boost::str(boost::format("connection established with `%s' (process id %u)\n")
-                % m->associated_process->get_executable_name() % m->associated_process->get_identifier()));
+      if (impl) {
+        m->signal_connection(m, e);
+      }
     }
 
     /**

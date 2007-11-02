@@ -69,7 +69,7 @@ namespace transport {
       void connect(boost::shared_ptr < basic_transceiver > const&, std::string const&, short int const&);
 
       /** \brief Disconnect all */
-      void disconnect();
+      virtual void disconnect();
 
       /** \brief Disconnect connection number <|number|> */
       bool disconnect(size_t number);
