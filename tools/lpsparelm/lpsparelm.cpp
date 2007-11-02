@@ -260,12 +260,13 @@ void lpsParElm::writeStream(lps::specification newSpec)  {
 // Finds all used variables within a data_expression
 //
 void lpsParElm::findDataVariablesInDataExpression(lps::data_expression const& input){
-	if (is_data_variable(input.head())){ 
-      p_usedVars.insert(input.head());
-	  gsDebugMsg("Found Var: %s\n", input.head().to_string().c_str() );
-	  }   
-	if (!input.arguments().empty()){
- 		for(lps::data_expression_list::iterator i= input.arguments().begin(); i != input.arguments().end(); ++i){
+	if (is_data_variable(DEPRECATED_FUNCTION_HEAD(input))){ 
+      p_usedVars.insert(DEPRECATED_FUNCTION_HEAD(input));
+	  gsDebugMsg("Found Var: %s\n", DEPRECATED_FUNCTION_HEAD(input).to_string().c_str() );
+	  }
+	lps::data_expression_list arguments = DEPRECATED_FUNCTION_ARGUMENTS(input);
+	if (!arguments.empty()){
+ 		for(lps::data_expression_list::iterator i= arguments.begin(); i != arguments.end(); ++i){
 	    findDataVariablesInDataExpression( *i );
 	  }
     } 
@@ -378,7 +379,7 @@ inline void lpsParElm::output() {
   linear_process lps = p_spec.process();
   summand_list rebuild_summandlist;
   data_variable_list rebuild_process_parameters;
-  data_expression_list rebuild_data_expression_pars;
+  lps::data_expression_list rebuild_data_expression_pars;
   
   for(data_variable_list::iterator i = lps.process_parameters().begin() ; i != lps.process_parameters().end() ; i++){
     if (p_usedVars.find(*i) != p_usedVars.end()){

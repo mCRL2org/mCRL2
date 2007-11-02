@@ -25,6 +25,33 @@
 
 namespace lps {
 
+/// \internal
+template <typename IdentifierGenerator, typename Term>
+aterm_appl rename_process_parameters_helper(const linear_process& p, Term& t, IdentifierGenerator& generator)
+{
+  std::set<identifier_string> forbidden_names = detail::set_union(
+    detail::free_variable_names(p),
+    detail::summand_variable_names(p)
+  );
+  
+  std::vector<data_variable> src;  // contains the variables that need to be renamed
+  std::vector<data_variable> dest; // contains the corresponding replacements
+  generator.add_identifiers(forbidden_names);
+
+  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
+  {
+    identifier_string new_name = generator(i->name());
+    if (new_name != i->name())
+    {
+      // save the old and new value in the src and dest arrays
+      src.push_back(*i);
+      dest.push_back(data_variable(new_name, i->sort()));
+    }
+  }
+  return atermpp::partial_replace(t, detail::make_data_variable_replacer(src, dest));
+}
+
+/*
 /// Renames the process parameters in the process p using the given identifier generator.
 template <typename IdentifierGenerator>
 linear_process rename_process_parameters(const linear_process& p, IdentifierGenerator& generator)
@@ -50,6 +77,14 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
   }
   return atermpp::partial_replace(p, detail::make_data_variable_replacer(src, dest));
 }
+*/
+
+/// Renames the process parameters in the process p using the given identifier generator.
+template <typename IdentifierGenerator>
+linear_process rename_process_parameters(const linear_process& p, IdentifierGenerator& generator)
+{
+  return rename_process_parameters_helper(p, p, generator);
+}
 
 /// Renames the process parameters in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
@@ -59,6 +94,23 @@ linear_process rename_process_parameters(const linear_process& p, const std::set
   lps::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(p, generator);
+}
+
+/// Renames the process parameters in the specification spec using the given identifier generator.
+template <typename IdentifierGenerator>
+specification rename_process_parameters(const specification& spec, IdentifierGenerator& generator)
+{
+  return rename_process_parameters_helper(spec.process(), spec, generator);
+}
+
+/// Renames the process parameters in the specification spec, such that none of them
+/// appears in forbidden_names. Postfix is used as a hint for the new name.
+inline
+specification rename_process_parameters(const specification& spec, const std::set<identifier_string>& forbidden_names, const std::string postfix)
+{
+  lps::postfix_identifier_generator generator(postfix);
+  generator.add_identifiers(forbidden_names);
+  return rename_process_parameters(spec, generator);
 }
 
 /// Renames the free variables in the process p using the given identifier generator.
@@ -74,7 +126,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
   std::vector<data_variable> dest; // contains the corresponding replacements
   generator.add_identifiers(forbidden_names);
 
-  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
+  for (data_variable_list::iterator i = p.free_variables().begin(); i != p.free_variables().end(); ++i)
   {
     identifier_string new_name = generator(i->name());
     if (new_name != i->name())

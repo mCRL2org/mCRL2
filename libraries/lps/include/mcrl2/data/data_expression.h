@@ -63,23 +63,8 @@ class data_expression: public aterm_appl
       ATermAppl result = gsGetSort(*this);
       assert(!gsIsSortUnknown(result));
       return sort_expression(result);
-    }     
-
-    /// Returns the head of the data expression.
-    /// DEPRECATED
-    ///
-    data_expression head() const
-    {
-      return gsGetDataExprHead(*this);
     }
 
-    /// Returns the arguments of the data expression.
-    ///
-    data_expression_list arguments() const
-    {
-      return gsGetDataExprArgs(*this);
-    }  
-  
     /// Applies a substitution to this data expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -87,7 +72,7 @@ class data_expression: public aterm_appl
     data_expression substitute(Substitution f) const
     {
       return data_expression(f(aterm(*this)));
-    }     
+    }
 };
 
 /// \brief Returns true if the term t is a data expression
@@ -95,6 +80,22 @@ inline
 bool is_data_expression(aterm_appl t)
 {
   return gsIsDataExpr(t);
+}
+
+/// DEPRECATED Returns the head of the data expression t.
+///
+inline
+data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
+{
+  return gsGetDataExprHead(t);
+}
+
+/// DEPRECATED Returns the arguments of the data expression t.
+///
+inline
+data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
+{
+  return gsGetDataExprArgs(t);
 }
 
 /// Accessor functions and predicates for data expressions.
@@ -112,7 +113,7 @@ namespace data_expr {
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
   /// \brief Returns true if the term t is equal to nil
-  inline bool is_nil(aterm_appl t) { return t == gsMakeNil(); }     
+  inline bool is_nil(aterm_appl t) { return t == gsMakeNil(); }
 
   /// \brief Returns true if the term t is equal to true
   inline bool is_true(aterm_appl t) { return gsIsDataExprTrue(t); }
@@ -136,7 +137,7 @@ namespace data_expr {
   inline bool is_binder(aterm_appl t) { return gsIsBinder(t); }
 
   /// \brief Returns true if the term t is a where expression
-  inline bool is_where(aterm_appl t) { return gsIsWhr(t); }                                 
+  inline bool is_where(aterm_appl t) { return gsIsWhr(t); }
 
   /// \brief Returns true if the term t has type real
   inline bool is_real(aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
@@ -204,14 +205,14 @@ namespace data_expr {
   {
     return data_expression(gsMakeDataExprTrue());
   }
-  
+
   /// \brief Returns the expression false
   inline
   data_expression false_()
   {
     return data_expression(gsMakeDataExprFalse());
   }
-  
+
   /// \brief Returns not applied to p
   /// This function contains optimizations for true and false arguments.
   inline
@@ -224,7 +225,7 @@ namespace data_expr {
     else
       return data_expression(gsMakeDataExprNot(p));
   }
-  
+
   /// \brief Returns and applied to p and q
   /// This function contains optimizations for true and false arguments.
   inline
@@ -241,7 +242,7 @@ namespace data_expr {
     else
       return data_expression(gsMakeDataExprAnd(p,q));
   }
-  
+
   /// \brief Returns or applied to p and q
   /// This function contains optimizations for true and false arguments.
   inline
@@ -258,14 +259,14 @@ namespace data_expr {
     else
       return data_expression(gsMakeDataExprOr(p,q));
   }
-  
+
   /// \brief Returns or applied to the sequence of data expressions [first, last[
   /// This function contains optimizations for true and false arguments.
   template <typename FwdIt>
   data_expression multi_or(FwdIt first, FwdIt last)
   {
     using namespace data_expr;
-  
+
     if (first == last)
       return data_expr::false_();
     data_expression result = *first++;
@@ -275,14 +276,14 @@ namespace data_expr {
     }
     return result;
   }
-  
+
   /// \brief Returns and_ applied to the sequence of data expressions [first, last[
   /// This function contains optimizations for true and false arguments.
   template <typename FwdIt>
   data_expression multi_and(FwdIt first, FwdIt last)
   {
     using namespace data_expr;
-  
+
     if (first == last)
       return data_expr::true_();
     data_expression result = *first++;
@@ -344,98 +345,98 @@ namespace data_expr {
   {
     return gsMakeDataExprNeg(d);
   }
-  
+
   /// \brief Returns the expression d + e
   inline
   data_expression plus(data_expression d, data_expression e)
   {
     return gsMakeDataExprAdd(d, e);
   }
-  
+
   /// \brief Returns the expression d - e
   inline
   data_expression minus(data_expression d, data_expression e)
   {
     return gsMakeDataExprSubt(d, e);
   }
-  
+
   /// \brief Returns the expression d * e
   inline
   data_expression multiplies(data_expression d, data_expression e)
   {
     return gsMakeDataExprMult(d, e);
   }
-  
+
   /// \brief Returns the expression d / e
   inline
   data_expression divides(data_expression d, data_expression e)
   {
     return gsMakeDataExprDiv(d, e);
   }
-  
+
   /// \brief Returns the expression d % e
   inline
   data_expression modulus(data_expression d, data_expression e)
   {
     return gsMakeDataExprMod(d, e);
   }
-  
+
   /// \brief Returns the expression d = e
   inline
   data_expression equal_to(data_expression d, data_expression e)
   {
     return gsMakeDataExprEq(d, e);
   }
-  
+
   /// \brief Returns the expression d != e
   inline
   data_expression not_equal_to(data_expression d, data_expression e)
   {
     return gsMakeDataExprNeq(d, e);
   }
-  
+
   /// \brief Returns the expression d < e
   inline
   data_expression less(data_expression d, data_expression e)
   {
     return gsMakeDataExprLT(d, e);
   }
-  
+
   /// \brief Returns the expression d > e
   inline
   data_expression greater(data_expression d, data_expression e)
   {
     return gsMakeDataExprGT(d, e);
   }
-  
+
   /// \brief Returns the expression d <= e
   inline
   data_expression less_equal(data_expression d, data_expression e)
   {
     return gsMakeDataExprLTE(d, e);
   }
-  
+
   /// \brief Returns the expression d >= e
   inline
   data_expression greater_equal(data_expression d, data_expression e)
   {
     return gsMakeDataExprGTE(d, e);
   }
-  
+
   /// \brief Returns an expression for the minimum of d and e
   inline
   data_expression min_(data_expression d, data_expression e)
   {
     return gsMakeDataExprMin(d, e);
   }
-  
+
   /// \brief Returns an expression for the maximum of d and e
   inline
   data_expression max_(data_expression d, data_expression e)
   {
     return gsMakeDataExprMax(d, e);
   }
-  
+
   /// \brief Returns an expression for the absolute value of d
   inline
   data_expression abs(data_expression d)

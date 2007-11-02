@@ -42,8 +42,22 @@ class data_application: public data_expression
     data_application(data_expression expr, data_expression_list args)
      : data_expression(gsMakeDataAppl(expr, args))
     {}
+
+    /// Returns the head of the data application.
+    ///
+    data_expression head() const
+    {
+      return gsGetDataExprHead(*this);
+    }
+
+    /// Returns the arguments of the data expression.
+    ///
+    data_expression_list arguments() const
+    {
+      return gsGetDataExprArgs(*this);
+    }
   };
-                                                            
+
 ///////////////////////////////////////////////////////////////////////////////
 // data_application_list
 /// \brief singly linked list of data applications

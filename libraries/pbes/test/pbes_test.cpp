@@ -434,10 +434,6 @@ void test_pbes()
   BOOST_CHECK(!p.is_bes());
   BOOST_CHECK(!e.is_bes());
 
-  // data_expression d  = pbes2data(e, spec);
-  // pbes_expression e1 = data2pbes(d);
-  // BOOST_CHECK(e == e1);
-
   try
   {
     p.load("non-existing file");

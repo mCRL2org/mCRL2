@@ -538,21 +538,21 @@ data_expression pbes_to_data(pbes_expression e)
  
 #ifdef debug2
  gsVerboseMsg("Data_to_pbes_lazy: Head is %s, args are %s\n", 
-	      pp(d.head()).c_str(), pp(d.arguments()).c_str());
+	      pp(DEPRECATED_FUNCTION_HEAD(d)).c_str(), pp(DEPRECATED_FUNCTION_ARGUMENTS(d)).c_str());
 #endif
 
 
- if (is_data_variable(d.head()))
+ if (is_data_variable(DEPRECATED_FUNCTION_HEAD(d)))
 	// d is either a predicate or a data variable with arguments (?)
 	{
-	 std::string varname = data_variable(d.head()).name();
+	 std::string varname = data_variable(DEPRECATED_FUNCTION_HEAD(d)).name();
 #ifdef debug2
 	 gsVerboseMsg("head is data var, varname=%s\n ",varname.c_str());
 #endif
 	 if (varname.at(varname.size()-1) == PREDVAR_MARK)
 	   return 
 	     propositional_variable_instantiation
-	     (identifier_string(varname.substr(0,varname.size()-1)), d.arguments());
+	     (identifier_string(varname.substr(0,varname.size()-1)), DEPRECATED_FUNCTION_ARGUMENTS(d));
 
 	 else
 		return val(d);
@@ -576,7 +576,7 @@ data_expression pbes_to_data(pbes_expression e)
 #ifdef debug2
      gsVerboseMsg("IS IF!\n");
 #endif
-     data_expression_list::iterator i = d.arguments().begin();
+     data_expression_list::iterator i = DEPRECATED_FUNCTION_ARGUMENTS(d).begin();
      data_expression d1 = *i;
      i++;
      data_expression d2 = *i;
@@ -614,7 +614,7 @@ data_expression pbes_to_data(pbes_expression e)
        return(or_(and_(ptest,ptrue),and_(not_(ptest),pfalse)));
    }
  else if ((dname::is_and(d)) || (dname::is_or(d))){
-   data_expression_list::iterator i = d.arguments().begin();
+   data_expression_list::iterator i = DEPRECATED_FUNCTION_ARGUMENTS(d).begin();
    data_expression d1 = *i; i++; 
    data_expression d2 = *i;
    return (is_and(d) ?
@@ -642,7 +642,7 @@ data_expression pbes_to_data(pbes_expression e)
  namespace pname = lps::pbes_expr;
  namespace sname = lps::sort_expr;
  
- data_expression head = d.head();
+ data_expression head = DEPRECATED_FUNCTION_HEAD(d);
  if (is_data_variable(head))
 	// d is either a predicate or a data variable
 	{
@@ -650,7 +650,7 @@ data_expression pbes_to_data(pbes_expression e)
 	 if (varname.at(varname.size()-1) == PREDVAR_MARK)
 		return 
 			propositional_variable_instantiation
-		 (identifier_string(varname.substr(0,varname.size()-1)), d.arguments());
+		 (identifier_string(varname.substr(0,varname.size()-1)), DEPRECATED_FUNCTION_ARGUMENTS(d));
 	 else
 		return val(d);
     }
@@ -940,7 +940,7 @@ data_expression data_expression_simplify
 #ifdef debug
       gsVerboseMsg("DATA_EXPRESSION_SIMPLIFY: IS IF!\n");
 #endif
-      data_expression_list::iterator i = d.arguments().begin();
+      data_expression_list::iterator i = DEPRECATED_FUNCTION_ARGUMENTS(d).begin();
       data_expression d1 = *i;
       i++;
       data_expression d2 = *i;
@@ -1281,8 +1281,8 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
   
   using namespace data_expr;
   
-  data_expression head = d.head();
-  data_expression_list args = d.arguments();
+  data_expression head = DEPRECATED_FUNCTION_HEAD(d);
+  data_expression_list args = DEPRECATED_FUNCTION_ARGUMENTS(d);
   
   //  gsVerboseMsg("FREE_VARS_AND_NO_QUANTS: data expr is %s, head is %s, args are %s\n",
   //       pp(d).c_str(),pp(head).c_str(),pp(args).c_str());
