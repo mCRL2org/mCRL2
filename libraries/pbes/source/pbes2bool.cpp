@@ -147,7 +147,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
 
     data_expression_list tl=X.parameters();
     string s=X.name();
-    f << s.substr(1,s.size()-2); // Remove initial and trailing quotes.
+    f << s; 
     for(data_expression_list::iterator t=tl.begin();
           t!=tl.end(); t++)
     { f << (t==tl.begin()?"(":",");
@@ -1112,6 +1112,7 @@ bool solve_bes(const t_tool_options &tool_options,
 
     set <bes::variable_type> todo;
 
+    // cerr << "RANK" << current_rank << "\n";
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       { 
