@@ -770,13 +770,16 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           // This means we must optimize the bes by substituting true/false for this variable
           // everywhere. For this we use the occurrence set.
   
-          deque <bes::variable_type> to_set_to_true_or_false;
-          to_set_to_true_or_false.push_front(variable_to_be_processed);
+          set <bes::variable_type> to_set_to_true_or_false;
+          to_set_to_true_or_false.insert(variable_to_be_processed);
           for( ; !to_set_to_true_or_false.empty() ; )
           {
-            bes::variable_type w=to_set_to_true_or_false.front();
+            bes::variable_type w=(*to_set_to_true_or_false.begin());
+            // Take the lowest element for substitution, to generate
+            // short counterexample.
+            
             // gsVerboseMsg("------------------ %d\n",(unsigned long)w);
-            to_set_to_true_or_false.pop_front();
+            to_set_to_true_or_false.erase(w);
             for( set <bes::variable_type>::iterator 
                       v=bes_equations.variable_occurrence_set_begin(w);
                       v!=bes_equations.variable_occurrence_set_end(w); 
@@ -793,7 +796,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
               }
 
               if (bes::is_true(b)||bes::is_false(b))
-              { to_set_to_true_or_false.push_front(*v);
+              { to_set_to_true_or_false.insert(*v); 
               }
               relevance_counter++;
               bes_equations.set_rhs(*v,b,w);
