@@ -7,7 +7,6 @@
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
 // TODO: 
-// Optimise finding MU and NU loops.
 // Improve the quality of counterexamples when using approximation.
 
 // ======================================================================
@@ -628,6 +627,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     if (tool_options.opt_strategy>=on_the_fly)
     { variable_to_be_processed=todo.front();
       todo.pop_front();
+      cerr << "Processing variable " << variable_to_be_processed << "\n";
     }
     else
     { variable_to_be_processed=nr_of_processed_variables+1;
@@ -720,6 +720,10 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                                variable_to_be_processed,
                                bes_equations.get_rank(variable_to_be_processed)))
           { new_bes_expression=bes::false_();
+            if (tool_options.opt_construct_counter_example)
+            { bes_equations.counter_example_queue(variable_to_be_processed).
+                   push_back(bes::counter_example(variable_to_be_processed,bes::MU_CYCLE));
+            }
           }
         }
         else           
@@ -729,6 +733,10 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                                variable_to_be_processed,
                                bes_equations.get_rank(variable_to_be_processed)))
           { new_bes_expression=bes::true_();
+            if (tool_options.opt_construct_counter_example)
+            { bes_equations.counter_example_queue(variable_to_be_processed).
+                   push_back(bes::counter_example(variable_to_be_processed,bes::NU_CYCLE));
+            }
           }
         }
       }

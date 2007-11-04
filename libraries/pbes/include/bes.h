@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include <algorithm>
 #include <deque>
+#include <map>
 
 #define RELEVANCE_MASK 1
 #define FIXPOINT_MASK 2
@@ -1242,115 +1243,89 @@ namespace bes
         return data_to_construct_counter_example[v].end();
       }
 
-      bool find_nu_loop(
+      // The following function indicates whether there is a mu/nu loop.
+      bool find_mu_nu_loop_rec(
              bes_expression b,
              variable_type v,
              unsigned long current_rank,
-             std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
-      { if (is_false(b) || is_true(b) || is_dummy(b))
-        { return false;
-        }
-
-        if (is_if(b))
-        { variable_type w=get_variable(condition(b));
-          if ((get_rank(w)!=current_rank)||(w>v))
-          { return false;
-          }
-          if (w==v)
-          { if ( construct_counter_example)
-            { counter_example_queue.push_front(counter_example(w,NU_CYCLE));
-            }
-            if (is_true(then_branch(b)))
-            { return true;
-            }
-            return false;
-          }
-          if (is_true(then_branch(b)))
-          { return find_nu_loop(else_branch(b),v,current_rank,counter_example_queue);
-          }
-          if (is_true(else_branch(b)))
-          { return find_nu_loop(then_branch(b),v,current_rank,counter_example_queue);
-          }
-          return false;
-        }
-
-        if (is_variable(b))
-        { variable_type w=get_variable(b);
-          if (w==v)
-          { if ( construct_counter_example)
-            { counter_example_queue.push_front(counter_example(w,NU_CYCLE));
-            }
-            return true;
-          }
-          if ((get_rank(w)!=current_rank)||(w>v))
-          { return false;
-          }
-          return find_nu_loop(get_rhs(w),v,current_rank,counter_example_queue);
-        }
-
-        if (is_and(b))
-        { return false;
-        }
-        
-        assert(is_or(b));
-        return find_nu_loop(lhs(b),v,current_rank,counter_example_queue) || find_nu_loop(rhs(b),v,current_rank,counter_example_queue);
-      }
-
-      bool find_mu_loop(
-             bes_expression b,
-             variable_type v,
-             unsigned long current_rank,
-             std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
+             std::map < variable_type,bool > &visited_variables,
+             bool is_mu)
       { 
         if (is_false(b) || is_true(b) || is_dummy(b))
         { return false;
         }
 
-        if (is_if(b))
-        { variable_type w=get_variable(condition(b));
-          if ((get_rank(w)!=current_rank)||(w>v))
+        if (is_variable(b))
+        { variable_type w=get_variable(b);
+          if (get_rank(w)!=current_rank)
           { return false;
           }
           if (w==v)
           { 
-            if ( construct_counter_example)
-            { counter_example_queue.push_front(counter_example(w,MU_CYCLE));
-            }
+            return true;
+          }
+          if (visited_variables.find(w)!=visited_variables.end())                                                      { return visited_variables[w];                                                                               }                  
 
-            if (is_false(else_branch(b)))
-            { return true;
+          bool result;
+          result=find_mu_nu_loop_rec(get_rhs(w),v,current_rank,visited_variables,is_mu);
+          visited_variables.insert(std::make_pair(w,result));    
+          return result;
+        }
+
+        if (is_mu)
+        { if (is_and(b))
+          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) || 
+                        find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          }
+
+          if (is_or(b))
+          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) && 
+                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          }
+        }
+        else
+        { if (is_and(b))
+          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) && 
+                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          }
+  
+          if (is_or(b))
+          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) ||
+                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          }
+        }
+
+        if (is_if(b))
+        { 
+          bool r=find_mu_nu_loop_rec(condition(b),v,current_rank,visited_variables,is_mu);
+          if (r)
+          { if (is_mu)
+            { return find_mu_nu_loop_rec(else_branch(b),v,current_rank,visited_variables,is_mu);
             }
-            return false;
-          }
-          if (is_false(then_branch(b)))
-          { return find_mu_loop(else_branch(b),v,current_rank,counter_example_queue);
-          }
-          if (is_false(else_branch(b)))
-          { return find_mu_loop(then_branch(b),v,current_rank,counter_example_queue);
+            return find_mu_nu_loop_rec(then_branch(b),v,current_rank,visited_variables,is_mu);
           }
           return false;
         }
 
-        if (is_variable(b))
-        { variable_type w=get_variable(b);
-          if (w==v)
-          { if ( construct_counter_example)
-            { counter_example_queue.push_front(counter_example(w,MU_CYCLE));
-            }
-            return true;
-          }
-          if ((get_rank(w)!=current_rank)||(w>v))
-          { return false;
-          }
-          return find_mu_loop(get_rhs(w),v,current_rank,counter_example_queue);
-        }
-
-        if (is_and(b))
-        { return find_mu_loop(lhs(b),v,current_rank,counter_example_queue) || find_mu_loop(rhs(b),v,current_rank,counter_example_queue);
-        }
-
-        assert(is_or(b));
+        assert(0); // One should not end up here.
         return false;
+      }
+
+      /* delivers true if a loop from variables in b to v is detected. */
+      bool find_mu_loop(
+             bes_expression b,
+             variable_type v,
+             unsigned long current_rank)
+      { std::map < variable_type, bool > visited_variables;
+        return find_mu_nu_loop_rec(b,v,current_rank,visited_variables,true);
+      }
+
+      bool find_nu_loop(
+             bes_expression b,
+             variable_type v,
+             unsigned long current_rank)
+      { std::map < variable_type, bool > visited_variables;
+        return find_mu_nu_loop_rec(b,v,current_rank,visited_variables,false);
       }
 
   };
