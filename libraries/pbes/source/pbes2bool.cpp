@@ -627,7 +627,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     if (tool_options.opt_strategy>=on_the_fly)
     { variable_to_be_processed=todo.front();
       todo.pop_front();
-      cerr << "Processing variable " << variable_to_be_processed << "\n";
     }
     else
     { variable_to_be_processed=nr_of_processed_variables+1;
@@ -718,7 +717,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           if (bes_equations.find_mu_loop(
                                new_bes_expression,
                                variable_to_be_processed,
-                               bes_equations.get_rank(variable_to_be_processed)))
+                               atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value()))
           { new_bes_expression=bes::false_();
             if (tool_options.opt_construct_counter_example)
             { bes_equations.counter_example_queue(variable_to_be_processed).
@@ -731,7 +730,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           if (bes_equations.find_nu_loop(
                                new_bes_expression,
                                variable_to_be_processed,
-                               bes_equations.get_rank(variable_to_be_processed)))
+                               atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value()))
           { new_bes_expression=bes::true_();
             if (tool_options.opt_construct_counter_example)
             { bes_equations.counter_example_queue(variable_to_be_processed).
@@ -756,7 +755,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
            from the initial variable 1, are always relevant. Furthermore, relevant 
            variables that need to be investigated are always in the todo list */
         relevance_counter++;
-        if (relevance_counter>relevance_counter_limit)
+        if (relevance_counter>=relevance_counter_limit)
         { relevance_counter_limit=bes_equations.nr_of_variables()/RELEVANCE_DIVIDE_FACTOR; 
           relevance_counter=0;
           bes_equations.refresh_relevances(todo);
@@ -783,6 +782,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           for( ; !to_set_to_true_or_false.empty() ; )
           {
             bes::variable_type w=(*to_set_to_true_or_false.begin());
+          // cerr << "DOING a substitution for " << w << "\n";
             // Take the lowest element for substitution, to generate
             // short counterexample.
             

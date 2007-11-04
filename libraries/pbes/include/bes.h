@@ -453,6 +453,7 @@ namespace bes
                       std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
+    // std::cerr << "Substitute true/false " << v << " with " << b_subst << "  " << "\n";
     if (is_true(b)||is_false(b)||is_dummy(b))
     { return b;
     }
@@ -1247,63 +1248,71 @@ namespace bes
       bool find_mu_nu_loop_rec(
              bes_expression b,
              variable_type v,
-             unsigned long current_rank,
+             unsigned long rankv, // rank of v may not have been stored yet.
              std::map < variable_type,bool > &visited_variables,
              bool is_mu)
       { 
+        // std::cerr << "find " << v << "  " << b << "\n";
         if (is_false(b) || is_true(b) || is_dummy(b))
-        { return false;
+        { 
+          // std::cerr << "false1  " << b << "\n";
+          return false;
         }
 
         if (is_variable(b))
         { variable_type w=get_variable(b);
-          if (get_rank(w)!=current_rank)
-          { return false;
-          }
           if (w==v)
-          { 
+          { // std::cerr << "true" << b << "\n";
             return true;
           }
-          if (visited_variables.find(w)!=visited_variables.end())                                                      { return visited_variables[w];                                                                               }                  
+          if (get_rank(w)!=rankv)
+          { 
+            // std::cerr << "false2  " << b << "Rankv " << rankv << "Rankw " << get_rank(w) << "\n";
+            return false;
+          }
+          if (visited_variables.find(w)!=visited_variables.end())                                            { return visited_variables[w];
+          }                  
 
+          visited_variables.insert(std::make_pair(w,false));    
           bool result;
-          result=find_mu_nu_loop_rec(get_rhs(w),v,current_rank,visited_variables,is_mu);
+          result=find_mu_nu_loop_rec(get_rhs(w),v,rankv,visited_variables,is_mu);
           visited_variables.insert(std::make_pair(w,result));    
           return result;
         }
 
         if (is_mu)
         { if (is_and(b))
-          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) || 
-                        find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          { return find_mu_nu_loop_rec(lhs(b),v,rankv,visited_variables,is_mu) || 
+                        find_mu_nu_loop_rec(rhs(b),v,rankv,visited_variables,is_mu);
           }
 
           if (is_or(b))
-          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) && 
-                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          { return find_mu_nu_loop_rec(lhs(b),v,rankv,visited_variables,is_mu) && 
+                          find_mu_nu_loop_rec(rhs(b),v,rankv,visited_variables,is_mu);
           }
         }
         else
         { if (is_and(b))
-          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) && 
-                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          { return find_mu_nu_loop_rec(lhs(b),v,rankv,visited_variables,is_mu) && 
+                          find_mu_nu_loop_rec(rhs(b),v,rankv,visited_variables,is_mu);
           }
   
           if (is_or(b))
-          { return find_mu_nu_loop_rec(lhs(b),v,current_rank,visited_variables,is_mu) ||
-                          find_mu_nu_loop_rec(rhs(b),v,current_rank,visited_variables,is_mu);
+          { return find_mu_nu_loop_rec(lhs(b),v,rankv,visited_variables,is_mu) ||
+                          find_mu_nu_loop_rec(rhs(b),v,rankv,visited_variables,is_mu);
           }
         }
 
         if (is_if(b))
         { 
-          bool r=find_mu_nu_loop_rec(condition(b),v,current_rank,visited_variables,is_mu);
+          bool r=find_mu_nu_loop_rec(condition(b),v,rankv,visited_variables,is_mu);
           if (r)
           { if (is_mu)
-            { return find_mu_nu_loop_rec(else_branch(b),v,current_rank,visited_variables,is_mu);
+            { return find_mu_nu_loop_rec(else_branch(b),v,rankv,visited_variables,is_mu);
             }
-            return find_mu_nu_loop_rec(then_branch(b),v,current_rank,visited_variables,is_mu);
+            return find_mu_nu_loop_rec(then_branch(b),v,rankv,visited_variables,is_mu);
           }
+          // std::cerr << "false3  " << b << "\n";
           return false;
         }
 
@@ -1315,17 +1324,25 @@ namespace bes
       bool find_mu_loop(
              bes_expression b,
              variable_type v,
-             unsigned long current_rank)
+             unsigned long rankv)
       { std::map < variable_type, bool > visited_variables;
-        return find_mu_nu_loop_rec(b,v,current_rank,visited_variables,true);
+        // std::cerr << "SEARCHING FOR A MU LOOP  " << v << "\n";
+        bool result=find_mu_nu_loop_rec(b,v,rankv,visited_variables,true);
+        if (result) 
+        { // std::cerr << "MULOOP GEVONDEN " << v << "\n";
+        }
+        else 
+        { // std::cerr << "JAMMER " << v << "\n";
+        }
+        return result;
       }
 
       bool find_nu_loop(
              bes_expression b,
              variable_type v,
-             unsigned long current_rank)
+             unsigned long rankv)
       { std::map < variable_type, bool > visited_variables;
-        return find_mu_nu_loop_rec(b,v,current_rank,visited_variables,false);
+        return find_mu_nu_loop_rec(b,v,rankv,visited_variables,false);
       }
 
   };
