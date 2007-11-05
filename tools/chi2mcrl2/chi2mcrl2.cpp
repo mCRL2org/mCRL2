@@ -107,6 +107,9 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_opt
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  if (!c.output_exists(mcrl2_file_for_output)) {
+    c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
+  }
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {

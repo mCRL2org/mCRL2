@@ -1624,7 +1624,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
 
         return result;
      }
-     if (StrcmpIsFun("/=",(ATermAppl) ATgetArgument(input, 0)))
+     if (StrcmpIsFun("!=",(ATermAppl) ATgetArgument(input, 0)))
      {
         /* ::SHOULD BE::       
         result.append(manipulateExpression( (ATermAppl) ATgetArgument(input , 2) ) );
