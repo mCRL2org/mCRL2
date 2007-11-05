@@ -591,7 +591,7 @@ namespace squadt {
             tp->append_input(t);
 
             /* Attach tool display */
-            install_tool_display(tp->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
+            install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(t->location).leaf());
 
             /* Register handler to on update the object view after process termination */
             tp->get_monitor()->on_completion(boost::bind(&project::process_configuration, this, s, tp));
