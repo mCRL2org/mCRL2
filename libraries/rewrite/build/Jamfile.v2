@@ -4,7 +4,6 @@ project libraries/rewrite
        : requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
-          <dependency>/libraries//data
        : usage-requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
@@ -15,6 +14,7 @@ alias rewrite.main
          [ glob ../source/prover/*.cpp ]
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/lps//headers
+         <use>/libraries//data
          <use>/libraries/utilities//headers
          <include>../include/rewrite
          <include>../include/prover
@@ -31,6 +31,7 @@ lib rewrite
        : <link>static
        :
        : <library>/libraries//mcrl2_basic
+         <library>/libraries//data
          <library>/libraries//utilities
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
