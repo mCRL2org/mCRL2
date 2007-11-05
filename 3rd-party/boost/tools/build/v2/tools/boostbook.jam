@@ -1,6 +1,6 @@
 # Copyright 2003, 2004, 2005 Dave Abrahams 
 # Copyright 2003, 2004, 2005 Douglas Gregor 
-# Copyright 2005, 2006 Rene Rivera 
+# Copyright 2005, 2006, 2007 Rene Rivera 
 # Copyright 2003, 2004, 2005 Vladimir Prus 
 # Distributed under the Boost Software License, Version 1.0. 
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt) 
@@ -27,6 +27,11 @@ import modules path project ;
 import build-system ;
 
 import xsltproc : xslt xslt-dir ;
+
+# Make this module into a project.
+project.initialize $(__name__) ;
+project boostbook ;
+
 
 feature.feature format : html xhtml htmlhelp onehtml man pdf ps docbook fo tests
   : incidental implicit composite propagated ;
@@ -206,8 +211,11 @@ rule generate-xml-catalog ( target : sources * : properties * )
 
   # BoostBook DTD catalog entry
   local boostbook-dtd-dir = [ boostbook.dtd-dir ] ;
-  boostbook-dtd-dir = [ regex.replace $(boostbook-dtd-dir) " " "%20" ] ;
-  
+  if $(boostbook-dtd-dir)
+  {      
+    boostbook-dtd-dir = [ regex.replace $(boostbook-dtd-dir) " " "%20" ] ;
+  }
+    
   print.text
     "<?xml version=\"1.0\"?>"
     "<!DOCTYPE catalog "
@@ -217,8 +225,7 @@ rule generate-xml-catalog ( target : sources * : properties * )
     "  <rewriteURI uriStartString=\"http://www.boost.org/tools/boostbook/dtd/\" rewritePrefix=\"file://$(boostbook-dtd-dir)/\"/>"
     : true ;
 
-  local docbook-xsl-dir = [ boostbook.docbook-xsl-dir ] ;
-  docbook-xsl-dir = [ regex.replace $(docbook-xsl-dir) " " "%20" ] ;
+  local docbook-xsl-dir = [ boostbook.docbook-xsl-dir ] ;    
   if ! $(docbook-xsl-dir) 
   {
     ECHO "BoostBook warning: no DocBook XSL directory specified." ;
@@ -231,11 +238,11 @@ rule generate-xml-catalog ( target : sources * : properties * )
   }
   else 
   {
+    docbook-xsl-dir = [ regex.replace $(docbook-xsl-dir) " " "%20" ] ;      
     print.text "  <rewriteURI uriStartString=\"http://docbook.sourceforge.net/release/xsl/current/\" rewritePrefix=\"file://$(docbook-xsl-dir)/\"/>" ;
   }
 
-  local docbook-dtd-dir = [ boostbook.docbook-dtd-dir ] ;
-  docbook-dtd-dir = [ regex.replace $(docbook-dtd-dir) " " "%20" ] ;
+  local docbook-dtd-dir = [ boostbook.docbook-dtd-dir ] ;  
   if ! $(docbook-dtd-dir)
   {
     ECHO "BoostBook warning: no DocBook DTD directory specified." ;
@@ -248,10 +255,41 @@ rule generate-xml-catalog ( target : sources * : properties * )
   }
   else 
   {
+    docbook-dtd-dir = [ regex.replace $(docbook-dtd-dir) " " "%20" ] ;      
     print.text "  <rewriteURI uriStartString=\"http://www.oasis-open.org/docbook/xml/4.2/\" rewritePrefix=\"file://$(docbook-dtd-dir)/\"/>" ;
   }
 
   print.text "</catalog>" ;
+}
+
+rule xml-catalog ( )
+{
+    if ! $(.xml-catalog)
+    {
+        # The target is created as part of the root project. But ideally
+        # it would be created as part of the boostbook project. This is not
+        # current possible as such global projects don't inherit things like
+        # the build directory.
+        
+        # Find the root project.
+        local root-project = [ project.current ] ;
+        root-project = [ $(root-project).project-module ] ;
+        while
+            [ project.attribute $(root-project) parent-module ] &&
+            [ project.attribute $(root-project) parent-module ] != user-config
+        {
+            root-project = [ project.attribute $(root-project) parent-module ] ;
+        }
+        .xml-catalog = [ new file-target boostbook_catalog
+            : XML
+            : [ project.target $(root-project) ]
+            : [ new action : boostbook.generate-xml-catalog ]
+            :
+            ] ;
+        .xml-catalog-file = [ $(.xml-catalog).path ] [ $(.xml-catalog).name ] ;
+        .xml-catalog-file = $(.xml-catalog-file:J=/) ;
+    }
+    return $(.xml-catalog) $(.xml-catalog-file) ;
 }
 
 class boostbook-generator : generator
@@ -259,6 +297,7 @@ class boostbook-generator : generator
     import feature ;
     import virtual-target ;
     import generators ;
+    import boostbook ;
       
     
     rule __init__ ( * : * )
@@ -268,21 +307,13 @@ class boostbook-generator : generator
     
     rule run ( project name ? : property-set : sources * : multiple ? )
     {
-        # Generate the catalog
-        local catalog = [ new file-target catalog 
-                            : XML 
-                            : $(project)
-                            : [ new action 
-                                  : boostbook.generate-xml-catalog 
-                                  : $(property-set) ] ] ;
-
-        #  catalog = [ virtual-target.register $(catalog) ] ;
+        # Generate the catalog, but only once...
+        local global-catalog = [ boostbook.xml-catalog ] ;
+        local catalog = $(global-catalog[1]) ;
+        local catalog-file = $(global-catalog[2]) ;
        
         # Add the catalog to the property set
-        local catalog-path = [ $(catalog).path ] ;
-        property-set = [ $(property-set).add-raw <catalog>$(catalog-path)/catalog.xml ] ;
-
-        # local targets = $(catalog) ;
+        property-set = [ $(property-set).add-raw <catalog>$(catalog-file) ] ;
 
         local type = none ;
         local manifest ; 
@@ -302,7 +333,6 @@ class boostbook-generator : generator
             case htmlhelp    : 
             {
                 type = HTMLHELP ;
-                #manifest = HTML.manifest ;
             }
             
             case onehtml : type = HTML ;
@@ -329,8 +359,11 @@ class boostbook-generator : generator
             $(base-target).depends $(catalog) ;
             
             # Generate HTML/PDF/PS from DOCBOOK.
-            local target = [ generators.construct $(project) $(manifest)
-              : $(type) : $(property-set) : $(base-target) ] ;
+            local target = [ generators.construct $(project) $(name)_$(manifest)
+                : $(type)
+                : [ $(property-set).add-raw
+                    <xsl:param>manifest=$(name)_$(manifest) ]
+                : $(base-target) ] ;
             local name = [ $(property-set).get <name> ] ;
             name ?= $(format) ;
             $(target[2]).set-path $(name) ;

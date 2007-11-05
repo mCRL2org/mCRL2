@@ -4,7 +4,15 @@ import set ;
 import package ;
 import common ;
 
-constant BOOST_VERSION : 1.35 ;
+constant BOOST_VERSION : 1.35.0 ;
+constant BOOST_JAMROOT_MODULE : $(__name__) ;
+
+local version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(BOOST_VERSION) ] ; 
+if $(version-tag[3]) = 0 {
+  version-tag = $(version-tag[1-2]) ;
+}
+
+constant BOOST_VERSION_TAG : $(version-tag:J="_") ;
 
 project boost
        : build-dir $(BUILD_TOP)
@@ -21,34 +29,27 @@ project boost
           <define>BOOST_ALL_NO_LIB=1
        ;
 
-# This rule is called by Boost.Build to determine the name of  
-# target. We use it to encode build variant, compiler name and 
-# boost version in the target name  
+# This rule is called by Boost.Build to determine the name of
+# target. We use it to encode build variant, compiler name and
+# boost version in the target name
 rule tag ( name : type ? : property-set ) {
   if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB {
     if $(layout) = versioned {
       local result = [ common.format-name
-          <base> <toolset> <threading> <runtime> -$(BOOST_VERSION_TAG)
-          : $(name) : $(type) : $(property-set) ] ;
-      
-      # Optionally add version suffix.
-      # On NT, library with version suffix won't be recognized
-      # by linkers. On CYGWIN, we get strage duplicate symbol
-      # errors when library is generated with version suffix.
-      # On OSX, version suffix is not needed -- the linker expets
-      # libFoo.1.2.3.dylib format.
-      # AIX linkers don't accept version suffixes either.
+        <base> <toolset> <threading> <runtime> -$(BOOST_VERSION_TAG) -$(BUILD_ID)
+            : $(name) : $(type) : $(property-set) ] ;
+
       if $(type) = SHARED_LIB &&
-        ! ( [ $(property-set).get <target-os> ] in windows cygwin darwin aix ) {
-        result = $(result).$(BOOST_VERSION)  ;
+        ! ( [ $(property-set).get <target-os> ] in windows cygwin darwin aix )
+      {
+          result = $(result).$(BOOST_VERSION)  ;
       }
       
       return $(result) ;
     }
     else {
-      return [ common.format-name
-        <base> <threading> <runtime>
-        : $(name) : $(type) : $(property-set) ] ;
+      return [ common.format-name <base> <threading> <runtime> -$(BUILD_ID)
+                  : $(name) : $(type) : $(property-set) ] ;
     }
   }
 }

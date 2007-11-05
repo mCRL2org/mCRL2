@@ -1669,6 +1669,7 @@ bjam_call(PyObject* self, PyObject* args)
 
     frame_free( inner );
 
+    Py_INCREF(Py_None);
     return Py_None;
 }
 
@@ -1690,7 +1691,11 @@ bjam_import_rule(PyObject* self, PyObject* args)
         return NULL;
     
     if (!PyCallable_Check(func))
+    {
+        PyErr_SetString(PyExc_RuntimeError, 
+                        "Non-callable object passed to bjam.import_rule");
         return NULL;
+    }
     
     m = bindmodule(module);
     r = bindrule(rule, m);
@@ -1699,6 +1704,8 @@ bjam_import_rule(PyObject* self, PyObject* args)
     Py_INCREF(func);
 
     r->python_function = func;
+
+    Py_INCREF(Py_None);
     return Py_None;
 }
 
@@ -1741,7 +1748,58 @@ bjam_define_action(PyObject* self, PyObject *args)
 
     new_rule_actions(root_module(), name, newstr(body), bindlist, flags);
 
+    Py_INCREF(Py_None);
     return Py_None;    
+}
+
+/* Returns the value of a variable in root Jam module.  */
+PyObject*
+bjam_variable(PyObject* self, PyObject* args)
+{
+    char *name;
+    LIST* value;
+    PyObject *result;
+    int i;
+
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return NULL;
+
+    enter_module(root_module());
+    value = var_get(name);
+    exit_module(root_module());
+
+    result = PyList_New(list_length(value));
+    for (i = 0; value; value = list_next(value), ++i)
+        PyList_SetItem(result, i, PyString_FromString(value->string));
+
+    return result;
+}
+
+PyObject*
+bjam_backtrace(PyObject* self, PyObject *args)
+{
+    PyObject *result = PyList_New(0);
+    struct frame *f = frame_before_python_call;
+
+    for(; f = f->prev;)
+    {
+        PyObject *tuple = PyTuple_New(4);
+        char* file;
+        int line;
+        char buf[32];
+        get_source_line( f->procedure, &file, &line );
+        sprintf( buf, "%d", line );
+        
+        /* PyTuple_SetItem steals reference. */
+        PyTuple_SetItem(tuple, 0, PyString_FromString(file));
+        PyTuple_SetItem(tuple, 1, PyString_FromString(buf));
+        PyTuple_SetItem(tuple, 2, PyString_FromString(f->module->name));
+        PyTuple_SetItem(tuple, 3, PyString_FromString(f->rulename));
+
+        PyList_Append(result, tuple);
+        Py_DECREF(tuple);
+    }
+    return result;
 }
 
 #endif

@@ -506,21 +506,7 @@ class project-target : abstract-target
             [ RULENAMES project-rules ] ] ;
         IMPORT $(parent-module) : $(user-rules) : $(this-module) : $(user-rules) ;
         EXPORT $(this-module) : $(user-rules) ;
-    }
-    
-    
-    # Intern the constants from this project into the specified module.
-    #
-    rule intern-constants (
-        target-module # The module to intern into.
-        )
-    {
-        for local c in $(self.constants)
-        {
-            modules.poke $(target-module) : $(c) : $(self.constant.$(c)) ;
-        }
-    }
-
+    }        
 }
 
 
@@ -834,13 +820,6 @@ class file-reference : abstract-target
         return $(self.file-location) ;
     }
 }
-
-
-if "--quiet" in [ modules.peek : ARGV ]
-{
-    .quiet = true ;
-}
-
 
 # Given a target-reference, made in context of 'project',
 # returns the abstract-target instance that is referred to, as well
@@ -1281,16 +1260,16 @@ class basic-target : abstract-target
                 if $(rproperties[1]) = "@error" 
                 {
                     ECHO [ targets.indent ] 
-                      "Skipping build: cannot compute common properties" ;
+                      "Skipping build of: " [ full-name ] " cannot compute common properties" ;
                 }
                 else if [ $(rproperties).get <build> ] = no
                 {
                     ECHO [ targets.indent ] 
-                      "Skipping build: <build>no in common properties" ;
+                      "Skipping build of: " [ full-name ] " <build>no in common properties" ;
                 }
                 else
                 {
-                    ECHO [ targets.indent ] "Skipping build: unknown reason" ;
+                    ECHO [ targets.indent ] "Skipping build of: " [ full-name ] " unknown reason" ;
                 }
                                
                 # We're here either because there's error computing
