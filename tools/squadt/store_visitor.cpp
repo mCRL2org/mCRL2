@@ -218,7 +218,6 @@ namespace utility {
 
     out << "</default-actions>\n";
 
-    /** FIXME temporary measure until xml2pp is phased out */
     out << "</squadt-preferences>";
   }
   /// \endcond

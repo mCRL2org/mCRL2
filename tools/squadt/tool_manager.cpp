@@ -150,7 +150,7 @@ namespace squadt {
       boost::filesystem::path file_name(*t);
 #endif
 
-      tools.push_back(boost::shared_ptr < tool > (new tool(*t, (default_path / file_name).native_file_string())));
+      tools.push_back(boost::shared_ptr < tool > (new tool(*t, (default_path / file_name).string())));
     }
   }
 
