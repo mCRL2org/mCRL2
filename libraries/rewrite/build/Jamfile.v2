@@ -14,7 +14,7 @@ alias rewrite.main
          [ glob ../source/prover/*.cpp ]
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/lps//headers
-         <use>/libraries//data
+         <use>/libraries/data//headers
          <use>/libraries/utilities//headers
          <include>../include/rewrite
          <include>../include/prover
