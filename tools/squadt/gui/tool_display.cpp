@@ -736,6 +736,7 @@ namespace squadt {
           wxTheApp->Yield();
         }
 
+        m_event_handler.clear();
         m_layout = l;
 
         std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
@@ -857,8 +858,6 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(boost::shared_ptr < tipi::layout::tool_display > l) {
-      m_event_handler.clear();
-
       m_project->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
     }
 

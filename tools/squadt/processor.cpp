@@ -318,10 +318,10 @@ namespace squadt {
 
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(tipi::message_configuration).get() != 0) {
-        send_start_signal();
-
         /* Do not let process status influence return status */
         clear_handlers(tipi::message_task_done);
+
+        send_start_signal();
 
         if (await_completion()) {
           /* Operation completed successfully */

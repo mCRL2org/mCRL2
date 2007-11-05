@@ -176,7 +176,9 @@ namespace squadt {
       boost::mutex::scoped_lock l(register_lock);
  
       /* Other side has not connected and the process has not been registered as terminated */
-      connection_condition.wait(l);
+      if (number_of_connections() == 0) {
+        connection_condition.wait(l);
+      }
 
       return 0 < number_of_connections();
     }

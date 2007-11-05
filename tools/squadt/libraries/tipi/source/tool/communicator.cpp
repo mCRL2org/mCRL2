@@ -138,20 +138,24 @@ namespace tipi {
      **/
     void communicator::send_display_layout(boost::shared_ptr< layout::tool_display > d) {
       struct trampoline {
-        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl, void const* e) {
-          std::string c;
+        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl, boost::weak_ptr< layout::tool_display > d, void const* e) {
+          boost::shared_ptr < layout::tool_display > g(d.lock());
 
-          {
-            tipi::store_visitor v(c);
-
-            v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < ::tipi::display::element_identifier > (e));
+          if (!d.expired()) {
+            std::string c;
+           
+            {
+              tipi::store_visitor v(c);
+           
+              v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < ::tipi::display::element_identifier > (e));
+            }
+           
+            boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
           }
-
-          boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
         }
       };
 
-      d->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), _1));
+      d->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), d, _1));
 
       boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
