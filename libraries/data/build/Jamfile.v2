@@ -24,6 +24,7 @@ lib data
        : <link>static
        :
        : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/data//headers
        ;
 
 alias data

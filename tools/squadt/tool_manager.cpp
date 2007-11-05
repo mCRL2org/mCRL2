@@ -226,14 +226,16 @@ namespace squadt {
       get_logger()->log(1, "connection terminated; peer provided invalid instance identifier");
     }
 
-    execution::task_monitor::sptr p(instances[id]);
+    execution::task_monitor::sptr monitor(instances[id]);
 
-    relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
+    relay_connection(monitor.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
 
     instances.erase(id);
 
+    monitor->await_process();
+
     /* Signal the listener that a connection has been established */
-    p->signal_connection(m->get_originator());
+    monitor->signal_connection(m->get_originator());
   }
   /// \endcond
 

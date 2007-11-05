@@ -51,6 +51,7 @@ alias headers
        :
        :
        : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/data//headers
          <use>/libraries/lps//headers
          <include>../include/rewrite
        ;
