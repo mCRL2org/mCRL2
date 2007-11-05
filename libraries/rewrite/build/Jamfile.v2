@@ -4,6 +4,7 @@ project libraries/rewrite
        : requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
+          <dependency>/libraries//data
        : usage-requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
