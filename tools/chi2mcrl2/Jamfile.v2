@@ -16,6 +16,4 @@ exe chi2mcrl2
 
 install-binaries install
        : chi2mcrl2
-       :
-       : <status>experimental
        ;

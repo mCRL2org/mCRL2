@@ -343,9 +343,6 @@ FILE *fsmin = (FILE *) 0, *fsmout = (FILE *) 0;
 typedef int yy_state_type;
 
 extern int fsmlineno;
-
-int fsmlineno = 1;
-
 extern char *fsmtext;
 #define yytext_ptr fsmtext
 
@@ -487,7 +484,7 @@ extern char* string_buffer;
 extern unsigned int string_buffer_size;
 void processId();
 void processNumber();
-#line 491 "fsmlexer.cpp"
+#line 488 "fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -641,7 +638,7 @@ YY_DECL
 #line 17 "fsmlexer.ll"
 
 
-#line 645 "fsmlexer.cpp"
+#line 642 "fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -796,7 +793,7 @@ YY_RULE_SETUP
 #line 33 "fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 800 "fsmlexer.cpp"
+#line 797 "fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1301,19 +1298,9 @@ static void fsm_load_buffer_state  (void)
 	fsmfree((void *) b  );
 }
 
-#ifndef _UNISTD_H /* assume unistd.h has isatty() for us */
-#ifdef __cplusplus
-extern "C" {
-#endif
-#ifdef __THROW /* this is a gnuism */
-extern int isatty (int ) __THROW;
-#else
+#ifndef __cplusplus
 extern int isatty (int );
-#endif
-#ifdef __cplusplus
-}
-#endif
-#endif
+#endif /* __cplusplus */
     
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -1579,15 +1566,6 @@ static void yy_fatal_error (yyconst char* msg )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-/** Get the current line number.
- * 
- */
-int fsmget_lineno  (void)
-{
-        
-    return fsmlineno;
-}
-
 /** Get the input stream.
  * 
  */
@@ -1619,16 +1597,6 @@ int fsmget_leng  (void)
 char *fsmget_text  (void)
 {
         return fsmtext;
-}
-
-/** Set the current line number.
- * @param line_number
- * 
- */
-void fsmset_lineno (int  line_number )
-{
-    
-    fsmlineno = line_number;
 }
 
 /** Set the input stream. This does not discard the current

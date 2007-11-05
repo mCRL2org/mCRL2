@@ -100,7 +100,7 @@ bool is_number(std::string s);
 %left LSUBTRACT CONCAT IN  
 %left MIN MAX SUB UNION INTERSECTION HEAD TAKE TAIL  
 
-%left SEP
+%right SEP
 %right GUARD 
 %right ALT
 %right BARS

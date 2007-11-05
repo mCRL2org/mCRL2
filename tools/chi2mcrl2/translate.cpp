@@ -35,7 +35,7 @@ bool CAsttransform::translator(ATermAppl ast)
     * Write the special Terminator actions for the mcrl2 specification
     *
     **/
-  result = "\nact Terminator; \n ";
+  result = "\nact Terminator, skip; \n ";
 
   if( StrcmpIsFun( "ChiSpec", ast ) )
   {
@@ -119,7 +119,7 @@ bool CAsttransform::translator(ATermAppl ast)
   }
 
  
-  std::set<std::string> new_channels; 
+  std::set<std::string> new_channels = DeclaredTypesForChannels; 
   result.append("\n");
   for( std::map<std::string, RC>::iterator itMap = ReduceChannels.begin(); 
         itMap != ReduceChannels.end();
@@ -158,8 +158,8 @@ bool CAsttransform::translator(ATermAppl ast)
     result.append("Send_"+*itSet+", Recv_"+*itSet);
   }
   result.append("},");
-
-  result.append("\n  allow({ Terminator");
+  result.append("\n  hide({skip},");
+  result.append("\n   allow({ Terminator, skip");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
         ++itSet
@@ -173,7 +173,7 @@ bool CAsttransform::translator(ATermAppl ast)
   }
   result.append("},");
 
-  result.append("\n   comm({");
+  result.append("\n    comm({");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
         ++itSet
@@ -185,9 +185,9 @@ bool CAsttransform::translator(ATermAppl ast)
     }
     result.append("Send_"+*itSet+"| Recv_"+*itSet+"->Comm_"+*itSet);
   }
-  result.append("},\n    ");
+  result.append("},\n     ");
 
-  result.append(initialisation+"\n   )\n  )\n );\n");
+  result.append(initialisation+"\n    )\n   )\n  )\n );\n");
 
   mcrl2_result = result;
   return true; 
@@ -1897,7 +1897,6 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
               RC tmpRC = Channels[channelID];
               tmpRC.send_end = "Send_" + type;
               tmpRC.Type = type; 
-              known = true;
               Channels[channelID]= tmpRC; 
             } else {
               gsErrorMsg("Multiple sending ends for channel \"%s\"\n", channelID.first.c_str());
@@ -2025,7 +2024,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.originates_from_stream = originates_from_stream;
       transition.state = state;
       transition.nextstate = next_state;
-      transition.action = "tau";
+      transition.action = "skip";
       transition.terminate = terminate;
       transition.parenthesis_level = parenthesis_level;
       transition.looped_state = loop;
@@ -2045,7 +2044,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.stream = stream_number;
       transition.originates_from_stream = originates_from_stream;
       transition.nextstate = next_state;
-      transition.action = "tau";
+      transition.action = "skip";
       transition.terminate = terminate;
       transition.looped_state = loop; 
       transition.guardedloop = guardedloop;
@@ -2104,16 +2103,18 @@ void CAsttransform::manipulateStatements(ATermAppl input)
                                   ChannelHashValue+
                                  ")"  
                                 )  ; 
+        DeclaredTypesForChannels.insert("Void");
       }
       while ( ATgetLength(to_process) > 0)
       {
+        string type = processType((ATermAppl) ATgetArgument(ATgetFirst(to_process), 1) );
         transition.action.append("sum "+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+
-                                 to_string(i)+ ":" + 
-                                 (std::string) processType((ATermAppl) ATgetArgument(ATgetFirst(to_process), 1) )+
+                                 to_string(i)+ ":" +  
+                                 type +
                                  ". "+
                                  "Recv_"+
-                                 (std::string) processType((ATermAppl) ATgetArgument(ATgetFirst(to_process), 1) )+"("+
+                                 type +"("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
                                  ChannelHashValue+", "+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+
@@ -2122,6 +2123,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
                                 ); 
         transition.vectorUpdate[(std::string) ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(to_process),0)))]= 
                 (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1))) + to_string(i);
+        DeclaredTypesForChannels.insert(type);
         to_process = ATgetNext(to_process);
         i++;
    
@@ -2172,17 +2174,20 @@ void CAsttransform::manipulateStatements(ATermAppl input)
                                   ChannelHashValue+
                                  ")"  
                                 )  ; 
+         DeclaredTypesForChannels.insert("Void");
       }
 
       while ( ATgetLength(to_process) > 0)
       {
+        string type = processType((ATermAppl) ATgetArgument(ATgetFirst(to_process), 1) );
         transition.action.append("Send_"+
-                                 processType((ATermAppl) ATgetArgument(ATgetFirst(to_process), 1) )+"("+
+                                 type+"("+
                                  (std::string) ATgetName(ATgetAFun(ATgetArgument(input,1)))+", "+
                                  ChannelHashValue+", "+
                                  manipulateExpression( (ATermAppl) ATgetFirst(to_process))+
                                  ")" 
                                 ); 
+         DeclaredTypesForChannels.insert(type);
         to_process = ATgetNext(to_process);
       }
 
@@ -2269,7 +2274,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
       transition.state = state;
       transition.guardedloop = false;
       transition.nextstate = transitionSystem.size()+1;
-      transition.action = "tau";
+      transition.action = "skip";
       transition.terminate = false;
       transition.parenthesis_level = parenthesis_level;
       transition.looped_state = false;

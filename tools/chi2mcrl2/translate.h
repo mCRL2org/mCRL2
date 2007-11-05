@@ -212,7 +212,9 @@ class CAsttransform
     std::set<std::string> dif_setTypes;  
     std::set<std::string> equal_setTypes;
 
-    std::set<std::string> InstantiatedHashedChannels; 
+    std::set<std::string> InstantiatedHashedChannels;
+
+    std::set<std::string> DeclaredTypesForChannels; 
 
     bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
 

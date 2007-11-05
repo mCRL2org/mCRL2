@@ -6,6 +6,10 @@
 //
 /// \file chi2mcrl2.cpp
 /// \brief Add your file description here.
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <mcrl2/utilities/squadt_interface.h>
+#endif
 
 #include <cassert>
 #include <stdbool.h>
@@ -38,7 +42,147 @@ static ATermAppl translate_file(t_options &options);
 static void PrintMoreInfo(char *Name);
 static void PrintVersion(void);
 static void PrintHelp(char *Name);
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
 
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
+
+  private:
+
+    static const char* chi_file_for_input;     
+    static const char* mcrl2_file_for_output;  
+
+  private:
+
+    /** \brief compiles a t_lin_options instance from a configuration */
+    bool extract_task_options(tipi::configuration const& c, t_options&) const;
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration&);
+
+};
+
+const char* squadt_interactor::chi_file_for_input = "chi_in";
+const char* squadt_interactor::mcrl2_file_for_output  = "mcrl2_out";
+
+
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(chi_file_for_input, tipi::mime_type("chi", tipi::mime_type::text),
+                                                            tipi::tool::category::transformation);
+}
+
+bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_options& task_options) const {
+  bool result = true;
+
+  if (c.input_exists(chi_file_for_input)) {
+    task_options.infilename = c.get_input(chi_file_for_input).get_location();
+  }
+  else {
+    send_error("Configuration does not contain an input object\n");
+
+    result = false;
+  }
+
+  if (c.output_exists(mcrl2_file_for_output) ) {
+    task_options.outfilename = c.get_output(mcrl2_file_for_output).get_location();
+  }
+  else {
+    send_error("Configuration does not contain an output object\n");
+
+    result = false;
+  }
+
+  return (result);
+}
+
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+}
+
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+  bool result = true;
+
+  result |= c.input_exists(chi_file_for_input);
+  result |= c.output_exists(mcrl2_file_for_output);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
+
+  tipi::layout::tool_display d;
+  t_options options;
+  CAsttransform asttransform;
+
+  bool result = true;
+
+  extract_task_options(c, options);
+ 
+  label& message = d.create< label >();
+ 
+  d.set_manager(d.create< vertical_box >().
+                        append(message.set_text("Translation in progress"), layout::left));
+
+  send_display_layout(d);
+
+  std::string mcrl2spec; 
+
+  ATermAppl ast_result = translate_file(options);
+
+  if (ast_result == NULL) {
+    message.set_text("Reading input file failed");
+    result = false;
+  }
+
+  if (asttransform.translator(ast_result) && result )
+  {
+      mcrl2spec = asttransform.getResult();
+
+      if(mcrl2spec.empty())
+      {
+
+        message.set_text("Reading input file failed");
+        result = false;
+
+      }
+   }
+
+  if(result)
+  {
+    //store the result
+
+   FILE *outstream = fopen(options.outfilename.c_str(), "wb");
+   if (outstream != NULL) {
+       fputs (mcrl2spec.c_str(), outstream); 
+       fclose(outstream);
+    }
+    else {
+      send_error(str(boost::format("cannot open output file '%s'\n") % options.outfilename));
+      result = false;
+    }
+
+    if (result) {
+      message.set_text("Translation finished");
+    }
+  }
+  send_display_layout(d);
+
+  return true;
+}
+#endif
 
 static bool parse_command_line(int argc, char *argv[],t_options &options)
 { 
@@ -181,8 +325,9 @@ int main(int argc, char *argv[])
   
   ATinit(argc,argv,&stack_bottom);
 
-  //enable constructor functions
-  //gsEnableConstructorFunctions();
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+#endif
 
     if (parse_command_line(argc,argv,options)) {
       ATermAppl result = translate_file(options);
@@ -209,10 +354,14 @@ int main(int argc, char *argv[])
           return 1;
         }
         gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
-        //ATwriteToBinaryFile( result, outstream);
+        fputs (mcrl2spec.c_str(), outstream); 
         fclose(outstream);
       }
     }
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
 
   return 0;
 }
