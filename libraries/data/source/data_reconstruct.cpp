@@ -70,11 +70,11 @@ static inline bool is_lambda_expr(ATermAppl Part);
 //     have been removed.
 static ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_substs);
 
-//post: p_data_decls constains the reconstructed versions of the structured
-//      sorts in p_data_decls.
+//post: p_data_decls constains the reconstructed version of the data
+//      declarations in p_data_decls.
 //      p_substs is extended with the substitutions induced by the context of
-//      the structured sorts.
-static void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_substs);
+//      the data declarations.
+static void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs);
 
 //pre: data_expr is a data expression
 //ret: true if data_expr is of the form v_1 == w_1 && ... && v_n == w_n, where
@@ -700,7 +700,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   // system defined sorts, operators and data equations
   // these are removed from their respective parts of the data declarations
   // on the fly.
-  reconstruct_structured_sorts(&data_decls, p_substs);
+  reconstruct_data_decls(&data_decls, p_substs);
 
   // Construct new DataSpec and Specification
   SortSpec    = gsMakeSortSpec   (data_decls.sorts);
@@ -721,7 +721,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   return Spec;
 }
 
-void reconstruct_structured_sorts(t_data_decls* p_data_decls, ATermList* p_substs)
+void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
 {
   assert(p_substs != NULL);
   gsDebugMsg("Reconstructing structured sorts\n");

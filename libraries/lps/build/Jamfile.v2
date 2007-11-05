@@ -15,6 +15,7 @@ alias lps.main
        : source/lin_std.cpp
          source/libalpha.cpp
          source/libdataelm.cpp
+         source/sumelm.cpp
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/rewrite//headers
          <use>/libraries/pbes//headers
