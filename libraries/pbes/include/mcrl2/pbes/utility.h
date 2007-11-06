@@ -257,6 +257,58 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   return result;
 }
 
+/// \brief Gives the instantiated right hand side for a propositional_variable_instantiation
+
+
+template <typename Container>
+inline pbes_expression give_the_instantiated_rhs( 
+                   const propositional_variable_instantiation current_variable_instantiation, 
+                   pbes<Container> pbes_spec,
+                   Rewriter *rewriter,
+                   const bool use_internal_rewriter_format=false)
+{ 
+  Container eqsys = pbes_spec.equations();
+
+  // Fill the pbes_equations table
+
+  assert(eqsys.size()>0); // There should be at least one equation
+  fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
+
+  pbes_equation current_pbeq;
+  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  {
+    if (current_variable_instantiation.name()==eqi->variable().name())
+    { current_pbeq=pbes_equation(eqi->symbol(),eqi->variable(),eqi->formula());
+      break;
+    }
+  }
+
+  data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
+      
+  for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+               vlist!=current_pbeq.variable().parameters().end() ; vlist++)
+  { 
+    assert(elist!=current_variable_instantiation.parameters().end());
+
+    if (use_internal_rewriter_format)
+    { rewriter->setSubstitution(*vlist,(aterm)*elist);
+    }
+    else
+    { 
+      rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+    }
+    elist++;
+  }
+  assert(elist==current_variable_instantiation.parameters().end());
+  return  pbes_expression_substitute_and_rewrite(
+                                current_pbeq.formula(), 
+                                pbes_spec.data(),
+                                rewriter,
+                                use_internal_rewriter_format);
+}
+
+
+
 
 /**************************************************************************************************/
 
