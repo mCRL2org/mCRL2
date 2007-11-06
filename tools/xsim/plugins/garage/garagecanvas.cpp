@@ -26,11 +26,13 @@ GarageCanvas::GarageCanvas( wxWindow* parent,
                     int width,
                     int height       )
         : wxGLCanvas( parent,
-                      -1,
+                      wxID_ANY,
+                      0,
                       wxPoint(xPos, yPos),
                       wxSize(width, height) )
 // ------------------------------------------
 {
+  context = 0;
 }
 
 
@@ -39,6 +41,9 @@ GarageCanvas::GarageCanvas( wxWindow* parent,
 GarageCanvas::~GarageCanvas()
 // --------------------------
 {
+  if (context) {
+    delete context;
+  }
 }
 
 
@@ -109,10 +114,12 @@ void GarageCanvas::Draw()
 {
   // 1. Get current size of the GarageCanvas
   int width, height;
-  this->GetSize( &width, &height );
+  GetSize( &width, &height );
+
+  context = new wxGLContext(this);
 
   // 2. Set this as current GL context
-  this->SetCurrent();
+  SetCurrent(*context);
 
   // 3. Set up viewing volume
   glMatrixMode( GL_PROJECTION );
@@ -204,16 +211,14 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 {
-  wxGLCanvas::OnSize(event);
-
   // Gets size of GarageCanvas
   int width;
   int height;
   GetSize( &width, &height );
 
   // Set this tocurrent GL context
-  if (GetContext()) {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
 
     // Set up viewport to match canvas size
     glViewport(0, 0, width, height);
@@ -223,6 +228,8 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
     //Force redraw because the paint event is not triggered in Windows
 //  Draw();
   }
+
+  event.Skip(true);
 }
 
 

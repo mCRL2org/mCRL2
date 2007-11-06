@@ -40,7 +40,7 @@ static void print_state(ostream &os, ATermAppl state)
   os << ")";
 }
 
-static void trace2dot(ostream &os, Trace &trace, char *name)
+static void trace2dot(ostream &os, Trace &trace, char const* name)
 {
   os << "digraph \"" << name << "\" {" << endl;
   os << "center = TRUE;" << endl;
