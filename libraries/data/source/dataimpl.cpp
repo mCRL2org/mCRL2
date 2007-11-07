@@ -55,13 +55,6 @@ static void impl_standard_functions_term(ATerm term, lps::specification &lps_spe
 //Post:an implementation for equality, inequality and if
 //     is added to lps_spec for each sort occurring in term.
 
-void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
-//Pre: sort represents a sort expression of the internal syntax after data
-//     implementation
-//     p_data_decls represents a pointer to data declarations
-//Post:an implementation for equality, inequality and if for sort expression
-//     sort is added to p_data_decls
-
 static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
 //Pre: part is a part of a specification that adheres to the internal syntax

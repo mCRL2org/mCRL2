@@ -191,13 +191,12 @@ void impl_sort_int(t_data_decls *p_data_decls);
 /// \post an implementation of sort Real is added to *p_data_decls
 void impl_sort_real(t_data_decls *p_data_decls);
 
-/// \pre sort is a sort that adheres to the internal syntax after
+/// \pre sort is a sort expression that adheres to the internal syntax after
 //     data implementation
-//     p_data_decls represents a pointer to new data declarations, induced by
-//     the context of part
-/// \post an implementation of equality, inequality and if of sort sort
-//     is added to *p_data_decls
-void impl_sort(ATermAppl sort, t_data_decls *p_data_decls);
+//     p_data_decls represents a pointer to data declarations
+/// \post an implementation of equality, inequality and if for sort expression
+//     sort is added to *p_data_decls
+void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 
 /// \pre op_id is an operation identifier of sort s_op_id; here s_op_id is:
 //     - either a sort identifier
