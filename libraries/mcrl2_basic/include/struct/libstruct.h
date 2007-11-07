@@ -1272,9 +1272,21 @@ bool gsIsDataExprPos2Nat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a Pos2Nat
 
+bool gsIsDataExprPos2Int(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Pos2Int
+
+bool gsIsDataExprPos2Real(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Pos2Real
+
 bool gsIsDataExprNat2Int(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: DataExpr is a Nat2Int
+
+bool gsIsDataExprNat2Real(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is a Nat2Real
 
 bool gsIsDataExprInt2Real(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression

@@ -48,6 +48,36 @@ static ATermAppl impl_standard_functions_spec(ATermAppl spec);
 //Ret: spec in which an implementation for equality, inequality and if
 //     is added for each sort occurring in spec.
 
+static ATermAppl impl_numerical_pattern_matching(ATermAppl spec);
+//Pre: spec is a specification that adheres to the internal syntax after
+//     data implementation
+//Ret: spec in which numerical patterns can be matched; this means that in the
+//     left-hand-sides of equations the following patterns are implemented:
+//     - Pos2Nat(p) : replace by cNat(p)
+//     - Pos2Int(p) : replace by cInt(cNat(p))
+//     - Pos2Real(p): replace by cReal(cInt(cNat(p)))
+//     - Nat2Int(n) : replace by cInt(n)
+//     - Nat2Real(n): replace by cReal(cInt(n))
+//     - Int2Real(x): replace by cReal(x)
+//     TODO:
+//     - p+k, where k is a constant of sort Pos: replace by p,
+//       add condition p>=k, and add substitution [p -> Int2Pos(p-k)]
+//       (for the condition and the rhs)
+//     - n+k, where k is a constant of sort Nat: replace by n,
+//       add condition n>=k, and add substitution [n -> Int2Nat(n-k)]
+//     - -p: replace by cNeg(p)
+//     - -n: replace by the following two patterns:
+//           c0,      and add substitution [n -> c0]
+//           cNeg(p), and add substitution [p -> cNat(p)]
+
+static ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr,
+  bool top_level);
+//Pre: data_expr is a data expression that adheres to the internal syntax after
+//     data implementation
+//     top_level indicates if data_expr contains the top-level operation
+//Ret: data_expr in which numerical patterns can be matched if they do not occur
+//     at top level
+
 static void impl_standard_functions_term(ATerm term, lps::specification &lps_spec);
 //Pre: term represents a part of the internal syntax after data
 //     implementation
@@ -168,9 +198,11 @@ ATermAppl implement_data_spec(ATermAppl spec)
   impl_sort_bool(&data_decls);
   //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
+  //implement numerical pattern matching
+  spec = impl_numerical_pattern_matching(spec);
   //implement sort references
   spec = impl_sort_refs(spec);
-  //implement standard functions for all sorts
+  //implement standard functions
   spec = impl_standard_functions_spec(spec);
   return spec;
 }
@@ -230,7 +262,7 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
   ar_spec = add_data_decls(ar_spec, data_decls);
   //implement sort references
   ar_spec = impl_sort_refs(ar_spec);
-  //implement function sorts
+  //implement standard functions
   ar_spec = impl_standard_functions_spec(ar_spec);
   return ar_spec;
 }
@@ -358,6 +390,69 @@ void impl_standard_functions_term(ATerm term, lps::specification &lps_spec)
   }
   //update data declarations in lps_spec
   set_data_decls(lps_spec, data_decls);
+}
+
+ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
+{
+  //get data equations
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl data_eqn_spec = ATAgetArgument(data_spec, 3);
+  ATermList data_eqns = ATLgetArgument(data_eqn_spec, 0);
+  //implement pattern matching for each equation
+  ATermList l = ATmakeList0();
+  while (!ATisEmpty(data_eqns)) {
+    ATermAppl data_eqn = ATAgetFirst(data_eqns);
+    //implement pattern matching on the left-hand side of the data equation
+    ATermAppl lhs = ATAgetArgument(data_eqn, 2);
+    lhs = impl_numerical_pattern_matching_expr(lhs, true);
+    data_eqn = ATsetArgument(data_eqn, (ATerm) lhs, 2);
+    l = ATinsert(l, (ATerm) data_eqn);
+    data_eqns = ATgetNext(data_eqns);
+  }
+  data_eqns = ATreverse(l);
+  data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqns, 0);
+  data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
+  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  return spec;
+}
+
+ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr, bool top_level)
+{
+  assert(gsIsDataExpr(data_expr));
+  if (gsIsDataVarId(data_expr) || gsIsOpId(data_expr)) {
+    return data_expr;
+  }
+  assert(gsIsDataAppl(data_expr));
+  if (!top_level) {
+    //implement numerical patterns
+    if (gsIsDataExprPos2Nat(data_expr)) {
+      return gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+    } else if (gsIsDataExprPos2Int(data_expr)) {
+      return gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1))));
+    } else if (gsIsDataExprPos2Real(data_expr)) {
+      return gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)))));
+    } else if (gsIsDataExprNat2Int(data_expr)) {
+      return gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+    } else if (gsIsDataExprNat2Real(data_expr)) {
+      return gsMakeDataExprCReal(gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1))));
+    } else if (gsIsDataExprInt2Real(data_expr)) {
+      return gsMakeDataExprCReal(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+    }
+  }
+  //implement pattern matching in the head of data_expr
+  ATermAppl head = ATAgetArgument(data_expr, 0);
+  head = impl_numerical_pattern_matching_expr(head, top_level);
+  //implement pattern matching in the arguments of data_expr
+  ATermList args = ATLgetArgument(data_expr, 1);
+  ATermList l = ATmakeList0();
+  while (!ATisEmpty(args)) {
+    ATermAppl arg = ATAgetFirst(args);
+    arg = impl_numerical_pattern_matching_expr(arg, false);
+    l = ATinsert(l, (ATerm) arg);
+    args = ATgetNext(args);
+  }
+  args = ATreverse(l);
+  return gsMakeDataAppl(head, args);
 }
 
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,

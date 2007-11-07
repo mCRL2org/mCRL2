@@ -2913,12 +2913,42 @@ bool gsIsDataExprPos2Nat(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprPos2Int(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Int();
+  }
+  return false;
+}
+
+bool gsIsDataExprPos2Real(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Real();
+  }
+  return false;
+}
+
 bool gsIsDataExprNat2Int(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameNat2Int();
+  }
+  return false;
+}
+
+bool gsIsDataExprNat2Real(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNameNat2Real();
   }
   return false;
 }

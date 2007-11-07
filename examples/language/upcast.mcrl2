@@ -1,0 +1,26 @@
+% This is an example where numerical pattern matching is used in the implicit
+% upcasts of numeric types.
+
+map Np: Nat -> Nat;
+    Ip, In: Int -> Int;
+    Rp, Rn, Ri: Real -> Real;
+
+var p: Pos;
+eqn Np(p) = 0;
+
+var p: Pos;
+eqn Ip(p) = 0;
+
+var n: Nat;
+eqn In(n) = 0;
+
+var p: Pos;
+eqn Rp(p) = 0;
+
+var n: Nat;
+eqn Rn(n) = 0;
+
+var i: Int;
+eqn Ri(i) = 0;
+
+init delta@0;
