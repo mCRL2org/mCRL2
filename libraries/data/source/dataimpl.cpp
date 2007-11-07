@@ -328,41 +328,32 @@ ATermAppl impl_sort_refs(ATermAppl spec)
 ATermAppl impl_sorts_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
-  //get function sorts occurring in spec
-  ATermList sorts = get_sorts((ATerm) spec);
-  //get operation declarations
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
-  ATermAppl op_spec = ATAgetArgument(data_spec, 2);
-  ATermList op_decls = ATLgetArgument(op_spec, 0);
   //initalise data declarations
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
-  //implement function sorts that are not already implemented
+  //get sorts occurring in spec
+  ATermList sorts = get_sorts((ATerm) spec);
+  //implement each sort in sorts
   while (!ATisEmpty(sorts))
   {
-    ATermAppl sort = ATAgetFirst(sorts);
-    if (ATindexOf(op_decls, (ATerm) gsMakeOpIdEq(sort), 0) == -1) {
-      impl_sort(sort, &data_decls);
-    }
+    impl_sort(ATAgetFirst(sorts), &data_decls);
     sorts = ATgetNext(sorts);
   }
+  //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
   return spec;
 }
 
 void impl_sorts(ATerm term, lps::specification &lps_spec)
 {
-  //get function sorts occurring in term
-  ATermList sorts = get_sorts(term);
   //get data declarations from lps_spec
   t_data_decls data_decls = get_data_decls(lps_spec);
-  //implement function sorts that are not already implemented
+  //get sorts occurring in term
+  ATermList sorts = get_sorts(term);
+  //implement each sort in sorts
   while (!ATisEmpty(sorts))
   {
-    ATermAppl sort = ATAgetFirst(sorts);
-    if (ATindexOf(data_decls.ops, (ATerm) gsMakeOpIdEq(sort), 0) == -1) {
-      impl_sort(sort, &data_decls);
-    }
+    impl_sort(ATAgetFirst(sorts), &data_decls);
     sorts = ATgetNext(sorts);
   }
   //update data declarations in lps_spec
@@ -1406,14 +1397,11 @@ void impl_sort_bool(t_data_decls *p_data_decls)
     ), p_data_decls->cons_ops);
   //Declare operations for sort Bool
   ATermAppl se_bool = gsMakeSortExprBool();
-  p_data_decls->ops = ATconcat(ATmakeList(7,
+  p_data_decls->ops = ATconcat(ATmakeList(4,
       (ATerm) gsMakeOpIdNot(),
       (ATerm) gsMakeOpIdAnd(),
       (ATerm) gsMakeOpIdOr(),
-      (ATerm) gsMakeOpIdImp(),
-      (ATerm) gsMakeOpIdEq(se_bool),
-      (ATerm) gsMakeOpIdNeq(se_bool),
-      (ATerm) gsMakeOpIdIf(se_bool)
+      (ATerm) gsMakeOpIdImp()
     ), p_data_decls->ops);
   //Declare data equations for sort Bool
   ATermList el = ATmakeList0();
@@ -1421,10 +1409,8 @@ void impl_sort_bool(t_data_decls *p_data_decls)
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), se_bool);
-  ATermAppl c = gsMakeDataVarId(gsString2ATermAppl("c"), se_bool);
   ATermList bl = ATmakeList1((ATerm) b);
-  ATermList bcl = ATmakeList2((ATerm) b, (ATerm) c);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(22,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(17,
       //logical negation (Bool -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(f), t),
@@ -1447,16 +1433,8 @@ void impl_sort_bool(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(t, b), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(f, b), t),
       //equality (Bool -> Bool -> Bool)
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, b), t),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(t, f), f),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, t), f),
-      //inequality (Bool -> Bool -> Bool)
-      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprNeq(b, c), 
-                      gsMakeDataExprNot(gsMakeDataExprEq(b, c))),
-      //conditional (Bool -> Bool -> Bool -> Bool)
-      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(t, b, c), b),
-      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(f, b, c), c),
-      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(b, c, c), c)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, t), f)
     ), p_data_decls->data_eqns);
 }
 
