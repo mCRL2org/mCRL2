@@ -42,18 +42,25 @@ static ATermAppl impl_sort_refs(ATermAppl spec);
 //       sort reference with e as a rhs, e is replaced by n in spec;
 //       otherwise, n is replaced by e in spec
 
-static ATermAppl impl_sorts_spec(ATermAppl spec);
+static ATermAppl impl_standard_functions_spec(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation
 //Ret: spec in which an implementation for equality, inequality and if
 //     is added for each sort occurring in spec.
 
-static void impl_sorts(ATerm term, lps::specification &lps_spec);
+static void impl_standard_functions_term(ATerm term, lps::specification &lps_spec);
 //Pre: term represents a part of the internal syntax after data
 //     implementation
 //     lps_spec represents an LPS specification
 //Post:an implementation for equality, inequality and if
 //     is added to lps_spec for each sort occurring in term.
+
+void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
+//Pre: sort represents a sort expression of the internal syntax after data
+//     implementation
+//     p_data_decls represents a pointer to data declarations
+//Post:an implementation for equality, inequality and if for sort expression
+//     sort is added to p_data_decls
 
 static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
@@ -153,7 +160,7 @@ ATermAppl implement_data_spec(ATermAppl spec)
     gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
   }
-  //implement system sort and data expressions occurring in spec
+  //implement system sorts and data expressions occurring in spec
   ATermList substs     = ATmakeList0();
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
@@ -170,8 +177,8 @@ ATermAppl implement_data_spec(ATermAppl spec)
   spec = add_data_decls(spec, data_decls);
   //implement sort references
   spec = impl_sort_refs(spec);
-  //implement function sorts
-  spec = impl_sorts_spec(spec);
+  //implement standard functions for all sorts
+  spec = impl_standard_functions_spec(spec);
   return spec;
 }
 
@@ -231,7 +238,7 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
   //implement sort references
   ar_spec = impl_sort_refs(ar_spec);
   //implement function sorts
-  ar_spec = impl_sorts_spec(ar_spec);
+  ar_spec = impl_standard_functions_spec(ar_spec);
   return ar_spec;
 }
 
@@ -277,8 +284,8 @@ static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec)
     data_eqns = ATgetNext(data_eqns);
   }
   new_decls = ATreverse(new_decls);
-  //implement function sorts in expr and the new declarations
-  impl_sorts((ATerm) ATinsert(new_decls, (ATerm) expr), lps_spec);
+  //implement standard functions in expr and the new declarations
+  impl_standard_functions_term((ATerm) ATinsert(new_decls, (ATerm) expr), lps_spec);
   return expr;
 }
 
@@ -325,7 +332,7 @@ ATermAppl impl_sort_refs(ATermAppl spec)
   return spec;
 }
 
-ATermAppl impl_sorts_spec(ATermAppl spec)
+ATermAppl impl_standard_functions_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
   //initalise data declarations
@@ -333,10 +340,10 @@ ATermAppl impl_sorts_spec(ATermAppl spec)
   initialize_data_decls(&data_decls);
   //get sorts occurring in spec
   ATermList sorts = get_sorts((ATerm) spec);
-  //implement each sort in sorts
+  //implement standard functions for each sort in sorts
   while (!ATisEmpty(sorts))
   {
-    impl_sort(ATAgetFirst(sorts), &data_decls);
+    impl_standard_functions_sort(ATAgetFirst(sorts), &data_decls);
     sorts = ATgetNext(sorts);
   }
   //add new data declarations to spec
@@ -344,7 +351,7 @@ ATermAppl impl_sorts_spec(ATermAppl spec)
   return spec;
 }
 
-void impl_sorts(ATerm term, lps::specification &lps_spec)
+void impl_standard_functions_term(ATerm term, lps::specification &lps_spec)
 {
   //get data declarations from lps_spec
   t_data_decls data_decls = get_data_decls(lps_spec);
@@ -353,7 +360,7 @@ void impl_sorts(ATerm term, lps::specification &lps_spec)
   //implement each sort in sorts
   while (!ATisEmpty(sorts))
   {
-    impl_sort(ATAgetFirst(sorts), &data_decls);
+    impl_standard_functions_sort(ATAgetFirst(sorts), &data_decls);
     sorts = ATgetNext(sorts);
   }
   //update data declarations in lps_spec
@@ -2364,7 +2371,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
   }
 }
 
-void impl_sort(ATermAppl sort, t_data_decls *p_data_decls)
+void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
 {
   assert(gsIsSortExpr(sort));
   //Declare operations for sort
