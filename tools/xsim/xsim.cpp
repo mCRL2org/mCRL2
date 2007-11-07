@@ -99,8 +99,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   return starter.perform_entry();
 }
-
-std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #define PROGRAM_NAME "xsim"
@@ -136,7 +134,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   }
 
   if (cmdln.Found(wxT("h"))) {
-    std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
+    std::cerr << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
               << "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
               << "loaded into the simulator.\n"
               << "\n"
@@ -246,15 +244,9 @@ bool XSim::OnInit()
   /* The rewrite strategy that will be used */
   RewriteStrategy rewrite_strategy = GS_REWR_INNER;
  
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!interactor->is_active()) {
-#endif
-    if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
-      return false;
-    }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
+    return false;
   }
-#endif
 
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
   frame->use_dummies = dummies;
@@ -281,43 +273,40 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   HINSTANCE hPrevInstance,                
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
+
+  using namespace mcrl2::utilities::squadt;
+
   ATerm bot;
 
   ATinit(0,0,&bot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-
-  interactor.reset(new squadt_interactor(starter));
-
-  if (!interactor->try_interaction(lpCmdLine)) {
+  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
 #endif
     return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#endif
 
   return (0);
+#endif
 }
 #else
 int main(int argc, char **argv) {
+  using namespace mcrl2::utilities::squadt;
+
   ATerm bot;
 
   /* Initialise aterm library */
   ATinit(argc,argv,&bot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
-
-  interactor.reset(new squadt_interactor(starter));
-
-  if(!interactor->try_interaction(argc, argv)) {
+  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     return wxEntry(argc, argv);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#endif
 
   return 0;
+#endif
 }
 #endif

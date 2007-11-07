@@ -18,6 +18,7 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
+      /// \internal
       boost::function< void (const tipi::report::type, std::string const&) > mcrl2_tool_interface::do_send_report;
 
       tool_interface::tool_interface() : m_communicator(new tipi::tool::communicator) {
@@ -105,6 +106,9 @@ namespace mcrl2 {
         return (false);
       }
   
+      /**
+       * \param[in] av command line arguments (Windows specific)
+       **/
       bool tool_interface::try_interaction(char* av) {
         set_capabilities(m_communicator->get_tool_capabilities());
 
@@ -136,14 +140,23 @@ namespace mcrl2 {
         return (active);
       }
   
+      /**
+       * \param[in] m descriptive message
+       **/
       void tool_interface::send_notification(std::string const& m) const {
         m_communicator->send_status_report(tipi::report::notice, m);
       }
   
+      /**
+       * \param[in] m descriptive message
+       **/
       void tool_interface::send_warning(std::string const& m) const {
         m_communicator->send_status_report(tipi::report::warning, m);
       }
   
+      /**
+       * \param[in] m descriptive message
+       **/
       void tool_interface::send_error(std::string const& m) const {
         m_communicator->send_status_report(tipi::report::error, m);
       }
@@ -165,6 +178,9 @@ namespace mcrl2 {
           }
       };
   
+      /**
+       * \param[in] d the display object that contains the data to communicate
+       **/
       void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
         boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d, trivial_deleter());
 
@@ -183,15 +199,18 @@ namespace mcrl2 {
         m_communicator->send_display_layout(p);
       }
   
+      /// \internal
       boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
-      static bool initialise () {
+      /// \internal
+      static bool initialise() {
         rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
         *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
   
         return true;
       }
   
+      /// \internal
       bool initialised = initialise();
     }
   }

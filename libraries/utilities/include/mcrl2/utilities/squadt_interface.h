@@ -200,7 +200,7 @@ namespace mcrl2 {
 #ifndef NO_MCRL2_TOOL_FACILITIES
       using ::mcrl2::utilities::messageType;
   
-      /** \brief Used to relay messages generated using mcrl2_basic::print */
+      /** \internal \brief Used to relay messages generated using mcrl2_basic::print */
       template < >
       inline void relay_message(const messageType t, const char* data) {
         tipi::report::type report_type;
@@ -251,36 +251,52 @@ namespace mcrl2 {
       inline void tool_interface::finalise() {
       }
 
+      /**
+       * \brief Component that simplifies a connection attempt with squadt to a single call
+       **/
       template < typename T >
       class interactor {
-  
+
         public:
   
-          static bool free_activation(int&, char** const);
-  
-          static bool free_activation(char*);
+          /**
+           * \brief builds a connection with SQuADT
+           **/
+          inline static bool free_activation(int& ac, char** const av) {
+#ifdef __WXWINDOWS__
+            int    dummy_ac = 0;
+            char** dummy_av = 0;
+
+            entry_wrapper starter(dummy_ac, dummy_av);
+
+            T c(starter);
+#else
+            T c;
+#endif
+           
+            return (c.try_interaction(ac, av));
+          }
+
+#ifdef __WINDOWS__
+          inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
+# ifdef __WXWINDOWS__
+            wxCmdLineArgType dummy_lpCmdLine = 0;
+
+            entry_wrapper starter(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow);
+
+            T c(starter);
+# else
+            T c;
+# endif
+            return (c.try_interaction(lpCmdLine));
+          }
+#endif
       };
 
-      /** \brief builds a connection with SQuADT */
-      template < typename T >
-      inline bool interactor< T >::free_activation(char* av) {
-        T c;
-  
-        return (c.try_interaction(av));
-      }
-  
-      /** \brief builds a connection with SQuADT */
-      template < typename T >
-      inline bool interactor< T >::free_activation(int& ac, char** const av) {
-        T c;
-  
-        return (c.try_interaction(ac, av));
-      }
-  
-      /* Standard type for input validation */
+      /** \brief Standard type for communication of rewrite strategy */
       extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
-      // Helper function for unsigned long to string conversion
+      /// \internal Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
         char buf[21];
    
@@ -291,7 +307,7 @@ namespace mcrl2 {
         return o;
       }
   
-      // Helper function for unsigned long long to string conversion
+      /// \internal Helper function for unsigned long long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
         char buf[21];
    

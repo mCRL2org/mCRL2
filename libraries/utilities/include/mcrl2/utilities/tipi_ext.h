@@ -47,7 +47,18 @@ namespace mcrl2 {
         }
       }
   
-      /** Helper class to project the selected radio button in a group to instances of a type T */
+      /** \brief Helper class to work with tipi::radio_buttons
+       *
+       * A group of tipi::radio_button objects behave as a single control. The
+       * tipi::radio_button interface also contains a function to return the
+       * radio_button in the group that is selected. A very common use is to
+       * map the radio buttons to the values of an enumerated type.
+       *
+       * This class helps to project the radio buttons in a group to instances
+       * of a type T. For convenience it also takes over creation of the
+       * radio_buttons in the group. So creation of the radio button and
+       * association to a value of an enumerated type go hand-in-hand.
+       **/
       template < typename T >
       class radio_button_helper {
   
@@ -73,7 +84,7 @@ namespace mcrl2 {
           /** \brief associate a radio button with a layout manager and a value */
           radio_button& associate(T const&, std::string const&, bool = false);
   
-          /** \brief gets the button associated with a value */
+          /** \brief gets the first button associated with a value */
           radio_button& get_button(T const&);
   
           /** \brief sets the selection for the group of radio buttons */
@@ -120,6 +131,10 @@ namespace mcrl2 {
         return button;
       }
   
+      /**
+       * \pre there must be a button that is associated with the value
+       * \param[in] t the value for which to find the associated button
+       **/
       template < typename T >
       inline tipi::layout::elements::radio_button& radio_button_helper< T >::get_button(T const& t) {
         for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
@@ -131,6 +146,9 @@ namespace mcrl2 {
         return *first;
       }
   
+      /**
+       * \param[in] t the value for which to select the associated button
+       **/
       template < typename T >
       inline void radio_button_helper< T >::set_selection(T const& t) {
         for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {

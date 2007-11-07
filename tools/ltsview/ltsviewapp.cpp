@@ -7,12 +7,14 @@
 /// \file ltsviewapp.cpp
 /// \brief Add your file description here.
 
+#include <string>
+
+std::string lts_file_argument;
+
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <wx/wx.h>
 //SQuADT protocol interface
 #include <mcrl2/utilities/squadt_interface.h>
-
-std::string lts_file_argument;
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   private:
@@ -63,8 +65,6 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration&) {
   return starter.perform_entry();
 }
-
-std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #include <wx/cmdline.h>
@@ -101,23 +101,16 @@ bool LTSViewApp::OnInit() {
 
   wxInitAllImageHandlers();
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!interactor->is_active()) {
-#else
-    std::string lts_file_argument;
-#endif
-    wxCmdLineParser cmdParser(argc,argv);
+  wxCmdLineParser cmdParser(argc,argv);
 
-    cmdParser.AddParam(wxT("INFILE"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL);
+  cmdParser.AddParam(wxT("INFILE"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL);
 
-    if (cmdParser.Parse() == 0) {
-      if (cmdParser.GetParamCount() > 0) {
-        lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
-      }
+  if (cmdParser.Parse() == 0) {
+    if (cmdParser.GetParamCount() > 0) {
+      lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
     }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
-#endif
+
   if (!lts_file_argument.empty()) {
     wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
     fileName.Normalize();
@@ -128,46 +121,45 @@ bool LTSViewApp::OnInit() {
 }
 
 #ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow) {                                                                     
 
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,
-                              wxCmdLineArgType lpCmdLine,int nCmdShow) {
-  // Initialize ATerms
+  using namespace mcrl2::utilities::squadt;
+
   ATerm bot;
-  ATinit(0,0,&bot);
 
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-  mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  ATinit(0,0,&bot); // XXX args?
 
-  interactor.reset(new squadt_interactor(starter));
-
-  if (!interactor->try_interaction(lpCmdLine)) {
-# endif
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+#endif
     return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-# ifdef ENABLE_SQUADT_CONNECTIVITY
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 
-  return 0;
-# endif
+  return (0);
+#endif
 }
 #else
 int main(int argc, char **argv) {
-  // Initialize ATerms
+  using namespace mcrl2::utilities::squadt;
+
   ATerm bot;
+
+  /* Initialise aterm library */
   ATinit(argc,argv,&bot);
 
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-  mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
-
-  interactor.reset(new squadt_interactor(starter));
-
-  if(!interactor->try_interaction(argc, argv)) {
-# endif
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
+#endif
     return wxEntry(argc, argv);
-# ifdef ENABLE_SQUADT_CONNECTIVITY
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 
   return 0;
-# endif
+#endif
 }
 #endif
 

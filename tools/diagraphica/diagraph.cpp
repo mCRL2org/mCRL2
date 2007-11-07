@@ -19,7 +19,7 @@
   #include <crtdbg.h>
 #endif
 
-std::string fsm_file_argument("");
+std::string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -75,45 +75,39 @@ std::string fsm_file_argument("");
         fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
         return starter.perform_entry();
     }
-
-    std::auto_ptr < squadt_interactor > interactor;
 #endif
 
 #include "diagraph.h"
 
 #ifndef ENABLE_SQUADT_CONNECTIVITY
-    // implement wxApp
-    IMPLEMENT_APP( DiaGraph )
+// implement wxApp
+IMPLEMENT_APP( DiaGraph )
 #else
-    IMPLEMENT_APP_NO_MAIN( DiaGraph )
+IMPLEMENT_APP_NO_MAIN( DiaGraph )
 
-    # ifdef __WINDOWS__
-        extern "C" int WINAPI WinMain(
-            HINSTANCE hInstance,                    
-            HINSTANCE hPrevInstance,                
-            wxCmdLineArgType lpCmdLine,             
-            int nCmdShow) 
-        {                                                                     
-            mcrl2::utilities::squadt::entry_wrapper starter(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-            interactor.reset(new squadt_interactor(starter));
-        
-            if (!interactor->try_interaction(lpCmdLine)) {
-                return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-            }
-            return (0);
-        }
-    # else
-        int main(int argc, char **argv) 
-        {
-            mcrl2::utilities::squadt::entry_wrapper starter(argc, argv);
-            interactor.reset(new squadt_interactor(starter));
+# ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {                                                                     
 
-            if(!interactor->try_interaction(argc, argv)) {
-                return wxEntry(argc, argv);
-            }
-            return 0;
-        }
-    # endif
+  using namespace mcrl2::utilities::squadt;
+
+  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  }
+
+  return (0);
+}
+# else
+int main(int argc, char **argv) {
+  using namespace mcrl2::utilities::squadt;
+
+  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return wxEntry(argc, argv);
+  }
+}
+# endif
 #endif
 // -- * -------------------------------------------------------------
 
@@ -213,24 +207,6 @@ bool DiaGraph::OnInit()
     // set view
     view = VIEW_SIM;
 
-    // squadt
-    #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (interactor->is_active())  {
-      // init colleagues
-      initColleagues();
-
-      if (!fsm_file_argument.empty()) {
-        openFile(fsm_file_argument);
-      }; 
-
-      critSect = false;
-
-      return true;
-    }
-    #endif
-
-    std::string fsm_file_argument;
-
     // command line
     if (!parse_command_line(argc, argv, fsm_file_argument)) 
     {
@@ -239,6 +215,7 @@ bool DiaGraph::OnInit()
 
     // init colleagues
     initColleagues();
+
     critSect = false;
    
     if (!fsm_file_argument.empty()) {
