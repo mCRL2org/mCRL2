@@ -508,6 +508,16 @@ void LTSViewApp::zoomInAbove()
   mainFrame->setSim(lts->getSimulation());
 }
 
+void LTSViewApp::zoomOutTillTop()
+{
+  LTS* oldLTS = lts;
+  do
+  {
+    zoomOut();
+    oldLTS = lts;
+  }  while (lts != oldLTS);
+}
+
 void LTSViewApp::zoomOut()
 {
   LTS* oldLTS = lts;
@@ -525,7 +535,6 @@ void LTSViewApp::zoomOut()
   {
     delete oldLTS;
   }
-
 }
 
 void LTSViewApp::loadTrace(std::string const& path)

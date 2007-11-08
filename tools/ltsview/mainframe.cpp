@@ -536,6 +536,7 @@ void MainFrame::onActivateTool(wxCommandEvent& event) {
 }
 
 void MainFrame::onRankStyle(wxCommandEvent& event) {
+  mediator->zoomOutTillTop();
   if (event.GetId() == myID_ITERATIVE) {
     mediator->setRankStyle(ITERATIVE);
   } else if (event.GetId() == myID_CYCLIC) {

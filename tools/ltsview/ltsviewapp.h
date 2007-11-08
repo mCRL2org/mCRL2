@@ -56,6 +56,7 @@ class LTSViewApp : public wxApp, public Mediator {
     
     void          zoomInBelow();
     void          zoomInAbove();
+    void          zoomOutTillTop();
     void          zoomOut();
 
     void          reportError(std::string const& error);

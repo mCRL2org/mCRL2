@@ -34,6 +34,7 @@ class Mediator {
     virtual int       getNumberOfObjects() = 0;
     virtual void      zoomInBelow() = 0;
     virtual void      zoomInAbove() = 0;
+    virtual void      zoomOutTillTop() = 0;
     virtual void      zoomOut() = 0;
 
     // Reports an error to the user through a message box.
