@@ -22,7 +22,7 @@
 #include <boost/system/system_error.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
-#if defined(BOOST_WINDOWS)
+#if defined(BOOST_WINDOWS) && !defined(UNDER_CE)
 
 #include <boost/asio/error.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
@@ -120,7 +120,7 @@ inline unsigned int __stdcall win_thread_function(void* arg)
 } // namespace asio
 } // namespace boost
 
-#endif // defined(BOOST_WINDOWS)
+#endif // defined(BOOST_WINDOWS) && !defined(UNDER_CE)
 
 #include <boost/asio/detail/pop_options.hpp>
 
