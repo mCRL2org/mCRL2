@@ -217,6 +217,9 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->setNumberInfo(lts->getNumStates(),
       lts->getNumTransitions(),lts->getNumClusters(),
       lts->getNumRanks());
+
+
+
   mainFrame->resetMarkRules();
   
   vector< string > ls;
@@ -229,6 +232,7 @@ void LTSViewApp::openFile(string fileName) {
 
   mainFrame->setMarkedStatesInfo(0);
   mainFrame->setMarkedTransitionsInfo(0);
+
 }
 
 void LTSViewApp::setRankStyle(RankStyle rs) {
@@ -383,7 +387,12 @@ void LTSViewApp::notifyRenderingFinished() {
 }
 
 void LTSViewApp::startSim() {
-  lts->getSimulation()->start();
+  Simulation* sim = lts->getSimulation();
+
+  sim->start();
+  
+  // Select/deselect initial state of simulation, to initialize state info pane.
+  selectStateByID(sim->getCurrState()->getID());
 }
 
 int LTSViewApp::getNumberOfParams() const {
