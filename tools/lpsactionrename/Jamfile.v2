@@ -8,6 +8,7 @@ exe lpsactionrename
          /libraries//data
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
+         <squadt-connectivity>implemented
        ;
 
 install-binaries install

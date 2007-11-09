@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "lpsactionrename"
-#define VERSION "July 2007"
+#define VERSION "November 2007"
 
 #include <cstdio>
 #include <cerrno>
@@ -30,6 +30,7 @@
 #include "mcrl2/lps/specification.h"
 #include "print/messaging.h"
 #include "mcrl2/lps/rename.h"
+#include "mcrl2/lps/sumelm.h"
 
 using namespace mcrl2::utilities;
 using namespace std;
@@ -43,13 +44,13 @@ using namespace data_expr;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE, PH_RENAME} t_phase;
 
 //t_tool_options represents the options of the tool 
-typedef struct {
+typedef struct t_tool_options {
   bool pretty;
   t_phase end_phase;
   string action_rename_filename;
   string infilename;
   string outfilename;
-} t_tool_options;
+};
 
 //Functions used by the main program
 //----------------------------------
@@ -61,7 +62,7 @@ static t_tool_options parse_command_line(int argc, char **argv);
 //      - non-standard behaviour was requested (help or version)
 //Ret:  the parsed command line options
 
-static ATermAppl rename_lps_actions(t_tool_options tool_options);
+static ATermAppl rename_actions(t_tool_options tool_options);
 //Pre:  tool_options.action_rename_filename contains a action rename
 //      specification
 //      tool_options.infilename contains an LPS ("" indicates stdin)
@@ -75,23 +76,11 @@ static void print_help(char *name);
 static void print_version(void);
 static void print_more_info(char *name);
 
-//Main program
-//------------
-
-int main(int argc, char **argv)
-{
-  //parse command line
-  t_tool_options tool_options = parse_command_line(argc, argv);
-
-  //initialise ATerm library
-  ATerm stackbot;
-  ATinit(argc,argv,&stackbot);
-  gsEnableConstructorFunctions();
-
+bool process(t_tool_options const& tool_options) {
   //process action rename specfication
-  ATermAppl result = rename_lps_actions(tool_options);
+  ATermAppl result = rename_actions(tool_options);
   if (result == NULL) {
-    return 1;
+    return false;
   }
 
   //store the result
@@ -99,18 +88,156 @@ int main(int argc, char **argv)
   bool opt_pretty = tool_options.pretty;
   if (outfilename == "") {
     gsVerboseMsg("saving result to stdout...\n");
-    PrintPart_CXX(cout, (ATerm) result, opt_pretty?ppDefault:ppInternal);//TODO: change +Q? why not load/save
+    PrintPart_CXX(cout, (ATerm) result, opt_pretty?ppDefault:ppInternal);
     cout << endl;
   } else {
     gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
     ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
     if (!outstream.is_open()) {
       gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-      return 1;
+      return false;
     }
-    PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);//TODO: change
+    PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);
     outstream.close();
   }
+
+  return true;
+}
+
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include "mcrl2/utilities/squadt_interface.h"
+
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
+
+  private:
+
+    static const char*  lps_file_for_input;      ///< file containing an LPS
+    static const char*  rename_file_for_input;   ///< file containing a rename specification
+    static const char*  lps_file_for_output;    ///< file used to write the output to
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration&);
+};
+
+const char* squadt_interactor::lps_file_for_input    = "lps_in";
+const char* squadt_interactor::rename_file_for_input = "renamefile_in";
+const char* squadt_interactor::lps_file_for_output   = "lps_out";
+
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+}
+
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;//
+
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
+
+  /* Create and add the top layout manager */
+  text_field& rename_file_field = d.create< text_field >();
+  button&     okay_button       = d.create< button >().set_label("OK");
+
+  m.append(d.create< horizontal_box >().
+        append(d.create< label >().set_text("Rename file name : ")).
+        append(rename_file_field)).
+     append(d.create< label >().set_text(" ")).
+     append(okay_button, layout::right);
+
+  // Set default values if the configuration specifies them
+  if (c.input_exists(rename_file_for_input)) {
+    rename_file_field.set_text(c.get_input(rename_file_for_input).get_location());
+  }
+
+  send_display_layout(d.set_manager(m));
+
+  /* Wait until the ok button was pressed */
+  okay_button.await_change();
+  
+  c.add_input(rename_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), rename_file_field.get_text());
+
+  /* Add output file to the configuration */
+  if (c.output_exists(lps_file_for_output)) {
+    tipi::object& output_file = c.get_output(lps_file_for_output);
+
+    output_file.set_location(c.get_output_name(".lps"));
+  }
+  else {
+    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
+  }
+
+  send_clear_display();
+}
+
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+  bool result = true;
+
+  result &= c.input_exists(lps_file_for_input);
+  result &= c.input_exists(rename_file_for_input);
+  result &= c.output_exists(lps_file_for_output);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(tipi::configuration& c) {
+  t_tool_options tool_options;
+
+  tool_options.pretty           = false;
+  tool_options.end_phase        = PH_NONE;
+  tool_options.action_rename_filename = c.get_input(rename_file_for_input).get_location();
+  tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
+  tool_options.outfilename      = c.get_output(lps_file_for_output).get_location();
+
+  bool result = process(tool_options);
+
+  if (result) {
+    send_clear_display();
+  }
+
+  return (result);
+}
+#endif //ENABLE_SQUADT_CONNECTIVITY
+
+//Main program
+//------------
+
+int main(int argc, char **argv)
+{
+  //initialise ATerm library
+  ATerm stackbot;
+  ATinit(argc,argv,&stackbot);
+  gsEnableConstructorFunctions();
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (!mcrl2::utilities::squadt::interactor< squadt_interactor    >::free_activation(argc, argv)) {
+#endif
+
+  //parse command line
+  t_tool_options tool_options = parse_command_line(argc, argv);
+
+  //process action rename specfication
+  if (!process(tool_options)) {
+    return 1;
+  }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
+
   return 0;
 }
 
@@ -124,7 +251,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   #define SHORT_OPTIONS "f:p:ehqvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
-    { "rename",    required_argument,  NULL,  'r' },
+    { "file",      required_argument,  NULL,  'f' },
     { "end-phase", required_argument,  NULL,  'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
@@ -138,7 +265,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //parse options
   while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
     switch (option) {
-      case 'r': /* rename file */
+      case 'f': /* rename file */
         action_rename_filename = optarg;
         break;
       case 'p': /* end-phase */
@@ -220,6 +347,35 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
+template <typename IdentifierGenerator>
+void rename_renamerule_variables(lps::data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
+{
+  std::vector<data_variable> src;  // contains the variables that need to be renamed
+  std::vector<data_variable> dest; // contains the corresponding replacements
+
+  std::set<data_variable> new_vars;
+  std::set<data_variable> found_vars;
+  for(lps::data_expression_list::iterator rleft_argument_i = rleft.arguments().begin();
+                                          rleft_argument_i != rleft.arguments().end();
+                                        ++rleft_argument_i){
+    found_vars = find_variables(*rleft_argument_i);
+    new_vars.insert(found_vars.begin(), found_vars.end());
+  }
+
+  for (std::set<data_variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i){
+    identifier_string new_name = generator(i->name());
+    if (new_name != i->name())
+    {
+      src.push_back(*i);
+      dest.push_back(data_variable(new_name, i->sort()));
+    }
+  }
+
+  rcond = atermpp::partial_replace(rcond, detail::make_data_variable_replacer(src, dest));
+  rleft = atermpp::partial_replace(rleft, detail::make_data_variable_replacer(src, dest));
+  rright = atermpp::partial_replace(rright, detail::make_data_variable_replacer(src, dest));
+}
+
 ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spec){
 // merges the declarations in the data section and the actions declared in the action rename file action_rename
 // with the sections in the lps specification lps_wspec and resolves variable name conflicts
@@ -284,11 +440,14 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
   used_names.insert(boost::make_transform_iterator(rule_vars.begin(), detail::data_variable_name()),
                     boost::make_transform_iterator(rule_vars.end()  , detail::data_variable_name())
                    );
+
   result_lp = rename_free_variables(result_lp, used_names, "_S");
-  result_lp = rename_process_parameters(result_lp, used_names, "_S");
   result_lp = rename_summation_variables(result_lp, used_names, "_S");
 
+  result_lp = rename_process_parameters(result_lp, used_names, "_S");
   result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
+  //result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
+  //result = rename_process_parameters(result, used_names, "_S");
 
   return result;
 }
@@ -310,6 +469,10 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   lps::data_variable_list lps_new_sum_vars = lps::data_variable_list();
   lps::action rule_old_action;
   lps::action rule_new_action;
+  
+  std::set<identifier_string> s;
+  lps::postfix_identifier_generator generator("_S");
+  generator.add_identifiers(s);
 
   aterm_appl new_element;
 
@@ -322,11 +485,11 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   for(aterm_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i){
     rename_rule = *i;
     aterm_appl::iterator j =  rename_rule.begin();
-    j++;//rule_vars = lps::data_variable_list(*j++);
-    rule_condition = lps::data_expression(*j++);
-    rule_old_action =  lps::action(*j++);
-    
-    new_element = *j;
+    //skipping the data_variable_list j
+    rule_condition = lps::data_expression(*++j);
+    rule_old_action =  lps::action(*++j);
+    new_element = *++j;
+
     if(is_action(new_element)){
       rule_new_action =  lps::action(new_element);
       to_tau = false;
@@ -337,6 +500,9 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
       if(gsIsTau(new_element)){ to_tau = true; to_delta = false;}
       else if (gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
     }
+
+    //rename all previously used variables
+    rename_renamerule_variables(rule_condition, rule_old_action, rule_new_action, generator);
 
     lps_summands = summand_list();
     //go through the summands of the old lps
@@ -370,18 +536,14 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
               //add new variables to the summation list and to the condition
               std::set<data_variable> new_vars = find_variables(*rule_old_argument_i);
               for(std::set<data_variable>::iterator sdvi = new_vars.begin(); sdvi != new_vars.end(); sdvi++){
-                //check if the sum var already exists in lps_new_sum_vars
-                bool exists=false;
+                //check for naming conflicts
                 for(lps::data_variable_list::iterator dvli = lps_new_sum_vars.begin(); dvli != lps_new_sum_vars.end(); dvli++){
                   if(string(dvli->name()).compare(sdvi->name())==0){
-                    exists=true;
-                    break;
+		    gsVerboseMsg("WARNING: Two variables are using the same name, this might lead to conflicts\n");
                   }
                 }
-                if(!exists){
-                  gsVerboseMsg("  new var in arg found: %i\n", new_vars.size());
-                  lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
-                }
+
+                lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
                 lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
               }//end data var loop
   
@@ -461,7 +623,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   return lps_new_spec;
 } //end of rename(...)
 
-ATermAppl rename_lps_actions(t_tool_options tool_options)
+ATermAppl rename_actions(t_tool_options tool_options)
 {
   string infilename = tool_options.infilename;
   string outfilename = tool_options.outfilename;
@@ -495,8 +657,6 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
       return NULL;
     }
   }
-
-
 
   //parse the action rename file
   gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
@@ -574,13 +734,10 @@ ATermAppl rename_lps_actions(t_tool_options tool_options)
   }
 
  
-  //type check the new LPS
-  gsVerboseMsg("type checking the new LPS...\n");
+  //apply sum elimination
+  gsVerboseMsg("applying sum elimination to the new LPS...\n");
   lps_new_spec = lps::specification(result);
-  if (!lps_new_spec.is_well_typed()) {
-    gsVerboseMsg("The newly formed LPS is not well typed!\n");
-    return NULL;
-  }
+  lps_new_spec = lps::sumelm(lps_new_spec);
   return lps_new_spec;
 }
 
@@ -594,7 +751,7 @@ static void print_help(char *name)
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
     "used.\n"
     "\n"
-    "  -rRENAMEFILE, --rename=RENAMEFILE\n"
+    "  -fRENAMEFILE, --file=RENAMEFILE\n"
     "                        use the rename rules from FILE\n"
     "  -pPHASE, --end-phase=PHASE\n"
     "                        stop conversion after phase PHASE and output the\n"
