@@ -206,34 +206,30 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
     if (create_objects) {
       root->setVisObject(visObjectFactory->makeObject(
             primitiveFactory->makeSphere(),ids));
-    } 
-    else {
+    } else {
       visObjectFactory->updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
-  }
-  else {
+  } else {
     int drot = rot + settings->getInt(BranchRotation);
-    
     if (drot >= 360) {
       drot -= 360;
     }
+    if (create_objects) {
+      root->clearBranchVisObjects();
+    }
     
     glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-    
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL) 
-      { 
+      if (desc != NULL) { 
         if (desc->isCentered()) {
           if (root->getNumDescendants() > 1) {
             traverseTreeC(desc,false,drot);
-          } 
-          else {
+          } else {
             traverseTreeC(desc,false,rot);
           }
-        }
-        else {
+        } else {
           glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
           glTranslatef(root->getBaseRadius(),0.0f,0.0f);
           glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
@@ -244,7 +240,6 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
         }
       }
     }
-    
     glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
     
     float r = root->getBaseRadius() / root->getTopRadius();
@@ -265,14 +260,12 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
               primitiveFactory->makeTruncatedCone(r,topClosed,
                 root->getNumDescendants() > 1 || root->hasSeveredDescendants()),
               ids));
-      }
-      else {
+      } else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
-    } 
-    else {
+    } else {
       glScalef(root->getTopRadius(),root->getTopRadius(),
           settings->getFloat(ClusterHeight));
       
@@ -285,8 +278,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
               primitiveFactory->makeTruncatedCone(r,
                 root->getNumDescendants() > 1 || root->hasSeveredDescendants(), 
                 topClosed), ids));
-      } 
-      else {
+      } else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
@@ -298,39 +290,31 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
 
 void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
   if (!root->hasDescendants()) {
-  // root has no descendants; so draw it as a hemispheroid
+    // root has no descendants; so draw it as a hemispheroid
     glPushMatrix();
     glScalef(root->getTopRadius(),root->getTopRadius(),
         min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
-    
     if (create_objects) {
       vector<int> ids; 
-
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
-
       if (root == lts->getInitialState()->getCluster()) {
         // exception: draw root as a sphere if it is the initial cluster
         root->setVisObject(visObjectFactory->makeObject(
               primitiveFactory->makeSphere(), ids));
-      } 
-      else {
+      } else {
         root->setVisObject(visObjectFactory->makeObject(
-              primitiveFactory->makeHemisphere(), ids));
+              primitiveFactory->makeHemisphere(),ids));
       }
-    } 
-    else {
+    } else {
       visObjectFactory->updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
-  }
-  else {
+  } else {
     int drot = rot + settings->getInt(BranchRotation);
-    
     if (drot >= 360) {
       drot -= 360;
     }
-    
     float baserad = 0.0f;
     if (create_objects) {
       root->clearBranchVisObjects();
@@ -385,7 +369,7 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
           glTranslatef(root->getBaseRadius(),0.0f,
               settings->getFloat(ClusterHeight));
           glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-          traverseTreeT(desc, true, drot);
+          traverseTreeT(desc,false,drot);
           glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,
               -settings->getFloat(ClusterHeight));
@@ -842,10 +826,21 @@ bool Visualizer::isMarked(State* s) {
 
 void Visualizer::forceDirectedInit() {
   if (lts == NULL) return;
-  computeAbsPos();
   resetVelocities(lts->getInitialState()->getCluster());
   // assign initial positions to the states
   // ensure that no two states have the same position
+  forceDirectedInitPos(lts->getInitialState()->getCluster());
+  update_abs = true;
+  computeAbsPos();
+}
+
+void Visualizer::forceDirectedInitPos(Cluster* root) {
+  root->positionStatesSpiral();
+  for (int i = 0; i < root->getNumDescendants(); ++i) {
+    if (root->getDescendant(i) != NULL) {
+      forceDirectedInitPos(root->getDescendant(i));
+    }
+  }
 }
 
 void Visualizer::forceDirectedStep() {
@@ -891,13 +886,15 @@ void Visualizer::computeForces(Cluster* root) {
     for (int j = 0; j < s->getNumOutTransitions(); ++j) {
       if (!s->getOutTransition(j)->isBackpointer()) {
         State *v = s->getOutTransition(j)->getEndState();
-        // compute attracting force of s on v (and v.v.) using Hook's law
+        // compute attracting force of s on v (and v.v.) using Hooke's law
         Point3D d = s->getPositionAbs() - v->getPositionAbs();
         float dl = length(d);
-        Point3D force = (settings->getInt(TransitionAttraction) * 
-          (dl - settings->getInt(TransitionLength)) / dl) * d;
-        s->addForce(force);
-        v->addForce(-1.0f * force);
+        if (dl > 0.0f) {
+          Point3D force = (-settings->getFloat(TransitionAttraction) * 
+            (dl - settings->getFloat(TransitionLength)) / dl) * d;
+          s->addForce(force);
+          v->addForce(-1.0f * force);
+        }
       }
     }
     for (int j = i+1; j < root->getNumStates(); ++j) {
@@ -906,7 +903,7 @@ void Visualizer::computeForces(Cluster* root) {
       Point3D d = s->getPositionAbs() - v->getPositionAbs();
       float dl = length(d);
       if (dl > 0.0f) {
-        Point3D force = settings->getInt(StateRepulsion) / (dl*dl*dl) * d;
+        Point3D force = (settings->getFloat(StateRepulsion) / (dl*dl*dl)) * d;
         v->addForce(force);
         s->addForce(-1.0f * force);
       }

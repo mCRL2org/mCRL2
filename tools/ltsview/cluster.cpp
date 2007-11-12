@@ -361,6 +361,25 @@ void Cluster::clearSlots() {
   undecidedStates.clear();
 }
 
+void Cluster::positionStatesSpiral() {
+  states[0]->center();
+  float d = 0.25f;
+  float r = d;
+  unsigned int i = 1;
+  float a,da;
+  while (i < states.size()) {
+    a = 0.0f;
+    da = rad_to_deg(d/r);
+    while (i < states.size() && a < 360.0f - da) {
+      states[i]->setPositionRadius(r);
+      states[i]->setPositionAngle(a);
+      ++i;
+      a += da;
+    }
+    r += d;
+  }
+}
+
 void Cluster::computeSizeAndDescendantPositions() {
 // pre: size of every descendant and its number of slots are known 
 // (and assumed to be correct)

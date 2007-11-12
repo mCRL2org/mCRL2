@@ -24,6 +24,13 @@ State::State() {
 }
 
 State::~State() {
+  unsigned int i;
+  for (i = 0; i < outTransitions.size(); ++i) {
+    delete outTransitions[i];
+  }
+  for (i = 0; i < loops.size(); ++i) {
+    delete loops[i];
+  }
 }
 
 void State::addInTransition( Transition* trans )

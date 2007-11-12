@@ -55,6 +55,7 @@ class Visualizer: public Subscriber {
     void applyForces(Cluster* root, int rot);
     void resetForces(Cluster* root);
     void resetVelocities(Cluster* root);
+    void forceDirectedInitPos(Cluster* root);
   
   public:
     Visualizer(Mediator* owner,Settings* ss);

@@ -115,21 +115,21 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   sizer->Add(qlSpin,0,rf,bd);
   
   wxSlider *srSlider = new wxSlider(panel,myID_STATE_REPULSION,
-      settings->getInt(StateRepulsion),0,10000,wxDefaultPosition,sliderSize,
+      int(settings->getFloat(StateRepulsion)),0,100,wxDefaultPosition,sliderSize,
       sliderStyle);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State repulsion:")),0,lf,bd);
   sizer->Add(srSlider,0,rf,bd);
 
   wxSlider *taSlider = new wxSlider(panel,myID_TRANSITION_ATTRACTION,
-      settings->getInt(TransitionAttraction),0,10000,wxDefaultPosition,
+      int(settings->getFloat(TransitionAttraction)),0,100,wxDefaultPosition,
       sliderSize,sliderStyle);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition attraction:")),0,
       lf,bd);
   sizer->Add(taSlider,0,rf,bd);
 
   wxSlider *tlSlider = new wxSlider(panel,myID_TRANSITION_LENGTH,
-      settings->getInt(TransitionLength),0,10000,wxDefaultPosition,sliderSize,
-      sliderStyle);
+      int(settings->getFloat(TransitionLength)*10.0f),0,100,wxDefaultPosition,
+      sliderSize,sliderStyle);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition length:")),0,lf,bd);
   sizer->Add(tlSlider,0,rf,bd);
 
@@ -415,15 +415,15 @@ void SettingsDialog::onQualitySpin(wxSpinEvent& event) {
 }
 
 void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event) {
-  settings->setInt(TransitionAttraction,event.GetPosition());
+  settings->setFloat(TransitionAttraction,float(event.GetPosition()));
 }
 
 void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event) {
-  settings->setInt(TransitionLength,event.GetPosition());
+  settings->setFloat(TransitionLength,float(event.GetPosition())/10.0f);
 }
 
 void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event) {
-  settings->setInt(StateRepulsion,event.GetPosition());
+  settings->setFloat(StateRepulsion,float(event.GetPosition()));
 }
 
 void SettingsDialog::onTransparencySpin(wxSpinEvent& event) {

@@ -229,9 +229,9 @@ Settings::Settings() {
   settings[ClusterHeight]       = new Setting_Float(ClusterHeight,0.0f);
   settings[BranchTilt]          = new Setting_Int(BranchTilt,30);
   settings[Quality]             = new Setting_Int(Quality,12);
-  settings[TransitionAttraction]= new Setting_Int(TransitionAttraction,100);
-  settings[TransitionLength]    = new Setting_Int(TransitionLength,0);
-  settings[StateRepulsion]      = new Setting_Int(StateRepulsion,100);
+  settings[TransitionAttraction]= new Setting_Float(TransitionAttraction,1.0f);
+  settings[TransitionLength]    = new Setting_Float(TransitionLength,1.0f);
+  settings[StateRepulsion]      = new Setting_Float(StateRepulsion,1.0f);
   settings[Alpha]               = new Setting_UByte(Alpha,178);
   settings[LongInterpolation]   = new Setting_Bool(LongInterpolation,false);
   settings[DisplayBackpointers] = new Setting_Bool(DisplayBackpointers,false);

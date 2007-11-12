@@ -60,12 +60,14 @@ class Cluster {
     void         markState();
     void         setDeadlock( bool b );
     void         unmarkState();
+
     unsigned int getTotalNumSlots() const;
     unsigned int getNumSlots(unsigned int ring) const;
     void         occupySlot(unsigned int ring,float pos,State* s);
     void         occupyCenterSlot(State* s);
     void         resolveSlots();
     void         clearSlots();
+    void         positionStatesSpiral();
 
     // Methods on transitions
     void      addActionLabel(int l);
