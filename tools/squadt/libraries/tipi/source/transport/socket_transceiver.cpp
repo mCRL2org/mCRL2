@@ -23,17 +23,14 @@ namespace transport {
 
     /* Start listening */
     void socket_transceiver::activate(boost::weak_ptr < socket_transceiver > w) {
-      boost::asio::socket_base::keep_alive  option_keep_alive(true);
-      boost::asio::socket_base::linger      option_linger(false, 0);
-
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
         using namespace boost;
         using namespace boost::asio;
 
-        socket.set_option(option_keep_alive);
-        socket.set_option(option_linger);
+        socket.set_option(socket_base::keep_alive(true));
+        socket.set_option(socket_base::linger(false, 0));
 
         socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0, 
                         boost::bind(&socket_transceiver::handle_receive, this, w, _1));
@@ -60,7 +57,6 @@ namespace transport {
 
         /* Build socket connection */
         ip::tcp::endpoint endpoint(a, (p == 0) ? default_port : p);
-
         socket.connect(endpoint, e);
 
         /* Set socket options */
@@ -69,7 +65,7 @@ namespace transport {
 
         if (!e) {
           /* Clear buffer */
-          for (unsigned int i = 0; i < input_buffer_size; ++i) {
+          for (size_t i = 0; i < input_buffer_size; ++i) {
             buffer[i] = 0;
           }
 
@@ -80,7 +76,7 @@ namespace transport {
           scheduler.run();
         }
         else {
-          if (e == asio::error::eof) {
+          if (e == asio::error::eof || e == asio::error::connection_reset) {
             basic_transceiver::handle_disconnect(this);
           }
           else if (e != asio::error::operation_aborted) {
@@ -191,6 +187,10 @@ namespace transport {
           if (e == asio::error::eof || e == asio::error::connection_reset) {
             /* The safe default error handling */
             basic_transceiver::handle_disconnect(this);
+          }
+          else if (e == asio::error::try_again || e.value() == 11) { // value comparison is a workaround for failing erroc_code comparison
+            socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
+              boost::bind(&socket_transceiver::handle_receive, this, w, _1));
           }
           else if (e != asio::error::operation_aborted) {
             throw boost::system::system_error(e.value(), boost::system::get_system_category());
