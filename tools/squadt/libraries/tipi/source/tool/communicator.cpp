@@ -50,7 +50,7 @@ namespace tipi {
     /**
      * \return a pointer to the tool capabilities object that is sent to the controller on request
      **/
-    tool::capabilities& communicator::get_tool_capabilities() {
+    tool::capabilities& communicator::get_capabilities() {
       return (boost::static_pointer_cast < communicator_impl > (impl)->current_tool_capabilities);
     }
  

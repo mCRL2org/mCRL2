@@ -160,7 +160,7 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
+  c.add_input_configuration(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {

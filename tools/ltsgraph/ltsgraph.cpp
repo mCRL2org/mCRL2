@@ -50,12 +50,12 @@ squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w)
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::visualisation);
-  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::visualisation);
-  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
-  c.add_input_combination(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::visualisation);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::visualisation);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::visualisation);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::visualisation);
 #ifdef MCRL2_BCG
-  c.add_input_combination(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
 #endif  
 }
 

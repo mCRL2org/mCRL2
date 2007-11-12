@@ -46,7 +46,7 @@ namespace tipi {
       public:
   
         /** \brief Description for a tool's main input object */
-        class input_combination {
+        class input_configuration {
  
           public:
  
@@ -57,10 +57,10 @@ namespace tipi {
           public:
  
             /** \brief Constructor */
-            input_combination(tool::category const&, mime_type const&, std::string const&);
+            input_configuration(tool::category const&, mime_type const&, std::string const&);
  
             /** \brief Compares two input combinations for equality */
-            static bool equal(const input_combination&, const input_combination&);
+            static bool equal(const input_configuration&, const input_configuration&);
         };
   
         /** \brief Description for a tool's output object */
@@ -81,13 +81,13 @@ namespace tipi {
         };
   
         /** \brief Convenience type for a list of input configurations */
-        typedef std::set  < input_combination >                                   input_combination_list;
+        typedef std::set  < input_configuration >                                   input_configuration_list;
   
         /** \brief Convenience type for a list of input configurations */
         typedef std::set  < output_combination >                                  output_combination_list;
   
         /** \brief Convenience type for use in interface */
-        typedef boost::iterator_range < input_combination_list::const_iterator >  input_combination_range;
+        typedef boost::iterator_range < input_configuration_list::const_iterator >  input_configuration_range;
  
         /** \brief Convenience type for use in interface */
         typedef boost::iterator_range < output_combination_list::const_iterator > output_combination_range;
@@ -98,7 +98,7 @@ namespace tipi {
         version                  m_protocol_version;
   
         /** \brief The available input configurations */
-        input_combination_list   m_input_combinations;
+        input_configuration_list   m_input_configurations;
  
         /** \brief The available input configurations */
         output_combination_list  m_output_combinations;
@@ -109,7 +109,7 @@ namespace tipi {
         capabilities(const version = default_protocol_version);
   
         /** \brief Add an input configuration */
-        void add_input_combination(std::string const&, mime_type const&, tool::category const& = category::unknown);
+        void add_input_configuration(std::string const&, mime_type const&, tool::category const& = category::unknown);
   
         /** \brief Add an output configuration */
         void add_output_combination(std::string const&, mime_type const&);
@@ -118,17 +118,17 @@ namespace tipi {
         version get_version() const;
   
         /** \brief Returns a reference to the list of input combinations */
-        input_combination_range get_input_combinations() const;
+        input_configuration_range get_input_configurations() const;
  
         /** \brief Returns a reference to the list of output combinations */
         output_combination_range get_output_combinations() const;
  
         /** \brief Find a specific input combination of this tool, if it exists */
-        input_combination const* find_input_combination(const mime_type&, const tool::category&) const;
+        input_configuration const* find_input_configuration(const mime_type&, const tool::category&) const;
     };
   
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
-    inline bool operator < (const capabilities::input_combination& a, const capabilities::input_combination& b) {
+    inline bool operator < (const capabilities::input_configuration& a, const capabilities::input_configuration& b) {
       return (a.m_mime_type < b.m_mime_type || ((a.m_mime_type == b.m_mime_type) && a.m_category < b.m_category));
     }
  
@@ -137,7 +137,7 @@ namespace tipi {
       return (a.m_mime_type < b.m_mime_type || a.m_mime_type == b.m_mime_type);
     }
  
-    inline capabilities::input_combination::input_combination(tool::category const& c,
+    inline capabilities::input_configuration::input_configuration(tool::category const& c,
                         mime_type const& m, std::string const& id) : m_category(c), m_mime_type(m), m_identifier(id) {
     }
  
@@ -145,7 +145,7 @@ namespace tipi {
                                                                                 m_mime_type(f), m_identifier(id) {
     }
  
-    inline bool capabilities::input_combination::equal(input_combination const& p, input_combination const& q) {
+    inline bool capabilities::input_configuration::equal(input_configuration const& p, input_configuration const& q) {
       return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type() && p.m_category == q.m_category);
     }
  

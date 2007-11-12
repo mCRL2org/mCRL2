@@ -42,7 +42,7 @@ squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w)
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(fsm_file_for_input,tipi::mime_type("fsm",
+  c.add_input_configuration(fsm_file_for_input,tipi::mime_type("fsm",
 				tipi::mime_type::text),tipi::tool::category::visualisation);
 }
 

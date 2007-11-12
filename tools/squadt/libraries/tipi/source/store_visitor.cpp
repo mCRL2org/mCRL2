@@ -368,7 +368,7 @@ namespace utility {
         << "<protocol-version major=\"" << (unsigned short) c.m_protocol_version.major
         << "\" minor=\"" << (unsigned short) c.m_protocol_version.minor << "\"/>";
 
-    for (tipi::tool::capabilities::input_combination_list::const_iterator i = c.m_input_combinations.begin(); i != c.m_input_combinations.end(); ++i) {
+    for (tipi::tool::capabilities::input_configuration_list::const_iterator i = c.m_input_configurations.begin(); i != c.m_input_configurations.end(); ++i) {
       out << "<input-configuration category=\"" << (*i).m_category
           << "\" format=\"" << (*i).m_mime_type
           << "\" id=\"" << (*i).m_identifier << "\"/>";

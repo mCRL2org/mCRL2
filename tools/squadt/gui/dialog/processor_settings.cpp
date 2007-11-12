@@ -190,7 +190,7 @@ namespace squadt {
         tool_selector->ScrollTo(selected_tool);
       }
 
-      void processor_details::select_tool(tipi::tool::capabilities::input_combination const* combination, std::string const& name) {
+      void processor_details::select_tool(tipi::tool::capabilities::input_configuration const* combination, std::string const& name) {
         wxString category(combination->m_category.get_name().c_str(), wxConvLocal);
 
         std::stack < wxTreeItemId > id_stack;

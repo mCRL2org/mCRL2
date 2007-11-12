@@ -54,7 +54,7 @@ std::string fsm_file_argument;
     void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const 
     {
         /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-        c.add_input_combination(fsm_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+        c.add_input_configuration(fsm_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
     }
 
     void squadt_interactor::user_interactive_configuration(tipi::configuration& c)

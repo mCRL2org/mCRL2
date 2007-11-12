@@ -42,6 +42,7 @@ namespace tipi {
 
       public:
 
+        static const category editing;        ///< show edit
         static const category reporting;      ///< show properties of objects
         static const category conversion;     ///< transformations of objects between different storage formats
         static const category transformation; ///< changing objects but retaining the storage format: e.g. optimisation, editing
@@ -49,14 +50,12 @@ namespace tipi {
         static const category simulation;     ///< simulation
 
         /** \brief The standard available tool categories */
-        static const boost::array < category const*, 6 > categories;
+        static const boost::array < category const*, 7 > categories;
 
-      private:
+      public:
 
         /** \brief Constructor */
         inline category(std::string const&);
-
-      public:
 
         /** \brief Gets the name of the category */
         inline std::string get_name() const;
@@ -79,14 +78,16 @@ namespace tipi {
 
 #ifdef TIPI_IMPORT_STATIC_DEFINITIONS
     const category category::unknown("unknown");
+    const category category::editing("editing");
     const category category::reporting("reporting");
     const category category::conversion("conversion");
     const category category::transformation("transformation");
     const category category::visualisation("visualisation");
     const category category::simulation("simulation");
 
-    const boost::array < category const*, 6 > category::categories = { {
+    const boost::array < category const*, 7 > category::categories = { {
       &category::unknown,
+      &category::editing,
       &category::reporting,
       &category::conversion,
       &category::transformation,

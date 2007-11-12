@@ -243,9 +243,9 @@ namespace utility {
     if (p.tool_descriptor.get() != 0) {
       out << " tool-name=\"" << p.tool_descriptor->get_name() << "\"";
 
-      if (p.selected_input_combination != 0) {
-        out << " format=\"" << p.selected_input_combination->m_mime_type << "\"";
-        out << " category=\"" << p.selected_input_combination->m_category << "\"";
+      if (p.selected_input_configuration != 0) {
+        out << " format=\"" << p.selected_input_configuration->m_mime_type << "\"";
+        out << " category=\"" << p.selected_input_configuration->m_category << "\"";
       }
     }
 

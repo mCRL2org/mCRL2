@@ -51,8 +51,8 @@ squadt_interactor::squadt_interactor() {
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  cp.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
-  cp.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+  cp.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
+  cp.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
 class squadt_interactor::storage_configuration {

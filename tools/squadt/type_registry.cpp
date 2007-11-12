@@ -45,7 +45,7 @@ namespace squadt {
 
     for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
 
-      BOOST_FOREACH(tipi::tool::capabilities::input_combination j, (*t)->get_capabilities()->get_input_combinations()) {
+      BOOST_FOREACH(tipi::tool::capabilities::input_configuration j, (*t)->get_capabilities()->get_input_configurations()) {
         if (categories_for_format.find(j.m_mime_type) == categories_for_format.end()) {
           /* Format unknown, create new map */
           tools_for_category temporary;

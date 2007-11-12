@@ -135,6 +135,283 @@ using namespace ::mcrl2::utilities;
       void write_result();
   };
 
+// Squadt protocol interface and utility pseudo-library
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include "mcrl2/utilities/squadt_interface.h"
+
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface, public LPS_Conf_Check {
+
+  private:
+
+    static const char* lps_file_for_input; ///< file containing an LTS that can be imported using the LTS library
+    static const char* lps_file_for_output;  ///< file containing an LTS that can be imported using the LTS library
+
+    static const char* option_generate_invariants;
+    static const char* option_check_invariant;
+    static const char* option_mark_tau;
+    static const char* option_check_combinations;
+    static const char* option_counter_example;
+    static const char* option_induction_on_lists;
+    static const char* option_invariant;
+    static const char* option_time_limit;
+    static const char* option_rewrite_strategy;
+    static const char* option_smt_solver;
+
+  private:
+
+    boost::shared_ptr < tipi::datatype::enumeration > smt_solver_enumeration;
+
+  public:
+
+    /** \brief constructor */
+    squadt_interactor();
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration&);
+};
+
+const char* squadt_interactor::lps_file_for_input = "lps_in";
+const char* squadt_interactor::invariant_file_for_input = "invariant_in";
+const char* squadt_interactor::lps_file_for_output  = "lps_out";
+
+const char* squadt_interactor::option_generate_invariants = "generate_invariants";
+const char* squadt_interactor::option_check_invariant     = "check_invariant";
+const char* squadt_interactor::option_mark_tau            = "mark_tau";
+const char* squadt_interactor::option_check_combinations  = "check_combinations";
+const char* squadt_interactor::option_counter_example     = "counter_example";
+const char* squadt_interactor::option_induction_on_lists  = "induction_on_lists";
+const char* squadt_interactor::option_invariant           = "invariant";
+const char* squadt_interactor::option_time_limit          = "time_limit";
+const char* squadt_interactor::option_rewrite_strategy    = "rewrite_strategy";
+const char* squadt_interactor::option_smt_solver          = "smt_solver";
+
+squadt_interactor::squadt_interactor() {
+  smt_solver_enumeration.reset(new tipi::datatype::enumeration("none"));
+
+  *smt_solver_enumeration % "ario" % "cvc";
+}
+
+void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+  c.add_input_configuration(lps_file_for_input, tipi::mime_type("mcrl2", tipi::mime_type::text),
+                                                            tipi::tool::category::transformation);
+}
+
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
+
+  std::string infilename = c.get_input(lps_file_for_input).get_location();
+
+  // Set defaults for options
+  if (!c.option_exists(option_generate_invariants)) {
+    c.add_option(option_generate_invariants).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_check_invariant)) {
+    c.add_option(option_check_invariant).set_argument_value< 0, tipi::datatype::boolean >(
+        c.option_exists(option_generate_invariants) || c.option_exists(option_invariant));
+  }
+  if (!c.option_exists(option_mark_tau)) {
+    c.add_option(option_mark_tau).set_argument_value< 0, tipi::datatype::boolean >(true);
+  }
+  if (!c.option_exists(option_check_combinations)) {
+    c.add_option(option_check_combinations).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_counter_example)) {
+    c.add_option(option_counter_example).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_induction_on_lists)) {
+    c.add_option(option_induction_on_lists).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  // Helper for linearisation method selection
+  mcrl2::utilities::squadt::radio_button_helper < SMT_Solver_Type > solver_selector(d);
+
+  // Helper for strategy selection
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
+
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
+
+  m.append(d.create< horizontal_box >().
+        append(d.create< label >().set_text("SMT prover: ")).
+        append(solver_selector.associate(solver_type_cvc_fast, "none")).
+        append(solver_selector.associate(solver_type_ario, "ario")).
+        append(solver_selector.associate(solver_type_cvc, "CVC3", true)));
+
+  m.append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("Rewrite strategy")).
+                append(strategy_selector.associate(GS_REWR_INNER, "inner")).
+                append(strategy_selector.associate(GS_REWR_INNERC, "innerc")).
+                append(strategy_selector.associate(GS_REWR_JITTY, "jitty")).
+                append(strategy_selector.associate(GS_REWR_JITTYC, "jittyc")));
+
+  checkbox&   generate_invariants = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_generate_invariants));
+  checkbox&   check_invariant     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_invariant));
+  checkbox&   mark_tau            = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_mark_tau));
+  checkbox&   check_combinations  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_combinations));
+  checkbox&   counter_example     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_counter_example));
+  checkbox&   induction_on_lists  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_induction_on_lists));
+  text_field& invariant           = d.create< text_field >();
+  text_field& time_limit          = d.create< text_field >();
+
+  // two columns to select the linearisation options of the tool
+  m.append(d.create< label >().set_text(" ")).
+    append(d.create< horizontal_box >().
+        append(d.create< vertical_box >().set_default_alignment(layout::right).
+            append(generate_invariants.set_label("Generate invariants")).
+            append(check_invariant.set_label("Check invariant")).
+            append(mark_tau.set_label("Mark confluent tau's")).
+            append(check_combinations.set_label("Check all combinations of summands for confluence")).
+            append(counter_example.set_label("Produce counter examples")).
+            append(induction_on_lists.set_label("Add delta summands"))).
+        append(d.create< vertical_box >().set_default_alignment(layout::left).
+            append(d.create< text_field >, layout::hidden).
+            append(invariant.set_text("")).
+            append(alpha.set_label("Apply alphabet axioms")).
+            append(sumelm.set_label("Apply sum elimination")).
+            append(deltaelm.set_label("Apply delta elimination")).
+            append(freevars.set_label("Generate free variables"))));
+
+  // Set default values for options if the configuration specifies them
+  if (c.option_exists(option_rewrite_strategy)) {
+    strategy_selector.set_selection(static_cast < RewriteStrategy > (
+        configuration.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+  }
+  if (c.option_exists(option_invariant)) {
+    invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
+  }
+  if (c.option_exists(option_time_limit)) {
+    time_limit.set_text(c.get_option_argument< std::string >(option_time_limit));
+  }
+
+  // Add okay button
+  button& okay_button = d.create< button >().set_label("OK");
+
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
+
+  send_display_layout(d.set_manager(m));
+
+  /* Wait for the OK button to be pressed */
+  okay_button.await_change();
+
+  // Update configuration
+  using tipi::datatype::boolean;
+
+  c.get_option(option_generate_invariants).set_argument_value< 0, boolean >(generate_invariants.get_status());
+  c.get_option(option_check_invariant).set_argument_value< 0, boolean >(check_invariant.get_status());
+  c.get_option(option_mark_tau).set_argument_value< 0, boolean >(mark_tau.get_status());
+  c.get_option(option_counter_example).set_argument_value< 0, boolean >(newstate.counter_example());
+  c.get_option(option_induction_on_lists).set_argument_value< 0, boolean >(induction_on_lists.get_status());
+
+  if (!c.output_exists(lps_file_for_output) && !c.get_option_argument< bool >(option_mark_tau)) {
+    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
+  }
+
+  using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
+
+  if (invariant.get_text().empty()) {
+    c.remove_option(option_invariant);
+  }
+  else {
+    c.add_option(option_invariant).set_argument_value< 0, tipi::datatype::string >(invariant.get_text());
+  }
+  if (time_limit.get_text().empty()) {
+    c.remove_option(option_time_limit);
+  }
+  else {
+    c.add_option(option_time_limit).set_argument_value< 0, tipi::datatype::natural >(time_limit.get_text());
+  }
+
+  c.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
+  c.get_option(option_smt_solver).replace_argument(0, smt_solver_enumeration, solver_selector.get_selection());
+
+  send_clear_display();
+}
+
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+  bool result = true;
+
+  result |= c.input_exists(lps_file_for_input);
+
+  return (result);
+}
+
+bool squadt_interactor::perform_task(tipi::configuration& c) {
+  using namespace boost;
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
+
+  bool result = true;
+
+  t_lin_options task_options;
+  
+  // Extract configuration
+  extract_task_options(c, task_options);
+
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  label& message = d.create< label >();
+ 
+  d.set_manager(d.create< vertical_box >().
+                        append(message.set_text("Linearisation in progress"), layout::left));
+
+  send_display_layout(d);
+
+  // Perform linearisation
+  ATermAppl linearisation_result = linearise_file(task_options);
+
+  if (linearisation_result == 0) {
+    message.set_text("Linearisation in failed");
+
+    result = false;
+  }
+  else if (task_options.opt_check_only) {
+    message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % task_options.infilename));
+  }
+  else {
+    //store the result
+    FILE *outstream = fopen(task_options.outfilename.c_str(), "wb");
+
+    if (outstream != 0) {
+      ATwriteToBinaryFile((ATerm) linearisation_result, outstream);
+
+      fclose(outstream);
+    }
+    else {
+      send_error(str(format("cannot open output file '%s'\n") % task_options.outfilename));
+
+      result = false;
+    }
+
+    if (result) {
+      message.set_text("Linearisation finished");
+    }
+  }
+
+  send_display_layout(d);
+
+  return (result);
+}
+
+#endif
+
   // Class LPS_Conf_Check - Functions declared private --------------------------------------------
 
     void LPS_Conf_Check::print_help() {

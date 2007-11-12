@@ -280,7 +280,7 @@ namespace utility {
     try {
       p.tool_descriptor            = global_build_system.get_tool_manager()->
                                        get_tool_by_name(h.tree->GetAttribute("tool-name"));
-      p.selected_input_combination = p.tool_descriptor->find_input_combination(
+      p.selected_input_configuration = p.tool_descriptor->find_input_configuration(
                                        tipi::tool::category::fit(h.tree->GetAttribute("category")),
                                        tipi::mime_type(h.tree->GetAttribute("format")));
     }
@@ -340,10 +340,10 @@ namespace utility {
     }
 
     // Try reconstructing the selected input combination
-    if (p.tool_descriptor && p.selected_input_combination == 0) {
+    if (p.tool_descriptor && p.selected_input_configuration == 0) {
       if (0 < p.inputs.size()) {
         // Take the first input as main input and try to find a combination
-        p.selected_input_combination = p.tool_descriptor->find_input_combination(
+        p.selected_input_configuration = p.tool_descriptor->find_input_configuration(
         	p.current_monitor->get_configuration()->get_category(), p.inputs[0]->mime_type);
       }
     }

@@ -162,9 +162,21 @@ namespace squadt {
       }
 #else
       if (current_status == process::running) {
-        kill(identifier, SIGKILL);
+        kill(identifier, SIGHUP);
 
         current_status = process::aborted;
+
+        boost::timed_mutex m;
+
+        boost::xtime time;
+
+        xtime_get(&time, boost::TIME_UTC);
+
+        time.sec += 2;
+
+        boost::timed_mutex::scoped_timed_lock(m, time);
+
+        kill(identifier, SIGKILL);
       }
 #endif
     }

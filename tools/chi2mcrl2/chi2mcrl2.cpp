@@ -78,7 +78,7 @@ const char* squadt_interactor::mcrl2_file_for_output  = "mcrl2_out";
 
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(chi_file_for_input, tipi::mime_type("chi", tipi::mime_type::text),
+  c.add_input_configuration(chi_file_for_input, tipi::mime_type("chi", tipi::mime_type::text),
                                                             tipi::tool::category::transformation);
 }
 

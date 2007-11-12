@@ -85,8 +85,8 @@ namespace tipi {
         /** \brief Set the current (perhaps partial) configuration */
         void set_configuration(boost::shared_ptr < tipi::configuration >);
 
-        /** \brief Creates a new configuration object based on a given input_combination */
-        static boost::shared_ptr < configuration > new_configuration(tipi::tool::capabilities::input_combination const&);
+        /** \brief Creates a new configuration object based on a given input_configuration */
+        static boost::shared_ptr < configuration > new_configuration(tipi::tool::capabilities::input_configuration const&);
  
         /** \brief Get the current (perhaps partial) configuration */
         boost::shared_ptr < configuration > get_configuration() const;

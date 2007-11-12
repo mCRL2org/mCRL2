@@ -125,7 +125,7 @@ squadt_interactor::squadt_interactor() {
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(mcrl2_file_for_input, tipi::mime_type("mcrl2", tipi::mime_type::text),
+  c.add_input_configuration(mcrl2_file_for_input, tipi::mime_type("mcrl2", tipi::mime_type::text),
                                                             tipi::tool::category::transformation);
 }
 

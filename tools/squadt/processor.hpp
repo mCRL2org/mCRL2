@@ -153,7 +153,7 @@ namespace squadt {
       bool demote_status();
 
       /** \brief Start tool configuration */
-      void configure(const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
+      void configure(const tool::input_configuration*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
       void configure(std::string const& = "");
@@ -180,13 +180,13 @@ namespace squadt {
       const tool::sptr get_tool();
 
       /** \brief Get the input combination if one is already selected */
-      void set_input_combination(tool::input_combination*);
+      void set_input_configuration(tool::input_configuration*);
 
       /** \brief Whether or not an input combination has been set */
-      bool has_input_combination();
+      bool has_input_configuration();
 
       /** \brief Get the input combination if one is already selected */
-      tool::input_combination const* get_input_combination() const;
+      tool::input_configuration const* get_input_configuration() const;
 
       /** \brief Get the object for the tool associated with this processor */
       boost::shared_ptr < monitor > get_monitor();

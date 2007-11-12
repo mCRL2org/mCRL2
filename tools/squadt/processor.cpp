@@ -448,16 +448,16 @@ namespace squadt {
   /**
    * \param[in] i the input combination to set
    **/
-  void processor::set_input_combination(tool::input_combination* i) {
-    impl->selected_input_combination = i;
+  void processor::set_input_configuration(tool::input_configuration* i) {
+    impl->selected_input_configuration = i;
   }
 
-  bool processor::has_input_combination() {
-    return (impl->selected_input_combination != 0);
+  bool processor::has_input_configuration() {
+    return (impl->selected_input_configuration != 0);
   }
 
-  tool::input_combination const* processor::get_input_combination() const {
-    return(impl->selected_input_combination);
+  tool::input_configuration const* processor::get_input_configuration() const {
+    return(impl->selected_input_configuration);
   }
 
   boost::shared_ptr < processor::monitor > processor::get_monitor() {
@@ -528,7 +528,7 @@ namespace squadt {
     impl->configure(impl->interface_object.lock(), impl->current_monitor->get_configuration(), w);
   }
 
-  void processor::configure(const tool::input_combination* i, const boost::filesystem::path& p, std::string const& w) {
+  void processor::configure(const tool::input_configuration* i, const boost::filesystem::path& p, std::string const& w) {
     assert(impl->interface_object.lock().get() == this);
 
     impl->configure(impl->interface_object.lock(), i, p, w);

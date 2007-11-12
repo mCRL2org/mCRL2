@@ -38,7 +38,7 @@ namespace tipi {
       private:
 
         /** \brief Creates a new configuration object */
-        static boost::shared_ptr < configuration > new_configuration(tipi::tool::capabilities::input_combination const& c);
+        static boost::shared_ptr < configuration > new_configuration(tipi::tool::capabilities::input_configuration const& c);
 
       private:
 
@@ -75,7 +75,7 @@ namespace tipi {
     /**
      * \param[in] c the input combination on which to base the new configuration
      **/
-    inline boost::shared_ptr < configuration > communicator_impl::new_configuration(tipi::tool::capabilities::input_combination const& c) {
+    inline boost::shared_ptr < configuration > communicator_impl::new_configuration(tipi::tool::capabilities::input_configuration const& c) {
       boost::shared_ptr < configuration > nc(new tipi::configuration(c.m_category));
 
       return (nc);

@@ -93,7 +93,7 @@ const char* squadt_interactor::lps_file_for_input  = "lps_in";
 const char* squadt_interactor::lps_file_for_output = "lps_out";
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {

@@ -3,9 +3,11 @@ project toolset/squadt
   : requirements <include>.
   ;
 
+import set ;
 import sequence ;
 
 source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
+source_files = [ set.difference $(source_files) : [ glob ./squadt_proxy.cpp ] ] ;
 
 alias squadt : : <wx>no ;
 

@@ -39,7 +39,7 @@ namespace squadt {
       typedef boost::shared_ptr < tool >             sptr;
 
       /** \brief Convenience type alias */
-      typedef tipi::tool::capabilities::input_combination input_combination;
+      typedef tipi::tool::capabilities::input_configuration input_configuration;
 
     private:
 
@@ -83,7 +83,7 @@ namespace squadt {
       inline std::string get_name() const;
 
       /** \brief Find a specific input combination of this tool, if it exists */
-      inline input_combination const* find_input_combination(build_system::tool_category const&, build_system::storage_format const&) const;
+      inline input_configuration const* find_input_configuration(build_system::tool_category const&, build_system::storage_format const&) const;
   };
 
   /**
@@ -125,8 +125,8 @@ namespace squadt {
    * \param[in] f the storage format
    * \param[in] t the category in which the tool operates
    **/
-  inline tool::input_combination const* tool::find_input_combination(build_system::tool_category const& t, build_system::storage_format const& f) const {
-    return (m_capabilities->find_input_combination(f, t));
+  inline tool::input_configuration const* tool::find_input_configuration(build_system::tool_category const& t, build_system::storage_format const& f) const {
+    return (m_capabilities->find_input_configuration(f, t));
   }
 }
 

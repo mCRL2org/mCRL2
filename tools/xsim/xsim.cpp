@@ -78,7 +78,7 @@ squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w)
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  c.add_input_combination(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
+  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {

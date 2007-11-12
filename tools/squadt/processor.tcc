@@ -89,7 +89,7 @@ namespace squadt {
       boost::weak_ptr < project_manager >  manager;
  
       /** \brief The selected input combination of the tool */
-      tool::input_combination const*       selected_input_combination;
+      tool::input_configuration const*       selected_input_configuration;
 
       /** \brief The directory from which tools should be run on behalf of this object */
       std::string                          output_directory;
@@ -153,7 +153,7 @@ namespace squadt {
       bool demote_status();
 
       /** \brief Start tool configuration */
-      void configure(interface_ptr const&, const tool::input_combination*, const boost::filesystem::path&, std::string const& = "");
+      void configure(interface_ptr const&, const tool::input_configuration*, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
       void configure(interface_ptr const&, boost::shared_ptr < tipi::configuration > const&, std::string const& = "");
@@ -243,7 +243,7 @@ namespace squadt {
   }
 
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
-                interface_object(tp), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
+                interface_object(tp), current_monitor(new monitor(*tp)), manager(p), selected_input_configuration(0) {
   }
 
   /**
@@ -252,7 +252,7 @@ namespace squadt {
    * \param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p, tool::sptr t) :
-    interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(p), selected_input_combination(0) {
+    interface_object(tp), tool_descriptor(t), current_monitor(new monitor(*tp)), manager(p), selected_input_configuration(0) {
   }
 
   /**
@@ -621,7 +621,7 @@ namespace squadt {
    * \attention This function is non-blocking
    * \pre t.get() == this
    **/
-  inline void processor_impl::configure(interface_ptr const& t, const tool::input_combination* ic, const boost::filesystem::path& l, std::string const& w) {
+  inline void processor_impl::configure(interface_ptr const& t, const tool::input_configuration* ic, const boost::filesystem::path& l, std::string const& w) {
     using namespace boost;
     using namespace boost::filesystem;
 
@@ -630,9 +630,9 @@ namespace squadt {
     if (g.get()) {
       assert(ic != 0);
 
-      selected_input_combination = const_cast < tool::input_combination* > (ic);
+      selected_input_configuration = const_cast < tool::input_configuration* > (ic);
 
-      boost::shared_ptr < tipi::configuration > c(tipi::controller::communicator::new_configuration(*selected_input_combination));
+      boost::shared_ptr < tipi::configuration > c(tipi::controller::communicator::new_configuration(*selected_input_configuration));
 
       c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % g->get_unique_count()));
 
@@ -672,7 +672,7 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
-    assert(selected_input_combination != 0);
+    assert(selected_input_configuration != 0);
 
     c->set_fresh();
 

@@ -18,8 +18,9 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-      /// \internal
+      /// \cond INTERNAL_DOCS
       boost::function< void (const tipi::report::type, std::string const&) > mcrl2_tool_interface::do_send_report;
+      /// \endcond
 
       tool_interface::tool_interface() : m_communicator(new tipi::tool::communicator) {
       }
@@ -98,6 +99,8 @@ namespace mcrl2 {
 
           m_communicator->send_signal_termination();
 
+          m_communicator->disconnect();
+
           active = false;
 
           return (true);
@@ -110,7 +113,7 @@ namespace mcrl2 {
        * \param[in] av command line arguments (Windows specific)
        **/
       bool tool_interface::try_interaction(char* av) {
-        set_capabilities(m_communicator->get_tool_capabilities());
+        set_capabilities(m_communicator->get_capabilities());
 
         active = m_communicator->activate(av);
 
@@ -129,7 +132,7 @@ namespace mcrl2 {
        **/
       bool tool_interface::try_interaction(int& ac, char** const av) {
   
-        set_capabilities(m_communicator->get_tool_capabilities());
+        set_capabilities(m_communicator->get_capabilities());
   
         active = m_communicator->activate(ac,av);
   
@@ -169,7 +172,7 @@ namespace mcrl2 {
         m_communicator->send_status_report(m, d);
       }
 
-      /// \internal
+      /// \cond INTERNAL_DOCS
       class trivial_deleter {
 
         public:
@@ -177,6 +180,7 @@ namespace mcrl2 {
           void operator() (::tipi::layout::tool_display*) {
           }
       };
+      /// \endcond
   
       /**
        * \param[in] d the display object that contains the data to communicate
@@ -199,10 +203,9 @@ namespace mcrl2 {
         m_communicator->send_display_layout(p);
       }
   
-      /// \internal
+      /// \cond INTERNAL_DOCS
       boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
-      /// \internal
       static bool initialise() {
         rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
         *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
@@ -210,8 +213,8 @@ namespace mcrl2 {
         return true;
       }
   
-      /// \internal
       bool initialised = initialise();
+      /// \endcond
     }
   }
 }

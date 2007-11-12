@@ -72,9 +72,9 @@ void tool_capabilities_exchange() {
   tipi::controller::communicator cc;
   tipi::tool::communicator       tc;
 
-  tipi::tool::capabilities&      tcp = tc.get_tool_capabilities();
+  tipi::tool::capabilities&      tcp = tc.get_capabilities();
 
-  tcp.add_input_combination(0, "text/aut", "Testing");
+  tcp.add_input_configuration(0, "text/aut", "Testing");
 
   tc.connect(cc);
 

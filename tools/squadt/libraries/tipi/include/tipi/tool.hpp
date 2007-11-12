@@ -97,7 +97,7 @@ namespace tipi {
         void send_status_report(tipi::report::type, std::string const&) const;
  
         /** \brief Get the tool capabilities object that will be sent when a request is received */
-        tool::capabilities& get_tool_capabilities();
+        tool::capabilities& get_capabilities();
  
         /** \brief Get the current tool configuration object be sent when a request is received */
         configuration& get_configuration();

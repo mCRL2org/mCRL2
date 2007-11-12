@@ -424,12 +424,12 @@ namespace squadt {
 
         const tool::sptr               the_tool;
 
-        const tool::input_combination* input_combination;
+        const tool::input_configuration* input_configuration;
 
       public:
 
-        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::sptr& tp, const tool::input_combination* ic) :
-                                        wxMenuItem(m, id, t), the_tool(tp), input_combination(ic) {
+        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::sptr& tp, const tool::input_configuration* ic) :
+                                        wxMenuItem(m, id, t), the_tool(tp), input_configuration(ic) {
         }
     };
 
@@ -480,7 +480,7 @@ namespace squadt {
 
           cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
                                     wxString(i.second->get_name().c_str(), wxConvLocal),
-                                    i.second, i.second->find_input_combination(i.first, n.get_object()->mime_type));
+                                    i.second, i.second->find_input_configuration(i.first, n.get_object()->mime_type));
 
           target_menu->Append(new_menu_item)->Enable(show_update_operations);
         }
@@ -544,12 +544,12 @@ namespace squadt {
             else {
               tool::sptr selected_tool = p->get_tool();
 
-              if (p->has_input_combination()) {
+              if (p->has_input_configuration()) {
                 /* Add the main input (must exist) */
-                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_combination()->m_mime_type.get_sub_type()));
+                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_configuration()->m_mime_type.get_sub_type()));
                
                 if (selected_tool) {
-                  dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());
+                  dialog.select_tool(p->get_input_configuration(), p->get_tool()->get_name());
                 }
                
                 dialog.allow_tool_selection(false);
@@ -597,7 +597,7 @@ namespace squadt {
             tp->get_monitor()->on_completion(boost::bind(&project::process_configuration, this, s, tp));
 
             /* Start tool configuration phase */
-            tp->configure(menu_item->input_combination, boost::filesystem::path(t->location));
+            tp->configure(menu_item->input_configuration, boost::filesystem::path(t->location));
           }
           break;
       }

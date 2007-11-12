@@ -385,8 +385,8 @@ namespace utility {
           c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
         }
         else if (e->Value() == "input-configuration") {
-          c.m_input_combinations.insert(
-              tipi::tool::capabilities::input_combination(
+          c.m_input_configurations.insert(
+              tipi::tool::capabilities::input_configuration(
                   tipi::tool::category::fit(e->GetAttribute("category")),
                   tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id")));
         }
