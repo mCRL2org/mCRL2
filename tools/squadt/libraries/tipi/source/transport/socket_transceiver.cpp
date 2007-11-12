@@ -85,7 +85,7 @@ namespace transport {
           }
           else if (e != asio::error::operation_aborted) {
             /* The safe default error handling */
-            throw (boost::system::system_error(e));
+            throw boost::system::system_error(e.value(), boost::system::get_system_category());
           }
         }
       }
@@ -132,12 +132,12 @@ namespace transport {
         
         boost::mutex::scoped_lock ll(operation_lock);
        
-        boost::system::error_code ec;
+        boost::system::error_code e;
        
-        socket.close(ec);
+        socket.close(e);
        
-        if (ec) {
-          std::cerr << boost::system::system_error(ec).what() << std::endl; // An error occurred.
+        if (e) { // An error occurred.
+          throw boost::system::system_error(e.value(), boost::system::get_system_category());
         }
       }
     }
@@ -193,7 +193,7 @@ namespace transport {
             basic_transceiver::handle_disconnect(this);
           }
           else if (e != asio::error::operation_aborted) {
-            throw (boost::system::system_error(e));
+            throw boost::system::system_error(e.value(), boost::system::get_system_category());
           }
         }
       }
@@ -224,7 +224,7 @@ namespace transport {
             basic_transceiver::handle_disconnect(this);
           }
           else if (e != boost::asio::error::operation_aborted) {
-            throw (boost::system::system_error(e));
+            throw boost::system::system_error(e.value(), boost::system::get_system_category());
           }
         }
       }
