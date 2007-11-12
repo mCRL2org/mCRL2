@@ -171,11 +171,16 @@ bool Squadt::OnInit() {
     splash* splash_window = new splash(&logo, 1);
 
     try {
+      try {
       global_build_system.initialise(
           std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
           std::auto_ptr < tool_manager > (new tool_manager()),
           std::auto_ptr < executor > (new executor()),
           std::auto_ptr < type_registry > (new type_registry()));
+      }
+      catch (std::exception& e) {
+        wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+      }
      
       splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());
      
