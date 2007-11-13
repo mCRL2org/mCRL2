@@ -257,8 +257,51 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   return result;
 }
 
-/// \brief Gives the instantiated right hand side for a propositional_variable_instantiation
+/// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
+/// occurs in the pbes_specification. 
 
+template <typename Container>
+inline unsigned long get_rank(const propositional_variable_instantiation current_variable_instantiation,
+                              pbes<Container> pbes_spec)
+{
+  unsigned long rank=0;
+  Container eqsys = pbes_spec.equations();
+  fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
+  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  {
+    if (eqi->variable().name()==current_variable_instantiation.name())
+    { return rank;
+    }
+    if (eqi->symbol()!=current_fixpoint_symbol)
+    { current_fixpoint_symbol=eqi->symbol();
+      rank=rank+1;
+    }
+  }
+  assert(0); // It is assumed that the current_variable_instantiation occurs in the pbes_spec.
+  return 0;
+}
+
+
+/// \brief gives the fixed point symbol of a propositional_variable_instantiation. It is assumed that the variable
+/// occurs in the pbes_specification. Returns false if the symbol is mu, and true if the symbol in nu.
+
+template <typename Container>
+inline bool get_fixpoint_symbol(const propositional_variable_instantiation current_variable_instantiation,
+                                pbes<Container> pbes_spec)
+{
+  Container eqsys = pbes_spec.equations();
+  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
+  {
+    if (eqi->variable().name()==current_variable_instantiation.name())
+    { return (is_nu(eqi->symbol()));
+    }
+  }
+  assert(0); // It is assumed that the variable instantiation occurs in the PBES.
+  return false;
+}
+
+
+/// \brief Gives the instantiated right hand side for a propositional_variable_instantiation
 
 template <typename Container>
 inline pbes_expression give_the_instantiated_rhs( 
