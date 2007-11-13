@@ -274,13 +274,13 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  using namespace mcrl2::utilities::squadt;
-
   ATerm bot;
 
   ATinit(0,0,&bot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+  using namespace mcrl2::utilities::squadt;
+
   if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
 #endif
     return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
@@ -292,14 +292,14 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 }
 #else
 int main(int argc, char **argv) {
-  using namespace mcrl2::utilities::squadt;
-
   ATerm bot;
 
   /* Initialise aterm library */
   ATinit(argc,argv,&bot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+  using namespace mcrl2::utilities::squadt;
+
   if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
     return wxEntry(argc, argv);
