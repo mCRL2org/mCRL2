@@ -31,6 +31,7 @@
 #include "print/messaging.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
+#include "librewrite.h"
 
 using namespace mcrl2::utilities;
 using namespace std;
@@ -41,11 +42,13 @@ using namespace data_expr;
 //----------------
 
 //t_phase represents the phases at which the program should be able to stop
-typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE, PH_RENAME} t_phase;
+typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE} t_phase;
 
 //t_tool_options represents the options of the tool 
 typedef struct t_tool_options {
   bool pretty;
+  bool norewrite;
+  bool nosumelm;
   t_phase end_phase;
   string action_rename_filename;
   string infilename;
@@ -112,9 +115,11 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    static const char*  lps_file_for_input;      ///< file containing an LPS
-    static const char*  rename_file_for_input;   ///< file containing a rename specification
+    static const char*  lps_file_for_input;     ///< file containing an LPS
+    static const char*  rename_file_for_input;  ///< file containing a rename specification
     static const char*  lps_file_for_output;    ///< file used to write the output to
+    static const char*  option_no_rewrite;
+    static const char*  option_no_sumelm;
 
   public:
 
@@ -134,6 +139,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 const char* squadt_interactor::lps_file_for_input    = "lps_in";
 const char* squadt_interactor::rename_file_for_input = "renamefile_in";
 const char* squadt_interactor::lps_file_for_output   = "lps_out";
+const char* squadt_interactor::option_no_rewrite     = "no_rewrites";
+const char* squadt_interactor::option_no_sumelm      = "no_sumelm";
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
@@ -144,6 +151,13 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;//
 
+  if (!c.option_exists(option_no_rewrite)) {
+    c.add_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+  if (!c.option_exists(option_no_sumelm)) {
+    c.add_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+  }
+
   /* Create display */
   tipi::layout::tool_display d;
 
@@ -151,11 +165,17 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Create and add the top layout manager */
   text_field& rename_file_field = d.create< text_field >();
+  checkbox&   rewrite            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_rewrite));
+  checkbox&   sumelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
   button&     okay_button       = d.create< button >().set_label("OK");
+
 
   m.append(d.create< horizontal_box >().
         append(d.create< label >().set_text("Rename file name : ")).
         append(rename_file_field)).
+        append(d.create< vertical_box >().set_default_alignment(layout::left).
+            append(rewrite.set_label("Use rewriting")).
+            append(sumelm.set_label("Apply sum elimination"))).
      append(d.create< label >().set_text(" ")).
      append(okay_button, layout::right);
 
@@ -181,6 +201,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
 
+  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite.get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm.get_status());
+
   send_clear_display();
 }
 
@@ -198,6 +221,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
   tool_options.pretty           = false;
+  tool_options.norewrite	= false;
+  tool_options.nosumelm		= false;
   tool_options.end_phase        = PH_NONE;
   tool_options.action_rename_filename = c.get_input(rename_file_for_input).get_location();
   tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
@@ -247,11 +272,15 @@ static t_tool_options parse_command_line(int argc, char **argv)
   //declarations for getopt
   t_phase opt_end_phase = PH_NONE;
   bool opt_pretty = false;
+  bool opt_norewrite = false;
+  bool opt_nosumelm = false;
   string action_rename_filename = "";
-  #define SHORT_OPTIONS "f:p:ehqvd"
+  #define SHORT_OPTIONS "f:p:ehqvdom"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "file",      required_argument,  NULL,  'f' },
+    { "no-rewrite",no_argument,	       NULL,  'o' },
+    { "no-sumelm", no_argument,        NULL,  'm' },
     { "end-phase", required_argument,  NULL,  'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
@@ -268,6 +297,12 @@ static t_tool_options parse_command_line(int argc, char **argv)
       case 'f': /* rename file */
         action_rename_filename = optarg;
         break;
+      case 'o': /* no rewrites */
+        opt_norewrite = true;
+        break;
+      case 'm': /* no sumelm */
+        opt_nosumelm = true;
+        break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
           opt_end_phase = PH_PARSE;
@@ -277,8 +312,6 @@ static t_tool_options parse_command_line(int argc, char **argv)
           opt_end_phase = PH_DATA_IMPL;
         } else if (strcmp(optarg, "me") == 0) {
           opt_end_phase = PH_MERGE;
-        } else if (strcmp(optarg, "re") == 0) {
-          opt_end_phase = PH_RENAME;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
@@ -341,6 +374,8 @@ static t_tool_options parse_command_line(int argc, char **argv)
   }
   tool_options.end_phase    = opt_end_phase;
   tool_options.pretty       = opt_pretty;
+  tool_options.norewrite    = opt_norewrite;
+  tool_options.nosumelm     = opt_nosumelm;
   tool_options.action_rename_filename = action_rename_filename;
   tool_options.infilename   = infilename;
   tool_options.outfilename  = outfilename;
@@ -374,6 +409,65 @@ void rename_renamerule_variables(lps::data_expression& rcond, lps::action& rleft
   rcond = atermpp::partial_replace(rcond, detail::make_data_variable_replacer(src, dest));
   rleft = atermpp::partial_replace(rleft, detail::make_data_variable_replacer(src, dest));
   rright = atermpp::partial_replace(rright, detail::make_data_variable_replacer(src, dest));
+}
+
+lps::specification rewrite_lps(lps::specification lps){
+  lps::summand_list lps_summands = lps.process().summands();
+  lps::summand_list new_summands;
+  lps::summand new_summand;
+  lps::action_list lps_actions;
+  lps::action_list new_actions;
+  lps::action new_action;
+  lps::data_expression_list lps_arguments;
+  lps::data_expression_list new_arguments;
+  lps::data_expression new_expression;
+  lps::data_assignment_list lps_assignments;
+  lps::data_assignment_list new_assignments;
+  lps::data_assignment new_assignment;
+
+  Rewriter *rewr = createRewriter(lps.data());
+
+  new_summands = lps::summand_list();
+  for(lps::summand_list::iterator si = lps_summands.begin(); si != lps_summands.end(); ++si){
+    //rewrite the arguments of the actions
+    lps_actions = si->actions();
+    new_actions = lps::action_list();
+    for(lps::action_list::iterator ai = lps_actions.begin(); ai != lps_actions.end(); ++ai){
+      lps_arguments = ai->arguments();
+      new_arguments = lps::data_expression_list();
+      for(lps::data_expression_list::iterator argi = lps_arguments.begin();
+                                              argi != lps_arguments.end();
+                                            ++argi){
+        new_expression = rewr->rewrite(*argi);
+        new_arguments = push_front(new_arguments, new_expression);
+      }
+      new_arguments = reverse(new_arguments);
+      new_action = lps::action(ai->label(), new_arguments);
+      new_actions = push_front(new_actions, new_action);
+    }
+    new_actions = reverse(new_actions);
+    new_summand = set_actions(*si, new_actions);
+
+    //rewrite the assignments
+    lps_assignments = si->assignments();
+    for(lps::data_assignment_list::iterator di = lps_assignments.begin();
+                                            di != lps_assignments.end();
+                                          ++di){
+      new_expression = rewr->rewrite(di->rhs());
+      new_assignment = lps::data_assignment(di->lhs(), new_expression);
+      new_assignments = push_front(new_assignments, new_assignment);
+    }
+    new_assignments = reverse(new_assignments);
+    new_summand = set_assignments(new_summand, new_assignments);
+
+    //rewrite the condition
+    new_expression = rewr->rewrite(si->condition());
+    new_summand = set_condition(new_summand, new_expression);
+
+    new_summands = push_front(new_summands, new_summand);
+  }   
+  new_summands = reverse(new_summands);
+  return set_lps(lps, set_summands(lps.process(), new_summands));
 }
 
 ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spec){
@@ -443,16 +537,13 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
 
   result_lp = rename_free_variables(result_lp, used_names, "_S");
   result_lp = rename_summation_variables(result_lp, used_names, "_S");
-
-  result_lp = rename_process_parameters(result_lp, used_names, "_S");
   result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
-  //result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
-  //result = rename_process_parameters(result, used_names, "_S");
+  result = rename_process_parameters(result, used_names, "_S");
 
   return result;
 }
 
-ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::specification lps_new_spec){
+ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::specification lps_new_spec, bool norewrite, bool nosumelm){
   aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
   aterm_appl rename_rule;
   lps::summand_list lps_old_summands = lps_old_spec.process().summands();
@@ -536,13 +627,6 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
               //add new variables to the summation list and to the condition
               std::set<data_variable> new_vars = find_variables(*rule_old_argument_i);
               for(std::set<data_variable>::iterator sdvi = new_vars.begin(); sdvi != new_vars.end(); sdvi++){
-                //check for naming conflicts
-                for(lps::data_variable_list::iterator dvli = lps_new_sum_vars.begin(); dvli != lps_new_sum_vars.end(); dvli++){
-                  if(string(dvli->name()).compare(sdvi->name())==0){
-		    gsVerboseMsg("WARNING: Two variables are using the same name, this might lead to conflicts\n");
-                  }
-                }
-
                 lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
                 lps_new_condition = and_(lps_new_condition, lps::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
               }//end data var loop
@@ -609,7 +693,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   }//end of rename rule iterator
 
   //copy all old summands to the new lps
-  gsVerboseMsg("adding left overs from old lps...\n");
+  gsVerboseMsg("adding leftovers from old lps...\n");
   for(lps::summand_list::iterator losi = lps_old_summands.begin(); losi != lps_old_summands.end(); ++losi){
     if(!is_false(losi->condition()))
     {
@@ -617,9 +701,14 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
     }
   }
   lps_new_summands = reverse(lps_new_summands);
-  gsVerboseMsg("new lps complete\n");
 
+  gsVerboseMsg("simplifying the result...\n");
   lps_new_spec = set_lps(lps_new_spec, set_summands(lps_new_spec.process(), lps_new_summands));
+  if(!norewrite) lps_new_spec = rewrite_lps(lps_new_spec);
+  if(!nosumelm)  lps_new_spec = lps::sumelm(lps_new_spec);
+  if(!nosumelm && !norewrite) lps_new_spec = rewrite_lps(lps_new_spec);
+
+  gsVerboseMsg("new lps complete\n");
   return lps_new_spec;
 } //end of rename(...)
 
@@ -725,19 +814,12 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  result = rename(action_rename_spec, lps_old_spec, lps_new_spec);
+  result = rename(action_rename_spec, lps_old_spec, lps_new_spec, tool_options.norewrite, tool_options.nosumelm);
   if (result == NULL) {
     return NULL;
   }
-  if (end_phase == PH_RENAME) {
-    return result;
-  }
-
- 
-  //apply sum elimination
-  gsVerboseMsg("applying sum elimination to the new LPS...\n");
   lps_new_spec = lps::specification(result);
-  lps_new_spec = lps::sumelm(lps_new_spec);
+
   return lps_new_spec;
 }
 
@@ -753,10 +835,13 @@ static void print_help(char *name)
     "\n"
     "  -fRENAMEFILE, --file=RENAMEFILE\n"
     "                        use the rename rules from FILE\n"
+    "  -o, --no-rewrite      do not rewrite data terms while linearising;\n"
+    "                        useful when the rewrite system does not terminate\n"
+    "  -m, --no-sumelm       do not apply sum elimination to the final result\n"
     "  -pPHASE, --end-phase=PHASE\n"
     "                        stop conversion after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
-    "                        'di' (data implementation), 'me' (merge), 're' (rename)\n"
+    "                        'di' (data implementation), 'me' (merge data types)\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
