@@ -206,7 +206,7 @@ namespace detail {
 
 inline const boost::system::error_category& get_system_category()
 {
-  return boost::system::system_category;
+  return boost::system::get_system_category();
 }
 
 #if !defined(BOOST_WINDOWS) && !defined(__CYGWIN__)
