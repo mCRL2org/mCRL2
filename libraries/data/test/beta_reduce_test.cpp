@@ -1,0 +1,61 @@
+// Author(s): Jeroen Keiren
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file beta_reduce_test.cpp
+/// \brief Add your file description here.
+
+#include <iostream>
+#include <boost/test/minimal.hpp>
+#include <aterm2.h>
+#include "mcrl2/data_common.h"
+#include "libstruct.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
+#include "print/messaging.h"
+
+using namespace ::mcrl2::utilities;
+
+int test_main(int, char*[])
+{
+  ATerm bottom_of_stack;
+  ATinit(0, 0, &bottom_of_stack);
+  gsEnableConstructorFunctions();
+  gsSetVerboseMsg();
+
+  ATermAppl x_name = gsString2ATermAppl("x");
+  ATermAppl y_name = gsString2ATermAppl("y");
+  ATermAppl x = gsMakeDataVarId(x_name, gsMakeSortExprNat());
+  ATermAppl y = gsMakeDataVarId(y_name, gsMakeSortExprNat());
+  ATermList xl = ATmakeList1((ATerm) x);
+  ATermList yl = ATmakeList1((ATerm) y);
+  ATermAppl five = gsMakeDataExprNat("5");
+  ATermAppl add_x = gsMakeDataExprAdd(x, five);
+  ATermAppl add_y = gsMakeDataExprAdd(y, five);
+  ATermAppl lambda = gsMakeBinder(gsMakeLambda(), xl, add_x);
+  ATermAppl lambda_appl = gsMakeDataAppl(lambda, yl);
+  ATermAppl beta_reduced_lambda_appl = (ATermAppl) beta_reduce_term((ATerm) lambda_appl);
+  BOOST_CHECK(ATisEqual(beta_reduced_lambda_appl, add_y));
+
+  // Check that beta reduction preserves annotation
+  ATermAppl sort = gsMakeSortId(gsString2ATermAppl("sort"));
+  ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
+  ATermAppl u_name = gsString2ATermAppl("u");
+  ATermAppl v_name = gsString2ATermAppl("v");
+  ATermAppl u = gsMakeDataVarId(u_name, sort);
+  ATermAppl v = gsMakeDataVarId(v_name, sort);
+  u = (ATermAppl) ATsetAnnotation((ATerm) u,  dummy, dummy);
+  v = (ATermAppl) ATsetAnnotation((ATerm) v,  dummy, dummy);
+  ATermList ul = ATmakeList1((ATerm) u);
+  ATermList vl = ATmakeList1((ATerm) v);
+  ATermAppl u_lambda = gsMakeBinder(gsMakeLambda(), ul, u);
+  ATermAppl u_lambda_appl = gsMakeDataAppl(u_lambda, vl);
+  gsVerboseMsg("u_lambda_appl: %T\n", u_lambda_appl);
+  ATermAppl u_beta_reduced_lambda_appl = (ATermAppl) beta_reduce_term((ATerm) u_lambda_appl);
+  gsVerboseMsg("u_beta_reduced_lambda_appl: %T\n", u_beta_reduced_lambda_appl);
+  BOOST_CHECK(ATisEqual(u_beta_reduced_lambda_appl, v));
+
+  return 0;
+}

@@ -1,0 +1,23 @@
+import testing ;
+
+project libraries/lps/test
+   : requirements
+       <use>/boost//headers
+#       <source>/libraries//rewrite
+       <source>/libraries//mcrl2_basic
+       <source>/libraries//data
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+   ;
+
+test-suite lps
+    :
+      [ run apply_test.cpp ]
+      [ run beta_reduce_test.cpp ]
+      [ run data_expression.cpp ]
+      [ run data_test.cpp ]
+      [ run data_utiltiy_test.cpp ]
+      [ run operator.cpp ]
+      [ run replace_test.cpp ]
+      [ run sort_test.cpp ]
+    ;
