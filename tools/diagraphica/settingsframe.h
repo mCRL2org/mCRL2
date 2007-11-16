@@ -21,6 +21,9 @@ using namespace std;
 #include "mcrl2/utilities/colorbutton.h"
 #include "mcrl2/utilities/spinctrlfloat.h"
 
+using mcrl2::utilities::wxColorButton;
+using mcrl2::utilities::wxSpinCtrlFloat;
+
 class SettingsFrame : public PopupFrame
 {
 public:

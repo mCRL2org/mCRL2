@@ -9,20 +9,41 @@
 
 #ifndef COLORBUTTON_H
 #define COLORBUTTON_H
-#include <wx/colordlg.h>
 #include <wx/wx.h>
+#include <wx/colordlg.h>
 
-class wxColorButton : public wxPanel
-{
-  public:
-    wxColorButton( wxWindow* parent, wxWindow* topframe, wxWindowID id = -1,
-	const wxPoint& pos = wxDefaultPosition, const wxSize& size =
-	wxDefaultSize );
-    void OnMouseDown( wxMouseEvent& event );
+namespace mcrl2 {
+  namespace utilities {
 
-  private:
-    wxWindow* appFrame;
-  DECLARE_EVENT_TABLE()
-};
+    /**
+     * \brief A widget for choosing colors
+     *
+     * The widget consists of a small square with the selected colour as
+     * background.  Clicking the square will activate a colour picking dialog.
+     * The colour that is selected in the dialog is taken as the new colour of
+     * the square.
+     **/
+    class wxColorButton : public wxPanel {
+
+      protected:
+    
+        /// \brief Window used to centering a colour dialog
+        wxWindow* appFrame;
+    
+        DECLARE_EVENT_TABLE()
+
+      protected:
+    
+        /// \brief Event handler for mouse down events
+        void OnMouseDown( wxMouseEvent& event );
+    
+      public:
+    
+        /// \brief Constructor
+        wxColorButton( wxWindow* parent, wxWindow* topframe, wxWindowID id = wxID_ANY,
+                        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize );
+    };
+  }
+}
 
 #endif

@@ -17,7 +17,13 @@
 #include <tipi/layout_manager.hpp>
 #include <tipi/layout_elements.hpp>
 
+/**
+ * \brief Name space for all mCRL2 toolset related functionality
+ **/
 namespace mcrl2 {
+  /**
+   * \brief Name space for all utility functionality
+   **/
   namespace utilities {
     namespace squadt {
 

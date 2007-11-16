@@ -10,40 +10,67 @@
 #ifndef SPINCTRLFLOAT_H
 #define SPINCTRLFLOAT_H
 
-#include <cmath>
-#include <string>
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
 #include <wx/spinctrl.h>
 
-class wxSpinCtrlFloat : public wxPanel
-{
-  public:
-    wxSpinCtrlFloat(
-        wxWindow* parent, 
-        wxWindowID id, 
-        double p_Min, 
-        double p_Max,
-        double p_Rate, 
-        double p_Init, 
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize );
+namespace mcrl2 {
+  namespace utilities {
 
-    double GetValue();
-    void SetValue(float v);
-protected:
-    void OnEnter(wxCommandEvent & event);
-    void OnSpin(wxSpinEvent & event);
-    wxTextCtrl* m_TextCtrl;
-    wxSpinButton* m_SpinButton;
-	
-    double m_Rate;
-    int m_Min;
-    int m_Max;
-    int m_ID;
-      
-    DECLARE_EVENT_TABLE()
-};
+    /**
+     * \brief A spin control widget
+     *
+     * A widget that consists of a text field with a string that represents a
+     * numeric value in it that is editable by the user, and a pair of buttons
+     * that can be used to increase or decrease the value in the text field
+     * with a configurable amount.
+     **/
+    class wxSpinCtrlFloat : public wxPanel {
 
+      protected:
+
+        /// \brief Event handler for SPIN events
+        void OnEnter(wxCommandEvent & event);
+
+        /// \brief Event handler for SPIN events
+        void OnSpin(wxSpinEvent & event);
+
+        /// \brief A wxWidgets text control, used to display the current value
+        wxTextCtrl*   m_TextCtrl;
+        /// \brief A wxWidgets spin button, used to manipulate the current value
+        wxSpinButton* m_SpinButton;
+    	
+        /// \brief The spin button resolution
+        double m_Rate;
+
+        /// \brief The rounded minimum value
+        int    m_Min;
+
+        /// \brief The rounded maximum value
+        int    m_Max;
+          
+        DECLARE_EVENT_TABLE()
+
+      public:
+
+        /// \brief Constructor
+        wxSpinCtrlFloat(
+            wxWindow* parent, 
+            wxWindowID id, 
+            double p_Min, 
+            double p_Max,
+            double p_Rate, 
+            double p_Init, 
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize );
+    
+        /// \brief Gets current value
+        double GetValue();
+
+        /// \brief Sets current value
+        void SetValue(float v);
+    };
+  }
+}
 
 #endif

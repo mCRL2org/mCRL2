@@ -24,6 +24,7 @@
 #include "print/messaging.h"
 #endif
 
+/// \cond INTERNAL_DOCS
 namespace tipi {
   class configuration;
 
@@ -33,6 +34,7 @@ namespace tipi {
     class capabilities;
   }
 }
+/// \endcond
 
 /** \brief Helps relaying messages printed through the mcrl2_basic::print */
 namespace mcrl2 {

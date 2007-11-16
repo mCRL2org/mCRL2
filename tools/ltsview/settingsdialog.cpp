@@ -15,6 +15,8 @@
 #include "ids.h"
 #include "utils.h"
 
+using mcrl2::utilities::wxColorButton;
+
 using namespace IDs;
 using namespace Utils;
 
