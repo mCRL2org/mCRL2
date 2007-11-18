@@ -146,7 +146,7 @@ static ATermAppl ar_true, ar_false;
 
 // Maximal arity for which we generate functions for every combination of
 // arguments that are in normal form or not
-#define NF_MAX_ARITY 3
+#define NF_MAX_ARITY 3  // currently this should be such that it is at most sizeof(unsigned int)*8
 
 static unsigned int is_initialised = 0;
 
@@ -232,6 +232,96 @@ static void finalise_common()
 		ATunprotectAFun(afunS);
 	}
 }
+
+
+#define DECL_NFS_A(x,y) DECL_A(x,unsigned int,y); clear_nfs_array(x,y)
+#define FREE_NFS_A(x) FREE_A(x)
+
+static void clear_nfs_array(nfs_array a, unsigned int arity)
+{
+  if ( arity == 0 )
+    return;
+  memset(a,0,((arity-1)/(sizeof(unsigned int)*8)+1)*sizeof(unsigned int));
+}
+
+static void fill_nfs_array(nfs_array a, unsigned int arity, bool val = true)
+{
+  unsigned int i = 0;
+  while ( i*sizeof(unsigned int)*8 < arity )
+  {
+    if ( val )
+    {
+      a[i++] = ~((unsigned int) 0);
+    } else {
+      a[i++] = ((unsigned int) 0);
+    }
+  }
+}
+
+static unsigned int get_nfs_array_value(nfs_array a, unsigned int arity)
+{
+  assert(arity <= NF_MAX_ARITY);
+  return (a[0] & ((1 << arity)-1));
+}
+
+static void set_nfs_array_value(nfs_array a, unsigned int arity, unsigned int val)
+{
+  assert(arity <= NF_MAX_ARITY || val == 0);
+  a[0] = val;
+}
+
+static bool equal_nfs_array(nfs_array a, nfs_array b, unsigned int arity)
+{
+  unsigned int i = 0;
+  while ( arity >= sizeof(unsigned int)*8 )
+  {
+    if ( a[i] != b[i] )
+      return false;
+    arity -= sizeof(unsigned int)*8;
+    ++i;
+  }
+  return (a[i] & ((1 << arity)-1)) == (b[i] & ((1 << arity)-1));
+}
+
+static bool get_nfs_array(nfs_array a, unsigned int i)
+{
+  return a[i/(sizeof(unsigned int)*8)] & (((unsigned int) 1) << (i%(sizeof(unsigned int)*8)));
+}
+
+static void set_nfs_array(nfs_array a, unsigned int i, bool val = true)
+{
+  if ( val )
+  {
+    a[i/(sizeof(unsigned int)*8)] |= ((unsigned int) 1) << (i%(sizeof(unsigned int)*8));
+  } else {
+    a[i/(sizeof(unsigned int)*8)] &= ~(((unsigned int) 1) << (i%(sizeof(unsigned int)*8)));
+  }
+}
+
+static bool is_clear_nfs_array(nfs_array a, unsigned int arity)
+{
+  unsigned int i = 0;
+  while ( arity >= sizeof(unsigned int)*8 )
+  {
+    if ( a[i++] != ((unsigned int) 0) )
+      return false;
+    arity -= sizeof(unsigned int)*8;
+  }
+  return (a[i] & ((1 << arity)-1)) == 0;
+}
+
+static bool is_filled_nfs_array(nfs_array a, unsigned int arity)
+{
+  unsigned int i = 0;
+  while ( arity >= sizeof(unsigned int)*8 )
+  {
+    if ( a[i++] != ~((unsigned int) 0) )
+      return false;
+    arity -= sizeof(unsigned int)*8;
+  }
+  return (a[i] & ((1 << arity)-1)) == (unsigned int) ((1 << arity)-1);
+}
+
 
 #define is_ar_true(x) (ATisEqual((x),ar_true))
 #define is_ar_false(x) (ATisEqual((x),ar_false))
@@ -1444,9 +1534,9 @@ static ATermList dep_vars(ATermList eqn)
 }
 
 #ifdef _JITTYC_STORE_TREES
-ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, unsigned int arity, unsigned int nfs)
+ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs)
 #else
-static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, unsigned int nfs)
+static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs)
 #endif
 {
   ATermList strat = ATmakeList0();
@@ -1458,7 +1548,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
   DECL_A(used,bool,arity);
   for (unsigned int i = 0; i < arity; i++)
   {
-    used[i] = nfs & ( 1 << i );
+    used[i] = get_nfs_array(nfs,i);
   }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
@@ -1633,35 +1723,31 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
   return ATreverse(strat);
 }
 
-unsigned int RewriterCompilingJitty::get_base_nfs(ATermInt opid, unsigned int arity)
+void RewriterCompilingJitty::add_base_nfs(nfs_array nfs, ATermInt opid, unsigned int arity)
 {
-  unsigned int nfs = 0;
-
   for (unsigned int i=0; i<arity; i++)
   {
     if ( always_rewrite_argument(opid,arity,i) )
     {
-      nfs |= (1 << i);
+      set_nfs_array(nfs,i);
     }
   }
-
-  return nfs;
 }
 
-unsigned int RewriterCompilingJitty::extend_nfs(unsigned int nfs, ATermInt opid, unsigned int arity)
+void RewriterCompilingJitty::extend_nfs(nfs_array nfs, ATermInt opid, unsigned int arity)
 {
   ATermList eqns = jittyc_eqns[ATgetInt(opid)];
   if ( eqns == NULL )
   {
-    return (1 << arity) - 1;
+    fill_nfs_array(nfs,arity);
+    return;
   }
   ATermList strat = create_strategy(eqns,ATgetInt(opid),arity,nfs);
   while ( !ATisEmpty(strat) && ATisInt(ATgetFirst(strat)) )
   {
-    nfs |= 1 << ATgetInt((ATermInt) ATgetFirst(strat));
+    set_nfs_array(nfs,ATgetInt((ATermInt) ATgetFirst(strat)));
     strat = ATgetNext(strat);
   }
-  return nfs;
 }
 
 bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, unsigned int num_args)
@@ -1684,16 +1770,15 @@ bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, unsigned int num_args)
   return true;
 }
 
-unsigned int RewriterCompilingJitty::calc_nfs_list(ATermList args, int startarg, ATermList nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(nfs_array nfs, unsigned int arity, ATermList args, int startarg, ATermList nnfvars)
 {
   if ( ATisEmpty(args) )
   {
-    return 0;
+    return;
   }
 
-  bool head = calc_nfs(ATgetFirst(args),startarg,nnfvars);
-  unsigned int tail = calc_nfs_list(ATgetNext(args),startarg+1,nnfvars);
-  return (tail << 1) | (head?1:0);
+  set_nfs_array(nfs,arity-ATgetLength(args),calc_nfs(ATgetFirst(args),startarg,nnfvars));
+  calc_nfs_list(nfs,arity,ATgetNext(args),startarg+1,nnfvars);
 }
 
 bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
@@ -1705,12 +1790,11 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     {
       if ( opid_is_nf((ATermInt) ATgetFirst((ATermList) t),arity) && arity != 0 )
       {
-        unsigned int args = calc_nfs_list(ATgetNext((ATermList) t),startarg,nnfvars);
-        if ( args != ((unsigned int) ((1 << arity)-1)) )
-        {
-          return false;
-        }
-        return true;
+        DECL_NFS_A(args,arity);
+        calc_nfs_list(args,arity,ATgetNext((ATermList) t),startarg,nnfvars);
+        bool b = is_filled_nfs_array(args,arity);
+        FREE_A(args);
+        return b;
       } else {
         return false;
       }
@@ -1734,16 +1818,17 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
   }
 }
 
-pair<unsigned int,string> RewriterCompilingJitty::calc_inner_terms(ATermList args, int startarg, ATermList nnfvars, unsigned int rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array nfs, unsigned int arity, ATermList args, int startarg, ATermList nnfvars, nfs_array rewr)
 {
   if ( ATisEmpty(args) )
   {
-    return pair<unsigned int,string>(0,"");
+    return "";
   }
 
-  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr & 1);
-  pair<unsigned int,string> tail = calc_inner_terms(ATgetNext(args),startarg+1,nnfvars,rewr >> 1);
-  return pair<unsigned int,string>((tail.first << 1) | (head.first?1:0),head.second+(ATisEmpty(ATgetNext(args))?"":",")+tail.second);
+  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr?get_nfs_array(rewr,arity-ATgetLength(args)):false);
+  set_nfs_array(nfs,arity-ATgetLength(args),head.first);
+  string tail = calc_inner_terms(nfs,arity,ATgetNext(args),startarg+1,nnfvars,rewr);
+  return head.second+(ATisEmpty(ATgetNext(args))?"":",")+tail;
 }
 
 static string calc_inner_appl_head(unsigned int arity)
@@ -1793,7 +1878,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << "rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
         }
       } else {
-        unsigned int args_nfs = calc_nfs_list(ATgetNext((ATermList) t),startarg,nnfvars);
+        DECL_NFS_A(args_nfs,arity);
+        calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         if ( b || !rewr )
         {
 #ifndef USE_INT2ATERM_VALUE
@@ -1802,14 +1888,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         } else {
           ss << "rewr_";
 #ifdef EXTEND_NFS
-          args_nfs = extend_nfs( args_nfs | get_base_nfs((ATermInt) ATgetFirst((ATermList) t),arity) , (ATermInt) ATgetFirst((ATermList) t) , arity );
+          add_base_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
+          extend_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
 #endif
         }
         if ( arity > NF_MAX_ARITY )
         {
-          args_nfs = 0;
+          clear_nfs_array(args_nfs,arity);
         }
-        if ( (args_nfs == 0) || b || rewr || (arity > NF_MAX_ARITY) )
+        if ( is_clear_nfs_array(args_nfs,arity) || b || rewr || (arity > NF_MAX_ARITY) )
         {
 #ifdef USE_INT2ATERM_VALUE
           if ( b || !rewr )
@@ -1820,19 +1907,24 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         } else {
 #ifdef USE_INT2ATERM_VALUE
           if ( b || !rewr )
-            ss << "(ATerm) " << (void *) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
+            ss << "(ATerm) " << (void *) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+get_nfs_array_value(args_nfs,arity));
           else
 #endif
           ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
         }
-        pair<unsigned int,string> args = calc_inner_terms(ATgetNext((ATermList) t),startarg,nnfvars,(rewr && b)?((1 << arity)-1):args_nfs);
-        assert( !rewr || b || (arity > NF_MAX_ARITY) || (args.first == args_nfs) );
+        DECL_NFS_A(args_first,arity);
+        if ( rewr && b )
+        {
+          fill_nfs_array(args_nfs,arity);
+        }
+        string args_second = calc_inner_terms(args_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,args_nfs);
+        assert( !rewr || b || (arity > NF_MAX_ARITY) || equal_nfs_array(args_first,args_nfs,arity) );
         if ( rewr && !b )
         {
           ss << "_" << arity << "_";
           if ( arity <= NF_MAX_ARITY )
           {
-            ss << args.first;
+            ss << get_nfs_array_value(args_first,arity);
           } else {
             ss << "0";
           } 
@@ -1840,11 +1932,12 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         } else {
           ss << ",";
         }
-        ss << args.second << ")";
-        if ( args.first != ((unsigned int) ((1 << arity)-1)) )
+        ss << args_second << ")";
+        if ( !is_filled_nfs_array(args_first,arity) )
         {
           b = false;
         }
+        FREE_A(args_nfs);
       }
       b = b || rewr;
       
@@ -1856,13 +1949,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       b = rewr;
       pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false);
-      pair<unsigned int,string> tail = calc_inner_terms(ATgetNext((ATermList) t),startarg,nnfvars,0); 
+      DECL_NFS_A(tail_first,arity);
+      string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL); 
       ss << "isAppl(" << head.second << ")?";
       if ( rewr )
       {
         ss << "rewrite(";
       }
-      ss <<"build" << arity << "(" << head.second << "," << tail.second << ")";
+      ss <<"build" << arity << "(" << head.second << "," << tail_second << ")";
       if ( rewr )
       {
         ss << ")";
@@ -1877,16 +1971,16 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       ss << calc_inner_appl_head(arity) << "(ATerm) " << head.second << ",";
       if ( c )
       {
-        pair<unsigned int,string> tail2 = calc_inner_terms(ATgetNext((ATermList) t),startarg,nnfvars,(1 << arity)-1);
-        ss << tail2.second;
-      } else {
-        ss << tail.second;
+        clear_nfs_array(tail_first,arity);
+        DECL_NFS_A(rewrall,arity); fill_nfs_array(rewrall,arity);
+        tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall);
       }
-      ss << ")";
+      ss << tail_second << ")";
       if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != -1) )
       {
         ss << ")";
       }
+      FREE_A(tail_first);
     }
     
     return pair<bool,string>(b,ss.str());
@@ -3272,6 +3366,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
             
     for (int a=0; a<=arity; a++)
     {
+    DECL_NFS_A(nfs_a,a);
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (unsigned int nfs=0; (nfs >> b) == 0; nfs++)
     {
@@ -3300,7 +3395,8 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
       // Implement strategy
       if ( jittyc_eqns[j] != NULL )
       {
-            implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs),a,1,j,nfs);
+        set_nfs_array_value(nfs_a,a,nfs);
+        implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a),a,1,j,nfs);
       } else {
 	bool used[a];
 	for (int k=0; k<a; k++)
@@ -3313,6 +3409,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
       
   fprintf(f,                 "}\n");
     }
+    FREE_NFS_A(nfs_a);
     }
     if ( arity > NF_MAX_ARITY )
 	    arity = NF_MAX_ARITY;

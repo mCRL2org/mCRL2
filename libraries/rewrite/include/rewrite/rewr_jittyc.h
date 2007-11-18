@@ -14,6 +14,8 @@
 #include <string>
 #include "librewrite.h"
 
+typedef unsigned int* nfs_array;
+
 class RewriterCompilingJitty: public Rewriter
 {
 	public:
@@ -69,15 +71,15 @@ class RewriterCompilingJitty: public Rewriter
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
 		ATermAppl create_tree(ATermList rules, int opid, int arity);
-		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, unsigned int nfs);
+		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs);
 #endif
 
-		unsigned int get_base_nfs(ATermInt opid, unsigned int arity);
-		unsigned int extend_nfs(unsigned int nfs, ATermInt opid, unsigned int arity);
+		void add_base_nfs(nfs_array a, ATermInt opid, unsigned int arity);
+		void extend_nfs(nfs_array a, ATermInt opid, unsigned int arity);
 		bool opid_is_nf(ATermInt opid, unsigned int num_args);
-		unsigned int calc_nfs_list(ATermList args, int startarg, ATermList nnfvars);
+		void calc_nfs_list(nfs_array a, unsigned int arity, ATermList args, int startarg, ATermList nnfvars);
 		bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
-		std::pair<unsigned int,std::string> calc_inner_terms(ATermList args, int startarg, ATermList nnfvars, unsigned int rewr);
+		std::string calc_inner_terms(nfs_array nfs, unsigned int arity,ATermList args, int startarg, ATermList nnfvars, nfs_array rewr);
 		std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
