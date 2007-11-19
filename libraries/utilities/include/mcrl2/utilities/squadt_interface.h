@@ -36,9 +36,10 @@ namespace tipi {
 }
 /// \endcond
 
-/** \brief Helps relaying messages printed through the mcrl2_basic::print */
 namespace mcrl2 {
   namespace utilities {
+
+    /// SQuADT specific utility functionality
     namespace squadt {
   
       /**

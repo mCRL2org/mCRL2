@@ -1,4 +1,4 @@
-AC_INIT([mCRL2 toolset],[0.2],[bug@mcrl2.org])
+AC_INIT([mCRL2 toolset],[1.0],[http://www.mcrl2.org/issuetracker])
 AC_CONFIG_AUX_DIR(build/autoconf)
 AC_CONFIG_SRCDIR([boost-build.jam])
 AC_CANONICAL_HOST

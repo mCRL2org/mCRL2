@@ -475,7 +475,7 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
     wxT("\"Visualization of State Transition Graphs\". ")
     wxT("Proc. IEEE Symp. Information Visualization 2001, IEEE CS Press, pp. 59-66, 2001.\n\n")
     wxT("Distributed as part of the mCRL2 toolset. For information see: http://www.mcrl2.org\n\n")
-    wxT("Please send all complaints, comments and bug reports to: bug@mcrl2.org\n");
+    wxT("For problems or enhancement requests please use: http://www.mcrl2.org/issuetracker\n");
   wxMessageDialog dlg(this,msg,ttl,wxOK|wxICON_INFORMATION);
   dlg.ShowModal();
 }

@@ -39,7 +39,7 @@ namespace squadt {
        wxT("Developed by Jeroen van der Wulp\n\n")
        wxT("Distributed as part of the mCRL2 toolset\n")
        wxT("For information: http://www.mcrl2.org\n")
-       wxT("For complaints and bug reports: bug@mcrl2.org\n"),
+       wxT("For problems or enhancement requests please use: http://www.mcrl2.org/issuetracker\n"),
        wxT("About deskSQuADT"), wxOK|wxICON_INFORMATION) {
     }
   }

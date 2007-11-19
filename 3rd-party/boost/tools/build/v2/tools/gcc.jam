@@ -685,10 +685,6 @@ else if [ modules.peek : UNIX ]
         {
         # gcc on IRIX does not support multi-threading, don't set anything here.
         }
-    case HP_UX :
-        {
-        # gcc on HP-UX does not support multi-threading, don't set anything here
-        }
     case Darwin :
         {
         # Darwin has no threading options, don't set anything here.

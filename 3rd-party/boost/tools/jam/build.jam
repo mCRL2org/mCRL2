@@ -55,13 +55,15 @@ if $(with-python)
         {
             --python-lib ?=
                 [ GLOB [ .path $(python-location) libs ] : "python$(v).lib" ]
-                [ GLOB $(python-location) $(Path) $(PATH) $(path) : "python$(v).dll" ]
+                [ GLOB $(python-location) [ .path $(python-location) libs ]
+                    $(Path) $(PATH) $(path) : "python$(v).dll" ]
                 ;
             if ! $(--python-lib[2])
             {
                 --python-lib = ;
             }
         }
+        --python-lib = $(--python-lib[1]) ;
     }
     else if $(OS) = MACOSX
     {
@@ -173,7 +175,7 @@ toolset darwin cc :  "-o " : -D
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
 ## GCC 2.x, 3.x, 4.x
 toolset gcc gcc : "-o " : -D
-    : -pedantic
+    : -pedantic -fno-strict-aliasing
     [ opt --release : [ opt --symbols : -g : -s ] -O3 -fno-strict-aliasing ]
     [ opt --debug : -g -O0 -fno-inline ]
     -I$(--python-include) -I$(--extra-include) -Wno-long-long
@@ -195,8 +197,8 @@ toolset intel-linux icc : "-o " : -D
 ## Intel C/C++ for Win32
 toolset intel-win32 icl : /Fe : -D
     : /nologo
-    [ opt --release : /ML /O2 /Ob2 /Gy /GF /GA /GB ]
-    [ opt --debug : /MLd /DEBUG /Z7 /Od /Ob0 ]
+    [ opt --release : /MT /O2 /Ob2 /Gy /GF /GA /GB ]
+    [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 ]
     -I$(--python-include) -I$(--extra-include)
     : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
 ## KCC ?
@@ -829,7 +831,6 @@ dist.source = $(dist.source:D=)
     [ .path modules property-set.c ]
     [ .path modules sequence.c ]
     [ .path modules order.c ]
-    boost-jam.spec
     ;
 dist.bin =
     bjam

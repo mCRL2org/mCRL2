@@ -723,7 +723,7 @@ void GraphFrame::on_about(wxCommandEvent& /* event */) {
 //  content.Printf(wxT("%s%s. \n\n"), content.c_str(), REVISION);
 
   content += wxT("Info: http://www.mcrl2.org \n");
-  content += wxT("Bug reports: bug@mcrl2.org");
+  content += wxT("For problems or enhancement requests please use: http://www.mcrl2.org/issuetracker");
   wxMessageBox(content, caption,wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
 }
 
