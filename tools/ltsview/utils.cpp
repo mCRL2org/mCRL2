@@ -193,12 +193,16 @@ int round_to_int(double f) {
   return static_cast< int > (f+0.5);
 }
 
+float truncate_float(float f) {
+  return float(int(f * 1000000.0f)) / 1000000.0f;
+}
+
 float vec_to_deg(Utils::Vect v) {
-  float r = atan2(v.y,v.x);
+  float r = rad_to_deg(atan2(v.y,v.x));
   if (r < 0.0f) {
-    r += 2.0*PI;
+    r += 360.0f;
   }
-  return rad_to_deg(r);
+  return r;
 }
 
 Utils::Vect deg_to_vec(float deg) {

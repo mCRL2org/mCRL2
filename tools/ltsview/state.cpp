@@ -33,57 +33,47 @@ State::~State() {
   }
 }
 
-void State::addInTransition( Transition* trans )
-{
-  inTransitions.push_back( trans );
+void State::addInTransition(Transition* trans) {
+  inTransitions.push_back(trans);
 }
 
-void State::addOutTransition( Transition* trans )
-{
-  outTransitions.push_back( trans );
+void State::addOutTransition(Transition* trans) {
+  outTransitions.push_back(trans);
 }
 
-void State::addLoop( Transition* trans )
-{
-  loops.push_back( trans );
+void State::addLoop(Transition* trans) {
+  loops.push_back(trans);
 }
 
 void State::addParameterValue(int valindex) {
 	stateVector.push_back(valindex);
 }
 
-bool State::isDeadlock() const
-{
-  return ( outTransitions.size() + loops.size() == 0 );
+bool State::isDeadlock() const {
+  return (outTransitions.size() + loops.size() == 0);
 }
 
-bool State::isMarked() const
-{
+bool State::isMarked() const {
   return marked;
 }
 
-void State::mark()
-{
+void State::mark() {
   marked = true;
 }
 
-void State::unmark()
-{
+void State::unmark() {
   marked = false;
 }
 
-bool State::isSelected() const
-{
+bool State::isSelected() const {
   return selected;
 }
 
-void State::select()
-{
+void State::select() {
   selected = true;
 }
 
-void State::deselect()
-{
+void State::deselect() {
   selected = false;
 }
 
@@ -96,13 +86,11 @@ void State::setID(int i) {
 	id = i;
 }
 
-int State::getRank() const
-{
+int State::getRank() const {
   return rank;
 }
 
-void State::setRank( int r )
-{
+void State::setRank(int r) {
   rank = r;
 }
 
@@ -144,26 +132,24 @@ void State::setPositionAngle(float a) {
 }
 
 void State::setPositionAbs(Point3D &p) {
-  positionAbs = p;
+  positionAbs.x = p.x;
+  positionAbs.y = p.y;
+  positionAbs.z = p.z;
 }
 
-void State::setOutgoingControl(Point3D &p) 
-{
+void State::setOutgoingControl(Point3D &p) {
   outgoingControl = p;
 }
 
-void State::setIncomingControl(Point3D &p) 
-{
+void State::setIncomingControl(Point3D &p) {
   incomingControl = p;
 }
 
-Cluster* State::getCluster() const
-{
+Cluster* State::getCluster() const {
   return cluster;
 }
 
-void State::setCluster( Cluster* c )
-{
+void State::setCluster(Cluster* c) {
   cluster = c;
 }
 
@@ -195,24 +181,20 @@ int State::getParameterValue(int parindex) {
   return stateVector[parindex];
 }
 
-void State::setSimulated(bool simulated)
-{
+void State::setSimulated(bool simulated) {
   this->simulated = simulated;
 }
 
-bool State::isSimulated() const
-{
+bool State::isSimulated() const {
   return simulated;
 }
 
-int State::getZoomLevel() const
-{
+int State::getZoomLevel() const {
   return zoomLevel;
 }
 
 
-void State::setZoomLevel(const int level)
-{
+void State::setZoomLevel(const int level) {
   zoomLevel = level;
 }
 
@@ -221,13 +203,15 @@ Point3D State::getForce() {
 }
 
 void State::resetForce() {
-  force.x = 0;
-  force.y = 0;
-  force.z = 0;
+  force.x = 0.0f;
+  force.y = 0.0f;
+  force.z = 0.0f;
 }
 
 void State::addForce(Point3D f) {
-  force = force + f;
+  force.x += f.x;
+  force.y += f.y;
+  force.z += f.z;
 }
 
 Vect State::getVelocity() {
@@ -235,10 +219,10 @@ Vect State::getVelocity() {
 }
 
 void State::resetVelocity() {
-  velocity.x = 0;
-  velocity.y = 0;
+  velocity.x = 0.0f;
+  velocity.y = 0.0f;
 }
 
-void State::addVelocity(Vect v) {
-  velocity = velocity + v;
+void State::setVelocity(Vect v) {
+  velocity = v;
 }

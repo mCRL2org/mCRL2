@@ -130,7 +130,7 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   sizer->Add(taSlider,0,rf,bd);
 
   wxSlider *tlSlider = new wxSlider(panel,myID_TRANSITION_LENGTH,
-      int(settings->getFloat(TransitionLength)*10.0f),0,100,wxDefaultPosition,
+      int(settings->getFloat(TransitionLength)),0,100,wxDefaultPosition,
       sliderSize,sliderStyle);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition length:")),0,lf,bd);
   sizer->Add(tlSlider,0,rf,bd);
@@ -421,7 +421,7 @@ void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event) {
 }
 
 void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event) {
-  settings->setFloat(TransitionLength,float(event.GetPosition())/10.0f);
+  settings->setFloat(TransitionLength,float(event.GetPosition()));
 }
 
 void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event) {

@@ -57,7 +57,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
       const long int type = static_cast < wxImageHandler* > (node->GetData())->GetType();
 #endif
 
-      if (extension != wxT("jpg")) {
+      if (extension == wxT("jpg")) {
         fts.Add(name + wxT(" (.jpg .jpeg)"));
       }
       else if (extension == wxT("tif")) {

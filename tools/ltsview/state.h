@@ -76,9 +76,9 @@ class State {
     void addForce(Utils::Point3D f);
     Utils::Point3D getForce();
     void resetForce();
-    void addVelocity(Utils::Vect v);
     Utils::Vect getVelocity();
     void resetVelocity();
+    void setVelocity(Utils::Vect v);
 
   private:
     Cluster*                   cluster;

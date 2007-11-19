@@ -739,6 +739,20 @@ void GLCanvas::startForceDirected() {
     display();
     wxTheApp->Yield(true);
   }
+  /*
+  int n = 0;
+  while (n < 10) {
+    if (GetContext()) {
+      SetCurrent();
+    }
+    #include <iostream>
+    using namespace std;
+    cerr << "------- Iteration " << n << " ---------" << endl;
+    ++n;
+    visualizer->forceDirectedStep();
+    display();
+    wxTheApp->Yield(true);
+  }*/
 }
 
 void GLCanvas::stopForceDirected() {

@@ -890,10 +890,24 @@ void Visualizer::computeForces(Cluster* root) {
         Point3D d = s->getPositionAbs() - v->getPositionAbs();
         float dl = length(d);
         if (dl > 0.0f) {
-          Point3D force = (-settings->getFloat(TransitionAttraction) * 
-            (dl - settings->getFloat(TransitionLength)) / dl) * d;
-          s->addForce(force);
-          v->addForce(-1.0f * force);
+          Point3D force = (0.00001f * settings->getFloat(TransitionAttraction) * 
+            (dl - 0.4f*settings->getFloat(TransitionLength)) / dl) * d;
+          force.x = truncate_float(force.x);
+          force.y = truncate_float(force.y);
+          force.z = truncate_float(force.z);
+          v->addForce(force);
+          s->addForce(-1.0f * force);
+          
+    /*cerr << "add force (" << force.x << "," << force.y << "," << force.z
+      << ") to " << s->getID() << endl;
+    cerr << "add force (" << -force.x << "," << -force.y << "," << -force.z
+      << ") to " << v->getID() << endl;
+    force = s->getForce();
+    cerr << "force of " << s->getID() << " is now: (" << force.x << "," <<
+      force.y << "," << force.z << ")" << endl;
+    force = v->getForce();
+    cerr << "force of " << v->getID() << " is now: (" << force.x << "," <<
+      force.y << "," << force.z << ")" << endl;*/
         }
       }
     }
@@ -903,9 +917,12 @@ void Visualizer::computeForces(Cluster* root) {
       Point3D d = s->getPositionAbs() - v->getPositionAbs();
       float dl = length(d);
       if (dl > 0.0f) {
-        Point3D force = (settings->getFloat(StateRepulsion) / (dl*dl*dl)) * d;
-        v->addForce(force);
-        s->addForce(-1.0f * force);
+        Point3D force = (0.00001f * settings->getFloat(StateRepulsion) / (dl*dl*dl)) * d;
+        force.x = truncate_float(force.x);
+        force.y = truncate_float(force.y);
+        force.z = truncate_float(force.z);
+        s->addForce(force);
+        v->addForce(-1.0f * force);
       }
     }
   }
@@ -922,12 +939,6 @@ void Visualizer::applyForces(Cluster* root,int rot) {
     for (int i = 0; i < root->getNumStates(); ++i) {
       State *s = root->getState(i);
       if (s != lts->getInitialState()) {
-        if (!s->isCentered()) {
-          glPushMatrix();
-          // move to the current position of s
-          glRotatef(-s->getPositionAngle(),0.0f,0.0f,1.0f);
-          glTranslatef(s->getPositionRadius(),0.0f,0.0f);
-        }
         // "localize" the force on s: it has to become a vector in the current
         // coordinate system; we do this by multiplying it with the current GL
         // matrix
@@ -936,34 +947,50 @@ void Visualizer::applyForces(Cluster* root,int rot) {
         Point3D force = s->getForce();
         // we're only interested in the (x,y) components, because the state has
         // to stay in the plane of its cluster
-        Vect v = { M[0]*force.x + M[4]*force.y + M[8]*force.z,
-                   M[1]*force.x + M[5]*force.y + M[9]*force.z };
-        if (!s->isCentered()) {
-          glPopMatrix();
-        }
+        Vect v = { truncate_float(M[0]*force.x + M[4]*force.y + M[8]*force.z),
+                   truncate_float(M[1]*force.x + M[5]*force.y + M[9]*force.z) };
         // add force vector to s's velocity and get the new velocity vector
         // s will be translated over this vector
-        s->addVelocity(v);
-        v = s->getVelocity();
-          
-        // add the old position in Euclidean coordinates if s is not centered
+        v.x += s->getVelocity().x;
+        v.y += s->getVelocity().y;
+  //cerr << "add velocity (" << v.x << "," << v.y << ") to " << s->getID() << endl;
+        v = 0.7f * v;
+  /*cerr << "velocity of " << s->getID() << " is now: (" << v.x << "," <<  v.y << ")" << endl;
+  cerr << "current location " << s->getID() << " (polar): (" <<
+      s->getPositionAngle() << "," << s->getPositionRadius() << ")" << endl;
+  cerr << "current location " << s->getID() << " (eucln): (" <<
+      s->getPositionRadius()*cos(deg_to_rad(s->getPositionAngle())) << "," <<
+      s->getPositionRadius()*sin(deg_to_rad(s->getPositionAngle())) << ")" << endl;*/
+
+        Vect old_pos = {
+          s->getPositionRadius()*cos(deg_to_rad(s->getPositionAngle())),
+          s->getPositionRadius()*sin(deg_to_rad(s->getPositionAngle()))
+        };
+        // add the old position in local Euclidean coordinates if s is not centered
         if (!s->isCentered()) {
-          v.x += s->getPositionRadius()*cos(deg_to_rad(s->getPositionAngle()));
-          v.y += s->getPositionRadius()*sin(deg_to_rad(s->getPositionAngle()));
+          v.x += old_pos.x;
+          v.y += old_pos.y;
         }
-        // now v is the new location of s in local Euclidean coordinates
-        // compute the angle and radius of s's new position
+        Vect new_pos;
+        // normally, v would now be the new position of s in local Euclidean
+        // coordinates, but we still have to make sure it is within the boundary
+        // of the cluster
         if (!(v.x == 0.0f && v.y == 0.0f)) {
-          float angle = vec_to_deg(v);
+          float angle = truncate_float(vec_to_deg(v));
           // make sure we stay inside the boundary of the cluster
-          float radius = min(vec_length(v),root->getTopRadius());
+          float radius = truncate_float(min(vec_length(v),root->getTopRadius()));
+          new_pos.x = radius * cos(deg_to_rad(angle));
+          new_pos.y = radius * sin(deg_to_rad(angle));
+  //cerr << "new location of " << s->getID() << " (polar): (" << angle << "," << radius << ")" << endl;
+  //cerr << "new location of " << s->getID() << " (eucln): (" << new_pos.x << "," <<  new_pos.y << ")" << endl;
           // compute the new position of s in "world" coordinates (i.e. with the
           // initial state at (0,0,0))
           glPushMatrix();
             glRotatef(-angle,0.0f,0.0f,1.0f);
             glTranslatef(radius,0.0f,0.0f);
             glGetFloatv(GL_MODELVIEW_MATRIX,M);
-            Point3D new_pos = { M[12], M[13], M[14] };
+            Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]), 
+              truncate_float(M[14]) };
           glPopMatrix();
           s->setPositionAngle(angle);
           s->setPositionRadius(radius);
@@ -971,10 +998,18 @@ void Visualizer::applyForces(Cluster* root,int rot) {
         } else {
           // s is centered
           s->center();
+          new_pos.x = 0.0f;
+          new_pos.y = 0.0f;
           glGetFloatv(GL_MODELVIEW_MATRIX,M);
-          Point3D new_pos = { M[12], M[13], M[14] };
+          Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]), 
+            truncate_float(M[14]) };
           s->setPositionAbs(new_pos);
         }
+        // state may have been moved over a vector different from the computed
+        // velocity, so compute the actual velocity and store it
+        v.x = truncate_float(new_pos.x - old_pos.x);
+        v.y = truncate_float(new_pos.y - old_pos.y);
+        s->setVelocity(v);
       }
     }
   }

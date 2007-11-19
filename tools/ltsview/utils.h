@@ -59,6 +59,7 @@ namespace Utils {
   };
 
   int round_to_int(double f);
+  float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
   float deg_to_rad(float deg);
   float rad_to_deg(float rad);
   
