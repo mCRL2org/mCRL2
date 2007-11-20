@@ -33,61 +33,48 @@ namespace mcrl2 {
 //ATerm library functions.
 //This is caused by a bad interface design of the ATerm library.
 
-ATermAppl ATAelementAt(ATermList List, int Index);
-ATermList ATLelementAt(ATermList List, int Index);
-ATermAppl ATAgetArgument(ATermAppl Appl, int Nr);
-ATermList ATLgetArgument(ATermAppl Appl, int Nr);
-ATermAppl ATAgetFirst(ATermList List);
-ATermList ATLgetFirst(ATermList List);
-ATermAppl ATAtableGet(ATermTable Table, ATerm Key);
-ATermList ATLtableGet(ATermTable Table, ATerm Key);
-#ifndef ATprotectAppl
-void      ATprotectAppl(ATermAppl *PAppl);
-#endif
-#ifndef ATprotectList
-void      ATprotectList(ATermList *PList);
-#endif
-#ifndef ATprotectInt
-void      ATprotectInt(ATermInt *PInt);
-#endif
-#ifndef ATunprotectAppl
-void      ATunprotectAppl(ATermAppl *PAppl);
-#endif
-#ifndef ATunprotectList
-void      ATunprotectList(ATermList *PList);
-#endif
-#ifndef ATunprotectInt
-void      ATunprotectInt(ATermInt *PInt);
-#endif
-
+/**
+ * \brief Conditional prepend operation on ATermList
+ * \return el ++ list if not el in list, list if el in list
+ **/
 inline ATermList ATinsertUnique(ATermList list, ATerm el)
-//Ret: el ++ list if not el in list,
-//     list if el in list
 {
   if (ATindexOf(list, el, 0) == -1) return ATinsert(list, el);
-  else return list;
+  return list;
 }
 
+/**
+ * \brief Condition on an Aterm
+ * \return t is NULL or an ATermAppl
+ **/
 inline bool ATisApplOrNull(ATerm t)
-//Ret: t is NULL or an ATermAppl
 {
   if (t == NULL) return true;
-  else return ATgetType(t) == AT_APPL;
+  return ATgetType(t) == AT_APPL;
 }
 
+/**
+ * \brief Condition on an Aterm
+ * \return t is NULL or an ATermList
+ **/
 inline bool ATisListOrNull(ATerm t)
-//Ret: t is NULL or an ATermList
 {
   if (t == NULL) return true;
-  else return ATgetType(t) == AT_LIST;
+  return ATgetType(t) == AT_LIST;
 }
 
+/**
+ * \brief Gets an ATermAppl at a specified position in a list
+ **/
 inline ATermAppl ATAelementAt(ATermList List, int Index) {
   ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
   return (ATermAppl) Result;
 }
 
+/**
+ * \brief Gets an ATermList at a specified position in a list
+ **/
 inline ATermList ATLelementAt(ATermList List, int Index)
 {
   ATerm Result = ATelementAt(List, Index);
@@ -95,6 +82,9 @@ inline ATermList ATLelementAt(ATermList List, int Index)
   return (ATermList) Result;
 }
 
+/**
+ * \brief Gets the argument as ATermAppl at the specified position
+ **/
 inline ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
@@ -102,6 +92,9 @@ inline ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
   return (ATermAppl) Result;
 }
 
+/**
+ * \brief Gets the argument as ATermList at the specified position
+ **/
 inline ATermList ATLgetArgument(ATermAppl Appl, int Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
@@ -109,6 +102,9 @@ inline ATermList ATLgetArgument(ATermAppl Appl, int Nr)
   return (ATermList) Result;
 }
 
+/**
+ * \brief Gets the first argument as ATermAppl
+ **/
 inline ATermAppl ATAgetFirst(ATermList List)
 {
   ATerm Result = ATgetFirst(List);
@@ -116,6 +112,9 @@ inline ATermAppl ATAgetFirst(ATermList List)
   return (ATermAppl) Result;
 }
 
+/**
+ * \brief Gets the first argument as ATermList
+ **/
 inline ATermList ATLgetFirst(ATermList List)
 {
   ATerm Result = ATgetFirst(List);
@@ -123,6 +122,9 @@ inline ATermList ATLgetFirst(ATermList List)
   return (ATermList) Result;
 }
 
+/**
+ * \brief Gets the term associated with a key as ATermAppl
+ **/
 inline ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
 {
   ATerm Result = ATtableGet(Table, Key);
@@ -130,6 +132,9 @@ inline ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
   return (ATermAppl) Result;
 }
 
+/**
+ * \brief Gets the term associated with a key as ATermList
+ **/
 inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
 {
   ATerm Result = ATtableGet(Table, Key);
@@ -182,64 +187,148 @@ inline void ATunprotectInt(ATermInt *PInt)
 //Substitutions on ATerm's
 //------------------------
 
-ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue);
-//Ret: a substitution, i.e. an ATermAppl of the form 'subst(OldValue, NewValue)'
+/**
+ * \brief Creates a new substitution
+ *
+ * \param[in] old_value the Aterm that to replace
+ * \param[in] new_value the Aterm to replace with
+ *
+ * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
+ **/
+ATermAppl gsMakeSubst(ATerm old_value, ATerm new_value);
 
-//ATermAppl variant of gsMakeSubst
-inline ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue) {
-  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
+/**
+ * \brief Creates a new substitution
+ *
+ * \param[in] old_value the Aterm that to replace
+ * \param[in] new_value the Aterm to replace with
+ *
+ * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
+ * \note ATermAppl variant of gsMakeSubst
+ **/
+inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value) {
+  return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
-//ATermList variant of gsMakeSubst
-inline ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue) {
-  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
+/**
+ * \brief Creates a new substitution
+ *
+ * \param[in] old_value the Aterm that to replace
+ * \param[in] new_value the Aterm to replace with
+ *
+ * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
+ * \note ATermList variant of gsMakeSubst
+ **/
+inline ATermAppl gsMakeSubst_List(ATermList old_value, ATermList new_value) {
+  return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
-ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive);
-//Pre: Substs is a list containing substitutions only
-//     Term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: Term, in which all substitutions are applied to the top level of Term,
-//     from head to tail; if Recursive and there was no match, the
-//     substitutions are distributed over the arguments/elements of Term
+/**
+ * \brief Applies a list of substitutions to a term
+ *
+ * \param[in] substs a table of substitutions from Aterm to Aterm
+ * \param[in] term an Aterm
+ * \param[in] recursive flag that triggers recursive traversal
+ *
+ * \pre substs is a list containing substitutions only
+ *     term is an ATerm containing ATermAppl's and ATermList's only
+ * \return term, in which all substitutions are applied to the top level of term,
+ *     from head to tail; if recursive and there was no match, the
+ *     substitutions are distributed over the arguments/elements of term
+ **/
+ATerm gsSubstValues(ATermList substs, ATerm term, bool recursive);
 
-//ATermAppl variant of gsSubstValues
-inline ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive) {
-  return (ATermAppl) gsSubstValues(Substs, (ATerm) Appl, Recursive);
+/**
+ * \brief Applies a list of substitutions to a term
+ *
+ * \param[in] substs a table of substitutions from Aterm to Aterm
+ * \param[in] term an Aterm
+ * \param[in] recursive flag that triggers recursive traversal
+ *
+ * \pre substs is a list containing substitutions only
+ *     term is an ATerm containing ATermAppl's and ATermList's only
+ * \return term, in which all substitutions are applied to the top level of term,
+ *     from head to tail; if recursive and there was no match, the
+ *     substitutions are distributed over the arguments/elements of term
+ * \note This is the ATermAppl variant of gsSubstValues
+ **/
+inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recursive) {
+  return (ATermAppl) gsSubstValues(substs, (ATerm) appl, recursive);
 }
 
-//ATermList variant of gsSubstValues
-inline ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive) {
-  return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
+/**
+ * \brief Applies a list of substitutions to a term
+ *
+ * \param[in] substs a table of substitutions from Aterm to Aterm
+ * \param[in] term an Aterm
+ * \param[in] recursive flag that triggers recursive traversal
+ *
+ * \pre substs is a list containing substitutions only
+ *     term is an ATerm containing ATermAppl's and ATermList's only
+ * \return term, in which all substitutions are applied to the top level of term,
+ *     from head to tail; if recursive and there was no match, the
+ *     substitutions are distributed over the arguments/elements of term
+ * \note This is the ATermList variant of gsSubstValues
+ **/
+inline ATermList gsSubstValues_List(ATermList substs, ATermList list, bool recursive) {
+  return (ATermList) gsSubstValues(substs, (ATerm) list, recursive);
 }
 
-ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive);
-//Pre: Substs is a table containing substitutions from ATerm's to ATerm's
-//     Term is an ATerm consisting of ATermAppl's and ATermList's only
-//Ret: Term in which all substitutions from Substs are performed recursively
+/**
+ * \brief Adds a substitution to a list of substitutions
+ *
+ * \param[in] substs a table of substitutions from Aterm to Aterm
+ * \param[in] term an Aterm
+ * \param[in] recursive flag that triggers recursive traversal
+ * \pre substs is a table containing substitutions from ATerm's to ATerm's
+ *     Term is an ATerm consisting of ATermAppl's and ATermList's only
+ * \return Term in which all substitutions from substs are performed recursively
+ **/
+ATerm gsSubstValuesTable(ATermTable substs, ATerm term, bool recursive);
 
-ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs);
-//Pre: Subst is a substitution
-//     Substs is a list of substitions
-//Ret: a list of substitutions with:
-//     - Subst as the head
-//     - Substs, in which Subst is performed on the RHS's, as the tail
+/**
+ * \brief Adds a substitution to a list of substitutions
+ *
+ * \param[in] subst a substitution specification
+ * \param[in] substs a list of substitutions
+ * \pre subst is a substitution
+ *      substs is a list of substitions
+ * \return a list of substitutions with:
+ *     - subst as the head
+ *     - substs, in which subst is performed on the RHS's, as the tail
+ **/
+ATermList gsAddSubstToSubsts(ATermAppl subst, ATermList substs);
 
 //Occurrences of ATerm's
 //----------------------
 
+/**
+ * \brief Counts the number of times that an Aterm occurs in another Aterm
+ * \param[in] elt a term of which to count instances
+ * \param[in] term a term to search inside
+ * \pre term is an ATerm containing ATermAppl's and ATermList's only
+ * \return elt occurs in term
+ * \note that this is a faster implementation than gsCount(elt, term) > 0 because
+ *       it is used at a crucial point in the rewriter
+ **/
 bool gsOccurs(ATerm elt, ATerm term);
-//Pre: term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: elt occurs in term
-//Note that this is a faster implementation than gsCount(elt, term) > 0 because
-//it is used at a crucial point in the rewriter
 
+/** \brief Counts the number of times a symbol occurs as head of a subterm.
+ * \param[in] elt a term of which to count instances
+ * \param[in] term a term to search inside
+ * \pre term is an ATerm containing ATermAppl's and ATermList's only
+ * \return the number of times elt occurs in term
+ **/
 int gsCount(ATerm elt, ATerm term);
-//Pre: term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: the number of times elt occurs in term
 
+/**
+ * \brief Counts the number of times a symbol occurs as head of a subterm.
+ * \param[in] fun a symbol
+ * \param[in] term a term
+ * \pre term is an ATerm containing ATermAppl's and ATermList's only
+ * \return the number of fun occurs in term (as an AFun)
+ **/
 int gsCountAFun(AFun fun, ATerm term);
-//Pre: term is an ATerm containing ATermAppl's and ATermList's only
-//Ret: the number of fun occurs in term (as an AFun)
 #ifdef __cplusplus
     }
   }

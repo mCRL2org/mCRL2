@@ -3,7 +3,7 @@
 
 // Boost lexical_cast.hpp header  -------------------------------------------//
 //
-// See http://www.boost.org/ for most recent version including documentation.
+// See http://www.boost.org/libs/converston for documentation.
 // See end of this header for rights and permissions.
 //
 // what:  lexical_cast custom keyword cast
@@ -52,9 +52,9 @@ namespace boost
         {
         }
         bad_lexical_cast(
-            const std::type_info &source_type,
-            const std::type_info &target_type) :
-            source(&source_type), target(&target_type)
+            const std::type_info &source_type_arg,
+            const std::type_info &target_type_arg) :
+            source(&source_type_arg), target(&target_type_arg)
         {
         }
         const std::type_info &source_type() const
@@ -307,7 +307,7 @@ namespace boost
 #undef BOOST_AUX_LEXICAL_CAST_DEF
 #undef BOOST_AUX_LEXICAL_CAST_DEF1
 
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
+#ifndef BOOST_LCAST_NO_COMPILE_TIME_PRECISION
 // This #if is in sync with lcast_precision
 
         // Helper for floating point types.
@@ -376,7 +376,7 @@ namespace boost
     };
 
 #endif // #ifndef DISABLE_WIDE_CHAR_SUPPORT
-#endif // #ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
+#endif // #ifndef BOOST_LCAST_NO_COMPILE_TIME_PRECISION
     }
 
     namespace detail // '0' and '-' constants

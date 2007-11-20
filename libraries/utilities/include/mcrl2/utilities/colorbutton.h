@@ -16,7 +16,7 @@ namespace mcrl2 {
   namespace utilities {
 
     /**
-     * \brief A widget for choosing colors
+     * \brief A widget for choosing colours
      *
      * The widget consists of a small square with the selected colour as
      * background.  Clicking the square will activate a colour picking dialog.
@@ -32,7 +32,7 @@ namespace mcrl2 {
     
         DECLARE_EVENT_TABLE()
 
-      protected:
+      private:
     
         /// \brief Event handler for mouse down events
         void OnMouseDown( wxMouseEvent& event );

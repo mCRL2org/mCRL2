@@ -29,13 +29,18 @@
 #include <boost/assert.hpp>
 #include <iterator>
 #include <algorithm>
-#ifndef BOOST_OLD_IOSTREAMS
-# include <ostream>
-#else
-# include <ostream.h>
-#endif
+#ifndef _STLP_NO_IOSTREAMS
+# ifndef BOOST_OLD_IOSTREAMS
+#  include <ostream>
+# else
+#  include <ostream.h>
+# endif
+#endif // _STLP_NO_IOSTREAMS
 #include <cstddef>
 
+#if BOOST_WORKAROUND(BOOST_MSVC, == 1310) || BOOST_WORKAROUND(BOOST_MSVC, == 1400) 
+    #pragma warning( disable : 4996 )
+#endif
 
 /*! \file
     Defines the \c iterator_class and related functions. 
@@ -70,7 +75,7 @@ namespace boost
         template< class Left, class Right >
         inline bool equal( const Left& l, const Right& r )
         {
-            typedef BOOST_DEDUCED_TYPENAME boost::range_size<Left>::type sz_type;
+            typedef BOOST_DEDUCED_TYPENAME boost::range_difference<Left>::type sz_type;
 
             sz_type l_size = boost::size( l ),
                     r_size = boost::size( r );
@@ -163,20 +168,7 @@ namespace boost
             , singular( true )
                 #endif
             { }
-/*
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))  
-            iterator_range( this_type r ) :
-            : m_Begin(r.begin()), m_End(r.end())
-            { }
-
-            this_type& operator=( this_type r )
-            {
-                m_Begin = r.begin();
-                m_End   = r.end();
-                return *this;
-            }
-#endif
-*/            
+           
             //! Constructor from a pair of iterators
             template< class Iterator >
             iterator_range( Iterator Begin, Iterator End ) : 
@@ -280,7 +272,7 @@ namespace boost
                 return m_End; 
             } 
 
-            size_type size() const
+            difference_type size() const
             { 
                 BOOST_ASSERT( !is_singular() );
                 return m_End - m_Begin;
@@ -348,10 +340,21 @@ namespace boost
                return *--last;
            }
     
-           reference operator[]( size_type sz ) const
+           reference operator[]( difference_type at ) const
            {
-               BOOST_ASSERT( sz < size() );
-               return m_Begin[sz];
+               BOOST_ASSERT( at >= 0 && at < size() );
+               return m_Begin[at];
+           }
+
+           //
+           // When storing transform iterators, operator[]()
+           // fails because it returns by reference. Therefore
+           // operator()() is provided for these cases.
+           //
+           value_type operator()( difference_type at ) const
+           {
+               BOOST_ASSERT( at >= 0 && at < size() );
+               return m_Begin[at];               
            }
 
            iterator_range& advance_begin( difference_type n )
@@ -395,7 +398,8 @@ namespace boost
 
 //  iterator range free-standing operators ---------------------------//
 
-#ifndef BOOST_OLD_IOSTREAMS   
+#ifndef _STLP_NO_IOSTREAMS
+# ifndef BOOST_OLD_IOSTREAMS   
 
         //! iterator_range output operator
         /*!
@@ -414,7 +418,7 @@ namespace boost
             return Os;
         }
 
-#else
+# else
 
         //! iterator_range output operator
         /*!
@@ -430,7 +434,8 @@ namespace boost
             return Os;
         }
 
-#endif
+# endif
+#endif // _STLP_NO_IOSTREAMS
 
         /////////////////////////////////////////////////////////////////////
         // comparison operators

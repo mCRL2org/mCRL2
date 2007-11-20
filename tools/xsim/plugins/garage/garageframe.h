@@ -47,13 +47,13 @@ class GarageFrame : public wxFrame, public SimulatorViewDLLInterface
 #endif
 {
 public:
-  GarageFrame( wxChar* title,
+  GarageFrame( wxString const& title,
                int xPos,
                int yPos,
                int width,
                int height            );
   GarageFrame( wxWindow* parent,
-               wxChar* title,
+               wxString const& title,
                int xPos,
                int yPos,
                int width,

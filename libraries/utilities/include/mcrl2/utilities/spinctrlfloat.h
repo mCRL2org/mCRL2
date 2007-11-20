@@ -27,13 +27,7 @@ namespace mcrl2 {
      **/
     class wxSpinCtrlFloat : public wxPanel {
 
-      protected:
-
-        /// \brief Event handler for SPIN events
-        void OnEnter(wxCommandEvent & event);
-
-        /// \brief Event handler for SPIN events
-        void OnSpin(wxSpinEvent & event);
+      private:
 
         /// \brief A wxWidgets text control, used to display the current value
         wxTextCtrl*   m_TextCtrl;
@@ -50,6 +44,14 @@ namespace mcrl2 {
         int    m_Max;
           
         DECLARE_EVENT_TABLE()
+
+      private:
+
+        /// \brief Event handler for SPIN events
+        void OnEnter(wxCommandEvent & event);
+
+        /// \brief Event handler for SPIN events
+        void OnSpin(wxSpinEvent & event);
 
       public:
 

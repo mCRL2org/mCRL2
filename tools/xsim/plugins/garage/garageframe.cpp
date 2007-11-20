@@ -31,7 +31,7 @@ inline std::string intToString( int i )
 }
 
 // --------------------------------------------
-GarageFrame::GarageFrame( wxChar* title,
+GarageFrame::GarageFrame( wxString const& title,
                           int xPos,
                           int yPos,
                           int width,
@@ -53,7 +53,7 @@ GarageFrame::GarageFrame( wxChar* title,
 
 // --------------------------------------------
 GarageFrame::GarageFrame( wxWindow* parent,
-                          wxChar* title,
+                          wxString const& title,
                           int xPos,
                           int yPos,
                           int width,

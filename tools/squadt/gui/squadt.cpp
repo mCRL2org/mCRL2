@@ -92,7 +92,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
           action = boost::bind(&squadt::GUI::main::project_new, _1, std::string(parser.GetParam(0).fn_str()), std::string());
         }
         else {
-          std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << parser.GetParam(0).fn_str();
+          std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << std::string(parser.GetParam(0).fn_str());
 
           return (false);
         }

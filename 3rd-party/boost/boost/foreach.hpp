@@ -5,6 +5,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+// See http://www.boost.org/libs/foreach for documentation
 //
 // Credits:
 //  Anson Tsao        - for the initial inspiration and several good suggestions.
@@ -351,7 +352,9 @@ struct foreach_iterator
     //
     // To treat the container as an array, use boost::as_array() in <boost/range/as_array.hpp>,
     // as in BOOST_FOREACH( char ch, boost::as_array("hello") ) ...
+    #if BOOST_MSVC > 1300
     BOOST_MPL_ASSERT_MSG( (!is_char_array<T>::value), IS_THIS_AN_ARRAY_OR_A_NULL_TERMINATED_STRING, (T) );
+    #endif
 
     // If the type is a pointer to a null terminated string (as opposed 
     // to an array type), there is no ambiguity.
@@ -619,18 +622,6 @@ begin(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     return iterator(boost::begin(derefof(auto_any_cast<type *, boost::mpl::false_>(col))));
 }
 
-// work around msvc bugs wrt array types that have been deduced
-#if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
-template<typename T, std::size_t N, typename C>
-inline auto_any<BOOST_DEDUCED_TYPENAME boost::mpl::if_<C, T const *, T*>::type>
-begin(auto_any_t col, type2type<T[N], C> *, boost::mpl::false_ *) // lvalue
-{
-    typedef BOOST_DEDUCED_TYPENAME type2type<T[N], C>::type type;
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<C, T const *, T*>::type iterator;
-    return &((*(auto_any_cast<type *, boost::mpl::false_>(col)))[0]);
-}
-#endif
-
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
 template<typename T>
 auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, const_>::type>
@@ -667,18 +658,6 @@ end(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iterator;
     return iterator(boost::end(derefof(auto_any_cast<type *, boost::mpl::false_>(col))));
 }
-
-// work around msvc bugs wrt array types that have been deduced
-#if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
-template<typename T, std::size_t N, typename C>
-inline auto_any<BOOST_DEDUCED_TYPENAME boost::mpl::if_<C, T const *, T*>::type>
-end(auto_any_t col, type2type<T[N], C> *, boost::mpl::false_ *) // lvalue
-{
-    typedef BOOST_DEDUCED_TYPENAME type2type<T[N], C>::type type;
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<C, T const *, T*>::type iterator;
-    return &((*(auto_any_cast<type *, boost::mpl::false_>(col)))[0]) + N;
-}
-#endif
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
 template<typename T>
