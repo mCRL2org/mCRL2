@@ -7041,7 +7041,6 @@ static bool might_communicate(ATermList m, ATermList n = NULL)
   }
 }
   
-
 static ATermList makeMultiActionConditionList_aux(
                    ATermList multiaction,
                    ATermList r);
@@ -7112,24 +7111,10 @@ static bool xi(ATermList alpha, ATermList beta)
   }
 }
 
-static ATermAppl makeNegatedConjunction(ATermList S)
-{
-  ATermAppl result=gsMakeDataExprTrue();
-  for( ; S!=ATempty ; S=ATgetNext(S) )
-  {
-    ATermAppl tup = ATAgetFirst(S);
-
-    ATermAppl cond = ATAgetArgument(tup,1);
-    result=gsMakeDataExprAnd(
-             gsMakeDataExprNot(cond),result);
-  }
-  return result; 
-}
-
 static ATermAppl psi(ATermList alpha)
 {
   alpha=ATreverse(alpha);
-  ATermAppl cond = gsMakeDataExprTrue();
+  ATermAppl cond = gsMakeDataExprFalse();
   while ( !ATisEmpty(alpha) )
   {
     ATerm a = ATgetFirst(alpha);
@@ -7140,7 +7125,7 @@ static ATermAppl psi(ATermList alpha)
       if ( might_communicate(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) && xi(ATmakeList2(a,ATgetFirst(beta)),ATgetNext(beta)) )
       {
         // sort and remove duplicates??
-        cond = gsMakeDataExprAnd(cond,pairwiseMatch(ATLgetArgument((ATermAppl) a,1),ATLgetArgument(ATAgetFirst(beta),1))
+        cond = gsMakeDataExprOr(cond,pairwiseMatch(ATLgetArgument((ATermAppl) a,1),ATLgetArgument(ATAgetFirst(beta),1))
             );
       }
       beta = ATgetNext(beta);
@@ -7148,7 +7133,7 @@ static ATermAppl psi(ATermList alpha)
 
     alpha = ATgetNext(alpha);
   }
-  return cond;
+  return gsMakeDataExprNot(cond);
 }
 
 static ATermList makeMultiActionConditionList_aux(
@@ -7174,8 +7159,7 @@ static ATermList makeMultiActionConditionList_aux(
   ATermList T=makeMultiActionConditionList_aux(
                   remainingmultiaction,
                   (r==NULL)?ATmakeList1((ATerm) firstaction):ATinsertA(r,firstaction));
-  return addActionCondition(firstaction,makeNegatedConjunction(S),T,S);
-
+  return addActionCondition(firstaction,gsMakeDataExprTrue(),T,S);
 }
 
 static void ATunprotectCommTable(comm_entry *t)
