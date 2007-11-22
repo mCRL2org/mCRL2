@@ -279,7 +279,7 @@ static bool isDeltaAtZero(ATermAppl t)
   if (!gsIsDelta(ATAgetArgument(t,0))) {
    return false;
   }
-  return ATisEqual(ATAgetArgument(t,1), gsMakeDataExprReal(0));
+  return ATisEqual(ATAgetArgument(t,1), gsMakeDataExprReal_int(0));
 }
 
 static int strequal(char *s1,char *s2)

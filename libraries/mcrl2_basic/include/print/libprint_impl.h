@@ -329,6 +329,9 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
        the context
  */
 
+static bool gsIsOpIdNumericUpCast(ATermAppl Term);
+//Ret: DataExpr is an operation identifier for a numeric upcast
+
 static bool gsIsOpIdPrefix(ATermAppl Term);
 //Ret: DataExpr is a prefix operation identifier
 
@@ -1103,8 +1106,8 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       ATermAppl Head;
       ATermList Args;
       if (!gsIsDataAppl(DataExpr)) {
-        Head = gsGetDataExprHead(DataExpr);
-        Args = gsGetDataExprArgs(DataExpr);
+        Head = DataExpr;
+        Args = ATmakeList0();
       } else {
         Head = ATAgetArgument(DataExpr, 0);
         Args = ATLgetArgument(DataExpr, 1);
@@ -1130,6 +1133,11 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
+      } else if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
+        //print upcast expression
+        PRINT_FUNC(dbg_prints)("printing upcast expression\n");
+        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
+          pp_format, ShowSorts, PrecLevel);
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -1895,6 +1903,21 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
     l = ATgetNext(l);
   }
   return Result;
+}
+
+bool gsIsOpIdNumericUpCast(ATermAppl Term)
+{
+  if (!gsIsOpId(Term)) {
+    return false;
+  }
+  return
+    (Term == gsMakeOpIdPos2Nat())  ||
+    (Term == gsMakeOpIdPos2Int())  ||
+    (Term == gsMakeOpIdPos2Real()) ||
+    (Term == gsMakeOpIdNat2Int())  ||
+    (Term == gsMakeOpIdNat2Real()) ||
+    (Term == gsMakeOpIdInt2Real())
+    ;
 }
 
 bool gsIsOpIdPrefix(ATermAppl Term)
