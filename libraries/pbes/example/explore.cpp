@@ -14,7 +14,7 @@
 
 
 //Rewriter
-#include "rewrite/librewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 using namespace lps;
 using namespace pbes_expr;

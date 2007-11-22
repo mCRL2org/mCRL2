@@ -38,8 +38,10 @@ END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
     const wxSize &size,int* attribList)
-	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
-		     wxT(""),attribList), simReader(NULL) {
+	: wxGLCanvas(parent,wxID_ANY,attribList, wxDefaultPosition,size,wxSUNKEN_BORDER,
+		     wxEmptyString), simReader(NULL) {
+
+  context = 0;
   mediator = owner;
   settings = ss;
   settings->subscribe(BackgroundColor,this);
@@ -60,10 +62,15 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
 }
 
 GLCanvas::~GLCanvas() {
+  if (context) {
+    delete context;
+  }
 }
 
 void GLCanvas::initialize() {
-  SetCurrent();
+  context = new wxGLContext(this);
+
+  SetCurrent(*context);
 
   glDepthFunc(GL_LEQUAL);
 
@@ -161,7 +168,7 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
 
     if (!selecting)
     {
-      SetCurrent();
+      SetCurrent(*context);
     }
     
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -291,10 +298,10 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
 }
 
 void GLCanvas::reshape() {
-  if (GetContext()) {
+  if (context) {
     int width,height;
     GetClientSize(&width,&height);
-    SetCurrent();
+    SetCurrent(*context);
     glViewport(0,0,width,height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -686,7 +693,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6; 
-  if(GetContext()) {
+  if(context) {
     GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
@@ -732,8 +739,8 @@ void GLCanvas::startForceDirected() {
   stop_force_directed = false;
   visualizer->forceDirectedInit();
   while (!stop_force_directed) {
-    if (GetContext()) {
-      SetCurrent();
+    if (context) {
+      SetCurrent(*context);
     }
     visualizer->forceDirectedStep();
     display();

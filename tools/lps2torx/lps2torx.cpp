@@ -21,9 +21,9 @@
 #include <sstream>
 #include "libstruct.h"
 #include "libprint.h"
-#include "libnextstate.h"
-#include "libenum.h"
-#include "librewrite.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/enum.h"
+#include "mcrl2/data/rewrite.h"
 #include "mcrl2/libdataelm.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

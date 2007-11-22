@@ -40,7 +40,7 @@
 #include <wx/wx.h>
 #include <list>
 #include <aterm2.h>
-#include "libnextstate.h"
+#include <mcrl2/lps/nextstate.h>
 
 class SimulatorInterface;
 class SimulatorViewInterface;

@@ -7,8 +7,8 @@
 /// \file pbes_rewrite.h
 /// \brief Add your file description here.
 
-#include "librewrite.h"
-#include "mcrl2/pbes/pbes.h"
+#include <mcrl2/data/rewrite.h>
+#include <mcrl2/pbes/pbes.h>
 #include "libprint_c.h"
 
 /// pbes_expression_rewrite rewrites a pbes_expression p as far as possible.

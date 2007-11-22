@@ -10,10 +10,10 @@ exe diagraphica
         /libraries/utilities//colorbutton
         /libraries//ticpp
         /site-config//wx_gl
-      : <wx>yes
-        <squadt-connectivity>implemented
+      : <squadt-connectivity>implemented
         <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
+        <wx>yes
       ;
 
 install-binaries install

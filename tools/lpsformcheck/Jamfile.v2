@@ -4,7 +4,7 @@ project toolset/lpsformcheck
 
 exe lpsformcheck
        : lpsformcheck.cpp
-         /libraries//prover
+         /libraries//lps
        : <include>.
 #         <toolset>gcc:<define>CVC_LITE_LIB
          <toolset>msvc:<library>/libraries//getopt

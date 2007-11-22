@@ -68,6 +68,11 @@ public:
 protected:
   // Macro declaring the beginning of event table
   DECLARE_EVENT_TABLE()
+
+private:
+
+  wxGLContext* context;
+
 private:
   void DrawGarage();
 

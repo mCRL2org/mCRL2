@@ -11,10 +11,10 @@
 // file: manipulator.cpp
 
 #include "aterm2.h"
-#include "librewrite.h"
 #include "libstruct.h"
-#include "mcrl2/utilities/manipulator.h"
-#include "mcrl2/utilities/info.h"
+#include <mcrl2/data/rewrite.h>
+#include <mcrl2/utilities/manipulator.h>
+#include <mcrl2/utilities/info.h>
 
 // Class ATerm_Manipulator ------------------------------------------------------------------------
   // Class ATerm_Manipulator - Functions declared public ------------------------------------------

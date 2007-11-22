@@ -11,8 +11,8 @@
 #define  VERSION   "July 2007"
 #define  AUTHOR    "Luc Engelen"
 
-#include "confluence_checker.h"
-#include "invariant_checker.h"
+#include "mcrl2/confluence_checker.h"
+#include "mcrl2/invariant_checker.h"
 #include "getopt.h"
 #include "libparse.h"
 #include "typecheck.h"

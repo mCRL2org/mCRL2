@@ -11,8 +11,7 @@ lib xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         /libraries//nextstate
-         /libraries//mcrl2_basic
+         /libraries//lps
          /tools/xsim//xsim_base
          /site-config//wx_gl
        : <define>GARAGEFRAMEDLL
@@ -30,7 +29,7 @@ exe garageframe
          garagecanvas.cpp
          visutils.cpp
          /site-config//wx_gl
-       : <library>/libraries//nextstate
+       : <library>/libraries//lps
          <wx>yes
        ;
 

@@ -26,12 +26,12 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
-#include "mcrl2/lps/lin_std.h"
+#include <mcrl2/lps/lin_std.h>
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "librewrite.h"
+#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/data/rewrite.h>
 #include "libalpha.h"
 
 // For Aterm library extension functions

@@ -4,8 +4,7 @@ project lpsinvelm
 
 exe lpsinvelm
        : lpsinvelm.cpp
-         /libraries//prover
-         /libraries//data
+         /libraries//lps
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB

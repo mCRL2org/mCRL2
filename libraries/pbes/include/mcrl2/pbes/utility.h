@@ -21,7 +21,7 @@
 #include "mcrl2/dataimpl.h" // implement_data_data_expr
 
 // JFG:
-#include "rewrite/librewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 namespace lps {
 

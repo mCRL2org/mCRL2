@@ -22,15 +22,15 @@
 #include <assert.h>
 
 #include "libstruct.h"
-#include "librewrite.h"
-#include "libenum.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/enum.h"
 #include "libprint_c.h"
 #include "mcrl2/lps/specification.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libparse.h"
 #include "typecheck.h"
-#include "mcrl2/dataimpl.h"
+#include <mcrl2/dataimpl.h>
 
 using namespace std;
 using namespace lps;

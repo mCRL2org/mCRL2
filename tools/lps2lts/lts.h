@@ -10,7 +10,7 @@
 #define _LTS_H
 
 #include <aterm2.h>
-#include <libnextstate.h>
+#include <mcrl2/lps/nextstate.h>
 
 #define OF_UNKNOWN  0
 #define OF_AUT      1

@@ -16,7 +16,7 @@ alias pbes.main
          source/pbes_rewrite.cpp
          source/pbes2bool.cpp
        : <use>/libraries/mcrl2_basic//headers
-         <use>/libraries/rewrite//headers
+         <use>/libraries/data//headers
          <use>/libraries/lps//headers
        : <threading>single
        ;
@@ -24,12 +24,12 @@ alias pbes.main
 lib pbes
        : pbes.main
          /libraries//mcrl2_basic
-         /libraries//rewrite
+         /libraries//data
          /libraries//lps
        : <link>static
        :
        : <library>/libraries//mcrl2_basic
-         <library>/libraries//rewrite
+         <library>/libraries//data
          <library>/libraries//lps
        ;
 
@@ -43,7 +43,7 @@ alias pbes.alias
        :
        :
        : <use>/libraries/mcrl2_basic//headers
-         <use>/libraries/rewrite//headers
+         <use>/libraries/data//headers
          <use>/libraries/lps//headers
        ;
 

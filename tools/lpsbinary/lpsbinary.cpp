@@ -46,8 +46,8 @@
 #include <mcrl2/lps/detail/specification_utility.h>
 
 //Enumerator
-#include <enum_standard.h>
-#include <libnextstate.h>
+#include <mcrl2/data/enum/standard.h>
+#include <mcrl2/lps/nextstate.h>
 
 using namespace std;
 using namespace atermpp;

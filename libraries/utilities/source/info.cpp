@@ -11,11 +11,11 @@
 // file: info.cpp
 
 #include "aterm2.h"
-#include "librewrite.h"
+#include <mcrl2/data/rewrite.h>
 #include "libstruct.h"
-#include "mcrl2/utilities/info.h"
-#include "mcrl2/utilities/utilities.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include <mcrl2/utilities/info.h>
+#include <mcrl2/utilities/utilities.h>
+#include <mcrl2/utilities/aterm_ext.h>
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

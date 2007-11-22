@@ -7,7 +7,6 @@ project toolset/pbes2bes
 
 exe pbes2bes
        : pbes2bes.cpp
-         /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
          <squadt-connectivity>implemented
@@ -15,7 +14,6 @@ exe pbes2bes
 
 exe pbes2bool
        : pbes2bool.cpp
-         /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
          <squadt-connectivity>implemented

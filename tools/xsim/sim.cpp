@@ -23,8 +23,8 @@
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "libstruct.h"
-#include "libnextstate.h"
-#include "librewrite.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/rewrite.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;

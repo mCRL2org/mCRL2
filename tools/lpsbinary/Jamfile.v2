@@ -4,9 +4,7 @@ project lpsbinary
 
 exe lpsbinary
        : lpsbinary.cpp
-         /libraries//mcrl2_basic
          /libraries//lps
-         /libraries//nextstate
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;

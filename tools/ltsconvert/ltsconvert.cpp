@@ -145,10 +145,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(svc_mcrl, "SVC/mCRL")).
                 append(format_selector.associate(svc_mcrl2, "SVC/mCRL2")).
 #ifdef MCRL2_BCG
-                append(format_selector.associate(bcg, "SVC/BCG")).
+                append(format_selector.associate(bcg, "BCG")).
 #endif
-                append(format_selector.associate(fsm, "SVC/FSM")).
-                append(format_selector.associate(dot, "SVC/dot")),
+                append(format_selector.associate(fsm, "FSM")).
+                append(format_selector.associate(dot, "dot")),
            margins(0,5,0,5));
   
   text_field& lps_file_field        = d.create< text_field >();

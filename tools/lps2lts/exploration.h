@@ -10,11 +10,13 @@
 #define _EXPLORATION_H
 
 #include <string>
+
+#include <boost/bind.hpp>
+
 #include <aterm2.h>
 #include "lts.h"
-#include "libnextstate.h"
-#include "librewrite.h"
-#include <boost/bind.hpp>
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/rewrite.h"
 
 #ifndef ULLONG_MAX
 #define ULLONG_MAX      18446744073709551615ULL

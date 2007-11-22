@@ -8,13 +8,13 @@
 /// \brief Add your file description here.
 
 // Interface to classes ATerm_Info, AI_Jitty and AI_Inner
-// file: info.h
+// file: mcrl2/utilities/info.h
 
 #ifndef INFO_H
 #define INFO_H
 
-#include "librewrite.h"
-#include "utilities.h"
+#include <mcrl2/data/rewrite.h>
+#include <mcrl2/utilities/utilities.h>
 
 /// \brief Base class for classes that provide information about the structure of
 /// \brief data expressions in one of the internal formats of the rewriter.

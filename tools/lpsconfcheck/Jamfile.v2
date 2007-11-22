@@ -4,8 +4,7 @@ project toolset/lpsconfcheck
 
 exe lpsconfcheck
        : lpsconfcheck.cpp
-         /libraries//prover
-         /libraries//data
+         /libraries//lps
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB

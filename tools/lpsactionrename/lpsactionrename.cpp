@@ -31,7 +31,7 @@
 #include "print/messaging.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
-#include "librewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 using namespace mcrl2::utilities;
 using namespace std;

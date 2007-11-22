@@ -57,10 +57,7 @@ doxy:
 	@cd libraries/lps/doc; doxygen
 	@cd libraries/lts/doc; doxygen
 	@cd libraries/mcrl2_basic/doc; doxygen
-	@cd libraries/nextstate/doc; doxygen
 	@cd libraries/pbes/doc; doxygen
-	@cd libraries/prover/doc; doxygen
-	@cd libraries/rewrite/doc; doxygen
 	@cd libraries/trace/doc; doxygen
 	@cd libraries/utilities/doc; doxygen
 	@cd tools/squadt/libraries/tipi/doc; doxygen

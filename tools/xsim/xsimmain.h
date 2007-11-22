@@ -14,8 +14,8 @@
 #include <wx/listctrl.h>
 #include <aterm2.h>
 
-#include "libnextstate.h"
-#include "librewrite.h"
+#include <mcrl2/lps/nextstate.h>
+#include "mcrl2/data/rewrite.h"
 #include "xsimbase.h"
 #include "xsimtrace.h"
 

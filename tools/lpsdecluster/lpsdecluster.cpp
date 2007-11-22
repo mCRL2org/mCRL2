@@ -40,8 +40,8 @@
 #include <print/messaging.h>
 
 //Enumerator
-#include <libnextstate.h>
-#include <enum_standard.h>
+#include <mcrl2/lps/nextstate.h>
+#include <mcrl2/data/enum/standard.h>
 
 using namespace std;
 using namespace atermpp;

@@ -34,7 +34,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "print/messaging.h"
 
-#include "librewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 using namespace std;
 using namespace lps;

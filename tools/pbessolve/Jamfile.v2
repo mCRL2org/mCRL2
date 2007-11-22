@@ -6,7 +6,6 @@ obj gauss.o
        : gauss.cpp
          /libraries//lps
          /libraries//pbes
-         /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
        ;
@@ -15,7 +14,6 @@ obj sort_instantiator.o
        : sort_instantiator.h sort_instantiator.cpp
          /libraries//lps
          /libraries//pbes
-         /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
        ;
@@ -26,7 +24,6 @@ exe pbessolve
 	 gauss.o
 	 /libraries//lps
          /libraries//pbes
-	 /libraries//rewrite
          /site-config//boost_program_options
        : <include>.
        ;
@@ -35,7 +32,6 @@ exe txt2pbes
        : txt2pbes.cpp
          /libraries//lps
          /libraries//pbes
-         /libraries//rewrite
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;

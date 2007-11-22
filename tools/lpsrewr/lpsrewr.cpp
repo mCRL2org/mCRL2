@@ -18,7 +18,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "libstruct.h"
-#include "librewrite.h"
+#include "mcrl2/data/rewrite.h"
 #include "print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 

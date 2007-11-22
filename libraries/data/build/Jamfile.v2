@@ -3,20 +3,37 @@ project data
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
+          <os>NT:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
+          <os>NT:<define>NO_DYNLOAD
        ;
 
 alias data.main
        : dataimpl.cpp
          data_reconstruct.cpp
          data_common.cpp
+         enum.cpp
+         enum_standard.cpp
+         confluence_checker.cpp
+         disjointness_checker.cpp
+         invariant_checker.cpp
+         invariant_eliminator.cpp
+         formula_checker.cpp
+         [ glob rewrite/*.cpp ]
+         [ glob prover/*.cpp ]
        : <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers
          <use>/libraries/utilities//headers
+         <use>/site-config//cvc
        : <threading>single
-       : <use>/libraries/lps//headers
+       : <use>headers
+         <use>/libraries/lps//headers
          <use>/libraries/mcrl2_basic//headers
+         <library>/site-config//cvc
+         <os>LINUX:<library>/site-config//m   # for rewrite
+         <os>CYGWIN:<library>/site-config//m  # for rewrite
+         <os>LINUX:<library>/site-config//dl  # for rewrite
        ;
 
 lib data
@@ -41,6 +58,7 @@ alias data.alias
 alias headers
        :
        : <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/lps//headers
        ;
 
 explicit data.main data.alias ;

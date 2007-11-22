@@ -12,8 +12,8 @@
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "librewrite.h" // rewriter
-#include "prover/bdd_prover.h" // prover
+#include "mcrl2/data/rewrite.h" // rewriter
+#include "mcrl2/data/prover/bdd_prover.h" // prover
 #include "print/messaging.h"
 
 #define PREDVAR_MARK '$'

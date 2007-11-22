@@ -7,8 +7,7 @@ alias xsim_base : : <wx>no ;
 obj xsim_base
        : xsimbase.cpp
          /libraries//trace
-         /libraries//nextstate
-         /libraries//mcrl2_basic
+         /libraries//lps
          /site-config//wx_base
        : <wx>yes
        ;
@@ -21,8 +20,7 @@ exe xsim
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
-         /libraries//nextstate
-         /libraries//mcrl2_basic
+         /libraries//lps
          /site-config//wx_base
        : <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
          <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
@@ -33,8 +31,7 @@ exe xsim
 
 exe sim
        : sim.cpp
-         /libraries//nextstate
-         /libraries//mcrl2_basic
+         /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
        ;
 

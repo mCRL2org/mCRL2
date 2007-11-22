@@ -38,10 +38,7 @@ lib mcrl2
           /libraries/aterm//aterm.alias
           /libraries/data//data.alias
           /libraries/mcrl2_basic//mcrl2_basic.alias
-          /libraries/prover//prover.alias
-          /libraries/rewrite//rewrite.alias
           /libraries/trace//trace.alias
-          /libraries/nextstate//nextstate.alias
           /libraries/utilities//utilities.alias
         : <threading>multi
           <toolset>darwin:<cflags>"-fPIC -fno-common"

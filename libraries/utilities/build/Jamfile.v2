@@ -60,7 +60,7 @@ alias utilities.main
         utilities.cpp       # Temporary?
       : <use>/libraries/aterm//headers
         <use>/libraries/mcrl2_basic//headers
-        <use>/libraries/rewrite//headers
+        <use>/libraries/data//headers
       ;
 
 lib utilities

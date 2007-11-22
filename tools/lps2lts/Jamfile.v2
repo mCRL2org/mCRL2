@@ -6,8 +6,6 @@ exe lps2lts
        : lps2lts.cpp
          exploration.cpp
 	 lts.cpp
-         /libraries//nextstate
-         /libraries//mcrl2_basic
          /libraries//trace
          /libraries//lps
          /libraries//lts

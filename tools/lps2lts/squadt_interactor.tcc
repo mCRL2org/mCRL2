@@ -4,8 +4,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include "libnextstate.h"
-#include "librewrite.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/rewrite.h"
 #include "lps2lts.h"
 #include "exploration.h"
 

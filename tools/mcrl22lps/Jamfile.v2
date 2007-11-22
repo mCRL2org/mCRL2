@@ -5,8 +5,6 @@ project toolset/mcrl22lps
 exe mcrl22lps
        : mcrl22lps.cpp
          /libraries//utilities
-         /libraries//rewrite
-         /libraries//data
          /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
@@ -16,7 +14,6 @@ exe alpha
        : alpha.cpp
          /libraries//lps
          /libraries//utilities
-         /libraries//rewrite
        : <toolset>msvc:<library>/libraries//getopt
        ;
 

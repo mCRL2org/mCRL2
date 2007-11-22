@@ -24,7 +24,7 @@
 #include "print/messaging.h"
 
 //Rewriter
-#include "librewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 //Aterm
 #include "atermpp/aterm.h"

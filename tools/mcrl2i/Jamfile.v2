@@ -5,9 +5,6 @@ project toolset/mcrl2i
 exe mcrl2i
        : mcrl2i.cpp
          /libraries//lps
-         /libraries//rewrite
-         /libraries//nextstate
-         /libraries//data
        : <toolset>msvc:<library>/libraries//getopt
        ;
 
