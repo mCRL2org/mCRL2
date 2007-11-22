@@ -38,7 +38,10 @@ static ATermList reconstruct_exprs_list(ATermList Parts, ATermList* p_substs, co
 //ret: The reconstructed version of Part.
 static ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATermAppl Spec, bool* recursive);
 
-//TODO: Describe prototype
+//pre: PosExpr is a data expression of sort Pos
+//     Mult is a string representation of a positive number
+//ret: a data expression of sort Pos, representing PosExpr * Mult,
+//     only containing essential multiplications
 static ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult);
 
 //pre: data_expr is a set comprehension or a bag comprehension
@@ -502,24 +505,21 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult)
     if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
       //Mult*v(b) = 0
       return PosArg;
+    } else if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+      //Mult*v(b) = Mult
+      return gsMakeDataExprAdd(PosArg, 
+               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
+    } else if (strcmp(Mult, "1") == 0) {
+      //Mult*v(b) = v(b)
+      ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
+      return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, Sort));
     } else {
-      //Mult*v(b) > 0
-      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
-        //Mult*v(b) = Mult
-        return gsMakeDataExprAdd(PosArg, 
-                 gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
-      } else if (strcmp(Mult, "1") == 0) {
-        //Mult*v(b) = v(b)
-        ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
-        return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, Sort));
-      } else {
-        //Mult*v(b)
-        ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
-        return gsMakeDataExprAdd(PosArg, 
-                 gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), 
-                                      Sort), 
-                                    bool_to_numeric(BoolArg, Sort)));
-      }
+      //Mult*v(b)
+      ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
+      return gsMakeDataExprAdd(PosArg, 
+               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), 
+                                    Sort), 
+                                  bool_to_numeric(BoolArg, Sort)));
     }
   } else {
     //PosExpr is not a Pos constructor
