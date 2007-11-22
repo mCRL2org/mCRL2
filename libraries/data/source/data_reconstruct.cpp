@@ -449,8 +449,9 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     } else if (gsIsDataExprFalse(Bit)) {
       Part = Mult;
     } else {
+      ATermAppl Sort = gsGetSortExprResult(gsGetSort(IR));
       Part = gsMakeDataExprAdd(
-               gsMakeDataExprMult(bool_to_numeric(Bit, gsMakeSortExprPos()), IR),
+               gsMakeDataExprMult(bool_to_numeric(Bit, Sort), IR),
                Mult);
     }
   } else if (gsIsDataExprDivMod(Part)) {
@@ -509,13 +510,15 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult)
                  gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
       } else if (strcmp(Mult, "1") == 0) {
         //Mult*v(b) = v(b)
-        return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
+        ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
+        return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, Sort));
       } else {
         //Mult*v(b)
+        ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
         return gsMakeDataExprAdd(PosArg, 
                  gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), 
-                                      gsMakeSortExprPos()), 
-                                    bool_to_numeric(BoolArg, gsMakeSortExprNat())));
+                                      Sort), 
+                                    bool_to_numeric(BoolArg, Sort)));
       }
     }
   } else {
