@@ -1165,6 +1165,13 @@ ATermAppl gsMakeDataExprInt(char *z);
 ATermAppl gsMakeDataExprInt_int(int z);
 //Ret: data expression of sort Int that is a representation of z
 
+ATermAppl gsMakeDataExprReal(char *z);
+//Pre: z is of the form "0 | -? [1-9][0-9]*"
+//Ret: data expression of sort Real that is a representation of z
+
+ATermAppl gsMakeDataExprReal_int(int z);
+//Ret: data expression of sort Real that is a representation of z
+
 bool gsIsPosConstant(const ATermAppl PosExpr);
 //Pre: PosExpr is a data expression of sort Pos
 //Ret: PosExpr is built from constructors only

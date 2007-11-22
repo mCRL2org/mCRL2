@@ -2635,6 +2635,20 @@ ATermAppl gsMakeDataExprInt_int(int z)
   return a;
 }
 
+ATermAppl gsMakeDataExprReal(char *z)
+{
+  return gsMakeDataExprCReal(gsMakeDataExprInt(z));
+}
+
+ATermAppl gsMakeDataExprReal_int(int z)
+{
+  DECL_A(s,char,NrOfChars(z)+1);
+  sprintf(s, "%d", z);
+  ATermAppl a = gsMakeDataExprReal(s);
+  FREE_A(s);
+  return a;
+}
+
 bool gsIsPosConstant(const ATermAppl PosExpr)
 {
   if (gsIsOpId(PosExpr)) {

@@ -267,18 +267,19 @@ static void newobject(int n)
 }
 
 static ATermAppl gsMakeDeltaAtZero(void)
-{ return gsMakeAtTime(gsMakeDelta(),gsMakeDataExprNat2Real(gsMakeDataExprNat_int(0)));
+{
+  return gsMakeAtTime(gsMakeDelta(), gsMakeDataExprReal_int(0));
 }
 
 static bool isDeltaAtZero(ATermAppl t)
 {
-  if (!gsIsAtTime(t)) return 0;
-  if (!gsIsDelta(ATAgetArgument(t,0))) return 0;
-  ATermAppl time=ATAgetArgument(t,1);
-  ATermList timeval=ATLgetArgument(time,1);
-  if (gsNatValue_int(ATAgetFirst(timeval))!=0) return 0;
-  /* BETTER: if (gsRealValue(time)!=0) return 0;  awaiting the availability of gsRealValue */
-  return 1;
+  if (!gsIsAtTime(t)) {
+    return false;
+  }
+  if (!gsIsDelta(ATAgetArgument(t,0))) {
+   return false;
+  }
+  return ATisEqual(ATAgetArgument(t,1), gsMakeDataExprReal(0));
 }
 
 static int strequal(char *s1,char *s2)
