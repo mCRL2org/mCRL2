@@ -401,7 +401,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     } else if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
       Part = Mult;
     } else {
-      Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, Sort));
+      Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     }
   } else if (gsIsDataExprAddC(Part)) {
     gsDebugMsg("Reconstructing implementation of AddC (%T)\n", Part);
@@ -416,7 +416,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     } else if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
       Part = Sum;
     } else {
-      Part = gsMakeDataExprAdd(Sum, bool_to_numeric(BoolArg, Sort));
+      Part = gsMakeDataExprAdd(Sum, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     }
   } else if (gsIsDataExprGTESubt(Part)) {
     gsDebugMsg("Reconstructing implementation of GTESubt (%T)\n", Part);
@@ -442,7 +442,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
       Part = gsMakeDataExprSubt(Part, gsMakeOpId(gsString2ATermAppl("1"), Sort));
     } else if (!ATisEqual(BoolArg, gsMakeDataExprFalse())) {
-      Part = gsMakeDataExprSubt(Part, bool_to_numeric(BoolArg, Sort));
+      Part = gsMakeDataExprSubt(Part, bool_to_numeric(BoolArg, gsMakeSortExprInt()));
     }
     Part = gsMakeDataExprInt2Nat(Part);
   } else if (gsIsDataExprMultIR(Part)) {
@@ -458,9 +458,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     } else if (gsIsDataExprFalse(Bit)) {
       Part = Mult;
     } else {
-      ATermAppl Sort = gsGetSortExprResult(gsGetSort(IR));
       Part = gsMakeDataExprAdd(
-               gsMakeDataExprMult(bool_to_numeric(Bit, Sort), IR),
+               gsMakeDataExprMult(bool_to_numeric(Bit, gsMakeSortExprNat()), gsMakeDataExprPos2Nat(IR)),
                Mult);
     }
   } else if (gsIsDataExprDivMod(Part)) {
@@ -517,15 +516,12 @@ ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult)
                gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
     } else if (strcmp(Mult, "1") == 0) {
       //Mult*v(b) = v(b)
-      ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
-      return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, Sort));
+      return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     } else {
       //Mult*v(b)
-      ATermAppl Sort = gsGetSortExprResult(gsGetSort(PosArg));
       return gsMakeDataExprAdd(PosArg, 
-               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), 
-                                    Sort), 
-                                  bool_to_numeric(BoolArg, Sort)));
+               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprNat()), 
+                                  bool_to_numeric(BoolArg, gsMakeSortExprNat())));
     }
   } else {
     //PosExpr is not a Pos constructor
