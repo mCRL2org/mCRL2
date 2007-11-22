@@ -1299,7 +1299,10 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
   ATermAppl g_sort_func = gsMakeDataVarId(gsString2ATermAppl("g"), sort_func);
   ATermAppl d_sort_elt = gsMakeDataVarId(gsString2ATermAppl("d"), sort_elt);
   ATermAppl x_sort_elt = gsMakeDataVarId(gsString2ATermAppl("x"), sort_elt);
+  ATermAppl y_sort_elt = gsMakeDataVarId(gsString2ATermAppl("y"), sort_elt);
   ATermAppl u_sort_set = gsMakeDataVarId(gsString2ATermAppl("u"), sort_set);
+  ATermAppl m = gsMakeDataVarId(gsString2ATermAppl("m"), gsMakeSortExprNat());
+  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
   ATermAppl nil = gsMakeNil();
   ATermAppl zero = gsMakeDataExprC0();
   ATermList sl = ATmakeList1((ATerm) s_sort_id);
@@ -1325,11 +1328,15 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
       )
     );
   ATermAppl subt_max0_func =
-    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
-      gsMakeDataExprIf(
-        gsMakeDataExprGT(gsMakeDataAppl1(f_sort_func, x_sort_elt), gsMakeDataAppl1(g_sort_func, x_sort_elt)),
-          gsMakeDataExprGTESubt(gsMakeDataAppl1(f_sort_func, x_sort_elt), gsMakeDataAppl1(g_sort_func, x_sort_elt)), zero)
-      );
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) y_sort_elt),
+      gsMakeDataAppl2(
+        gsMakeBinder(gsMakeLambda(), ATmakeList2((ATerm) m, (ATerm) n),
+          gsMakeDataExprIf(
+            gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
+          )
+        ),
+        gsMakeDataAppl1(f_sort_func, y_sort_elt),
+        gsMakeDataAppl1(g_sort_func, y_sort_elt)));
   /*
   ATermAppl subt_max0_func =
     gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),

@@ -351,11 +351,20 @@ ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive)
         }
         Substs = ATreverse(Substs);
         DataExpr = capture_avoiding_substs(Expr, Substs, Context);
+        ATermAppl tmp = beta_reduce(DataExpr, Context, true);
+        while (!ATisEqual(DataExpr, tmp)) {
+          DataExpr = beta_reduce(tmp, Context, true);
+          tmp = beta_reduce(DataExpr, Context, true);
+        }
       }
     }
   }
 
   if (recursive) {
+    // If the top-level term is annotated with @dummy, then preserve annotation,
+    // this is needed for matching data expressions.
+    ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
+    ATerm dummy_ann = ATgetAnnotation((ATerm) DataExpr, dummy);
     // Recursively handle all parts of the expression.
     AFun head = ATgetAFun(DataExpr);
     int nr_args = ATgetArity(head);
@@ -370,6 +379,9 @@ ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive)
       }
       DataExpr = ATmakeApplArray(head, args);
       FREE_A(args);
+    }
+    if (dummy_ann != NULL) {
+      DataExpr = (ATermAppl) ATsetAnnotation((ATerm) DataExpr, dummy, dummy);
     }
   }
 
@@ -394,6 +406,10 @@ ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context)
   }
 
   //reconstruct expressions in the arguments of part
+  // If the top-level term is annotated with @dummy, then preserve annotation,
+  // this is needed for matching data expressions.
+  ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
+  ATerm dummy_ann = ATgetAnnotation((ATerm) Part, dummy);
   AFun head = ATgetAFun(Part);
   int nr_args = ATgetArity(head);
   if (nr_args > 0) {
@@ -407,6 +423,9 @@ ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context)
     }
     Part = ATmakeApplArray(head, args);
     FREE_A(args);
+  }
+  if (dummy_ann != NULL) {
+    Part = (ATermAppl) ATsetAnnotation((ATerm) Part, dummy, dummy);
   }
 
   return Part;
@@ -451,8 +470,8 @@ ATermAppl capture_avoiding_subst(ATermAppl Part, ATermAppl OldValue,
     // Construct new application.
     Part = gsMakeDataAppl(LHS, NewRHS);
 
-    if (gsIsBinder(LHS)) {
-      Part = beta_reduce(Part, Context, false);
+    if (gsIsBinder(LHS) || !ATisEqual(RHS, NewRHS)) {
+      Part = beta_reduce(Part, Context, true);
     }
 
     return Part;
@@ -519,5 +538,11 @@ ATermAppl capture_avoiding_substs(ATermAppl Part, ATermList Substs,
     Substs = ATgetNext(Substs);
   }
   return Part;
+}
+
+ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs)
+{
+  ATermList context = ATmakeList0();
+  return capture_avoiding_substs(Part, Substs, &context);
 }
 

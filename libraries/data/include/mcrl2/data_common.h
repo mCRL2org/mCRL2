@@ -249,5 +249,9 @@ ATermList get_sorts(ATerm term);
 /// \ret Term with beta reduction performed on it.
 ATerm beta_reduce_term(ATerm Term);
 
+/// \ret Part with capture avoiding substitution of the substitutions in Substs
+//       performed on it.
+ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs);
+
 #endif //MCRL2_DATA_COMMON_H
 

@@ -65,6 +65,12 @@ static bool reconstruct_bag_enumeration(ATermAppl data_expr, ATermList* enumerat
 //     false otherwise.
 static inline bool is_lambda_expr(ATermAppl Part);
 
+//pre: Part is a data expression
+//ret: true if Part is an application of a lambda binder
+//     (DataAppl(Binder(Lambda, [x_1, ..., x_n], e), [t_1, ..., t_n])
+//     false otherwise.
+static inline bool is_lambda_binder_application(ATermAppl data_expr);
+
 //pre: Spec is a Specification
 //ret: Spec from which system defined functions and equations
 //     have been removed.
@@ -598,6 +604,18 @@ bool is_lambda_expr(ATermAppl Part)
     Part = ATAgetArgument(Part, 0);
   }
   return is_lambda_op_id(Part);
+}
+
+bool is_lambda_binder_application(ATermAppl data_expr)
+{
+  if (!gsIsDataAppl(data_expr)) return false;
+  while (gsIsDataAppl(data_expr)) {
+    data_expr = ATAgetArgument(data_expr, 0);
+  }
+  if (gsIsBinder(data_expr)) {
+    return gsIsLambda(ATAgetArgument(data_expr, 0));
+  }
+  return false;
 }
 
 ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_substs)
@@ -1477,12 +1495,62 @@ bool match_appl(ATermAppl aterm_ann, ATermAppl aterm, ATermList* p_substs)
 {
   aterm_ann = gsSubstValues_Appl(*p_substs, aterm_ann, false);
 
+  ATerm dummy_str = (ATerm) gsString2ATermAppl("@dummy");
+
   if (ATisEqual(aterm_ann, aterm)) return true;
 
   if (gsIsSortId(aterm_ann) && gsIsSortId(aterm)) {
-    if (ATgetAnnotation((ATerm) aterm_ann, (ATerm) gsString2ATermAppl("@dummy")) != NULL) {
+    if (ATgetAnnotation((ATerm) aterm_ann, dummy_str) != NULL) {
       *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(aterm_ann, aterm), *p_substs);
       return true;
+    } 
+  }
+
+  if (gsIsBinder(aterm_ann) && gsIsBinder(aterm)) {
+    ATermList vars_ann = ATLgetArgument(aterm_ann, 1);
+    ATermAppl expr_ann = ATAgetArgument(aterm_ann, 2);
+    ATermList vars = ATLgetArgument(aterm, 1);
+    ATermAppl expr = ATAgetArgument(aterm, 2);
+
+    if (ATgetLength(vars_ann) != ATgetLength(vars)) {
+      return false;
+    }
+
+    while(!ATisEmpty(vars_ann)) {
+      ATermAppl var_ann = ATAgetFirst(vars_ann);
+      ATermAppl var = ATAgetFirst(vars);
+      ATermAppl sort_ann = gsGetSort(var_ann);
+      ATermAppl sort = gsGetSort(var);
+      if (ATgetAnnotation((ATerm) sort_ann, dummy_str) != NULL) {
+        // match(lambda x:S_a.e, lambda x:T.e') = [S_a := T] match(e, e')
+        // match(lambda x:S_a.e, lambda y:T.e') = [S_a := T] match(e[x:=y], e')
+        *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort_ann, sort), *p_substs);
+        if (!ATisEqual(gsGetName(var_ann), gsGetName(var))) {
+          expr_ann = capture_avoiding_substitutions(expr_ann, 
+            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann, 
+                                            (ATerm) var)));
+        }
+      } else if (!ATisEqual(sort_ann, sort)) {
+        // match(lambda x:S.e, lambda x:T.e') = false
+        // match(lambda x:S.e, lambda y:T.e') = false
+        return false;
+      } else {
+        // match(lambda x:S.e, lambda y:S.e') = match(e[x:=y], e')
+        if (!ATisEqual(gsGetName(var_ann), gsGetName(var))) {
+          expr_ann = capture_avoiding_substitutions(expr_ann, 
+            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann, 
+                                            (ATerm) var)));
+        }
+      }
+      vars_ann = ATgetNext(vars_ann);
+      vars = ATgetNext(vars);
+    }
+    if ((is_lambda_binder_application(expr_ann) && is_lambda_binder_application(expr)) ||
+        (!is_lambda_binder_application(expr_ann) && !is_lambda_binder_application(expr))) {
+    } else if (is_lambda_binder_application(expr_ann)) {
+      return match_appl((ATermAppl) beta_reduce_term((ATerm) expr_ann), expr, p_substs);
+    } else {
+      return match_appl(expr_ann, (ATermAppl) beta_reduce_term((ATerm) expr), p_substs);
     }
   }
 

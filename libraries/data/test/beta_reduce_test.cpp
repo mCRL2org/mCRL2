@@ -39,7 +39,7 @@ int test_main(int, char*[])
   ATermAppl beta_reduced_lambda_appl = (ATermAppl) beta_reduce_term((ATerm) lambda_appl);
   BOOST_CHECK(ATisEqual(beta_reduced_lambda_appl, add_y));
 
-  // Check that beta reduction preserves annotation
+  // Check that beta reduction preserves annotation if annotated with @dummy
   ATermAppl sort = gsMakeSortId(gsString2ATermAppl("sort"));
   ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
   ATermAppl u_name = gsString2ATermAppl("u");
@@ -52,9 +52,7 @@ int test_main(int, char*[])
   ATermList vl = ATmakeList1((ATerm) v);
   ATermAppl u_lambda = gsMakeBinder(gsMakeLambda(), ul, u);
   ATermAppl u_lambda_appl = gsMakeDataAppl(u_lambda, vl);
-  gsVerboseMsg("u_lambda_appl: %T\n", u_lambda_appl);
   ATermAppl u_beta_reduced_lambda_appl = (ATermAppl) beta_reduce_term((ATerm) u_lambda_appl);
-  gsVerboseMsg("u_beta_reduced_lambda_appl: %T\n", u_beta_reduced_lambda_appl);
   BOOST_CHECK(ATisEqual(u_beta_reduced_lambda_appl, v));
 
   return 0;
