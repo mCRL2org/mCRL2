@@ -731,7 +731,7 @@ inline void lpsConstElm::output() {
   //
 //data_assignment_expressions(data_assignment_list());
 //data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
-  lps::specification rebuild_spec = lps::specification(
+    lps::specification rebuild_spec = lps::specification(
     p_spec.data(),
     p_spec.action_labels(),
     rebuild_process,
@@ -741,6 +741,10 @@ inline void lpsConstElm::output() {
                                             )
                        )
   );
+
+  gsVerboseMsg("lpsconstelm: Number of process parameters in the old LPS: %d\n", p_process.process_parameters().size());
+  gsVerboseMsg("lpsconstelm: Number of process parameters in the new LPS: %d\n", rebuild_process.process_parameters().size());
+  
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
   //gsDebugMsg("%s\n", pp(p_process).c_str());
