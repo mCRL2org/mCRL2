@@ -51,8 +51,6 @@ class SettingsDialog: public wxDialog {
     void setupParPanel(wxPanel* panel);
     void setupSimPanel(wxPanel* panel);
     void setupPfmPanel(wxPanel* panel);
-    wxColour RGB_to_wxC(Utils::RGB_Color c) const;
-    Utils::RGB_Color wxC_to_RGB(wxColour c) const;
     DECLARE_EVENT_TABLE()
 };
 

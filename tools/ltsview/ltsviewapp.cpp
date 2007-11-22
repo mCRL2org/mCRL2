@@ -324,6 +324,17 @@ void LTSViewApp::editMarkRule(const int index) {
   }
 }
 
+Utils::RGB_Color LTSViewApp::getNewRuleColour()
+{
+  // TODO implement
+  RGB_Color result;
+  result.r = 255;
+  result.g = 255;
+  result.b = 255;
+
+  return result;
+}
+
 void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
   if (lts != NULL) {
     lts->activateMarkRule(index,activate);
@@ -331,9 +342,9 @@ void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
   }
 }
 
-void LTSViewApp::setMatchAnyMarkRule(bool b) {
+void LTSViewApp::setMatchAnyMarkRule(int i) {
   if (lts != NULL) {
-    lts->setMatchAnyMarkRule(b);
+    lts->setMatchAnyMarkRule(i);
     applyMarkStyle(MARK_STATES);
   }
 }

@@ -12,6 +12,7 @@
 #include <wx/bitmap.h>
 #include <wx/event.h>
 #include <wx/filedlg.h>
+#include <wx/colordlg.h>
 #include <wx/notebook.h>
 #include <wx/sysopt.h>
 //#include <time.h>
@@ -330,10 +331,13 @@ void MainFrame::setupMarkPanel(wxPanel* panel) {
   
   wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,panel,
       wxT("Mark states"));
-  wxString choices[2] = { wxT("Match any of the following"),
-      wxT("Match all of the following") };
+
+  //TODO: Name correct?
+  wxString choices[3] = { wxT("Match any of the following"),
+      wxT("Match all of the following"), wxT("Match the following separately") };
+
   markAnyAllChoice = new wxChoice(panel,myID_MARK_ANYALL,wxDefaultPosition,
-      wxDefaultSize,2,choices);
+      wxDefaultSize,3,choices);
   markAnyAllChoice->SetSelection(0);
   markStatesSizer->Add(markAnyAllChoice,0,flags,border);
   
@@ -347,6 +351,7 @@ void MainFrame::setupMarkPanel(wxPanel* panel) {
       border);
   addremoveSizer->Add(new wxButton(panel,myID_REMOVE_RULE,wxT("Remove")),0,
       flags,border);
+
   markStatesSizer->Add(addremoveSizer,0,flags,border);
   
   wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(wxVERTICAL,
@@ -605,7 +610,7 @@ void MainFrame::onMarkRuleEdit(wxCommandEvent& event) {
 }
 
 void MainFrame::onMarkAnyAll(wxCommandEvent& event) {
-  mediator->setMatchAnyMarkRule(event.GetSelection() == 0);
+  mediator->setMatchAnyMarkRule(event.GetSelection());
   markStatesRadio->SetValue(true);
 }
 

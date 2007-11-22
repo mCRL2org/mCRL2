@@ -39,7 +39,7 @@ class LTS {
     Cluster*    getClusterAtRank(int r, int c) const;
     State*	getInitialState() const;
     std::string getLabel(int labindex);
-    bool	getMatchAnyMarkRule() const;
+    int   	getMatchAnyMarkRule() const;
     Utils::MarkRule*	getMarkRule(const int index) const;
     int		getNumClusters() const;
     int		getNumClustersAtRank(int r) const;
@@ -69,7 +69,7 @@ class LTS {
     void	removeMarkRule(const int index);
     void	replaceMarkRule(int index, Utils::MarkRule* mr);
     void	setInitialState(State* s);
-    void	setMatchAnyMarkRule(bool b);
+    void	setMatchAnyMarkRule(int i);
     void	unmarkAction(std::string label);
     
     void trim();
@@ -114,7 +114,7 @@ class LTS {
     Mediator*	mediator;
     Simulation* simulation;
     bool lastWasAbove;
-    bool	matchAny;
+    int	matchAny;
     int zoomLevel;
     int	deadlockCount;
     int	transitionCount;

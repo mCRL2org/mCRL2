@@ -19,7 +19,7 @@ using namespace std;
 LTS::LTS(Mediator* owner) {
   mediator = owner;
   initialState = NULL;
-  matchAny = true;
+  matchAny = 0;
   deadlockCount = -1;
   transitionCount = 0;
   markedTransitionCount = 0;
@@ -905,24 +905,84 @@ void LTS::resolveClusterSlots() {
 void LTS::addMarkRule(MarkRule* r,int index) {
   if (index == -1) {
     markRules.push_back(r);
-  } else {
+  } 
+  else 
+  {
     markRules.insert(markRules.begin()+index,r);
   }
+
   if (r->isActivated) {
     processAddedMarkRule(r);
   }
 }
 
 void LTS::processAddedMarkRule(MarkRule* r) {
-  State* s;
-  list< State* >::iterator li;
-  if (matchAny) {
+  // Add r to all clusters' states.
+  for (vector< vector<Cluster*> >::iterator r_it = clustersInRank.begin();
+       r_it != clustersInRank.end(); ++r_it)
+  {
+    for(vector<Cluster*>::iterator c_it = (*r_it).begin(); 
+        c_it != (*r_it).end(); ++c_it)
+    {
+      (*c_it)->markState(r);
+    }
+  }
+
+  std::list<State*>::iterator it = unmarkedStates.begin();
+
+  while (it != unmarkedStates.end())
+  {
+    if ((*it)->isMarked())
+    {
+      markedStates.push_back((*it));
+      it = unmarkedStates.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+  
+  
+
+  if (matchAny == 1)
+  {
+    unsigned int activeMarkRulesCount = 0;
+
+    for ( vector< MarkRule* >::iterator mr_it = markRules.begin() ; mr_it !=
+          markRules.end() ; ++mr_it )
+    {
+      if ( (**mr_it).isActivated )
+      {
+        ++activeMarkRulesCount;
+      }
+    }
+
+    for(it = markedStates.begin(); it != markedStates.end(); ++it)
+    {
+      State* s = (*it);
+      if(s->nrRulesMatched() == activeMarkRulesCount)
+      {
+        s->setMarking(true);
+        s->getCluster()->setMarking(true);
+      }
+      else
+      {
+        s->setMarking(false);
+        s->getCluster()->setMarking(false);
+      }
+    }
+  }
+    
+
+  /*if (matchAny == 0) {
+    // MatchAny is true, so just add the 
+    //TODO Inefficient implementation
     li = unmarkedStates.begin();
     while (li != unmarkedStates.end()) {
       s = *li;
       if (r->valueSet[s->getParameterValue(r->paramIndex)]) {
-        s->mark();
-        s->getCluster()->markState();
+        s->getCluster()->markState(r);
         markedStates.push_back(s);
         li = unmarkedStates.erase(li);
       } else {
@@ -930,13 +990,14 @@ void LTS::processAddedMarkRule(MarkRule* r) {
       }
     }
   }
-  else {
+  
+  else if (matchAny == 1) {
+    // TODO: Inefficient implementation
     li = markedStates.begin();
     while (li != markedStates.end()) {
       s = *li;
       if (!r->valueSet[s->getParameterValue(r->paramIndex)]) {
-        s->unmark();
-        s->getCluster()->unmarkState();
+        s->getCluster()->unmarkState(r);
         unmarkedStates.push_back(s);
         li = markedStates.erase(li);
       } else {
@@ -944,6 +1005,36 @@ void LTS::processAddedMarkRule(MarkRule* r) {
       }
     }
   }
+  else
+  {
+    // matchAny == 2
+    li = unmarkedStates.begin();
+    while (li != unmarkedStates.end())
+    {
+      s = *li;
+      if (r->valueSet[s->getParameterValue(r->paramIndex)])
+      {
+        s->getCluster()->markState(r);
+      }
+      ++li;
+    }
+
+    li = markedStates.begin();
+    while (li != markedStates.end())
+    {
+      s = *li;
+      if (r->valueSet[s->getParameterValue(r->paramIndex)])
+      {
+        s->getCluster()->markState(r);
+      }
+      ++li;
+    }
+  }
+  */
+  
+  // TODO WORKAROUND
+  setMatchAnyMarkRule(matchAny);
+
 }
 
 void LTS::activateMarkRule( const int index, const bool activate )
@@ -975,66 +1066,35 @@ void LTS::removeMarkRule( const int index )
 
 void LTS::processRemovedMarkRule( MarkRule* r )
 {
-  vector< MarkRule* > activeMarkRules;
-  for ( vector< MarkRule* >::iterator mr_it = markRules.begin() ; mr_it !=
-      markRules.end() ; ++mr_it )
+  // Unmark each state in each cluster, which match r
+  for(vector<vector<Cluster*> >::iterator it = clustersInRank.begin();
+      it != clustersInRank.end(); ++it)
   {
-    if ( (**mr_it).isActivated ) activeMarkRules.push_back( *mr_it );
+    for(vector<Cluster*>::iterator c_it = (*it).begin(); c_it != (*it).end(); 
+        ++c_it)
+    {
+      (*c_it)->unmarkState(r);
+    }
   }
 
-  State* s;
-  list< State* >::iterator li;
-  unsigned int i;
-  if (matchAny)
+  // Adapt markedStates, unmarkedStates
+  list<State*>::iterator s_it = markedStates.begin();
+
+  while (s_it != markedStates.end())
   {
-    li = markedStates.begin();
-    while (li != markedStates.end()) {
-      s = *li;
-      if (r->valueSet[s->getParameterValue(r->paramIndex)]) {
-        s->unmark();
-        for (i = 0; i < activeMarkRules.size() && !s->isMarked(); ++i) {
-          MarkRule* r_i = activeMarkRules[i];
-          if (r_i->valueSet[s->getParameterValue(r_i->paramIndex)]) {
-            s->mark();
-          }
-        }
-        if (!s->isMarked()) {
-          s->getCluster()->unmarkState();
-          unmarkedStates.push_back(s);
-          li = markedStates.erase(li);
-        } else {
-          ++li;
-        }
-      } else {
-        ++li;
-      }
+    if ((*s_it)->nrRulesMatched() == 0)
+    {
+      unmarkedStates.push_back(*s_it);
+      s_it = markedStates.erase(s_it);
+    }
+    else
+    {
+      ++s_it;
     }
   }
-  else
-  {
-    li = unmarkedStates.begin();
-    while (li != unmarkedStates.end()) {
-      s = *li;
-      if (!r->valueSet[s->getParameterValue(r->paramIndex)]) {
-        s->mark();
-        for (i = 0; i < activeMarkRules.size() && s->isMarked(); ++i) {
-          MarkRule* r_i = activeMarkRules[i];
-          if (!r_i->valueSet[s->getParameterValue(r_i->paramIndex)]) {
-            s->unmark();
-          }
-        }
-        if (s->isMarked()) {
-          s->getCluster()->markState();
-          markedStates.push_back(s);
-          li = unmarkedStates.erase(li);
-        } else {
-          ++li;
-        }
-      } else {
-        ++li;
-      }
-    }
-  }
+
+  //TODO WORKAROUND
+  setMatchAnyMarkRule(matchAny);
 }
 
 MarkRule* LTS::getMarkRule( const int index ) const
@@ -1042,18 +1102,119 @@ MarkRule* LTS::getMarkRule( const int index ) const
   return markRules[index];
 }
 
-bool LTS::getMatchAnyMarkRule() const
+int LTS::getMatchAnyMarkRule() const
 {
   return matchAny;
 }
 
-void LTS::setMatchAnyMarkRule(bool b) {
-  if (matchAny == b) {
+void LTS::setMatchAnyMarkRule(int ma) {
+  matchAny = ma;
+
+  vector<MarkRule*> activeMarkRules;
+
+  for(vector<MarkRule*>::iterator mr_it = markRules.begin();
+      mr_it != markRules.end(); ++mr_it)
+  {
+    if((*mr_it)->isActivated)
+    {
+      activeMarkRules.push_back(*mr_it);
+    }
+  }
+
+  for(list<State*>::iterator s_it = markedStates.begin();
+      s_it != markedStates.end(); ++s_it)
+  {
+    (*s_it)->setMarking(false);
+    (*s_it)->getCluster()->setMarking(false);
+    (*s_it)->setMarkAllEmpty(false);
+    (*s_it)->getCluster()->setMarkAllEmpty(false);
+  }
+
+  if (activeMarkRules.size() == 0 && matchAny == 1)
+  {
+    for(list<State*>::iterator s_it = unmarkedStates.begin();
+        s_it != unmarkedStates.end(); ++s_it)
+    {
+      (*s_it)->setMarking(true);
+      (*s_it)->getCluster()->setMarking(true);
+      (*s_it)->setMarkAllEmpty(true);
+      (*s_it)->getCluster()->setMarkAllEmpty(true);
+    }
+  }
+  else
+  {
+    
+    for(vector<vector<Cluster*> >::iterator r_it = clustersInRank.begin();
+        r_it != clustersInRank.end(); ++r_it)
+    {
+      for(vector<Cluster*>::iterator c_it = (*r_it).begin();
+          c_it != (*r_it).end(); ++c_it)
+      {
+        for(vector<MarkRule*>::iterator it = activeMarkRules.begin(); 
+            it != activeMarkRules.end(); ++it)
+        {
+          (*c_it)->markState(*it);
+        }
+      }
+    }
+
+    if (matchAny == 1)
+    {
+
+      for(list<State*>::iterator it = markedStates.begin(); 
+          it != markedStates.end(); ++it)
+      {
+        State* s = (*it);
+        if(s->nrRulesMatched() == activeMarkRules.size())
+        {
+          s->setMarking(true);
+          s->getCluster()->setMarking(true);
+        }
+        else
+        {
+          s->setMarking(false);
+          s->getCluster()->setMarking(false);
+        }
+      }
+    }
+  }
+  
+  list<State*>::iterator s_it = unmarkedStates.begin();
+
+  while(s_it != unmarkedStates.end())
+  {
+    if((*s_it)->isMarked())
+    {
+      markedStates.push_back(*s_it);
+      s_it = unmarkedStates.erase(s_it);
+    }
+    else
+    {
+      ++s_it;
+    }
+  }
+
+  s_it = markedStates.begin();
+
+  while(s_it != markedStates.end())
+  {
+    if(!(*s_it)->isMarked())
+    {
+      unmarkedStates.push_back(*s_it);
+      s_it = markedStates.erase(s_it);
+    }
+    else
+    {
+      ++s_it;
+    }
+  }
+  /*
+  if (matchAny == ma || ma == 2) {
     return;
   }
   
-  matchAny = b;
-  
+  matchAny = ma;
+
   vector< MarkRule* > activeMarkRules;
   for (vector< MarkRule* >::iterator mr_it = markRules.begin();
       mr_it != markRules.end(); ++mr_it) {
@@ -1064,17 +1225,30 @@ void LTS::setMatchAnyMarkRule(bool b) {
   
   if (activeMarkRules.size() == 0) {
     list< State* >::iterator li;
-    if (matchAny) {
+    if (matchAny == 0) {
       for (li = markedStates.begin(); li != markedStates.end(); ++li) {
-        (*li)->unmark();
-        (*li)->getCluster()->unmarkState();
+        for(vector<MarkRule*>::iterator mr_it = markRules.begin();
+            mr_it != markRules.end(); ++mr_it)
+        {
+          // TODO inefficient
+          (*li)->getCluster()->unmarkState((*mr_it));
+        }
       }
     }
-    else {
+    else if (matchAny == 1) {
       for (li = unmarkedStates.begin(); li != unmarkedStates.end(); ++li) {
-        (*li)->mark();
-        (*li)->getCluster()->markState();
+        for(vector<MarkRule*>::iterator mr_it = markRules.begin();
+            mr_it != markRules.end(); ++mr_it)
+        {
+          //TODO inefficient
+          (*li)->getCluster()->markState((*mr_it));
+        }
       }
+    }
+    else
+    {
+      // matchAny == 2
+      // TODO
     }
     markedStates.swap(unmarkedStates);
   }
@@ -1085,15 +1259,14 @@ void LTS::setMatchAnyMarkRule(bool b) {
     State* s;
     list< State* >::iterator li;
     unsigned int i;
-    if (matchAny) {
+    if (matchAny == 0) {
       li = unmarkedStates.begin();
       while (li != unmarkedStates.end()) {
         s = *li;
         for (i = 0; i < activeMarkRules.size() && !s->isMarked(); ++i) {
           MarkRule* markRule = activeMarkRules[i];
           if (markRule->valueSet[s->getParameterValue(markRule->paramIndex)])  {
-            s->mark();
-            s->getCluster()->markState();
+            s->getCluster()->markState(markRule);
             markedStates.push_back(s);
             li = unmarkedStates.erase(li);
           }
@@ -1103,15 +1276,14 @@ void LTS::setMatchAnyMarkRule(bool b) {
         }
       }
     }
-    else {
+    else if (matchAny == 1) {
       li = markedStates.begin();
       while (li != markedStates.end()) {
         s = *li;
         for (i = 0; i < activeMarkRules.size() && s->isMarked(); ++i) {
           MarkRule* markRule = activeMarkRules[i];
           if (!markRule->valueSet[s->getParameterValue(markRule->paramIndex)]) {
-            s->unmark();
-            s->getCluster()->unmarkState();
+            s->getCluster()->unmarkState(markRule);
             unmarkedStates.push_back(s);
             li = markedStates.erase(li);
           }
@@ -1121,7 +1293,12 @@ void LTS::setMatchAnyMarkRule(bool b) {
         }
       }
     }
-  }
+    else
+    {
+      // matchAny == 2
+      // TODO
+    }
+  }*/
 }
 
 void LTS::markClusters() {
@@ -1132,7 +1309,12 @@ void LTS::markClusters() {
   for (li = markedStates.begin(); li != markedStates.end(); ++li) {
     s = *li;
     if (s->isMarked()) {
-      s->getCluster()->markState();
+      for(vector<MarkRule*>::iterator it = markRules.begin(); 
+          it != markRules.end(); ++it)
+      {
+        // TODO inefficient
+        s->getCluster()->markState((*it));
+      }
     }
   }
 }
@@ -1292,10 +1474,13 @@ void LTS::trim() {
   visit(initialState);
   list<State*>::iterator li = unmarkedStates.begin();
   while (li != unmarkedStates.end()) {
-    if ((*li)->isMarked()) {
-      (*li)->unmark();
-      ++li;
-    } else {
+    if ((*li)->isMarkedNoRule()) 
+    {
+        (*li)->unmark();
+        ++li;
+    } 
+    else 
+    {
       delete (*li);
       li = unmarkedStates.erase(li);
     }
@@ -1303,9 +1488,12 @@ void LTS::trim() {
 }
 
 void LTS::visit(State* s) {
-  if (!s->isMarked()) {
+  if (!s->isMarkedNoRule()) 
+  {
     s->mark();
-    for (int i = 0; i < s->getNumOutTransitions(); ++i) {
+    
+    for (int i = 0; i < s->getNumOutTransitions(); ++i) 
+    {
       visit(s->getOutTransition(i)->getEndState());
     }
   }

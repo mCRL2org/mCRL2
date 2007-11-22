@@ -33,6 +33,7 @@ class LTSViewApp : public wxApp, public Mediator {
     void	  addMarkRule();
     void	  applyMarkStyle(Utils::MarkStyle ms);
     void	  editMarkRule(const int index);
+    Utils::RGB_Color getNewRuleColour();
     void	  markAction(std::string label);
     void	  notifyRenderingFinished();
     void	  notifyRenderingStarted();
@@ -40,7 +41,7 @@ class LTSViewApp : public wxApp, public Mediator {
     virtual bool OnInit();
     void	  openFile(std::string fileName);
     void	  removeMarkRule(const int index);
-    void	  setMatchAnyMarkRule(bool b);
+    void	  setMatchAnyMarkRule(int i);
     void	  setRankStyle(Utils::RankStyle rs);
     void	  setVisStyle(Utils::VisStyle vs);
     void	  unmarkAction(std::string label);

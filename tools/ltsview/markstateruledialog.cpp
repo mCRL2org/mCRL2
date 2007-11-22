@@ -10,6 +10,8 @@
 #include "markstateruledialog.h"
 #include <wx/statline.h>
 #include "ids.h"
+#include "utils.h"
+
 using namespace IDs;
 using namespace Utils;
 
@@ -25,8 +27,8 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
 	lts = alts;
 
   wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(2,3,0,0);
-    
+  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(3,3,0,0);
+  
   int numParams = lts->getNumParameters();
   wxArrayString paramChoices;
 	wxString str;
@@ -61,6 +63,16 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
   controlSizer->Add(parameterListBox,0,f,b);
   controlSizer->Add(relationListBox,0,f,b);
   controlSizer->Add(valuesListBox,0,f,b);
+
+  controlSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Rule Colour: ")), 0, f, b);
+  
+  ruleClrButton = new mcrl2::utilities::wxColorButton(
+                                    this, this, wxID_ANY, wxDefaultPosition, 
+                                    wxSize(25,25));
+  ruleClrButton->SetBackgroundColour(RGB_to_wxC(
+    mediator->getNewRuleColour()));
+
+  controlSizer->Add(ruleClrButton, 0, f,b);
 
   mainSizer->Add(controlSizer,0,wxEXPAND|wxALL,b);
   mainSizer->Add(new wxStaticLine(this,wxID_ANY),0,wxEXPAND|wxALL,b);
@@ -102,25 +114,27 @@ void MarkStateRuleDialog::setMarkRule(MarkRule* mr) {
   parameterListBox->SetStringSelection(paramName);
   loadValues(paramName);
   
+  ruleClrButton->SetBackgroundColour(RGB_to_wxC(mr->colour));
+
   if (!mr->isNegated) {
     relationListBox->SetSelection(0);
-		for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
-			if (mr->valueSet[i]) {
-				valuesListBox->Check(valuesListBox->FindString(wxString(
-								lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
-						true);
-			}
-		}
+    for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
+      if (mr->valueSet[i]) {
+        valuesListBox->Check(valuesListBox->FindString(wxString(
+	  lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
+	  true);
+      }
+    }
   }
   else {
     relationListBox->SetSelection(1);
-		for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
-			if (!mr->valueSet[i]) {
-				valuesListBox->Check(valuesListBox->FindString(wxString(
-								lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
-						true);
-			}
-		}
+    for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
+      if (!mr->valueSet[i]) {
+        valuesListBox->Check(valuesListBox->FindString(wxString(
+	  lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
+	  true);
+      }
+    }
   }
 }
 
@@ -135,6 +149,7 @@ MarkRule* MarkStateRuleDialog::getMarkRule() {
   result->isActivated = true;
   result->isNegated = (relationListBox->GetSelection() == 1);
   result->valueSet.assign(valuesListBox->GetCount(),true);
+  result->colour = wxC_to_RGB(ruleClrButton->GetBackgroundColour());  
 
   if (relationListBox->GetSelection() == 0) {
     for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i) {

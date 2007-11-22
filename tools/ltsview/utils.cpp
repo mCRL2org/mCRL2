@@ -270,4 +270,13 @@ Utils::RGB_Color Interpolater::getColor(int i) {
   return HSV_to_RGB(result);
 }
 
+wxColour RGB_to_wxC(RGB_Color c) {
+  return wxColour(c.r,c.g,c.b);
+}
+
+Utils::RGB_Color wxC_to_RGB(wxColour c) { 
+  RGB_Color result = {c.Red(),c.Green(),c.Blue()};
+  return result;
+}
+
 }

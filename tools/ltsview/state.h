@@ -57,8 +57,14 @@ class State {
     bool isCentered() const;
     bool isDeadlock() const;
     bool isMarked() const;
+    unsigned int  nrRulesMatched() const;
+    void setMarking(bool b);
+    void setMarkAllEmpty(bool b);
     bool isSelected() const;
-    void mark();
+
+    // Adds mr to the rules matched by this state, and returns the total number
+    // of rules matched.
+    int mark(Utils::MarkRule* mr);
     void select();
     void setCluster(Cluster* c);
     void setPositionAngle(float a);
@@ -69,7 +75,10 @@ class State {
     void setID(int id);
     void setRank(int r);
     void setSimulated(bool simulated);
-    void unmark();
+
+    // Removes mr from the rules matched by this state (if any) and returns the 
+    // total number of rules matched.
+    int unmark(Utils::MarkRule* mr);
     void setZoomLevel(const int i);
     int  getZoomLevel() const;
 
@@ -79,7 +88,10 @@ class State {
     Utils::Vect getVelocity();
     void resetVelocity();
     void setVelocity(Utils::Vect v);
-
+  
+    void mark();
+    void unmark();
+    bool isMarkedNoRule();
   private:
     Cluster*                   cluster;
     int                        id;
@@ -87,7 +99,11 @@ class State {
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
     std::vector< Transition* > outTransitions;
-    bool                       marked;
+    std::vector< Utils::MarkRule* >   rulesMatched;
+    
+    bool  marked;
+    bool  markAllEmpty;
+
     float                      positionAngle;
     float                      positionRadius;
     Utils::Point3D             positionAbs;

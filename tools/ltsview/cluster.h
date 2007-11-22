@@ -11,6 +11,7 @@
 #define CLUSTER_H
 #include <vector>
 #include <map>
+#include "utils.h"
 
 #ifndef STATE_H
   #include "state.h"
@@ -56,10 +57,19 @@ class Cluster {
     State*       getState(int i) const;
     int          getNumStates() const;
     bool         hasDeadlock() const;
+
+    void         setMarking(bool b);
+    void         setMarkAllEmpty(bool b);
     bool         hasMarkedState() const;
-    void         markState();
+
+    // Calls s->mark(rule) for all s in states that match rule, and adapts
+    // markedState to the number of states marked.
+    void         markState(Utils::MarkRule* rule);
     void         setDeadlock( bool b );
-    void         unmarkState();
+
+    // Calls s->unmark(rule) for all s in states that match rule, and adapts 
+    // markedState to the number of states marked.
+    void         unmarkState(Utils::MarkRule* rule);
 
     unsigned int getTotalNumSlots() const;
     unsigned int getNumSlots(unsigned int ring) const;
@@ -112,7 +122,9 @@ class Cluster {
     std::vector< Cluster* > descendants;
     std::vector<std::vector<bool> > severedDescendants;
     unsigned int severedDescendantsC;
-    int markedState;
+    int markedStates;
+    bool marking;
+    bool markAllEmpty;
     int markedTransitionCount;
     float position;
     int rank;
@@ -126,8 +138,11 @@ class Cluster {
     int visObject;
     std::vector< int > branchVisObjects;
     bool selected;
+    std::vector< Utils::MarkRule* > rulesMatched;
+
     void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
     void spreadSlots(unsigned int ring);
+
 };
 
 #endif

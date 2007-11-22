@@ -10,6 +10,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <vector>
+#include <wx/colour.h>
 //using namespace std;
 
 namespace Utils {
@@ -50,7 +51,9 @@ namespace Utils {
     int paramIndex;
     bool isActivated;
     bool isNegated;
+    RGB_Color colour; // Colour asociated with this mark rule.
     std::vector< bool > valueSet;
+
   };
 
   struct Vect {
@@ -85,7 +88,9 @@ namespace Utils {
   float vec_to_deg(Vect v);
   Vect deg_to_vec(float deg);
   float vec_length(Vect v);
-  
+  wxColour RGB_to_wxC(Utils::RGB_Color c);
+  RGB_Color wxC_to_RGB(wxColour c);
+ 
   class Interpolater {
     private:
       bool is_long;

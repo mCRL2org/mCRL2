@@ -434,11 +434,3 @@ void SettingsDialog::onTransparencySpin(wxSpinEvent& event) {
   glCanvas->display();
 }
 
-wxColour SettingsDialog::RGB_to_wxC(RGB_Color c) const {
-  return wxColour(c.r,c.g,c.b);
-}
-
-RGB_Color SettingsDialog::wxC_to_RGB(wxColour c) const {
-  RGB_Color result = {c.Red(),c.Green(),c.Blue()};
-  return result;
-}

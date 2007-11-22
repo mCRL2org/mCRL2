@@ -15,6 +15,7 @@
 #include "mediator.h"
 #include "lts.h"
 #include "utils.h"
+#include "mcrl2/utilities/colorbutton.h"
 
 class MarkStateRuleDialog : public wxDialog { 
   public:
@@ -29,9 +30,10 @@ class MarkStateRuleDialog : public wxDialog {
     std::map< wxString, int >	parameterIndices;
     wxListBox*	parameterListBox;
     wxListBox*	relationListBox;
+    mcrl2::utilities::wxColorButton* ruleClrButton;
     std::map< wxString, int >	valueIndices;
     wxCheckListBox*	valuesListBox;
-		LTS*	lts;
+    LTS*  lts;
 
     void loadValues(wxString paramName);
 
