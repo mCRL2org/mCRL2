@@ -329,9 +329,15 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
   } else if (is_lambda_expr(Part)) {
     gsDebugMsg("Reconstructing implementation of a lambda expression\n");
     Part = gsSubstValues_Appl(*p_substs, Part, true);
-    Part = (ATermAppl) beta_reduce_term((ATerm) Part);
-    *recursive = false;
-    Part = reconstruct_exprs_appl(Part, p_substs, Spec);
+    // If the specification was not provided, substitution will not change Part,
+    // hence beta reduction will not change the term, and the recursive call
+    // would be on exactly the same term, hence running out of the call stack
+    // eventually.
+    if (!is_lambda_expr(Part)) {
+      Part = (ATermAppl) beta_reduce_term((ATerm) Part);
+      *recursive = false;
+      Part = reconstruct_exprs_appl(Part, p_substs, Spec);
+    }
   } else if (is_lambda_op_id(Part)) {
     gsDebugMsg("Reconstructing implementation of a lambda op id\n");
     Part = gsSubstValues_Appl(*p_substs, Part, true);
