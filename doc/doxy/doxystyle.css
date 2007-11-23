@@ -175,8 +175,8 @@ div.qindex {
 }
 div.nav {
 	width: 100%;
-  background-color: #eee;
-  border: 1px solid #aaa;
+	background-color: #eee;
+	border: 1px solid #aaa;
 	margin-bottom: 2em;
 	padding: 2px;
 	line-height: 140%;
@@ -254,7 +254,7 @@ div.groupHeader {
 }
 div.groupText { margin-left: 16px; font-style: italic; font-size: 90% }
 td.indexkey {
-	background-color: #e8eef2;
+	background-color: #f9f9f9;
 	font-weight: bold;
 	padding-right  : 10px;
 	padding-top    : 2px;
@@ -264,10 +264,10 @@ td.indexkey {
 	margin-right   : 0px;
 	margin-top     : 2px;
 	margin-bottom  : 2px;
-	border: 1px solid #CCCCCC;
+	border: 1px solid #e0e0e0;
 }
 td.indexvalue {
-	background-color: #e8eef2;
+	background-color: #f9f9f9;
 	font-style: italic;
 	padding-right  : 10px;
 	padding-top    : 2px;
@@ -277,7 +277,7 @@ td.indexvalue {
 	margin-right   : 0px;
 	margin-top     : 2px;
 	margin-bottom  : 2px;
-	border: 1px solid #CCCCCC;
+	border: 1px solid #e0e0e0;
 }
 tr.memlist {
    background-color: #f0f0f0; 
@@ -295,108 +295,82 @@ span.charliteral   { color: #008080 }
 .mdescLeft {
        padding: 0px 8px 4px 8px;
 	font-style: italic;
-	background-color: #FAFAFA;
-	border-top: 1px none #E0E0E0;
-	border-right: 1px none #E0E0E0;
-	border-bottom: 1px none #E0E0E0;
-	border-left: 1px none #E0E0E0;
+	background-color: #f9f9f9;
+	border-width: 1px;
+	border-color: #e0e0e0;
+	border-top-style: none;
+	border-right-style: solid;
+	border-bottom-style: none;
+	border-left-style: solid;
 	margin: 0px;
 }
 .mdescRight {
        padding: 0px 8px 4px 8px;
 	font-style: italic;
-	background-color: #FAFAFA;
-	border-top: 1px none #E0E0E0;
-	border-right: 1px none #E0E0E0;
-	border-bottom: 1px none #E0E0E0;
-	border-left: 1px none #E0E0E0;
+	background-color: #f9f9f9;
+	border-width: 1px;
+	border-color: #e0e0e0;
+	border-top-style: none;
+	border-right-style: solid;
+	border-bottom-style: none;
+	border-left-style: none;
 	margin: 0px;
 }
 .memItemLeft {
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #E0E0E0;
-	border-right-color: #E0E0E0;
-	border-bottom-color: #E0E0E0;
-	border-left-color: #E0E0E0;
+	border-width: 1px;
+	background-color: #f9f9f9;
+	border-color: #e0e0e0;
 	border-top-style: solid;
-	border-right-style: none;
+	border-right-style: solid;
 	border-bottom-style: none;
-	border-left-style: none;
-	background-color: #FAFAFA;
+	border-left-style: solid;
 }
 .memItemRight {
 	padding: 1px 8px 0px 8px;
 	margin: 4px;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #E0E0E0;
-	border-right-color: #E0E0E0;
-	border-bottom-color: #E0E0E0;
-	border-left-color: #E0E0E0;
+	border-width: 1px;
+	border-color: #e0e0e0;
 	border-top-style: solid;
-	border-right-style: none;
+	border-right-style: solid;
 	border-bottom-style: none;
 	border-left-style: none;
-	background-color: #FAFAFA;
+	background-color: #f9f9f9;
 }
 .memTemplItemLeft {
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #E0E0E0;
-	border-right-color: #E0E0E0;
-	border-bottom-color: #E0E0E0;
-	border-left-color: #E0E0E0;
+	border-width: 1px;
+	border-color: #e0e0e0;
 	border-top-style: none;
-	border-right-style: none;
+	border-right-style: solid;
 	border-bottom-style: none;
-	border-left-style: none;
-	background-color: #FAFAFA;
+	border-left-style: solid;
+	background-color: #f9f9f9;
 }
 .memTemplItemRight {
 	padding: 1px 8px 0px 8px;
 	margin: 4px;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #E0E0E0;
-	border-right-color: #E0E0E0;
-	border-bottom-color: #E0E0E0;
-	border-left-color: #E0E0E0;
+	border-width: 1px;
+	border-color: #e0e0e0;
 	border-top-style: none;
-	border-right-style: none;
+	border-right-style: solid;
 	border-bottom-style: none;
 	border-left-style: none;
-	background-color: #FAFAFA;
+	background-color: #f9f9f9;
 }
 .memTemplParams {
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-color: #E0E0E0;
-	border-right-color: #E0E0E0;
-	border-bottom-color: #E0E0E0;
-	border-left-color: #E0E0E0;
+	border-width: 1px;
+	border-color: #e0e0e0;
 	border-top-style: solid;
-	border-right-style: none;
+	border-right-style: solid;
 	border-bottom-style: none;
-	border-left-style: none;
-       color: #606060;
-	background-color: #FAFAFA;
+	border-left-style: solid;
+	background-color: #f9f9f9;
+	color: #606060;
 }
 td.tiny      { font-size: 75%;
 }
@@ -428,11 +402,8 @@ hr { height: 1px;
 }
 .memitem {
   padding: 4px;
-  background-color: #eef3f5;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #dedeee;
-  -moz-border-radius: 8px 8px 8px 8px;
+  background-color: #f9f9f9;
+  border: 1px solid #aaa;
 }
 .memname {
   white-space: nowrap;
@@ -448,7 +419,6 @@ hr { height: 1px;
   border-style: solid;
   border-color: #84b0c7;
   font-weight: bold;
-  -moz-border-radius: 8px 8px 8px 8px;
 }
 .paramkey {
   text-align: right;
