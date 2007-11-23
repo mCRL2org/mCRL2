@@ -119,6 +119,7 @@ static void newequation(
                 ATermAppl t3, 
                 specificationbasictype *spec);
 static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
+static ATermAppl RewriteTerm(ATermAppl t);
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)
 { return ATinsert(l,(ATerm)a);
@@ -279,7 +280,8 @@ static bool isDeltaAtZero(ATermAppl t)
   if (!gsIsDelta(ATAgetArgument(t,0))) {
    return false;
   }
-  return ATisEqual(ATAgetArgument(t,1), gsMakeDataExprReal_int(0));
+  return ATisEqual(RewriteTerm(ATAgetArgument(t,1)), 
+                               gsMakeDataExprReal_int(0));
 }
 
 static int strequal(char *s1,char *s2)
@@ -6792,122 +6794,6 @@ static ATermAppl can_communicate(ATermList m)
   return NULL;
 }
 
-//static bool might_communicate(ATermList m, ATermList n)
-//{
-  /* this function indicates whether the actions in m
-     consisting of actions and data occur in C, such that
-     a communication might take place (i.e. m is a subbag
-     of the lhs of a communication in C). */
- 
-/*  ATermList rest[comm_table_num];
-
-  for(int i=0; i<comm_table_num; i++)
-  {
-    comm_table[i].tmp = comm_table[i].lhs;
-    rest[i] = n;
-  }
-
-  // m must be contained in a lhs; check every action
-  ATermList mwalker=m;
-  while ( mwalker != ATempty )
-  {
-    ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
-    
-    // check every lhs for actionname
-    bool comm_ok = false;
-    for(int i=0; i<comm_table_num; i++)
-    {
-      if ( ATisEmpty(comm_table[i].tmp) )
-      {
-        continue;
-      }
-
-      ATermAppl commname;
-      while ( actionname != (commname = ATAgetFirst(comm_table[i].tmp)) )
-      {
-        if ( ATisEmpty(rest[i]) )
-        {
-          rest[i] = NULL;
-          comm_table[i].tmp = ATmakeList0();
-          break;
-        }
-        ATermAppl restname;
-        while ( commname != (restname = ATAgetArgument(ATAgetArgument(ATAgetFirst(rest[i]),0),0)) )
-        {
-          rest[i] = ATgetNext(rest[i]);
-          if ( ATisEmpty(rest[i]) )
-          {
-            rest[i] = NULL;
-            break;
-          }
-        }
-        if ( rest[i] != NULL )
-        {
-          rest[i] = ATgetNext(rest[i]);
-          comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
-        } else {
-          comm_table[i].tmp = ATmakeList0();
-        }
-        if ( ATisEmpty(comm_table[i].tmp) )
-        {
-          break;
-        }
-      }
-      if ( actionname == commname )
-      {
-        comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
-        comm_ok = true;
-      } else {
-        rest[i] = NULL;
-      }
-    }
-    if ( !comm_ok )
-    {
-      return false;
-    }
-    mwalker=ATgetNext(mwalker);
-  }
-  for(int i=0; i<comm_table_num; i++)
-  {
-    if ( rest[i] == NULL )
-      continue;
-    while ( !ATisEmpty(comm_table[i].tmp) )
-    {
-      if ( ATisEmpty(rest[i]) )
-      {
-        rest[i] = NULL;
-        break;
-      }
-      ATermAppl commname = ATAgetFirst(comm_table[i].tmp);
-      ATermAppl restname;
-      while ( commname != (restname = ATAgetArgument(ATAgetArgument(ATAgetFirst(rest[i]),0),0)) )
-      {
-        rest[i] = ATgetNext(rest[i]);
-        if ( ATisEmpty(rest[i]) )
-        {
-          rest[i] = NULL;
-          break;
-        }
-      }
-      if ( commname != restname )
-      {
-        break;
-      }
-      rest[i] = ATgetNext(rest[i]);
-      comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
-    }
-    if ( rest[i] == NULL )
-    {
-      continue;
-    }
-    if ( ATisEmpty(comm_table[i].tmp) )
-    {
-      return true;
-    }
-  }
-  return false;
-}*/
-  
 static bool might_communicate(ATermList m, ATermList n = NULL)
 { /* this function indicates whether the actions in m
      consisting of actions and data occur in C, such that
@@ -7430,7 +7316,6 @@ static ATermAppl communicationcomposition(
                      makeMultiActionConditionList(
                               ATLgetArgument(multiaction,0),
                               communications);
-
 
       assert(multiactionconditionlist!=ATempty);
       for( ; multiactionconditionlist!=ATempty ;
