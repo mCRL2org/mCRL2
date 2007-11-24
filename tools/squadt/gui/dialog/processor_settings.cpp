@@ -43,7 +43,7 @@ namespace squadt {
        * @param s path to the project store
        * @param p the processor of which to display data
        **/
-      processor_details::processor_details(wxWindow* o, wxString s, squadt::processor::sptr p) :
+      processor_details::processor_details(wxWindow* o, wxString s, boost::shared_ptr < squadt::processor > p) :
                                                 dialog::processor(o, wxT("View and change details")),
                                                 project_store(s), input_objects(0), output_objects(0),
                                                 target_processor(p), tools_selectable(true) {
@@ -76,12 +76,14 @@ namespace squadt {
           input_objects->InsertColumn(2, wxT("Date"));
         
           long row = 0;
-        
-          for (squadt::processor::input_object_iterator i = target_processor->get_input_iterator(); i.valid(); ++i) {
-            if (*i != 0) {
+
+          boost::iterator_range < squadt::processor::input_object_iterator > input_range(target_processor->get_input_iterators()); 
+
+          BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > i, input_range) {
+            if (i.get() != 0) {
               path p(project_store.fn_str());
               
-              p = p / path((*i)->location);
+              p = p / path(i->get_location());
         
               input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
 
@@ -118,11 +120,13 @@ namespace squadt {
          
           long row = 0;
          
-          for (squadt::processor::output_object_iterator i = target_processor->get_output_iterator(); i.valid(); ++i) {
-            if (*i != 0) {
+          boost::iterator_range < squadt::processor::output_object_iterator > output_range(target_processor->get_output_iterators()); 
+
+          BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > o, output_range) {
+            if (o.get() != 0) {
               path p(project_store.fn_str());
               
-              p = p / path((*i)->location);
+              p = p / path(o->get_location());
          
               output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
          
@@ -190,8 +194,8 @@ namespace squadt {
         tool_selector->ScrollTo(selected_tool);
       }
 
-      void processor_details::select_tool(tipi::tool::capabilities::input_configuration const* combination, std::string const& name) {
-        wxString category(combination->m_category.get_name().c_str(), wxConvLocal);
+      void processor_details::select_tool(tipi::tool::capabilities::input_configuration const* configuration, std::string const& name) {
+        wxString category(configuration->get_category().get_name().c_str(), wxConvLocal);
 
         std::stack < wxTreeItemId > id_stack;
 

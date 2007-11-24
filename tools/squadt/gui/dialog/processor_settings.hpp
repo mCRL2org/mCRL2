@@ -43,28 +43,28 @@ namespace squadt {
         private:
 
           /** \brief Path to the project store where input/output objects are stored */
-          wxString                project_store;
+          wxString                                project_store;
 
           /** \brief Tree control for tool selection */
-          wxTreeCtrl*             tool_selector;
+          wxTreeCtrl*                             tool_selector;
 
           /** \brief Text field that contains a name */
-          wxStaticText*           name;
+          wxStaticText*                           name;
 
           /** \brief The list of input objects */
-          wxListCtrl*             input_objects;
+          wxListCtrl*                             input_objects;
 
           /** \brief The list of output objects */
-          wxListCtrl*             output_objects;
+          wxListCtrl*                             output_objects;
 
           /** \brief The processor for which to display information */
-          squadt::processor::sptr target_processor;
+          boost::shared_ptr < squadt::processor > target_processor;
 
           /** \brief Whether tools are selectable or not */
-          bool                    tools_selectable;
+          bool                                    tools_selectable;
 
           /** \brief Selected tool id, because selections are lost when a part containing it is collapsed */
-          wxTreeItemId            selected_tool;
+          wxTreeItemId                            selected_tool;
 
         private:
         
@@ -89,7 +89,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          processor_details(wxWindow*, wxString, squadt::processor::sptr);
+          processor_details(wxWindow*, wxString, boost::shared_ptr < squadt::processor >);
 
           /** \brief Whether tools in the tool list are selectable */
           inline void allow_tool_selection(bool b);

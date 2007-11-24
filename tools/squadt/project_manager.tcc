@@ -20,6 +20,7 @@ namespace squadt {
 
   class project_manager_impl : public utility::visitable {
     friend class project_manager;
+    friend class processor_impl;
 
     template < typename R, typename S >
     friend class utility::visitor;
@@ -84,35 +85,38 @@ namespace squadt {
       /** \brief Add a new processor to the project */
       processor* add();
 
-      /** \brief Add a new processor to the project, if it is not already */
-      void add(processor::ptr const&);
+      /** \brief Check for conflicts and add to project */
+      void commit(boost::shared_ptr< processor >);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
-      void remove(processor*, bool = true);
+      void remove(boost::shared_ptr< processor >, bool = true);
 
       /** \brief Recursively add all files in a directory to the project */
       void import_directory(const boost::filesystem::path&);
  
       /** \brief Add a file to the project under a new name */
-      processor::ptr import_file(const boost::filesystem::path&, const std::string& = "");
+      boost::shared_ptr < processor > import_file(const boost::filesystem::path&, const std::string& = "");
 
       /** \brief Updates the status of all outputs that depend on the argument */
-      void update_status(processor*, bool = false);
+      void update_status(boost::shared_ptr< processor >, bool = false);
 
       /** \brief Updates the status of all outputs that depend on the argument, sets it to out-of-date (unless it does not exist) */
-      void demote_status(processor*);
+      void demote_status(boost::shared_ptr< processor >);
 
       /** \brief Given a processor, it produces a list of object_descriptors that conflict with its outputs */
-      std::auto_ptr < conflict_list > get_conflict_list(processor::sptr p) const;
+      std::auto_ptr < conflict_list > get_conflict_list(boost::shared_ptr< processor > p) const;
  
       /** \brief Removes all files that cannot be recreated by any of the processors */
-      void clean_store(processor* p, bool b);
+      void clean_store(boost::shared_ptr< processor > p, bool b);
 
       /** \brief Make objects in the project up to date */
-      void update(processor::sptr, boost::function< void (processor*) >);
+      void update(boost::shared_ptr< processor >, boost::function< void (processor*) >);
 
       /** \brief Make objects in the project up to date */
       void update(boost::function< void (processor*) >);
+
+      /** \brief Updates dependencies for a processor that is part of the project */
+      bool update_dependencies(boost::shared_ptr< processor >);
 
       /** \brief Shutdown all running processors */
       void shutdown();

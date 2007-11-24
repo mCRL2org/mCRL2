@@ -59,17 +59,14 @@ namespace squadt {
  
     public:
  
-      /** \brief Convenience type alias for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool_manager >                              sptr;
-
       /** \brief Convenience type alias the list of tools, indexed by main input format */
-      typedef std::multimap < build_system::storage_format, tool::sptr >      tool_map;
+      typedef std::multimap < build_system::storage_format, boost::shared_ptr < tool > > tool_map;
 
       /** \brief Convenience type alias the list of tools */
-      typedef std::list < tool::sptr >                                        tool_list;
+      typedef std::list < boost::shared_ptr < tool > >                                   tool_list;
  
       /** \brief Constant tool sequence type */
-      typedef boost::iterator_range < tool_list::const_iterator >             tool_const_sequence;
+      typedef boost::iterator_range < tool_list::const_iterator >                        tool_const_sequence;
 
     private:
 
@@ -85,10 +82,10 @@ namespace squadt {
       bool exists(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      tool::sptr find(std::string const&) const;
+      boost::shared_ptr < tool > find(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      tool::sptr get_tool_by_name(std::string const&) const;
+      boost::shared_ptr < tool > get_tool_by_name(std::string const&) const;
 
       /** \brief Add a new tool to the catalog */
       bool add_tool(std::string const&, std::string const&);

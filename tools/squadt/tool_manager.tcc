@@ -66,7 +66,7 @@ namespace squadt {
     private:
 
       /** \brief Start a tool */
-      void execute(tool&, std::string const&, execution::task_monitor::sptr, bool);
+      void execute(tool const&, std::string const&, execution::task_monitor::sptr, bool);
 
       /** \brief Execute a command */
       void execute(execution::command const*, execution::task_monitor::sptr, bool);
@@ -83,10 +83,10 @@ namespace squadt {
       bool exists(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      tool::sptr find(std::string const&) const;
+      boost::shared_ptr< tool > find(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      tool::sptr get_tool_by_name(std::string const&) const;
+      boost::shared_ptr< tool > get_tool_by_name(std::string const&) const;
 
       /** \brief Add a new tool to the catalog */
       bool add_tool(std::string const&, std::string const&);

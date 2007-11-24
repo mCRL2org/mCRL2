@@ -35,9 +35,6 @@ namespace squadt {
 
     public:
 
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool >             sptr;
-
       /** \brief Convenience type alias */
       typedef tipi::tool::capabilities::input_configuration input_configuration;
 
@@ -83,7 +80,7 @@ namespace squadt {
       inline std::string get_name() const;
 
       /** \brief Find a specific input combination of this tool, if it exists */
-      inline input_configuration const* find_input_configuration(build_system::tool_category const&, build_system::storage_format const&) const;
+      inline boost::shared_ptr < const input_configuration > find_input_configuration(build_system::tool_category const&, build_system::storage_format const&) const;
   };
 
   /**
@@ -125,8 +122,8 @@ namespace squadt {
    * \param[in] f the storage format
    * \param[in] t the category in which the tool operates
    **/
-  inline tool::input_configuration const* tool::find_input_configuration(build_system::tool_category const& t, build_system::storage_format const& f) const {
-    return (m_capabilities->find_input_configuration(f, t));
+  inline boost::shared_ptr < const tool::input_configuration > tool::find_input_configuration(build_system::tool_category const& t, build_system::storage_format const& f) const {
+    return m_capabilities->find_input_configuration(f, t);
   }
 }
 

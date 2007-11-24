@@ -37,7 +37,7 @@ namespace tipi {
      * \param[in] c category to which the functionality of the tool must be counted
      **/
     void capabilities::add_input_configuration(std::string const& id, mime_type const& f, tool::category const& c) {
-      input_configuration ic(c, f, id);
+      boost::shared_ptr< const input_configuration > ic(new input_configuration(c, f, id));
  
       m_input_configurations.insert(ic);
     }
@@ -46,10 +46,10 @@ namespace tipi {
      * \param[in] id a unique identifier for the output object
      * \param[in] f mime-type for the object
      **/
-    void capabilities::add_output_combination(std::string const& id, mime_type const& f) {
-      output_combination oc(f, id);
+    void capabilities::add_output_configuration(std::string const& id, mime_type const& f) {
+      boost::shared_ptr< const output_configuration > oc(new output_configuration(f, id));
  
-      m_output_combinations.insert(oc);
+      m_output_configurations.insert(oc);
     }
  
     version capabilities::get_version() const {
@@ -60,24 +60,24 @@ namespace tipi {
       return (boost::make_iterator_range(m_input_configurations));
     }
  
-    capabilities::output_combination_range capabilities::get_output_combinations() const {
-      return (boost::make_iterator_range(m_output_combinations));
+    capabilities::output_configuration_range capabilities::get_output_configurations() const {
+      return (boost::make_iterator_range(m_output_configurations));
     }
 
     /**
      * \param[in] f the storage format
      * \param[in] t the category in which the tool operates
      **/
-    capabilities::input_configuration const*
+    boost::shared_ptr< const capabilities::input_configuration >
               capabilities::find_input_configuration(const mime_type& f, const tool::category& t) const {
  
       for (input_configuration_list::const_iterator i = m_input_configurations.begin(); i != m_input_configurations.end(); ++i) {
-        if (i->m_category == t && i->m_mime_type == f) {
-          return (&(*i));
+        if ((*i)->get_category() == t && (*i)->get_primary_object_descriptor().second == f) {
+          return *i;
         }
       }
 
-      return (0);
+      return boost::shared_ptr< const input_configuration >();
     }
   }
 }

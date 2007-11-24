@@ -80,7 +80,7 @@ namespace squadt {
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    * \param[in] w the directory in which execution should take place
    **/
-  void tool_manager_impl::execute(tool& t, std::string const& w, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(tool const& t, std::string const& w, execution::task_monitor::sptr p, bool b) {
     instance_identifier id = free_identifier++;
 
     execution::command c(t.get_location(), w);
@@ -115,7 +115,7 @@ namespace squadt {
                boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
 
     /* Wait until the process has been identified */
-    execution::process::sptr p(e->get_process(true));
+    boost::shared_ptr < execution::process > p(e->get_process(true));
 
     if (p.get() != 0) {
       /* Start extracting */
@@ -157,10 +157,10 @@ namespace squadt {
   /**
    * \param[in] n the name of the tool
    **/
-  tool::sptr tool_manager_impl::find(const std::string& n) const {
+  boost::shared_ptr< tool > tool_manager_impl::find(const std::string& n) const {
     using namespace boost;
 
-    tool::sptr t;
+    boost::shared_ptr< tool > t;
 
     for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
       if ((*i)->get_name() == n) {
@@ -192,7 +192,7 @@ namespace squadt {
     bool b = exists(n);
 
     if (!b) {
-      tools.push_back(tool::sptr(new tool(n, l)));
+      tools.push_back(boost::shared_ptr< tool >(new tool(n, l)));
     }
 
     return (b);
@@ -205,7 +205,7 @@ namespace squadt {
     bool b = exists(t.get_name());
 
     if (!b) {
-      tools.push_back(tool::sptr(new tool(t)));
+      tools.push_back(boost::shared_ptr< tool >(new tool(t)));
     }
 
     return (b);
@@ -255,7 +255,7 @@ namespace squadt {
   /**
    * \param[in] n the name of the tool
    **/
-  tool::sptr tool_manager::find(const std::string& n) const {
+  boost::shared_ptr< tool > tool_manager::find(const std::string& n) const {
     return (impl->find(n));
   }
 
@@ -265,7 +265,7 @@ namespace squadt {
    * \pre a tool with this name must be among the known tools
    **/
   boost::shared_ptr < tool > tool_manager::get_tool_by_name(std::string const& n) const {
-    tool::sptr t = impl->find(n);
+    boost::shared_ptr< tool > t = impl->find(n);
 
     /* Check tool existence */
     if (!t) {

@@ -180,6 +180,8 @@ bool Squadt::OnInit() {
       }
       catch (std::exception& e) {
         wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+
+        return false;
       }
      
       splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());

@@ -24,6 +24,7 @@
 
 #include "build_system.hpp"
 #include "project_manager.tcc"
+#include "processor.tcc"
 #include "settings_manager.hpp"
 #include "visitors.hpp"
 
@@ -94,46 +95,83 @@ namespace squadt {
 
     /* Compute reverse dependencies */
     for (processor_list::const_iterator i = processors.begin(); i != processors.end(); ++i) {
-      for (processor::input_object_iterator j = (*i)->get_input_iterator(); j.valid(); ++j) {
-        processor::sptr g((*j)->generator.lock());
+      boost::iterator_range< processor::input_object_iterator > input_range((*i)->get_input_iterators());
+
+      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, input_range) {
+        boost::shared_ptr< processor > g(o->get_generator());
 
         if (g.get() != 0) {
-          reverse_depends.insert(std::make_pair(g.get(), (*i).get()));
+          reverse_depends.insert(std::make_pair(g.get(), i->get()));
         }
       }
     }
-  }
-
-  processor* project_manager_impl::add() {
-    boost::mutex::scoped_lock l(list_lock);
-
-    boost::shared_ptr < processor > p(processor::create(m_interface.lock()));
-
-    processors.push_back(p);
-
-    return p.get();
   }
 
   /**
-   * \param p a reference to the processor to add
+   * \param p a reference to the processor to add or update
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
-  void project_manager_impl::add(processor::ptr const& p) {
+  void project_manager_impl::commit(boost::shared_ptr< processor > p) {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
     boost::mutex::scoped_lock l(list_lock);
 
-    if (processors.end() == std::find(processors.begin(), processors.end(), p)) {
+    if (std::find(processors.begin(), processors.end(), p) == processors.end()) {
       processors.push_back(p);
 
-      /* Register reverse dependencies */
-      for (processor::input_object_iterator i = p->get_input_iterator(); i.valid(); ++i) {
-        processor::sptr g((*i)->generator.lock());
-
-        if (g.get() != 0) {
-          reverse_depends.insert(std::make_pair(g.get(), p.get()));
-        }
-      }
-
       write();
+
+      update_dependencies(p);
     }
+  }
+  
+  /**
+   * \param p a reference to the processor to add
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
+   **/
+  bool project_manager_impl::update_dependencies(boost::shared_ptr < processor > p) {
+    bool changes = false;
+
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
+    // Collect reverse dependencies
+    std::set < processor* > collected;
+
+    boost::iterator_range< processor::input_object_iterator > input_range(p->get_input_iterators());
+
+    BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& i, input_range) {
+      boost::shared_ptr< processor > g(i->get_generator());
+
+      if (g.get() != 0) {
+        collected.insert(g.get());
+      }
+    }
+
+    // Remove obsolete reverse dependencies
+    dependency_map::iterator i = reverse_depends.begin();
+
+    while (i != reverse_depends.end()) {
+      if (i->second == p.get() && !collected.count(i->first)) {
+        dependency_map::iterator j(i++);
+
+        reverse_depends.erase(j);
+
+        changes = true;
+      }
+    }
+
+    // Add new reverse dependencies
+    for (std::set< processor* >::const_iterator i = collected.begin(); i != collected.end(); ++i) {
+      dependency_map::value_type dependency(*i, p.get());
+
+      if (std::find(reverse_depends.begin(), reverse_depends.end(), dependency) == reverse_depends.end()) {
+        reverse_depends.insert(dependency);
+
+        changes = true;
+      }
+    }
+
+    return changes;
   }
 
   /**
@@ -200,14 +238,17 @@ namespace squadt {
           }
         }
         else {
-          processor::input_object_iterator k              = (*i)->get_input_iterator();
-          unsigned int                     maximum_weight = 0;
+          boost::iterator_range< processor::input_object_iterator > input_range((*i)->get_input_iterators());
+          unsigned int maximum_weight  = 0;
+          bool         all_have_weight = true;
 
-          while (k.valid()) {
-            processor::sptr target((*k)->generator);
+          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, input_range) {
+            boost::shared_ptr< processor > target(object->get_generator());
 
             if (target.get() != 0) {
               if (weights.find(target.get()) == weights.end()) {
+                all_have_weight = false;
+
                 break;
               }
               else {
@@ -218,11 +259,9 @@ namespace squadt {
                 }
               }
             }
-
-            ++k;
           }
 
-          if (!k.valid()) {
+          if (all_have_weight) {
             weights[(*i).get()] = 1 + (std::max)(maximum_weight, number);
           }
         }
@@ -232,20 +271,23 @@ namespace squadt {
     /* Do the actual sorting */
     std::stable_sort(processors.begin(), processors.end(), boost::bind(std::less< unsigned short >(), 
                         boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&processor::ptr::get, _1)),
+                                boost::bind(&boost::shared_ptr< processor >::get, _1)),
                         boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&processor::ptr::get, _2))));
+                                boost::bind(&boost::shared_ptr< processor >::get, _2))));
   }
 
   /**
    * \param[in] p the processor that selects the targets
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
-  void project_manager_impl::demote_status(processor* p) {
-    if (0 < reverse_depends.count(p)) {
+  void project_manager_impl::demote_status(boost::shared_ptr < processor > p) {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
+    if (0 < reverse_depends.count(p.get())) {
       std::stack < processor* > p_stack;
 
       // start with the outputs of p
-      p_stack.push(p);
+      p_stack.push(p.get());
 
       while (0 < p_stack.size()) {
         std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p_stack.top());
@@ -266,14 +308,17 @@ namespace squadt {
   /**
    * \param[in] p the processor that selects the targets
    * \param[in] b whether or not to force an update for all processors that depend on p
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
-  void project_manager_impl::update_status(processor* p, bool u) {
-    if (0 < reverse_depends.count(p)) {
+  void project_manager_impl::update_status(boost::shared_ptr< processor > p, bool u) {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
+    if (0 < reverse_depends.count(p.get())) {
 
       std::stack < processor* > p_stack;
 
       if (u) {
-        std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p);
+        std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p.get());
 
         BOOST_FOREACH(dependency_map::value_type i, range) {
           i.second->demote_status();
@@ -282,7 +327,7 @@ namespace squadt {
         }
       }
       else {
-        p_stack.push(p);
+        p_stack.push(p.get());
       }
 
       while (0 < p_stack.size()) {
@@ -299,11 +344,19 @@ namespace squadt {
     }
   }
 
-  std::auto_ptr < project_manager_impl::conflict_list > project_manager_impl::get_conflict_list(processor::sptr p) const {
+  /**
+   * \param[in] p the processor that selects the targets
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
+   **/
+  std::auto_ptr < project_manager_impl::conflict_list > project_manager_impl::get_conflict_list(boost::shared_ptr< processor > p) const {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
     std::set < std::string > locations; // Names of files produced by p
 
-    for (processor::output_object_iterator j = p->get_output_iterator(); j.valid(); ++j) {
-      locations.insert((*j)->location);
+    boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
+
+    BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+      locations.insert(object->get_location());
     }
 
     boost::mutex::scoped_lock l(list_lock);
@@ -313,10 +366,12 @@ namespace squadt {
     /* Check all processors for conflicts */
     for (processor_list::const_iterator i = processors.begin(); i != processors.end(); ++i) {
       if (*i != p) {
-        for (processor::output_object_iterator j = (*i)->get_output_iterator(); j.valid(); ++j) {
-          if (locations.find((*j)->location) != locations.end()) {
+        boost::iterator_range< processor::output_object_iterator > output_range((*i)->get_output_iterators());
+
+        BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+          if (locations.find(object->get_location()) != locations.end()) {
             /* Conflict */
-            conflicts->push_back(j.pointer());
+            conflicts->push_back(object);
           }
         }
       }
@@ -327,14 +382,18 @@ namespace squadt {
 
   /**
    * \param[in] p the processor that selects the targets
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
-  void project_manager_impl::update(processor::sptr p, boost::function < void (processor*) > h) {
+  void project_manager_impl::update(boost::shared_ptr< processor > p, boost::function < void (processor*) > h) {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
 
     /* Recursively update inputs */
     p->check_status(true);
 
-    for (processor::output_object_iterator j = p->get_output_iterator(); j.valid(); ++j) {
-      if (!(*j)->is_up_to_date()) {
+    boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
+
+    BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+      if (!object->is_up_to_date()) {
         h(p.get());
 
         p->update();
@@ -354,11 +413,13 @@ namespace squadt {
       update_active = true;
 
       BOOST_FOREACH(processor_list::value_type i, processors) {
-        if (i->get_tool() && reverse_depends.count(i.get()) == 0) {
+        if (i->get_tool().get() != 0 && reverse_depends.count(i.get()) == 0) {
           i->check_status(true);
 
-          for (processor::output_object_iterator j = i->get_output_iterator(); j.valid(); ++j) {
-            if (!(*j)->is_up_to_date()) {
+          boost::iterator_range< processor::output_object_iterator > output_range(i->get_output_iterators());
+
+          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+            if (!object->is_up_to_date()) {
               h(i.get());
 
               i->update();
@@ -382,13 +443,13 @@ namespace squadt {
    *  - when d is empty, the original filename will be maintained
    *  - when the file is already in the project store it is not copied
    **/
-  processor::ptr project_manager_impl::import_file(const boost::filesystem::path& s, std::string const& d) {
+  boost::shared_ptr< processor > project_manager_impl::import_file(const boost::filesystem::path& s, std::string const& d) {
     using namespace boost::filesystem;
 
     assert(exists(s) && !is_directory(s) && native(d));
 
     path           destination_path = store / path(d.empty() ? s.leaf() : d);
-    processor::ptr p                = processor::create(m_interface.lock());
+    boost::shared_ptr< processor > p                = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
       copy_file(s, destination_path);
@@ -397,7 +458,7 @@ namespace squadt {
     build_system::mime_type type(extension(s).empty() ? "unknown" : extension(s).substr(1));
 
     /* Add the file to the project */
-    p->append_output(type, "", destination_path.leaf(), processor::object_descriptor::original);
+    p->append_output("", type, destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
 
@@ -410,17 +471,20 @@ namespace squadt {
    *
    * \attention also removes processors with inputs that are not longer available
    * \pre input should be sorted as can be obtained by doing sort_processors()
+   * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
-  void project_manager_impl::remove(processor* p, bool b) {
+  void project_manager_impl::remove(boost::shared_ptr < processor > p, bool b) {
+    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
     std::set < processor* > obsolete;
 
-    obsolete.insert(p);
+    obsolete.insert(p.get());
 
-    if (0 < reverse_depends.count(p)) {
+    if (0 < reverse_depends.count(p.get())) {
 
       std::stack < processor* > p_stack;
 
-      p_stack.push(p);
+      p_stack.push(p.get());
 
       while (0 < p_stack.size()) {
         std::pair < dependency_map::iterator, dependency_map::iterator > range = reverse_depends.equal_range(p_stack.top());
@@ -439,8 +503,10 @@ namespace squadt {
 
     /* Update reverse dependencies, remove files and processors */
     BOOST_FOREACH(processor* i, obsolete) {
-      for (processor::input_object_iterator j = i->get_input_iterator(); j.valid(); ++j) {
-        processor::sptr g((*j)->generator.lock());
+      boost::iterator_range< processor::input_object_iterator > input_range(p->get_input_iterators());
+
+      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, input_range) {
+        boost::shared_ptr< processor > g(object->get_generator());
 
         if (g.get() != 0) {
           std::pair < dependency_map::iterator, dependency_map::iterator > range(reverse_depends.equal_range(g.get()));
@@ -481,14 +547,16 @@ namespace squadt {
     write();
   }
 
-  void project_manager_impl::clean_store(processor* p, bool b) {
+  void project_manager_impl::clean_store(boost::shared_ptr< processor > p, bool b) {
     namespace bf = boost::filesystem;
 
     std::set < std::string > objects;
 
     for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
-      for (processor::output_object_iterator j = (*i)->get_output_iterator(); j.valid(); ++j) {
-        objects.insert(bf::path((*j)->location).leaf());
+      boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
+
+      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+        objects.insert(bf::path(object->get_location()).leaf());
       }
     }
 
@@ -514,8 +582,8 @@ namespace squadt {
    * \param[in] l a path to the root of the project store
    * \param[in] b whether or not to create the project anew (ignore existing project file)
    **/
-  project_manager::ptr project_manager::create(const boost::filesystem::path& l, bool b) {
-    project_manager::ptr p(new project_manager);
+  boost::shared_ptr < project_manager > project_manager::create(const boost::filesystem::path& l, bool b) {
+    boost::shared_ptr < project_manager > p(new project_manager);
 
     p->impl->m_interface = p;
 
@@ -600,27 +668,37 @@ namespace squadt {
     return (processor_iterator(impl->processors));
   }
 
-  processor* project_manager::add() {
-    return impl->add();
+  void project_manager::commit(boost::shared_ptr< processor > const& p) {
+    return impl->commit(p);
   }
 
-  void project_manager::add(processor::ptr const& p) {
-    impl->add(p);
+  boost::shared_ptr< processor > project_manager::construct() {
+    return boost::shared_ptr< processor >(processor::create(impl->m_interface.lock()));
+
   }
 
-  std::auto_ptr < project_manager::conflict_list > project_manager::get_conflict_list(processor::sptr p) const {
+  /**
+   * \param[in] t the tool
+   * \param[in] t the selected input configuration of a tool
+   **/
+  boost::shared_ptr< processor > project_manager::construct(boost::shared_ptr < const tool > t, boost::shared_ptr < const tool::input_configuration > ic) {
+    return boost::shared_ptr< processor >(processor::create(impl->m_interface.lock(), t, ic));
+
+  }
+
+  std::auto_ptr < project_manager::conflict_list > project_manager::get_conflict_list(boost::shared_ptr< processor > const& p) const {
     return(impl->get_conflict_list(p));
   }
 
-  void project_manager::demote_status(processor* p) {
+  void project_manager::demote_status(boost::shared_ptr< processor > const& p) {
     impl->demote_status(p);
   }
 
-  void project_manager::update_status(processor* p, bool u) {
+  void project_manager::update_status(boost::shared_ptr< processor > const& p, bool u) {
     impl->update_status(p, u);
   }
 
-  void project_manager::update(processor::sptr p, boost::function < void (processor*) > h) {
+  void project_manager::update(boost::shared_ptr< processor > const& p, boost::function < void (processor*) > h) {
     impl->update(p, h);
   }
 
@@ -628,7 +706,7 @@ namespace squadt {
     impl->update(h);
   }
 
-  processor::ptr project_manager::import_file(const boost::filesystem::path& s, const std::string& d) {
+  boost::shared_ptr< processor > project_manager::import_file(const boost::filesystem::path& s, const std::string& d) {
     return(impl->import_file(s, d));
   }
 
@@ -636,11 +714,11 @@ namespace squadt {
     impl->import_directory(l);
   }
 
-  void project_manager::remove(processor* p, bool b) {
+  void project_manager::remove(boost::shared_ptr< processor > const& p, bool b) {
     impl->remove(p, b);
   }
 
-  void project_manager::clean_store(processor* p, bool b) {
+  void project_manager::clean_store(boost::shared_ptr< processor > const& p, bool b) {
     impl->clean_store(p, b);
   }
 

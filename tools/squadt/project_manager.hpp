@@ -39,26 +39,24 @@ namespace squadt {
    **/
   class project_manager : public utility::visitable, public boost::noncopyable {
     friend class project_manager_impl;
+    friend class processor_impl;
 
     template < typename R, typename S >
     friend class utility::visitor;
 
     public:
 
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < project_manager >                    ptr;
-
       /** \brief Convenience type alias */
-      typedef std::vector < processor::ptr >                           processor_list;
+      typedef std::vector < boost::shared_ptr< processor > >                    processor_list;
 
       /** \brief Iterator type for the processor list */
-      typedef constant_indirect_iterator < processor_list, processor > processor_iterator;
+      typedef constant_indirect_iterator < processor_list, processor >          processor_iterator;
 
       /** \brief Convenience type alias for a list of conflicting objects */
-      typedef std::vector < processor::object_descriptor::sptr >       conflict_list;
+      typedef std::vector < boost::shared_ptr< processor::object_descriptor > > conflict_list;
 
       /** \brief Finite type for counting the number of added processors */
-      typedef boost::uint32_t                                          processor_count;
+      typedef boost::uint32_t                                                   processor_count;
 
     private:
 
@@ -76,7 +74,7 @@ namespace squadt {
     public:
  
       /** \brief Factory function */
-      static project_manager::ptr create(const boost::filesystem::path&, bool);
+      static boost::shared_ptr < project_manager > create(const boost::filesystem::path&, bool);
 
       /** \brief Checks whether or not a path points to a directory that can be recognised as a project store */
       static bool is_project_store(std::string const&);
@@ -94,7 +92,7 @@ namespace squadt {
       void import_directory(const boost::filesystem::path&);
  
       /** \brief Add a file to the project under a new name */
-      processor::ptr import_file(const boost::filesystem::path&, const std::string& = "");
+      boost::shared_ptr< processor > import_file(const boost::filesystem::path&, const std::string& = "");
 
       /** \brief Get a reference to the list of processors in this project */
       processor_iterator get_processor_iterator() const;
@@ -114,29 +112,32 @@ namespace squadt {
       /** \brief Writes project configuration to the project file */
       void store() const;
 
-      /** \brief Add a new processor to the project */
-      processor* add();
+      /** \brief Constructs a new processor */
+      boost::shared_ptr< processor > construct();
 
-      /** \brief Add a new processor to the project, if it is not already */
-      void add(processor::ptr const&);
+      /** \brief Constructs a new processor */
+      boost::shared_ptr< processor > construct(boost::shared_ptr < const tool >, boost::shared_ptr < const tool::input_configuration >);
+
+      /** \brief Check for conflicts and add to project */
+      void commit(boost::shared_ptr< processor > const&);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
-      void remove(processor*, bool = true);
+      void remove(boost::shared_ptr< processor > const&, bool = true);
 
       /** \brief Updates the status of all outputs that depend on the argument */
-      void update_status(processor*, bool = false);
+      void update_status(boost::shared_ptr< processor > const&, bool = false);
 
       /** \brief Updates the status of all outputs that depend on the argument, sets it to out-of-date (unless it does not exist) */
-      void demote_status(processor*);
+      void demote_status(boost::shared_ptr< processor > const&);
 
       /** \brief Given a processor, it produces a list of object_descriptors that conflict with its outputs */
-      std::auto_ptr < conflict_list > get_conflict_list(processor::sptr p) const;
+      std::auto_ptr < conflict_list > get_conflict_list(boost::shared_ptr< processor > const& p) const;
  
       /** \brief Removes all files that cannot be recreated by any of the processors */
-      void clean_store(processor* p, bool b);
+      void clean_store(boost::shared_ptr< processor > const& p, bool b);
 
       /** \brief Make objects in the project up to date */
-      void update(processor::sptr, boost::function< void (processor*) >);
+      void update(boost::shared_ptr< processor > const&, boost::function< void (processor*) >);
 
       /** \brief Make objects in the project up to date */
       void update(boost::function< void (processor*) >);

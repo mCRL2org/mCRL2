@@ -15,6 +15,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/md5.hpp>
 
 #include "tipi/utility/indirect_iterator.hpp"
@@ -42,7 +45,7 @@ namespace squadt {
    **/
   class processor : public utility::visitable, private boost::noncopyable {
     friend class processor_impl;
-    friend class project_manager;
+    friend class project_manager_impl;
     friend class tool_manager;
     friend class executor;
 
@@ -51,79 +54,76 @@ namespace squadt {
  
     public:
 
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                               ptr;
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                               sptr;
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::weak_ptr < processor >                                 wptr;
-
-      /** \brief Convenient type alias */
-      typedef tipi::configuration::parameter_identifier                      parameter_identifier;
-
-      /** \brief Type to hold information about output objects */
-      struct object_descriptor {
-
-        /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::shared_ptr < object_descriptor >  sptr;
-       
-        /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::weak_ptr < object_descriptor >    wptr;
-
-        /** \brief Type that is used to keep the status of the output of a processor */
-        enum t_status {
-          original,                 /* unique not reproducible */
-          reproducible_nonexistent, /* can be reproduced but does not exist */
-          reproducible_out_of_date, /* can be reproduced, exists and is out of date */
-          reproducible_up_to_date,  /* can be reproduced, exists, and is up to date */
-          generation_in_progress    /* outputs are being generated */
-        };
-
-        processor::wptr                          generator;      ///< The process responsible for generating this object
-        build_system::storage_format             mime_type;      ///< The used storage format
-        std::string                              location;       ///< The location of the object
-        tipi::configuration::parameter_identifier identifier;     ///< The identifier of the associated output object in a configuration
-        boost::md5::digest_type                  checksum;       ///< The digest for the completed object
-        std::time_t                              timestamp;      ///< The last time the file was modified just before the last checksum was computed
-        t_status                                 status;         ///< The status of this object
-
-        /** \brief Construction with a mime type */
-        object_descriptor(tipi::mime_type const&);
-
-        /** \brief Whether or not the generator points to an existing object */
-        bool generator_exists();
-
-        /** \brief Verifies whether or not the object is up to date */
-        bool is_up_to_date();
-
-        /** \brief Verifies whether or not the object is present in the store and updates status accordingly */
-        bool present_in_store(project_manager const&);
-
-        /** \brief Verifies whether or not the object is physically available and not changed */
-        bool self_check(project_manager const&, long int const& = 0);
-
-        /** \brief Synchronises timestamp and checksum with files on disk */
-        void synchronise(project_manager const&);
-      };
-
       class monitor;
 
+      /** \brief Type to hold information about output objects */
+      class object_descriptor {
+        friend class processor_impl;
+        friend class monitor;
+
+        public:
+
+          /** \brief Type that is used to keep the status of the output of a processor */
+          enum status_type {
+            original,                 /* unique not reproducible */
+            reproducible_nonexistent, /* can be reproduced but does not exist */
+            reproducible_out_of_date, /* can be reproduced, exists and is out of date */
+            reproducible_up_to_date,  /* can be reproduced, exists, and is up to date */
+            generation_in_progress    /* outputs are being generated */
+          };
+
+        protected:
+
+          status_type status; ///< The status of this object
+
+        public:
+
+          /** \brief Returns the storage format as MIME type */
+          virtual status_type get_status() const;
+
+          /** \brief Returns the storage format as MIME type */
+          virtual tipi::mime_type get_format() const = 0;
+
+          /** \brief Returns the location as URI */
+          virtual tipi::uri get_location() const = 0;
+
+          /** \brief Returns the processor that generated this object */
+          virtual boost::shared_ptr< processor > get_generator() const = 0;
+
+          /** \brief Verifies and reports whether or not the object is up to date */
+          bool is_up_to_date();
+
+          /** \brief Checks and updates status */
+          virtual bool self_check(project_manager const&) = 0;
+
+          /** \brief Destructor */
+          virtual ~object_descriptor();
+      };
+
+      /** \brief Type that is used to associate a configuration object identifier to an object descriptor */
+      struct configurated_object_descriptor {
+        tipi::configuration::parameter_identifier identifier; ///< The identifier of the associated output object in a configuration
+        boost::shared_ptr < object_descriptor >   object;
+
+        inline configurated_object_descriptor() {
+        }
+      };
+
       /** \brief Convenience type for hiding the implementation of a list with input information */
-      typedef std::vector < object_descriptor::sptr >                       input_list;
+      typedef std::vector < configurated_object_descriptor >                                      input_list;
 
       /** \brief Convenience type for hiding the implementation of a list with output information */
-      typedef std::vector < object_descriptor::sptr >                       output_list;
+      typedef std::vector < configurated_object_descriptor >                                      output_list;
 
-      /** \brief Type for iterating the input objects */
-      typedef constant_indirect_iterator < input_list, object_descriptor >  input_object_iterator;
+      /** \brief Type of a functor to project {input,output}list elements to object_descriptors  */
+      typedef boost::function<
+                boost::shared_ptr < object_descriptor > (configurated_object_descriptor const&) > projection_functor_type;
 
-      /** \brief Type for iterating the output objects */
-      typedef constant_indirect_iterator < output_list, object_descriptor > output_object_iterator;
+      /** \brief Type for iterating the input object descriptors */
+      typedef boost::transform_iterator < projection_functor_type, input_list::const_iterator >   input_object_iterator;
 
-      /** \brief Helper type for read() members */
-      typedef std::map < unsigned long, object_descriptor::sptr >           id_conversion_map;
+      /** \brief Type for iterating the output object descriptors */
+      typedef boost::transform_iterator < projection_functor_type, output_list::const_iterator >  output_object_iterator;
 
     private:
 
@@ -138,10 +138,11 @@ namespace squadt {
     public:
 
       /** \brief Factory method for creating instances of this object */
-      static processor::sptr create(boost::weak_ptr < project_manager > const&);
+      static boost::shared_ptr < processor > create(boost::weak_ptr < project_manager > const&);
  
       /** \brief Factory method for creating instances of this object */
-      static processor::sptr create(boost::weak_ptr < project_manager > const&, tool::sptr);
+      static boost::shared_ptr < processor > create(boost::weak_ptr < project_manager > const&,
+                        boost::shared_ptr < const tool >, boost::shared_ptr < const tool::input_configuration >);
  
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
@@ -153,7 +154,7 @@ namespace squadt {
       bool demote_status();
 
       /** \brief Start tool configuration */
-      void configure(const tool::input_configuration*, const boost::filesystem::path&, std::string const& = "");
+      void configure(boost::shared_ptr< const tool::input_configuration >, const boost::filesystem::path&, std::string const& = "");
  
       /** \brief Start tool configuration */
       void configure(std::string const& = "");
@@ -174,19 +175,19 @@ namespace squadt {
       void update(boost::function < void () > h, bool b = false);
 
       /** \brief Get the object for the tool associated with this processor */
-      void set_tool(tool::sptr const&);
+      void set_tool(boost::shared_ptr < tool > const&);
 
       /** \brief Get the object for the tool associated with this processor */
-      const tool::sptr get_tool();
+      boost::shared_ptr < const tool > get_tool() const;
 
       /** \brief Get the input combination if one is already selected */
-      void set_input_configuration(tool::input_configuration*);
+      void set_input_configuration(boost::shared_ptr< const tool::input_configuration >);
 
       /** \brief Whether or not an input combination has been set */
       bool has_input_configuration();
 
       /** \brief Get the input combination if one is already selected */
-      tool::input_configuration const* get_input_configuration() const;
+      boost::shared_ptr < const tool::input_configuration > get_input_configuration() const;
 
       /** \brief Get the object for the tool associated with this processor */
       boost::shared_ptr < monitor > get_monitor();
@@ -195,39 +196,38 @@ namespace squadt {
       bool is_active() const;
 
       /** \brief Get input objects */
-      input_object_iterator get_input_iterator() const;
+      boost::iterator_range < input_object_iterator > get_input_iterators() const;
  
       /** \brief Get output objects */
-      output_object_iterator get_output_iterator() const;
+      boost::iterator_range < output_object_iterator > get_output_iterators() const;
  
       /** \brief Add an input object */
-      void append_input(object_descriptor::sptr const&);
+      void append_input(tipi::configuration::parameter_identifier const&,
+                        boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_input(parameter_identifier const&) const;
- 
-      /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_input(object_descriptor*) const;
+      const boost::shared_ptr < object_descriptor > find_input(
+                        tipi::configuration::parameter_identifier const&) const;
  
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
-      const object_descriptor::sptr find_output(parameter_identifier const&) const;
- 
-      /** \brief Find an object descriptor for a given pointer to an object */
-      const object_descriptor::sptr find_output(object_descriptor*) const;
+      const boost::shared_ptr < object_descriptor > find_output(
+                        tipi::configuration::parameter_identifier const&) const;
  
       /** \brief Find an object descriptor for a given name and rename if it exists */
-      void rename_output(std::string const&, std::string const&);
+      void relocate_output(object_descriptor&, std::string const&);
  
       /** \brief Find an object descriptor for a given name and rename if it exists */
-      void rename_input(std::string const&, std::string const&);
+      void relocate_input(object_descriptor&, std::string const&);
  
       /** \brief Add an output object */
-      void append_output(const build_system::storage_format&, parameter_identifier const&, const std::string&,
-                object_descriptor::t_status const& = object_descriptor::reproducible_nonexistent);
+      void append_output(tipi::configuration::parameter_identifier const&,
+                const build_system::storage_format&, const std::string&,
+                object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
  
       /** \brief Add an output object */
-      void replace_output(object_descriptor::sptr, tipi::object const&,
-                object_descriptor::t_status const& = object_descriptor::reproducible_up_to_date);
+      void replace_output(tipi::configuration::parameter_identifier const&,
+                boost::shared_ptr < object_descriptor >, tipi::object const&,
+                object_descriptor::status_type const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief The number of input objects of this processor */
       const size_t number_of_inputs() const;
@@ -242,7 +242,7 @@ namespace squadt {
       void shutdown();
   };
 
-  std::istream& operator >> (std::istream&, processor::object_descriptor::t_status&);
+  std::istream& operator >> (std::istream&, processor::object_descriptor::status_type&);
 
   /**
    * \brief Basic monitor for task progress
@@ -259,16 +259,13 @@ namespace squadt {
       typedef boost::function < void () >                                                     status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (tipi::layout::tool_display::sptr) >                     display_layout_callback_function;
+      typedef boost::function < void (boost::shared_ptr < tipi::layout::tool_display >) >     display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
       typedef boost::function < void (tipi::layout::tool_display::constant_elements const&) > display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (tipi::report::sptr) >                                   status_message_callback_function;
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < monitor >                                                  sptr;
+      typedef boost::function < void (boost::shared_ptr < tipi::report >) >                   status_message_callback_function;
 
     public:
 
@@ -289,16 +286,16 @@ namespace squadt {
       void signal_change(boost::shared_ptr < execution::process >, const execution::process::status);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
-      void start_tool_configuration(processor::sptr const&, boost::shared_ptr < tipi::configuration > const& c);
+      void start_tool_configuration(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const& c);
 
       /** \brief Helper function for communication with a tool, starts a new thread with tool_operation() */
-      void start_tool_operation(processor::sptr const&, boost::shared_ptr < tipi::configuration > const&);
+      void start_tool_operation(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool configuration operation */
-      void tool_configuration(processor::sptr, boost::shared_ptr < tipi::configuration >);
+      void tool_configuration(boost::shared_ptr < processor >, boost::shared_ptr < tipi::configuration >);
 
       /** \brief Actual tool execution with a configuration */
-      void tool_operation(processor::sptr, boost::shared_ptr < tipi::configuration > const&);
+      void tool_operation(boost::shared_ptr < processor >, boost::shared_ptr < tipi::configuration > const&);
 
     public:
  

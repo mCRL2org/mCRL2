@@ -55,22 +55,19 @@ namespace squadt {
     public:
 
       /** \brief Tool category type */
-      typedef tipi::tool::category                                           tool_category;
-
-      /** \brief Alias for convenient reference of shared pointer implementation */
-      typedef boost::shared_ptr < type_registry >                           sptr;
+      typedef tipi::tool::category                                                tool_category;
 
       /** \brief Maps a tool category to a number of tool objects that can accept input in that */
-      typedef std::multimap < tool_category, boost::shared_ptr < tool > >   tools_for_category;
+      typedef std::multimap < tool_category, boost::shared_ptr < const tool > >   tools_for_category;
 
       /** \brief Maps a storage format to a number of tool categories */
-      typedef std::map < build_system::mime_type, tools_for_category >      categories_for_mime_type;
+      typedef std::map < build_system::mime_type, tools_for_category >            categories_for_mime_type;
 
       /** \brief Iterator range type on tools_for_category */
-      typedef boost::iterator_range < tools_for_category::const_iterator >  tool_sequence;
+      typedef boost::iterator_range < tools_for_category::const_iterator >        tool_sequence;
 
       /** \brief Map that associates commands to mime-types */
-      typedef std::map < mime_type, std::string >                           actions_for_type;
+      typedef std::map < mime_type, std::string >                                 actions_for_type;
 
     public:
 

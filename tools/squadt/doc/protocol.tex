@@ -79,137 +79,123 @@
 
   The remainder of this text is structured as follows. First the important
   concepts are introduced, to give the reader an overview of things involved.
-  Next an abstract overview is given on the structure of communication: what
-  messages are, what types of messages are used in the protocol, the meaning of
-  those message and how the messages may interact. All of this is followed by a
-  section that discusses implementation aspects such as the design choices that
-  were made, along with motivation and an elaborate description of what
-  messages look like in detail.
+  Next a high level overview of the protocol is presented. It specifies the
+  structure of communication: what is communicated and in what way. This is
+  followed by a more detailed description of the protocol consisting of design
+  choices along with motivation and concrete syntax and semantics of messages
+  by means of examples.
+
+% IDE comparison
+% note control aspect: user asserts control over a tool by means of the system
 
  \pagebreak
 
  \section{Concepts}
 
+   This document describes the design of a communication protocol that will be
+   used by a system that targets integration of software tools. There are lots
+   of examples of software tools that all have different functionality. Not
+   every tool can be used in combination with every other tool. For any kind of
+   integration some form of communication between tools is required. The system
+   has the task to enable and direct the communication between tools.  This
+   section functions as introduction to the important concepts on top of which
+   the protocol is designed.
+
   \subsection{System}
 
-   The system is a software application for interactive software tool
-   integration. A concrete example of such a system would be deskSQuADT, but in
-   the remainder of this document we will talk about system, or controller when
-   viewing the system as a communication partner of a tool.
+   The system is an anonymous software application for interactive software tool
+   integration. A key concept is that the system is an intermediary between the
+   user and a set of tools that can be controlled. A concrete example of such a
+   system is the deskSQuADT application.
 
-%   The protocol described in this document describes how the system and a
-%   software tool communicate.
+   As main task the system is responsible for running tools and directing
+   communication between tools. Other tasks are:
    
-%   It is likely that the protocol will be extended in the future as more
-%   functionality becomes available in the system.
-   
+    \begin{itemize}
+     \item help guide users to find tools that offer the desired functionality
+     \item and automate frequently (re)occurring tasks that involve running one or more tools
+     \item provide a uniform manner for users to interact with tools
+    \end{itemize}
+
+   There are some more but the ones mentioned directly affect the design of the
+   communication protocol.
+
   \subsection{Tool}
 
-   A tool is a software program that can be executed multiple times
-   concurrently on the same or a different machine.  A tool offers services to
-   its environment, controlled by the user by means of the system. It is
-   assumed that the end-user has particular goals in mind that require the use
-   of functionality provided by a combination of tools controlled by the
-   system. The system will assist the user by finding and using the right tool
-   at intermediate steps toward achieving the final goal.
-
-   Applying a tool is assumed to consists of reading input and produce some
-   result, the output.  This result may or may not be a stepping stone for
-   applying another tool on that result (or part thereof).  For example one
-   tool generates a 3D model of a tree at random and another tool can be used
-   to view and manipulate this model. The result is not required to be
-   concrete. For example a visualisation tool might to give a user insight
-   through different views on the input, but has otherwise probably no concrete
-   result that another tool can process as input.
+   A (software) tool is a program that processes input to produce output. The
+   input can be anything for example a file in the local filesystem or a
+   potentially unbounded stream of data across a network. The output can be
+   anything that can be input as well as output on a display or another human
+   interface device. An example of the last kind is a program that creates an
+   interactive visualisation of the input.
    
-   We assume that the only direct communication between tools is
-   uni-directional trough persistent storage (think of files in a filesystem).
-   In particular no tools should not mutually depend on each others existence.
-   If such a dependency does exist among tools then this dependency can be
-   eliminated by treating their combination as a single tool.
+   Modern operating systems allow programs to be executed as processes either
+   concurrently or in a time-sharing fashion. The consequence of is that a tool
+   can be running multiple times at the same moment on the same machine. Notice
+   that a tool's input and output function as communication channels between
+   processes. % where to put unidirectional requirement?
 
-   So a tool can be any computer program. It can be tools with a command line
-   interface or more complex programs with graphical user interfaces.  There
-   can be large differences between the required degree of user interactivity
-   for different tools.
+   Any tool (in the ordinary sense) is always used with a particular purpose in
+   mind. Whether the use actually satisfies the purpose depends on the
+   capabilities of that tool. A software tool is no exception, it offers a
+   limited set of functionality each of which specifies how input will be
+   related to output.  The choice on how to use a software tool is the choice
+   between available relations between input and output.  The process of making
+   a choice is called configuration and that of actually using the tool in the
+   selected fashion corresponds to performing a task.
 
-  \subsection{Task Configuration}
+  \subsection{Task \& Task Configuration} \label{concepts::task_configuration}
 
-   Tools may have different services to offer, but an end-user may only be
-   interested in a very specific service, namely the one that helps completing
-   the task at hand. Configuration is the name of the process of bringing a
-   tool into a state from where it can be started to perform a certain task
-   pertaining to some of the functionality offered by the tool. A \textit{task}
-   is an indivisible amount of work with some result, that can be performed by
-   a single tool.  A tool is not required to complete a task autonomously after
-   it is started.
-   
-   A (task) \textit{configuration} is a formal specification that uniquely
-   defines a task up to user-interaction. A tool must be able to use a valid
-   configuration to bring itself in a configured state from which it will
-   always perform that same task. Configurations are bound to a tool, sometimes
-   even specific versions of it. A configuration for one tool may not be a
-   valid configuration for another. Or a configuration for version 1.0 may not
-   be valid for version 1.1; this is up to the developer of the tool.
-   
-   For some tools user user-interaction is inherently a part of the task and in
-   a way can be viewed as part of the configuration process. Our purpose for
-   defining a task and a configuration as means of uniquely defining a task is
-   to have a manner to (semi)automatically recreate this task by circumventing
-   all or part of the user-interaction. Control about exactly what user
-   interaction is required and what not is in the hands of the tool developer.
+   A \textit{task} is an indivisible amount of work with some result, that can
+   be performed by a single tool. The work consists of processing input and
+   producing output according to functionality specified by a task \textit{
+   configuration}.  A (task) \textit{configuration} is a specification that
+   uniquely defines a task up to user-interaction. Naturally a task
+   specification for a tool $t$ is restricted to the set of functionality
+   offered by $t$.
 
-   We assume that the system does not have to interpret a configuration except
-   to find out what input is needed for the task and what output is produced by
-   the task. Apart from input/output the semantics of the configuration are
-   determined by the tool. The conceived use of a configuration is as follows.
-   On request a tool in any configured state $s$, must specify its
-   configuration $c$.  At a later time the tool may be requested to recreate
-   the configured state from $c$. The resulting configured state must of course
-   be $s$.
+   % creation and manipulation (tool and system)
+   A task configuration is both created and modified by the tool itself. Both
+   input and output of the tool are part of the task configuration. Other than
+   that the configuration specifies the relation between input and output.  In
+   the case of concrete inputs or outputs that can serve as input, such as
+   files the system can change the configuration by renaming files. The system
+   must have this capability to be able to perform its main task.
+ 
+   % note on failure
+   Since tools are programs, and programs can fail, task execution may fail.
+   Nothing can be concluded about a task that failed. If output exists it must
+   be assumed corrupted. If tool input and output are always disjoint (i.e. a
+   task cannot change input), then it is as if the task was not started at all.
 
-%   The information that the tool requires to bring itself into a
-%   configured state must be captured somehow and cast into a form that allows
-%   it can be stored. This allows the same configured state to be recreated at a
-%   later time.
+   % note on user interaction
+   Some tools require interaction with the user. In such a case a task cannot
+   be unambiguously specified. The task configuration only specifies a starting
+   point from where to start further configuration. The actions of the user can
+   completely change the configuration in any way.
 
-%   The process of configuration is to bring the tool in a state where it will
-%   perform the desired task. A formalism is needed to capture this state such
-%   that it can be reproduced later. For our purposes a \textit{configuration}
-%   is a concrete specification that can be used to bring a tool into a state
-%   where it will perform the desired task.
+  \subsection{Interaction Display}
 
-  \subsection{Tool Display}
+   Obtaining a task configuration for a tool is a process that often requires
+   user interaction. The system has no knowledge about any particular tool
+   other than what may be communicated by means of the protocol. So obviously
+   the tool is better equipped to direct the interaction with the user than the
+   system is. For communicating with the user the system provides a number of
+   facilities. Currently the only available facility is an \textit{interaction
+   display} which is a per-tool interactive user interface.
 
-   All communication between the user and a system is assumed to take place via
-   the inputs to the tool and any facilities that the system will provide for
-   such communication. The \textit{tool display} is a system facility that
-   offers an interactive display to users of the system of which the content is
-   controlled by a single tool. As long as a tool is running a tool display is
-   associated with it.
+   % added value
+   The interaction display can be used for other purposes than configuration.
+   The tool controls the contents of the display as long as it runs. One
+   example of its use may be showing progress during task execution.
 
-   Tools are not required to use the tool display at all. It is an optional
-   facility that is available for when user interaction is needed. Recall that
-   the purpose of the system is to integrate functionality provided by tools.
-   From this perspective bypassing the tool display cannot be recommended as it
-   sacrifices the uniformity of communication between a user and a tool.
-   Nevertheless in some cases it may be a necessity because the tool display
-   does not offer the desired functionality.
-
-   Side note: the availability of a facility like the tool display in a
-   protocol to control tools seems questionable. This functionality does not
-   seem to fit the purpose. The control aspect does not refer to total control
-   of a tool in the sense that user-interaction is cut out. In fact it is not
-   the system that asserts the control over a tool, but rather the user does by
-   means of the system.
-
-%   The full extend to which the display can be manipulated will not be
-%   described in this document. The original idea was that the protocol
-%   provides the means for putting user interface controls on the display and
-%   to support interaction with these controls. This however, requires the
-%   protocol description to be updated every time as. It is up to the system to
-%   provide a number of these interface controls that a tool requires for
-%   operation.
+   % added value
+   The interaction display is a facility of which the use is optional. A tool
+   can very well provide its own graphical user interface for the purpose of
+   obtaining a suitable task configuration. The added value of using this
+   facility is that it the improves interface uniformity across tools and that
+   it also works without effort for tools that run on a different machine and
+   communicate across a network.
 
  \section{Protocol (high level)} \label{s:message_definitions}
 

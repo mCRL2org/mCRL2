@@ -242,11 +242,6 @@ namespace utility {
 
     if (p.tool_descriptor.get() != 0) {
       out << " tool-name=\"" << p.tool_descriptor->get_name() << "\"";
-
-      if (p.selected_input_configuration != 0) {
-        out << " format=\"" << p.selected_input_configuration->m_mime_type << "\"";
-        out << " category=\"" << p.selected_input_configuration->m_category << "\"";
-      }
     }
 
     if (!p.output_directory.empty()) {
@@ -254,6 +249,10 @@ namespace utility {
     }
     else {
       out << ">";
+    }
+
+    if (p.selected_input_configuration != 0) {
+      tipi::visitors::store(*p.selected_input_configuration, out);
     }
 
     /* The last received configuration from the tool */
@@ -265,22 +264,25 @@ namespace utility {
 
     /* The inputs */
     for (processor::input_list::const_iterator i = p.inputs.begin(); i != p.inputs.end(); ++i) {
-      out << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get()) << "\"/>\n";
+      out << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > (i->object.get()) << "\"/>\n";
+      out << "\" identifier=\"" << std::dec << i->identifier << "\"/>\n";
     }
 
     /* The outputs */
     for (processor::output_list::const_iterator i = p.outputs.begin(); i != p.outputs.end(); ++i) {
-      out << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
-        << "\" format=\"" << (*i)->mime_type
-        << "\" location=\"" << (*i)->location;
+      processor_impl::object_descriptor& object(*boost::static_pointer_cast< processor_impl::object_descriptor >(i->object));
 
-      if ((*i)->status != processor::object_descriptor::original) {
-        out << "\" identifier=\"" << std::dec << (*i)->identifier;
+      out << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > (&object)
+        << "\" format=\"" << object.get_format()
+        << "\" location=\"" << object.get_location();
+
+      if (object.get_status() != processor::object_descriptor::original) {
+        out << "\" identifier=\"" << std::dec << i->identifier;
       }
 
-      out << "\" status=\"" << (*i)->status
-          << "\" digest=\"" << (*i)->checksum
-          << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
+      out << "\" status=\"" << object.get_status()
+          << "\" digest=\"" << object.get_checksum()
+          << "\" timestamp=\"" << std::dec << object.get_timestamp() << "\"/>\n";
     }
 
     out << "</processor>\n";

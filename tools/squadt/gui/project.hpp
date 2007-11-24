@@ -121,20 +121,17 @@ namespace squadt {
         /** \brief Handler for the event that objects are being dragged by the user */
         void on_object_drag(wxTreeEvent& e);
 
-        /** \brief Handler for the event that an item has been edited by the user */
-        void on_object_temporary_name_edited(wxTreeEvent& e);
-
         /** \brief Creates a context menu for the selected processor */
         void spawn_context_menu(tool_data&);
 
         /** \brief Add new processor outputs to the object view */
-        void process_configuration(wxTreeItemId, processor::sptr);
+        void update_after_configuration(wxTreeItemId, boost::shared_ptr< processor >, bool);
 
         /** \brief Adds the outputs produced by a processor as objects to the object view */
-        bool add_outputs_as_objects(wxTreeItemId, processor::sptr);
+        bool add_outputs_as_objects(wxTreeItemId, boost::shared_ptr< processor >);
 
         /** \brief Adds a single object to the object view */
-        void add_to_object_view(wxTreeItemId& s, processor::object_descriptor::sptr);
+        void add_to_object_view(wxTreeItemId& s, boost::shared_ptr< processor::object_descriptor >);
 
         /** \brief Add a new tool display to the process_display_view */
         GUI::tool_display* install_tool_display(boost::shared_ptr < processor::monitor >, std::string const&);
@@ -143,16 +140,16 @@ namespace squadt {
         void prepare_tool_display(processor* p);
 
         /** \brief Resolves conflicts, through user interaction, between processors that generate same output objects with the same name */
-        void resolve_conflict(wxTreeItemId s, processor::object_descriptor::sptr e, processor::object_descriptor::sptr n);
+        void resolve_conflict(wxTreeItemId s, boost::shared_ptr< processor::object_descriptor > e, boost::shared_ptr< processor::object_descriptor > n);
 
         /** \brief Reports a conflict by presenting a non-interactive dialog window with details */
         void report_conflict(wxString const& s);
 
         /** \brief Updates the status of files in the object view */
-        void set_object_status(processor::wptr const&, const wxTreeItemId);
+        void set_object_status(boost::weak_ptr< processor > const&, const wxTreeItemId);
 
         /** \brief Updates the status of files in the object view */
-        void update_object_status(processor::wptr const&, const wxTreeItemId);
+        void update_object_status(boost::weak_ptr< processor > const&, const wxTreeItemId);
 
       public:
 

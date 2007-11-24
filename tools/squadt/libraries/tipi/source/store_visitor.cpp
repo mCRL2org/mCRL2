@@ -363,20 +363,37 @@ namespace utility {
    **/
   template <>
   template <>
+  void visitor< tipi::store_visitor_impl >::visit(tipi::tool::capabilities::input_configuration const& c) {
+    using tipi::tool::capabilities;
+
+    out << "<input-configuration category=\"" << c.get_category() << "\" identifier=\"" << c.m_primary_identifier << "\">";
+
+    for (capabilities::input_configuration::object_map::const_iterator j = c.m_object_map.begin(); j != c.m_object_map.end(); ++j) {
+      out << "<object id=\"" << j->first << "\" format=\"" << j->second << "\"/>";
+    }
+
+    out << "</input-configuration>";
+  }
+
+  /**
+   * \param[in] c the tipi::tool::capabilities object to store
+   **/
+  template <>
+  template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::tool::capabilities const& c) {
+    using tipi::tool::capabilities;
+
     out << "<capabilities>"
         << "<protocol-version major=\"" << (unsigned short) c.m_protocol_version.major
         << "\" minor=\"" << (unsigned short) c.m_protocol_version.minor << "\"/>";
 
-    for (tipi::tool::capabilities::input_configuration_list::const_iterator i = c.m_input_configurations.begin(); i != c.m_input_configurations.end(); ++i) {
-      out << "<input-configuration category=\"" << (*i).m_category
-          << "\" format=\"" << (*i).m_mime_type
-          << "\" id=\"" << (*i).m_identifier << "\"/>";
+    for (capabilities::input_configuration_list::const_iterator i = c.m_input_configurations.begin(); i != c.m_input_configurations.end(); ++i) {
+      visit(*(*i));
     }
 
-    for (tipi::tool::capabilities::output_combination_list::const_iterator i = c.m_output_combinations.begin(); i != c.m_output_combinations.end(); ++i) {
-      out << "<output-configuration format=\"" << (*i).m_mime_type
-          << "\" id=\"" << (*i).m_identifier << "\"/>";
+    for (capabilities::output_configuration_list::const_iterator i = c.m_output_configurations.begin(); i != c.m_output_configurations.end(); ++i) {
+      out << "<output-configuration format=\"" << (*i)->get_format()
+          << "\" id=\"" << (*i)->m_identifier << "\"/>";
     }
  
     out << "</capabilities>";
@@ -652,6 +669,7 @@ namespace utility {
     register_visit_method< const tipi::configuration >();
     register_visit_method< const tipi::controller::capabilities >();
     register_visit_method< const tipi::tool::capabilities >();
+    register_visit_method< const tipi::tool::capabilities::input_configuration >();
     register_visit_method< const tipi::report >();
     register_visit_method< const tipi::layout::tool_display >();
     register_visit_method< const tipi::layout::elements::button, const ::tipi::display::element_identifier >();

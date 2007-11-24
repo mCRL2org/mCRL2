@@ -38,27 +38,36 @@ namespace squadt {
    * \attention Not thread safe
    **/
   void type_registry::build_index() {
+    using tipi::tool::capabilities;
+
     tool_manager::tool_const_sequence tools = global_build_system.get_tool_manager()->get_tools();
 
     /* Make sure the map is empty */
     categories_for_format.clear();
 
     for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
+      capabilities::input_configuration_range inputs((*t)->get_capabilities()->get_input_configurations());
 
-      BOOST_FOREACH(tipi::tool::capabilities::input_configuration j, (*t)->get_capabilities()->get_input_configurations()) {
-        if (categories_for_format.find(j.m_mime_type) == categories_for_format.end()) {
-          /* Format unknown, create new map */
-          tools_for_category temporary;
+      BOOST_FOREACH(capabilities::input_configuration_range::value_type j, inputs) {
+        capabilities::input_configuration::object_sequence input_range(j->object_range());
 
-          categories_for_format.insert(std::make_pair(j.m_mime_type,temporary));
+        BOOST_FOREACH(capabilities::input_configuration::object_sequence::value_type input_descriptor, input_range) {
+          tipi::mime_type& format(input_descriptor.second);
 
-          /* Make sure the type is registered */
-          if (!has_registered_command(j.m_mime_type,true)) {
-            register_command(j.m_mime_type, command_none);
+          if (categories_for_format.find(format) == categories_for_format.end()) {
+            /* Format unknown, create new map */
+            tools_for_category temporary;
+
+            categories_for_format.insert(std::make_pair(format, temporary));
+
+            /* Make sure the type is registered */
+            if (!has_registered_command(format, true)) {
+              register_command(format, command_none);
+            }
           }
-        }
 
-        categories_for_format[j.m_mime_type].insert(std::make_pair(j.m_category, *t));
+          categories_for_format[format].insert(std::make_pair(j->get_category(), *t));
+        }
       }
     }
   }
@@ -134,6 +143,8 @@ namespace squadt {
   }
 
   std::set < build_system::storage_format > type_registry::get_mime_types() const {
+    using tipi::tool::capabilities;
+
     std::set < build_system::storage_format > formats;
 
     BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
@@ -146,9 +157,11 @@ namespace squadt {
       }
     }
 
-    BOOST_FOREACH(tool::sptr t, global_build_system.get_tool_manager()->get_tools()) {
-      BOOST_FOREACH(tipi::tool::capabilities::output_combination j, t->get_capabilities()->get_output_combinations()) {
-        formats.insert(j.m_mime_type);
+    BOOST_FOREACH(boost::shared_ptr< tool > t, global_build_system.get_tool_manager()->get_tools()) {
+      tipi::tool::capabilities::output_configuration_range outputs(t->get_capabilities()->get_output_configurations());
+
+      BOOST_FOREACH(tipi::tool::capabilities::output_configuration_range::value_type i, outputs) {
+        formats.insert(i->get_format());
       }
     }
 

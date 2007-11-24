@@ -46,51 +46,113 @@ namespace tipi {
       public:
   
         /** \brief Description for a tool's main input object */
-        class input_configuration {
+        class input_configuration : public ::utility::visitable {
+          template < typename R, typename S >
+          friend class ::utility::visitor;
+  
+          friend bool operator< (const input_configuration&, const input_configuration&);
+
+          private:
+
+            typedef std::map< tipi::configuration::parameter_identifier, tipi::mime_type > object_map;
  
           public:
+
+            typedef boost::iterator_range < object_map::const_iterator >                   object_sequence;
+
+          private:
  
-            tool::category const& m_category;   ///< tool category
-            mime_type const       m_mime_type;  ///< storage format
-            std::string           m_identifier; ///< identifier for the main input object
+            tipi::tool::category const&               m_category;           ///< tool category
+            object_map                                m_object_map;         ///< storage format
+            tipi::configuration::parameter_identifier m_primary_identifier; ///< identifier of primary input
+ 
+          private:
+
+            inline input_configuration(tool::category const& c) : m_category(c) {
+            }
  
           public:
  
             /** \brief Constructor */
-            input_configuration(tool::category const&, mime_type const&, std::string const&);
+            inline input_configuration(tool::category const& c,
+                        mime_type const& m, tipi::configuration::parameter_identifier const& id) : m_category(c), m_primary_identifier(id) {
+
+              m_object_map.insert(std::make_pair(id, m));
+            }
  
+            /** \brief Gets the category */
+            inline tipi::tool::category get_category() const {
+              return m_category;
+            }
+
+            /** \brief Gets the primary input object descriptor */
+            inline object_map::value_type get_primary_object_descriptor() const {
+              return *m_object_map.find(m_primary_identifier);
+            }
+
+            /** \brief Gets the sequence of objects descriptors */
+            inline boost::iterator_range < object_map::const_iterator > object_range() const {
+              return boost::make_iterator_range(m_object_map.begin(), m_object_map.end());
+            }
+
             /** \brief Compares two input combinations for equality */
-            static bool equal(const input_configuration&, const input_configuration&);
+            inline static bool equal(const input_configuration& p, const input_configuration& q) {
+              object_map::const_iterator i = p.m_object_map.begin();
+              object_map::const_iterator j = q.m_object_map.begin();
+
+              while (i != p.m_object_map.end() && j != q.m_object_map.end()) {
+                if (i->first != j->first || i->second.get_sub_type() != j->second.get_sub_type()) {
+                  return false;
+                }
+
+                ++i;
+                ++j;
+              }
+
+              return i == p.m_object_map.end() && j == q.m_object_map.end() && p.m_category == q.m_category;
+            }
         };
   
         /** \brief Description for a tool's output object */
-        class output_combination {
+        class output_configuration : public ::utility::visitable {
+          template < typename R, typename S >
+          friend class ::utility::visitor;
+  
+          friend bool operator< (const output_configuration&, const output_configuration&);
  
-          public:
+          private:
  
-            mime_type          m_mime_type;  ///< storage format
-            std::string        m_identifier; ///< identifier for the output object
+            mime_type                                 m_mime_type;  ///< storage format
+            tipi::configuration::parameter_identifier m_identifier; ///< identifier of primary input
  
           public:
  
             /** \brief Constructor */
-            output_combination(mime_type const&, std::string const&);
+            inline output_configuration(mime_type const& m, tipi::configuration::parameter_identifier id) : m_mime_type(m), m_identifier(id) {
+            }
+ 
+            /** \brief Gets the format */
+            inline tipi::mime_type get_format() const {
+              return m_mime_type;
+            }
  
             /** \brief Compares two input combinations for equality */
-            static bool equal(const output_combination&, const output_combination&);
+            inline static bool equal(const output_configuration& p, const output_configuration& q) {
+              return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type());
+            }
         };
   
         /** \brief Convenience type for a list of input configurations */
-        typedef std::set  < input_configuration >                                   input_configuration_list;
+        typedef std::set  < boost::shared_ptr < const input_configuration > >       input_configuration_list;
   
         /** \brief Convenience type for a list of input configurations */
-        typedef std::set  < output_combination >                                  output_combination_list;
+        typedef std::set  < boost::shared_ptr < const output_configuration > >      output_configuration_list;
   
         /** \brief Convenience type for use in interface */
         typedef boost::iterator_range < input_configuration_list::const_iterator >  input_configuration_range;
  
         /** \brief Convenience type for use in interface */
-        typedef boost::iterator_range < output_combination_list::const_iterator > output_combination_range;
+        typedef boost::iterator_range < output_configuration_list::const_iterator >   output_configuration_range;
  
       private:
   
@@ -98,10 +160,10 @@ namespace tipi {
         version                  m_protocol_version;
   
         /** \brief The available input configurations */
-        input_configuration_list   m_input_configurations;
+        input_configuration_list m_input_configurations;
  
         /** \brief The available input configurations */
-        output_combination_list  m_output_combinations;
+        output_configuration_list  m_output_configurations;
   
       public:
   
@@ -112,7 +174,7 @@ namespace tipi {
         void add_input_configuration(std::string const&, mime_type const&, tool::category const& = category::unknown);
   
         /** \brief Add an output configuration */
-        void add_output_combination(std::string const&, mime_type const&);
+        void add_output_configuration(std::string const&, mime_type const&);
   
         /** \brief Get the protocol version */
         version get_version() const;
@@ -121,36 +183,32 @@ namespace tipi {
         input_configuration_range get_input_configurations() const;
  
         /** \brief Returns a reference to the list of output combinations */
-        output_combination_range get_output_combinations() const;
+        output_configuration_range get_output_configurations() const;
  
         /** \brief Find a specific input combination of this tool, if it exists */
-        input_configuration const* find_input_configuration(const mime_type&, const tool::category&) const;
+        boost::shared_ptr< const input_configuration > find_input_configuration(const mime_type&, const tool::category&) const;
     };
   
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
-    inline bool operator < (const capabilities::input_configuration& a, const capabilities::input_configuration& b) {
-      return (a.m_mime_type < b.m_mime_type || ((a.m_mime_type == b.m_mime_type) && a.m_category < b.m_category));
+    inline bool operator< (const capabilities::input_configuration& p, const capabilities::input_configuration& q) {
+      capabilities::input_configuration::object_map::const_iterator i = p.m_object_map.begin();
+      capabilities::input_configuration::object_map::const_iterator j = q.m_object_map.begin();
+
+      while (i != p.m_object_map.end() && j != q.m_object_map.end()) {
+        if (i->first < j->first || i->second < j->second) {
+          return true;
+        }
+
+        ++i;
+        ++j;
+      }
+
+      return (i == p.m_object_map.end() && j != q.m_object_map.end()) && p.m_category < q.m_category;
     }
  
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
-    inline bool operator < (const capabilities::output_combination& a, const capabilities::output_combination& b) {
+    inline bool operator< (const capabilities::output_configuration& a, const capabilities::output_configuration& b) {
       return (a.m_mime_type < b.m_mime_type || a.m_mime_type == b.m_mime_type);
-    }
- 
-    inline capabilities::input_configuration::input_configuration(tool::category const& c,
-                        mime_type const& m, std::string const& id) : m_category(c), m_mime_type(m), m_identifier(id) {
-    }
- 
-    inline capabilities::output_combination::output_combination(mime_type const& f, std::string const& id) :
-                                                                                m_mime_type(f), m_identifier(id) {
-    }
- 
-    inline bool capabilities::input_configuration::equal(input_configuration const& p, input_configuration const& q) {
-      return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type() && p.m_category == q.m_category);
-    }
- 
-    inline bool capabilities::output_combination::equal(output_combination const& p, output_combination const& q) {
-      return (p.m_mime_type.get_sub_type() == q.m_mime_type.get_sub_type());
     }
   }
 }

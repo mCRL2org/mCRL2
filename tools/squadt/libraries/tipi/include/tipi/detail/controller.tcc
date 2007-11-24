@@ -76,7 +76,7 @@ namespace tipi {
      * \param[in] c the input combination on which to base the new configuration
      **/
     inline boost::shared_ptr < configuration > communicator_impl::new_configuration(tipi::tool::capabilities::input_configuration const& c) {
-      boost::shared_ptr < configuration > nc(new tipi::configuration(c.m_category));
+      boost::shared_ptr < configuration > nc(new tipi::configuration(c.get_category()));
 
       return (nc);
     }

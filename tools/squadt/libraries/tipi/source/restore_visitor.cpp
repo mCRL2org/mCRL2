@@ -370,6 +370,26 @@ namespace utility {
   }
 
   /**
+   * \param[in] c a tipi::tool::capabilities::input_configuration object to restore
+   * \param[in,out] cp a pointer that will contain the restored object
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool::capabilities::input_configuration& c, boost::shared_ptr < tipi::tool::capabilities::input_configuration >& cp) {
+    using tipi::tool::capabilities;
+
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration");
+
+    cp.reset(new capabilities::input_configuration(tipi::tool::category::fit(tree->GetAttribute("category"))));
+
+    cp->m_primary_identifier = tree->GetAttribute("identifier");
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      cp->m_object_map.insert(std::make_pair(e->GetAttribute("id"), e->GetAttribute("format")));
+    }
+  }
+
+  /**
    * \param[in] c a tipi::tool::capabilities object to restore
    **/
   template <>
@@ -378,6 +398,10 @@ namespace utility {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
 
     if (tree->Value() == "capabilities") {
+      using tipi::tool::capabilities;
+
+      static capabilities::input_configuration dummy(tipi::tool::category("unknown"));
+
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
      
         if (e->Value() == "protocol-version") {
@@ -385,15 +409,17 @@ namespace utility {
           c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
         }
         else if (e->Value() == "input-configuration") {
-          c.m_input_configurations.insert(
-              tipi::tool::capabilities::input_configuration(
-                  tipi::tool::category::fit(e->GetAttribute("category")),
-                  tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id")));
+          boost::shared_ptr< capabilities::input_configuration > input_configuration;
+
+          visitor< tipi::restore_visitor_impl >(e).visit(dummy, input_configuration);
+
+          c.m_input_configurations.insert(input_configuration);
         }
         else if (e->Value() == "output-configuration") {
-          c.m_output_combinations.insert(
-              tipi::tool::capabilities::output_combination(
-                      tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id")));
+          c.m_output_configurations.insert(
+             boost::shared_ptr< const capabilities::output_configuration >(
+               new capabilities::output_configuration(
+                  tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id"))));
         }
       }
     }
@@ -894,6 +920,8 @@ namespace utility {
     register_visit_method< tipi::configuration >();
     register_visit_method< tipi::controller::capabilities >();
     register_visit_method< tipi::tool::capabilities >();
+    register_visit_method< tipi::tool::capabilities::input_configuration,
+                boost::shared_ptr < tipi::tool::capabilities::input_configuration > >();
     register_visit_method< tipi::report >();
     register_visit_method< tipi::layout::tool_display >();
     register_visit_method< tipi::layout::tool_display, std::vector< tipi::layout::element const* > >();
