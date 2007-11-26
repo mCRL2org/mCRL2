@@ -23,7 +23,7 @@ alias data.main
          [ glob rewrite/*.cpp ]
          [ glob prover/*.cpp ]
        : <use>/libraries/lps//headers
-         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/core//headers
          <use>/libraries/utilities//headers
          <toolset>gcc:<use>/libraries//pstream
          <toolset>darwin:<use>/libraries//pstream
@@ -31,7 +31,7 @@ alias data.main
        : <threading>single
        : <use>headers
          <use>/libraries/lps//headers
-         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/core//headers
          <library>/site-config//cvc
          <os>LINUX:<library>/site-config//m   # for rewrite
          <os>CYGWIN:<library>/site-config//m  # for rewrite
@@ -42,7 +42,7 @@ lib data
        : data.main
        : <link>static
        :
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
          <use>/libraries/data//headers
        ;
 
@@ -50,7 +50,7 @@ alias data
        : /libraries//mcrl2
        : <link>shared
          <use>/libraries/lps//headers
-         <use>/libraries/mcrl2_basic//headers
+         <use>/libraries/core//headers
        ;
 
 alias data.alias
@@ -59,7 +59,7 @@ alias data.alias
 
 alias headers
        :
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
          <use>/libraries/lps//headers
        ;
 

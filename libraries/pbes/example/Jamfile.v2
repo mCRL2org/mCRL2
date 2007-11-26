@@ -2,7 +2,7 @@ project libraries/pbes/example
    : requirements
        <use>/boost//headers
        <source>/libraries//rewrite
-       <source>/libraries//mcrl2_basic
+       <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes
        <source>/site-config//boost_program_options

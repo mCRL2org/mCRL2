@@ -20,7 +20,7 @@ alias squadt_interface.main
       : squadt_interface.cpp
       : <threading>multi
         <use>/libraries/tipi//tool_interface
-        <use>/libraries/mcrl2_basic//headers
+        <use>/libraries/core//headers
         <define>ENABLE_SQUADT_CONNECTIVITY
       :
       : <library>/libraries/tipi//tool_interface
@@ -59,7 +59,7 @@ alias utilities.main
         manipulator.cpp     # Temporary?
         utilities.cpp       # Temporary?
       : <use>/libraries/aterm//headers
-        <use>/libraries/mcrl2_basic//headers
+        <use>/libraries/core//headers
         <use>/libraries/data//headers
       ;
 

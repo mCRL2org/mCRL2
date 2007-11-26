@@ -33,7 +33,7 @@ ltsview-fsmparser:
 	bison -p fsm -d -o fsmparser.cpp fsmparser.yy
 
 mcrl2parser:
-	cd libraries/mcrl2_basic/source; \
+	cd libraries/core/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
 	sed -i "" 's/#ifdef YYDEBUG/#if YYDEBUG/g' mcrl2parser.cpp; \
@@ -56,7 +56,7 @@ doxy:
 	@cd libraries/data/doc; doxygen
 	@cd libraries/lps/doc; doxygen
 	@cd libraries/lts/doc; doxygen
-	@cd libraries/mcrl2_basic/doc; doxygen
+	@cd libraries/core/doc; doxygen
 	@cd libraries/pbes/doc; doxygen
 	@cd libraries/trace/doc; doxygen
 	@cd libraries/utilities/doc; doxygen

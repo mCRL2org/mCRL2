@@ -5,7 +5,7 @@ project toolset/tbf2lps
 exe tbf2lps
        : tbf2lps.cpp
          lpstrans.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;

@@ -4,7 +4,7 @@ project toolset/tracepp
 
 exe tracepp
        : tracepp.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
          /libraries//trace
        : <include>.
          <toolset>msvc:<library>/libraries//getopt

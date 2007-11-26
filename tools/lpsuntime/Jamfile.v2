@@ -4,7 +4,7 @@ project lpsuntime
 
 exe lpsuntime
        : lpsuntime.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented

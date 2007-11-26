@@ -4,7 +4,7 @@ project toolset/pbesinfo
 
 exe pbesinfo
        : pbesinfo.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
          /libraries//lps
          /libraries//pbes
          /site-config//boost_program_options

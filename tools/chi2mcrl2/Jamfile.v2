@@ -8,7 +8,7 @@ exe chi2mcrl2
          chilexer.cpp
          translate.cpp
          /libraries//aterm
-         /libraries//mcrl2_basic
+         /libraries//core
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented

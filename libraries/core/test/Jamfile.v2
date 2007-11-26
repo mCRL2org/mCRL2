@@ -1,0 +1,12 @@
+project libraries/core/test
+   : source-location .
+   ;
+
+obj test_lib.o : test_lib.cpp : <use>/boost//headers <source>/libraries//core ;
+
+alias mcrl22lps-test-tool : $(TOP)/tools/mcrl22lps//mcrl22lps ;
+
+test-suite core
+    : [ run test_lib.o ]
+      [ run_tool_on_examples mcrl22lps-test-tool core lps : : . : mcrl2 ]
+    ;

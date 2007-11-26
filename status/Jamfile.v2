@@ -16,4 +16,4 @@ build-project ../3rd-party/svc/test ;         # test-suite svc
 build-project ../libraries/atermpp/test ;     # test-suite atermpp
 build-project ../libraries/lps/test ;         # test-suite lps
 build-project ../libraries/lts/test ;         # test-suite lts
-build-project ../libraries/mcrl2_basic/test ; # test-suite mcrl2 basic
+build-project ../libraries/core/test ;        # test-suite mcrl2 basic

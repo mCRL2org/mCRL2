@@ -395,7 +395,7 @@ def main():
 
     if options.libstruct:
         ignored_phases = []
-        filename = '../../mcrl2_basic/include/struct/libstruct_core.h'
+        filename = '../../core/include/struct/libstruct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
 
     if options.constructors:

@@ -18,7 +18,7 @@ alias lps.main
          source/sumelm.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
          <use>/libraries/data//headers
          <use>/libraries/pbes//headers
          <use>/libraries/lps//headers
@@ -27,11 +27,11 @@ alias lps.main
 
 lib lps
        : lps.main
-         /libraries//mcrl2_basic
+         /libraries//core
          /libraries//data
        : <link>static
        :
-       : <library>/libraries//mcrl2_basic
+       : <library>/libraries//core
          <library>/libraries//data
          <use>/libraries/lps//headers
        ;
@@ -45,7 +45,7 @@ alias lps.alias
        : lps.main
        :
        :
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
          <use>/libraries/data//headers
          <use>/libraries/lps//headers
        ;

@@ -203,7 +203,7 @@ namespace mcrl2 {
 #ifndef NO_MCRL2_TOOL_FACILITIES
       using ::mcrl2::utilities::messageType;
   
-      /** \internal \brief Used to relay messages generated using mcrl2_basic::print */
+      /** \internal \brief Used to relay messages generated using core::print */
       template < >
       inline void relay_message(const messageType t, const char* data) {
         tipi::report::type report_type;

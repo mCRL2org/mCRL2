@@ -68,7 +68,7 @@
 
 
 // only for debug
-//#include "mcrl2_basic/include/struct/libstruct_core.h"
+//#include "mcrl2/core/libstruct_core.h"
  
 //#include "pbes_simple.h"
 #include "pbesparser.cpp"

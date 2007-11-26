@@ -3,7 +3,7 @@ import testing ;
 project libraries/lps/test
    : requirements
        <use>/boost//headers
-       <source>/libraries//mcrl2_basic
+       <source>/libraries//core
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem

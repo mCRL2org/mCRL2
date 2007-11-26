@@ -4,7 +4,7 @@ project toolset/lpsrewr
 
 exe lpsrewr
        : lpsrewr.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;

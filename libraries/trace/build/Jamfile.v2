@@ -9,7 +9,7 @@ project libraries/trace
 
 alias trace.main
        : trace.cpp
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
          <use>/libraries/utilities//headers
        : <threading>single
        ;
@@ -18,7 +18,7 @@ lib trace
        : trace.main
        : <link>static
        :
-       : <library>/libraries//mcrl2_basic
+       : <library>/libraries//core
        ;
 
 alias trace
@@ -30,12 +30,12 @@ alias trace.alias
        : trace.main
        :
        :
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
        ;
 
 alias headers 
        :
-       : <use>/libraries/mcrl2_basic//headers
+       : <use>/libraries/core//headers
        ;
 
 explicit trace.main trace.alias ;

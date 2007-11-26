@@ -1,4 +1,4 @@
-project mcrl2_basic
+project core
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
@@ -22,7 +22,7 @@ local PARSER_SOURCES = mcrl2parser.o mcrl2lexer.cpp parse.cpp typecheck.cpp regf
 
 local PRINT_SOURCES = print print_c messaging ;
 
-alias mcrl2_basic.main
+alias core.main
        : $(PRINT_SOURCES).cpp
          $(STRUCT_SOURCES).cpp
          $(PARSER_SOURCES)
@@ -35,8 +35,8 @@ alias mcrl2_basic.main
          <os>CYGWIN:<library>/site-config//m
        ;
 
-lib mcrl2_basic
-       : mcrl2_basic.main
+lib core
+       : core.main
        : <link>static
          <use>/libraries/data//headers
        :
@@ -46,14 +46,14 @@ lib mcrl2_basic
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;
 
-alias mcrl2_basic
+alias core
        : /libraries//mcrl2
        : <link>shared
          <use>/libraries/data//headers
        ;
 
-alias mcrl2_basic.alias
-       : mcrl2_basic.main
+alias core.alias
+       : core.main
        :
        :
        : <use>/libraries/aterm//headers
@@ -66,4 +66,4 @@ alias headers
        : <use>/libraries/aterm//headers
        ;
 
-explicit mcrl2_basic.main mcrl2_basic.alias ;
+explicit core.main core.alias ;

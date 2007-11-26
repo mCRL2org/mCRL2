@@ -28,7 +28,7 @@ exe ltsview
         visualizer.cpp
         /libraries/utilities//colorbutton
         /libraries//trace
-        /libraries//mcrl2_basic
+        /libraries//core
         /site-config//boost_signals
         /site-config//wx_gl
       : <squadt-connectivity>implemented
