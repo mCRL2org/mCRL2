@@ -13,8 +13,9 @@
 
 #include "mcrl2/formula_checker.h"
 #include "getopt.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <string>
@@ -321,19 +322,23 @@ using namespace ::mcrl2::utilities;
     /// formulas in the list are tautologies or contradictions using the data equations of the LPS.
 
     void LPS_Form_Check::check_formulas() {
+      gsEnableConstructorFunctions();
+
       ATermList v_formulas = (ATermList) read_ATerm_from_file(f_formulas_file_name, "formulas");
       ATermAppl v_lps = (ATermAppl) read_ATerm_from_file(f_lps_file_name, "LPS");
 
-      gsEnableConstructorFunctions();
-      if ((ATgetType(v_lps) != AT_APPL) || !gsIsSpecV1(v_lps)) {
-        gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_lps_file_name);
-        exit(1);
-      } else {
+      lps::specification lps_specification(v_lps);
+
+      if (lps_specification.is_well_typed()) {
         Formula_Checker v_formula_checker(
           ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name
         );
 
         v_formula_checker.check_formulas(v_formulas);
+      }
+      else {
+        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", f_lps_file_name);
+        exit(1);
       }
     }
 

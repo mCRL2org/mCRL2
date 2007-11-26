@@ -114,7 +114,7 @@ using namespace std;
 
   // ----------------------------------------------------------------------------------------------
 
-  ATerm read_ATerm_from_file(char* a_file_name, char* a_feedback_string) {
+  ATerm read_ATerm_from_file(char const* a_file_name, char const* a_feedback_string) {
     FILE* v_stream;
     ATerm v_result;
 
@@ -147,7 +147,7 @@ using namespace std;
 
   // ----------------------------------------------------------------------------------------------
 
-  void write_ATerm_to_file(char* a_file_name, ATermAppl a_term, char* a_feedback_string) {
+  void write_ATerm_to_file(char const* a_file_name, ATermAppl a_term, char const* a_feedback_string) {
     if (a_file_name == 0) {
       gsVerboseMsg("Writing the %s to stdout.\n", a_feedback_string);
       ATwriteToBinaryFile((ATerm) a_term, stdout);

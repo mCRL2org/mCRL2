@@ -411,6 +411,8 @@ using namespace ::mcrl2::utilities;
     /// LPS_Inv_Elm::f_lps. If no input file name was specified, the LPS is read from stdin.
 
     void LPS_Inv_Elm::read_input() {
+      gsEnableConstructorFunctions();
+
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name, std::ifstream::in|std::ifstream::binary);
       if (!instream.is_open()) {
@@ -427,36 +429,25 @@ using namespace ::mcrl2::utilities;
       //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
       f_lps = (ATermAppl) read_ATerm_from_file(f_lps_file_name, "LPS");
 
-      gsEnableConstructorFunctions();
+      lps::specification lps_specification(f_lps);
 
-      //if ((ATgetType(f_lps) != AT_APPL) || !gsIsSpecV1(f_lps)) {
-      //  gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_lps_file_name);
-      //  exit(1);
-      //}
-
-      lps::specification lps_specification;
-      try
-      {
-        lps_specification.load(f_lps_file_name);
+      if (lps_specification.is_well_typed()) {
+        //typecheck the invariant formula
+        f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
+        if(!f_invariant){
+          gsErrorMsg("Typechecking of the invariant formula failed.\n");
+          exit(1);
+        }
+       
+        //data implement the invariant formula
+        f_invariant = implement_data_data_expr(f_invariant,lps_specification);
+        if(!f_invariant){
+          gsErrorMsg("Data implementation of the invariant formula failed.\n");
+          exit(1);
+        }
       }
-      catch (std::runtime_error e)
-      {
-        gsErrorMsg("The file '%s' does not contain an mCRL2 LPS.\n", f_lps_file_name);
-        exit(1);
-      }
-
-
-      //typecheck the invariant formula
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
-      if(!f_invariant){
-        gsErrorMsg("Typechecking of the invariant formula failed.\n");
-        exit(1);
-      }
- 
-      //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant,lps_specification);
-      if(!f_invariant){
-        gsErrorMsg("Data implementation of the invariant formula failed.\n");
+      else {
+        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", f_lps_file_name);
         exit(1);
       }
     }
