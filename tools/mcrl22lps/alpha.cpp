@@ -20,12 +20,11 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include "mcrl2/core/struct.h"
-#include "mcrl2/print/types.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/lps/alpha.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/alpha.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;

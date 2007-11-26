@@ -48,17 +48,17 @@
 #include "mcrl2/lps/detail/algorithms.h"
 
 
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/lps/alpha.h"
-#include "mcrl2/dataimpl.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/alpha.h"
 
 // command-line options
 #include <getopt.h>
 
 //ATERM-specific 
 #include "atermpp/substitute.h" 
-#include "mcrl2/basic/identifier_string.h" 
+#include "mcrl2/core/identifier_string.h" 
 #include "atermpp/utility.h" 
 #include "atermpp/indexed_set.h" 
 #include "atermpp/table.h" 

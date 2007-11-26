@@ -20,7 +20,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
 #include "atermpp/substitute.h"
-#include "mcrl2/basic/pretty_print.h"
+#include "mcrl2/core/print.h"
 
 
 #include "atermpp/algorithm.h"     // replace
