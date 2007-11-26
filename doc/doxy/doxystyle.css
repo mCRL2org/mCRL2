@@ -513,7 +513,7 @@ div.tabs td {
    text-decoration  : none;
 }
 
-div.tabs li#current span {
+div.tabs li.current span {
 	border-bottom: 0px;
 	padding-bottom: 0.4em;
 	background-color: white;
