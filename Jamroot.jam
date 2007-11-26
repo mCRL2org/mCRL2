@@ -78,8 +78,6 @@ if [ path.exists ./tools ] {
       targets = /tools/$(targets) ;
     }
     else {
-      ECHO "Complete toolset build in progress!" ;
-
       targets += /tools/$(targets) build-plugins ;
     }
 
