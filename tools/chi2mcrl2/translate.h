@@ -5,7 +5,7 @@
 #include <math.h>
 #include <iostream>
 #include <aterm2.h>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <cstdio>
 #include <vector>

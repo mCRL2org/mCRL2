@@ -10,7 +10,7 @@
 // Implementation of class BDD_Info
 // file: bdd_info.cpp
 
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/bdd_info.h"
 

@@ -10,9 +10,9 @@
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include <mcrl2/pbes/pbes.h>
 #include <mcrl2/data/data_variable.h>
 

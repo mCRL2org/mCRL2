@@ -13,8 +13,8 @@
 
 #include "mcrl2/dataimpl.h"
 #include "mcrl2/data_common.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linear_process.h"

@@ -443,8 +443,8 @@ static yyconst flex_int16_t yy_chk[78] =
 #include <string>
 #include <cstdio>
 #include <aterm2.h>
-#include "mcrl2/print/messaging.h"
-#include <mcrl2/lts/liblts.h>
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/lts/liblts.h"
 #include "fsmlexer.h"
 #include "mcrl2/fsmparser.hpp"
 

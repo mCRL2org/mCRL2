@@ -8,7 +8,7 @@
 /// \brief Add your file description here.
 
 #include <sstream>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/parse.h"
 #include "mcrl2/parse/typecheck.h"
 #include "gc.h"

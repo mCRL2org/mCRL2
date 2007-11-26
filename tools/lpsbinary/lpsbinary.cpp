@@ -29,7 +29,7 @@
 //Boost
 #include <boost/program_options.hpp>
 
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 //Aterms
 #include <atermpp/algorithm.h>

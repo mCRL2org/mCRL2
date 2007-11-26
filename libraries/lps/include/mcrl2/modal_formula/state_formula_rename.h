@@ -11,7 +11,7 @@
 #define MCRL2_BASIC_STATE_VARIABLE_RENAME_H
 
 #include <deque>
-#include "mcrl2/basic/state_formula_builder.h"
+#include "mcrl2/modal_formula/state_formula_builder.h"
 #include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/data/utility.h"
 

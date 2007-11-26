@@ -8,10 +8,10 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "mcrl2/print.h"
+#include "mcrl2/core/print.h"
 
 #define PRINT_C
-#include "mcrl2/print/implementation.h"
+#include "mcrl2/core/detail/print_implementation.h"
 
 extern "C" {
 

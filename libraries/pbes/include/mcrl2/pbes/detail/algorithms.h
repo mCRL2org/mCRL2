@@ -17,7 +17,7 @@
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 

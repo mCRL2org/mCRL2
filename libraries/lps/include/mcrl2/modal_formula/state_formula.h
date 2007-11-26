@@ -18,8 +18,8 @@
 #include "atermpp/aterm_access.h"
 #include "atermpp/atermpp.h"
 #include "atermpp/algorithm.h"
-#include "mcrl2/basic/regular_formula.h"
-#include "mcrl2/basic/action_formula.h"
+#include "mcrl2/modal_formula/regular_formula.h"
+#include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/data/data.h"
 
 namespace lps {

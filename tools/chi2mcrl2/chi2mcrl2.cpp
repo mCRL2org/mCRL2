@@ -20,7 +20,7 @@
 #include <string>
 #include <iostream>
 #include "chilexer.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "translate.h"
 
 #define NAME "chi2mcrl2"

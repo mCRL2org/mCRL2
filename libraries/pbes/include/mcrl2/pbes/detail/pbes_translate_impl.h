@@ -24,7 +24,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/normalize.h"
@@ -42,7 +42,7 @@ using atermpp::make_substitution;
 inline
 std::string pp(std::set<data_variable> s)
 {
-  return pp(data_variable_list(s.begin(), s.end()));
+  return ::pp(data_variable_list(s.begin(), s.end()));
 }
 
 inline

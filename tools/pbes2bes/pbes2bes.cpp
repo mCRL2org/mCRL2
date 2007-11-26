@@ -25,7 +25,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 //LPS-Framework

@@ -10,7 +10,7 @@
 #define MCRL2_DATAIMPL_H
 
 #include <aterm2.h>
-#include "mcrl2/data_common.h"
+#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/lps/specification.h"
 
 /// \pre Global preconditions:

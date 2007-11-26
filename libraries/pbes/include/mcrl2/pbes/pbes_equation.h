@@ -11,7 +11,7 @@
 #define MCRL2_PBES_PBES_EQUATION_H
 
 #include "atermpp/algorithm.h"
-#include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"

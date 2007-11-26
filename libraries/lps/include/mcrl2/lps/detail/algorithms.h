@@ -17,15 +17,15 @@
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
-#include "mcrl2/print/messaging.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/lps/alpha.h"
-#include "mcrl2/dataimpl.h"
-#include "mcrl2/parse/regfrmtrans.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/alpha.h"
+#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 

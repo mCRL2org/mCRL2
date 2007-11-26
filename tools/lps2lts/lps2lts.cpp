@@ -11,12 +11,12 @@
 #include <aterm2.h>
 #include <cassert>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "lps2lts.h"
 #include "exploration.h"
 #include "lts.h"
 
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #include "squadt_interactor.tcc"
 

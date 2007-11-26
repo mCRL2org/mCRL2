@@ -9,9 +9,9 @@
 #include <ostream>
 #include <fstream>
 #include <string>
-#include "mcrl2/struct.h"
-#include "mcrl2/print.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/lts/liblts.h"
 

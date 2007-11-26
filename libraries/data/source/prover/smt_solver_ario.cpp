@@ -3,10 +3,10 @@
 // file: smt_solver_ario.cpp
 
 #include "mcrl2/data/prover/smt_solver_ario.h"
-#include "pstream.h"
-#include "mcrl2/print.h"
 #include <iostream>
-#include "mcrl2/print/messaging.h"
+#include "pstream.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

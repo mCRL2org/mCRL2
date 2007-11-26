@@ -12,7 +12,7 @@
 
 #include "aterm2.h"
 #include <mcrl2/data/rewrite.h>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include <mcrl2/utilities/info.h>
 #include <mcrl2/utilities/utilities.h>
 #include <mcrl2/utilities/aterm_ext.h>

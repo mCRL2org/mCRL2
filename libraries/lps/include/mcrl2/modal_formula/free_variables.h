@@ -10,7 +10,7 @@
 #ifndef MCRL2_BASIC_FREE_VARIABLES_H
 #define MCRL2_BASIC_FREE_VARIABLES_H
 
-#include "mcrl2/basic/state_formula_visitor.h"
+#include "mcrl2/modal_formula/state_formula_visitor.h"
 
 namespace lps {
 

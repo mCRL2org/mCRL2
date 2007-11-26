@@ -8,9 +8,9 @@
 
 #include <aterm2.h>
 
-#include "mcrl2/data_common.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/detail/data_common.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

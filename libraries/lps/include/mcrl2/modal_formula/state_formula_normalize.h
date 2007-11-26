@@ -10,7 +10,7 @@
 #ifndef MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H
 #define MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H
 
-#include "mcrl2/basic/state_formula_builder.h"
+#include "mcrl2/modal_formula/state_formula_builder.h"
 
 namespace lps {
 

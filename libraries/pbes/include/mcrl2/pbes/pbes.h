@@ -28,7 +28,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/basic/pretty_print.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/lps/detail/data_utility.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/sorted_sequence_algorithm.h"

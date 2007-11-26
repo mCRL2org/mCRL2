@@ -37,7 +37,7 @@ mcrl2parser:
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
 	sed -i "" 's/#ifdef YYDEBUG/#if YYDEBUG/g' mcrl2parser.cpp; \
-	mv mcrl2parser.hpp ../include/mcrl2/parse
+	mv mcrl2parser.hpp ../include/mcrl2/core/detail
 
 chiparser:
 	cd tools/chi2mcrl2; \

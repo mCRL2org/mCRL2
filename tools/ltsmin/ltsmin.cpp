@@ -11,9 +11,9 @@
 #define VERSION  "July 2007"
 
 #include <getopt.h>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "ltsmin.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;

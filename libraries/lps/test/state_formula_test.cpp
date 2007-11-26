@@ -11,8 +11,8 @@
 #include <iterator>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/basic/state_formula_rename.h"
-#include "mcrl2/basic/state_formula_normalize.h"
+#include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"

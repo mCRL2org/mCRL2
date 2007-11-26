@@ -20,8 +20,8 @@
 //Boost
 #include <boost/program_options.hpp>
 
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 
 //Rewriter
 #include "mcrl2/data/rewrite.h"

@@ -27,12 +27,12 @@
 #include <assert.h>
 #include <string.h>
 #include "mcrl2/lps/lin_std.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/lps/alpha.h"
+#include "mcrl2/core/alpha.h"
 
 // For Aterm library extension functions
 #ifdef __cplusplus

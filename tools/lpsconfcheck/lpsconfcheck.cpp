@@ -14,11 +14,11 @@
 #include "mcrl2/confluence_checker.h"
 #include "mcrl2/invariant_checker.h"
 #include "getopt.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/dataimpl.h"
-#include "mcrl2/print/messaging.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/struct.h"
 #include <string>
 #include <fstream>
 

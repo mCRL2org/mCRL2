@@ -10,10 +10,10 @@
 // Implementation of class BDD2Dot
 // file: bdd2dot.cpp
 
-#include "mcrl2/struct.h"
-#include "mcrl2/print.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/utilities/bdd2dot.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

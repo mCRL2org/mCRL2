@@ -9,10 +9,10 @@
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #define NAME "ltsconvert"
 #define VERSION "July 2007"

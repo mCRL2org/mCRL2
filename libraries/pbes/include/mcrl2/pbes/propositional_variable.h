@@ -14,10 +14,10 @@
 #include <string>
 #include <utility>
 #include "atermpp/aterm_appl.h"
-#include "mcrl2/basic/identifier_string.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/basic/pretty_print.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/struct.h"
 
 namespace lps {
 

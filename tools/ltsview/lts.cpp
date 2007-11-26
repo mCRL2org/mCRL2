@@ -9,8 +9,8 @@
 
 #include "lts.h"
 #include "mcrl2/trace.h"
-#include "mcrl2/print.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/struct.h"
 #include <algorithm>
 
 using namespace Utils;

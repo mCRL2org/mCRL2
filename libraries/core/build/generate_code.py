@@ -390,12 +390,12 @@ def main():
 
     if options.soundness_checks:
         ignored_phases = ['-tc', '-lin', '-di', '-rft', '.tc']
-        filename = '../include/mcrl2/basic/detail/soundness_checks.h'
+        filename = '../include/mcrl2/core/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
 
     if options.libstruct:
         ignored_phases = []
-        filename = '../../core/include/struct/libstruct_core.h'
+        filename = '../include/mcrl2/core/detail/libstruct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
 
     if options.constructors:

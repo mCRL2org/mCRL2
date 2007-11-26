@@ -5,11 +5,11 @@
 #include "mcrl2/data/prover.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include <cstdlib>
 #include "mcrl2/utilities/utilities.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

@@ -11,7 +11,7 @@
 #include "mcrl2/data/rewrite/innerc.h"
 
 #include <cstdlib>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace mcrl2::utilities;
 
@@ -80,10 +80,10 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <dlfcn.h>
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/rewrite/innerc.h"

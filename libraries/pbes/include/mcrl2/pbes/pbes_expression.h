@@ -13,7 +13,7 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_traits.h"
 #include "atermpp/aterm_access.h"
-#include "mcrl2/basic/detail/soundness_checks.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace lps {

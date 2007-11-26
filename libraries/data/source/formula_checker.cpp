@@ -11,7 +11,7 @@
 // file: formula_checker.cpp
 
 #include "mcrl2/formula_checker.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #ifdef __cplusplus

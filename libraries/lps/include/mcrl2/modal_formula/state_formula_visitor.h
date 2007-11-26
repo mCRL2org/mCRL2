@@ -11,7 +11,7 @@
 #define MCRL2_BASIC_STATE_FORMULA_VISITOR_H
 
 #include <stdexcept>
-#include "mcrl2/basic/state_formula.h"
+#include "mcrl2/modal_formula/state_formula.h"
 
 namespace lps {
 

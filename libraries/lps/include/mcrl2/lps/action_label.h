@@ -12,9 +12,9 @@
 
 #include <cassert>
 #include "atermpp/atermpp.h"
-#include "mcrl2/basic/identifier_string.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/basic/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace lps {
 

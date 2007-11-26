@@ -15,9 +15,9 @@
 #include <boost/format.hpp>
 #endif
 
-#include "mcrl2/dataimpl.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #ifdef __cplusplus

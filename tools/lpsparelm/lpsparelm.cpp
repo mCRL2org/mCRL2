@@ -14,7 +14,7 @@
 #include <boost/program_options.hpp>
 
 //Lowlevel library for messages
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 //mCRL2
 #include "atermpp/aterm.h"

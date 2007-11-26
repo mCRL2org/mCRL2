@@ -6,13 +6,13 @@
 //
 /// \file print.cpp
 
-#include "mcrl2/print.h"
+#include "mcrl2/core/print.h"
 
 
 #include <sstream>
 
 #define PRINT_CXX
-#include "mcrl2/print/implementation.h"
+#include "mcrl2/core/detail/print_implementation.h"
 
 using namespace std;
 

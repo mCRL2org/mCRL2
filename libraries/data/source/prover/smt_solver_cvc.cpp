@@ -5,7 +5,7 @@
 
 #include "mcrl2/data/prover/smt_solver_cvc.h"
 #include "pstream.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include <iostream>
 
 using namespace ::mcrl2::utilities;

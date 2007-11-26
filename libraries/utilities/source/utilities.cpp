@@ -12,9 +12,9 @@
 
 #include <cstdlib>
 #include <string>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/utilities.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace ::mcrl2::utilities;
 using namespace std;

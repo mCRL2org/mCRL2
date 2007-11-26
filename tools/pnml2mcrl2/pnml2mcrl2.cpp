@@ -18,11 +18,11 @@
 #include <getopt.h>
 #include <ticpp.h>
 #include <aterm2.h>
-#include "mcrl2/struct.h"
-#include "mcrl2/print.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 

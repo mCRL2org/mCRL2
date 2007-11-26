@@ -21,12 +21,12 @@
 #include <aterm2.h>
 #include <assert.h>
 
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum.h"
-#include "mcrl2/print.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/parse.h"
 #include "mcrl2/parse/typecheck.h"

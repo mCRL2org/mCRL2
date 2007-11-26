@@ -11,14 +11,14 @@
 #define MCRL2_PBES_UTILITY_H
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/basic/mucalculus.h"
+#include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "atermpp/algorithm.h"
-#include "mcrl2/dataimpl.h" // implement_data_data_expr
+#include "mcrl2/core/detail/data_implementation.h" // implement_data_data_expr
 
 // JFG:
 #include "mcrl2/data/rewrite.h"

@@ -31,7 +31,7 @@
 
 //MCRL-specific
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace std;
 using namespace lps;

@@ -21,7 +21,7 @@
 #ifndef NO_MCRL2_TOOL_FACILITIES
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #endif
 
 /// \cond INTERNAL_DOCS

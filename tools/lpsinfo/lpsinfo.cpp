@@ -23,7 +23,7 @@
 #include <atermpp/aterm.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include <mcrl2/utilities/aterm_ext.h>
 
 //LPS framework

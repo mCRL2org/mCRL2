@@ -13,9 +13,9 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/basic/pretty_print.h"
-#include "mcrl2/basic/detail/soundness_checks.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace lps {
 

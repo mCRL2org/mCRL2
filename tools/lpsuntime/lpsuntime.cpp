@@ -35,7 +35,7 @@
 //LPS framework
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/linear_process.h>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/utility.h>
 

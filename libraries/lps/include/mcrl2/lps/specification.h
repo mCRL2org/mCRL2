@@ -18,10 +18,10 @@
 #include <stdexcept>
 #include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/aterm.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_operation.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/basic/pretty_print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/action_utility.h"
 

@@ -15,7 +15,10 @@
 #include <stdlib.h>
 #include "aterm2.h"
 
-#include "mcrl2/print/types.h"
+//Type definitions for both pretty pretty printers
+
+typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
+//t_pp_format represents the available pretty print formats
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,6 +53,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 #ifdef __cplusplus
 #include <ostream>
 #include <string>
+#include "atermpp/atermpp.h"
 
 //Global preconditions:
 //- the ATerm library has been initialised
@@ -69,6 +73,19 @@ std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
        formula
   Ret: A textual representation of Part pretty printed using method pp_format
 */
+
+inline
+std::string pretty_print(ATerm t)
+{
+  return PrintPart_CXX(t, ppDefault);
+}
+
+template <typename Term>
+std::string pp(Term t)
+{
+  return pretty_print(atermpp::aterm_traits<Term>::term(t));
+}
+
 #endif
 
 #endif //MCRL2_PRINT_H

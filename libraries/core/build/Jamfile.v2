@@ -13,19 +13,24 @@ obj mcrl2parser.o
        : mcrl2parser.cpp
        : <use>/libraries/utilities//headers
          <use>/libraries/data//headers
-         <include>../include/mcrl2/parse
+         <include>../include/mcrl2/core/detail
        ;
 
-local STRUCT_SOURCES = struct struct_core ; 
-
-local PARSER_SOURCES = mcrl2parser.o mcrl2lexer.cpp parse.cpp typecheck.cpp regfrmtrans.cpp ;
-
-local PRINT_SOURCES = print print_c messaging ;
-
 alias core.main
-       : $(PRINT_SOURCES).cpp
-         $(STRUCT_SOURCES).cpp
-         $(PARSER_SOURCES)
+       : struct.cpp
+         struct_core.cpp
+         mcrl2parser.o
+         mcrl2lexer.cpp
+         parse.cpp
+         typecheck.cpp
+         regfrmtrans.cpp
+         print.cpp
+         print_c.cpp
+         messaging.cpp
+         data_implementation.cpp
+         data_common.cpp
+         data_reconstruct.cpp
+         alpha.cpp
        : <use>/libraries/lps//headers
          <use>/libraries/data//headers
          <use>/libraries/utilities//headers

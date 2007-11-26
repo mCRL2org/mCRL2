@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <aterm2.h>
-#include "mcrl2/struct.h"
+#include "mcrl2/core/struct.h"
 #include <mcrl2/data/enum.h>
 #include <mcrl2/data/rewrite.h>
 #include <mcrl2/lps/nextstate/standard.h>
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

@@ -9,14 +9,14 @@
 #include <string>
 #include <sstream>
 #include <svc/svc.h>
-#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/struct.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
-#include "mcrl2/dataimpl.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/detail/data_implementation.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;

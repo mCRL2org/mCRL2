@@ -16,8 +16,8 @@
 #include <cassert>
 #include "atermpp/aterm_traits.h"
 #include "atermpp/atermpp.h"
-#include "mcrl2/basic/detail/constructors.h"
-#include "mcrl2/basic/detail/soundness_checks.h"
+#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace lps {
 

@@ -10,10 +10,7 @@ project data
        ;
 
 alias data.main
-       : dataimpl.cpp
-         data_reconstruct.cpp
-         data_common.cpp
-         enum.cpp
+       : enum.cpp
          enum_standard.cpp
          confluence_checker.cpp
          disjointness_checker.cpp

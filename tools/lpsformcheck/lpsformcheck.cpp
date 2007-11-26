@@ -15,8 +15,8 @@
 #include "getopt.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <string>
 

@@ -29,12 +29,11 @@
 
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/print/types.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/data_reconstruct.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
@@ -2094,9 +2093,4 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
     return -1;
   }
 }
-
-#undef PRINT_OUTTYPE
-#undef PRINT_FUNC
-#undef PRINT_CXX
-#undef PRINT_C
 

@@ -32,7 +32,7 @@
 //MCRL-specific
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
 #include "mcrl2/data/rewrite.h"
 

@@ -19,11 +19,10 @@
 #include <sstream>
 #include <aterm2.h>
 #include "xsimtrace.h"
-#include "mcrl2/struct.h"
-#include "mcrl2/print/types.h"
-#include "mcrl2/print.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
