@@ -100,10 +100,14 @@ class P_TruncatedCone : public Primitive {
 		bool bot;
 };
 
-// an oblique cone is a cone of which the apex is not necessarily located at a
-// right angle to the center of the base.
-// creating a P_ObliqueCone with parameter x produces a cone with the base in
-// the (x,y)-plane, base radius 1 and apex located at (x,0,1)
+// an oblique cone is a cone of which the base is tilted. Imagine a normal cone
+// with apex on the positive z-axis and base in the (x,y)-plane. Then this cone
+// becomes "oblique" if we rotate the base around the y-axis over a certain
+// angle.
+// Creating a P_ObliqueCone with parameters a,r,s produces a cone with the apex in
+// (0,0,0), base radius r, base center at (0,0,1) and base rotated around the
+// line (x=0,z=1) over the following angle: PI/2 - a - s * Branch Tilt.
+// Sign s is either 1 or -1.
 class P_ObliqueCone : public Primitive {
   public:
     P_ObliqueCone(float a,float r,float s);

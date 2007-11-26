@@ -231,8 +231,8 @@ void P_Disc::reshape(int N,float *coss,float *sins) {
   int i,j;
   j = 0;
   for (i=0; i<2*N; i+=2) {
-    vertices[j] = GLfloat(coss[i]);
-    vertices[j+1] = GLfloat(sins[i]);
+    vertices[j] = coss[i];
+    vertices[j+1] = sins[i];
     vertices[j+2] = 0;
     j += 3;
   }
@@ -283,10 +283,16 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
   }
 
   GLfloat* normals = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
-  float z = 1-r_top;
-  memcpy(normals,vertices,N3*sizeof(float));
-  for (k=2; k<N3; k+=3) {
-    normals[k] = z;
+  float nz = 1.0f - r_top;
+  float r = sqrt(1.0f + nz*nz);
+  float nx = 1.0f / r;
+  nz = nz / r;
+  k = 0;
+  for (i = 0; i < 2*N; i += 2) {
+    normals[k] = coss[i] * nx;
+    normals[k+1] = sins[i] * nx;
+    normals[k+2] = nz;
+    k += 3;
   }
   memcpy(normals+N3,normals,N3*sizeof(float));
 
@@ -359,8 +365,8 @@ void P_TruncatedCone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/) {
 P_ObliqueCone::P_ObliqueCone(float a,float r,float s) {
   disp_list = 0;
   alpha = a;
-	radius = r;
-	sign = s;
+  radius = r;
+  sign = s;
 }
 
 P_ObliqueCone::~P_ObliqueCone() {
@@ -375,52 +381,57 @@ void P_ObliqueCone::reshape(int N,float *coss,float *sins) {
 }
 
 void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
-	float sin_a = -sign*sin(0.5f*PI - alpha - sign*obt);
-	float cos_a = cos(0.5f*PI - alpha - sign*obt);
-	int i,j;
-	GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
-	vertices[0] = 0.0f;
-	vertices[1] = 0.0f;
-	vertices[2] = 0.0f;
-	j = 3;
-	for (i = 0; i < 2*N; i += 2) {
-		vertices[j]   = radius * coss[i] * cos_a;
-		vertices[j+1] = radius * sins[i];
-		vertices[j+2] = 1.0f - radius * coss[i] * sin_a;
-		j += 3;
-	}
+  float a = 0.5f*PI - alpha - sign*obt;
+  float sin_a = -sign*sin(a);
+  float cos_a = cos(a);
+  int i,j;
+  GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+  vertices[0] = 0.0f;
+  vertices[1] = 0.0f;
+  vertices[2] = 0.0f;
+  j = 3;
+  for (i = 0; i < 2*N; i += 2) {
+    vertices[j]   = radius * coss[i] * cos_a;
+    vertices[j+1] = radius * sins[i];
+    vertices[j+2] = 1.0f - radius * coss[i] * sin_a;
+    j += 3;
+  }
 
-	GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
-	normals[0] = 0.0f;
-	normals[1] = 0.0f;
-	normals[2] = -1.0f;
-	j = 3;
-	for (i = 0; i < 2*N ; i += 2) {
-		normals[j]   = coss[i] * cos_a + sin_a;
-		normals[j+1] = sins[i];
-		normals[j+2] = cos_a - coss[i] * sin_a;
-		j += 3;
-	}
+  GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+  float nz = -radius;
+  float r = sqrt(1.0f + nz*nz);
+  float nx = 1.0f / r;
+  nz = nz / r;
+  normals[0] = 0.0f;
+  normals[1] = 0.0f;
+  normals[2] = -1.0f;
+  j = 3;
+  for (i = 0; i < 2*N; i += 2) {
+    normals[j]   = coss[i] * nx * cos_a - nz * sin_a;
+    normals[j+1] = sins[i] * nx;
+    normals[j+2] = coss[i] * nx * sin_a + nz * cos_a;
+    j += 3;
+  }
 
-	GLuint* is = (GLuint*)malloc((N+2) * sizeof(GLuint));
-	is[0] = 0;
-	for (i = 1; i <= N; ++i) {
-		is[i] = N+1-i;
-	}
-	is[N+1] = N;
+  GLuint* is = (GLuint*)malloc((N+2) * sizeof(GLuint));
+  is[0] = 0;
+  for (i = 1; i <= N; ++i) {
+    is[i] = N+1-i;
+  }
+  is[N+1] = N;
 
-	if (disp_list == 0) {
-		disp_list = glGenLists(1);
-	}
+  if (disp_list == 0) {
+    disp_list = glGenLists(1);
+  }
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glVertexPointer(3,GL_FLOAT,0,vertices);
-	glNormalPointer(GL_FLOAT,0,normals);
-	glNewList(disp_list,GL_COMPILE);
-		glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is);
-	glEndList();
-	free(vertices);
-	free(normals);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glVertexPointer(3,GL_FLOAT,0,vertices);
+  glNormalPointer(GL_FLOAT,0,normals);
+  glNewList(disp_list,GL_COMPILE);
+    glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is);
+  glEndList();
+  free(vertices);
+  free(normals);
   free(is);
 }

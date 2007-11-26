@@ -337,18 +337,23 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
           }
           glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
         } else {
-          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
           // make the connecting cone
+          float d_rad = root->getBaseRadius() - root->getTopRadius();
           float sz = sqrt(settings->getFloat(ClusterHeight) *
-            settings->getFloat(ClusterHeight) +
-              (root->getBaseRadius() - root->getTopRadius()) *
-                      (root->getBaseRadius() - root->getTopRadius()));
-          float alpha = atan(settings->getFloat(ClusterHeight) /
-                    fabs(root->getBaseRadius() - root->getTopRadius()));
-          float sign = 1.0f;
-          if (root->getBaseRadius() - root->getTopRadius() < 0.0f) {
+              settings->getFloat(ClusterHeight) + d_rad * d_rad);
+          float alpha, sign;
+          if (d_rad < 0.0f) {
             sign = -1.0f;
+            alpha = atan(settings->getFloat(ClusterHeight) / -d_rad);
+          } else {
+            sign = 1.0f;
+            if (d_rad > 0.0f) {
+              alpha = atan(settings->getFloat(ClusterHeight) / d_rad);
+            } else {
+              alpha = 0.5f * PI;
+            }
           }
+          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
           glPushMatrix();
           glTranslatef(root->getTopRadius(),0.0f,0.0f);
           glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);

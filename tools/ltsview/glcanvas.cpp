@@ -66,6 +66,7 @@ void GLCanvas::initialize() {
   SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
+  glLoadIdentity();
 
   GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
   GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
