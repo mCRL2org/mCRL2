@@ -15,9 +15,9 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "lpstrans.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace ::mcrl2::utilities;
 

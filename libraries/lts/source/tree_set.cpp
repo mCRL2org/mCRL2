@@ -8,7 +8,7 @@
 
 #include <cstdlib>
 #include <vector>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
 
 #ifdef __cplusplus

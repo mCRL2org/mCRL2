@@ -525,7 +525,7 @@ static yyconst flex_int16_t yy_chk[248] =
 #include <iostream>
 #include "libstruct_core.h"
 #include <vector>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include <map>
 #include <set>
 #include <utility>

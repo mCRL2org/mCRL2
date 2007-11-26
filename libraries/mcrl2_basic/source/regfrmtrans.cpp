@@ -16,8 +16,8 @@
 #endif
 
 #include "mcrl2/dataimpl.h"
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #ifdef __cplusplus

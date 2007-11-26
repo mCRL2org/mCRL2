@@ -8,7 +8,7 @@ project libraries/trace
        ;
 
 alias trace.main
-       : libtrace.cpp
+       : trace.cpp
        : <use>/libraries/mcrl2_basic//headers
          <use>/libraries/utilities//headers
        : <threading>single

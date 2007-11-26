@@ -11,7 +11,7 @@
 // file: manipulator.cpp
 
 #include "aterm2.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include <mcrl2/data/rewrite.h>
 #include <mcrl2/utilities/manipulator.h>
 #include <mcrl2/utilities/info.h>

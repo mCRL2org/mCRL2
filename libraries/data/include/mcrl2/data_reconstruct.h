@@ -13,7 +13,7 @@
 #define MCRL2_DATA_RECONSTRUCT_H
 
 #include <aterm2.h>
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 
 /// \brief Reconstructs as much of expr as possible to the mcrl2 format.
 /// \pre expr adheres to the internal format after data implementation

@@ -18,10 +18,10 @@
 #include "mcrl2/data_reconstruct.h"
 #include "mcrl2/data_common.h"
 #include "mcrl2/dataimpl.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace ::mcrl2::utilities;
 

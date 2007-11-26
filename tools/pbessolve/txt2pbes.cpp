@@ -33,7 +33,7 @@
 #include <boost/program_options.hpp> 
  
 //MCRL-specific 
-#include "print/messaging.h" 
+#include "mcrl2/print/messaging.h" 
 
 //LPS-Framework 
 #include "mcrl2/pbes/pbes.h" 
@@ -48,9 +48,9 @@
 #include "mcrl2/lps/detail/algorithms.h"
 
 
-#include "libparse.h"
-#include "typecheck.h"
-#include "libalpha.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
+#include "mcrl2/lps/alpha.h"
 #include "mcrl2/dataimpl.h"
 
 // command-line options

@@ -4,9 +4,9 @@
 
 #include "mcrl2/data/prover/smt_solver_ario.h"
 #include "pstream.h"
-#include "libprint_c.h"
+#include "mcrl2/print.h"
 #include <iostream>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

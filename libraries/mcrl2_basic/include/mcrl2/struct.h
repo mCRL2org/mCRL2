@@ -12,7 +12,7 @@
 //This file describes the functions that can be used for the internal ATerm
 //structure.
 
-#include "libstruct_core.h"
+#include "mcrl2/struct_core.h"
 
 #ifndef __cplusplus
 #include <stdbool.h>

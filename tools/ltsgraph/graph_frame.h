@@ -38,7 +38,7 @@
 
 //LTS
 #include <mcrl2/lts/liblts.h>
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 
 #include <mcrl2/utilities/spinctrlfloat.h>
 

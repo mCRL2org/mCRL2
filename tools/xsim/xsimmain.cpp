@@ -25,12 +25,12 @@
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
-#include "libprint_types.h"
-#include "libprint.h"
-#include "mcrl2/libtrace.h"
+#include "mcrl2/print/types.h"
+#include "mcrl2/print.h"
+#include "mcrl2/trace.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 // For PLUGIN_DIRECTORY

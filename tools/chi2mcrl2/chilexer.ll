@@ -6,7 +6,7 @@
 #include <iostream>
 #include "libstruct_core.h"
 #include <vector>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include <map>
 #include <set>
 #include <utility>

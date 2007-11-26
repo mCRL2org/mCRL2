@@ -7,10 +7,10 @@
 /// \file ltsmindata.cpp
 /// \brief Based on bsimdata.c (revision 1.1.1.1) from the muCRL toolset
 
-#include "libprint_c.h"
-#include "libstruct.h"
+#include "mcrl2/print.h"
+#include "mcrl2/struct.h"
 #include "ltsmin.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;

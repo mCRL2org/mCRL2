@@ -2,8 +2,8 @@
 // file: bdd_path_eliminator.cpp
 
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "time.h"
 

@@ -11,7 +11,7 @@
 // file: bdd_manipulator.cpp
 
 #include "aterm2.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/utilities/bdd_manipulator.h"
 
 // Class BDD_Manipulator --------------------------------------------------------------------------

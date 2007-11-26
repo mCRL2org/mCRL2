@@ -10,7 +10,7 @@
 #include <set>
 #include <stack>
 #include <string>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 

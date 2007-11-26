@@ -23,9 +23,9 @@
 #include <wx/string.h>
 #include <aterm2.h>
 #include "xsimmain.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/data/rewrite.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;

@@ -21,15 +21,15 @@
 #include <aterm2.h>
 #include <assert.h>
 
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum.h"
-#include "libprint_c.h"
+#include "mcrl2/print.h"
 #include "mcrl2/lps/specification.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libparse.h"
-#include "typecheck.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
 #include <mcrl2/dataimpl.h>
 
 using namespace std;

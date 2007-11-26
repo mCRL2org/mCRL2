@@ -32,11 +32,11 @@
 #include "garagecanvas.h"
 #include "xsimbase.h"
 #include "aterm2.h"
-#include "libprint_types.h"
-#include "libprint.h"
-#include <mcrl2/lps/nextstate.h>
-#include "libstruct.h"
-#include <mcrl2/utilities/aterm_ext.h>
+#include "mcrl2/print/types.h"
+#include "mcrl2/print.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
 

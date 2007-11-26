@@ -6,8 +6,8 @@
 //
 /// \file libparse.h
 
-#ifndef MCRL2_LIBPARSE_H
-#define MCRL2_LIBPARSE_H
+#ifndef MCRL2_PARSE_H
+#define MCRL2_PARSE_H
 
 #include <iostream>
 #include <vector>
@@ -64,4 +64,4 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
        NULL, otherwise
 */ 
 
-#endif // MCRL2_LIBPARSE_H
+#endif // MCRL2_PARSE_H

@@ -13,8 +13,8 @@ project lps
 
 alias lps.main
        : source/lin_std.cpp
-         source/libalpha.cpp
-         source/libdataelm.cpp
+         source/alpha.cpp
+         source/dataelm.cpp
          source/sumelm.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp

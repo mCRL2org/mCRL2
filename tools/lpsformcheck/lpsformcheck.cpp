@@ -13,9 +13,9 @@
 
 #include "mcrl2/formula_checker.h"
 #include "getopt.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <string>
 

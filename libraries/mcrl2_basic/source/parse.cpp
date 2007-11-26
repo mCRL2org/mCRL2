@@ -9,8 +9,8 @@
 #include <istream>
 #include <string>
 #include <sstream>
-#include "mcrl2lexer.h"
-#include "print/messaging.h"
+#include "mcrl2/parse/mcrl2lexer.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace std;
 

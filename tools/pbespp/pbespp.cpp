@@ -20,10 +20,10 @@
 #include <assert.h>
 
 #include <aterm2.h>
-#include "libstruct.h"
-#include "libprint_types.h"
-#include "libprint_c.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/types.h"
+#include "mcrl2/print.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace ::mcrl2::utilities;
 

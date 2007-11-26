@@ -37,7 +37,7 @@
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/sort_utility.h>
-#include <print/messaging.h>
+#include "mcrl2/print/messaging.h"
 
 //Enumerator
 #include <mcrl2/lps/nextstate.h>

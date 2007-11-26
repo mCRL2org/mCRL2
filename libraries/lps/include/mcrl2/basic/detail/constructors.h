@@ -10,7 +10,7 @@
 #ifndef LPS_DETAIL_CONSTRUCTORS
 #define LPS_DETAIL_CONSTRUCTORS
 
-#include "struct/libstruct_core.h" // gsString2ATermAppl
+#include "mcrl2/struct_core.h" // gsString2ATermAppl
 
 namespace lps {
 

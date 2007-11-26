@@ -14,10 +14,10 @@
 #include <getopt.h>
 #include <assert.h>
 #include <aterm2.h>
-#include "libstruct.h"
-#include "libprint.h"
-#include "mcrl2/libtrace.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print.h"
+#include "mcrl2/trace.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace std;
 using namespace mcrl2::utilities;;

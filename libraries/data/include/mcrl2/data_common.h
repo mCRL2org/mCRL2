@@ -12,7 +12,7 @@
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 
 using namespace ::mcrl2::utilities;
 

@@ -4,11 +4,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libprint_impl.h
+/// \file mcrl2/print/implementation.h
 
 //This file contains a generic implementation of the PrintPart functions for
-//both C and C++. It should NEVER be included directly. Use libprint_c.h and
-//libprint.h instead.
+//both C and C++. It should NEVER be included directly. Use mcrl2/print.h.
 
 #if defined(PRINT_C)
 #include <stdio.h>
@@ -30,9 +29,9 @@
 
 #include <assert.h>
 #include <aterm2.h>
-#include "libprint_types.h"
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/print/types.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/data_reconstruct.h"
@@ -2096,4 +2095,8 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
   }
 }
 
+#undef PRINT_OUTTYPE
+#undef PRINT_FUNC
+#undef PRINT_CXX
+#undef PRINT_C
 

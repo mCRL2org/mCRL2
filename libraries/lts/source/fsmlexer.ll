@@ -10,7 +10,7 @@
 #include <string>
 #include <cstdio>
 #include <aterm2.h>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include <mcrl2/lts/liblts.h>
 #include "fsmlexer.h"
 #include "mcrl2/fsmparser.hpp"

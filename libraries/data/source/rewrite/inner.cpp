@@ -14,10 +14,10 @@
 #include <cstdlib>
 #include <cassert>
 #include <memory.h>
-#include <libstruct.h>
-#include <libprint_c.h>
+#include <mcrl2/struct.h>
+#include <mcrl2/print.h>
 
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #ifdef __cplusplus

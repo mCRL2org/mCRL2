@@ -9,36 +9,30 @@ project mcrl2_basic
           <os>NT:<define>NO_DYNLOAD
        ;
 
-rule prepend ( prefix : elements * ) {
-  return $(prefix)$(elements) ;
-}
+obj mcrl2parser.o
+       : mcrl2parser.cpp
+       : <use>/libraries/utilities//headers
+         <use>/libraries/data//headers
+         <include>../include/mcrl2/parse
+       ;
 
-local STRUCT_SOURCES = [ prepend struct/ : libstruct libstruct_core ] ; 
+local STRUCT_SOURCES = struct struct_core ; 
 
-local PARSER_SOURCES = [ prepend parser/ : mcrl2parser mcrl2lexer libparse typecheck regfrmtrans ] ;
+local PARSER_SOURCES = mcrl2parser.o mcrl2lexer.cpp parse.cpp typecheck.cpp regfrmtrans.cpp ;
 
-local PRINT_SOURCES = [ prepend print/ : libprint libprint_c messaging ] ;
-
-local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(STRUCT_SOURCES) $(PARSER_SOURCES) ;
+local PRINT_SOURCES = print print_c messaging ;
 
 alias mcrl2_basic.main
-       : $(MCRL2_BASIC_SOURCES).cpp
-         [ glob ../source/auxiliary/*.cpp ]
-       : <include>../include/print
-         <include>../include/struct
-         <include>../include/parser
-         <use>/libraries/lps//headers
+       : $(PRINT_SOURCES).cpp
+         $(STRUCT_SOURCES).cpp
+         $(PARSER_SOURCES)
+       : <use>/libraries/lps//headers
          <use>/libraries/data//headers
          <use>/libraries/utilities//headers
-         <toolset>gcc:<use>/libraries//pstream
-         <toolset>darwin:<use>/libraries//pstream
        : <threading>single
        : <os>LINUX:<library>/site-config//m
          <os>LINUX:<library>/site-config//dl
          <os>CYGWIN:<library>/site-config//m
-         <include>../include/print
-         <include>../include/parser
-         <include>../include/struct
        ;
 
 lib mcrl2_basic
@@ -70,10 +64,6 @@ alias headers
        :
        :
        : <use>/libraries/aterm//headers
-         <toolset>gcc:<use>/libraries//pstream
-         <toolset>darwin:<use>/libraries//pstream
-         <include>../include/print
-         <include>../include/struct
        ;
 
 explicit mcrl2_basic.main mcrl2_basic.alias ;

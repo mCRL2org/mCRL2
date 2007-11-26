@@ -35,7 +35,7 @@
 #include <atermpp/algorithm.h>
 
 //LPS Framework
-#include <print/messaging.h>
+#include "mcrl2/print/messaging.h"
 #include <mcrl2/lps/sumelm.h>
 
 using namespace std;

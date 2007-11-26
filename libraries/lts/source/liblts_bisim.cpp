@@ -6,8 +6,8 @@
 //
 /// \file liblts_bisim.cpp
 
-#include "print/messaging.h"
-#include "libstruct.h"
+#include "mcrl2/print/messaging.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lts/detail/bsim.h"
 

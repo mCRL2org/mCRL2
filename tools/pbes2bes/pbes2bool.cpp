@@ -38,7 +38,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"

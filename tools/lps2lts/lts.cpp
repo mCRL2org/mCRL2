@@ -10,13 +10,12 @@
 #include <fstream>
 #include <aterm2.h>
 #include "svc/svc.h" //XXX
-#include "libstruct.h"
-#include "libprint_c.h"
-#include "libprint.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print.h"
 #include "lps2lts.h"
 #include "lts.h"
 
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace std;
 using namespace mcrl2::utilities;

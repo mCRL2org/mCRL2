@@ -34,7 +34,7 @@
 #include <boost/program_options.hpp>
 
 //MCRL-specific
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
@@ -42,7 +42,7 @@
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes2bool.h"
-#include "mcrl2/libdataelm.h"
+#include "mcrl2/lps/dataelm.h"
 
 //ATERM-specific
 #include "atermpp/substitute.h"

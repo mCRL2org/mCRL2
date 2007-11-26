@@ -19,13 +19,13 @@
 #include <assert.h>
 #include <iostream>
 #include <sstream>
-#include "libstruct.h"
-#include "libprint.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/libdataelm.h"
-#include "print/messaging.h"
+#include "mcrl2/lps/dataelm.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

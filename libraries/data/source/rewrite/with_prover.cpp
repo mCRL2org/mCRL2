@@ -13,8 +13,8 @@
 #include <aterm2.h>
 #include <memory.h>
 #include <assert.h>
-#include <libstruct.h>
-#include "print/messaging.h"
+#include <mcrl2/struct.h>
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/prover/bdd_prover.h"
 #include "mcrl2/data/rewrite.h"

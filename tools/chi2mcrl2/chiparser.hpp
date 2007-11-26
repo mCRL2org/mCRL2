@@ -139,7 +139,7 @@
 #include <iostream>
 #include "libstruct_core.h"
 #include <aterm2.h>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include <list>
 #include <map>
@@ -199,7 +199,7 @@ typedef union YYSTYPE
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2616 of glr.c.  */
+/* Line 2604 of glr.c.  */
 #line 204 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1

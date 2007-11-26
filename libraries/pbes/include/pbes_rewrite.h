@@ -7,9 +7,9 @@
 /// \file pbes_rewrite.h
 /// \brief Add your file description here.
 
-#include <mcrl2/data/rewrite.h>
-#include <mcrl2/pbes/pbes.h>
-#include "libprint_c.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/print.h"
 
 /// pbes_expression_rewrite rewrites a pbes_expression p as far as possible.
 lps::pbes_expression pbes_expression_rewrite(lps::pbes_expression p, lps::data_specification data, Rewriter *rewriter);

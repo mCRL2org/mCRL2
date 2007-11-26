@@ -14,14 +14,14 @@
 #include "mcrl2/invariant_eliminator.h"
 #include "mcrl2/invariant_checker.h"
 #include "getopt.h"
-#include "libstruct.h"
-#include "libparse.h"
-#include "typecheck.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
 #include "mcrl2/dataimpl.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include <string>
 #include <fstream>
 

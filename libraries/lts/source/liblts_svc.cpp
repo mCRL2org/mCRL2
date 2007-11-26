@@ -9,13 +9,13 @@
 #include <string>
 #include <sstream>
 #include <svc/svc.h>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
-#include "libparse.h"
-#include "typecheck.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
 #include "mcrl2/dataimpl.h"
 
 #ifdef __cplusplus

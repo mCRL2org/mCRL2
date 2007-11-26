@@ -4,13 +4,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libprint.cpp
+/// \file print.cpp
 
-#include "libprint.h"
+#include "mcrl2/print.h"
+
+
 #include <sstream>
 
 #define PRINT_CXX
-#include "libprint_impl.h"
+#include "mcrl2/print/implementation.h"
 
 using namespace std;
 
@@ -26,3 +28,4 @@ string PrintPart_CXX(const ATerm Part, t_pp_format pp_format)
   PrintPart_CXX(ss, Part, pp_format);
   return ss.str();
 }
+

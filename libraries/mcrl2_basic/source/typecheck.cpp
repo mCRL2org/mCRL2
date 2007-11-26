@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "typecheck.h"
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/parse/typecheck.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 #ifdef __cplusplus

@@ -33,17 +33,17 @@ ltsview-fsmparser:
 	bison -p fsm -d -o fsmparser.cpp fsmparser.yy
 
 mcrl2parser:
-	cd libraries/mcrl2_basic/source/parser; \
+	cd libraries/mcrl2_basic/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
-	sed -i 's/#ifdef YYDEBUG/#if YYDEBUG/g' mcrl2parser.cpp; \
-	mv mcrl2parser.hpp ../../include/parser
+	sed -i "" 's/#ifdef YYDEBUG/#if YYDEBUG/g' mcrl2parser.cpp; \
+	mv mcrl2parser.hpp ../include/mcrl2/parse
 
 chiparser:
 	cd tools/chi2mcrl2; \
 	flex -Pchi -ochilexer.cpp chilexer.ll; \
 	bison -p chi -d -o chiparser.cpp chiparser.yy; \
-	sed -i 's/#ifdef YYDEBUG/#if YYDEBUG/g' chiparser.cpp
+	sed -i "" 's/#ifdef YYDEBUG/#if YYDEBUG/g' chiparser.cpp
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<

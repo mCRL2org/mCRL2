@@ -2,9 +2,9 @@
 // file: smt_lib_solver.cpp
 
 #include "mcrl2/data/prover/smt_lib_solver.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/utilities/utilities.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;

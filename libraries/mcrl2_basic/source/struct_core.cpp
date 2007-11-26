@@ -11,8 +11,8 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "libstruct_core.h"
-#include "print/messaging.h"
+#include "mcrl2/struct_core.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 

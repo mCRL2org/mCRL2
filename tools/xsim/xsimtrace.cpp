@@ -19,12 +19,12 @@
 #include <sstream>
 #include <aterm2.h>
 #include "xsimtrace.h"
-#include "libstruct.h"
-#include "libprint_types.h"
-#include "libprint.h"
-#include <mcrl2/lps/nextstate.h>
-#include "print/messaging.h"
-#include <mcrl2/utilities/aterm_ext.h>
+#include "mcrl2/struct.h"
+#include "mcrl2/print/types.h"
+#include "mcrl2/print.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/print/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;

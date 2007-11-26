@@ -4,17 +4,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libprint_c.h
+/// \file print.h
 
-#ifndef _LIBPRINT_C_H
-#define _LIBPRINT_C_H
+#ifndef MCRL2_PRINT_H
+#define MCRL2_PRINT_H
 
 #include <stdio.h>
-#include <aterm2.h>
 #include <ctype.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "libprint_types.h"
+#include "aterm2.h"
+
+#include "mcrl2/print/types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +47,28 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 }
 #endif
 
+#ifdef __cplusplus
+#include <ostream>
+#include <string>
+
+//Global preconditions:
+//- the ATerm library has been initialised
+//- gsEnableConstructorFunctions() has been called
+
+void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
+  t_pp_format pp_format);
+/*Pre: OutStream points to a stream to which can be written
+       Part is an ATerm containing a part of a mCRL2 specification or state
+       formula
+  Post:A textual representation of Part is written to OutStream using method
+       pp_format
+*/
+
+std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
+/*Pre: Part is an ATerm containing a part of a mCRL2 specification or state
+       formula
+  Ret: A textual representation of Part pretty printed using method pp_format
+*/
 #endif
+
+#endif //MCRL2_PRINT_H

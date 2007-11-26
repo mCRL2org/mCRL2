@@ -6,8 +6,8 @@
 //
 /// \file messaging.cpp
 
-#include "print/messaging.h"
-#include "libprint_c.h"
+#include "mcrl2/print/messaging.h"
+#include "mcrl2/print.h"
 
 #ifdef __cplusplus
 namespace mcrl2 {

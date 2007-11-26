@@ -19,13 +19,13 @@
 #include <limits.h>
 #include <getopt.h>
 #include <aterm2.h>
-#include "libstruct.h"
-#include "libprint_types.h"
-#include "libprint_c.h"
-#include "libparse.h"
-#include "typecheck.h"
-#include "libalpha.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/types.h"
+#include "mcrl2/print.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
+#include "mcrl2/lps/alpha.h"
+#include "mcrl2/print/messaging.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;

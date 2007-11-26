@@ -9,10 +9,10 @@
 
 #include <cstring>
 #include <cstdio>
-#include "mcrl2lexer.h"
-#include "mcrl2parser.hpp"
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/parse/mcrl2lexer.h"
+#include "mcrl2/parse/mcrl2parser.hpp"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__

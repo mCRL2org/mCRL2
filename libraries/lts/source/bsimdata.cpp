@@ -9,8 +9,8 @@
 
 #include <algorithm>
 #include <string>
-#include "libprint.h"
-#include "libstruct.h"
+#include "mcrl2/print.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/lts/detail/bsim.h"
 #include "mcrl2/utilities/aterm_ext.h"
 

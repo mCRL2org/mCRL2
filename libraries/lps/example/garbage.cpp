@@ -8,9 +8,9 @@
 /// \brief Add your file description here.
 
 #include <sstream>
-#include "struct/libstruct.h"
-#include "libparse.h"
-#include "typecheck.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/parse.h"
+#include "mcrl2/parse/typecheck.h"
 #include "gc.h"
 
 const std::string SPECIFICATION =

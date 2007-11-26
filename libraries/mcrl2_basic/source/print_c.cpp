@@ -4,14 +4,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libprint_c.cpp
+/// \file print_c.cpp
 
 #include <stdint.h>
 #include <stddef.h>
-#include "libprint_c.h"
+#include "mcrl2/print.h"
 
 #define PRINT_C
-#include "libprint_impl.h"
+#include "mcrl2/print/implementation.h"
 
 extern "C" {
 

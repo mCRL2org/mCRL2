@@ -137,9 +137,9 @@
 #include <string.h>
 
 #include <aterm2.h>
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;
@@ -186,7 +186,7 @@ typedef union YYSTYPE
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2616 of glr.c.  */
+/* Line 2604 of glr.c.  */
 #line 191 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1

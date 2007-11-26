@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <sstream>
 #include <aterm2.h>
-#include "libstruct.h"
-#include "print/messaging.h"
+#include "mcrl2/struct.h"
+#include "mcrl2/print/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "libprint.h"
+#include "mcrl2/print.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum/standard.h"
 

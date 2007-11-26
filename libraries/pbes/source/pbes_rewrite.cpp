@@ -9,7 +9,7 @@
 
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
-#include "print/messaging.h"
+#include "mcrl2/print/messaging.h"
 #include "atermpp/substitute.h"
 
 #include "sort_functions.h"

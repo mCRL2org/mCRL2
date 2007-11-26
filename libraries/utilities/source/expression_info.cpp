@@ -10,7 +10,7 @@
 // Implementation of class Expression_Info
 // file: expression_info.cpp
 
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/utilities/expression_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
 

@@ -16,7 +16,7 @@
 #include "atermpp/aterm_traits.h"
 #include "mcrl2/basic/detail/constructors.h"
 #include "mcrl2/basic/detail/soundness_checks.h"
-#include "struct/libstruct.h"
+#include "mcrl2/struct.h"
 
 namespace lps {
 

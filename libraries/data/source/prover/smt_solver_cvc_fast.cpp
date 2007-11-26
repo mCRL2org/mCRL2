@@ -4,9 +4,9 @@
 #ifdef HAVE_CVC
 
 #include "prover/smt_solver_cvc_fast.h"
-#include "print/messaging.h"
-#include "libprint_c.h"
-#include "libstruct.h"
+#include "mcrl2/print/messaging.h"
+#include "mcrl2/print.h"
+#include "mcrl2/struct.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/utilities/utilities.h"
 

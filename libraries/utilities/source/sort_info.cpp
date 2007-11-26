@@ -11,7 +11,7 @@
 // file: sort_info.cpp
 
 #include "mcrl2/utilities/sort_info.h"
-#include "libstruct.h"
+#include "mcrl2/struct.h"
 #include <cstring>
 #include "mcrl2/utilities/aterm_ext.h"
 
