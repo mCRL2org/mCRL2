@@ -16,6 +16,7 @@
 #include <functional>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include "tipi/configuration.hpp"
@@ -118,6 +119,9 @@ namespace squadt {
 
       /** \brief Returns a pointer to a command that performs a configured action on a file */
       std::auto_ptr < command > get_registered_command(mime_type const&, std::string const& = "$") const;
+
+      /** \brief Guesses a mime type from the name of a file */
+      tipi::mime_type mime_type_from_name(boost::filesystem::path const& p, const bool c = true) const;
 
       /** \brief Associates a type with a command */
       void register_command(mime_type const&, std::string const&);

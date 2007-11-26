@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include <boost/foreach.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 #include <boost/bind.hpp>
 
@@ -170,6 +171,25 @@ namespace squadt {
 
   /**
    * \brief Whether or not a command is associated with this type
+   * \param[in] p path to a file
+   * \param[in] c whether or not to consult the system mime-database
+   **/
+  tipi::mime_type type_registry::mime_type_from_name(boost::filesystem::path const& p, const bool c) const {
+    std::string extension(boost::filesystem::extension(p));
+
+    extension = ((extension.size() <= 1) ? "unknown" : extension.substr(1));
+
+    BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
+      if (c.first.get_sub_type() == extension) {
+        return c.first;
+      }
+    }
+
+    return mime_type(extension);
+  }
+
+  /**
+   * \brief Whether or not a command is associated with this type
    * \param[in] t mime type for which to search
    * \param[in] c whether or not to consult the system mime-database
    **/
@@ -179,7 +199,6 @@ namespace squadt {
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
                 boost::bind(&mime_type::operator==, mime_type("text/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
-
     }
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
@@ -187,7 +206,7 @@ namespace squadt {
     }
 
     if (i == command_for_type.end()) {
-      if (t.known_main_type() && c) {
+      if (c) {
         bool result = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
 
         return result || ((t.is_type(tipi::mime_type::text)) && (global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain")) != 0));

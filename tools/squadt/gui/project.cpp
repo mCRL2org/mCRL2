@@ -364,13 +364,13 @@ std::cerr << "TARGET " << t.get() << std::endl;
 
       while (file_name_dialog.ShowModal() == wxID_OK) {
         boost::filesystem::path  name(file_name_dialog.GetValue().fn_str());
-        std::string              extension(boost::filesystem::extension(name));
-        tipi::mime_type          type((extension.size() == 1) ? "unknown" : extension.substr(1));
         
         try {
           boost::shared_ptr < processor > new_processor(manager->construct());
         
-          new_processor->append_output("authentic", type, name.leaf(), processor::object_descriptor::original);
+          new_processor->append_output("authentic",
+                global_build_system.get_type_registry()->mime_type_from_name(name),
+                name.leaf(), processor::object_descriptor::original);
 
           // Try creating the file
           std::ofstream f((boost::filesystem::path(manager->get_project_store()) / name).string().c_str(), std::ios::out);

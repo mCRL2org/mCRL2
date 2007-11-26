@@ -26,6 +26,7 @@
 #include "project_manager.tcc"
 #include "processor.tcc"
 #include "settings_manager.hpp"
+#include "type_registry.hpp"
 #include "visitors.hpp"
 
 namespace squadt {
@@ -448,17 +449,16 @@ namespace squadt {
 
     assert(exists(s) && !is_directory(s) && native(d));
 
-    path           destination_path = store / path(d.empty() ? s.leaf() : d);
-    boost::shared_ptr< processor > p                = processor::create(m_interface.lock());
+    path           destination_path  = store / path(d.empty() ? s.leaf() : d);
+    boost::shared_ptr< processor > p = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
       copy_file(s, destination_path);
     }
 
-    build_system::mime_type type(extension(s).empty() ? "unknown" : extension(s).substr(1));
-
     /* Add the file to the project */
-    p->append_output("", type, destination_path.leaf(), processor::object_descriptor::original);
+    p->append_output("", global_build_system.get_type_registry()->mime_type_from_name(s.leaf()),
+                                destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
 
