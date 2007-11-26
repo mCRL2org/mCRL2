@@ -141,9 +141,9 @@ INPUT.search { font-size: 75%;
 #main {
   position: relative;
   padding: 0;
-  width: 750px;
-  margin-left: auto;
-  margin-right: auto;
+/*  width: 750px;*/
+  margin-left: 20px;
+  margin-right: 20px;
   text-align: left;
 }
 .contents {
@@ -162,6 +162,7 @@ INPUT.search { font-size: 75%;
 #pageinfo {
 	font-size: x-small;
 	color: #555;
+	margin-bottom: 50px;
 }
 
 div.qindex {
@@ -453,7 +454,7 @@ div.tabs {
    left: -1em;
    border-bottom: 1px solid #aaa;
    padding-top: 1em;
-   width: 749px;
+   width: 103%;
 }
 
 div.tabs ul {
@@ -498,7 +499,7 @@ div.tabs a:hover {
 	color: #ba0000;
 }
 
-div.tabs span {
+div.tabs li span {
    border: 1px solid #aaa;
    background-color: #eee;
    padding          : 0.3em;
@@ -512,13 +513,13 @@ div.tabs td {
    text-decoration  : none;
 }
 
+div.tabs li#current span {
+	border-bottom: 0px;
+	padding-bottom: 0.4em;
+	background-color: white;
+	font-weight: bold;
+}
+
 /* Commented Backslash Hack hides rule from IE5-Mac \*/
 div.tabs span {float : none;}
 /* End IE5-Mac hack */
-
-div.tabs li.current span
-{
-  border-bottom: 0px;
-  padding-bottom: 0.4em;
-   background-color: white;
-}
