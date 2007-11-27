@@ -7,6 +7,7 @@ project core
        : usage-requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD
+          <dependency>/libraries//atermpp
        ;
 
 obj mcrl2parser.o
