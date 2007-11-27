@@ -103,7 +103,6 @@ bool LTSViewApp::OnInit() {
 
   wxCmdLineParser cmdParser(argc,argv);
 
-  cmdln.AddSwitch(wxT("_"),wxT("version"),wxT("display version information and terminate"));
   cmdParser.AddParam(wxT("INFILE"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL);
 
   if (cmdParser.Parse() == 0) {
