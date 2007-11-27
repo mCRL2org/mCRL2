@@ -7,6 +7,7 @@
 /// \file mcrl2i.cpp
 
 #define NAME "mcrl2i"
+#define VERSION "July 2007"
 
 #include <iostream>
 #include <sstream>
@@ -243,6 +244,11 @@ void declare_variables(string &vars, specification &spec)
   }
 }
 
+void print_version(FILE *f)
+{
+  fprintf(f, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
+}
+
 void print_help(FILE *f, char *Name)
 {
   fprintf(f,
@@ -253,12 +259,12 @@ void print_help(FILE *f, char *Name)
     "%s"
     "\n"
     "The following command line options are available.\n"
-    "  -h, --help               display this help gsMessage\n"
-    "  -q, --quiet              do not display any unrequested information\n"
-    "  -v, --verbose            display consise intermediate gsMessages\n"
-    "  -d, --debug              display detailed intermediate gsMessages\n"
-    "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n",
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n"
+    "  -h, --help               display this help and terminate\n"
+    "      --version            display version information and terminate\n"
+    "  -q, --quiet              do not display warning messages\n"
+    "  -v, --verbose            display consise intermediate messages\n"
+    "  -d, --debug              display detailed intermediate messages\n",
     Name,
     help_gsMessage
   );
@@ -269,24 +275,24 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvdyR:"
+  #define sopts "hqvdR:"
+  #define version_option CHAR_MAX + 1
   struct option lopts[] = {
-    { "help",  no_argument,  NULL,  'h' },
-    { "quiet",  no_argument,  NULL,  'q' },
-    { "verbose",    no_argument,  NULL,  'v' },
-    { "debug",  no_argument,  NULL,  'd' },
-    { "dummy",  no_argument,  NULL,  'y' },
-    { "rewriter",  no_argument,  NULL,  'R' },
+    { "help",     no_argument,  NULL,  'h' },
+    { "version",  no_argument,  NULL,  version_option },
+    { "quiet",    no_argument,  NULL,  'q' },
+    { "verbose",  no_argument,  NULL,  'v' },
+    { "debug",    no_argument,  NULL,  'd' },
+    { "rewriter", no_argument,  NULL,  'R' },
     { 0, 0, 0, 0 }
   };
 
   ATinit(argc,argv,&stackbot);
 
+  RewriteStrategy strat = GS_REWR_INNER;
   bool quiet = false;
   bool verbose = false;
   bool debug = false;
-  bool usedummy = false;
-  RewriteStrategy strat = GS_REWR_INNER;
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
@@ -294,6 +300,9 @@ int main(int argc, char **argv)
     {
       case 'h':
         print_help(stderr, argv[0]);
+        return 0;
+      case version_option:
+        print_version(stderr);
         return 0;
       case 'q':
         quiet = true;
@@ -303,9 +312,6 @@ int main(int argc, char **argv)
         break;
       case 'd':
         debug = true;
-        break;
-      case 'y':
-        usedummy = true;
         break;
       case 'R':
         strat = RewriteStrategyFromString(optarg);

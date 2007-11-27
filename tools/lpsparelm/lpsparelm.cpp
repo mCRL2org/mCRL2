@@ -12,6 +12,9 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/parelm.h>
 
+#define NAME    "lpsparelm"
+#define VERSION "July 2007"
+
 struct tool_configuration {
   std::string input_file;  ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
@@ -138,7 +141,7 @@ tool_configuration parse_command_line(int ac, char** av, tool_configuration& opt
   }
         
   if (vm.count("version")) {
-    std::cerr << "July 2007" << " (revision " << REVISION << ")" << std::endl;
+    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
 
     exit (0);
   }

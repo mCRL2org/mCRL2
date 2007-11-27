@@ -12,7 +12,7 @@
  
  
 #define NAME "txt2pbes" 
-#define VERSION "0.0.1" 
+#define VERSION "July 2007" 
  
 
 
@@ -491,6 +491,11 @@ pbes<> make_pbes(const string fileName){
  
 
 
+void print_version(void)
+{
+  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
+}
+
 
 void print_help(void)
 {
@@ -500,7 +505,8 @@ void print_help(void)
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
     "used.\n"
     "  -s, --syntax          display the syntax (and examples) of the expected text input\n"    	  
-    "  -h, --help            display this help message and terminate\n"
+    "  -h, --help            display this help and terminate\n"
+    "      --version         display version information and terminate\n"
     "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n"
   );
@@ -548,13 +554,15 @@ void print_more_info(char *name)
 void parse_command_line(int argc, char **argv)
 //==========================
 {
-#define SHORT_OPTIONS "hvds"
-#define VERSION_OPTION CHAR_MAX + 1;
+#define SHORT_OPTIONS "shqvd"
+#define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
-    { "syntax",   no_argument,        NULL,  's' },
-    { "help",      no_argument,        NULL,  'h' },
-     { "verbose",   no_argument,        NULL,  'v' },
-    { "debug",     no_argument,        NULL,  'd' },
+    { "syntax",  no_argument, NULL,  's' },
+    { "help",    no_argument, NULL,  'h' },
+    { "version", no_argument, NULL, VERSION_OPTION },
+    { "quiet",   no_argument, NULL,  'q' },
+    { "verbose", no_argument, NULL,  'v' },
+    { "debug",   no_argument, NULL,  'd' },
     { 0, 0, 0, 0 }
   };
   int option;
@@ -567,6 +575,12 @@ void parse_command_line(int argc, char **argv)
     case 'h': /* help */
       print_help();
       exit(0);
+    case VERSION_OPTION: /* version */
+      print_version();
+      exit(0);
+    case 'q': /* quiet */
+      gsSetQuietMsg();
+      break;
     case 'v': /* verbose */
       gsSetVerboseMsg();
       break;

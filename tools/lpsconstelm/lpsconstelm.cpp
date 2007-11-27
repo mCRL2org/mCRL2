@@ -33,7 +33,8 @@ using namespace lps;
 using namespace atermpp;
 using namespace mcrl2::utilities;
 
-const char* version = "July 2007";
+#define NAME "lpsconstelm"
+#define VERSION "July 2007"
 
 class lpsConstElm {
   private:
@@ -1053,7 +1054,7 @@ void lpsConstElm::filter() {
 // Gets the version of the tool
 //
 inline std::string lpsConstElm::getVersion() {
-  return (version);
+  return VERSION;
 }
 
 void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
@@ -1103,7 +1104,7 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
   }
 
   if (vm.count("version")) {
-    std::cerr << version << " (revision " << REVISION << ")" << std::endl;
+    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
 
     exit (0);
   }

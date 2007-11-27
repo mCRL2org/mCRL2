@@ -114,8 +114,9 @@ int main(int argc, char **argv) {
 
 // -- command line --------------------------------------------------
 
-// optional input file that should contain an FSM
-#define PROGRAM_NAME "DiaGraph"
+#define NAME "diagraphica"
+#define VERSION "July 2007"
+
 
 // parse command line 
 bool parse_command_line(
@@ -124,8 +125,9 @@ bool parse_command_line(
 {
     wxCmdLineParser cmdln(argc,argv);
 
-    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-    cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
+    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
+    cmdln.AddSwitch(wxT("_"),wxT("version"),wxT("display version information and terminate"));
+    cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any warning messages"));
     cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
     cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
     cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
@@ -136,15 +138,21 @@ bool parse_command_line(
     return false;
     }
 
+    if (cmdln.Found(wxT("_"))) {
+    std::cout << NAME " " << VERSION << " (revision " << REVISION << ")" << std::endl;
+    return false;
+    }
+
     if (cmdln.Found(wxT("h"))) {
-    std::cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
-              << "DiaGrahica is a prototype for the interactive visual analysis of multivariate\n" 
-	          << "state transition graphs. If INFILE is supplied it will be\n"
-              << "loaded into DiaGraphica.\n"
+    std::cout << "Usage: " << NAME << " [OPTION]... [INFILE]\n"
+              << "DiaGraphica is a prototype for the interactive visual analysis of multivariate\n" 
+              << "state transition graphs. If INFILE is supplied it will be loaded into\n"
+              << "DiaGraphica.\n"
               << "\n"
               << "Options:\n"
-              << "  -h, --help               display this help message\n"
-              << "  -q, --quiet              do not display any unrequested information\n"
+              << "  -h, --help               display this help and terminate\n"
+              << "      --version            display version information and terminate\n"
+              << "  -q, --quiet              do not display warning messages\n"
               << "  -v, --verbose            display concise intermediate messages\n"
               << "  -d, --debug              display detailed intermediate messages\n";
     return false;

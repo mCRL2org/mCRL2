@@ -101,7 +101,12 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-#define PROGRAM_NAME "xsim"
+#define NAME "xsim"
+#define VERSION "July 2007"
+#define VERSION_OPTION "_"
+//XXX VERSION_OPTION should be an untypable character, wxWidgets doesn't allow
+//me to enter anything but [a-zA-Z0-9_]. I have chosen "_" because it is the
+//less likeliest character to be entered. Aad
 
 //------------------------------------------------------------------------------
 // XSim
@@ -120,12 +125,13 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 
   wxCmdLineParser cmdln(argc,argv);
 
-  cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-  cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any unrequested information"));
-  cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
-  cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
   cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
   cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
+  cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
+  cmdln.AddSwitch(wxT(VERSION_OPTION),wxT("version"),wxT("display version information and terminate"));
+  cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display warning messages"));
+  cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
+  cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
   cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
   cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPSs."));
 
@@ -134,18 +140,23 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   }
 
   if (cmdln.Found(wxT("h"))) {
-    std::cerr << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
+    std::cerr << "Usage: " << NAME << " [OPTION]... [INFILE]\n"
               << "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
               << "loaded into the simulator.\n"
               << "\n"
               << "Options:\n"
-              << "  -h, --help               display this help message\n"
-              << "  -q, --quiet              do not display any unrequested information\n"
-              << "  -v, --verbose            display concise intermediate messages\n"
-              << "  -d, --debug              display detailed intermediate messages\n"
               << "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n";
+              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n"
+              << "  -h, --help               display this help and terminate\n"
+              << "      --version            display version information and terminate\n"
+              << "  -q, --quiet              do not display warning messages\n"
+              << "  -v, --verbose            display concise intermediate messages\n"
+              << "  -d, --debug              display detailed intermediate messages\n";
+    return false;
+  }
 
+  if (cmdln.Found(wxT(VERSION_OPTION))) {
+    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
     return false;
   }
 

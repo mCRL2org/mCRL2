@@ -100,8 +100,7 @@ void print_help() {
 }
 
 void print_version() {
-  cout << "ltsgraph version " << LTSG_VERSION << "\n"
-       << "Part of mCRL2 toolset revision " << REVISION << "\n";
+  cout << "ltsgraph version " << LTSG_VERSION << " (revision " << REVISION << ")" << endl;
 }
 
 class GraphApp : public wxApp

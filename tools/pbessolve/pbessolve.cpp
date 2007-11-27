@@ -223,7 +223,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   } 
    
   if (vm.count("version")) { 
-    cerr << NAME << " " << VERSION  << endl; 
+    cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << endl; 
     exit(0); 
   } 
    
