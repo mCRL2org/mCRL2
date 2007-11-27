@@ -18,7 +18,7 @@
 #include "atermpp/vector.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/detail/linear_process_utility.h"
 #include "mcrl2/lps/detail/sorted_sequence_algorithm.h"

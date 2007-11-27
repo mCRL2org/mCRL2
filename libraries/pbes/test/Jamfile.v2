@@ -3,7 +3,6 @@ import testing ;
 project libraries/pbes/test
    : requirements
        <use>/boost//headers
-       <source>/libraries//rewrite
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes

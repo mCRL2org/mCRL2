@@ -1,7 +1,6 @@
 project libraries/pbes/example
    : requirements
        <use>/boost//headers
-       <source>/libraries//rewrite
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes
@@ -10,10 +9,12 @@ project libraries/pbes/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe bisimulation    : bisimulation.cpp : ;
+exe bisimulation : bisimulation.cpp : ;
+exe lps2pbes     : lps2pbes.cpp : ;
 
 install dist
    :
      bisimulation
+     lps2pbes
    :
    ;

@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/tools.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/basic/detail/read_text.h"
+#include "mcrl2/modal_formula/detail/read_text.h"
 
 using namespace atermpp;
 using namespace lps;

@@ -501,7 +501,7 @@ namespace pbes_timed
     } else if (s::is_false(f)) {
       result = false_();
     } else if (s::is_not(f)) {
-		  result = not_(RHS(f0, s::lhs(f), lps, T, context));
+		  result = not_(RHS(f0, s::not_arg(f), lps, T, context));
     } else if (s::is_and(f)) {
 		  result = and_(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_or(f)) {
@@ -744,7 +744,7 @@ namespace pbes_untimed
     } else if (s::is_false(f)) {
       result = false_();
     } else if (s::is_not(f)) {
-      result = not_(RHS(f0, s::lhs(f), lps, context));
+      result = not_(RHS(f0, s::not_arg(f), lps, context));
     } else if (s::is_and(f)) {
       result = and_(RHS(f0, s::lhs(f), lps, context), RHS(f0, s::rhs(f), lps, context));
     } else if (s::is_or(f)) {
