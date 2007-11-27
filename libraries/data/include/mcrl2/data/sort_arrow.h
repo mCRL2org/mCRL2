@@ -40,7 +40,7 @@ typedef term_list<sort_arrow> sort_arrow_list;
 //                | SortStruct(<StructCons>+)                              (- di)
 //                | SortArrow(<SortExpr>+, <SortExpr>)                 (- di)
 //                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
-class sort_arrow: public aterm_appl
+class sort_arrow: public sort_expression
 {
   public:
     sort_arrow()
