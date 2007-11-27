@@ -23,7 +23,7 @@
 class Cluster;
 
 // class for cluster comparison based on cluster volumes
-class Comp_ClusterVolume {
+class Comp_BCVolume {
   public:
     bool operator()(const Cluster*,const Cluster*) const;
 };
@@ -87,15 +87,16 @@ class Cluster {
     
     // General cluster information
     void      center();
-    void      computeSizeAndDescendantPositions();
+    void      computeSizeAndPositions();
     float     getBaseRadius() const;
     float     getPosition() const;
     int       getRank() const;
     int       getPositionInRank() const;
     void      setPositionInRank(int p);
     float     getTopRadius() const;
-    float     getSize() const;
-    float     getVolume() const;
+    float     getBCHeight() const;
+    float     getBCRadius() const;
+    float     getBCVolume() const;
     bool      isCentered() const;
     void      setPosition(float p);
 
@@ -129,10 +130,10 @@ class Cluster {
     float position;
     int rank;
     int positionInRank;
-    float size;
     std::vector< State* > states;
     float topRadius;
-    float volume;
+    float bc_radius; // radius of the bounding cylinder that contains this cluster's subtree
+    float bc_height; // height of the bounding cylinder that contains this cluster's subtree
     std::vector< State* > undecidedStates;
     std::vector< std::vector< std::vector< State* > > > slots;
     int visObject;

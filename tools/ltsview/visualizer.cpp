@@ -53,10 +53,10 @@ float Visualizer::getHalfStructureHeight() const {
 void Visualizer::setLTS(LTS* l,bool compute_ratio) {
   lts = l;
   if (compute_ratio) {
-    float ratio = lts->getInitialState()->getCluster()->getSize() / 
-                  (lts->getNumRanks() - 1);
-    settings->setFloat(ClusterHeight,max(4,round_to_int(40.0f * ratio)) / 
-                      10.0f);
+    float ratio = lts->getInitialState()->getCluster()->getBCRadius() /
+      lts->getInitialState()->getCluster()->getBCHeight();
+    settings->setFloat(ClusterHeight,
+        max(4,round_to_int(40.0f * ratio)) / 10.0f);
   }
   update_abs = true;
   traverseTree(true);

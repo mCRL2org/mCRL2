@@ -614,16 +614,7 @@ void LTS::computeClusterLabelInfo() {
 }
 
 void LTS::positionClusters() {
-  // iterate over the ranks in reverse order (bottom-up)
-  for (vector< vector< Cluster*> >::reverse_iterator r_it =
-      clustersInRank.rbegin(); r_it != clustersInRank.rend(); ++r_it)  {
-    // iterate over the clusters in this rank
-    for (vector<Cluster*>::iterator c_it = r_it->begin(); c_it != r_it->end();
-        ++c_it) {
-      // compute the size of this cluster and the positions of its descendants
-      (**c_it).computeSizeAndDescendantPositions();
-    }
-  }
+  initialState->getCluster()->computeSizeAndPositions();
   // position the initial state's cluster
   initialState->getCluster()->center();
 }

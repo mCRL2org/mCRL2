@@ -14,14 +14,13 @@
 using namespace std;
 using namespace Utils;
 
-bool Comp_ClusterVolume::operator()(const Cluster* c1,const Cluster* c2) const {
-  return (c1->getVolume() < c2->getVolume());
+bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const {
+  return (c1->getBCVolume() < c2->getBCVolume());
 }
 
 Cluster::Cluster(int r) {
   ancestor = NULL;
   position = 0.0f;
-  size = 0.0f;
   baseRadius = 0.0f;
   topRadius = 0.0f;
   deadlock = false;
@@ -128,12 +127,16 @@ bool Cluster::hasSeveredDescendants()
 }
 
 
-float Cluster::getSize() const {
-  return size;
+float Cluster::getBCRadius() const {
+  return bc_radius;
 }
 
-float Cluster::getVolume() const {
-  return volume;
+float Cluster::getBCHeight() const {
+  return bc_height;
+}
+
+float Cluster::getBCVolume() const {
+  return bc_radius * bc_radius * PI * bc_height;
 }
 
 float Cluster::getPosition() const {
@@ -382,13 +385,14 @@ void Cluster::positionStatesSpiral() {
   }
 }
 
-void Cluster::computeSizeAndDescendantPositions() {
-// pre: size of every descendant and its number of slots are known 
-// (and assumed to be correct)
-  
+void Cluster::computeSizeAndPositions() {
   /* We also use this function to calculate the number of slots.
    * This process is described in Frank van Ham's Master's thesis, p. 24
    */
+  // Recurse into the tree (depth first)
+  for (unsigned int i = 0; i < descendants.size(); ++i) {
+    descendants[i]->computeSizeAndPositions();
+  }
    
   /* Compute the cluster radius r such that all states fit nicely into the
    * cluster. Suppose the cluster has N states and every state is visualized by
@@ -404,88 +408,76 @@ void Cluster::computeSizeAndDescendantPositions() {
 
   if (descendants.size() == 0) { 
     baseRadius = topRadius;
-    size = topRadius;
-    volume = 4 * PI/3 * topRadius * topRadius * topRadius;
-    //volume = 0.0f;
-    
+    bc_radius = topRadius;
+    bc_height = 1.0f;
     // Assign as much slots as there are nodes, to provide the best  
     // possible spacing
     // The position of the nodes is by the index as follows:
     // 0 -- getNumStates + 1: The rim slots.
     numSlots = getNumStates();
-  }
-  else if (descendants.size() == 1) {
+  } else if (descendants.size() == 1) {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
-    size = max(topRadius,(**descendants.begin()).getSize());
-    volume  = PI / 3 * (baseRadius - topRadius) * (baseRadius - topRadius);
-    volume += PI * baseRadius * topRadius;
-    volume += desc->getVolume();
+    bc_radius = max(topRadius,desc->getBCRadius());
+    bc_height = desc->getBCHeight() + 1.0f;
     desc->center();
 
     // The number of slots is double that of the descendant's slots, capped to
     // 32.
     numSlots = desc->getTotalNumSlots() * 2;
     numSlots = min(32,numSlots);
-  }
-  else { // descendants.size() > 1
+  } else { // descendants.size() > 1
     // sort descendants by size in ascending order
-    sort( descendants.begin(), descendants.end(), Comp_ClusterVolume() );
+    sort(descendants.begin(),descendants.end(),Comp_BCVolume());
 
     // determine whether a unique smallest descendant exists
     Cluster* smallest = descendants[0];
     Cluster* nextSmallest = descendants[1];
     
-    bool uniqueSmallest = ( ( nextSmallest->getVolume() - smallest->getVolume()
-    ) / smallest->getVolume()) > 0.01f;
+    bool uniqueSmallest = ((nextSmallest->getBCVolume()-smallest->getBCVolume()) / 
+        smallest->getBCVolume()) > 0.01f;
     
     // determine whether a unique largest descendant exists
-    Cluster* largest = descendants[ descendants.size()-1 ];
-    Cluster* nextLargest = descendants[ descendants.size()-2 ];
+    Cluster* largest = descendants[descendants.size()-1];
+    Cluster* nextLargest = descendants[descendants.size()-2];
 
-    bool uniqueLargest = ( ( nextLargest->getVolume() - largest->getVolume() ) /
-        largest->getVolume() ) < -0.01f;
+    bool uniqueLargest = ((nextLargest->getBCVolume()-largest->getBCVolume()) /
+        largest->getBCVolume()) < -0.01f;
 
-    // invariant: descendants in range [noPosBegin, noPosEnd) have not been
-    // assigned a position yet
-    int noPosBegin = 0;
-    int noPosEnd = descendants.size();
+    // invariant: descendants in range [x,y) have not been assigned a position
+    int x = 0;
+    int y = descendants.size();
     
-    float centerSize = 0.0f;  // size of largest descendant in center
-    float rimSize = 0.0f;  // size of largest descendant on rim
+    float bcr_center = 0.0f;  // BC radius of largest descendant in center
+    float bcr_rim = 0.0f;  // BC radius of largest descendant on rim
     if (uniqueLargest) {
       // center the largest descendant
       largest->center();
-      --noPosEnd;
-
-      centerSize = largest->getSize();
-      rimSize = nextLargest->getSize();
-    }
-    else {
+      --y;
+      bcr_center = largest->getBCRadius();
+      bcr_rim = nextLargest->getBCRadius();
+    } else {
       // no unique largest descendant, so largest will be placed on the rim
-      rimSize = largest->getSize();
-      
+      bcr_rim = largest->getBCRadius();
       if (uniqueSmallest) {
         // center the smallest descendant
         smallest->center();
-        ++noPosBegin;
-        centerSize = smallest->getSize();
+        ++x;
+        bcr_center = smallest->getBCRadius();
       }
     }
     
     // compute the radius of the base of the cylinder and the cluster's size
-    float minRimRadius = (float)( rimSize / sin(PI / (noPosEnd - noPosBegin)) );
-    baseRadius = max( centerSize + rimSize + 0.01f, minRimRadius );
-    size = max( topRadius, baseRadius );
-
-    // compute the cluster's volume, which is the volume of the cylinder...
-    volume  = PI / 3 * (baseRadius - topRadius) * (baseRadius - topRadius);
-    volume += PI * baseRadius * topRadius;
-    // ...plus the sum of the volumes of all the descendants
-    for (vector< Cluster* >::iterator descit = descendants.begin();
-        descit != descendants.end(); ++descit) {
-      volume += (**descit).getVolume();
+    float minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
+    baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
+    bc_radius = max(topRadius,baseRadius + bcr_rim);
+    bc_height = 0.0f;
+    for (unsigned int i = 0; i < descendants.size(); ++i) {
+      if (descendants[i]->getBCHeight() > bc_height) {
+        bc_height = descendants[i]->getBCHeight();
+      }
     }
+    bc_height += 1.0f;
 
     // Divide the remaining descendants over the rim of the circle. First take
     // the two largest unpositioned clusters and place them opposite to each
@@ -495,42 +487,26 @@ void Cluster::computeSizeAndDescendantPositions() {
     // the clusters are placed in the following order (starting at angle 0 and
     // going counter-clockwise): 5, 0, 3, 4, 1, 2
 
-    bool begin = false;
     int i = 0;
-    int j = ( noPosEnd - noPosBegin ) / 2 + ( noPosEnd - noPosBegin ) % 2;
-    float angle = 360.0 / ( noPosEnd - noPosBegin );
-    while (noPosBegin != noPosEnd) {
-      if (begin) {
-        if (noPosBegin+1 != noPosEnd) {
-          descendants[noPosBegin]->setPosition( (i++)*angle );
-          volume += descendants[noPosBegin]->getVolume();
-          noPosBegin++;
-          descendants[noPosBegin]->setPosition( (j++)*angle );
-          volume += descendants[noPosBegin]->getVolume();
-          noPosBegin++;
+    int h = (y-x) / 2 + (y-x) % 2;
+    float angle = 360.0f / (y-x);
+    while (x != y) {
+      if (i % 2 == 1) {
+        descendants[x]->setPosition(i*angle);
+        ++x;
+        if (x != y) {
+          descendants[x]->setPosition((h+i)*angle);
+          ++x;
         }
-        else {
-          descendants[noPosBegin]->setPosition( i*angle );
-          volume += descendants[noPosBegin]->getVolume();
-          noPosBegin++;
-        }
-      }
-      else {
-        if(noPosEnd-1 != noPosBegin) {
-          noPosEnd--;
-          descendants[noPosEnd]->setPosition( (i++)*angle );
-          volume += descendants[noPosEnd]->getVolume();
-          noPosEnd--;
-          descendants[noPosEnd]->setPosition( (j++)*angle );
-          volume += descendants[noPosEnd]->getVolume();
-        }
-        else {
-          noPosEnd--;
-          descendants[noPosEnd]->setPosition( (i++)*angle );
-          volume += descendants[noPosEnd]->getVolume();
+      } else {
+        descendants[y-1]->setPosition(i*angle);
+        --y;
+        if (x != y) {
+          descendants[y-1]->setPosition((h+i)*angle);
+          --y;
         }
       }
-      begin = !begin;
+      ++i;
     }
 
     // Now all the positions of the descendants have been determined, we can

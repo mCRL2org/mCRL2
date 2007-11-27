@@ -225,7 +225,7 @@ Settings::Settings() {
   RGB_Color pos = {0, 255, 255};
   RGB_Color bg = {150,150,150};
   settings[StateSize]           = new Setting_Float(StateSize,0.1f);
-  settings[BranchRotation]      = new Setting_Int(BranchRotation,111);
+  settings[BranchRotation]      = new Setting_Int(BranchRotation,0);
   settings[ClusterHeight]       = new Setting_Float(ClusterHeight,0.0f);
   settings[BranchTilt]          = new Setting_Int(BranchTilt,30);
   settings[Quality]             = new Setting_Int(Quality,12);
