@@ -75,7 +75,8 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          object_descriptor(boost::weak_ptr < processor > const& g, tipi::mime_type const& m, tipi::uri const& u) :
+          object_descriptor(boost::weak_ptr < processor > const& g, tipi::mime_type const& m, tipi::uri const& u,
+                                processor::object_descriptor::status_type t = processor::object_descriptor::original) :
                                                            generator(g), mime_type(m), location(u), timestamp(0) {
           }
 
@@ -214,8 +215,7 @@ namespace squadt {
       void append_input(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Add an output object */
-      void append_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&,
-                                                object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
+      void append_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Add an output object */
       void append_output(tipi::configuration::parameter_identifier const&, tipi::object const&,

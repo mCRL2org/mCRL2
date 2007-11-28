@@ -98,9 +98,8 @@ namespace squadt {
    * \param id the identifier for the object
    * \param p shared pointer to an object descriptor
    **/
-  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& p, object_descriptor::status_type const& s) {
+  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& p) {
     p->generator = interface_object;
-    p->status    = s;
 
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       if (p->location == boost::static_pointer_cast< processor_impl::object_descriptor >(i->object)->location) {
@@ -119,7 +118,9 @@ namespace squadt {
   void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, tipi::object const& o, object_descriptor::status_type const& s) {
     boost::shared_ptr< object_descriptor > p(new object_descriptor(interface_object, o.get_mime_type(), o.get_location()));
 
-    append_output(id, p, s);
+    p->status = s;
+
+    append_output(id, p);
   }
 
   /**
@@ -1070,9 +1071,9 @@ namespace squadt {
    * \param[in] s the status of the new object
    **/
   void processor::append_output(tipi::configuration::parameter_identifier const& id, build_system::mime_type const& m, const std::string& u, object_descriptor::status_type const& s) {
-    boost::shared_ptr< processor_impl::object_descriptor > p(new processor_impl::object_descriptor(impl->interface_object, m, u));
+    boost::shared_ptr< processor_impl::object_descriptor > p(new processor_impl::object_descriptor(impl->interface_object, m, u, s));
 
-    impl->append_output(id, p, s);
+    impl->append_output(id, p);
   }
 
   void processor::configure(std::string const& w) {

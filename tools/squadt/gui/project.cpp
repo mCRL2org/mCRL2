@@ -325,7 +325,7 @@ namespace squadt {
         wxTreeItemId                       s = e.GetItem();
         boost::shared_ptr< processor >                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
         boost::shared_ptr< processor::object_descriptor > t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
-std::cerr << "TARGET " << t.get() << std::endl;
+
         p->relocate_output(*t, std::string(e.GetLabel().fn_str()));
       }
       else {
@@ -574,7 +574,7 @@ std::cerr << "TARGET " << t.get() << std::endl;
             install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
 
             /* Register handler to on update the object view after process termination */
-            p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, p, true));
+            p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
              
             /* Start tool configuration phase */
             p->reconfigure();
