@@ -296,7 +296,7 @@ namespace squadt {
     std::string basename(boost::filesystem::basename(name));
 
     if (4 < basename.size()) {
-      std::string suffix(basename.substr(name.size() - 4));
+      std::string suffix(basename.substr(basename.size() - 4));
 
       if (suffix[0] == '-') {
         for (size_t i = 1; i < 4; ++i) {

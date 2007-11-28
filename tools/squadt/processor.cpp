@@ -388,7 +388,7 @@ namespace squadt {
             remove(g->get_path_for_name(o->location));
           }
        
-          replace_output(id, o, object);
+          replace_output(id, o, object, object_descriptor::reproducible_up_to_date);
 
           /* Check status */
           o->self_check(*g);

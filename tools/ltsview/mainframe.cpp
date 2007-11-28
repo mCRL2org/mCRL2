@@ -472,7 +472,7 @@ void MainFrame::setFileInfo(wxFileName fn) {
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
-  wxString msg = wxT("LTSView - revision "REVISION"\n\n")
+  wxString msg = wxT("LTSView - revision "MCRL2_REVISION"\n\n")
     wxT("Tool for the interactive visualisation of state transition systems.\n\n")
     wxT("Developed by Bas Ploeger and Carst Tankink.\n")
     wxT("Based on visualisation techniques by Frank van Ham and Jack van Wijk. ")

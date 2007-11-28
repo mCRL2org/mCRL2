@@ -31,6 +31,7 @@ if $(WX_CPPFLAGS) {
         : <threading>multi
         :
         : <cxxflags>$(WX_CPPFLAGS)
+          <define>USING_WX
           <wx>yes
           <toolset>msvc:<user-interface>gui
         ;
@@ -41,6 +42,7 @@ if $(WX_CPPFLAGS) {
         : <threading>multi
         :
         : <cxxflags>$(WX_CPPFLAGS)
+          <define>USING_WX
           <wx>yes
           <toolset>msvc:<user-interface>gui
           <library>opengl

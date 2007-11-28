@@ -255,9 +255,9 @@ namespace squadt {
 
       type_registry* registry = global_build_system.get_type_registry();
 
-      std::set < build_system::mime_type > types(registry->get_mime_types());
+      std::set < tipi::mime_type > types(registry->get_mime_types());
 
-      BOOST_FOREACH(build_system::mime_type f, types) {
+      BOOST_FOREACH(tipi::mime_type f, types) {
         std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
 
         formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));

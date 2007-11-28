@@ -37,7 +37,7 @@ namespace squadt {
     public:
 
       /* \brief Guesses the mime type from a filename */
-      tipi::mime_type guess_mime_type(std::string const&) const;
+      tipi::mime_type guess_mime_type(boost::filesystem::path const&) const;
 
       /* \brief Gets the system command associated with a type, if any */
       std::string get_command(tipi::mime_type const&) const;
@@ -58,7 +58,7 @@ namespace squadt {
       if (wtype) {
         wxString mime_type;
      
-        wtype->GetMimeType(mime_type);
+        wtype->GetMimeType(&mime_type);
      
         delete wtype;
      
@@ -96,7 +96,7 @@ namespace squadt {
       return true;
     }
     else {
-      if (t.is_type(tipi::mime_type::text)) {
+      if (type.is_type(tipi::mime_type::text)) {
         wtype = m.GetFileTypeFromMimeType(wxT("text/plain"));
       }
 
@@ -110,15 +110,15 @@ namespace squadt {
     return false;
   }
 #else
-  inline tipi::mime_type system_mime_type_manager::guess_mime_type(std::string const& name) const {
+  inline tipi::mime_type system_mime_type_manager::guess_mime_type(boost::filesystem::path const&) const {
     return tipi::mime_type("unknown");
   }
 
-  inline std::string system_mime_type_manager::get_command(tipi::mime_type const& type) const {
+  inline std::string system_mime_type_manager::get_command(tipi::mime_type const&) const {
     return std::string();
   }
 
-  inline bool system_mime_type_manager::is_known_type(tipi::mime_type const& name) const {
+  inline bool system_mime_type_manager::is_known_type(tipi::mime_type const&) const {
     return false;
   }
 #endif

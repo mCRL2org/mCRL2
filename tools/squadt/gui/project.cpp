@@ -240,7 +240,7 @@ namespace squadt {
 
           }
 
-          t->check_status(false);
+//          t->check_status(false);
 
           processor::monitor& m = *(t->get_monitor());
 
