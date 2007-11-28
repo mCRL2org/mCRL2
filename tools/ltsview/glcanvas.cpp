@@ -38,10 +38,8 @@ END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
     const wxSize &size,int* attribList)
-	: wxGLCanvas(parent,wxID_ANY,attribList, wxDefaultPosition,size,wxSUNKEN_BORDER,
-		     wxEmptyString), simReader(NULL) {
-
-  context = 0;
+	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
+		     wxT(""),attribList), simReader(NULL) {
   mediator = owner;
   settings = ss;
   settings->subscribe(BackgroundColor,this);
@@ -62,15 +60,10 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
 }
 
 GLCanvas::~GLCanvas() {
-  if (context) {
-    delete context;
-  }
 }
 
 void GLCanvas::initialize() {
-  context = new wxGLContext(this);
-
-  SetCurrent(*context);
+  SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
   glLoadIdentity();
@@ -169,7 +162,7 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
 
     if (!selecting)
     {
-      SetCurrent(*context);
+      SetCurrent();
     }
     
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -299,10 +292,10 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
 }
 
 void GLCanvas::reshape() {
-  if (context) {
+  if (GetContext()) {
     int width,height;
     GetClientSize(&width,&height);
-    SetCurrent(*context);
+    SetCurrent();
     glViewport(0,0,width,height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -694,7 +687,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6; 
-  if(context) {
+  if(GetContext()) {
     GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
@@ -740,8 +733,8 @@ void GLCanvas::startForceDirected() {
   stop_force_directed = false;
   visualizer->forceDirectedInit();
   while (!stop_force_directed) {
-    if (context) {
-      SetCurrent(*context);
+    if (GetContext()) {
+      SetCurrent();
     }
     visualizer->forceDirectedStep();
     display();

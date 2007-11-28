@@ -360,7 +360,7 @@ std::cerr << "TARGET " << t.get() << std::endl;
     }
 
     void project::add_new_file() {
-      wxTextEntryDialog file_name_dialog(0, wxT("Please enter a name for the new file (everything before '/' or '\\' are ignored)"), wxT("Enter file name"));
+      wxTextEntryDialog file_name_dialog(0, wxT("Please enter a name for the new file (everything before '/' or '\\' is ignored)"), wxT("Enter file name"));
 
       while (file_name_dialog.ShowModal() == wxID_OK) {
         boost::filesystem::path  name(file_name_dialog.GetValue().fn_str());

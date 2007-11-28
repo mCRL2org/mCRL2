@@ -463,7 +463,7 @@ namespace squadt {
 
       boost::shared_ptr < tipi::configuration > c(tipi::controller::communicator::new_configuration(*selected_input_configuration));
 
-      c->set_output_prefix(str(format("%s%04X") % (basename(find_primary_input()->location)) % g->get_unique_count()));
+      c->set_output_prefix(str(format("%s-%03X") % (get_output_prefix(find_primary_input()->location)) % g->get_unique_count()));
 
       c->add_input(ic->get_primary_object_descriptor().first, ic->get_primary_object_descriptor().second.as_string(), l.string());
 

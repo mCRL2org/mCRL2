@@ -156,6 +156,9 @@ namespace squadt {
       /** \brief Execute an edit command on one of the outputs */
       void edit(execution::command*);
 
+      /** \brief Returns the prefix for output files */
+      std::string get_output_prefix(std::string const&) const;
+
       /** \brief Extracts useful information from a configuration object */
       void process_configuration(boost::shared_ptr < tipi::configuration > const&, std::set < tipi::object const* >&, bool = true);
 
@@ -286,8 +289,31 @@ namespace squadt {
     assert(selected_input_configuration.get());
   }
 
+  /**
+   * \param[in] name the name of a file on which the prefix will be based
+   **/
+  inline std::string processor_impl::get_output_prefix(std::string const& name) const {
+    std::string basename(boost::filesystem::basename(name));
+
+    if (4 < basename.size()) {
+      std::string suffix(basename.substr(name.size() - 4));
+
+      if (suffix[0] == '-') {
+        for (size_t i = 1; i < 4; ++i) {
+          if (suffix[i] < '0' || '9' < suffix[i]) {
+            return basename;
+          }
+        }
+
+        return basename.substr(0, basename.size() - 4);
+      }
+    }
+
+    return basename;
+  }
+
   inline bool processor_impl::is_active() const {
-    return (current_monitor->get_status() == execution::process::running);
+    return current_monitor->get_status() == execution::process::running;
   }
 
   inline processor_impl::~processor_impl() {
@@ -343,7 +369,6 @@ namespace squadt {
   inline void processor_impl::update_configuration(tipi::configuration& c) const {
     BOOST_FOREACH(processor::configurated_object_descriptor const& i, inputs) {
       if (c.input_exists(i.identifier)) {
-std::cerr << "TARGET " << i.object.get() << std::endl;
         c.get_input(i.identifier).set_location(
                 boost::static_pointer_cast< object_descriptor > (i.object)->location);
       }
