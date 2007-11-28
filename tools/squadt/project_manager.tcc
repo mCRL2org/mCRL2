@@ -10,7 +10,7 @@
 #ifndef PROJECT_MANAGER_TCC_
 #define PROJECT_MANAGER_TCC_
 
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include "project_manager.hpp"
 
@@ -63,7 +63,7 @@ namespace squadt {
       dependency_map                      reverse_depends;
 
       /** \brief Used to guarantee atomicity of operations on the processor list */
-      mutable boost::mutex                list_lock;
+      mutable boost::recursive_mutex      list_lock;
 
       /** \brief Whether or not a global update operation is in progress */
       bool                                update_active;

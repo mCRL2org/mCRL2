@@ -367,7 +367,7 @@ std::cerr << "TARGET " << t.get() << std::endl;
         
         try {
           boost::shared_ptr < processor > new_processor(manager->construct());
-        
+
           new_processor->append_output("authentic",
                 global_build_system.get_type_registry()->mime_type_from_name(name),
                 name.leaf(), processor::object_descriptor::original);
@@ -376,9 +376,9 @@ std::cerr << "TARGET " << t.get() << std::endl;
           std::ofstream f((boost::filesystem::path(manager->get_project_store()) / name).string().c_str(), std::ios::out);
 
           f.close();
-        
+
           manager->commit(new_processor);
-        
+
           manager->store();
 
           // Add to the new project
@@ -495,15 +495,16 @@ std::cerr << "TARGET " << t.get() << std::endl;
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
       wxTreeItemId                                      selection = object_view->GetSelection();
+      tool_data*                                        node_data = reinterpret_cast < tool_data* > (object_view->GetItemData(selection));
 
-      boost::shared_ptr< processor >                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(selection))->get_processor();
-      boost::shared_ptr< processor::object_descriptor > t = reinterpret_cast < tool_data* > (object_view->GetItemData(selection))->get_object();
+      boost::shared_ptr< processor >                    p = node_data->get_processor();
+      boost::shared_ptr< processor::object_descriptor > object = node_data->get_object();
 
       type_registry* registry = global_build_system.get_type_registry();
 
       switch (e.GetId()) {
         case cmID_EDIT:
-          p->edit(registry->get_registered_command(t->get_format(), t->get_location()).get());
+          p->edit(registry->get_registered_command(object->get_format(), object->get_location()).get());
           break;
         case cmID_REMOVE:
           if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
@@ -520,7 +521,7 @@ std::cerr << "TARGET " << t.get() << std::endl;
           p->flush_outputs();
 
           /* Register handler to on update the object view after process termination */
-          p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, p, false));
+          p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
 
           /* Attach tool display */
           manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
@@ -570,7 +571,7 @@ std::cerr << "TARGET " << t.get() << std::endl;
           break;
         case cmID_CONFIGURE:
             /* Attach tool display */
-            install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(t->get_location()).leaf());
+            install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
 
             /* Register handler to on update the object view after process termination */
             p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, p, true));
@@ -590,16 +591,16 @@ std::cerr << "TARGET " << t.get() << std::endl;
               boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
              
               /* Attach the new processor by relating it to t */
-              tp->append_input(icon->get_primary_object_descriptor().first, t);
+              tp->append_input(icon->get_primary_object_descriptor().first, object);
              
               /* Attach tool display */
-              install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(t->get_location()).leaf());
+              install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
              
               /* Register handler to on update the object view after process termination */
               tp->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, tp, true));
              
               /* Start tool configuration phase */
-              tp->configure(icon, boost::filesystem::path(t->get_location()));
+              tp->configure(icon, boost::filesystem::path(object->get_location()));
             }
             else {
               wxMessageDialog(0, wxT("Selected tool configuration is not available.\n\nTool (") +

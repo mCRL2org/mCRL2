@@ -40,7 +40,16 @@ namespace squadt {
        * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
-        return (project_manager::is_project_store(std::string(p.fn_str())));
+        
+        try {
+          boost::shared_ptr < project_manager > m = project_manager::create(std::string(p.fn_str()), false); 
+
+          return m.get() != 0;
+        }
+        catch (...) {
+        }
+
+        return false;
       }
 
       /**

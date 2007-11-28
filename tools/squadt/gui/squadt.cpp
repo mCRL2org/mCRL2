@@ -9,11 +9,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
-
-#define SQUADT_IMPORT_STATIC_DEFINITIONS
-
 #include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 #include "tipi/utility/print_logger.hpp"
 
@@ -35,15 +31,6 @@
 
 const char* program_name    = "squadt";
 const char* program_version = "July 2007";
-
-/**
- * \namespace squadt
- *
- * The global namespace for all squadt components.
- **/
-namespace squadt {
-  build_system global_build_system;
-}
 
 using namespace squadt::GUI;
 

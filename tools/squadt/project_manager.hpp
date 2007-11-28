@@ -71,13 +71,16 @@ namespace squadt {
       /** \brief Load project */
       void load(const boost::filesystem::path&, bool);
 
+      /** \brief Factory function */
+      static boost::shared_ptr < project_manager > create();
+
     public:
  
       /** \brief Factory function */
       static boost::shared_ptr < project_manager > create(const boost::filesystem::path&, bool);
 
       /** \brief Checks whether or not a path points to a directory that can be recognised as a project store */
-      static bool is_project_store(std::string const&);
+      bool is_project_store(std::string const&);
 
       /** \brief Get the name of the project */
       std::string get_name() const;

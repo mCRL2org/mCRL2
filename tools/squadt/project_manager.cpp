@@ -39,6 +39,7 @@ namespace squadt {
 
   /**
    * \param l a path to the root of the project store
+   * \param b whether or not to (re)create a project
    *
    * \pre l should be a path to a directory
    * 
@@ -59,31 +60,29 @@ namespace squadt {
     if (filesystem::exists(l)) {
       assert(filesystem::is_directory(l));
 
-      if (!filesystem::exists(project_file)) {
+      if (b && !filesystem::exists(project_file)) {
         import_directory(l);
 
         /* Create initial project description file */
         visitors::store(*this, project_file);
       }
       else {
-        if (b) {
-          filesystem::remove(project_file);
+        try {
+          visitors::restore(*this, project_file);
         }
-        else {
-          try {
-            visitors::restore(*this, project_file);
-          }
-          catch (...) {
-            b = true;
-          }
-        }
+        catch (std::exception& e) {
+          if (b) {
+            filesystem::remove(project_file);
 
-        if (b) {
-          /* Project description file is probably broken */
-          import_directory(l);
-
-          /* Create initial project description file */
-          visitors::store(*this, project_file);
+            /* Project description file is probably broken */
+            import_directory(l);
+          
+            /* Create initial project description file */
+            visitors::store(*this, project_file);
+          }
+          else {
+            throw;
+          }
         }
       }
     }
@@ -115,14 +114,14 @@ namespace squadt {
   void project_manager_impl::commit(boost::shared_ptr< processor > p) {
     assert(p->impl->manager.lock().get() == m_interface.lock().get());
 
-    boost::mutex::scoped_lock l(list_lock);
+    boost::recursive_mutex::scoped_lock l(list_lock);
 
     if (std::find(processors.begin(), processors.end(), p) == processors.end()) {
       processors.push_back(p);
 
-      write();
-
       update_dependencies(p);
+
+      write();
     }
   }
   
@@ -158,6 +157,9 @@ namespace squadt {
         reverse_depends.erase(j);
 
         changes = true;
+      }
+      else {
+        ++i;
       }
     }
 
@@ -360,7 +362,7 @@ namespace squadt {
       locations.insert(object->get_location());
     }
 
-    boost::mutex::scoped_lock l(list_lock);
+    boost::recursive_mutex::scoped_lock l(list_lock);
 
     std::auto_ptr < conflict_list > conflicts(new conflict_list);
 
@@ -447,7 +449,7 @@ namespace squadt {
   boost::shared_ptr< processor > project_manager_impl::import_file(const boost::filesystem::path& s, std::string const& d) {
     using namespace boost::filesystem;
 
-    assert(exists(s) && !is_directory(s) && native(d));
+    assert(exists(s) && !is_directory(s));
 
     path           destination_path  = store / path(d.empty() ? s.leaf() : d);
     boost::shared_ptr< processor > p = processor::create(m_interface.lock());
@@ -499,7 +501,7 @@ namespace squadt {
       }
     }
 
-    boost::mutex::scoped_lock l(list_lock);
+    boost::recursive_mutex::scoped_lock l(list_lock);
 
     /* Update reverse dependencies, remove files and processors */
     BOOST_FOREACH(processor* i, obsolete) {
@@ -578,6 +580,14 @@ namespace squadt {
     impl->load(l, b);
   }
 
+  boost::shared_ptr < project_manager > project_manager::create() {
+    boost::shared_ptr < project_manager > p(new project_manager);
+
+    p->impl->m_interface = p;
+
+    return p;
+  }
+
   /**
    * \param[in] l a path to the root of the project store
    * \param[in] b whether or not to create the project anew (ignore existing project file)
@@ -632,9 +642,9 @@ namespace squadt {
 
     if (bf::exists(path_to)) {
       try {
-        project_manager p;
+        boost::shared_ptr < project_manager > p(project_manager::create());
 
-        visitors::restore(p, path_to);
+        visitors::restore(*p, path_to);
 
         return_value = true;
       }

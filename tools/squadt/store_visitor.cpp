@@ -264,8 +264,8 @@ namespace utility {
 
     /* The inputs */
     for (processor::input_list::const_iterator i = p.inputs.begin(); i != p.inputs.end(); ++i) {
-      out << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > (i->object.get()) << "\"/>\n";
-      out << "\" identifier=\"" << std::dec << i->identifier << "\"/>\n";
+      out << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > (i->object.get())
+          << "\" identifier=\"" << std::dec << i->identifier << "\"/>\n";
     }
 
     /* The outputs */

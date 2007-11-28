@@ -155,7 +155,7 @@ namespace squadt {
      * @param[in] d an optional description
      **/
     void main::project_new(std::string const& s, std::string const& d) {
-      add_project_view(new GUI::project(this, boost::filesystem::path(s), d, true));
+      add_project_view(new GUI::project(this, boost::filesystem::path(s), d, false));
     }
 
     void main::project_open() {

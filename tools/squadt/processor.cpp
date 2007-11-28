@@ -444,7 +444,7 @@ namespace squadt {
   /**
    * \param[in] t shared pointer to the interface object
    * \param[in] ic the input combination that is to be used
-   * \param[in] l absolute path to the file that serves as main input
+   * \param[in] l relative (to project store) path to the file that serves as main input
    * \param[in] w the path to the directory in which to run the tool
    *
    * \attention This function is non-blocking

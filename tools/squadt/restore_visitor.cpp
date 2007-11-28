@@ -143,7 +143,7 @@ namespace utility {
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
-    //assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
 
     tree->GetAttribute("name", &t.m_name);
     tree->GetAttribute("location", &t.m_location);
@@ -176,7 +176,7 @@ namespace utility {
   void visitor< squadt::restore_visitor_impl >::visit(tool_manager_impl& tm) {
     using namespace boost::filesystem;
 
-    //assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool-catalog");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool-catalog");
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       tool new_tool;
@@ -205,7 +205,7 @@ namespace utility {
       tree = tree->FirstChildElement();
     }
 
-    //assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "execution-settings");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "execution-settings");
 
     if (tree->Value() == "execution-settings") {
       unsigned int maximum_instance_count = 3;
@@ -233,7 +233,7 @@ namespace utility {
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(type_registry& r) {
-    //assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "default-actions");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "default-actions");
 
     if (tree->Value() == "default-actions") {
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
@@ -275,7 +275,7 @@ namespace utility {
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(processor_impl& p, id_helper& h) {
-    //assert((h.tree->Type() == TiXmlNode::ELEMENT) && h.tree->Value() == "processor");
+    assert((h.tree->Type() == TiXmlNode::ELEMENT) && h.tree->Value() == "processor");
 
     try {
       p.tool_descriptor            = global_build_system.get_tool_manager()->
@@ -312,7 +312,7 @@ namespace utility {
        
         e->GetAttribute("id", &id);
 
-        //assert(h.cmap.find(id) == h.cmap.end());
+        assert(h.cmap.find(id) == h.cmap.end());
        
         h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor>(
                 new processor_impl::object_descriptor(p.interface_object, tipi::mime_type(e->GetAttribute("format")), tipi::uri(e->GetAttribute("location"))));
@@ -367,7 +367,7 @@ namespace utility {
   template <>
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager_impl& p) {
-    //assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "squadt-project");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "squadt-project");
 
     tree->GetAttribute("count", &p.count);
 

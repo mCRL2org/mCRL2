@@ -19,15 +19,111 @@
 
 #include "tipi/mime_type.hpp"
 
+#ifdef USING_WX
 #include <wx/mimetype.h>
+#endif
 
 #include "tool_manager.hpp"
 #include "command.hpp"
 #include "tool.hpp"
 
-wxMimeTypesManager global_mime_types_manager;
-
 namespace squadt {
+
+  /**
+   * \internal
+   **/
+  class system_mime_type_manager {
+
+    public:
+
+      /* \brief Guesses the mime type from a filename */
+      tipi::mime_type guess_mime_type(std::string const&) const;
+
+      /* \brief Gets the system command associated with a type, if any */
+      std::string get_command(tipi::mime_type const&) const;
+
+      /* \brief Returns whether the type is known to the system */
+      bool is_known_type(tipi::mime_type const&) const;
+  };
+
+#if defined(USING_WX)
+  tipi::mime_type system_mime_type_manager::guess_mime_type(boost::filesystem::path const& name) const {
+    static wxMimeTypesManager m;
+
+    std::string extension = boost::filesystem::extension(name);
+
+    if (!extension.empty()) {
+      wxFileType* wtype(m.GetFileTypeFromExtension(wxString(extension.substr(1).c_str(), wxConvLocal)));
+     
+      if (wtype) {
+        wxString mime_type;
+     
+        wtype->GetMimeType(mime_type);
+     
+        delete wtype;
+     
+        return tipi::mime_type(std::string(mime_type.fn_str()));
+      }
+    }
+
+    return tipi::mime_type("unknown");
+  }
+
+  std::string system_mime_type_manager::get_command(tipi::mime_type const& type) const {
+    static wxMimeTypesManager m;
+
+    wxFileType* wtype = m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal));
+
+    if (wtype) {
+      std::string command(wtype->GetOpenCommand(wxT("$")).fn_str());
+
+      delete wtype;
+
+      return command;
+    }
+
+    return std::string();
+  }
+
+  bool system_mime_type_manager::is_known_type(tipi::mime_type const& type) const {
+    static wxMimeTypesManager m;
+
+    wxFileType* wtype = m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal));
+
+    if (wtype != 0) {
+      delete wtype;
+
+      return true;
+    }
+    else {
+      if (t.is_type(tipi::mime_type::text)) {
+        wtype = m.GetFileTypeFromMimeType(wxT("text/plain"));
+      }
+
+      if (wtype != 0) {
+        delete wtype;
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+#else
+  inline tipi::mime_type system_mime_type_manager::guess_mime_type(std::string const& name) const {
+    return tipi::mime_type("unknown");
+  }
+
+  inline std::string system_mime_type_manager::get_command(tipi::mime_type const& type) const {
+    return std::string();
+  }
+
+  inline bool system_mime_type_manager::is_known_type(tipi::mime_type const& name) const {
+    return false;
+  }
+#endif
+
+  static system_mime_type_manager global_mime_types_manager;
 
   const std::string type_registry::command_system = "system defined";
   const std::string type_registry::command_none;
@@ -207,9 +303,10 @@ namespace squadt {
 
     if (i == command_for_type.end()) {
       if (c) {
-        bool result = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.as_string().c_str(), wxConvLocal)) != 0;
+        bool result = global_mime_types_manager.is_known_type(t);
 
-        return result || ((t.is_type(tipi::mime_type::text)) && (global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain")) != 0));
+        return result || ((t.is_type(tipi::mime_type::text))
+                && (global_mime_types_manager.guess_mime_type("m.txt").get_sub_type() != "unknown"));
       }
     }
     else {
@@ -229,8 +326,8 @@ namespace squadt {
   void type_registry::register_command(mime_type const& t, std::string const& c) {
 
     if (&c == &command_system) {
-      if (global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal)) != 0) {
-        command_for_type[t] = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal))->GetOpenCommand(wxT("$")).fn_str();
+      if (global_mime_types_manager.is_known_type(t)) {
+        command_for_type[t] = global_mime_types_manager.get_command(t);
       }
       else {
         command_for_type[t] = c;
@@ -252,13 +349,7 @@ namespace squadt {
    * \param[in] e extension for which to get the mime type
    **/
   std::auto_ptr < mime_type > type_registry::mime_type_for_extension(std::string const& e) const {
-    std::auto_ptr < mime_type > result;
-
-    wxString file_mime_type;
-
-    if (global_mime_types_manager.GetFileTypeFromExtension(wxString(e.c_str(), wxConvLocal))->GetMimeType(&file_mime_type)) {
-      result.reset(new mime_type(std::string(file_mime_type.fn_str())));
-    }
+    std::auto_ptr < mime_type > result(new tipi::mime_type(global_mime_types_manager.guess_mime_type(e)));
 
     return (result);
   }
@@ -283,17 +374,10 @@ namespace squadt {
       std::string const& command_string = regex_replace((*i).second, sregex(bos >> '$' >> eos), f);
 
       if (command_string == command_system) {
-        wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
+        std::string c(global_mime_types_manager.get_command(t));
 
-        if (wxt != 0) {
-          p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
-        }
-        else if (t.is_type(tipi::mime_type::text)) {
-          wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxT("text/plain"));
-
-          if (wxt != 0) {
-            p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
-          }
+        if (!c.empty()) {
+          p = command::from_command_line(c);
         }
       }
       else if (command_string != command_none) {
@@ -301,10 +385,10 @@ namespace squadt {
       }
     }
     else {
-      wxFileType* wxt = global_mime_types_manager.GetFileTypeFromMimeType(wxString(t.to_string().c_str(), wxConvLocal));
+      std::string c(global_mime_types_manager.get_command(t));
 
-      if (wxt != 0) {
-        p = command::from_command_line(std::string(wxt->GetOpenCommand(wxString(f.c_str(), wxConvLocal)).fn_str()));
+      if (!c.empty()) {
+        p = command::from_command_line(c);
       }
     }
 

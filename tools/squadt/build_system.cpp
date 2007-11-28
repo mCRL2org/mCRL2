@@ -19,7 +19,13 @@
 #include "executor.hpp"
 #include "tool.hpp"
 
+/**
+ * \namespace squadt
+ *
+ * The global namespace for all squadt components.
+ **/
 namespace squadt {
+  build_system global_build_system;
 
   build_system::build_system() {
   }
