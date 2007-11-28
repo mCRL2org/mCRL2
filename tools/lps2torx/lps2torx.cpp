@@ -7,7 +7,6 @@
 /// \file lps2torx.cpp
 
 #define NAME "lps2torx"
-#define VERSION "July 2007"
 
 #include <stdio.h>
 #include <errno.h>
@@ -27,6 +26,7 @@
 #include "mcrl2/lps/dataelm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
 using namespace std;
@@ -155,11 +155,6 @@ static void print_help(FILE *f, char *Name)
     Name);
 }
 
-static void print_version(FILE *f)
-{
-  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
-}
-
 int main(int argc, char **argv)
 {
   FILE *SpecStream;
@@ -199,7 +194,7 @@ int main(int argc, char **argv)
         print_help(stderr, argv[0]);
         return 0;
       case 0:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'q':
         quiet = true;

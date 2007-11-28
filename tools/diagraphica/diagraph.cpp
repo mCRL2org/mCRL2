@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 // -- command line --------------------------------------------------
 
 #define NAME "diagraphica"
-#define VERSION "July 2007"
+#define MCRL2_VERSION "July 2007"
 
 
 // parse command line 
@@ -126,7 +126,7 @@ bool parse_command_line(
     wxCmdLineParser cmdln(argc,argv);
 
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
-    cmdln.AddSwitch(wxT("_"),wxT("version"),wxT("display version information and terminate"));
+    cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
     cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any warning messages"));
     cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
     cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
@@ -138,8 +138,8 @@ bool parse_command_line(
     return false;
     }
 
-    if (cmdln.Found(wxT("_"))) {
-    std::cout << NAME " " << VERSION << " (revision " << REVISION << ")" << std::endl;
+    if (cmdln.Found(wxT("version"))) {
+    std::cout << NAME " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl;
     return false;
     }
 

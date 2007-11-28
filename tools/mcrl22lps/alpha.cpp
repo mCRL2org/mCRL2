@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Yaroslav S. Usenko and Muck van Weerdenburg
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,9 +7,7 @@
 /// \file alpha.cpp
 /// \brief Add your file description here.
 
-#define NAME      "alpha"
-#define LVERSION  "0.1"
-#define AUTHOR    "Yaroslav S. Usenko and Muck van Weerdenburg"
+#define NAME "alpha"
 
 #include <iostream>
 #include <fstream>
@@ -25,6 +23,7 @@
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/alpha.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -50,12 +49,6 @@ void PrintUsage(FILE *f, char *Name)
 void PrintMoreInfo(FILE *Stream, char *Name) {
   fprintf(Stream, "Try \'%s --help\' for more information.\n", Name);
 }
-
-void PrintVersion(FILE *Stream) {
-  fprintf(Stream, "%s %s\nWritten by %s.\n",
-    NAME, LVERSION, AUTHOR);
-}
-
 
 int main(int argc, char **argv)
 {
@@ -95,7 +88,7 @@ int main(int argc, char **argv)
 		PrintUsage(stderr, argv[0]);
 		return 0;
 	      case VersionOption:
-		PrintVersion(stderr);
+		print_version_information(NAME);
 		return 0;
 	      case 'q':
 		gsSetQuietMsg();

@@ -4,20 +4,9 @@
 //
 /// \file ./txt2pbes.cpp
 
-//====================================================================== 
-// 
-//  
-// 
-//====================================================================== 
- 
- 
 #define NAME "txt2pbes" 
-#define VERSION "July 2007" 
- 
-
 
 // #define debug
- 
  
 //C++ 
 #include <cstdio> 
@@ -32,10 +21,11 @@
 //Boost 
 #include <boost/program_options.hpp> 
  
-//MCRL-specific 
+//MCRL2-specific 
 #include "mcrl2/core/messaging.h" 
+#include "mcrl2/utilities/version_info.h" 
 
-//LPS-Framework 
+//PBES-Framework 
 #include "mcrl2/pbes/pbes.h" 
 #include "mcrl2/pbes/pbes_expression.h" 
 //#include "mcrl2/pbes/propositional_variable.h" 
@@ -488,15 +478,6 @@ pbes<> make_pbes(const string fileName){
   return pbes_simple_to_pbes();
 }
 
- 
-
-
-void print_version(void)
-{
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
-}
-
-
 void print_help(void)
 {
   fprintf(stderr,
@@ -576,7 +557,7 @@ void parse_command_line(int argc, char **argv)
       print_help();
       exit(0);
     case VERSION_OPTION: /* version */
-      print_version();
+      print_version_information(NAME);
       exit(0);
     case 'q': /* quiet */
       gsSetQuietMsg();

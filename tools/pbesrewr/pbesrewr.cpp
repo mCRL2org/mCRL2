@@ -16,9 +16,8 @@
 // author        : Jan Friso Groote <J.F.Groote@tue.nl>
 //
 // ======================================================================
+
 #define NAME "pbesrewr"
-#define VERSION "July 2007"
-#define AUTHOR "Jan Friso Groote"
 
 //C++
 #include <cstdio>
@@ -29,10 +28,11 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//MCRL-specific
+//MCRL2-specific
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 #include "mcrl2/data/rewrite.h"
 
@@ -99,8 +99,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   
   if (vm.count("version"))
   {
-    cerr << "pbesrewr " << VERSION <<  " (revision " << REVISION << ")" << endl;
-    
+    print_version_information(NAME);
     exit(0);
   }
 

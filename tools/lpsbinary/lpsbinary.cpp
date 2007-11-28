@@ -22,6 +22,8 @@
 // ======================================================================
 //
 
+#define NAME "lpsbinary"
+
 //C++
 #include <cstdio>
 #include <exception>
@@ -30,6 +32,7 @@
 #include <boost/program_options.hpp>
 
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 //Aterms
 #include <atermpp/algorithm.h>
@@ -744,8 +747,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   }
 
   if (vm.count("version")) {
-    cerr << "lpsbinary " << VERSION << " (revision " << REVISION << ")" << endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

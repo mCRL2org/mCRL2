@@ -4,6 +4,7 @@
 //
 /// \file ./lpsinfo.cpp
 
+#define NAME "lpsinfo"
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -25,6 +26,7 @@
 #include <mcrl2/lps/specification.h>
 #include "mcrl2/core/messaging.h"
 #include <mcrl2/utilities/aterm_ext.h>
+#include "mcrl2/utilities/version_info.h"
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
@@ -34,8 +36,6 @@ using namespace atermpp;
 using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
-
-#define VERSION "July 2007"
 
 /* Verbosity switch */
 bool        verbose = false;
@@ -112,8 +112,7 @@ void parse_command_line(int ac, char** av) {
   }
       
   if (vm.count("version")) {
-    cerr << "lpsinfo " << VERSION << " (revision " << REVISION << ")" << endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

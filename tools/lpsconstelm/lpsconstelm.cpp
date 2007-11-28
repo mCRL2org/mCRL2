@@ -4,6 +4,8 @@
 //
 /// \file ./lpsconstelm.cpp
 
+#define NAME "lpsconstelm"
+
 //LPS framework
 #include "mcrl2/lps/specification.h"
 
@@ -22,6 +24,7 @@
 
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 //Rewriter
 #include "mcrl2/data/rewrite.h"
@@ -32,9 +35,6 @@
 using namespace lps;
 using namespace atermpp;
 using namespace mcrl2::utilities;
-
-#define NAME "lpsconstelm"
-#define VERSION "July 2007"
 
 class lpsConstElm {
   private:
@@ -115,7 +115,6 @@ class lpsConstElm {
     void setAllTrue(bool b);
     void setReachable(bool b);
     void printSetVar();
-    std::string getVersion();
     void filter();
 };
 
@@ -1051,12 +1050,6 @@ void lpsConstElm::filter() {
   }
 }
 
-// Gets the version of the tool
-//
-inline std::string lpsConstElm::getVersion() {
-  return VERSION;
-}
-
 void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
   namespace po = boost::program_options;
 
@@ -1104,8 +1097,7 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
   }
 
   if (vm.count("version")) {
-    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

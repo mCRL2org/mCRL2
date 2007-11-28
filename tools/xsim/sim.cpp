@@ -7,7 +7,6 @@
 /// \file sim.cpp
 
 #define NAME "sim"
-#define VERSION "July 2007"
 
 #include <iostream>
 #include <string>
@@ -26,6 +25,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -53,11 +53,6 @@ char help_gsMessage[] = "During the simulation the following commands are accept
 		      "   N - take transition N to the corresponding state (where N is a number)\n"
 		      "   h - print this help gsMessage\n"
 		      "   q - quit\n";
-
-void print_version(FILE *f)
-{
-  fprintf(f, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
-}
 
 void print_help(FILE *f, char *Name)
 {
@@ -118,7 +113,7 @@ int main(int argc, char **argv)
 				print_help(stderr, argv[0]);
 				return 0;
                         case version_option:
-                                print_version(stderr);
+                                print_version_information(NAME);
                                 return 0;
 			case 'q':
 				quiet = true;

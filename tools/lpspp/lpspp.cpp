@@ -7,8 +7,6 @@
 /// \file lpspp.cpp
 
 #define  NAME      "lpspp"
-#define  VERSION   "July 2007"
-#define  AUTHOR    "Aad Mathijssen"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +21,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace mcrl2::utilities;
 
@@ -38,9 +37,6 @@ static void PrintUsage(char *Name);
 
 static void PrintMoreInfo(char *Name);
 //print --help suggestion
-
-static void PrintVersion(void);
-//print version information
 
 static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName,
   t_pp_format pp_format);
@@ -100,7 +96,7 @@ int main(int argc, char* argv[]) {
         PrintUsage(argv[0]);
         return 0; 
       case VersionOption: 
-        PrintVersion(); 
+        print_version_information(NAME);
         return 0;
       case 'q':
         gsSetQuietMsg();
@@ -265,10 +261,6 @@ void PrintUsage(char *Name) {
 
 void PrintMoreInfo(char *Name) {
   fprintf(stderr, "Try \'%s --help\' for more information.\n", Name);
-}
-
-void PrintVersion(void) {
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void PrintPPFormat(FILE *stream, t_pp_format pp_format)

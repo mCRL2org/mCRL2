@@ -6,6 +6,8 @@
 //
 /// \file ltsinfo.cpp
 
+#define NAME "ltsinfo"
+
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
@@ -13,13 +15,11 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 #include <boost/lexical_cast.hpp>
 
 using namespace mcrl2::utilities;
-
-#define NAME "ltsinfo"
-#define VERSION "July 2007"
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -174,11 +174,6 @@ static void print_help(FILE *f, char *Name)
     Name);
 }
 
-static void print_version(FILE *f)
-{
-  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
-}
-
 bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
   using namespace mcrl2::lts;
 
@@ -208,7 +203,7 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
         print_help(stderr,argv[0]);
         return (false);
       case VersionOption:
-        print_version(stderr);
+        print_version_information(NAME);
         return (false);
       case 'v':
         verbose = true;

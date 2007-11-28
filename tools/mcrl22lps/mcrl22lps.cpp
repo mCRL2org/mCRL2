@@ -7,6 +7,8 @@
 /// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
+#define NAME "mcrl22lps"
+
 #include <cassert>
 #include <stdbool.h>
 #include <getopt.h>
@@ -26,9 +28,8 @@
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
+#include "mcrl2/utilities/version_info.h"
 
-#define NAME "mcrl22lps"
-#define VERSION "July 2007"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
 
@@ -40,7 +41,6 @@ using namespace ::mcrl2::utilities;
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
 static void PrintMoreInfo(char *Name);
-static void PrintVersion(void);
 static void PrintHelp(char *Name);
 
 // Squadt protocol interface and utility pseudo-library
@@ -531,7 +531,7 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
         PrintHelp(argv[0]);
         return false;
       case VersionOption: /* version */
-        PrintVersion();
+        print_version_information(NAME);
         return false;
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -688,11 +688,6 @@ inline char const* lin_method_to_string(t_lin_method lin_method)
 void PrintMoreInfo(char *Name)
 {
   fprintf(stderr, "Use %s --help for options\n", Name);
-}
-
-void PrintVersion(void)
-{
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void PrintHelp(char *Name)

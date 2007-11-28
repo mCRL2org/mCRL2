@@ -21,6 +21,8 @@
 //
 // ======================================================================
 
+#define NAME "lpsdecluster"
+
 //C++
 #include <exception>
 #include <cstdio>
@@ -38,6 +40,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/sort_utility.h>
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 //Enumerator
 #include <mcrl2/lps/nextstate.h>
@@ -50,7 +53,6 @@ using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
 
-#define VERSION "July 2007"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -509,8 +511,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   }
       
   if (0 < vm.count("version")) {
-    cerr << "lpsdecluster " << VERSION << " (revision " << REVISION << ")" << endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

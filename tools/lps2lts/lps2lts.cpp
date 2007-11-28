@@ -6,6 +6,8 @@
 //
 /// \file lps2lts.cpp
 
+#define NAME "lps2lts"
+
 #include <string>
 #include <getopt.h>
 #include <aterm2.h>
@@ -17,6 +19,7 @@
 #include "lts.h"
 
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 #include "squadt_interactor.tcc"
 
@@ -133,11 +136,6 @@ static void print_help(FILE *f, const char *Name)
     Name);
 }
 
-static void print_version(FILE *f)
-{
-  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
-}
-
 int main(int argc, char **argv)
 {
   ATerm bot;
@@ -227,7 +225,7 @@ int main(int argc, char **argv)
         print_help(stderr, argv[0]);
         return 0;
       case 0:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'q':
         lgopts.quiet = true;

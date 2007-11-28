@@ -4,13 +4,15 @@
 //
 /// \file ./ltsgraph.cpp
 
+#define NAME "ltsgraph"
+
 // Graphical shell
 #include "graph_frame.h"
 
-#include "ltsgraph_version.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <mcrl2/lts/liblts.h>
+#include "mcrl2/utilities/version_info.h"
 
 std::string lts_file_argument;
 
@@ -88,7 +90,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 #endif
 
 void print_help() {
-  cout << "Usage: ltsgraph [INFILE]\n"
+  cout << "Usage: " << NAME << " [INFILE]\n"
        << "Draw graphs and optimize their layout in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
        << "the tool will use this file as input for drawing.\n"
        << "\n"
@@ -97,10 +99,6 @@ void print_help() {
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n"
        << "  --version             displays version information and exits \n";
-}
-
-void print_version() {
-  cout << "ltsgraph version " << LTSG_VERSION << " (revision " << REVISION << ")" << endl;
 }
 
 class GraphApp : public wxApp
@@ -127,7 +125,7 @@ class GraphApp : public wxApp
       }
 
       if (cmdln.Found(wxT("version")) ) {
-        print_version();
+        print_version_information(NAME);
         return false;
       }
 
@@ -149,7 +147,7 @@ class GraphApp : public wxApp
 	
       wxSize maximum_size = wxGetClientDisplayRect().GetSize();
 
-      frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150),
+      frame = new GraphFrame(wxT(NAME), wxPoint(150, 150),
                      wxSize((std::min)(maximum_size.GetWidth(),INITIAL_WIN_WIDTH), (std::min)(maximum_size.GetHeight(),INITIAL_WIN_HEIGHT)));
       frame->Show(true);
       frame->GetSizer()->RecalcSizes();

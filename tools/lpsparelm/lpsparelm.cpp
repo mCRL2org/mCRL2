@@ -4,6 +4,8 @@
 //
 /// \file ./lpsparelm.cpp
 
+#define NAME "lpsparelm"
+
 #include <exception>
 
 //Boost
@@ -11,9 +13,7 @@
 
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/parelm.h>
-
-#define NAME    "lpsparelm"
-#define VERSION "July 2007"
+#include "mcrl2/utilities/version_info.h"
 
 struct tool_configuration {
   std::string input_file;  ///< Name of the file to read input from
@@ -141,8 +141,7 @@ tool_configuration parse_command_line(int ac, char** av, tool_configuration& opt
   }
         
   if (vm.count("version")) {
-    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

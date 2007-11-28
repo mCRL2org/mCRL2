@@ -6,6 +6,8 @@
 //
 /// \file xsim.cpp
 
+#define NAME "xsim"
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsim.h"
 #endif
@@ -26,6 +28,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
@@ -101,13 +104,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-#define NAME "xsim"
-#define VERSION "July 2007"
-#define VERSION_OPTION "_"
-//XXX VERSION_OPTION should be an untypable character, wxWidgets doesn't allow
-//me to enter anything but [a-zA-Z0-9_]. I have chosen "_" because it is the
-//less likeliest character to be entered. Aad
-
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
@@ -128,7 +124,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
   cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
-  cmdln.AddSwitch(wxT(VERSION_OPTION),wxT("version"),wxT("display version information and terminate"));
+  cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
   cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display warning messages"));
   cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
   cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
@@ -155,8 +151,8 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
     return false;
   }
 
-  if (cmdln.Found(wxT(VERSION_OPTION))) {
-    std::cerr << NAME << " " << VERSION << " (revision " << REVISION << ")" << std::endl;
+  if (cmdln.Found(wxT("version"))) {
+    print_version_information(NAME);
     return false;
   }
 

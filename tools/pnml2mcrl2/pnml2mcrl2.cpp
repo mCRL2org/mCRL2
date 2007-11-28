@@ -8,7 +8,6 @@
 /// \brief Add your file description here.
 
 #define NAME "pnml2mcrl2"
-#define VERSION "July 2007"
 
 #include <sstream>
 #include <cstdio>
@@ -25,6 +24,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
 
@@ -2484,7 +2484,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
           gsSetVerboseMsg();
           break;
         case 0: /* version */
-          fprintf(stderr, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
+          print_version_information(NAME);
           return 0;
         default:
           break;

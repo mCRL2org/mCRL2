@@ -8,12 +8,12 @@
 /// \brief Based on bsim.c (revision 1.1.1.1) from the muCRL toolset
 
 #define NAME     "ltsmin"
-#define VERSION  "July 2007"
 
 #include <getopt.h>
 #include "mcrl2/core/struct.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
          exit(EXIT_OK);
          break;
       case CMD_VERSION:
-         doVersion();
+         print_version_information(NAME);
          exit(EXIT_OK);
       case CMD_REDUCE:
          exit(doReduce());
@@ -166,7 +166,7 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                 fprintf(stderr, "%s: %s\n", argv[optind+1], SVCerror(SVCerrno));
                 return ERR_FILE;
 	      } else {
-                SVCsetVersion(outFile , VERSION); 
+                SVCsetVersion(outFile , MCRL2_VERSION); 
 	      }
       }
 
@@ -224,7 +224,7 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                      fprintf(stderr, "%s: %s\n", outFilename, SVCerror(SVCerrno));
                      ret=ERR_FILE;
                      }
-                SVCsetVersion(outFile , VERSION); 
+                SVCsetVersion(outFile , MCRL2_VERSION); 
                 }
             }      */
       return ret;
@@ -260,12 +260,6 @@ void doHelp(char *cmd) {
 } /* doHelp */
 
 
-
-void doVersion() {
-
-   fprintf(stderr, NAME " " VERSION " (revision %s)\n", REVISION);
-
-} /* doVersion */
 
 
 

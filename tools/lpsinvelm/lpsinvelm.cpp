@@ -7,9 +7,7 @@
 /// \file lpsinvelm.cpp
 /// \brief Add your file description here.
 
-#define  NAME      "lpsinvelm"
-#define  VERSION   "July 2007"
-#define  AUTHOR    "Luc Engelen"
+#define NAME "lpsinvelm"
 
 #include "mcrl2/invariant_eliminator.h"
 #include "mcrl2/invariant_checker.h"
@@ -22,6 +20,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 #include <string>
 #include <fstream>
 
@@ -113,8 +112,6 @@ using namespace ::mcrl2::utilities;
       /// \brief Prints a message indicating how to display the help message.
       void print_more_info();
 
-      /// \brief Prints the version of the tool.
-      void print_version();
     public:
       /// \brief Constructor setting all flags to their default values.
       LPS_Inv_Elm();
@@ -216,10 +213,6 @@ using namespace ::mcrl2::utilities;
     }
 
     // --------------------------------------------------------------------------------------------
-
-    void LPS_Inv_Elm::print_version() {
-      fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
-    }
 
   // Class LPS_Inv_Elm - Functions declared public ----------------------------------------------
 
@@ -324,7 +317,7 @@ using namespace ::mcrl2::utilities;
             print_help();
             exit(0);
           case 0x1:
-            print_version();
+            print_version_information(NAME);
             exit(0);
           case 'q':
             gsSetQuietMsg();

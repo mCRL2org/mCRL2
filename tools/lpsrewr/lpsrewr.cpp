@@ -7,7 +7,6 @@
 /// \file lpsrewr.cpp
 
 #define NAME "lpsrewr"
-#define VERSION "July 2007"
 
 #include <stdio.h>
 #include <errno.h>
@@ -21,12 +20,12 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
 
 //Functions used by the main program
 static void print_help(char *Name);
-static void print_version(void);
 static void print_more_info(char *Name);
 static bool is_valid_lps(ATermAppl spec);
 static ATermAppl rewrite_lps(ATermAppl Spec);
@@ -61,7 +60,7 @@ int main(int argc, char **argv)
         print_help(argv[0]);
         return 0;
       case VERSION_OPTION: /* version */
-        print_version();
+        print_version_information(NAME);
         return 0;
       case 'q': /* quite */
         gsSetQuietMsg();
@@ -231,11 +230,6 @@ static void print_help(char *Name)
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
     Name
   );
-}
-
-void print_version(void)
-{
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void print_more_info(char *Name)

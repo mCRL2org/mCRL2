@@ -22,6 +22,8 @@
 // ======================================================================
 //
 
+#define NAME "lpsuntime"
+
 //C++
 #include <exception>
 #include <cstdio>
@@ -36,6 +38,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/linear_process.h>
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/utility.h>
 
@@ -46,8 +49,6 @@ using namespace lps::data_expr;
 using namespace mcrl2::utilities;
 
 namespace po = boost::program_options;
-
-#define VERSION "July 2007"
 
 typedef struct
 {
@@ -280,13 +281,13 @@ int do_untime(const tool_options& options)
     if (!untime(lps_specification).save(options.output_file, true)) 
     {
       // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
+      gsErrorMsg("could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
   catch (std::runtime_error e)
   {
-    gsErrorMsg("lpsuntime: Unable to load LPS from `%s'\n", options.input_file.c_str());
+    gsErrorMsg("unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }
 
@@ -334,8 +335,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   }
       
   if (vm.count("version")) {
-    cerr << "lpsuntime " << VERSION << " (revision " << REVISION << ")" << endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

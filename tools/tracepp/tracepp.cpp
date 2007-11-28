@@ -7,7 +7,6 @@
 /// \file tracepp.cpp
 
 #define NAME "tracepp"
-#define VERSION "July 2007"
 
 #include <iostream>
 #include <fstream>
@@ -18,6 +17,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace mcrl2::utilities;;
@@ -131,11 +131,6 @@ static void print_help(FILE *f, char *Name)
   );
 }
 
-static void print_version(FILE *f)
-{
-  fprintf(f, NAME " " VERSION " (revision %s)\n", REVISION);
-}
-
 int main(int argc, char **argv)
 {
   #define sopts "hqvdpmDa"
@@ -171,7 +166,7 @@ int main(int argc, char **argv)
         print_help(stderr, argv[0]);
         return 0;
       case 0x1:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'q':
         quiet = true;

@@ -22,6 +22,8 @@
 // ======================================================================
 //
 
+#define NAME "lpssumelm"
+
 //C++
 #include <exception>
 #include <cstdio>
@@ -36,6 +38,7 @@
 
 //LPS Framework
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 #include <mcrl2/lps/sumelm.h>
 
 using namespace std;
@@ -45,8 +48,6 @@ using namespace lps::data_expr;
 using namespace ::mcrl2::utilities;
 
 namespace po = boost::program_options;
-
-#define VERSION "July 2007"
 
 typedef struct{
   std::string input_file; ///< Name of the file to read input from
@@ -142,13 +143,13 @@ int do_sumelm(const tool_options& options)
     if (!success) 
     {
       // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
+      gsErrorMsg("could not save to '%s'\n", options.output_file.c_str());
       return (1);
     }
   }
   catch (std::runtime_error e)
   {
-    gsErrorMsg("lpssumelm: Unable to load LPS from `%s'\n", options.input_file.c_str());
+    gsErrorMsg("unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }
 
@@ -196,8 +197,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   }
       
   if (vm.count("version")) {
-    cerr << "lpssumelm " << VERSION << " (revision " << REVISION << ")" << endl;
-
+    print_version_information(NAME);
     exit (0);
   }
 

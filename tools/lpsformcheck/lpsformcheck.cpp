@@ -8,8 +8,6 @@
 /// \brief Add your file description here.
 
 #define  NAME      "lpsformcheck"
-#define  VERSION   "July 2007"
-#define  AUTHOR    "Luc Engelen"
 
 #include "mcrl2/formula_checker.h"
 #include "getopt.h"
@@ -18,6 +16,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/version_info.h"
 #include <string>
 
 using namespace ::mcrl2::utilities;
@@ -79,8 +78,6 @@ using namespace ::mcrl2::utilities;
       /// \brief Prints a message indicating how to display the help message.
       void print_more_info();
 
-      /// \brief Prints the version of the tool.
-      void print_version();
     public:
       /// \brief Constructor setting all flags to their default values.
       LPS_Form_Check();
@@ -161,10 +158,6 @@ using namespace ::mcrl2::utilities;
 
     // --------------------------------------------------------------------------------------------
 
-    void LPS_Form_Check::print_version() {
-      fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
-    }
-
   // Class LPS_Form_Check - Functions declared public ---------------------------------------------
 
     LPS_Form_Check::LPS_Form_Check() {
@@ -239,7 +232,7 @@ using namespace ::mcrl2::utilities;
             print_help();
             exit(0);
           case 0x1:
-            print_version();
+            print_version_information(NAME);
             exit(0);
           case 'q':
             gsSetQuietMsg();

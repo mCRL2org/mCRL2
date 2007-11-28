@@ -20,7 +20,7 @@ project toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <define>_FILE_OFFSET_BITS=64
-          <define>REVISION=\\\"$(BUILD_TAG)\\\"
+          <define>MCRL2_REVISION=\\\"$(BUILD_TAG)\\\"
           <toolset>msvc:<pch>off
           <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
           <use>/workarounds//configuration

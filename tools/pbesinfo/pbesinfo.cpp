@@ -16,9 +16,8 @@
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
+
 #define NAME "pbesinfo"
-#define VERSION "July 2007"
-#define AUTHOR "Alexander van Dam"
 
 //C++
 #include <cstdio>
@@ -29,9 +28,10 @@
 //Boost
 #include <boost/program_options.hpp>
 
-//MCRL-specific
+//MCRL2-specific
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace lps;
@@ -90,8 +90,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 	
 	if (vm.count("version"))
 	{
-		cerr << "pbesinfo " << VERSION <<  " (revision " << REVISION << ")" << endl;
-		
+                print_version_information(NAME);
 		exit(0);
 	}
 

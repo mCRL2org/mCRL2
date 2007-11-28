@@ -8,7 +8,6 @@
 /// \brief Add your file description here.
 
 #define NAME "lpsactionrename"
-#define VERSION "July 2007"
 
 #include <cstdio>
 #include <cerrno>
@@ -28,6 +27,7 @@
 #include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/data/rewrite.h"
@@ -75,7 +75,6 @@ static ATermAppl rename_actions(t_tool_options tool_options);
 //      NULL, if something went wrong
 
 static void print_help(char *name);
-static void print_version(void);
 static void print_more_info(char *name);
 
 bool process(t_tool_options const& tool_options) {
@@ -323,7 +322,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
         print_help(argv[0]);
         exit(0);
       case VERSION_OPTION: /* version */
-        print_version();
+        print_version_information(NAME);
         exit(0);
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -849,11 +848,6 @@ static void print_help(char *name)
     "  -d, --debug           display detailed intermediate messages\n",
     name
   );
-}
-
-void print_version(void)
-{
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void print_more_info(char *name)

@@ -7,7 +7,6 @@
 /// \file tbf2lps.cpp
 
 #define NAME "tbf2lps"
-#define VERSION "July 2007"
 
 #include <stdio.h>
 #include <errno.h>
@@ -20,13 +19,9 @@
 #include "mcrl2/core/struct.h"
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
-
-void print_version(FILE *f)
-{
-  fprintf(f, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
-}
 
 static void print_help(FILE *f, char *Name)
 {
@@ -86,7 +81,7 @@ int main(int argc, char **argv)
         print_help(stderr, argv[0]);
         return 0;
       case version_option:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'q':
         opt_quiet = true;

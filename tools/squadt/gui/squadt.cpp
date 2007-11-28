@@ -113,7 +113,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         tipi::controller::communicator::get_standard_logger()->set_filter_level(0);
       }
       if (parser.Found(wxT("version"))) {
-        std::cerr << program_name << " " << program_version << " (revision " << REVISION << ")" << std::endl;
+        std::cerr << program_name << " " << program_version << " (revision " << MCRL2_REVISION << ")" << std::endl;
  
         return (false);
       }

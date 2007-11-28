@@ -6,6 +6,8 @@
 //
 /// \file ltscompare.cpp
 
+#define NAME "ltscompare"
+
 #include <string>
 #include <getopt.h>
 #include "aterm2.h"
@@ -13,9 +15,7 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
-
-#define NAME "ltscompare"
-#define VERSION "July 2007"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace ::mcrl2::lts;
@@ -79,11 +79,6 @@ static void print_help(FILE *f, char *Name)
     Name);
 }
 
-static void print_version(FILE *f)
-{
-  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
-}
-
 int main(int argc, char **argv)
 {
   ATerm bot;
@@ -122,7 +117,7 @@ int main(int argc, char **argv)
         print_help(stderr,argv[0]);
         return 0;
       case VersionOption:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'v':
         verbose = true;

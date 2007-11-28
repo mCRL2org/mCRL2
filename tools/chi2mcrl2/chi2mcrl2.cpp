@@ -22,9 +22,9 @@
 #include "chilexer.h"
 #include "mcrl2/core/messaging.h"
 #include "translate.h"
+#include "mcrl2/utilities/version_info.h"
 
 #define NAME "chi2mcrl2"
-#define VERSION "July 2007"
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
 
@@ -40,7 +40,6 @@ struct t_options {
 //Functions used by the main program
 static ATermAppl translate_file(t_options &options);
 static void PrintMoreInfo(char *Name);
-static void PrintVersion(void);
 static void PrintHelp(char *Name);
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -213,7 +212,7 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
         PrintHelp(argv[0]);
         return false;
       case VersionOption: /* version */
-        PrintVersion();
+        print_version_information(NAME);
         return false;
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -294,11 +293,6 @@ ATermAppl translate_file(t_options &options)
 void PrintMoreInfo(char *Name)
 {
   fprintf(stderr, "Use %s --help for options\n", Name);
-}
-
-void PrintVersion(void)
-{
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
 }
 
 void PrintHelp(char *Name)

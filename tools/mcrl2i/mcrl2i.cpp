@@ -7,7 +7,6 @@
 /// \file mcrl2i.cpp
 
 #define NAME "mcrl2i"
-#define VERSION "July 2007"
 
 #include <iostream>
 #include <sstream>
@@ -32,6 +31,7 @@
 #include <mcrl2/core/detail/data_implementation.h>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/version_info.h"
 
 using namespace std;
 using namespace lps;
@@ -244,11 +244,6 @@ void declare_variables(string &vars, specification &spec)
   }
 }
 
-void print_version(FILE *f)
-{
-  fprintf(f, "%s %s (revision %s)\n", NAME, VERSION, REVISION);
-}
-
 void print_help(FILE *f, char *Name)
 {
   fprintf(f,
@@ -302,7 +297,7 @@ int main(int argc, char **argv)
         print_help(stderr, argv[0]);
         return 0;
       case version_option:
-        print_version(stderr);
+        print_version_information(NAME);
         return 0;
       case 'q':
         quiet = true;
