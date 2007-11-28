@@ -371,7 +371,7 @@ namespace squadt {
     }
 
     if (i != command_for_type.end()) {
-      std::string const& command_string = regex_replace((*i).second, sregex(bos >> '$' >> eos), f);
+      std::string const& command_string = regex_replace((*i).second, sregex(as_xpr('$')), f);
 
       if (command_string == command_system) {
         std::string c(global_mime_types_manager.get_command(t));

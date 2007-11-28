@@ -57,18 +57,24 @@ namespace tipi {
            
             while (*current != '\0' && *current != ' ') {
               if (*current == '\'') {
-                while (*current != '\0' && *current != '\'') {
+                do {
                   ++current;
                 }
+                while (*current != '\0' && *current != '\'');
 
-                ++current;
+                if (*current == '\'') {
+                  ++current;
+                }
               }
               else if (*current == '\"') {
-                while (*current != '\0' && *current != '\"') {
+                do {
                   ++current;
                 }
+                while (*current != '\0' && *current != '\"');
 
-                ++current;
+                if (*current == '\"') {
+                  ++current;
+                }
               }
               else {
                 ++current;

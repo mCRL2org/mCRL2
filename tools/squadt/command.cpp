@@ -40,18 +40,24 @@ namespace squadt {
            
             while (current != c.end() && *current != ' ') {
               if (*current == '\'') {
-                while (current != c.end() && *current != '\'') {
+                do {
                   ++current;
                 }
+                while (current != c.end() && *current != '\'');
 
-                ++current;
+                if (*current == '\'') {
+                  ++current;
+                }
               }
               else if (*current == '\"') {
-                while (current != c.end() && *current != '\"') {
+                do {
                   ++current;
                 }
+                while (current != c.end() && *current != '\"');
 
-                ++current;
+                if (*current == '\"') {
+                  ++current;
+                }
               }
               else {
                 ++current;
@@ -98,7 +104,12 @@ namespace squadt {
       }
 
       for (std::deque < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
-        *(d++) = (*i).c_str();
+        if ((*i)[0] == '\'' || (*i)[0] == '\"' && 2 < i->size()) {
+          *(d++) = (*i).substr(1, i->size() - 2).c_str();
+        }
+        else {
+          *(d++) = (*i).c_str();
+        }
       }
 
       *d = 0;
