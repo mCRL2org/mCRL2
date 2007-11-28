@@ -1710,7 +1710,7 @@ namespace ticpp
 			{
 				if ( throwIfNotFound )
 				{
-					TICPPTHROW( "Attribute does not exist" );
+					TICPPTHROW( "Attribute `" + name + "'does not exist" );
 				}
 				else
 				{

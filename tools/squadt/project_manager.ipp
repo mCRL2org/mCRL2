@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file project_manager.tcc
+/// \file project_manager.ipp
 /// \brief Add your file description here.
 
 #ifndef PROJECT_MANAGER_TCC_

@@ -23,8 +23,8 @@
 #include "tipi/controller.hpp"
 #include "tipi/utility/logger.hpp"
 
-#include "processor.tcc"
-#include "project_manager.tcc"
+#include "processor.ipp"
+#include "project_manager.ipp"
 #include "task_monitor.hpp"
 
 namespace squadt {

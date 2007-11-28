@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/controller.tcc
+/// \file include/tipi/detail/controller.ipp
 
 #ifndef TIPI_CONTROLLER_TCC_
 #define TIPI_CONTROLLER_TCC_
@@ -13,7 +13,7 @@
 #include "tipi/controller.hpp"
 #include "tipi/configuration.hpp"
 #include "tipi/controller/capabilities.hpp"
-#include <tipi/detail/basic_messenger.tcc>
+#include <tipi/detail/basic_messenger.ipp>
 #include "tipi/common.hpp"
 #include "tipi/visitors.hpp"
 

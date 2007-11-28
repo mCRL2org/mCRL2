@@ -7,7 +7,7 @@
 /// \file task_monitor.cpp
 /// \brief Add your file description here.
 
-#include "task_monitor.tcc"
+#include "task_monitor.ipp"
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>

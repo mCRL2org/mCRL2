@@ -8,7 +8,7 @@
 
 #include "tipi/tool/category.hpp"
 #include "tipi/controller/capabilities.hpp"
-#include <tipi/detail/tool.tcc>
+#include <tipi/detail/tool.ipp>
 #include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {

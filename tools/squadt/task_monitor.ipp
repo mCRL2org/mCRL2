@@ -4,12 +4,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file task_monitor.tcc
+/// \file task_monitor.ipp
 /// \brief Add your file description here.
 
 #include "task_monitor.hpp"
 
-#include "tipi/detail/controller.tcc"
+#include "tipi/detail/controller.ipp"
 
 namespace squadt {
   namespace execution {

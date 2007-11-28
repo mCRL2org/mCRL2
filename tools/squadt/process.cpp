@@ -15,7 +15,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include "task_monitor.tcc"
+#include "task_monitor.ipp"
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>

@@ -12,7 +12,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <tipi/transport/detail/socket_transceiver.hpp>
-#include <tipi/transport/detail/listener.tcc>
+#include <tipi/transport/detail/listener.ipp>
 
 namespace transport {
   /// \internal

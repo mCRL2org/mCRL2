@@ -18,13 +18,13 @@
 
 #include "build_system.hpp"
 #include "settings_manager.hpp"
-#include "project_manager.tcc"
-#include "tool_manager.tcc"
+#include "project_manager.ipp"
+#include "tool_manager.ipp"
 #include "type_registry.hpp"
-#include "executor.tcc"
-#include "processor.tcc"
+#include "executor.ipp"
+#include "processor.ipp"
 
-#include <tipi/utility/generic_visitor.tcc>
+#include <tipi/utility/generic_visitor.ipp>
 
 namespace squadt {
 

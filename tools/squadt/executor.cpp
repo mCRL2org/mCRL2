@@ -21,7 +21,7 @@
 
 #include "tipi/utility/generic_visitor.hpp"
 
-#include "executor.tcc"
+#include "executor.ipp"
 
 namespace squadt {
   namespace execution {

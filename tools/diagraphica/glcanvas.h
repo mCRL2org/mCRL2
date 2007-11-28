@@ -95,6 +95,8 @@ public:
     void onKeyDown( wxKeyEvent &event );
     void onKeyUp( wxKeyEvent &event );
 private:
+    wxGLContext* context;
+private:
     // -- data members ----------------------------------------------
     double scaleFactor;
     double xTranslation;

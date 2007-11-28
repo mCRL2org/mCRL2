@@ -2,10 +2,10 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/tool.tcc
+/// \file include/tipi/detail/tool.ipp
 
 #include "tipi/common.hpp"
-#include <tipi/detail/basic_messenger.tcc>
+#include <tipi/detail/basic_messenger.ipp>
 #include "tipi/tool.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/layout_base.hpp"

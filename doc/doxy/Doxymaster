@@ -513,7 +513,7 @@ FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
                          *.cpp \
-                         *.tcc \
+                         *.ipp \
                          *.c++ \
                          *.h \
                          *.hh \

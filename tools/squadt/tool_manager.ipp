@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tool_manager.tcc
+/// \file tool_manager.ipp
 /// \brief Add your file description here.
 
 #ifndef TOOL_MANAGER_TCC__

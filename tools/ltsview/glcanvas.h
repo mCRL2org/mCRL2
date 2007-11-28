@@ -52,6 +52,9 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     void      resetStatePositions();
 
   private:
+
+    wxGLContext* context;
+
     int	      activeTool;
     float     angleX;
     float     angleY;

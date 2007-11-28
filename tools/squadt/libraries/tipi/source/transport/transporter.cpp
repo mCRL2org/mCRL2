@@ -12,8 +12,8 @@
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
 
-#include <tipi/transport/detail/transporter.tcc>
-#include <tipi/transport/detail/transceiver.tcc>
+#include <tipi/transport/detail/transporter.ipp>
+#include <tipi/transport/detail/transceiver.ipp>
 #include <tipi/transport/detail/socket_listener.hpp>
 #include <tipi/transport/detail/direct_transceiver.hpp>
 #include <tipi/transport/detail/socket_transceiver.hpp>

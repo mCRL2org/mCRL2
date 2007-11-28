@@ -7,7 +7,7 @@
 #include <boost/test/unit_test_log.hpp>
 #include <boost/test/unit_test_monitor.hpp>
 
-#include <tipi/detail/basic_messenger.tcc>
+#include <tipi/detail/basic_messenger.ipp>
 #include "tipi/tool.hpp"
 #include "tipi/controller.hpp"
 

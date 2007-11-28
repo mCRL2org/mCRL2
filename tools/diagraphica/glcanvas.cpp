@@ -32,12 +32,11 @@ GLCanvas::GLCanvas(
     : wxGLCanvas( 
         parent,
         id,
+        attribList,
         wxDefaultPosition,
         wxDefaultSize,
 		wxNO_FULL_REPAINT_ON_RESIZE | 
-        wxCLIP_CHILDREN,
-        wxString( wxT("") ),
-        attribList ), 
+        wxCLIP_CHILDREN), 
       Colleague( m )
 // ----------------------------------
 {
@@ -50,6 +49,7 @@ GLCanvas::GLCanvas(
     wxToolTip::Enable( true );
     wxToolTip::SetDelay( 0 );
     
+    context      = 0;
     scaleFactor  = 1.0;
     xTranslation = 0.0;
     yTranslation = 0.0;
@@ -57,11 +57,14 @@ GLCanvas::GLCanvas(
     handleMouseMotion = true;
 }
 
-
 // ------------------
 GLCanvas::~GLCanvas()
 // ------------------
-{}
+{
+  if (context) {
+    delete context;
+  }
+}
 
 
 // -- set functions -------------------------------------------------
@@ -299,7 +302,7 @@ void GLCanvas::getWorldCoords(
          GetParent()->IsShown() )
     {
         // this is current context
-        SetCurrent();
+        SetCurrent(*context);
 
         GLint viewport[4];
         GLdouble modelviewMatrix[16];
@@ -336,10 +339,10 @@ void GLCanvas::clear()
 // ------------------------------------------------------------------
 {
     if ( IsShown() && 
-         GetParent()->IsShown() && GetContext() )
+         GetParent()->IsShown() && context)
     {
         // this is current context
-        SetCurrent();
+        SetCurrent(*context);
 
         glClearColor( 1.0, 1.0, 1.0, 1.0 );
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -373,28 +376,27 @@ void GLCanvas::display()
 //                   top    = (1/apsect)*1
 // ------------------------------------------------------------------
 {
-    if (!GetContext()) return;
     // get current size of canvas
     int width, height;
     GetClientSize( &width, &height );
-
-	// this is current context
-    SetCurrent();
-
+    
+    // this is current context
+    SetCurrent(*context);
+    
     // set up viewing volume
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     // casting to GLdouble ensures smooth transitions
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
-
+    
     // specify clipping rectangle ( left, right, bottom, top )
     if ( aspect > 1 )
-		// width > height
+        	// width > height
         gluOrtho2D( aspect*(-1), aspect*1, -1, 1 );
-	else
-		// height >= width
-		gluOrtho2D( -1, 1, (1/aspect)*(-1), (1/aspect)*1 );
-
+        else
+        	// height >= width
+        	gluOrtho2D( -1, 1, (1/aspect)*(-1), (1/aspect)*1 );
+    
     // switch back to the default matrix mode
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
@@ -403,11 +405,11 @@ void GLCanvas::display()
     
     // draw
     mediator->handlePaintEvent( this );
-
+    
     // swap buffers
     glFinish();
     SwapBuffers();
-
+    
     // check for errors
     int error = glGetError();
     if ( error != GL_NO_ERROR )
@@ -445,9 +447,14 @@ void GLCanvas::onEvtPaint( wxPaintEvent &event )
 // be repainted and redraw.
 // ------------------------------------------------------------------
 {
-    if ( IsShown() && GetContext() ) {
+    if ( IsShown() ) {
+        if (!context) {
+          context = new wxGLContext(this);
+        }
+
+        SetCurrent(*context);
+
         // this is current context
-        SetCurrent();
         wxPaintDC dc( this );
         display();
 
@@ -469,11 +476,11 @@ void GLCanvas::onEvtSize( wxSizeEvent &event )
     // update visualizers using this canvas
     mediator->handleSizeEvent( this );
 
-    // call to GetContext() necessary for some Linux distributions
-    if ( GetContext() ) {
+    // context check, necessary for some Linux distributions
+    if ( context ) {
         // get size of canvas
         int width, height;
-        SetCurrent();
+        SetCurrent(*context);
     
         // set up viewport to match canvas size
         GetClientSize( &width, &height );
@@ -499,7 +506,8 @@ void GLCanvas::OnEraseBackground( wxEraseEvent &event )
 void GLCanvas::onLftMouseDown( wxMouseEvent &event )
 // -------------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
     mediator->handleMouseLftDownEvent( 
         this, 
         event.GetX(), 
@@ -507,6 +515,7 @@ void GLCanvas::onLftMouseDown( wxMouseEvent &event )
     Refresh();
 
     event.Skip();
+  }
 }
 
 
@@ -514,7 +523,8 @@ void GLCanvas::onLftMouseDown( wxMouseEvent &event )
 void GLCanvas::onLftMouseUp( wxMouseEvent &event )
 // -----------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
 	mediator->handleMouseLftUpEvent(
         this,
         event.GetX(),
@@ -522,6 +532,7 @@ void GLCanvas::onLftMouseUp( wxMouseEvent &event )
 	Refresh();
 
     event.Skip();
+  }
 }
 
 
@@ -529,12 +540,14 @@ void GLCanvas::onLftMouseUp( wxMouseEvent &event )
 void GLCanvas::onLftMouseDClick( wxMouseEvent &event )
 // ---------------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
     mediator->handleMouseLftDClickEvent(
         this,
         event.GetX(),
         event.GetY() );
     Refresh();
+  }
 }
 
 
@@ -542,12 +555,14 @@ void GLCanvas::onLftMouseDClick( wxMouseEvent &event )
 void GLCanvas::onRgtMouseDown( wxMouseEvent &event )
 // -------------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
     mediator->handleMouseRgtDownEvent(
         this,
         event.GetX(),
         event.GetY() );
     Refresh();
+  }
 }
 
 
@@ -555,12 +570,14 @@ void GLCanvas::onRgtMouseDown( wxMouseEvent &event )
 void GLCanvas::onRgtMouseUp( wxMouseEvent &event )
 // -----------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
 	mediator->handleMouseRgtUpEvent(
         this,
         event.GetX(),
         event.GetY() );
 	Refresh();
+  }
 }
 
 
@@ -568,12 +585,14 @@ void GLCanvas::onRgtMouseUp( wxMouseEvent &event )
 void GLCanvas::onRgtMouseDClick( wxMouseEvent &event )
 // ---------------------------------------------------
 {
-    SetCurrent();
+  if (context) {
+    SetCurrent(*context);
     mediator->handleMouseRgtDClickEvent(
         this,
         event.GetX(),
         event.GetY() );
     Refresh();
+  }
 }
 
 
@@ -581,9 +600,10 @@ void GLCanvas::onRgtMouseDClick( wxMouseEvent &event )
 void GLCanvas::onMouseMotion( wxMouseEvent &event )
 // ------------------------------------------------
 {
+  if (context) {
     if ( handleMouseMotion == true )
     {
-        SetCurrent();
+        SetCurrent(*context);
         mediator->handleMouseMotionEvent(
             this,
             event.GetX(),
@@ -593,6 +613,7 @@ void GLCanvas::onMouseMotion( wxMouseEvent &event )
     }
     else
         event.Skip();
+  }
 }
 
 
@@ -600,8 +621,9 @@ void GLCanvas::onMouseMotion( wxMouseEvent &event )
 void GLCanvas::onMouseWheel( wxMouseEvent &event )
 // -----------------------------------------------
 {
+  if (context) {
     // this is current context
-    SetCurrent();
+    SetCurrent(*context);
     
 	int delta = event.GetWheelRotation();
 
@@ -621,6 +643,7 @@ void GLCanvas::onMouseWheel( wxMouseEvent &event )
             event.GetY() );
         Refresh();
     }
+  }
 }
 
 
@@ -632,12 +655,14 @@ void GLCanvas:: onEnterMouse( wxMouseEvent &event )
 // events to be caught and handled.
 // -------------------------------------------------------------------
 {
+  if (context) {
     // this is current context
-    SetCurrent();
+    SetCurrent(*context);
     
     SetFocus();
     mediator->handleMouseEnterEvent( this );
     Refresh();
+  }
 }
 
 
@@ -648,11 +673,13 @@ void GLCanvas:: onLeaveMouse( wxMouseEvent &event )
 // This function simply sets resets cursor to the default icon.
 // -------------------------------------------------------------------
 {
+  if (context) {
     // this is current context
-    SetCurrent();
+    SetCurrent(*context);
     
 	mediator->handleMouseLeaveEvent( this );
     Refresh();
+  }
 }
 
 
@@ -665,13 +692,15 @@ void GLCanvas::onKeyDown( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-	SetCurrent();
-	mediator->handleKeyDownEvent(
-        this,
-        event.GetKeyCode() );
-	event.Skip();
+  if (context) {
+    SetCurrent(*context);
+
+    mediator->handleKeyDownEvent(this, event.GetKeyCode() );
+
+    event.Skip();
 	
-	Refresh();
+    Refresh();
+  }
 }
 
 
@@ -684,13 +713,15 @@ void GLCanvas::onKeyUp( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
+  if (context) {
     // this is current context
-    SetCurrent();
+    SetCurrent(*context);
     
 	mediator->handleKeyUpEvent(this,event.GetKeyCode() );
     event.Skip();
 
     Refresh();
+  }
 }
 
 

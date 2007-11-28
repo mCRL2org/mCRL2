@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/detail/basic_messenger.tcc
+/// \file include/tipi/detail/basic_messenger.ipp
 
 #ifndef BASIC_MESSENGER_TCC
 #define BASIC_MESSENGER_TCC
@@ -17,7 +17,7 @@
 
 #include <workarounds.h>
 
-#include <tipi/transport/detail/transporter.tcc>
+#include <tipi/transport/detail/transporter.ipp>
 #include <tipi/detail/basic_messenger.hpp>
 #include <tipi/common.hpp>
 

@@ -20,7 +20,7 @@
 #include <boost/system/system_error.hpp>
 
 #include <tipi/transport/transporter.hpp>
-#include <tipi/transport/detail/transceiver.tcc>
+#include <tipi/transport/detail/transceiver.ipp>
 #include <tipi/transport/detail/socket_scheduler.hpp>
 
 namespace transport {

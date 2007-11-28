@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/unit_test_log.hpp>
 
-#include <tipi/detail/basic_messenger.tcc>
+#include <tipi/detail/basic_messenger.ipp>
 
 #define BOOST_TEST_SHOW_PROGRESS yes
 

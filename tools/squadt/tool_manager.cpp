@@ -19,10 +19,10 @@
 
 #include "tipi/utility/generic_visitor.hpp"
 
-#include <tipi/detail/controller.tcc>
+#include <tipi/detail/controller.ipp>
 
 #include "settings_manager.hpp"
-#include "tool_manager.tcc"
+#include "tool_manager.ipp"
 #include "task_monitor.hpp"
 #include "executor.hpp"
 #include "command.hpp"

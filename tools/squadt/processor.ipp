@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file processor.tcc
+/// \file processor.ipp
 /// \brief Add your file description here.
 
 #ifndef PROCESSOR_TCC
@@ -23,7 +23,7 @@
 #include "processor.hpp"
 #include "project_manager.hpp"
 #include "executor.hpp"
-#include "tool_manager.tcc"
+#include "tool_manager.ipp"
 
 namespace squadt {
   /// \cond INTERNAL_DOCS

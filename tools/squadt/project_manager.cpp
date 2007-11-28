@@ -23,8 +23,8 @@
 #include <boost/function.hpp>
 
 #include "build_system.hpp"
-#include "project_manager.tcc"
-#include "processor.tcc"
+#include "project_manager.ipp"
+#include "processor.ipp"
 #include "settings_manager.hpp"
 #include "type_registry.hpp"
 #include "visitors.hpp"
