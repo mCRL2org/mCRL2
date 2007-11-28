@@ -73,20 +73,20 @@ int test_main(int, char*[])
   gsEnableConstructorFunctions(); 
 
   // case 1
-  BOOST_CHECK(parelm(mcrl22lps(case_1).process()).process_parameters().empty());
+  BOOST_CHECK(parelm(mcrl22lps(case_1).process()).process().process_parameters().empty());
 
   // case 2
-  data_variable_list v = parelm(mcrl22lps(case_2).process()).process_parameters();
+  data_variable_list v = parelm(mcrl22lps(case_2).process()).process().process_parameters();
 
   BOOST_CHECK((v.size() == 1) && (v.front() == data_variable("i:Nat")));
 
   // case 3
-  v = parelm(mcrl22lps(case_3).process()).process_parameters();
+  v = parelm(mcrl22lps(case_3).process()).process().process_parameters();
 
   BOOST_CHECK((v.size() == 1) && v.front() == data_variable("i:Nat"));
 
   // case 4
-  v = parelm(mcrl22lps(case_3).process()).process_parameters();
+  v = parelm(mcrl22lps(case_3).process()).process().process_parameters();
 
   BOOST_CHECK((v.size() == 1));
 
