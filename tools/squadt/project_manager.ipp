@@ -33,9 +33,6 @@ namespace squadt {
       /** \brief Convenience type alias for a list of conflicting objects */
       typedef project_manager::conflict_list                           conflict_list;
 
-      /** \brief Iterator type for the processor list */
-      typedef project_manager::processor_iterator                      processor_iterator;
-
       /** \brief Finite type for counting the number of added processors */
       typedef project_manager::processor_count                         processor_count;
 

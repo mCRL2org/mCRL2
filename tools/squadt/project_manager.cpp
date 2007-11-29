@@ -682,8 +682,8 @@ namespace squadt {
     return (impl->store.native_directory_string());
   }
 
-  project_manager::processor_iterator project_manager::get_processor_iterator() const {
-    return (processor_iterator(impl->processors));
+  project_manager::processor_sequence project_manager::get_processor_sequence() const {
+    return (processor_sequence(impl->processors.begin(), impl->processors.end()));
   }
 
   void project_manager::commit(boost::shared_ptr< processor > const& p) {

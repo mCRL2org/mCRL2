@@ -20,13 +20,10 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/md5.hpp>
 
-#include "tipi/utility/indirect_iterator.hpp"
 #include "task_monitor.hpp"
 #include "tool.hpp"
 
 namespace squadt {
-
-  using iterator_wrapper::constant_indirect_iterator;
 
   class project_manager;
 

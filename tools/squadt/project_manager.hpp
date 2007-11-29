@@ -15,13 +15,11 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/range/iterator_range.hpp>
 
-#include "tipi/utility/indirect_iterator.hpp"
 #include "processor.hpp"
 
 namespace squadt {
-
-  using iterator_wrapper::constant_indirect_iterator;
 
   class project_manager_impl;
 
@@ -50,7 +48,7 @@ namespace squadt {
       typedef std::vector < boost::shared_ptr< processor > >                    processor_list;
 
       /** \brief Iterator type for the processor list */
-      typedef constant_indirect_iterator < processor_list, processor >          processor_iterator;
+      typedef boost::iterator_range< processor_list::const_iterator >           processor_sequence;
 
       /** \brief Convenience type alias for a list of conflicting objects */
       typedef std::vector < boost::shared_ptr< processor::object_descriptor > > conflict_list;
@@ -97,8 +95,8 @@ namespace squadt {
       /** \brief Add a file to the project under a new name */
       boost::shared_ptr< processor > import_file(const boost::filesystem::path&, const std::string& = "");
 
-      /** \brief Get a reference to the list of processors in this project */
-      processor_iterator get_processor_iterator() const;
+      /** \brief Get iterator range of the list of processors in this project */
+      processor_sequence get_processor_sequence() const;
 
       /** \brief Get the count value */
       processor_count get_unique_count();
