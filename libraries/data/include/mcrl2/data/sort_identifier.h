@@ -36,25 +36,25 @@ class sort_identifier: public sort_expression
 {
   public:
     sort_identifier()
-      : aterm_appl(detail::constructSortId())
+      : sort_expression(detail::constructSortId())
     {}
 
     /// Constructs a sort with internal representation t.
     ///
     sort_identifier(ATermAppl t)
-      : aterm_appl(t)
+      : sort_expression(t)
     {
       assert(detail::check_rule_SortId(m_term));
     }
 
     sort_identifier(aterm_appl t)
-      : aterm_appl(t)
+      : sort_expression(t)
     {
       assert(detail::check_rule_SortId(m_term));
     }
 
     sort_identifier(identifier_string name)
-      : aterm_appl(gsMakeSortId(name))
+      : sort_expression(gsMakeSortId(name))
     {
       assert(detail::check_rule_SortId(m_term));
     }
@@ -62,7 +62,7 @@ class sort_identifier: public sort_expression
     /// Constructs a sort from a string.
     ///
     sort_identifier(std::string s)
-      : aterm_appl(gsMakeSortId(gsString2ATermAppl(s.c_str())))
+      : sort_expression(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
 
     /// Returns the name of the sort id.
@@ -79,7 +79,7 @@ class sort_identifier: public sort_expression
     }
 };
 
-/// \brief Returns true if the term t is a sort
+/// \brief Returns true if the term t is a sort identifier.
 inline
 bool is_sort_identifier(aterm_appl t)
 {
