@@ -13,13 +13,16 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
+#include <boost/iterator/transform_iterator.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/algorithm.h"
 #include "atermpp/utility.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/action_utility.h"
+#include "mcrl2/lps/detail/sequence_algorithm.h"
 
 namespace lps {
 
@@ -189,6 +192,7 @@ class summand: public aterm_appl
     /// <li>the (optional) time has sort Real</li>
     /// <li>the condition has sort Bool</li>
     /// <li>the summation variables have unique names</li>
+    //  <li>the left hand sides of the data assignments are unique</li>
     /// </ul>
     ///
     bool is_well_typed() const
@@ -220,6 +224,17 @@ class summand: public aterm_appl
       if (!detail::unique_names(m_summation_variables))
       {
         std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
+        return false;
+      }
+
+      // check 5)
+      if (detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , detail::data_assignment_lhs())
+              )
+         )
+      {
+        std::cerr << "summand::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
         return false;
       }
 

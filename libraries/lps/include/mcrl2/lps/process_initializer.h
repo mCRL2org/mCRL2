@@ -16,7 +16,9 @@
 #include "atermpp/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
+#include "mcrl2/lps/detail/sequence_algorithm.h"
 
 namespace lps {
 
@@ -85,15 +87,22 @@ class process_initializer: public aterm_appl
 
     /// Returns true if
     /// <ul>
-    // <li>the summands are well typed</li>
-    // <li>the process parameters have unique names</li>
-    // <li>the free variables have unique names</li>
-    // <li>the names of the process parameters do not appear as the name of a summation variable</li>
-    // <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
+    // <li>the left hand sides of the data assignments are unique</li>
     /// </ul>
     ///
     bool is_well_typed() const
     {
+      // check 1)
+      if (detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , detail::data_assignment_lhs())
+              )
+         )
+      {
+        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
+        return false;
+      }
+
       return true;
     }
 };

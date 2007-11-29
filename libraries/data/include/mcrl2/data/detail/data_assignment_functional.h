@@ -17,6 +17,16 @@ namespace lps {
 
 namespace detail {
 
+/// Returns the left hand side of a data assignment.
+struct data_assignment_lhs: public std::unary_function<data_assignment, data_variable>
+{
+  data_variable operator()(const data_assignment& a) const
+  {
+    return a.lhs();
+  }
+};
+
+/// Returns true if the left hand side of an assignment equals a given variable.
 struct has_left_hand_side
 {
   const data_variable& m_variable;
@@ -31,6 +41,7 @@ struct has_left_hand_side
   }
 };
 
+/// Returns true if the left hand side of an assignment is contained in a given set.
 struct has_left_hand_side_in
 {
   const std::set<data_variable>& m_variables;
