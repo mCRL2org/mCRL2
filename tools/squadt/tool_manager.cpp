@@ -142,7 +142,9 @@ namespace squadt {
   
   void tool_manager_impl::factory_configuration() {
     const boost::filesystem::path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
-       
+
+    tools.clear();
+
     for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
 #if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
       boost::filesystem::path file_name(std::string(*t) + ".exe");
@@ -316,6 +318,10 @@ namespace squadt {
       if (!impl->query_tool(t)) {
         retry_list.push_back(t);
       }
+    }
+
+    if (4 < retry_list.size()) {
+      throw std::runtime_error("Initialisation failed for too many tools!");
     }
 
     /* Retry initialisation of failed tools */

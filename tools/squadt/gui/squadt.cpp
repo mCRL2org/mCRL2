@@ -42,14 +42,22 @@ class initialisation : public wxThread {
 
   public:
 
+    bool too_many_tools_failed;
+
     initialisation(splash* s) : wxThread(wxTHREAD_JOINABLE), splash_window(s) {
+      too_many_tools_failed = false;
       Create();
       Run();
     }
 
     void* Entry() {
-      squadt::global_build_system.get_tool_manager()->query_tools(
+      try {
+        squadt::global_build_system.get_tool_manager()->query_tools(
                     boost::bind(&splash::set_operation, splash_window, "", _1));
+      }
+      catch (...) {
+        too_many_tools_failed = true;
+      }
 
       return (0);
     }
@@ -181,6 +189,25 @@ bool Squadt::OnInit() {
         splash_window->update();
      
         wxApp::Yield();
+      }
+
+      if (ti.too_many_tools_failed) {
+        wxMessageDialog retry(0, wxT("Do you want to replace the current list of known tools with the default set and retry?"),
+                wxT("Initialisation of multiple tools failed!"), wxOK|wxCANCEL|wxICON_WARNING);
+
+        if (retry.ShowModal() == wxID_OK) {
+          /* Perform initialisation */
+          initialisation reinitialisation_thread(splash_window);
+
+          global_build_system.get_tool_manager()->factory_configuration();
+       
+          /* Cannot just wait because the splash would not be updated */
+          while (reinitialisation_thread.IsAlive()) {
+            splash_window->update();
+       
+            wxApp::Yield();
+          }
+        }
       }
 
       global_build_system.get_type_registry()->rebuild_indices();
