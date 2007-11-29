@@ -170,10 +170,14 @@ namespace squadt {
         button_accept->Enable(false);
 
         if (!location->GetValue().IsEmpty()) {
-          if (wxFileName(location->GetValue()).FileExists()) {
+          using namespace boost::filesystem;
+
+          path target(std::string(location->GetValue().c_str()));
+
+          if (exists(target)) {
             wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
           }
-          else if (wxFileName(location->GetValue()).DirExists() && dialog::project::is_project_directory(location->GetValue())) {
+          else if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
             /* Directory contains a directory with the name of this project */
             screen0->Show(open_project_instead, true);
           } else {
