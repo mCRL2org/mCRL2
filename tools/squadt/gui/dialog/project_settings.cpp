@@ -19,6 +19,7 @@
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
 #include <wx/dirdlg.h>
+#include <wx/dir.h>
 #include <wx/textctrl.h>
 
 #define cmID_BROWSE (wxID_HIGHEST + 1)
@@ -68,7 +69,7 @@ namespace squadt {
       new_project::new_project(wxWindow* p) : dialog::project(p, wxT("Specify project store location")) {
         build();
 
-        Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::new_project::on_text_updated));
+        Connect(wxEVT_COMMAND_TEXT_ENTER, wxTextEventHandler(dialog::new_project::on_text_updated));
         Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::new_project::on_button_clicked));
       }
 
@@ -96,7 +97,7 @@ namespace squadt {
         wxStaticText* directory_text = new wxStaticText(main_panel, wxID_ANY,
                         wxT("Select a directory where the files for the new project can be stored."));
 
-        location = new wxTextCtrl(main_panel, wxID_ANY, default_directory);
+        location = new wxTextCtrl(main_panel, wxID_ANY, default_directory, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
         directory_text->Wrap(GetSize().GetWidth() - 40);
 
@@ -141,8 +142,15 @@ namespace squadt {
             break;
           default: /* wxID_OK */
             if (wxFileName::DirExists(location->GetValue())) {
-              if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
-                                    wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+              wxDir container(location->GetValue());
+
+              if (container.HasFiles()) {
+                if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
+                                      wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                  EndModal(1);
+                }
+              }
+              else {
                 EndModal(1);
               }
             }

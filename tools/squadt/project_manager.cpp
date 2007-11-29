@@ -60,11 +60,16 @@ namespace squadt {
     if (filesystem::exists(l)) {
       assert(filesystem::is_directory(l));
 
-      if (b && !filesystem::exists(project_file)) {
-        import_directory(l);
+      if (!filesystem::exists(project_file)) {
+        if (b) {
+          import_directory(l);
 
-        /* Create initial project description file */
-        visitors::store(*this, project_file);
+          /* Create initial project description file */
+          visitors::store(*this, project_file);
+        }
+        else {
+          throw std::runtime_error("Unable to load project file `"+project_file.string()+"'.");
+        }
       }
       else {
         try {
@@ -86,11 +91,14 @@ namespace squadt {
         }
       }
     }
-    else {
+    else if (b) {
       filesystem::create_directories(l);
 
       /* Create initial project description file */
       visitors::store(*this, project_file);
+    }
+    else {
+      return;
     }
 
     /* Compute reverse dependencies */
