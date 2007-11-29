@@ -18,6 +18,7 @@
 //#include <time.h>
 #include "ids.h"
 #include "icons/main_window.xpm"
+#include "mcrl2/utilities/version_info.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -472,16 +473,24 @@ void MainFrame::setFileInfo(wxFileName fn) {
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
-  wxString msg = wxT("LTSView - revision "MCRL2_REVISION"\n\n")
-    wxT("Tool for the interactive visualisation of state transition systems.\n\n")
-    wxT("Developed by Bas Ploeger and Carst Tankink.\n")
-    wxT("Based on visualisation techniques by Frank van Ham and Jack van Wijk. ")
-    wxT("See: F. van Ham, H. van de Wetering and J.J. van Wijk, ")
-    wxT("\"Visualization of State Transition Graphs\". ")
-    wxT("Proc. IEEE Symp. Information Visualization 2001, IEEE CS Press, pp. 59-66, 2001.\n\n")
-    wxT("Distributed as part of the mCRL2 toolset. For information see:\nhttp://www.mcrl2.org\n\n")
-    wxT("For feature requests or bug reports, please visit:\nhttp://www.mcrl2.org/issuetracker\n");
-  wxMessageDialog dlg(this,msg,ttl,wxOK|wxICON_INFORMATION);
+  wxString msg = wxString();
+  msg += wxT(get_version_information("LTSView"));
+  msg += wxT("\n");
+  msg += wxT("\n");
+  msg += wxT("Tool for interactive visualisation of state transition systems.\n");
+  msg += wxT("Developed by Bas Ploeger and Carst Tankink.\n");
+  msg += wxT("\n");
+  msg += wxT("LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. ");
+  msg += wxT("See: F. van Ham, H. van de Wetering and J.J. van Wijk, ");
+  msg += wxT("\"Visualization of State Transition Graphs\". ");
+  msg += wxT("Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n");
+  msg += wxT("\n");
+  msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  msg += wxT("For information see http://www.mcrl2.org\n");
+  msg += wxT("\n");
+  msg += wxT("For feature requests or bug reports,\n");
+  msg += wxT("please visit http://www.mcrl2.org/issuetracker");
+  wxMessageDialog dlg(this, msg, ttl, wxOK|wxICON_INFORMATION);
   dlg.ShowModal();
 }
 

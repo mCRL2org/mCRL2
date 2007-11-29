@@ -6,6 +6,7 @@
 
 #include "graph_frame.h"
 #include "workarounds.h"
+#include "mcrl2/utilities/version_info.h"
 
 static const wxColour &border_colour_selected = *wxBLUE;
 
@@ -420,7 +421,7 @@ void GraphFrame::Init(wxString LTSfile) {
 
   	//leftPanel->sz = leftPanel->GetSize();
         // Set the title of the frame to ltsgraph - LTSfile
-        wxString title = wxT("ltsgraph - ");
+        wxString title = wxT("LTSGraph - ");
         title.append(LTSfile);
         SetTitle(title);
 
@@ -716,13 +717,20 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
   }
 }
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
-  wxString caption = wxT("About");
-  wxString content = wxT("ltsgraph - Tool for visualising labelled transition systems. \n");
-  content += wxT("Developed by Didier Le Lann and Carst Tankink.\n\n");
-
-  content += wxT("Info: http://www.mcrl2.org \n");
-  content += wxT("For problems or enhancement requests please use: http://www.mcrl2.org/issuetracker");
-  wxMessageBox(content, caption,wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
+  wxString caption = wxT("About LTSGraph");
+  wxString content = wxString();
+  content += wxT(get_version_information("LTSGraph"));
+  content += wxT("\n");
+  content += wxT("\n");
+  content += wxT("Tool for visualising labelled transition systems.\n");
+  content += wxT("Developed by Didier Le Lann and Carst Tankink.\n");
+  content += wxT("\n");
+  content += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  content += wxT("For information see http://www.mcrl2.org\n");
+  content += wxT("\n");
+  content += wxT("For feature requests or bug reports,\n");
+  content += wxT("please visit http://www.mcrl2.org/issuetracker");
+  wxMessageBox(content, caption, wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
 }
 
  

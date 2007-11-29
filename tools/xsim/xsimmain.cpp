@@ -31,6 +31,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/version_info.h"
 
 // For PLUGIN_DIRECTORY
 #include <mcrl2/setup.h>
@@ -1114,9 +1115,21 @@ void XSimMain::OnStop( wxCommandEvent& /* event */ )
 
 void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
-    wxMessageDialog dialog( this, wxT("mCRL2 Simulator GUI"),
-        wxT("About XSim"), wxOK|wxICON_INFORMATION );
-    dialog.ShowModal();
+  wxString ttl = wxT("About XSim");
+  wxString msg = wxString();
+  msg += wxT(get_version_information("XSim"));
+  msg += wxT("\n");
+  msg += wxT("\n");
+  msg += wxT("Tool for simulation of linear process specifications.\n");
+  msg += wxT("Developed by Muck van Weerdenburg.\n");
+  msg += wxT("\n");
+  msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  msg += wxT("For information see http://www.mcrl2.org\n");
+  msg += wxT("\n");
+  msg += wxT("For feature requests or bug reports,\n");
+  msg += wxT("please visit http://www.mcrl2.org/issuetracker");
+  wxMessageDialog dialog(this, msg, ttl, wxOK|wxICON_INFORMATION);
+  dialog.ShowModal();
 }
 
 void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )

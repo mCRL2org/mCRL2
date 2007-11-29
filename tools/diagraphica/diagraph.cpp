@@ -11,6 +11,7 @@
 #include <string>
 #include <wx/wx.h>
 #include <wx/sysopt.h>
+#include "mcrl2/utilities/version_info.h"
 
 // windows debug libraries
 #ifdef _MSC_VER
@@ -115,8 +116,6 @@ int main(int argc, char **argv) {
 // -- command line --------------------------------------------------
 
 #define NAME "diagraphica"
-#define MCRL2_VERSION "July 2007"
-
 
 // parse command line 
 bool parse_command_line(
@@ -139,7 +138,7 @@ bool parse_command_line(
     }
 
     if (cmdln.Found(wxT("version"))) {
-    std::cout << NAME " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl;
+      print_version_information(NAME);
     return false;
     }
 

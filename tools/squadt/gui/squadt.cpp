@@ -7,11 +7,14 @@
 /// \file gui/squadt.cpp
 /// \brief Add your file description here.
 
+#define NAME "squadt"
+
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
 #include "tipi/utility/print_logger.hpp"
+#include "mcrl2/utilities/version_info.h"
 
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
@@ -29,8 +32,6 @@
 #include <wx/msgdlg.h>
 #include <wx/sysopt.h>
 
-const char* program_name    = "squadt";
-const char* program_version = "July 2007";
 
 using namespace squadt::GUI;
 
@@ -102,7 +103,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         tipi::controller::communicator::get_standard_logger()->set_filter_level(2);
       }
       if (parser.Found(wxT("h"))) {
-        std::cout << "Usage: " << program_name << " [OPTION] [PATH]\n"
+        std::cout << "Usage: " << argv[0] << " [OPTION] [PATH]\n"
                   << "Graphical environment that provides a uniform interface for using all kinds\n"
                   << "of other connected tools.\n"
                   << "\n"
@@ -121,8 +122,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         tipi::controller::communicator::get_standard_logger()->set_filter_level(0);
       }
       if (parser.Found(wxT("version"))) {
-        std::cerr << program_name << " " << program_version << " (revision " << MCRL2_REVISION << ")" << std::endl;
- 
+        print_version_information(NAME);
         return (false);
       }
     }

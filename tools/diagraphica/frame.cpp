@@ -10,6 +10,7 @@
 
 #include "frame.h"
 #include "figures.xpm"
+#include "mcrl2/utilities/version_info.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -1928,34 +1929,39 @@ void Frame::initAboutFrame()
     panel->SetSizer( sizer );
 
     // message
-    wxString msg;
-    msg.Append( wxT( "DiaGraphica Version 3.01\n" ) );
-    msg.Append( wxT( "Copyright (c) 2007, "  ) );
-    msg.Append( wxT( "A. Johannes Pretorius, TU/e, "  ) );
-    msg.Append( wxT( "All rights reserved.\n"  ) );
-    msg.Append( wxT( "\n" )  );
+    wxString msg = wxString();
+    msg += wxT( get_version_information("DiaGraphica") );
+    msg += wxT( "\n" );
+    msg += wxT( "\n" );
+    msg += wxT( "Developed by A. Johannes Pretorius\n" );
+    msg += wxT( "Visualization Group\n" );
+    msg += wxT( "Department of Mathematics and Computer Science\n" );
+    msg += wxT( "Eindhoven University of Technology.\n" );
+    msg += wxT( "\n" );
 
-    msg.Append( wxT( "Visualization Group\n" )  );
-    msg.Append( wxT( "Dept Math and Computer Science\n" )  );
-    msg.Append( wxT( "Eindhoven University of Technology\n" )  );
-    msg.Append( wxT( "\n" )  );
+    msg += wxT( "For more information please see:\n" );
+    msg += wxT( "www.win.tue.nl/~apretori/diagraphica\n" );
+    msg += wxT( "\n" );
 
-    msg.Append( wxT( "For more information please see: www.win.tue.nl/~apretori/diagraphica/\n" )  );
-    msg.Append( wxT( "\n" )  );
+    msg += wxT( "You are free to use images produced with DiaGraphica. " );
+    msg += wxT( "In this case, image credits would be much appreciated.\n" );
+    msg += wxT( "\n" );
 
-    msg.Append( wxT( "You are free to use images produced with DiaGraphica. " )  );
-    msg.Append( wxT( "In this case, image credits would be much appreciated.\n" )  );
-    msg.Append( wxT( "\n" )  );
+    msg += wxT( "This program is an academic prototype. " );
+    msg += wxT( "You are free to use it at your own risk. " );
+    msg += wxT( "The author will not be held responsible for any damages resulting from use.\n" );
+    msg += wxT( "\n" );
 
-    msg.Append( wxT( "This program is an academic prototype. " )  );
-    msg.Append( wxT( "You are free to use it at your own risk. " )  );
-    msg.Append( wxT( "The author will not be held responsible for any damages resulting from use.\n" )  );
-    msg.Append( wxT( "\n" )  );
+    msg += wxT( "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and " );
+    msg += wxT( "uses the TinyXML parser (tinyxml.sourceforge.net). " );
+    msg += wxT( "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n" );
+    msg += wxT( "\n" );
 
-    msg.Append( wxT( "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and " )  );
-    msg.Append( wxT( "uses the TinyXML parser (tinyxml.sourceforge.net). " )  );
-    msg.Append( wxT( "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n" ) );
-    
+    msg += wxT( "This version of DiaGraphica is distributed as part of the mCRL2 toolset.\n" );
+    msg += wxT( "For information see http://www.mcrl2.org\n");
+    msg += wxT( "\n" );
+    msg += wxT( "Please report bugs at http://www.mcrl2.org/issuetracker\n" );
+
     wxTextCtrl* textCtrl = new wxTextCtrl(
         panel, 
         wxID_ANY, 
