@@ -13,11 +13,11 @@ project libraries/lps/test
 test-suite lps
     :
       [ run apply_test.cpp ]
-      [ run beta_reduce_test.cpp ]
       [ run data_expression.cpp ]
+      [ run data_expression_replace_test.cpp ]
       [ run data_test.cpp ]
-      [ run data_utiltiy_test.cpp ]
-      [ run operator.cpp ]
+      [ run data_utility_test.cpp ]
+      [ run operators.cpp ]
       [ run replace_test.cpp ]
       [ run sort_test.cpp ]
     ;

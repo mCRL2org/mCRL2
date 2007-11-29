@@ -33,7 +33,7 @@ void test_apply()
 {
   data_variable a("i:Int");
   data_expression b(gsMakeDataExprInt("4"));
-  data_expression c = lps::equal_to(a, b); // i == 4
+  data_expression c = data_expr::equal_to(a, b); // i == 4
 
   data_expression_list cl; //singleton Container with c
   cl = push_front(cl, c);
