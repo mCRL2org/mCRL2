@@ -172,7 +172,7 @@ namespace squadt {
         if (!location->GetValue().IsEmpty()) {
           using namespace boost::filesystem;
 
-          path target(std::string(location->GetValue().c_str()));
+          path target(std::string(location->GetValue().fn_str()));
 
           if (exists(target)) {
             wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
