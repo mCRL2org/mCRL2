@@ -15,6 +15,7 @@
 #include <set>
 #include <vector>
 #include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -54,7 +55,7 @@ std::map<data_variable, data_expression> compute_constant_parameters(const linea
         if (k != replacements.end())
         {
           data_expression gj = data_variable_map_replace(j->rhs(), replacements);
-          if (r(or_(not_(rc), not_equal_to(k->second, r(gj)))) == true_())
+          if (r(or_(not_(rc), not_equal_to(k->second, gj))) == true_())
           {
             replacements.erase(k);
             has_changed = true;
@@ -65,6 +66,63 @@ std::map<data_variable, data_expression> compute_constant_parameters(const linea
     }
   } while (has_changed == true);
 
+  return replacements;
+}
+
+/// Returns zero or more constant process parameters of the process p with initial state init.
+/// The result is returned as a map m that maps the constant parameters to their
+/// constant value.
+template<>
+std::map<data_variable, data_expression> compute_constant_parameters(const linear_process& p, data_expression_list init, rewriter& r)
+{
+  using namespace data_expr;
+  
+  data_variable_list::iterator i = p.process_parameters().begin();
+  data_expression_list::iterator j = init.begin();
+  for ( ; i != p.process_parameters().end(); ++i, ++j)
+  {
+    r.add_substitution(*i, *j);
+  }
+
+  bool has_changed;
+  do
+  {
+    has_changed = false;
+    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    {
+      data_expression rc = r(i->condition());
+
+      if (rc == false_())
+      {
+        continue;
+      }
+      for (data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      {
+        data_expression dj = r.substitution(j->lhs());
+
+        if (dj != data_expression())
+        {
+          data_expression gj = j->rhs();
+          if (r(or_(not_(rc), not_equal_to(dj, gj))) == true_())
+          {
+            r.remove_substitution(j->lhs());
+            has_changed = true;
+          }
+        }
+      }
+      // if (has_changed) { break; }
+    }
+  } while (has_changed == true);
+
+  std::map<data_variable, data_expression> replacements;
+  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++ i)
+  {
+    data_expression e = r.substitution(*i);
+    if (e != data_expression())
+    {
+      replacements[*i] = e;
+    }
+  }
   return replacements;
 }
 

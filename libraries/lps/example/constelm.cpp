@@ -1,43 +1,9 @@
 #include <string>
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewriter.h"
 
 using namespace lps;
 using namespace std;
-
-///////////////////////////////////////////////////////////////////////////////
-// rewriter
-/// \brief rewriter.
-class rewriter
-{
-  private:
-    Rewriter* m_rewriter;
-
-  public:
-    /// Constructs a rewriter from data specification d.
-    ///
-    rewriter(data_specification d)
-    {
-      m_rewriter = createRewriter(d);
-    }
-
-    ~rewriter()
-    {
-      delete m_rewriter;
-    }
-  
-		/// \brief Rewrites a data expression.
-		/// \param d The term to be rewritten.
-		/// \return The normal form of d.
-		///
-		data_expression operator()(const data_expression& d) const
-		{
-		  ATerm t = m_rewriter->toRewriteFormat(d);
-		  return m_rewriter->rewrite((ATermAppl) t);
-		}
-};
-
-using namespace lps;
 
 int main(int argc, char* argv[])
 {
