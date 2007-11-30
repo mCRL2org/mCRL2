@@ -30,7 +30,7 @@ struct data_variable_map_replace_helper
     std::map<data_variable, data_expression>::const_iterator i = m_replacements.find(t);
     if (i == m_replacements.end())
     {
-      return t;
+      return aterm_appl(t);
     }
     else
     {
