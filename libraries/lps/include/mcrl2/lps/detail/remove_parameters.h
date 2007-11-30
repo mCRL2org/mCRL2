@@ -50,7 +50,6 @@ linear_process remove_parameters(const linear_process& p, const std::set<data_va
   linear_process result = set_process_parameters(p, new_process_parameters);
   result = set_summands(result, new_summands);
 
-  assert(result.is_well_typed());
   return result;
 }
 

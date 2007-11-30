@@ -11,7 +11,7 @@
 #include <string>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/basic/detail/read_text.h"
+#include "mcrl2/modal_formula/detail/read_text.h"
 
 using namespace std;
 using namespace lps;

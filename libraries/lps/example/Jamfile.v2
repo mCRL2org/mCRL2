@@ -1,13 +1,13 @@
 project libraries/lps/example
    : requirements
        <use>/boost//headers
-       <source>/libraries//rewrite
        <source>/libraries//core
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
    ;
 
+exe constelm        : constelm.cpp : ;
 exe parelm          : parelm.cpp : ;
 exe garbage         : garbage.cpp : ;
 exe constructors    : constructors.cpp : ;
@@ -20,6 +20,7 @@ exe mcrl22lps       : mcrl22lps.cpp : ;
 
 install dist
    :
+     constelm
      parelm
      term_replace
      garbage

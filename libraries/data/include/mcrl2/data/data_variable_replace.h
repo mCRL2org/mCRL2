@@ -19,15 +19,15 @@ namespace lps {
 /// \internal
 struct data_variable_map_replace_helper
 {
-  const std::map<data_variable, data_variable>& m_replacements;
+  const std::map<data_variable, data_expression>& m_replacements;
     
-  data_variable_map_replace_helper(const std::map<data_variable, data_variable>& replacements)
+  data_variable_map_replace_helper(const std::map<data_variable, data_expression>& replacements)
     : m_replacements(replacements)
   {}
   
-  data_variable operator()(const data_variable& t) const
+  data_expression operator()(const data_variable& t) const
   {
-    std::map<data_variable, data_variable>::const_iterator i = m_replacements.find(t);
+    std::map<data_variable, data_expression>::const_iterator i = m_replacements.find(t);
     if (i == m_replacements.end())
     {
       return t;
@@ -42,7 +42,7 @@ struct data_variable_map_replace_helper
 /// Replaces all data_variables in the term t using the specified map of replacements.
 ///
 template <typename Term>
-Term data_variable_map_replace(Term t, const std::map<data_variable, data_variable>& replacements)
+Term data_variable_map_replace(Term t, const std::map<data_variable, data_expression>& replacements)
 {
   return atermpp::checked_replace(t, is_data_variable, data_variable_map_replace_helper(replacements));
 }

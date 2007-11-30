@@ -72,9 +72,9 @@ class specification: public aterm_appl
     specification()
       : aterm_appl(detail::constructProcSpec())
     {
-#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-      assert(is_well_typed());
-#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//      assert(is_well_typed());
+//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     specification(aterm_appl t)
@@ -82,9 +82,9 @@ class specification: public aterm_appl
     {
       assert(detail::check_rule_ProcSpec(m_term));
       init_term(t);
-#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-      assert(is_well_typed());
-#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//      assert(is_well_typed());
+//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     specification(
@@ -107,9 +107,9 @@ class specification: public aterm_appl
           initial_process
         )
       );
-#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-      assert(is_well_typed());
-#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
+//      assert(is_well_typed());
+//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     /// Reads the LPS from file. Returns true if the operation succeeded.

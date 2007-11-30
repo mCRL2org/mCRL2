@@ -9,8 +9,8 @@
 
 #include <sstream>
 #include "mcrl2/core/struct.h"
-#include "mcrl2/parse.h"
-#include "mcrl2/parse/typecheck.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
 #include "gc.h"
 
 const std::string SPECIFICATION =

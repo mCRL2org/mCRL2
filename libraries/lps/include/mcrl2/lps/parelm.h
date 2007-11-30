@@ -84,7 +84,9 @@ inline
 specification parelm(const specification& spec)
 {
   std::set<data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
-  return detail::remove_parameters(spec, to_be_removed); 
+  specification result = detail::remove_parameters(spec, to_be_removed);
+  assert(result.is_well_typed());
+  return result;
 }
 
 } // namespace lps
