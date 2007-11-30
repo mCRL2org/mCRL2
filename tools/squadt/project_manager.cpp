@@ -98,7 +98,7 @@ namespace squadt {
       visitors::store(*this, project_file);
     }
     else {
-      return;
+      throw std::runtime_error("Project cannot be opened, directory `" + l.string() + "' does not exist.");
     }
 
     /* Compute reverse dependencies */
