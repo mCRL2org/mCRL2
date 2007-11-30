@@ -42,8 +42,8 @@ std::map<data_variable, data_expression> compute_constant_parameters(const linea
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      data_expression c = data_variable_map_replace(i->condition(), replacements);
-      if (r(c) == false_())
+      data_expression rc = r(data_variable_map_replace(i->condition(), replacements));
+      if (rc == false_())
       {
         continue;
       }
@@ -54,7 +54,7 @@ std::map<data_variable, data_expression> compute_constant_parameters(const linea
         if (k != replacements.end())
         {
           data_expression gj = data_variable_map_replace(j->rhs(), replacements);
-          if (k->second != r(gj))
+          if (r(or_(not_(rc), not_equal_to(k->second, r(gj)))) == true_())
           {
             replacements.erase(k);
             has_changed = true;
