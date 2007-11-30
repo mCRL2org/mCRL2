@@ -18,7 +18,8 @@ namespace tipi {
     /** Default constructor */
     template < >
     basic_messenger< tipi::message >::basic_messenger() :
-        transport::transporter(boost::shared_ptr < transport::transporter_impl > (new basic_messenger_impl< tipi::message >)) {
+        transport::transporter(boost::shared_ptr < transport::transporter_impl > (
+                new basic_messenger_impl< tipi::message >(basic_messenger_impl< tipi::message >::standard_logger))) {
     }
 
     /**

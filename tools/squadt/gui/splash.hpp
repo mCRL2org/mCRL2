@@ -22,6 +22,8 @@
 #include <wx/panel.h>
 #include <wx/utils.h>
 
+#include "pixmaps/logo.xpm"
+
 namespace squadt {
   namespace GUI {
     /// \cond INTERNAL_DOCS
@@ -86,7 +88,7 @@ namespace squadt {
 
       public:
         /** \brief Constructor */
-        inline splash(wxImage*, unsigned char);
+        inline splash(unsigned char);
 
         /** \brief Sets the category */
         inline void set_category(const std::string&, unsigned int = 0);
@@ -140,16 +142,17 @@ namespace squadt {
     /// \endcond
 
     /**
-     * \param[in] i the image to display
      * \param[in] n the number of categories
      **/
-    inline splash::splash(wxImage* i, unsigned char n) :
+    inline splash::splash(unsigned char n) :
             wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxFRAME_NO_TASKBAR),
             number_of_categories(n), current_category(0), new_amount(0), changed(false) {
 
+      static wxImage logo(logo_xpm);
+    
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
-      display            = new detail::picture(this, i);
+      display            = new detail::picture(this, &logo);
 
       s->Add(display, 0, wxALL|wxEXPAND, 0);
       s->Add(progress_indicator, 0, wxALL|wxEXPAND, 0);

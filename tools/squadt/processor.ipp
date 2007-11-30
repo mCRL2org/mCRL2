@@ -269,7 +269,7 @@ namespace squadt {
   }
 
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
-                interface_object(tp), current_monitor(new monitor(*tp)), manager(p) {
+                interface_object(tp), current_monitor(new monitor(tp)), manager(p) {
 
     assert(manager.lock().get());
   }
@@ -282,7 +282,7 @@ namespace squadt {
    **/
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp,
         boost::weak_ptr < project_manager > p, boost::shared_ptr < const tool > t, boost::shared_ptr < const tool::input_configuration > c) :
-               interface_object(tp), tool_descriptor(t), selected_input_configuration(c), current_monitor(new monitor(*tp)), manager(p) {
+               interface_object(tp), tool_descriptor(t), selected_input_configuration(c), current_monitor(new monitor(tp)), manager(p) {
 
     assert(manager.lock().get());
     assert(tool_descriptor.get());

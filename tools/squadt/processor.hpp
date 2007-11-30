@@ -267,7 +267,7 @@ namespace squadt {
     public:
 
       /** \brief The processor that owns this object */
-      processor& owner;
+      boost::weak_ptr < processor > owner;
 
     private:
  
@@ -297,7 +297,7 @@ namespace squadt {
     public:
  
       /** \brief Constructor with a callback handler */
-      monitor(processor&);
+      monitor(boost::shared_ptr < processor >);
 
       /** \brief Set the callback handler for status changes */
       void set_status_handler(status_callback_function);

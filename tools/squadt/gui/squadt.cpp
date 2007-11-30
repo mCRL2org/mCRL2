@@ -129,11 +129,7 @@ bool Squadt::OnInit() {
 
     wxSystemOptions::SetOption(wxT("msw.remap"), 0);
     
-    #include "pixmaps/logo.xpm"
-    
-    wxImage logo(logo_xpm);
-    
-    splash* splash_window = new splash(&logo, 1);
+    splash* splash_window = new splash(1);
 
     try {
       struct local {
@@ -164,6 +160,12 @@ bool Squadt::OnInit() {
           std::auto_ptr < tool_manager > (new tool_manager()),
           std::auto_ptr < executor > (new executor()),
           std::auto_ptr < type_registry > (new type_registry()));
+
+        // Open log file
+        boost::shared_ptr < tipi::utility::logger > logger(new tipi::utility::file_print_logger(
+                global_build_system.get_settings_manager()->path_to_user_settings().append("/log")));
+
+        tipi::controller::communicator::set_standard_logger(logger);
       }
       catch (std::exception& e) {
         wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();

@@ -718,7 +718,7 @@ namespace squadt {
   /**
    * \param[in] o the processor that owns of this object
    **/
-  processor::monitor::monitor(processor& o) : owner(o) {
+  processor::monitor::monitor(boost::shared_ptr < processor > o) : owner(o) {
   }
 
   /**
@@ -737,52 +737,56 @@ namespace squadt {
   void processor::monitor::signal_change(boost::shared_ptr < execution::process > p, const execution::process::status s) {
     using namespace execution;
 
-    boost::iterator_range< processor::output_object_iterator > output_range(owner.get_output_iterators());
+    boost::shared_ptr < processor > guard(owner.lock());
 
-    if (s == process::running) { // process started execution
-      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-        o->status = object_descriptor::generation_in_progress;
+    if (guard) {
+      boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+     
+      if (s == process::running) { // process started execution
+        BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+          o->status = object_descriptor::generation_in_progress;
+        }
       }
-    }
-    else if (owner.number_of_inputs() == 0) { // output does not depend on input
-      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-        o->status = object_descriptor::original;
+      else if (guard->number_of_inputs() == 0) { // output does not depend on input
+        BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+          o->status = object_descriptor::original;
+        }
       }
-    }
-    else { // output depends on input
-      switch (s) {
-        case process::stopped:
-          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-            if (exists(o->get_location())) {
-              o->status = object_descriptor::reproducible_out_of_date;
+      else { // output depends on input
+        switch (s) {
+          case process::stopped:
+            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+              if (exists(o->get_location())) {
+                o->status = object_descriptor::reproducible_out_of_date;
+              }
+              else {
+                o->status = object_descriptor::reproducible_nonexistent;
+              }
             }
-            else {
-              o->status = object_descriptor::reproducible_nonexistent;
+            break;
+          case process::completed:
+            // Task status determines object status
+            break;
+          default: /* aborted... */
+            if (p.get() && p->get_identifier()) {
+              get_logger()->log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
+                                 p->get_identifier());
             }
-          }
-          break;
-        case process::completed:
-          // Task status determines object status
-          break;
-        default: /* aborted... */
-          if (p.get() && p->get_identifier()) {
-            get_logger()->log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
-                               p->get_identifier());
-          }
-
-          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-            if (o->status == object_descriptor::generation_in_progress) {
-              o->status = object_descriptor::reproducible_nonexistent;
+     
+            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+              if (o->status == object_descriptor::generation_in_progress) {
+                o->status = object_descriptor::reproducible_nonexistent;
+              }
             }
-          }
-          break;
+            break;
+        }
       }
     }
 
     task_monitor::signal_change(p, s);
-
-    if (s != process::running) {
-      owner.check_status(false);
+     
+    if (guard && s != process::running) {
+      guard->check_status(false);
     }
 
     /* Update status for known processor outputs */
@@ -802,7 +806,7 @@ namespace squadt {
   }
 
   void processor::monitor::tool_configuration(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > c) {
-    assert(t.get() == &owner);
+    assert(t.get() == owner.lock().get());
 
     /* collect set of output arguments of the existing configuration */
     std::set < tipi::object const* > old_outputs;
@@ -834,46 +838,50 @@ namespace squadt {
   }
 
   void processor::monitor::tool_operation(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > const& c) {
-    assert(t.get() == &owner);
+    assert(t.get() == owner.lock().get());
 
-    /* collect set of output arguments of the existing configuration */
-    std::set < tipi::object const* > old_outputs;
+    boost::shared_ptr < processor > guard(owner.lock());
 
-    tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
-
-    for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-      old_outputs.insert(static_cast < tipi::object const* > (&*i));
-    }
-
-    /* Wait until the tool has connected and identified itself */
-    if (await_connection()) {
-      /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
-      send_configuration(c);
-
-      /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(tipi::message_configuration).get() != 0) {
-        /* Do not let process status influence return status */
-        clear_handlers(tipi::message_task_done);
-
-        send_start_signal();
-
-        if (await_completion()) {
-          /* Operation completed successfully */
-          t->impl->process_configuration(get_configuration(), old_outputs);
-
-          /* Successful, set new status */
-          boost::iterator_range< processor::output_object_iterator > output_range(owner.get_output_iterators());
-
-          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-            o->status = object_descriptor::reproducible_up_to_date;
+    if (guard) {
+      /* collect set of output arguments of the existing configuration */
+      std::set < tipi::object const* > old_outputs;
+     
+      tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
+     
+      for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+        old_outputs.insert(static_cast < tipi::object const* > (&*i));
+      }
+     
+      /* Wait until the tool has connected and identified itself */
+      if (await_connection()) {
+        /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
+        send_configuration(c);
+     
+        /* Wait until configuration is accepted, or the tool has terminated */
+        if (await_message(tipi::message_configuration).get() != 0) {
+          /* Do not let process status influence return status */
+          clear_handlers(tipi::message_task_done);
+     
+          send_start_signal();
+     
+          if (await_completion()) {
+            /* Operation completed successfully */
+            t->impl->process_configuration(get_configuration(), old_outputs);
+     
+            /* Successful, set new status */
+            boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+     
+            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+              o->status = object_descriptor::reproducible_up_to_date;
+            }
           }
-        }
-        else {
-          /* Task completed unsuccessfully, set new status */
-          boost::iterator_range< processor::output_object_iterator > output_range(owner.get_output_iterators());
-
-          BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-            o->status = object_descriptor::reproducible_out_of_date;
+          else {
+            /* Task completed unsuccessfully, set new status */
+            boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+     
+            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+              o->status = object_descriptor::reproducible_out_of_date;
+            }
           }
         }
       }
