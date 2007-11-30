@@ -99,7 +99,7 @@ state_formula rename_data_variables(const state_formula& f, IdentifierGenerator&
   std::set<data_variable> src = lps::find_variables(f);
 
   // create a mapping of replacements
-  std::map<data_variable, data_variable> replacements;
+  std::map<data_variable, data_expression> replacements;
 
   for (std::set<data_variable>::iterator i = src.begin(); i != src.end(); ++i)
   {
