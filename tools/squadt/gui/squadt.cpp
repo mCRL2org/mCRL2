@@ -10,6 +10,7 @@
 #define NAME "squadt"
 
 #include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
@@ -27,42 +28,11 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include <wx/thread.h>
 #include <wx/cmdline.h>
 #include <wx/msgdlg.h>
 #include <wx/sysopt.h>
 
-
 using namespace squadt::GUI;
-
-class initialisation : public wxThread {
-
-  private:
-
-    splash* splash_window;
-
-  public:
-
-    bool too_many_tools_failed;
-
-    initialisation(splash* s) : wxThread(wxTHREAD_JOINABLE), splash_window(s) {
-      too_many_tools_failed = false;
-      Create();
-      Run();
-    }
-
-    void* Entry() {
-      try {
-        squadt::global_build_system.get_tool_manager()->query_tools(
-                    boost::bind(&splash::set_operation, splash_window, "", _1));
-      }
-      catch (...) {
-        too_many_tools_failed = true;
-      }
-
-      return (0);
-    }
-};
 
 bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt::GUI::main*) >& action) {
   bool c = 0 < argc;
@@ -135,8 +105,8 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
 class Squadt : public wxApp {
   public:
 
-    virtual bool OnInit();
-    virtual int  OnExit();
+    bool OnInit();
+    int  OnExit();
 };
 
 IMPLEMENT_APP(Squadt)
@@ -166,8 +136,30 @@ bool Squadt::OnInit() {
     splash* splash_window = new splash(&logo, 1);
 
     try {
+      struct local {
+        static void initialise_tools(splash& splash_window, bool& finished) {
+          finished = false;
+
+          squadt::global_build_system.get_tool_manager()->query_tools(
+            boost::bind(&splash::set_operation, &splash_window, "", _1));
+
+          finished = true;
+        }
+
+        static void initialise_tools(splash& splash_window, bool& finished, bool& too_many_tools_failed) {
+          try {
+            initialise_tools(splash_window, finished);
+          }
+          catch (...) {
+            too_many_tools_failed = true;
+          }
+
+          finished = true;
+        }
+      };
+
       try {
-      global_build_system.initialise(
+        global_build_system.initialise(
           std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
           std::auto_ptr < tool_manager > (new tool_manager()),
           std::auto_ptr < executor > (new executor()),
@@ -182,31 +174,38 @@ bool Squadt::OnInit() {
       splash_window->set_category("Querying tools", global_build_system.get_tool_manager()->number_of_tools());
      
       /* Perform initialisation */
-      initialisation ti(splash_window);
-     
-      /* Cannot just wait because the splash would not be updated */
-      while (ti.IsAlive()) {
-        splash_window->update();
-     
-        wxApp::Yield();
-      }
+      bool finished              = false;
+      bool too_many_tools_failed = false;
 
-      if (ti.too_many_tools_failed) {
+      boost::thread initialisation_thread(boost::bind(&local::initialise_tools,
+                        boost::ref(*splash_window), boost::ref(finished), boost::ref(too_many_tools_failed)));
+
+      /* Cannot just wait because the splash would not be updated */
+      do {
+        wxApp::Yield();
+
+        splash_window->update();
+      }
+      while (!finished);
+
+      if (too_many_tools_failed) {
         wxMessageDialog retry(0, wxT("Do you want to replace the current list of known tools with the default set and retry?"),
                 wxT("Initialisation of multiple tools failed!"), wxOK|wxCANCEL|wxICON_WARNING);
 
         if (retry.ShowModal() == wxID_OK) {
           /* Perform initialisation */
-          initialisation reinitialisation_thread(splash_window);
+          boost::thread reinitialisation_thread(boost::bind(&local::initialise_tools,
+                                boost::ref(*splash_window), boost::ref(finished)));
 
           global_build_system.get_tool_manager()->factory_configuration();
        
           /* Cannot just wait because the splash would not be updated */
-          while (reinitialisation_thread.IsAlive()) {
-            splash_window->update();
-       
+          do {
             wxApp::Yield();
+
+            splash_window->update();
           }
+          while (!finished);
         }
       }
 
@@ -239,5 +238,5 @@ bool Squadt::OnInit() {
 }
 
 int Squadt::OnExit() {
-  return (wxApp::OnExit());
+  return wxApp::OnExit();
 }
