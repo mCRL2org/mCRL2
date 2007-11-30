@@ -184,7 +184,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
     rewrite_strategy = RewriteStrategyFromString(strategy.fn_str());
 
     if ( rewrite_strategy == GS_REWR_INVALID ) {
-      std::cerr << "error: invalid rewrite strategy '" << strategy.fn_str() << "'" << std::endl;;
+      std::cerr << "error: invalid rewrite strategy '" << std::string(strategy.fn_str()) << "'" << std::endl;;
 
       return false;
     }

@@ -22,27 +22,6 @@ namespace squadt {
      **/
     class about : public wxMessageDialog {
 
-      protected:
-      
-        inline wxString get_text(void) {
-          wxString msg = wxString();
-          msg += wxString(get_version_information("deskSQuADT").c_str(),wxConvLocal);
-          msg += wxT("\n");
-          msg += wxT("\n");
-          msg += wxT("A controlled environment that provides a graphical user interface that helps users to ");
-          msg += wxT("interact with all kinds of connected tools. The goal is to simplify the use of these ");
-          msg += wxT("tools especially in combination with each other.\n");
-          msg += wxT("\n");
-          msg += wxT("Developed by Jeroen van der Wulp\n");
-          msg += wxT("\n");
-          msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
-          msg += wxT("For information see http://www.mcrl2.org\n");
-          msg += wxT("\n");
-          msg += wxT("For feature requests or bug reports,\n");
-          msg += wxT("please visit http://www.mcrl2.org/issuetracker\n");
-          return msg;
-        }
-
       public:
 
         /** \brief Constructor */
@@ -54,7 +33,21 @@ namespace squadt {
      * \param[in] p the message to print
      **/
     inline about::about(wxWindow* p) : wxMessageDialog(p,
-       get_text(), wxT("About deskSQuADT"), wxOK|wxICON_INFORMATION) {
+       wxString(get_version_information("deskSQuADT").c_str(), wxConvLocal) +
+       wxT("\n")
+       wxT("\n")
+       wxT("A controlled environment that provides a graphical user interface that helps users to ")
+       wxT("interact with all kinds of connected tools. The goal is to simplify the use of these ")
+       wxT("tools especially in combination with each other.\n")
+       wxT("\n")
+       wxT("Developed by Jeroen van der Wulp\n")
+       wxT("\n")
+       wxT("This tool is distributed as part of the mCRL2 toolset.\n")
+       wxT("For information see http://www.mcrl2.org\n")
+       wxT("\n")
+       wxT("For feature requests or bug reports,\n")
+       wxT("please visit http://www.mcrl2.org/issuetracker\n"),
+       wxT("About deskSQuADT"), wxOK|wxICON_INFORMATION) {
     }
   
   }
