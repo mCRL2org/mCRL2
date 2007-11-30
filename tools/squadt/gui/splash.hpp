@@ -122,7 +122,7 @@ namespace squadt {
         dc.DrawBitmap(image, 0, 0, false);
         dc.SetTextForeground(*wxBLACK);
         dc.SetBackgroundMode(wxTRANSPARENT);
-        dc.SetFont(wxFont(13, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        dc.SetFont(wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
         dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 400, 40);
         dc.SetFont(wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
      

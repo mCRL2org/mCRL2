@@ -209,9 +209,9 @@ bool Squadt::OnInit() {
         }
       }
 
-      global_build_system.get_type_registry()->rebuild_indices();
-
       splash_window->set_category("Initialising components");
+
+      global_build_system.get_type_registry()->rebuild_indices();
 
       /* Disable splash */
       splash_window->set_done();

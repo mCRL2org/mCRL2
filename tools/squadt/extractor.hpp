@@ -30,12 +30,12 @@ namespace squadt {
     private:
 
       /** \brief handler that accomplishes the actual task */
-      static void handle_store_tool_capabilities(boost::shared_ptr < extractor >, const tipi::message_ptr& m, boost::shared_ptr < tool > t);
+      static void handle_store_tool_capabilities(boost::weak_ptr < extractor >, const tipi::message_ptr& m, boost::shared_ptr < tool > t);
 
     public:
 
       /** \brief Starts the extraction */
-      bool extract(boost::shared_ptr < extractor > const&, boost::shared_ptr < tool > const&);
+      bool extract(boost::weak_ptr < extractor > const&, boost::shared_ptr < tool > const&);
   };
 }
 
