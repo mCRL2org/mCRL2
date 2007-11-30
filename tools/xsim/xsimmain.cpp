@@ -1117,7 +1117,7 @@ void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
   wxString ttl = wxT("About XSim");
   wxString msg = wxString();
-  msg += wxT(get_version_information("XSim"));
+  msg += wxString(get_version_information("XSim").c_str(),wxConvLocal);
   msg += wxT("\n");
   msg += wxT("\n");
   msg += wxT("Tool for simulation of linear process specifications.\n");

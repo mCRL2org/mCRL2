@@ -719,7 +719,7 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About LTSGraph");
   wxString content = wxString();
-  content += wxT(get_version_information("LTSGraph"));
+  content += wxString(get_version_information("LTSGraph").c_str(),wxConvLocal);
   content += wxT("\n");
   content += wxT("\n");
   content += wxT("Tool for visualising labelled transition systems.\n");

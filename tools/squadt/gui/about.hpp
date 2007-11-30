@@ -26,7 +26,7 @@ namespace squadt {
       
         inline wxString get_text(void) {
           wxString msg = wxString();
-          msg += wxT(get_version_information("deskSQuADT"));
+          msg += wxString(get_version_information("deskSQuADT").c_str(),wxConvLocal);
           msg += wxT("\n");
           msg += wxT("\n");
           msg += wxT("A controlled environment that provides a graphical user interface that helps users to ");

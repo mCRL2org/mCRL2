@@ -1930,7 +1930,7 @@ void Frame::initAboutFrame()
 
     // message
     wxString msg = wxString();
-    msg += wxT( get_version_information("DiaGraphica") );
+    msg += wxString( get_version_information("DiaGraphica").c_str(), wxConvLocal );
     msg += wxT( "\n" );
     msg += wxT( "\n" );
     msg += wxT( "Developed by A. Johannes Pretorius\n" );

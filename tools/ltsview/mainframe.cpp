@@ -474,7 +474,7 @@ void MainFrame::setFileInfo(wxFileName fn) {
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
   wxString msg = wxString();
-  msg += wxT(get_version_information("LTSView"));
+  msg += wxString(get_version_information("LTSView").c_str(),wxConvLocal);
   msg += wxT("\n");
   msg += wxT("\n");
   msg += wxT("Tool for interactive visualisation of state transition systems.\n");
