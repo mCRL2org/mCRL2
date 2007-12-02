@@ -132,9 +132,9 @@ namespace squadt {
   void processor_impl::replace_output(tipi::configuration::parameter_identifier const& id,
         boost::shared_ptr< object_descriptor > p, tipi::object const& o, object_descriptor::status_type const& s) {
 
-    p->mime_type  = o.get_mime_type();
-    p->location   = o.get_location();
-    p->status     = s;
+    p->mime_type = o.get_mime_type();
+    p->location  = o.get_location();
+    p->status    = s;
   }
 
   /**

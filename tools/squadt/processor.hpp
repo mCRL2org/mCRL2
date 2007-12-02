@@ -73,6 +73,12 @@ namespace squadt {
 
           status_type status; ///< The status of this object
 
+        protected:
+
+          /** \brief Constructor */
+          object_descriptor(status_type s) : status(s) {
+          }
+
         public:
 
           /** \brief Returns the storage format as MIME type */

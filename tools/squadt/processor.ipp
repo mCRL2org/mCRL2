@@ -76,8 +76,8 @@ namespace squadt {
 
           /** \brief Constructor */
           object_descriptor(boost::weak_ptr < processor > const& g, tipi::mime_type const& m, tipi::uri const& u,
-                                processor::object_descriptor::status_type t = processor::object_descriptor::original) :
-                                                           generator(g), mime_type(m), location(u), timestamp(0) {
+                    processor::object_descriptor::status_type t = processor::object_descriptor::original) :
+                            processor::object_descriptor(t), generator(g), mime_type(m), location(u), timestamp(0) {
           }
 
           /** \brief Returns the storage format as MIME type */
