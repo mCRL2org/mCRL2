@@ -448,6 +448,7 @@ lps::specification rewrite_lps(lps::specification lps){
 
     //rewrite the assignments
     lps_assignments = si->assignments();
+    new_assignments = lps::data_assignment_list();
     for(lps::data_assignment_list::iterator di = lps_assignments.begin();
                                             di != lps_assignments.end();
                                           ++di){
