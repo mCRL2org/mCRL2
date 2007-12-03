@@ -122,6 +122,7 @@
 # include "strings.h"
 # include "expand.h"
 # include "filesys.h"
+# include "output.h"
 
 /* Macintosh is "special" */
 
@@ -249,9 +250,8 @@ int  main( int argc, char **argv, char **arg_environ )
         printf( "-lx     Limit actions to x number of seconds after which they are stopped.\n" );
         printf( "-n      Don't actually execute the updating actions.\n" );
         printf( "-ox     Write the updating actions to file x.\n" );
-	printf( "-px     x=0, pipes action stdout and stderr merged into action output.\n" );
-	printf( "-q      Quit quickly as soon as a target fails.\n" );
-	printf( "-r      Enable Dart results.\n" );
+        printf( "-px     x=0, pipes action stdout and stderr merged into action output.\n" );
+        printf( "-q      Quit quickly as soon as a target fails.\n" );
         printf( "-sx=y   Set variable x=y, overriding environment.\n" );
         printf( "-tx     Rebuild x, even if it is up-to-date.\n" );
         printf( "-v      Print the version of jam and exit.\n" );
@@ -373,19 +373,7 @@ int  main( int argc, char **argv, char **arg_environ )
 
     /* Set JAMDATE first */
 
-    {
-        char *date;
-        time_t clock;
-        time( &clock );
-        date = newstr( ctime( &clock ) );
-
-        /* Trim newline from date */
-
-        if( strlen( date ) == 25 )
-            date[ 24 ] = 0;
-
-        var_set( "JAMDATE", list_new( L0, newstr( date ) ), VAR_SET );
-    }
+    var_set( "JAMDATE", list_new( L0, outf_time(time(0)) ), VAR_SET );
 
  
     var_set( "JAM_VERSION",

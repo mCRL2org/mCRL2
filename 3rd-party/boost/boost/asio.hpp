@@ -58,7 +58,6 @@
 #include <boost/asio/is_write_buffered.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/read.hpp>
-#include <boost/asio/read_until.hpp>
 #include <boost/asio/socket_acceptor_service.hpp>
 #include <boost/asio/socket_base.hpp>
 #include <boost/asio/strand.hpp>

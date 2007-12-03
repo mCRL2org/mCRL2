@@ -6,6 +6,7 @@
 
 #include "jam.h"
 #include "output.h"
+#include "newstr.h"
 #include <stdio.h>
 
 #define bjam_out (stdout)
@@ -63,7 +64,11 @@ void out_action(
         case EXIT_TIMEOUT:
         {
             /* process expired, make user aware with explicit message */
-            fprintf(bjam_out, "%d second time limit exceeded\n", globs.timeout);
+            if ( action )
+            {
+                /* but only output for non-quietly actions */
+                fprintf(bjam_out, "%d second time limit exceeded\n", globs.timeout);
+            }
             break;
         }
         default:
@@ -71,19 +76,46 @@ void out_action(
     }
     
     /* print out the command output, if requested */
-    if (0 != out_data &&
-       ( globs.pipe_action & 1 /* STDOUT_FILENO */ ||
-         globs.pipe_action == 0))
+    if ( action )
     {
-        out_(out_data,bjam_out);
-    }
-    if (0 != err_data &&
-        globs.pipe_action & 2 /* STDERR_FILENO */)
-    {
-        out_(err_data,bjam_err);
+        /* but only output for non-quietly actions */
+        if (0 != out_data &&
+           ( globs.pipe_action & 1 /* STDOUT_FILENO */ ||
+             globs.pipe_action == 0))
+        {
+            out_(out_data,bjam_out);
+        }
+        if (0 != err_data &&
+            globs.pipe_action & 2 /* STDERR_FILENO */)
+        {
+            out_(err_data,bjam_err);
+        }
     }
     
     fflush(bjam_out);
     fflush(bjam_err);
     fflush(globs.cmdout);
 }
+
+
+char * outf_int( int value )
+{
+    char buffer[50];
+    sprintf(buffer, "%i", value);
+    return newstr(buffer);
+}
+
+char * outf_double( double value )
+{
+    char buffer[50];
+    sprintf(buffer, "%f", value);
+    return newstr(buffer);
+}
+
+char * outf_time( time_t value )
+{
+    char buffer[50];
+    strftime(buffer,49,"%Y-%m-%d %H:%M:%SZ",gmtime(&value));
+    return newstr(buffer);
+}
+

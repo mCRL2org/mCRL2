@@ -13,7 +13,7 @@ else { . = "." ; }
 ./ ?= "" ; 
 
 # Info about what we are building.
-_VERSION_ = 3 1 16 ;
+_VERSION_ = 3 1 17 ;
 NAME = boost-jam ;
 VERSION = $(_VERSION_:J=$(.)) ;
 RELEASE = 1 ;
@@ -312,6 +312,13 @@ toolset vc7 cl : /Fe /Fe /Fd /Fo : -D
     : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
 ## Microsoft Visual C++ 2005
 toolset vc8 cl : /Fe /Fe /Fd /Fo : -D
+    : /nologo
+    [ opt --release : /MT /O2 /Ob2 /Gy /GF /GA /wd4996 ]
+    [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 /wd4996 ]
+    -I$(--python-include) -I$(--extra-include)
+    : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
+## Microsoft Visual C++ 2008
+toolset vc9 cl : /Fe /Fe /Fd /Fo : -D
     : /nologo
     [ opt --release : /MT /O2 /Ob2 /Gy /GF /GA /wd4996 ]
     [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 /wd4996 ]
