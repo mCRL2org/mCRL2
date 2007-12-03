@@ -31,6 +31,7 @@
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/sort_identifier.h"
 
 using namespace mcrl2::utilities;
 using namespace std;
@@ -470,45 +471,12 @@ lps::specification rewrite_lps(lps::specification lps){
 }
 
 ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spec){
-// merges the declarations in the data section and the actions declared in the action rename file action_rename
-// with the sections in the lps specification lps_wspec and resolves variable name conflicts
-  lps::data_specification lps_data = lps_spec.data();
-  lps::data_specification new_data = lps::data_specification(ATAgetArgument(action_rename, 0));
+// merges action declarations in action_rename with the sections in the lps
+// specification lps_spec and resolves variable name conflicts
   lps::specification result;
   lps::linear_process result_lp = lps_spec.process();
-  lps::data_specification result_data;
-
-  gsVerboseMsg("  Merging data declarations...\n");
-
-  //merge sort_spec
-  lps::sort_expression_list lps_sort = lps_data.sorts();
-  lps::sort_expression_list new_sort = new_data.sorts();
-  for(lps::sort_expression_list::iterator i=new_sort.begin(); i!=new_sort.end(); i++){
-    lps_sort = push_front(lps_sort, *i);
-  }
-
-  //merge cons_spec
-  lps::data_operation_list lps_cons = lps_data.constructors();
-  lps::data_operation_list new_cons = new_data.constructors();
-  for(lps::data_operation_list::iterator i=new_cons.begin(); i!=new_cons.end(); i++){
-    lps_cons = push_front(lps_cons, *i);
-  }
-
-  //merge map_spec
-  lps::data_operation_list lps_map = lps_data.mappings();
-  lps::data_operation_list new_map = new_data.mappings();
-  for(lps::data_operation_list::iterator i=new_map.begin(); i!=new_map.end(); i++){
-    lps_map = push_front(lps_map, *i);
-  }
-
-  //merge eqn_spec
-  data_equation_list lps_eqn = lps_data.equations();
-  data_equation_list new_eqn = new_data.equations();
-  for(lps::data_equation_list::iterator i=new_eqn.begin(); i!=new_eqn.end(); i++){
-    lps_eqn = push_front(lps_eqn, *i);
-  }
-
-  result_data = lps::data_specification(lps_sort, lps_cons, lps_map, lps_eqn);
+  //action rename already contains all data elements of lps_spec since typechecking
+  lps::data_specification new_data = lps::data_specification(ATAgetArgument(action_rename, 0));
 
   gsVerboseMsg("  Merging action labels...\n");
 
@@ -536,7 +504,7 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
 
   result_lp = rename_free_variables(result_lp, used_names, "_S");
   result_lp = rename_summation_variables(result_lp, used_names, "_S");
-  result = lps::specification(result_data, lps_actions, result_lp, lps_spec.initial_process());
+  result = lps::specification(new_data, lps_actions, result_lp, lps_spec.initial_process());
   result = rename_process_parameters(result, used_names, "_S");
 
   return result;
@@ -834,7 +802,7 @@ static void print_help(char *name)
     "\n"
     "  -fRENAMEFILE, --file=RENAMEFILE\n"
     "                        use the rename rules from FILE\n"
-    "  -o, --no-rewrite      do not rewrite data terms while linearising;\n"
+    "  -o, --no-rewrite      do not rewrite data terms while renaming;\n"
     "                        useful when the rewrite system does not terminate\n"
     "  -m, --no-sumelm       do not apply sum elimination to the final result\n"
     "  -pPHASE, --end-phase=PHASE\n"
