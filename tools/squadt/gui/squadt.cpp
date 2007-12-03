@@ -134,8 +134,6 @@ bool Squadt::OnInit() {
     try {
       struct local {
         static void initialise_tools(splash& splash_window, bool& finished) {
-          finished = false;
-
           squadt::global_build_system.get_tool_manager()->query_tools(
             boost::bind(&splash::set_operation, &splash_window, "", _1));
 
@@ -143,8 +141,10 @@ bool Squadt::OnInit() {
         }
 
         static void initialise_tools(splash& splash_window, bool& finished, bool& too_many_tools_failed) {
+          bool wait_finish = false;
+
           try {
-            initialise_tools(splash_window, finished);
+            initialise_tools(splash_window, wait_finish);
           }
           catch (...) {
             too_many_tools_failed = true;
@@ -192,14 +192,16 @@ bool Squadt::OnInit() {
 
       if (too_many_tools_failed) {
         wxMessageDialog retry(0, wxT("Do you want to replace the current list of known tools with the default set and retry?"),
-                wxT("Initialisation of multiple tools failed!"), wxOK|wxCANCEL|wxICON_WARNING);
+                wxT("Initialisation of multiple tools failed!"), wxYES|wxNO|wxICON_WARNING);
 
-        if (retry.ShowModal() == wxID_OK) {
+        if (retry.ShowModal() == wxID_YES) {
           /* Perform initialisation */
           boost::thread reinitialisation_thread(boost::bind(&local::initialise_tools,
                                 boost::ref(*splash_window), boost::ref(finished)));
 
           global_build_system.get_tool_manager()->factory_configuration();
+
+          finished = false;
        
           /* Cannot just wait because the splash would not be updated */
           do {
