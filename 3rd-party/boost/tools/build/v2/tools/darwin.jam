@@ -93,7 +93,7 @@ local rule available-macosx-versions ( )
     local sdks = [ GLOB /Developer/SDKs : MacOSX* ] ;
     for local sdk in $(sdks)
     {
-        local sdk-version = [ MATCH ([0-9]+[.][0-9]+[.]?[0-9]*) : $(sdk) ] ;
+        local sdk-version = [ MATCH ([0-9]+[.][0-9]+[.]?[0-9]*).sdk : $(sdk) ] ;
         if $(sdk-version)
         {
             .macosx-sdk = $(sdk-version) $(.macosx-sdk) ;
