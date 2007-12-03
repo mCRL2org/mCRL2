@@ -209,7 +209,9 @@ namespace squadt {
       if (changed) {
         changed = false;
 
-        progress_indicator->SetValue(new_amount);
+        if (new_amount < progress_indicator->GetRange()) {
+          progress_indicator->SetValue(new_amount);
+        }
 
         display->Refresh();
         display->Update();

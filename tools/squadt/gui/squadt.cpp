@@ -133,18 +133,10 @@ bool Squadt::OnInit() {
 
     try {
       struct local {
-        static void initialise_tools(splash& splash_window, bool& finished) {
-          squadt::global_build_system.get_tool_manager()->query_tools(
-            boost::bind(&splash::set_operation, &splash_window, "", _1));
-
-          finished = true;
-        }
-
         static void initialise_tools(splash& splash_window, bool& finished, bool& too_many_tools_failed) {
-          bool wait_finish = false;
-
           try {
-            initialise_tools(splash_window, wait_finish);
+            squadt::global_build_system.get_tool_manager()->query_tools(
+              boost::bind(&splash::set_operation, &splash_window, "", _1));
           }
           catch (...) {
             too_many_tools_failed = true;
@@ -197,7 +189,7 @@ bool Squadt::OnInit() {
         if (retry.ShowModal() == wxID_YES) {
           /* Perform initialisation */
           boost::thread reinitialisation_thread(boost::bind(&local::initialise_tools,
-                                boost::ref(*splash_window), boost::ref(finished)));
+                                boost::ref(*splash_window), boost::ref(finished), boost::ref(too_many_tools_failed)));
 
           global_build_system.get_tool_manager()->factory_configuration();
 
