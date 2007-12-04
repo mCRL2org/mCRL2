@@ -502,10 +502,13 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
                     boost::make_transform_iterator(rule_vars.end()  , detail::data_variable_name())
                    );
 
-  result_lp = rename_free_variables(result_lp, used_names, "_S");
-  result_lp = rename_summation_variables(result_lp, used_names, "_S");
+  lps::postfix_identifier_generator generator("_S");
+  generator.add_identifiers(used_names);
+
+  result_lp = rename_free_variables(result_lp, generator);
+  result_lp = rename_summation_variables(result_lp, generator);
   result = lps::specification(new_data, lps_actions, result_lp, lps_spec.initial_process());
-  result = rename_process_parameters(result, used_names, "_S");
+  result = rename_process_parameters(result, generator);
 
   return result;
 }
@@ -529,7 +532,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
   lps::action rule_new_action;
   
   std::set<identifier_string> s;
-  lps::postfix_identifier_generator generator("_S");
+  lps::postfix_identifier_generator generator("_R");
   generator.add_identifiers(s);
 
   aterm_appl new_element;
