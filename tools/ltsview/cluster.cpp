@@ -602,7 +602,7 @@ void Cluster::computeSizeAndPositions() {
     int y = descendants.size();
     
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
-    float bcr_rim = 0.0f;  // BC radius of largest descendant on rim
+    float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
     if (uniqueLargest) {
       // center the largest descendant
       largest->center();
@@ -610,8 +610,6 @@ void Cluster::computeSizeAndPositions() {
       bcr_center = largest->getBCRadius();
       bcr_rim = nextLargest->getBCRadius();
     } else {
-      // no unique largest descendant, so largest will be placed on the rim
-      bcr_rim = largest->getBCRadius();
       if (uniqueSmallest) {
         // center the smallest descendant
         smallest->center();
@@ -626,7 +624,8 @@ void Cluster::computeSizeAndPositions() {
       minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
     }
     baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
-    bc_radius = max(topRadius,baseRadius + bcr_rim);
+    bc_radius = max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
+    bc_radius = max(topRadius,bc_radius);
     bc_height = 0.0f;
     for (unsigned int i = 0; i < descendants.size(); ++i) {
       if (descendants[i]->getBCHeight() > bc_height) {

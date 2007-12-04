@@ -289,7 +289,7 @@ void LTSViewApp::setFSMStyle(bool b) {
       lts->positionClusters(fsmStyle);
       visualizer->setLTS(lts,true);
       glCanvas->enableDisplay();
-      glCanvas->display();
+      glCanvas->resetView();
     }
   }
 }

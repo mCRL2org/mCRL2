@@ -94,7 +94,9 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   }*/
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
   f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
-  f_text->SetLabel(f_name.GetFullPath());
+  f_text->SetLabel(f_name.GetFullName());
+  d_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
+  d_text->SetLabel(f_name.GetPath());
   
   f_button = new wxButton(this,myID_F_BUTTON,wxT("Change..."));
 
@@ -103,6 +105,10 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
     wxEXPAND|wxALL,5);
   controlSizer->Add(r_slider,0,wxEXPAND|wxALL,5);
   controlSizer->Add(r_text,0,wxEXPAND|wxALL,5);
+  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Directory:")),0,
+    wxEXPAND|wxALL,5);
+  controlSizer->Add(d_text,0,wxEXPAND|wxALL,5);
+  controlSizer->AddSpacer(0);
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File name:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(f_text,0,wxEXPAND|wxALL,5);
@@ -157,7 +163,8 @@ void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
       f_name.SetName(f_name.GetFullName());
       f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
     }
-    f_text->SetLabel(f_name.GetFullPath());
+    f_text->SetLabel(f_name.GetFullName());
+    d_text->SetLabel(f_name.GetPath());
   }
 }
 
@@ -168,7 +175,7 @@ void SavePicDialog::onChoice(wxCommandEvent& event) {
       !(newext == wxT("jpg") && oldext == wxT("jpeg")) &&
       !(newext == wxT("tif") && oldext == wxT("tiff"))) {
     f_name.SetExt(newext);
-    f_text->SetLabel(f_name.GetFullPath());
+    f_text->SetLabel(f_name.GetFullName());
   }
 }
 
@@ -212,16 +219,18 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
 
   statusbar->SetStatusText(wxT("Saving image to file..."));
   statusbar->Update();
-  img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()]);
-  
-  statusbar->SetStatusText(wxT("Done"));
+  if (!img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()])) {
+    statusbar->SetStatusText(wxT("Save picture failed"));
+    statusbar->Update();
+  } else {
+    statusbar->SetStatusText(wxT("Done"));
+    statusbar->Update();
+    wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") + 
+        f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
+    msgDialog.ShowModal();
+  }
+  statusbar->SetStatusText(wxT(""));
   statusbar->Update();
   GetParent()->Enable();
   GetParent()->SetCursor(wxNullCursor);
-  wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") + 
-      f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
-  msgDialog.ShowModal();
-  
-  statusbar->SetStatusText(wxT(""));
-  statusbar->Update();
 }

@@ -42,6 +42,7 @@ class SavePicDialog : public wxDialog {
     wxStaticText* r_text;
     wxChoice*     ft_choice;
     wxStaticText* f_text;
+    wxStaticText* d_text;
     wxButton*     f_button;
     wxFileName    f_name;
     wxArrayString f_exts;
