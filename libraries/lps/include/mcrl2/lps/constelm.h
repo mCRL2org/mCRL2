@@ -62,7 +62,10 @@ std::map<data_variable, data_expression> compute_constant_parameters(const linea
           }
         }
       }
-      // if (has_changed) { break; }
+      if (has_changed)
+      {
+        break;
+      }
     }
   } while (has_changed == true);
 
@@ -109,7 +112,10 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
           }
         }
       }
-      // if (has_changed) { break; }
+      if (has_changed)
+      {
+        break;
+      }
     }
   } while (has_changed == true);
 
@@ -129,18 +135,15 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
 template <typename Rewriter>
 specification constelm(const specification& spec, Rewriter& r)
 {
-  std::map<data_variable, data_expression> replacements = compute_constant_parameters(spec.process(), spec.initial_process().state(), r);
+  std::map<data_variable, data_expression> replacements = compute_constant_parameters_subst(spec.process(), spec.initial_process().state(), r);
   std::set<data_variable> constant_parameters;
   for (std::map<data_variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
   {
 	  constant_parameters.insert(i->first);
   }
 
-std::cout << "<hier0>" << std::endl;
   specification result = repair_free_variables(spec);
-std::cout << "<hier1>" << std::endl;
   result = detail::remove_parameters(result, constant_parameters);
-std::cout << "<hier2>" << std::endl;
 
   // N.B. The replacements may only be applied to the process and the initial process!
   linear_process new_process   = data_variable_map_replace(result.process(), replacements);
