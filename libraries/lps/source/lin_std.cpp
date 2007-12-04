@@ -218,7 +218,7 @@ static void newobject(int n)
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
     }
     if (objectdata==NULL)
-    { gsErrorMsg("Fail to resize objectdata to %d\n",2*maxobject); 
+    { gsErrorMsg("failed to resize objectdata to %d\n",2*maxobject); 
       stop();
     }
     
@@ -394,7 +394,7 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
   { return getTargetSort(ATAgetArgument(sortterm,1));
   }
 
-  gsErrorMsg("Expect a sortterm %T",sortterm);
+  gsErrorMsg("expected a sortterm %T",sortterm);
   stop();
   return NULL;
 }
@@ -437,7 +437,7 @@ static int existsort(ATermAppl sortterm)
     return 0;
   }
 
-  gsErrorMsg("Expected a sortterm (1) %T\n",sortterm);
+  gsErrorMsg("expected a sortterm (1) %T\n",sortterm);
   stop();
   return 0;
 }
@@ -500,7 +500,7 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     n=addObject(sortterm,&isnew);
  
     if (isnew==0)
-    { gsErrorMsg("Sort %T is added twice\n",sortterm); 
+    { gsErrorMsg("sort %T is added twice\n",sortterm); 
       stop();
     }
  
@@ -511,7 +511,7 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     objectdata[n].constructor=0;
     return;
   }
-  gsErrorMsg("Expected a sortterm (2)  %T\n",sortterm);
+  gsErrorMsg("expected a sortterm (2)  %T\n",sortterm);
   stop();
 }
 
@@ -523,7 +523,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   long n=0;
 
   if (!gsIsOpId(constructor)) 
-  { gsErrorMsg("Expect operation declaration %T\n",constructor);
+  { gsErrorMsg("expected operation declaration %T\n",constructor);
     stop();
   };
 
@@ -537,7 +537,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   n=addObject(constructor,&isnew);
 
   if (isnew==0)
-  { gsErrorMsg("Function %T is added twice\n",constructor); 
+  { gsErrorMsg("function %T is added twice\n",constructor); 
     stop();
   }
 
@@ -685,7 +685,7 @@ static void insertvariable(ATermAppl var, ATbool mustbenew)
   n=addObject(var,&isnew);
 
   if ((isnew==0)&&(mustbenew))
-  { gsErrorMsg("Variable %T already exists\n",var); 
+  { gsErrorMsg("variable %T already exists\n",var); 
     stop();
   }
 
@@ -696,7 +696,7 @@ static void insertvariable(ATermAppl var, ATbool mustbenew)
 
 #ifndef NDEBUG
   if (existsort(ATAgetArgument(var,1))<0)
-  { gsErrorMsg("Variable %T has unknown sort\n",var); 
+  { gsErrorMsg("variable %T has unknown sort\n",var); 
     stop();
   }
 #endif
@@ -705,11 +705,11 @@ static void insertvariable(ATermAppl var, ATbool mustbenew)
 static void removevariable(ATermAppl var)
 { long n=existsObjectIndex(var);
   if (n<0) 
-  { gsErrorMsg("Cannot remove a non existing variable %T\n",var); 
+  { gsErrorMsg("cannot remove a non existing variable %T\n",var); 
     stop();
   }
   if (objectdata[n].object!=variable) 
-  { gsErrorMsg("Data structure is confused %T\n",var); 
+  { gsErrorMsg("data structure is confused %T\n",var); 
     stop();
   }
   objectdata[n].object=none;
@@ -829,7 +829,7 @@ static ATermAppl pCRLrewrite(ATermAppl t)
   { return RewriteMultAct(t);
   } 
 
-  gsErrorMsg("Expect pCRLterm %T\n",t);
+  gsErrorMsg("expected pCRLterm %T\n",t);
   stop();
   return NULL;
   
@@ -843,7 +843,7 @@ static long insertAction(ATermAppl actionId)
   char *str=NULL;
 
   if (isnew==0)
-  { gsErrorMsg("Action %T is added twice\n",actionId); 
+  { gsErrorMsg("action %T is added twice\n",actionId); 
     stop();
   }
 
@@ -861,7 +861,7 @@ static long insertAction(ATermAppl actionId)
                   l=ATgetNext(l))
     { 
       if (existsort(ATAgetFirst(l))<0)
-      { gsErrorMsg("The term %T is not a sort in the declaration of actionId %T\n",
+      { gsErrorMsg("the term %T is not a sort in the declaration of actionId %T\n",
                               ATgetFirst(l),actionId); 
         stop();
       }
@@ -972,7 +972,7 @@ static long insertProcDeclaration(
   char *str=NULL;
 
   if (!gsIsProcVarId(procId)) 
-  { gsErrorMsg("Expect process declaration %T\n",procId);
+  { gsErrorMsg("expected process declaration %T\n",procId);
     stop();
   }
 
@@ -982,7 +982,7 @@ static long insertProcDeclaration(
   n=addObject(procId,&isnew);
 
   if (isnew==0)
-  { gsErrorMsg("Process %T is added twice\n",procId); 
+  { gsErrorMsg("process %T is added twice\n",procId); 
     stop();
   }
 
@@ -1001,7 +1001,7 @@ static long insertProcDeclaration(
                   l=ATgetNext(l))
     { 
       if (existsort(ATAgetFirst(l))<0)
-      { gsErrorMsg("The term %T is not a sort in the declaration of action %T\n",
+      { gsErrorMsg("the term %T is not a sort in the declaration of action %T\n",
                               ATgetFirst(l),procId); 
         stop();
       }
@@ -1226,7 +1226,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsChoice(body))
   { if (status==multiAction) 
-    { gsErrorMsg("Choice operator occurs in a multi-action in %P.\n", body);
+    { gsErrorMsg("choice operator occurs in a multi-action in %P.\n", body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
@@ -1240,7 +1240,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsSeq(body))
   { if (status==multiAction) 
-    { gsErrorMsg("Sequential operator occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("sequential operator occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
@@ -1254,7 +1254,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsMerge(body))
   { if (status!=mCRL)
-    { gsErrorMsg("The parallel operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("parallel operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),mCRL);
@@ -1263,13 +1263,13 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsLMerge(body))
-  { gsErrorMsg("Cannot linearize because the specification contains a leftmerge.\n");
+  { gsErrorMsg("cannot linearize because the specification contains a leftmerge.\n");
     stop();
   }
 
   if (gsIsIfThen(body))  
   { if (status==multiAction) 
-    { gsErrorMsg("If-then occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("if-then occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1283,7 +1283,7 @@ static processstatustype determine_process_statusterm(
   if (gsIsIfThenElse(body))      
   { 
     if (status==multiAction) 
-    { gsErrorMsg("If-then-else occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("if-then-else occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1300,7 +1300,7 @@ static processstatustype determine_process_statusterm(
        that this variable name will be reused later on */
     insertvariables(ATLgetArgument(body,0),ATfalse);
     if (status==multiAction)
-    { gsErrorMsg("Sum operator occurs within a multi-action in %P.\n",body);
+    { gsErrorMsg("sum operator occurs within a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1313,7 +1313,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsComm(body))
   { if (status!=mCRL)
-    { gsErrorMsg("The communication operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("communication operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s2=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1321,19 +1321,19 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsBInit(body))
-  { gsErrorMsg("Cannot linearize a specification with the bounded initialization operator.\n");
+  { gsErrorMsg("cannot linearize a specification with the bounded initialization operator.\n");
     stop();
   }
 
   if (gsIsAtTime(body)) 
   { timeIsBeingUsed = true;
     if (status==multiAction)
-    { gsErrorMsg("A time operator occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("time operator occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     if (s1==mCRL)
-    { gsErrorMsg("A mCRL operator occurs in the scope of a time operator in %P.\n",body);
+    { gsErrorMsg("mCRL operator occurs in the scope of a time operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1345,7 +1345,7 @@ static processstatustype determine_process_statusterm(
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1!=multiAction)||(s2!=multiAction))
     { 
-      gsErrorMsg("Other objects than multi-actions occur in the scope of a synch operator in %P.\n",body);
+      gsErrorMsg("other objects than multi-actions occur in the scope of a synch operator in %P.\n",body);
       stop();
     }
     return multiAction;
@@ -1371,7 +1371,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsHide(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A hide operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("hide operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1380,7 +1380,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsRename(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A rename operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("rename operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1389,7 +1389,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsAllow(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("An allow operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("allow operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1398,14 +1398,14 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsBlock(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A block operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("block operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
   }
 
-  gsErrorMsg("Process has unexpected format (2) %P\n",body);
+  gsErrorMsg("process has unexpected format (2) %P\n",body);
   stop();
   return error;
 } 
@@ -1523,7 +1523,7 @@ static void collectPcrlProcesses_term(ATermAppl body, ATermIndexedSet visited)
   { return;
   }
 
-  gsErrorMsg("Process has unexpected format (1) %T\n",body);
+  gsErrorMsg("process has unexpected format (1) %T\n",body);
   stop();
 } 
 
@@ -1693,7 +1693,7 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
    { return 0; }
   if (gsIsTau(p))
    { return 0; }
-  gsErrorMsg("Unexpected process format in occursinCRLterm %T\n",p);
+  gsErrorMsg("unexpected process format in occursinCRLterm %T\n",p);
   stop();
   return 0;
 }
@@ -1769,7 +1769,7 @@ static ATermAppl substitute_variable_rec(
    { 
 #ifndef NDEBUG
      if (vars!=ATempty) 
-     { gsErrorMsg("Non matching terms and vars list\n");
+     { gsErrorMsg("non matching terms and vars list\n");
        stop();
      }
 #endif
@@ -2099,7 +2099,7 @@ static ATermAppl substitute_pCRLproc(
 
   }
 
-  gsErrorMsg("Expect a pCRL process %T\n",p);
+  gsErrorMsg("expected a pCRL process %T\n",p);
   stop();
   return NULL;
 }
@@ -2127,7 +2127,7 @@ static ATermList parameters_that_occur_in_body(
   
   variable=ATAgetFirst(parameters);
   if (!gsIsDataVarId(variable))
-  { gsErrorMsg("Expect variable list %T\n",parameters);
+  { gsErrorMsg("expected variable list %T\n",parameters);
     stop();
   }
          
@@ -2155,7 +2155,7 @@ static ATermAppl newprocess(
 { 
   numberOfNewProcesses++;
   if (numberOfNewProcesses == warningNumber)
-  { gsWarningMsg("Generated %d new internal processes. A possible unbounded loop can be avoided by using the flag -2 (--regular2) instead of the default -1 (--regular).\n",
+  { gsWarningMsg("generated %d new internal processes. A possible unbounded loop can be avoided by using the flag -2 (--regular2) instead of the default -1 (--regular).\n",
                          numberOfNewProcesses);
     warningNumber=warningNumber*2;
   }
@@ -2229,7 +2229,7 @@ static ATermAppl wraptime(
   { return gsMakeAtTime(body,time);
   }
 
-  gsErrorMsg("Expect pCRL process in wraptime %T\n",body);
+  gsErrorMsg("expected pCRL process in wraptime %T\n",body);
   stop();
   return NULL;
 }
@@ -2259,7 +2259,7 @@ static ATermList make_pars(ATermList sortlist)
   if (gsIsSortId(sort))
   { s=ATSgetArgument(sort,0); }
   else 
-  { gsErrorMsg("Unexpected sort encountered %T\n",sort);
+  { gsErrorMsg("unexpected sort encountered %T\n",sort);
     stop();
   }
 
@@ -2630,7 +2630,7 @@ static ATermAppl bodytovarheadGNF(
     return gsMakeProcess(delta_process,ATempty); 
   }
 
-  gsErrorMsg("Unexpected process format in bodytovarheadGNF %T\n",body);
+  gsErrorMsg("unexpected process format in bodytovarheadGNF %T\n",body);
   stop();
   return NULL;
 }
@@ -2699,7 +2699,7 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   
   if (gsIsAction(body1))
   { /* return gsMakeSeq(body1,body2); */
-    gsErrorMsg("expect only multiactions, no single actions\n");
+    gsErrorMsg("expected only multiactions, no single actions\n");
     stop();
   }
 
@@ -2717,7 +2717,7 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   
   if (gsIsTau(body1))
   { /* return gsMakeSeq(body1,body2); */
-    gsErrorMsg("expect only multiactions, not a tau\n");
+    gsErrorMsg("expected only multiactions, not a tau\n");
     stop();
   }
   
@@ -2725,7 +2725,7 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   { return gsMakeSeq(body1,body2); 
   }
 
-  gsErrorMsg("Unexpected process format in putbehind %T\n",body1);
+  gsErrorMsg("unexpected process format in putbehind %T\n",body1);
   stop();
   return NULL;
 }
@@ -2789,7 +2789,7 @@ static ATermAppl distribute_condition(
   { return gsMakeIfThen(condition,body1);
   }
 
-  gsErrorMsg("Unexpected process format in distribute condition %T\n",body1);
+  gsErrorMsg("unexpected process format in distribute condition %T\n",body1);
   stop();
   return NULL;
 }
@@ -2821,7 +2821,7 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   { return body1;
   }
 
-  gsErrorMsg("Unexpected process format in distribute_sum %T\n",body1);
+  gsErrorMsg("unexpected process format in distribute_sum %T\n",body1);
   stop();
   return NULL;
 }
@@ -2910,7 +2910,7 @@ static ATermList extract_names(ATermAppl sequence)
     } 
   }
 
-  gsErrorMsg("Expect sequence of process names (1) %T\n",sequence);
+  gsErrorMsg("expected sequence of process names (1) %T\n",sequence);
   stop();
   return NULL;
 }
@@ -2942,7 +2942,7 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
     }
   } 
 
-  gsErrorMsg("Expect a sequence of process names (2) %T\n",oldbody);
+  gsErrorMsg("expected a sequence of process names (2) %T\n",oldbody);
   stop();
   return NULL;
 }
@@ -2958,7 +2958,7 @@ static ATermList argscollect(ATermAppl t)
     return ATconcat(ATLgetArgument(firstproc,1),argscollect(ATAgetArgument(t,1)));
   }
 
-  gsErrorMsg("Expect a sequence of process names (3) %T\n",t);
+  gsErrorMsg("expected a sequence of process names (3) %T\n",t);
   stop();
   return NULL;      
 }
@@ -2983,7 +2983,7 @@ static ATermAppl create_regular_invocation(
        return sequence;
     if (gsIsSeq(sequence))
        return ATAgetArgument(sequence,0);
-    gsErrorMsg("Expect a sequence of process names %T\n",sequence);
+    gsErrorMsg("expected a sequence of process names %T\n",sequence);
     stop();
   }
   /* There is more than one process name in the sequence,
@@ -3071,7 +3071,7 @@ static ATermAppl to_regular_form(
   }
   
   else 
-  { gsErrorMsg("To regular form expects GNF %T\n",t);
+  { gsErrorMsg("to regular form expects GNF %T\n",t);
     stop();
   }
   return NULL;
@@ -3137,7 +3137,7 @@ static ATermAppl distributeTime(
   { return gsMakeAtTime(body,time);
   }
 
-  gsErrorMsg("Expect pCRL process in distributeTime %T\n",body);
+  gsErrorMsg("expected pCRL process in distributeTime %T\n",body);
   stop();
   return NULL;
 }
@@ -3176,7 +3176,7 @@ static ATermAppl procstorealGNFbody(
   }
 
   if (gsIsSync(body))
-  { gsErrorMsg("Sync operator cannot occur here.\n");
+  { gsErrorMsg("sync operator cannot occur here.\n");
     stop();
   }
 
@@ -3218,7 +3218,7 @@ static ATermAppl procstorealGNFbody(
   
   if (gsIsAction(body))
   { 
-    gsErrorMsg("Expect only multiactions at this point\n");
+    gsErrorMsg("expected only multiactions at this point\n");
     stop();
   }
  
@@ -3268,7 +3268,7 @@ static ATermAppl procstorealGNFbody(
   
   if (gsIsTau(body))
   { /* return body; */
-    gsErrorMsg("Only expect multiactions, no tau\n");
+    gsErrorMsg("expected only multiactions, no tau\n");
     stop();
   }
   
@@ -3290,7 +3290,7 @@ static ATermAppl procstorealGNFbody(
     return NULL;
   }
 
-  gsErrorMsg("Unexpected process format in procstorealGNF %T\n",body);
+  gsErrorMsg("unexpected process format in procstorealGNF %T\n",body);
   stop();
   return NULL;
 }
@@ -3317,7 +3317,7 @@ static void procstorealGNFrec(
     t=procstorealGNFbody(objectdata[n].processbody,first,
               todo,regular,pCRL,objectdata[n].parameters);
     if (objectdata[n].processstatus!=GNFbusy)
-    { gsErrorMsg("Something wrong with recursion\n");
+    { gsErrorMsg("there is something wrong with recursion\n");
       stop();
     }
 
@@ -3339,7 +3339,7 @@ static void procstorealGNFrec(
   }
 
   if ((objectdata[n].processstatus==GNFbusy) && (v==first))
-  { gsErrorMsg("Unguarded recursion in process %T\n",procIdDecl);
+  { gsErrorMsg("unguarded recursion in process %T\n",procIdDecl);
     stop();
   }
 
@@ -3352,11 +3352,11 @@ static void procstorealGNFrec(
   }
 
   if (objectdata[n].processstatus==mCRLbusy)
-  { gsErrorMsg("Unguarded recursion without pCRL operators\n");
+  { gsErrorMsg("unguarded recursion without pCRL operators\n");
     stop();
   }
   
-  gsErrorMsg("Strange process type %d\n",objectdata[n].processstatus);  
+  gsErrorMsg("strange process type %d\n",objectdata[n].processstatus);  
   stop();
 }
 
@@ -3424,7 +3424,7 @@ static void makepCRLprocs_rec(ATermAppl t)
     return; 
   }
 
-  gsErrorMsg("Unexpected process format %T in makepCRLprocs_rec\n",t);
+  gsErrorMsg("unexpected process format %T in makepCRLprocs_rec\n",t);
   stop();
 }
 
@@ -3446,7 +3446,7 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
   ATermAppl var1=ATAgetFirst(vl);
 
   if (!gsIsDataVarId(var1))
-  { gsErrorMsg("Expect variablelist %T\n",vl);
+  { gsErrorMsg("expected variablelist %T\n",vl);
     stop();
   }
 
@@ -3530,7 +3530,7 @@ static ATermList localequationvariables=NULL;
 static void declare_equation_variables(ATermList t1)
 { 
   if (localequationvariables!=NULL)
-  { gsErrorMsg("Cannot declare variables as section is not yet closed %T\n",
+  { gsErrorMsg("cannot declare variables as section is not yet closed %T\n",
                 localequationvariables);
     stop();
   }
@@ -3539,7 +3539,7 @@ static void declare_equation_variables(ATermList t1)
 
 static void end_equation_section(void)
 { if (localequationvariables==NULL)
-  { gsErrorMsg("Cannot open an non ended equation section\n",NULL);
+  { gsErrorMsg("cannot open an non ended equation section\n",NULL);
     stop();
   }
   
@@ -3553,7 +3553,7 @@ static void newequation(
                 specificationbasictype *spec)
 { 
   if (localequationvariables==NULL)
-  { gsErrorMsg("Variables must be declared first! %T\n",t2);
+  { gsErrorMsg("variables must be declared first! %T\n",t2);
     stop();
   }
 
@@ -3703,7 +3703,7 @@ static stacklisttype *new_stack(
   
   stack=(stacklisttype *) malloc(sizeof(stacklisttype));
   if (stack==NULL)
-  { gsErrorMsg("Cannot allocate memory for stack data\n");
+  { gsErrorMsg("cannot allocate memory for stack data\n");
     stop();
   }
   stack->parameterlist=ATempty; 
@@ -3758,7 +3758,7 @@ static stacklisttype *new_stack(
     { /* stack->opns == NULL */
       stack->opns=(stackoperations *) malloc(sizeof(stackoperations));
       if (stack->opns==NULL)
-      { gsErrorMsg("Cannot allocate memory for stack operations\n");
+      { gsErrorMsg("cannot allocate memory for stack operations\n");
         stop();
       }
 
@@ -3818,11 +3818,11 @@ static stacklisttype *new_stack(
       { tempsort_domain=ATinsert(tempsort_domain, (ATerm) gsMakeSortExprPos());
       }
       else if (binary)
-      { gsErrorMsg("Cannot combine stacks with binary\n");
+      { gsErrorMsg("cannot combine stacks with binary\n");
         stop();
       }
       else /* enumerated type */
-      { gsErrorMsg("Cannot combine stacks with an enumerated type\n");
+      { gsErrorMsg("cannot combine stacks with an enumerated type\n");
         stop();
       }
 
@@ -3839,11 +3839,11 @@ static stacklisttype *new_stack(
         insertmapping(stack->opns->getstate,spec);
       }
       else if (binary)
-      { gsErrorMsg("Cannot combine stacks with binary\n");
+      { gsErrorMsg("cannot combine stacks with binary\n");
         stop();
       }
       else /* enumerated type */
-      { gsErrorMsg("Cannot combine stacks with an enumerated type\n");
+      { gsErrorMsg("cannot combine stacks with an enumerated type\n");
         stop();
       }
 
@@ -4087,7 +4087,7 @@ static ATermAppl adapt_term_to_stack(
             adapt_termlist_to_stack(ATLgetArgument(t,1),stack,vars,spec));
   }
               
-  gsErrorMsg("Expect a term\n");
+  gsErrorMsg("expected a term\n");
   stop();
   return NULL;
 }
@@ -4259,7 +4259,7 @@ static ATermList make_procargs(
 
   if (gsIsSeq(t))   
   { if (regular)
-    { gsErrorMsg("Process is not regular, as it has stacking vars %T\n",t);
+    { gsErrorMsg("process is not regular, as it has stacking vars %T\n",t);
       stop();
     }
     process=ATAgetArgument(t,0);
@@ -4322,7 +4322,7 @@ static ATermList make_procargs(
     return ATinsertA(ATempty,ATAgetFirst(t3));
   }
   
-  gsErrorMsg("Expect seq or name %T\n",t);
+  gsErrorMsg("expected seq or name %T\n",t);
   stop();
   return NULL;
 }
@@ -4737,7 +4737,7 @@ static void add_summands(
   { multiAction=summandterm;
   } 
   else 
-  { gsErrorMsg("Expected multiaction %T\n",summandterm);
+  { gsErrorMsg("expected multiaction %T\n",summandterm);
     stop();
   }
 
@@ -4745,7 +4745,7 @@ static void add_summands(
   { if (!gsIsDelta(multiAction))
     /* As termination has been replaced by an explicit action terminated, followed
      * by delta, a single terminating action cannot exist for regular processes. */
-    { gsErrorMsg("with the flag regular terminating processes should not exist\n");
+    { gsErrorMsg("terminating processes should not exist when using the regular flag\n");
       stop();
     }
     sumlist=insert_summand(sumlist,
@@ -4968,7 +4968,7 @@ static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
   };
 
   
-  gsErrorMsg("Searching for nonexisting case function on sort %T\n",sort);
+  gsErrorMsg("searching for nonexisting case function on sort %T\n",sort);
   stop();
   return NULL;
 }
@@ -6561,7 +6561,7 @@ static int occursinvarandremove(ATermAppl var, ATermList *vl)
 #ifdef NDEBUG
    if (ATgetAFun(ATgetArgument(var,0))==
        ATgetAFun(ATgetArgument(var1,0)))
-   { gsErrorMsg("Variable conflict %T  %T\n",var,var1);
+   { gsErrorMsg("variable conflict %T  %T\n",var,var1);
      stop();
    }
 #endif
@@ -7936,7 +7936,7 @@ static ATermAppl generateLPEmCRLterm(
   }
    
   else 
-  { gsErrorMsg("Expect mCRL term %T\n",t);
+  { gsErrorMsg("expected mCRL term %T\n",t);
     stop();
   }
 
@@ -8041,7 +8041,7 @@ static ATermAppl generateLPEmCRL(
              regular); 
   }
 
-  gsErrorMsg("Laststatus: %d\n",objectdata[n].processstatus);
+  gsErrorMsg("laststatus: %d\n",objectdata[n].processstatus);
   stop();
   return NULL;
 }
@@ -8190,7 +8190,7 @@ static ATermAppl alphaconversionterm(
     return NULL;
   }  
   
-  gsErrorMsg("Unexpected process format in alphaconversionterm %T\n",t);
+  gsErrorMsg("unexpected process format in alphaconversionterm %T\n",t);
   stop();
   return NULL;
 }
@@ -8219,7 +8219,7 @@ static void alphaconversion(ATermAppl procId, ATermList parameters)
   if (objectdata[n].processstatus==GNFalpha)
      return;
   else 
-  { gsErrorMsg("Unknown type %d in alphaconversion of %T\n",
+  { gsErrorMsg("unknown type %d in alphaconversion of %T\n",
                        objectdata[n].processstatus,procId); 
     stop();
   }
@@ -8328,7 +8328,7 @@ static bool containstimebody(
     return r1||r2;
   }
 
-  gsErrorMsg("Unexpected process format in containstime%T\n",t);
+  gsErrorMsg("unexpected process format in containstime%T\n",t);
   stop();
   return 0;
 }
@@ -8346,7 +8346,7 @@ static bool containstime_rec(
   if (nnew)
   { bool ct=containstimebody(objectdata[n].processbody,stable,visited,1); 
     if ((ct) && !add_delta)
-    { gsVerboseMsg("Process %s contains time\n",ATgetName(ATgetAFun(ATgetArgument(procId,0))));
+    { gsVerboseMsg("process %s contains time\n",ATgetName(ATgetAFun(ATgetArgument(procId,0))));
     }
     if (objectdata[n].containstime!=ct)
     { objectdata[n].containstime=ct;
@@ -8470,7 +8470,7 @@ static int canterminatebody(
     return r1&&r2;
   }
 
-  gsErrorMsg("Unexpected process format in canterminate%T\n",t);
+  gsErrorMsg("unexpected process format in canterminate%T\n",t);
   stop();
   return 0;
 }
@@ -8524,7 +8524,7 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
 
   if (result!=NULL)
   { /* if (objectdata[n].processstatus==mCRL)
-    { gsErrorMsg("Unguarded recursion in the process part of the input (%T)\n",
+    { gsErrorMsg("unguarded recursion in the process part of the input (%T)\n",
               objectdata[n].objectname);
       stop();
     } */
@@ -8656,7 +8656,7 @@ static ATermAppl split_body(
       }
     }
     else
-    { gsErrorMsg("Unexpected process format in split process %T\n",t);
+    { gsErrorMsg("unexpected process format in split process %T\n",t);
       stop();
     }
   }
@@ -8767,7 +8767,7 @@ static ATermAppl transform(
   pcrlprocesslist=collectPcrlProcesses(init);
 
   if (pcrlprocesslist==ATempty) 
-  { gsErrorMsg("There are no pCRL processes to be linearized\n"); 
+  { gsErrorMsg("there are no pCRL processes to be linearized\n"); 
     stop();
   }
 
