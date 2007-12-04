@@ -79,6 +79,9 @@ namespace squadt {
       /** \brief Sorts the processor list */
       void sort_processors();
 
+      /** \brief Checks whether a file is in the project store, or registered as output by one of the processors */
+      bool file_exists(const boost::filesystem::path& s);
+
       /** \brief Add a new processor to the project */
       processor* add();
 

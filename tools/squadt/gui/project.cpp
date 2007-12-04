@@ -323,11 +323,19 @@ namespace squadt {
      **/
     void project::on_object_name_edited(wxTreeEvent& e) {
       if (!e.GetLabel().IsEmpty()) {
-        wxTreeItemId                       s = e.GetItem();
+        wxTreeItemId s = e.GetItem();
+
         boost::shared_ptr< processor >                    p = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_processor();
         boost::shared_ptr< processor::object_descriptor > t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
 
-        p->relocate_output(*t, std::string(e.GetLabel().fn_str()));
+        try {
+          p->relocate_output(*t, std::string(e.GetLabel().fn_str()));
+        }
+        catch (std::exception& ex) {
+          wxMessageDialog(0, wxT("Renaming failed: \n\n  ") + wxString(ex.what(), wxConvLocal), wxT("Error")).ShowModal();
+
+          e.Veto();
+        }
       }
       else {
         e.Veto();

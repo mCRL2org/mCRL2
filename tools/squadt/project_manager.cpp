@@ -476,6 +476,35 @@ namespace squadt {
   }
 
   /**
+   * \param[in] s path (relative to the project store) to a file
+   */
+  bool project_manager_impl::file_exists(const boost::filesystem::path& s) {
+    using namespace boost::filesystem;
+
+    path full_path(store / s);
+
+    if (exists(full_path)) {
+      if (!is_regular(full_path)) {
+        throw std::runtime_error("Conflict, non-file with name `" + s.string() + "' in directory " + store.string() + ".");
+      }
+    }
+
+    for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
+      boost::iterator_range< processor::output_object_iterator > output_range((*i)->get_output_iterators());
+
+      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+        boost::shared_ptr< processor > g(object->get_generator());
+
+        if (object->get_location() == s) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * \param[in] p pointer to the processor that is to be removed
    * \param[in] b whether or not to remove the associated files
    *

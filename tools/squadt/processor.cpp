@@ -98,16 +98,23 @@ namespace squadt {
    * \param id the identifier for the object
    * \param p shared pointer to an object descriptor
    **/
-  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& p) {
-    p->generator = interface_object;
+  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& o) {
+    boost::shared_ptr < project_manager > guard(manager.lock());
 
-    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      if (p->location == boost::static_pointer_cast< processor_impl::object_descriptor >(i->object)->location) {
-        throw std::runtime_error("Failed to append output object due to conflict: file exists!");
+    if (guard) {
+      o->generator = interface_object;
+
+      if (o->get_status() == object_descriptor::original) {
+        if (guard->impl->file_exists(o->location)) {
+          throw std::runtime_error("The project already contains a file named `" + o->location + "'");
+        }
       }
+     
+      outputs.push_back(make_configurated_object_descriptor(id, o));
     }
-
-    outputs.push_back(make_configurated_object_descriptor(id, p));
+    else {
+      throw std::runtime_error("Fatal: project manager destroyed!");
+    }
   }
 
   /**
@@ -337,6 +344,10 @@ namespace squadt {
 
     if (g.get() != 0) {
       boost::shared_ptr < object_descriptor > object(boost::static_pointer_cast< object_descriptor >(d.object));
+
+      if (g->impl->file_exists(object->location)) {
+        throw std::runtime_error("The project already contains a file named `" + object->location + "'");
+      }
 
       path source(g->get_path_for_name(object->location));
       path target(g->get_path_for_name(n));
