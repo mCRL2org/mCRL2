@@ -87,8 +87,9 @@ END_EVENT_TABLE()
 bool LTSViewApp::OnInit() {
   lts = NULL;
   markStyle = NO_MARKS;
-  settings = new Settings();
   rankStyle = ITERATIVE;
+  fsmStyle = false;
+  settings = new Settings();
   mainFrame = new MainFrame(this,settings);
   visualizer = new Visualizer(this,settings);
   glCanvas = mainFrame->getGLCanvas();
@@ -200,7 +201,7 @@ void LTSViewApp::openFile(string fileName) {
   lts->computeClusterLabelInfo();
   
   mainFrame->updateProgressDialog(67,"Positioning clusters");
-  lts->positionClusters();
+  lts->positionClusters(fsmStyle);
 
   visualizer->setLTS(lts,true);
   
@@ -254,7 +255,7 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       lts->markClusters();
       
       mainFrame->updateProgressDialog(60,"Positioning clusters");
-      lts->positionClusters();
+      lts->positionClusters(fsmStyle);
 
       visualizer->setLTS(lts,true);
 
@@ -277,6 +278,19 @@ void LTSViewApp::setVisStyle(VisStyle vs) {
   if (visualizer->getVisStyle() != vs) {
     visualizer->setVisStyle(vs);
     glCanvas->display();
+  }
+}
+
+void LTSViewApp::setFSMStyle(bool b) {
+  if (b != fsmStyle) {
+    fsmStyle = b;
+    if (lts != NULL) {
+      glCanvas->disableDisplay();
+      lts->positionClusters(fsmStyle);
+      visualizer->setLTS(lts,true);
+      glCanvas->enableDisplay();
+      glCanvas->display();
+    }
   }
 }
 

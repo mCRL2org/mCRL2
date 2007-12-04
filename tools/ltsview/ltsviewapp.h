@@ -27,6 +27,7 @@ class LTSViewApp : public wxApp, public Mediator {
     Visualizer *visualizer;
     Utils::RankStyle rankStyle;
     Utils::MarkStyle markStyle;
+    bool fsmStyle;
 
   public:
     void	  activateMarkRule(const int index,const bool activate);
@@ -44,6 +45,7 @@ class LTSViewApp : public wxApp, public Mediator {
     void	  setMatchAnyMarkRule(int i);
     void	  setRankStyle(Utils::RankStyle rs);
     void	  setVisStyle(Utils::VisStyle vs);
+    void	  setFSMStyle(bool b);
     void	  unmarkAction(std::string label);
     void          startSim();
     int           getNumberOfParams() const;

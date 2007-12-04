@@ -45,6 +45,7 @@ class MainFrame : public wxFrame, public simReader {
     void  onSavePic(wxCommandEvent& event);
     void  onRankStyle(wxCommandEvent& event);
     void  onVisStyle(wxCommandEvent& event);
+    void  onFSMStyle(wxCommandEvent& event);
     void  onRemoveMarkRuleButton(wxCommandEvent& event);
     void  onResetButton(wxCommandEvent& event);
     void  onResetView(wxCommandEvent& event);

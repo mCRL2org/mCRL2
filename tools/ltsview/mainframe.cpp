@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
   EVT_MENU  (myID_TUBES_STYLE,MainFrame::onVisStyle)
+  EVT_MENU  (myID_FSM_STYLE,MainFrame::onFSMStyle)
   EVT_MENU  (myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
   EVT_MENU  (myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
   EVT_MENU  (myID_ZOOM_OUT, MainFrame::onZoomOut)
@@ -147,6 +148,8 @@ void MainFrame::setupMenuBar() {
     wxT("Cones visualization style"));
   viewMenu->AppendRadioItem(myID_TUBES_STYLE,wxT("Tubes"),
     wxT("Tubes visualization style"));
+  viewMenu->AppendCheckItem(myID_FSM_STYLE,
+    wxT("FSMView style"), wxT("Toggle FSMView style"));
   viewMenu->AppendSeparator();
   viewMenu->Append(wxID_PREFERENCES,wxT("S&ettings..."),
     wxT("Show the settings panel"));
@@ -564,6 +567,10 @@ void MainFrame::onVisStyle(wxCommandEvent& event){
   } else if (event.GetId() == myID_TUBES_STYLE) {
     mediator->setVisStyle(TUBES);
   }
+}
+
+void MainFrame::onFSMStyle(wxCommandEvent& event){
+  mediator->setFSMStyle(event.IsChecked());
 }
 
 void MainFrame::onResetView(wxCommandEvent& /*event*/) {

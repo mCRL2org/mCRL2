@@ -22,6 +22,7 @@ namespace IDs
     // Drawing style identifiers
     myID_CONES_STYLE,
     myID_TUBES_STYLE,
+    myID_FSM_STYLE,
     // Event identifiers
     myID_MARK_RADIOBUTTON,
     myID_MARK_ANYALL,

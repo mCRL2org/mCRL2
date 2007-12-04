@@ -14,6 +14,10 @@
 using namespace std;
 using namespace Utils;
 
+bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const {
+  return (c1->getBCRadius() < c2->getBCRadius());
+}
+
 bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const {
   return (c1->getBCVolume() < c2->getBCVolume());
 }
@@ -385,6 +389,155 @@ void Cluster::positionStatesSpiral() {
   }
 }
 
+void Cluster::computeSizeAndPositions_FSM() {
+  /* We also use this function to calculate the number of slots.
+   * This process is described in Frank van Ham's Master's thesis, p. 24
+   */
+  // Recurse into the tree (depth first)
+  for (unsigned int i = 0; i < descendants.size(); ++i) {
+    descendants[i]->computeSizeAndPositions_FSM();
+  }
+   
+  /* Compute the cluster radius r such that all states fit nicely into the
+   * cluster. Suppose the cluster has N states and every state is visualized by
+   * a circle with radius 0.1. Suppose we want the total area of all states
+   * to fill a quarter of the circle that represents the cluster. This way,
+   * there is (hopefully) enough room left for transitions and space between the
+   * states.
+   * So: N * pi * 0.1^2 = 0.25 * pi * r^2
+   * Hence: r = sqrt( N * 0.04 )
+   */
+  topRadius = states.size()/(2*PI);
+  int numSlots;
+
+  if (descendants.size() == 0) { 
+    baseRadius = topRadius;
+    bc_radius = topRadius;
+    bc_height = 1.0f;
+    // Assign as much slots as there are nodes, to provide the best  
+    // possible spacing
+    // The position of the nodes is by the index as follows:
+    // 0 -- getNumStates + 1: The rim slots.
+    numSlots = getNumStates();
+  } else if (descendants.size() == 1) {
+    Cluster* desc = *descendants.begin();
+    baseRadius = desc->getTopRadius();
+    bc_radius = max(topRadius,desc->getBCRadius());
+    bc_height = desc->getBCHeight() + 1.0f;
+    desc->center();
+
+    // The number of slots is double that of the descendant's slots, capped to
+    // 32.
+    numSlots = desc->getTotalNumSlots() * 2;
+    numSlots = min(32,numSlots);
+  } else { // descendants.size() > 1
+    // sort descendants by size in ascending order
+    sort(descendants.begin(),descendants.end(),Comp_BCRadius());
+
+    // determine whether a unique smallest descendant exists
+    Cluster* smallest = descendants[0];
+    Cluster* nextSmallest = descendants[1];
+    bool uniqueSmallest = ((nextSmallest->getBCRadius()-smallest->getBCRadius()) / 
+        smallest->getBCRadius()) > 0.01f;
+    
+    // determine whether a unique largest descendant exists
+    Cluster* largest = descendants[descendants.size()-1];
+    Cluster* nextLargest = descendants[descendants.size()-2];
+    bool uniqueLargest = ((nextLargest->getBCRadius()-largest->getBCRadius()) /
+        largest->getBCRadius()) < -0.01f;
+
+    // invariant: descendants in range [x,y) have not been assigned a position
+    int x = 0;
+    int y = descendants.size();
+    float bcr_center = 0.0f;  // BC radius of largest descendant in center
+    float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
+    if (uniqueLargest) {
+      // center the largest descendant
+      largest->center();
+      --y;
+      bcr_center = largest->getBCRadius();
+      bcr_rim = nextLargest->getBCRadius();
+    } 
+    if (uniqueSmallest && (!uniqueLargest || !smallest->hasDescendants())) {
+      // center the smallest descendant
+      smallest->center();
+      ++x;
+      if (!uniqueLargest) {
+        bcr_center = smallest->getBCRadius();
+      }
+      if (y-x == 0) {
+        bcr_rim = 0.0f;
+      }
+    }
+    if (y-x == 1) {
+      ++y;
+      bcr_rim = largest->getBCRadius();
+      if (smallest->isCentered()) {
+        bcr_center = smallest->getBCRadius();
+      }
+    }
+    
+    // compute the radius of the base of the cylinder and the cluster's size
+    float min_radius1 = 0.0f;
+    if (y-x > 1) {
+      min_radius1 = (float)(bcr_rim / sin(PI / (y-x)));
+    }
+    float min_radius2 = bcr_center;
+    if (y-x > 0) {
+      min_radius2 += bcr_rim + 0.01f;
+    }
+    baseRadius = max(min_radius1,min_radius2);
+    bc_radius = max(min_radius1 + bcr_rim,min_radius2);
+    bc_radius = max(topRadius,bc_radius);
+    bc_height = 0.0f;
+    for (unsigned int i = 0; i < descendants.size(); ++i) {
+      if (descendants[i]->getBCHeight() > bc_height) {
+        bc_height = descendants[i]->getBCHeight();
+      }
+    }
+    bc_height += 1.0f;
+
+    // Divide the remaining descendants over the rim of the circle.
+    float angle = 360.0f / (y-x);
+    int i = 0;
+    while (x+i != y) {
+      descendants[x+i]->setPosition(i*angle);
+      ++i;
+    }
+
+    // Now all the positions of the descendants have been determined, we can
+    // determine the number of slots
+    if (uniqueLargest) {
+      // There is a centered descendant, the largest cluster.
+      numSlots = largest->getTotalNumSlots() * 2;
+    }
+    else if (uniqueSmallest) {
+      // There is a centered descendant, the smallest cluster.
+      numSlots = smallest->getTotalNumSlots() * 2;      
+    }
+    else {
+      // There is no centered descendant. All clusters are placed on the rim.
+      numSlots = getNumDescendants() * 2;
+    }
+    numSlots = min(32,numSlots);
+  }
+  // create the slots
+  int S;
+  for (unsigned int r = 0; r < NUM_RINGS; ++r) {
+    if (r == 0) {
+      S = 1;
+    } else {
+      S = round_to_int(numSlots * float(r) / float(NUM_RINGS));
+    }
+    vector< vector< State* > > slots_r;
+    for (int s = 0; s < S; ++s) {
+      vector< State* > slots_rs;
+      slots_r.push_back(slots_rs);
+    }
+    slots.push_back(slots_r);
+  }
+}
+
 void Cluster::computeSizeAndPositions() {
   /* We also use this function to calculate the number of slots.
    * This process is described in Frank van Ham's Master's thesis, p. 24
@@ -468,7 +621,10 @@ void Cluster::computeSizeAndPositions() {
     }
     
     // compute the radius of the base of the cylinder and the cluster's size
-    float minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
+    float minRimRadius = 0.0f;
+    if (y-x > 1) {
+      minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
+    }
     baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
     bc_radius = max(topRadius,baseRadius + bcr_rim);
     bc_height = 0.0f;

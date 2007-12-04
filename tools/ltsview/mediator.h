@@ -28,6 +28,7 @@ class Mediator {
     virtual void      setMatchAnyMarkRule(int i) = 0;
     virtual void      setRankStyle(Utils::RankStyle rs) = 0;
     virtual void      setVisStyle(Utils::VisStyle vs) = 0;
+    virtual void      setFSMStyle(bool b) = 0;
     virtual void      unmarkAction(std::string label) = 0;
     virtual void      selectStateByID(const int id) = 0;
     virtual void      selectCluster(const int rank, const int pos) = 0;

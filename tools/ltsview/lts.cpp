@@ -613,8 +613,12 @@ void LTS::computeClusterLabelInfo() {
   }
 }
 
-void LTS::positionClusters() {
-  initialState->getCluster()->computeSizeAndPositions();
+void LTS::positionClusters(bool fsmstyle) {
+  if (fsmstyle) {
+    initialState->getCluster()->computeSizeAndPositions_FSM();
+  } else {
+    initialState->getCluster()->computeSizeAndPositions();
+  }
   // position the initial state's cluster
   initialState->getCluster()->center();
 }

@@ -61,7 +61,7 @@ class LTS {
     void	markAction(std::string label);
     void	markClusters();
     void	mergeSuperiorClusters(Utils::RankStyle rs);
-    void	positionClusters();
+    void	positionClusters(bool fsmstyle);
     void	positionStates();
     void	clearStatePositions();
 //    void  	printStructure();

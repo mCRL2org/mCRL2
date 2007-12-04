@@ -22,6 +22,12 @@
 // forward declaration
 class Cluster;
 
+// class for cluster comparison based on cluster radii
+class Comp_BCRadius {
+  public:
+    bool operator()(const Cluster*,const Cluster*) const;
+};
+
 // class for cluster comparison based on cluster volumes
 class Comp_BCVolume {
   public:
@@ -88,6 +94,7 @@ class Cluster {
     // General cluster information
     void      center();
     void      computeSizeAndPositions();
+    void      computeSizeAndPositions_FSM();
     float     getBaseRadius() const;
     float     getPosition() const;
     int       getRank() const;
