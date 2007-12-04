@@ -140,27 +140,31 @@ namespace squadt {
           case wxID_OPEN:
             EndModal(2);
             break;
-          default: /* wxID_OK */
-            if (wxFileName::DirExists(location->GetValue())) {
-              wxDir container(location->GetValue());
-
-              if (container.HasFiles()) {
-                if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
-                                      wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
-                  EndModal(1);
+          default: { /* wxID_OK */
+              using namespace boost::filesystem;
+             
+              path target(std::string(location->GetValue().fn_str()));
+             
+              if (exists(target)) {
+                if (is_directory(target)) {
+                  if (directory_iterator(target) != directory_iterator()) {
+                    if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
+                                          wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                      EndModal(1);
+                    }
+                  }
+                  else {
+                    EndModal(1);
+                  }
+                }
+                else {
+                  wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
                 }
               }
               else {
                 EndModal(1);
               }
-            }
-            else if (wxFileName::FileExists(location->GetValue())) {
-              wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
-            }
-            else {
-              EndModal(1);
-            }
-            break;
+            } break;
         }
       }
 
@@ -174,10 +178,7 @@ namespace squadt {
 
           path target(std::string(location->GetValue().fn_str()));
 
-          if (exists(target)) {
-            wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
-          }
-          else if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
+          if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
             /* Directory contains a directory with the name of this project */
             screen0->Show(open_project_instead, true);
           } else {

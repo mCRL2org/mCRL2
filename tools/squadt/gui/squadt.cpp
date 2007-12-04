@@ -187,15 +187,15 @@ bool Squadt::OnInit() {
                 wxT("Initialisation of multiple tools failed!"), wxYES|wxNO|wxICON_WARNING);
 
         if (retry.ShowModal() == wxID_YES) {
-          /* Perform initialisation */
+          // Reset list of known tools
+          global_build_system.get_tool_manager()->factory_configuration();
+
+          // Perform initialisation
           boost::thread reinitialisation_thread(boost::bind(&local::initialise_tools,
                                 boost::ref(*splash_window), boost::ref(finished), boost::ref(too_many_tools_failed)));
 
-          global_build_system.get_tool_manager()->factory_configuration();
-
           finished = false;
        
-          /* Cannot just wait because the splash would not be updated */
           do {
             wxApp::Yield();
 
