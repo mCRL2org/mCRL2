@@ -329,10 +329,14 @@ namespace squadt {
         boost::shared_ptr< processor::object_descriptor > t = reinterpret_cast < tool_data* > (object_view->GetItemData(s))->get_object();
 
         try {
-          p->relocate_output(*t, std::string(e.GetLabel().fn_str()));
+          std::string new_name(e.GetLabel().fn_str());
+
+          if (t->get_location() != new_name) {
+            p->relocate_output(*t, new_name);
+          }
         }
         catch (std::exception& ex) {
-          wxMessageDialog(0, wxT("Renaming failed: \n\n  ") + wxString(ex.what(), wxConvLocal), wxT("Error")).ShowModal();
+          wxMessageDialog(0, wxT("Renaming failed: \n\n ") + wxString(ex.what(), wxConvLocal), wxT("Error"), wxOK|wxICON_ERROR).ShowModal();
 
           e.Veto();
         }

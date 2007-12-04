@@ -345,8 +345,8 @@ namespace squadt {
     if (g.get() != 0) {
       boost::shared_ptr < object_descriptor > object(boost::static_pointer_cast< object_descriptor >(d.object));
 
-      if (g->impl->file_exists(object->location)) {
-        throw std::runtime_error("The project already contains a file named `" + object->location + "'");
+      if (g->impl->file_exists(n)) {
+        throw std::runtime_error("The project already contains a file named `" + n + "'");
       }
 
       path source(g->get_path_for_name(object->location));
