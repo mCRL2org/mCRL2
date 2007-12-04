@@ -69,7 +69,7 @@ namespace squadt {
       new_project::new_project(wxWindow* p) : dialog::project(p, wxT("Specify project store location")) {
         build();
 
-        Connect(wxEVT_COMMAND_TEXT_ENTER, wxTextEventHandler(dialog::new_project::on_text_updated));
+        Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::new_project::on_text_updated));
         Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::new_project::on_button_clicked));
       }
 
@@ -97,7 +97,7 @@ namespace squadt {
         wxStaticText* directory_text = new wxStaticText(main_panel, wxID_ANY,
                         wxT("Select a directory where the files for the new project can be stored."));
 
-        location = new wxTextCtrl(main_panel, wxID_ANY, default_directory, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+        location = new wxTextCtrl(main_panel, wxID_ANY, default_directory, wxDefaultPosition, wxDefaultSize);
 
         directory_text->Wrap(GetSize().GetWidth() - 40);
 
