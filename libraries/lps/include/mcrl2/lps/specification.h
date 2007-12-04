@@ -294,6 +294,25 @@ specification set_initial_process(specification spec, process_initializer initia
                       );
 }
 
+/// \brief Replaces the free variables of the process and the initial state by the union of them.
+inline
+specification repair_free_variables(const specification& spec)
+{
+  data_variable_list fv1 = spec.process().free_variables();
+  data_variable_list fv2 = spec.initial_process().free_variables();
+  std::set<data_variable> freevars(fv1.begin(), fv1.end());
+  freevars.insert(fv2.begin(), fv2.end());
+  data_variable_list new_free_vars(freevars.begin(), freevars.end());
+
+  linear_process      new_process = set_free_variables(spec.process(), new_free_vars);
+  process_initializer new_init(new_free_vars, spec.initial_process().assignments());
+
+  specification result = set_lps(spec, new_process);
+  result = set_initial_process(result, new_init);
+  assert(result.is_well_typed());
+  return result;
+}
+
 } // namespace lps
 
 /// \internal
