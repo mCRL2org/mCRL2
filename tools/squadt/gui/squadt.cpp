@@ -157,7 +157,7 @@ bool Squadt::OnInit() {
         boost::shared_ptr < tipi::utility::logger > logger(new tipi::utility::file_print_logger(
                 global_build_system.get_settings_manager()->path_to_user_settings().append("/log")));
 
-        logger->set_filter_level(tipi::controller::communicator::get_standard_logger()->get_filter_level());
+        logger->set_filter_level((std::max)(tipi::controller::communicator::get_standard_logger()->get_filter_level(), static_cast < tipi::utility::logger::log_level > (2)));
 
         tipi::controller::communicator::set_standard_logger(logger);
       }

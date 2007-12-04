@@ -34,11 +34,11 @@ namespace squadt {
     wxImageList* load_main_icons() {
       wxImageList* list = new wxImageList(24, 24, true, 7);
 
-      list->Add(wxIcon(file_original_xpm));
-      list->Add(wxIcon(file_derived_nonexistent_xpm));
-      list->Add(wxIcon(file_derived_out_of_date_xpm));
-      list->Add(wxIcon(file_derived_up_to_date_xpm));
-      list->Add(wxIcon(file_generation_in_progress_xpm));
+      list->Add(wxBitmap(file_original_xpm));
+      list->Add(wxBitmap(file_derived_nonexistent_xpm));
+      list->Add(wxBitmap(file_derived_out_of_date_xpm));
+      list->Add(wxBitmap(file_derived_up_to_date_xpm));
+      list->Add(wxBitmap(file_generation_in_progress_xpm));
 
       gui_icon = new wxIcon(logo_icon_xpm);
 
@@ -49,11 +49,11 @@ namespace squadt {
     wxImageList* load_format_icons() {
       wxImageList* list = new wxImageList(24, 24, true, 5);
 
-      list->Add(wxIcon(file_original_xpm));
-      list->Add(wxIcon(file_derived_nonexistent_xpm));
-      list->Add(wxIcon(file_derived_out_of_date_xpm));
-      list->Add(wxIcon(file_derived_up_to_date_xpm));
-      list->Add(wxIcon(file_generation_in_progress_xpm));
+      list->Add(wxBitmap(file_original_xpm));
+      list->Add(wxBitmap(file_derived_nonexistent_xpm));
+      list->Add(wxBitmap(file_derived_out_of_date_xpm));
+      list->Add(wxBitmap(file_derived_up_to_date_xpm));
+      list->Add(wxBitmap(file_generation_in_progress_xpm));
 
       return(list);
     }
@@ -62,7 +62,7 @@ namespace squadt {
     wxImageList* load_small_format_icons() {
       wxImageList* list = new wxImageList(16, 16, true, 1);
 
-      list->Add(wxIcon(stock_new_small_xpm));
+      list->Add(wxBitmap(stock_new_small_xpm));
 
       return(list);
     }
