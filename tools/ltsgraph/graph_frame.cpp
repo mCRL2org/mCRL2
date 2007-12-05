@@ -814,10 +814,19 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
        ExportToLatex * ltx = new ExportToLatex(export_file_name.c_str(), vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
  
       if (ltx->Generate()) {
-       }
-       else {
-   	 wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
-       }
+        wxMessageDialog msg_dlg(
+          this,
+          wxT("The layout was exported to file:\n\n") + export_file_name,
+          wxT("Layout exported"),
+          wxOK | wxICON_INFORMATION,
+          wxDefaultPosition);
+        msg_dlg.ShowModal();
+      }
+      //XXX else part disabled because the default wxWidgets logger already
+      //    displays a message
+      //else { 
+      //wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
+      //}
 
     delete ltx;
 
@@ -884,10 +893,19 @@ void GraphFrame::export_svg(wxString export_file_name) {
     int message_x = wxDefaultPosition.x;
     int message_y = wxDefaultPosition.y;
   if (svg->generate()) {
+    wxMessageDialog msg_dlg(
+      this,
+      wxT("The layout was exported to file:\n\n") + export_file_name,
+      wxT("Layout exported"),
+      wxOK | wxICON_INFORMATION,
+      wxPoint(message_x, message_y));
+    msg_dlg.ShowModal();
   }
-  else {
-    wxMessageBox(wxT("Export unsuccessful"), wxT("Error"), wxOK | wxICON_ERROR, this, message_x, message_y);
-  }
+  //XXX else part disabled because the default wxWidgets logger already
+  //    displays a message
+  //else { 
+  //wxMessageBox(wxT("Export unsuccessful"), wxT("Error"), wxOK | wxICON_ERROR, this, message_x, message_y);
+  //}
   delete svg;
   
 }
@@ -917,12 +935,20 @@ void GraphFrame::CreateBackup(wxCommandEvent& event) {
     wxString backup_filename = bckup_dialog.GetPath();
     // Get last part of the filename (backup expects a local file path
     if (bckp.Backup(backup_filename)) {
+      wxMessageDialog msg_dlg(
+        this,
+        wxT("The layout was saved to file:\n\n") + backup_filename,
+        wxT("Layout exported"),
+        wxOK | wxICON_INFORMATION,
+        wxDefaultPosition);
+      msg_dlg.ShowModal();
     }
-    else {
-      wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
-    }
+    //XXX else part disabled because the default wxWidgets logger already
+    //    displays a message
+    //else {
+    //  wxMessageBox(wxT("Save unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR, this, wxDefaultPosition.x, wxDefaultPosition.y);
+    //}
   }
-				
 }
 
 void GraphFrame::RestoreBackup() {
