@@ -44,10 +44,13 @@ namespace squadt {
        * @param p the processor of which to display data
        **/
       processor_details::processor_details(wxWindow* o, wxString s, boost::shared_ptr < squadt::processor > p) :
-                                                dialog::processor(o, wxT("View and change details")),
+                                                dialog::processor(o, wxT("Generation details")),
                                                 project_store(s), input_objects(0), output_objects(0),
                                                 target_processor(p), tools_selectable(true) {
         build();
+
+        GetSizer()->Show(button_cancel, false, true);
+        GetSizer()->Layout();
 
         Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(processor_details::on_tool_selector_item_selected), 0, this);
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGING, wxTreeEventHandler(processor_details::on_tool_selector_item_select), 0, this);

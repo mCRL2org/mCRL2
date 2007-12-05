@@ -406,7 +406,7 @@ namespace squadt {
           break;
         }
         catch (std::exception& e) {
-          wxMessageDialog(0, wxT("Failed to add `") + name.string() +
+          wxMessageDialog(0, wxT("Failed to add `") + wxString(name.string().c_str(), wxConvLocal) +
                 wxT("' to project, please try again.\n\n Details: ") +
                 wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
         }
