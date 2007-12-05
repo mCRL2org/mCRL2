@@ -90,7 +90,7 @@ namespace squadt {
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)
-                            % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_standard_logger()->get_filter_level()))));
+                            % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_standard_logger()->get_default_filter_level()))));
 
     instances[id] = p;
 

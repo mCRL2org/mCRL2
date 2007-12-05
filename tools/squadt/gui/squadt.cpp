@@ -50,9 +50,9 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
  
     c = parser.Parse(false) == 0;
  
-    tipi::controller::communicator::get_standard_logger()->set_filter_level(1);
-
     if (c) {
+      tipi::utility::logger::log_level default_log_level = 1;
+
       if (parser.Found(wxT("c"))) {
         if (0 < parser.GetParamCount()) {
           action = boost::bind(&squadt::GUI::main::project_new, _1, std::string(parser.GetParam(0).fn_str()), std::string());
@@ -67,10 +67,10 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         action = boost::bind(&squadt::GUI::main::project_open, _1, std::string(parser.GetParam(0).fn_str()));
       }
       if (parser.Found(wxT("d"))) {
-        tipi::controller::communicator::get_standard_logger()->set_filter_level(3);
+        default_log_level = 3;
       }
       if (parser.Found(wxT("v"))) {
-        tipi::controller::communicator::get_standard_logger()->set_filter_level(2);
+        default_log_level = 2;
       }
       if (parser.Found(wxT("h"))) {
         std::cout << "Usage: " << argv[0] << " [OPTION] [PATH]\n"
@@ -89,12 +89,15 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         return (false);
       }
       if (parser.Found(wxT("q"))) {
-        tipi::controller::communicator::get_standard_logger()->set_filter_level(0);
+        default_log_level = 0;
       }
       if (parser.Found(wxT("version"))) {
         print_version_information(NAME);
         return (false);
       }
+
+      tipi::controller::communicator::get_standard_logger()->set_default_filter_level(default_log_level);
+      tipi::controller::communicator::get_standard_logger()->set_filter_level(default_log_level);
     }
   }
 

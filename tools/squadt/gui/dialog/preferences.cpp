@@ -94,6 +94,9 @@ namespace squadt {
         /* The level above which diagnostic messages are filtered and removed */
         wxSlider*   filter_level;
 
+        /* The level above which diagnostic messages are filtered and removed (tool specific) */
+        wxSlider*   default_filter_level;
+
         /* Toggles more verbose output (tools) */
         wxCheckBox* toggle_verbose;
 
@@ -283,30 +286,42 @@ namespace squadt {
       Connect(wxEVT_COMMAND_LIST_ITEM_SELECTED, wxCommandEventHandler(edit_preferences::item_selected));
     }
 
-    void debug_preferences::filter_level_changed(wxCommandEvent&) {
-      tipi::controller::communicator::get_standard_logger()->
+    void debug_preferences::filter_level_changed(wxCommandEvent& e) {
+      if (static_cast < wxSlider* > (e.GetEventObject()) == filter_level) {
+        tipi::controller::communicator::get_standard_logger()->
                      set_filter_level(static_cast < tipi::utility::logger::log_level > (filter_level->GetValue()));
+      }
+      else {
+        tipi::controller::communicator::get_standard_logger()->
+                     set_default_filter_level(static_cast < tipi::utility::logger::log_level > (default_filter_level->GetValue()));
+      }
     }
 
     debug_preferences::debug_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
+      filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_standard_logger()->get_filter_level(),
+                                  0, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
+
       current_sizer->AddStretchSpacer();
-      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level for diagnostic messages and warnings")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
-
-      filter_level = new wxSlider(this, wxID_ANY, std::max(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
-                                  static_cast < tipi::utility::logger::log_level > (1)), 1, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
-
+      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Main log filter level for diagnostic messages and warnings.")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
       current_sizer->AddSpacer(8);
       current_sizer->Add(filter_level, 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+
+      default_filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_standard_logger()->get_default_filter_level(),
+                                  0, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
+
       current_sizer->AddSpacer(8);
-      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Notice that lower filter levels are more restrictive and"
-                                "that tools started after making this change also assume this verbosity setting")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Filter level communicated to tools.")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+      current_sizer->AddSpacer(8);
+      current_sizer->Add(default_filter_level, 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
+      current_sizer->AddSpacer(16);
+      current_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Note: lower filter levels are more restrictive")), 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
       current_sizer->AddStretchSpacer();
 
       SetSizer(current_sizer);
 
-      Connect(wxEVT_SCROLL_CHANGED, wxCommandEventHandler(debug_preferences::filter_level_changed));
+      Connect(wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(debug_preferences::filter_level_changed));
     }
 
     /**
