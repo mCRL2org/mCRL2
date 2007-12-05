@@ -160,7 +160,9 @@ bool Squadt::OnInit() {
         boost::shared_ptr < tipi::utility::logger > logger(new tipi::utility::file_print_logger(
                 global_build_system.get_settings_manager()->path_to_user_settings().append("/log")));
 
-        logger->set_filter_level((std::max)(tipi::controller::communicator::get_standard_logger()->get_filter_level(), static_cast < tipi::utility::logger::log_level > (2)));
+        logger->set_filter_level(
+                (std::max)(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
+                        static_cast < tipi::utility::logger::log_level > (2)));
 
         tipi::controller::communicator::set_standard_logger(logger);
       }
@@ -189,7 +191,7 @@ bool Squadt::OnInit() {
 
       if (too_many_tools_failed) {
         wxMessageDialog retry(0, wxT("Do you want to replace the current list of known tools with the default set and retry?"),
-                wxT("Initialisation of multiple tools failed!"), wxYES|wxNO|wxICON_WARNING);
+                wxT("Initialisation of multiple tools failed!"), wxYES_NO|wxICON_WARNING);
 
         if (retry.ShowModal() == wxID_YES) {
           // Reset list of known tools

@@ -10,6 +10,8 @@
 #include <boost/filesystem/operations.hpp>
 
 #include "gui/dialog/project_settings.hpp"
+#include "gui/project.hpp"
+#include "gui/resources.hpp"
 #include "settings_manager.hpp"
 #include "project_manager.hpp"
 
@@ -342,8 +344,8 @@ namespace squadt {
        * @param p the parent window
        * @param s path of the project store
        **/
-      add_to_project::add_to_project(wxWindow* p, wxString s) : dialog::project(p, wxT("Select the file to add...")),
-                                                                project_store(s) {
+      add_to_project::add_to_project(wxWindow* p) : dialog::project(p, wxT("Select the file to add...")) {
+
         build();
 
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::add_to_project::on_selection_changed));
@@ -354,29 +356,35 @@ namespace squadt {
       void add_to_project::build() {
         wxBoxSizer*       s = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       t = new wxBoxSizer(wxHORIZONTAL);
-        wxTreeEvent       e;
 
         name = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
 
-        t->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Add as :")));
+        t->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Add as :")), 0, wxALIGN_CENTRE_VERTICAL);
         t->AddSpacer(5);
         t->Add(name, 1, wxEXPAND);
 
         file_selector = new wxGenericDirCtrl(main_panel, wxID_ANY, default_directory,
                         wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER);
 
-        s->AddSpacer(10);
-        s->Add(file_selector, 1, wxEXPAND|wxLEFT|wxRIGHT, 20);
-        s->AddSpacer(10);
+        cannot_add = new wxBoxSizer(wxHORIZONTAL);
+        cannot_add->Add(new wxStaticBitmap(main_panel, wxID_ANY, *alert_icon));
+        cannot_add->Add(new wxStaticText(main_panel, wxID_ANY, wxT(" Sorry, cannot add this name is already taken!")));
+
+        s->AddSpacer(8);
+        s->Add(file_selector, 2, wxEXPAND|wxLEFT|wxRIGHT, 20);
+        s->AddSpacer(8);
         s->Add(t, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
-        s->AddSpacer(10);
+        s->AddSpacer(8);
+        s->Add(cannot_add, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
+        s->AddSpacer(8);
+
+        s->Show(cannot_add, false);
+        button_accept->Enable(false);
+        name->Enable(false);
 
         main_panel->SetSizer(s);
 
         Layout();
-
-        /* Trigger event to set the buttons right */
-        on_selection_changed(e);
       }
 
       /**
@@ -387,51 +395,65 @@ namespace squadt {
           case wxID_CANCEL:
             EndModal(0);
             break;
-          default: /* wxID_OK */
-            using namespace boost::filesystem;
+          default: { /* wxID_OK */
+              wxSizer* sizer = main_panel->GetSizer();
+             
+              using namespace boost::filesystem;
 
-            path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
+              try {
+                if (!static_cast < squadt::GUI::project* > (GetParent())->exists(std::string(name->GetValue().fn_str()))) {
+                  EndModal(1);
 
-            if (exists(target)) {
-              wxMessageDialog(0, wxT("A file with this name already exists in the project directory!"), wxT("Error"), wxOK).ShowModal();
+                  return;
+                }
+              }
+              catch(...) {
+              }
 
               button_accept->Enable(false);
-            }
-            else {
-              EndModal(1);
+              sizer->Show(cannot_add, true);
+
+              sizer->Layout();
             }
             break;
         }
       }
 
       void add_to_project::on_name_updated(wxCommandEvent&) {
-        button_accept->Enable(false);
+        wxSizer* sizer = main_panel->GetSizer();
 
         if (!name->GetValue().IsEmpty()) {
           using namespace boost::filesystem;
 
-          path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
+          bool status = true;
 
-          if (exists(target)) {
-            wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
+          try {
+            if (!static_cast < squadt::GUI::project* > (GetParent())->exists(std::string(name->GetValue().fn_str()))) {
+              status = false;
+            }
           }
-          else {
-            button_accept->Enable(true);
+          catch (...) {
           }
+
+          button_accept->Enable(!status);
+          sizer->Show(cannot_add, status);
         }
+        else {
+          sizer->Show(cannot_add, false);
+          button_accept->Enable(false);
+        }
+
+        sizer->Layout();
       }
 
       void add_to_project::on_selection_changed(wxTreeEvent&) {
         if (wxFileName::FileExists(file_selector->GetPath())) {
-          /* To circumvent a bug in wxWidgets: sometimes the text updated event is not triggered */
-          name->SetValue(wxT("n"));
-
           name->SetValue(wxFileName(file_selector->GetPath()).GetFullName());
+          name->Enable(true);
         }
         else {
           name->SetValue(wxEmptyString);
-
-          button_accept->Enable(false);
+          name->Enable(false);
         }
       }
 
@@ -447,11 +469,7 @@ namespace squadt {
 
       /** \brief Gets the selected file that is to be added the the project */
       std::string add_to_project::get_destination() const {
-        using namespace boost::filesystem;
-
-        path target(path(project_store.fn_str()) / path(name->GetValue().fn_str()));
-
-        return (target.native_file_string());
+        return boost::filesystem::path(name->GetValue().fn_str()).string();
       }
 
       add_to_project::~add_to_project() {

@@ -354,7 +354,7 @@ namespace squadt {
     }
 
     void project::add_existing_file() {
-      dialog::add_to_project dialog(this, wxString(manager->get_project_store().c_str(), wxConvLocal));
+      dialog::add_to_project dialog(this);
 
       if (dialog.ShowModal()) {
         /* File does not exist in project directory */
@@ -406,7 +406,9 @@ namespace squadt {
           break;
         }
         catch (std::exception& e) {
-          wxMessageDialog(0, wxT("Something went wrong: \n  ") + wxString(e.what(), wxConvLocal) + wxT("\nPlease try again."), wxT("Error")).ShowModal();
+          wxMessageDialog(0, wxT("Failed to add `") + name.string() +
+                wxT("' to project, please try again.\n\n Details: ") +
+                wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
         }
       }
     }
@@ -521,7 +523,8 @@ namespace squadt {
           break;
         case cmID_REMOVE:
           if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
-                           wxT("Warning: irreversable operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
+                           wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
+
             manager->remove(p);
 
             object_view->Delete(selection);
@@ -716,9 +719,7 @@ namespace squadt {
     }
 
     void project::report_conflict(wxString const& s) {
-      wxMessageDialog dialog(this, s, wxT("Warning: file overwritten"), wxOK);
-      
-      dialog.ShowModal();
+      wxMessageDialog(this, s, wxT("Warning: file overwritten"), wxOK).ShowModal();
     }
 
     /**
@@ -730,6 +731,13 @@ namespace squadt {
 
       object_view->SetItemData(item, new tool_data(*this, t));
       object_view->Expand(s);
+    }
+
+    /**
+     * \param[in] t path to a file relative to the project store
+     **/
+    bool project::exists(boost::filesystem::path const& t) const {
+      return manager->exists(t);
     }
 
     wxString project::get_name() const {

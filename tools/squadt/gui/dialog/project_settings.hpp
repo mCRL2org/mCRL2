@@ -159,8 +159,8 @@ namespace squadt {
           /** \brief Text field that contains the name of the new project */
           wxTextCtrl*       name;
 
-          /** \brief Path to the project store */
-          wxString          project_store;
+          /** \brief Warning that a file with the same name is part of the project */
+          wxSizer*          cannot_add;
 
         private:
 
@@ -179,7 +179,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          add_to_project(wxWindow*, wxString);
+          add_to_project(wxWindow*);
 
           /** \brief Gets the name of the project */
           std::string get_name() const;

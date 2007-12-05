@@ -488,6 +488,9 @@ namespace squadt {
         throw std::runtime_error("Conflict, non-file with name `" + s.string() + "' in directory " + store.string() + ".");
       }
     }
+    if (s == store / settings_manager::project_definition_base_name) {
+      throw std::runtime_error("Sorry, name `" + s.string() + "' is not allowed.");
+    }
 
     for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
       boost::iterator_range< processor::output_object_iterator > output_range((*i)->get_output_iterators());
@@ -609,6 +612,7 @@ namespace squadt {
 
     update_status(p);
   }
+  /// \endcond
 
   project_manager::project_manager() : impl(new project_manager_impl) {
   }
@@ -769,6 +773,11 @@ namespace squadt {
     impl->clean_store(p, b);
   }
 
-  /// \endcond
+  /**
+   * \param[in] s path (relative to the project store) to a file
+   */
+  bool project_manager::exists(const boost::filesystem::path& s) {
+    return impl->file_exists(s);
+  }
 }
 

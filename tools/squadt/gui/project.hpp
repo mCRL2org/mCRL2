@@ -37,7 +37,7 @@ namespace squadt {
     /**
      * \brief Represents the main view of a project
      **/
-    class project : wxSplitterWindow {
+    class project : public wxSplitterWindow {
       friend class squadt::GUI::main;
       friend class squadt::GUI::tool_display;
 
@@ -158,6 +158,9 @@ namespace squadt {
 
         /** \brief Store project specification */
         void store();
+
+        /** \brief Checks whether the project contains a file */
+        bool exists(boost::filesystem::path const&) const;
 
         /** \brief Returns the name of the project */
         wxString get_name() const;

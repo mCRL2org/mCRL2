@@ -142,6 +142,10 @@ namespace squadt {
 
       /** \brief Make objects in the project up to date */
       void update(boost::function< void (processor*) >);
+
+      /** \brief Checks whether a file is in the project store, or registered as output by one of the processors */
+      bool exists(const boost::filesystem::path& s);
+
   };
 }
 #endif

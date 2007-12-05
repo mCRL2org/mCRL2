@@ -18,7 +18,8 @@ namespace squadt {
     wxImageList* format_small_icon_list;
 
     /* Icon for use by Squadt */
-    wxIcon* gui_icon;
+    wxIcon*     gui_icon;
+    wxBitmap*   alert_icon;
 
     /* Images */
     #include "pixmaps/file_original.xpm"
@@ -29,6 +30,7 @@ namespace squadt {
     #include "pixmaps/stock_new_small.xpm"
 
     #include "pixmaps/logo_icon.xpm"
+    #include "pixmaps/alert.xpm"
 
     /* General of GUI Icons */
     wxImageList* load_main_icons() {
@@ -41,6 +43,7 @@ namespace squadt {
       list->Add(wxBitmap(file_generation_in_progress_xpm));
 
       gui_icon = new wxIcon(logo_icon_xpm);
+      alert_icon = new wxBitmap(alert_xpm);
 
       return(list);
     }

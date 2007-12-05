@@ -19,7 +19,8 @@ namespace squadt {
     extern wxImageList* format_icon_list;
     extern wxImageList* format_small_icon_list;
 
-    extern wxIcon* gui_icon;
+    extern wxIcon*   gui_icon;
+    extern wxBitmap* alert_icon;
 
     /* Function to load the icons */
     wxImageList* load_main_icons();
