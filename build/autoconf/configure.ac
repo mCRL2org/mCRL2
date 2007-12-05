@@ -174,9 +174,6 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--disable-optimisation],
                  [disables compile-time optimisation])
 )
-if test "x$enable_optimisation" = xyes; then
- BUILD_OPTIONS="optimization=speed $BUILD_OPTIONS"
-fi
 
 # Check for debug/profile options
 AC_ARG_ENABLE(
@@ -190,11 +187,17 @@ if test "x$enable_debug" = xyes; then
   BFLAGS="-t $BFLAGS"
   BUILD_VARIANT=""
   BUILD_OPTIONS="debug-symbols=on runtime-debugging=on $BUILD_OPTIONS"
+  if test "x$enable_optimisation" = xyes; then
+   BUILD_OPTIONS="optimization=speed $BUILD_OPTIONS"
+  fi
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
   BUILD_VARIANT="release"
+  if test "x$enable_optimisation" = xno; then
+   BUILD_OPTIONS="optimization=off $BUILD_OPTIONS"
+  fi
 fi
 AC_SUBST([BFLAGS],[])
 
