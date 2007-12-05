@@ -8,7 +8,9 @@
 /// \brief Add your file description here.
 
 #include "savepicdialog.h"
+#include <algorithm>
 #include <wx/statline.h>
+using namespace std;
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -28,13 +30,9 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 : wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
   statusbar = sb;
   glcanvas = glc;
-  int w,h,w_max,h_max;
-  glcanvas->GetClientSize(&w,&h);
-  glcanvas->getMaxViewportDims(&w_max,&h_max);
-  ar = float(w)/float(h);
-  r_slider = new wxSlider(this,myID_R_SLIDER,w,1,(w_max<=h_max)?w_max:
-    int(ar*h_max));
-  r_text = new wxStaticText(this,-1,wxString::Format(wxT("%dx%d"),w,h));
+  r_slider = new wxSlider(this,myID_R_SLIDER,0,0,0);
+  r_text = new wxStaticText(this,-1,wxT("0x0"));
+  updateSlider();
 
   wxArrayString fts;
 
@@ -129,6 +127,22 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 }
 
 SavePicDialog::~SavePicDialog() {
+}
+
+void SavePicDialog::updateSlider() {
+  int w,h,w_max,h_max,w_curr;
+  glcanvas->GetClientSize(&w,&h);
+  glcanvas->getMaxViewportDims(&w_max,&h_max);
+  ar = float(w)/float(h);
+  w_max = min(w_max,int(ar*h_max));
+  w_curr = r_slider->GetValue();
+  if (w_curr == 0) {
+    w_curr = w;
+  }
+  w_curr = min(w_curr,w_max);
+  r_slider->SetRange(1,w_max);
+  r_slider->SetValue(w_curr);
+  r_text->SetLabel(wxString::Format(wxT("%dx%d"),w_curr,int(w_curr/ar)));
 }
 
 void SavePicDialog::onSlider(wxScrollEvent& /*event*/) {

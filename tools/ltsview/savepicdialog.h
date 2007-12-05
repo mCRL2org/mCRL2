@@ -34,6 +34,7 @@ class SavePicDialog : public wxDialog {
     void onChangeFile(wxCommandEvent& event);
     void onChoice(wxCommandEvent& event);
     void OnOK(wxCommandEvent& event);
+    void updateSlider();
   private:
     float ar;
     GLCanvas*     glcanvas;

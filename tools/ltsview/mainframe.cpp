@@ -532,6 +532,8 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
   if (savePicDialog == NULL) {
     savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
+  } else {
+    savePicDialog->updateSlider();
   }
   savePicDialog->ShowModal();
 }
