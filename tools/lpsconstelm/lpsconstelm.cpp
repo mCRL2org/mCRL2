@@ -59,7 +59,7 @@ class lpsConstElm {
     bool                                  p_reachable;
     std::string                           p_filenamein;
     lps::specification                    p_spec;
-    std::set< sort_expression >                 p_singletonSort;
+    std::set< sort_expression >           p_singletonSort;
     Rewriter*                             rewr;
 
     //Only used by getDataVarIDs
@@ -249,7 +249,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     return (true);
   }
   else {
-    send_error("Could not read `" + c.get_input(lps_file_for_input).get_location() + "', corruption or incorrect format?\n");
+    send_error("Could not read `" + c.get_input(lps_file_for_input).get_location() + "', corrupt or incorrect format\n");
   }
 
   return (false);
@@ -550,17 +550,21 @@ inline void lpsConstElm::printVar() {
 
 inline void lpsConstElm::printState() {
   std::ostringstream result;
-  if ( p_S.size() > 0 )
+  if ( !p_S.empty() )
   {
-    result << "lpsconstelm:   [ ";
-    for(std::set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
+    result << "lpsconstelm: [ ";
+    for(std::set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
+      if (i != p_S.begin())
+      {
+        result << ", ";
+      }     
       if (!p_nosingleton){
-        result << pp(p_currentState[*i]);
+        result << pp(p_currentState[*i]) ;
       } else {
-        result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort());
+        result << pp(p_currentState[*i]) << pp(p_currentState[*i].lhs().sort()) ;
       }
     }
-    result << pp(p_currentState[*(--p_S.end())]) << " ]";
+    result << " ]";
   }
   gsVerboseMsg("%s\n", result.str().c_str());
 }
@@ -694,7 +698,26 @@ inline void lpsConstElm::output() {
   }
 
 
+
+  //Move the 'constant' free variables to the set of usedFreeVars
+  lps::data_variable_list lps_init_free_vars = p_spec.initial_process().free_variables();
+  std::set <lps::data_variable> init_free_vars;
+  for(lps::data_variable_list::iterator i = lps_init_free_vars.begin(); i != lps_init_free_vars.end(); ++i)
+  {
+    init_free_vars.insert(*i);
+  }
+
   std::set< lps::data_variable > usedFreeVars = p_process.find_free_variables();
+  for(std::vector< lps::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); i++)
+  {
+    if( init_free_vars.find(i->rhs()) != init_free_vars.end() )
+    {   
+      usedFreeVars.insert(i->rhs());
+    }
+  }
+
+  //exit(0);
+  
   //construct new specfication
   //
   //linear_process(data_variable_list free_variables, data_variable_list process_parameters,
