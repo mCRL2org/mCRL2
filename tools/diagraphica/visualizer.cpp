@@ -8,6 +8,7 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
+#include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"
 
@@ -71,10 +72,10 @@ void Visualizer::setClearColor(
 // -- helper functions ----------------------------------------------
 void Visualizer::printMouseVariables()
 {
-    char* mb = "DOWN";
-    char* ms = "LEFT";
-    char* mc = "SINGLE";
-    char* md = "DRAG";
+    char const* mb = "DOWN";
+    char const* ms = "LEFT";
+    char const* mc = "SINGLE";
+    char const* md = "DRAG";
   
     if(mouseButton == MSE_BUTTON_UP)
     	mb = "UP";
@@ -87,10 +88,10 @@ void Visualizer::printMouseVariables()
     if(mouseDrag == MSE_DRAG_FALSE)
     	md = "NOT_DRAG";
     	 
-	cout << "Mouse Button: " << mb << endl;
-	cout << "Mouse Side: " << ms << endl;
-	cout << "Mouse Click: " << mc << endl;
-	cout << "Mouse Drag: " << md << endl << endl;
+    std::clog << "Mouse Button: " << mb << endl;
+    std::clog << "Mouse Side: " << ms << endl;
+    std::clog << "Mouse Click: " << mc << endl;
+    std::clog << "Mouse Drag: " << md << endl << endl;
 }
 
 
