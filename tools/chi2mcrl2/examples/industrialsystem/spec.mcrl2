@@ -20,15 +20,15 @@ var xs :s0;
 eqn drop_s0(xs, 0)= xs;
     n>0 -> drop_s0( x |> xs , n ) = drop_s0(xs , Int2Nat(n - 1 ));
 
-act Terminator; 
+act Terminator, skip; 
  
 proc 
   Spec(s: Nat, x: Nat, xs: s0, es: Nat, es_hash: Nat, se: Nat, se_hash: Nat, state_0: Nat)= 
-	  ( state_0 == 0) -> tau.Spec(s, x, [], es, es_hash, se, se_hash, 1) <> delta
+	  ( state_0 == 0) -> skip.Spec(s, x, [], es, es_hash, se, se_hash, 1) <> delta
 	+ ( state_0 == 1) -> sum es0:Nat. Recv_Nat(es, es_hash, es0).Spec(s, es0, xs, es, es_hash, se, se_hash, 2) <> delta
-	+ ( state_0 == 2) -> tau.Spec(s, x, xs ++ [x], es, es_hash, se, se_hash, 1) <> delta
+	+ ( state_0 == 2) -> skip.Spec(s, x, xs ++ [x], es, es_hash, se, se_hash, 1) <> delta
 	+ ( #xs>=s && state_0 == 1) -> Send_s0(se, se_hash, take_s0(xs , s)).Spec(s, x, xs, es, es_hash, se, se_hash, 1) <> delta
-	+ ( state_0 == 4) -> tau.Spec(s, x, drop_s0(xs , s), es, es_hash, se, se_hash, 1) <> delta
+	+ ( state_0 == 4) -> skip.Spec(s, x, drop_s0(xs , s), es, es_hash, se, se_hash, 1) <> delta
 	;
 
 proc 
@@ -43,9 +43,11 @@ proc
 
 init 
  block({Send_Nat, Recv_Nat,Send_s0, Recv_s0},
-  allow({ Terminator,Send_Nat, Recv_Nat, Comm_Nat,Send_s0, Recv_s0, Comm_s0},
-   comm({Send_Nat| Recv_Nat->Comm_Nat,Send_s0| Recv_s0->Comm_s0},
-    Spec(10, 0, [], es, 0, se, 0, 0) || Din(es, 0, 0) || Dout([], se, 0, 0)
+  hide({skip},
+   allow({ Terminator, skip,Send_Nat, Recv_Nat, Comm_Nat,Send_s0, Recv_s0, Comm_s0},
+    comm({Send_Nat| Recv_Nat->Comm_Nat,Send_s0| Recv_s0->Comm_s0},
+     Spec(10, 0, [], es, 0, se, 0, 0) || Din(es, 0, 0) || Dout([], se, 0, 0)
+    )
    )
   )
  );

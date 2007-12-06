@@ -31,11 +31,6 @@
 using namespace ::mcrl2::utilities;
 using namespace std;
 
-//t_options represents the options of the translator 
-struct t_options {
-  string infilename;
-  string outfilename;
-};
 
 //Functions used by the main program
 static ATermAppl translate_file(t_options &options);
@@ -189,9 +184,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 static bool parse_command_line(int argc, char *argv[],t_options &options)
 { 
   //declarations for getopt
-  /* empty */
+  bool opt_no_statepar = false;
 
-  #define ShortOptions   "hqvd"
+  #define ShortOptions   "hqvdn"
   #define VersionOption   0x1
   struct option LongOptions[] = 
   {
@@ -200,6 +195,7 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
     { "quiet",       no_argument,       NULL, 'q' },
     { "verbose",     no_argument,       NULL, 'v' },
     { "debug",       no_argument,       NULL, 'd' },
+    { "no-state",    no_argument,       NULL, 'n' },
     // getop termination string 
 	{ 0, 0, 0, 0 }
   };
@@ -223,6 +219,9 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
       case 'd': /* debug */
         gsSetDebugMsg();
         break;
+      case 'n': /* No data parameters are generated */
+        opt_no_statepar = true;
+        break; 
       case '?':
       default:
         PrintMoreInfo(argv[0]); 
@@ -252,6 +251,8 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
       options.outfilename = argv[optind + 1];
     }
   }
+
+  options.no_statepar = opt_no_statepar;
 
   return true;  // main continues
 }
@@ -303,11 +304,12 @@ void PrintHelp(char *Name)
 	"OUTFILE. if OUTFILE is not present, stdout is used. If INFILE is not present\n"
     "stdin is used.\n"
     "\n"
-    "  -h, --help            display this help and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
+    "  -h, --help            Display this help and terminate.\n"
+    "      --version         Display version information and terminate.\n"
+    "  -q, --quiet           Do not display warning messages.\n"
+    "  -v, --verbose         Display concise intermediate messages.\n"
+    "  -d, --debug           Display detailed intermediate messages.\n"
+    "  -n, --nostatepar      No state parameters are generated when translating chi processes.\n",
     Name);
 }
 
@@ -332,7 +334,9 @@ int main(int argc, char *argv[])
       if (result == NULL) {
         return 1;
       }
-	 
+	  gsDebugMsg("Set options");
+      asttransform.set_options(options);
+ 
  	  gsDebugMsg("Transforming AST to mcrl2 specification\n");
 	  if (asttransform.translator(result))
         {

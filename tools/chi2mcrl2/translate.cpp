@@ -26,16 +26,28 @@ bool CAsttransform::StrcmpIsFun( const char* str, ATermAppl aterm)
 	ATmakeAFun( str, ATgetArity( ATgetAFun( aterm ) ), ATisQuoted( ATgetAFun( aterm ) ) );
 }
 
+bool CAsttransform::set_options(t_options options)
+{
+  no_statepar = options.no_statepar;
+  return true;
+}
+
 bool CAsttransform::translator(ATermAppl ast)
 {
   gsDebugMsg("input of translator: %T\n", ast);
   std::string result;
 
   /**
-    * Write the special Terminator actions for the mcrl2 specification
+    * 
     *
     **/
-  result = "\nact Terminator, skip; \n ";
+  gsVerboseMsg("Options: State parameter elimination: %s\n", no_statepar?"yes":"no");
+
+  /**
+    * Write the special Terminate actions for the mcrl2 specification
+    *
+    **/
+  result = "\nact Terminate, skip; \n ";
 
   if( StrcmpIsFun( "ChiSpec", ast ) )
   {
@@ -145,7 +157,7 @@ bool CAsttransform::translator(ATermAppl ast)
   result.insert(0, prefix);
  
   result.append("init ");
-  result.append("\n block({");
+/*  result.append("\n block({");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
         ++itSet
@@ -158,18 +170,15 @@ bool CAsttransform::translator(ATermAppl ast)
     result.append("Send_"+*itSet+", Recv_"+*itSet);
   }
   result.append("},");
+*/
   result.append("\n  hide({skip},");
-  result.append("\n   allow({ Terminator, skip");
+  result.append("\n   allow({ Terminate, skip");
   for( std::set<std::string>::iterator itSet = new_channels.begin(); 
         itSet != new_channels.end();
         ++itSet
   )
   {
-    /*if(itSet != new_channels.begin())
-    {*/
-      result.append(",");
-    //}
-    result.append("Send_"+*itSet+", Recv_"+*itSet+", Comm_"+*itSet);
+    result.append(", Comm_"+*itSet);
   }
   result.append("},");
 
@@ -187,7 +196,7 @@ bool CAsttransform::translator(ATermAppl ast)
   }
   result.append("},\n     ");
 
-  result.append(initialisation+"\n    )\n   )\n  )\n );\n");
+  result.append(initialisation+"\n    )\n   )\n );\n");
 
   mcrl2_result = result;
   return true; 
@@ -235,6 +244,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   vector<RAT>::iterator itRAT;
   vector<int>::iterator itint;
   string result;
+  set<int> collection_of_used_counters;
 
   //Clear global variables that are exclusivly thoughout this process
   begin_state.clear(); //first:  parenthesis level
@@ -511,70 +521,89 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * Write the mcrl2 process specification
     *
     **/
-  result.append("\nproc \n  "+processName+"(");
-  /**
-    * Declare the used variables
-    *
-    **/
-
-  for(std::vector<RPV>::iterator itRVT = ProcessVariableMap.begin(); itRVT != ProcessVariableMap.end(); itRVT++)
-    {
-      if (itRVT != ProcessVariableMap.begin())
-        {
-          result.append(", ");
-        }
-      result.append(itRVT->Name);
-      result.append(": ");
-      result.append(itRVT->Type);
-    }
-
-  for(std::vector<RPC>::iterator itRPC = ProcessChannelMap.begin(); itRPC != ProcessChannelMap.end(); itRPC++)
+  if( !no_statepar )
   {
-      if ( !(itRPC == ProcessChannelMap.begin() && ProcessVariableMap.empty()) )
-        {
-          result.append(", ");
-        }
-      result.append(itRPC->Name);
-      result.append(": Nat");
-      /*if ((atoi(itRPC->HashCount.c_str()) > 0) &&
-          (InstantiatedHashedChannels.find(itRPC->Name) == InstantiatedHashedChannels.end()))
-      { */
-        result.append(", ");
+    result.append("\nproc \n  "+processName+"(");
+
+    /**
+      * Declare the used variables
+      *
+      **/
+
+    for(std::vector<RPV>::iterator itRVT = ProcessVariableMap.begin(); itRVT != ProcessVariableMap.end(); itRVT++)
+      {
+        if (itRVT != ProcessVariableMap.begin())
+          {
+            result.append(", ");
+          }
+        result.append(itRVT->Name);
+        result.append(": ");
+        result.append(itRVT->Type);
+      }
+
+    for(std::vector<RPC>::iterator itRPC = ProcessChannelMap.begin(); itRPC != ProcessChannelMap.end(); itRPC++)
+      {
+        if ( !(itRPC == ProcessChannelMap.begin() && ProcessVariableMap.empty()) )
+          {
+            result.append(", ");
+          }
         result.append(itRPC->Name);
-        result.append("_hash");
         result.append(": Nat");
+        /*if ((atoi(itRPC->HashCount.c_str()) > 0) &&
+            (InstantiatedHashedChannels.find(itRPC->Name) == InstantiatedHashedChannels.end()))
+        { */
+          result.append(", ");
+          result.append(itRPC->Name);
+          result.append("_hash");
+          result.append(": Nat");
      // }
-
-  }
-  /**
-    * Declare the number of used streams
-    *
-    **/
-  for(set<int>::iterator i = all_streams.begin(); 
-    i != all_streams.end(); 
-    ++i )
-  {
-    if (!(ProcessVariableMap.empty() && i == all_streams.begin() && ProcessChannelMap.empty()) )
-    {
-      result.append(", ");
     }
-    result.append("state_");
-    result.append(to_string(*i));
-    result.append(": Nat");
-  }
 
-  result.append(")= \n");
+    /**
+      * Declare the number of used streams
+      *
+      **/
+    for(set<int>::iterator i = all_streams.begin(); 
+      i != all_streams.end(); 
+      ++i )
+    {
+      if (!(ProcessVariableMap.empty() && i == all_streams.begin() && ProcessChannelMap.empty()) )
+      {
+        result.append(", ");
+      }
+      result.append("state_");
+      result.append(to_string(*i));
+      result.append(": Nat");
+    }
+
+    result.append(")= \n");
+  }
   
 
+
+  /**
+    * orden transistionSystem
+    *
+    **/
+  multimap<int,vector<RAT>::iterator> OrderTransistionSystem;
+  for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ ) 
+    { 
+       OrderTransistionSystem.insert( pair<int, vector<RAT>::iterator>(itRAT->state, itRAT) ); 
+    }
+ 
   /**
     * Write the transitionSystem into an LPS with summands
     *
     **/  
   int index = 0;
-  for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ ) 
+  for( multimap<int,vector<RAT>::iterator>::iterator itOrdRAT = OrderTransistionSystem.begin(); 
+       itOrdRAT != OrderTransistionSystem.end();
+       itOrdRAT++ ) 
     { 
+      itRAT = itOrdRAT->second;
+
       if (itRAT != transitionSystem.begin()){
-         result.append("\t+ ");
+         if (!no_statepar) {result.append("\t+ ");};
       } else {
          result.append("\t  ");
       };
@@ -584,11 +613,15 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
         *
         **/
       //Write guard of the summand;
-      result.append("( ");
-      if (!itRAT->guard.empty())
+      if( !no_statepar )
       {
-        result.append(itRAT->guard+" && ");
-      }
+        result.append("( ");
+        if (!itRAT->guard.empty())
+        {
+          result.append(itRAT->guard+" && ");
+        }
+      } 
+
       
       /**
         * Collect ending streams
@@ -624,11 +657,71 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       }      
       collect_streams.clear();
 
-      result.append("state_");
-      result.append(to_string(itRAT->stream));
-      result.append(" == ");
-      result.append(to_string(itRAT->state));
-      result.append(") -> ");
+      if( !no_statepar )
+      {
+
+        result.append("state_");
+        result.append(to_string(itRAT->stream));
+        result.append(" == ");
+        result.append(to_string(itRAT->state));
+        result.append(") -> ");
+
+      } else {
+        if (collection_of_used_counters.find(itRAT->state) == collection_of_used_counters.end()) 
+        {
+          result.append("\nproc "+processName+to_string(itRAT->state));
+          collection_of_used_counters.insert(itRAT->state);
+      /**
+        * Declare the used variables
+        *
+        **/
+          if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+          {
+            result.append("(");
+          }  
+
+      for(std::vector<RPV>::iterator itRVT = ProcessVariableMap.begin(); itRVT != ProcessVariableMap.end(); itRVT++)
+        {
+          if (itRVT != ProcessVariableMap.begin() )
+            {
+              result.append(", ");
+            } 
+          result.append(itRVT->Name);
+          result.append(": ");
+          result.append(itRVT->Type);
+        }
+    
+
+      for(std::vector<RPC>::iterator itRPC = ProcessChannelMap.begin(); itRPC != ProcessChannelMap.end(); itRPC++)
+        {
+          if (!(ProcessVariableMap.empty() && (ProcessChannelMap.begin() == itRPC) ) )
+          { 
+            result.append(", ");
+          }
+          result.append(itRPC->Name);
+          result.append(": Nat");
+          result.append(", ");
+          result.append(itRPC->Name);
+          result.append("_hash");
+          result.append(": Nat");
+        }
+          if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+          {
+            result.append(") ");
+          }  
+
+        result.append("= ");
+        /* Print Guard */
+
+        if (!itRAT->guard.empty())
+          {
+            result.append(itRAT->guard+" -> ");
+          }
+        } else
+        {
+          result.append("\n\t+ ");
+        }
+      }
       
       //Write the valuation of the state for a summand
       result.append(itRAT->action);
@@ -636,8 +729,17 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       result.append(".");
       //Write the process name for a summand
       result.append(processName);
+
+      if(no_statepar)
+      {
+        result.append(to_string(itRAT->nextstate));
+      }
+     
       //Write the process vector
-      result.append("(");
+      if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+      {
+        result.append("(");
+      }  
 
       //write the variable valuation
 	  for(std::vector<RPV>::iterator itMap = ProcessVariableMap.begin(); itMap != ProcessVariableMap.end(); itMap++)
@@ -692,36 +794,54 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                        DifIter
                       );
       
-       //write the state valuation  
-       for(set<int>::iterator i = all_streams.begin(); 
-         i != all_streams.end(); 
-         ++i )
-         {
-	     if (!(ProcessVariableMap.empty() && ProcessChannelMap.empty() && *i == 0) )
-         {
-           result.append(", ");
-         }
-            
-         if (itRAT->stream == *i || ResultDif.find(*i) != ResultDif.end() )
-         {
-           //Determine if the state is looped
-           if(itRAT->looped_state)
+      if(!no_statepar)
+      {
+        //write the state valuation  
+        for(set<int>::iterator i = all_streams.begin(); 
+          i != all_streams.end(); 
+          ++i )
+          {
+	       if (!(ProcessVariableMap.empty() && ProcessChannelMap.empty() && *i == 0) )
            {
-             if(itRAT->guardedloop)
+             result.append(", ");
+           }
+            
+           if (itRAT->stream == *i || ResultDif.find(*i) != ResultDif.end() )
+           {
+             //Determine if the state is looped
+             if(itRAT->looped_state)
              {
-               result.append(to_string(itRAT->state-1));
+               if(itRAT->guardedloop)
+               {
+                 result.append(to_string(itRAT->state-1));
+               } else {
+                 result.append(to_string(itRAT->state));
+               }
              } else {
-               result.append(to_string(itRAT->state));
+               result.append(to_string(itRAT->nextstate));
              }
            } else {
-             result.append(to_string(itRAT->nextstate));
+             result.append("state_");
+             result.append(to_string(*i));
            }
-         } else {
-           result.append("state_");
-           result.append(to_string(*i));
-         }
-       }  
-       result.append(") <> delta\n");
+         } 
+       } 
+       if(!no_statepar)
+       {
+         result.append(") <> delta\n");
+       } else {
+          if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+          {
+            result.append(")");
+          } 
+  
+          multimap<int,vector<RAT>::iterator>::iterator tmp_mlt = itOrdRAT;
+          ++tmp_mlt;
+          if(tmp_mlt->first != itOrdRAT->first)
+          {          
+            result.append(";");
+          }
+       } 
        ++index;
     }
 
@@ -741,6 +861,8 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
       } 
       if (!collect_streams.empty())
       {
+        if(!no_statepar)
+        {
         result.append("\t+ ( ");
         for(std::set<int>::iterator itSetInt = collect_streams.begin();
           itSetInt != collect_streams.end();
@@ -755,13 +877,57 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
           result.append(" == ");
           result.append(to_string(terminate_state.state));
         }
-      result.append(") -> Terminator.delta\n");
+        result.append(") -> Terminate.delta\n");
+        result.append("\t;\n");
+        } else {
+          if (collect_streams.size() > 1)
+          {
+              gsErrorMsg("Option -n cannot be used when having parallel processes!");
+              exit(0); 
+          } 
+          result.append("\nproc "+processName+to_string(terminate_state.state));
+          if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+          {
+            result.append("(");
+          }  
+  
+          /**
+            * Construct process parameters for Terminate action
+            *
+            **/
+
+          for(std::vector<RPV>::iterator itRVT = ProcessVariableMap.begin(); itRVT != ProcessVariableMap.end(); itRVT++)
+          {
+            if (itRVT != ProcessVariableMap.begin() )
+              {
+                result.append(", ");
+              } 
+            result.append(itRVT->Name);
+            result.append(": ");
+            result.append(itRVT->Type);
+          }
+    
+          for(std::vector<RPC>::iterator itRPC = ProcessChannelMap.begin(); itRPC != ProcessChannelMap.end(); itRPC++)
+          {
+            if (!(ProcessVariableMap.empty() && (ProcessChannelMap.begin() == itRPC) ) )
+            { 
+              result.append(", ");
+            }
+            result.append(itRPC->Name);
+            result.append(": Nat");
+            result.append(", ");
+            result.append(itRPC->Name);
+            result.append("_hash");
+            result.append(": Nat");
+          }
+
+          if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
+          {
+            result.append(")");
+          }  
+          result.append(" = Terminate.delta;\n");
+        }
       }      
-
-
-  result.append("\t;\n");
-
-
   return result; 
 }
 
@@ -1938,41 +2104,97 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
       //Write state vector
       initialisation.append(processName);
-      initialisation.append("(");
-      while (ATgetLength(to_process)>0)
+      if( no_statepar)
       {
+        initialisation.append("0");
+      }
+
+      if(! ( no_statepar && 
+           ( ATisEmpty(to_process) 
+           && ProcessForInstantation[processName].SpecificationVariables.empty() 
+           && local_channels.empty()
+           )
+         ) )
+      {
+        initialisation.append("(");
+      }
+      
+      bool is_single = false;
+      while (!(ATisEmpty(to_process)))
+      {
+        
         //Check if the paramter is either a Expression or a Channel
         if (  StrcmpIsFun( "BinaryExpression", (ATermAppl) ATgetFirst(to_process)) 
            || StrcmpIsFun( "Expression", (ATermAppl) ATgetFirst(to_process) )
            || StrcmpIsFun( "UnaryExpression", (ATermAppl) ATgetFirst(to_process) ) 
            ) 
         { 
-          initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process))+", ");
+          if(is_single)
+          {
+            initialisation.append(", ");
+          }
+          initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process)));
         }
+
         if (  StrcmpIsFun( "TypedChannels", (ATermAppl) ATgetFirst(to_process))) 
         {};
 
         to_process = ATgetNext(to_process);
+        is_single = true;
       }
+
       for(vector<RPV>::iterator itRPV = ProcessForInstantation[processName].SpecificationVariables.begin();
           itRPV != ProcessForInstantation[processName].SpecificationVariables.end();
           ++itRPV)
       {
-        initialisation.append(itRPV->InitValue+", ");
+        if(itRPV == ProcessForInstantation[processName].SpecificationVariables.begin())
+        {
+          if(is_single)
+          {
+            initialisation.append(", ");
+          }
+        } else {
+          initialisation.append(", ");
+        }
+        initialisation.append(itRPV->InitValue);
+        
       }
 
       for(vector< pair <string, int > >::iterator itRVT = local_channels.begin();
           itRVT != local_channels.end();
           ++itRVT)
       {
+                
+        if(!(!is_single && ProcessForInstantation[processName].SpecificationVariables.empty() && (itRVT == local_channels.begin())))
+        {
+          initialisation.append(", ");
+        }
+
         initialisation.append(itRVT->first+", ");
         /*if(itRVT->second != INT_MIN)
         { */
-          initialisation.append(to_string(itRVT->second)+", ");
+          initialisation.append(to_string(itRVT->second));
         //} 
      }
       //Initial State is alway 0
-      initialisation.append("0)");
+      if(!no_statepar)
+      {
+        if(! (!is_single && ProcessForInstantation[processName].SpecificationVariables.empty() && local_channels.empty()))
+        {
+          initialisation.append(", ");
+        }
+        initialisation.append("0");
+      }
+
+      if(! ( no_statepar && 
+           ( !is_single 
+           && ProcessForInstantation[processName].SpecificationVariables.empty() 
+           && local_channels.empty()
+           )
+         ) )
+      {
+        initialisation.append(")");
+      }
 
       return ;
     } 

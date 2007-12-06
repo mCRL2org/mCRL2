@@ -25,6 +25,12 @@
 #define RPC RecProcessChannels
 #define RC  RecChannel
 
+struct t_options {
+  std::string infilename;
+  std::string outfilename;
+  bool no_statepar;
+};
+
 typedef struct
   {
     std::string Name;
@@ -115,6 +121,7 @@ class CAsttransform
 {
   public:
   	bool translator(ATermAppl ast);
+    bool set_options(t_options options);
     std::string getResult();
   private:
 	std::string manipulateProcess(ATermAppl input);
@@ -217,6 +224,9 @@ class CAsttransform
     std::set<std::string> DeclaredTypesForChannels; 
 
     bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
+
+    //OPTIONS
+    bool no_statepar;
 
 } 
 ;
