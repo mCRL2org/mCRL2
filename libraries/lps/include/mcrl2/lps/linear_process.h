@@ -189,7 +189,7 @@ class linear_process: public aterm_appl
         {
           std::cerr << pp(*i) << " ";
         }
-        std::cerr << "occurring free variables: ";
+        std::cerr << "\noccurring free variables: ";
         for (std::set<data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
         {
           std::cerr << pp(*i) << " ";
