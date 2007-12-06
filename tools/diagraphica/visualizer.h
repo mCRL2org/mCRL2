@@ -40,6 +40,9 @@ public:
         const double &r,
         const double &g,
         const double &b );
+    
+    // -- helper functions ------------------------------------------
+    virtual void printMouseVariables();
 
     // -- visualization functions -----------------------------------
     virtual void visualize( const bool &inSelectMode ) = 0;

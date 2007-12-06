@@ -758,6 +758,12 @@ int DiagramEditor::getEditMode()
     return editMode;
 }
 
+// -- helper functions ----------------------------------------------
+void DiagramEditor::printMouseVariables()
+{
+	Visualizer::printMouseVariables();
+}
+
 
 // -- visualization functions  ----------------------------------
 
@@ -769,7 +775,7 @@ void DiagramEditor::visualize( const bool &inSelectMode )
     clear();
 
     if ( inSelectMode == true )
-    {
+    {    	
         if ( editMode == EDIT_MODE_SELECT ||
              editMode == EDIT_MODE_DOF )
         {
@@ -980,10 +986,13 @@ void DiagramEditor::handleMouseMotionEvent(
           mouseDrag == MSE_DRAG_TRUE )
     {
         if ( drgBegIdx1 < 0 && drgBegIdx2 < 0 )
-            // select mode
-            visualize( true );
+        {
+            visualize( true );    // select mode        
+        }
         else
+        {
             handleDrag();
+        }
     }
 
     xMousePrev = xMouseCur;
@@ -1020,16 +1029,19 @@ void DiagramEditor::handleHits( const vector< int > &ids )
         *mediator << "] ";
     }
     *mediator << "\n";
-    */
-
+    */	
     // only diagram was hit
     if ( ids.size() == 1 )
         handleHitDiagramOnly();  
     // shape was hit
     else if ( ids.size() == 2 )
+    {
         handleHitShape( ids[1] );
+    }
     else if ( ids.size() == 3 )
+    {
         handleHitShapeHandle( ids[1], ids[2] );
+	}
 }
 
 
@@ -1053,7 +1065,10 @@ void DiagramEditor::handleHitDiagramOnly()
         canvas->getWorldCoords( 
             xMouseCur, yMouseCur, 
             xPaste,    yPaste );
-            
+          
+        //Clear mouse input    
+        handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur); 
+        
         bool pasteFlag = false;
         if ( clipBoardShape != NULL )
             pasteFlag = true;
@@ -1069,7 +1084,6 @@ void DiagramEditor::handleHitDiagramOnly()
             false );   // edit DOF
     }
 }
-
 
 // ------------------------------------------------------
 void DiagramEditor::handleHitShape( const int &shapeIdx )
@@ -1140,18 +1154,17 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                             diagram->getShape(i)->setModeNormal();
                 
                     s->setModeEdit();
+                    
+                    //Clear mouse input
+                    handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
+                    
                     displShapeEdtOptions( s );
                 } // side
             } // button
         } // click
-	    
+
 		canvas->Refresh();
         s = NULL;
-		
-		//Clear mouse input 
-		mouseClick  = -1;
-		mouseButton = -1;
-		mouseSide   = -1; 
     }
 }
 
@@ -1200,6 +1213,10 @@ void DiagramEditor::handleHitShapeHandle(
                             diagram->getShape(i)->setModeNormal();
                 
                     //s->setModeEdit();
+                    
+                    //Clear mouse input
+                    handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
+                    
                     displShapeEdtOptions( s );
                 }
             }
@@ -1236,12 +1253,7 @@ void DiagramEditor::handleHitShapeHandle(
                             diagram->getShape(i)->setModeNormal();
                 }
             }
-        }
-       
-		//Clear mouse input 
-		mouseClick  = -1;
-		mouseButton = -1;
-		mouseSide   = -1; 
+        }      
         s = NULL;
     }
 }
@@ -1258,7 +1270,6 @@ void DiagramEditor::handleDrag()
     if ( 0 <= drgBegIdx1 && drgBegIdx1 < sizeShapes )
     {
         // do transl & scale here
-        
         Shape* s = diagram->getShape( drgBegIdx1 );
 
         if ( s->getMode() == Shape::MODE_EDIT )

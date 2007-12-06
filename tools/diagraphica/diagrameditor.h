@@ -76,6 +76,9 @@ public:
     void clearLinkDOFAttr( const int &DOFIdx );
     void clearLinkAttrDOF( const int &attrIdx );
     
+    // -- helper functions ------------------------------------------
+    virtual void printMouseVariables();
+    
     // -- get functions ---------------------------------------------
     Diagram* getDiagram();
     int getEditMode();

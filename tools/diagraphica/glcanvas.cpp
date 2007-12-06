@@ -582,7 +582,7 @@ void GLCanvas::onMouseMotion( wxMouseEvent &event )
 // ------------------------------------------------
 {
     if ( handleMouseMotion == true )
-    {
+    { 
         SetCurrent();
         mediator->handleMouseMotionEvent(
             this,

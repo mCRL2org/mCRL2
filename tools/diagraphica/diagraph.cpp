@@ -3128,7 +3128,7 @@ void DiaGraph::handleMouseRgtUpEvent(
 // ----------------------------------
 {
     if ( mode == MODE_EDIT )
-    {
+    {    	
         if ( c == canvasEdit && editor != NULL )
             editor->handleMouseRgtUpEvent( x, y );
         else if ( c == canvasColChooser && colChooser != NULL )
@@ -3175,7 +3175,9 @@ void DiaGraph::handleMouseMotionEvent(
     if ( mode == MODE_EDIT )
     {
         if ( c == canvasEdit && editor != NULL )
+        {
             editor->handleMouseMotionEvent( x, y );
+        }
         else if ( c == canvasColChooser && colChooser != NULL )
             colChooser->handleMouseMotionEvent( x, y );
         else if ( c == canvasOpaChooser && opaChooser != NULL )

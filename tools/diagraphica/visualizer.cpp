@@ -67,6 +67,31 @@ void Visualizer::setClearColor(
     clearColor.b = b;
     clearColor.a = 1.0;
 }
+ 
+// -- helper functions ----------------------------------------------
+void Visualizer::printMouseVariables()
+{
+    char* mb = "DOWN";
+    char* ms = "LEFT";
+    char* mc = "SINGLE";
+    char* md = "DRAG";
+  
+    if(mouseButton == MSE_BUTTON_UP)
+    	mb = "UP";
+    if(mouseSide == MSE_SIDE_RGT)
+    	ms = "RIGHT";
+    else if (mouseSide == MSE_SIDE_MID)
+    	ms = "MIDDLE";
+    if(mouseClick == MSE_CLICK_DOUBLE)
+    	mc = "DOUBLE";
+    if(mouseDrag == MSE_DRAG_FALSE)
+    	md = "NOT_DRAG";
+    	 
+	cout << "Mouse Button: " << mb << endl;
+	cout << "Mouse Side: " << ms << endl;
+	cout << "Mouse Click: " << mc << endl;
+	cout << "Mouse Drag: " << md << endl << endl;
+}
 
 
 // -- visualization functions ---------------------------------------
@@ -105,11 +130,12 @@ void Visualizer::handleMouseLftDownEvent(
     const int &x, 
     const int &y )
 // --------------------------------------
-{
+{	
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_LFT;
     mouseClick  = MSE_CLICK_SINGLE;
-    mouseDrag   = MSE_DRAG_FALSE;
+    mouseDrag   = MSE_DRAG_TRUE;
+    if(mouseDrag == MSE_DRAG_TRUE)
 
     xMouseDragBeg = x;
     yMouseDragBeg = y;
@@ -158,11 +184,11 @@ void Visualizer::handleMouseRgtDownEvent(
     const int &x, 
     const int &y )
 // --------------------------------------
-{
+{	
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_RGT;
     mouseClick  = MSE_CLICK_SINGLE;
-    mouseDrag   = MSE_DRAG_FALSE;
+    mouseDrag   = MSE_DRAG_TRUE;
 
     xMouseDragBeg = x;
     yMouseDragBeg = y;
@@ -213,10 +239,12 @@ void Visualizer::handleMouseMotionEvent(
 // -------------------------------------
 {
     if ( mouseButton == MSE_BUTTON_DOWN )
-      {  mouseDrag  = MSE_DRAG_TRUE;
+    {  
+    	 mouseDrag  = MSE_DRAG_TRUE;
          mouseClick = MSE_CLICK_SINGLE; 
-      }
-	else {
+    }
+	else 
+	{
 		mouseDrag  = MSE_DRAG_FALSE;
 		mouseClick = -1;
     }    
