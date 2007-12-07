@@ -335,9 +335,9 @@ AC_ARG_WITH(
   [cadp],
   AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])  
 )
+AC_MSG_CHECKING([for CADP in $with_cadp])
 USE_BCG=no
 if test ${with_cadp}; then
-  AC_MSG_CHECKING([for CADP in $with_cadp])
   AC_COMPILE_IFELSE(
      [
       #include <$with_cadp/incl/bcg_user.h>
@@ -358,8 +358,17 @@ if test ${with_cadp}; then
          USE_BCG=yes
        ])
      ])
-  AC_MSG_RESULT($USE_BCG)
+else
+  if test ! -z "${CADP}"; then
+    if test -x ${CADP}/com/arch; then
+      LIBS="-L${CADP}/bin.`${CADP}/com/arch` -lBCG_IO"
+      AC_SUBST([CADP_HEADERS],["${CADP}/incl"])
+      AC_SUBST([CADP_LIBRARIES],["${CADP}/bin.`${CADP}/com/arch`"])
+      USE_BCG=yes
+    fi
+  fi
 fi
+AC_MSG_RESULT($USE_BCG)
 
 AC_ARG_WITH(
   [cvc],
