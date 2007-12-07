@@ -1541,8 +1541,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
 {
   ATermList strat = ATmakeList0();
 
-  //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs);
-  //gsfprintf(stderr,"rules: %T\n\n",rules);
+  //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs[0]);
 
   // Array to keep note of the used parameters
   DECL_A(used,bool,arity);
@@ -1596,8 +1595,8 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
         ATermList evars = get_vars(ATgetArgument(pars,i+1));
         for (; !ATisEmpty(evars); evars=ATgetNext(evars))
         {
-          int j=i-1; // ATgetLength(ATgetNext(vars))-1
-          for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
+          int j=i-1;
+          for (ATermList o=vars; !ATisEmpty(ATgetNext(o)); o=ATgetNext(o))
           {
             if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
             {
