@@ -93,7 +93,7 @@ namespace squadt {
         void on_status_change(boost::function < void () >);
 
         /** \brief Disconnects from a running process (or make sure no connection exists) */
-        void disconnect(boost::weak_ptr < execution::process >&);
+        void disconnect(boost::weak_ptr < execution::process > const&);
 
         /** \brief Unblocks waiters and requests a tool to prepare termination */
         void finish();

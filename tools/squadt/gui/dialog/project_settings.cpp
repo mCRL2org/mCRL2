@@ -368,7 +368,7 @@ namespace squadt {
 
         cannot_add = new wxBoxSizer(wxHORIZONTAL);
         cannot_add->Add(new wxStaticBitmap(main_panel, wxID_ANY, *alert_icon));
-        cannot_add->Add(new wxStaticText(main_panel, wxID_ANY, wxT(" Sorry, cannot add this name is already taken!")));
+        cannot_add->Add(new wxStaticText(main_panel, wxID_ANY, wxT(" Sorry this name is already taken!")));
 
         s->AddSpacer(8);
         s->Add(file_selector, 2, wxEXPAND|wxLEFT|wxRIGHT, 20);

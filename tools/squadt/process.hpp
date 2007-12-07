@@ -20,8 +20,6 @@
 namespace squadt {
   namespace execution {
 
-    class task_monitor;
-
     class process_impl;
 
     /**
@@ -48,7 +46,7 @@ namespace squadt {
         typedef boost::shared_ptr < process >          sptr;
 
         /** \brief Convenience type for handlers */
-        typedef boost::function < void (process*) >    handler;
+        typedef boost::function < void (boost::shared_ptr < process >) >    termination_handler;
 
       private:
 
@@ -58,21 +56,18 @@ namespace squadt {
       private:
 
         /** \brief Constructor */
-        process(handler);
+        process();
     
-        /** \brief Constructor with listener */
-        process(handler, boost::shared_ptr < task_monitor >&);
-
       public:
 
         /** \brief Factory method */
-        static boost::shared_ptr < process > create(handler);
-    
-        /** \brief Factory method */
-        static boost::shared_ptr < process > create(handler, boost::shared_ptr < task_monitor >&);
+        static boost::shared_ptr < process > create();
     
         /** \brief Start the process by executing a command */
         void execute(const command&);
+     
+        /** \brief Start the process by executing a command */
+        void execute(const command&, termination_handler const& h);
      
         /** \brief Returns the process status */
         status get_status() const;

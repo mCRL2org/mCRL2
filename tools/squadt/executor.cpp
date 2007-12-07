@@ -34,7 +34,7 @@ namespace squadt {
      * \param[in] p the process to remove
      **/
     inline void executor_impl::remove(process* p) {
-      for (std::list < process::sptr >::iterator i = processes.begin(); i != processes.end(); ++i) {
+      for (std::list < boost::shared_ptr < process > >::iterator i = processes.begin(); i != processes.end(); ++i) {
         if (i->get() == p) {
           processes.erase(i);
 
@@ -48,11 +48,11 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < executor_impl >& w) {
-      process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w)));
+      boost::shared_ptr < process > p(process::create());
 
       processes.push_back(p);
 
-      p->execute(c);
+      p->execute(c, boost::bind(&executor_impl::handle_process_termination, this, w, _1));
     }
 
     /**
@@ -61,7 +61,7 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < task_monitor >& l, boost::shared_ptr < executor_impl >& w) {
-      process::sptr p(process::create(boost::bind(&executor_impl::handle_process_termination, this, _1, w), l));
+      boost::shared_ptr < process > p(process::create());
 
       if (l) {
         l->attach_process(p);
@@ -70,7 +70,12 @@ namespace squadt {
 
       processes.push_back(p);
 
-      p->execute(c);
+      p->execute(c, boost::bind(&executor_impl::handle_process_termination, this, w, l, _1));
+
+      if (l) {
+        l->signal_change(p, p->get_status());
+        l->disconnect(boost::weak_ptr< process >(p));
+      }
     }
 
     /**
@@ -111,7 +116,7 @@ namespace squadt {
     
       delayed_commands.clear();
 
-      BOOST_FOREACH(process::sptr p, processes) {
+      BOOST_FOREACH(boost::shared_ptr < process > p, processes) {
         p->terminate();
       }
     }
@@ -142,13 +147,34 @@ namespace squadt {
     /**
      * \param p a pointer to a process object
      **/
-    inline void executor_impl::handle_process_termination(process* p, boost::weak_ptr < executor_impl > w) {
-      boost::shared_ptr < executor_impl > g(w.lock());
+    void executor_impl::handle_process_termination(boost::weak_ptr < executor_impl > w, boost::shared_ptr < process > p) {
+      boost::shared_ptr < executor_impl > alive(w.lock());
 
-      if (g.get() != 0) {
-        remove(p);
+      if (alive) {
+        remove(p.get());
  
-        start_delayed(g);
+        start_delayed(alive);
+      }
+    }
+
+    /**
+     * \param p a pointer to a process object
+     **/
+    void executor_impl::handle_process_termination(boost::weak_ptr < executor_impl > w,
+                                boost::weak_ptr < task_monitor > l, boost::shared_ptr < process > p) {
+
+      boost::shared_ptr < executor_impl > alive(w.lock());
+
+      if (alive) {
+        boost::shared_ptr < task_monitor > monitor(l.lock());
+
+        if (monitor) {
+          monitor->signal_change(p, p->get_status());
+        }
+
+        remove(p.get());
+ 
+        start_delayed(alive);
       }
     }
 
