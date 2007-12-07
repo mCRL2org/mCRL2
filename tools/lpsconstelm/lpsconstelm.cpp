@@ -697,8 +697,6 @@ inline void lpsConstElm::output() {
       rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp);
   }
 
-
-
   //Move the 'constant' free variables to the set of usedFreeVars
   lps::data_variable_list lps_init_free_vars = p_spec.initial_process().free_variables();
   std::set <lps::data_variable> init_free_vars;
@@ -710,7 +708,7 @@ inline void lpsConstElm::output() {
   std::set< lps::data_variable > usedFreeVars = p_process.find_free_variables();
   for(std::vector< lps::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); i++)
   {
-    if( init_free_vars.find(i->rhs()) != init_free_vars.end() )
+    if( !init_free_vars.empty() && init_free_vars.find(i->rhs()) != init_free_vars.end() )
     {   
       usedFreeVars.insert(i->rhs());
     }
@@ -729,8 +727,7 @@ inline void lpsConstElm::output() {
     atermpp::reverse(rebuild_summandlist_no_cp)
   );
 
-
-   //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
+  //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
 
   std::set< lps::data_variable > foundVars;
   std::set< lps::data_variable > initial_free_variables;
@@ -741,7 +738,6 @@ inline void lpsConstElm::output() {
          initial_free_variables.insert(*k);
        }
   }
-
 
   // Rebuild spec
   //
@@ -768,6 +764,12 @@ inline void lpsConstElm::output() {
   gsVerboseMsg("lpsconstelm: Number of process parameters in the old LPS: %d\n", p_process.process_parameters().size());
   gsVerboseMsg("lpsconstelm: Number of process parameters in the new LPS: %d\n", rebuild_process.process_parameters().size());
   
+  gsVerboseMsg("lpsconstelm: ===== Replacements =====\n");
+  for(std::vector< lps::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
+  { 
+    gsVerboseMsg("lpsconstelm: The contant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
+  } 
+
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
   //gsDebugMsg("%s\n", pp(p_process).c_str());
