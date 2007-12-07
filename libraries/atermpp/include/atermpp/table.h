@@ -10,19 +10,27 @@
 #ifndef MCRL2_ATERMPP_TABLE_H
 #define MCRL2_ATERMPP_TABLE_H
 
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 
 namespace atermpp
 {
+  struct table_deleter
+  {
+    void operator()(ATermTable t)
+    {
+      ATtableDestroy(t);
+    }
+  };
+
   //---------------------------------------------------------//
   //                     table
   //---------------------------------------------------------//
-  class table: boost::noncopyable
+  class table
   {
    protected:
-      ATermTable m_table;
+      boost::shared_ptr<_ATermTable> m_table;
 
    public:
       /// Create an table.
@@ -35,33 +43,21 @@ namespace atermpp
       /// a maximum load percentage of 75%. You are not required to do this, it merely saves a runtime
       /// expansion and rehashing of the table which increases efficiency.
       ///
-      table(unsigned int initial_size, unsigned int max_load_pct)
-        : m_table(ATtableCreate(initial_size, max_load_pct))
+      table(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
+        : m_table(ATtableCreate(initial_size, max_load_pct), table_deleter())
       {}
-      
-      /// Destroy an table.
-      /// Contrary to aterm_dictionaries, aterm_tables are themselves not aterms. This
-      /// means they are not freed by the garbage collector when they are no longer referred to. Therefore,
-      /// when the table is no longer needed, the user should release the resources allocated by the table
-      /// by calling table_destroy. All references the table has to aterms will then also be removed, so
-      /// that those may be freed by the garbage collector (if no other references to them exist of course).
-      ///
-      ~table()
-      {
-        ATtableDestroy(m_table);
-      }
       
       /// Reset an table.
       /// This function resets an ermtable, without freeing the memory it occupies. Its
       /// effect is the same as the subsequent execution of a destroy and a create of a table, but as no
-      /// memory is released and obtained from the C memeory management system this function is gen-
+      /// memory is released and obtained from the C memory management system this function is gen-
       /// erally cheaper. but if subsequent tables differ very much in size, the use of table_destroy and
       /// table_create may be prefered, because in such a way the sizes of the table adapt automatically
       /// to the requirements of the application.
       ///
       void reset()
       {
-        ATtableReset(m_table);
+        ATtableReset(m_table.get());
       }
       
       /// Add / update a (key, value)-pair in a table.
@@ -70,21 +66,21 @@ namespace atermpp
       ///
       void put(aterm key, aterm value)
       {
-        ATtablePut(m_table, key, value);
+        ATtablePut(m_table.get(), key, value);
       }
       
       /// Get the value belonging to a given key in a table.
       ///
       aterm get(aterm key)
       {
-        return ATtableGet(m_table, key);
+        return ATtableGet(m_table.get(), key);
       }
       
       /// Remove the (key, value)-pair from table.
       ///
       void remove(aterm key)
       {
-        ATtableRemove(m_table, key);
+        ATtableRemove(m_table.get(), key);
       }
       
       /// Get an term_list of all the keys in a table.
@@ -94,7 +90,7 @@ namespace atermpp
       ///
       aterm_list table_keys()
       {
-        return aterm_list(ATtableKeys(m_table));
+        return aterm_list(ATtableKeys(m_table.get()));
       }
   };
 
