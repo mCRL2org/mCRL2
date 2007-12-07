@@ -361,27 +361,33 @@ ATermAppl beta_reduce(ATermAppl DataExpr, ATermList* Context, bool recursive)
   }
 
   if (recursive) {
-    // If the top-level term is annotated with @dummy, then preserve annotation,
-    // this is needed for matching data expressions.
-    ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
-    ATerm dummy_ann = ATgetAnnotation((ATerm) DataExpr, dummy);
-    // Recursively handle all parts of the expression.
-    AFun head = ATgetAFun(DataExpr);
-    int nr_args = ATgetArity(head);
-    if (nr_args > 0) {
-      DECL_A(args,ATerm,nr_args);
-      for (int i = 0; i < nr_args; i++) {
-        ATerm arg = ATgetArgument(DataExpr, i);
-        if (ATgetType(arg) == AT_APPL)
-          args[i] = (ATerm) beta_reduce_part((ATermAppl) arg, Context);
-        else //ATgetType(arg) == AT_LIST
-          args[i] = (ATerm) beta_reduce_list((ATermList) arg, Context);
+    if (gsIsDataAppl(DataExpr)) {
+      ATermList args = ATLgetArgument(DataExpr, 1);
+      ATermList new_args = ATmakeList0();
+      while(!ATisEmpty(args))
+      {
+        new_args = ATinsert(new_args, (ATerm) beta_reduce(ATAgetFirst(args), Context, recursive));
+        args = ATgetNext(args);
       }
-      DataExpr = ATmakeApplArray(head, args);
-      FREE_A(args);
-    }
-    if (dummy_ann != NULL) {
-      DataExpr = (ATermAppl) ATsetAnnotation((ATerm) DataExpr, dummy, dummy);
+      new_args = ATreverse(new_args);
+      DataExpr = gsMakeDataAppl(beta_reduce(ATAgetArgument(DataExpr, 0), Context, recursive), new_args);
+    } else if (gsIsBinder(DataExpr)) {
+      ATermAppl new_body = beta_reduce(ATAgetArgument(DataExpr, 2), Context, recursive);
+      DataExpr = gsMakeBinder(ATAgetArgument(DataExpr, 0), ATLgetArgument(DataExpr, 1), new_body);
+    } else if (gsIsWhr(DataExpr)) {
+      ATermAppl new_expr = beta_reduce(ATAgetArgument(DataExpr, 0), Context, recursive);
+      ATermList new_decls = ATmakeList0();
+      ATermList decls = ATLgetArgument(DataExpr, 1);
+      while(!ATisEmpty(decls)) {
+        ATermAppl decl = ATAgetFirst(decls);
+        ATermAppl var = ATAgetArgument(decl, 0);
+        ATermAppl new_val = beta_reduce(ATAgetArgument(decl, 1), Context, recursive);
+        assert(gsIsDataVarIdInit(decl));
+        new_decls = ATinsert(new_decls, (ATerm) gsMakeDataVarIdInit(var, new_val));
+        decls = ATgetNext(decls);
+      }
+      new_decls = ATreverse(decls);
+      DataExpr = gsMakeWhr(new_expr, new_decls);
     }
   }
 
@@ -408,7 +414,7 @@ ATermAppl beta_reduce_part(ATermAppl Part, ATermList* Context)
   //reconstruct expressions in the arguments of part
   // If the top-level term is annotated with @dummy, then preserve annotation,
   // this is needed for matching data expressions.
-  ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
+  static ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
   ATerm dummy_ann = ATgetAnnotation((ATerm) Part, dummy);
   AFun head = ATgetAFun(Part);
   int nr_args = ATgetArity(head);
