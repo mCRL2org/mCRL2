@@ -2,10 +2,10 @@ project toolset/xsim
        : build-dir $(BUILD_TOP)/xsim
        ;
 
-alias xsim_base : : <wx>no ;
+alias sim_base_gui : : <wx>no ;
 
-obj xsim_base
-       : xsimbase.cpp
+obj sim_base_gui
+       : simbasegui.cpp
          /libraries//trace
          /libraries//lps
          /site-config//wx_base
@@ -16,7 +16,10 @@ alias xsim : : <wx>no ;
 
 exe xsim
        : xsim.cpp
-         xsim_base
+         simbase.cpp
+         sim_base_gui
+         simulator.cpp
+         simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
@@ -31,6 +34,8 @@ exe xsim
 
 exe sim
        : sim.cpp
+         simbase.cpp
+         simulator.cpp
          /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
        ;

@@ -30,7 +30,7 @@
 #include <vector>
 #include <iostream>
 #include "garagecanvas.h"
-#include "xsimbase.h"
+#include "simbase.h"
 #include "aterm2.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"

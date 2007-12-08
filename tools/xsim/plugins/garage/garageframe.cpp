@@ -13,6 +13,7 @@
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+#include "simbasegui.h"
 #include "garageframe.h"
 #include <sstream>
 
@@ -408,8 +409,8 @@ void GarageFrame::OnCloseWindow( wxCloseEvent & )
 // ---------------------------------------------
 {
 #ifdef GARAGEFRAMEDLL
-  if (xsimdll != NULL) {
-    xsimdll->Remove(this, true);
+  if (simdll != NULL) {
+    simdll->Remove(this, true);
   }
 #endif
   Destroy();
@@ -424,25 +425,25 @@ void GarageFrame::OnMoveWindow( wxMoveEvent & )
 }
 
 #ifdef GARAGEFRAMEDLL
-static XSimViewsDLL *xsvdll;
+static SimViewsDLL *svdll;
 
 extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 {
           GarageFrame *v;
           v = new GarageFrame(
-            Simulator->MainWindow(), wxT("Garage State"),-1,-1,300,200);
+            GetMainWindow(Simulator), wxT("Garage State"),-1,-1,300,200);
           v->Show();
-          v->SetXSimViewsDLL(xsvdll);
-          xsvdll->Add(v,Simulator);
+          v->SetSimViewsDLL(svdll);
+          svdll->Add(v,Simulator);
 }
 
 extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
-          xsvdll = new XSimViewsDLL;
+          svdll = new SimViewsDLL;
 }
 
 extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
 {
-          delete xsvdll;
+          delete svdll;
 }
 #endif

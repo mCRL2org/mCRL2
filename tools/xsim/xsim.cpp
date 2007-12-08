@@ -256,8 +256,8 @@ bool XSim::OnInit()
   }
 
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-  frame->use_dummies = dummies;
-  frame->rewr_strat  = rewrite_strategy;
+  frame->simulator->use_dummies = dummies;
+  frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
 
   if (!lps_file_argument.empty()) {

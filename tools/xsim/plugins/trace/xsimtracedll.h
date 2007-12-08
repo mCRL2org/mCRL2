@@ -21,7 +21,7 @@
 
 #include <wx/listctrl.h>
 #include <aterm2.h>
-#include "xsimbase.h"
+#include "simbase.h"
 
 //----------------------------------------------------------------------------
 // XSimTraceDLL

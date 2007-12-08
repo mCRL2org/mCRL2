@@ -4,57 +4,53 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file xsimbase.cpp
+/// \file simbase.cpp
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "xsimbase.h"
-#endif
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
+    #pragma implementation "simbase.h"
 #endif
 
 #include <list>
-#include "xsimbase.h"
+#include "simbase.h"
 
 using namespace std;
 
 SimulatorViewDLLInterface::~SimulatorViewDLLInterface()
 {
-	if ( xsimdll != NULL )
+	if ( simdll != NULL )
 	{
-		xsimdll->Remove(this);
+		simdll->Remove(this);
 	}
 }
 
 void SimulatorViewDLLInterface::Registered(SimulatorInterface *Simulator)
 {
-	if ( xsimdll != NULL )
+	if ( simdll != NULL )
 	{
-		xsimdll->SetSimulator(this,Simulator);
+		simdll->SetSimulator(this,Simulator);
 	}
 }
 
 void SimulatorViewDLLInterface::Unregistered()
 {
-	if ( xsimdll != NULL )
+	if ( simdll != NULL )
 	{
-		xsimdll->ClearSimulator(this);
+		simdll->ClearSimulator(this);
 	}
 }
 
-void SimulatorViewDLLInterface::SetXSimViewsDLL(XSimViewsDLL *dll)
+void SimulatorViewDLLInterface::SetSimViewsDLL(SimViewsDLL *dll)
 {
-	xsimdll = dll;
+	simdll = dll;
 }
 
-XSimViewsDLL::~XSimViewsDLL()
+SimViewsDLL::~SimViewsDLL()
 {
 	list<SimulatorInterface *>::iterator j = sims.begin();
 	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
 	for (; i != views.end(); i++, j++)
 	{
-		(*i)->SetXSimViewsDLL(NULL);
+		(*i)->SetSimViewsDLL(NULL);
 		if ( (*j) != NULL )
 		{
 			(*j)->Unregister(*i);
@@ -63,7 +59,7 @@ XSimViewsDLL::~XSimViewsDLL()
 	}
 }
 
-void XSimViewsDLL::Add(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator, bool Register)
+void SimViewsDLL::Add(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator, bool Register)
 {
 	views.push_back(View);
 	sims.push_back(Simulator);
@@ -73,7 +69,7 @@ void XSimViewsDLL::Add(SimulatorViewDLLInterface *View, SimulatorInterface *Simu
 	}
 }
 
-void XSimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
+void SimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
 {
 	list<SimulatorInterface *>::iterator j = sims.begin();
 	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
@@ -84,7 +80,7 @@ void XSimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
 		{
 			if ( Unregister && ((*j) != NULL) )
 			{
-				(*i)->SetXSimViewsDLL(NULL);
+				(*i)->SetSimViewsDLL(NULL);
 				(*j)->Unregister(*i);
 			}
 			views.erase(i);
@@ -94,7 +90,7 @@ void XSimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
 	}
 }
 
-void XSimViewsDLL::SetSimulator(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator)
+void SimViewsDLL::SetSimulator(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator)
 {
 	list<SimulatorInterface *>::iterator j = sims.begin();
 	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
@@ -108,7 +104,7 @@ void XSimViewsDLL::SetSimulator(SimulatorViewDLLInterface *View, SimulatorInterf
 	}
 }
 
-void XSimViewsDLL::ClearSimulator(SimulatorViewDLLInterface *View)
+void SimViewsDLL::ClearSimulator(SimulatorViewDLLInterface *View)
 {
 	SetSimulator(View,NULL);
 }

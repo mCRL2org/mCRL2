@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file xsimbase.h
+/// \file simbase.h
 
 /* To make a new view one has to make a new class derived from
  * the SimulatorViewInterface below. Views are registered at
@@ -34,10 +34,9 @@
  * variables.
  */
 
-#ifndef __xsimbase_H__
-#define __xsimbase_H__
+#ifndef __simbase_H__
+#define __simbase_H__
 
-#include <wx/wx.h>
 #include <list>
 #include <aterm2.h>
 #include <mcrl2/lps/nextstate.h>
@@ -45,7 +44,7 @@
 class SimulatorInterface;
 class SimulatorViewInterface;
 class SimulatorViewDLLInterface;
-class XSimViewsDLL;
+class SimViewsDLL;
 
 typedef std::list<SimulatorViewInterface *> viewlist;
 typedef viewlist::iterator viewlistiterator;
@@ -59,9 +58,6 @@ public:
 	/* Register *View to this Simulator */
 	virtual void Unregister(SimulatorViewInterface *View) = 0;
 	/* Unregister previously registered *View */
-
-	virtual wxWindow *MainWindow() = 0;
-	/* Returns the main window of the simulator. */
 
 	virtual void Reset() = 0;
 	/* Reset trace to initial state */
@@ -79,11 +75,11 @@ public:
 	virtual ATerm GetState() = 0;
 	/* Returns the current state. */
 	virtual ATermList GetNextStates() = 0;
-	/* Returns the NextState currently in use by the
-	 * simulator. */
-	virtual NextState *GetNextState() = 0;
 	/* Returns the currently enabled transitions and the
 	 * resulting states. */
+	virtual NextState *GetNextState() = 0;
+	/* Returns the NextState currently in use by the
+	 * simulator. */
 	virtual bool ChooseTransition(unsigned int index) = 0;
 	/* Goto a state x with a transition y, where [y,x] is
 	 * the index'th element in GetNextStates(). */
@@ -99,6 +95,12 @@ public:
 	 * trace. */
 	virtual ATermList GetTrace() = 0;
 	/* Get the whole trace. */
+	virtual ATerm GetNextStateFromTrace() = 0;
+        /* Get the the state following the current state in the trace.
+         * Returns NULL is there is no such state. */
+	virtual ATermAppl GetNextTransitionFromTrace() = 0;
+        /* Get the the transition following the current state in the trace.
+         * Returns NULL is there is no such transitions. */
 	virtual bool SetTrace(ATermList Trace, unsigned int From = 0) = 0;
 	/* Set the trace to Trace starting at position From. */
 };
@@ -179,18 +181,18 @@ public:
  * if a library is loaded twice. For this prupose, the following classes
  * are available.
  *
- * XSimViewsDLL is a class that stores Views and the Simulator where they
+ * SimViewsDLL is a class that stores Views and the Simulator where they
  * are registered. On destruction of this class, all Views are unregistered
  * (if needed) and destroyed.
  *
  * SimulatorViewDLLInterface is a SimulatorViewInterface with some added
- * implementation to interact with a XSimViewsDLL object. The implementor
+ * implementation to interact with a SimViewsDLL object. The implementor
  * of a subclass does not have to worry about this, except when he gives
  * an implementation of Registered or Unregistered (see below).
  *
  * A typical DLL source file would look as follows:
  *
- *   static XSimViewsDLL *xsvdll;
+ *   static SimViewsDLL *svdll;
  *
  *   extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
  *   {
@@ -201,25 +203,25 @@ public:
  *     v = new MyView(Simulator->MainWindow());
  *     v->Show();
  *
- *     // Let view know which XSimViewsDLL he is in and add him
- *     v->SetXSimViewsDLL(xsvdll);
- *     xsvdll->Add(v,Simulator);
+ *     // Let view know which SimViewsDLL he is in and add him
+ *     v->SetSimViewsDLL(svdll);
+ *     svdll->Add(v,Simulator);
  *   }
  *
  *   extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
  *   {
- *     xsvdll = new XSimViewsDLL;
+ *     svdll = new SimViewsDLL;
  *   }
  *
  *   extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
  *   {
- *     delete xsvdll; // This unregisters and destroys all Views in xsvdll
+ *     delete svdll; // This unregisters and destroys all Views in svdll
  *   }
  *
  * If MyView would implement the Registered and/or Unregistered functions,
  * they need to call the corresponding functions from
  * SimulatorViewDLLInterface to assure the correctness of the information
- * in the XSimViewsDLL. This means it should look like:
+ * in the SimViewsDLL. This means it should look like:
  *
  *   void MyView::Registered(SimulatorInterface *Simulator)
  *   {
@@ -243,21 +245,21 @@ public:
 class SimulatorViewDLLInterface: public SimulatorViewInterface
 {
 	protected:
-		XSimViewsDLL *xsimdll;
+		SimViewsDLL *simdll;
 	public:
 		virtual ~SimulatorViewDLLInterface();
 		
 		void Registered(SimulatorInterface *Simulator);
 		void Unregistered();
 
-		virtual void SetXSimViewsDLL(XSimViewsDLL *dll);
-		/* Sets xsimdll to dll */
+		virtual void SetSimViewsDLL(SimViewsDLL *dll);
+		/* Sets simdll to dll */
 };
 
-class XSimViewsDLL
+class SimViewsDLL
 {
 public:
-	~XSimViewsDLL();
+	~SimViewsDLL();
 	/* Destructor
 	 * Unregisters every View in views if it is linked to a
 	 * Simulator and the destroys the view

@@ -1,0 +1,58 @@
+// Author(s): Muck van Weerdenburg
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file simulatorgui.cpp
+
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+    #pragma implementation "simulatorgui.h"
+#endif
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#include <wx/wx.h>
+#include <wx/dynlib.h>
+#include "simulatorgui.h"
+
+using namespace std;
+
+StandardSimulatorGUI::StandardSimulatorGUI(wxWindow *window)
+{
+  w = window;
+}
+
+StandardSimulatorGUI::~StandardSimulatorGUI()
+{
+}
+
+void StandardSimulatorGUI::LoadView(const string &filename)
+{
+	wxDynamicLibrary lib(filename);
+
+	if ( lib.IsLoaded() )
+	{
+		void (*f)(SimulatorInterface *);
+
+		f = (void (*)(SimulatorInterface *)) lib.GetSymbol(wxT("SimulatorViewDLLAddView"));
+		if ( f != NULL )
+		{
+			f(this);
+			lib.Detach(); //XXX
+		} else {
+			wxMessageDialog msg(w, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
+			msg.ShowModal();
+		}
+	} else {
+		/*wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
+		msg.ShowModal();*/
+       }
+}
+
+wxWindow *StandardSimulatorGUI::MainWindow()
+{
+  return w;
+}

@@ -18,6 +18,7 @@
 
 #include <sstream>
 #include <aterm2.h>
+#include "simbasegui.h"
 #include "xsimtracedll.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
@@ -238,9 +239,9 @@ void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */
 
 void XSimTraceDLL::OnCloseWindow( wxCloseEvent& /* event */)
 {
-	if ( xsimdll != NULL )
+	if ( simdll != NULL )
 	{
-		xsimdll->Remove(this,true);
+		simdll->Remove(this,true);
 	}
 	Destroy();
 }
@@ -254,24 +255,24 @@ void XSimTraceDLL::OnListItemActivated( wxListEvent &event )
 }
 
 
-static XSimViewsDLL *xsimdll;
+static SimViewsDLL *simdll;
 
 extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 {
 	XSimTraceDLL *v;
-	v = new XSimTraceDLL(Simulator->MainWindow());
+	v = new XSimTraceDLL(GetMainWindow(Simulator));
 	v->Show();
-	v->SetXSimViewsDLL(xsimdll);
-	xsimdll->Add(v,Simulator);
+	v->SetSimViewsDLL(simdll);
+	simdll->Add(v,Simulator);
 }
 
 extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
 	gsEnableConstructorFunctions();
-	xsimdll = new XSimViewsDLL;
+	simdll = new SimViewsDLL;
 }
 
 extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
 {
-	delete xsimdll;
+	delete simdll;
 }

@@ -9,7 +9,7 @@ alias xsim_trace_view : : <wx>yes <link>static ;
 
 lib xsim_trace_view
        : xsimtracedll.cpp
-         /tools/xsim//xsim_base
+         /tools/xsim//sim_base_gui
          /libraries//data
          /site-config//wx_base
        : <include>../..
