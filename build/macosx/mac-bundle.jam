@@ -30,7 +30,7 @@ SAMPLE_R = $(__name__:P)/sample.r ;
 actions quietly make-bundle {
   mkdir -p $(LOCATION)/$(<:BS)/Contents/MacOS
   mkdir -p $(LOCATION)/$(<:BS)/Contents/Resources
-  echo -n 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
+  echo 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
   cp $(INFO) $(LOCATION)/$(<:BS)/Contents/Info.plist
   cp $(ICON) $(LOCATION)/$(<:BS)/Contents/Resources
 

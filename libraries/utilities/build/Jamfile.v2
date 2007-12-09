@@ -24,6 +24,7 @@ alias squadt_interface.main
         <define>ENABLE_SQUADT_CONNECTIVITY
       :
       : <library>/libraries/tipi//tool_interface
+        <framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 

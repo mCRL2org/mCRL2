@@ -92,6 +92,7 @@ namespace squadt {
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)
                             % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_standard_logger()->get_default_filter_level()))));
 
+    // Security note, should remove again if it is not matched to a process within some reasonable amount of time
     instances[id] = p;
 
     global_build_system.get_executor()->execute(c, p, b);
@@ -111,7 +112,7 @@ namespace squadt {
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::shared_ptr < extractor > e(new extractor());
 
-    execute(*t, boost::filesystem::current_path().native_file_string(),
+    execute(*t, boost::filesystem::current_path().string(),
                boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
 
     /* Wait until the process has been identified */
@@ -122,7 +123,7 @@ namespace squadt {
       return e->extract(e, t);
     }
 
-    return (false);
+    return false;
   }
 
   void tool_manager_impl::terminate() {
@@ -225,6 +226,8 @@ namespace squadt {
     instance_identifier id = boost::lexical_cast< instance_identifier > (m->to_string());
 
     if (instances.find(id) == instances.end()) {
+      transporter::disconnect(*(m->get_originator()));
+
       get_logger()->log(1, "connection terminated; peer provided invalid instance identifier");
 
       return;

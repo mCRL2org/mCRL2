@@ -63,8 +63,8 @@ namespace transport {
       /** \brief Disconnect all */
       void disconnect();
 
-      /** \brief Disconnect connection number <|number|> */
-      bool disconnect(size_t number);
+      /** \brief Disconnect from directly connected peer */
+      bool disconnect(basic_transceiver const&);
 
       /** \brief Disconnect from directly connected peer */
       bool disconnect(transporter&);

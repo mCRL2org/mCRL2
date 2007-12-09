@@ -150,21 +150,23 @@ bool Squadt::OnInit() {
       };
 
       try {
-        global_build_system.initialise(
-          std::auto_ptr < settings_manager > (new settings_manager(std::string(wxFileName::GetHomeDir().fn_str()))),
-          std::auto_ptr < tool_manager > (new tool_manager()),
-          std::auto_ptr < executor > (new executor()),
-          std::auto_ptr < type_registry > (new type_registry()));
+        std::auto_ptr < settings_manager > global_settings_manager(new settings_manager(std::string(wxFileName::GetHomeDir().fn_str())));
 
         // Open log file
         boost::shared_ptr < tipi::utility::logger > logger(new tipi::utility::file_print_logger(
-                global_build_system.get_settings_manager()->path_to_user_settings().append("/log")));
+                global_settings_manager->path_to_user_settings().append("/log")));
 
         logger->set_filter_level(
                 (std::max)(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
                         static_cast < tipi::utility::logger::log_level > (2)));
 
         tipi::controller::communicator::set_standard_logger(logger);
+
+        global_build_system.initialise(
+          global_settings_manager,
+          std::auto_ptr < tool_manager > (new tool_manager()),
+          std::auto_ptr < executor > (new executor()),
+          std::auto_ptr < type_registry > (new type_registry()));
       }
       catch (std::exception& e) {
         wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();

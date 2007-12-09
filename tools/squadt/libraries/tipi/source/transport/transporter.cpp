@@ -203,29 +203,19 @@ namespace transport {
   }
 
   /**
-   * \param[in] n the number of the connection that is to be closed
+   * \param[in] t the local endpoint (transceiver) to disconnect
    * \return whether a connection was broken (otherwise it did not exist)
    **/
-  bool transporter_impl::disconnect(size_t n) {
-    if (n < connections.size()) {
-      boost::recursive_mutex::scoped_lock l(lock);
-     
-      connection_list::iterator i = connections.begin();
-   
-      while (0 < n) {
-        assert(i != connections.end());
-     
-        --n;
-     
-        ++i;
-      }
-
-      (*i)->owner.reset();
-      (*i)->disconnect(*i);
+  bool transporter_impl::disconnect(basic_transceiver const& t) {
+    for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
+      if ((*i).get() == &t) {
+        (*i)->owner.reset();
+        (*i)->disconnect(*i);
  
-      connections.erase(i);
+        connections.erase(i);
 
-      return true;
+        return true;
+      }
     }
 
     return false;
@@ -345,10 +335,16 @@ namespace transport {
     impl->disconnect();
   }
 
-  bool transporter::disconnect(size_t n) {
-    return impl->disconnect(n);
+  /**
+   * \param[in] t the local endpoint to disconnect from 
+   **/
+  bool transporter::disconnect(basic_transceiver const& t) {
+    return impl->disconnect(t);
   }
 
+  /**
+   * \param[in] m the local transporter to disconnect from 
+   **/
   bool transporter::disconnect(transporter& m) {
     return impl->disconnect(m.impl.get());
   }

@@ -1151,7 +1151,12 @@ namespace squadt {
   void processor::run(bool b) {
     assert(impl->interface_object.lock().get() == this);
 
-    impl->run(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
+    if (impl->current_monitor.get() == 0) {
+      throw std::runtime_error("Cannot start execution task configuration missing or corrupted!");
+    }
+    else {
+      impl->run(impl->interface_object.lock(), impl->current_monitor->get_configuration(), b);
+    }
   }
 
   const size_t processor::number_of_inputs() const {

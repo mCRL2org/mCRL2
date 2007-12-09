@@ -71,8 +71,8 @@ namespace transport {
       /** \brief Disconnect all */
       virtual void disconnect();
 
-      /** \brief Disconnect connection number <|number|> */
-      bool disconnect(size_t number);
+      /** \brief Disconnect based on local endpoint */
+      bool disconnect(basic_transceiver const&);
 
       /** \brief Disconnect from directly connected peer */
       bool disconnect(transporter_impl const*);

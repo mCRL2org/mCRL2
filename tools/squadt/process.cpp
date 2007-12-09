@@ -35,7 +35,9 @@
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 #include "command.hpp"
 #include "process.hpp"
@@ -106,13 +108,16 @@ namespace squadt {
       private:
 
         /** \brief Creates the new process */
-        void create_process(command const& c);
+        void create_process(command const& c, boost::function <  void (process::status) > h);
+
+        /** \brief Waits for a process to terminate */
+        void await_termination(boost::weak_ptr < process >, process_impl::information&, boost::function <  void (process::status) > h);
 
         /** \brief Executed at process termination */
-        void await_termination(boost::weak_ptr < process >, process_impl::information&);
+        void termination_handler(boost::weak_ptr < process >, process::status);
 
         /** \brief Executed at process termination */
-        void await_termination(boost::weak_ptr < process >, process::termination_handler, process_impl::information&);
+        void termination_handler(boost::weak_ptr < process >, process::termination_handler, process::status);
 
       public:
 
@@ -123,7 +128,7 @@ namespace squadt {
         void execute(const command&);
      
         /** \brief Start the process by executing a command */
-        void execute(const command&, process::termination_handler h);
+        void execute(const command&, process::termination_handler const& h);
      
         /** \brief Returns the process id */
         pid_t get_identifier() const;
@@ -176,12 +181,12 @@ namespace squadt {
 
     /**
      * \param[in] p pointer to the process interface object
+     * \param[in] pi the process information structure
      * \param[in] h functor that is invoked when the process ends (if the process object is still alive)
-     * \param[in,out] ph the process information object
      *
      * \pre p.lock().get() = m_interface
      **/
-    inline void process_impl::await_termination(boost::weak_ptr < process > p, process_impl::information& pi) {
+    inline void process_impl::await_termination(boost::weak_ptr < process > p, process_impl::information& pi, boost::function <  void (process::status) > h) {
       HANDLE& process_handle(m_information.process.hProcess);
 
       if (process_handle != 0) {
@@ -189,45 +194,146 @@ namespace squadt {
     
         WaitForSingleObject(process_handle, INFINITE);
     
-        boost::shared_ptr < process > alive(p.lock());
-
-        if (alive) {
-          m_status = (GetExitCodeProcess(process_handle, &exit_code) && exit_code == 0) ? process::completed : process::aborted;
-        }
+        h((GetExitCodeProcess(process_handle, &exit_code) && exit_code == 0) ? process::completed : process::aborted);
+      }
+      else {
+        h(process::aborted);
       }
     }
 
     /**
      * \param[in] c the command to execute
      **/
-    inline void process_impl::create_process(command const& c) {
+    inline void process_impl::create_process(command const& c, boost::function <  void (process::status) > h) {
       LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
 
       int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.c_str(),&m_information.startup,&m_information.process);
 
       m_status = (identifier < 0) ? process::aborted : process::running;
+
+      if (m_status != process::running) {
+        h(m_status);
+      }
+      else {
+        boost::thread(boost::bind(&process_impl::await_termination, this, m_interface, m_information, h));
+      }
     }
 #else
     /**
      * \param[in] p pointer to the process interface object
+     * \param[in] pi the process information structure
      * \param[in] h functor that is invoked when the process ends (if the process object is still alive)
-     * \param[in,out] ph the process information object
      *
      * \pre p.lock().get() = m_interface
      **/
-    void process_impl::await_termination(boost::weak_ptr < process > p, process_impl::information& pi) {
+    void process_impl::await_termination(boost::weak_ptr < process > p, process_impl::information& pi, boost::function <  void (process::status) > h) {
       int exit_code;
 
       waitpid(pi.process_identifier, &exit_code, 0);
 
-      boost::shared_ptr < process > alive(p.lock());
-
-      if (alive.get()) {
-        m_status = (WIFEXITED(exit_code)) ? process::completed : process::aborted;
-      }
+      h((WIFEXITED(exit_code)) ? process::completed : process::aborted);
     }
 
-    inline void process_impl::create_process(command const& c) {
+    /**
+     * \param[in] c command to execute
+     **/
+    inline void process_impl::create_process(command const& c, boost::function <  void (process::status) > h) {
+#if defined(__APPLE__)
+      using namespace boost::filesystem;
+
+      struct local {
+        inline static std::string as_string(const CFStringRef s) {
+          size_t length = CFStringGetLength(s) + 1;
+          char   buffer[length];
+
+          if (!CFStringGetCString(s, buffer, length, kCFStringEncodingASCII)) {
+            throw false;
+          }
+
+          return std::string(buffer);
+        }
+      };
+
+      // Start application bundle
+      if (is_directory(c.executable) && extension(c.executable).compare(".app") == 0) {
+        CFURLRef bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+            CFStringCreateWithCString(kCFAllocatorDefault, c.executable.c_str(), kCFStringEncodingASCII),
+                                                                                        kCFURLPOSIXPathStyle, true);
+         
+        CFBundleRef bundle  = CFBundleCreate(kCFAllocatorDefault, bundle_url);
+
+        // Assume that bundle is unusable
+        m_status = process::aborted;
+
+        if (bundle) {
+          UInt32 bundle_type, bundle_creator;
+
+          CFBundleGetPackageInfo(bundle, &bundle_type, &bundle_creator);
+
+          // Check to see if bundle is indeed an application bundle
+          if(bundle_type == 'APPL') {
+            CFMutableArrayRef bundle_arguments = CFArrayCreateMutable(kCFAllocatorDefault,
+                                                        c.get_arguments().size(), &kCFTypeArrayCallBacks);
+
+            if (bundle_arguments) {
+              command::const_argument_sequence arguments(c.get_arguments());
+
+              BOOST_FOREACH(command::argument_sequence::value_type a, arguments) {
+                CFArrayAppendValue(bundle_arguments, CFStringCreateWithCString(kCFAllocatorDefault, a.c_str(), kCFStringEncodingASCII));
+              }
+
+              CFURLRef executable_url = CFBundleCopyExecutableURL(bundle);
+
+              if (executable_url) {
+                FSRef executable_path;
+
+                if (FSPathMakeRef(reinterpret_cast < const UInt8* > ((path(c.executable) / std::string("Contents/MacOS") / local::as_string(CFURLGetString(executable_url))).string().c_str()), &executable_path, 0) == noErr) {
+                  std::string unparsed_command_line_arguments(c.as_string());
+
+                  AppleEvent          initialEvent;
+                  ProcessSerialNumber serial_number;
+
+                  LSApplicationParameters bundle_parameters;
+                       bundle_parameters.version           = 0;
+                       bundle_parameters.flags             = kLSLaunchNewInstance;
+                       bundle_parameters.application       = &executable_path;
+                       bundle_parameters.asyncLaunchRefCon = 0;
+                       bundle_parameters.environment       = 0;
+                       bundle_parameters.argv              = 0;
+                       bundle_parameters.argv              = bundle_arguments;
+                       bundle_parameters.initialEvent      = &initialEvent;
+
+                  AEAddressDesc target_descriptor;
+
+                  AECreateDesc(typeProcessSerialNumber, &serial_number, sizeof(ProcessSerialNumber), &target_descriptor);
+
+                  AECreateAppleEvent(kCoreEventClass, kAEOpenApplication, &target_descriptor, kAutoGenerateReturnID, kAnyTransactionID, bundle_parameters.initialEvent);
+
+                  // Apple event for communicating argv
+                  AEPutParamPtr(bundle_parameters.initialEvent, keyDirectObject, typeChar, unparsed_command_line_arguments.c_str(), unparsed_command_line_arguments.size());
+
+                  if (LSOpenApplication(&bundle_parameters, &serial_number) == noErr) {
+                    GetProcessPID(&serial_number, &m_information.process_identifier);
+
+                    m_status = process::running;
+                  }
+                }
+             
+                CFRelease(executable_url);
+              }
+
+              CFRelease(bundle_arguments);
+            }
+          }
+
+          CFRelease(bundle);
+        }
+
+        CFRelease(bundle_url);
+
+        return;
+      }
+#endif
       boost::shared_array < char const* > arguments(c.get_array());
 
       m_information.process_identifier = fork();
@@ -244,6 +350,13 @@ namespace squadt {
       }
 
       m_status = (m_information.process_identifier < 0) ? process::aborted : process::running;
+
+      if (m_status != process::running) {
+        h(m_status);
+      }
+      else {
+        boost::thread(boost::bind(&process_impl::await_termination, this, m_interface, m_information, h));
+      }
     }
 
     void process_impl::terminate() {
@@ -269,14 +382,29 @@ namespace squadt {
 
     /**
      * \param[in] p pointer to the process interface object
+     * \param[in] s the new status of the process
      * \pre p.lock().get() = m_interface
      **/
-    void process_impl::await_termination(boost::weak_ptr < process > p, process::termination_handler h, process_impl::information& pi) {
-      await_termination(p, pi);
-
+    void process_impl::termination_handler(boost::weak_ptr < process > p, process::status s) {
       boost::shared_ptr< process > alive(p.lock());
 
       if (alive) {
+        m_status = s;
+      }
+    }
+
+    /**
+     * \param[in] p pointer to the process interface object
+     * \param[in] h the next handler
+     * \param[in] s the new status of the process
+     * \pre p.lock().get() = m_interface
+     **/
+    void process_impl::termination_handler(boost::weak_ptr < process > p, process::termination_handler h, process::status s) {
+      boost::shared_ptr< process > alive(p.lock());
+
+      if (alive) {
+        m_status = s;
+
         h(alive);
       }
     }
@@ -287,29 +415,17 @@ namespace squadt {
     void process_impl::execute(const command& c) {
       m_command.reset(new command(c));
 
-      create_process(c);
-
-      if (m_status == process::running) {
-        /* Wait for the process to terminate */
-        boost::thread t(bind(&process_impl::await_termination, this, m_interface, m_information));
-      }
+      create_process(c, boost::bind(&process_impl::termination_handler, this, m_interface, _1));
     }
 
     /**
      * \param[in] c the command to execute
+     * \param[in] h handler function to execute when the process terminates
      **/
-    void process_impl::execute(const command& c, process::termination_handler h) {
+    void process_impl::execute(const command& c, process::termination_handler const& h) {
       m_command.reset(new command(c));
 
-      create_process(c);
-
-      if (m_status == process::running) {
-        /* Wait for the process to terminate */
-        boost::thread t(bind(&process_impl::await_termination, this, m_interface, h, m_information));
-      }
-      else {
-        h(m_interface.lock());
-      }
+      create_process(c, boost::bind(&process_impl::termination_handler, this, m_interface, h, _1));
     }
  
     process::process() {

@@ -61,21 +61,19 @@ namespace squadt {
      * \param[in] w a pointer to the associated implementation object
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < task_monitor >& l, boost::shared_ptr < executor_impl >& w) {
+      assert(l.get() != 0);
+
       boost::shared_ptr < process > p(process::create());
 
       if (l) {
         l->attach_process(p);
         l->get_logger()->log(1, "executing command `" + c.as_string() + "'\n");
+        l->signal_change(p, process::running);
       }
 
       processes.push_back(p);
 
       p->execute(c, boost::bind(&executor_impl::handle_process_termination, this, w, l, _1));
-
-      if (l) {
-        l->signal_change(p, p->get_status());
-        l->disconnect(boost::weak_ptr< process >(p));
-      }
     }
 
     /**
@@ -170,6 +168,7 @@ namespace squadt {
 
         if (monitor) {
           monitor->signal_change(p, p->get_status());
+          monitor->disconnect(boost::weak_ptr< process >(p));
         }
 
         remove(p.get());

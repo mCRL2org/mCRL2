@@ -13,6 +13,10 @@
 #include "mcrl2/utilities/squadt_interface.h"
 #include "tipi/utility/logger.hpp"
 
+#if defined(__APPLE__)
+# include <Carbon/Carbon.h>
+#endif
+
 using namespace mcrl2::utilities;
 
 namespace mcrl2 {
@@ -103,10 +107,10 @@ namespace mcrl2 {
 
           active = false;
 
-          return (true);
+          return true;
         }
   
-        return (false);
+        return false;
       }
   
       /**
@@ -117,7 +121,7 @@ namespace mcrl2 {
 
         active = m_communicator->activate(av);
 
-        return (try_run());
+        return try_run();
       }
   
       /**
@@ -135,8 +139,52 @@ namespace mcrl2 {
         set_capabilities(m_communicator->get_capabilities());
   
         active = m_communicator->activate(ac,av);
+
+#if defined (__APPLE__)
+        // Apple Event handler for arguments
+        if (!active) {
+          static char* argv = 0;
+
+          struct local {
+            static OSErr get_arguments(const AppleEvent* message, AppleEvent*, long)  {
+              AEDesc descriptor = { typeChar, 0 };
+
+              if (AEGetParamDesc(message, keyDirectObject, typeChar, &descriptor) == noErr) {
+                argv = new char[AEGetDescDataSize(&descriptor)];
+
+                AEGetDescData(&descriptor, argv, AEGetDescDataSize(&descriptor));
+              }
+
+              AEDisposeDesc(&descriptor);
+
+              return noErr;
+            }
+          };
+
+          if (AEInstallEventHandler(kCoreEventClass, kAEOpenApplication, &local::get_arguments, 0, FALSE) == noErr) {
+            EventTypeSpec type_mask = { kEventClassAppleEvent, kEventAppleEvent };
+            EventRef      initial_apple_event;
+
+            if ((ReceiveNextEvent(1, &type_mask, 1.0, true, &initial_apple_event) == noErr)) {
+              EventRecord initial_apple_event_record;
+
+              if (ConvertEventRefToEventRecord(initial_apple_event, &initial_apple_event_record)) {
+                if (AEProcessAppleEvent(&initial_apple_event_record) == noErr) {
+                  if (argv) {
+                    if (active = m_communicator->activate(argv)) {
+                      return try_run();
+                    }
+                  }
+                }
+              }
+            }
+
+            AERemoveEventHandler(kCoreEventClass, kAEOpenApplication, 0, FALSE);
+          }
+        }
+#endif
   
-        return (try_run());
+        return try_run();
       }
   
       bool tool_interface::is_active() const {
@@ -209,7 +257,7 @@ namespace mcrl2 {
       static bool initialise() {
         rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
         *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
-  
+
         return true;
       }
   
