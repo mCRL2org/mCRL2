@@ -26,7 +26,7 @@
 # include <unistd.h>
 # include <sys/wait.h>
 # if defined(__APPLE__)
-#  include <CoreFoundation/CoreFoundation.h>
+#  include <Carbon/Carbon.h>
 #  include <ApplicationServices/ApplicationServices.h>
 # endif
 #endif
@@ -204,7 +204,7 @@ namespace squadt {
     /**
      * \param[in] c the command to execute
      **/
-    inline void process_impl::create_process(command const& c, boost::function <  void (process::status) > h) {
+    inline void process_impl::create_process(command const& c, boost::function < void (process::status) > h) {
       LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
 
       int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.c_str(),&m_information.startup,&m_information.process);
@@ -234,12 +234,24 @@ namespace squadt {
       h((WIFEXITED(exit_code)) ? process::completed : process::aborted);
     }
 
+#if defined(__APPLE__)
+    class smaller {
+      public:
+        
+        bool operator() (ProcessSerialNumber const& l, ProcessSerialNumber const& r) const {
+          return l.highLongOfPSN < r.highLongOfPSN || (l.highLongOfPSN == r.highLongOfPSN && l.lowLongOfPSN < r.lowLongOfPSN);
+        }
+    };
+#endif
+
     /**
      * \param[in] c command to execute
      **/
-    inline void process_impl::create_process(command const& c, boost::function <  void (process::status) > h) {
+    void process_impl::create_process(command const& c, boost::function < void (process::status) > h) {
 #if defined(__APPLE__)
       using namespace boost::filesystem;
+
+      static std::map < ProcessSerialNumber, boost::function < void (process::status) >, smaller > termination_handlers;
 
       struct local {
         inline static std::string as_string(const CFStringRef s) {
@@ -252,7 +264,52 @@ namespace squadt {
 
           return std::string(buffer);
         }
+
+        static OSStatus termination_handler(EventHandlerCallRef, EventRef e, void* d) {
+          ProcessSerialNumber psn;
+          EventParamType      data_type;
+          UInt32              data_size;
+
+          if (GetEventParameter(e, kEventParamProcessID, typeProcessSerialNumber,
+                                        &data_type, sizeof(ProcessSerialNumber), &data_size, &psn) == noErr) {
+
+            if (data_type == typeProcessSerialNumber && data_size == sizeof(ProcessSerialNumber)) {
+              if (0 < termination_handlers.count(psn)) {
+                boost::function < void (process::status) > handler(termination_handlers[psn]);
+
+                termination_handlers.erase(psn);
+
+                handler(process::completed);
+              }
+            }
+          }
+
+          return noErr;
+        }
+
+        static bool install_termination_handler() {
+          EventTypeSpec event_descriptors[1];
+
+          event_descriptors[0].eventClass = kEventClassApplication;
+          event_descriptors[0].eventKind  = kEventAppTerminated;
+
+          EventHandlerUPP upp = NewEventHandlerUPP(&local::termination_handler);
+
+          if (upp) {
+            if (InstallApplicationEventHandler(upp, 1, event_descriptors, 0, 0) == noErr) {
+              return true;
+            }
+
+            DisposeEventHandlerUPP(upp);
+          }
+
+          return false;
+        }
       };
+
+      static bool termination_handling = local::install_termination_handler();
+      
+      assert(termination_handling);
 
       // Start application bundle
       if (is_directory(c.executable) && extension(c.executable).compare(".app") == 0) {
@@ -300,7 +357,6 @@ namespace squadt {
                        bundle_parameters.asyncLaunchRefCon = 0;
                        bundle_parameters.environment       = 0;
                        bundle_parameters.argv              = 0;
-                       bundle_parameters.argv              = bundle_arguments;
                        bundle_parameters.initialEvent      = &initialEvent;
 
                   AEAddressDesc target_descriptor;
@@ -314,6 +370,9 @@ namespace squadt {
 
                   if (LSOpenApplication(&bundle_parameters, &serial_number) == noErr) {
                     GetProcessPID(&serial_number, &m_information.process_identifier);
+
+                    // Register termination handler
+                    termination_handlers[serial_number] = h;
 
                     m_status = process::running;
                   }
@@ -330,6 +389,10 @@ namespace squadt {
         }
 
         CFRelease(bundle_url);
+
+        if (m_status != process::running) {
+          h(m_status);
+        }
 
         return;
       }
