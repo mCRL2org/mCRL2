@@ -110,7 +110,8 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
 	    bool b = config.GetFirstEntry(s,i);
 	    while ( b )
 	    {
-		    simulator->LoadView(config.Read(s,wxT("")).fn_str());
+		    string t(config.Read(s,wxT("")).fn_str());
+		    simulator->LoadView(t);
 		    b = config.GetNextEntry(s,i);
 	    }
     }
@@ -358,7 +359,8 @@ void XSimMain::LoadFile(const wxString &filename)
 
 void XSimMain::LoadDLL(const wxString &filename)
 {
-  simulator->LoadView(filename.fn_str());
+  string s(filename.fn_str());
+  simulator->LoadView(s);
 }
  
 
@@ -467,7 +469,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 		    simulator->LoadTrace(fn);
 	    } catch ( string err )
             {
-		    wxMessageDialog dialog(this,wxT(err.c_str()),wxT("Error loading trace"),wxOK|wxICON_ERROR);
+		    wxMessageDialog dialog(this,wxConvLocal.cMB2WX(err.c_str()),wxT("Error loading trace"),wxOK|wxICON_ERROR);
 		    dialog.ShowModal();
             }
 	    Stopper_Exit();
@@ -485,7 +487,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 		    simulator->SaveTrace(fn);
 	    } catch ( string err )
 	    {
-		    wxMessageDialog dialog(this,wxT(err.c_str()),wxT("Error saving trace"),wxOK|wxICON_ERROR);
+		    wxMessageDialog dialog(this,wxConvLocal.cMB2WX(err.c_str()),wxT("Error saving trace"),wxOK|wxICON_ERROR);
 		    dialog.ShowModal();
 	    }
     }

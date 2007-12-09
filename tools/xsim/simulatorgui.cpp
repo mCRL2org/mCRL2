@@ -31,7 +31,7 @@ StandardSimulatorGUI::~StandardSimulatorGUI()
 
 void StandardSimulatorGUI::LoadView(const string &filename)
 {
-	wxDynamicLibrary lib(filename);
+	wxDynamicLibrary lib(wxConvLocal.cMB2WX(filename.c_str()));
 
 	if ( lib.IsLoaded() )
 	{
