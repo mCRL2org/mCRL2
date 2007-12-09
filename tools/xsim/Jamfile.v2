@@ -14,11 +14,15 @@ obj sim_base_gui
 
 alias xsim : : <wx>no ;
 
+alias sim_shared
+       : [ obj simbase.o : simbase.cpp /libraries//lps ]
+         [ obj simulator.o : simulator.cpp /libraries//lps ]
+       ;
+
 exe xsim
        : xsim.cpp
-         simbase.cpp
+         sim_shared
          sim_base_gui
-         simulator.cpp
          simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
@@ -34,8 +38,7 @@ exe xsim
 
 exe sim
        : sim.cpp
-         simbase.cpp
-         simulator.cpp
+         sim_shared
          /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
        ;
