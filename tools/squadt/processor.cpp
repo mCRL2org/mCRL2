@@ -81,24 +81,30 @@ namespace squadt {
   }
 
   /**
-   * \param id the identifier for the object
-   * \param p shared pointer to an object descriptor
+   * \param[in] id the identifier for the object
+   * \param[in] p shared pointer to an object descriptor
    **/
-  void processor_impl::append_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& p) {
-    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
-      if (p->location == boost::static_pointer_cast< processor_impl::object_descriptor >(i->object)->location) {
-        throw std::runtime_error("Failed to append output object due to conflict: file exists!");
+  void processor_impl::register_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& o) {
+    for (input_list::iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      if (id == i->identifier) {
+        i->object = o;
+
+        return;
       }
     }
 
-    inputs.push_back(make_configurated_object_descriptor(id, p));
+    inputs.push_back(make_configurated_object_descriptor(id, o));
   }
 
   /**
-   * \param id the identifier for the object
-   * \param p shared pointer to an object descriptor
+   * \param[in] id the identifier for the object
+   * \param[in,out] p shared pointer to an object descriptor
+   * \note the object descriptor can be replaced by the already registered object descriptor
+   * \pre o->generator.lock().get() == interface_object.lock().get()
    **/
-  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& o) {
+  void processor_impl::register_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor >& o) {
+    assert(o->generator.lock().get() == interface_object.lock().get());
+
     boost::shared_ptr < project_manager > guard(manager.lock());
 
     if (guard) {
@@ -110,6 +116,14 @@ namespace squadt {
         }
       }
      
+      for (output_list::iterator i = outputs.begin(); i != outputs.end(); ++i) {
+        if (id == i->identifier) {
+          *i->object = *o;
+
+          return;
+        }
+      }
+
       outputs.push_back(make_configurated_object_descriptor(id, o));
     }
     else {
@@ -117,31 +131,52 @@ namespace squadt {
     }
   }
 
+  boost::filesystem::path processor_impl::try_convert_to_store_relative(boost::filesystem::path const& s) const {
+    boost::shared_ptr < project_manager > project(manager.lock());
+
+    if (project) {
+      using boost::filesystem::path;
+
+      path store(project->get_project_store());
+
+      path::const_iterator i = store.begin();
+      path::const_iterator j = s.begin();
+
+      while (i != store.end() && j != s.end()) {
+        if (*i != *j) {
+          break;
+        }
+
+        ++i;
+        ++j;
+      }
+
+      if (j != s.end()) {
+        path result;
+
+        while (j != s.end()) {
+          result /= *(j++);
+        }
+
+        return result;
+      }
+    }
+
+    return s;
+  }
+
   /**
    * \param[in] o a tipi::object object that describes an output object
    * \param[in] id the unique identifier for this object in the configuration
    * \param[in] s the status of the new object
    **/
-  void processor_impl::append_output(tipi::configuration::parameter_identifier const& id, tipi::object const& o, object_descriptor::status_type const& s) {
-    boost::shared_ptr< object_descriptor > p(new object_descriptor(interface_object, o.get_mime_type(), o.get_location()));
+  void processor_impl::register_output(tipi::configuration::parameter_identifier const& id, tipi::object const& o, object_descriptor::status_type const& s) {
+    boost::shared_ptr< object_descriptor > p(new
+                object_descriptor(interface_object, manager, o.get_mime_type(), try_convert_to_store_relative(o.get_location()).string()));
 
     p->status = s;
 
-    append_output(id, p);
-  }
-
-  /**
-   * \param[in] p the object descriptor that should be replaced
-   * \param[in] id the unique identifier for this object in the configuration
-   * \param[in] o a tipi::object object that describes an output object
-   * \param[in] s the new status of the object
-   **/
-  void processor_impl::replace_output(tipi::configuration::parameter_identifier const& id,
-        boost::shared_ptr< object_descriptor > p, tipi::object const& o, object_descriptor::status_type const& s) {
-
-    p->mime_type = o.get_mime_type();
-    p->location  = o.get_location();
-    p->status    = s;
+    register_output(id, p);
   }
 
   /**
@@ -180,7 +215,7 @@ namespace squadt {
           boost::shared_ptr < object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(i.object));
         
           if (output_object.get() == 0) {
-            output_object->self_check(*g);
+            output_object->self_check();
      
             maximum_input_timestamp = (std::max)(maximum_input_timestamp, output_object->timestamp);
      
@@ -192,7 +227,7 @@ namespace squadt {
         BOOST_FOREACH(processor::configurated_object_descriptor& o, outputs) {
           boost::shared_ptr < object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(o.object));
 
-          output_object->self_check(*g, static_cast < const long int > (maximum_input_timestamp));
+          output_object->self_check(static_cast < const long int > (maximum_input_timestamp));
      
           result |= (output_object->status != object_descriptor::original) && (output_object->status != object_descriptor::reproducible_up_to_date);
         }
@@ -240,7 +275,7 @@ namespace squadt {
       for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
         boost::shared_ptr< object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(i->object));
 
-        path p(g->get_path_for_name(output_object->location));
+        path p(output_object->get_location());
 
         if (exists(p)) {
           remove(p);
@@ -340,17 +375,13 @@ namespace squadt {
   void processor_impl::relocate_object(processor::configurated_object_descriptor& d, std::string const& n) {
     using namespace boost::filesystem;
 
-    boost::shared_ptr < project_manager > g(manager.lock());
+    boost::shared_ptr < project_manager > project(manager.lock());
 
-    if (g.get() != 0) {
+    if (project) {
       boost::shared_ptr < object_descriptor > object(boost::static_pointer_cast< object_descriptor >(d.object));
 
-      if (g->impl->file_exists(n)) {
-        throw std::runtime_error("The project already contains a file named `" + n + "'");
-      }
-
-      path source(g->get_path_for_name(object->location));
-      path target(g->get_path_for_name(n));
+      path source(object->get_location());
+      path target(project->get_project_store() / n);
       
       if (exists(source) && source != target) {
         if (exists(target)) {
@@ -366,7 +397,7 @@ namespace squadt {
       boost::shared_ptr < tipi::configuration > c = current_monitor->get_configuration();
       
       if (c.get() != 0) {
-        c->get_output(d.identifier).set_location(n);
+        c->get_output(d.identifier).set_location(target.string());
       }
     }
   }
@@ -376,37 +407,59 @@ namespace squadt {
    * \param[in] p the previous set of output objects part of the old configuration
    * \param[in] check whether or not to check for existence of concrete outputs
    **/
-  void processor_impl::process_configuration(boost::shared_ptr < tipi::configuration > const& c,
+  void processor_impl::process_configuration(boost::shared_ptr < tipi::configuration >& c,
                                                     std::set < tipi::object const* >& p, bool check) {
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
+      tipi::configuration::const_iterator_input_range input_range(c->get_input_objects());
+
+      /* Extract information about input objects from the configuration */
+      for (tipi::configuration::const_iterator_input_range::const_iterator i = input_range.begin(); i != input_range.end(); ++i) {
+        tipi::configuration::object const& object(static_cast < tipi::configuration::object& > (*i));
+
+        if (!boost::filesystem::path(object.get_location()).has_branch_path()) {
+          // Assume that the object is located in the project directory
+          boost::shared_ptr < processor::object_descriptor > descriptor(g->impl->search_object_descriptor(object.get_location()));
+
+          if (descriptor) {
+            register_input(c->get_identifier(object), boost::static_pointer_cast < processor_impl::object_descriptor > (descriptor));
+          }
+        }
+      }
+
       tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
 
       /* Extract information about output objects from the configuration */
       for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-        tipi::configuration::object const& object(static_cast < tipi::configuration::object& > (*i));
+        tipi::configuration::object& object(static_cast < tipi::configuration::object& > (*i));
 
         tipi::configuration::parameter_identifier  id = c->get_identifier(*i);
-        boost::shared_ptr < object_descriptor >    o  = boost::static_pointer_cast< object_descriptor > (find_output_by_id(id));
        
-        if (o.get() == 0) {
-          /* Output not registered yet */
-          append_output(id, object, object_descriptor::reproducible_nonexistent);
-        }
-        else {
-          if (object.get_location() != o->location) {
+        boost::filesystem::path new_object_location(try_convert_to_store_relative(object.get_location()));
+
+        boost::shared_ptr < object_descriptor > descriptor = boost::static_pointer_cast< object_descriptor > (find_output_by_id(id));
+
+        if (descriptor) {
+          if (new_object_location != descriptor->location) {
             /* Output already known, but filenames do not match */
-            remove(g->get_path_for_name(o->location));
+            remove(descriptor->get_location());
           }
+
+          descriptor->location = new_object_location.string();
+          descriptor->status   = object_descriptor::reproducible_up_to_date;
        
-          replace_output(id, o, object, object_descriptor::reproducible_up_to_date);
+          register_output(id, descriptor);
 
           /* Check status */
-          o->self_check(*g);
+          descriptor->self_check();
+        }
+        else {
+          /* Output not registered yet */
+          register_output(id, object, object_descriptor::reproducible_nonexistent);
         }
 
-        if (!boost::filesystem::exists(g->get_path_for_name(object.get_location())) && check) {
+        if (!boost::filesystem::exists(object.get_location()) && check) {
           current_monitor->get_logger()->log(1, "Warning, output file with name: " + object.get_location() + " does not exist!\n");
         }
 
@@ -421,7 +474,7 @@ namespace squadt {
 
       /* Remove files from the old configuration that do not appear in the new one */
       for (std::set< tipi::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
-        remove(g->get_path_for_name((*i)->get_location()));
+        remove((*i)->get_location());
       }
 
       if (0 < outputs.size()) {
@@ -475,7 +528,7 @@ namespace squadt {
 
       boost::shared_ptr < tipi::configuration > c(tipi::controller::communicator::new_configuration(*selected_input_configuration));
 
-      c->set_output_prefix(str(format("%s-%03X") % (get_output_prefix(find_primary_input()->location)) % g->get_unique_count()));
+      c->set_output_prefix(str(format("%s-%03d") % (get_output_prefix(find_primary_input()->location)) % g->get_unique_count()));
 
       c->add_input(ic->get_primary_object_descriptor().first, ic->get_primary_object_descriptor().second.as_string(), l.string());
 
@@ -505,7 +558,10 @@ namespace squadt {
         BOOST_FOREACH(input_list::value_type& i, inputs) {
           object_descriptor& object(*boost::static_pointer_cast< object_descriptor >(i.object));
 
-          if (!object.present_in_store(*g)) {
+          // Set object location to absolute path (path to project store prepended)
+          c->get_input(i.identifier).set_location(object.get_location().string());
+
+          if (!object.present_in_store()) {
             boost::shared_ptr < processor > p(object.generator.lock());
 
             if (p.get() != 0) {
@@ -553,6 +609,9 @@ namespace squadt {
         /* Check that dependent files exist and rebuild if this is not the case */
         BOOST_FOREACH(input_list::value_type& i, inputs) {
           boost::shared_ptr < object_descriptor > object(boost::static_pointer_cast< object_descriptor >(i.object));
+
+          // Set object location to absolute path (path to project store prepended)
+          c->get_input(i.identifier).set_location(object->get_location().string());
 
           boost::shared_ptr < processor > p(object->generator.lock());
 
@@ -624,11 +683,28 @@ namespace squadt {
     global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }
 
+
+  void processor_impl::object_descriptor::operator=(object_descriptor const& o) {
+    assert(generator.lock().get() == o.generator.lock().get());
+    assert(project.lock().get() == o.project.lock().get());
+
+    status    = o.status;
+    mime_type = o.mime_type;
+    location  = o.location;
+    timestamp = o.timestamp;
+  }
+
   tipi::mime_type processor_impl::object_descriptor::get_format() const {
     return mime_type;
   }
 
-  tipi::uri processor_impl::object_descriptor::get_location() const {
+  boost::filesystem::path processor_impl::object_descriptor::get_location() const {
+    boost::shared_ptr < project_manager > project_manager(project.lock());
+
+    if (project_manager) {
+      return project_manager->get_project_store() / location;
+    }
+
     return location;
   }
 
@@ -644,13 +720,8 @@ namespace squadt {
     return timestamp;
   }
 
-  /**
-   * \param[in] m the associated project manager
-   **/
-  bool processor_impl::object_descriptor::present_in_store(project_manager const& m) {
-    path l(m.get_path_for_name(location));
-
-    if (exists(l)) {
+  bool processor_impl::object_descriptor::present_in_store() {
+    if (exists(get_location())) {
       return (true);
     }
     else {
@@ -676,42 +747,45 @@ namespace squadt {
     }
   }
 
-  bool processor_impl::object_descriptor::self_check(project_manager const& m) {
-    return self_check(m, 0);
+  bool processor_impl::object_descriptor::self_check() {
+    return self_check(0);
   }
 
   /**
-   * \param[in] m a reference to a project manager, used to obtain complete paths files in the project
    * \param[in] t objects older than this time stamp are considered obsolete
    **/
-  bool processor_impl::object_descriptor::self_check(project_manager const& m, const long int t) {
-    using namespace boost::filesystem;
+  bool processor_impl::object_descriptor::self_check(const long int t) {
+    boost::shared_ptr < project_manager > project_manager(project.lock());
 
-    if (!generator.lock()->is_active()) {
-      path l(m.get_path_for_name(location));
-      
-      if (exists(l)) {
-        /* Input exists, get timestamp */ 
-        time_t stamp = last_write_time(l);
-      
-        if (stamp < t) {
-          return (processor_impl::try_change_status(*this, reproducible_out_of_date));
-        }
-        else if (timestamp < stamp) {
-          /* Compare checksums and update recorded checksum */
-          boost::md5::digest_type old = checksum;
-      
-          checksum = boost::md5(l).digest();
-    
-          if (timestamp != 0 && old != checksum) {
-            return processor_impl::try_change_status(*this, reproducible_up_to_date);
+    if (project_manager) {
+      using namespace boost::filesystem;
+
+      if (!generator.lock()->is_active()) {
+        path l(get_location());
+        
+        if (exists(l)) {
+          /* Input exists, get timestamp */ 
+          time_t stamp = last_write_time(l);
+        
+          if (stamp < t) {
+            return (processor_impl::try_change_status(*this, reproducible_out_of_date));
           }
-    
-          timestamp = stamp;
+          else if (timestamp < stamp) {
+            /* Compare checksums and update recorded checksum */
+            boost::md5::digest_type old = checksum;
+        
+            checksum = boost::md5(l).digest();
+      
+            if (timestamp != 0 && old != checksum) {
+              return processor_impl::try_change_status(*this, reproducible_up_to_date);
+            }
+      
+            timestamp = stamp;
+          }
         }
-      }
-      else {
-        return (processor_impl::try_change_status(*this, reproducible_nonexistent));
+        else {
+          return (processor_impl::try_change_status(*this, reproducible_nonexistent));
+        }
       }
     }
 
@@ -838,8 +912,10 @@ namespace squadt {
         /* End tool execution */
         finish();
 
+        boost::shared_ptr < tipi::configuration > configuration(get_configuration());
+
         /* Operation completed successfully */
-        t->impl->process_configuration(get_configuration(), old_outputs, false);
+        t->impl->process_configuration(configuration, old_outputs, false);
       }
     }
     else {
@@ -876,8 +952,10 @@ namespace squadt {
           send_start_signal();
      
           if (await_completion()) {
+            boost::shared_ptr < tipi::configuration > configuration(get_configuration());
+
             /* Operation completed successfully */
-            t->impl->process_configuration(get_configuration(), old_outputs);
+            t->impl->process_configuration(configuration, old_outputs);
      
             /* Successful, set new status */
             boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
@@ -1041,8 +1119,8 @@ namespace squadt {
   /**
    * \param p weak pointer to an object descriptor
    **/
-  void processor::append_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr< object_descriptor > const& p) {
-    impl->append_input(id, boost::static_pointer_cast< processor_impl::object_descriptor > (p));
+  void processor::register_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr< object_descriptor > const& p) {
+    impl->register_input(id, boost::static_pointer_cast< processor_impl::object_descriptor > (p));
   }
 
   /**
@@ -1089,10 +1167,10 @@ namespace squadt {
    * \param[in] u a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
    **/
-  void processor::append_output(tipi::configuration::parameter_identifier const& id, build_system::mime_type const& m, const std::string& u, object_descriptor::status_type const& s) {
-    boost::shared_ptr< processor_impl::object_descriptor > p(new processor_impl::object_descriptor(impl->interface_object, m, u, s));
+  void processor::register_output(tipi::configuration::parameter_identifier const& id, build_system::mime_type const& m, const std::string& u, object_descriptor::status_type const& s) {
+    boost::shared_ptr< processor_impl::object_descriptor > p(new processor_impl::object_descriptor(impl->interface_object, impl->manager, m, u, s));
 
-    impl->append_output(id, p);
+    impl->register_output(id, p);
   }
 
   void processor::configure(std::string const& w) {

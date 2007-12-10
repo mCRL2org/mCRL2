@@ -367,7 +367,7 @@ namespace squadt {
     boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
     BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-      locations.insert(object->get_location());
+      locations.insert(object->get_location().string());
     }
 
     boost::recursive_mutex::scoped_lock l(list_lock);
@@ -380,7 +380,7 @@ namespace squadt {
         boost::iterator_range< processor::output_object_iterator > output_range((*i)->get_output_iterators());
 
         BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-          if (locations.find(object->get_location()) != locations.end()) {
+          if (locations.find(object->get_location().string()) != locations.end()) {
             /* Conflict */
             conflicts->push_back(object);
           }
@@ -467,7 +467,7 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->append_output("", global_build_system.get_type_registry()->mime_type_from_name(s.leaf()),
+    p->register_output("", global_build_system.get_type_registry()->mime_type_from_name(s.leaf()),
                                 destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);
@@ -498,13 +498,34 @@ namespace squadt {
       BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
         boost::shared_ptr< processor > g(object->get_generator());
 
-        if (object->get_location() == s) {
+        if (object->get_location() == full_path) {
           return true;
         }
       }
     }
 
     return false;
+  }
+
+  /**
+   * \param[in] s path to the file, relative to the project store
+   **/
+  boost::shared_ptr < processor::object_descriptor > project_manager_impl::search_object_descriptor(boost::filesystem::path const& s) {
+    boost::filesystem::path full_path(store / s);
+
+    for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
+      boost::iterator_range< processor::output_object_iterator > output_range((*i)->get_output_iterators());
+
+      BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
+        boost::shared_ptr< processor > g(object->get_generator());
+
+        if (boost::filesystem::equivalent(object->get_location(), full_path)) {
+          return object;
+        }
+      }
+    }
+
+    return boost::shared_ptr < processor::object_descriptor >();
   }
 
   /**
@@ -647,15 +668,6 @@ namespace squadt {
     return (impl->store.leaf());
   }
 
-  /**
-   * \param n the name of the file
-   **/
-  boost::filesystem::path project_manager::get_path_for_name(const std::string& n) const {
-    assert(boost::filesystem::native(n));
-
-    return (impl->store / n);
-  }
-
   void project_manager_impl::write() const {
     boost::filesystem::path project_file(settings_manager::path_concatenate(store,
              settings_manager::project_definition_base_name));
@@ -676,7 +688,7 @@ namespace squadt {
   /**
    * \param[in] s a path to a project file
    **/
-  bool project_manager::is_project_store(const std::string& s) {
+  bool project_manager::is_project_store(const boost::filesystem::path& s) {
     bool return_value = false;
 
     bf::path path_to(settings_manager::path_concatenate(s, settings_manager::project_definition_base_name));
@@ -711,8 +723,8 @@ namespace squadt {
     return (impl->description);
   }
 
-  std::string project_manager::get_project_store() const {
-    return (impl->store.native_directory_string());
+  boost::filesystem::path project_manager::get_project_store() const {
+    return (impl->store);
   }
 
   project_manager::processor_sequence project_manager::get_processor_sequence() const {

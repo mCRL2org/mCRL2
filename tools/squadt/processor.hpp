@@ -88,7 +88,7 @@ namespace squadt {
           virtual tipi::mime_type get_format() const = 0;
 
           /** \brief Returns the location as URI */
-          virtual tipi::uri get_location() const = 0;
+          virtual boost::filesystem::path get_location() const = 0;
 
           /** \brief Returns the processor that generated this object */
           virtual boost::shared_ptr< processor > get_generator() const = 0;
@@ -97,7 +97,7 @@ namespace squadt {
           bool is_up_to_date();
 
           /** \brief Checks and updates status */
-          virtual bool self_check(project_manager const&) = 0;
+          virtual bool self_check() = 0;
 
           /** \brief Destructor */
           virtual ~object_descriptor();
@@ -204,8 +204,8 @@ namespace squadt {
       /** \brief Get output objects */
       boost::iterator_range < output_object_iterator > get_output_iterators() const;
  
-      /** \brief Add an input object */
-      void append_input(tipi::configuration::parameter_identifier const&,
+      /** \brief Add (or modify) an input object */
+      void register_input(tipi::configuration::parameter_identifier const&,
                         boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
@@ -223,7 +223,7 @@ namespace squadt {
       void relocate_input(object_descriptor&, std::string const&);
  
       /** \brief Add an output object */
-      void append_output(tipi::configuration::parameter_identifier const&,
+      void register_output(tipi::configuration::parameter_identifier const&,
                 const build_system::storage_format&, const std::string&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
  

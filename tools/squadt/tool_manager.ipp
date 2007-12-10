@@ -66,7 +66,7 @@ namespace squadt {
     private:
 
       /** \brief Start a tool */
-      void execute(tool const&, std::string const&, execution::task_monitor::sptr, bool);
+      void execute(tool const&, boost::filesystem::path const&, execution::task_monitor::sptr, bool);
 
       /** \brief Execute a command */
       void execute(execution::command const*, execution::task_monitor::sptr, bool);

@@ -52,9 +52,9 @@ namespace squadt {
   /// \cond INTERNAL_DOCS
   const long tool_manager_impl::default_port = 10949;
 
-  char const* tool_manager_impl::default_tools[] = {"diagraphica", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
+  char const* tool_manager_impl::default_tools[] = {"diagraphica.app", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
                                                     "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm", "ltsconvert", "ltsinfo",
-                                                    "ltsgraph", "ltsview", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim", 0};
+                                                    "ltsgraph.app", "ltsview.app", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim.app", 0};
 
 
   tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
@@ -80,10 +80,10 @@ namespace squadt {
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    * \param[in] w the directory in which execution should take place
    **/
-  void tool_manager_impl::execute(tool const& t, std::string const& w, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, execution::task_monitor::sptr p, bool b) {
     instance_identifier id = free_identifier++;
 
-    execution::command c(t.get_location(), w);
+    execution::command c(t.get_location().string(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
                             % boost::asio::ip::address_v4::loopback() % default_port));
@@ -142,18 +142,31 @@ namespace squadt {
   }
   
   void tool_manager_impl::factory_configuration() {
+    using namespace boost::filesystem;
+
     const boost::filesystem::path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
 
     tools.clear();
 
     for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
 #if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
-      boost::filesystem::path file_name(std::string(*t) + ".exe");
+      path path_to_binary(*t + ".exe");
 #else
-      boost::filesystem::path file_name(*t);
+      path path_to_binary(*t);
 #endif
 
-      tools.push_back(boost::shared_ptr < tool > (new tool(*t, (default_path / file_name).string())));
+#if defined(__APPLE__)
+      if (extension(path_to_binary).empty()) {
+        path_to_binary = default_path / path_to_binary;
+      }
+      else {
+        path_to_binary = default_path.branch_path() / path_to_binary;
+      }
+#else
+      path_to_binary = default_path.branch_path() / path_to_binary;
+#endif
+
+      tools.push_back(boost::shared_ptr < tool > (new tool(basename(*t), path_to_binary)));
     }
   }
 

@@ -13,6 +13,8 @@
 #include <string>
 #include <iostream>
 
+#include <boost/filesystem/path.hpp>
+
 #include "tipi/tool/capabilities.hpp"
 
 #include "tipi/utility/generic_visitor.hpp"
@@ -41,10 +43,10 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string                                    m_name;
+      std::string                                     m_name;
 
       /** \brief The location where the tool can be found */
-      std::string                                    m_location;
+      boost::filesystem::path                         m_location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
       boost::shared_ptr < tipi::tool::capabilities >  m_capabilities;
@@ -57,7 +59,7 @@ namespace squadt {
     private:
 
       /** \brief Constructor */
-      inline tool(std::string, std::string, boost::shared_ptr < tipi::tool::capabilities > = tool::no_capabilities);
+      inline tool(std::string const&, boost::filesystem::path const&, boost::shared_ptr < tipi::tool::capabilities > = tool::no_capabilities);
 
       /** \brief Copy constructor */
       inline tool(tool const&);
@@ -74,7 +76,7 @@ namespace squadt {
       inline boost::shared_ptr < tipi::tool::capabilities > get_capabilities() const;
 
       /** \brief Get the location to for this tool */
-      inline std::string get_location() const;
+      inline boost::filesystem::path get_location() const;
 
       /** \brief Get the name of this tool */
       inline std::string get_name() const;
@@ -88,7 +90,7 @@ namespace squadt {
    * \param[in] n a name for the tool
    * \param[in] c a tool::capabilities object for the tool
    **/
-  inline tool::tool(std::string n, std::string l, boost::shared_ptr < tipi::tool::capabilities > c) : m_name(n), m_location(l), m_capabilities(c) {
+  inline tool::tool(std::string const& n, boost::filesystem::path const& l, boost::shared_ptr < tipi::tool::capabilities > c) : m_name(n), m_location(l), m_capabilities(c) {
   }
 
   inline tool::tool(tool const& t) : m_name(t.m_name), m_location(t.m_location), m_capabilities(t.m_capabilities) {
@@ -110,7 +112,7 @@ namespace squadt {
     return (m_capabilities);
   }
 
-  inline std::string tool::get_location() const {
+  inline boost::filesystem::path tool::get_location() const {
     return (m_location);
   }
 

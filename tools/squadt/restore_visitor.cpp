@@ -304,7 +304,7 @@ namespace utility {
 
         e->GetAttribute("identifier", &tipi_id);
        
-        p.append_input(tipi_id, h.cmap[id]);
+        p.register_input(tipi_id, h.cmap[id]);
       }
       else if (e->Value() == "output") {
         /* Read output */
@@ -314,10 +314,10 @@ namespace utility {
 
         assert(h.cmap.find(id) == h.cmap.end());
        
-        h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor>(
-                new processor_impl::object_descriptor(p.interface_object, tipi::mime_type(e->GetAttribute("format")), tipi::uri(e->GetAttribute("location"))));
+        h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor >(
+                new processor_impl::object_descriptor(p.interface_object, p.manager, tipi::mime_type(e->GetAttribute("format")), tipi::uri(e->GetAttribute("location"))));
 
-        processor_impl::object_descriptor& new_descriptor = *h.cmap[id];
+        processor_impl::object_descriptor& new_descriptor(*h.cmap[id]);
         
         e->GetAttribute("timestamp", &new_descriptor.timestamp);
         e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
@@ -332,7 +332,7 @@ namespace utility {
         
         e->GetAttribute("digest", &new_descriptor.checksum, false);
 
-        p.append_output(tipi_id, h.cmap[id]);
+        p.register_output(tipi_id, h.cmap[id]);
       }
       else if (e->Value() == "configuration") {
         boost::shared_ptr < tipi::configuration > new_configuration(new tipi::configuration);

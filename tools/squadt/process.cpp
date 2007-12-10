@@ -403,7 +403,7 @@ namespace squadt {
 
       if (m_information.process_identifier == 0) {
         /* Change working directory to the project directory */
-        chdir(c.working_directory.c_str());
+        chdir(c.working_directory.string().c_str());
 
         execvp(c.executable.c_str(), const_cast < char* const* > (arguments.get()));
 

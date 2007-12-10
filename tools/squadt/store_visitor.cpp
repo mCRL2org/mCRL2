@@ -274,7 +274,7 @@ namespace utility {
 
       out << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > (&object)
         << "\" format=\"" << object.get_format()
-        << "\" location=\"" << object.get_location();
+        << "\" location=\"" << p.try_convert_to_store_relative(object.get_location());
 
       if (object.get_status() != processor::object_descriptor::original) {
         out << "\" identifier=\"" << std::dec << i->identifier;

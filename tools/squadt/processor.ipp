@@ -66,25 +66,29 @@ namespace squadt {
 
         private:
 
-          boost::weak_ptr < processor >  generator;      ///< The processor responsible for generating this object
-          tipi::mime_type                mime_type;      ///< The used storage format
-          tipi::uri                      location;       ///< The location of the object
-          boost::md5::digest_type        checksum;       ///< The digest for the completed object
-          std::time_t                    timestamp;      ///< The last time the file was modified just before the last checksum was computed
+          boost::weak_ptr < processor >       generator;      ///< The processor responsible for generating this object
+          boost::weak_ptr < project_manager > project;        ///< The manager of the project of which this object is part (generator->impl->manager)
+          tipi::mime_type                     mime_type;      ///< The used storage format
+          tipi::uri                           location;       ///< The location of the object
+          boost::md5::digest_type             checksum;       ///< The digest for the completed object
+          std::time_t                         timestamp;      ///< The last time the file was modified just before the last checksum was computed
         
         public:
 
           /** \brief Constructor */
-          object_descriptor(boost::weak_ptr < processor > const& g, tipi::mime_type const& m, tipi::uri const& u,
-                    processor::object_descriptor::status_type t = processor::object_descriptor::original) :
-                            processor::object_descriptor(t), generator(g), mime_type(m), location(u), timestamp(0) {
+          object_descriptor(boost::weak_ptr < processor > const& g, boost::weak_ptr < project_manager> m,
+                tipi::mime_type const& f, tipi::uri const& u, processor::object_descriptor::status_type t = processor::object_descriptor::original) :
+                            processor::object_descriptor(t), generator(g), project(m), mime_type(f), location(u), timestamp(0) {
           }
+
+          /** \brief Assignment */
+          void operator=(object_descriptor const&);
 
           /** \brief Returns the storage format as MIME type */
           tipi::mime_type get_format() const;
 
           /** \brief Returns the location as URI */
-          tipi::uri get_location() const;
+          boost::filesystem::path get_location() const;
 
           /** \brief Returns the last recorded MD5 checksum of the file */
           boost::md5::digest_type get_checksum() const;
@@ -96,13 +100,13 @@ namespace squadt {
           boost::shared_ptr< processor > get_generator() const;
 
           /** \brief Verifies whether or not the object is present in the store and updates status accordingly */
-          bool present_in_store(project_manager const&);
+          bool present_in_store();
 
           /** \brief Verifies whether or not the object is physically available and not changed */
-          bool self_check(project_manager const&, const long int);
+          bool self_check();
 
           /** \brief Verifies whether or not the object is physically available and not changed */
-          bool self_check(project_manager const&);
+          bool self_check(const long int);
       };
 
     private:
@@ -145,6 +149,9 @@ namespace squadt {
       /** \brief Handler that is executed when an edit operation is completed */
       void edit_completed();
 
+      /** \brief Tries to convert a path to a path that is relative to the project store */
+      boost::filesystem::path try_convert_to_store_relative(boost::filesystem::path const&) const;
+
     private:
 
       /** \brief Basic constructor */
@@ -161,7 +168,7 @@ namespace squadt {
       std::string get_output_prefix(std::string const&) const;
 
       /** \brief Extracts useful information from a configuration object */
-      void process_configuration(boost::shared_ptr < tipi::configuration > const&, std::set < tipi::object const* >&, bool = true);
+      void process_configuration(boost::shared_ptr < tipi::configuration >&, std::set < tipi::object const* >&, bool = true);
 
       /** \brief Find an object descriptor for a given pointer to an object */
       boost::shared_ptr < processor::object_descriptor > find_output_by_id(tipi::configuration::parameter_identifier const&);
@@ -211,19 +218,15 @@ namespace squadt {
       /** \brief Start updating and afterward execute a function */
       void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
-      /** \brief Add an output object */
-      void append_input(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
+      /** \brief Add (or modify) an output object */
+      void register_input(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
+
+      /** \brief Add (or modify) an output object */
+      void register_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor >&);
 
       /** \brief Add an output object */
-      void append_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
-
-      /** \brief Add an output object */
-      void append_output(tipi::configuration::parameter_identifier const&, tipi::object const&,
+      void register_output(tipi::configuration::parameter_identifier const&, tipi::object const&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
-
-      /** \brief Replace an existing output object */
-      void replace_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor >, tipi::object const&,
-                object_descriptor::status_type const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();

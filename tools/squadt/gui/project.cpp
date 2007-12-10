@@ -95,19 +95,25 @@ namespace squadt {
     }
     
     void project::builder::process(wxTimerEvent&) {
-      if (0 < tasks.size()) {
+      std::deque < boost::function < void () > > local_tasks;
+
+      local_tasks.swap(tasks);
+
+      if (0 < local_tasks.size()) {
         timer.Stop();
 
-        while (0 < tasks.size()) {
-          boost::function < void () > task = tasks.front();
-       
-          tasks.pop_front();
-       
-          /* Execute task */
-          if (!task.empty()) {
-            task();
+        do {
+          for (std::deque < boost::function < void () > >::const_iterator task = local_tasks.begin(); task != local_tasks.end(); ++task) {
+            if (!task->empty()) {
+              /* Execute task */
+              (*task)();
+            }
           }
+
+          local_tasks.clear();
+          local_tasks.swap(tasks);
         }
+        while (0 < local_tasks.size());
 
         timer.Start(50);
       }
@@ -223,7 +229,10 @@ namespace squadt {
           BOOST_FOREACH(boost::shared_ptr < processor > const& p, processor_range) {
             boost::iterator_range< processor::input_object_iterator > input_range(p->get_input_iterators());
 
-            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& iobject, input_range) {
+            // for non tree visualisation use: BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& iobject, input_range) {
+            if (!input_range.empty()) {
+              boost::shared_ptr < processor::object_descriptor > const& iobject(*input_range.begin());
+
               if (iobject.get() != 0 && iobject->get_generator() == t) {
                 boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
@@ -381,7 +390,7 @@ namespace squadt {
         try {
           boost::shared_ptr < processor > new_processor(manager->construct());
 
-          new_processor->append_output("authentic",
+          new_processor->register_output("authentic",
                 global_build_system.get_type_registry()->mime_type_from_name(name),
                 name.leaf(), processor::object_descriptor::original);
 
@@ -445,6 +454,8 @@ namespace squadt {
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
 
+      assert(n.get_processor().get() != 0);
+
       type_registry* registry = global_build_system.get_type_registry();
 
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
@@ -470,8 +481,7 @@ namespace squadt {
       type_registry::tool_sequence range = registry->tools_by_mime_type(n.get_object()->get_format());
 
       if (!range.empty()) {
-        bool        enabled     = boost::filesystem::exists(
-                        boost::filesystem::path(manager->get_project_store()) /n.get_object()->get_location());
+        bool        enabled     = boost::filesystem::exists(n.get_object()->get_location());
         int         identifier  = cmID_TOOLS; // wxWidgets identifier for menu items
         std::string last_seen_category;
         wxMenu*     target_menu = 0;
@@ -519,7 +529,7 @@ namespace squadt {
 
       switch (e.GetId()) {
         case cmID_EDIT:
-          p->edit(registry->get_registered_command(object->get_format(), object->get_location()).get());
+          p->edit(registry->get_registered_command(object->get_format(), object->get_location().leaf()).get());
           break;
         case cmID_REMOVE:
           if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
@@ -546,7 +556,7 @@ namespace squadt {
           p->flush_outputs();
           break;
         case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxString(manager->get_project_store().c_str(), wxConvLocal), p);
+            dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
 
             dialog.set_name(object_view->GetItemText(selection));
 
@@ -607,7 +617,7 @@ namespace squadt {
               boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
              
               /* Attach the new processor by relating it to t */
-              tp->append_input(icon->get_primary_object_descriptor().first, object);
+              tp->register_input(icon->get_primary_object_descriptor().first, object);
              
               /* Attach tool display */
               install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
@@ -693,7 +703,7 @@ namespace squadt {
                 wxString(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
                   "The original file will be restored.") % (*j)->get_location() % tp->get_tool()->get_name()).c_str(), wxConvLocal)));
        
-            (*j)->self_check(*manager);
+            (*j)->self_check();
        
             boost::shared_ptr < processor > g((*j)->get_generator());
        

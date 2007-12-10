@@ -36,7 +36,7 @@ namespace squadt {
         std::string                 executable;
 
         /** \brief Path to the working directory of the tool */
-        std::string                 working_directory;
+        boost::filesystem::path     working_directory;
   
         /** \brief The arguments to the command */
         std::deque < std::string >  arguments;
@@ -65,16 +65,16 @@ namespace squadt {
         command(const std::string&);
 
         /** \brief Constructor with working directory */
-        command(const std::string&, std::string const&);
+        command(const std::string&, boost::filesystem::path const&);
 
         /** \brief Copy constructor */
         command(command const&);
 
         /** \brief Gets the working directory */
-        std::string get_working_directory() const;
+        boost::filesystem::path get_working_directory() const;
   
         /** \brief Sets the working directory */
-        void set_working_directory(std::string const&);
+        void set_working_directory(boost::filesystem::path const&);
   
         /** \brief Adds an argument */
         void prepend_argument(std::string const&);
@@ -102,14 +102,14 @@ namespace squadt {
      * @param[in] e a complete path to an executable of the program that is to be executed
      **/
     inline command::command(std::string const& e) : executable(e),
-                working_directory(boost::filesystem::current_path().native_file_string()) {
+                working_directory(boost::filesystem::current_path()) {
     }
 
     /**
      * @param[in] e a complete path to an executable of the program that is to be executed
      * @param[in] w path to the working directory for this tool
      **/
-    inline command::command(std::string const& e, std::string const& w) : executable(e), working_directory(w) {
+    inline command::command(std::string const& e, boost::filesystem::path const& w) : executable(e), working_directory(w) {
     }
 
     /**
@@ -120,11 +120,11 @@ namespace squadt {
                 arguments(o.arguments) {
     }
 
-    inline std::string command::get_working_directory() const {
+    inline boost::filesystem::path command::get_working_directory() const {
       return (working_directory);
     }
 
-    inline void command::set_working_directory(std::string const& w) {
+    inline void command::set_working_directory(boost::filesystem::path const& w) {
       working_directory = w;
     }
 

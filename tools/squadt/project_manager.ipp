@@ -82,6 +82,9 @@ namespace squadt {
       /** \brief Checks whether a file is in the project store, or registered as output by one of the processors */
       bool file_exists(const boost::filesystem::path& s);
 
+      /** \brief Finds a descriptor for a file in the project, if it exists */
+      boost::shared_ptr < processor::object_descriptor > search_object_descriptor(boost::filesystem::path const&);
+
       /** \brief Add a new processor to the project */
       processor* add();
 
@@ -92,10 +95,10 @@ namespace squadt {
       void remove(boost::shared_ptr< processor >, bool = true);
 
       /** \brief Recursively add all files in a directory to the project */
-      void import_directory(const boost::filesystem::path&);
+      void import_directory(boost::filesystem::path const&);
  
       /** \brief Add a file to the project under a new name */
-      boost::shared_ptr < processor > import_file(const boost::filesystem::path&, const std::string& = "");
+      boost::shared_ptr < processor > import_file(boost::filesystem::path const&, const std::string& = "");
 
       /** \brief Updates the status of all outputs that depend on the argument */
       void update_status(boost::shared_ptr< processor >, bool = false);
