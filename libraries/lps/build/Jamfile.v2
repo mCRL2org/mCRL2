@@ -50,6 +50,8 @@ alias lps.alias
        ;
 
 # This target must not be used, it exists solely for the parser library which should not depend on the lps framework
-alias headers ;
+alias headers 
+       : [ path.glob-tree include/lps : *.h *.hpp : .svn ]
+       ;
 
 explicit lps.main lps.alias dataelm.main dataelm.alias ;

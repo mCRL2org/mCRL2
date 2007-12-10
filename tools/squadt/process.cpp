@@ -309,8 +309,6 @@ namespace squadt {
 
       static bool termination_handling = local::install_termination_handler();
       
-      assert(termination_handling);
-
       // Start application bundle
       if (is_directory(c.executable) && extension(c.executable).compare(".app") == 0) {
         CFURLRef bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
@@ -372,7 +370,9 @@ namespace squadt {
                     GetProcessPID(&serial_number, &m_information.process_identifier);
 
                     // Register termination handler
-                    termination_handlers[serial_number] = h;
+                    if (termination_handling) { 
+                      termination_handlers[serial_number] = h;
+                    }
 
                     m_status = process::running;
                   }
