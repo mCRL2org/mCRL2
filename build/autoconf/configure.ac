@@ -553,9 +553,9 @@ AC_SUBST([BUILD_OPTIONS])
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    AC_SUBST([IATERM_CPPFLAGS],["-DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""])
+    AC_SUBST([IATERM_CPPFLAGS],["-m64 -DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""])
   else
-    AC_SUBST([IATERM_CPPFLAGS],["-I\\\"${IATERM_CPPFLAGS}\\\""])
+    AC_SUBST([IATERM_CPPFLAGS],["-m32 -I\\\"${IATERM_CPPFLAGS}\\\""])
   fi
 
   eval "eval IATERM_LDFLAGS=\\\"${libdir}/mcrl2\\\""

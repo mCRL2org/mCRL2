@@ -6427,10 +6427,10 @@ fi
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    IATERM_CPPFLAGS="-DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""
+    IATERM_CPPFLAGS="-m64 -DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""
 
   else
-    IATERM_CPPFLAGS="-I\\\"${IATERM_CPPFLAGS}\\\""
+    IATERM_CPPFLAGS="-m32 -I\\\"${IATERM_CPPFLAGS}\\\""
 
   fi
 
