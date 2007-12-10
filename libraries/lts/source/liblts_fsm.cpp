@@ -64,7 +64,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
   unsigned int len = ATgetLength((ATermList) state);
   DECL_A(state_args,ATerm,len);
 
-  for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state))
+  for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state),++i)
   {
     ATermAppl val = ATAgetFirst((ATermList) state);
     ATermAppl expr = ATAgetArgument(val,0);
@@ -129,7 +129,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
       for (unsigned int i=0; i<nstates; i++)
       {
         state_values[i] = parse_mcrl2_state(state_values[i],*spec);
-        if ( label_values[i] == NULL )
+        if ( state_values[i] == NULL )
         {
           return false;
         }
