@@ -84,15 +84,13 @@ namespace squadt {
 
           BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > i, input_range) {
             if (i.get() != 0) {
-              path p(project_store.fn_str());
+              path path_to_file(i->get_location());
               
-              p = p / path(i->get_location());
-        
-              input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
+              input_objects->InsertItem(row, wxString(path_to_file.leaf().c_str(), wxConvLocal));
 
-              if (exists(p)) {
-                unsigned long size       = file_size(p);
-                wxDateTime    write_time(last_write_time(p));
+              if (exists(path_to_file)) {
+                unsigned long size       = file_size(path_to_file);
+                wxDateTime    write_time(last_write_time(path_to_file));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
         
                 size = (unsigned long) (size / pow(1024, magnitude));
@@ -127,15 +125,13 @@ namespace squadt {
 
           BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > o, output_range) {
             if (o.get() != 0) {
-              path p(project_store.fn_str());
+              path path_to_file(o->get_location());
               
-              p = p / path(o->get_location());
+              output_objects->InsertItem(row, wxString(path_to_file.leaf().c_str(), wxConvLocal));
          
-              output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
-         
-              if (exists(p)) {
-                unsigned long size       = file_size(p);
-                wxDateTime    write_time(last_write_time(p));
+              if (exists(path_to_file)) {
+                unsigned long size       = file_size(path_to_file);
+                wxDateTime    write_time(last_write_time(path_to_file));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
          
                 size = (unsigned long) (size / pow(1024, magnitude));

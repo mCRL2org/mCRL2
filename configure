@@ -4771,6 +4771,9 @@ if test "${with_cadp+set}" = set; then
   withval=$with_cadp;
 fi
 
+if test ! ${with_cadp}; then
+  with_cadp="${CADP}"
+fi
 { echo "$as_me:$LINENO: checking for CADP in $with_cadp" >&5
 echo $ECHO_N "checking for CADP in $with_cadp... $ECHO_C" >&6; }
 USE_BCG=no
@@ -4851,17 +4854,6 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-else
-  if test ! -z "${CADP}"; then
-    if test -x ${CADP}/com/arch; then
-      LIBS="-L${CADP}/bin.`${CADP}/com/arch` -lBCG_IO"
-      CADP_HEADERS="${CADP}/incl"
-
-      CADP_LIBRARIES="${CADP}/bin.`${CADP}/com/arch`"
-
-      USE_BCG=yes
-    fi
-  fi
 fi
 { echo "$as_me:$LINENO: result: $USE_BCG" >&5
 echo "${ECHO_T}$USE_BCG" >&6; }
