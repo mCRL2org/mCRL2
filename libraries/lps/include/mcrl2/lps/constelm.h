@@ -11,6 +11,7 @@
 #define MCRL2_LPS_CONSTELM_H
 
 #include <algorithm>
+#include <list>
 #include <map>
 #include <set>
 #include <vector>
@@ -28,7 +29,7 @@ template <typename Rewriter>
 std::map<data_variable, data_expression> compute_constant_parameters(const linear_process& p, data_expression_list init, Rewriter& r)
 {
   using namespace data_expr;
-  
+
   std::map<data_variable, data_expression> replacements;
   data_variable_list::iterator i = p.process_parameters().begin();
   data_expression_list::iterator j = init.begin();
@@ -79,11 +80,23 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
 {
   using namespace data_expr;
   
-  data_variable_list::iterator i = p.process_parameters().begin();
+  typedef std::map<data_variable, std::list<rewriter::substitution>::iterator> index_map;
+
+  // create a mapping from process parameters to initial values
+  std::map<data_variable, data_expression> replacements;
   data_expression_list::iterator j = init.begin();
-  for ( ; i != p.process_parameters().end(); ++i, ++j)
+  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {
-    r.add_substitution(*i, *j);
+    replacements[*i] = *j;
+  }
+
+  // put the substitutions in a list, and make an index for it
+  std::list<rewriter::substitution> substitutions;
+  index_map index;
+  for (std::map<data_variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+  {
+    substitutions.push_back(r.make_substitution(i->first, i->second));
+    index[i->first] = --substitutions.end();
   }
 
   bool has_changed;
@@ -92,7 +105,7 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      data_expression rc = r(i->condition());
+      data_expression rc = r(i->condition(), substitutions.begin(), substitutions.end());
 
       if (rc == false_())
       {
@@ -100,14 +113,16 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
       }
       for (data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
-        data_expression dj = r.substitution(j->lhs());
-
-        if (dj != data_expression())
+        index_map::iterator k = index.find(j->lhs());
+        if (k != index.end())
         {
-          data_expression gj = j->rhs();
-          if (r(or_(not_(rc), not_equal_to(dj, gj))) == true_())
+          const data_variable&   d  = j->lhs();  // process parameter
+          const data_expression& g  = j->rhs();  // assigned value
+          if (r(or_(not_(rc), not_equal_to(d, g)), substitutions.begin(), substitutions.end()) == true_())
           {
-            r.remove_substitution(j->lhs());
+            replacements.erase(d);
+            substitutions.erase(index[d]);
+            index.erase(k);
             has_changed = true;
           }
         }
@@ -119,27 +134,28 @@ std::map<data_variable, data_expression> compute_constant_parameters_subst(const
     }
   } while (has_changed == true);
 
-  std::map<data_variable, data_expression> replacements;
-  for (data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++ i)
-  {
-    data_expression e = r.substitution(*i);
-    if (e != data_expression())
-    {
-      replacements[*i] = e;
-    }
-  }
   return replacements;
 }
 
 /// Removes zero or more constant parameters from the specification p.
 template <typename Rewriter>
-specification constelm(const specification& spec, Rewriter& r)
+specification constelm(const specification& spec, Rewriter& r, bool verbose = false)
 {
   std::map<data_variable, data_expression> replacements = compute_constant_parameters_subst(spec.process(), spec.initial_process().state(), r);
   std::set<data_variable> constant_parameters;
   for (std::map<data_variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
   {
 	  constant_parameters.insert(i->first);
+  }
+
+  if (verbose)
+  {
+    std::cout << "Removing the constant process parameters: ";
+    for (std::set<data_variable>::iterator i = constant_parameters.begin(); i != constant_parameters.end(); ++i)
+    {
+      std::cout << pp(*i) << " ";
+    }
+    std::cout << std::endl;
   }
 
   specification result = repair_free_variables(spec);

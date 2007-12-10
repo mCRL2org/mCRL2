@@ -35,6 +35,20 @@ class rewriter
 	    jitty_prover               = GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
 	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
     };
+
+    struct substitution
+    {
+      friend class rewriter;
+      
+      ATermAppl m_variable;
+      ATerm m_value;
+
+      protected:
+        substitution(ATermAppl variable, ATerm value)
+          : m_variable(variable),
+            m_value(value)
+        { }
+    };
     
     /// Constructs a rewriter from data specification d.
     ///
@@ -47,7 +61,7 @@ class rewriter
     {
       delete m_rewriter;
     }
-  
+
 		/// \brief Rewrites a data expression.
 		/// \param d The term to be rewritten.
 		/// \return The normal form of d.
@@ -59,52 +73,43 @@ class rewriter
 		  return m_rewriter->rewrite((ATermAppl) t);
 		}
 
+		/// \brief Rewrites a data expression, and on the fly applies the substitutions
+		/// in the sequence [first, last[.
+		/// \param d The term to be rewritten.
+		/// \return The normal form of d.
+		// Question: is this function guaranteed to terminate?
+		///
+		template <typename Iter>
+		data_expression operator()(const data_expression& d, Iter first, Iter last) const
+		{
+		  ATerm t = m_rewriter->toRewriteFormat(d);
+		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
+		  for (Iter i = first; i != last; ++i)
+		  {
+		    m_rewriter->setSubstitution(i->m_variable, i->m_value);
+		  }
+		  data_expression result = m_rewriter->rewrite((ATermAppl) t);
+		  m_rewriter->clearSubstitutions();
+		  return result;
+		}
+
+    substitution make_substitution(const data_variable& variable, const data_expression& value)
+    {
+      return substitution(variable, m_rewriter->toRewriteFormat(value));
+    }
+
     /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.
     ///
     bool add_rule(const data_equation& eq)
     {
-      m_rewriter->addRewriteRule(eq);
+      return m_rewriter->addRewriteRule(eq);
     }
 
-    /// Removes the equation eq from the rewriter rules. Returns true if the operation succeeded.
+    /// Removes the equation eq from the rewriter rules.
     ///
-    bool remove_rule(const data_equation& eq)
+    void remove_rule(const data_equation& eq)
     {
       m_rewriter->removeRewriteRule(eq);
-    }
-
-    /// Adds the substitution [var := value] to the rewriter. During rewrite all
-    /// added substitutions will be applied.
-    ///
-		void add_substitution(const data_variable& var, const data_expression& value)
-		{
-		  m_rewriter->setSubstitution(var, m_rewriter->toRewriteFormat(value));
-		}
-
-    /// Removes the current substitution to the variable var from the rewriter.
-		void remove_substitution(const data_variable& var)
-		{
-		  m_rewriter->clearSubstitution(var);
-		}
-
-    /// Returns the current substituted value to the variable var, or data_expression()
-    /// if no such value is available.
-		data_expression substitution(const data_variable& var)
-		{
-		  ATerm t = m_rewriter->getSubstitution(var);
-		  data_expression result = t == NULL ? data_expression() : data_expression(m_rewriter->fromRewriteFormat(t));
-		  if (result == var) // workaround for a bug
-		  {
-		    result = data_expression();
-		  }
-		  return result;
-		}
-
-    /// Removes all substitutions.
-    ///
-    void clear_substitutions()
-    {
-      m_rewriter->clearSubstitutions();
     }
 };
 

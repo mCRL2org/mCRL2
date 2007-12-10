@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <set>
 #include <vector>
+#include "atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 
 namespace lps {
@@ -32,8 +33,8 @@ data_assignment_list remove_parameters(const data_assignment_list& l, const std:
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<data_variable>& to_be_removed)
 {
-  std::vector<data_variable> v(p.process_parameters().begin(), p.process_parameters().end());
-  std::vector<summand> s(p.summands().begin(), p.summands().end());
+  atermpp::vector<data_variable> v(p.process_parameters().begin(), p.process_parameters().end());
+  atermpp::vector<summand> s(p.summands().begin(), p.summands().end());
 
   for (std::set<data_variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {

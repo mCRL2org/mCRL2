@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
   spec1.load(argv[1]);
   rewriter r(spec1.data());
   specification spec2;
-  spec2 = constelm(spec1, r);
+  spec2 = constelm(spec1, r, true);
   spec2.save(argv[2]);
 
   return 0;

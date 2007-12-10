@@ -133,7 +133,11 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
 CHECK_RULE = '''template <typename Term>
 bool check_rule_%(name)s(Term t)
 {
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
 }
 
 '''
@@ -142,7 +146,9 @@ CHECK_TERM = '''// %(name)s(%(arguments)s)
 template <typename Term>
 bool %(check_name)s(Term t)
 {
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
 
