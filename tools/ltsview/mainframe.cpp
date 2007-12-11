@@ -7,14 +7,9 @@
 /// \file mainframe.cpp
 /// \brief Add your file description here.
 
-#include <wx/defs.h>
 #include "mainframe.h"
-#include <wx/bitmap.h>
-#include <wx/event.h>
 #include <wx/filedlg.h>
-#include <wx/colordlg.h>
 #include <wx/notebook.h>
-#include <wx/sysopt.h>
 //#include <time.h>
 #include "ids.h"
 #include "icons/main_window.xpm"
@@ -30,7 +25,6 @@ using namespace Utils;
 using namespace IDs;
 // Event table
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-  EVT_TOOL  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
   EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)

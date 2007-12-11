@@ -11,7 +11,6 @@
 #define UTILS_H
 #include <vector>
 #include <wx/colour.h>
-//using namespace std;
 
 namespace Utils {
   const double PI = 3.14159265359;

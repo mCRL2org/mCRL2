@@ -16,7 +16,6 @@
 #include <wx/filename.h>
 #include <wx/listctrl.h>
 #include <wx/progdlg.h>
-#include <wx/splitter.h>
 
 #include "infodialog.h"
 #include "settingsdialog.h"
