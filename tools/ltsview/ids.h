@@ -19,6 +19,7 @@ namespace IDs
     myID_ZOOM,
     myID_PAN,
     myID_ROTATE,
+    myID_INFO,
     // Drawing style identifiers
     myID_CONES_STYLE,
     myID_TUBES_STYLE,

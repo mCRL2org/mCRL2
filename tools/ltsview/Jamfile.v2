@@ -10,6 +10,7 @@ exe ltsview
         fileloader.cpp
         fsmparser.cpp
         glcanvas.cpp
+        infodialog.cpp
         lts.cpp
         ltsviewapp.cpp
         mainframe.cpp

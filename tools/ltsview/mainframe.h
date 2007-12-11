@@ -18,6 +18,7 @@
 #include <wx/progdlg.h>
 #include <wx/splitter.h>
 
+#include "infodialog.h"
 #include "settingsdialog.h"
 #include "savepicdialog.h"
 #include "glcanvas.h"
@@ -29,64 +30,68 @@
 class MainFrame : public wxFrame, public simReader {
   public:
     MainFrame(Mediator* owner,Settings* ss);
-    void  addMarkRule(wxString str);
-    void  createProgressDialog(const std::string title,const std::string text);
-    GLCanvas*  getGLCanvas() const;
-    void  loadTitle();
+    void addMarkRule(wxString str);
+    void createProgressDialog(const std::string title,const std::string text);
+    GLCanvas* getGLCanvas() const;
+    void loadTitle();
 
-    void  onAbout(wxCommandEvent &event);
-    void  onActivateTool(wxCommandEvent& event);
-    void  onAddMarkRuleButton(wxCommandEvent& event);
-    void  onDisplay(wxCommandEvent& event);
-    void  onExit(wxCommandEvent& event);
-    void  onClose(wxCloseEvent& event);
-    void  onOpen(wxCommandEvent& event);
-    void  onOpenTrace(wxCommandEvent& event);
-    void  onSavePic(wxCommandEvent& event);
-    void  onRankStyle(wxCommandEvent& event);
-    void  onVisStyle(wxCommandEvent& event);
-    void  onFSMStyle(wxCommandEvent& event);
-    void  onRemoveMarkRuleButton(wxCommandEvent& event);
-    void  onResetButton(wxCommandEvent& event);
-    void  onResetView(wxCommandEvent& event);
-    void  onSettings(wxCommandEvent& event);
-    void  onMarkAnyAll(wxCommandEvent& event);
-    void  onMarkRadio(wxCommandEvent& event);
-    void  onMarkRuleActivate(wxCommandEvent& event);
-    void  onMarkRuleEdit(wxCommandEvent& event);
-    void  onMarkTransition(wxCommandEvent& event);
+    void onAbout(wxCommandEvent &event);
+    void onActivateTool(wxCommandEvent& event);
+    void onAddMarkRuleButton(wxCommandEvent& event);
+    void onDisplay(wxCommandEvent& event);
+    void onExit(wxCommandEvent& event);
+    void onClose(wxCloseEvent& event);
+    void onOpen(wxCommandEvent& event);
+    void onOpenTrace(wxCommandEvent& event);
+    void onSavePic(wxCommandEvent& event);
+    void onRankStyle(wxCommandEvent& event);
+    void onVisStyle(wxCommandEvent& event);
+    void onFSMStyle(wxCommandEvent& event);
+    void onRemoveMarkRuleButton(wxCommandEvent& event);
+    void onResetButton(wxCommandEvent& event);
+    void onResetView(wxCommandEvent& event);
+    void onSettings(wxCommandEvent& event);
+    void onInfo(wxCommandEvent& event);
+    void onMarkAnyAll(wxCommandEvent& event);
+    void onMarkRadio(wxCommandEvent& event);
+    void onMarkRuleActivate(wxCommandEvent& event);
+    void onMarkRuleEdit(wxCommandEvent& event);
+    void onMarkTransition(wxCommandEvent& event);
     
-    void  onZoomInBelow(wxCommandEvent& event);
-    void  onZoomInAbove(wxCommandEvent& event);
-    void  onZoomOut(wxCommandEvent& event);
+    void onZoomInBelow(wxCommandEvent& event);
+    void onZoomInAbove(wxCommandEvent& event);
+    void onZoomOut(wxCommandEvent& event);
     // Simulation event handlers
-    void        onSimStartButton(wxCommandEvent& event);
-    void        onSimResetButton(wxCommandEvent& event);
-    void        onSimStopButton(wxCommandEvent& event);
-    void        onSimTransitionSelected(wxListEvent& event);
-    void        onSimTransitionActivated(wxListEvent& event);
-    void        onKeyDown(wxKeyEvent& event);
-    void        onSimTriggerButton(wxCommandEvent& event);
-    void        onSimUndoButton(wxCommandEvent& event);
-    void        onGenerateBackTraceButton(wxCommandEvent& event);
+    void onSimStartButton(wxCommandEvent& event);
+    void onSimResetButton(wxCommandEvent& event);
+    void onSimStopButton(wxCommandEvent& event);
+    void onSimTransitionSelected(wxListEvent& event);
+    void onSimTransitionActivated(wxListEvent& event);
+    void onKeyDown(wxKeyEvent& event);
+    void onSimTriggerButton(wxCommandEvent& event);
+    void onSimUndoButton(wxCommandEvent& event);
+    void onGenerateBackTraceButton(wxCommandEvent& event);
     void onStartForceDirected(wxCommandEvent& event);
     void onStopForceDirected(wxCommandEvent& event);
     void onResetStatePositions(wxCommandEvent& event);
   
 
-    void  replaceMarkRule(int index, wxString str);
-    void  resetMarkRules();
-    void  setActionLabels(std::vector< std::string > &labels);
-    void  setFileInfo(wxFileName fn);
-    void  setMarkedStatesInfo(int number);
-    void  setMarkedTransitionsInfo(int number);
-    void  setNumberInfo(int ns,int nt,int nc,int nr);
-    void  showMessage(std::string title,std::string text);
-    void  startRendering();
-    void  stopRendering();
-    void  updateProgressDialog(int val,std::string msg);
-    void  addParameter(std::string par);
-    void  setParameterValue(std::string par, std::string value);
+    void replaceMarkRule(int index, wxString str);
+    void resetMarkRules();
+    void setActionLabels(std::vector< std::string > &labels);
+    void setFileInfo(wxFileName fn);
+    void setMarkedStatesInfo(int number);
+    void setMarkedTransitionsInfo(int number);
+    void setNumberInfo(int ns,int nt,int nc,int nr);
+    void showMessage(std::string title,std::string text);
+    void startRendering();
+    void stopRendering();
+    void updateProgressDialog(int val,std::string msg);
+
+    void addParameter(int i,std::string par);
+    void setParameterValue(int i,std::string value);
+    void resetParameters();
+    void resetParameterValues();
     
     void reportError(std::string const& error);
    
@@ -108,15 +113,10 @@ class MainFrame : public wxFrame, public simReader {
     wxRadioButton*    markTransitionsRadio;
     Mediator*         mediator;
     wxRadioButton*    nomarksRadio;
-    wxStaticText*     ncLabel;
-    wxStaticText*     nmsLabel;
-    wxStaticText*     nmtLabel;
-    wxStaticText*     nrLabel;
-    wxStaticText*     nsLabel;
-    wxStaticText*     ntLabel;
     wxProgressDialog* progDialog;
-    SavePicDialog*     savePicDialog;
+    SavePicDialog*    savePicDialog;
     SettingsDialog*   settingsDialog;
+    InfoDialog*       infoDialog;
     Settings*         settings;
     wxFlexGridSizer*  selSizer;
     wxMenu*           toolMenu;
@@ -135,14 +135,12 @@ class MainFrame : public wxFrame, public simReader {
 
     void setupMainArea();
     void setupMenuBar();
-    void setupRightPanel(wxSplitterWindow* panel);
+    void setupRightPanel(wxPanel* panel);
     void setupMarkPanel(wxPanel* panel);
     void setupSimPanel(wxPanel* panel);
 
 //    void setupSettingsPanel(wxPanel* panel);
 
-    std::map<std::string, wxStaticText*> parameters;
-    wxScrolledWindow* selectionInfo;
     DECLARE_EVENT_TABLE()
 };
 #endif

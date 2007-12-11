@@ -218,9 +218,10 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->setNumberInfo(lts->getNumStates(),
       lts->getNumTransitions(),lts->getNumClusters(),
       lts->getNumRanks());
-
-
-
+  mainFrame->resetParameters();
+  for (int i = 0; i < lts->getNumParameters(); ++i) {
+    mainFrame->addParameter(i,lts->getParameterName(i));
+  }
   mainFrame->resetMarkRules();
   
   vector< string > ls;
@@ -465,16 +466,12 @@ string LTSViewApp::getParValue(const int i, const int j) const {
 
 
 void LTSViewApp::selectStateByID(const int id) {
-  if (lts != NULL)
-  {
+  if (lts != NULL) {
     State* s = lts->selectStateByID(id);
     lts->getSimulation()->setInitialState(s);
-
-    for(int i = 0; i < lts->getNumParameters(); ++i)
-    {
-      string paramName = lts->getParameterName(i);
-      string paramValue = lts->getParameterValue(i, s->getParameterValue(i));
-      mainFrame->setParameterValue(paramName, paramValue);
+    for (int i = 0; i < lts->getNumParameters(); ++i) {
+      mainFrame->setParameterValue(i,lts->getParameterValue(i,
+            s->getParameterValue(i)));
     }
   }
 }

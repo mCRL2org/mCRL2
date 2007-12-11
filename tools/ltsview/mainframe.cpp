@@ -41,6 +41,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_DISPLAY_BACKPOINTERS,MainFrame::onDisplay)
   EVT_MENU  (myID_DISPLAY_WIREFRAME,MainFrame::onDisplay)
   EVT_MENU  (wxID_PREFERENCES,MainFrame::onSettings)
+  EVT_MENU  (myID_INFO,MainFrame::onInfo)
   EVT_MENU  (myID_PAN,MainFrame::onActivateTool)
   EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
@@ -92,6 +93,7 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   progDialog = NULL;
   savePicDialog = NULL;
   settingsDialog = NULL;
+  infoDialog = new InfoDialog(this);
 
   SetIcon(wxIcon(main_window));
 
@@ -117,6 +119,8 @@ void MainFrame::setupMenuBar() {
       wxT("Save current picture to file"));
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
     wxT("Open a trace for this file"));
+  fileMenu->AppendSeparator();
+  fileMenu->Append(myID_INFO, wxT("&Information..."),wxT("Show information"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
     
@@ -190,8 +194,7 @@ void MainFrame::setupMainArea() {
   mainSizer->AddGrowableCol(0);
   mainSizer->AddGrowableRow(0);
 
-  wxSplitterWindow* rightPanel = new wxSplitterWindow(this,wxID_ANY,
-    wxDefaultPosition, wxDefaultSize);
+  wxPanel* rightPanel = new wxPanel(this,wxID_ANY);
   setupRightPanel(rightPanel);
 
   int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
@@ -203,86 +206,15 @@ void MainFrame::setupMainArea() {
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
-
-  // Now that we know the window size, update minimum pane size of the right 
-  // panel and update Sash position accordingly.
-  rightPanel->SetMinimumPaneSize(50);
-  rightPanel->SetSashPosition(rightPanel->GetClientSize().GetHeight()/2, true);
 }
 
-void MainFrame::setupRightPanel(wxSplitterWindow* panel) {
-  //wxFlexGridSizer* sizer = new wxFlexGridSizer(2,1,0,0);
-  //sizer->AddGrowableCol(0);
-  //sizer->AddGrowableRow(1);
+void MainFrame::setupRightPanel(wxPanel* panel) {
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(1,1,0,0);
+  sizer->AddGrowableCol(0);
+  sizer->AddGrowableRow(0);
 
-  int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
-  int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
-  
-  wxNotebook* topNotebook = new wxNotebook(panel, wxID_ANY);
-  
-  wxPanel* infoPanel  = new wxPanel(topNotebook, wxID_ANY);
-  // setup the top part (information box)
-  wxFlexGridSizer* topSizer = new wxFlexGridSizer(6,2,0,0);
-  nsLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  ntLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  ncLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nrLabel = new wxStaticText(infoPanel,wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nmsLabel = new wxStaticText(infoPanel,
-                              wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  nmtLabel = new wxStaticText(infoPanel,
-                              wxID_ANY,wxEmptyString,wxDefaultPosition,
-    wxDefaultSize,wxALIGN_RIGHT|wxST_NO_AUTORESIZE);
-  
-  topSizer->AddGrowableCol(1);
-  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("States:")),0,lf,3);
-  topSizer->Add(nsLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(infoPanel,
-                                 wxID_ANY,wxT("Transitions:")),0,lf,3);
-  topSizer->Add(ntLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("Clusters:")),0,lf,3);
-  topSizer->Add(ncLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(infoPanel,wxID_ANY,wxT("Ranks:")),0,lf,3);
-  topSizer->Add(nrLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(infoPanel,
-                                 wxID_ANY,wxT("Marked states:")),0,rf,3);
-  topSizer->Add(nmsLabel,0,rf,3);
-  topSizer->Add(new wxStaticText(infoPanel,
-                                 wxID_ANY,wxT("Marked transitions:")),0,rf,3);
-  topSizer->Add(nmtLabel,0,rf,3);
-  
-  topSizer->Fit(infoPanel);
-  infoPanel->SetSizer(topSizer);
-  infoPanel->Fit();
-  infoPanel->Layout();
-
-  topNotebook->AddPage(infoPanel, wxT("LTS information"), false);
-
-  selectionInfo = new wxScrolledWindow(topNotebook);
-  selectionInfo->SetScrollRate(0,5);
-  
-
-  selSizer = new wxFlexGridSizer(1, 2, 0, 0);
-  selSizer->AddGrowableCol(1);
-//  selSizer->SetFlexibleDirection(wxVERTICAL);
-  selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
-                                 wxT("Parameter")),0,lf,3);
-  selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
-                                 wxT("Value"), wxDefaultPosition, 
-                                            wxDefaultSize, 
-                                            wxALIGN_RIGHT|wxST_NO_AUTORESIZE), 
-                                            0, rf, 3);
-  selSizer->Fit(selectionInfo);
-  selectionInfo->SetSizer(selSizer);
-  selectionInfo->Fit();
-  selectionInfo->Layout();
-
-  topNotebook->AddPage(selectionInfo, wxT("State information"), false);
-
+//  int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
+//  int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook(panel, wxID_ANY);
   wxScrolledWindow* markPanel = new wxScrolledWindow(bottomNotebook,wxID_ANY);
@@ -296,17 +228,11 @@ void MainFrame::setupRightPanel(wxSplitterWindow* panel) {
   bottomNotebook->AddPage(simPanel, wxT("Simulation"), false); 
 
   
-  //sizer->Add(topNotebook, 0, wxEXPAND | wxALL, 5);
-  //sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
-  //sizer->Fit(panel);
-  //panel->SetSizer(sizer);
-  //panel->Fit();
-
-  panel->SplitHorizontally(topNotebook, bottomNotebook);
-  panel->SetSashGravity(1.0);
-  
+  sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
+  sizer->Fit(panel);
+  panel->SetSizer(sizer);
+  panel->Fit();
   panel->Layout();
-  panel->UpdateSize();
 }
 
 void MainFrame::setupMarkPanel(wxPanel* panel) {
@@ -421,7 +347,7 @@ void MainFrame::setupSimPanel(wxPanel* panel) {
 
   simTransView = new wxListView(panel, myID_SIM_TRANSITIONS_VIEW, 
     wxDefaultPosition, wxSize(200, 100), listViewStyle);
-
+  //simTransView->SetMaxSize(wxSize(200, 100));
   simTransView->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
   simTransView->InsertColumn(1, wxT("State change"), wxLIST_FORMAT_LEFT);
   simTransView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
@@ -599,6 +525,10 @@ void MainFrame::onSettings(wxCommandEvent& /*event*/) {
     settingsDialog = new SettingsDialog(this,glCanvas,settings);
   }
   settingsDialog->Show();
+}
+
+void MainFrame::onInfo(wxCommandEvent& /*event*/) {
+  infoDialog->Show();
 }
 
 void MainFrame::onResetButton(wxCommandEvent& /*event*/) {
@@ -782,22 +712,15 @@ void MainFrame::loadTitle() {
 }
 
 void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {
-  nsLabel->SetLabel(wxString::Format(wxT("%d"), ns));
-  ntLabel->SetLabel(wxString::Format(wxT("%d"), nt));
-  ncLabel->SetLabel(wxString::Format(wxT("%d"), nc));
-  nrLabel->SetLabel(wxString::Format(wxT("%d"), nr));
-  nrLabel->GetParent()->Fit();
-  Layout();
+  infoDialog->setLTSInfo(ns,nt,nc,nr);
 }
 
 void MainFrame::setMarkedStatesInfo(int number) {
-  nmsLabel->SetLabel(wxString::Format(wxT("%d"),number));
-  Layout();
+  infoDialog->setNumMarkedStates(number);
 }
 
 void MainFrame::setMarkedTransitionsInfo(int number) {
-  nmtLabel->SetLabel(wxString::Format(wxT("%d"),number));
-  Layout();
+  infoDialog->setNumMarkedTransitions(number);
 }
 
 void MainFrame::addMarkRule(wxString str) {
@@ -853,33 +776,20 @@ void MainFrame::stopRendering() {
   GetStatusBar()->Update();
 }
 
-void MainFrame::addParameter(std::string par)
-{
-  if (parameters.find(par) == parameters.end())
-  {
-    std::pair<std::string, wxStaticText*> param(par, 
-        new wxStaticText(selectionInfo, wxID_ANY, wxEmptyString,
-                         wxDefaultPosition, wxDefaultSize,
-                         wxALIGN_RIGHT|wxST_NO_AUTORESIZE));
-
-    parameters.insert(param);
-
-    selSizer->SetRows(selSizer->GetRows() + 1);
-    selSizer->Add(new wxStaticText(selectionInfo, wxID_ANY, 
-                  wxString(par.c_str(), wxConvLocal)), 0,
-                  wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL|wxALL,3);
-    selSizer->Add(parameters.find(par)->second, 0,
-                        wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxEXPAND | wxALL, 3);
-  }
+void MainFrame::resetParameters() {
+  infoDialog->resetParameterNames();
 }
 
-void MainFrame::setParameterValue(std::string par, std::string value)
-{
-  addParameter(par);
-  map<string, wxStaticText*>::iterator it = parameters.find(par);
-  
-  it->second->SetLabel(wxString(value.c_str(), wxConvLocal));
-  it->second->GetParent()->Fit();
+void MainFrame::resetParameterValues() {
+  infoDialog->resetParameterValues();
+}
+
+void MainFrame::addParameter(int i,std::string par) {
+  infoDialog->setParameterName(i,par);
+}
+
+void MainFrame::setParameterValue(int i,std::string value) {
+  infoDialog->setParameterValue(i,value);
 }
 
 void MainFrame::refresh() {
