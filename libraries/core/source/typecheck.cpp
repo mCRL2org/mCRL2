@@ -236,7 +236,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n\n",sort_expr);
     }
   }
   gsDebugMsg ("type checking sort expression part phase finished\n");
@@ -270,13 +270,13 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   gsDebugMsg ("type checking data expression part read-in phase finished\n");
   
   if(gsIsNotInferred(sort_expr)){
-    gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+    gsErrorMsg("type checking of data expressions failed (%T is not a sort expression)\n\n",sort_expr);
     goto done;
   }
 
   if(gstcIsSortExprDeclared(sort_expr)){
     if(!gsIsDataExpr(data_expr)){
-      gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
+      gsErrorMsg("type checking of data expressions failed (%T is not a data expression)\n\n",data_expr);
       goto done;
     }
 
@@ -330,7 +330,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n\n",sort_expr);
     }
   }
   else {
@@ -365,13 +365,13 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
     if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
-      gsErrorMsg("type checking of data expressions failed (%T is not a sort expressions)\n\n",sort_expr);
+      gsErrorMsg("type checking of data expressions failed (%T is not a sort expression)\n\n",sort_expr);
       goto failed;
     }
 
     if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)){
       if(!gsIsDataExpr(data_expr)){
-        gsErrorMsg("type checking of data expressions failed (%T is not a data expressions)\n\n",data_expr);
+        gsErrorMsg("type checking of data expressions failed (%T is not a data expression)\n\n",data_expr);
         goto failed;
       }
 
@@ -1546,7 +1546,8 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   }
  
   if(ATisEmpty(ParList)) {
-    gsErrorMsg("no %s %P with %d parameters is declared (while typechecking %P)\n", msg, Name, nFactPars, ProcTerm);     
+    gsErrorMsg("no %s %P with %d parameter%s is declared (while typechecking %P)\n",
+      msg, Name, nFactPars, (nFactPars != 1)?"s":"", ProcTerm);
     return NULL;
   }
 
@@ -2291,10 +2292,12 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 
     if(!ParList) {
-      gsErrorMsg("unknown operation %P with %d parameters\n",Name,nFactPars);
+      gsErrorMsg("unknown operation %P with %d parameter%s\n",
+        Name, nFactPars, (nFactPars != 1)?"s":"");
       return NULL;
     }
-    gsDebugMsg("Possible types for Op/Var %T with %d arguments are (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
+    gsDebugMsg("Possible types for Op/Var %T with %d argument%s are (ParList: %T; PosType: %T)\n",
+      Name, nFactPars, (nFactPars != 1)?"s":"", ParList, PosType);
 
     { // filter ParList keeping only functions A_0#...#A_nFactPars->A
       ATermList NewParList;
@@ -2328,7 +2331,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	//and get the list. Then we take the min of the list.
 	
 	ParList=BackupParList;
-        gsDebugMsg("Trying casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
+        gsDebugMsg("Trying casting for Op %T with %d argument%s (ParList: %T; PosType: %T)\n",
+          Name, nFactPars, (nFactPars != 1)?"s":"", ParList, PosType);
 	PosType=gstcExpandNumTypesUp(PosType);
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
@@ -2345,7 +2349,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	//Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
 	
 	ParList=BackupParList;
-	gsDebugMsg("Trying result casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
+	gsDebugMsg("Trying result casting for Op %T with %d argument%s (ParList: %T; PosType: %T)\n",
+          Name, nFactPars, (nFactPars != 1)?"s":"", ParList, PosType);
 	PosType=gstcExpandNumTypesDown(gstcExpandNumTypesUp(PosType));
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
@@ -2360,7 +2365,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 	
     if(ATisEmpty(ParList)) {
-      gsErrorMsg("unknown operation/variable %P with %d arguments that matches type %P\n",Name,nFactPars,PosType);    
+      gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
+        Name, nFactPars, (nFactPars != 1)?"s":"", PosType);    
       return NULL;
     }
     
@@ -2481,7 +2487,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing SubSet[Eq] or SubBag[Eq] matching Type %T, PosType %T\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchSetBagOpSubEq(Type);
 	if(!NewType){
-	  gsErrorMsg("the function SubSet[Eq] or SubBag[Eq]  has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("the function SubSet[Eq] or SubBag[Eq] has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -2537,7 +2543,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
     else{
       if(strict_ambiguous){
-	gsErrorMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars); return NULL;
+	gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":""); return NULL;
       }
       else{
         *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
