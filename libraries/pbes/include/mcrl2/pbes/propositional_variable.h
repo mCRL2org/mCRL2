@@ -18,6 +18,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
+#include "mcrl2/lps/detail/data_utility.h"
 
 namespace lps {
 

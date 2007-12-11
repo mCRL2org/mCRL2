@@ -75,6 +75,12 @@ struct pbes_expression_builder
     return pbes_expression();
   }
   
+  virtual pbes_expression visit_unknown(const pbes_expression& e)
+  {
+    throw std::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
+    return pbes_expression();
+  }
+
   /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals pbes_expression(),
   /// the recursion in this node is continued automatically, otherwise the returned
@@ -127,8 +133,8 @@ struct pbes_expression_builder
       return (result == pbes_expression()) ? e : result;
     }
     else {
-      throw std::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
-      return pbes_expression();
+      pbes_expression result = visit_unknown(e);
+      return (result == pbes_expression()) ? e : result;
     }
   }
 };
