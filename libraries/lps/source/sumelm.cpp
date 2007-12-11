@@ -1,7 +1,3 @@
-////////////////////////////////////////////////////////////////
-// Auxiliary functions used to support sumelm operation
-// Some of these might be interesting to get into the LPS library
-
 //Aterms
 #include <atermpp/aterm.h>
 #include <atermpp/aterm_list.h>
@@ -24,6 +20,10 @@ using namespace lps;
 using namespace lps::data_expr;
 
 namespace lps {
+
+////////////////////////////////////////////////////////////////
+// Auxiliary functions used to support sumelm operation
+// Some of these might be interesting to get into the LPS library
 
   ///Used to assist in occurs_in function.
   struct compare_data_variable
@@ -54,7 +54,7 @@ namespace lps {
   data_expression lhs(data_expression t)
   {
     assert(is_and(t) || is_equal_to(t));
-    return data_expression(ATAelementAt(ATLgetArgument(t, 1), 0));  
+    return data_expression(ATAelementAt(ATLgetArgument(t, 1), 0));
   }
 
   ///pre: is_and(t) || is_equal_to(t)
@@ -99,7 +99,7 @@ namespace lps {
   lps::summand remove_unused_variables(const lps::summand& summand_)
   {
     //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
-
+    int num_removed = 0;
     lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
     lps::data_variable_list new_summation_variables;
@@ -107,13 +107,15 @@ namespace lps {
     for(lps::data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
     {
       data_variable v = *i;
-     
+
       //Check whether variable occurs in other terms of summand
       //If variable occurs leave the variable, so add variable to new list
       if (occurs_in(summand_.condition(), v) || occurs_in(summand_.actions(), v)
           || occurs_in(summand_.time(), v) || occurs_in(summand_.assignments(), v))
       {
         new_summation_variables = push_front(new_summation_variables, v);
+      } else {
+        ++num_removed;
       }
       //else remove the variable, i.e. do not add it to the new list (skip)
     }
@@ -121,6 +123,7 @@ namespace lps {
     new_summation_variables = reverse(new_summation_variables);
 
     new_summand = set_summation_variables(summand_, new_summation_variables);
+    gsVerboseMsg("Removed %d summation variables\n", num_removed);
 
     return new_summand;
   }
@@ -132,18 +135,24 @@ namespace lps {
 
     lps::linear_process lps = specification.process();
     lps::specification new_specification;
-    lps::summand_list new_summand_list = lps.summands();
+    lps::summand_list new_summand_list;
 
-    new_summand_list = atermpp::apply(new_summand_list, remove_unused_variables);
+    int index = 0;
+    for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+    {
+      gsVerboseMsg("Summand %d: ", ++index);
+      new_summand_list = push_front(new_summand_list, remove_unused_variables(*i));
+    }
+    new_summand_list = reverse(new_summand_list);
 
     new_specification = set_lps(specification, set_summands(lps, new_summand_list));
 
     return new_specification;
   }
 
-  //Recursively apply sum elimination on a summand. 
+  //Recursively apply sum elimination on a summand.
   //We build up a list of substitutions that need to be made in substitutions
-  //the caller of this function needs to apply sumstitutions to the summand
+  //the caller of this function needs to apply substitutions to the summand
   //once we exit recursion
   //working_condition is a parameter that we use to split up the problem,
   //at the first call of this function working_condition == summand_->condition()
@@ -171,7 +180,7 @@ namespace lps {
       b = recursive_substitute_equalities(summand_, rhs(working_condition), substitutions);
       result = and_(a,b);
     }
-    
+
     else if (is_equal_to(working_condition))
     {
       //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
@@ -183,7 +192,7 @@ namespace lps {
 
       //If lhs is a variable, check if it occurs in the summation variables, if so
       //apply substitution lhs := rhs in actions, time and assignments.
-      //substitution in condition is accounted for on returnpath of recursion,
+      //substitution in condition is accounted for on return path of recursion,
       //substitution in summation_variables is done in calling function.
       if (is_data_variable(lhs(working_condition)))
       {
@@ -193,11 +202,17 @@ namespace lps {
           lhs_subst = push_front(lhs_subst, i->lhs());
         }
 
+        //There already is a substitution lhs := rhs, but we may add rhs := lhs
+        //if rhs is a variable as well.
+        if (occurs_in(lhs_subst, data_variable(lhs(working_condition))) && is_data_variable(rhs(working_condition))) {
+          swap_equality(working_condition);
+        }
+
         //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
         if (!occurs_in(lhs_subst, data_variable(lhs(working_condition))) && occurs_in(summand_.summation_variables(), data_variable(lhs(working_condition))) && !occurs_in(rhs(working_condition), data_variable(lhs(working_condition))))
         {
           data_assignment substitution = data_assignment(data_variable(lhs(working_condition)), rhs(working_condition));
-   
+
           // First apply substitution to righthandside of other substitutions,
           // then add new substitution.
           substitutions = substitute_rhs(substitutions, substitution);
@@ -207,7 +222,7 @@ namespace lps {
       }
 
     }
-    
+
     return result;
   }
 
@@ -218,8 +233,6 @@ namespace lps {
   ///and returns X(..) = e -> a(..) . X(..)
   lps::summand substitute_equalities(const lps::summand& summand_)
   {
-    gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
-   
     lps::summand new_summand = summand_;
 
     //Apply elimination and store result
@@ -245,19 +258,26 @@ namespace lps {
   lps::specification substitute_equalities_(const lps::specification& specification)
   {
     gsVerboseMsg("Substituting equality conditions in summands\n");
-    
     lps::linear_process lps = specification.process();
-    lps::specification new_specification;
-    lps::summand_list new_summand_list = lps.summands();
 
+    lps::specification new_specification;
+    lps::summand_list new_summand_list;
+
+    int index = 0;
     // Apply sum elimination on each of the summands in the summand_ list.
-    new_summand_list = atermpp::apply(new_summand_list, substitute_equalities);
+    for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+    {
+      gsVerboseMsg("Summand %d: ", ++index);
+      new_summand_list = push_front(new_summand_list, substitute_equalities(*i));
+    }
+    new_summand_list = reverse(new_summand_list);
+
     new_specification = set_lps(specification, set_summands(lps, new_summand_list));
     return new_specification;
   }
 
   ///Returns an LPS specification in which the timed arguments have been rewritten
-  lps::specification sumelm(const lps::specification& specification) 
+  lps::specification sumelm(const lps::specification& specification)
   {
     gsVerboseMsg("Applying sum elimination on an LPS of %d summands\n", specification.process().summands().size());
 
