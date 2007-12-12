@@ -46,9 +46,7 @@ void test_apply()
   
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT() 
 
   test_apply();
   return 0;

@@ -12,9 +12,7 @@ using namespace lps;
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT() 
 
   data_variable y("y",sort_expr::int_()); 
   data_expression e(y);

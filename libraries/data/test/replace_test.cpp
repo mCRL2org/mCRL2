@@ -139,9 +139,7 @@ void test_data_assignment_list()
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   test_replace();
   test_data_assignment_list();

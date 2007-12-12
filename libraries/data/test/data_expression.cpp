@@ -19,9 +19,7 @@ using namespace lps;
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT() 
 
   ATermAppl T = gsMakeDataExprTrue();
   ATermAppl F = gsMakeDataExprFalse();
