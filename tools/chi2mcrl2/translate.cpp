@@ -832,15 +832,14 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
        } else {
           if(!(ProcessChannelMap.empty() && ProcessVariableMap.empty()))
           {
-            result.append(")");
+            result.append(");");
           } 
   
-          multimap<int,vector<RAT>::iterator>::iterator tmp_mlt = itOrdRAT;
+          /*multimap<int,vector<RAT>::iterator>::iterator tmp_mlt = itOrdRAT;
           ++tmp_mlt;
           if(tmp_mlt->first != itOrdRAT->first)
           {          
-            result.append(";");
-          }
+          }*/
        } 
        ++index;
     }
@@ -877,8 +876,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
           result.append(" == ");
           result.append(to_string(terminate_state.state));
         }
-        result.append(") -> Terminate.delta\n");
-        result.append("\t;\n");
+        result.append(") -> Terminate.delta");
         } else {
           if (collect_streams.size() > 1)
           {
@@ -925,9 +923,11 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
           {
             result.append(")");
           }  
-          result.append(" = Terminate.delta;\n");
+          result.append(" = Terminate.delta");
         }
       }      
+  
+  result.append(";\n");
   return result; 
 }
 
@@ -2109,54 +2109,36 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
         initialisation.append("0");
       }
 
-      if(! ( no_statepar && 
-           ( ATisEmpty(to_process) 
-           && ProcessForInstantation[processName].SpecificationVariables.empty() 
-           && local_channels.empty()
-           )
-         ) )
-      {
-        initialisation.append("(");
-      }
-      
-      bool is_single = false;
+      std::vector<std::string> arguments;
+ 
       while (!(ATisEmpty(to_process)))
       {
-        
+
+        gsDebugMsg("%T\n", to_process);
+ 
         //Check if the paramter is either a Expression or a Channel
         if (  StrcmpIsFun( "BinaryExpression", (ATermAppl) ATgetFirst(to_process)) 
            || StrcmpIsFun( "Expression", (ATermAppl) ATgetFirst(to_process) )
            || StrcmpIsFun( "UnaryExpression", (ATermAppl) ATgetFirst(to_process) ) 
            ) 
         { 
-          if(is_single)
-          {
-            initialisation.append(", ");
-          }
-          initialisation.append(manipulateExpression( (ATermAppl) ATgetFirst(to_process)));
+
+          arguments.push_back(manipulateExpression( (ATermAppl) ATgetFirst(to_process)));
         }
 
         if (  StrcmpIsFun( "TypedChannels", (ATermAppl) ATgetFirst(to_process))) 
-        {};
+        {
+        };
 
         to_process = ATgetNext(to_process);
-        is_single = true;
       }
 
       for(vector<RPV>::iterator itRPV = ProcessForInstantation[processName].SpecificationVariables.begin();
           itRPV != ProcessForInstantation[processName].SpecificationVariables.end();
           ++itRPV)
       {
-        if(itRPV == ProcessForInstantation[processName].SpecificationVariables.begin())
-        {
-          if(is_single)
-          {
-            initialisation.append(", ");
-          }
-        } else {
-          initialisation.append(", ");
-        }
-        initialisation.append(itRPV->InitValue);
+
+        arguments.push_back(itRPV->InitValue);
         
       }
 
@@ -2164,37 +2146,36 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
           itRVT != local_channels.end();
           ++itRVT)
       {
-                
-        if(!(!is_single && ProcessForInstantation[processName].SpecificationVariables.empty() && (itRVT == local_channels.begin())))
-        {
-          initialisation.append(", ");
-        }
+          arguments.push_back(to_string(itRVT->first));
+          arguments.push_back(to_string(itRVT->second));
+      }
 
-        initialisation.append(itRVT->first+", ");
-        /*if(itRVT->second != INT_MIN)
-        { */
-          initialisation.append(to_string(itRVT->second));
-        //} 
-     }
       //Initial State is alway 0
       if(!no_statepar)
       {
-        if(! (!is_single && ProcessForInstantation[processName].SpecificationVariables.empty() && local_channels.empty()))
-        {
-          initialisation.append(", ");
-        }
-        initialisation.append("0");
+        arguments.push_back("0");
       }
 
-      if(! ( no_statepar && 
-           ( !is_single 
-           && ProcessForInstantation[processName].SpecificationVariables.empty() 
-           && local_channels.empty()
-           )
-         ) )
+      if (!arguments.empty())
+      {
+        initialisation.append("(");
+      }
+      
+      for(std::vector< std::string >::iterator i = arguments.begin() ; i != arguments.end(); ++i )
+      {
+         if (i != arguments.begin())
+         {
+           initialisation.append(", ");
+         }
+         initialisation.append(*i);
+      }
+
+      if (!arguments.empty())
       {
         initialisation.append(")");
       }
+
+//      exit(0);
 
       return ;
     } 
