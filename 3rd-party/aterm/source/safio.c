@@ -1322,7 +1322,7 @@ void ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
 	FILE *file = fopen(filename, "w+b");
 	if(file == NULL) ATerror("Unable to open file for writing: %s\n", filename);
 	
-	return ATwriteToSAFFile(aTerm, file);
+	ATwriteToSAFFile(aTerm, file);
 }
  
 /**
@@ -1409,11 +1409,11 @@ char* ATwriteToSAFString(ATerm aTerm, int *length){
 	
 	do{
 		ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
+		BufferNode *current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
 		
 		ATresetByteBuffer(byteBuffer);
 		ATserialize(binaryWriter, byteBuffer);
 		
-		BufferNode *current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
 		current->byteBuffer = byteBuffer;
 		current->next = NULL;
 		last->next = current;
@@ -1461,9 +1461,10 @@ ATerm ATreadFromSAFString(char *data, int length){
 	BinaryReader binaryReader = ATcreateBinaryReader();
 	
 	do{
+		ByteBuffer byteBuffer;
 		int blockSize = (unsigned char) data[position++];
 		blockSize += ((unsigned char) data[position++]) << 8;
-		ByteBuffer byteBuffer = ATwrapBuffer(data + position, blockSize); /* Move the window to the next block. */
+		byteBuffer = ATwrapBuffer(data + position, blockSize); /* Move the window to the next block. */
 		
 		ATdeserialize(binaryReader, byteBuffer);
 		
