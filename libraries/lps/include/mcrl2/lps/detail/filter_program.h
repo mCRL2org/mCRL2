@@ -156,7 +156,7 @@ namespace lps {
 
         if (m_output_file.empty())
         {
-          result = ATwriteToBinaryFile(aterm(spec), stdout);
+          result = ATwriteToSAFFile(aterm(spec), stdout);
         }
         else
         {

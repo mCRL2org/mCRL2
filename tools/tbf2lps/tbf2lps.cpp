@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
   }
 
-  ATwriteToBinaryFile((ATerm) spec,OutStream);
+  ATwriteToSAFFile((ATerm) spec,OutStream);
 
   if (OutStream != stdout) {
     fclose(OutStream);

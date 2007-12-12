@@ -6,6 +6,10 @@
 #include <string.h>
 #include <assert.h>
 
+#ifdef WIN32
+#include <fcntl.h>
+#endif
+
 #include "_aterm.h"
 #include "memory.h"
 #include "afun.h"
@@ -52,7 +56,7 @@
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 23071 2007-07-02 10:06:17Z eriks $";
+char            aterm_id[] = "$Id: aterm.c 24415 2007-12-12 14:20:55Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
 ATbool silent	  = ATtrue;
@@ -242,6 +246,18 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   AT_initBafIO(argc, argv);
 
   /*}}}  */
+
+#ifdef WIN32
+  if (_setmode(_fileno(stdin), _O_BINARY) == -1) {
+    perror("Warning: Cannot set inputstream to binary mode.");
+  }
+  if (_setmode(_fileno(stdout), _O_BINARY) == -1) {
+    perror("Warning: Cannot set outputstream to binary mode.");
+  }
+  if (_setmode(_fileno(stderr), _O_BINARY) == -1) {
+    perror("Warning: Cannot set errorstream to binary mode.");
+  }
+#endif 
 
   initialized = ATtrue;
 

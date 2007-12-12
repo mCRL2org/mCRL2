@@ -150,7 +150,7 @@ using namespace std;
   void write_ATerm_to_file(char const* a_file_name, ATermAppl a_term, char const* a_feedback_string) {
     if (a_file_name == 0) {
       gsVerboseMsg("Writing the %s to stdout.\n", a_feedback_string);
-      ATwriteToBinaryFile((ATerm) a_term, stdout);
+      ATwriteToSAFFile((ATerm) a_term, stdout);
       fprintf(stdout, "\n");
     } else {
       FILE* v_output_stream = fopen(a_file_name, "wb");
@@ -159,7 +159,7 @@ using namespace std;
         exit(1);
       } else {
         gsVerboseMsg("Writing the %s to '%s'.\n", a_feedback_string, a_file_name);
-        ATwriteToBinaryFile((ATerm) a_term, v_output_stream);
+        ATwriteToSAFFile((ATerm) a_term, v_output_stream);
         fclose(v_output_stream);
       }
     }

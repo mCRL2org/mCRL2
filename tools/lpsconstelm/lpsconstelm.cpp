@@ -853,7 +853,7 @@ inline bool lpsConstElm::readStream() {
 //
 void lpsConstElm::writeStream(lps::specification newSpec) {
   assert(gsIsSpecV1((ATermAppl) newSpec));
-  ATwriteToBinaryFile(aterm(newSpec) , stdout);
+  ATwriteToSAFFile(aterm(newSpec) , stdout);
 }
 
 // Sets verbose option

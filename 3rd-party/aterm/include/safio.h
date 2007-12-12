@@ -1,6 +1,7 @@
 #ifndef SAFIO_H
 #define SAFIO_H
 
+#include "aterm1.h"
 #include "aterm2.h"
 #include "hashtable.h"
 
@@ -139,11 +140,6 @@ int ATisFinishedReading(BinaryReader binaryReader);
 ATerm ATgetRoot(BinaryReader binaryReader);
 
 void ATdestroyBinaryReader(BinaryReader binaryReader);
-
-/* I/O stuff */
-void ATwriteToSAFFile(ATerm aTerm, FILE *file);
-
-ATerm ATreadFromSAFFile(FILE *file);
 
 #ifdef __cplusplus
 }

@@ -135,7 +135,7 @@ class specification: public aterm_appl
         throw std::runtime_error("Error in specification::save(): term is not well typed");
       if (binary)
       {
-        return atermpp::write_to_named_binary_file(m_term, filename);
+        return atermpp::write_to_named_saf_file(m_term, filename);
       }
       else
       {

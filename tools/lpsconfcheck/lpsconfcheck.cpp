@@ -386,7 +386,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     FILE *outstream = fopen(task_options.outfilename.c_str(), "wb");
 
     if (outstream != 0) {
-      ATwriteToBinaryFile((ATerm) linearisation_result, outstream);
+      ATwriteToSAFFile((ATerm) linearisation_result, outstream);
 
       fclose(outstream);
     }

@@ -248,7 +248,7 @@ class pbes
       aterm t = ATermAppl(*this);
       if (binary)
       {
-        return atermpp::write_to_named_binary_file(t, filename);
+        return atermpp::write_to_named_saf_file(t, filename);
       }
       else
       {

@@ -1314,9 +1314,19 @@ void ATwriteToSAFFile(ATerm aTerm, FILE *file){
 	
 	if(fflush(file) != 0) ATerror("Unable to flush file stream.\n");
 }
+
+/**
+ * Writes the given ATerm in SAF format to the file with the given name.
+ */
+void ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
+	FILE *file = fopen(filename, "w+b");
+	if(file == NULL) ATerror("Unable to open file for writing: %s\n", filename);
+	
+	return ATwriteToSAFFile(aTerm, file);
+}
  
 /**
- * Interprets the given SAF file and returns the constructed ATerm.
+ * Interprets the content of the given SAF file and returns the constructed ATerm.
  */
 ATerm ATreadFromSAFFile(FILE *file){
 	ATerm term;
@@ -1349,6 +1359,119 @@ ATerm ATreadFromSAFFile(FILE *file){
 	}while(bytesRead > 0);
 	
 	ATdestroyByteBuffer(byteBuffer);
+	
+	if(!ATisFinishedReading(binaryReader)) ATerror("Term incomplete, missing data.\n");
+	term = ATgetRoot(binaryReader);
+	
+	ATdestroyBinaryReader(binaryReader);
+	
+	return term;
+}
+
+/**
+ * Interprets the content of the SAF file with the given name and returns the constructed ATerm.
+ */
+ATerm ATreadFromNamedSAFFile(const char *filename){
+	FILE *file = fopen(filename, "r+b");
+	if(file == NULL) ATerror("Unable to open file for reading: %s\n", filename);
+	
+	return ATreadFromSAFFile(file);
+}
+
+/**
+ * This is a node we need to build a linked list of ByteBuffers while writing SAF to a string.
+ * By using this strategy, we avoid the unnecessary reallocation of a temporary buffer.
+ */
+typedef struct _BufferNode{
+	ByteBuffer byteBuffer;
+	struct _BufferNode *next;
+} BufferNode;
+
+/**
+ * Writes the given ATerm to a string in SAF format.
+ * Since the string will contain \0 bytes, the value the length parameter has after this function returns will specify the number of bytes that were written.
+ * Note that the resulting string has been malloced and will need to be freed by the user.
+ */
+char* ATwriteToSAFString(ATerm aTerm, int *length){
+	char *result;
+	int totalBytesWritten = 0;
+	int position = 0;
+	
+	BinaryWriter binaryWriter = ATcreateBinaryWriter(aTerm);
+	
+	BufferNode *last;
+	BufferNode *currentBufferNode;
+	BufferNode *root = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
+	if(root == NULL) ATerror("Unable to allocate space for BufferNode.\n");
+	last = root;
+	
+	ATinitializeIntegerStore();
+	
+	do{
+		ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
+		
+		ATresetByteBuffer(byteBuffer);
+		ATserialize(binaryWriter, byteBuffer);
+		
+		BufferNode *current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
+		current->byteBuffer = byteBuffer;
+		current->next = NULL;
+		last->next = current;
+		last = current;
+		
+		totalBytesWritten += byteBuffer->limit + 2; /* Bytes written per block = buffer size + 2 bytes block size spec. */
+	}while(!ATisFinishedWriting(binaryWriter));
+	
+	ATdestroyBinaryWriter(binaryWriter);
+	
+	result = (char*) malloc(totalBytesWritten * sizeof(char));
+	if(result == NULL) ATerror("Unable to allocate space for result string.\n");
+	
+	currentBufferNode = root->next;
+	AT_free(root);
+	do{
+		BufferNode *nextBufferNode;
+		ByteBuffer currentByteBuffer = currentBufferNode->byteBuffer;
+		int blockSize = currentByteBuffer->limit;
+		
+		result[position++] = blockSize & 0x000000ffU;
+		result[position++] = (blockSize >> 8) & 0x000000ffU;
+		memcpy(result + position, currentByteBuffer->buffer, blockSize * sizeof(char));
+		position += blockSize;
+		
+		ATdestroyByteBuffer(currentByteBuffer);
+		
+		nextBufferNode = currentBufferNode->next;
+		AT_free(currentBufferNode);
+		currentBufferNode = nextBufferNode;
+	}while(currentBufferNode != NULL);
+	
+	*length = totalBytesWritten;
+	return result;
+}
+
+/**
+ * Interprets the given string in SAF format and returns the constructed ATerm.
+ */
+ATerm ATreadFromSAFString(char *data, int length){
+	ATerm term;
+	
+	int position = 0;
+	
+	BinaryReader binaryReader = ATcreateBinaryReader();
+	
+	do{
+		int blockSize = (unsigned char) data[position++];
+		blockSize += ((unsigned char) data[position++]) << 8;
+		ByteBuffer byteBuffer = ATwrapBuffer(data + position, blockSize); /* Move the window to the next block. */
+		
+		ATdeserialize(binaryReader, byteBuffer);
+		
+		byteBuffer->buffer = NULL; /* Prevent the data string from being freed. */
+		ATdestroyByteBuffer(byteBuffer);
+		
+		position += blockSize;
+	}while(position < length);
 	
 	if(!ATisFinishedReading(binaryReader)) ATerror("Term incomplete, missing data.\n");
 	term = ATgetRoot(binaryReader);

@@ -190,7 +190,7 @@ int main(int argc, char **argv)
     //store the result
     if (outfilename == NULL) {
       gsVerboseMsg("saving result to stdout...\n");
-      ATwriteToBinaryFile((ATerm) result, stdout);
+      ATwriteToSAFFile((ATerm) result, stdout);
       fprintf(stdout, "\n");
     } else { //outfilename != NULL
       //open output filename
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
         return 1;
       }
       gsVerboseMsg("saving result to '%s'...\n", outfilename);
-      ATwriteToBinaryFile((ATerm) result, outstream);
+      ATwriteToSAFFile((ATerm) result, outstream);
       fclose(outstream);
     }
   }

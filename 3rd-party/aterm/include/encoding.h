@@ -4,6 +4,7 @@
 
 #ifndef ENCODING_H
 #define ENCODING_H
+#include "atypes.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -155,11 +156,31 @@ typedef unsigned long header_type;
 #define AT_TABLE_SIZE(table_class)  (1<<(table_class))
 #define AT_TABLE_MASK(table_class)  (AT_TABLE_SIZE(table_class)-1)
 
-
 /* Integers in BAF are always exactly 32 bits.  The size must be fixed so that
  * BAF terms can be exchanged between platforms. */
 #define INT_SIZE_IN_BAF 32
 
+#define MAX_ARITY             MAX_LENGTH
+
+#define MIN_TERM_SIZE         TERM_SIZE_APPL(0)
+#define INITIAL_MAX_TERM_SIZE 256
+
+
+struct __ATerm
+{
+  header_type   header;
+  union _ATerm *next;
+};
+
+typedef union _ATerm
+{
+  header_type     header;
+  struct __ATerm  aterm;
+  union _ATerm*   subaterm[1];
+  MachineWord     word[1];
+} *ATerm;
+
+typedef void (*ATermProtFunc)();
 
 #ifdef __cplusplus
 }

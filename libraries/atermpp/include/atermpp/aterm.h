@@ -247,6 +247,15 @@ namespace atermpp
     return ATwriteToNamedBinaryFile(t, filename.c_str()) == ATtrue;
   }
 
+  /// Writes term t to file named filename in Streamable aterm Format (saf).
+  ///
+  inline
+  bool write_to_named_saf_file(aterm t, const std::string& filename)
+  {
+    ATwriteToNamedSAFFile(t, filename.c_str());
+    return true;
+  }
+
   /// Annotate a term with a labeled annotation.
   /// Creates a version of t that is annotated with annotation and labeled by
   /// label.

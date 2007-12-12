@@ -380,7 +380,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     FILE *outstream = fopen(task_options.outfilename.c_str(), "wb");
 
     if (outstream != 0) {
-      ATwriteToBinaryFile((ATerm) linearisation_result, outstream);
+      ATwriteToSAFFile((ATerm) linearisation_result, outstream);
 
       fclose(outstream);
     }
@@ -781,7 +781,7 @@ int main(int argc, char *argv[])
         //store the result
         if (lin_options.outfilename == "") {
           gsVerboseMsg("saving result to stdout...\n");
-          ATwriteToBinaryFile((ATerm) result, stdout);
+          ATwriteToSAFFile((ATerm) result, stdout);
           fprintf(stdout, "\n");
         } else { //outfilename != NULL
           //open output filename
@@ -791,7 +791,7 @@ int main(int argc, char *argv[])
             return 1;
           }
           gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-          ATwriteToBinaryFile((ATerm) result, outstream);
+          ATwriteToSAFFile((ATerm) result, outstream);
           fclose(outstream);
         }
       }
