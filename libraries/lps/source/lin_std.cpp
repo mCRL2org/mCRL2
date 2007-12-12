@@ -2970,6 +2970,7 @@ static ATermAppl create_regular_invocation(
 { ATermList process_names=NULL;
   ATermAppl new_process=NULL;
   ATermList args=NULL;
+ 
 
   /* Sequence consists of a sequence of process references, 
      concatenated with the sequential composition operator */
@@ -3256,7 +3257,8 @@ static ATermAppl procstorealGNFbody(
          objectdata[m].processbody);
     
     if (regular)
-    { t3=to_regular_form(t3,todo,freevars);
+    { 
+      t3=to_regular_form(t3,todo,freevars);
     }
     
     return t3;
@@ -7295,6 +7297,7 @@ static ATermAppl communicationcomposition(
         { newsumvars=ATinsertA(newsumvars,sumvar);
         }
       }
+      newsumvars=ATreverse(newsumvars);
 
       resultingDeltaSummands=ATinsertA(
                                 resultingDeltaSummands,
@@ -8813,7 +8816,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //initialise local data structures
   initialize_data();
   if (mayrewrite) {
-    rewr = createRewriter(lps::data_specification(ATAgetArgument(spec,0)));
+    rewr = createRewriter(lps::data_specification(ATAgetArgument(spec,0)),GS_REWR_JITTY);
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL) {
