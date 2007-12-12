@@ -46,9 +46,7 @@ bool occurs_in(data_expression d, data_variable v)
 
 int main()
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   linear_process lps = spec.process();

@@ -23,9 +23,7 @@ using namespace lps::data_expr;
 
 int main(int, char*[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   data_variable d("d:D");
   data_variable d00("d00:D");

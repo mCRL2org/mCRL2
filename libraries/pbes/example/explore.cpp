@@ -23,9 +23,7 @@ int main(int argc, char** argv)
 {
 
   // Initialize the aterm library
-  ATerm bottom;
-  ATinit(argc, argv, &bottom);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   // load a pbes.
   pbes<> pbes_spec;

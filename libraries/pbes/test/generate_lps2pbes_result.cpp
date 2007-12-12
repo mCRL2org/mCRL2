@@ -23,9 +23,7 @@ using namespace lps::detail;
 
 int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   if (argc < 4)
   {

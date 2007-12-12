@@ -45,9 +45,7 @@ int main()
 {
   using namespace lps::data_expr;
 
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   data_variable d("d:D");
   data_variable d0("d0:D");

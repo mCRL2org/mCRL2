@@ -130,8 +130,7 @@ void test_operators()
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
 
   test_algorithm();
   test_operators();

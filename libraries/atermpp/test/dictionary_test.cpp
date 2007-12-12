@@ -39,8 +39,7 @@ void test_dictionary()
 
 int test_main( int, char*[] )
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  ATERM_LIBRARY_INIT()
   test_dictionary();
   return 0;
 }

@@ -287,17 +287,6 @@ namespace atermpp
     return ATremoveAnnotation(t, label);
   }
 
-  /// Initialize the ATerm++ Library. The specified argument t is used to mark the
-  /// the bottom of the program stack. All aterms in the range [bottom_of_stack,...[
-  /// will not be garbage collected.
-  /// 
-  inline
-  void aterm_init(const aterm& bottom_of_stack)
-  {
-    ATerm a = bottom_of_stack;
-    ATinit(0, 0, &a);
-  }
-
   inline
   bool operator==(const aterm& x, const aterm& y)
   {
@@ -337,5 +326,6 @@ namespace atermpp
 } // namespace atermpp
 
 #include "atermpp/aterm_make_match.h"
+#include "atermpp/aterm_init.h"
 
 #endif // MCRL2_ATERMPP_ATERM_H

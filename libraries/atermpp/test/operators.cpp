@@ -24,8 +24,7 @@ class D: public aterm_appl
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
 
   aterm t      = make_term("[1,2]");
   aterm_appl a = make_term("f(x)");

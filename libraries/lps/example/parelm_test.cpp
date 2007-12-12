@@ -156,9 +156,7 @@ std::string SPEC7 =
 
 int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   test_parelm(SPEC1);
   test_parelm(SPEC2);

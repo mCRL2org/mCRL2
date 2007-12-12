@@ -20,9 +20,7 @@ using namespace lps::detail;
 
 int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   string spec_file(argv[1]); // specification file
   string mcf_file(argv[2]);  // modal formula file

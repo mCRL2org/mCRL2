@@ -33,8 +33,7 @@ using namespace atermpp;
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
   aterm_int i(10);
   aterm_real r(2.5);
   aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y"));

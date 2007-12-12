@@ -51,8 +51,7 @@ void test_aterm()
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
   test_aterm();
   return 0;
 }

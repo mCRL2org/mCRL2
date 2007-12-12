@@ -33,8 +33,7 @@ using namespace atermpp;
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
   // unquoted function symbol s == "f"
   function_symbol s("\"f\"", 1, false);
   aterm_appl f(s, aterm("x"));

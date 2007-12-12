@@ -74,9 +74,7 @@ class my_program: public lps::filter_program
 
 int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   std::string input_filename;
   std::string output_filename;

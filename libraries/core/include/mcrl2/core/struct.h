@@ -1488,4 +1488,6 @@ bool gsIsFixpoint(ATermAppl Term);
 }
 #endif
 
+#include "mcrl2/core/core_init.h"
+
 #endif // MCRL2_LIBSTRUCT_H

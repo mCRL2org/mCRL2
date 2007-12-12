@@ -23,9 +23,7 @@ using namespace lps::detail;
 
 int main()
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   namespace d = lps::data_expr;
   namespace p = lps::pbes_expr;

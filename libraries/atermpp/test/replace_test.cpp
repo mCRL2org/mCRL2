@@ -122,8 +122,7 @@ void test_replace()
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
 
   test_find();
   test_replace();

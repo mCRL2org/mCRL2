@@ -60,8 +60,7 @@ void test_make_match()
 
 int test_main( int, char*[] )
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  ATERM_LIBRARY_INIT()
   test_make_match();
   return 0;
 }

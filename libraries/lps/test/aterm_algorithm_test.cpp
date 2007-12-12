@@ -111,9 +111,7 @@ void test_find_variable()
 
 int test_main(int, char*[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   test_find_variable();
 
