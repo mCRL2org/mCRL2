@@ -13,47 +13,66 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/modal_formula/detail/read_text.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
-///////////////////////////////////////////////////////////////////////////////
-// rewriter
-/// \brief rewriter.
-class rewriter
-{
-  private:
-    Rewriter* m_rewriter;
-
-  public:
-    /// Constructs a rewriter from data specification d.
-    ///
-    rewriter(data_specification d)
-    {
-      m_rewriter = createRewriter(d);
-    }
-
-    ~rewriter()
-    {
-      delete m_rewriter;
-    }
-  
-		/// \brief Rewrites a data expression.
-		/// \param d The term to be rewritten.
-		/// \return The normal form of d.
-		///
-		data_expression operator()(const data_expression& d) const
-		{
-		  ATerm t = m_rewriter->toRewriteFormat(d);
-		  return m_rewriter->rewrite((ATermAppl) t);
-		}
-};
+const std::string SPECIFICATION =
+"sort Natural;                                    \n" 
+"                                                 \n"
+"cons _0: Natural;                                \n"
+"    S: Natural -> Natural;                       \n"
+"                                                 \n"
+"map  eq: Natural # Natural -> Bool;              \n"
+"    less: Natural # Natural -> Bool;             \n"
+"    plus: Natural # Natural -> Natural;          \n"
+"    _1, _2, _3, _4, _5, _6, _7, _8, _9: Natural; \n"
+"    P: Natural -> Natural;                       \n"
+"    even: Natural -> Bool;                       \n"
+"                                                 \n"
+"var  n, m: Natural;                              \n"
+"                                                 \n"
+"eqn  eq(n, n) = true;                            \n"
+"    eq(S(n), _0) = false;                        \n"
+"    eq(_0, S(m)) = false;                        \n"
+"    eq(S(n), S(m)) = eq(n, m);                   \n"
+"                                                 \n"
+"    less(n, n) = false;                          \n"
+"    less(n, _0) = false;                         \n"
+"    less(_0, S(m)) = true;                       \n"
+"    less(S(n), S(m)) = less(n, m);               \n"
+"                                                 \n"
+"    plus(_0, n) = n;                             \n"
+"    plus(n, _0) = n;                             \n"
+"    plus(S(n), m) = S(plus(n, m));               \n"
+"    plus(n, S(m)) = S(plus(n, m));               \n"
+"                                                 \n"
+"    even(_0) = true;                             \n"
+"    even(S(n)) = !(even(n));                     \n"
+"                                                 \n"
+"    P(S(n)) = n;                                 \n"
+"                                                 \n"
+"    _1 = S(_0);                                  \n"
+"    _2 = S(_1);                                  \n"
+"    _3 = S(_2);                                  \n"
+"    _4 = S(_3);                                  \n"
+"    _5 = S(_4);                                  \n"
+"    _6 = S(_5);                                  \n"
+"    _7 = S(_6);                                  \n"
+"    _8 = S(_7);                                  \n"
+"    _9 = S(_8);                                  \n"
+"                                                 \n"
+"act a: Natural;                                  \n"
+"                                                 \n"
+"proc P(n: Natural) = sum m: Natural. a(m). P(m); \n"
+"                                                 \n"
+"init P(_0);                                      \n"
+;
 
 struct sort_has_name
 {
@@ -118,7 +137,7 @@ sort_expression find_sort(data_specification data, std::string s)
 
 void test1()
 {
-  specification spec = mcrl22lps(read_text("natural.mcrl2"));
+  specification spec = mcrl22lps(SPECIFICATION);
   rewriter r(spec.data());
 
   data_expression n1    = find_mapping(spec.data(), "_1");
@@ -138,9 +157,7 @@ void test1()
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
 
   test1();
 
