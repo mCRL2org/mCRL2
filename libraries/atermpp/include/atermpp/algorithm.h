@@ -140,16 +140,13 @@ namespace atermpp
   };
 
   /// Replaces subterms in the term t. Each subterm for which f(s) returns true
-  /// is replaced by r(s).
+  /// is replaced by r(s), and the recursion is not continued.
   ///
   /// The CheckFunction f and the ReplaceFunction r have the following signature:
   ///
   /// aterm_appl x;
   /// bool b = f(x);
   /// std::pair<aterm_appl, bool> result = r(x);
-  ///
-  /// result.first  is the result r(x) of the replacement
-  /// result.second denotes if the recursion should be continued
   ///
   template <typename Term, typename ReplaceFunction, typename CheckFunction>
   Term checked_replace(Term t, CheckFunction f, ReplaceFunction r)

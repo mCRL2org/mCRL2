@@ -7,6 +7,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression_replace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -24,6 +25,48 @@ namespace lps {
 ////////////////////////////////////////////////////////////////
 // Auxiliary functions used to support sumelm operation
 // Some of these might be interesting to get into the LPS library
+
+  /// \internal
+  struct sumelm_replace_helper
+  {
+    const std::map<data_expression, data_expression>& m_replacements;
+    
+    sumelm_replace_helper(const std::map<data_expression, data_expression>& replacements)
+      : m_replacements(replacements)
+    {}
+    
+    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    {
+      if (is_sort_expression(t))
+      {
+        return std::pair<aterm_appl, bool>(t, false); // do not continue the recursion
+      }
+      else if (is_data_expression(t))
+      {
+        std::map<data_expression, data_expression>::const_iterator i = m_replacements.find(t);
+        if (i == m_replacements.end())
+        {         
+          return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+        }
+        else
+        {
+          return std::pair<aterm_appl, bool>(i->second, false); // do not continue the recursion
+        }
+      }
+      else
+      {
+        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      }
+    }
+  };
+
+  /// Replaces all data expressions in the term t using the specified map of replacements.
+  ///
+  template <typename Term>
+  Term sumelm_replace(Term t, const std::map<data_expression, data_expression>& replacements)
+  {
+    return atermpp::partial_replace(t, sumelm_replace_helper(replacements));
+  }
 
   ///Used to assist in occurs_in function.
   struct compare_data_variable
@@ -166,7 +209,7 @@ namespace lps {
   //!!!INTERNAL USE ONLY!!!
   data_expression recursive_substitute_equalities(const summand& summand_,
                                                   data_expression working_condition,
-                                                  data_assignment_list& substitutions)
+                                                  std::map<data_expression, data_expression>& substitutions)
   {
     // In all cases not explicitly handled we return the original working_condition
     data_expression result = working_condition;
@@ -196,33 +239,32 @@ namespace lps {
       //substitution in summation_variables is done in calling function.
       if (is_data_variable(lhs(working_condition)))
       {
-        data_variable_list lhs_subst;
-        for (data_assignment_list::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+        if (occurs_in(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
+            !occurs_in(rhs(working_condition), lhs(working_condition)))
         {
-          lhs_subst = push_front(lhs_subst, i->lhs());
-        }
-
-        //There already is a substitution lhs := rhs, but we may add rhs := lhs
-        //if rhs is a variable as well.
-        if (occurs_in(lhs_subst, data_variable(lhs(working_condition))) && is_data_variable(rhs(working_condition))) {
-          swap_equality(working_condition);
-        }
-
-        //According to sum elimination lemma the variable that is being substituted can not occur in its replacement.
-        if (!occurs_in(lhs_subst, data_variable(lhs(working_condition))) && occurs_in(summand_.summation_variables(), data_variable(lhs(working_condition))) && !occurs_in(rhs(working_condition), data_variable(lhs(working_condition))))
-        {
-          data_assignment substitution = data_assignment(data_variable(lhs(working_condition)), rhs(working_condition));
-
-          // First apply substitution to righthandside of other substitutions,
-          // then add new substitution.
-          substitutions = substitute_rhs(substitutions, substitution);
-          substitutions = push_front(substitutions, substitution);
-          result = true_();
+          if (substitutions.count(lhs(working_condition)) == 0)
+          {
+            // apply all previously added substitutions to the rhs.
+            substitutions[lhs(working_condition)] = sumelm_replace(rhs(working_condition), substitutions);
+            result = true_();
+          } else if (is_data_variable(rhs(working_condition))) {
+            // check whether the converse is possible
+            if (substitutions.count(rhs(working_condition)) == 0) {
+              substitutions[rhs(working_condition)] = sumelm_replace(substitutions[lhs(working_condition)], substitutions);
+              result = true_();
+            }
+          } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0) {
+            substitutions[lhs(working_condition)] = sumelm_replace(rhs(working_condition), substitutions);
+            result = true_();
+          } else if (is_data_variable(substitutions[lhs(working_condition)])) {
+            data_expression new_rhs = sumelm_replace(rhs(working_condition), substitutions);
+            substitutions[substitutions[lhs(working_condition)]] = new_rhs;
+            substitutions[lhs(working_condition)] = new_rhs;
+            result = true_();
+          }
         }
       }
-
     }
-
     return result;
   }
 
@@ -236,17 +278,16 @@ namespace lps {
     lps::summand new_summand = summand_;
 
     //Apply elimination and store result
-    lps::data_assignment_list substitutions;
+    std::map<data_expression, data_expression> substitutions;
     lps::data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
 
     //Apply the substitutions that were returned from the recursive call
-    new_condition = new_condition.substitute(assignment_list_substitution(substitutions));
     new_summand = summand(new_summand.summation_variables(),
-                              new_condition.substitute(assignment_list_substitution(substitutions)),
+                              sumelm_replace(new_condition, substitutions),
                               new_summand.is_delta(),
-                              new_summand.actions().substitute(assignment_list_substitution(substitutions)),
-                              new_summand.time().substitute(assignment_list_substitution(substitutions)),
-                              new_summand.assignments().substitute(assignment_list_substitution(substitutions)));
+                              sumelm_replace(new_summand.actions(), substitutions),
+                              sumelm_replace(new_summand.time(), substitutions),
+                              sumelm_replace(new_summand.assignments(), substitutions));
     //Take the summand with substitution, and remove the summation variables that are now not needed
     new_summand = remove_unused_variables(new_summand);
     return new_summand;
