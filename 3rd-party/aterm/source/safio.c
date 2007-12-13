@@ -1339,6 +1339,9 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
  */
 ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
 	ATbool result;
+
+	if (!strcmp(filename,"-"))
+		return ATwriteToSAFFile(aTerm,stdout);
 	
 	FILE *file = fopen(filename, "wb");
 	if(file == NULL){
@@ -1420,6 +1423,9 @@ ATerm ATreadFromSAFFile(FILE *file){
  */
 ATerm ATreadFromNamedSAFFile(const char *filename){
 	ATerm result;
+
+	if (!strcmp(filename,"-"))
+		return ATreadFromSAFFile(stdin);
 	
 	FILE *file = fopen(filename, "rb");
 	if(file == NULL){
