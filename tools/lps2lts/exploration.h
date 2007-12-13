@@ -81,7 +81,7 @@ inline lts_generation_options::lts_generation_options() :
     quiet(false),
     verbose(false),
     debug(false),
-    strat(GS_REWR_INNER),
+    strat(GS_REWR_JITTY),
     usedummies(true),
     removeunused(true),
     stateformat(GS_STATE_VECTOR),

@@ -8,6 +8,7 @@ exe lpsconfcheck
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
 #         <toolset>gcc:<define>CVC_LITE_LIB
+#         <squadt-connectivity>implemented
        ;
 
 install-binaries install

@@ -180,7 +180,7 @@ using namespace ::mcrl2::utilities;
         "  -q, --quiet                     Do not display warning messages.\n"
         "  -v, --verbose                   Display concise intermediate messages.\n"
         "  -d, --debug                     Display detailed intermediate messages.\n"
-        "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
+        "  -r, --rewriter=STRATEGY         Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
         "                                  - 'innerc' for the compiled innermost rewrite\n"
@@ -273,7 +273,7 @@ using namespace ::mcrl2::utilities;
         {"quiet",            no_argument,       0, 'q'},
         {"verbose",          no_argument,       0, 'v'},
         {"debug",            no_argument,       0, 'd'},
-        {"rewrite-strategy", required_argument, 0, 'r'},
+        {"rewriter",         required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
         {"smt-solver",       required_argument, 0, 'z'},
         {"induction",        no_argument,       0, 'o'},

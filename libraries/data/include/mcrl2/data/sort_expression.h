@@ -175,7 +175,7 @@ namespace sort_expr {
     return gsMakeSortExprNat();
   }
   
-  /// Returns the predefined sort_expression int.
+  /// Returns the predefined sort_expression bool.
   inline
   sort_expression bool_()
   {

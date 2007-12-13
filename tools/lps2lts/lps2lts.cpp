@@ -21,7 +21,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
 
-#include "squadt_interactor.tcc"
+#include "squadt_interactor.ipp"
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -124,7 +124,7 @@ static void print_help(FILE *f, const char *Name)
     "                             b, breadth   breadth-first search (default)\n"
     "                             d, depth     depth-first search\n"
     "                             r, random    random simulation\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner');\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty');\n"
     "                           available rewriters are inner, jitty, innerc and\n"
     "                           jittyc\n"
     "      --aut                force OUTFILE to be in the aut format (implies\n"

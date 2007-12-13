@@ -1053,7 +1053,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 							"finite  Compute all possible boolean equations\n"
 							"lazy    Compute only boolean equations which can be reached from the initial state\n")
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
-			 				"available outputformats are binary, internal and cwi")
+			 				"available output formats are binary, internal and cwi")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
 			("version",		"display version information")

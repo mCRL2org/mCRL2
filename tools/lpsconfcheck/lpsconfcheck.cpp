@@ -140,6 +140,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface,
   private:
 
     static const char* lps_file_for_input; ///< file containing an LTS that can be imported using the LTS library
+    static const char* invariant_file_for_input; ///< file containing an LTS that can be imported using the LTS library
     static const char* lps_file_for_output;  ///< file containing an LTS that can be imported using the LTS library
 
     static const char* option_generate_invariants;
@@ -175,9 +176,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface,
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input = "lps_in";
+const char* squadt_interactor::lps_file_for_input       = "lps_in";
 const char* squadt_interactor::invariant_file_for_input = "invariant_in";
-const char* squadt_interactor::lps_file_for_output  = "lps_out";
+const char* squadt_interactor::lps_file_for_output      = "lps_out";
 
 const char* squadt_interactor::option_generate_invariants = "generate_invariants";
 const char* squadt_interactor::option_check_invariant     = "check_invariant";
@@ -260,8 +261,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   checkbox&   check_combinations  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_combinations));
   checkbox&   counter_example     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_counter_example));
   checkbox&   induction_on_lists  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_induction_on_lists));
-  text_field& invariant           = d.create< text_field >();
-  text_field& time_limit          = d.create< text_field >();
+  text_field& invariant           = d.create< text_field >().set_text("");
+  text_field& time_limit          = d.create< text_field >().set_text("0");
 
   // two columns to select the linearisation options of the tool
   m.append(d.create< label >().set_text(" ")).
@@ -273,18 +274,20 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
             append(check_combinations.set_label("Check all combinations of summands for confluence")).
             append(counter_example.set_label("Produce counter examples")).
             append(induction_on_lists.set_label("Add delta summands"))).
+            append(d.create< text_field >().set_text("Time limit for proving a single formula")).
         append(d.create< vertical_box >().set_default_alignment(layout::left).
-            append(d.create< text_field >, layout::hidden).
-            append(invariant.set_text("")).
-            append(alpha.set_label("Apply alphabet axioms")).
-            append(sumelm.set_label("Apply sum elimination")).
-            append(deltaelm.set_label("Apply delta elimination")).
-            append(freevars.set_label("Generate free variables"))));
+            append(d.create< checkbox >(), layout::hidden).
+            append(invariant).
+            append(d.create< checkbox >(), layout::hidden).
+            append(d.create< checkbox >(), layout::hidden).
+            append(d.create< checkbox >(), layout::hidden).
+            append(d.create< checkbox >(), layout::hidden).
+            append(time_limit)));
 
   // Set default values for options if the configuration specifies them
   if (c.option_exists(option_rewrite_strategy)) {
     strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        configuration.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+        c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
   }
   if (c.option_exists(option_invariant)) {
     invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
@@ -310,7 +313,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.get_option(option_generate_invariants).set_argument_value< 0, boolean >(generate_invariants.get_status());
   c.get_option(option_check_invariant).set_argument_value< 0, boolean >(check_invariant.get_status());
   c.get_option(option_mark_tau).set_argument_value< 0, boolean >(mark_tau.get_status());
-  c.get_option(option_counter_example).set_argument_value< 0, boolean >(newstate.counter_example());
+  c.get_option(option_check_combinations).set_argument_value< 0, boolean >(check_combinations.get_status());
+  c.get_option(option_counter_example).set_argument_value< 0, boolean >(counter_example.get_status());
   c.get_option(option_induction_on_lists).set_argument_value< 0, boolean >(induction_on_lists.get_status());
 
   if (!c.output_exists(lps_file_for_output) && !c.get_option_argument< bool >(option_mark_tau)) {
@@ -449,7 +453,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         "  -q, --quiet                     Do not display warning messages.\n"
         "  -v, --verbose                   Display concise intermediate messages.\n"
         "  -d, --debug                     Display detailed intermediate messages.\n"
-        "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
+        "  -r, --rewriter=STRATEGY         Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
         "                                  - 'innerc' for the compiled innermost rewrite\n"
@@ -542,7 +546,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         {"quiet",            no_argument,       0, 'q'},
         {"verbose",          no_argument,       0, 'v'},
         {"debug",            no_argument,       0, 'd'},
-        {"rewrite-strategy", required_argument, 0, 'r'},
+        {"rewriter",         required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
         {"smt-solver",       required_argument, 0, 'z'},
         {"induction",        no_argument,       0, 'o'},

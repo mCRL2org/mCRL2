@@ -18,7 +18,7 @@ namespace squadt {
   namespace GUI {
 
     /**
-     * \brief A window that shows some basic information about deskSQuADT
+     * \brief A window that shows some basic information about SQuADT
      **/
     class about : public wxMessageDialog {
 
@@ -33,7 +33,7 @@ namespace squadt {
      * \param[in] p the message to print
      **/
     inline about::about(wxWindow* p) : wxMessageDialog(p,
-       wxString(get_version_information("deskSQuADT").c_str(), wxConvLocal) +
+       wxString(get_version_information("SQuADT").c_str(), wxConvLocal) +
        wxT("\n")
        wxT("\n")
        wxT("A controlled environment that provides a graphical user interface that helps users to ")
@@ -47,7 +47,7 @@ namespace squadt {
        wxT("\n")
        wxT("For feature requests or bug reports,\n")
        wxT("please visit http://www.mcrl2.org/issuetracker\n"),
-       wxT("About deskSQuADT"), wxOK|wxICON_INFORMATION) {
+       wxT("About SQuADT"), wxOK|wxICON_INFORMATION) {
     }
   
   }

@@ -10,20 +10,8 @@ exe mcrl22lps
          <squadt-connectivity>implemented
        ;
 
-exe alpha
-       : alpha.cpp
-         /libraries//lps
-         /libraries//utilities
-       : <toolset>msvc:<library>/libraries//getopt
-       ;
-
 install-binaries install
        : mcrl22lps
-       : <dependency>experimental-install
+       :
        ;
 
-install-binaries experimental-install
-       : alpha
-       :
-       : <status>experimental
-       ;

@@ -74,7 +74,7 @@ void print_help(FILE *f, char *Name)
     "\n"
     "The following command line options are available.\n"
     "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"
     "  -q, --quiet              do not display warning messages\n"
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	bool verbose = false;
 	bool debug = false;
 	bool usedummy = false;
-	RewriteStrategy strat = GS_REWR_INNER;
+	RewriteStrategy strat = GS_REWR_JITTY;
 	int opt;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{

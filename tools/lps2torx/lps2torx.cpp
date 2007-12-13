@@ -151,7 +151,7 @@ static void print_help(FILE *f, char *Name)
     "  -u, --unused-data       do not remove unused parts of the data specification\n"
     "  -c, --vector            store state in a vector (fastest, default)\n"
     "  -r, --tree              store state in a tree (for memory efficiency)\n"
-    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'inner')\n",
+    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'jitty')\n",
     Name);
 }
 
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
   bool quiet = false;
   bool verbose = false;
   bool debug = false;
-  RewriteStrategy strat = GS_REWR_INNER;
+  RewriteStrategy strat = GS_REWR_JITTY;
   bool usedummies = true;
   bool removeunused = true;
   int stateformat = GS_STATE_VECTOR;

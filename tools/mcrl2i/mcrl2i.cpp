@@ -254,7 +254,7 @@ void print_help(FILE *f, char *Name)
     "%s"
     "\n"
     "The following command line options are available.\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"
     "  -q, --quiet              do not display warning messages\n"
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 
   ATinit(argc,argv,&stackbot);
 
-  RewriteStrategy strat = GS_REWR_INNER;
+  RewriteStrategy strat = GS_REWR_JITTY;
   bool quiet = false;
   bool verbose = false;
   bool debug = false;

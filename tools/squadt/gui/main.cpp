@@ -28,7 +28,7 @@
 namespace squadt {
   namespace GUI {
 
-    wxString main::default_title = wxT("deskSQuADT");
+    wxString main::default_title = wxT("SQuADT");
 
     void main::about() {
       squadt::GUI::about about_dialog(this);

@@ -122,7 +122,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   wxCmdLineParser cmdln(argc,argv);
 
   cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
-  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
+  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'jitty')"));
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
   cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
   cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display warning messages"));
@@ -249,7 +249,7 @@ bool XSim::OnInit()
   bool dummies = false;
  
   /* The rewrite strategy that will be used */
-  RewriteStrategy rewrite_strategy = GS_REWR_INNER;
+  RewriteStrategy rewrite_strategy = GS_REWR_JITTY;
  
   if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
     return false;

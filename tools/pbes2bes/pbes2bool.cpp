@@ -393,7 +393,7 @@ t_tool_options parse_command_line(int argc, char** argv)
        "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
        "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
        "needed to generate an equation substantially")
-      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("inner"), "indicate the rewriter to be used. Options are:\n"
+      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
        "inner   interpreting innermost rewriter (default),\n"
        "jitty   interpreting just in time rewriter,\n"
        "innerc  compiling innermost rewriter (not for Windows),\n"
