@@ -1325,6 +1325,10 @@ ATermAppl get_linked_sort(ATermAppl op_id)
 
 void initialise_sorts(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+
+  gsDebugMsg("Initialising table with sorts\n");
 // Retrieve all sorts from the data declarations
   ATermList sorts = ATconcat(get_sorts((ATerm) p_data_decls->sorts),
                     ATconcat(get_sorts((ATerm) p_data_decls->cons_ops),
@@ -1332,22 +1336,27 @@ void initialise_sorts(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
                              get_sorts((ATerm) p_data_decls->data_eqns))));
 
   // Initialisation
-  //p_ctx->sorts_table(50,75);
   for (ATermList l = sorts; !ATisEmpty(l); l = ATgetNext(l))
   {
     ATermAppl sort = ATAgetFirst(l);
-    p_ctx->sorts_table.put         (sort, (ATerm) ATtrue);
-    p_ctx->sort_constructors.insert       (std::make_pair(sort, atermpp::indexed_set(20,50)));
-    p_ctx->num_sort_constructors.insert   (std::make_pair(sort, 0));
-    p_ctx->sort_mappings.insert           (std::make_pair(sort, atermpp::indexed_set(20,50)));
-    p_ctx->num_sort_mappings.insert       (std::make_pair(sort, 0));
-    p_ctx->sort_cons_equations.insert     (std::make_pair(sort, atermpp::indexed_set(20,50)));
-    p_ctx->num_sort_cons_equations.insert (std::make_pair(sort, 0));
+    if (p_ctx->sorts_table.get(sort) == NULL) { // Unique sorts in the table
+      p_ctx->sorts_table.put         (sort, (ATerm) ATtrue);
+      p_ctx->sort_constructors.insert       (std::make_pair(sort, atermpp::indexed_set(20,50)));
+      p_ctx->num_sort_constructors.insert   (std::make_pair(sort, 0));
+      p_ctx->sort_mappings.insert           (std::make_pair(sort, atermpp::indexed_set(20,50)));
+      p_ctx->num_sort_mappings.insert       (std::make_pair(sort, 0));
+      p_ctx->sort_cons_equations.insert     (std::make_pair(sort, atermpp::indexed_set(20,50)));
+      p_ctx->num_sort_cons_equations.insert (std::make_pair(sort, 0));
+    }
   }
 }
 
 void initialise_sort_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+
+  gsDebugMsg("Initialising constructors\n");
   // Initialise sort_constructors, such that for each sort s in
   // sorts sort_constructors(s) contains exactly the
   // constructors of s.
@@ -1367,6 +1376,11 @@ void initialise_sort_constructors(t_data_decls* p_data_decls, t_reconstruct_cont
 
 void initialise_mappings(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+  assert(p_substs != NULL);
+
+  gsDebugMsg("Initialising mappings\n");
   std::pair<long, bool> put_result;
   // Traverse mappings to find relevant functions, and mark possible recogniser
   // and projection functions as such.
@@ -1437,6 +1451,11 @@ void initialise_mappings(t_data_decls* p_data_decls, t_reconstruct_context* p_ct
 
 void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+  assert(p_substs != NULL);
+
+  gsDebugMsg("Collecting data equations\n");
  // for matching against list, set, bag equations
   ATermAppl elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt"));
   ATermAppl list_sort = gsMakeSortId(gsString2ATermAppl("sort_list"));
@@ -1555,6 +1574,10 @@ void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p
 
 void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+
+  gsDebugMsg("Checking completeness\n");
   // Check for completeness and remove structured sort from data declarations
   ATermList non_struct_sorts = ATmakeList0();
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
@@ -1564,14 +1587,18 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
       if ((p_ctx->num_sort_cons_equations[sort] != (p_ctx->num_sort_constructors[sort] * p_ctx->num_sort_constructors[sort]))) {
         if (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1) {
           non_struct_sorts = ATinsert(non_struct_sorts, (ATerm) sort);
+        } else {
+          p_ctx->sorts_table.remove(sort);
+          p_ctx->sort_constructors.erase(sort);
+          p_ctx->num_sort_constructors.erase(sort);
+          p_ctx->sort_mappings.erase(sort);
+          p_ctx->num_sort_mappings.erase(sort);
+          p_ctx->sort_cons_equations.erase(sort);
+          p_ctx->num_sort_cons_equations.erase(sort);
         }
-        p_ctx->sorts_table.remove(sort);
-        p_ctx->sort_constructors.erase(sort);
-        p_ctx->num_sort_constructors.erase(sort);
-        p_ctx->sort_mappings.erase(sort);
-        p_ctx->num_sort_mappings.erase(sort);
-        p_ctx->sort_cons_equations.erase(sort);
-        p_ctx->num_sort_cons_equations.erase(sort);
+      } else if (p_ctx->num_sort_cons_equations[sort] == 0 &&
+                (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1)) {
+        non_struct_sorts = ATinsert(non_struct_sorts, (ATerm) sort);
       }
     }
   }
@@ -1580,6 +1607,9 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
 
 void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
 {
+  assert(p_ctx != NULL);
+
+  gsDebugMsg("Calculating recogniser and projection functions\n");
   ATermList struct_sorts = p_ctx->sorts_table.table_keys();
 
   // Check for equations that have sufficient equations to be a recogniser
@@ -1618,6 +1648,10 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
 
 void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* equations, t_reconstruct_context* p_ctx)
 {
+  assert(mappings != NULL);
+  assert(equations != NULL);
+  assert(p_ctx != NULL);
+
   gsDebugMsg("Flatten mappings and equations\n");
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
@@ -1648,6 +1682,9 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
 
 void remove_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+
   gsDebugMsg("Remove constructors\n");
   // Remove constructors for structured sorts from declarations
   ATermList constructors = ATmakeList0();
@@ -1665,6 +1702,9 @@ void remove_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ct
 
 void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
 {
+  assert(p_data_decls != NULL);
+  assert(p_mappings != NULL);
+
   gsDebugMsg("Remove mappings\n");
 
   // Remove mappings from declarations
@@ -1682,6 +1722,10 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
 
 void remove_data_equations(t_data_decls* p_data_decls, atermpp::table* p_data_eqns, ATermList* p_substs)
 {
+  assert(p_data_decls != NULL);
+  assert(p_data_eqns != NULL);
+  assert(p_substs != NULL);
+
   gsDebugMsg("Remove equations\n");
 
   // Remove equations for structured sorts
@@ -1704,6 +1748,10 @@ void remove_data_equations(t_data_decls* p_data_decls, atermpp::table* p_data_eq
 
 void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
+  assert(p_data_decls != NULL);
+  assert(p_ctx != NULL);
+  assert(p_substs != NULL);
+
   gsDebugMsg("Building structured sort declarations\n");
   // Insert struct sort declarations
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
@@ -1778,7 +1826,5 @@ void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_con
     }
   }
   gsDebugMsg("Done reconstructing structured sorts\n");
-
-
 }
 

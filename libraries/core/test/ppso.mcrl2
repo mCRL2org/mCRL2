@@ -1,0 +1,14 @@
+% This specification belongs to bug #266
+% The following command gives a segmentation fault due to a stack overflow.
+%   mcrl22lps ppso.mcrl2 ppso.lps && sim -Rjittyc ppso.lps
+% On pretty printing OpId("lambda@0",SortArrow([SortId("S")],SortId("S")))
+% furthermore lpspp fails to print sort S, the rest is correct.
+%
+% The bug was reported by Muck van Weerdenburg
+
+sort S;
+
+map f: S -> S;
+eqn f = lambda x: S . x;
+
+init delta;
