@@ -79,7 +79,7 @@ std::set<data_variable> compute_insignificant_parameters(const linear_process& p
   return detail::set_difference(process_parameters, significant_variables);
 }
 
-/// Removes zero or more insignificant parameters from the specification p.
+/// Removes zero or more insignificant parameters from the specification spec.
 inline
 specification parelm(const specification& spec)
 {

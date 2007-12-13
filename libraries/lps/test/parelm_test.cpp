@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file sort_test.cpp
+/// \file parelm_test.cpp
 /// \brief Add your file description here.
 
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/mcrl22lps.h>
+#include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
 using namespace lps;
@@ -68,51 +69,83 @@ int test_main(int, char*[])
 {
   using namespace lps;
 
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
+
+  specification s0;
+  s0.protect();
+  specification s1;
+  s1.protect();
+  data_variable_list v0;  
+  data_variable_list v1;
 
   // case 1
-  BOOST_CHECK(parelm(mcrl22lps(case_1).process()).process().process_parameters().empty());
+  s0 = mcrl22lps(case_1);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK(v1.empty());
 
   // case 2
-  data_variable_list v = parelm(mcrl22lps(case_2).process()).process().process_parameters();
-
-  BOOST_CHECK((v.size() == 1) && (v.front() == data_variable("i:Nat")));
+  s0 = mcrl22lps(case_2);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters();
+  BOOST_CHECK((v1.size() == 1) && (v1.front() == data_variable("i:Nat")));
 
   // case 3
-  v = parelm(mcrl22lps(case_3).process()).process().process_parameters();
-
-  BOOST_CHECK((v.size() == 1) && v.front() == data_variable("i:Nat"));
+  s0 = mcrl22lps(case_3);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK((v1.size() == 1) && v1.front() == data_variable("i:Nat"));
 
   // case 4
-  v = parelm(mcrl22lps(case_3).process()).process().process_parameters();
-
-  BOOST_CHECK((v.size() == 1));
+  s0 = mcrl22lps(case_4);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK((v1.size() == 1));
 
   // case 5
-  linear_process in(mcrl22lps(case_5).process());
-  linear_process out(parelm(in));
-
-  BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
-  BOOST_CHECK(in.summands().size() == out.summands().size());
-  BOOST_CHECK(in.free_variables().size() == out.free_variables().size());
+  s0 = mcrl22lps(case_5);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK(v0.size() == v1.size());
+  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
+  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
 
   // case 6
-  in  = mcrl22lps(case_6).process();
-  out = parelm(in);
-
-  BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
-  BOOST_CHECK(in.summands().size() == out.summands().size());
-  BOOST_CHECK(in.free_variables().size() == out.free_variables().size());
+  s0 = mcrl22lps(case_6);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK(v0.size() == v1.size());
+  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
+  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
 
   // case 7
-  in  = mcrl22lps(case_7).process();
-  out = parelm(in);
-
-  BOOST_CHECK(in.process_parameters().size() == out.process_parameters().size());
-  BOOST_CHECK(in.summands().size() == out.summands().size());
-  BOOST_CHECK(in.free_variables().size() == out.free_variables().size());
+  s0 = mcrl22lps(case_7);
+  s0.protect();
+  s1 = parelm(s0);
+  s1.protect();
+  v0 = s0.process().process_parameters(); 
+  v1 = s1.process().process_parameters(); 
+  BOOST_CHECK(v0.size() == v1.size());
+  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
+  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
 
   return 0;
 }

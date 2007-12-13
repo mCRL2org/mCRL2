@@ -60,9 +60,7 @@ std::string SPECIFICATION =
 
 int test_main(int, char*[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
