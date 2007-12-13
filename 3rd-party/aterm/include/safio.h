@@ -66,7 +66,7 @@ typedef struct _ATermMapping{
 
 typedef struct _BinaryWriter{
 	ATermMapping *stack;
-	unsigned int stackSize;
+	int stackSize;
 	int stackPosition;
 	
 	HashTable sharedTerms;

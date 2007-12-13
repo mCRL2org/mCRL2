@@ -1278,18 +1278,22 @@ void ATdestroyBinaryReader(BinaryReader binaryReader){
 
 /**
  * Writes the given ATerm in SAF format to the given file.
+ * NOTE: The given file must be opened in binary mode (at least on Win32 this is required).
  */
-void ATwriteToSAFFile(ATerm aTerm, FILE *file){
-	int bytesWritten;
+ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
+	BinaryWriter binaryWriter;
+	ByteBuffer byteBuffer;
 	
-	BinaryWriter binaryWriter = ATcreateBinaryWriter(aTerm);
-	
-	ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
+	int bytesWritten = fwrite("?", sizeof(char), 1, file);
+	if(bytesWritten != 1){
+		ATwarning("Unable to write SAF identifier token to file.\n");
+		return ATfalse;
+	}
 	
 	ATinitializeIntegerStore();
 	
-	bytesWritten = fwrite("?", sizeof(char), 1, file);
-	if(bytesWritten != 1) ATerror("Unable to write SAF identifier token to file.\n");
+	binaryWriter = ATcreateBinaryWriter(aTerm);
+	byteBuffer = ATcreateByteBuffer(65536);
 	
 	do{
 		int blockSize;
@@ -1303,43 +1307,72 @@ void ATwriteToSAFFile(ATerm aTerm, FILE *file){
 		sizeBytes[1] = (blockSize >> 8) & 0x000000ffU;
 		
 		bytesWritten = fwrite(sizeBytes, sizeof(char), 2, file);
-		if(bytesWritten != 2) ATerror("Unable to write block size bytes to file.\n");
+		if(bytesWritten != 2){
+			ATwarning("Unable to write block size bytes to file.\n");
+			ATdestroyByteBuffer(byteBuffer);
+			ATdestroyBinaryWriter(binaryWriter);
+			return ATfalse;
+		}
 		
 		bytesWritten = fwrite(byteBuffer->buffer, sizeof(char), byteBuffer->limit, file);
-		if(bytesWritten != byteBuffer->limit) ATerror("Unable to write bytes to file.\n");
+		if(bytesWritten != byteBuffer->limit){
+			ATwarning("Unable to write bytes to file.\n");
+			ATdestroyByteBuffer(byteBuffer);
+			ATdestroyBinaryWriter(binaryWriter);
+			return ATfalse;
+		}
 	}while(!ATisFinishedWriting(binaryWriter));
 	
 	ATdestroyByteBuffer(byteBuffer);
 	ATdestroyBinaryWriter(binaryWriter);
 	
-	if(fflush(file) != 0) ATerror("Unable to flush file stream.\n");
+	if(fflush(file) != 0){
+		ATwarning("Unable to flush file stream.\n");
+		return ATfalse;
+	}
+	
+	return ATtrue;
 }
 
 /**
  * Writes the given ATerm in SAF format to the file with the given name.
  */
-void ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
-	FILE *file = fopen(filename, "w+b");
-	if(file == NULL) ATerror("Unable to open file for writing: %s\n", filename);
+ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
+	ATbool result;
 	
-	ATwriteToSAFFile(aTerm, file);
+	FILE *file = fopen(filename, "wb");
+	if(file == NULL){
+		ATwarning("Unable to open file for writing: %s\n", filename);
+		return ATfalse;
+	}
+	
+	result = ATwriteToSAFFile(aTerm, file);
+	
+	if(fclose(file) != 0) return ATfalse;
+	
+	return result;
 }
  
 /**
  * Interprets the content of the given SAF file and returns the constructed ATerm.
+ * NOTE: The given file must be opened in binary mode (at least on Win32 this is required)
  */
 ATerm ATreadFromSAFFile(FILE *file){
 	ATerm term;
-	
-	BinaryReader binaryReader = ATcreateBinaryReader();
-	
-	ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
+	BinaryReader binaryReader;
+	ByteBuffer byteBuffer;
 	
 	char buffer[1];
 	unsigned int bytesRead = fread(buffer, sizeof(char), 1, file); /* Consume the first character in the stream. */
-	if(bytesRead <= 0) ATerror("Unable to read SAF id token from file.\n");
+	if(bytesRead <= 0){
+		ATwarning("Unable to read SAF id token from file.\n");
+		return NULL;
+	}
 	
 	if(buffer[0] != SAF_IDENTIFICATION_TOKEN) ATerror("Not a SAF file.\n");
+	
+	binaryReader = ATcreateBinaryReader();
+	byteBuffer = ATcreateByteBuffer(65536);
 	
 	do{
 		int blockSize;
@@ -1347,21 +1380,35 @@ ATerm ATreadFromSAFFile(FILE *file){
 		
 		bytesRead = fread(sizeBytes, sizeof(char), 2, file);
 		if(bytesRead <= 0) break;
-		else if(bytesRead != 2) ATerror("Unable to read block size bytes from file: %d.\n", bytesRead);
+		else if(bytesRead != 2){
+			ATwarning("Unable to read block size bytes from file: %d.\n", bytesRead);
+			ATdestroyByteBuffer(byteBuffer);
+			ATdestroyBinaryReader(binaryReader);
+			return NULL;
+		}
 		blockSize = ((unsigned char) sizeBytes[0]) + (((unsigned char) sizeBytes[1]) << 8);
 		
 		ATresetByteBuffer(byteBuffer);
 		byteBuffer->limit = blockSize;
 		bytesRead = fread(byteBuffer->buffer, sizeof(char), blockSize, file);
-		if(bytesRead != blockSize) ATerror("Unable to read bytes from file.\n");
+		if(bytesRead != blockSize){
+			ATwarning("Unable to read bytes from file.\n");
+			ATdestroyByteBuffer(byteBuffer);
+			ATdestroyBinaryReader(binaryReader);
+			return NULL;
+		}
 		
 		ATdeserialize(binaryReader, byteBuffer);
 	}while(bytesRead > 0);
 	
 	ATdestroyByteBuffer(byteBuffer);
 	
-	if(!ATisFinishedReading(binaryReader)) ATerror("Term incomplete, missing data.\n");
-	term = ATgetRoot(binaryReader);
+	if(!ATisFinishedReading(binaryReader)){
+		ATwarning("Term incomplete, missing data.\n");
+		term = NULL;
+	}else{
+		term = ATgetRoot(binaryReader);
+	}
 	
 	ATdestroyBinaryReader(binaryReader);
 	
@@ -1372,10 +1419,19 @@ ATerm ATreadFromSAFFile(FILE *file){
  * Interprets the content of the SAF file with the given name and returns the constructed ATerm.
  */
 ATerm ATreadFromNamedSAFFile(const char *filename){
-	FILE *file = fopen(filename, "r+b");
-	if(file == NULL) ATerror("Unable to open file for reading: %s\n", filename);
+	ATerm result;
 	
-	return ATreadFromSAFFile(file);
+	FILE *file = fopen(filename, "rb");
+	if(file == NULL){
+		ATwarning("Unable to open file for reading: %s\n", filename);
+		return NULL;
+	}
+	
+	result = ATreadFromSAFFile(file);
+	
+	if(fclose(file) != 0) return NULL;
+	
+	return result;
 }
 
 /**
@@ -1408,12 +1464,13 @@ char* ATwriteToSAFString(ATerm aTerm, int *length){
 	ATinitializeIntegerStore();
 	
 	do{
+		BufferNode *current;
 		ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
-		BufferNode *current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
 		
 		ATresetByteBuffer(byteBuffer);
 		ATserialize(binaryWriter, byteBuffer);
 		
+		current = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
 		current->byteBuffer = byteBuffer;
 		current->next = NULL;
 		last->next = current;
@@ -1474,8 +1531,12 @@ ATerm ATreadFromSAFString(char *data, int length){
 		position += blockSize;
 	}while(position < length);
 	
-	if(!ATisFinishedReading(binaryReader)) ATerror("Term incomplete, missing data.\n");
-	term = ATgetRoot(binaryReader);
+	if(!ATisFinishedReading(binaryReader)){
+		ATwarning("Term incomplete, missing data.\n");
+		term = NULL;
+	}else{
+		term = ATgetRoot(binaryReader);
+	}
 	
 	ATdestroyBinaryReader(binaryReader);
 	

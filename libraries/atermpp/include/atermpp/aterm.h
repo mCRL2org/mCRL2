@@ -252,8 +252,7 @@ namespace atermpp
   inline
   bool write_to_named_saf_file(aterm t, const std::string& filename)
   {
-    ATwriteToNamedSAFFile(t, filename.c_str());
-    return true;
+    return ATwriteToNamedSAFFile(t, filename.c_str()) == ATtrue;
   }
 
   /// Annotate a term with a labeled annotation.

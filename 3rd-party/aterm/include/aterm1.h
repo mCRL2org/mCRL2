@@ -308,11 +308,11 @@ ATerm ATreadFromBinaryString(const unsigned char *s, int size);
 
 
 /* SAF I/O stuff */
-void ATwriteToSAFFile(ATerm aTerm, FILE *file);
+ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file);
 
 ATerm ATreadFromSAFFile(FILE *file);
 
-void ATwriteToNamedSAFFile(ATerm aTerm, const char *filename);
+ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename);
 
 ATerm ATreadFromNamedSAFFile(const char *filename);
 
