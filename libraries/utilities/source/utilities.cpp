@@ -151,7 +151,6 @@ using namespace std;
     if (a_file_name == 0) {
       gsVerboseMsg("Writing the %s to stdout.\n", a_feedback_string);
       ATwriteToSAFFile((ATerm) a_term, stdout);
-      fprintf(stdout, "\n");
     } else {
       FILE* v_output_stream = fopen(a_file_name, "wb");
       if (v_output_stream == 0) {

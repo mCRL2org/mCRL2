@@ -782,7 +782,6 @@ int main(int argc, char *argv[])
         if (lin_options.outfilename == "") {
           gsVerboseMsg("saving result to stdout...\n");
           ATwriteToSAFFile((ATerm) result, stdout);
-          fprintf(stdout, "\n");
         } else { //outfilename != NULL
           //open output filename
           FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
