@@ -64,6 +64,7 @@ class Cluster {
     int          getNumStates() const;
     bool         hasDeadlock() const;
 
+    bool         getMarking() const;
     void         setMarking(bool b);
     void         setMarkAllEmpty(bool b);
     bool         hasMarkedState() const;

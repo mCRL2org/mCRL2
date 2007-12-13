@@ -43,7 +43,7 @@ squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w)
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(fsm_file_for_input,tipi::mime_type("fsm",
-				tipi::mime_type::text),tipi::tool::category::visualisation);
+        tipi::mime_type::text),tipi::tool::category::visualisation);
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
@@ -191,14 +191,14 @@ void LTSViewApp::openFile(string fileName) {
   // first remove all unreachable states
   lts->trim();
   
-  mainFrame->updateProgressDialog(17,"Applying ranking");
-  lts->applyRanking(rankStyle);
+  mainFrame->updateProgressDialog(17,"Ranking states");
+  lts->rankStates(rankStyle);
   
-  mainFrame->updateProgressDialog(33,"Merging superiors");
-  lts->mergeSuperiorClusters(rankStyle);
+  mainFrame->updateProgressDialog(33,"Clustering states");
+  lts->clusterStates();
 
-  mainFrame->updateProgressDialog(50,"Setting mark info");
-  lts->computeClusterLabelInfo();
+  mainFrame->updateProgressDialog(50,"Setting cluster info");
+  lts->computeClusterInfo();
   
   mainFrame->updateProgressDialog(67,"Positioning clusters");
   lts->positionClusters(fsmStyle);
@@ -245,14 +245,14 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
 
       mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
 
-      mainFrame->updateProgressDialog(0,"Applying ranking");
-      lts->applyRanking(rankStyle);
+      mainFrame->updateProgressDialog(17,"Ranking states");
+      lts->rankStates(rankStyle);
       
-      mainFrame->updateProgressDialog(20,"Merging superiors");
-      lts->mergeSuperiorClusters(rankStyle);
+      mainFrame->updateProgressDialog(33,"Clustering states");
+      lts->clusterStates();
 
-      mainFrame->updateProgressDialog(40,"Setting mark info");
-      lts->computeClusterLabelInfo();
+      mainFrame->updateProgressDialog(40,"Setting cluster info");
+      lts->computeClusterInfo();
       lts->markClusters();
       
       mainFrame->updateProgressDialog(60,"Positioning clusters");
@@ -298,14 +298,14 @@ void LTSViewApp::setFSMStyle(bool b) {
 void LTSViewApp::addMarkRule() {
   if (lts != NULL) {
     MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
-				lts);
+        lts);
     msrDialog->CentreOnParent();
     if (msrDialog->ShowModal() == wxID_OK) {
       MarkRule* markrule = msrDialog->getMarkRule();
       if (markrule != NULL) {
-				lts->addMarkRule(markrule);
-				mainFrame->addMarkRule(msrDialog->getMarkRuleString());
-				applyMarkStyle(MARK_STATES);
+        lts->addMarkRule(markrule);
+        mainFrame->addMarkRule(msrDialog->getMarkRuleString());
+        applyMarkStyle(MARK_STATES);
       }
     }
     msrDialog->Close();
@@ -321,17 +321,17 @@ void LTSViewApp::removeMarkRule(const int index) {
 void LTSViewApp::editMarkRule(const int index) {
   if (lts != NULL) {
     MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
-				lts);
-		bool oldActivated = lts->getMarkRule(index)->isActivated;
+        lts);
+    bool oldActivated = lts->getMarkRule(index)->isActivated;
     msrDialog->setMarkRule(lts->getMarkRule(index));
     msrDialog->CentreOnParent();
     if (msrDialog->ShowModal() == wxID_OK) {
       MarkRule* markrule = msrDialog->getMarkRule();
       if (markrule != NULL) {
-				markrule->isActivated = oldActivated;
-				lts->replaceMarkRule(index,markrule);
-				mainFrame->replaceMarkRule(index,msrDialog->getMarkRuleString());
-				applyMarkStyle(MARK_STATES);
+        markrule->isActivated = oldActivated;
+        lts->replaceMarkRule(index,markrule);
+        mainFrame->replaceMarkRule(index,msrDialog->getMarkRuleString());
+        applyMarkStyle(MARK_STATES);
       }
     }
     msrDialog->Close();

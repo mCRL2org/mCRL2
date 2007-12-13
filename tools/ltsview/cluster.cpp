@@ -705,13 +705,15 @@ float Cluster::getBaseRadius() const {
   return baseRadius;
 }
 
-void Cluster::setMarkAllEmpty(bool b)
-{
+void Cluster::setMarkAllEmpty(bool b) {
   markAllEmpty = b;
 }
 
-void Cluster::setMarking(bool b)
-{
+bool Cluster::getMarking() const {
+  return marking;
+}
+
+void Cluster::setMarking(bool b) {
   marking = b;
 }
 

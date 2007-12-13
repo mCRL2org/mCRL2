@@ -24,33 +24,34 @@ class LTS {
 
     LTS( Mediator* owner );
     ~LTS();
-    void	activateMarkRule(const int index,const bool activate);
-    int		addLabel(std::string label);
-    void	addMarkRule(Utils::MarkRule* r,int index=-1);
-    int		addParameter(std::string parname,std::string partype);
-    void	addParameterValue(int parindex,std::string parvalue);
-    void  addCluster(Cluster* c);
-    void  addClusterAndBelow(Cluster* c);
-    void	addState(State* s);
-    void	addTransition(Transition* t);
-    void	applyRanking(Utils::RankStyle rs);
-    void	computeClusterLabelInfo();
-    void	getActionLabels(std::vector<std::string> &ls) const;
-    Cluster*    getClusterAtRank(int r, int c) const;
-    State*	getInitialState() const;
+    void activateMarkRule(const int index,const bool activate);
+    int  addLabel(std::string label);
+    void addMarkRule(Utils::MarkRule* r,int index=-1);
+    int  addParameter(std::string parname,std::string partype);
+    void addParameterValue(int parindex,std::string parvalue);
+    void addCluster(Cluster* c);
+    void addClusterAndBelow(Cluster* c);
+    void addState(State* s);
+    void addTransition(Transition* t);
+    void clearStatePositions();
+    void clusterStates();
+    void computeClusterInfo();
+    void getActionLabels(std::vector<std::string> &ls) const;
+    Cluster* getClusterAtRank(int r, int c) const;
+    State* getInitialState() const;
     std::string getLabel(int labindex);
-    int   	getMatchAnyMarkRule() const;
-    Utils::MarkRule*	getMarkRule(const int index) const;
-    int		getNumClusters() const;
-    int		getNumClustersAtRank(int r) const;
-    int		getNumDeadlocks();
-    int		getNumMarkedStates() const;
-    int		getNumMarkedTransitions() const;
-    int		getNumRanks() const;
-    int		getNumStates() const;
-    int		getNumTransitions() const;
-    int		getNumParameters() const;
-    int		getNumParameterValues(int parindex) const;
+    int  getMatchAnyMarkRule() const;
+    Utils::MarkRule* getMarkRule(const int index) const;
+    int  getNumClusters() const;
+    int  getNumClustersAtRank(int r) const;
+    int  getNumDeadlocks();
+    int  getNumMarkedStates() const;
+    int  getNumMarkedTransitions() const;
+    int  getNumRanks() const;
+    int  getNumStates() const;
+    int  getNumTransitions() const;
+    int  getNumParameters() const;
+    int  getNumParameterValues(int parindex) const;
     
     std::string getParameterName(int parindex) ;
     std::string getParameterType(int parindex) ;
@@ -58,19 +59,16 @@ class LTS {
     State*      selectStateByID(int id);
     void        selectCluster(const int rank, const int pos);
     void        deselect();
-    void	markAction(std::string label);
-    void	markClusters();
-    void	mergeSuperiorClusters(Utils::RankStyle rs);
-    void	positionClusters(bool fsmstyle);
-    void	positionStates();
-    void	clearStatePositions();
-//    void  	printStructure();
-//    void	printClusterSizesPositions();
-    void	removeMarkRule(const int index);
-    void	replaceMarkRule(int index, Utils::MarkRule* mr);
-    void	setInitialState(State* s);
-    void	setMatchAnyMarkRule(int i);
-    void	unmarkAction(std::string label);
+    void markAction(std::string label);
+    void markClusters();
+    void positionClusters(bool fsmstyle);
+    void positionStates();
+    void rankStates(Utils::RankStyle rs);
+    void removeMarkRule(const int index);
+    void replaceMarkRule(int index, Utils::MarkRule* mr);
+    void setInitialState(State* s);
+    void setMatchAnyMarkRule(int i);
+    void unmarkAction(std::string label);
     
     void trim();
 
@@ -111,24 +109,24 @@ class LTS {
     LTS(Mediator* owner, LTS* parent, bool fromAbove);
 
     // Variables
-    Mediator*	mediator;
+    Mediator* mediator;
     Simulation* simulation;
     bool lastWasAbove;
-    int	matchAny;
+    int matchAny;
     int zoomLevel;
-    int	deadlockCount;
-    int	transitionCount;
-    int	markedTransitionCount;
+    int deadlockCount;
+    int transitionCount;
+    int markedTransitionCount;
     int countMarkedTransitions();
     LTS*        previousLevel;
-    State*	    initialState;
+    State*     initialState;
     State*      selectedState;
     Cluster*    selectedCluster;
     Cluster*    lastCluster;
-    std::list< State* >	markedStates;
-    std::list< State* >	unmarkedStates;
-    std::vector< Utils::MarkRule* >	markRules;
-    std::vector< std::vector< Cluster* > >	clustersInRank;
+    std::list< State* > markedStates;
+    std::list< State* > unmarkedStates;
+    std::vector< Utils::MarkRule* > markRules;
+    std::vector< std::vector< Cluster* > > clustersInRank;
 
     // State vector info
     std::vector< std::string > parameterNames;
@@ -145,8 +143,8 @@ class LTS {
     std::map<std::string, std::string> freeVars;
 
     // Methods
-    void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();
+    void clusterTree(State* s,Cluster *c);
     void processAddedMarkRule( Utils::MarkRule* r );
     void processRemovedMarkRule( Utils::MarkRule* r );
 

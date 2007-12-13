@@ -440,175 +440,125 @@ void LTS::clearRanksAndClusters() {
   clustersInRank.swap(temp2);
 }
 
-void LTS::applyRanking(Utils::RankStyle rs) {
+void LTS::rankStates(Utils::RankStyle rs) {
   clearRanksAndClusters();
-  
   int rankNumber = 0;
 
-  vector< Cluster* > cluslist;
   vector< State* > nextRank,currRank;
   currRank.push_back(initialState);
   initialState->setRank(rankNumber);
 
-  int t;
+  int i;
   vector< State* >::iterator it;
-  State *cs,*ss;
+  State *s,*t;
   while (currRank.size() > 0) {
-    cluslist.clear();
     nextRank.clear();
     // iterate over the states in this rank
     for (it  = currRank.begin(); it != currRank.end(); ++it) {
-      cs = *it;
+      s = *it;
       if (rs == CYCLIC) {
         // iterate over all in-transitions of cs
-        for (t = 0; t < cs->getNumInTransitions(); ++t) {
-          ss = cs->getInTransition(t)->getBeginState();
-          if (ss->getRank() == -1) {
-            ss->setRank(rankNumber+1);
-            nextRank.push_back(ss);
+        for (i = 0; i < s->getNumInTransitions(); ++i) {
+          t = s->getInTransition(i)->getBeginState();
+          if (t->getRank() == -1) {
+            t->setRank(rankNumber+1);
+            nextRank.push_back(t);
           }
         }
       }
       // iterate over all out-transitions of cs
-      for (t = 0; t < cs->getNumOutTransitions(); ++t) {
-        ss = cs->getOutTransition(t)->getEndState();
-        if (ss->getRank() == -1) {
-          ss->setRank(rankNumber+1);
-          nextRank.push_back(ss);
+      for (i = 0; i < s->getNumOutTransitions(); ++i) {
+        t = s->getOutTransition(i)->getEndState();
+        if (t->getRank() == -1) {
+          t->setRank(rankNumber+1);
+          nextRank.push_back(t);
         }
-      }
-      if (cs->getCluster() == NULL) {
-        Cluster* c = new Cluster(rankNumber);
-        //Give cluster a preliminary position in this rank.
-        c->setPositionInRank(cluslist.size());
-        cluslist.push_back(c);
-        addComradesToCluster(c,cs);
       }
     }
     currRank.swap(nextRank);
-    clustersInRank.push_back(cluslist);
     ++rankNumber;
   }
 }
 
-void LTS::addComradesToCluster(Cluster* c, State* s) {
-  if (s->getCluster() == NULL) {
-    c->addState(s);
-    s->setCluster(c);
-    for (int t = 0; t < s->getNumInTransitions(); ++t) {
-      if (s->getInTransition(t)->getBeginState()->getRank() == s->getRank()) {
-        addComradesToCluster(c,s->getInTransition(t)->getBeginState());
-      }
+void LTS::clusterStates() {
+  Cluster *d = new Cluster(0);
+  vector< Cluster* > cs;
+  cs.push_back(d);
+  d->setPositionInRank(0);
+  clustersInRank.push_back(cs);
+  clusterTree(initialState,d);
+}
+
+void LTS::clusterTree(State *v,Cluster *c) {
+  int h,i,j,r;
+  State *w, *y;
+  c->addState(v);
+  v->setCluster(c);
+  for (i = 0; i < v->getNumOutTransitions(); ++i) {
+    w = v->getOutTransition(i)->getEndState();
+    if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+      clusterTree(w,c);
     }
-    for (int t = 0; t < s->getNumOutTransitions(); ++t) {
-      if (s->getOutTransition(t)->getEndState()->getRank() == s->getRank()) {
-        addComradesToCluster(c,s->getOutTransition(t)->getEndState());
+  }
+  for (i = 0; i < v->getNumInTransitions(); ++i) {
+    w = v->getInTransition(i)->getBeginState();
+    if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+      clusterTree(w,c);
+    }
+  }
+  for (i = 0; i < v->getNumOutTransitions(); ++i) {
+    w = v->getOutTransition(i)->getEndState();
+    r = w->getRank();
+    if (w->getCluster() == NULL && r == v->getRank()+1) {
+      Cluster *d = new Cluster(r);
+      if ((unsigned int)(r) >= clustersInRank.size()) {
+        vector< Cluster* > cs;
+        clustersInRank.push_back(cs);
+      }
+      d->setPositionInRank(clustersInRank[r].size());
+      clustersInRank[r].push_back(d);
+      d->setAncestor(c);
+      c->addDescendant(d);
+      clusterTree(w,d);
+
+      for (h = 0; h < d->getNumStates(); ++h) {
+        y = d->getState(h);
+        for (j = 0; j < y->getNumInTransitions(); ++j) {
+          w = y->getInTransition(j)->getBeginState();
+          if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+            clusterTree(w,c);
+          }
+        }
       }
     }
   }
 }
 
-void LTS::mergeSuperiorClusters(Utils::RankStyle rs) {
-  State *s,*sup;
-  Cluster *c,*mc;
-  set< Cluster* > mergeSet,descSet;
-  set< Cluster* >::iterator c_it1;
-  vector< Cluster* > *prevRank;
-  vector< Cluster* >::iterator c_it;
-  int i,r,t;
-  // iterate over the ranks in reverse order (bottom-up)
-  for (r = clustersInRank.size()-1; r > 0; --r) {
-    prevRank = &(clustersInRank[r-1]);
-    // iterate over the clusters in this rank
-    for (c_it  = clustersInRank[r].begin();
-         c_it != clustersInRank[r].end(); ++c_it) {
-      c = *c_it;
-      mergeSet.clear();
-      // iterate over the states in this cluster
-      for (i = 0; i < c->getNumStates(); ++i) {
-        s = c->getState(i);
-        // set deadlock information
-        c->setDeadlock(c->hasDeadlock() || s->isDeadlock());
-        // iterate over the superiors of s
-        if (rs == CYCLIC) {
-          for (t = 0; t < s->getNumOutTransitions(); ++t) {
-            sup = s->getOutTransition(t)->getEndState();
-            if (s->getRank()-1 == sup->getRank()) {
-              // add the superior's cluster to the merge set
-              mergeSet.insert(sup->getCluster());
-            }
-          }
-        }
-        for (t = 0; t < s->getNumInTransitions(); ++t) {
-          sup = s->getInTransition(t)->getBeginState();
-          if (s->getRank()-1 == sup->getRank()) {
-            // add the superior's cluster to the merge set
-            mergeSet.insert(sup->getCluster());
-          }
-        }
-      }
-      
-      if (mergeSet.size() > 1) {
-        mc = new Cluster(r-1);
-        // Give mc a preliminary positionInRank
-        mc->setPositionInRank(prevRank->size());
-        descSet.clear();
-        // iterate over the clusters in the mergeSet
-        for (c_it1 = mergeSet.begin(); c_it1 != mergeSet.end(); ++c_it1) {
-          // add the cluster's states to mc
-          for (i = 0; i < (**c_it1).getNumStates(); ++i) {
-            s = (**c_it1).getState(i);
-            mc->addState(s);
-            s->setCluster(mc);
-          }
-          for (i = 0; i < (**c_it1).getNumDescendants(); ++i) {
-            descSet.insert((**c_it1).getDescendant(i));
-          }
-          // delete the cluster
-          prevRank->erase(std::find(prevRank->begin(),prevRank->end(),*c_it1));
-          delete *c_it1;
-        }
-        // update hierarchy info
-        descSet.insert(c);
-        for (c_it1 = descSet.begin(); c_it1 != descSet.end(); ++c_it1) {
-          mc->addDescendant(*c_it1);
-          (**c_it1).setAncestor(mc);
-        }
-        prevRank->push_back(mc);
-      } else {
-        mc = *(mergeSet.begin());
-        mc->addDescendant(c);
-        c->setAncestor(mc);
-      } 
-    }
-
-    // This rank is stable, add rank location information to clusters.
-    for (size_t i = 0; i < clustersInRank[r].size(); ++i) {
-     clustersInRank[r][i]->setPositionInRank(i);
-    }
-  }
-}
-
-void LTS::computeClusterLabelInfo() {
+void LTS::computeClusterInfo() {
   State* s;
+  Cluster* c;
   list< State* >::iterator li;
   int t;
   for (li = markedStates.begin(); li != markedStates.end(); ++li) {
     s = *li;
+    c = s->getCluster();
+    c->setDeadlock(c->hasDeadlock() || s->isDeadlock());
     for (t = 0; t < s->getNumOutTransitions(); ++t) {
-      s->getCluster()->addActionLabel(s->getOutTransition(t)->getLabel());
+      c->addActionLabel(s->getOutTransition(t)->getLabel());
     }
     for (t = 0; t < s->getNumLoops(); ++t) {
-      s->getCluster()->addActionLabel(s->getLoop(t)->getLabel());
+      c->addActionLabel(s->getLoop(t)->getLabel());
     }
   }
   for (li = unmarkedStates.begin(); li != unmarkedStates.end(); ++li) {
     s = *li;
+    c = s->getCluster();
+    c->setDeadlock(c->hasDeadlock() || s->isDeadlock());
     for (t = 0; t < s->getNumOutTransitions(); ++t) {
-      s->getCluster()->addActionLabel(s->getOutTransition(t)->getLabel());
+      c->addActionLabel(s->getOutTransition(t)->getLabel());
     }
     for (t = 0; t < s->getNumLoops(); ++t) {
-      s->getCluster()->addActionLabel(s->getLoop(t)->getLabel());
+      c->addActionLabel(s->getLoop(t)->getLabel());
     }
   }
 }
