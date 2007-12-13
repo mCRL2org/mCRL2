@@ -38,7 +38,7 @@ using namespace ::mcrl2::utilities;
 StandardSimulator::StandardSimulator()
 {
     use_dummies = false;
-    rewr_strat = GS_REWR_INNER;
+    rewr_strat = GS_REWR_JITTY;
 
     state_vars = ATmakeList0();
     ATprotectList(&state_vars);

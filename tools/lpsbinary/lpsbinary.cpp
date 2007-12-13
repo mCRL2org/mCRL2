@@ -710,8 +710,8 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
       ("help,h",      "display this help")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("inner"),
-                       "use rewriter arg (default 'inner');"
+      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"),
+                       "use rewriter arg (default 'jitty');"
                       "available rewriters are inner, jitty, innerc and jittyc")
 
       ("version",     "display version information")

@@ -222,7 +222,7 @@ NextState *createNextState(
 		ATermAppl spec,
 		bool allow_free_vars = true,
 		int state_format = GS_STATE_VECTOR,
-		RewriteStrategy rewrite_strategy = GS_REWR_INNER,
+		RewriteStrategy rewrite_strategy = GS_REWR_JITTY,
 		EnumerateStrategy enumerator_strategy = ENUM_STANDARD,
 		NextStateStrategy strategy = nsStandard
 		);

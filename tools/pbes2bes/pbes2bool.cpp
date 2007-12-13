@@ -394,8 +394,8 @@ t_tool_options parse_command_line(int argc, char** argv)
        "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
        "needed to generate an equation substantially")
       ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
-       "inner   interpreting innermost rewriter (default),\n"
-       "jitty   interpreting just in time rewriter,\n"
+       "inner   interpreting innermost rewriter,\n"
+       "jitty   interpreting just in time rewriter (default),\n"
        "innerc  compiling innermost rewriter (not for Windows),\n"
        "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
       ("counter,c", "Print at the end a tree labelled with instantiations of the left hand side of"

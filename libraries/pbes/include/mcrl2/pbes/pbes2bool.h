@@ -48,7 +48,7 @@ struct t_tool_options
      : opt_outputformat("none"),
        opt_strategy(lazy),
        opt_precompile_pbes(false),
-       rewrite_strategy(GS_REWR_INNER),
+       rewrite_strategy(GS_REWR_JITTY),
        opt_use_hashtables(false),
        opt_construct_counter_example(false),
        opt_store_as_tree(false),

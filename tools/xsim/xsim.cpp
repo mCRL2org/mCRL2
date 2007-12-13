@@ -142,7 +142,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
               << "\n"
               << "Options:\n"
               << "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'inner')\n"
+              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
               << "  -h, --help               display this help and terminate\n"
               << "      --version            display version information and terminate\n"
               << "  -q, --quiet              do not display warning messages\n"

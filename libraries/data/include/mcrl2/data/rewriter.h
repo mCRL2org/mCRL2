@@ -52,7 +52,7 @@ class rewriter
     
     /// Constructs a rewriter from data specification d.
     ///
-    rewriter(data_specification d, strategy s = innermost)
+    rewriter(data_specification d, strategy s = jitty)
     {
       m_rewriter = createRewriter(d, static_cast<RewriteStrategy>(s));
     }
