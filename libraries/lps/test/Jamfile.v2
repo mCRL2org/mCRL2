@@ -11,6 +11,7 @@ project libraries/lps/test
 
 test-suite lps
     :
+      [ run linearization_test.cpp ]
       [ run rewriter_test.cpp ]
       [ run state_formula_test.cpp ]
       [ run rename_test.cpp ]
