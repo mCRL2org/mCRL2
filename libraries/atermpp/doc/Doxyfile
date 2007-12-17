@@ -6,3 +6,4 @@ HTML_OUTPUT            = atermpp
 INPUT                  = ../include
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
+GENERATE_TAGFILE       = ../../../build/doxy/atermpp.tag

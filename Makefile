@@ -52,14 +52,22 @@ tags:
 	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
 
 doxy:
-	@cd libraries/atermpp/doc; doxygen
+	@cd tools/squadt/libraries/tipi/doc; doxygen
+	@cd libraries/core/doc; doxygen
 	@cd libraries/data/doc; doxygen
+	@cd libraries/atermpp/doc; doxygen
 	@cd libraries/lps/doc; doxygen
 	@cd libraries/lts/doc; doxygen
-	@cd libraries/core/doc; doxygen
 	@cd libraries/pbes/doc; doxygen
 	@cd libraries/trace/doc; doxygen
 	@cd libraries/utilities/doc; doxygen
-	@cd tools/squadt/libraries/tipi/doc; doxygen
+	@cd libraries/core/doc; doxygen
+	@cd libraries/data/doc; doxygen
+	@cd libraries/atermpp/doc; doxygen
+	@cd libraries/lps/doc; doxygen
+	@cd libraries/lts/doc; doxygen
+	@cd libraries/pbes/doc; doxygen
+	@cd libraries/trace/doc; doxygen
+	@cd libraries/utilities/doc; doxygen
 	@cp doc/doxy/index.html build/doxy/
 	@cp doc/doxy/doxystyle.css build/doxy/

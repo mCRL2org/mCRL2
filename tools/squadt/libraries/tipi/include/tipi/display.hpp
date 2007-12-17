@@ -125,6 +125,7 @@ namespace tipi {
   }
 
   /**
+   * \param[in] id the identifier of the element to find
    * \pre the element should be in the list
    * \throw false, when no element with this identifier is present
    **/
@@ -140,6 +141,7 @@ namespace tipi {
   }
 
   /**
+   * \param[in] id the identifier of the element to find
    * \pre the element should be in the list
    * \throw false, when no element with this identifier is present
    **/

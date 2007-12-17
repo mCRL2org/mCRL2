@@ -242,7 +242,7 @@ ATerm gsSubstValues(ATermList substs, ATerm term, bool recursive);
  * \brief Applies a list of substitutions to a term
  *
  * \param[in] substs a table of substitutions from Aterm to Aterm
- * \param[in] term an Aterm
+ * \param[in] appl an Aterm
  * \param[in] recursive flag that triggers recursive traversal
  *
  * \pre substs is a list containing substitutions only
@@ -260,7 +260,7 @@ inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recur
  * \brief Applies a list of substitutions to a term
  *
  * \param[in] substs a table of substitutions from Aterm to Aterm
- * \param[in] term an Aterm
+ * \param[in] list an Aterm list
  * \param[in] recursive flag that triggers recursive traversal
  *
  * \pre substs is a list containing substitutions only

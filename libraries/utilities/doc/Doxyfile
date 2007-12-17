@@ -6,6 +6,8 @@ HTML_OUTPUT            = utilities
 INPUT                  = .. ../source
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
+GENERATE_TAGFILE       = ../../../build/doxy/utilities.tag
+TAGFILES               = ../../../build/doxy/tipi.tag
 
 # EXTRACT_ALL is set to 'yes' until documentation of the classes is provided.
 # When documentation has been provided, please remove these three lines.

@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libtrace.h
+/// \file mcrl2/trace.h
 /// \brief This library allows to flexibly manipulate traces.
 /// This library allows to build, traverse and store traces.
 /// Traces are sequences of state-action-time triples.

@@ -28,7 +28,7 @@ namespace mcrl2 {
      * \param[in] parent the wxWidgets window object of which this object will be a child
      * \param[in] id a wxWidgets identifier for this widget
      * \param[in] p_Min the minimum value
-     * \param[in] p_Min the maximum value
+     * \param[in] p_Max the maximum value
      * \param[in] p_Rate the resolution of the spin control
      * \param[in] p_Init the initial value
      * \param[in] pos the position for this widget

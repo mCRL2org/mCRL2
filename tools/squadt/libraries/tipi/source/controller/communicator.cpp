@@ -68,7 +68,8 @@ namespace tipi {
     }
 
     /**
-     * \param h the function that is called when a new layout for the display has been received
+     * \param hi the function that is called when a new layout for the display has been received
+     * \param hu the function that is called when an update for the current layout has been received
      **/
     void communicator::activate_display_layout_handling(display_layout_handler_function const& hi, display_update_handler_function const& hu) {
       boost::static_pointer_cast < communicator_impl > (impl)->
