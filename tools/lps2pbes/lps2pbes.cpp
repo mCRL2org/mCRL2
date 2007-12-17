@@ -328,8 +328,8 @@ static t_tool_options parse_command_line(int argc, char **argv)
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
-    { "end-phase", required_argument,  NULL,  'p' },
     { "timed",     no_argument,        NULL,  't' },
+    { "end-phase", required_argument,  NULL,  'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -345,6 +345,9 @@ static t_tool_options parse_command_line(int argc, char **argv)
       case 'f': /* formula */
         formfilename = optarg;
         break;
+      case 't': /* timed */
+        opt_timed = true;
+        break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
           opt_end_phase = PH_PARSE;
@@ -358,9 +361,6 @@ static t_tool_options parse_command_line(int argc, char **argv)
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
         }
-        break;
-      case 't': /* timed */
-        opt_timed = true;
         break;
       case 'e': /* pretty */
         opt_pretty = true;
@@ -417,12 +417,12 @@ static t_tool_options parse_command_line(int argc, char **argv)
       */
     }
   }
-  tool_options.end_phase    = opt_end_phase;
-  tool_options.pretty       = opt_pretty;
-  tool_options.timed        = opt_timed;
   tool_options.formfilename = formfilename;
   tool_options.infilename   = infilename;
   tool_options.outfilename  = outfilename;
+  tool_options.timed        = opt_timed;
+  tool_options.end_phase    = opt_end_phase;
+  tool_options.pretty       = opt_pretty;
   return tool_options;
 }
 
@@ -532,18 +532,19 @@ static void print_help(char *name)
     "used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -f, --formula=FILE    use the state formula from FILE\n"
-    "  -p, --end-phase=PHASE stop conversion after phase PHASE and output the\n"
-    "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
-    "                        'di' (data implementation) or 'rft' (regular formula\n"
-    "                        translation)\n"
-    "  -t, --timed           use the timed version of the algorithm, even for untimed LPS's\n"
-    "  -e, --external        return the result in the external format\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
+    "  -fFILE, --formula=FILE      use the state formula from FILE\n"
+    "  -t, --timed                 use the timed version of the algorithm, even for\n"
+    "                              untimed LPS's\n"
+    "  -pPHASE, --end-phase=PHASE  stop conversion and output the result after PHASE\n"
+    "                              'pa' (parsing), 'tc' (type checking), 'di'\n"
+    "                              (data implementation) or 'rft' (regular formula\n"
+    "                              translation)\n"
+    "  -e, --external              return the result in the external format\n"
+    "  -h, --help                  display this help message and terminate\n"
+    "      --version               display version information and terminate\n"
+    "  -q, --quiet                 do not display warning messages\n"
+    "  -v, --verbose               display concise intermediate messages\n"
+    "  -d, --debug                 display detailed intermediate messages\n",
     name
   );
 }
