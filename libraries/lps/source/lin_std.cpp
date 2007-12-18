@@ -972,7 +972,6 @@ static long insertProcDeclaration(
   char *str=NULL;
 
 
-  // ATfprintf(stderr,"Proc %t\nparameters: %t\n",procId,parameters);
   assert(gsIsProcVarId(procId));
   assert(ATgetLength(ATLgetArgument(procId,1))==ATgetLength(parameters));
 
@@ -2861,9 +2860,9 @@ static int match_sequence(ATermList s1, ATermList s2)
 static ATermAppl exists_variable_for_sequence(
                      ATermList process_names,
                      ATermAppl process_body)
-{ // ATfprintf(stderr,"process names %t\nprocess body %t\n\n",process_names,process_body);
+{ 
   if (regular2)
-  { // Dit is fout..  ...............
+  { 
 
     for(ATermList walker=seq_varnames; (walker!=ATempty);
                     walker=ATgetNext(walker))
@@ -2872,8 +2871,6 @@ static ATermAppl exists_variable_for_sequence(
             process_names,
             (ATermList)objectdata[objectIndex(process)].representedprocesses))
       { 
-        // ATfprintf(stderr,"Exists variable process%t\nrepresentedprocesses %t\n\n",
-        //               process,(ATermList)objectdata[objectIndex(process)].representedprocesses);
         return process;
       }
     }
@@ -2898,7 +2895,6 @@ static void procstorealGNFrec(ATermAppl procIdDecl, variableposition v,
 
 static ATermList extract_names(ATermAppl sequence)
 { 
-  // ATfprintf(stderr,"extract_names:  %t\n",sequence);
   if (gsIsAction(sequence)||gsIsProcess(sequence))
   { return ATinsertA(ATempty,sequence);
   }
@@ -2908,7 +2904,7 @@ static ATermList extract_names(ATermAppl sequence)
     if (gsIsProcess(first))
     { long n=objectIndex(ATAgetArgument(first,0));
       if (objectdata[n].canterminate)
-      { // ATfprintf(stderr,"Can terminate????\n");
+      { 
         return ATinsertA(
                   extract_names(ATAgetArgument(sequence,1)),
                   first);
@@ -2965,7 +2961,6 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
 
 static ATermList argscollect(ATermAppl t)
 { 
-  // ATfprintf(stderr,"ARGSCOLLECT %t\n",t);
   if (gsIsProcess(t))
   return ATLgetArgument(t,1);
 
@@ -3019,8 +3014,6 @@ static ATermAppl create_regular_invocation(
   sequence=cut_off_unreachable_tail(sequence);
   sequence=pCRLrewrite(sequence);
   process_names=extract_names(sequence);
-  // ATfprintf(stderr,"EXTRACTATETAETEAETATAETAET \nsequence %t\nprocess_names %t\n\n",
-  //                    sequence,process_names);
   assert(process_names!=ATempty);
 
   if (ATgetLength(process_names)==1)
@@ -3049,8 +3042,6 @@ static ATermAppl create_regular_invocation(
       new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0),containstimebody(newbody,NULL,NULL,false));
       objectdata[objectIndex(new_process)].representedprocesses=
                    (ATerm)process_names;
-      // ATfprintf(stderr,"NEW_PROCESS %t\nsorts%t\nargscollect(sequence) %t\nprocess_names: %t\npars %t\nsequence: %t\n------\n",
-      //    new_process,new_process,argscollect(sequence),process_names,pars,sequence);
     }
     else 
     { new_process=newprocess(freevars,sequence,pCRL,
@@ -3064,12 +3055,10 @@ static ATermAppl create_regular_invocation(
   /* now we must construct arguments */
   if (regular2)
   { args=argscollect(sequence);
-    // ATfprintf(stderr,"HiER\nARGS: %t\nSEQUENCE %t\n\n",args,sequence);
   }
   else
   { args=objectdata[objectIndex(new_process)].parameters;
   }
-  // ATfprintf(stderr,"ARGS: %t\n",args);
   return gsMakeProcess(new_process,args);
 }
 
@@ -4218,23 +4207,19 @@ static ATermAppl find(
 
   assert(ATgetLength(pars)==ATgetLength(args));
   long n=ATindexOf(pars,(ATerm)s,0);
-  // ATfprintf(stderr,"HIER3 %d args: %t\n",n,args);
   ATermAppl result=NULL;
   if (n>=0)
   { result=(ATermAppl)ATelementAt(args,n);
-    // ATfprintf(stderr,"HIER4 %t\n",result);
   }
   else
   { result=dummyterm(ATAgetArgument(s,1),spec); 
-    // ATfprintf(stderr,"HIER5 %t\n",result);
-  /*result=((regular)?newProcDataVar(ATAgetArgument(s,1),spec):dummyterm(ATAgetArgument(s,1),spec));  */
+    /*result=((regular)?newProcDataVar(ATAgetArgument(s,1),spec):dummyterm(ATAgetArgument(s,1),spec));  */
   }
  
   if (regular)
   { 
     return result;
   }
-  // ATfprintf(stderr,"HIER6 %t\n",result);
   return adapt_term_to_stack(result,stack,vars,spec);
 }
 
@@ -4250,17 +4235,13 @@ static ATermList findarguments(
                    specificationbasictype *spec)
 { ATermAppl string1term=NULL;
 
-  if (ATgetLength(pars)!=ATgetLength(args))
-  { // ATfprintf(stderr,"Findarguments: pars %t\nargs %t\n",pars,args);
-  }
   assert(ATgetLength(pars)==ATgetLength(args));
   
   if (parlist==ATempty)
-  { // ATfprintf(stderr,"HIER1\n");
+  { 
     return t2; 
   }
 
-  // ATfprintf(stderr,"HIER2\n");
   string1term=ATAgetFirst(parlist);
   parlist=ATgetNext(parlist);
 
@@ -4283,7 +4264,6 @@ static ATermList push(
 { 
   int i;
   ATermList t=NULL;
-  // ATfprintf(stderr,"PUSH: %t\n",objectdata[objectIndex(procId)].parameters);
   t=findarguments(objectdata[objectIndex(procId)].parameters, 
             stack->parameterlist,args,t2,stack,vars,regular,spec);
 
@@ -4345,7 +4325,7 @@ static ATermList make_procargs(
   } 
   
   if (gsIsProcess(t)) 
-  { // ATfprintf(stderr,"Process: %t\n",t);
+  { 
     procId=ATAgetArgument(t,0);
     t1=ATLgetArgument(t,1);
     assert(gsIsProcVarId(procId));
