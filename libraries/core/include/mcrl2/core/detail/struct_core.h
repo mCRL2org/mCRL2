@@ -18,6 +18,7 @@
 #include <aterm2.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -3010,6 +3011,10 @@ ATermAppl gsMakeProcVarId(ATermAppl String_0, ATermList SortExpr_1)
 inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
 }
 
