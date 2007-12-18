@@ -345,6 +345,9 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
 {
   //check correctness of the data expression in data_expr using
   //the LPS specification in lps_spec
+  
+  //check preconditions
+  assert(gsIsDataExpr(data_expr));
   assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
   //gsWarningMsg("type checking of data expressions is partially implemented\n");
 
@@ -357,32 +360,24 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   gsDebugMsg ("type checking of data expressions read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) 
-       && gstcReadInConstructors() 
-       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
-       && gstcReadInActs((ATermList) lps_spec.action_labels())
-    ){
+  if (gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) &&
+      gstcReadInConstructors() &&
+      gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false) &&
+      gstcReadInActs((ATermList) lps_spec.action_labels()))
+  {
     gsDebugMsg ("type checking of data expressions read-in phase finished\n");
 
     if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
       gsErrorMsg("type checking of data expressions failed (%T is not a sort expression)\n\n",sort_expr);
-      goto failed;
-    }
-
-    if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)){
-      if(!gsIsDataExpr(data_expr)){
-        gsErrorMsg("type checking of data expressions failed (%T is not a data expression)\n\n",data_expr);
-        goto failed;
-      }
-
+    } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
       bool destroy_vars=(!Vars);
       if(destroy_vars) Vars=ATtableCreate(63,50);
       if(use_vars_from_lps) {
         ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
 	if(!NewVars){
 	  if(destroy_vars) ATtableDestroy(Vars);
-          gsErrorMsg("The parameters of the LPS cannot be used as variables\n\n");
-	  goto failed;
+          gsErrorMsg("the parameters of the LPS cannot be used as variables\n\n");
+          goto finally;
         }
 	else Vars=NewVars;
       }
@@ -393,12 +388,11 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
       if(Type && !gsIsSortUnknown(Type)) Result=data;
       else gsErrorMsg("type checking of data expressions failed.\n\n");
     }
-  }
-  else {
-      gsErrorMsg("Reading from LPS failed.\n\n");
+  } else {
+    gsErrorMsg("Reading from LPS failed.\n\n");
   }
 
-  failed:
+finally:
   gstcDataDestroy();
   return Result;
 }
@@ -430,7 +424,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
         if(!NewVars){
           ATtableDestroy(Vars);
           gsErrorMsg("The parameters of the LPS cannot be used as variables\n\n");
-          goto failed;
+          goto finally;
         }
         else Vars=NewVars;
       }
@@ -457,7 +451,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
       gsErrorMsg("Reading from LPS failed.\n\n");
   }
     
-failed:
+finally:
   gstcDataDestroy();
   return Result;
 }
@@ -504,7 +498,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
            if(!NewVars){
              ATtableDestroy(Vars);
              gsErrorMsg("The parameters of the LPS cannot be used as variables\n\n");
-             goto failed;
+             goto finally;
            }
            else Vars=NewVars;
          }
@@ -530,17 +524,21 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
     gsErrorMsg("Reading sorts from LPS failed.\n");
   }
 	
-failed:
+finally:
   gstcDataDestroy();
   return Result;
 }
 
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec){
+
+  //check precondition
+  assert(gsIsActionRenameSpec(ar_spec));
+
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
   gstcDataInit();
 
-  gsDebugMsg ("type checking of action renamings read-in phase started\n");
+  gsDebugMsg ("type checking of action rename specification read-in phase started\n");
 
   ATermTable actions_from_lps=ATtableCreate(63,50);
 
@@ -549,35 +547,33 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
     if(gstcReadInConstructors()){
        if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
          if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
-           gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
-         gsDebugMsg ("type checking of action renamings read-in phase of LPS finished\n");
-
-	 assert(gsIsActionRenameSpec(ar_spec));
+           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information.\n");
+         gsDebugMsg ("type checking of action rename specification read-in phase of LPS finished\n");
 
          ATermAppl data_spec = ATAgetArgument(ar_spec, 0);
          if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
-	   goto failed;
+	   goto finally;
 	 }
          // Check sorts for loops
          // Unwind sorts to enable equiv and subtype relations
          if(!gstcReadInConstructors()) {
-           goto failed;
+           goto finally;
          }
          if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
                                      ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
-           goto failed;
+           goto finally;
          }
          body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
 
 	 //Save the actions from LPS only for the latter use.
          gstcATermTableCopy(context.actions,actions_from_lps);
          if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(ar_spec,1),0))) {
-           goto failed;
+           goto finally;
          }
-         gsDebugMsg ("type checking action renamings read-in phase of the ActionRename finished\n");
+         gsDebugMsg ("type checking action rename specification read-in phase of the ActionRenameSpec finished\n");
 
          if(!gstcTransformVarConsTypeData()){
-           goto failed;
+           goto finally;
          }
          gsDebugMsg ("type checking transform VarConstTypeData phase finished\n");
 
@@ -600,7 +596,11 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
            assert(gsIsActionRenameRule(Rule));
 
            ATermList VarList=ATLgetArgument(Rule,0);
-           if(!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("the variables in action rename rule %P are not unique\n",VarList,Rule); break;}
+           if(!gstcVarsUnique(VarList)){
+             b = false;
+             gsErrorMsg("the variables in action rename rule %P are not unique\n",VarList,Rule);
+             break;
+           }
 
            ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
            if(!NewDeclaredVars){ b = false; break; }
@@ -629,7 +629,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
          ATtableDestroy(FreeVars);
          ATtableDestroy(DeclaredVars);
 	 if(!b){
-           goto failed;
+           Result = NULL;
+           goto finally;
          }
 
 	 ActionRenameRules=ATsetArgument(ActionRenameRules,(ATerm)ATreverse(NewRules),0);
@@ -648,10 +649,9 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
     gsErrorMsg("Reading sorts from LPS failed.\n");
   }
 
-failed:
+finally:
   ATtableDestroy(actions_from_lps);
   gstcDataDestroy();
-  gsDebugMsg("return NULL\n");
   return Result;
 }
 
