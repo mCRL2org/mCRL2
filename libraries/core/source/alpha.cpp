@@ -300,6 +300,10 @@ static ATermList merge_list(ATermList l, ATermList m){
       r = ATinsert(r,el);
     }
   }
+  
+  //gsDebugMsg("l: %T, m:%T\n\n",l,m);
+
+
   return ATconcat(l,ATreverse(r));
 }
 
@@ -1602,7 +1606,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     assert(l);
   }
   else {
-    gsWarningMsg("a: %T\n\n", a);
+    //gsDebugMsg("a: %T\n\n", a);
     assert(0);
   }
 
@@ -1761,6 +1765,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
 
 ATermList gsaGetDeps(ATermAppl a){
   //returns process names that a depends to (should be applied iteratevly).
+  gsDebugMsg("gsaGetDeps: a: %T\n",a);
   ATermList r=ATmakeList0();
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return r;
@@ -1959,8 +1964,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	old_dep=ATmakeList0();
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
-      ATermList dep=gsaGetDeps(ATAtableGet(procs,(ATerm)pn));
-      //gsWarningMsg("proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
+      gsDebugMsg("Phase 1: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
@@ -2177,8 +2182,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	old_dep=ATmakeList0();
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
-      ATermList dep=gsaGetDeps(ATAtableGet(procs,(ATerm)pn));
-      //gsWarningMsg("proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
+      gsDebugMsg("Phase 2: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
@@ -2255,8 +2260,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	old_dep=ATmakeList0();
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
-      ATermList dep=gsaGetDeps(ATAtableGet(procs,(ATerm)pn));
-      //gsWarningMsg("proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
+      gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
