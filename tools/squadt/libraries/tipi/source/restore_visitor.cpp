@@ -342,7 +342,12 @@ namespace utility {
 
     tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
     tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
-    tree->GetAttribute("category", &c.m_category);
+
+    std::string category;
+
+    tree->GetAttribute("category", &category);
+
+    c.m_category = tipi::tool::category::fit(category);
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       std::string identifier = e->GetAttribute("id");

@@ -11,7 +11,6 @@
 #include <tipi/tool.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
-#include "tipi/utility/logger.hpp"
 
 #if defined(__APPLE__)
 # include <Carbon/Carbon.h>

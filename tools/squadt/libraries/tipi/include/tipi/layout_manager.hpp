@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/detail/layout_manager.hpp
+/// \file tipi/layout_manager.hpp
 
 #ifndef LAYOUT_MANAGER_H
 #define LAYOUT_MANAGER_H
@@ -101,8 +101,8 @@ namespace tipi {
       }
     };
 
+    /// \cond INTERNAL_DOCS
     /**
-     * \internal
      * \brief Base class for layout constraint containers
      **/
     class properties : public ::utility::visitable {
@@ -119,29 +119,54 @@ namespace tipi {
         bool                 m_enabled;              ///< whether or not the control is enabled
 
         /** \brief Constructor */
-        inline properties();
+        inline properties() : m_alignment_horizontal(left), m_alignment_vertical(top),
+                              m_margin(0, 0, 0, 0), m_visible(visible), m_grow(true), m_enabled(true) {
+        }
 
         /** \brief Copy constructor */
-        inline properties(properties const&);
+        inline properties(properties const& p) : m_alignment_horizontal(p.m_alignment_horizontal),
+                                                 m_alignment_vertical(p.m_alignment_vertical),
+                                                 m_margin(p.m_margin), m_visible(p.m_visible),
+                                                 m_grow(p.m_grow), m_enabled(p.m_enabled) {
+        }
 
         /** \brief Constructor */
-        inline properties(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
+        inline properties(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
+        }
        
         /** \brief Constructor, for when horizontal alignment does not matter */
-        inline properties(vertical_alignment const&, margins const&, visibility const&);
+        inline properties(vertical_alignment const& av, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
+        }
        
         /** \brief Constructor, for when vertical alignment does not matter */
-        inline properties(horizontal_alignment const&, margins const&, visibility const&);
+        inline properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                m_alignment_horizontal(ah), m_alignment_vertical(top), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
+        }
 
         /** \brief Whether the control is allowed to grow */
-        inline void set_growth(bool b);
+        inline void set_growth(bool b) {
+          m_grow = b;
+        }
 
         /** \brief Compares for equality */
-        inline bool operator==(properties const&) const;
+        inline bool operator==(properties const& c) const {
+          return (m_alignment_horizontal == c.m_alignment_horizontal &&
+              m_alignment_vertical == c.m_alignment_vertical &&
+              m_margin == c.m_margin && m_visible == c.m_visible &&
+              m_grow == c.m_grow && m_enabled == c.m_enabled);
+        }
 
         /** \brief Compares for inequality */
-        inline bool operator!=(properties const&) const;
+        inline bool operator!=(properties const& c) const {
+          return (m_alignment_horizontal != c.m_alignment_horizontal ||
+              m_alignment_vertical != c.m_alignment_vertical ||
+              m_margin != c.m_margin || m_visible != c.m_visible ||
+              m_grow != c.m_grow || m_enabled != c.m_enabled);
+        }
     };
+    /// \endcond
 
     /** \brief Abstract base class for layout managers */
     class manager : public tipi::layout::element {
@@ -370,52 +395,6 @@ namespace tipi {
 
     inline manager::~manager() {
     }
-
-    /// \cond INTERNAL_DOCS
-    inline properties::properties() : m_alignment_horizontal(left), m_alignment_vertical(top), m_margin(0, 0, 0, 0), m_visible(visible), m_grow(true), m_enabled(true) {
-    }
-
-    inline properties::properties(properties const& p) :
-        m_alignment_horizontal(p.m_alignment_horizontal), m_alignment_vertical(p.m_alignment_vertical),
-        m_margin(p.m_margin), m_visible(p.m_visible), m_grow(p.m_grow), m_enabled(p.m_enabled) {
-    }
-
-    inline properties::properties(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
-    }
-
-    inline properties::properties(vertical_alignment const& av, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
-    }
-
-    inline properties::properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                m_alignment_horizontal(ah), m_alignment_vertical(top), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
-    }
-
-    inline void properties::set_growth(bool b) {
-      m_grow = b;
-    }
-
-    /**
-     * \param[in] c the properties object to compare against
-     **/
-    inline bool properties::operator==(properties const& c) const {
-      return (m_alignment_horizontal == c.m_alignment_horizontal &&
-              m_alignment_vertical == c.m_alignment_vertical &&
-              m_margin == c.m_margin && m_visible == c.m_visible &&
-              m_grow == c.m_grow && m_enabled == c.m_enabled);
-    }
-
-    /**
-     * \param[in] c the properties object to compare against
-     **/
-    inline bool properties::operator!=(properties const& c) const {
-      return (m_alignment_horizontal != c.m_alignment_horizontal ||
-              m_alignment_vertical != c.m_alignment_vertical ||
-              m_margin != c.m_margin || m_visible != c.m_visible ||
-              m_grow != c.m_grow || m_enabled != c.m_enabled);
-    }
-    /// \endcond
 
     /**
      * \param[in] t the top margin

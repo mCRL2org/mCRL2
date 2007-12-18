@@ -16,6 +16,7 @@
 #include "tipi/utility/generic_visitor.hpp"
 
 #include "tipi/configuration.hpp"
+#include "tipi/common.hpp"
 #include "tipi/mime_type.hpp"
 #include "tipi/tool/category.hpp"
 
@@ -42,7 +43,7 @@ namespace tipi {
 
       template < typename R, typename S >
       friend class ::utility::visitor;
-  
+
       public:
   
         /** \brief Description for a tool's main input object */

@@ -10,6 +10,7 @@
 #include <map>
 #include <set>
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
@@ -19,13 +20,22 @@
 
 #include "tipi/option.hpp"
 #include "tipi/object.hpp"
-#include "tipi/common.hpp"
 #include "tipi/mime_type.hpp"
 #include "tipi/tool/category.hpp"
 
 namespace tipi {
 
-  class configuration;
+  class report;
+
+  namespace controller {
+    class communicator;
+    class communicator_impl;
+  }
+
+  namespace tool {
+    class communicator;
+    class communicator_impl;
+  }
 
   /** \brief This class models a tool configuration */
   class configuration : public ::utility::visitable {
@@ -136,7 +146,7 @@ namespace tipi {
       position_list           m_positions;
 
       /** \brief The selected category in which the tool operates */
-      tool_category           m_category;
+      tipi::tool::category    m_category;
 
       /** \brief Whether or not the tool accepted this configuration in the past */
       bool                    m_fresh;
@@ -144,15 +154,10 @@ namespace tipi {
       /** \brief Prefix for output objects (TODO replace when naming component is added) */
       std::string             m_output_prefix;
 
-    private:
-
-      /** \brief Constructor */
-      inline configuration(tool_category);
-
     public:
 
-      /** \brief Default Constructor */
-      inline configuration();
+      /** \brief Constructor */
+      inline configuration(tool::category const& = tool::category::unknown);
 
       /** \brief Returns whether the configuration is empty or not */
       bool is_empty() const;
@@ -296,10 +301,7 @@ namespace tipi {
       size_t number_of_outputs() const;
   };
 
-  inline configuration::configuration() : m_fresh(true) {
-  }
-
-  inline configuration::configuration(tool_category c) : m_category(c), m_fresh(true) {
+  inline configuration::configuration(tool::category const& c) : m_category(c), m_fresh(true) {
   }
 
   inline bool configuration::is_empty() const {

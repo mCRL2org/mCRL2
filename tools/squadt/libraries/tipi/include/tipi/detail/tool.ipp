@@ -41,7 +41,7 @@ namespace tipi {
         void handle_capabilities_request(const tipi::messenger::message_ptr&);
 
         /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
-        void receive_display_data_handler(const tipi::messenger::message_ptr&, layout::tool_display::sptr);
+        void receive_display_data_handler(const tipi::messenger::message_ptr&, boost::shared_ptr < layout::tool_display >);
 
         /** \brief Extract a configuration from an offer_configuration message */
         void receive_configuration_handler(const tipi::messenger::message_ptr& m);
@@ -61,7 +61,7 @@ namespace tipi {
         bool activate(tipi::tool::communicator*, command_line_interface::scheme_ptr const&, long const&);
 
         /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(layout::tool_display::sptr);
+        void send_display_layout(boost::shared_ptr < layout::tool_display >);
  
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();
@@ -115,7 +115,7 @@ namespace tipi {
       return (s.get() != 0);
     }
 
-    inline void communicator_impl::send_display_layout(layout::tool_display::sptr d) {
+    inline void communicator_impl::send_display_layout(boost::shared_ptr < layout::tool_display > d) {
       tipi::message m(tipi::visitors::store(*d), tipi::message_display_layout);
 
       send_message(m);
@@ -148,7 +148,7 @@ namespace tipi {
      * \param[in] m shared pointer to the message
      * \param[out] d tool display on which to execute changes
      **/
-    inline void communicator_impl::receive_display_data_handler(const tipi::messenger::message_ptr& m, layout::tool_display::sptr d) {
+    inline void communicator_impl::receive_display_data_handler(const tipi::messenger::message_ptr& m, boost::shared_ptr < layout::tool_display > d) {
       std::vector < tipi::layout::element const* > elements;
 
       d->update(m->to_string(), elements);

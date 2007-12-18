@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/detail/display.hpp
+/// \file tipi/display.hpp
 
 #ifndef TIPI_LAYOUT_DISPLAY_H
 #define TIPI_LAYOUT_DISPLAY_H
@@ -13,7 +13,7 @@
 #include <boost/integer.hpp>
 
 #include "tipi/layout_base.hpp"
-#include <tipi/detail/event_handlers.hpp>
+#include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
 

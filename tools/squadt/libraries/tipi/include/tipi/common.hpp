@@ -185,16 +185,3 @@ namespace tipi {
 }
 
 #endif
-
-#ifdef BASIC_MESSENGER_H
-#ifndef TIPI_COMMON_MESSENGER_H
-#define TIPI_COMMON_MESSENGER_H
-
-namespace tipi {
-
-  /** \brief Convenience type alias for connection end points (primarily used by delivery handler functions) */
-  typedef const transport::transceiver::basic_transceiver* end_point;
-}
-
-#endif
-#endif

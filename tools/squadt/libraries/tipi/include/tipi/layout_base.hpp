@@ -18,6 +18,7 @@
 #include "tipi/detail/layout_mediator.hpp"
 
 namespace tipi {
+  /// \cond INTERNAL_DOCS
   namespace tool {
     class communicator;
   }
@@ -26,6 +27,7 @@ namespace tipi {
   }
 
   class display;
+  /// \endcond
 
   namespace layout {
     class basic_event_handler;

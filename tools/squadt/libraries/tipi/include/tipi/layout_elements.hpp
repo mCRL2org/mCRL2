@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/detail/layout_elements.hpp
+/// \file tipi/layout_elements.hpp
 
 #ifndef LAYOUT_ELEMENTS_H
 #define LAYOUT_ELEMENTS_H
@@ -12,7 +12,6 @@
 #include "tipi/layout_base.hpp"
 #include "tipi/detail/layout_mediator.hpp"
 #include "tipi/basic_datatype.hpp"
-#include "tipi/common.hpp"
 
 namespace tipi {
   namespace layout {

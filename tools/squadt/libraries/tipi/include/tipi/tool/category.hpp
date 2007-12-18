@@ -4,14 +4,14 @@
 //
 /// \file tipi/tool/category.hpp
 
-#ifndef TIPI_CATEGORY_H__
-#define TIPI_CATEGORY_H__
+#ifndef __TIPI_CATEGORY_H__
+#define __TIPI_CATEGORY_H__
 
 #include <string>
 #include <algorithm>
 #include <functional>
-#include <boost/bind.hpp>
 
+#include <boost/bind.hpp>
 #include <boost/array.hpp>
 
 namespace tipi {
