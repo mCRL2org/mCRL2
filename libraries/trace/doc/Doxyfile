@@ -7,9 +7,5 @@ INPUT                  = ../include ../source
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
 GENERATE_TAGFILE       = ../../../build/doxy/trace.tag
-TAGFILES               = ../../../build/doxy/data.tag=../data
+TAGFILES               = ../../../build/doxy/data.tag=../data \
                          ../../../build/doxy/utilities.tag=../utilities
-
-# EXTRACT_ALL is set to 'yes' until documentation of the classes is provided.
-# When documentation has been provided, please remove these three lines.
-EXTRACT_ALL = YES

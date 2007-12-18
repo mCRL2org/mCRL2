@@ -7,7 +7,3 @@ INPUT                  = ../include ../source
 EXCLUDE_PATTERNS      += */fsmlexer.cpp */fsmparser.cpp */fsmparser.hpp
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
-
-# EXTRACT_ALL is set to 'yes' until documentation of the classes is provided.
-# When documentation has been provided, please remove these three lines.
-EXTRACT_ALL = YES
