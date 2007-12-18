@@ -124,7 +124,7 @@ using namespace ::mcrl2::utilities;
         "  -q, --quiet                     Do not display warning messages.\n"
         "  -v, --verbose                   Display concise intermediate messages.\n"
         "  -d, --debug                     Display detailed intermediate messages.\n"
-        "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
+        "  -r, --rewriter=STRATEGY         Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
         "                                  - 'innerc' for the compiled innermost rewrite\n"
@@ -204,7 +204,7 @@ using namespace ::mcrl2::utilities;
         {"quiet",            no_argument,       0, 'q'},
         {"verbose",          no_argument,       0, 'v'},
         {"debug",            no_argument,       0, 'd'},
-        {"rewrite-strategy", required_argument, 0, 'r'},
+        {"rewriter",         required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
         {"smt-solver",       required_argument, 0, 'z'},
         {"induction",        no_argument,       0, 'o'},
@@ -317,21 +317,27 @@ using namespace ::mcrl2::utilities;
     void LPS_Form_Check::check_formulas() {
       gsEnableConstructorFunctions();
 
-      ATermList v_formulas = (ATermList) read_ATerm_from_file(f_formulas_file_name, "formulas");
-      ATermAppl v_lps = (ATermAppl) read_ATerm_from_file(f_lps_file_name, "LPS");
+      ATermList v_formulas = (ATermList) ATreadFromNamedFile(f_formulas_file_name);
 
-      lps::specification lps_specification(v_lps);
+      if (!v_formulas) {
+        throw std::runtime_error("error loading formulas from `" + std::string(f_formulas_file_name) + "'");
+      }
+
+      lps::specification lps_specification;
+
+      lps_specification.load(f_lps_file_name);
 
       if (lps_specification.is_well_typed()) {
+        // temporary measure, until the invariant and confluence checkers use the lps framework
+        ATermAppl v_lps = (ATermAppl) ATreadFromNamedFile(f_lps_file_name);
+
         Formula_Checker v_formula_checker(
-          ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name
-        );
+          ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
 
         v_formula_checker.check_formulas(v_formulas);
       }
       else {
-        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", f_lps_file_name);
-        exit(1);
+        throw std::runtime_error("Invalid mCRL2 LPS read from " + std::string(f_lps_file_name));
       }
     }
 
@@ -341,9 +347,17 @@ using namespace ::mcrl2::utilities;
     ATerm v_bottom_of_stack;
     ATinit(argc, argv, &v_bottom_of_stack);
 
-    LPS_Form_Check v_lps_form_check;
+    try {
+      LPS_Form_Check v_lps_form_check;
 
-    v_lps_form_check.get_options(argc, argv);
-    v_lps_form_check.check_formulas();
+      v_lps_form_check.get_options(argc, argv);
+      v_lps_form_check.check_formulas();
+    }
+    catch (std::exception& e) {
+      gsErrorMsg("Fatal: %s\n", e.what());
+ 
+      exit(1);
+    }
+
     return 0;
   }

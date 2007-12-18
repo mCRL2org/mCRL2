@@ -13,42 +13,47 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include <cmath>
+
 #include "aterm2.h"
 
-enum Compare_Result {
-  compare_result_smaller,
-  compare_result_equal,
-  compare_result_bigger
-};
+/**
+ * \brief Converts to textual representation for a boolean
+ * \param[in] b the boolean to convert
+ * \note for writing to stream consider using std::boolalpha
+ **/
+inline const char* bool_to_char_string(bool b) {
+  return (b) ? "true" : "false";
+}
 
-const char* bool_to_char_string(bool a_bool);
+/**
+ * \brief Computes the number of digits in decimal representation
+ **/
+inline int number_of_digits(const int a_integer) {
+  return static_cast < int > (std::ceil(std::log10(static_cast < double > (a_integer))));
+}
 
-class Indent {
-  private:
-    int f_indentation_level;
-    void update_string();
-  public:
-    Indent();
-    ~Indent();
-    char* blank_spaces;
-    void indent();
-    void deindent();
-};
+// Eventually, these two functions should probably be moved into core
+/**
+ * \brief Creates an identifier for the for the ctau action
+ **/
+inline ATermAppl make_ctau_act_id() {
+  static ATermAppl ctau_act_id(gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
 
-int number_of_digits(int a_integer);
+  assert(ctau_act_id);
 
-Compare_Result compare_address(ATerm a_term1, ATerm a_term2);
+  return ctau_act_id;
+}
 
-Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2);
+/**
+ * \brief Creates the ctau action
+ **/
+inline ATermAppl make_ctau_action() {
+  static ATermAppl ctau_action(gsMakeAction(make_ctau_act_id(), ATmakeList0()));
 
-ATerm read_ATerm_from_file(char const* a_file_name, char const* a_feedback_string);
+  assert(ctau_action);
 
-void write_ATerm_to_file(char const* a_file_name, ATermAppl a_term, char const* a_feedback_string);
-
-// Eventually, these two functions should probably be moved into libstruct
-
-ATermAppl make_ctau_act_id();
-
-ATermAppl make_ctau_action();
+  return ctau_action;
+}
 
 #endif

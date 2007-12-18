@@ -269,22 +269,22 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
 
   if ( type == lts_mcrl )
   {
-    SVCsetType(&f,"generic");
+    SVCsetType(&f,const_cast < char* > ("generic"));
   } else if ( type == lts_mcrl2 )
   {
     if ( state_info )
     {
-      SVCsetType(&f,"mCRL2+info");
+      SVCsetType(&f,const_cast < char* > ("mCRL2+info"));
     } else {
-      SVCsetType(&f,"mCRL2");
+      SVCsetType(&f,const_cast < char* > ("mCRL2"));
     }
   } else {
-      SVCsetType(&f,"unknown");
+      SVCsetType(&f,const_cast < char* > ("unknown"));
   }
 
   if ( creator == "" )
   {
-    SVCsetCreator(&f,"liblts (mCRL2)");
+    SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
   } else {
     char *s = strdup(creator.c_str());
     SVCsetCreator(&f,s);

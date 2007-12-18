@@ -25,18 +25,22 @@ namespace mcrl2 {
       //String representations of numbers
       //---------------------------------
   
-      inline int gsChar2Int(char c)
-      //Pre: '0' <= c < '9'
-      //Ret: integer value corresponding to c
-      {
+      /**
+       * \pre: '0' <= c < '9'
+       * \param[in] c a character that represents a decimal digit
+       * \return integer value corresponding to c
+       **/
+      inline int gsChar2Int(const char c) {
         assert(c >= '0' && c <= '9');
         return c - '0';
       }
   
-      inline char gsInt2Char(int n)
-      //Pre: 0 <= n <= 9
-      //Ret: character corresponding to the value of n
-      {
+      /**
+       * \pre: '0' <= n < '9'
+       * \param[in] n an integer value
+       * \return character value corresponding to n
+       **/
+      inline char gsInt2Char(const int n) {
         assert(n >= 0 && n <= 9);
         return n + '0';
       }
@@ -94,7 +98,7 @@ namespace mcrl2 {
         return r;
       }
   
-      int NrOfChars(int n)
+      int NrOfChars(const int n)
       {
         if (n > 0)
           return (int) ceil(log10((double) n));

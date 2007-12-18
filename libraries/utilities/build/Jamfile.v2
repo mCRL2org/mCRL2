@@ -58,7 +58,6 @@ alias utilities.main
         bdd_info.cpp        # Temporary?
         bdd_manipulator.cpp # Temporary?
         manipulator.cpp     # Temporary?
-        utilities.cpp       # Temporary?
       : <use>/libraries/aterm//headers
         <use>/libraries/core//headers
         <use>/libraries/data//headers

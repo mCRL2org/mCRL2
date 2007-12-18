@@ -181,6 +181,8 @@ namespace mcrl2 {
        * \note only works for one object at a time
        **/
       class mcrl2_tool_interface : public tool_interface {
+
+        /// \brief relays messages from the mCRL2 messaging system
         template < typename T >
         friend void relay_message(const T, const char* data);
 
@@ -203,7 +205,7 @@ namespace mcrl2 {
 #ifndef NO_MCRL2_TOOL_FACILITIES
       using ::mcrl2::utilities::messageType;
   
-      /** \internal \brief Used to relay messages generated using core::print */
+      /** \brief Used to relay messages generated using core::print */
       template < >
       inline void relay_message(const messageType t, const char* data) {
         tipi::report::type report_type;
@@ -299,7 +301,7 @@ namespace mcrl2 {
       /** \brief Standard type for communication of rewrite strategy */
       extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
   
-      /// \internal Helper function for unsigned long to string conversion
+      /// \brief Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
         char buf[21];
    
@@ -310,7 +312,7 @@ namespace mcrl2 {
         return o;
       }
   
-      /// \internal Helper function for unsigned long long to string conversion
+      /// \brief Helper function for unsigned long long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
         char buf[21];
    

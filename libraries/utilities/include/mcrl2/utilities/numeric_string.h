@@ -47,6 +47,8 @@ int gsStringMod2(const char *n);
 
 /**
  * \brief Computes modulo 2 in decimal string representation
+ * \param[in] n a string that represents a number
+ * \param[in] inc a displacement (+0 or +1)
  * \pre n is of the form "0 | [1-9][0-9]*" and 0 <= inc <= 1
  * \return the smallest string representation of 2*n + inc,
  * \note The result is created with malloc, so it has to be freed
@@ -55,9 +57,10 @@ char *gsStringDub(const char *n, const int inc);
 
 /**
  * \brief Computes number of characters of the decimal representation
+ * \param[in] n an integer number
  * \return the number of characters of the decimal representation of n
  **/
-int NrOfChars(int n);
+int NrOfChars(const int n);
 
 #ifdef __cplusplus
     }

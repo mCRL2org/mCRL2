@@ -14,9 +14,10 @@
 
 using namespace std;
 
-/// \internal
-static int roundToInt( double f )
-{
+/**
+ * \brief Rounds a double to an integer value
+ **/
+static int roundToInt( double f ) {
   double intpart;
   modf( f + 0.5, &intpart );
   return static_cast< int > ( intpart );

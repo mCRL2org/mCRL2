@@ -68,19 +68,21 @@ namespace mcrl2 {
       template < typename T >
       class radio_button_helper {
   
-        typedef tipi::layout::elements::radio_button radio_button;
-  
+        private:
+
+          /** \brief Associates radio buttons with values */
+          typedef std::map < tipi::layout::elements::radio_button const*, T > button_to_value_map;
+
         private:
   
-          std::map < radio_button const*, T > selector;
+          /** \brief Associates buttons with values */
+          button_to_value_map                   selector;
   
-        public:
-
           /** \brief The display for which to create the radio button objects */
-          tipi::display& display;
+          tipi::display&                        display;
   
           /** \brief The first button in the group */
-          radio_button* first;
+          tipi::layout::elements::radio_button* first;
   
         public:
   
@@ -88,10 +90,10 @@ namespace mcrl2 {
           radio_button_helper(tipi::display&);
   
           /** \brief associate a radio button with a layout manager and a value */
-          radio_button& associate(T const&, std::string const&, bool = false);
+          tipi::layout::elements::radio_button& associate(T const&, std::string const&, bool = false);
   
           /** \brief gets the first button associated with a value */
-          radio_button& get_button(T const&);
+          tipi::layout::elements::radio_button& get_button(T const&);
   
           /** \brief sets the selection for the group of radio buttons */
           void set_selection(T const&);
@@ -117,7 +119,9 @@ namespace mcrl2 {
        **/
       template < typename T >
       inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(T const& v, std::string const& s, bool b) {
-        radio_button& button = display.create< tipi::layout::elements::radio_button >();
+        using tipi::layout::elements::radio_button;
+
+        radio_button& button = display.create< radio_button >();
   
         if (first == 0) {
           first = &button;
@@ -143,7 +147,9 @@ namespace mcrl2 {
        **/
       template < typename T >
       inline tipi::layout::elements::radio_button& radio_button_helper< T >::get_button(T const& t) {
-        for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+        using tipi::layout::elements::radio_button;
+
+        for (typename button_to_value_map::const_iterator i = selector.begin(); i != selector.end(); ++i) {
           if (i->second == t) {
             return const_cast < radio_button& > (*(i->first));
           }
@@ -157,7 +163,9 @@ namespace mcrl2 {
        **/
       template < typename T >
       inline void radio_button_helper< T >::set_selection(T const& t) {
-        for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+        using tipi::layout::elements::radio_button;
+
+        for (typename button_to_value_map::const_iterator i = selector.begin(); i != selector.end(); ++i) {
           if (i->second == t) {
             const_cast < radio_button* > (i->first)->select();
           }

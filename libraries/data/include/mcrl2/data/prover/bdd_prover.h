@@ -77,14 +77,14 @@ class BDD_Prover: public Prover {
     /// \brief Class that creates all statements needed to prove a given property using induction.
     Induction f_induction;
 
-    /// \brief Class that produces a number of spaces corresponding to an indentation level.
-    Indent f_indent;
-
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd();
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
     ATerm bdd_down(ATerm a_formula);
+
+    /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
+    ATerm bdd_down(ATerm a_formula, std::string& a_indent);
 
     /// \brief Removes all inconsistent paths from the BDD BDD_Prover::f_bdd.
     void eliminate_paths();

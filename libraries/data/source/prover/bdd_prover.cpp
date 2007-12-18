@@ -53,8 +53,15 @@ using namespace ::mcrl2::utilities;
     }
 
     // --------------------------------------------------------------------------------------------
-
     ATerm BDD_Prover::bdd_down(ATerm a_formula) {
+      std::string indent;
+
+      return bdd_down(f_internal_bdd, indent);
+    }
+
+    ATerm BDD_Prover::bdd_down(ATerm a_formula, std::string& a_indent) {
+      a_indent.append("  ");
+
       if (f_time_limit != 0 && (f_deadline - time(0)) <= 0) {
         gsDebugMsg("The time limit has passed.\n");
         return a_formula;
@@ -80,7 +87,7 @@ using namespace ::mcrl2::utilities;
       if (!v_guard) {
         return a_formula;
       } else {
-        gsDebugMsg("%sSmallest guard: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_guard));
+        gsDebugMsg("%sSmallest guard: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_guard));
       }
 
       ATerm v_term1, v_term2;
@@ -88,23 +95,22 @@ using namespace ::mcrl2::utilities;
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
       v_term1 = f_rewriter->rewriteInternal(v_term1);
       v_term1 = f_manipulator->orient(v_term1);
-      gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
-      f_indent.indent();
-      v_term1 = bdd_down(v_term1);
-      f_indent.deindent();
-      gsDebugMsg("%sBDD of the true-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term1));
+      gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term1));
+      v_term1 = bdd_down(v_term1, a_indent);
+      gsDebugMsg("%sBDD of the true-branch: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term1));
 
       v_term2 = f_manipulator->set_false(a_formula, v_guard);
       v_term2 = f_rewriter->rewriteInternal(v_term2);
       v_term2 = f_manipulator->orient(v_term2);
-      gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
-      f_indent.indent();
-      v_term2 = bdd_down(v_term2);
-      f_indent.deindent();
-      gsDebugMsg("%sBDD of the false-branch: %P\n", f_indent.blank_spaces, f_rewriter->fromRewriteFormat(v_term2));
+      gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term2));
+      v_term2 = bdd_down(v_term2, a_indent);
+      gsDebugMsg("%sBDD of the false-branch: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term2));
 
       v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
       ATtablePut(f_formula_to_bdd, a_formula, v_bdd);
+
+      a_indent.erase(a_indent.size() - 2);
+
       return v_bdd;
     }
 

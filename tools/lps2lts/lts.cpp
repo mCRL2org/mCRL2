@@ -62,11 +62,11 @@ void open_lts(const char *filename, lts_options &opts)
         b = lts_opts.outinfo?SVCfalse:SVCtrue;
         SVCopen(svc,t,SVCwrite,&b); // XXX check result
         free(t);
-        SVCsetCreator(svc,NAME);
+        SVCsetCreator(svc,const_cast < char* > (NAME));
         if (lts_opts.outinfo)
-          SVCsetType(svc, "mCRL2+info");
+          SVCsetType(svc, const_cast < char* > ("mCRL2+info"));
         else
-          SVCsetType(svc, "mCRL2");
+          SVCsetType(svc, const_cast < char* > ("mCRL2"));
         svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
       }
       break;

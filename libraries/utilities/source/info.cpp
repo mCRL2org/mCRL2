@@ -21,6 +21,24 @@
 using namespace ::mcrl2::utilities;
 #endif
 
+inline static Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2) {
+  return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
+}
+
+inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
+  long v_address1 = reinterpret_cast < long > (a_term1);
+  long v_address2 = reinterpret_cast < long > (a_term2);;
+
+  if (v_address1 < v_address2) {
+    return compare_result_smaller;
+  }
+  if (v_address1 > v_address2) {
+    return compare_result_bigger;
+  }
+  return compare_result_equal;
+}
+
+
 // Class ATerm_Info -------------------------------------------------------------------------------
   // Class ATerm_Info - Functions declared public -------------------------------------------------
 

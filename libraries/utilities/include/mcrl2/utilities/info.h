@@ -16,9 +16,14 @@
 #include <mcrl2/data/rewrite.h>
 #include <mcrl2/utilities/utilities.h>
 
+enum Compare_Result {
+  compare_result_smaller,
+  compare_result_equal,
+  compare_result_bigger
+};
+
 /// \brief Base class for classes that provide information about the structure of
 /// \brief data expressions in one of the internal formats of the rewriter.
-
 class ATerm_Info {
   protected:
     /// \brief The rewriter used to translate formulas to the internal format of rewriters.
@@ -125,7 +130,6 @@ class ATerm_Info {
 /// \brief Class that provides information about the structure of
 /// \brief data expressions in the internal format of the rewriter
 /// \brief with the jitty strategy.
-
 class AI_Jitty: public ATerm_Info {
   public:
     /// \brief Constructor that initializes all fields.
@@ -166,7 +170,6 @@ class AI_Jitty: public ATerm_Info {
 /// \brief Class that provides information about the structure of
 /// \brief data expressions in the internal format of the rewriter
 /// \brief with the innermost strategy.
-
 class AI_Inner: public ATerm_Info {
   public:
     /// \brief Constructor that initializes all fields.

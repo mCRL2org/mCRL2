@@ -419,12 +419,12 @@ using namespace ::mcrl2::utilities;
         exit(1);
       }
 
-      //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
-      f_lps = (ATermAppl) read_ATerm_from_file(f_lps_file_name, "LPS");
-
       lps::specification lps_specification(f_lps);
 
       if (lps_specification.is_well_typed()) {
+        // temporary measure until the invariant and confluence checkers use the lps framework
+        f_lps = (ATermAppl) ATreadFromNamedFile(f_lps_file_name);
+
         //typecheck the invariant formula
         f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
         if(!f_invariant){
@@ -490,7 +490,7 @@ using namespace ::mcrl2::utilities;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        write_ATerm_to_file(f_output_file_name, f_lps, "resulting LPS");
+        ATwriteToNamedSAFFile((ATerm) f_lps, f_output_file_name);
       }
     }
 

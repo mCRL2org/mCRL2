@@ -35,6 +35,8 @@ namespace mcrl2 {
 
 /**
  * \brief Conditional prepend operation on ATermList
+ * \param[in] list an ATerm list
+ * \param[in] el the aterm to prepend
  * \return el ++ list if not el in list, list if el in list
  **/
 inline ATermList ATinsertUnique(ATermList list, ATerm el)
@@ -45,6 +47,7 @@ inline ATermList ATinsertUnique(ATermList list, ATerm el)
 
 /**
  * \brief Condition on an Aterm
+ * \param[in] t an ATerm
  * \return t is NULL or an ATermAppl
  **/
 inline bool ATisApplOrNull(ATerm t)
@@ -55,6 +58,7 @@ inline bool ATisApplOrNull(ATerm t)
 
 /**
  * \brief Condition on an Aterm
+ * \param[in] t an ATerm
  * \return t is NULL or an ATermList
  **/
 inline bool ATisListOrNull(ATerm t)
@@ -143,6 +147,9 @@ inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
 }
 
 #ifndef ATprotectAppl
+/**
+ * \brief Convenience function for protection of AtermAppl objects
+ **/
 inline void ATprotectAppl(ATermAppl *PAppl)
 {
   ATprotect((ATerm *) PAppl);
@@ -150,6 +157,9 @@ inline void ATprotectAppl(ATermAppl *PAppl)
 #endif
 
 #ifndef ATprotectList
+/**
+ * \brief Convenience function for protection of AtermList objects
+ **/
 inline void ATprotectList(ATermList *PList)
 {
   ATprotect((ATerm *) PList);
@@ -157,6 +167,9 @@ inline void ATprotectList(ATermList *PList)
 #endif
 
 #ifndef ATprotectInt
+/**
+ * \brief Convenience function for protection of AtermInt objects
+ **/
 inline void ATprotectInt(ATermInt *PInt)
 {
   ATprotect((ATerm *) PInt);
@@ -164,6 +177,9 @@ inline void ATprotectInt(ATermInt *PInt)
 #endif
 
 #ifndef ATunprotectAppl
+/**
+ * \brief Convenience function for unprotection of AtermAppl objects
+ **/
 inline void ATunprotectAppl(ATermAppl *PAppl)
 {
   ATunprotect((ATerm *) PAppl);
@@ -171,6 +187,9 @@ inline void ATunprotectAppl(ATermAppl *PAppl)
 #endif
 
 #ifndef ATunprotectList
+/**
+ * \brief Convenience function for unprotection of AtermList objects
+ **/
 inline void ATunprotectList(ATermList *PList)
 {
   ATunprotect((ATerm *) PList);
@@ -178,6 +197,9 @@ inline void ATunprotectList(ATermList *PList)
 #endif
 
 #ifndef ATunprotectInt
+/**
+ * \brief Convenience function for unprotection of AtermInt objects
+ **/
 inline void ATunprotectInt(ATermInt *PInt)
 {
   ATunprotect((ATerm *) PInt);

@@ -13,19 +13,26 @@
 #include <string>
 #include <iostream>
 
+/**
+ * \brief toolset version string
+ **/
 #define MCRL2_VERSION "January 2008"
 
-inline std::string get_version_information(const std::string tool_name) {
-  std::string text = tool_name;
-  text.append(" ");
-  text.append(MCRL2_VERSION);
-  text.append(" (revision ");
-  text.append(MCRL2_REVISION);
-  text.append(")");
-  return text;
+/**
+ * \brief Gets a string that describes the toolset version information
+ * \param[in] tool_name the name of the tool
+ **/
+inline std::string get_version_information(std::string const& tool_name) {
+  std::string text(tool_name);
+
+  return text.append(" " MCRL2_VERSION " (revision " MCRL2_REVISION ")");
 }
 
-inline void print_version_information(const std::string tool_name) {
+/**
+ * \brief Prints toolset version information
+ * \param[in] tool_name the name of the tool
+ **/
+inline void print_version_information(std::string const& tool_name) {
   std::cerr << get_version_information(tool_name) << std::endl;
 }
 

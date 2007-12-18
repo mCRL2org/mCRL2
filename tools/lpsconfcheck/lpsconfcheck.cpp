@@ -42,15 +42,15 @@ using namespace ::mcrl2::utilities;
 
       /// \brief The name of a file containing an invariant that is used to check confluence.
       /// \brief If this string is 0, the constant true is used as invariant.
-      char* f_invariant_file_name;
+      std::string f_invariant_file_name;
 
       /// \brief The name of the file containing the LPS.
       /// \brief If this string is 0, the input is read from stdin.
-      char* f_input_file_name;
+      std::string f_input_file_name;
 
       /// \brief The name of the file the LPS is written to.
       /// \brief If this string is 0, the output is written to stdout.
-      char* f_output_file_name;
+      std::string f_output_file_name;
 
       /// \brief The number of the summand that is checked for confluence.
       /// \brief If this number is 0, all summands are checked.
@@ -76,7 +76,7 @@ using namespace ::mcrl2::utilities;
 
       /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
       /// \brief a contradiction nor a tautology. If the string is 0, no files are written.
-      char* f_dot_file_name;
+      std::string f_dot_file_name;
 
       /// \brief The rewrite strategy used by the rewriter.
       RewriteStrategy f_strategy;
@@ -489,18 +489,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   // Class LPS_Conf_Check - Functions declared public ---------------------------------------------
 
-    LPS_Conf_Check::LPS_Conf_Check() {
+    LPS_Conf_Check::LPS_Conf_Check() : f_input_file_name("-"), f_output_file_name("-") {
       f_tool_command = 0;
-      f_invariant_file_name = 0;
-      f_input_file_name = 0;
-      f_output_file_name = 0;
       f_summand_number = 0;
       f_generate_invariants = false;
       f_no_check = false;
       f_no_marking = false;
       f_check_all = false;
       f_counter_example = false;
-      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
       f_path_eliminator = false;
@@ -511,14 +507,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     // --------------------------------------------------------------------------------------------
 
     LPS_Conf_Check::~LPS_Conf_Check() {
-      free(f_invariant_file_name);
-      f_invariant_file_name = 0;
-      free(f_input_file_name);
-      f_input_file_name = 0;
-      free(f_output_file_name);
-      f_output_file_name = 0;
-      free(f_dot_file_name);
-      f_dot_file_name = 0;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -557,7 +545,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       while (v_option != -1) {
         switch (v_option) {
           case 'i':
-            f_invariant_file_name = strdup(optarg);
+            f_invariant_file_name = std::string(optarg);
             break;
           case 'g':
             f_generate_invariants = true;
@@ -584,7 +572,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
             f_counter_example = true;
             break;
           case 'p':
-            f_dot_file_name = strdup(optarg);
+            f_dot_file_name = std::string(optarg);
             break;
           case 'h':
             print_help();
@@ -656,9 +644,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         exit(1);
       } else {
         if (v_number_of_remaining_arguments > 0) {
-          f_input_file_name = strdup(a_argv[optind]);
+          f_input_file_name = std::string(a_argv[optind]);
           if (v_number_of_remaining_arguments == 2) {
-            f_output_file_name = strdup(a_argv[optind + 1]);
+            f_output_file_name = std::string(a_argv[optind + 1]);
           }
         }
       }
@@ -675,44 +663,48 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::read_input() {
       gsEnableConstructorFunctions();
       
-      if (f_invariant_file_name != 0) {
+      if (!f_invariant_file_name.empty()) {
         //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
-        std::ifstream instream(f_invariant_file_name, std::ifstream::in|std::ifstream::binary);
+        std::ifstream instream(f_invariant_file_name.c_str(), std::ifstream::in|std::ifstream::binary);
+      
+        instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
+      
         if (!instream.is_open()) {
-          gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name);
-          exit(1);
+          throw std::runtime_error("cannot open input file '" + f_invariant_file_name + "'");
         }
-        gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name);
-        f_invariant = parse_data_expr(instream);
+
+        gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
+
+        if (!(f_invariant = parse_data_expr(instream))) {
+          throw std::runtime_error("parsing failed!");
+        }
+
         instream.close();
-	if(!f_invariant){
-          exit(1);
-        }
-      } else {
+      }
+      else {
         f_invariant = gsMakeOpIdTrue();
       }
-      f_lps = (ATermAppl) read_ATerm_from_file(f_input_file_name, "LPS");
 
-      lps::specification lps_specification(f_lps);
+      lps::specification lps_specification;
+      
+      lps_specification.load(f_input_file_name);
 
       if (lps_specification.is_well_typed()) {
+        // temporary measure, until the invariant and confluence checkers use the lps framework
+        f_lps = (ATermAppl) ATreadFromNamedFile(f_input_file_name.c_str());
+
         //typecheck the invariant formula
-        f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
-        if(!f_invariant){
-          gsErrorMsg("Typechecking of the invariant formula failed.\n");
-          exit(1);
+        if (!(f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true))) {
+          throw std::runtime_error("Typechecking of the invariant formula failed.\n");
         }
        
         //data implement the invariant formula
-        f_invariant = implement_data_data_expr(f_invariant,lps_specification);
-        if(!f_invariant){
-          gsErrorMsg("Data implementation of the invariant formula failed.\n");
-          exit(1);
+        if (!(f_invariant = implement_data_data_expr(f_invariant, lps_specification))) {
+          throw std::runtime_error("Invalid mCRL2 LPS read from " + f_input_file_name);
         }
       }
       else {
-        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", f_input_file_name);
-        exit(1);
+        throw std::runtime_error("Invalid mCRL2 LPS read from " + f_input_file_name);
       }
     }
 
@@ -725,21 +717,19 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     ///         false, if the invariant does not hold.
 
     bool LPS_Conf_Check::check_invariant() {
-      bool result = true;
+      if (!f_invariant_file_name.empty()) {
+        if (!f_no_check) {
+          Invariant_Checker v_invariant_checker(
+            f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, const_cast < char* > (f_dot_file_name.c_str()));
 
-      if (!f_no_check && f_invariant_file_name != 0) {
-        Invariant_Checker v_invariant_checker(
-          f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, f_dot_file_name
-        );
-
-        result = v_invariant_checker.check_invariant(f_invariant);
-      } else {
-        if (f_invariant_file_name != 0) {
+          return v_invariant_checker.check_invariant(f_invariant);
+        }
+        else {
           gsWarningMsg("The invariant is not checked; it may not hold for this LPS.\n");
         }
       }
 
-      return result;
+      return true;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -751,8 +741,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
         f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_no_marking, f_check_all, f_counter_example,
-        f_generate_invariants, f_dot_file_name
-      );
+        f_generate_invariants, const_cast < char* > (f_dot_file_name.c_str()));
 
       f_lps = v_confluence_checker.check_confluence_and_mark(f_invariant, f_summand_number);
     }
@@ -765,7 +754,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     void LPS_Conf_Check::write_result() {
       if (!f_no_marking) {
-        write_ATerm_to_file(f_output_file_name, f_lps, "resulting LPS");
+        ATwriteToNamedSAFFile((ATerm) f_lps, const_cast < char* > (f_output_file_name.c_str()));
       }
     }
 
@@ -775,13 +764,22 @@ int main(int argc, char* argv[]) {
   ATerm v_bottom_of_stack;
   ATinit(argc, argv, &v_bottom_of_stack);
 
-  LPS_Conf_Check v_lps_conf_check;
+  try {
+    LPS_Conf_Check v_lps_conf_check;
 
-  v_lps_conf_check.get_options(argc, argv);
-  v_lps_conf_check.read_input();
-  if (v_lps_conf_check.check_invariant()) {
-    v_lps_conf_check.check_confluence_and_mark();
-    v_lps_conf_check.write_result();
+    v_lps_conf_check.get_options(argc, argv);
+    v_lps_conf_check.read_input();
+
+    if (v_lps_conf_check.check_invariant()) {
+      v_lps_conf_check.check_confluence_and_mark();
+      v_lps_conf_check.write_result();
+    }
   }
+  catch (std::exception& e) {
+    gsErrorMsg("Fatal: %s\n", e.what());
+
+    return 1;
+  }
+
   return 0;
 }
