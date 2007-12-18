@@ -4,6 +4,7 @@ PROJECT_NAME           = LTS
 OUTPUT_DIRECTORY       = ../../../build/doxy
 HTML_OUTPUT            = lts
 INPUT                  = ../include ../source
+EXCLUDE_PATTERNS      += */fsmlexer.cpp */fsmparser.cpp */fsmparser.hpp
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
 

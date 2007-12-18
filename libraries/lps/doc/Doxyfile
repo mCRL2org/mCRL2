@@ -8,5 +8,4 @@ HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
 GENERATE_TAGFILE       = ../../../build/doxy/lps.tag
 TAGFILES               = ../../../build/doxy/data.tag=../data \
-                         ../../../build/doxy/atermpp.tag=../atermpp \
-                         ../../../build/doxy/lps.tag=../lps
+                         ../../../build/doxy/atermpp.tag=../atermpp

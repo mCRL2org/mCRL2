@@ -4,6 +4,7 @@ PROJECT_NAME           = "Core"
 OUTPUT_DIRECTORY       = ../../../build/doxy
 HTML_OUTPUT            = core
 INPUT                  = ../include ../source
+EXCLUDE_PATTERNS      += */mcrl2parser.cpp */mcrl2lexer.cpp
 HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
 HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html
 GENERATE_TAGFILE       = ../../../build/doxy/core.tag
