@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <set>
 #include <vector>
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 
 namespace lps {

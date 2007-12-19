@@ -10,8 +10,8 @@
 #define ATERM_DEBUG_ALLOCATOR
 
 #include <vector>
-#include "atermpp/atermpp.h"
-#include "atermpp/aterm_allocator.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_allocator.h"
 
 using namespace std;
 using namespace atermpp;

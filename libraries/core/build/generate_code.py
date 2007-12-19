@@ -406,7 +406,7 @@ def main():
 
     if options.constructors:
         ignored_phases = []
-        filename = '../include/mcrl2/basic/detail/constructors.h'
+        filename = '../include/mcrl2/core/detail/constructors.h'
         generate_constructor_functions(rules, filename, ignored_phases)
 
 if __name__ == "__main__":

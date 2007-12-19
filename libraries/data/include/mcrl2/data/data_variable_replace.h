@@ -11,7 +11,7 @@
 #define MCRL2_DATA_DATA_VARIABLE_REPLACE_H
 
 #include <map>
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 
 namespace lps {

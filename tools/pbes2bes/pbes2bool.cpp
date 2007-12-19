@@ -46,10 +46,10 @@
 #include "mcrl2/pbes/pbes2bool.h"
 
 //ATERM-specific
-#include "atermpp/substitute.h"
-#include "atermpp/utility.h"
-#include "atermpp/indexed_set.h"
-#include "atermpp/table.h"
+#include "mcrl2/atermpp/substitute.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/table.h"
 #include "_aterm.h"
 
 //Tool-specific

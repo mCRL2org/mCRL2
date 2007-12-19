@@ -10,7 +10,7 @@
 #ifndef MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 
-#include "atermpp/set.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/utility.h"
 

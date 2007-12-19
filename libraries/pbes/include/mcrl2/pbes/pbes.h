@@ -22,9 +22,9 @@
 #include <iterator>
 #include <stdexcept>
 #include <boost/iterator/transform_iterator.hpp>
-#include "atermpp/aterm_list.h"
-#include "atermpp/set.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"

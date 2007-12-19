@@ -10,7 +10,7 @@
 #ifndef MCRL2_CORE_CORE_INIT_H
 #define MCRL2_CORE_CORE_INIT_H
 
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace lps
 {

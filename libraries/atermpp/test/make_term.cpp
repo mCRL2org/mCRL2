@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 
 using namespace std;
 using namespace atermpp;

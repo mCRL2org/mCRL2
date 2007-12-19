@@ -11,9 +11,9 @@
 #define MCRL2_DATA_SORT_EXPRESSION_H
 
 #include <cassert>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/constructors.h"

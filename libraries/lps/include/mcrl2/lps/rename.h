@@ -14,9 +14,9 @@
 #include <vector>
 #include <utility>
 #include <boost/iterator/transform_iterator.hpp>
-#include "atermpp/make_list.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/lps/specification.h"

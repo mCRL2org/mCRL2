@@ -12,7 +12,7 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"

@@ -16,10 +16,10 @@
 #include <iostream>
 #include "libstruct.h"
 #include "libstruct_core.h"
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_traits.h"
 
 
 namespace lps {

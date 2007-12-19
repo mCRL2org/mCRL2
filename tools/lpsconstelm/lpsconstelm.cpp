@@ -30,7 +30,7 @@
 #include "mcrl2/data/rewrite.h"
 
 //Aterm
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 
 using namespace lps;
 using namespace atermpp;

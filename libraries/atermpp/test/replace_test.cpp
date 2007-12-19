@@ -26,8 +26,8 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 using namespace std;
 using namespace atermpp;

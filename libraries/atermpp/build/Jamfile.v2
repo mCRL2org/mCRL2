@@ -26,7 +26,7 @@ alias atermpp
        ;
 
 alias headers
-       :
+       : [ path.glob-tree include/mcrl2 : *.h *.hpp : .svn ]
        :
        :
        : <include>../include

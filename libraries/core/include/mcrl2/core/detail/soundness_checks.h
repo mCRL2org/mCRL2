@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/detail/soundness_checks.h
+/// \file mcrl2/core/detail/soundness_checks.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_BASIC_DETAIL_SOUNDNESS_CHECKS_H
@@ -15,10 +15,10 @@
 
 #include <iostream>
 #include "mcrl2/core/struct.h"
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_traits.h"
 
 
 namespace lps {

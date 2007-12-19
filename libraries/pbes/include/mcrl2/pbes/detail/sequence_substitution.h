@@ -12,7 +12,7 @@
 
 #include <algorithm>
 #include <utility>
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 
 namespace lps {

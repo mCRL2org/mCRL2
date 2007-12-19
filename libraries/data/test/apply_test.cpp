@@ -10,9 +10,9 @@
 #include <sstream>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_appl.h"
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
 
 using namespace std;

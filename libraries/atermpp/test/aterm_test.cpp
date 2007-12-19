@@ -25,9 +25,9 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;

@@ -11,8 +11,8 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data_operation.h"
 
 using namespace atermpp;

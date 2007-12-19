@@ -14,11 +14,11 @@
 #include <cassert>
 #include <algorithm>
 #include <functional>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/filtered_list.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/filtered_list.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/utility.h"        // find_variables
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"

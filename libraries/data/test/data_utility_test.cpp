@@ -12,7 +12,7 @@
 #include <set>
 #include <algorithm>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
+#include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 

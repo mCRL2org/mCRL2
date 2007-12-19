@@ -26,9 +26,9 @@
 #include <cassert>
 #include <vector>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 using namespace std;
 using namespace atermpp;

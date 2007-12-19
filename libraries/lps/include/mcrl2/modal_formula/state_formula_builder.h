@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/state_formula_builder.h
+/// \file mcrl2/modal_formula/state_formula_builder.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_STATE_FORMULA_BUILDER_H

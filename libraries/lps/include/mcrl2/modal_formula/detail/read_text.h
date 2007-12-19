@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/detail/read_text.h
+/// \file mcrl2/modal_formula/detail/read_text.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_BASIC_DETAIL_READ_TEXT_H

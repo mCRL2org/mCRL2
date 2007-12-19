@@ -13,9 +13,9 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
-#include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_traits.h"
-#include "atermpp/algorithm.h"          // replace
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/algorithm.h"          // replace
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 

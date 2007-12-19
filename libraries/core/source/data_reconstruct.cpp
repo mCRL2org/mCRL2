@@ -11,9 +11,9 @@
 
 #include <assert.h>
 #include <aterm2.h>
-#include "atermpp/indexed_set.h"
-#include "atermpp/map.h"
-#include "atermpp/table.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/table.h"
 
 #include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/detail/data_common.h"

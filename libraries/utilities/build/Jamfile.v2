@@ -51,12 +51,8 @@ alias squadt_interface.alias
 alias utilities.main
       : aterm_ext.cpp
         numeric_string.cpp
-        expression_info.cpp # Temporary?
-        sort_info.cpp       # Temporary?
         info.cpp            # Temporary?
         bdd2dot.cpp         # Temporary?
-        bdd_info.cpp        # Temporary?
-        bdd_manipulator.cpp # Temporary?
         manipulator.cpp     # Temporary?
       : <use>/libraries/aterm//headers
         <use>/libraries/core//headers
@@ -78,4 +74,9 @@ alias utilities.alias
       : utilities.main
       ;
 
-alias headers : : <use>/boost//headers : : <use>/boost//headers ;
+alias headers
+       : [ path.glob-tree include/mcrl2 : *.h *.hpp : .svn ]
+       : <use>/boost//headers
+       :
+       : <use>/boost//headers
+       ;

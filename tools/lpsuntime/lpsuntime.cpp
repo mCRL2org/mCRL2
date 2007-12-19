@@ -32,7 +32,7 @@
 #include <boost/program_options.hpp>
 
 //Aterm
-#include <atermpp/aterm.h>
+#include <mcrl2/atermpp/aterm.h>
 
 //LPS framework
 #include <mcrl2/lps/specification.h>

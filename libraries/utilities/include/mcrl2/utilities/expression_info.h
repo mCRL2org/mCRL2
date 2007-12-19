@@ -13,23 +13,44 @@
 #ifndef EXPRESSION_INFO_H
 #define EXPRESSION_INFO_H
 
-#include "aterm2.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
-  /// The class Expression_Info provides information about the structure of data expressions.
+using namespace mcrl2::utilities;
 
+/// \brief Extracts information from data expressions
+/// The class Expression_Info provides information about the structure of data expressions.
 class Expression_Info {
+
   public:
-    /// \brief Constructor initializing all fields.
-    Expression_Info();
 
     /// \brief Indicates whether or not the expression has a main operator.
-    bool is_operator(ATermAppl a_expression);
+    inline bool is_operator(ATermAppl a_expression) {
+      return (gsIsOpId(ATAgetArgument(a_expression, 0)) &&
+                  (ATgetLength(gsGetDataExprArgs(a_expression)) != 0));
+    }
 
     /// \brief Returns an argument of the main operator of an expression.
-    ATermAppl get_argument(ATermAppl a_expression, int a_number);
+    inline ATermAppl get_argument(ATermAppl a_expression, const size_t a_number) {
+      ATermList v_arguments = gsGetDataExprArgs(a_expression);
+
+      for (size_t i = 0; i < a_number; ++i) {
+        v_arguments = ATgetNext(v_arguments);
+      }
+
+      return ATAgetFirst(v_arguments);
+    }
 
     /// \brief Returns the main operator of an expression.
-    ATermAppl get_operator(ATermAppl a_expression);
+    inline ATermAppl get_operator(ATermAppl a_expression) {
+      ATermAppl v_result = a_expression;
+
+      while (!gsIsOpId(v_result)) {
+        v_result = ATAgetArgument(v_result, 0);
+      }
+
+      return v_result;
+    }
 };
 
 #endif

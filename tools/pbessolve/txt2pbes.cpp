@@ -47,13 +47,13 @@
 #include <getopt.h>
 
 //ATERM-specific 
-#include "atermpp/substitute.h" 
+#include "mcrl2/atermpp/substitute.h" 
 #include "mcrl2/core/identifier_string.h" 
-#include "atermpp/utility.h" 
-#include "atermpp/indexed_set.h" 
-#include "atermpp/table.h" 
-#include "atermpp/vector.h" 
-#include "atermpp/set.h" 
+#include "mcrl2/atermpp/utility.h" 
+#include "mcrl2/atermpp/indexed_set.h" 
+#include "mcrl2/atermpp/table.h" 
+#include "mcrl2/atermpp/vector.h" 
+#include "mcrl2/atermpp/set.h" 
 #include "gc.h" 
 
 

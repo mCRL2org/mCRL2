@@ -10,8 +10,8 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_expression.h"

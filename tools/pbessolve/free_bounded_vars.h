@@ -5,7 +5,7 @@
 //
 /// \file ./free_bounded_vars.h
 
-#include "atermpp/substitute.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "util.h"
 
 

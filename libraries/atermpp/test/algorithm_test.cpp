@@ -27,14 +27,14 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_string.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_real.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_string.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_real.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/vector.h"
 
 using namespace std;
 using namespace atermpp;

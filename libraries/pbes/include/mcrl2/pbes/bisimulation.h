@@ -3,7 +3,7 @@
 #include <set>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/rename.h"

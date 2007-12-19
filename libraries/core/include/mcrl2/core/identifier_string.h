@@ -4,13 +4,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/identifier_string.h
+/// \file mcrl2/core/identifier_string.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H
 
-#include "atermpp/aterm_string.h"
+#include "mcrl2/atermpp/aterm_string.h"
 
 namespace lps {
 

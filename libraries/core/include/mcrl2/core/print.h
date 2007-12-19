@@ -53,7 +53,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 #ifdef __cplusplus
 #include <ostream>
 #include <string>
-#include "atermpp/atermpp.h"
+#include "mcrl2/atermpp/atermpp.h"
 
 //Global preconditions:
 //- the ATerm library has been initialised

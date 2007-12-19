@@ -10,13 +10,13 @@
 #ifndef BES_H
 #define BES_H
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_traits.h"
-#include "atermpp/aterm_access.h"
-#include "atermpp/aterm_appl.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/indexed_set.h"
-#include "atermpp/table.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/table.h"
 #include "mcrl2/pbes/pbes.h"
 #include <algorithm>
 #include <deque>

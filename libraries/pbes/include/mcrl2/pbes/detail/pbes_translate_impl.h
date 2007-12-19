@@ -17,10 +17,10 @@
 #include <algorithm>
 #include <map>
 
-#include "atermpp/aterm_access.h"
-#include "atermpp/vector.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/substitute.h"
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"

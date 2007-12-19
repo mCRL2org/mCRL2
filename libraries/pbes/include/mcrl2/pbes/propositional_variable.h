@@ -13,7 +13,7 @@
 #include <cassert>
 #include <string>
 #include <utility>
-#include "atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/print.h"

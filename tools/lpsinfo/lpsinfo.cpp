@@ -21,7 +21,7 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include <atermpp/aterm.h>
+#include <mcrl2/atermpp/aterm.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include "mcrl2/core/messaging.h"

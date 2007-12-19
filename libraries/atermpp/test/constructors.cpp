@@ -23,10 +23,10 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_real.h"
-#include "atermpp/aterm_string.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_real.h"
+#include "mcrl2/atermpp/aterm_string.h"
 
 using namespace std;
 using namespace atermpp;

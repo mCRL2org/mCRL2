@@ -1,8 +1,12 @@
 project libraries/core/test
    : source-location .
+   : requirements
+      <use>/libraries/atermpp//headers
+      <use>/boost//headers 
    ;
 
-obj test_lib.o : test_lib.cpp : <use>/boost//headers <source>/libraries//core ;
+obj test_lib.o : test_lib.cpp : <source>/libraries//core ;
+obj beta_reduce_test.o : beta_reduce_test.cpp : <source>/libraries//core ;
 
 alias mcrl22lps-test-tool : $(TOP)/tools/mcrl22lps//mcrl22lps ;
 

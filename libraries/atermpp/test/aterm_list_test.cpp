@@ -25,10 +25,10 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/transform.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/transform.h"
 
 using namespace std;
 using namespace atermpp;

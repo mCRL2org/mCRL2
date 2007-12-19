@@ -5,7 +5,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression_replace.h"
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/make_list.h"
 
 using namespace std;
 using namespace atermpp;

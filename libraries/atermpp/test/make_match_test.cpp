@@ -24,8 +24,8 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 using namespace std;
 using namespace atermpp;

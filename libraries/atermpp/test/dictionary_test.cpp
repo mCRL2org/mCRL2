@@ -13,8 +13,8 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/dictionary.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/dictionary.h"
 
 using namespace std;
 using namespace atermpp;

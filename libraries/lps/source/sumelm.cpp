@@ -1,7 +1,7 @@
 //Aterms
-#include <atermpp/aterm.h>
-#include <atermpp/aterm_list.h>
-#include <atermpp/algorithm.h>
+#include <mcrl2/atermpp/aterm.h>
+#include <mcrl2/atermpp/aterm_list.h>
+#include <mcrl2/atermpp/algorithm.h>
 
 //LPS Framework
 #include "mcrl2/lps/linear_process.h"

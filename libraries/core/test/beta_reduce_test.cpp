@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
+#include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"

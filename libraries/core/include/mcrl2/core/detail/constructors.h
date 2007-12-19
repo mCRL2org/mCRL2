@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/detail/constructors.h
+/// \file mcrl2/core/detail/constructors.h
 /// \brief Add your file description here.
 
 #ifndef LPS_DETAIL_CONSTRUCTORS

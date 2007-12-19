@@ -12,8 +12,8 @@
 
 #include <set>
 #include <boost/iterator/filter_iterator.hpp>
-#include "atermpp/aterm.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"

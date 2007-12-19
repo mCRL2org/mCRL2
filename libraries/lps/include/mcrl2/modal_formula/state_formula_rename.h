@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/basic/state_formula_rename.h
+/// \file mcrl2/modal_formula/state_formula_rename.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_BASIC_STATE_VARIABLE_RENAME_H

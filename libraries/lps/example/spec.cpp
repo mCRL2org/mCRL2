@@ -13,7 +13,7 @@
 #include <fstream>
 #include <boost/format.hpp>
 
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/mcrl22lps.h"

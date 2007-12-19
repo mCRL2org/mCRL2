@@ -17,7 +17,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/sort_expression.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/data_implementation.h" // implement_data_data_expr
 
 // JFG:

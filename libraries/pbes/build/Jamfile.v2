@@ -49,4 +49,6 @@ alias pbes.alias
 
 explicit pbes.alias ;
 
-alias headers ;
+alias headers
+       : [ path.glob-tree include/mcrl2 : *.h *.hpp : .svn ]
+       ;

@@ -35,9 +35,9 @@
 #include "mcrl2/utilities/version_info.h"
 
 //Aterms
-#include <atermpp/algorithm.h>
-#include <atermpp/aterm.h>
-#include <atermpp/table.h>
+#include <mcrl2/atermpp/algorithm.h>
+#include <mcrl2/atermpp/aterm.h>
+#include <mcrl2/atermpp/table.h>
 
 //LPS Framework
 #include <mcrl2/data/data.h>

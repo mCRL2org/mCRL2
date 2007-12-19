@@ -11,8 +11,8 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/vector.h"
-#include "atermpp/aterm_access.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data.h"
 

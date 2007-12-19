@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/mcrl22lps.h"
 

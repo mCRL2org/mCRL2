@@ -19,12 +19,12 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
-#include "atermpp/substitute.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 
 
-#include "atermpp/algorithm.h"     // replace
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/algorithm.h"     // replace
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/specification.h"

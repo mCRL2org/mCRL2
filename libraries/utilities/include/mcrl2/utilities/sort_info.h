@@ -13,11 +13,14 @@
 #ifndef SORT_INFO_H
 #define SORT_INFO_H
 
-#include "aterm2.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/struct.h"
+
+using namespace mcrl2::utilities;
 
 /// \brief Class that provides information on sort expressions.
-
 class Sort_Info {
+
   private:
     /// \brief ATermAppl representing the sort Int.
     ATermAppl f_sort_id_int;
@@ -33,54 +36,97 @@ class Sort_Info {
 
     /// \brief ATermAppl representing the sort Bool.
     ATermAppl f_sort_id_bool;
+
   public:
+
     /// \brief Constructor that initializes the fields of the class.
-    Sort_Info();
+    inline Sort_Info() {
+      f_sort_id_int = gsMakeSortIdInt();
+      f_sort_id_nat = gsMakeSortIdNat();
+      f_sort_id_pos = gsMakeSortIdPos();
+      f_sort_id_real = gsMakeSortIdReal();
+      f_sort_id_bool = gsMakeSortIdBool();
+    }
 
     /// \brief Indicates whether or not a sort expression is a base type.
-    bool is_sort_id(ATermAppl a_sort_expression);
+    inline bool is_sort_id(ATermAppl a_sort_expression) {
+      return gsIsSortId(a_sort_expression);
+    }
 
     /// \brief Indicates whether or not the main operator of a sort expression is an arrow product.
-    bool is_sort_arrow_prod(ATermAppl a_sort_expression);
+    inline bool is_sort_arrow_prod(ATermAppl a_sort_expression) {
+      return gsIsSortArrow(a_sort_expression);
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Int.
-    bool is_sort_int(ATermAppl a_sort_expression);
+    inline bool is_sort_int(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_int;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Nat.
-    bool is_sort_nat(ATermAppl a_sort_expression);
+    inline bool is_sort_nat(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_nat;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Pos.
-    bool is_sort_pos(ATermAppl a_sort_expression);
+    inline bool is_sort_pos(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_pos;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Real.
-    bool is_sort_real(ATermAppl a_sort_expression);
+    inline bool is_sort_real(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_real;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Bool.
-    bool is_sort_bool(ATermAppl a_sort_expression);
+    inline bool is_sort_bool(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_bool;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort List.
-    bool is_sort_list(ATermAppl a_sort_expression);
+    inline bool is_sort_list(ATermAppl a_sort_expression) {
+      return strncmp(
+        gsATermAppl2String(ATAgetArgument(a_sort_expression, 0)), "List@", 5) == 0;
+    }
 
     /// \brief Indicates whether or not a sort expression represents the sort Bool.
-    bool returns_bool(ATermAppl a_sort_expression);
+    inline bool returns_bool(ATermAppl a_sort_expression) {
+      return gsGetSortExprResult(a_sort_expression) == f_sort_id_bool;
+    }
 
     /// \brief Returns the ID of the sort.
-    char* get_sort_id(ATermAppl a_sort_expression);
+    inline char* get_sort_id(ATermAppl a_sort_expression) {
+      return gsATermAppl2String(ATAgetArgument(a_sort_expression, 0));
+    }
 
     /// \brief Returns the domain of a sort expression.
-    ATermList get_domain(ATermAppl a_sort_expression);
+    inline ATermList get_domain(ATermAppl a_sort_expression) {
+      return gsGetSortExprDomain(a_sort_expression);
+    }
 
     /// \brief Returns the range of a sort expression.
-    ATermAppl get_range(ATermAppl a_sort_expression);
+    inline ATermAppl get_range(ATermAppl a_sort_expression) {
+      return gsGetSortExprResult(a_sort_expression);
+    }
 
     /// \brief Returns the number of arguments accepted by a function with this type;
-    int get_number_of_arguments(ATermAppl a_sort_expression);
+    inline int get_number_of_arguments(ATermAppl a_sort_expression) {
+      if (is_sort_arrow_prod(a_sort_expression)) {
+        return ATgetLength(ATLgetArgument(a_sort_expression, 0));
+      }
+
+      return 0;
+    }
 
     /// \brief Returns the type of the argument with the given number.
-    ATermAppl get_type_of_argument(ATermAppl a_sort_expression, int a_number);
+    inline ATermAppl get_type_of_argument(ATermAppl a_sort_expression, int a_number) {
+      return ATAelementAt(get_domain(a_sort_expression), a_number);
+    }
 
     /// \brief Returns the result type of a sort expression.
-    ATermAppl get_result_type(ATermAppl a_sort_expression);
+    inline ATermAppl get_result_type(ATermAppl a_sort_expression) {
+      return ATAgetArgument(a_sort_expression, 1);
+    }
 };
 
 #endif

@@ -14,7 +14,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/mcrl22lps.h"

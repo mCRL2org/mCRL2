@@ -10,9 +10,9 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_traits.h"
-#include "atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/pbes/propositional_variable.h"
 

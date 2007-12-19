@@ -21,10 +21,10 @@
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/detail/data_utility.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/aterm.h"
-#include "atermpp/set.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/utility.h"
 
 namespace lps {
 

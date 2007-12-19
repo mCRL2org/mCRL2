@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <boost/iterator/transform_iterator.hpp>
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data_specification.h"

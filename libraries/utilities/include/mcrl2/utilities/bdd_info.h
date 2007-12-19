@@ -13,32 +13,60 @@
 #ifndef BDD_INFO_H
 #define BDD_INFO_H
 
-#include "aterm2.h"
+#include "mcrl2/core/struct.h"
+#include "mcrl2/utilities/aterm_ext.h"
+
+using namespace mcrl2::utilities;
 
   /// The class BDD_Info provides information about the structure of binary decision diagrams.
-
 class BDD_Info {
+
   public:
-    /// \brief Constructor that initializes the field BDD_Info::f_if_then_else.
-    BDD_Info();
 
     /// \brief Method that returns the guard of a BDD.
-    ATermAppl get_guard(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return The guard at the root of the BDD.
+    inline ATermAppl get_guard(ATermAppl a_bdd) {
+      return ATAgetFirst(ATLgetArgument(a_bdd, 1));
+    }
 
     /// \brief Method that returns the true-branch of a BDD.
-    ATermAppl get_true_branch(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return The true-branch of the BDD.
+    inline ATermAppl get_true_branch(ATermAppl a_bdd) {
+      return ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
+    }
 
     /// \brief Method that returns the false-branch of a BDD.
-    ATermAppl get_false_branch(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return The false-branch of the BDD.
+    inline ATermAppl get_false_branch(ATermAppl a_bdd) {
+      return ATAgetFirst(ATgetNext(ATgetNext(ATLgetArgument(a_bdd, 1))));
+    }
 
     /// \brief Method that indicates whether or not a BDD equals true.
-    bool is_true(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return True, if the BDD equals true.
+    ///         False, if the BDD does not equal true.
+    inline bool is_true(ATermAppl a_bdd) {
+      return gsIsDataExprTrue(a_bdd);
+    }
 
     /// \brief Method that indicates whether or not a BDD equals false.
-    bool is_false(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return True, if the BDD equals false.
+    ///         False, if the BDD does not equal true.
+    inline bool is_false(ATermAppl a_bdd) {
+      return gsIsDataExprFalse(a_bdd);;
+    }
 
     /// \brief Method that indicates wether or not the root of a BDD is a guard node.
-    bool is_if_then_else(ATermAppl a_bdd);
+    /// \param a_bdd A binary decision diagram.
+    /// \return True, if the root of the BDD is a guard node.
+    ///         False, if the BDD equals true or if the BDD equals false.
+    inline bool is_if_then_else(ATermAppl a_bdd) {
+      return gsIsDataExprIf(a_bdd); 
+    }
 };
 
 #endif

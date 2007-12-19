@@ -14,10 +14,10 @@
 #include <cassert>
 #include <algorithm>
 #include <boost/iterator/transform_iterator.hpp>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/action.h"

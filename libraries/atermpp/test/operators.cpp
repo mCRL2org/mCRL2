@@ -10,7 +10,7 @@
 #include <iostream>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
+#include "mcrl2/atermpp/atermpp.h"
 
 using namespace std;
 using namespace atermpp;

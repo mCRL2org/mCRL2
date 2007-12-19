@@ -15,7 +15,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/data/detail/free_variables.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 namespace lps {
 

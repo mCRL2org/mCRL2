@@ -12,8 +12,8 @@
 
 #include <cassert>
 #include <string>
-#include "atermpp/algorithm.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state

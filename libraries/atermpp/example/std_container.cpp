@@ -12,12 +12,12 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-#include "atermpp/atermpp.h"
-#include "atermpp/deque.h"
-#include "atermpp/list.h"
-#include "atermpp/map.h"
-#include "atermpp/set.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/deque.h"
+#include "mcrl2/atermpp/list.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/vector.h"
 #include "gc.h"               // AT_collect
 
 using namespace std;

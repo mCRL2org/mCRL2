@@ -14,9 +14,9 @@
 #include <iterator>
 #include <vector>
 #include <set>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
