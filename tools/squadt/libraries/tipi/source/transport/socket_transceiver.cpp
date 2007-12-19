@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <tipi/transport/detail/socket_transceiver.hpp>
+#include <tipi/detail/transport/detail/socket_transceiver.hpp>
 
 namespace transport {
   /// \internal

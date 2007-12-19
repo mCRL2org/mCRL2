@@ -5,8 +5,8 @@
 #include <list>
 #include <istream>
 
-#include <tipi/transport/transporter.hpp>
-#include <tipi/transport/detail/listener.hpp>
+#include <tipi/detail/transport/transporter.hpp>
+#include <tipi/detail/transport/detail/listener.hpp>
 
 #include <boost/asio/ip/address.hpp>
 

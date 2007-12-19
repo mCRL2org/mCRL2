@@ -19,9 +19,9 @@
 #include <boost/thread/condition.hpp>
 #include <boost/system/system_error.hpp>
 
-#include <tipi/transport/transporter.hpp>
-#include <tipi/transport/detail/transceiver.ipp>
-#include <tipi/transport/detail/socket_scheduler.hpp>
+#include <tipi/detail/transport/transporter.hpp>
+#include <tipi/detail/transport/detail/transceiver.ipp>
+#include <tipi/detail/transport/detail/socket_scheduler.hpp>
 
 namespace transport {
   namespace transceiver {

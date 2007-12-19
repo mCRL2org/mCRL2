@@ -11,8 +11,8 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <tipi/transport/detail/socket_transceiver.hpp>
-#include <tipi/transport/detail/listener.ipp>
+#include <tipi/detail/transport/detail/socket_transceiver.hpp>
+#include <tipi/detail/transport/detail/listener.ipp>
 
 namespace transport {
   /// \internal

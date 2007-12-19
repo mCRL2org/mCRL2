@@ -17,7 +17,7 @@
 
 #include <workarounds.h>
 
-#include <tipi/transport/detail/transporter.ipp>
+#include <tipi/detail/transport/detail/transporter.ipp>
 #include <tipi/detail/basic_messenger.hpp>
 #include <tipi/common.hpp>
 

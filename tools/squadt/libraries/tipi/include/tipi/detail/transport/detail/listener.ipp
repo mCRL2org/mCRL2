@@ -7,7 +7,7 @@
 #ifndef TRANSPORT_LISTENER_TCC
 #define TRANSPORT_LISTENER_TCC
 
-#include <tipi/transport/detail/listener.ipp>
+#include <tipi/detail/transport/detail/listener.ipp>
 
 namespace transport {
   /// \cond INTERNAL_DOCS

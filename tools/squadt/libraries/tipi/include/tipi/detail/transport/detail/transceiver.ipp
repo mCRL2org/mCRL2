@@ -7,7 +7,7 @@
 #ifndef TRANSPORT_TRANSCEIVER_TCC
 #define TRANSPORT_TRANSCEIVER_TCC
 
-#include <tipi/transport/detail/transporter.ipp>
+#include <tipi/detail/transport/detail/transporter.ipp>
 
 namespace transport {
   namespace transceiver {

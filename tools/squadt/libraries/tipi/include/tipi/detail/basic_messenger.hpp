@@ -12,7 +12,7 @@
 
 #include "tipi/utility/print_logger.hpp"
 
-#include "tipi/transport/transporter.hpp"
+#include "tipi/detail/transport/transporter.hpp"
 #include "tipi/detail/message.hpp"
 
 namespace transport {

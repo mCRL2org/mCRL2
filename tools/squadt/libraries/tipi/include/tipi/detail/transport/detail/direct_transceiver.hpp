@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-#include <tipi/transport/detail/transceiver.ipp>
+#include <tipi/detail/transport/detail/transceiver.ipp>
 
 namespace transport {
   /// \cond INTERNAL_DOCS
