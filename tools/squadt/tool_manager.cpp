@@ -150,7 +150,7 @@ namespace squadt {
 
     for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
 #if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
-      path path_to_binary(*t + ".exe");
+      path path_to_binary(std::string(*t).append(".exe"));
 #else
       path path_to_binary(*t);
 #endif

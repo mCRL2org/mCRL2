@@ -207,7 +207,7 @@ namespace squadt {
     inline void process_impl::create_process(command const& c, boost::function < void (process::status) > h) {
       LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
 
-      int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.c_str(),&m_information.startup,&m_information.process);
+      int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.string().c_str(),&m_information.startup,&m_information.process);
 
       m_status = (identifier < 0) ? process::aborted : process::running;
 
