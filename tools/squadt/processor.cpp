@@ -188,7 +188,7 @@ namespace squadt {
     bool   result = false;
 
     if (!is_active()) {
-      time_t maximum_input_timestamp  = 0;
+      time_t maximum_input_timestamp = 0;
      
       if (r) {
         /* Check recursively */
@@ -212,14 +212,14 @@ namespace squadt {
       if (g.get()) {
         /* Find the maximum timestamp of the inputs */
         BOOST_FOREACH(processor::configurated_object_descriptor& i, inputs) {
-          boost::shared_ptr < object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(i.object));
+          boost::shared_ptr < object_descriptor > input_object(boost::static_pointer_cast< object_descriptor >(i.object));
         
-          if (output_object.get() == 0) {
-            output_object->self_check();
+          if (input_object.get() == 0) {
+            input_object->self_check();
      
-            maximum_input_timestamp = (std::max)(maximum_input_timestamp, output_object->timestamp);
+            maximum_input_timestamp = (std::max)(maximum_input_timestamp, input_object->timestamp);
      
-            result |= (output_object->status != object_descriptor::original) && (output_object->status != object_descriptor::reproducible_up_to_date);
+            result |= (input_object->status != object_descriptor::original) && (input_object->status != object_descriptor::reproducible_up_to_date);
           }
         }
        
@@ -227,8 +227,7 @@ namespace squadt {
         BOOST_FOREACH(processor::configurated_object_descriptor& o, outputs) {
           boost::shared_ptr < object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(o.object));
 
-          output_object->self_check(static_cast < const long int > (maximum_input_timestamp));
-     
+          result |= output_object->self_check(static_cast < const long int > (maximum_input_timestamp));
           result |= (output_object->status != object_descriptor::original) && (output_object->status != object_descriptor::reproducible_up_to_date);
         }
        
@@ -459,8 +458,8 @@ namespace squadt {
           register_output(id, object, object_descriptor::reproducible_nonexistent);
         }
 
-        if (!boost::filesystem::exists(object.get_location()) && check) {
-          current_monitor->get_logger()->log(1, "Warning, output file with name: " + object.get_location() + " does not exist!\n");
+        if (!boost::filesystem::exists(new_object_location) && check) {
+          current_monitor->get_logger()->log(1, "Warning, output file with name: " + new_object_location.string() + " does not exist!\n");
         }
 
         /* Remove object from p if it is part of the new configuration too */
@@ -753,6 +752,7 @@ namespace squadt {
 
   /**
    * \param[in] t objects older than this time stamp are considered obsolete
+   * \return whether the object is up to date (according to time stamp and checksum)
    **/
   bool processor_impl::object_descriptor::self_check(const long int t) {
     boost::shared_ptr < project_manager > project_manager(project.lock());
@@ -777,7 +777,9 @@ namespace squadt {
             checksum = boost::md5(l).digest();
       
             if (timestamp != 0 && old != checksum) {
-              return processor_impl::try_change_status(*this, reproducible_up_to_date);
+              processor_impl::try_change_status(*this, reproducible_up_to_date);
+
+              return true;
             }
       
             timestamp = stamp;
