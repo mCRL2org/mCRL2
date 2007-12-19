@@ -6,6 +6,7 @@
 //
 /// \file chi2mcrl2.cpp
 /// \brief Add your file description here.
+
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>

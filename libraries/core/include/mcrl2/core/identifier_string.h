@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/identifier_string.h
-/// \brief Add your file description here.
+/// \brief Library for ATerm strings.
 
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H
@@ -14,11 +14,11 @@
 
 namespace lps {
 
-  /// \brief String type of the LPS library.
+  /// String type of the LPS library.
   /// Identifier strings are represented internally as ATerms.
   typedef atermpp::aterm_string identifier_string;
   
-  /// Test if a term is an identifier string.
+  /// Tests if a term is an identifier string.
   inline
   bool is_identifier_string(atermpp::aterm t)
   {

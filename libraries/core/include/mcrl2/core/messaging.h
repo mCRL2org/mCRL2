@@ -5,6 +5,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file messaging.h
+/// \brief Library for controlling and printing messages.  
+///
+/// Global precondition: the ATerm library has been initialised
 
 #ifndef __MCRL2_MESSAGING_H__
 #define __MCRL2_MESSAGING_H__
@@ -24,42 +27,57 @@ namespace mcrl2 {
     extern "C" {
 #endif
 
-      //Global precondition: the ATerm library has been initialised
   
       //Message printing options
       //------------------------
-  
+
+      ///Post: Printing of warnings, verbose information and extended debugging
+      ///      information during program execution is disabled.
       void gsSetQuietMsg(void);
-      //Post: Printing of warnings, verbose information and extended debugging
-      //      information during program execution is disabled.
   
+      ///Post: Printing of warnings during program execution is enabled. Printing of
+      ///      verbose information and extended debugging information is disabled.
       void gsSetNormalMsg(void);
-      //Post: Printing of warnings during program execution is enabled. Printing of
-      //      verbose information and extended debugging information is disabled.
   
+      ///Post: Printing of warnings and verbose information during program execution
+      ///      is enabled. Printing of extended debugging information is disabled.
       void gsSetVerboseMsg(void);
-      //Post: Printing of warnings and verbose information during program execution
-      //      is enabled. Printing of extended debugging information is disabled.
   
+      ///Post: Printing of warnings, verbose information and extended debugging
+      ///      information during program execution is enabled.
       void gsSetDebugMsg(void);
-      //Post: Printing of warnings, verbose information and extended debugging
-      //      information during program execution is enabled.
   
+      /// If gsQuiet is set, printing of warnings, verbose information and extended debugging
+      /// information during program execution is disabled.
       extern bool gsQuiet;
+
+      /// If gsWarning is set, printing of warnings during program execution is enabled. Printing of
+      /// verbose information and extended debugging information is disabled.
       extern bool gsWarning;
+
+      /// If gsVerbose is set, printing of warnings and verbose information during program execution
+      /// is enabled. Printing of extended debugging information is disabled.
       extern bool gsVerbose;
+
+      /// If gsDebug is set, printing of warnings, verbose information and extended debugging
+      /// information during program execution is enabled.
       extern bool gsDebug;
   
-      // Type for message distinction (by purpose)
+      /// Type for message distinction (by purpose)
       enum messageType {gs_notice, gs_warning, gs_error};
-  
+ 
+      /// Function for printing regular messages  
       extern void gsMessage(const char *Format, ...);
+      /// Function for printing error messages
       extern void gsErrorMsg(const char *Format, ...);
+      /// Function for printing verbose messages
       extern void gsVerboseMsg(const char *Format, ...);
+      /// Function for printing warning messages
       extern void gsWarningMsg(const char *Format, ...);
+      /// Function for printing debug messages
       extern void gsDebugMsg(const char *Format, ...);
   
-      // Replaces message_handler by the function pointer passed as argument
+      /// Replaces message_handler by the function pointer passed as argument
       void gsSetCustomMessageHandler(void (*)(messageType, const char*));
 
 #  ifdef __func__
