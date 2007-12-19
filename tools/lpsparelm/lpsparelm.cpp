@@ -130,6 +130,11 @@ tool_configuration parse_command_line(int ac, char** av, tool_configuration& opt
   po::store(po::command_line_parser(ac, av).
     options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
+
+  if (vm.count("verbose"))
+  {
+    gsSetVerboseMsg();
+  }
      
   if (vm.count("help")) {
     std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
@@ -149,12 +154,9 @@ tool_configuration parse_command_line(int ac, char** av, tool_configuration& opt
                             (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-");
 }
 
-int main(int argc, char** argv) {
-  ATerm     bottom;
-
-  ATinit(argc,argv,&bottom);
-
-  gsEnableConstructorFunctions();
+int main(int argc, char** argv)
+{
+  MCRL2_CORE_LIBRARY_INIT()
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

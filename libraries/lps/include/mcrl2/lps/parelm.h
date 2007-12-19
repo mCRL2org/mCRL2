@@ -15,6 +15,7 @@
 #include <set>
 #include <vector>
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/mcrl22lps.h"
@@ -84,6 +85,15 @@ inline
 specification parelm(const specification& spec)
 {
   std::set<data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
+    
+  // logging statements
+  gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  for (std::set<data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  {
+    gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
+  }
+  gsVerboseMsg("\n");
+    
   specification result = detail::remove_parameters(spec, to_be_removed);
   assert(result.is_well_typed());
   return result;

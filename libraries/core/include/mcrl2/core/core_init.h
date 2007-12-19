@@ -15,9 +15,9 @@
 namespace lps
 {
 /// Define a macro to hide the initialization statements of the Core Library.
-#define MCRL2_CORE_LIBRARY_INIT()    \
-  aterm bottom_of_stack;       \
-  aterm_init(bottom_of_stack); \
+#define MCRL2_CORE_LIBRARY_INIT()       \
+  atermpp::aterm bottom_of_stack;       \
+  atermpp::aterm_init(bottom_of_stack); \
   gsEnableConstructorFunctions();
 
 } // namespace lps
