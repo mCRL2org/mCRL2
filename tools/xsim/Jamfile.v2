@@ -10,6 +10,8 @@ obj sim_base_gui
          /libraries//lps
          /site-config//wx_base
        : <wx>yes
+       :
+       : <source>sim_shared
        ;
 
 alias xsim : : <wx>no ;
@@ -21,7 +23,6 @@ alias sim_shared
 
 exe xsim
        : xsim.cpp
-         sim_shared
          sim_base_gui
          simulatorgui.cpp
          xsimmain.cpp
