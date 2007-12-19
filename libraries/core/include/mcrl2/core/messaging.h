@@ -31,19 +31,19 @@ namespace mcrl2 {
       //Message printing options
       //------------------------
 
-      ///Post: Printing of warnings, verbose information and extended debugging
+      ///\post Printing of warnings, verbose information and extended debugging
       ///      information during program execution is disabled.
       void gsSetQuietMsg(void);
   
-      ///Post: Printing of warnings during program execution is enabled. Printing of
+      ///\post Printing of warnings during program execution is enabled. Printing of
       ///      verbose information and extended debugging information is disabled.
       void gsSetNormalMsg(void);
   
-      ///Post: Printing of warnings and verbose information during program execution
+      ///\post Printing of warnings and verbose information during program execution
       ///      is enabled. Printing of extended debugging information is disabled.
       void gsSetVerboseMsg(void);
   
-      ///Post: Printing of warnings, verbose information and extended debugging
+      ///\post Printing of warnings, verbose information and extended debugging
       ///      information during program execution is enabled.
       void gsSetDebugMsg(void);
   

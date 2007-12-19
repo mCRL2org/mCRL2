@@ -31,9 +31,9 @@ extern "C" {
 //- the ATerm library has been initialised
 //- gsEnableConstructorFunctions() has been called
 
-/*! Pre: OutStream points to a stream to which can be written
+/*! \pre OutStream points to a stream to which can be written
          Part is an ATerm containing a part of a mCRL2 specification
-    Post:A textual (pretty printed) representation of Part is written to
+    \post A textual (pretty printed) representation of Part is written to
          OutStream using method pp_format
 */
 void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format);
@@ -72,19 +72,17 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 //- the ATerm library has been initialised
 //- gsEnableConstructorFunctions() has been called
 
-/*! Pre: OutStream points to a stream to which can be written
-         Part is an ATerm containing a part of a mCRL2 specification or state
-         formula
-    Post:A textual representation of Part is written to OutStream using method
-         pp_format
-*/
+/// \pre OutStream points to a stream to which can be written
+///         Part is an ATerm containing a part of a mCRL2 specification or state
+///         formula.
+/// \return A textual representation of Part is written to OutStream using method
+///         pp_format.
 void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
   t_pp_format pp_format);
 
-/*! Pre: Part is an ATerm containing a part of a mCRL2 specification or state
-         formula
-    Ret: A textual representation of Part pretty printed using method pp_format
-*/
+/// \pre Part is an ATerm containing a part of a mCRL2 specification or state
+///      formula.
+/// \post A textual representation of Part pretty printed using method pp_format.
 std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
 
 inline
