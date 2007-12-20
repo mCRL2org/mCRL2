@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger 
+// Author(s): Bas Ploeger, Muck van Weerdenburg 
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -19,6 +19,38 @@ namespace mcrl2
 {
 namespace lts
 {
+
+bool lts::is_deterministic()
+{
+  p_sort_transitions();
+  unsigned int *trans_lut = p_get_transition_indices();
+  DECL_A(seen,bool,nlabels);
+
+  for (unsigned int state = 0; state < nstates; state++)
+  {
+    for (unsigned int l = 0; l < nlabels; l++)
+    {
+      seen[l] = false;
+    }
+
+    unsigned t = trans_lut[state];
+    while ( t < trans_lut[state+1] )
+    {
+      if ( seen[transitions[t].label] )
+      {
+        FREE_A(seen);
+        return false;
+      }
+      seen[transitions[t].label] = true;
+      t++;
+    }
+  }
+
+  FREE_A(seen);
+  return true;
+}
+
+
 // class for comparison of two transitions of an LTS l
 class comp_trans_lds {
   private:

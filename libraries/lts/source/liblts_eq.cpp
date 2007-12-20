@@ -44,6 +44,7 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options &opts)
   switch ( eq )
   {
     case lts_eq_none:
+    case lts_eq_isomorph:
       return true;
     case lts_eq_strong:
       return bisimulation_reduce(*this,false,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
@@ -76,6 +77,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options &opts)
       return bisimulation_compare(*this,l,true,&opts.reduce.tau_actions);
     case lts_eq_trace:
     case lts_eq_weak_trace:
+    case lts_eq_isomorph:
     default:
       gsErrorMsg("comparision for this equivalence is not yet implemented\n");
       return false;

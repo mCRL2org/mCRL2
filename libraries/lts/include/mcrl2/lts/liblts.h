@@ -31,7 +31,7 @@ namespace lts
 #endif
                 };
 
-  enum lts_equivalence { lts_eq_none, lts_eq_trace, lts_eq_strong, lts_eq_weak_trace, lts_eq_branch };
+  enum lts_equivalence { lts_eq_none, lts_eq_trace, lts_eq_strong, lts_eq_weak_trace, lts_eq_branch, lts_eq_isomorph };
   typedef struct
   {
     struct {
@@ -110,27 +110,28 @@ namespace lts
 
   class lts : p_lts
   {
-    private:
-
-      /** \brief String representations for lts_type */
-      static char const* type_strings[];
-
-      /** \brief Extensions associated with elements of lts_type (except lts_none) */
-      static char const* extension_strings[];
-
     public:
 
-      /** \brief Helpsr function to guess the lts format from a filename (by its extension) */
+      /** \brief Helper function to guess the lts format from a filename (by its extension) */
       static lts_type guess_format(std::string const& s);
 
-      /** \brief Helpsr function to get storage format from a storage format specification */
+      /** \brief Helper function to get storage format from a storage format specification */
       static lts_type parse_format(char const* s);
 
-      /** \brief Helpsr function to get storage format for a given file extension */
+      /** \brief Helper function to get storage format for a given file extension */
       static char const* string_for_type(const lts_type s);
 
-      /** \brief Helpsr function to get the extension associated to an element (of lts_type) */
+      /** \brief Helper function to get the extension associated to an element (of lts_type) */
       static char const* extension_for_type(const lts_type type);
+
+      /** \brief Helper function to get equivalence type from a string */
+      static lts_equivalence parse_equivalence(char const* s);
+      
+      /** \brief Helper function to get string from equivalence type */
+      static char const* string_for_equivalence(const lts_equivalence s);
+
+      /** \brief Helper function to get (descriptive) name from equivalence type */
+      static char const* name_of_equivalence(const lts_equivalence s);
 
     public:
       lts(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
@@ -201,6 +202,7 @@ namespace lts
        * \return  true iff all states are reachable from the initial state
        **/
       bool reachability_check();
+      bool is_deterministic();
 
       friend class state_iterator;
       friend class label_iterator;

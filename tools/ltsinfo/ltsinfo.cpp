@@ -25,6 +25,10 @@ using namespace mcrl2::utilities;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
+typedef struct {
+  mcrl2::lts::lts_equivalence determinism_equivalence;
+} ltsinfo_options;
+
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   private:
@@ -122,7 +126,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
           append(d.create< label >().set_text("(This might result in unspecificied behaviour of LTS tools.)"));
     }
-
+        
     send_display_layout(d.set_manager(n));
   }
   else {
@@ -170,14 +174,20 @@ static void print_help(FILE *f, char *Name)
     "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n"
     "  -f, --formats         list accepted formats\n"
-    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n",
+    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n"
+    "  -eEQ, --equiv=EQ      use equivalence EQ for deterministic check\n"
+    "                        EQ can be one of the following:\n"
+    "                          none     - do not do deterministic check\n"
+    "                          isomorph - isomorphism (default)\n"
+    "                          strong   - strong bisimilarity\n"
+    "                          branch   - branching bisimilarity\n",
     Name);
 }
 
-bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
+bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_options &opts) {
   using namespace mcrl2::lts;
 
-  #define ShortOptions      "hqvdi:f"
+  #define ShortOptions      "hqvdi:fe:"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
@@ -187,6 +197,7 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
     {"debug"     , no_argument,         NULL, 'd'},
     {"in"        , required_argument,   NULL, 'i'},
     {"formats"   , no_argument,         NULL, 'f'},
+    {"equiv"     , required_argument,   NULL, 'e'},
     {0, 0, 0, 0}
   };
 
@@ -194,6 +205,7 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
   bool quiet = false;
   bool debug = false;
   lts_type intype = lts_none;
+  opts.determinism_equivalence = lts_eq_isomorph;
   int opt;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
@@ -229,6 +241,9 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l) {
       case 'f':
         print_formats(stderr);
         return (false);
+      case 'e':
+        opts.determinism_equivalence = lts::parse_equivalence(optarg);
+        break;
       default:
         break;
     }
@@ -318,8 +333,9 @@ int main(int argc, char **argv) {
     using namespace mcrl2::lts;
 
     lts l;
+    ltsinfo_options opts;
 
-    if (parse_command_line(argc, argv, l)) {
+    if (parse_command_line(argc, argv, l, opts)) {
 
       cout << "LTS format: " << lts::string_for_type(l.get_type()) << endl
            << "Number of states: " << l.num_states() << endl
@@ -346,6 +362,21 @@ int main(int argc, char **argv) {
       if ( !l.reachability_check() )
       {
         cout << "Warning: some states are not reachable from the initial state! (This might result in unspecificied behaviour of LTS tools.)" << endl;
+      }
+      if ( opts.determinism_equivalence != lts_eq_none )
+      {
+        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence));
+        lts_eq_options reduce_options;
+        set_eq_options_defaults(reduce_options);
+        gsVerboseMsg("minimisation...\n");
+        l.reduce(opts.determinism_equivalence,reduce_options);
+        gsVerboseMsg("deterministic check...\n");
+        if ( l.is_deterministic() )
+        {
+          cout << "LTS is determinisitic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
+        } else {
+          cout << "LTS is not determinisitic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
+        }
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY

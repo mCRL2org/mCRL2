@@ -53,6 +53,15 @@
   class p_lts
   {
     protected:
+      /** \brief String representations for lts_type */
+      static char const* type_strings[];
+
+      /** \brief Extensions associated with elements of lts_type (except lts_none) */
+      static char const* extension_strings[];
+      
+      static char const* equivalence_strings[];
+      static char const* equivalence_desc_strings[];
+
       lts *lts_object;
       lts_type type;
       std::string creator;
