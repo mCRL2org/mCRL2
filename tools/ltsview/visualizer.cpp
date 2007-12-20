@@ -15,6 +15,7 @@ using namespace std;
 using namespace Utils;
 #define SELECT_BLEND 0.3f
 
+
 Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   lts = NULL;
   mediator = owner;
@@ -510,6 +511,7 @@ void Visualizer::sortClusters(Point3D viewpoint) {
 bool Visualizer::isMarked(Cluster* c) {
   if (c != NULL) {
     return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
+            (markStyle == MARK_MULTI && c->hasMarkedState())  ||
             (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
             (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
   } else {
@@ -787,13 +789,54 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
     for (int i = 0; i < root->getNumStates(); ++i) {
       State *s = root->getState(i);
 
-      if(!(simulating && s->isSimulated())) {
+      if(!(simulating && s->isSimulated())) 
+      {
         RGB_Color c;
+
+
+        //GLubyte texture[5][4];
+        GLuint texName;
+
         if (isMarked(s)) {
           c = settings->getRGB(MarkedColor);
-        } else {
+
+        }
+        else if (isMultiMarked(s))
+        {
+          GLubyte texture[s->nrRulesMatched()][4];
+          c = settings->getRGB(StateColor);
+
+          for(unsigned int i = 0; i < s->nrRulesMatched(); ++i)
+          {
+            RGB_Color c1 = s->getRuleColour(i);
+            texture[i][0] = (GLubyte) c1.r;
+            texture[i][1] = (GLubyte) c1.g;
+            texture[i][2] = (GLubyte) c1.b;
+            texture[i][3] = (GLubyte) 255;
+          }
+          // Bind the texture created above, set textures on. (From Red Book)
+          
+          glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+          glGenTextures(1, &texName);
+          glBindTexture(GL_TEXTURE_1D, texName);
+
+          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+          glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, s->nrRulesMatched(), 0, 
+                       GL_RGBA, GL_UNSIGNED_BYTE, texture);
+          
+          glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+          glBindTexture(GL_TEXTURE_1D, texName);
+          glEnable(GL_TEXTURE_1D);
+        } 
+        else {
           c = settings->getRGB(StateColor);
         }
+
         if (s->isSelected()) {
           c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
         }
@@ -806,9 +849,18 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
         glScalef(ns,ns,ns);
        
         glPushName(s->getID());
+
         primitiveFactory->drawSimpleSphere();
         glPopName();
         glPopMatrix();
+        
+        if(isMarked(s))
+        {
+          glDisable(GL_TEXTURE_1D);
+
+        }
+ 
+        glDeleteTextures(1, &texName);
       }
     }
     Cluster *desc;
@@ -825,6 +877,11 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
 bool Visualizer::isMarked(State* s) {
   return ((markStyle == MARK_STATES && s->isMarked()) || 
           (markStyle == MARK_DEADLOCKS && s->isDeadlock()));
+}
+
+bool Visualizer::isMultiMarked(State* s) 
+{
+  return (markStyle == MARK_MULTI && s->isMarked());
 }
 
 // ------------- FORCE DIRECTED ------------------------------------------------

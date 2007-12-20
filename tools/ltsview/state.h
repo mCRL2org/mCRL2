@@ -57,6 +57,7 @@ class State {
     bool isCentered() const;
     bool isDeadlock() const;
     bool isMarked() const;
+    bool hasTextures() const;
     unsigned int  nrRulesMatched() const;
     void setMarking(bool b);
     void setMarkAllEmpty(bool b);
@@ -65,6 +66,8 @@ class State {
     // Adds mr to the rules matched by this state, and returns the total number
     // of rules matched.
     int mark(Utils::MarkRule* mr);
+
+    Utils::RGB_Color getRuleColour(unsigned int i);
     void select();
     void setCluster(Cluster* c);
     void setPositionAngle(float a);

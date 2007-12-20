@@ -17,7 +17,8 @@ namespace Utils {
   const unsigned int NUM_RINGS = 2;
 
   enum RankStyle      {ITERATIVE,CYCLIC};
-  enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS};
+  enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS,
+                       MARK_MULTI};
   enum VisStyle	      {CONES,TUBES};
   // Allows picking processor to identify type of item picked.
   enum PickState      {STATE, CLUSTER, SIMSTATE, PICKNONE}; 

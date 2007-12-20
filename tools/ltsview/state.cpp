@@ -57,6 +57,7 @@ bool State::isMarked() const {
   return marked && (markAllEmpty ||(rulesMatched.size() > 0));
 }
 
+
 unsigned int State::nrRulesMatched() const {
   return rulesMatched.size();
 }
@@ -90,6 +91,20 @@ int State::mark(Utils::MarkRule* rule) {
 
   return rulesMatched.size();
 }
+
+Utils::RGB_Color State::getRuleColour(unsigned int i)
+{
+  if (i < rulesMatched.size())
+  {
+    return rulesMatched[i]->colour;
+  }
+  else
+  {
+    Utils::RGB_Color result = {0, 0, 0};
+    return result;
+  }
+}
+
 
 int State::unmark(Utils::MarkRule* rule) {
   // Search for rule in rulesMatched, and erase it.

@@ -44,6 +44,7 @@ class Visualizer: public Subscriber {
     void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
     bool isMarked(Cluster* c);
     bool isMarked(State* s);
+    bool isMultiMarked(State* s);
     bool isMarked(Transition* s);
 
     void traverseTree(bool co);

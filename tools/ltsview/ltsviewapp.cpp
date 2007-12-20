@@ -305,7 +305,14 @@ void LTSViewApp::addMarkRule() {
       if (markrule != NULL) {
         lts->addMarkRule(markrule);
         mainFrame->addMarkRule(msrDialog->getMarkRuleString());
-        applyMarkStyle(MARK_STATES);
+        if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
+        {
+          applyMarkStyle(MARK_STATES);
+        }
+        else
+        {
+          applyMarkStyle(markStyle);
+        }
       }
     }
     msrDialog->Close();
@@ -315,7 +322,14 @@ void LTSViewApp::addMarkRule() {
 
 void LTSViewApp::removeMarkRule(const int index) {
   lts->removeMarkRule(index);
-  applyMarkStyle(MARK_STATES);
+  if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
+  {
+    applyMarkStyle(MARK_STATES);
+  }
+  else
+  {
+    applyMarkStyle(markStyle);
+  }
 }
 
 void LTSViewApp::editMarkRule(const int index) {
@@ -331,7 +345,14 @@ void LTSViewApp::editMarkRule(const int index) {
         markrule->isActivated = oldActivated;
         lts->replaceMarkRule(index,markrule);
         mainFrame->replaceMarkRule(index,msrDialog->getMarkRuleString());
-        applyMarkStyle(MARK_STATES);
+        if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
+        {
+          applyMarkStyle(MARK_STATES);
+        }
+        else
+        {
+          applyMarkStyle(markStyle);
+        }
       }
     }
     msrDialog->Close();
@@ -353,14 +374,28 @@ Utils::RGB_Color LTSViewApp::getNewRuleColour()
 void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
   if (lts != NULL) {
     lts->activateMarkRule(index,activate);
-    applyMarkStyle(MARK_STATES);
+    if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
+    {
+      applyMarkStyle(MARK_STATES);
+    }
+    else
+    {
+      applyMarkStyle(markStyle);
+    }
   }
 }
 
 void LTSViewApp::setMatchAnyMarkRule(int i) {
   if (lts != NULL) {
     lts->setMatchAnyMarkRule(i);
-    applyMarkStyle(MARK_STATES);
+    if ( i == 2)
+    { 
+      applyMarkStyle(MARK_MULTI);
+    }
+    else
+    {
+      applyMarkStyle(MARK_STATES);
+    }
   }
 }
 
@@ -386,6 +421,7 @@ void LTSViewApp::applyMarkStyle(MarkStyle ms) {
       mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
       mainFrame->setMarkedTransitionsInfo(0);
       break;
+    case MARK_MULTI:
     case MARK_STATES:
       mainFrame->setMarkedStatesInfo(lts->getNumMarkedStates());
       mainFrame->setMarkedTransitionsInfo(0);
