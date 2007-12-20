@@ -17,7 +17,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include <tipi/detail/controller.ipp>
 

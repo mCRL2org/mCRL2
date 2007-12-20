@@ -11,7 +11,7 @@
 #include <sstream>
 
 #include "tipi/common.hpp"
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 namespace tipi {
   namespace tool {

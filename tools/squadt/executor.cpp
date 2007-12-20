@@ -19,7 +19,7 @@
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include "executor.ipp"
 

@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "tipi/utility/logger.hpp"
+#include "tipi/detail/utility/logger.hpp"
 
 #include "tipi/common.hpp"
 #include "tipi/tool/capabilities.hpp"

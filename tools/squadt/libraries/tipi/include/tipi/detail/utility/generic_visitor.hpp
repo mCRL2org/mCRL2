@@ -2,7 +2,7 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/utility/generic_visitor.hpp
+/// \file tipi/detail/utility/generic_visitor.hpp
 
 #ifndef UTILITY_GENERIC_VISITOR_H__
 #define UTILITY_GENERIC_VISITOR_H__

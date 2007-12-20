@@ -2,9 +2,9 @@
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/tipi/utility/generic_visitor.ipp
+/// \file include/tipi/detail/utility/generic_visitor.ipp
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 namespace utility {
   template < typename S, typename R >

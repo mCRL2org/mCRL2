@@ -11,7 +11,7 @@
 
 #include "tipi/tool_display.hpp"
 #include "tipi/layout_elements.hpp"
-#include "tipi/utility/logger.hpp"
+#include "tipi/detail/utility/logger.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/tool/category.hpp"

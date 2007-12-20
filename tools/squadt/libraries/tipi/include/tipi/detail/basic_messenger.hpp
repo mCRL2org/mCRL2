@@ -10,7 +10,7 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "tipi/utility/print_logger.hpp"
+#include "tipi/detail/utility/print_logger.hpp"
 
 #include "tipi/detail/transport/transporter.hpp"
 #include "tipi/detail/message.hpp"

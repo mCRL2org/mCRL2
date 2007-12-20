@@ -22,7 +22,7 @@
 #include "tipi/configuration.hpp"
 #include "tipi/mime_type.hpp"
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include "build_system.hpp"
 

@@ -16,7 +16,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 namespace tipi {
 

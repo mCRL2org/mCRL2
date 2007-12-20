@@ -21,7 +21,7 @@
 #include "executor.ipp"
 #include "processor.ipp"
 
-#include <tipi/utility/generic_visitor.ipp>
+#include <tipi/detail/utility/generic_visitor.ipp>
 
 #include "visitors.hpp"
 

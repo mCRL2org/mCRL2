@@ -15,7 +15,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 namespace squadt {
   class store_visitor_impl;

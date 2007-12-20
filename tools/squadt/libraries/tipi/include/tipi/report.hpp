@@ -11,7 +11,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 #include "tipi/configuration.hpp"
 
 namespace tipi {

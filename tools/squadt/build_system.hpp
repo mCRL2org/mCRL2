@@ -16,7 +16,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include "tipi/tool.hpp"
 #include "tipi/mime_type.hpp"

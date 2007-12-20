@@ -14,7 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-#include "tipi/utility/print_logger.hpp"
+#include "tipi/detail/utility/print_logger.hpp"
 #include "mcrl2/utilities/version_info.h"
 
 #include "settings_manager.hpp"

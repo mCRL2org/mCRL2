@@ -13,7 +13,7 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include "tipi/detail/layout_mediator.hpp"
 

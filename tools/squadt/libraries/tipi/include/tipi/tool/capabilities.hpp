@@ -13,7 +13,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 #include "tipi/configuration.hpp"
 #include "tipi/common.hpp"

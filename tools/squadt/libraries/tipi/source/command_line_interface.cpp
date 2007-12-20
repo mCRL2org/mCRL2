@@ -17,7 +17,7 @@
 #include "tipi/detail/command_line_interface.hpp"
 #include <tipi/detail/tool.ipp>
 #include <tipi/detail/schemes.ipp>
-#include "tipi/utility/logger.hpp"
+#include "tipi/detail/utility/logger.hpp"
 
 namespace tipi {
   /// \cond INTERNAL_DOCS

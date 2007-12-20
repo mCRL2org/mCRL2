@@ -7,7 +7,7 @@
 #ifndef PARAMETER_H__
 #define PARAMETER_H__
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
 namespace tipi {
 

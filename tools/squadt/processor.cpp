@@ -21,7 +21,7 @@
 #include <boost/foreach.hpp>
 
 #include "tipi/controller.hpp"
-#include "tipi/utility/logger.hpp"
+#include "tipi/detail/utility/logger.hpp"
 
 #include "processor.ipp"
 #include "project_manager.ipp"
