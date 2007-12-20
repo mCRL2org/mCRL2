@@ -52,7 +52,7 @@ namespace tipi {
     public:
 
       /** \brief Type used to constrain occurrences of options within a configuration */
-      struct option_constraint {
+      struct constraint {
         unsigned short minimum; ///< \brief minimum occurrences of this option in a single configuration
         unsigned short maximum; ///< \brief maximum occurrences of this option in a single configuration
       };

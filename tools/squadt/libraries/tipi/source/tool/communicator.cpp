@@ -165,7 +165,7 @@ namespace tipi {
     }
 
     /* Send a signal that the tool is about to terminate */
-    void communicator::send_signal_done(bool b) {
+    void communicator::send_task_done(bool b) {
       message m((b) ? "success" : "", tipi::message_task_done);
  
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);

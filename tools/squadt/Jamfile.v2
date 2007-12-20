@@ -24,6 +24,11 @@ exe squadt
         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
       ;
 
+exe squadt_proxy
+      : squadt_proxy.cpp
+      : <library>/libraries/tipi//tool_interface
+      ;
+
 install-binaries install
       : squadt
       ;

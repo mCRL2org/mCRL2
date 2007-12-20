@@ -76,7 +76,7 @@ namespace mcrl2 {
                       m_communicator->send_configuration(configuration);
                     }
   
-                    m_communicator->send_signal_done(result);
+                    m_communicator->send_task_done(result);
                   }
                   else {
                     send_error("Start signal received without valid configuration!");
