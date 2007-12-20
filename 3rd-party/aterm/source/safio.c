@@ -385,7 +385,7 @@ inline static unsigned int getNrOfSubTerms(ATerm term){
  * Ensures that there is enough space left on the stack of the binary writer after the invocation of this function.
  */
 static void ensureWriteStackCapacity(BinaryWriter binaryWriter){
-	if(binaryWriter->stackPosition >= binaryWriter->stackSize){
+	if((binaryWriter->stackPosition + 1) >= binaryWriter->stackSize){
 		binaryWriter->stack = (ATermMapping*) AT_realloc(binaryWriter->stack, (binaryWriter->stackSize += STACKSIZEINCREMENT) * sizeof(struct _ATermMapping));
 		if(binaryWriter->stack == NULL) ATerror("The binary writer was unable to enlarge the stack.\n");
 	}
@@ -474,7 +474,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 	
 	if(binaryWriter->indexInTerm == 0){
 		SymEntry symEntry = at_lookup_table[fun];
-		unsigned int funHash = (unsigned int) symEntry;
+		unsigned int funHash = (unsigned int)((unsigned long) symEntry);
 		
 		HashTable hashTable = binaryWriter->sharedSymbols;
 		unsigned int *id = (unsigned int*) HTgetElement(hashTable, symEntry, funHash);
@@ -748,7 +748,7 @@ inline static double readDouble(ByteBuffer byteBuffer){
  * Ensures that there is enough space left on the stack of the binary reader after the invocation of this function.
  */
 static void ensureReadStackCapacity(BinaryReader binaryReader){
-	if(binaryReader->stackPosition >= binaryReader->stackSize){
+	if((binaryReader->stackPosition + 1) >= binaryReader->stackSize){
 		binaryReader->stack = (ATermConstruct*) AT_realloc(binaryReader->stack, (binaryReader->stackSize += STACKSIZEINCREMENT) * sizeof(struct _ATermConstruct));
 		if(binaryReader->stack == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's stack.\n");
 	}
@@ -758,7 +758,7 @@ static void ensureReadStackCapacity(BinaryReader binaryReader){
  * Ensures that there is enough space left in the shared terms array of the binary reader after the invocation of this function.
  */
 static void ensureReadSharedTermCapacity(BinaryReader binaryReader){
-	if(binaryReader->sharedTermsIndex >= binaryReader->sharedTermsSize){
+	if((binaryReader->sharedTermsIndex + 1) >= binaryReader->sharedTermsSize){
 		binaryReader->sharedTerms = (ATerm*) AT_realloc(binaryReader->sharedTerms, (binaryReader->sharedTermsSize += SHAREDTERMARRAYINCREMENT) * sizeof(ATerm));
 		if(binaryReader->sharedTerms == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's shared terms array.\n");
 	}
@@ -768,7 +768,7 @@ static void ensureReadSharedTermCapacity(BinaryReader binaryReader){
  * Ensures that there is enough space left in the shared signatures array of the binary reader after teh invocation of this function.
  */
 static void ensureReadSharedSymbolCapacity(BinaryReader binaryReader){
-	if(binaryReader->sharedSymbolsIndex >= binaryReader->sharedSymbolsSize){
+	if((binaryReader->sharedSymbolsIndex + 1) >= binaryReader->sharedSymbolsSize){
 		binaryReader->sharedSymbols = (SymEntry*) AT_realloc(binaryReader->sharedSymbols, (binaryReader->sharedSymbolsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(SymEntry));
 		if(binaryReader->sharedSymbols == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's shared signatures array.\n");
 	}
@@ -1340,15 +1340,16 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
 ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
 	ATbool result;
 	FILE *file;
-
-	if (!strcmp(filename,"-"))
-		return ATwriteToSAFFile(aTerm,stdout);
 	
-	file = fopen(filename, "wb");
-	if(file == NULL){
-		ATwarning("Unable to open file for writing: %s\n", filename);
-		return ATfalse;
+	if(strcmp(filename, "-") == 0){
+		return ATwriteToSAFFile(aTerm, stdout);
 	}
+	
+        file = fopen(filename, "wb");
+	if(file == NULL){
+               	ATwarning("Unable to open file for writing: %s\n", filename);
+               	return ATfalse;
+        }
 	
 	result = ATwriteToSAFFile(aTerm, file);
 	
@@ -1425,9 +1426,10 @@ ATerm ATreadFromSAFFile(FILE *file){
 ATerm ATreadFromNamedSAFFile(const char *filename){
 	ATerm result;
 	FILE *file;
-
-	if (!strcmp(filename,"-"))
-		return ATreadFromSAFFile(stdin);
+	
+	if(strcmp(filename, "-") == 0){
+                return ATreadFromSAFFile(stdin);
+        }
 	
 	file = fopen(filename, "rb");
 	if(file == NULL){
