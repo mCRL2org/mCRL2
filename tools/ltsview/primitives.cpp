@@ -104,11 +104,37 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
 P_SimpleSphere::P_SimpleSphere() {
   GLfloat S = GLfloat(sin(PI/4));
   GLfloat C = GLfloat(cos(PI/4));
-  GLfloat vertices[] = { 0,0,-1,
-    S,0,-C, 0,-S,-C, -S,0,-C, 0,S,-C,
-    1,0, 0, 0,-1, 0, -1,0, 0, 0,1, 0,
-    S,0, C, 0,-S, C, -S,0, C, 0,S, C,
-    0,0,1 };
+  GLfloat vertices[] = { 0,  0, -1,
+                         S,  0, -C, 
+                         0, -S, -C, 
+                        -S,  0, -C, 
+                         0,  S,  -C,
+                         1,  0,   0, 
+                         0, -1,   0, 
+                        -1,  0,   0, 
+                         0,  1,   0,
+                         S,  0,   C, 
+                         0, -S,   C, 
+                        -S,  0,   C, 
+                         0,  S,   C,
+                         0,  0,   1 };
+
+  
+  GLfloat texCoords[] = {0.5, 
+                         S, 
+                         0.5, 
+                         0.5 * S ,
+                         0.5,
+                         1.0,
+                         0.5,
+                         0.0, 
+                         0.5,
+                         S,
+                         0.5,
+                         0.5 * S,
+                         0.5,
+                         0.5
+                         };
 
   GLuint is_bot[] = { 0,1,2,3,4,1 };
   GLuint is_mid1[] = { 5,1,8,4,7,3,6,2,5,1 };
@@ -118,8 +144,12 @@ P_SimpleSphere::P_SimpleSphere() {
   disp_list = glGenLists(1);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
   glVertexPointer(3,GL_FLOAT,0,vertices);
   glNormalPointer(GL_FLOAT,0,vertices);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_TRIANGLE_FAN,6,GL_UNSIGNED_INT,is_bot);
     glDrawElements(GL_QUAD_STRIP,10,GL_UNSIGNED_INT,is_mid1);
