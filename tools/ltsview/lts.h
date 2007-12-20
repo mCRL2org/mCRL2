@@ -34,7 +34,7 @@ class LTS {
     void addState(State* s);
     void addTransition(Transition* t);
     void clearStatePositions();
-    void clusterStates();
+    void clusterStates(Utils::RankStyle rs);
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     Cluster* getClusterAtRank(int r, int c) const;
@@ -144,7 +144,7 @@ class LTS {
 
     // Methods
     void clearRanksAndClusters();
-    void clusterTree(State* s,Cluster *c);
+    void clusterTree(State* s,Cluster *c,bool cyclic);
     void processAddedMarkRule( Utils::MarkRule* r );
     void processRemovedMarkRule( Utils::MarkRule* r );
 

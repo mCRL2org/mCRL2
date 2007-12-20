@@ -480,16 +480,16 @@ void LTS::rankStates(Utils::RankStyle rs) {
   }
 }
 
-void LTS::clusterStates() {
+void LTS::clusterStates(Utils::RankStyle rs) {
   Cluster *d = new Cluster(0);
   vector< Cluster* > cs;
   cs.push_back(d);
   d->setPositionInRank(0);
   clustersInRank.push_back(cs);
-  clusterTree(initialState,d);
+  clusterTree(initialState,d,rs == CYCLIC);
 }
 
-void LTS::clusterTree(State *v,Cluster *c) {
+void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
   int h,i,j,r;
   State *w, *y;
   c->addState(v);
@@ -497,13 +497,47 @@ void LTS::clusterTree(State *v,Cluster *c) {
   for (i = 0; i < v->getNumOutTransitions(); ++i) {
     w = v->getOutTransition(i)->getEndState();
     if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
-      clusterTree(w,c);
+      clusterTree(w,c,cyclic);
     }
   }
   for (i = 0; i < v->getNumInTransitions(); ++i) {
     w = v->getInTransition(i)->getBeginState();
     if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
-      clusterTree(w,c);
+      clusterTree(w,c,cyclic);
+    }
+  }
+  if (cyclic) {
+    for (i = 0; i < v->getNumInTransitions(); ++i) {
+      w = v->getInTransition(i)->getBeginState();
+      r = w->getRank();
+      if (w->getCluster() == NULL && r == v->getRank()+1) {
+        Cluster *d = new Cluster(r);
+        if ((unsigned int)(r) >= clustersInRank.size()) {
+          vector< Cluster* > cs;
+          clustersInRank.push_back(cs);
+        }
+        d->setPositionInRank(clustersInRank[r].size());
+        clustersInRank[r].push_back(d);
+        d->setAncestor(c);
+        c->addDescendant(d);
+        clusterTree(w,d,cyclic);
+
+        for (h = 0; h < d->getNumStates(); ++h) {
+          y = d->getState(h);
+          for (j = 0; j < y->getNumOutTransitions(); ++j) {
+            w = y->getOutTransition(j)->getEndState();
+            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+              clusterTree(w,c,cyclic);
+            }
+          }
+          for (j = 0; j < y->getNumInTransitions(); ++j) {
+            w = y->getInTransition(j)->getBeginState();
+            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+              clusterTree(w,c,cyclic);
+            }
+          }
+        }
+      }
     }
   }
   for (i = 0; i < v->getNumOutTransitions(); ++i) {
@@ -519,14 +553,22 @@ void LTS::clusterTree(State *v,Cluster *c) {
       clustersInRank[r].push_back(d);
       d->setAncestor(c);
       c->addDescendant(d);
-      clusterTree(w,d);
+      clusterTree(w,d,cyclic);
 
       for (h = 0; h < d->getNumStates(); ++h) {
         y = d->getState(h);
+        if (cyclic) {
+          for (j = 0; j < y->getNumOutTransitions(); ++j) {
+            w = y->getOutTransition(j)->getEndState();
+            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+              clusterTree(w,c,cyclic);
+            }
+          }
+        }
         for (j = 0; j < y->getNumInTransitions(); ++j) {
           w = y->getInTransition(j)->getBeginState();
           if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
-            clusterTree(w,c);
+            clusterTree(w,c,cyclic);
           }
         }
       }

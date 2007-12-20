@@ -195,7 +195,7 @@ void LTSViewApp::openFile(string fileName) {
   lts->rankStates(rankStyle);
   
   mainFrame->updateProgressDialog(33,"Clustering states");
-  lts->clusterStates();
+  lts->clusterStates(rankStyle);
 
   mainFrame->updateProgressDialog(50,"Setting cluster info");
   lts->computeClusterInfo();
@@ -249,7 +249,7 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
       lts->rankStates(rankStyle);
       
       mainFrame->updateProgressDialog(33,"Clustering states");
-      lts->clusterStates();
+      lts->clusterStates(rankStyle);
 
       mainFrame->updateProgressDialog(40,"Setting cluster info");
       lts->computeClusterInfo();
