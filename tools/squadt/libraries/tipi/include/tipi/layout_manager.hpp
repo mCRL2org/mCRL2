@@ -298,7 +298,7 @@ namespace tipi {
         element& add(element&, properties const&);
 
         /** \brief Instantiate a layout element, through a mediator */
-        mediator::wrapper_aptr instantiate(layout::mediator::aptr) const;
+        mediator::wrapper_aptr instantiate(std::auto_ptr < layout::mediator >) const;
 
       public:
 

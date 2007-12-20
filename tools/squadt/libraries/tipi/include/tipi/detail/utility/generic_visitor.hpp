@@ -72,7 +72,6 @@ namespace utility {
       typedef visitable visitable_type;
     };
   }
-  /// \endcond
 
   /**
    * Because virtual template member functions do not exist in C++, and there
@@ -136,7 +135,6 @@ namespace utility {
       }
   };
 
-  /// \cond INTERNAL_DOCS
   namespace detail {
 
     template < typename S >
@@ -271,7 +269,6 @@ namespace utility {
     };
 
   }
-  /// \endcond
 
   template < typename R >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t) {
@@ -382,6 +379,7 @@ namespace utility {
       visitor(T* t) : S(t) {
       }
   };
+  /// \endcond
 
   /**
    * \brief Interface for new visitors

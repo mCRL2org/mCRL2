@@ -25,7 +25,7 @@ namespace tipi {
     /**
      * \param[in] c an implementation object
      **/
-    communicator::communicator(boost::shared_ptr < communicator_impl > const& c) :
+    communicator::communicator(boost::shared_ptr < tipi::controller::communicator_impl > const& c) :
         tipi::messenger(boost::static_pointer_cast< tipi::messaging::basic_messenger_impl < tipi::message > > (c)) {
     }
 
@@ -92,6 +92,7 @@ namespace tipi {
         activate_status_message_handler(boost::static_pointer_cast < communicator_impl > (impl), h);
     }
 
+    /// \cond INTERNAL_DOCS
     communicator_impl::communicator_impl() {
       using namespace boost;
 
@@ -221,5 +222,6 @@ namespace tipi {
         add_handler(tipi::message_display_layout, boost::bind(&trampoline::instantiate, _1, g, hi, hu));
       }
     }
+    /// \endcond
   }
 }

@@ -11,9 +11,10 @@ namespace tipi {
 
   namespace messaging {
 
-    /** Standard logger that uses std::clog */
+    /// \cond INTERNAL_DOCS
     template < >
-    boost::shared_ptr < utility::logger > basic_messenger_impl< tipi::message >::standard_logger(new utility::print_logger(std::clog));
+    boost::shared_ptr< utility::logger > basic_messenger_impl< tipi::message >::standard_logger(new utility::print_logger(std::clog));
+    /// \endcond
 
     /** Default constructor */
     template < >

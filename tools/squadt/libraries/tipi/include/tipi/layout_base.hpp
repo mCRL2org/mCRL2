@@ -107,7 +107,7 @@ namespace tipi {
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Synchronise with instantiation that is part of a (G)UI */
-        virtual void update(layout::mediator*, mediator::wrapper*) const;
+        virtual void update(layout::mediator*, layout::mediator::wrapper*) const;
 
         /** \brief Awaits the next change event */
         void await_change() const;

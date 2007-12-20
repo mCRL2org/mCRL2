@@ -60,6 +60,7 @@ namespace tipi {
       template < typename T >
       restore_visitor(T&);
   };
+  /// \endcond
 
   /**
    * \brief Operations on hierarchies using visitors

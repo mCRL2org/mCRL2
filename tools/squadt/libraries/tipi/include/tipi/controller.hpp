@@ -57,10 +57,8 @@ namespace tipi {
 
       protected:
 
-      /// \cond INTERNAL_DOCS
         /** \brief Constructor for derived implementation objects */
         communicator(boost::shared_ptr < tipi::controller::communicator_impl > const&);
-      /// \endcond
 
       public:
 

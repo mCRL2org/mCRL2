@@ -13,6 +13,7 @@
 
 #include <tipi/detail/layout_mediator.hpp>
 
+/// \cond INTERNAL_DOCS
 namespace tipi {
   namespace layout {
     namespace elements {
@@ -28,7 +29,7 @@ namespace tipi {
     class element;
     class properties;
 
-    /** \internal
+    /**
      * \brief Abstract base class for interaction with a structure of connected
      * layout elements
      *
@@ -131,5 +132,6 @@ namespace tipi {
     }
   }
 }
+/// \endcond
 
 #endif

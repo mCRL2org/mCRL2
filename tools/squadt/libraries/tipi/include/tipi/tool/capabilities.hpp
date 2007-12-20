@@ -59,6 +59,7 @@ namespace tipi {
  
           public:
 
+            /// \brief type that specifies a sequence of {input, output} objects
             typedef boost::iterator_range < object_map::const_iterator >                   object_sequence;
 
           private:

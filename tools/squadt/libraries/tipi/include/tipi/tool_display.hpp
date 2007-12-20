@@ -64,7 +64,7 @@ namespace tipi {
         inline layout::manager const* get_manager() const;
 
         /** \brief Set the layout manager that contains all widgets for this display */
-        inline tool_display& set_manager(layout::manager&);
+        inline tool_display& set_manager(::tipi::layout::manager&);
 
         /** \brief Creates a (G)UI for this tool_display */
         mediator::wrapper_aptr instantiate(mediator* m) const;
