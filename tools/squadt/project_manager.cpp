@@ -53,13 +53,16 @@ namespace squadt {
 
     assert(!l.empty());
 
-    store = l;
+    if (l.leaf() == settings_manager::project_definition_base_name) {
+      store = l.branch_path();
+    }
+    else {
+      store = (filesystem::is_directory(l)) ? l : l.branch_path();
+    }
 
-    filesystem::path project_file = l / filesystem::path(settings_manager::project_definition_base_name);
+    filesystem::path project_file = store / filesystem::path(settings_manager::project_definition_base_name);
 
-    if (filesystem::exists(l)) {
-      assert(filesystem::is_directory(l));
-
+    if (filesystem::exists(store) && filesystem::is_directory(store)) {
       if (!filesystem::exists(project_file)) {
         if (b) {
           import_directory(l);
@@ -92,13 +95,13 @@ namespace squadt {
       }
     }
     else if (b) {
-      filesystem::create_directories(l);
+      filesystem::create_directories(store);
 
       /* Create initial project description file */
       visitors::store(*this, project_file);
     }
     else {
-      throw std::runtime_error("Project cannot be opened, directory `" + l.string() + "' does not exist.");
+      throw std::runtime_error("Project cannot be opened, directory `" + store.string() + "' does not exist.");
     }
 
     /* Compute reverse dependencies */
