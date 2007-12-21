@@ -298,9 +298,15 @@ namespace utility {
     private:
 
       /** \brief Map for looking up visit methods */
-      static typename abstract_visitor< R >::visitable_type_tree  visitable_types;
+      typename abstract_visitor< R >::visitable_type_tree& visitable_types;
 
     private:
+
+      static typename abstract_visitor< R >::visitable_type_tree& get_master_types() {
+        static typename abstract_visitor< R >::visitable_type_tree master_visitable_types;
+
+        return master_visitable_types;
+      }
 
       /** \brief Initialise handler map; registers available visit methods */
       static bool initialise();
@@ -322,7 +328,7 @@ namespace utility {
           }
         };
 
-        visitable_types.insert(typeid(T)).insert(typeid(void)).
+        get_master_types().insert(typeid(T)).insert(typeid(void)).
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
 		typename detail::visitable_type_helper< T >::visitable_type, void >(&local::trampoline));
       }
@@ -338,7 +344,7 @@ namespace utility {
           }
         };
 
-        visitable_types.insert(typeid(T)).insert(typeid(U)).
+        get_master_types().insert(typeid(T)).insert(typeid(U)).
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
 		typename detail::visitable_type_helper< T >::visitable_type, U >(&local::trampoline));
       }
@@ -366,17 +372,17 @@ namespace utility {
       }
 
       /** \brief Default constructor */
-      visitor() {
+      visitor() : visitable_types(get_master_types()) {
       }
 
       /** \brief Alternative initialisation with reference argument */
       template < typename T >
-      visitor(T& t) : S(t) {
+      visitor(T& t) : S(t), visitable_types(get_master_types()) {
       }
 
       /** \brief Alternative initialisation with pointer argument */
       template < typename T >
-      visitor(T* t) : S(t) {
+      visitor(T* t) : S(t), visitable_types(get_master_types()) {
       }
   };
   /// \endcond

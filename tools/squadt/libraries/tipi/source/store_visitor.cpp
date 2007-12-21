@@ -18,7 +18,7 @@
 #include <tipi/tool/capabilities.hpp>
 #include <tipi/layout_elements.hpp>
 #include <tipi/layout_manager.hpp>
-#include <tipi/detail/utility/generic_visitor.ipp>
+#include <tipi/detail/utility/generic_visitor.hpp>
 #include <tipi/tool_display.hpp>
 #include <tipi/common.hpp>
 

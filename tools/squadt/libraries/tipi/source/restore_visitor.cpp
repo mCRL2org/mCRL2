@@ -10,7 +10,7 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <tipi/detail/utility/generic_visitor.ipp>
+#include <tipi/detail/utility/generic_visitor.hpp>
 #include "tipi/visitors.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool/capabilities.hpp"

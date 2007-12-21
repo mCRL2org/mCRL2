@@ -24,7 +24,7 @@
 #include "executor.ipp"
 #include "processor.ipp"
 
-#include <tipi/detail/utility/generic_visitor.ipp>
+#include <tipi/detail/utility/generic_visitor.hpp>
 
 namespace squadt {
 
