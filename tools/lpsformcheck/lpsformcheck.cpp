@@ -329,7 +329,7 @@ using namespace ::mcrl2::utilities;
 
       if (lps_specification.is_well_typed()) {
         // temporary measure, until the invariant and confluence checkers use the lps framework
-        ATermAppl v_lps = (ATermAppl) ATreadFromNamedFile(f_lps_file_name);
+        ATermAppl v_lps = (ATermAppl) lps_specification;
 
         Formula_Checker v_formula_checker(
           ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);

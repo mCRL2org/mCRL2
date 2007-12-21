@@ -691,7 +691,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
       if (lps_specification.is_well_typed()) {
         // temporary measure, until the invariant and confluence checkers use the lps framework
-        f_lps = (ATermAppl) ATreadFromNamedFile(f_input_file_name.c_str());
+        f_lps = (ATermAppl) lps_specification;
 
         //typecheck the invariant formula
         if (!(f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true))) {

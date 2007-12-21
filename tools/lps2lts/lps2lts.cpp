@@ -114,7 +114,8 @@ static void print_help(FILE *f, const char *Name)
     "                           to the state that could not be explored\n"
     "  -C[NAME], --confluence[=NAME]\n"
     "                           apply on-the-fly confluence reduction with NAME the\n"
-    "                           confluent tau action\n"
+    "                           confluent tau action (when no NAME is supplied,\n"
+    "                           'ctau' is used)\n"
 /*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
@@ -298,7 +299,7 @@ int main(int argc, char **argv)
         {
           lgopts.priority_action = optarg;
         } else {
-          lgopts.priority_action = "tau";
+          lgopts.priority_action = "ctau";
         }
         break;
       case 's':

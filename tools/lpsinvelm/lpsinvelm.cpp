@@ -423,7 +423,7 @@ using namespace ::mcrl2::utilities;
 
       if (lps_specification.is_well_typed()) {
         // temporary measure until the invariant and confluence checkers use the lps framework
-        f_lps = (ATermAppl) ATreadFromNamedFile(f_lps_file_name);
+        f_lps = (ATermAppl) lps_specification;
 
         //typecheck the invariant formula
         f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
