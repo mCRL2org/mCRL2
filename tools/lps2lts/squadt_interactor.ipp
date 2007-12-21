@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lts/liblts.h"
 #include "mcrl2/data/rewrite.h"
 #include "lps2lts.h"
 #include "exploration.h"
@@ -421,7 +422,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
 
     lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);
  
-    lgopts.outformat = (configuration.get_option_argument< bool >(option_as_aut)) ? lts_aut : lts_mcrl2 ;
+    lgopts.outformat = (configuration.get_option_argument< bool >(option_as_aut)) ? mcrl2::lts::lts_aut : mcrl2::lts::lts_mcrl2 ;
  
     lgopts.usedummies   = configuration.get_option_argument< bool >(option_usedummies);
     lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;

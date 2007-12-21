@@ -57,7 +57,7 @@ void open_lts(const char *filename, lts_options &opts)
       }
       break;
     case lts_mcrl2:
-      gsVerboseMsg("writing state space in SVC format to '%s'.\n",filename);
+      gsVerboseMsg("writing state space in mCRL2 format to '%s'.\n",filename);
       {
         SVCbool b;
         char *t = strdup(filename);
@@ -77,6 +77,7 @@ void open_lts(const char *filename, lts_options &opts)
       gsVerboseMsg("not saving state space.\n");
       break;
     default:
+      gsVerboseMsg("writing state space in %s format to '%s'.\n",lts::string_for_type(lts_opts.outformat),filename);
       generic_lts = new lts();
       aterm2state = ATtableCreate(10000,50);
       aterm2label = ATtableCreate(100,50);
@@ -221,10 +222,10 @@ void remove_lts()
 {
   switch ( lts_opts.outformat )
   {
-    case OF_AUT:
+    case lts_aut:
       aut.close();
       break;
-    case OF_SVC:
+    case lts_mcrl2:
       {
         int e = SVCclose(svc);
         if ( e )

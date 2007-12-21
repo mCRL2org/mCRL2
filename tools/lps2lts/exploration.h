@@ -86,7 +86,7 @@ inline lts_generation_options::lts_generation_options() :
     usedummies(true),
     removeunused(true),
     stateformat(GS_STATE_VECTOR),
-    outformat(OF_UNKNOWN),
+    outformat(mcrl2::lts::lts_none),
     outinfo(true),
     max_states(DEFAULT_MAX_STATES),
     trace(false),
