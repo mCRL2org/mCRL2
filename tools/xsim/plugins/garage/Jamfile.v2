@@ -13,6 +13,7 @@ lib xsim_garage_view
          visutils.cpp
          /libraries//lps
          /tools/xsim//sim_base_gui
+         /tools/xsim//sim_shared
          /site-config//wx_gl
        : <define>GARAGEFRAMEDLL
          <toolset>darwin:<bundle>yes

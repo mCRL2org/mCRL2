@@ -32,3 +32,5 @@ exe squadt_proxy
 install-binaries install
       : squadt
       ;
+
+explicit squadt_proxy ;
