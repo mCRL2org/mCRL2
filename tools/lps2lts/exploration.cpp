@@ -160,35 +160,13 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   if ( lgopts->lts != "" )
   {
-    if ( lgopts->outformat == OF_UNKNOWN )
-    {
-      const char *s = strrchr(lgopts->lts.c_str(),'.');
-      if ( s == NULL )
-      {
-        gsWarningMsg("no extension given for output file; writing state space in SVC format\n",s);
-        lgopts->outformat = OF_SVC;
-      } else {
-        s++;
-        if ( !strcmp(s,"aut") )
-        {
-          lgopts->outformat = OF_AUT;
-        } else {
-          if ( strcmp(s,"svc") )
-          {
-            gsWarningMsg("extension '%s' of output file not recognised; writing state space in SVC format\n",s);
-          }
-          lgopts->outformat = OF_SVC;
-        }
-      }
-    }
-
     lts_options lts_opts;
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
-    lgopts->outformat = OF_UNKNOWN;
+    lgopts->outformat = mcrl2::lts::lts_none;
     gsVerboseMsg("not saving state space.\n");
   }
 

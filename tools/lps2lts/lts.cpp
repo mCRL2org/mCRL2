@@ -19,6 +19,7 @@
 
 using namespace std;
 using namespace mcrl2::utilities;
+using namespace mcrl2::lts;
 
 static lts_options lts_opts;
 static ATermAppl term_nil;
@@ -29,6 +30,8 @@ static SVCfile svcf;
 static SVCfile *svc = &svcf;
 static SVCparameterIndex svcparam = 0;
 static const char *lts_filename;
+static lts *generic_lts;
+static ATermTable aterm2state, aterm2label;
 
 void open_lts(const char *filename, lts_options &opts)
 {
@@ -43,7 +46,7 @@ void open_lts(const char *filename, lts_options &opts)
   lts_opts = opts;
   switch ( lts_opts.outformat )
   {
-    case OF_AUT:
+    case lts_aut:
       gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
       lts_opts.outinfo = false;
       aut.open(filename);
@@ -53,7 +56,7 @@ void open_lts(const char *filename, lts_options &opts)
         exit(1);
       }
       break;
-    case OF_SVC:
+    case lts_mcrl2:
       gsVerboseMsg("writing state space in SVC format to '%s'.\n",filename);
       {
         SVCbool b;
@@ -70,8 +73,13 @@ void open_lts(const char *filename, lts_options &opts)
         svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
       }
       break;
-    default:
+    case lts_none:
       gsVerboseMsg("not saving state space.\n");
+      break;
+    default:
+      generic_lts = new lts();
+      aterm2state = ATtableCreate(10000,50);
+      aterm2label = ATtableCreate(100,50);
       break;
   }
 }
@@ -81,10 +89,10 @@ void save_initial_state(unsigned long long idx, ATerm state)
   initial_state = idx;
   switch ( lts_opts.outformat )
   {
-    case OF_AUT:
+    case lts_aut:
       aut << "des (0,0,0)                                      " << endl;
       break;
-    case OF_SVC:
+    case lts_mcrl2:
       {
         SVCbool b;
         if ( lts_opts.outinfo )
@@ -95,7 +103,18 @@ void save_initial_state(unsigned long long idx, ATerm state)
         }
       }
       break;
+    case lts_none:
+      break;
     default:
+      {
+        ATerm t = ATtableGet(aterm2state,state);
+        if ( t == NULL )
+        {
+          t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(state)));
+          ATtablePut(aterm2state,state,t);
+        }
+        generic_lts->set_initial_state(ATgetInt((ATermInt) t));
+      }
       break;
   }
 }
@@ -104,7 +123,7 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
 {
   switch ( lts_opts.outformat )
   {
-    case OF_AUT:
+    case lts_aut:
       if ( idx_from == initial_state )
         idx_from = 0;
       if ( idx_to == initial_state )
@@ -114,7 +133,7 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
       aut << "\"," << idx_to << ")" << endl;
       aut.flush();
       break;
-    case OF_SVC:
+    case lts_mcrl2:
       if ( lts_opts.outinfo )
       {
         SVCbool b;
@@ -132,7 +151,36 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
           svcparam);
       }
       break;
+    case lts_none:
+      break;
     default:
+      {
+        unsigned int from_state;
+        unsigned int to_state;
+        unsigned int label;
+        ATerm t = ATtableGet(aterm2state,from);
+        if ( t == NULL )
+        {
+          t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(from)));
+          ATtablePut(aterm2state,from,t);
+        }
+        from_state = ATgetInt((ATermInt) t);
+        t = ATtableGet(aterm2state,to);
+        if ( t == NULL )
+        {
+          t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(to)));
+          ATtablePut(aterm2state,to,t);
+        }
+        to_state = ATgetInt((ATermInt) t);
+        t = ATtableGet(aterm2label,(ATerm) action);
+        if ( t == NULL )
+        {
+          t = (ATerm) ATmakeInt(generic_lts->add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue));
+          ATtablePut(aterm2state,(ATerm) action,t);
+        }
+        label = ATgetInt((ATermInt) t);
+        generic_lts->add_transition(from_state,label,to_state);
+      }
       break;
   }
 }
@@ -141,12 +189,12 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
 {
   switch ( lts_opts.outformat )
   {
-    case OF_AUT:
+    case lts_aut:
       aut.seekp(0);
       aut << "des (0," << num_trans << "," << num_states << ")";
       aut.close();
       break;
-    case OF_SVC:
+    case lts_mcrl2:
       {
         int e = SVCclose(svc);
         if ( e )
@@ -155,7 +203,16 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         }
       }
       break;
+    case lts_none:
+      break;
     default:
+      if ( !generic_lts->write_to(lts_filename,lts_opts.outformat) )
+      {
+        gsErrorMsg("failed to write state space to file\n");
+      }
+      ATtableDestroy(aterm2label);
+      ATtableDestroy(aterm2state);
+      delete generic_lts;
       break;
   }
 }
@@ -176,7 +233,12 @@ void remove_lts()
         }
       }
       break;
+    case lts_none:
+      break;
     default:
+      ATtableDestroy(aterm2label);
+      ATtableDestroy(aterm2state);
+      delete generic_lts;
       break;
   }
   remove(lts_filename);

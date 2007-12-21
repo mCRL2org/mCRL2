@@ -11,13 +11,10 @@
 
 #include <aterm2.h>
 #include <mcrl2/lps/nextstate.h>
+#include <mcrl2/lts/liblts.h>
 
-#define OF_UNKNOWN  0
-#define OF_AUT      1
-#define OF_SVC      2
-	
 typedef struct {
-  int outformat;
+  mcrl2::lts::lts_type outformat;
   bool outinfo;
   NextState *nstate;
 } lts_options;

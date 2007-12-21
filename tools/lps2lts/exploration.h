@@ -17,6 +17,7 @@
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/lts/liblts.h"
 
 #ifndef ULLONG_MAX
 #define ULLONG_MAX      18446744073709551615ULL
@@ -56,7 +57,7 @@ struct lts_generation_options {
   bool usedummies;
   bool removeunused;
   int stateformat;
-  int outformat;
+  mcrl2::lts::lts_type outformat;
   bool outinfo;
   unsigned long long max_states;
   std::string priority_action;

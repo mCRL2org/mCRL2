@@ -14,6 +14,7 @@
 #include <cassert>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/struct.h"
+#include "mcrl2/lts/liblts.h"
 #include "lps2lts.h"
 #include "exploration.h"
 #include "lts.h"
@@ -25,6 +26,7 @@
 
 using namespace std;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::lts;
 
 ATermAppl *parse_action_list(const char *s, int *len)
 {
@@ -62,6 +64,25 @@ ATermAppl *parse_action_list(const char *s, int *len)
   free(t);
 
   return r;
+}
+
+static void print_formats(FILE *f)
+{
+  fprintf(f,
+    "The following formats are accepted by " NAME ":\n"
+    "\n"
+    "  format  ext.  description                       remarks\n"
+    "  -----------------------------------------------------------\n"
+    "  aut     .aut  Aldebaran format (CADP)\n"
+#ifdef MCRL2_BCG
+    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
+#endif
+    "  dot     .dot  GraphViz format\n"
+    "  fsm     .fsm  Finite State Machine format\n"
+    "  mcrl    .svc  mCRL SVC format\n"
+    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
+    "\n"
+    );
 }
 
 static void print_help_suggestion(FILE *f, const char *Name)
@@ -128,9 +149,10 @@ static void print_help(FILE *f, const char *Name)
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty');\n"
     "                           available rewriters are inner, jitty, innerc and\n"
     "                           jittyc\n"
-    "      --aut                force OUTFILE to be in the aut format (implies\n"
-    "                           --no-info, see below)\n"
-    "      --svc                force OUTFILE to be in the svc format\n"
+    "  -oFORMAT, --out=FORMAT   use FORMAT as the output format\n"
+    "      --formats            list accepted output formats\n"
+    "      --aut                alias for --out=aut\n"
+    "      --svc                alias for --out=mcrl2\n"
     "      --no-info            do not add state information to OUTFILE\n"
     "      --init-tsize=NUM     set the initial size of the internally used hash\n"
     "                           tables (default is 10000)\n",
@@ -175,7 +197,7 @@ int main(int argc, char **argv)
 
   lts_generation_options lgopts;
 
-  #define sopts "hqvdfyucrb::l:Da:t::C::R:s:"
+  #define sopts "hqvdfyucrb::l:Da:t::C::R:s:o:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -199,6 +221,8 @@ int main(int argc, char **argv)
     { "rewriter",        required_argument, NULL, 'R' },
     { "aut",             no_argument,       NULL, 1   },
     { "svc",             no_argument,       NULL, 2   },
+    { "out",             required_argument, NULL, 'o' },
+    { "formats",         no_argument,       NULL, 7   },
     { "no-info",         no_argument,       NULL, 3   },
     { "init-tsize",      required_argument, NULL, 4   },
     { "todo-max",        required_argument, NULL, 5   },
@@ -319,11 +343,21 @@ int main(int argc, char **argv)
         }
         break;
       case 1:
-        lgopts.outformat = OF_AUT;
+        lgopts.outformat = lts_aut;
         break;
       case 2:
-        lgopts.outformat = OF_SVC;
+        lgopts.outformat = lts_mcrl2;
         break;
+      case 'o':
+        lgopts.outformat = lts::parse_format(optarg);
+        if ( lgopts.outformat == lts_none )
+        {
+          fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
+        }
+        break;
+      case 7:
+        print_formats(stderr);
+        return 0;
       case 3:
         lgopts.outinfo = false;
         break;
@@ -360,6 +394,15 @@ int main(int argc, char **argv)
   if ( argc-optind > 1 )
   {
     lgopts.lts = argv[optind+1];
+    if ( lgopts.outformat == lts_none )
+    {
+      lgopts.outformat = lts::guess_format(lgopts.lts);
+      if ( lgopts.outformat == lts_none )
+      {
+        gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+        lgopts.outformat = lts_mcrl2;
+      }
+    }
   }
   if ( lgopts.quiet && lgopts.verbose )
   {
