@@ -14,7 +14,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-#include "tipi/detail/utility/print_logger.hpp"
 #include "mcrl2/utilities/version_info.h"
 
 #include "settings_manager.hpp"
@@ -96,8 +95,8 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         return (false);
       }
 
-      tipi::controller::communicator::get_standard_logger()->set_default_filter_level(default_log_level);
-      tipi::controller::communicator::get_standard_logger()->set_filter_level(default_log_level);
+      tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
+      tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
     }
   }
 
@@ -153,14 +152,8 @@ bool Squadt::OnInit() {
         std::auto_ptr < settings_manager > global_settings_manager(new settings_manager(std::string(wxFileName::GetHomeDir().fn_str())));
 
         // Open log file
-        boost::shared_ptr < tipi::utility::logger > logger(new tipi::utility::file_print_logger(
-                global_settings_manager->path_to_user_settings().append("/log")));
-
-        logger->set_filter_level(
-                (std::max)(tipi::controller::communicator::get_standard_logger()->get_filter_level(),
-                        static_cast < tipi::utility::logger::log_level > (2)));
-
-        tipi::controller::communicator::set_standard_logger(logger);
+        tipi::controller::communicator::get_default_logger().set_filter_level(3);
+        tipi::controller::communicator::get_default_logger().redirect(global_settings_manager->path_to_user_settings().append("/log"));
 
         global_build_system.initialise(
           global_settings_manager,

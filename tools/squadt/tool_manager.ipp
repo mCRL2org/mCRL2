@@ -71,9 +71,6 @@ namespace squadt {
       /** \brief Execute a command */
       void execute(execution::command const*, execution::task_monitor::sptr, bool);
 
-      /** \brief This is the event handler for incoming identification messages */
-      void handle_relay_connection(tipi::message_ptr const&);
-
     public:
 
       /** \brief Default constructor */

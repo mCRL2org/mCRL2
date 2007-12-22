@@ -19,6 +19,7 @@
 
 #include <tipi/detail/transport/detail/transporter.ipp>
 #include <tipi/detail/basic_messenger.hpp>
+#include <tipi/detail/utility/standard_utility.hpp>
 #include <tipi/common.hpp>
 
 #include <boost/ref.hpp>
@@ -77,18 +78,18 @@ namespace tipi {
           private:
        
             /** \brief boost::mutex synchronisation primitive */
-            boost::mutex                               mutex;
+            boost::mutex                                     mutex;
        
             /** \brief boost::condition synchronisation primitive */
-            boost::condition                           condition;
+            boost::condition                                 condition;
        
             /** \brief pointers to local message variables */
-            std::vector < boost::shared_ptr < M >* >   pointers;
+            std::vector < boost::shared_ptr < const M >* >   pointers;
        
           public:
        
             /** \brief Constructor */
-            waiter_data(boost::shared_ptr < M >&);
+            waiter_data(boost::shared_ptr < const M >&);
        
             /** \brief Block until the next message has been delivered, or the object is destroyed */
             void wait(boost::function < void () >);
@@ -97,13 +98,10 @@ namespace tipi {
             void wait(boost::function < void () >, long const&);
        
             /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
-            void wake(boost::shared_ptr < M > const&);
+            void wake(boost::shared_ptr < const M > const&);
        
             /** \brief Wake up all treads that are blocked via wait() */
             void wake();
-       
-            /** \brief Destructor */
-            ~waiter_data();
         };
 
       private:
@@ -118,10 +116,7 @@ namespace tipi {
         typedef std::map < typename M::type_identifier_t, boost::shared_ptr < waiter_data > >  waiter_map;
 
         /** \brief Type for the message queue */
-        typedef std::deque < boost::shared_ptr < M > >                                         message_queue_t;
-
-        /** \brief Standard (clog) logging component */
-        static boost::shared_ptr < utility::logger >                                           standard_logger;
+        typedef std::deque < boost::shared_ptr < const M > >                                   message_queue_t;
 
       private:
 
@@ -158,7 +153,16 @@ namespace tipi {
       protected:
 
         /** \brief The component used for logging */
-        boost::shared_ptr < utility::logger > logger;
+        boost::shared_ptr< utility::logger > logger;
+
+      protected:
+
+        /** \brief Standard (clog) logging component */
+        static boost::shared_ptr < utility::logger > get_default_logger() {
+          static utility::logger the_default_logger;
+
+          return boost::shared_ptr< utility::logger >(&the_default_logger, ::utility::trivial_deleter< utility::logger >());
+        }
 
       private:
 
@@ -166,33 +170,36 @@ namespace tipi {
         void service_handlers();
 
         /** \brief Remove a message from the queue */
-        void remove_message(boost::shared_ptr < M >& p);
+        void remove_message(boost::shared_ptr < const M >& p);
 
       public:
 
         /** \brief Default constructor */
-        basic_messenger_impl(boost::shared_ptr < utility::logger > = standard_logger);
+        basic_messenger_impl();
 
-        /** \brief Destroys all connections */
-        void disconnect();
- 
+        /** \brief Default constructor */
+        basic_messenger_impl(boost::shared_ptr< utility::logger >&);
+
         /** \brief Queues incoming messages */
         virtual void deliver(std::istream&, typename M::end_point);
  
         /** \brief Queues incoming messages */
-        virtual void deliver(const std::string&, typename M::end_point);
- 
-        /** \brief Wait until the next message of a certain type arrives */
-        const boost::shared_ptr < M > await_message(typename M::type_identifier_t);
- 
-        /** \brief Wait until the next message of a certain type arrives */
-        const boost::shared_ptr < M > await_message(typename M::type_identifier_t, long const&);
+        virtual void deliver(std::string const&, typename M::end_point);
  
         /** \brief Send a message */
         void send_message(M const&);
  
+        /** \brief Wait until the next message of a certain type arrives */
+        boost::shared_ptr < const M > await_message(typename M::type_identifier_t);
+ 
+        /** \brief Wait until the next message of a certain type arrives */
+        boost::shared_ptr < const M > await_message(typename M::type_identifier_t, long const&);
+ 
         /** \brief Wait until the first message of type t has arrived */
-        boost::shared_ptr < M > find_message(const typename M::type_identifier_t);
+        boost::shared_ptr < const M > find_message(const typename M::type_identifier_t);
+ 
+        /** \brief Destroys all connections */
+        void disconnect();
  
         /** \brief Set the handler for a type */
         void add_handler(const typename M::type_identifier_t, handler_type);
@@ -204,8 +211,101 @@ namespace tipi {
         void remove_handler(const typename M::type_identifier_t, handler_type);
 
         /** \brief Destructor */
-        virtual ~basic_messenger_impl();
+        virtual ~basic_messenger_impl() {
+          disconnect();
+        }
     };
+
+    /** Default constructor */
+    template < typename M >
+    basic_messenger< M >::basic_messenger() :
+        transport::transporter(boost::shared_ptr < transport::transporter_impl > (
+                new basic_messenger_impl< M >())) {
+    }
+
+    /**
+     * \param[in] l pointer to a logger object
+     **/
+    template < typename M >
+    basic_messenger< M >::basic_messenger(boost::shared_ptr < utility::logger > l) :
+        transport::transporter(boost::shared_ptr < transport::transporter_impl > (new basic_messenger_impl< M >(l))) {
+    }
+
+    /**
+     * \param[in] c pointer to an implementation object
+     **/
+    template < typename M >
+    basic_messenger< M >::basic_messenger(boost::shared_ptr < basic_messenger_impl< M > > const& c) : transport::transporter(c) {
+    }
+ 
+    /** Get the current logger */
+    template < typename M >
+    utility::logger& basic_messenger< M >::get_logger() {
+      return *boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->logger;
+    }
+
+    /** Returns the standard logger */
+    template < typename M >
+    utility::logger& basic_messenger< M >::get_default_logger() {
+      return *basic_messenger_impl< M >::get_default_logger();
+    }
+
+    /** Disconnects from all peers */
+    template < typename M >
+    void basic_messenger< M >::disconnect() {
+      boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->disconnect();
+    }
+
+    /**
+     * \param[in] m the message that is to be sent
+     **/
+    template < typename M >
+    void basic_messenger< M >::send_message(const M& m) {
+      boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->send_message(m);
+    }
+
+    /**
+     * \param[in] h the handler function that is to be executed
+     * \param[in] t the message type on which delivery h is to be executed
+     **/
+    template < typename M >
+    void basic_messenger< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
+      boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->add_handler(t, h);
+    }
+
+    /**
+     * \param[in] t the message type for which to clear the event handler
+     **/
+    template < typename M >
+    void basic_messenger< M >::clear_handlers(const typename M::type_identifier_t t) {
+      boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->clear_handlers(t);
+    }
+
+    /**
+     * \param[in] t the message type for which to clear the event handler
+     * \param[in] h the handler to remove
+     **/
+    template < typename M >
+    void basic_messenger< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
+      remove_handler(t, h);
+    }
+
+    /**
+     * \param[in] t the type of the message
+     **/
+    template < typename M >
+    boost::shared_ptr< const M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {
+      return boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->await_message(t);
+    }
+
+    /**
+     * \param[in] t the type of the message
+     * \param[in] ts the maximum time to wait in seconds
+     **/
+    template < typename M >
+    boost::shared_ptr< const M > basic_messenger< M >::await_message(typename M::type_identifier_t t, long const& ts) {
+      return boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->await_message(t, ts);
+    }
 
     /**
      * \param[in] l a logger object used to write logging messages to
@@ -213,13 +313,13 @@ namespace tipi {
      * \pre l != 0
      **/
     template < class M >
-    inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger > l) :
+    inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger >& l) :
        message_open(false), delivery_thread_active(false), partially_matched(0), logger(l) {
     }
 
     template < class M >
-    basic_messenger_impl< M >::~basic_messenger_impl() {
-      disconnect();
+    inline basic_messenger_impl< M >::basic_messenger_impl() :
+       message_open(false), delivery_thread_active(false), partially_matched(0), logger(get_default_logger()) {
     }
 
     template < class M >
@@ -469,12 +569,12 @@ namespace tipi {
      * \param t the type of the message
      **/
     template < class M >
-    boost::shared_ptr< M > basic_messenger_impl< M >::find_message(typename M::type_identifier_t t) {
+    boost::shared_ptr< const M > basic_messenger_impl< M >::find_message(typename M::type_identifier_t t) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      boost::shared_ptr < M > p;
+      boost::shared_ptr < const M > p;
 
       if (t == M::message_any) {
         if (0 < message_queue.size()) {
@@ -493,18 +593,20 @@ namespace tipi {
     }
 
     /**
-     * \param p a reference to message_ptr that points to the message that should be removed from the queue
+     * \param p a reference to a message that points to the message that should be removed from the queue
      * \pre the message must be in the queue
      **/
     template < class M >
-    inline void basic_messenger_impl< M >::remove_message(boost::shared_ptr < M >& p) {
+    inline void basic_messenger_impl< M >::remove_message(boost::shared_ptr< const M >& p) {
       using namespace boost;
 
-      message_queue.erase(std::find_if(message_queue.begin(),
-                      message_queue.end(),
-                      bind(std::equal_to< M* >(),
-                              bind(&boost::shared_ptr< M >::get, p),
-                              bind(&boost::shared_ptr< M >::get, _1))));
+      for (typename message_queue_t::iterator i = message_queue.begin(); i != message_queue.end(); ++i) {
+        if (*i == p) {
+          message_queue.erase(i);
+
+          return;
+        }
+      }
     }
 
     /**
@@ -518,7 +620,7 @@ namespace tipi {
       while (delivery_thread_active) {
         while (0 < task_queue.size()) {
        
-          boost::shared_ptr < M > m(task_queue.front());
+          boost::shared_ptr < const M > m(task_queue.front());
       
           task_queue.pop_front();
       
@@ -565,7 +667,7 @@ namespace tipi {
      * \param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    basic_messenger_impl< M >::waiter_data::waiter_data(boost::shared_ptr < M >& m) {
+    basic_messenger_impl< M >::waiter_data::waiter_data(boost::shared_ptr < const M >& m) {
       pointers.push_back(&m);
     }
 
@@ -573,10 +675,10 @@ namespace tipi {
      * \param[in] m reference to the pointer to a message to deliver
      **/
     template < class M >
-    void basic_messenger_impl< M >::waiter_data::wake(boost::shared_ptr < M > const& m) {
+    void basic_messenger_impl< M >::waiter_data::wake(boost::shared_ptr< const M > const& m) {
       boost::mutex::scoped_lock l(mutex);
 
-      BOOST_FOREACH(boost::shared_ptr < M >* i, pointers) {
+      BOOST_FOREACH(boost::shared_ptr < const M >* i, pointers) {
         *i = m;
       }
 
@@ -598,7 +700,7 @@ namespace tipi {
      * \param[in] h a function, called after lock on mutex is obtained and before notification
      **/
     template < class M >
-    void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h) {
+    void basic_messenger_impl< M >::waiter_data::wait(boost::function< void () > h) {
       boost::mutex::scoped_lock l(mutex);
 
       h();
@@ -611,7 +713,7 @@ namespace tipi {
      * \param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
-    void basic_messenger_impl< M >::waiter_data::wait(boost::function < void () > h, long const& ts) {
+    void basic_messenger_impl< M >::waiter_data::wait(boost::function< void () > h, long const& ts) {
       using namespace boost;
 
       mutex::scoped_lock l(mutex);
@@ -627,21 +729,17 @@ namespace tipi {
       condition.timed_wait(l, time);
     }
 
-    template < class M >
-    basic_messenger_impl< M >::waiter_data::~waiter_data() {
-    }
-
     /**
      * \param[in] t the type of the message
      * \param[in] ts the maximum time to wait in seconds
      **/
     template < class M >
-    const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t, long const& ts) {
+    boost::shared_ptr< const M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t, long const& ts) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      boost::shared_ptr < M > p(find_message(t));
+      boost::shared_ptr < const M > p(find_message(t));
 
       if (p.get() == 0) {
         if (waiters.count(t) == 0) {
@@ -663,12 +761,12 @@ namespace tipi {
      * \param[in] t the type of the message
      **/
     template < class M >
-    const boost::shared_ptr< M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t) {
+    boost::shared_ptr< const M > basic_messenger_impl< M >::await_message(typename M::type_identifier_t t) {
       using namespace boost;
 
       boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-      boost::shared_ptr < M > p(find_message(t));
+      boost::shared_ptr< const M > p(find_message(t));
 
       if (p.get() == 0) {
         if (waiters.count(t) == 0) {

@@ -80,7 +80,7 @@ void tool_capabilities_exchange() {
 
   cc.request_tool_capabilities();
 
-  tipi::messenger::message_ptr m = cc.await_message(tipi::reply_tool_capabilities);
+  boost::shared_ptr< const tipi::message > m = cc.await_message(tipi::reply_tool_capabilities);
 
   cc.disconnect();
 
@@ -111,7 +111,7 @@ void report_exchange() {
 
   c.send_message(m);
 
-  tipi::messenger::message_ptr p(d.await_message(tipi::unknown));
+  boost::shared_ptr< tipi::message > p(d.await_message(tipi::unknown));
 
   BOOST_CHECK(p->to_string() == std::string("<report></report>"));
 

@@ -87,7 +87,7 @@ namespace tipi {
  
       /* Await the reply */
       do {
-        message_ptr p = await_message(tipi::message_capabilities);
+        boost::shared_ptr< const message > p(await_message(tipi::message_capabilities));
  
         if (p.get() != 0) {
           boost::shared_ptr < controller::capabilities > n(new controller::capabilities);
@@ -98,7 +98,7 @@ namespace tipi {
             boost::static_pointer_cast < communicator_impl > (impl)->current_controller_capabilities = n;
           }
           catch (std::runtime_error& e) {
-            get_logger()->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
+            get_logger().log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");
           }
 
           break;

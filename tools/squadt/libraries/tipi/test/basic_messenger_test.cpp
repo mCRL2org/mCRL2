@@ -259,7 +259,7 @@ void message_wrapper() {
 
 bool event_triggered = false;
 
-void event_handler(const messenger_t::message_ptr&, const basic_transceiver*) {
+void event_handler(boost::shared_ptr< const tipi::message >&, const basic_transceiver*) {
   event_triggered = true;
 }
 
@@ -268,7 +268,7 @@ void message_delivery_event_handling() {
 
   messenger_t c;
   messenger_t d;
-  messenger_t::message_ptr m(new messenger_t::message);
+  boost::shared_ptr< const tipi::message > m(new messenger_t::message);
 
   /* Set handler for any message type */
   d.set_handler(event_handler);

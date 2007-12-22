@@ -288,11 +288,11 @@ namespace squadt {
 
     void debug_preferences::filter_level_changed(wxCommandEvent& e) {
       if (static_cast < wxSlider* > (e.GetEventObject()) == filter_level) {
-        tipi::controller::communicator::get_standard_logger()->
+        tipi::controller::communicator::get_default_logger().
                      set_filter_level(static_cast < tipi::utility::logger::log_level > (filter_level->GetValue()));
       }
       else {
-        tipi::controller::communicator::get_standard_logger()->
+        tipi::controller::communicator::get_default_logger().
                      set_default_filter_level(static_cast < tipi::utility::logger::log_level > (default_filter_level->GetValue()));
       }
     }
@@ -300,7 +300,7 @@ namespace squadt {
     debug_preferences::debug_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
-      filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_standard_logger()->get_filter_level(),
+      filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_default_logger().get_filter_level(),
                                   0, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       current_sizer->AddStretchSpacer();
@@ -308,7 +308,7 @@ namespace squadt {
       current_sizer->AddSpacer(8);
       current_sizer->Add(filter_level, 0, wxEXPAND|wxLEFT|wxRIGHT, 4);
 
-      default_filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_standard_logger()->get_default_filter_level(),
+      default_filter_level = new wxSlider(this, wxID_ANY, tipi::controller::communicator::get_default_logger().get_default_filter_level(),
                                   0, 5, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       current_sizer->AddSpacer(8);

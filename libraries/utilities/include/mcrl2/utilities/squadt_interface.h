@@ -189,7 +189,11 @@ namespace mcrl2 {
         private:
 
           /** \brief send status message, used only to relay messages */
-          static boost::function< void (const tipi::report::type, std::string const&) > do_send_report;
+          static boost::function< void (const tipi::report::type, std::string const&) >& get_reporting_method() {
+            static boost::function< void (const tipi::report::type, std::string const&) > reporter;
+
+            return reporter;
+          }
 
           using tool_interface::send_report;
 
@@ -223,7 +227,7 @@ namespace mcrl2 {
             break;
         }
       
-        mcrl2_tool_interface::do_send_report(report_type, std::string(data));
+        mcrl2_tool_interface::get_reporting_method()(report_type, std::string(data));
       }  
 
       inline void mcrl2_tool_interface::initialise() {
@@ -241,7 +245,7 @@ namespace mcrl2 {
           }
         }
 
-        mcrl2_tool_interface::do_send_report = boost::bind(&tool_interface::send_report, this, _1, _2);
+        mcrl2_tool_interface::get_reporting_method() = boost::bind(&tool_interface::send_report, this, _1, _2);
       }
   
       inline void mcrl2_tool_interface::finalise() {

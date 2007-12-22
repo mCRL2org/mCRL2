@@ -9,6 +9,7 @@
 
 #define NO_MCRL2_TOOL_FACILITIES
 #include <tipi/tool.hpp>
+#include <tipi/detail/utility/standard_utility.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
 
@@ -21,10 +22,6 @@ using namespace mcrl2::utilities;
 namespace mcrl2 {
   namespace utilities {
     namespace squadt {
-      /// \cond INTERNAL_DOCS
-      boost::function< void (const tipi::report::type, std::string const&) > mcrl2_tool_interface::do_send_report;
-      /// \endcond
-
       tool_interface::tool_interface() : m_communicator(new tipi::tool::communicator) {
       }
   
@@ -218,22 +215,13 @@ namespace mcrl2 {
       void tool_interface::send_report(const tipi::report::type m, std::string const& d) {
         m_communicator->send_status_report(m, d);
       }
-
-      /// \cond INTERNAL_DOCS
-      class trivial_deleter {
-
-        public:
-
-          void operator() (::tipi::layout::tool_display*) {
-          }
-      };
-      /// \endcond
   
       /**
        * \param[in] d the display object that contains the data to communicate
        **/
       void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
-        boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d, trivial_deleter());
+        boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d,
+                              ::utility::trivial_deleter< ::tipi::layout::tool_display >());
 
         m_communicator->send_display_layout(dsp);
       }

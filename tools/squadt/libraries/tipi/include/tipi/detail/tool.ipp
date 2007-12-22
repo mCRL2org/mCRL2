@@ -38,13 +38,13 @@ namespace tipi {
       private:
 
         /** \brief Send details about the controllers capabilities */
-        void handle_capabilities_request(const tipi::messenger::message_ptr&);
+        void handle_capabilities_request(boost::shared_ptr< const tipi::message >&);
 
         /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
-        void receive_display_data_handler(const tipi::messenger::message_ptr&, boost::shared_ptr < layout::tool_display >);
+        void receive_display_data_handler(boost::shared_ptr< const tipi::message >&, boost::shared_ptr < layout::tool_display >);
 
         /** \brief Extract a configuration from an offer_configuration message */
-        void receive_configuration_handler(const tipi::messenger::message_ptr& m);
+        void receive_configuration_handler(boost::shared_ptr< const tipi::message >& m);
 
       public:
  
@@ -136,7 +136,7 @@ namespace tipi {
     }
 
     /* Send a specification of the tools capabilities */
-    inline void communicator_impl::handle_capabilities_request(const tipi::messenger::message_ptr& m) {
+    inline void communicator_impl::handle_capabilities_request(boost::shared_ptr< const tipi::message >& m) {
       if (m->is_empty()) {
         tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_capabilities);
  
@@ -148,7 +148,7 @@ namespace tipi {
      * \param[in] m shared pointer to the message
      * \param[out] d tool display on which to execute changes
      **/
-    inline void communicator_impl::receive_display_data_handler(const tipi::messenger::message_ptr& m, boost::shared_ptr < layout::tool_display > d) {
+    inline void communicator_impl::receive_display_data_handler(boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < layout::tool_display > d) {
       std::vector < tipi::layout::element const* > elements;
 
       d->update(m->to_string(), elements);
@@ -157,7 +157,7 @@ namespace tipi {
     /**
      * \param[in] m shared pointer reference to an offer_configuration message
      **/
-    inline void communicator_impl::receive_configuration_handler(const tipi::messenger::message_ptr& m) {
+    inline void communicator_impl::receive_configuration_handler(boost::shared_ptr< const tipi::message >& m) {
       assert(m->get_type() == tipi::message_configuration);
 
       if (m.get() != 0) {

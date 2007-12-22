@@ -58,11 +58,41 @@ namespace squadt {
 
 
   tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
+    struct local {
+      /**
+       * \param[in] m the incoming message
+       **/
+      static void handle_relay_connection(tool_manager_impl& owner, boost::shared_ptr< const tipi::message >& m) {
+        instance_identifier id = boost::lexical_cast< instance_identifier > (m->to_string());
+  
+        if (owner.instances.find(id) == owner.instances.end()) {
+          static_cast< transporter& >(owner).disconnect(*(m->get_originator()));
+  
+          owner.get_logger().log(1, "connection terminated; peer provided invalid instance identifier");
+  
+          return;
+        }
+  
+        boost::shared_ptr < execution::task_monitor > monitor(owner.instances[id]);
+  
+        if (monitor) {
+          owner.relay_connection(monitor.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
+         
+          owner.instances.erase(id);
+         
+          monitor->await_process();
+         
+          /* Signal the listener that a connection has been established */
+          monitor->signal_connection(m->get_originator());
+        }
+      }
+    };
+
     /* Listen for incoming socket connections on the default interface with the default port */
     add_listener("", default_port);
 
     /* Set handler for incoming instance identification messages */
-    add_handler(tipi::message_identification, boost::bind(&tool_manager_impl::handle_relay_connection, this, _1));
+    add_handler(tipi::message_identification, boost::bind(&local::handle_relay_connection, boost::ref(*this), _1));
   }
 
   /**
@@ -90,7 +120,7 @@ namespace squadt {
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)
-                            % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_standard_logger()->get_default_filter_level()))));
+                            % boost::lexical_cast < std::string > (static_cast < unsigned int > (get_default_logger().get_default_filter_level()))));
 
     // Security note, should remove again if it is not matched to a process within some reasonable amount of time
     instances[id] = p;
@@ -230,34 +260,6 @@ namespace squadt {
   /** \brief Get the list of known tools */
   tool_manager::tool_const_sequence tool_manager_impl::get_tools() const {
     return (boost::make_iterator_range(tools));
-  }
- 
-  /**
-   * \param[in] m the message that was just delivered
-   **/
-  void tool_manager_impl::handle_relay_connection(tipi::message_ptr const& m) {
-    instance_identifier id = boost::lexical_cast< instance_identifier > (m->to_string());
-
-    if (instances.find(id) == instances.end()) {
-      transporter::disconnect(*(m->get_originator()));
-
-      get_logger()->log(1, "connection terminated; peer provided invalid instance identifier");
-
-      return;
-    }
-
-    boost::shared_ptr < execution::task_monitor > monitor(instances[id]);
-
-    if (monitor) {
-      relay_connection(monitor.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
-     
-      instances.erase(id);
-     
-      monitor->await_process();
-     
-      /* Signal the listener that a connection has been established */
-      monitor->signal_connection(m->get_originator());
-    }
   }
   /// \endcond
 

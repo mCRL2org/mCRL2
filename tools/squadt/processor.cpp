@@ -459,7 +459,7 @@ namespace squadt {
         }
 
         if (!boost::filesystem::exists(new_object_location) && check) {
-          current_monitor->get_logger()->log(1, "Warning, output file with name: " + new_object_location.string() + " does not exist!\n");
+          current_monitor->get_logger().log(1, "Warning, output file with name: " + new_object_location.string() + " does not exist!\n");
         }
 
         /* Remove object from p if it is part of the new configuration too */
@@ -856,7 +856,7 @@ namespace squadt {
             break;
           default: /* aborted... */
             if (p.get() && p->get_identifier()) {
-              get_logger()->log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
+              get_logger().log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
                                  p->get_identifier());
             }
      

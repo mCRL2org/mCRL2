@@ -11,7 +11,7 @@
 
 #include <boost/function.hpp>
 #include "tipi/detail/message.hpp"
-#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/detail/basic_messenger.ipp"
 
 /**
  * \brief Interface implementation for a protocol for interactive tool integration
@@ -159,11 +159,8 @@ namespace tipi {
   /** \brief A message type for communication of tipi protocol messages */
   typedef messaging::message < message_identifier_t, message_unknown, message_any > message;
 
-  /** \brief A convenience type to share the boost shared pointer implementation */
-  typedef boost::shared_ptr < message >                                             message_ptr;
-
   /** \brief A messenger type for communication of tipi protocol messages */
-  typedef messaging::basic_messenger < tipi::message >                               messenger;
+  typedef messaging::basic_messenger < tipi::message >                              messenger;
 
   /** \brief Convenience type for message delivery handlers */
   typedef boost::function < void (boost::shared_ptr < message > const&) >           message_handler_type;

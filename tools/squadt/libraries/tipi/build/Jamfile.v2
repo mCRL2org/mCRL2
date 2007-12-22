@@ -44,7 +44,6 @@ alias messenger
       [ obj tool_capabilities.o : tool/capabilities.cpp ]
       [ obj controller_capabilities.o : controller/capabilities.cpp ]
       basic_datatype.cpp
-      basic_messenger.cpp
       common.cpp
       command_line_interface.cpp
       configuration.cpp
@@ -57,7 +56,6 @@ alias messenger
       transport
       store_visitor.cpp
       restore_visitor.o
-      utility/logger.cpp
     : <threading>multi
       <use>/libraries/utilities//headers
       <dependency>/site-config//boost_filesystem

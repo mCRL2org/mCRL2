@@ -79,9 +79,6 @@ namespace squadt {
         /** \brief Waits until the current task has been completed */
         inline bool await_completion();
 
-        /** \brief Helper method used for unblocking the await_completion member */
-        void handle_task_completion(boost::shared_ptr < tipi::message > const&, bool&);
-
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(boost::shared_ptr < task_monitor_impl >&, tipi::message::end_point);
 
@@ -183,24 +180,26 @@ namespace squadt {
       return 0 < number_of_connections();
     }
 
-    inline void task_monitor_impl::handle_task_completion(boost::shared_ptr < tipi::message > const& m, bool& result) {
-      result = m.get() && !m->is_empty();
-
-      boost::mutex::scoped_lock l(register_lock);
-
-      completion_condition.notify_all();
-    }
-
     /**
      * Waits until a connection has been established, or the process has terminated
      * \return whether the task has been completed successfully
      **/
     inline bool task_monitor_impl::await_completion() {
+      struct local {
+        static void handle_task_completion(task_monitor_impl& t, boost::shared_ptr < const tipi::message > const& m, bool& result) {
+          result = m.get() && !m->is_empty();
+
+          boost::mutex::scoped_lock l(t.register_lock);
+
+          t.completion_condition.notify_all();
+        }
+      };
+
       bool result  = false;
  
       boost::mutex::scoped_lock l(register_lock);
 
-      add_handler(tipi::message_task_done, boost::bind(&task_monitor_impl::handle_task_completion, this, _1, boost::ref(result)));
+      add_handler(tipi::message_task_done, boost::bind(&local::handle_task_completion, boost::ref(*this), _1, boost::ref(result)));
 
       /* Other side has not connected and the process has not been registered as terminated */
       completion_condition.wait(l);

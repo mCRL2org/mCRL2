@@ -67,7 +67,7 @@ namespace squadt {
 
       if (l) {
         l->attach_process(p);
-        l->get_logger()->log(1, "executing command `" + c.as_string() + "'\n");
+        l->get_logger().log(1, "executing command `" + c.as_string() + "'\n");
         l->signal_change(p, process::running);
       }
 

@@ -36,6 +36,20 @@ namespace tipi {
       "termination",
       "unknown"
     };
+
+    /* Explicit instantiations for tipi::message */
+    template basic_messenger< tipi::message >::basic_messenger();
+    template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < utility::logger > l);
+    template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c);
+    template utility::logger& basic_messenger< tipi::message >::get_logger();
+    template utility::logger& basic_messenger< tipi::message >::get_default_logger();
+    template void basic_messenger< tipi::message >::disconnect();
+    template void basic_messenger< tipi::message >::send_message(tipi::message const& m);
+    template void basic_messenger< tipi::message >::add_handler(const tipi::message::type_identifier_t t, handler_type h);
+    template void basic_messenger< tipi::message >::clear_handlers(const tipi::message::type_identifier_t t);
+    template void basic_messenger< tipi::message >::remove_handler(const tipi::message::type_identifier_t t, handler_type h);
+    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t);
+    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t, long const& ts);
   }
 
   /** \brief textual identifiers for each element of message_identifier_t */

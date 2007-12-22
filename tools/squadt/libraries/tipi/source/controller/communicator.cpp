@@ -97,14 +97,14 @@ namespace tipi {
       using namespace boost;
 
       struct trampoline {
-        static void capabilities(const messenger::message_ptr& m, communicator_impl& impl) {
+        static void capabilities(boost::shared_ptr< const tipi::message >& m, communicator_impl& impl) {
           if (m->is_empty()) {
             message m(visitors::store(communicator::m_controller_capabilities), tipi::message_capabilities);
         
             impl.send_message(m);
           }
         }
-        static void configuration(const messenger::message_ptr& m, communicator_impl& impl) {
+        static void configuration(boost::shared_ptr< const tipi::message >& m, communicator_impl& impl) {
           impl.m_configuration.reset(new tipi::configuration);
 
           visitors::restore(*impl.m_configuration, m->to_string());
@@ -124,7 +124,7 @@ namespace tipi {
      **/
     void communicator_impl::activate_status_message_handler(boost::weak_ptr < communicator_impl > impl, status_message_handler_function& h) {
       struct trampoline {
-        static void status_message(const messenger::message_ptr& m, status_message_handler_function h) {
+        static void status_message(boost::shared_ptr< const tipi::message >& m, status_message_handler_function h) {
           boost::shared_ptr < tipi::report > r(new tipi::report);
 
           tipi::visitors::restore(*r, m->to_string());
@@ -153,7 +153,7 @@ namespace tipi {
      **/
     void communicator_impl::activate_display_layout_handling(boost::weak_ptr < communicator_impl > impl, display_layout_handler_function const& hi, display_update_handler_function const& hu) {
       struct trampoline {
-        static void update(const messenger::message_ptr& m, boost::weak_ptr < tipi::layout::tool_display > d, display_update_handler_function h) {
+        static void update(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < tipi::layout::tool_display > d, display_update_handler_function h) {
           boost::shared_ptr < tipi::layout::tool_display > g(d.lock());
 
           if (g) {
@@ -185,7 +185,7 @@ namespace tipi {
           }
         } 
 
-        static void instantiate(messenger::message_ptr const& m, boost::weak_ptr < communicator_impl > impl, display_layout_handler_function h1, display_update_handler_function h2) {
+        static void instantiate(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < communicator_impl > impl, display_layout_handler_function h1, display_update_handler_function h2) {
           boost::shared_ptr < communicator_impl > g(impl.lock());
 
           if (g) {
