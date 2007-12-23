@@ -944,6 +944,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
     //XXX
     ATermList l = ATLtableGet(alphas,(ATerm) a);
     if(!l) l=gsaGetAlpha(a);
+    a = gsApplyAlpha(a);
     a = gsMakeBlock(H,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
