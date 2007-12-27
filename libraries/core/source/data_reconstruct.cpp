@@ -51,16 +51,16 @@ using namespace ::mcrl2::utilities;
 //             fuction.
 typedef struct {
   atermpp::table sorts_table;
-  atermpp::map<ATermAppl, atermpp::indexed_set> sort_constructors;
-  atermpp::map<ATermAppl, int> num_sort_constructors;
-  atermpp::map<ATermAppl, atermpp::indexed_set> sort_mappings;
-  atermpp::map<ATermAppl, int>             num_sort_mappings;
-  atermpp::map<ATermAppl, atermpp::indexed_set> sort_cons_equations;
-  atermpp::map<ATermAppl, int>             num_sort_cons_equations;
-  atermpp::map<ATermAppl, atermpp::indexed_set> map_equations;
-  atermpp::map<ATermAppl, int>             num_map_equations;
-  atermpp::map<ATermAppl, ATermAppl>       recognises;
-  atermpp::map<ATermAppl, ATermAppl> is_recognised_by;
+  atermpp::map<ATermAppl, atermpp::indexed_set>      sort_constructors;
+  atermpp::map<ATermAppl, int>                       num_sort_constructors;
+  atermpp::map<ATermAppl, atermpp::indexed_set>      sort_mappings;
+  atermpp::map<ATermAppl, int>                       num_sort_mappings;
+  atermpp::map<ATermAppl, atermpp::indexed_set>      sort_cons_equations;
+  atermpp::map<ATermAppl, int>                       num_sort_cons_equations;
+  atermpp::map<ATermAppl, atermpp::indexed_set>      map_equations;
+  atermpp::map<ATermAppl, int>                       num_map_equations;
+  atermpp::map<ATermAppl, ATermAppl>                 recognises;
+  atermpp::map<ATermAppl, ATermAppl>                 is_recognised_by;
   atermpp::map<std::pair<ATermAppl, int>, ATermAppl> projects;
 } t_reconstruct_context;
 
@@ -1490,9 +1490,8 @@ void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p
       // generated for all sorts.
       if (is_system_defined_equation(data_eqn)) {
         assert(gsIsOpId(head));
-        ATermAppl sort = get_linked_sort(head);
-        assert(p_ctx->sorts_table.get(sort) != NULL);
-        assert(p_ctx->sort_mappings[sort].index(head) >= 0);
+        assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
+        assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
         put_result = p_ctx->map_equations[head].put(data_eqn);
         if (put_result.second) {
           p_ctx->num_map_equations[head]++;
@@ -1507,14 +1506,13 @@ void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p
         }
       } else if (is_recogniser_equation(data_eqn)) {
         assert(gsIsOpId(head));
-        ATermAppl sort = get_linked_sort(head);
         ATermAppl arg0 = ATAgetFirst(ATLgetArgument(data_eqn_lhs, 1));
         while (gsIsDataAppl(arg0)) {
           arg0 = ATAgetArgument(arg0, 0);
         }
-        assert(p_ctx->sorts_table.get(sort) != NULL);
-        assert(p_ctx->sort_mappings[sort].index(head) >= 0);
-        assert(p_ctx->sort_constructors[sort].index(arg0) >= 0);
+        assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
+        assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
+        assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
         put_result = p_ctx->map_equations[head].put(data_eqn);
         if (put_result.second) {
           p_ctx->num_map_equations[head]++;
@@ -1523,15 +1521,14 @@ void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p
           p_ctx->recognises[head] = arg0;
         }
       } else if (is_projection_equation(data_eqn)) {
-        ATermAppl sort = get_linked_sort(head);
         ATermList args = ATLgetArgument(data_eqn_lhs, 1);
         ATermAppl arg0 = ATAgetFirst(args);
         while (gsIsDataAppl(arg0)) {
           arg0 = ATAgetArgument(arg0, 0);
         }
-        assert(p_ctx->sorts_table.get(sort) != NULL);
-        assert(p_ctx->sort_mappings[sort].index(head) >= 0);
-        assert(p_ctx->sort_constructors[sort].index(arg0) >= 0);
+        assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
+        assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
+        assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
         if (p_ctx->num_map_equations[head] > 0) {
           // there can be only one data equation for a projection function,
           // hence head is not a projection function.
