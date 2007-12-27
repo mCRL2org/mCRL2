@@ -1848,7 +1848,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   //Returns the type of the term
   //which should match the PosType
   //all the variables should be in AllowedVars
-  //is a variable is in DeclaredVars and not in AllowedVars, 
+  //if a variable is in DeclaredVars and not in AllowedVars, 
   //a different error message is generated.
   //all free variables (if any) are added to FreeVars 
 
@@ -1943,7 +1943,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
       if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
+
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous);
+
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -2073,7 +2075,10 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     //function
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-						&Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments);
+						&Data,gsMakeSortUnknown()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments);
+
+    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T, ResultType: %T\n",Data,NewType);
+
     if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
     
     //it is possible that:
@@ -2097,22 +2102,69 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	  //upcasting
 	  ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg);
 	  if(CastedNewType) Type=CastedNewType;
-	  if(!gstcEqTypesA(NeededType,Type)){
-	    gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
-	    ATermAppl NewType=gstcTypeMatchA(NeededType,Type);
-	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
-	    if(!NewType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
-	    Type=NewType;
-	    Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,Type,FreeVars,strict_ambiguous);
-	    if(!Type) {return NULL;}
-	  }
-	}
+        }
+	if(!gstcEqTypesA(NeededType,Type)){
+	  gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
+	  ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
+	  if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
+	  //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+	  if(!NewArgType) NewArgType=NeededType; 
+	  NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous);
+	  if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          Type=NewArgType;
+        }
 	NewArguments=ATinsert(NewArguments,(ATerm)Arg);
 	NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
       }
       Arguments=ATreverse(NewArguments);
       ArgumentTypes=ATreverse(NewArgumentTypes);     
     }
+ 
+    //the function again
+    NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+                                                &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments);
+
+    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T, ResultType: %T\n",Data,NewType);
+
+    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
+
+    gsDebugMsg("Arguments once more: Arguments %T, ArgumentTypes: %T\n",Arguments,ArgumentTypes);
+
+    //and the arguments once more
+    if(gsIsSortArrow(gstcUnwindType(NewType))){
+      ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
+      ATermList NewArgumentTypes=ATmakeList0();
+      ATermList NewArguments=ATmakeList0();
+      for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments),
+            ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes)){
+        ATermAppl Arg=ATAgetFirst(Arguments);
+        ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
+        ATermAppl Type=ATAgetFirst(ArgumentTypes);
+
+        if(!gstcEqTypesA(NeededType,Type)){
+          //upcasting
+          ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg);
+          if(CastedNewType) Type=CastedNewType;
+        }
+        if(!gstcEqTypesA(NeededType,Type)){
+          gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
+          ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
+          if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
+          //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          if(!NewArgType) NewArgType=NeededType;
+          NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous);
+          if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          Type=NewArgType;
+          }
+
+        NewArguments=ATinsert(NewArguments,(ATerm)Arg);
+        NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
+      }
+      Arguments=ATreverse(NewArguments);
+      ArgumentTypes=ATreverse(NewArgumentTypes);
+    }
+
+    gsDebugMsg("Arguments after once more: Arguments %T, ArgumentTypes: %T\n",Arguments,ArgumentTypes);
 
     *DataTerm=gsMakeDataAppl(Data,Arguments);
     
@@ -2235,7 +2287,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     if(Type){
       variable=true;
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
-	gsWarningMsg("The variable %P is not allowed in %P (in the context of an equation)\n",Name,*DataTerm);
+        gsWarningMsg("Variable %P freely occurs in the right-hand-side or in the condition of an equation, but not its left-hand-side\n",Name);
+	//gsWarningMsg("The variable %P is not allowed in %P (in the context of an equation)\n",Name,*DataTerm);
       }
 
       //Add to free variables list
@@ -2323,6 +2376,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       }
       NewParList=ATreverse(NewParList);
 
+      gsDebugMsg("Possible matches w/o casting for Op/Var %T with %d argument%s are (ParList: %T; PosType: %T)\n",
+        Name, nFactPars, (nFactPars != 1)?"s":"", NewParList, PosType);
+
       if(ATisEmpty(NewParList)){
 	//Ok, this looks like a type error. We are not that strict. 
 	//Pos can be Nat, or even Int...
@@ -2361,6 +2417,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("The result of casting is %T\n",NewParList);
 	if(ATgetLength(NewParList)>1) NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
       }
+     
       ParList=NewParList;
     }
 	
@@ -2543,6 +2600,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
     else{
       if(strict_ambiguous){
+        gsDebugMsg("ambiguous operation %P (ParList %T)\n",Name,ParList);
 	gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":""); return NULL;
       }
       else{
