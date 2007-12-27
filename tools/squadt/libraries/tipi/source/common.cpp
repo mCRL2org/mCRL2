@@ -8,7 +8,7 @@
 
 #include "tipi/configuration.hpp"
 #include "tipi/tool/category.hpp"
-#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/common.hpp"
 
 namespace tipi {

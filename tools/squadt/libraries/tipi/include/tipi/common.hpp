@@ -7,11 +7,8 @@
 #ifndef TIPI_COMMON_H_
 #define TIPI_COMMON_H_
 
-#include <list>
-
-#include <boost/function.hpp>
 #include "tipi/detail/message.hpp"
-#include "tipi/detail/basic_messenger.ipp"
+#include "tipi/detail/basic_messenger.hpp"
 
 /**
  * \brief Interface implementation for a protocol for interactive tool integration
@@ -161,15 +158,6 @@ namespace tipi {
 
   /** \brief A messenger type for communication of tipi protocol messages */
   typedef messaging::basic_messenger < tipi::message >                              messenger;
-
-  /** \brief Convenience type for message delivery handlers */
-  typedef boost::function < void (boost::shared_ptr < message > const&) >           message_handler_type;
-
-  /** \brief Category name that describes a tools function */
-  typedef std::string tool_category;
-
-  /** \brief Storage format for tool input/output configuration specification */
-  typedef std::string storage_format;
 
   /** \brief Type for protocol version */
   struct version {
