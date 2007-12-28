@@ -78,7 +78,7 @@ static ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, cons
 //     Mult is a string representation of a positive number
 //ret: a data expression of sort Pos, representing PosExpr * Mult,
 //     only containing essential multiplications
-static ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult);
+static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult);
 
 //pre: data_expr is a set comprehension or a bag comprehension
 //ret: data_expr if data_expr is not a set or bag enumeration,
@@ -125,7 +125,7 @@ static void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_subs
 //ret: true if data_expr is of the form v_1 == w_1 && ... && v_n == w_n, where
 //     v_i, w_j are data variables,
 //     false, otherwise
-static bool is_and_of_data_var_equalities(ATermAppl data_expr);
+static bool is_and_of_data_var_equalities(const ATermAppl data_expr);
 
 //ret: true if all elements of l are DataVarIds,
 //     false otherwise
@@ -136,41 +136,41 @@ static ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t)
 
 //pre: data_expr is a data expression
 //ret: true if data_expr is a system defined function on lists
-static bool is_list_operator(ATermAppl data_expr);
+static bool is_list_operator(const ATermAppl data_expr);
 
 //pre: data_expr is a data expression
 //ret: true if data_expr is a system defined function on sets
-static bool is_set_operator(ATermAppl data_expr);
+static bool is_set_operator(const ATermAppl data_expr);
 
 //pre: data_expr is a data expression
 //ret: true if data_expr is a system defined function on bags
-static bool is_bag_operator(ATermAppl data_expr);
+static bool is_bag_operator(const ATermAppl data_expr);
 
 //pre: data_eqn is a data equation, sort_constructors holds the constructors
 //     for all relevant sorts.
 //ret: true if data_eqn has the form such that it belongs to a constructor
 //     false otherwise.
-static bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors);
+static bool is_constructor_induced_equation(const ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors);
 
 //pre: data_eqn is a data equation
 //ret: true if data_eqn has the form of an equation for a recogniser function.
-static bool is_recogniser_equation(ATermAppl data_eqn);
+static bool is_recogniser_equation(const ATermAppl data_eqn);
 
 //pre: data_eqn is a data equation
 //ret: true if data_eqn has the form of an equation for a projection function.
-static bool is_projection_equation(ATermAppl data_eqn);
+static bool is_projection_equation(const ATermAppl data_eqn);
 
 //pre: op is an OpId, sort is a sort expression, sort_mappings contains mappings
 //     of sort->indexed set of functions, map_equations contains mappings of
 //     functions -> indexed set of equations. num_map_equations[s] ==
 //     |map_equations[s]|
-static void remove_mapping_not_list(ATermAppl op,
-                        ATermAppl sort,
+static void remove_mapping_not_list(const ATermAppl op,
+                        const ATermAppl sort,
                         t_reconstruct_context* p_ctx);
 
 //pre: generic_list is a list of terms which may be annotated with label @dummy
 //ret: true if there is a match for term in generic_list
-static bool find_match_in_list(ATermAppl term, ATermList generic_list);
+static bool find_match_in_list(const ATermAppl term, ATermList generic_list);
 
 //pre: aterm_ann is a term which may have annotation with label @dummy,
 //     aterm is a term, p_substs is a list with substitutions, induced by adding
@@ -179,31 +179,31 @@ static bool find_match_in_list(ATermAppl term, ATermList generic_list);
 static bool match(ATerm aterm_ann, ATerm aterm, ATermList* p_substs);
 
 //similar to match
-static bool match_appl(ATermAppl aterm_ann, ATermAppl aterm, ATermList* p_substs);
+static bool match_appl(ATermAppl aterm_ann, const ATermAppl aterm, ATermList* p_substs);
 
 //similar to match
 static bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs);
 
 //post: p_substs is extended with substitutions for the implementations of the
 //      lambda expressions in p_data_decls->data_eqns
-static void calculate_lambda_expressions(t_data_decls* p_data_decls, ATermList* p_substs);
+static void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p_substs);
 
 //ret: true if data_eqn is a system defined equation
-static bool is_system_defined_equation(ATermAppl data_eqn);
+static bool is_system_defined_equation(const ATermAppl data_eqn);
 
 //pre: op_id is an operation identifier.
 //ret: the sort for which op_id was introduced.
-static ATermAppl get_linked_sort(ATermAppl op_id);
+static ATermAppl get_linked_sort(const ATermAppl op_id);
 
 //! \brief All sorts in p_data_decls are collected, and added to
 //p_ctx->sorts_table. Furthermore, the other fields in p_ctx, that are indexed
 //by sorts are initialised empty.
-static void initialise_sorts(t_data_decls* p_data_decls,
+static void initialise_sorts(const t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx);
 
 //! \brief Add all constructors in p_data_decls to the appropriate sortt
 // in p_ctx->sort_constructors
-static void initialise_sort_constructors(t_data_decls* p_data_decls,
+static void initialise_sort_constructors(const t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx);
 
 //! \brief Add all relevant functions to the appropriate sort in
@@ -223,7 +223,7 @@ static void initialise_sort_constructors(t_data_decls* p_data_decls,
 // - Bag@k := Bag(S) (0<=k),
 // - Set@k := Set(S) (0<=k)
 // whenever a set comprehension or bag comprehension is seen.
-static void initialise_mappings(t_data_decls* p_data_decls,
+static void initialise_mappings(const t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx,
                              ATermList* p_substs);
 
@@ -241,7 +241,7 @@ static void initialise_mappings(t_data_decls* p_data_decls,
 // or have the signature to belong to a projection function.
 // Third, if an equation is generated in the data implementation of a List, Set
 // or Bag sort.
-static void collect_data_equations(t_data_decls* p_data_decls,
+static void collect_data_equations(const t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx,
                              ATermList* p_substs);
 
@@ -631,7 +631,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
   return Part;
 }
 
-ATermAppl reconstruct_pos_mult(ATermAppl PosExpr, char const* Mult)
+ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
 {
   ATermAppl Head = gsGetDataExprHead(PosExpr);
   ATermList Args = gsGetDataExprArgs(PosExpr);
@@ -890,6 +890,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
   t_reconstruct_context ctx; 
 
   calculate_lambda_expressions(p_data_decls, p_substs);
+  // TODO: use hashtable for substitutions
   ATermList lambda_substs = *p_substs; // Copy needed for interfering substitutions that
                                        // are added in processing the mappings!
 
@@ -909,6 +910,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
 
   // At this point, all sorts that are still in sort_cons_equations and
   // sort_constructors are structured sorts.
+  // TODO: to context
   atermpp::table struct_mappings(25, 50);
   atermpp::table struct_equations(100, 50);
   flatten_mappings_and_equations(&struct_mappings, &struct_equations, &ctx);
@@ -919,7 +921,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
   compute_structured_sort_decls(p_data_decls, &ctx, p_substs);
 }
 
-bool is_and_of_data_var_equalities(ATermAppl data_expr)
+bool is_and_of_data_var_equalities(const ATermAppl data_expr)
 {
   assert(gsIsDataExpr(data_expr));
   if (gsIsDataExprAnd(data_expr)) {
@@ -961,7 +963,7 @@ ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t)
   return result;
 }
 
-bool is_list_operator(ATermAppl data_expr)
+bool is_list_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
   ATermAppl name = gsGetName(data_expr);
@@ -976,7 +978,7 @@ bool is_list_operator(ATermAppl data_expr)
          ATisEqual(name, gsMakeOpIdNameRTail());
 }
 
-bool is_set_operator(ATermAppl data_expr)
+bool is_set_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
   ATermAppl name = gsGetName(data_expr);
@@ -991,7 +993,7 @@ bool is_set_operator(ATermAppl data_expr)
          ATisEqual(name, gsMakeOpIdNameSetCompl());
 }
 
-bool is_bag_operator(ATermAppl data_expr)
+bool is_bag_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
   ATermAppl name = gsGetName(data_expr);
@@ -1008,7 +1010,7 @@ bool is_bag_operator(ATermAppl data_expr)
          ATisEqual(name, gsMakeOpIdNameSet2Bag());
 }
 
-bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors)
+bool is_constructor_induced_equation(const ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors)
 {
   assert(gsIsDataEqn(data_eqn));
   ATermAppl lhs = ATAgetArgument(data_eqn, 2);
@@ -1054,7 +1056,7 @@ bool is_constructor_induced_equation(ATermAppl data_eqn, atermpp::map<ATermAppl,
   return false;
 }
 
-bool is_recogniser_equation(ATermAppl data_eqn)
+bool is_recogniser_equation(const ATermAppl data_eqn)
 {
   assert(gsIsDataEqn(data_eqn));
   ATermAppl lhs = ATAgetArgument(data_eqn, 2);
@@ -1080,7 +1082,7 @@ bool is_recogniser_equation(ATermAppl data_eqn)
          is_list_of_data_var_ids(args);
 }
 
-bool is_projection_equation(ATermAppl data_eqn)
+bool is_projection_equation(const ATermAppl data_eqn)
 {
   assert(gsIsDataEqn(data_eqn));
   ATermAppl lhs = ATAgetArgument(data_eqn, 2);
@@ -1107,8 +1109,8 @@ bool is_projection_equation(ATermAppl data_eqn)
          gsIsDataVarId(rhs);
 }
 
-void remove_mapping_not_list(ATermAppl op,
-                        ATermAppl sort,
+void remove_mapping_not_list(const ATermAppl op,
+                        const ATermAppl sort,
                         t_reconstruct_context* p_ctx)
 {
   if (!is_list_operator(op) && !is_set_operator(op) && !is_bag_operator(op)) {
@@ -1120,7 +1122,7 @@ void remove_mapping_not_list(ATermAppl op,
   }
 }
 
-bool find_match_in_list(ATermAppl term, ATermList generic_list)
+bool find_match_in_list(const ATermAppl term, ATermList generic_list)
 {
   bool result = false;
   while (!result && !ATisEmpty(generic_list))
@@ -1146,7 +1148,7 @@ bool match(ATerm aterm_ann, ATerm aterm, ATermList* p_substs)
   return false;
 }
 
-bool match_appl(ATermAppl aterm_ann, ATermAppl aterm, ATermList* p_substs)
+bool match_appl(ATermAppl aterm_ann, const ATermAppl aterm, ATermList* p_substs)
 {
   aterm_ann = gsSubstValues_Appl(*p_substs, aterm_ann, false);
 
@@ -1237,7 +1239,7 @@ bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs)
   return result && ATisEmpty(aterm_ann) && ATisEmpty(aterm);
 }
 
-void calculate_lambda_expressions(t_data_decls* p_data_decls, ATermList* p_substs)
+void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p_substs)
 {
   for (ATermList l = p_data_decls->data_eqns; !ATisEmpty(l); l = ATgetNext(l))
   {
@@ -1267,7 +1269,7 @@ void calculate_lambda_expressions(t_data_decls* p_data_decls, ATermList* p_subst
   }
 }
 
-bool is_system_defined_equation(ATermAppl data_eqn)
+bool is_system_defined_equation(const ATermAppl data_eqn)
 {
   assert(gsIsDataEqn(data_eqn));
   ATermAppl data_eqn_lhs = ATAgetArgument(data_eqn, 2);
@@ -1305,7 +1307,7 @@ bool is_system_defined_equation(ATermAppl data_eqn)
   return false;
 }
 
-ATermAppl get_linked_sort(ATermAppl op_id)
+ATermAppl get_linked_sort(const ATermAppl op_id)
 {
   assert(gsIsOpId(op_id));
   ATermAppl sort = gsGetSort(op_id);
@@ -1323,7 +1325,7 @@ ATermAppl get_linked_sort(ATermAppl op_id)
   return linked_sort;
 }
 
-void initialise_sorts(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
+void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
@@ -1351,7 +1353,7 @@ void initialise_sorts(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
   }
 }
 
-void initialise_sort_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
+void initialise_sort_constructors(const t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
 {
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
@@ -1374,7 +1376,7 @@ void initialise_sort_constructors(t_data_decls* p_data_decls, t_reconstruct_cont
   }
 }
 
-void initialise_mappings(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
+void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
@@ -1449,7 +1451,7 @@ void initialise_mappings(t_data_decls* p_data_decls, t_reconstruct_context* p_ct
   }
 }
 
-void collect_data_equations(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
+void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
