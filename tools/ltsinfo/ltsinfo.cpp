@@ -21,13 +21,13 @@
 
 using namespace mcrl2::utilities;
 
-// Squadt protocol interface and utility pseudo-library
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
-
 typedef struct {
   mcrl2::lts::lts_equivalence determinism_equivalence;
 } ltsinfo_options;
+
+// Squadt protocol interface and utility pseudo-library
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <mcrl2/utilities/squadt_interface.h>
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
