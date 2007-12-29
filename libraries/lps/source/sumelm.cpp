@@ -68,6 +68,25 @@ namespace lps {
     return atermpp::partial_replace(t, sumelm_replace_helper(replacements));
   }
 
+  /// Adds replacement lhs := rhs to the specified map of replacements.
+  /// All replacements that have lhs as a right hand side will be changed to
+  /// have rhs as a right hand side.
+  void sumelm_add_replacement(std::map<data_expression, data_expression>& replacements,
+                         const data_expression lhs, const data_expression rhs)
+  {
+    // First apply already present substitutions to rhs
+    data_expression new_rhs = sumelm_replace(rhs, replacements);
+    gsDebugMsg("Adding substitution %s := %s\n", pp(lhs).c_str(), pp(new_rhs).c_str());
+    for (std::map<data_expression, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+    {
+      if (i->second == lhs) {
+        gsDebugMsg("Changing substitution %s := %s into %s := %s\n", pp(i->first).c_str(), pp(i->second).c_str(), pp(i->first).c_str(), pp(new_rhs).c_str());
+        i->second = new_rhs;
+      }
+    }
+    replacements[lhs] = new_rhs;
+  }
+
   ///Used to assist in occurs_in function.
   struct compare_data_variable
   {
@@ -245,21 +264,18 @@ namespace lps {
           if (substitutions.count(lhs(working_condition)) == 0)
           {
             // apply all previously added substitutions to the rhs.
-            substitutions[lhs(working_condition)] = sumelm_replace(rhs(working_condition), substitutions);
+            sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();
           } else if (is_data_variable(rhs(working_condition))) {
             // check whether the converse is possible
             if (substitutions.count(rhs(working_condition)) == 0) {
-              substitutions[rhs(working_condition)] = sumelm_replace(substitutions[lhs(working_condition)], substitutions);
+              sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
               result = true_();
             }
-          } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0) {
-            substitutions[lhs(working_condition)] = sumelm_replace(rhs(working_condition), substitutions);
-            result = true_();
-          } else if (is_data_variable(substitutions[lhs(working_condition)])) {
-            data_expression new_rhs = sumelm_replace(rhs(working_condition), substitutions);
-            substitutions[substitutions[lhs(working_condition)]] = new_rhs;
-            substitutions[lhs(working_condition)] = new_rhs;
+          } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 ||
+                     is_data_variable(substitutions[lhs(working_condition)])) {
+            sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
+            sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();
           }
         }
