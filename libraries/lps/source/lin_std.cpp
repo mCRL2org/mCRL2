@@ -6181,7 +6181,7 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
              linGetInit(ips),linGetParameters(ips),resultsumlist);
 }
 
-/**************** allow  *************************************/
+/**************** allow/block *************************************/
 
 static int implies_condition(ATermAppl c1, ATermAppl c2)
 {
@@ -6347,17 +6347,53 @@ static int allow(ATermList allowlist, ATermAppl multiaction)
   return 0;
 }
 
-static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
-{
+static bool encap(ATermList encaplist, ATermAppl multiaction)
+{ int actioninset=0;
+  if (gsIsDelta(multiaction))
+  { return true ; }
+  
+  for (ATermList walker=ATLgetArgument(multiaction,0) ;
+            walker!=ATempty ; walker=ATgetNext(walker) )
+  { ATermAppl action=ATAgetFirst(walker);
+    if (isinset(ATAgetArgument(ATAgetArgument(action,0),0),encaplist))
+    { actioninset=1;
+      break;
+    }
+  }
+
+  /* reverse the actionlist to maintain the ordering */
+  if (actioninset)
+  { return true ; 
+  }
+  return false;
+}
+
+static ATermAppl allowblockcomposition(
+                      ATermList allowlist, 
+                      ATermAppl ips,
+                      const bool is_allow)
+{ /* This function calculates the allow or the block operator,
+     depending on whether is_allow is true */
+
   ATermList resultdeltasumlist=ATempty;
   ATermList resultsimpledeltasumlist=ATempty;
   ATermList resultactionsumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
-  allowlist=sortMultiActionLabels(allowlist);
+  if (is_allow)
+  { allowlist=sortMultiActionLabels(allowlist);
+  }
 
-  gsVerboseMsg(
-          "- calculating the allow operator on %d summands\n",
+  int sourcesumlist_length=ATgetLength(sourcesumlist);
+  if (sourcesumlist_length>=2 || is_allow) // This condition prevents this message to be printed
+                                           // when performing data elimination. In this case the
+                                           // term delta is linearised, to determine which data
+                                           // is essential for all processes. In these cases a
+                                           // message about the block operator is very confusing.
+  { gsVerboseMsg(
+          "- calculating the %s operator on %d summands",
+                          (is_allow?"allow":"block"),
                           ATgetLength(sourcesumlist));
+  }
 
   /* First add the resulting sums in two separate lists
      one for actions, and one for delta's. The delta's 
@@ -6372,7 +6408,8 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     ATermAppl actiontime=linGetActionTime(summand);
     ATermAppl condition=linGetCondition(summand);
 
-    if (allow(allowlist,multiaction))
+    if ((is_allow && allow(allowlist,multiaction)) ||
+        (!is_allow && !encap(allowlist,multiaction)))
     { 
       resultactionsumlist=ATinsertA(
                     resultactionsumlist,
@@ -6442,6 +6479,11 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
                       ATAgetFirst(resultdeltasumlist)); 
     } 
   }
+  if (sourcesumlist_length>=2 || is_allow)
+  { gsVerboseMsg(", resulting in %d summands\n",
+                          ATgetLength(resultsumlist));
+  }   
+
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
 }
@@ -6449,41 +6491,21 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
 
 /**************** encapsulation *************************************/
 
-static ATermAppl encap(ATermList encaplist, ATermAppl multiaction)
-{ int actioninset=0;
-  if (gsIsDelta(multiaction))
-  { return multiaction ; }
-  
-  for (ATermList walker=ATLgetArgument(multiaction,0) ;
-            walker!=ATempty ; walker=ATgetNext(walker) )
-  { ATermAppl action=ATAgetFirst(walker);
-    if (isinset(ATAgetArgument(ATAgetArgument(action,0),0),encaplist))
-    { actioninset=1;
-      break;
-    }
-  }
 
-  /* reverse the actionlist to maintain the ordering */
-  if (actioninset)
-  { return gsMakeDelta() ; 
-  }
-  return multiaction;
-}
-
-
-static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
+/* static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
 {  
   ATermList resultactionsumlist=ATempty;
   ATermList resultdeltasumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
 
-  if (ATgetLength(sourcesumlist)>2)  // This condition prevents this message to be printed
+  unsigned int sourcesumlist_length=ATgetLength(sourcesumlist);
+  if (sourcesumlist_length>2)  // This condition prevents this message to be printed
                                      // when performing data elimination. In this case the
                                      // term delta is linearised, to determine which data
                                      // is essential for all processes. In these cases a
                                      // message about the block operator is very confusing.
   { gsVerboseMsg(
-          "- calculating the block operator on %d summands\n",
+          "- calculating the block operator on %d summands",
                           ATgetLength(sourcesumlist));
   }
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
@@ -6493,13 +6515,13 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
     ATermAppl actiontime=linGetActionTime(summand);
     ATermAppl condition=linGetCondition(summand);
  
-    ATermAppl resultmultiaction=encap(encaplist,multiaction);
+    //ATermAppl resultmultiaction=encap(encaplist,multiaction);
 
-    /* The action and delta summands are first put into
+    / * The action and delta summands are first put into
        different lists. Below the delta's are added to
        the actions, and while doing so, it is checked whether
        adding them is necessary, or whether they are already
-       implied by other actions, or delta's */
+       implied by other actions, or delta's * /
     if (gsIsDelta(resultmultiaction)) 
     { 
       resultdeltasumlist=ATinsertA(
@@ -6532,9 +6554,12 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
                       ATAgetFirst(resultdeltasumlist));
     }
   }
+  if (sourcesumlist_length>2)  
+  { gsVerboseMsg(", resulting in %d summands.\n",ATgetLength(resultsumlist)); 
+  }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
-}
+}*/
 
 /**************** renaming ******************************************/
 
@@ -7581,10 +7606,10 @@ static ATermList combinesumlist(
   ATermAppl timevar=getfreshvariable(
                        "timevar",realsort);
   ATermAppl ultimatedelaycondition=
-               substitute_data(rename_list,par2,
-                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
-
-
+             (add_delta?gsMakeDataExprTrue():
+              substitute_data(rename_list,par2,
+                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec)));
+  // gsfprintf(stderr,"Ultimatedelaycondition1: %P\n",ultimatedelaycondition);
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
@@ -7647,8 +7672,14 @@ static ATermList combinesumlist(
   }
   /* second we enumerate the summands of sumlist2 */
 
-  ultimatedelaycondition=
+  if (add_delta)
+  { ultimatedelaycondition=gsMakeDataExprTrue();
+  }
+  else 
+  { ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist1,par1,timevar,spec);
+  }
+  // gsfprintf(stderr,"Ultimatedelaycondition2: %P\n",ultimatedelaycondition);
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
@@ -7958,7 +7989,7 @@ static ATermAppl generateLPEmCRLterm(
                           canterminate,
                           spec,
                           regular);
-    return allowcomposition(ATLgetArgument(t,0),t2);
+    return allowblockcomposition(ATLgetArgument(t,0),t2,true);
   }
 
   if (gsIsBlock(t)) 
@@ -7967,7 +7998,7 @@ static ATermAppl generateLPEmCRLterm(
                           canterminate,
                           spec,
                           regular);
-    return encapcomposition(ATLgetArgument(t,0),t2);
+    return allowblockcomposition(ATLgetArgument(t,0),t2,false);
   }
   
   if (gsIsRename(t))
@@ -8796,11 +8827,11 @@ static ATermList SieveProcDataVarsSummands(
       ATermAppl condition=linGetCondition(smd);
       ATermList nextstate=linGetNextState(smd);
 
-      if (((multiaction!=gsMakeDelta()) &&
+      if (((!gsIsDelta(multiaction)) &&
               (occursinmultiaction(var,multiaction)))||
-          (((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime))))||
+          (((!gsIsNil(actiontime)) && (occursinterm(var,actiontime))))||
           (occursinterm(var,condition))||
-          ((multiaction!=gsMakeDelta()) &&
+          ((!gsIsDelta(multiaction)) &&
               (occursinassignmentlist(var,nextstate,parameters))))
       { result=ATinsertA(result,var);
         break;
@@ -8863,7 +8894,7 @@ static ATermAppl transform(
            objectdata[objectIndex(init)].canterminate,
            spec,
            regular);
-  t3=encapcomposition(ATempty,t3); // This removes superfluous delta
+  t3=allowblockcomposition(ATempty,t3,false); // This removes superfluous delta
                                    // summands.
   if (cluster)
      t3=clusterfinalresult(t3,spec);
