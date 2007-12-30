@@ -4,6 +4,7 @@ project libraries/lps/test
    : requirements
        <use>/boost//headers
        <source>/libraries//core
+       <source>/libraries//data
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem

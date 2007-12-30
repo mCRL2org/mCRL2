@@ -5,6 +5,7 @@ project libraries/core/test
       <use>/libraries/utilities//headers
       <use>/libraries/atermpp//headers
       <use>/libraries/core//headers
+      <use>/libraries/data//headers
       <use>/boost//headers 
    ;
 
