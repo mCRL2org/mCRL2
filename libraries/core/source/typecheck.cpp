@@ -1946,6 +1946,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous);
 
+      gsDebugMsg("Result of gstcTraverseVarConsTypeD: DataTerm %T\n",Data);
+
       ATtableDestroy(CopyAllowedVars); 
       ATtableDestroy(CopyDeclaredVars); 
 
@@ -2077,7 +2079,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
 						&Data,gsMakeSortUnknown()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments);
 
-    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T, ResultType: %T\n",Data,NewType);
+    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
     if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
     
@@ -2110,7 +2112,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	  //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
 	  if(!NewArgType) NewArgType=NeededType; 
 	  NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous);
-	  if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+	  gsDebugMsg("Result of Doing again gstcTraverseVarConsTypeD: DataTerm %T\n",Arg);
+          if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
           Type=NewArgType;
         }
 	NewArguments=ATinsert(NewArguments,(ATerm)Arg);
@@ -2124,7 +2127,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                                                 &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments);
 
-    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T, ResultType: %T\n",Data,NewType);
+    gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
     if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
 
@@ -2175,7 +2178,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     return gstcUnArrowProd(ArgumentTypes,NewType);
   }  
 
-  if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
+  if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     if(gsIsNumericString(gsATermAppl2String(Name)))
     {
@@ -2269,9 +2272,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     }
   }
 
-  if(gsIsDataVarId(*DataTerm)){
-    return ATAgetArgument(*DataTerm,1);
-  }
+  // if(gsIsDataVarId(*DataTerm)){
+  //   return ATAgetArgument(*DataTerm,1);
+  // }
 
   assert(0);
   return Result;
