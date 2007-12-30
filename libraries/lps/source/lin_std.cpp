@@ -1060,10 +1060,20 @@ static void initialize_symbols(void)
   insertProcDeclaration(
            terminatedProcId,
            ATempty,
-// XXXXX           gsMakeSeq(terminationAction,gsMakeDeltaAtZero()), /* Changed to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
+// XXXXX           gsMakeSeq(terminationAction,gsMakeDeltaAtZero()), 
+/* Changed to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
            gsMakeSeq(terminationAction,gsMakeDelta()), 
            pCRL,0,false);
 }
+
+static void uninitialize_symbols(void)
+{
+  ATunprotectAFun(tuple_symbol);
+  ATunprotectAFun(initprocspec_symbol);
+  ATunprotectAppl(&terminationAction);
+  ATunprotectAppl(&terminatedProcId);
+}
+
 
 static ATermAppl linMakeTuple(
                     ATermList first, 
@@ -8117,6 +8127,30 @@ static void initialize_data(void)
   realsort=gsMakeSortId(gsString2ATermAppl("Real"));
 }
 
+static void uninitialize_data(void)
+{
+  ATunprotectList(&seq_varnames);
+  ATunprotectList(&localpcrlprocesses);
+  ATunprotectAppl(&tau_process);
+  ATunprotectAppl(&delta_process);
+  ATunprotectList(&LocalpCRLprocs);
+  ATunprotectList(&pcrlprocesses);
+  pcrlprocesses=ATempty;
+  ATindexedSetDestroy(objectIndexTable);
+  ATindexedSetDestroy(stringTable);
+  ATtableDestroy(freshstringIndices);
+  objectdata=NULL;
+  time_operators_used=0;
+  seq_varnames=ATempty;
+  enumeratedtypes=NULL;
+  enumeratedtypelist=NULL;
+  stacklist=NULL;
+  ATunprotectList(&sumlist);
+  ATunprotectList(&localequationvariables);
+  ATunprotectAppl(&realsort);
+}
+
+
 /**************** alphaconversion ********************************/
 
 
@@ -8861,7 +8895,8 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
     rewr = createRewriter(lps::data_specification(ATAgetArgument(spec,0)),GS_REWR_JITTY);
   }
   specificationbasictype *spec_int = create_spec(spec);
-  if (spec_int == NULL) {
+  if (spec_int == NULL) 
+  { uninitialize_data();
     return NULL;
   }
   initialize_symbols(); /* This must be done after storing the data,
@@ -8869,7 +8904,9 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
                            Terminate */
   //linearise spec
   ATermAppl result = transform(spec_int->init, spec_int);
-  if (result == NULL) {
+  if (result == NULL) 
+  { uninitialize_data();
+    uninitialize_symbols();
     return NULL;
   }
   result = gsMakeSpecV1(
@@ -8897,6 +8934,8 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   );
 
   //clean up
+  uninitialize_data();
+  uninitialize_symbols();
   delete rewr;
 
   return result;
