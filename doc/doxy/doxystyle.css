@@ -1,91 +1,6 @@
-body {
-  font: x-small sans-serif;
-  background: #f9f9f9;
-  color: black;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-table {
-  font-size: 100%;
-}
-
-#globalWrapper {
-  font-size: 127%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-
-h1 {
-  font-size: 150%;
-}
-h2 {
-  font-size: 132%;
-}
-h3 {
-  font-size: 116%;
-}
-
-caption { font-weight: bold }
-
-a { text-decoration: none; color: #002bb8; }
-a:visited { color: #5a3696; }
-a:active { color: #faa700; }
-a:hover { text-decoration: underline; }
-
-/* HEADER PART */
-
-#header {
-  position: relative;
-  width: 100%;
-  height: 120px;
-  top: 0;
-  left: 0;
-  margin: 0;
-  background: url('http://www.mcrl2.org/common/gradient.png') repeat-x;
-  text-align: center;
-}
-#logo {
-  margin-top: 36px;
-  border: none;
-}
-
 #navbar {
-	position: relative;
-	top: 0;
-	left: 0;
-	width: 100%;
-	background-color: black;
-	border-top: 1px solid #aaa;
 	border-bottom: 1px solid black;
-	text-align: center;
-	padding: 0;
 	margin: 0;
-}
-#navmenu ul {
-	list-style: none;
-	margin: 0.2em 0 0.2em 0;
-}
-#navmenu li {
-	display: inline;
-	font-weight: bold;
-}
-#navmenu li a {
-	color: white;
-	position: relative;
-	border-left: 1px solid #777;
-	padding: 0 1em 0 1em;
-	text-decoration: none;
-}
-#navmenu li:first-child a {
-	border: 0;
-}
-#navmenu li a:hover {
-	text-decoration: none;
-	color: yellow;
 }
 
 #libbar {
@@ -106,7 +21,6 @@ a:hover { text-decoration: underline; }
 }
 #libmenu li {
 	display: inline;
-	font-weight: bold;
 }
 #libmenu li a {
 	color: black;
@@ -119,16 +33,24 @@ a:hover { text-decoration: underline; }
 	border: 0;
 }
 #libmenu li a:hover {
-	text-decoration: none;
+	color: #ba0000;
+}
+#libmenu li.current a {
+	font-weight: bold;
 	color: #002bb8;
+}
+#libmenu li.current a:hover {
+	color: #ba0000;
 }
 
 .search     { color: #003399;
               font-weight: bold;
+              background-color: none;
 }
 FORM.search {
               margin-bottom: 0px;
               margin-top: 0px;
+              background-color: none;
 }
 INPUT.search { font-size: 75%;
                color: #000080;
@@ -141,7 +63,6 @@ INPUT.search { font-size: 75%;
 #main {
   position: relative;
   padding: 0;
-/*  width: 750px;*/
   margin-left: 20px;
   margin-right: 20px;
   text-align: left;
@@ -450,7 +371,7 @@ hr { height: 1px;
 
 div.tabs {
    position: relative;
-   top: -3.4em;
+   top: -3.7em;
    left: -1em;
    border-bottom: 1px solid #aaa;
    padding-top: 1em;
@@ -461,7 +382,7 @@ div.tabs ul {
    position: relative;
    left: -1px;
    padding: 0;
-   margin: 0 0 0.3em 0;
+   margin: 0 0 0.1em 0;
    list-style: none;
 }
 

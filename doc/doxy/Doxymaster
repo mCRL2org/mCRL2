@@ -104,7 +104,7 @@ INLINE_INHERITED_MEMB  = NO
 # path before files name in the file list and in the header files. If set 
 # to NO the shortest path that makes the file name unique will be used.
 
-FULL_PATH_NAMES        = NO
+FULL_PATH_NAMES        = YES
 
 # If the FULL_PATH_NAMES tag is set to YES then the STRIP_FROM_PATH tag 
 # can be used to strip a user-defined part of the path. Stripping is 
@@ -545,8 +545,7 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories 
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */.svn/* \
-                         */detail/*
+EXCLUDE_PATTERNS       = */.svn/* */detail/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the output. 
@@ -693,19 +692,19 @@ IGNORE_PREFIX          =
 # If the GENERATE_HTML tag is set to YES (the default) Doxygen will 
 # generate HTML output.
 
-GENERATE_HTML          = YES
+GENERATE_HTML          = NO
 
 # The HTML_OUTPUT tag is used to specify where the HTML docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
 # put in front of it. If left blank `html' will be used as the default path.
 
-HTML_OUTPUT            = html
+HTML_OUTPUT            = 
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for 
 # each generated HTML page (for example: .htm,.php,.asp). If it is left blank 
 # doxygen will generate files with .html extension.
 
-HTML_FILE_EXTENSION    = .html
+HTML_FILE_EXTENSION    =
 
 # The HTML_HEADER tag can be used to specify a personal HTML header for 
 # each generated HTML page. If it is left blank doxygen will generate a 

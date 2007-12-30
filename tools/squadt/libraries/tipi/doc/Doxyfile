@@ -1,14 +1,3 @@
-@INCLUDE_PATH = ../../../../../doc/doxy
-@INCLUDE = Doxymaster
-PROJECT_NAME           = TIPi
-OUTPUT_DIRECTORY       = ../../../../../build/doxy
-HTML_OUTPUT            = tipi
-INPUT                  = ../include ../source
-HTML_HEADER            = ../../../../../doc/doxy/Doxyheader.html
-HTML_FOOTER            = ../../../../../doc/doxy/Doxyfooter.html
-EXCLUDE_PATTERNS       = */.svn/* \
-                         */transport/* \
-                         */utility/*
-HIDE_SCOPE_NAMES       = NO
-SORT_BY_SCOPE_NAME     = YES
-GENERATE_TAGFILE       = ../../../../../build/doxy/tipi.tag
+EXCLUDE_PATTERNS  += */transport/* */utility/*
+HIDE_SCOPE_NAMES   = NO
+SORT_BY_SCOPE_NAME = YES
