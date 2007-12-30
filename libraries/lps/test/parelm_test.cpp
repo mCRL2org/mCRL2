@@ -38,7 +38,7 @@ const std::string case_3(
 
 // Parameter j should be removed
 const std::string case_4(
-  "act a\n\n"
+  "act a;\n\n"
   "proc X(i,j: Nat) = a@i.X(i,j);\n\n"
   "init X(0,4);\n");
 
