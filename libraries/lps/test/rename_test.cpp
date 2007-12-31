@@ -57,6 +57,14 @@ const std::string SPECIFICATION2 =
 "init P(0);                              \n"
 ;
 
+const std::string SPECIFICATION3 =
+"act a;                                  \n"
+"                                        \n"
+"proc P(b:Bool) = a. P(b);               \n"
+"                                        \n"
+"init P(false);                          \n"
+;
+
 void test_lps_rename()
 {
   specification spec = mcrl22lps(SPECIFICATION);
@@ -79,10 +87,22 @@ void test_lps_rename()
   spec = rename_process_parameters(spec, forbidden_names, "_S");
 }
 
+void test_rename()
+{
+  specification spec = mcrl22lps(SPECIFICATION3);
+  std::set<identifier_string> forbidden_names;
+  specification spec2 = rename_process_parameters(spec, forbidden_names, "_A");
+  std::cout << "<spec>" << pp(spec) << std::endl;
+  std::cout << "<spec2>" << pp(spec2) << std::endl;
+  BOOST_CHECK(spec2.process().process_parameters().size() == 1);
+  BOOST_CHECK(spec2.process().process_parameters().front().name() == identifier_string("b"));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_CORE_LIBRARY_INIT()
 
+  test_rename();
   test_lps_rename();
 
   return 0;

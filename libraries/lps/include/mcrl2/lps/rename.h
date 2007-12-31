@@ -83,12 +83,10 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
   std::pair<std::vector<data_variable>, std::vector<data_variable> > r = rename_process_parameters_helper(spec.process(), generator);
 
   linear_process new_process              = atermpp::partial_replace(spec.process()        , detail::make_data_variable_replacer(r.first, r.second));
-  action_label_list new_action_labels     = atermpp::partial_replace(spec.action_labels()  , detail::make_data_variable_replacer(r.first, r.second));
   process_initializer new_initial_process = atermpp::partial_replace(spec.initial_process(), detail::make_data_variable_replacer(r.first, r.second));
     
   specification result = spec;
   result = set_lps(result, new_process);
-  result = set_action_labels(result, new_action_labels);
   result = set_initial_process(result, new_initial_process);
   return result;
 }
