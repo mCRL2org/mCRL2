@@ -595,9 +595,14 @@ namespace bes
   { 
     
     static atermpp::table hashtable(100,75);
+    static unsigned int hashtable_reset_counter=0;
 
     bes_expression b=BDDif_rec(b1,b2,b3,hashtable);
-    // hashtable.reset(); This costs a lot of time, currently.
+    hashtable_reset_counter++;
+    if (hashtable_reset_counter==1000) // resetting of the hashtable is quite expensive.
+    { hashtable.reset();
+      hashtable_reset_counter=0;
+    } 
     return b;
   }
 

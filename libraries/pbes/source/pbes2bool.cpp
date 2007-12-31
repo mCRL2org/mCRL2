@@ -368,7 +368,7 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
   return p.name();
 
   unsigned int n=largest_power_of_2_smaller_than(args.size());
-  // ATfprintf(stderr,"P: %t\nSIZE %d POWEROFTWO %d\n",(ATermList)args,args.size(),n);
+  
   atermpp::vector<ATermAppl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
@@ -377,7 +377,6 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
   for(data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
   { if (i<2*n-args.size())
     { tree_store[i]= (*t);
-      // ATfprintf(stderr,"ITEM %d  %t\n",i,tree_store[i]);
       i++;
     }
     else
@@ -385,7 +384,6 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
       t++;
       ATermAppl t2(*t);
       tree_store[i]= apply_pair_symbol(t1,t2);
-      // ATfprintf(stderr,"PAIR %d  %t\n",i,tree_store[i]);
       i++;
     }
   }
@@ -394,7 +392,6 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
   { n=n>>1; // n=n/2;
     for (unsigned int i=0; i<n; i++)
     { 
-      // ATfprintf(stderr,"COMBINE %d  %t %t\n",i,tree_store[2*i],tree_store[2*i+1]);
       tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
     }
   }
@@ -415,7 +412,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bes::variable_type current_variable,
                    const bool opt_store_as_tree) 
 { 
-  // cerr << "HOHAAAA" << pp(p) << "\n";
+  
   if (is_propositional_variable_instantiation(p))
   { 
     pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?store_as_tree(p):p);
@@ -635,7 +632,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     if (bes_equations.is_relevant(variable_to_be_processed)) 
            // If v is not relevant, it does not need to be investigated.
     { 
-      // fprintf(stderr,"Process variable %d\n",(unsigned int)variable_to_be_processed);
 
       pbes_equation current_pbeq;
       
@@ -646,7 +642,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
          if (!is_pair(t))
          { // Then t is the name of the current_variable_instantiation, and it has 
            // no arguments.
-           // ATfprintf(stderr,"TTTTT %t\n",t);
+      
            current_pbeq = pbes_equation(pbes_equations.get(t));
            assert(current_pbeq.variable().parameters().size()==0);
          }
@@ -680,7 +676,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           { rewriter->setSubstitution(*vlist,(aterm)*elist);
           }
           else
-          { // cerr << "Set substitution: " << pp(*vlist) << " to " << pp(*elist) << "\n";
+          { 
             rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
           }
           elist++;
@@ -691,8 +687,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
       lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       
-     
-      // cerr << pp(new_pbes_expression);
       bes::bes_expression new_bes_expression=
            add_propositional_variable_instantiations_to_indexed_set_and_translate(
                         new_pbes_expression,
@@ -704,8 +698,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                         bes_equations,
                         variable_to_be_processed,
                         tool_options.opt_store_as_tree);
-      // ATfprintf(stderr,"HIER4\n");
-      // ATfprintf(stderr,"Resulting expression %d\n",AT_calcCoreSize(new_bes_expression));
   
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
       { // find a variable in the new_bes_expression from which `variable' to be
@@ -782,7 +774,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           for( ; !to_set_to_true_or_false.empty() ; )
           {
             bes::variable_type w=(*to_set_to_true_or_false.begin());
-          // cerr << "DOING a substitution for " << w << "\n";
+            
             // Take the lowest element for substitution, to generate
             // short counterexample.
             
@@ -793,7 +785,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                       v!=bes_equations.variable_occurrence_set_end(w); 
                       v++)
             {
-              // gsVerboseMsg("+ %d\n",(unsigned long)*v);
+              
               bes_expression b=bes_equations.get_rhs(*v);
               if (tool_options.opt_construct_counter_example)
               { b=substitute_true_false(b,w,bes_equations.get_rhs(w),
@@ -1123,7 +1115,6 @@ bool solve_bes(const t_tool_options &tool_options,
 
     set <bes::variable_type> todo;
 
-    // cerr << "RANK" << current_rank << "\n";
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       { 
@@ -1135,10 +1126,8 @@ bool solve_bes(const t_tool_options &tool_options,
                              tool_options.opt_use_hashtables,
                              bex_hashtable);
         
-        // ATfprintf(stderr,"Term: %t \n",(ATerm)t);
         if (toBDD(t)!=toBDD(approximation[v]))
         {
-          // ATfprintf(stderr,"BDD: %t\n%t\n",(ATerm)toBDD(t),(ATerm)toBDD(approximation[v]));
           if (tool_options.opt_use_hashtables)
           { bex_hashtable.reset();  /* we change the approximation, so the 
                                        hashtable becomes invalid */
@@ -1158,7 +1147,7 @@ bool solve_bes(const t_tool_options &tool_options,
          u=bes_equations.variable_occurrence_set_begin(w_value);
          u!=bes_equations.variable_occurrence_set_end(w_value); 
          u++)
-      { // fprintf(stderr,"Occurrence of %d in %d\n",w_value, *u);
+      { 
         if (bes_equations.is_relevant(*u) && (bes_equations.get_rank(*u)==current_rank))
         { bes_expression t=evaluate_bex(
                               bes_equations.get_rhs(*u),
@@ -1168,9 +1157,8 @@ bool solve_bes(const t_tool_options &tool_options,
                               tool_options.opt_use_hashtables,
                               bex_hashtable);
         
-          // ATfprintf(stderr,"HUH approximation:%t  t:%t\n",(ATerm)approximation[*u],(ATerm)t);
           if (toBDD(t)!=toBDD(approximation[*u]))
-          { // ATfprintf(stderr,"Set approximation[%d]=%t\n",*u,(ATerm)t);
+          { 
             if (tool_options.opt_use_hashtables)
             { bex_hashtable.reset();  /* we change approximation, so the 
                                          hashtable becomes invalid */
@@ -1227,7 +1215,6 @@ bool solve_bes(const t_tool_options &tool_options,
  
   }
 
-  // ATfprintf(stderr,"Approximation[1]=%t\n",(ATerm)approximation[1]);
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
@@ -1461,7 +1448,7 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    { //fprintf(stderr,"PPPP %d   %lu\n",bes_equations.is_relevant(i) ,bes_equations.get_rank(i));
+    { 
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       { ((outfilename=="-")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
