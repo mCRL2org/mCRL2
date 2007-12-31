@@ -708,7 +708,7 @@ inline void lpsConstElm::output() {
   std::set< lps::data_variable > usedFreeVars = p_process.find_free_variables();
   for(std::vector< lps::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); i++)
   {
-    if( !init_free_vars.empty() && init_free_vars.find(i->rhs()) != init_free_vars.end() )
+    if(is_data_variable(i->rhs()) && !init_free_vars.empty() && init_free_vars.find(i->rhs()) != init_free_vars.end() )
     {   
       usedFreeVars.insert(i->rhs());
     }
