@@ -39,7 +39,7 @@ alias lts.alias
        ;
 
 alias headers
-       : [ path.glob-tree include/mcrl2 : *.h *.hpp : .svn ]
+       : [ path.glob-tree ../include/mcrl2 : *.h *.hpp : .svn ]
        :
        :
        : <use>/libraries/core//headers
