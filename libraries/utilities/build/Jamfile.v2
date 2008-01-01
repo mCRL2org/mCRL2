@@ -1,5 +1,5 @@
 project libraries/utilities
-       : source-location ../source
+       : source-location ..
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
@@ -12,12 +12,12 @@ include $(TOP)/build/config.jam ;
 alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
 
-obj spinctrlfloat.o : spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
-obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+obj spinctrlfloat.o : source/spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+obj colorbutton.o   : source/colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 
 # Dummy for when squadt support is not desired
 alias squadt_interface.main
-      : squadt_interface.cpp
+      : source/squadt_interface.cpp
       : <threading>multi
         <use>/libraries/tipi//tool_interface
         <use>/libraries/core//headers
@@ -49,11 +49,11 @@ alias squadt_interface.alias
       ;
 
 alias utilities.main
-      : aterm_ext.cpp
-        numeric_string.cpp
-        info.cpp            # Temporary?
-        bdd2dot.cpp         # Temporary?
-        manipulator.cpp     # Temporary?
+      : source/aterm_ext.cpp
+        source/numeric_string.cpp
+        source/info.cpp            # Temporary?
+        source/bdd2dot.cpp         # Temporary?
+        source/manipulator.cpp     # Temporary?
       : <use>/libraries/aterm//headers
         <use>/libraries/core//headers
         <use>/libraries/data//headers
@@ -75,7 +75,7 @@ alias utilities.alias
       ;
 
 alias headers
-       : [ path.glob-tree ../include/mcrl2 : *.h *.hpp : .svn ]
+       : [ glob-tree *.h *.hpp : .svn ]
        : <use>/boost//headers
        :
        : <use>/boost//headers

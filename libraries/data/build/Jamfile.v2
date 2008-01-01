@@ -1,5 +1,5 @@
 project data
-       : source-location ../source
+       : source-location ..
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
@@ -10,15 +10,15 @@ project data
        ;
 
 alias data.main
-       : enum.cpp
-         enum_standard.cpp
-         confluence_checker.cpp
-         disjointness_checker.cpp
-         invariant_checker.cpp
-         invariant_eliminator.cpp
-         formula_checker.cpp
-         [ glob rewrite/*.cpp ]
-         [ glob prover/*.cpp ]
+       : source/enum.cpp
+         source/enum_standard.cpp
+         source/confluence_checker.cpp
+         source/disjointness_checker.cpp
+         source/invariant_checker.cpp
+         source/invariant_eliminator.cpp
+         source/formula_checker.cpp
+         [ glob source/rewrite/*.cpp ]
+         [ glob source/prover/*.cpp ]
        : <use>/libraries/lps//headers
          <use>/libraries/core//headers
          <use>/libraries/utilities//headers
@@ -55,7 +55,7 @@ alias data.alias
        ;
 
 alias headers
-       : [ path.glob-tree ../include/mcrl2 : *.h *.hpp : .svn ]
+       : [ glob-tree *.h *.hpp : .svn ]
        : <use>/libraries/core//headers
          <use>/libraries/lps//headers
        ;

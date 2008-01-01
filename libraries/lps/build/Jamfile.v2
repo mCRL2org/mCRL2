@@ -50,7 +50,7 @@ alias lps.alias
        ;
 
 alias headers 
-       : [ path.glob-tree ../include/mcrl2 : *.h *.hpp : .svn ]
+       : [ glob-tree *.h *.hpp : .svn ]
        ;
 
-explicit lps.main lps.alias dataelm.main dataelm.alias ;
+explicit lps.main lps.alias ;

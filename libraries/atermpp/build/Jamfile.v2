@@ -1,5 +1,5 @@
 project atermpp
-       : source-location ../source
+       : source-location ..
        : build-dir $(BUILD_TOP)
        ;
 
@@ -26,7 +26,7 @@ alias atermpp
        ;
 
 alias headers
-       : [ path.glob-tree include/mcrl2 : *.h *.hpp : .svn ]
+       : [ glob-tree *.h *.hpp : .svn ]
        :
        :
        : <include>../include

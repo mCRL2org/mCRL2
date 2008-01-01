@@ -1,5 +1,5 @@
 project lts
-       : source-location ../source
+       : source-location ..
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
@@ -8,7 +8,7 @@ project lts
        ;
 
 alias lts.main
-       : [ glob *.cpp ]
+       : [ glob source/*.cpp ]
        : <use>/libraries/core//headers
          <use>/libraries/svc//headers
          <use>/libraries/lps//headers
@@ -39,7 +39,7 @@ alias lts.alias
        ;
 
 alias headers
-       : [ path.glob-tree ../include/mcrl2 : *.h *.hpp : .svn ]
+       : [ glob-tree *.h *.hpp : .svn ]
        :
        :
        : <use>/libraries/core//headers
