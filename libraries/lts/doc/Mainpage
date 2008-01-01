@@ -1,0 +1,10 @@
+/** \mainpage LTS Reference
+ *
+ * The LTS library provides functionality for handling <i>labelled transition
+ * systems</i> (LTS).
+ * 
+ * These pages contain the reference manual for this library.
+ *
+ * More information about this library can be found at the <a
+ * href="http://www.mcrl2.org/wiki/index.php/LTS">LTS documentation page</a>.
+ */

@@ -34,10 +34,6 @@ STYLESHEET=doc/doxy/doxystyle.css
 #
 # If you want to have documentation generated for your library, simply add an
 # entry to LIBRARY_LIST below on a new line.
-#
-# By default, this script will process all source code files in the 'include'
-# and 'source' subdirectories of your library's directory. See below for a
-# way of changing this behaviour.
 LIBRARY_LIST="
 ATerm++:atermpp:libraries/atermpp
 Core:core:libraries/core
@@ -48,6 +44,12 @@ PBES:pbes:libraries/pbes
 Trace:trace:libraries/trace
 Utilities:utilities:libraries/utilities
 TIPi:tipi:tools/squadt/libraries/tipi"
+
+# Doxygen will extract documentation from every file/directory within your
+# library's directory that is listed in the INPUT_LIST variable (if and only if
+# it exists). This is a space-separated list of paths that are relative to a
+# library's root directory.
+INPUT_LIST="include source doc/Mainpage"
 
 # Optionally, a Doxygen configuration file called 'Doxyfile' may be added to the
 # 'doc' subdirectory of your library's root directory. If such a file exists,
@@ -82,9 +84,30 @@ DOXYFOOTER=doxyfooter.html
 
 # The text on the main page of the website (OUTPUT_DIR/index.html) in HTML
 # syntax.
-MAIN_TEXT="Welcome to the mCRL2 Library Reference.
+MAIN_TEXT="<h1>mCRL2 Library Reference</h1>
 <p>
-You can choose a library from the navigation bar to browse its reference pages."
+The mCRL2 Library Reference contains the reference pages for every mCRL2 library.
+The pages list and document the available data structures, methods and
+interfaces.
+As such, they serve as a <i>reference manual</i> for developers.
+</p>
+<p>
+The <a
+href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">library
+documentation</a> provides an overview of every library.
+It describes its structure and contains tutorials on how to write programs with
+the library.
+Hence, the library documentation serves as a <i>user manual</i> for developers
+who want to start using any of the libraries.
+It is therefore recommended to read those pages first.
+</p>
+<p>
+These reference pages can be browsed using the navigation bar at the top.
+They are generated automatically using <a
+href=\"http://www.doxygen.org\">Doxygen</a> and are updated to the latest
+revision of the <a href=\"https://svn.win.tue.nl/viewcvs/MCRL2\">mCRL2 SVN
+repository</a> every night.
+</p>"
 
 # The text at the bottom of every generated HTML page.
 # We use some of the predefined placeholders (starting with a '$') that Doxygen
@@ -93,10 +116,19 @@ FOOTER_TEXT="This page was generated on \$datetime by <a
 href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion."
 
 
-
 # End of variables section; below is the script
 
 
+# Determines the Doxygen input files/directories for the library of which the
+# location is passed as an argument
+function determine_input {
+  DOXYINPUT=""
+  for f in $INPUT_LIST ; do
+    if [ -e $1/$f ] ; then
+      DOXYINPUT="$DOXYINPUT $1/$f"
+    fi
+  done
+} # End of function determine_input
 
 function write_index {
   echo "
@@ -249,10 +281,12 @@ for L in $LIBRARY_LIST ; do
   set -- $L
   IFS=$OLDIFS
 
+  determine_input $3
+
   TAGFILES="$TAGFILES $3/$2.tag=../$2"
   DOXYCONFIG="
     GENERATE_TAGFILE = $3/$2.tag
-    INPUT = $3/include $3/source"
+    INPUT = $DOXYINPUT"
   if [ -e $3/doc/Doxyfile ] ; then
     ( cat $DOXYMASTER $3/doc/Doxyfile ; echo "$DOXYCONFIG" ) | doxygen -
   else
@@ -276,6 +310,7 @@ for L in $LIBRARY_LIST ; do
   
   # Create the HTML header for all pages that are generated for this library.
   write_doxyheader $2
+  determine_input $3
 
   # This library's tag file must *not* be in the list of tag files that are
   # passed to Doxygen via the TAGFILES variable. Otherwise, the reference pages
@@ -283,7 +318,7 @@ for L in $LIBRARY_LIST ; do
   TAGFILES_NOT_SELF=`echo "$TAGFILES" | sed -e "s|$3/$2.tag=../$2||"`
   DOXYCONFIG="
     PROJECT_NAME = \"$1\" 
-    INPUT = $3/include $3/source
+    INPUT = $DOXYINPUT
     GENERATE_HTML = YES
     OUTPUT_DIRECTORY = $OUTPUT_DIR
     HTML_OUTPUT = $2
