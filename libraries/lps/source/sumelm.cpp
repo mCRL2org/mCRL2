@@ -68,6 +68,22 @@ namespace lps {
     return atermpp::partial_replace(t, sumelm_replace_helper(replacements));
   }
 
+  /// Replaces all data expressions in the right hand sides of the list, using
+  /// the specified map of replacements.
+  ///
+  data_assignment_list sumelm_data_assignment_list_replace(data_assignment_list t,
+                         const std::map<data_expression, data_expression>& replacements)
+  {
+    data_assignment_list result;
+
+    for (data_assignment_list::iterator i = t.begin(); i != t.end(); ++i)
+    {
+      result = push_front(result, data_assignment(i->lhs(), sumelm_replace(i->rhs(), replacements)));
+    }
+
+    return result;
+  }
+
   /// Adds replacement lhs := rhs to the specified map of replacements.
   /// All replacements that have lhs as a right hand side will be changed to
   /// have rhs as a right hand side.
@@ -272,7 +288,7 @@ namespace lps {
               sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
               result = true_();
             }
-          } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 ||
+          } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 &&
                      is_data_variable(substitutions[lhs(working_condition)])) {
             sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
@@ -303,7 +319,7 @@ namespace lps {
                               new_summand.is_delta(),
                               sumelm_replace(new_summand.actions(), substitutions),
                               sumelm_replace(new_summand.time(), substitutions),
-                              sumelm_replace(new_summand.assignments(), substitutions));
+                              sumelm_data_assignment_list_replace(new_summand.assignments(), substitutions));
     //Take the summand with substitution, and remove the summation variables that are now not needed
     new_summand = remove_unused_variables(new_summand);
     return new_summand;
