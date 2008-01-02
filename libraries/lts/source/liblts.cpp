@@ -1393,11 +1393,6 @@ void transition_iterator::operator ++()
   pos++;
 }
 
-/**
- * \returns the format if successful, and lts_none otherwise
- *
- * @param[in] s format specification
- **/
 lts_type lts::guess_format(string const& s) {
   string::size_type pos = s.find_last_of('.');
   
@@ -1433,9 +1428,6 @@ lts_type lts::guess_format(string const& s) {
   return lts_none;
 }
 
-/**
- * @param[in] s the string representation of the file format
- **/
 lts_type lts::parse_format(char const* s) {
   if ( !strcmp(s,"aut") )
   {

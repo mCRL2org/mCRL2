@@ -1,3 +1,20 @@
+.note dt {
+  margin-right: 1em;
+  display: inline;
+}
+.note dd {
+  margin-left: 0em;
+  display: inline;
+}
+.see dt {
+  margin-right: 1em;
+  display: inline;
+}
+.see dd {
+  margin-left: 0em;
+  display: inline;
+}
+
 #navbar {
 	border-bottom: 1px solid black;
 	margin: 0;
