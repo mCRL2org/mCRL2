@@ -644,9 +644,9 @@ static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
 
 static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 {
+  ATfprintf(stderr,"AddMultiaction %t\n",multiAction);
   ATermList actionnames=getnames(multiAction);
   long n=addObject((ATermAppl)actionnames,isnew);
-  
   
   if (*isnew)
   { 
@@ -654,6 +654,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
     // tempvar is needed as objectdata can change during a call
     // of getparameters.
     ATermList templist=getparameters(multiAction);
+    ATfprintf(stderr,"Parameters: %t\n",templist);
     objectdata[n].parameters=templist;
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
@@ -6384,11 +6385,11 @@ static ATermAppl allowblockcomposition(
   }
 
   int sourcesumlist_length=ATgetLength(sourcesumlist);
-  if (sourcesumlist_length>=2 || is_allow) // This condition prevents this message to be printed
-                                           // when performing data elimination. In this case the
-                                           // term delta is linearised, to determine which data
-                                           // is essential for all processes. In these cases a
-                                           // message about the block operator is very confusing.
+  if (sourcesumlist_length>2 || is_allow) // This condition prevents this message to be printed
+                                          // when performing data elimination. In this case the
+                                          // term delta is linearised, to determine which data
+                                          // is essential for all processes. In these cases a
+                                          // message about the block operator is very confusing.
   { gsVerboseMsg(
           "- calculating the %s operator on %d summands",
                           (is_allow?"allow":"block"),
