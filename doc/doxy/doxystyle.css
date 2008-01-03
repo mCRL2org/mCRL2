@@ -1,3 +1,6 @@
+code {
+  background: transparent;
+}
 .note dt {
   margin-right: 1em;
   display: inline;
@@ -320,9 +323,8 @@ td.tiny      { font-size: 75%;
 th.dirtab { background: #e8eef2;
             font-weight: bold;
 }
-hr { height: 1px;
+hr { height: 0px;
      border: none;
-     border-top: 1px solid #aaa;
 }
 
 /* Style for detailed member documentation */

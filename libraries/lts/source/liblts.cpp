@@ -904,9 +904,6 @@ void p_lts::p_sort_transitions() {
 }
 
 unsigned int* p_lts::p_get_transition_indices() {
-// PRE: the array of transitions is sorted on source state
-// RETURNS: array A of size (nstates+1) such that for every state s:
-// [ A[s] .. A[s+1] ) are all transitions starting in s
   unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
   if (A == NULL) {
     gsErrorMsg("out of memory\n");

@@ -342,74 +342,236 @@ namespace lts
       static char const* name_of_equivalence(const lts_equivalence s);
 
     public:
+      /** Creates an empty LTS.
+       * \param[in] type The LTS format.
+       * \param[in] state_info Indicates whether state parameter information
+       * will be present.
+       * \param[in] label_info Indicates whether label information will be
+       * present. */
       lts(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
+      /** Creates an LTS and reads its data from a file.
+       * \param[in] filename The name of the file from which the data will be
+       * read.
+       * \param[in] type The format of the file. If \a lts_none is passed then
+       * an attempt is made to determine the format from the contents of the
+       * file. */
       lts(std::string &filename, lts_type type = lts_none);
+      /** Creates an LTS and reads its data from an input stream.
+       * \param[in] is The input stream from which the data will be read.
+       * \param[in] type The format of the data. If \a lts_none is passed then
+       * an attempt is made to determine the format from the contents of the
+       * stream. */
       lts(std::istream &is, lts_type type = lts_none);
+      /** Frees the memory occupied by this LTS. */
       ~lts();
 
+      /** Clears the LTS data. 
+       * \param[in] type The new LTS format.
+       * \param[in] state_info Indicates whether state parameter information
+       * will be present.
+       * \param[in] label_info Indicates whether label information will be
+       * present. */
       void reset(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
 
+      /** Reads LTS data from a file. This is not supported for Dot files.
+       * \param[in] filename The name of the file from which data will be read.
+       * \param[in] type The format of the file. If \a lts_none is passed then
+       * an attempt is made to determine the format from the contents of the
+       * file.
+       * \param[in] extra Additional data to be stored with the LTS.
+       * \retval true if the read operation succeeded;
+       * \retval false otherwise.*/
       bool read_from(std::string const& filename, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+      /** Reads LTS data from an input stream. This is not supported for SVC,
+       * Dot, and BCG files.
+       * \param[in] is The input stream from which data will be read.
+       * \param[in] type The format of the file. If \a lts_none is passed then
+       * an attempt is made to determine the format from the contents of the
+       * stream.
+       * \param[in] extra Additional data to be stored with the LTS.
+       * \retval true if the read operation succeeded;
+       * \retval false otherwise.*/
       bool read_from(std::istream &is, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+
+      /** Writes LTS data to a file.
+       * \param[in] filename The name of the file to which data will be written.
+       * \param[in] type The format of the file.
+       * \param[in] extra Additional information for the output.
+       * \retval true if the write operation succeeded;
+       * \retval false otherwise.*/
       bool write_to(std::string const& filename, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
+
+      /** Writes LTS data to an output stream. This is not supported for SVC and
+       * BCG files.
+       * \param[in] os The output stream to which data will be written.
+       * \param[in] type The format of the output stream.
+       * \param[in] extra Additional information for the output.
+       * \retval true if the write operation succeeded;
+       * \retval false otherwise.*/
       bool write_to(std::ostream &os, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
 
+      /** Gets the number of states of this LTS.
+       * \return The number of states of this LTS. */
       unsigned int num_states();
+      /** Gets the number of transitions of this LTS.
+       * \return The number of transitions of this LTS. */
       unsigned int num_transitions();
+      /** Gets the number of labels of this LTS.
+       * \return The number of labels of this LTS. */
       unsigned int num_labels();
       
+      /** Gets the number of the initial state of this LTS.
+       * \return The number of the initial state of this LTS. */
       unsigned int initial_state();
+      /** Sets the initial state of this LTS.
+       * \param[in] state The number of the state that will become the initial
+       * state. */
       void set_initial_state(unsigned int state);
       
+      /** Adds a state to this LTS.
+       * \param[in] value The value of the state. 
+       * \return The number of the added state. */
       unsigned int add_state(ATerm value = NULL);
+      /** Adds a label to this LTS.
+       * \param[in] value The value of the label. 
+       * \param[in] is_tau Indicates whether the label is a tau action.
+       * \return The number of the added label. */
       unsigned int add_label(ATerm value = NULL, bool is_tau = false);
+      /** Adds a label to this LTS.
+       * \param[in] is_tau Indicates whether the label is a tau action.
+       * \return The number of the added label. */
       unsigned int add_label(bool is_tau);
+      /** Adds a transition to this LTS.
+       * \param[in] from The number of the transition's source state.
+       * \param[in] label The number of the transition's label.
+       * \param[in] to The number of the transition's target state.
+       * \return The number of the added transition. */
       unsigned int add_transition(unsigned int from,
                                   unsigned int label,
                                   unsigned int to);
 
+      /** Sets the value of a state.
+       * \param[in] state The number of the state.
+       * \param[in] value The value that will be assigned to the state. */
       void set_state(unsigned int state, ATerm value);
+      /** Sets the value of a label.
+       * \param[in] label The number of the label.
+       * \param[in] value The value that will be assigned to the label.
+       * \param[in] is_tau Indicates whether the label is a tau action. */
       void set_label(unsigned int label, ATerm value, bool is_tau = false);
 
+      /** Gets the value of a state.
+       * \param[in] state The number of the state. 
+       * \return The value of the state. */
       ATerm state_value(unsigned int state);
+      /** Gets the value of a label.
+       * \param[in] label The number of the label. 
+       * \return The value of the label. */
       ATerm label_value(unsigned int label);
+      /** Gets the value of a state as a string.
+       * \param[in] state The number of the state. 
+       * \return A string representation of the value of the state. */
       std::string state_value_str(unsigned int state);
+      /** Gets the value of a label as a string.
+       * \param[in] label The number of the label. 
+       * \return A string representation of the value of the label. */
       std::string label_value_str(unsigned int label);
+      /** Gets the source state of a transition.
+       * \param[in] transition The number of the transition. 
+       * \return The number of the transition's source state. */
       unsigned int transition_from(unsigned int transition);
+      /** Gets the label of a transition.
+       * \param[in] transition The number of the transition. 
+       * \return The number of the transition's label. */
       unsigned int transition_label(unsigned int transition);
+      /** Gets the target state of a transition.
+       * \param[in] transition The number of the transition. 
+       * \return The number of the transition's target state. */
       unsigned int transition_to(unsigned int transition);
 
+      /** Gets an iterator to the states of this LTS.
+       * \return An iterator to the states of this LTS. */
       state_iterator get_states();
+      /** Gets an iterator to the labels of this LTS.
+       * \return An iterator to the labels of this LTS. */
       label_iterator get_labels();
+      /** Gets an iterator to the transitions of this LTS.
+       * \return An iterator to the transitions of this LTS. */
       transition_iterator get_transitions();
 
+      /** Checks whether a label is a tau action.
+       * \param[in] label The number of the label. 
+       * \retval true if the label is a tau action;
+       * \retval false otherwise.  */
       bool is_tau(unsigned int label);
+      /** Sets the tau attribute of a label.
+       * \param[in] label The number of the label.
+       * \param[in] is_tau Indicates whether the label should become a tau action. */
       void set_tau(unsigned int label, bool is_tau = true);
 
+      
+      /** Checks whether this LTS has a creator.
+       * \retval true if the label has a creator;
+       * \retval false otherwise.  */
       bool has_creator();
+      /** Gets the creator of this LTS.
+       * \return The creator string.*/
       std::string get_creator();
+      /** Sets the creator of this LTS.
+       * \param[in] creator The creator string.*/
       void set_creator(std::string creator);
       
+      /** Gets the format of this LTS.
+       * \return The format of this LTS. */
       lts_type get_type();
 
+      /** Checks whether this LTS has state values associated with its states.
+       * \retval true if the LTS has state information;
+       * \retval false otherwise.  */
       bool has_state_info();
+      /** Checks whether this LTS has label values associated with its labels.
+       * \retval true if the LTS has label information;
+       * \retval false otherwise.  */
       bool has_label_info();
 
+      /** Removes the state values from all states. */
       void remove_state_values();
 
+      /** Sorts the transitions first on source state number, then on label
+       * number, then on target state number. */
       void sort_transitions();
+      /** Gets an array specifying for each state, the range of transitions of
+       * which that state is the source state.
+       * \pre The transitions are sorted on source state number.
+       * \return An array \e A of size \ref num_states()+1 such that for every state <em>s</em>:
+       * [ \e A[\e s] .. \e A[<em>s</em>+1] ) are all transitions of which \e s is the source state. */
       unsigned int* get_transition_indices();
       
+      /** Applies a reduction algorithm to this LTS.
+       * \param[in] eq The equivalence with respect to which the LTS will be
+       * reduced.
+       * \param[in] opts The options that will be used for the reduction.
+       * \retval true if the reduction succeeded;
+       * \retval false otherwise. */
       bool reduce(lts_equivalence eq, lts_eq_options &opts);
+      /** Checks whether this LTS is equivalent to another LTS.
+       * \param[in] l The LTS to which this LTS will be compared.
+       * \param[in] eq The equivalence with respect to which the LTSs will be
+       * compared.
+       * \param[in] opts The options that will be used for the comparison.
+       * \retval true if the LTSs are found to be equivalent.
+       * \retval false otherwise. */
       bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts);
+      /** Determinises this LTS. */
       void determinise();
-      /**
-       * \brief  Check whether or not all states in the LTS are reachable from
-       *         the initial state. (Worst case: O(nstates*ntransitions))
-       *
-       * \return  true iff all states are reachable from the initial state
-       **/
+      /** Checks whether all states in this LTS are reachable from the initial
+       * state. Runs in O(\ref num_states * \ref num_transitions) time.
+       * \retval true if all states are reachable from the initial state;
+       * \retval false otherwise. */
       bool reachability_check();
+      /** Checks whether this LTS is deterministic.
+       * \retval true if this LTS is deterministic;
+       * \retval false otherwise. */
       bool is_deterministic();
 
       friend class state_iterator;
