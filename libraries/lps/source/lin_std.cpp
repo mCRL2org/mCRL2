@@ -98,7 +98,8 @@ static bool containstimebody(
               ATermAppl t,
               bool *stable,
               ATermIndexedSet visited,
-              bool allowrecursion);
+              bool allowrecursion,
+              const bool print_info=false);
 static ATermAppl storeinit(ATermAppl init);
 static void storeprocs(ATermList procs);
 static ATermList getsorts(ATermList l);
@@ -644,7 +645,7 @@ static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
 
 static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 {
-  ATfprintf(stderr,"AddMultiaction %t\n",multiAction);
+  // ATfprintf(stderr,"AddMultiaction %t\n",multiAction);
   ATermList actionnames=getnames(multiAction);
   long n=addObject((ATermAppl)actionnames,isnew);
   
@@ -654,7 +655,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
     // tempvar is needed as objectdata can change during a call
     // of getparameters.
     ATermList templist=getparameters(multiAction);
-    ATfprintf(stderr,"Parameters: %t\n",templist);
+    // ATfprintf(stderr,"Parameters: %t\n",templist);
     objectdata[n].parameters=templist;
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
@@ -3056,7 +3057,7 @@ static ATermAppl create_regular_invocation(
     }
     else 
     { new_process=newprocess(freevars,sequence,pCRL,
-                        canterminatebody(sequence,NULL,NULL,0),containstimebody(sequence,NULL,NULL,false));
+                        canterminatebody(sequence,NULL,NULL,0),containstimebody(sequence,NULL,NULL,false,false));
       objectdata[objectIndex(new_process)].representedprocess=
                    (ATerm)sequence;
     }
@@ -7610,7 +7611,6 @@ static ATermList combinesumlist(
              (add_delta?gsMakeDataExprTrue():
               substitute_data(rename_list,par2,
                    getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec)));
-  // gsfprintf(stderr,"Ultimatedelaycondition1: %P\n",ultimatedelaycondition);
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
@@ -7680,7 +7680,6 @@ static ATermList combinesumlist(
   { ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist1,par1,timevar,spec);
   }
-  // gsfprintf(stderr,"Ultimatedelaycondition2: %P\n",ultimatedelaycondition);
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
@@ -8342,59 +8341,61 @@ static void alphaconversion(ATermAppl procId, ATermList parameters)
 static bool containstime_rec(
               ATermAppl procId,
               bool *stable,
-              ATermIndexedSet visited);
+              ATermIndexedSet visited,
+              const bool print_info);
 
 static bool containstimebody(
               ATermAppl t,
               bool *stable,
               ATermIndexedSet visited,
-              bool allowrecursion)
+              bool allowrecursion,
+              const bool print_info)
 { 
   if (gsIsMerge(t))
   { /* the construction below is needed to guarantee that 
        both subterms are recursively investigated */
-    bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
+    bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
     return r1||r2;
   }
 
   if (gsIsProcess(t))
   { 
     if (allowrecursion)
-    { return (containstime_rec(ATAgetArgument(t,0),stable,visited));
+    { return (containstime_rec(ATAgetArgument(t,0),stable,visited,print_info));
     }
     return objectdata[objectIndex(ATAgetArgument(t,0))].containstime;
   }
 
   if (gsIsHide(t)) 
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsRename(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsAllow(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsBlock(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsComm(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsChoice(t)) 
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
     return r1||r2;
   }
 
   if (gsIsSeq(t))
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
     return r1||r2;
   }
 
@@ -8404,13 +8405,13 @@ static bool containstimebody(
 
   if (gsIsIfThenElse(t))
   {
-    bool r1=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
-    bool r2=containstimebody(ATAgetArgument(t,2),stable,visited,allowrecursion);
+    bool r1=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,2),stable,visited,allowrecursion,print_info);
     return r1||r2;
   }
 
   if (gsIsSum(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
   }
 
   if (gsIsAction(t)) 
@@ -8434,8 +8435,8 @@ static bool containstimebody(
   }
 
   if (gsIsSync(t))
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
     return r1||r2;
   }
 
@@ -8447,7 +8448,8 @@ static bool containstimebody(
 static bool containstime_rec(
               ATermAppl procId, 
               bool *stable,
-              ATermIndexedSet visited)
+              ATermIndexedSet visited,
+              const bool print_info)
 { long n=objectIndex(procId);
   ATbool nnew=ATfalse;
  
@@ -8455,9 +8457,11 @@ static bool containstime_rec(
   { ATindexedSetPut(visited,(ATerm)procId,&nnew);
   }
   if (nnew)
-  { bool ct=containstimebody(objectdata[n].processbody,stable,visited,1); 
+  { bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,print_info); 
     if ((ct) && !add_delta)
-    { gsVerboseMsg("process %s contains time\n",ATgetName(ATgetAFun(ATgetArgument(procId,0))));
+    { if (print_info)
+      { gsVerboseMsg("process %s contains time\n",ATgetName(ATgetAFun(ATgetArgument(procId,0))));
+      }
     }
     if (objectdata[n].containstime!=ct)
     { objectdata[n].containstime=ct;
@@ -8471,10 +8475,12 @@ static bool containstime_rec(
 
 static void determinewhetherprocessescontaintime(ATermAppl procId)
 { bool stable=0;
+  bool print_info=true;
   ATermIndexedSet visited=ATindexedSetCreate(64,50);
   while (!stable) 
   { stable=1;
-    containstime_rec(procId,&stable,visited);
+    containstime_rec(procId,&stable,visited,print_info);
+    print_info=false;
     ATindexedSetReset(visited);
   }
   ATindexedSetDestroy(visited);
@@ -8677,7 +8683,7 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
                 gsMakeSeq(objectdata[n].processbody,
                           gsMakeProcess(terminatedProcId,ATempty)),
                 pCRL,canterminatebody(objectdata[n].processbody,NULL,NULL,0),
-                     containstimebody(objectdata[n].processbody,NULL,NULL,0)); 
+                     containstimebody(objectdata[n].processbody,NULL,NULL,0,false)); 
     return newProcId;
   }
   ATtablePut(visited,(ATerm)procId,(ATerm)procId);
