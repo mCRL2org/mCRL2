@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/aterm_appl_iterator.h"
 
+/// Namespace containing all ATerm++ functionality
 namespace atermpp
 {
   //---------------------------------------------------------//

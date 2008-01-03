@@ -84,29 +84,24 @@ DOXYFOOTER=doxyfooter.html
 
 # The text on the main page of the website (OUTPUT_DIR/index.html) in HTML
 # syntax.
-MAIN_TEXT="<h1>mCRL2 Library Reference</h1>
+MAIN_TEXT="<h1>mCRL2 Library Reference Manual</h1>
 <p>
-The mCRL2 Library Reference contains the reference pages for every mCRL2 library.
-The pages list and document the available data structures, methods and
-interfaces.
-As such, they serve as a <i>reference manual</i> for developers.
+The mCRL2 Library Reference Manual contains the reference manuals of every mCRL2 library.
+These pages list and document the available data structures, methods and interfaces.
 </p>
 <p>
-The <a
-href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">library
-documentation</a> provides an overview of every library.
-It describes its structure and contains tutorials on how to write programs with
-the library.
-Hence, the library documentation serves as a <i>user manual</i> for developers
-who want to start using any of the libraries.
-It is therefore recommended to read those pages first.
-</p>
-<p>
-These reference pages can be browsed using the navigation bar at the top.
+The pages can be browsed using the navigation bar at the top.
 They are generated automatically using <a
 href=\"http://www.doxygen.org\">Doxygen</a> and are updated to the latest
 revision of the <a href=\"https://svn.win.tue.nl/viewcvs/MCRL2\">mCRL2 SVN
 repository</a> every night.
+</p>
+<p>
+This reference manual is part of the <a
+href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">mCRL2 Library
+Documentation</a> which also includes <i>user manuals</i> for developers
+who want to start using any of the libraries.
+It is therefore recommended to read those pages first.
 </p>"
 
 # The text at the bottom of every generated HTML page.
