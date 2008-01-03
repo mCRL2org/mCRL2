@@ -1,7 +1,14 @@
 #!/bin/bash
-
+#
 # IMPORTANT: This script should ONLY be run from the trunk directory of the
 # mCRL2 repository!
+
+###################### SETTINGS ###############################################
+
+# Whether this script is indeed called from the trunk directory will be checked
+# using the following variable.
+# It contains the path to this script from the trunk directory.
+PATH_FROM_TRUNK=doc/doxy
 
 # The file containing the global Doxygen configuration.
 # Path is relative to the current directory, i.e. trunk.
@@ -110,9 +117,11 @@ It is therefore recommended to read those pages first.
 FOOTER_TEXT="This page was generated on \$datetime by <a
 href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion."
 
+###################### END OF SETTINGS ########################################
 
-# End of variables section; below is the script
 
+
+###################### FUNCTIONS ##############################################
 
 # Determines the Doxygen input files/directories for the library of which the
 # location is passed as an argument
@@ -255,9 +264,114 @@ function write_doxyfooter {
 </html>" > $DOXYFOOTER
 } # End of function write_doxyfooter
 
+function print_help {
+  echo "Usage: `basename $0` [OPTION]"
+  echo
+  echo "where OPTION is one of:"
+  echo "   -h            prints this help message"
+  echo "   -i            lists the known libraries along with their IDs"
+  echo "   -l ID[,ID]*   generates the websites for the libraries with the"
+  echo "                 listed IDs only; use -i to see the IDs"
+  echo
+  echo "If no OPTION is passed, then the websites for all known libraries are"
+  echo "generated."
+  echo
+  echo "Use of -l does generally not result in properly interlinked library"
+  echo "websites."
+  echo
+  echo "If this script is not called from the trunk directory of the mCRL2"
+  echo "repository, it will abort with an error message before generating any"
+  echo "website."
+} # End of function print_help
+
+function print_liblist {
+  OLDIFS=$IFS
+  IFS=$'\n'
+  echo "This is the list of known libraries along with their IDs:"
+  I=1
+  for L in $LIBRARY_LIST ; do
+    IFS=$':'
+    set -- $L
+    IFS=$OLDIFS
+    echo -e "$I\t$1"
+    let I++
+  done
+} # End of function print_liblist
+
+###################### END OF FUNCTIONS #######################################
 
 
+
+# Variables and functions are set, here comes the script!
+
+# First check if we're called from the trunk directory
+if [ "$0" != "$PATH_FROM_TRUNK/`basename $0`" ] ; then
+  echo "error: script is not called from the trunk directory of the mCRL2 repository"
+  exit 1
+fi
+# Ok, apparently this holds:
 TRUNK=`pwd`
+
+# Process the command line arguments
+CMDARGS=":hil:"
+while getopts $CMDARGS OPT
+do
+  if [ "$OPT" == "h" ] ; then
+    print_help
+    exit 0
+  fi
+  if [ "$OPT" == "i" ] ; then
+    print_liblist
+    exit 0
+  fi
+  if [ "$OPT" == "l" ] ; then
+    LIBID_LIST=$OPTARG
+    continue
+  fi
+  if [ "$OPT" == ":" ] ; then
+    echo "error: missing argument after -$OPTARG option"
+    exit 1
+  fi
+  if [ "$OPT" == "?" ] ; then
+    echo "error: unknown option -$OPTARG"
+    exit 1
+  fi
+  # this should never happen
+  echo "error: unknown error"
+  exit 1
+done
+if [ "$OPTIND" -ne "`expr $# + 1`" ] ; then
+  echo "error: too many arguments"
+  exit 1
+fi
+
+if [ -n "$LIBID_LIST" ] ; then
+  # We process only the requested libraries
+  # Construct the list of libraries that have to be processed
+  OLDIFS=$IFS
+  IFS=$','
+  for I in $LIBID_LIST ; do
+    # set a value at place $I in array A
+    A[$I]="yes"
+  done
+
+  IFS=$'\n'
+  I=1
+  for L in $LIBRARY_LIST ; do
+    if [ "${A[$I]}" == "yes" ] ; then
+      NEW_LIB_LIST=`echo -e "$NEW_LIB_LIST\n$L"`
+    fi
+    let I++
+  done
+  IFS=$OLDIFS
+
+  if [ -z "$NEW_LIB_LIST" ] ; then
+    echo "no libraries to process; exiting"
+    exit 0
+  fi
+  LIBRARY_LIST="$NEW_LIB_LIST"
+fi
+
 
 # Sort LIBRARY_LIST alphabetically by library name
 LIBRARY_LIST=`echo "$LIBRARY_LIST" | sort`
