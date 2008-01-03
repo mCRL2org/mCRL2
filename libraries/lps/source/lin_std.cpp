@@ -6480,7 +6480,7 @@ static ATermAppl allowblockcomposition(
                       ATAgetFirst(resultdeltasumlist)); 
     } 
   }
-  if (sourcesumlist_length>=2 || is_allow)
+  if (sourcesumlist_length>2 || is_allow)
   { gsVerboseMsg(", resulting in %d summands\n",
                           ATgetLength(resultsumlist));
   }   
