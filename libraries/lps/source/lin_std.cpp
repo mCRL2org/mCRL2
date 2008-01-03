@@ -99,6 +99,7 @@ static bool containstimebody(
               bool *stable,
               ATermIndexedSet visited,
               bool allowrecursion,
+              bool &contains_if_then,
               const bool print_info=false);
 static ATermAppl storeinit(ATermAppl init);
 static void storeprocs(ATermList procs);
@@ -2220,7 +2221,8 @@ static ATermAppl wraptime(
 
   if (gsIsAtTime(body))
   { /* make a new process */
-    ATermAppl newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    ATermAppl newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeAtTime(
               gsMakeProcess(
                  newproc,
@@ -2380,7 +2382,8 @@ static ATermAppl bodytovarheadGNF(
         return gsMakeChoice(body1,body2);
       }  
      body=bodytovarheadGNF(body,alt,freevars,first);
-     newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+     bool dummy=false;
+     newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
      return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
    }
 
@@ -2405,7 +2408,8 @@ static ATermAppl bodytovarheadGNF(
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -2420,7 +2424,8 @@ static ATermAppl bodytovarheadGNF(
                 bodytovarheadGNF(body1,seq,freevars,first));
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
 
   } 
@@ -2458,7 +2463,8 @@ static ATermAppl bodytovarheadGNF(
                 bodytovarheadGNF(body2,seq,freevars,first)));
     }     
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
 
   } 
@@ -2515,7 +2521,8 @@ static ATermAppl bodytovarheadGNF(
       return gsMakeSeq(body1,body2);
     } 
     body1=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
 
@@ -2614,7 +2621,8 @@ static ATermAppl bodytovarheadGNF(
     }
 
     /* make a new process, containing this process */
-    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0),containstimebody(body,NULL,NULL,false));
+    bool dummy=false;
+    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0),containstimebody(body,NULL,NULL,false,dummy));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -3051,13 +3059,15 @@ static ATermAppl create_regular_invocation(
     ATermAppl newbody=NULL;   
     if (regular2)
     { ATermList pars=parscollect(sequence,&newbody);
-      new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0),containstimebody(newbody,NULL,NULL,false));
+      bool dummy=false;
+      new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0),containstimebody(newbody,NULL,NULL,false,dummy));
       objectdata[objectIndex(new_process)].representedprocesses=
                    (ATerm)process_names;
     }
     else 
-    { new_process=newprocess(freevars,sequence,pCRL,
-                        canterminatebody(sequence,NULL,NULL,0),containstimebody(sequence,NULL,NULL,false,false));
+    { bool dummy=false;
+      new_process=newprocess(freevars,sequence,pCRL,
+                        canterminatebody(sequence,NULL,NULL,0),containstimebody(sequence,NULL,NULL,false,dummy));
       objectdata[objectIndex(new_process)].representedprocess=
                    (ATerm)sequence;
     }
@@ -8342,6 +8352,7 @@ static bool containstime_rec(
               ATermAppl procId,
               bool *stable,
               ATermIndexedSet visited,
+              bool &contains_if_then,
               const bool print_info);
 
 static bool containstimebody(
@@ -8349,69 +8360,71 @@ static bool containstimebody(
               bool *stable,
               ATermIndexedSet visited,
               bool allowrecursion,
+              bool &contains_if_then,
               const bool print_info)
 { 
   if (gsIsMerge(t))
   { /* the construction below is needed to guarantee that 
        both subterms are recursively investigated */
-    bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
+    bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,contains_if_then,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info);
     return r1||r2;
   }
 
   if (gsIsProcess(t))
   { 
     if (allowrecursion)
-    { return (containstime_rec(ATAgetArgument(t,0),stable,visited,print_info));
+    { return (containstime_rec(ATAgetArgument(t,0),stable,visited,contains_if_then,print_info));
     }
     return objectdata[objectIndex(ATAgetArgument(t,0))].containstime;
   }
 
   if (gsIsHide(t)) 
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsRename(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsAllow(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsBlock(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsComm(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsChoice(t)) 
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,contains_if_then,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info);
     return r1||r2;
   }
 
   if (gsIsSeq(t))
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,contains_if_then,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info);
     return r1||r2;
   }
 
   if (gsIsIfThen(t))
-  { return true; 
+  { contains_if_then=true; 
+    return true; 
   }
 
   if (gsIsIfThenElse(t))
   {
-    bool r1=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
-    bool r2=containstimebody(ATAgetArgument(t,2),stable,visited,allowrecursion,print_info);
+    bool r1=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,2),stable,visited,allowrecursion,contains_if_then,print_info);
     return r1||r2;
   }
 
   if (gsIsSum(t))
-  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info));
+  { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
 
   if (gsIsAction(t)) 
@@ -8435,8 +8448,8 @@ static bool containstimebody(
   }
 
   if (gsIsSync(t))
-  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,print_info);
-    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,print_info);
+  { bool r1=containstimebody(ATAgetArgument(t,0),stable,visited,allowrecursion,contains_if_then,print_info);
+    bool r2=containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info);
     return r1||r2;
   }
 
@@ -8449,6 +8462,7 @@ static bool containstime_rec(
               ATermAppl procId, 
               bool *stable,
               ATermIndexedSet visited,
+              bool &contains_if_then,
               const bool print_info)
 { long n=objectIndex(procId);
   ATbool nnew=ATfalse;
@@ -8457,7 +8471,7 @@ static bool containstime_rec(
   { ATindexedSetPut(visited,(ATerm)procId,&nnew);
   }
   if (nnew)
-  { bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,print_info); 
+  { bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then,print_info); 
     if ((ct) && !add_delta)
     { if (print_info)
       { gsVerboseMsg("process %s contains time\n",ATgetName(ATgetAFun(ATgetArgument(procId,0))));
@@ -8473,17 +8487,25 @@ static bool containstime_rec(
   return (objectdata[n].containstime);
 }
 
-static void determinewhetherprocessescontaintime(ATermAppl procId)
-{ bool stable=0;
+static bool determinewhetherprocessescontaintime(ATermAppl procId)
+
+{ /* This function sets for all reachable processes in the array objectdata
+     whether they contain time in the field containstime. In verbose mode
+     it prints the process variables that contain time. Furtermore, it returns
+     whether there are processes that contain an if-then that will be translated
+     to an if-then-else with an delta@0 in the else branch, introducing time */
+  bool stable=0;
   bool print_info=true;
+  bool contains_if_then=false;
   ATermIndexedSet visited=ATindexedSetCreate(64,50);
   while (!stable) 
   { stable=1;
-    containstime_rec(procId,&stable,visited,print_info);
+    containstime_rec(procId,&stable,visited,contains_if_then,print_info);
     print_info=false;
     ATindexedSetReset(visited);
   }
   ATindexedSetDestroy(visited);
+  return contains_if_then;
 }
 /***** determinewhetherprocessescanterminate(init); **********/
 
@@ -8677,13 +8699,14 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
 
   if (objectdata[n].canterminate)
   { ATtablePut(visited,(ATerm)procId,(ATerm)newProcId);
+    bool dummy=false;
     insertProcDeclaration(
                 newProcId,
                 objectdata[n].parameters,
                 gsMakeSeq(objectdata[n].processbody,
                           gsMakeProcess(terminatedProcId,ATempty)),
                 pCRL,canterminatebody(objectdata[n].processbody,NULL,NULL,0),
-                     containstimebody(objectdata[n].processbody,NULL,NULL,0,false)); 
+                     containstimebody(objectdata[n].processbody,NULL,NULL,0,dummy,false)); 
     return newProcId;
   }
   ATtablePut(visited,(ATerm)procId,(ATerm)procId);
@@ -8880,7 +8903,9 @@ static ATermAppl transform(
   determine_process_status(init,mCRL);
   determinewhetherprocessescanterminate(init);
   init=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-  determinewhetherprocessescontaintime(init);
+  if (determinewhetherprocessescontaintime(init) && !(add_delta))
+  { gsMessage("Warning: specification contains time due to translating c->p to c->p<>delta@0. Use -D to suppress.\n");
+  }
   pcrlprocesslist=collectPcrlProcesses(init);
 
   if (pcrlprocesslist==ATempty) 
