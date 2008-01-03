@@ -982,7 +982,7 @@ void lpsConstElm::filter() {
     same = false;
     while (!same){
       same = true;
-      gsVerboseMsg("lpsconstelm: Cycle %d: \n", cycle++);
+      gsVerboseMsg("lpsconstelm: Cycle %d\n", cycle++);
       //int summandnr = 1;
       for(summand_list::iterator currentSummand = p_process.summands().begin(); currentSummand != p_process.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
@@ -1169,9 +1169,8 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
 }
 
 int main(int argc, char** argv) {
-  ATerm       bottom;
 
-  ATinit(argc,argv,&bottom);
+  ATinit(argc, argv, reinterpret_cast< ATerm* > ( &argc ) );
 
   gsEnableConstructorFunctions();
 
