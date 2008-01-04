@@ -25,6 +25,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 //Rewriter
 #include "mcrl2/data/rewrite.h"
@@ -1169,9 +1170,8 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
 }
 
 int main(int argc, char** argv) {
-
-  ATinit(argc, argv, reinterpret_cast< ATerm* > ( &argc ) );
-
+  
+  MCRL2_ATERM_INIT()
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

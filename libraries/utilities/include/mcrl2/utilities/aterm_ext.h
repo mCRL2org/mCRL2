@@ -25,7 +25,77 @@ namespace mcrl2 {
     extern "C" {
 #endif
 
-//Global precondition: the ATerm library has been initialised
+//Workarounds for the initialisation of the ATerm library
+//-------------------------------------------------------
+
+//To initialise the ATerm library either call MCRL2_ATERM_INIT() or
+//MCRL2_ATERM_INIT_DEBUG() from the body of the main program as the first
+//statement. Failing to do so may lead to crashes when the garbage collector
+//is started.
+
+//MCRL2_ATERM_INIT() initialises the ATerm library using
+//MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK with the argument &argc to determine the
+//bottom of the stack.
+#define MCRL2_ATERM_INIT()\
+  {\
+    ATerm *ESTIMATED_BOTTOM_OF_STACK = NULL;\
+    MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK(reinterpret_cast<ATerm*>(&argc))\
+    ATinit(0, 0, ESTIMATED_BOTTOM_OF_STACK);\
+  }
+
+//MCRL2_ATERM_INIT_DEBUG() initialises the ATerm library with debugging
+//information using MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK with the argument
+//&argc to determine the bottom of the stack.
+#define MCRL2_ATERM_INIT_DEBUG()\
+  {\
+    ATerm *ESTIMATED_BOTTOM_OF_STACK = NULL;\
+    MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK(reinterpret_cast<ATerm*>(&argc))\
+    char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
+    ATinit(3, debug_args, ESTIMATED_BOTTOM_OF_STACK);\
+  }
+//MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK() tries to the determine the bottom of
+//the stack, using:
+//- estimate_address: a user supplied ATerm pointer as a first estimation
+//- local_address:    a system supplied ATerm pointer as a second estimation
+//This macro uses the function stack_direction to determine the direction of
+//stack growth (up or down).
+//If the direction of the stack can be determined, then the estimated bottom
+//of the stack is stored in ESTIMATED_BOTTOM_OF_STACK.
+#define MCRL2_ATERM_ESTIMATE_BOTTOM_OF_STACK(estimate_address)\
+  {\
+    ATerm local_var;\
+    ATerm *local_address = &local_var;\
+    int sd = stack_direction();\
+    if (sd > 0) {\
+      ESTIMATED_BOTTOM_OF_STACK = MIN(estimate_address, local_address);\
+    } else if (sd < 0) {\
+      ESTIMATED_BOTTOM_OF_STACK = MAX(estimate_address, local_address);\
+    } else {\
+      gsErrorMsg("ATerm library cannot be properly initialised because the direction of the stack is unknown");\
+      exit(0);\
+    }\
+  }
+
+int stack_direction(void);
+//Ret: returns a value indication the direction the stack grows:
+//      1: the stack grows up
+//     -1: the stack grows down
+//      0: the direction of stack growth is unknown
+
+#ifndef MIN
+#  define MIN(a,b)	((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b)	((a) > (b) ? (a) : (b))
+#endif
+
+
+//-------------------------------------------------------------------------
+//For all function below we use the precondition the ATerm library has been
+//initialised.
+//-------------------------------------------------------------------------
+
 //ATerm library workarounds
 //--------------------------
 //
