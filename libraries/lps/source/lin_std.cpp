@@ -602,12 +602,29 @@ static ATermList getparameters(ATermAppl multiAction)
   for(ATermList l=ATLgetArgument(multiAction,0) ;
                 l!=ATempty ;
                 l=ATgetNext(l))
-  { for(ATermList l1=ATLgetArgument(ATAgetArgument(ATAgetFirst(l),0),1) ;
+  { ATermList data_arguments=ATLgetArgument(ATAgetFirst(l),1);
+    for(ATermList l1=ATLgetArgument(ATAgetArgument(ATAgetFirst(l),0),1) ;
                   l1!=ATempty ;
                   l1=ATgetNext(l1))
-    { result=ATinsertA(
-               result,
-               getfreshvariable("a",ATAgetFirst(l1)));
+    { 
+      assert(data_arguments!=ATempty);
+      // ATfprintf(stderr,"GETFIRST %t    %t     %t\n",ATAgetFirst(l1),ATAgetFirst(data_arguments),result);
+      ATermAppl dataterm=ATAgetFirst(data_arguments);
+      /* if the current argument of the multi-action is a variable that does
+       * not occur in result, use this variable. This is advantageous, when joining
+       * processes to one linear process where variable names are joined. If this
+       * is not being done (as happened before 4/1/2008) very long lists of parameters
+       * can occur when linearising using regular2 */
+
+      if (gsIsDataVarId(dataterm) && ATindexOf(result,(ATerm)dataterm,0)<0)
+      { result=ATinsertA(result,dataterm);
+      }
+      else
+      { result=ATinsertA(
+                 result,
+                 getfreshvariable("a",ATAgetFirst(l1)));
+      }
+      data_arguments=ATgetNext(data_arguments);
     }
   }
   return ATreverse(result);
@@ -2887,12 +2904,16 @@ static ATermAppl exists_variable_for_sequence(
     for(ATermList walker=seq_varnames; (walker!=ATempty);
                     walker=ATgetNext(walker))
     { ATermAppl process=ATAgetFirst(walker);
+      // ATfprintf(stderr,"FOUND MATCH SEQUENCE %t\nFOUND2  %t\n",process_names,
+      //      (ATermList)objectdata[objectIndex(process)].representedprocesses);
       if (match_sequence(
             process_names,
             (ATermList)objectdata[objectIndex(process)].representedprocesses))
       { 
+        // ATfprintf(stderr,"FOUND\n\n");
         return process;
       }
+      // ATfprintf(stderr,"NOT FOUND\n\n");
     }
     return NULL;  
   }
@@ -2941,7 +2962,6 @@ static ATermList extract_names(ATermAppl sequence)
 static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
 { /* we expect that oldbody is a sequence of process references */ 
 
-
   if (gsIsProcess(oldbody))
   { ATermAppl procId=ATAgetArgument(oldbody,0); 
     ATermList parameters=objectdata[objectIndex(procId)].parameters;
@@ -2951,18 +2971,23 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
 
   if (gsIsSeq(oldbody))   
   { ATermAppl first=ATAgetArgument(oldbody,0);
+    // gsfprintf(stderr,"oldbody %P\n",oldbody);
     if (gsIsProcess(first))
     { long n=objectIndex(ATAgetArgument(first,0));
       if (objectdata[n].canterminate)
       { ATermAppl procId=ATAgetArgument(first,0);
         ATermList pars=parscollect(ATAgetArgument(oldbody,1),newbody);
         ATermList pars1=ATempty, pars2=ATempty;
+
+        // ATfprintf(stderr,"Ready for renaming: %t\n%t\n",pars,objectdata[objectIndex(procId)].parameters);
      
         construct_renaming(pars,objectdata[objectIndex(procId)].parameters,&pars1,&pars2);
+        // ATfprintf(stderr,"Renamed: %t\n\n",pars1);
 
         *newbody=gsMakeSeq(
                    gsMakeProcess(procId,pars1),
                    *newbody);
+        // ATfprintf(stderr,"newbody %t\n",*newbody);
         return ATconcat(pars1,pars);
       }
       else
@@ -3059,6 +3084,7 @@ static ATermAppl create_regular_invocation(
     ATermAppl newbody=NULL;   
     if (regular2)
     { ATermList pars=parscollect(sequence,&newbody);
+      // ATfprintf(stderr,"PARSCOLLECT: %t\n",pars);
       bool dummy=false;
       new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0),containstimebody(newbody,NULL,NULL,false,dummy));
       objectdata[objectIndex(new_process)].representedprocesses=
@@ -3523,7 +3549,7 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
      and is not present in vl. */
   if (ATgetAFun(ATAgetArgument(*var,0))==
       ATgetAFun(ATAgetArgument(var1,0)))
-  { 
+  { // ATfprintf(stderr,"HIERHIHIH\n");
     ATermAppl var2=getfreshvariable(
                       ATgetName(ATgetAFun(ATAgetArgument(*var,0))),
                       ATAgetArgument(*var,1));
@@ -3569,7 +3595,9 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
   ATermList parameters=ATempty;
   for (walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
     { long n=objectIndex(ATAgetFirst(walker));
+      // ATfprintf(stderr,"Joinparameters: %t\n%t\n",parameters,objectdata[n].parameters);
       parameters=joinparameters(parameters,objectdata[n].parameters,n);
+      // ATfprintf(stderr,"Result: %t\n\n",parameters);
     }
   return parameters;
 }
@@ -5552,7 +5580,9 @@ static ATermAppl collect_sum_arg_arg_cond(
   { ATermAppl summand=ATAgetFirst(walker);
     ATermList sumvars=linGetSumVars(summand);
     
+    // ATfprintf(stderr,"MERGE_VAR %t\n%t\n",sumvars,resultsum);
     resultsum=merge_var(sumvars,resultsum,&rename_list,&conditionlist,spec); 
+    // ATfprintf(stderr,"RESULT %t\n\n",resultsum);
   }
   
   if (binary)
@@ -6682,6 +6712,7 @@ static ATermList construct_renaming(
      
   ATermList t=NULL, t1=NULL, t2=NULL;
   
+  // ATfprintf(stderr,"CONSTRUCT RENAMING\n");
   if (pars2==ATempty)
   { *pars3=ATempty;
     t1=ATempty;
