@@ -15,6 +15,7 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 
 using namespace std;
@@ -81,9 +82,7 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-  ATerm bot;
-  ATinit(argc,argv,&bot);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   #define ShortOptions      "hqvi:j:fsb"
   #define VersionOption     0x1

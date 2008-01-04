@@ -20,6 +20,7 @@
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 using namespace ::mcrl2::utilities;
 
@@ -48,8 +49,9 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
+  MCRL2_CORE_LIBRARY_INIT()
+
   FILE *InStream, *OutStream;
-  ATerm bot;
   #define sopts "hqvdn"
   #define version_option CHAR_MAX + 1
   #define no_conv_cons_option CHAR_MAX + 2
@@ -64,8 +66,6 @@ int main(int argc, char **argv)
      { 0, 0, 0, 0 }
   };
 
-  ATinit(argc,argv,&bot);
-  gsEnableConstructorFunctions();
 
   bool opt_quiet = false;
   bool opt_verbose = false;

@@ -11,6 +11,7 @@
 
 #include <getopt.h>
 #include "mcrl2/core/struct.h"
+#include "mcrl2/core/core_init.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
@@ -22,9 +23,7 @@ using namespace mcrl2::utilities;
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
 int main(int argc, char *argv[]) {
-   ATerm bottom;
-   ATinit(argc, argv, &bottom);
-   gsEnableConstructorFunctions();
+   MCRL2_CORE_LIBRARY_INIT()
 
    gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 

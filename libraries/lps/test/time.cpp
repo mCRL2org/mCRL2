@@ -58,7 +58,7 @@ std::string SPECIFICATION =
 "    )                                                                      \n"
 "  );                                                                       \n";
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
   MCRL2_CORE_LIBRARY_INIT()
 

@@ -12,6 +12,7 @@
 #include <getopt.h>
 #include "aterm2.h"
 #include "mcrl2/core/struct.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
@@ -642,9 +643,7 @@ bool write_lts_to_file(lts& l, std::string const& outfile, lts_type outtype, std
 
 int main(int argc, char **argv)
 {
-  ATerm bot;
-  ATinit(argc,argv,&bot);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   #define ShortOptions      "hqvdi:o:fl:nsbtuaD"
   #define VersionOption     0x1

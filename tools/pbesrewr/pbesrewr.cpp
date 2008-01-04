@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 #include "mcrl2/data/rewrite.h"
 
@@ -152,10 +153,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  ATerm bottom;
-  ATinit(argc, argv, &bottom);
-
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
   t_tool_options tool_options = parse_command_line(argc, argv);
 

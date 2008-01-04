@@ -20,6 +20,7 @@
 #include "lts.h"
 
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 
 #include "squadt_interactor.ipp"
@@ -161,7 +162,7 @@ static void print_help(FILE *f, const char *Name)
 
 int main(int argc, char **argv)
 {
-  ATerm bot;
+/*  ATerm bot;
   // handle the aterm options
   {
     short a_argc=1;
@@ -183,10 +184,10 @@ int main(int argc, char **argv)
     } 
   
     ATinit(a_argc,a_argv,&bot);
-  }
+  } */
   // end handle aterm lib options 
-  
-  gsEnableConstructorFunctions();
+
+  MCRL2_CORE_LIBRARY_INIT()
 
   // Start 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

@@ -32,6 +32,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 using namespace std;
 using namespace lps;
@@ -267,8 +268,9 @@ void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
+  MCRL2_CORE_LIBRARY_INIT()
+
   FILE *SpecStream;
-  ATerm stackbot;
   ATermAppl Spec;
   #define sopts "hqvdR:"
   #define version_option CHAR_MAX + 1
@@ -281,8 +283,6 @@ int main(int argc, char **argv)
     { "rewriter", no_argument,  NULL,  'R' },
     { 0, 0, 0, 0 }
   };
-
-  ATinit(argc,argv,&stackbot);
 
   RewriteStrategy strat = GS_REWR_JITTY;
   bool quiet = false;
@@ -366,7 +366,6 @@ int main(int argc, char **argv)
     return 1;
   }
   assert(Spec != NULL);
-  gsEnableConstructorFunctions();
   if (!gsIsSpecV1(Spec)) {
     gsErrorMsg("'%s' does not contain an LPS\n", SpecFileName);
     fclose(SpecStream);

@@ -15,6 +15,7 @@
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
@@ -315,7 +316,6 @@ using namespace ::mcrl2::utilities;
     /// formulas in the list are tautologies or contradictions using the data equations of the LPS.
 
     void LPS_Form_Check::check_formulas() {
-      gsEnableConstructorFunctions();
 
       ATermList v_formulas = (ATermList) ATreadFromNamedFile(f_formulas_file_name);
 
@@ -344,8 +344,7 @@ using namespace ::mcrl2::utilities;
 // Main function ----------------------------------------------------------------------------------
 
   int main(int argc, char* argv[]) {
-    ATerm v_bottom_of_stack;
-    ATinit(argc, argv, &v_bottom_of_stack);
+    MCRL2_CORE_LIBRARY_INIT()
 
     try {
       LPS_Form_Check v_lps_form_check;

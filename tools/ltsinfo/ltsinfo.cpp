@@ -15,9 +15,15 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 
 #include <boost/lexical_cast.hpp>
+
+//Temporary workaround for the passing of the determinism
+
+mcrl2::lts::lts_equivalence wa_determinism_option;
+
 
 using namespace mcrl2::utilities;
 
@@ -35,7 +41,16 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
 
+    static const char* option_determinism_equivalence;
+
+    boost::shared_ptr < tipi::datatype::enumeration > determinism_equivalence_enumeration;
+
+    /** \brief compiles a ltsinfo_options instance from a configuration */
+    bool extract_task_options(tipi::configuration const& c, ltsinfo_options&) const;
+
   public:
+    /** \brief constructor */
+    squadt_interactor();
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -51,6 +66,13 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 };
 
 const char* squadt_interactor::lts_file_for_input  = "lts_in";
+const char* squadt_interactor::option_determinism_equivalence = "determinism_equivalence";
+
+squadt_interactor::squadt_interactor() {
+  determinism_equivalence_enumeration.reset(new tipi::datatype::enumeration("none"));
+
+  *determinism_equivalence_enumeration % "isomorphism" % "strong-bisimilarity" % "branching-bisimilarity";
+}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::reporting);
@@ -64,12 +86,79 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::datatype;
+  using namespace tipi::layout::elements;
+
+  std::string infilename = c.get_input(lts_file_for_input).get_location();
+
+  /* Create display */
+  tipi::layout::tool_display d;
+
+  // Helper for linearisation method selection
+  mcrl2::utilities::squadt::radio_button_helper < mcrl2::lts::lts_equivalence > determinism_selector(d);
+
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
+
+  m.append(d.create< label >().set_text("Deterministic check:")).
+    append(d.create< horizontal_box >().
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_strong, "Strong bisimilarity")).
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_branch, "Branching bisimilarity")));
+
+  // Add okay button
+  button& okay_button = d.create< button >().set_label("OK");
+
+  m.append(d.create< label >().set_text(" ")).
+    append(okay_button, layout::right);
+
+  // Set default values for options if the configuration specifies them
+  if (c.option_exists(option_determinism_equivalence)) {
+    determinism_selector.set_selection(static_cast < mcrl2::lts::lts_equivalence > (
+        c.get_option_argument< size_t >(option_determinism_equivalence, 0)));
+  }
+
+  // Display
+  send_display_layout(d.set_manager(m));
+
+  /* Wait for the OK button to be pressed */
+  okay_button.await_change();
+
+  // work around 
+  switch(determinism_selector.get_selection())
+  {
+    case 0: wa_determinism_option = mcrl2::lts::lts_eq_none;
+          break;
+    case 2: wa_determinism_option = mcrl2::lts::lts_eq_strong;
+          break; 
+    case 4: wa_determinism_option = mcrl2::lts::lts_eq_branch;
+          break; 
+    case 5: wa_determinism_option = mcrl2::lts::lts_eq_isomorph;
+          break; 
+    default: send_error("Determinism check has an invalid value");   determinism_selector.get_selection();
+  }
+
+  std::cout << mcrl2::lts::lts::name_of_equivalence(wa_determinism_option) << std::endl;
+
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
-  result &= c.input_exists(lts_file_for_input);
+  result |= c.input_exists(lts_file_for_input);
+  result |= c.option_exists(option_determinism_equivalence);
+  std::cout << "check config: "<<  mcrl2::lts::lts::name_of_equivalence(wa_determinism_option) << std::endl;
+
+  return (result);
+}
+
+bool squadt_interactor::extract_task_options(tipi::configuration const& c, ltsinfo_options& task_options) const {
+  bool result = true;
+
+  // task_options.determinism_equivalence = static_cast < mcrl2::lts::lts_equivalence > (boost::any_cast < size_t > (c.get_option_argument(option_determinism_equivalence, 0)));
 
   return (result);
 }
@@ -85,11 +174,32 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   lts l;
   lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
 
+  // ltsinfo_options task_options;
+
+  // Extract configuration
+  // extract_task_options(c, task_options);
+
   if (l.read_from(input_object.get_location(), t)) {
     /* Create and add the top layout manager */
     tipi::layout::tool_display d;
  
     layout::horizontal_box& m = d.create< horizontal_box >();
+    std::string deterministic_str;
+ 
+ std::cout << mcrl2::lts::lts::name_of_equivalence(wa_determinism_option) << std::endl;
+
+    if(wa_determinism_option != mcrl2::lts::lts_eq_none)
+    {
+      lts_eq_options reduce_options;
+      set_eq_options_defaults(reduce_options);
+      l.reduce(wa_determinism_option,reduce_options);
+
+      deterministic_str.append( l.is_deterministic() ? "yes, " : "no, ");
+      deterministic_str.append("modulo ");
+      deterministic_str.append(lts::name_of_equivalence(wa_determinism_option));
+    } else {
+      deterministic_str.append("-");
+    } 
 
     m.append(d.create< vertical_box >().set_default_alignment(layout::left).
                 append(d.create< label >().set_text("States (#):")).
@@ -98,6 +208,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text("State information:")).
                 append(d.create< label >().set_text("Label information:")).
+                append(d.create< label >().set_text("Deterministic:")).
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text("Created by:")),
              margins(0,5,0,5));
@@ -110,6 +221,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text(l.has_state_info() ? "present" : "not present")).
                 append(d.create< label >().set_text(l.has_label_info() ? "present" : "not present")).
+                append(d.create< label >().set_text(deterministic_str)).
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text(l.get_creator())),
              margins(0,5,0,5));
@@ -124,7 +236,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     gsVerboseMsg("checking reachability...\n");
     if (!l.reachability_check()) {
         n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
-          append(d.create< label >().set_text("(This might result in unspecificied behaviour of LTS tools.)"));
+          append(d.create< label >().set_text("(This might result in unspecified behaviour of LTS tools.)"));
     }
         
     send_display_layout(d.set_manager(n));
@@ -320,11 +432,7 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_optio
 }
 
 int main(int argc, char **argv) {
-  ATerm       bottom;
-
-  ATinit(argc,argv,&bottom);
-  
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
@@ -361,7 +469,7 @@ int main(int argc, char **argv) {
       gsVerboseMsg("checking reachability...\n");
       if ( !l.reachability_check() )
       {
-        cout << "Warning: some states are not reachable from the initial state! (This might result in unspecificied behaviour of LTS tools.)" << endl;
+        cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << endl;
       }
       if ( opts.determinism_equivalence != lts_eq_none )
       {
@@ -369,13 +477,14 @@ int main(int argc, char **argv) {
         lts_eq_options reduce_options;
         set_eq_options_defaults(reduce_options);
         gsVerboseMsg("minimisation...\n");
+
         l.reduce(opts.determinism_equivalence,reduce_options);
         gsVerboseMsg("deterministic check...\n");
         if ( l.is_deterministic() )
         {
-          cout << "LTS is determinisitic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
+          cout << "LTS is deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
         } else {
-          cout << "LTS is not determinisitic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
+          cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
         }
       }
     }

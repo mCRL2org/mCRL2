@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/struct.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
 #include <fstream>
@@ -661,7 +662,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     /// LPS_Conf_Check::f_lps. If no input file name was specified, the LPS is read from stdin.
 
     void LPS_Conf_Check::read_input() {
-      gsEnableConstructorFunctions();
       
       if (!f_invariant_file_name.empty()) {
         //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
@@ -761,8 +761,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 // Main function ----------------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
-  ATerm v_bottom_of_stack;
-  ATinit(argc, argv, &v_bottom_of_stack);
+  MCRL2_CORE_LIBRARY_INIT()
 
   try {
     LPS_Conf_Check v_lps_conf_check;

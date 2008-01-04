@@ -24,6 +24,7 @@
 #include "mcrl2/core/messaging.h"
 #include "translate.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 #define NAME "chi2mcrl2"
 #define INFILEEXT ".chi"
@@ -318,12 +319,12 @@ void PrintHelp(char *Name)
 
 int main(int argc, char *argv[])
 {
-  ATerm         stack_bottom;
+  MCRL2_ATERM_INIT()
+
+
   t_options     options;
   std::string mcrl2spec; 
   CAsttransform asttransform;
-  
-  ATinit(argc,argv,&stack_bottom);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

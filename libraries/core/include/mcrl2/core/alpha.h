@@ -12,7 +12,7 @@
 
 #include <aterm2.h>
 
-/// Applies an alphabet reductions to a specification
+/// Applies an alphabet reduction to a specification
 ATermAppl gsAlpha(ATermAppl Spec);
 
 #endif // PARSER_LIBALPHA_H

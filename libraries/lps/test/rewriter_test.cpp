@@ -155,7 +155,7 @@ void test1()
   BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
 }
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
   MCRL2_CORE_LIBRARY_INIT()
 

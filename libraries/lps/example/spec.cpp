@@ -18,6 +18,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
+#include "mcrl2/core/core_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -27,9 +28,7 @@ using boost::format;
 
 int main()
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
   
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;

@@ -15,14 +15,13 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 
 using namespace ::mcrl2::utilities;
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
   gsSetVerboseMsg();
 
   ATermAppl x_name = gsString2ATermAppl("x");

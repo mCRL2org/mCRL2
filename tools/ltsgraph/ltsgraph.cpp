@@ -13,6 +13,7 @@
 #include <boost/bind.hpp>
 #include <mcrl2/lts/liblts.h>
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 std::string lts_file_argument;
 
@@ -106,8 +107,6 @@ class GraphApp : public wxApp
   public:
     bool OnInit() {
 
-      gsEnableConstructorFunctions();
-
       wxCmdLineParser cmdln(argc,argv);
          
       cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
@@ -167,9 +166,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {
 
-  ATerm bot;
-
-  ATinit(0,0,&bot); // XXX args?
+  int argc;
+  MCRL2_CORE_LIBRARY_INIT()
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
@@ -186,8 +184,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #else
 int main(int argc, char **argv)
 {
-  ATerm bot;
-  ATinit(argc,argv,&bot);
+  MCRL2_CORE_LIBRARY_INIT()
 
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

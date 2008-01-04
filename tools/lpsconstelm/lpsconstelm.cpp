@@ -24,8 +24,8 @@
 
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/utilities/aterm_ext.h"
 
 //Rewriter
 #include "mcrl2/data/rewrite.h"
@@ -1171,8 +1171,8 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
 
 int main(int argc, char** argv) {
   
-  MCRL2_ATERM_INIT()
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
+
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

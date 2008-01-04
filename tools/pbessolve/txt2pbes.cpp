@@ -24,6 +24,7 @@
 //MCRL2-specific 
 #include "mcrl2/core/messaging.h" 
 #include "mcrl2/utilities/version_info.h" 
+#include "mcrl2/core/core_init.h"
 
 //PBES-Framework 
 #include "mcrl2/pbes/pbes.h" 
@@ -601,10 +602,7 @@ void parse_command_line(int argc, char **argv)
 //MAIN =================================== 
 int main(int argc, char** argv) 
 { 
-  //Initialise ATerm library and lowlevel-functions 
-  ATerm bottom; 
-  ATinit(argc, argv, &bottom); 
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
    
   parse_command_line(argc, argv);
 

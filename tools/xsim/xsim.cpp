@@ -29,6 +29,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
@@ -241,7 +242,6 @@ void xsim_message_handler(mcrl2::utilities::messageType msg_type, const char *ms
 
 bool XSim::OnInit()
 {
-  gsEnableConstructorFunctions();
 
   this_xsim = this;
 
@@ -281,9 +281,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  ATerm bot;
+  MCRL2_CORE_LIBRARY_INIT()
 
-  ATinit(0,0,&bot); // XXX args?
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
@@ -299,10 +298,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 }
 #else
 int main(int argc, char **argv) {
-  ATerm bot;
+  MCRL2_CORE_LIBRARY_INIT()
 
-  /* Initialise aterm library */
-  ATinit(argc,argv,&bot);
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

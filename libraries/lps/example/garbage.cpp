@@ -11,6 +11,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/core_init.h"
 #include "gc.h"
 
 const std::string SPECIFICATION =
@@ -28,9 +29,7 @@ const std::string SPECIFICATION =
 
 int main()
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
 
   std::stringstream spec_stream;
   spec_stream << SPECIFICATION;

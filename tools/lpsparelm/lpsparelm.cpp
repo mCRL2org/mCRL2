@@ -15,6 +15,8 @@
 #include <mcrl2/lps/parelm.h>
 #include "mcrl2/utilities/version_info.h"
 
+#include "mcrl2/core/core_init.h"
+
 struct tool_configuration {
   std::string input_file;  ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)

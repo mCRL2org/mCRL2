@@ -744,13 +744,8 @@ void PrintHelp(char *Name)
 int main(int argc, char *argv[])
 {
   //initialise ATerm library
-  ATerm         stack_bottom;
+  MCRL2_CORE_LIBRARY_INIT()       
   t_lin_options lin_options;
-
-  ATinit(argc,argv,&stack_bottom);
-
-  //enable constructor functions
-  gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

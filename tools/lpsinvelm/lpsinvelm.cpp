@@ -23,8 +23,9 @@
 #include "mcrl2/utilities/version_info.h"
 #include <string>
 #include <fstream>
+#include "mcrl2/core/core_init.h"
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction
@@ -404,7 +405,6 @@ using namespace ::mcrl2::utilities;
     /// LPS_Inv_Elm::f_lps. If no input file name was specified, the LPS is read from stdin.
 
     void LPS_Inv_Elm::read_input() {
-      gsEnableConstructorFunctions();
 
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name, std::ifstream::in|std::ifstream::binary);
@@ -497,8 +497,8 @@ using namespace ::mcrl2::utilities;
 // Main function ----------------------------------------------------------------------------------
 
   int main(int argc, char* argv[]) {
-    ATerm v_bottom_of_stack;
-    ATinit(argc, argv, &v_bottom_of_stack);
+    MCRL2_CORE_LIBRARY_INIT()
+
 
     LPS_Inv_Elm v_lps_inv_elm;
 

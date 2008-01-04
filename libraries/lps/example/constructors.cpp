@@ -19,9 +19,7 @@ using namespace lps::detail;
 
 int main()
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_CORE_INIT()
 
   specification spec1 = mcrl22lps(ABP_SPECIFICATION);
   specification spec2(spec1.data(),

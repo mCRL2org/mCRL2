@@ -44,8 +44,9 @@ bool Bremen::OnInit()
 // ^^^^^^^^^^^^^^^^^^
 {
   //initialise ATerm library
-  ATerm StackBottom;
-  ATinit(0, NULL, &StackBottom);
+  int argc;
+  MCRL2_ATERM_INIT()
+
   //initiliase frame
   frame = new GarageFrame( wxT("Garage State"), 
   			 -1, 

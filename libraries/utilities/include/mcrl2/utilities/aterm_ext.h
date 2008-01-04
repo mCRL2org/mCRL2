@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>
+#include "mcrl2/core/messaging.h"
 
 #include <workarounds.h>
 
@@ -65,13 +66,13 @@ namespace mcrl2 {
   {\
     ATerm local_var;\
     ATerm *local_address = &local_var;\
-    int sd = stack_direction();\
+    int sd = mcrl2::utilities::stack_direction();\
     if (sd > 0) {\
       ESTIMATED_BOTTOM_OF_STACK = MIN(estimate_address, local_address);\
     } else if (sd < 0) {\
       ESTIMATED_BOTTOM_OF_STACK = MAX(estimate_address, local_address);\
     } else {\
-      gsErrorMsg("ATerm library cannot be properly initialised because the direction of the stack is unknown");\
+      mcrl2::utilities::gsErrorMsg("ATerm library cannot be properly initialised because the direction of the stack is unknown");\
       exit(0);\
     }\
   }

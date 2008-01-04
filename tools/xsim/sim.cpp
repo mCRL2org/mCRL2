@@ -26,6 +26,7 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 #include "simulator.h"
 
@@ -87,8 +88,8 @@ void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
+    MCRL2_CORE_LIBRARY_INIT()
 	FILE *SpecStream;
-	ATerm stackbot;
 	#define sopts "hqvdyR:"
         #define version_option CHAR_MAX + 1
 	struct option lopts[] = {
@@ -102,7 +103,6 @@ int main(int argc, char **argv)
 		{ 0, 0, 0, 0 }
 	};
 
-	ATinit(argc,argv,&stackbot);
 
 	bool quiet = false;
 	bool verbose = false;
@@ -191,7 +191,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
         assert(Spec != NULL);
-        gsEnableConstructorFunctions();
         if (!gsIsSpecV1(Spec)) {
           gsErrorMsg("'%s' does not contain an LPS\n", SpecFileName);
           fclose(SpecStream);

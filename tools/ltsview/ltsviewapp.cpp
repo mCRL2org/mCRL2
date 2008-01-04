@@ -15,6 +15,7 @@ std::string lts_file_argument;
 #include <wx/wx.h>
 //SQuADT protocol interface
 #include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/aterm_ext.h>
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   private:
@@ -127,9 +128,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  ATerm bot;
-
-  ATinit(0,0,&bot); // XXX args?
+  MCRL2_ATERM_INIT()                    
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
@@ -145,10 +144,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 }
 #else
 int main(int argc, char **argv) {
-  ATerm bot;
-
-  /* Initialise aterm library */
-  ATinit(argc,argv,&bot);
+  MCRL2_ATERM_INIT()                    
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

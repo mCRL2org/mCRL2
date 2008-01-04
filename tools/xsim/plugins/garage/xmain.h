@@ -28,6 +28,7 @@
 
 
 #include "garageframe.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 
 class Bremen : public wxApp

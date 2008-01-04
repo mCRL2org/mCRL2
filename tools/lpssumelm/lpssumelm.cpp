@@ -36,9 +36,11 @@
 #include <mcrl2/atermpp/aterm_list.h>
 #include <mcrl2/atermpp/algorithm.h>
 
-//LPS Framework
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
+
+//LPS Framework
 #include <mcrl2/lps/sumelm.h>
 
 using namespace std;
@@ -213,18 +215,16 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
 
-int main(int ac, char** av) {
-  ATerm bot;
-  ATinit(ac, av, &bot);
+int main(int argc, char** argv) {
+  MCRL2_CORE_LIBRARY_INIT()
   tool_options options;
-  gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(ac, av)) {
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
     return 0;
   }
 #endif
 
-  parse_command_line(ac, av, options);
+  parse_command_line(argc, argv, options);
   return do_sumelm(options);
 }

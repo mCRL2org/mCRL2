@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 
 using namespace std;
@@ -294,11 +295,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 int main(int argc, char **argv)
 {
-  ATerm stackbot;
-
-  //initialise ATerm library
-  ATinit(argc,argv,&stackbot);
-  gsEnableConstructorFunctions();
+  MCRL2_CORE_LIBRARY_INIT()
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

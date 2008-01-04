@@ -19,6 +19,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
@@ -37,6 +38,8 @@ static Rewriter *rewr;
 
 int main(int argc, char **argv)
 {
+  MCRL2_CORE_LIBRARY_INIT()
+
   //declarations for getopt
   bool opt_benchmark = false;
   unsigned long int  opt_bench_times = 0;
@@ -116,10 +119,6 @@ int main(int argc, char **argv)
     }
   }
 
-  //initialise ATerm library
-  ATerm stackbot;
-  ATinit(argc,argv,&stackbot);
-
   //open infilename
   FILE *instream;
   if (infilename == NULL) {
@@ -155,7 +154,6 @@ int main(int argc, char **argv)
   assert(result != NULL);
 
   //check if result is an LPS
-  gsEnableConstructorFunctions();
   if (!is_valid_lps(result)) {
     if (instream == stdin) {
       gsErrorMsg("stdin does not contain an LPS\n");

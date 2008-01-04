@@ -18,6 +18,7 @@
 #include "mcrl2/trace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/core/core_init.h"
 
 using namespace std;
 using namespace mcrl2::utilities;;
@@ -133,6 +134,8 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
+  MCRL2_CORE_LIBRARY_INIT()
+
   #define sopts "hqvdpmDa"
 //  #define sopts "hqvpmdas"
   struct option lopts[] = {
@@ -148,10 +151,6 @@ int main(int argc, char **argv)
 //    { "svc",      no_argument,  NULL,  's' },
     { 0, 0, 0, 0 }
   };
-
-  ATerm stackbot;
-  ATinit(argc,argv,&stackbot);
-  gsEnableConstructorFunctions();
 
   bool quiet = false;
   bool verbose = false;

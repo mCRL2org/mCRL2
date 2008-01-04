@@ -21,6 +21,7 @@
  
 //MCRL2-specific 
 #include "mcrl2/core/messaging.h" 
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h" 
 
 //LPS-Framework 
@@ -94,10 +95,7 @@ pbes_expression interpret_solution(pbes<> pbes_spec,
 //MAIN =================================== 
 int main(int argc, char** argv) 
 { 
-  //Initialise ATerm library and lowlevel-functions 
-  ATerm bottom; 
-  ATinit(argc, argv, &bottom); 
-  gsEnableConstructorFunctions(); 
+  MCRL2_CORE_LIBRARY_INIT()
    
   //Parse command line 
   t_tool_options tool_options = parse_command_line(argc, argv); 

@@ -65,7 +65,7 @@ const std::string case_7(
   "init X(0,5, 1);\n"
 );
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
   using namespace lps;
 

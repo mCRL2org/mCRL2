@@ -21,6 +21,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/version_info.h"
 
 using namespace mcrl2::utilities;
@@ -59,6 +60,8 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 //implementation
 
 int main(int argc, char* argv[]) {
+  MCRL2_CORE_LIBRARY_INIT()
+
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
@@ -128,9 +131,6 @@ int main(int argc, char* argv[]) {
       OutputFileName = strdup(argv[optind + 1]);
     }
   }
-  //initialise ATerm library
-  ATerm StackBottom;
-  ATinit(0, NULL, &StackBottom);
   //print specification  
   bool Result =
     PrintSpecificationFileName(SpecFileName, OutputFileName, opt_pp_format);
@@ -172,7 +172,6 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     return false;
   }
   assert(Spec != NULL);
-  gsEnableConstructorFunctions();
   if (!gsIsSpecV1(Spec)) {
     if (SpecStream == stdin) {
       gsErrorMsg("stdin does not contain an LPS\n");
