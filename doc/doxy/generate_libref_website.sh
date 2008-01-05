@@ -305,7 +305,7 @@ function print_liblist {
 # Variables and functions are set, here comes the script!
 
 # First check if we're called from the trunk directory
-if [ "$0" != "$PATH_FROM_TRUNK/`basename $0`" ] ; then
+if [ ! -e "$PATH_FROM_TRUNK/`basename $0`" ] ; then
   echo "error: script is not called from the trunk directory of the mCRL2 repository"
   exit 1
 fi

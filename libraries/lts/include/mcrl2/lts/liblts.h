@@ -149,8 +149,10 @@ namespace lts
    * \return A timed action with label \a action and time \a time.
    */
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
-
+  
+  /** \cond */
   #include "detail/liblts_private.h"
+  /** \endcond */
   
   /** \brief Stores additional LTS information.
    * \details This class is provided for storing additional information with an
@@ -191,6 +193,7 @@ namespace lts
        * \return The Dot format options stored in this object.*/
       lts_dot_options get_dot_options();
   };
+  /** An empty lts_extra object */
   extern lts_extra lts_no_extra;
 
   class lts;
