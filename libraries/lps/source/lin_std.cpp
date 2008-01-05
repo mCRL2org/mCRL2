@@ -108,9 +108,9 @@ static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec,int max_nesting_depth=3);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
-static ATermAppl getfreshvariable(char const* s,ATermAppl sort);
+static ATermAppl getfreshvariable(char const* s,ATermAppl sort, const int reusable=-1);
 static ATermList construct_renaming(ATermList pars1, ATermList pars2,
-                ATermList *pars3, ATermList *pars4);
+                ATermList *pars3, ATermList *pars4,const bool unique=true);
 static void alphaconversion(ATermAppl procId, ATermList parameters);
 static ATermAppl fresh_name(char const* name);
 static void declare_equation_variables(ATermList t1);
@@ -608,7 +608,6 @@ static ATermList getparameters(ATermAppl multiAction)
                   l1=ATgetNext(l1))
     { 
       assert(data_arguments!=ATempty);
-      // ATfprintf(stderr,"GETFIRST %t    %t     %t\n",ATAgetFirst(l1),ATAgetFirst(data_arguments),result);
       ATermAppl dataterm=ATAgetFirst(data_arguments);
       /* if the current argument of the multi-action is a variable that does
        * not occur in result, use this variable. This is advantageous, when joining
@@ -663,7 +662,6 @@ static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
 
 static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 {
-  // ATfprintf(stderr,"AddMultiaction %t\n",multiAction);
   ATermList actionnames=getnames(multiAction);
   long n=addObject((ATermAppl)actionnames,isnew);
   
@@ -673,7 +671,6 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
     // tempvar is needed as objectdata can change during a call
     // of getparameters.
     ATermList templist=getparameters(multiAction);
-    // ATfprintf(stderr,"Parameters: %t\n",templist);
     objectdata[n].parameters=templist;
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
@@ -2266,11 +2263,36 @@ static ATermAppl wraptime(
 
 typedef enum { alt, sum, /* cond,*/ seq, name, multiaction } state;
 
-static ATermAppl getfreshvariable(char const*s, ATermAppl sort)
-{ ATermAppl variable=NULL;
-  variable=gsMakeDataVarId(fresh_name(s),sort);
-  insertvariable(variable,ATtrue);
-  return variable; 
+static ATermAppl getfreshvariable(char const *s, ATermAppl sort, const int reuse_index)
+{ /* If reuse_index is smaller than 0 (-1 is the default value), an unused variable name is returned,
+     based on the string s with sort `sort'. If reuse_index is larger or equal to
+     0 the reuse_index+1 generated variable is returned. If for a particular reuse_index 
+     this function is called for the first time, it is guaranteed that the returned
+     variable is unique, and not used as variable elsewhere. Upon subsequent calls
+     getfreshvariable will return the same variable for the samen s,sort and reuse_triple.
+     This feature is added to make it possible to avoid generating too many different variables. */
+
+  static ATermTable generated_variables=ATtableCreate(10,40);
+     
+  if (reuse_index<0)
+  { ATermAppl variable=NULL;
+    variable=gsMakeDataVarId(fresh_name(s),sort);
+    insertvariable(variable,ATtrue);
+    return variable; 
+  }
+  else 
+  { /* Using a double dataVarId below is a trick, to combine the string s, the
+       sort and the reuse_index into one aterm, to store it in the 
+       hashtable */
+    ATermAppl table_index_term=gsMakeDataVarId(gsMakeDataVarId(gsString2ATermAppl(s),sort),(ATermAppl)ATmakeInt(reuse_index));
+    ATermAppl old_variable=(ATermAppl)ATtableGet(generated_variables,(ATerm)table_index_term);
+    if (old_variable==NULL)
+    { /* A new variable must be generated */
+      old_variable=getfreshvariable(s,sort);
+      ATtablePut(generated_variables, (ATerm)table_index_term,(ATerm)old_variable);
+    }
+    return old_variable;
+  }
 }
 
 static ATermList make_pars(ATermList sortlist)
@@ -2904,16 +2926,12 @@ static ATermAppl exists_variable_for_sequence(
     for(ATermList walker=seq_varnames; (walker!=ATempty);
                     walker=ATgetNext(walker))
     { ATermAppl process=ATAgetFirst(walker);
-      // ATfprintf(stderr,"FOUND MATCH SEQUENCE %t\nFOUND2  %t\n",process_names,
-      //      (ATermList)objectdata[objectIndex(process)].representedprocesses);
       if (match_sequence(
             process_names,
             (ATermList)objectdata[objectIndex(process)].representedprocesses))
       { 
-        // ATfprintf(stderr,"FOUND\n\n");
         return process;
       }
-      // ATfprintf(stderr,"NOT FOUND\n\n");
     }
     return NULL;  
   }
@@ -2971,7 +2989,6 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
 
   if (gsIsSeq(oldbody))   
   { ATermAppl first=ATAgetArgument(oldbody,0);
-    // gsfprintf(stderr,"oldbody %P\n",oldbody);
     if (gsIsProcess(first))
     { long n=objectIndex(ATAgetArgument(first,0));
       if (objectdata[n].canterminate)
@@ -2979,15 +2996,12 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
         ATermList pars=parscollect(ATAgetArgument(oldbody,1),newbody);
         ATermList pars1=ATempty, pars2=ATempty;
 
-        // ATfprintf(stderr,"Ready for renaming: %t\n%t\n",pars,objectdata[objectIndex(procId)].parameters);
      
-        construct_renaming(pars,objectdata[objectIndex(procId)].parameters,&pars1,&pars2);
-        // ATfprintf(stderr,"Renamed: %t\n\n",pars1);
+        construct_renaming(pars,objectdata[objectIndex(procId)].parameters,&pars1,&pars2,false);
 
         *newbody=gsMakeSeq(
                    gsMakeProcess(procId,pars1),
                    *newbody);
-        // ATfprintf(stderr,"newbody %t\n",*newbody);
         return ATconcat(pars1,pars);
       }
       else
@@ -3052,7 +3066,6 @@ static ATermAppl create_regular_invocation(
 { ATermList process_names=NULL;
   ATermAppl new_process=NULL;
   ATermList args=NULL;
- 
 
   /* Sequence consists of a sequence of process references, 
      concatenated with the sequential composition operator */
@@ -3084,7 +3097,6 @@ static ATermAppl create_regular_invocation(
     ATermAppl newbody=NULL;   
     if (regular2)
     { ATermList pars=parscollect(sequence,&newbody);
-      // ATfprintf(stderr,"PARSCOLLECT: %t\n",pars);
       bool dummy=false;
       new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0),containstimebody(newbody,NULL,NULL,false,dummy));
       objectdata[objectIndex(new_process)].representedprocesses=
@@ -3540,7 +3552,8 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
 
   /* The variable with correct type is present: */
   if (*var==var1)
-  { return 1;
+  { 
+    return 1;
   }
 
   /* Compare whether the string indicating the variable
@@ -3549,7 +3562,7 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
      and is not present in vl. */
   if (ATgetAFun(ATAgetArgument(*var,0))==
       ATgetAFun(ATAgetArgument(var1,0)))
-  { // ATfprintf(stderr,"HIERHIHIH\n");
+  { 
     ATermAppl var2=getfreshvariable(
                       ATgetName(ATgetAFun(ATAgetArgument(*var,0))),
                       ATAgetArgument(*var,1));
@@ -3575,7 +3588,6 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
 
 static ATermList joinparameters(ATermList par1,ATermList par2,long n)
 { ATermAppl var2=NULL;
-  
 
   if (par2==ATempty) 
      return par1;
@@ -3595,9 +3607,7 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
   ATermList parameters=ATempty;
   for (walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
     { long n=objectIndex(ATAgetFirst(walker));
-      // ATfprintf(stderr,"Joinparameters: %t\n%t\n",parameters,objectdata[n].parameters);
       parameters=joinparameters(parameters,objectdata[n].parameters,n);
-      // ATfprintf(stderr,"Result: %t\n\n",parameters);
     }
   return parameters;
 }
@@ -5580,9 +5590,7 @@ static ATermAppl collect_sum_arg_arg_cond(
   { ATermAppl summand=ATAgetFirst(walker);
     ATermList sumvars=linGetSumVars(summand);
     
-    // ATfprintf(stderr,"MERGE_VAR %t\n%t\n",sumvars,resultsum);
     resultsum=merge_var(sumvars,resultsum,&rename_list,&conditionlist,spec); 
-    // ATfprintf(stderr,"RESULT %t\n\n",resultsum);
   }
   
   if (binary)
@@ -6698,7 +6706,8 @@ static ATermList construct_renaming(
                    ATermList pars1, 
                    ATermList pars2, 
                    ATermList *pars3, 
-                   ATermList *pars4)
+                   ATermList *pars4,
+                   const bool unique)
 { /* check whether the variables in pars2 are unique,
      wrt to those in pars1, and deliver:
      - in pars3 a list of renamed parameters pars2, such that
@@ -6708,11 +6717,15 @@ static ATermList construct_renaming(
        This allows using substitute_data(list) to rename
        action and process arguments and conditions to adapt
        to the new parameter names.
+     The variable unique indicates whether the generated variables
+     are unique, and not occurring elsewhere. If unique is false,
+     it is attempted to reuse previously generated variable names, 
+     as long as they do not occur in pars1. The default value for 
+     unique is true.
    */
      
   ATermList t=NULL, t1=NULL, t2=NULL;
   
-  // ATfprintf(stderr,"CONSTRUCT RENAMING\n");
   if (pars2==ATempty)
   { *pars3=ATempty;
     t1=ATempty;
@@ -6722,18 +6735,21 @@ static ATermList construct_renaming(
   { ATermAppl var2=ATAgetFirst(pars2);
     pars2=ATgetNext(pars2);
 
-    if (occursin(var2,pars1))
-    { ATermAppl var3=getfreshvariable(
-                        ATSgetArgument(var2,0), 
-                        ATAgetArgument(var2,1)); 
-
-      t1=ATinsertA(construct_renaming(pars1,pars2,&t,&t2),var3);
+    ATermAppl var3=var2;
+    for(int i=0 ; occursin(var3,pars1) ; i++)
+    { var3=getfreshvariable(
+                  ATSgetArgument(var2,0), 
+                  ATAgetArgument(var2,1),(unique?-1:i)); 
+    }
+    if (var3!=var2)
+    {
+      t1=ATinsertA(construct_renaming(pars1,pars2,&t,&t2,unique),var3);
           
       *pars4=ATinsertA(t2,var2);
       *pars3=ATinsertA(t,var3);
     }
     else 
-    { t1=construct_renaming(pars1,pars2,&t,pars4);
+    { t1=construct_renaming(pars1,pars2,&t,pars4,unique);
       *pars3=ATinsertA(t,var2);
     }
 
