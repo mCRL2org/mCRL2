@@ -1116,16 +1116,16 @@ unsigned int* lts::get_transition_indices() {
   return p_get_transition_indices();
 }
 
-bool lts::reachability_check()
+bool lts::reachability_check(bool remove_unreachable)
 {
   // We use two algorithms here. One is O(nstates*ntransitions) and needs
   // nstates bits of memory. The other is O(ntransitions), but needs an
   // additional 2*nstates bytes of memory and requires the transitions to be
   // sorted (or more precisely: grouped on the source state).
   //
-  // We first allocate memory needed by but algorithms. Then we try to allocate
+  // We first allocate memory needed by both algorithms. Then we try to allocate
   // memory for the faster one. If this, or the following test for sortedness,
-  // fails, then we just the slower algorithm.
+  // fails, then we just use the slower algorithm.
 
   // bit array to represent the set of visited states
   #define visited_bpi (8*sizeof(unsigned int)) // bits per (unsigned) int
@@ -1281,7 +1281,8 @@ bool lts::reachability_check()
     free(todo_stack);
   }
   // in_visited(s) == state s is reachable from the initial state
- 
+
+  bool r = true; // return value
   // check to see if all states are reachable from the initial state
   for (unsigned int i=0; i<visited_size-1; i++) // quickly check the elements
                                                 // of the visited array of
@@ -1289,13 +1290,13 @@ bool lts::reachability_check()
   {
     if ( visited[i] != (~0U) ) // all bits should be set
     {
-      free(visited);
-      return false;
+      r = false;
+      break;
     }
   }
   // the last element of the visited array needs special care as not all bits
   // are necessarily used
-  if ( visited_size > 0 )
+  if ( r && (visited_size > 0) )
   {
     // the states in the last element have a index in
     // [(visited_size-1)*visited_bpi..nstates)
@@ -1303,13 +1304,88 @@ bool lts::reachability_check()
     {
       if ( !in_visited(i) )
       {
-        free(visited);
-        return false;
+        r = false;
+        break;
       }
     }
   }
+
+  if ( remove_unreachable )
+  {
+    // Remove all unreachable states, transitions from such states and labels
+    // that are only used in these transitions.
+    DECL_A(state_map,unsigned int,nstates);
+    DECL_A(label_map,unsigned int,nlabels);
+    if ( (state_map == NULL) || (label_map == NULL) )
+    {
+      gsErrorMsg("not enough memory to remove unreachable states\n");
+      exit(1);
+    }
+
+    unsigned int new_nstates = 0;
+    for (unsigned int i=0; i<nstates; i++)
+    {
+      if ( in_visited(i) )
+      {
+        state_map[i] = new_nstates;
+        if ( state_info )
+        {
+          state_values[new_nstates] = state_values[i];
+        }
+        new_nstates++;
+      }
+    }
+
+    for (unsigned int i=0; i<nlabels; i++)
+    {
+      label_map[i] = 0;
+    }
+
+    unsigned int new_ntransitions = 0;
+    for (unsigned int i=0; i<ntransitions; i++)
+    {
+      if ( in_visited(transitions[i].from) )
+      {
+        label_map[transitions[i].label] = 1;
+        transitions[new_ntransitions].from = state_map[transitions[i].from];
+        transitions[new_ntransitions].label = transitions[i].label;
+        transitions[new_ntransitions].to = state_map[transitions[i].to];
+        new_ntransitions++;
+      }
+    }
+
+    unsigned int new_nlabels = 0;
+    for (unsigned int i=0; i<nlabels; i++)
+    {
+      if ( label_map[i] )
+      {
+        label_map[i] = new_nlabels;
+        taus[new_nlabels] = taus[i];
+        if ( label_info )
+        {
+          label_values[new_nlabels] = label_values[i];
+        }
+        new_nlabels++;
+      }
+    }
+    for (unsigned int i=0; i<new_ntransitions; i++)
+    {
+      transitions[i].label = label_map[transitions[i].label];
+    }
+
+    init_state = state_map[init_state];
+    nstates = new_nstates;
+    ntransitions = new_ntransitions;
+    nlabels = new_nlabels;
+
+    // XXX realloc tables?
+
+    FREE_A(label_map);
+    FREE_A(state_map);
+  }
+
   free(visited);
-  return true;
+  return r;
 }
 
 state_iterator::state_iterator(lts *l)

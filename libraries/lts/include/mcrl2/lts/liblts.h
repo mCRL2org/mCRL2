@@ -41,7 +41,7 @@ namespace lts
    * */
   enum lts_type
   { 
-    lts_none,  /**< unknown format */
+    lts_none,  /**< unknown or no format */ 
     lts_mcrl2, /**< mCRL2 SVC format */
     lts_aut,   /**< Ald&eacute;baran format (CADP) */
     lts_mcrl,  /**< muCRL SVC format */
@@ -61,7 +61,7 @@ namespace lts
    */
   enum lts_equivalence
   {
-    lts_eq_none,        /**< unknown equivalence */
+    lts_eq_none,        /**< unknown or no equivalence */
     lts_eq_trace,       /**< Trace equivalence*/
     lts_eq_strong,      /**< Strong bisimulation equivalence */ 
     lts_eq_weak_trace,  /**< Weak trace equivalence */ 
@@ -84,19 +84,22 @@ namespace lts
        * If \a true, the LTS is \b not reduced. Instead, the algorithm adds a
        * parameter to the state vector of every state. The value of this
        * parameter indicates the equivalence class to which that state belongs.
+       *
+       * This options only works with strong and branching bisimilarity.
        */
       bool add_class_to_state;
       /** \details The vector of transition labels that the reduction algorithm
-       * considers to be internal actions.
+       * considers to be internal actions. (Besides those that are already
+       * marked as being internal.)
        */
       std::vector<std::string> tau_actions;
     } reduce;
   } lts_eq_options;
 
-  /** \brief Additional LTS types/formats.
-   * \details This enumerated type defines additional indicators for the format
-   * in which an LTS can be stored.
-   * \sa lts_type
+  /** \brief Typed of additional information for LTS operations.
+   * \details This enumerated type defines types for additional information for
+   * LTS operations.
+   * \sa lts_extra
    */
   enum lts_extra_type
   {
@@ -136,14 +139,14 @@ namespace lts
    */
   void lts_reduce_add_tau_actions(lts_eq_options &opts, std::string act_names);
 
-  /** Checks whether an action is timed.
+  /** Checks whether an action is a timed mCRL2 action.
    * \param[in] t The action for which the check has to be performed.
    * \retval true if the action is timed;
    * \retval false otherwise.
    */
   bool is_timed_pair(ATermAppl t);
 
-  /** Creates a timed action.
+  /** Creates a timed mCRL2 action.
    * \param[in] action The action part of the timed action that will be created.
    * \param[in] time The time part of the timed action that will be created.
    * \return A timed action with label \a action and time \a time.
@@ -308,7 +311,8 @@ namespace lts
        */
       static lts_type parse_format(char const* s);
 
-      /** Gives a string representation of an LTS format.
+      /** Gives a string representation of an LTS format. (This is the "inverse"
+       * of parse_format.)
        * \param[in] s The LTS format.
        * \return The name of the LTS format specified by \a s. */
       static char const* string_for_type(const lts_type s);
@@ -569,9 +573,13 @@ namespace lts
       void determinise();
       /** Checks whether all states in this LTS are reachable from the initial
        * state. Runs in O(\ref num_states * \ref num_transitions) time.
+       * \param[in] remove_unreachable Indicates whether all unreachable states
+       *            should be removed from the LTS. This option does not
+       *            influence the return value; the return value is with
+       *            respect to the original LTS.
        * \retval true if all states are reachable from the initial state;
        * \retval false otherwise. */
-      bool reachability_check();
+      bool reachability_check(bool remove_unreachable = false);
       /** Checks whether this LTS is deterministic.
        * \retval true if this LTS is deterministic;
        * \retval false otherwise. */

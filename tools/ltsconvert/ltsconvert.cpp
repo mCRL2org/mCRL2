@@ -544,9 +544,9 @@ static void print_help(FILE *f, char *Name)
 void reachability_check(lts &l)
 {
   gsVerboseMsg("checking reachability of input LTS...\n");
-  if ( !l.reachability_check() )
+  if ( !l.reachability_check(true) )
   {
-    gsWarningMsg("not all states of the input LTS are reachable from the initial state; this will invoke unspecified behaviour in LTS tools (including this one)!\n");
+    gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
   }
 }
 
