@@ -270,6 +270,7 @@ static void set_nfs_array_value(nfs_array a, unsigned int arity, unsigned int va
   a[0] = val;
 }
 
+#ifndef NDEBUG
 static bool equal_nfs_array(nfs_array a, nfs_array b, unsigned int arity)
 {
   unsigned int i = 0;
@@ -282,6 +283,7 @@ static bool equal_nfs_array(nfs_array a, nfs_array b, unsigned int arity)
   }
   return (a[i] & ((1 << arity)-1)) == (b[i] & ((1 << arity)-1));
 }
+#endif
 
 static bool get_nfs_array(nfs_array a, unsigned int i)
 {
