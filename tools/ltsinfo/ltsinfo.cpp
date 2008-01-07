@@ -190,9 +190,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     if(wa_determinism_option != mcrl2::lts::lts_eq_none)
     {
-      lts_eq_options reduce_options;
-      set_eq_options_defaults(reduce_options);
-      l.reduce(wa_determinism_option,reduce_options);
+      l.reduce(wa_determinism_option);
 
       deterministic_str.append( l.is_deterministic() ? "yes, " : "no, ");
       deterministic_str.append("modulo ");
@@ -475,11 +473,9 @@ int main(int argc, char **argv) {
       if ( opts.determinism_equivalence != lts_eq_none )
       {
         gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence));
-        lts_eq_options reduce_options;
-        set_eq_options_defaults(reduce_options);
         gsVerboseMsg("minimisation...\n");
 
-        l.reduce(opts.determinism_equivalence,reduce_options);
+        l.reduce(opts.determinism_equivalence);
         gsVerboseMsg("deterministic check...\n");
         if ( l.is_deterministic() )
         {

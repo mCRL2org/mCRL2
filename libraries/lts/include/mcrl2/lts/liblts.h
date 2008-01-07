@@ -70,31 +70,39 @@ namespace lts
   };
 
   /** \brief Options for equivalence checking/reduction algorithms
-   *  \details This struct stores options for the algorithms that reduce an LTS
+   *  \details This class stores options for the algorithms that reduce an LTS
    *  modulo an equivalence or check the equivalence of two LTSs.
    */
-  typedef struct
+  class lts_eq_options
   {
-    struct {
-      /**
-       * \details
-       * If \a false, the reduction algorithm reduces the LTS by mapping
-       * equivalent states onto each other.
-       * 
-       * If \a true, the LTS is \b not reduced. Instead, the algorithm adds a
-       * parameter to the state vector of every state. The value of this
-       * parameter indicates the equivalence class to which that state belongs.
-       *
-       * This options only works with strong and branching bisimilarity.
+    public:
+      /** Creates an object with the options for equivalence checking/reduction
+       *  set to their default values.
        */
-      bool add_class_to_state;
-      /** \details The vector of transition labels that the reduction algorithm
-       * considers to be internal actions. (Besides those that are already
-       * marked as being internal.)
-       */
-      std::vector<std::string> tau_actions;
-    } reduce;
-  } lts_eq_options;
+      lts_eq_options();
+
+      struct {
+        /**
+         * \details
+         * If \a false, the reduction algorithm reduces the LTS by mapping
+         * equivalent states onto each other.
+         * 
+         * If \a true, the LTS is \b not reduced. Instead, the algorithm adds a
+         * parameter to the state vector of every state. The value of this
+         * parameter indicates the equivalence class to which that state belongs.
+         *
+         * This options only works with strong and branching bisimilarity.
+         */
+        bool add_class_to_state;
+        /** \details The vector of transition labels that the reduction algorithm
+         * considers to be internal actions. (Besides those that are already
+         * marked as being internal.)
+         */
+        std::vector<std::string> tau_actions;
+      } reduce;
+  };
+  /** An empty lts_eq_options object */
+  extern lts_eq_options lts_eq_no_options;
 
   /** \brief Typed of additional information for LTS operations.
    * \details This enumerated type defines types for additional information for
@@ -123,12 +131,6 @@ namespace lts
      * If \a false, the states are not labelled. */
     bool print_states;
   } lts_dot_options;
-
-  /** Sets options for equivalence checking/reduction to their default values.
-   * \param[in,out] opts The object of which the members are to be set to their
-   * default values.
-   */
-  void set_eq_options_defaults(lts_eq_options &opts);
 
   /** Adds transition labels to the list of labels that are considered to be
    * internal actions.
@@ -560,7 +562,7 @@ namespace lts
        * \param[in] opts The options that will be used for the reduction.
        * \retval true if the reduction succeeded;
        * \retval false otherwise. */
-      bool reduce(lts_equivalence eq, lts_eq_options &opts);
+      bool reduce(lts_equivalence eq, lts_eq_options &opts = lts_eq_no_options);
       /** Checks whether this LTS is equivalent to another LTS.
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] eq The equivalence with respect to which the LTSs will be
@@ -568,7 +570,7 @@ namespace lts
        * \param[in] opts The options that will be used for the comparison.
        * \retval true if the LTSs are found to be equivalent.
        * \retval false otherwise. */
-      bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts);
+      bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts = lts_eq_no_options);
       /** Determinises this LTS. */
       void determinise();
       /** Checks whether all states in this LTS are reachable from the initial

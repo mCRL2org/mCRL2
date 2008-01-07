@@ -351,8 +351,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     lts_eq_options  eq_opts;
 
-    set_eq_options_defaults(eq_opts);
-
     switch (method) {
       case minimisation_modulo_strong_bisimulation:
         equivalence = lts_eq_strong;
@@ -682,7 +680,7 @@ int main(int argc, char **argv)
   string lpsfile;
   bool print_dot_state = true;
   lts_equivalence equivalence = lts_eq_none;
-  lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
+  lts_eq_options eq_opts;
   bool determinise = false;
   bool check_reach = true;
 

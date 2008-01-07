@@ -22,11 +22,13 @@ namespace mcrl2
 namespace lts
 {
 
-void set_eq_options_defaults(lts_eq_options &opts)
+lts_eq_options::lts_eq_options()
 {
-  opts.reduce.add_class_to_state = false;
-  opts.reduce.tau_actions.clear();
+  reduce.add_class_to_state = false;
+  reduce.tau_actions.clear();
 }
+
+lts_eq_options lts_eq_no_options = lts_eq_options();
 
 void lts_reduce_add_tau_actions(lts_eq_options &opts, string act_names)
 {

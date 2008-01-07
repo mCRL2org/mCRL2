@@ -107,7 +107,7 @@ int main(int argc, char **argv)
   lts_type in2type = lts_none;
   int opt;
   lts_equivalence equivalence = lts_eq_strong;
-  lts_eq_options eq_opts; set_eq_options_defaults(eq_opts);
+  lts_eq_options eq_opts;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
     switch ( opt )
