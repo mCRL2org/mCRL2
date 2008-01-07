@@ -20,15 +20,6 @@
 
 
 
-// --------------------------------------------------------
-// This macro must be defined here for a subclass of wxApp. 
-//		This creates a 'main()' method, amongst others.
-// --------------------------------------------------------
-
-IMPLEMENT_APP( Bremen )
-
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 
 
@@ -43,10 +34,6 @@ bool Bremen::OnInit()
 //
 // ^^^^^^^^^^^^^^^^^^
 {
-  //initialise ATerm library
-  int argc;
-  MCRL2_ATERM_INIT()
-
   //initiliase frame
   frame = new GarageFrame( wxT("Garage State"), 
   			 -1, 
@@ -78,3 +65,32 @@ int Bremen::OnExit()
 {
   	return 0;
 }
+
+// --------------------------------------------------------
+// This macro must be defined here for a subclass of wxApp. 
+//		This creates a 'main()' method, amongst others.
+// --------------------------------------------------------
+
+IMPLEMENT_APP_NO_MAIN(Bremen)
+IMPLEMENT_WX_THEME_SUPPORT
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow) {                                                                     
+
+  int argc;
+  MCRL2_ATERM_INIT()
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+}
+#else
+int main(int argc, char **argv) {
+  MCRL2_ATERM_INIT()
+
+  return wxEntry(argc, argv);
+}
+#endif
