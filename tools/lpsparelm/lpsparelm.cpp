@@ -1,4 +1,4 @@
-//  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
+//  Copyright 2007 J.van der Wulp. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -43,7 +43,60 @@ struct tool_configuration {
       return false;
     }
 
-    return true;;
+    return true;
+  }
+
+  tool_configuration(int ac, char** av) {
+    namespace po = boost::program_options;
+  
+    po::options_description description;
+
+    description.add_options()
+      ("help,h",      "display this help")
+      ("verbose,v",   "turn on the display of short intermediate messages")
+      ("debug,d",     "turn on the display of detailed intermediate messages")
+      ("version",     "display version information")
+    ;
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+        ("INFILE", po::value< string >(), "input file")
+        ("OUTFILE", po::value< string >(), "output file");
+  
+    po::options_description cmdline_options;
+    cmdline_options.add(description).add(hidden);
+          
+    po::options_description visible("Allowed options");
+    visible.add(description);
+          
+    po::positional_options_description p;
+    p.add("INFILE", 1).add("OUTFILE", 1);
+  
+    po::variables_map vm;
+    po::store(po::command_line_parser(ac, av).
+      options(cmdline_options).positional(p).run(), vm);
+    po::notify(vm);
+  
+    if (vm.count("verbose"))
+    {
+      gsSetVerboseMsg();
+    }
+       
+    if (vm.count("help")) {
+      std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+                << "Removes unused parameters from the LPS read from standard input or INFILE." << std::endl
+                << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
+                << std::endl << description;
+  
+      exit (0);
+    }
+          
+    if (vm.count("version")) {
+      print_version_information(NAME);
+      exit (0);
+    }
+  
+    input_file  = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
+    output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
   }
 };
 
@@ -103,59 +156,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-tool_configuration parse_command_line(int ac, char** av, tool_configuration& options) {
-  namespace po = boost::program_options;
-
-  po::options_description description;
-
-  description.add_options()
-    ("help,h",      "display this help")
-    ("verbose,v",   "turn on the display of short intermediate messages")
-    ("debug,d",     "turn on the display of detailed intermediate messages")
-    ("version",     "display version information")
-  ;
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("INFILE", po::value< string >(), "input file")
-      ("OUTFILE", po::value< string >(), "output file");
-
-  po::options_description cmdline_options;
-  cmdline_options.add(description).add(hidden);
-        
-  po::options_description visible("Allowed options");
-  visible.add(description);
-        
-  po::positional_options_description p;
-  p.add("INFILE", 1).add("OUTFILE", 1);
-
-  po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("verbose"))
-  {
-    gsSetVerboseMsg();
-  }
-     
-  if (vm.count("help")) {
-    std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
-              << "Removes unused parameters from the LPS read from standard input or INFILE." << std::endl
-              << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
-              << std::endl << description;
-
-    exit (0);
-  }
-        
-  if (vm.count("version")) {
-    print_version_information(NAME);
-    exit (0);
-  }
-
-  return tool_configuration((0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-",
-                            (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-");
-}
-
 int main(int argc, char** argv)
 {
   MCRL2_CORE_LIBRARY_INIT(argv)
@@ -166,7 +166,5 @@ int main(int argc, char** argv)
   }
 #endif
 
-  tool_configuration c(parse_command_line(argc,argv,c));
-
-  return c.execute();
+  return tool_configuration(argc, argv).execute();
 }

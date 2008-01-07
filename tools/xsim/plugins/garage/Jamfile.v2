@@ -22,9 +22,9 @@ lib xsim_garage_view
          <runtime-link>shared
        ;
 
-alias garageframe : : <wx>no ;
+alias garage : : <wx>no ;
 
-exe garageframe
+exe garage
        : xmain.cpp
          garageframe.cpp
          garagecanvas.cpp
@@ -34,5 +34,5 @@ exe garageframe
          <wx>yes
        ;
 
-explicit garageframe ;
+explicit garage ;
 

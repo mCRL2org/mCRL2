@@ -68,7 +68,7 @@ flags darwin.link OPTIONS <variant>release : -Wl,-dead_strip -no_dead_strip_init
 # End changes from Adobe ASL for universal binaries
 
 flags darwin.compile OPTIONS <link>shared : -dynamic ;
-flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp ;
+flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp  -gdwarf-2  ;
 
 flags darwin.link FRAMEWORK <framework> ;
 

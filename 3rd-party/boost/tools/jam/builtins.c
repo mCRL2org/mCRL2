@@ -1004,16 +1004,14 @@ static void unknown_rule( FRAME *frame, char* key, char *module_name, char *rule
 /*
  * builtin_import() - IMPORT ( SOURCE_MODULE ? : SOURCE_RULES * : TARGET_MODULE ? : TARGET_RULES * : LOCALIZE ? )
  *
- * The IMPORT rule imports rules from the SOURCE_MODULE into the
- * TARGET_MODULE as local rules. If either SOURCE_MODULE or
- * TARGET_MODULE is not supplied, it refers to the global
- * module. SOURCE_RULES specifies which rules from the SOURCE_MODULE
- * to import; TARGET_RULES specifies the names to give those rules in
- * TARGET_MODULE. If SOURCE_RULES contains a name which doesn't
- * correspond to a rule in SOURCE_MODULE, or if it contains a
- * different number of items than TARGET_RULES, an error is issued.
- * if LOCALIZE is specified, the rules will be executed in
- * TARGET_MODULE, with corresponding access to its module local
+ * The IMPORT rule imports rules from the SOURCE_MODULE into the TARGET_MODULE
+ * as local rules. If either SOURCE_MODULE or TARGET_MODULE is not supplied, it
+ * refers to the global module. SOURCE_RULES specifies which rules from the
+ * SOURCE_MODULE to import; TARGET_RULES specifies the names to give those rules
+ * in TARGET_MODULE. If SOURCE_RULES contains a name which doesn't correspond to
+ * a rule in SOURCE_MODULE, or if it contains a different number of items than
+ * TARGET_RULES, an error is issued. If LOCALIZE is specified, the rules will be
+ * executed in TARGET_MODULE, with corresponding access to its module local
  * variables.
  */
 LIST *
@@ -1087,15 +1085,14 @@ builtin_export(
 
     module_t* m = bindmodule( module_list ? module_list->string : 0 );
     
-            
     for ( ; rules; rules = list_next( rules ) )
     {
         RULE r_, *r = &r_;
         r_.name = rules->string;
-                
+
         if ( !m->rules || !hashcheck( m->rules, (HASHDATA**)&r ) )
             unknown_rule( frame, "EXPORT", m->name, r_.name );
-        
+
         r->exported = 1;
     }
     return L0;
