@@ -21,9 +21,9 @@ using namespace atermpp;
 using namespace lps;
 using namespace lps::data_expr;
 
-int main(int, char*[])
+int main(int argc, char*[] argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   data_variable d("d:D");
   data_variable d00("d00:D");

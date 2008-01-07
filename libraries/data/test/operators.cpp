@@ -25,9 +25,9 @@ class D: public aterm_appl
 // This program is for checking if some standard operators on aterms
 // are defined and don't lead to ambiguities.
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   aterm t      = make_term("[1,2]");
   aterm_appl a = data_variable("d:D");

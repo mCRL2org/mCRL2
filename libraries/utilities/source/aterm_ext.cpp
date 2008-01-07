@@ -22,28 +22,6 @@ namespace mcrl2 {
     extern "C" {
 #endif
 
-//Workarounds for the initialisation of the ATerm library
-//-------------------------------------------------------
-
-static int stack_direction_helper(int *a) {
-  int b;
-  if (&b > a) {
-    //direction of stack growth is up
-    return 1;
-  } else if (&b < a) {
-    //direction of stack growth is down
-    return -1;
-  } else {
-    //direction of stack growth is unknown
-    return 0;
-  }
-}
-
-int stack_direction(void) {
-  int a;
-  return stack_direction_helper(&a);
-}
-
 
       //Substitutions on ATerm's
       //------------------------

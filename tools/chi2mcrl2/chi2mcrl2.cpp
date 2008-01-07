@@ -319,7 +319,7 @@ void PrintHelp(char *Name)
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERM_INIT()
+  MCRL2_ATERM_INIT(argv)
 
 
   t_options     options;

@@ -602,7 +602,7 @@ void parse_command_line(int argc, char **argv)
 //MAIN =================================== 
 int main(int argc, char** argv) 
 { 
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
    
   parse_command_line(argc, argv);
 

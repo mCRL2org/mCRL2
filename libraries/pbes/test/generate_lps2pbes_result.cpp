@@ -21,9 +21,9 @@ using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   if (argc < 4)
   {

@@ -21,7 +21,8 @@ using namespace ::mcrl2::utilities;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
+
   gsSetVerboseMsg();
 
   ATermAppl x_name = gsString2ATermAppl("x");

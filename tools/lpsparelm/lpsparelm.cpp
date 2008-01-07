@@ -158,7 +158,7 @@ tool_configuration parse_command_line(int ac, char** av, tool_configuration& opt
 
 int main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
   
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

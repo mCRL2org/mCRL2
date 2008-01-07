@@ -27,9 +27,9 @@ const std::string SPECIFICATION =
 "                                         \n"
 "init P(0);                               \n";
 
-int main()
+int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   std::stringstream spec_stream;
   spec_stream << SPECIFICATION;

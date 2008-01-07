@@ -497,8 +497,8 @@ using namespace mcrl2::utilities;
 // Main function ----------------------------------------------------------------------------------
 
   int main(int argc, char* argv[]) {
-    MCRL2_CORE_LIBRARY_INIT()
 
+    MCRL2_CORE_LIBRARY_INIT(argv)
 
     LPS_Inv_Elm v_lps_inv_elm;
 

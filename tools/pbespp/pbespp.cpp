@@ -60,7 +60,7 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 //implementation
 
 int main(int argc, char* argv[]) {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   //declarations for parsing the specification
   char *SpecFileName   = NULL;

@@ -22,7 +22,7 @@ using namespace lps;
 
 int test_main(int argc, char** argv )
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   sort_expression X("X");
   sort_expression Y("Y");

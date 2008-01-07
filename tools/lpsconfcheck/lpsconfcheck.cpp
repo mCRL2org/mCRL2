@@ -761,7 +761,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 // Main function ----------------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
-  MCRL2_CORE_LIBRARY_INIT()
+
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   try {
     LPS_Conf_Check v_lps_conf_check;

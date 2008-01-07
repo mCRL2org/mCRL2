@@ -75,7 +75,7 @@ void test_multiple_linearization_calls()
 
 int test_main(int argc, char** argv )
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   void test_multiple_linearization_calls();
 

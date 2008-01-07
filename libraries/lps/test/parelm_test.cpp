@@ -69,7 +69,7 @@ int test_main(int argc, char** argv)
 {
   using namespace lps;
 
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   specification s0;
   specification s1;

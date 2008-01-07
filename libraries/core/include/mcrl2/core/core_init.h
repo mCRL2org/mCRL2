@@ -17,9 +17,11 @@
 
 namespace lps
 {
-/// Define a macro to hide the initialization statements of the Core Library.
-#define MCRL2_CORE_LIBRARY_INIT()       \
-  MCRL2_ATERM_INIT()                    \
+/// MCRL2_CORE_LIBRARY_INIT(p) initialises the following:
+/// - the ATerm library using p as the bottom of the stack
+/// - the constructor functions used by the Core library
+#define MCRL2_CORE_LIBRARY_INIT(p)       \
+  MCRL2_ATERM_INIT(p)                    \
   gsEnableConstructorFunctions();
 
 } // namespace lps

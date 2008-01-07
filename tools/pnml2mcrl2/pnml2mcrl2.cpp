@@ -2428,7 +2428,8 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   // main
   //==================================================
   int main(int argc, char **argv){
-    MCRL2_CORE_LIBRARY_INIT()
+
+    MCRL2_CORE_LIBRARY_INIT(argv)
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

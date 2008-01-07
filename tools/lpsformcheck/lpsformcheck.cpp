@@ -344,7 +344,7 @@ using namespace ::mcrl2::utilities;
 // Main function ----------------------------------------------------------------------------------
 
   int main(int argc, char* argv[]) {
-    MCRL2_CORE_LIBRARY_INIT()
+    MCRL2_CORE_LIBRARY_INIT(argv)
 
     try {
       LPS_Form_Check v_lps_form_check;

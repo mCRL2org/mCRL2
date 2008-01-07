@@ -4,7 +4,7 @@ using namespace lps;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   string infile(argv[1]);
   specification spec1;

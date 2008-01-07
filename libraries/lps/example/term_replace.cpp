@@ -41,7 +41,7 @@ struct replace_variables
   }
 };
 
-int main()
+int main(int argc, char **argv)
 {
   using namespace lps::data_expr;
 

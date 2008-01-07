@@ -717,9 +717,9 @@ void test_lps2pbes()
   pbes<> p2 = lps2pbes(model, req1_2, timed);
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_normalize(); 
   test_lps2pbes();

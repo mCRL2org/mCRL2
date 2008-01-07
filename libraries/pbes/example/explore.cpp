@@ -22,8 +22,7 @@ using namespace pbes_expr;
 int main(int argc, char** argv)
 {
 
-  // Initialize the aterm library
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   // load a pbes.
   pbes<> pbes_spec;

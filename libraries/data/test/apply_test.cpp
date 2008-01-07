@@ -44,9 +44,9 @@ void test_apply()
   cerr << "dl: " << dl << endl;
 }
   
-int test_main( int, char*[] )
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT() 
+  MCRL2_CORE_LIBRARY_INIT(argv) 
 
   test_apply();
   return 0;

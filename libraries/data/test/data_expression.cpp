@@ -17,9 +17,9 @@ using namespace std;
 using namespace atermpp;
 using namespace lps;
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT() 
+  MCRL2_CORE_LIBRARY_INIT(argv) 
 
   ATermAppl T = gsMakeDataExprTrue();
   ATermAppl F = gsMakeDataExprFalse();

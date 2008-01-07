@@ -375,7 +375,7 @@ void test_normalize()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_rename();
   test_normalize();

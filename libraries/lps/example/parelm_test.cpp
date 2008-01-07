@@ -156,7 +156,7 @@ std::string SPEC7 =
 
 int main(int argc, char* argv[])
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_parelm(SPEC1);
   test_parelm(SPEC2);

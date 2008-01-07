@@ -26,9 +26,9 @@ using namespace lps;
 using namespace lps::detail;
 using boost::format;
 
-int main()
+int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
   
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;

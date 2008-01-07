@@ -38,7 +38,7 @@ static Rewriter *rewr;
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   //declarations for getopt
   bool opt_benchmark = false;

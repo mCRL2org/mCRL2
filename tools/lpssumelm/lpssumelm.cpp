@@ -216,7 +216,9 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 }
 
 int main(int argc, char** argv) {
-  MCRL2_CORE_LIBRARY_INIT()
+
+  MCRL2_CORE_LIBRARY_INIT(argv)
+
   tool_options options;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

@@ -77,9 +77,9 @@ void test_trivial()
   BOOST_CHECK(p.is_well_typed());
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_trivial();
 

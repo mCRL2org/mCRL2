@@ -49,7 +49,7 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   FILE *InStream, *OutStream;
   #define sopts "hqvdn"

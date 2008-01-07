@@ -643,7 +643,7 @@ bool write_lts_to_file(lts& l, std::string const& outfile, lts_type outtype, std
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   #define ShortOptions      "hqvdi:o:fl:nsbtuaD"
   #define VersionOption     0x1

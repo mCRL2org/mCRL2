@@ -137,9 +137,9 @@ void test_data_assignment_list()
   BOOST_CHECK(t0 == t2);
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_replace();
   test_data_assignment_list();

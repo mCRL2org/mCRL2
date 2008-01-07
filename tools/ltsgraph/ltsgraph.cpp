@@ -166,8 +166,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {
 
-  int argc;
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(&lpCmdLine)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
@@ -184,7 +183,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #else
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

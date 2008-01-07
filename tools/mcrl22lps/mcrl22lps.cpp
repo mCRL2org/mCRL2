@@ -743,8 +743,8 @@ void PrintHelp(char *Name)
 
 int main(int argc, char *argv[])
 {
-  //initialise ATerm library
-  MCRL2_CORE_LIBRARY_INIT()       
+  MCRL2_CORE_LIBRARY_INIT(argv)
+
   t_lin_options lin_options;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

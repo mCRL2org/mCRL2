@@ -21,9 +21,9 @@ using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
-int main()
+int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   namespace d = lps::data_expr;
   namespace p = lps::pbes_expr;

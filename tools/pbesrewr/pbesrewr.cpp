@@ -153,7 +153,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   t_tool_options tool_options = parse_command_line(argc, argv);
 

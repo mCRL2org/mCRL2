@@ -52,9 +52,9 @@ void test_bisimulation()
   BOOST_CHECK(abp_result);
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   test_bisimulation();
   

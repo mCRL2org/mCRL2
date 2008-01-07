@@ -82,14 +82,14 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  int argc;
-  MCRL2_ATERM_INIT()
+  MCRL2_ATERM_INIT(&lpCmdLine)
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv) {
-  MCRL2_ATERM_INIT()
+
+  MCRL2_ATERM_INIT(argv)
 
   return wxEntry(argc, argv);
 }

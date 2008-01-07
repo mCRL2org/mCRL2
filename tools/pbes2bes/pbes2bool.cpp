@@ -347,7 +347,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 int main(int argc, char** argv)
 {
   //Initialise ATerm library and lowlevel-functions
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

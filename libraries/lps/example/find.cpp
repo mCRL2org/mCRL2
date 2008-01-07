@@ -44,9 +44,9 @@ bool occurs_in(data_expression d, data_variable v)
   return find_if(aterm_appl(d), compare_variable(v)) != aterm();
 }
 
-int main()
+int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT()
+  MCRL2_CORE_LIBRARY_INIT(argv)
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   linear_process lps = spec.process();

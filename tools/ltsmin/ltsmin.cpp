@@ -23,7 +23,7 @@ using namespace mcrl2::utilities;
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
 int main(int argc, char *argv[]) {
-   MCRL2_CORE_LIBRARY_INIT()
+   MCRL2_CORE_LIBRARY_INIT(argv)
 
    gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 

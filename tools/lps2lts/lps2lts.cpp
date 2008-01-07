@@ -162,6 +162,9 @@ static void print_help(FILE *f, const char *Name)
 
 int main(int argc, char **argv)
 {
+
+  MCRL2_CORE_LIBRARY_INIT(argv)
+
 /*  ATerm bot;
   // handle the aterm options
   {
@@ -187,7 +190,6 @@ int main(int argc, char **argv)
   } */
   // end handle aterm lib options 
 
-  MCRL2_CORE_LIBRARY_INIT()
 
   // Start 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
