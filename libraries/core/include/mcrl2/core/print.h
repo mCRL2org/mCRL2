@@ -29,7 +29,6 @@ extern "C" {
 
 //Global preconditions:
 //- the ATerm library has been initialised
-//- gsEnableConstructorFunctions() has been called
 
 /*! \pre OutStream points to a stream to which can be written
          Part is an ATerm containing a part of a mCRL2 specification
@@ -70,7 +69,6 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 
 //Global preconditions:
 //- the ATerm library has been initialised
-//- gsEnableConstructorFunctions() has been called
 
 /// \pre OutStream points to a stream to which can be written
 ///         Part is an ATerm containing a part of a mCRL2 specification or state

@@ -26,7 +26,6 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/core/core_init.h"
 
 #include "simulator.h"
 
@@ -88,7 +87,7 @@ void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-    MCRL2_CORE_LIBRARY_INIT(argv)
+    MCRL2_ATERM_INIT(argc, argv)
 
 	FILE *SpecStream;
 	#define sopts "hqvdyR:"

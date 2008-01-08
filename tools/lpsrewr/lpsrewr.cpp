@@ -19,7 +19,6 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
@@ -38,7 +37,7 @@ static Rewriter *rewr;
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   //declarations for getopt
   bool opt_benchmark = false;

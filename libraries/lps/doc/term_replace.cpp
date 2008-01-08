@@ -2,6 +2,7 @@
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace lps;
 using namespace atermpp;
@@ -30,13 +31,11 @@ struct replace_variables
   }
 };
 
-int main()
+int main(int argc, char **argv)
 {
-  using namespace lps::data_expr;
+  MCRL2_ATERM_INIT(argc, argv)
 
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  using namespace lps::data_expr;
 
   data_variable d("d:D");
   data_variable d0("d0:D");

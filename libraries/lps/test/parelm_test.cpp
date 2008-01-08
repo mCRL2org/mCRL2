@@ -67,9 +67,9 @@ const std::string case_7(
 
 int test_main(int argc, char** argv)
 {
-  using namespace lps;
+  MCRL2_ATERM_INIT(argc, argv)
 
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  using namespace lps;
 
   specification s0;
   specification s1;

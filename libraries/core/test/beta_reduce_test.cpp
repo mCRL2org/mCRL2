@@ -15,13 +15,12 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
 
 using namespace ::mcrl2::utilities;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   gsSetVerboseMsg();
 

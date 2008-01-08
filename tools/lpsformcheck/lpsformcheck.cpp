@@ -15,7 +15,6 @@
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
@@ -343,8 +342,9 @@ using namespace ::mcrl2::utilities;
 
 // Main function ----------------------------------------------------------------------------------
 
-  int main(int argc, char* argv[]) {
-    MCRL2_CORE_LIBRARY_INIT(argv)
+  int main(int argc, char* argv[])
+  {
+    MCRL2_ATERM_INIT(argc, argv)
 
     try {
       LPS_Form_Check v_lps_form_check;

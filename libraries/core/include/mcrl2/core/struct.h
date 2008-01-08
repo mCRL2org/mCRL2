@@ -27,18 +27,6 @@ extern "C" {
 #endif
 
 
-//Enabling constructor functions
-//------------------------------
-
-///\return  the constructor creator and recogniser functions are enabled
-bool gsConstructorFunctionsEnabled(void);
-
-///gsEnableConstrucorFunctions() should be called before calling any of the
-///remaining functions in this file.
-/// \post the constructor creator and recogniser functions are enabled
-void gsEnableConstructorFunctions(void);
-
-
 // Sort expressions
 // ----------------
 
@@ -1584,7 +1572,5 @@ bool gsIsFixpoint(ATermAppl Term);
 #ifdef __cplusplus
 }
 #endif
-
-#include "mcrl2/core/core_init.h"
 
 #endif /// MCRL2_LIBSTRUCT_H

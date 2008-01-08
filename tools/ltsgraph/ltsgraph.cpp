@@ -13,7 +13,7 @@
 #include <boost/bind.hpp>
 #include <mcrl2/lts/liblts.h>
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 std::string lts_file_argument;
 
@@ -183,7 +183,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #else
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
 # ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

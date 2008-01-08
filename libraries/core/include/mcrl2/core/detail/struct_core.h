@@ -26,11 +26,6 @@ extern "C" {
 
 //Global precondition: the ATerm library has been initialised
 
-// TODO: remove this function.
-inline
-void gsEnableCoreConstructorFunctions()
-{}
-
 //--- begin generated code
 // ActAnd
 inline

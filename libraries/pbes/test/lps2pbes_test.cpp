@@ -79,7 +79,7 @@ void test_trivial()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   test_trivial();
 

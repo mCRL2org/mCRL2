@@ -32,7 +32,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace lps;
@@ -268,7 +268,7 @@ void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   FILE *SpecStream;
   ATermAppl Spec;

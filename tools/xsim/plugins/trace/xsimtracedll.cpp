@@ -268,7 +268,6 @@ extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 
 extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
-	gsEnableConstructorFunctions();
 	simdll = new SimViewsDLL;
 }
 

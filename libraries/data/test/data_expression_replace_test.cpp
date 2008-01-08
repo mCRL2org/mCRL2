@@ -6,6 +6,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression_replace.h"
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;
@@ -13,8 +14,7 @@ using namespace lps;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
-
+  MCRL2_ATERM_INIT(argc, argv)
 
   // y:Real
   data_variable y("y",sort_expr::real()); 

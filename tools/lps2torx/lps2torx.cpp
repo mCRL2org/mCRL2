@@ -25,7 +25,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/lps/dataelm.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
@@ -157,7 +157,7 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   FILE *SpecStream;
   ATermAppl Spec;

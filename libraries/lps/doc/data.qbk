@@ -6,9 +6,8 @@ Currently there is no documentation available for this other than the reference.
 [endsect]
 
 [section: Initialization]
-Apart from the ATerm Library initialization, programs using the data library must
-also call the function `gsEnableConstructorFunctions`. So a program
-should look like this:
+programs using the data library must initialise the ATerm Library.
+So a program should look like this:
 
    #include "mcrl2/data/data.h"
 
@@ -16,7 +15,6 @@ should look like this:
    {
      aterm bottom_of_stack;
      aterm_init(bottom_of_stack);
-     gsEnableConstructorFunctions();
      
      ...
    }

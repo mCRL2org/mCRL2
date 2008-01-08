@@ -29,7 +29,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
@@ -297,9 +297,9 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #endif
 }
 #else
-int main(int argc, char **argv) {
-
-  MCRL2_CORE_LIBRARY_INIT(argv)
+int main(int argc, char **argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

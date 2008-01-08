@@ -43,9 +43,9 @@ struct replace_variables
 
 int main(int argc, char **argv)
 {
-  using namespace lps::data_expr;
+  MCRL2_ATERM_INIT(argc, argv)
 
-  MCRL2_CORE_LIBRARY_INIT()
+  using namespace lps::data_expr;
 
   data_variable d("d:D");
   data_variable d0("d0:D");

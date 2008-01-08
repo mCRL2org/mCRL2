@@ -15,7 +15,7 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
 #include <boost/lexical_cast.hpp>
@@ -429,9 +429,9 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_optio
   return (true);
 }
 
-int main(int argc, char **argv) {
-
-  MCRL2_CORE_LIBRARY_INIT(argv)
+int main(int argc, char **argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

@@ -11,7 +11,7 @@
 
 #include <getopt.h>
 #include "mcrl2/core/struct.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
@@ -22,12 +22,13 @@ using namespace mcrl2::utilities;
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
-int main(int argc, char *argv[]) {
-   MCRL2_CORE_LIBRARY_INIT(argv)
+int main(int argc, char *argv[])
+{
+  MCRL2_ATERM_INIT(argc, argv)
 
-   gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
+  gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 
-   switch(parseArgs(argc, argv, &traceLevel, &optimal, &classes)) {
+  switch(parseArgs(argc, argv, &traceLevel, &optimal, &classes)) {
       case ERR_ARGS:
          doHelp(argv[0]);
          exit(EXIT_ERR_ARGS);

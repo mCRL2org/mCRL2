@@ -12,6 +12,7 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
 
@@ -46,7 +47,7 @@ void test_apply()
   
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv) 
+  MCRL2_ATERM_INIT(argc, argv) 
 
   test_apply();
   return 0;

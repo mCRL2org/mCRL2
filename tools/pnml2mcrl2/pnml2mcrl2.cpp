@@ -22,7 +22,6 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/version_info.h"
@@ -2427,9 +2426,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   //==================================================
   // main
   //==================================================
-  int main(int argc, char **argv){
-
-    MCRL2_CORE_LIBRARY_INIT(argv)
+  int main(int argc, char **argv)
+  {
+    MCRL2_ATERM_INIT(argc, argv)
     
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

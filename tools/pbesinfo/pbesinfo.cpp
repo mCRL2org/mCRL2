@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace lps;
@@ -118,7 +118,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
 	t_tool_options tool_options = parse_command_line(argc, argv);
 

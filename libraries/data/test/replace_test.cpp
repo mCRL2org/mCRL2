@@ -29,6 +29,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
 using namespace lps;
@@ -139,7 +140,7 @@ void test_data_assignment_list()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   test_replace();
   test_data_assignment_list();

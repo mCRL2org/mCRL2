@@ -21,8 +21,7 @@ using namespace pbes_expr;
 
 int main(int argc, char** argv)
 {
-
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   // load a pbes.
   pbes<> pbes_spec;

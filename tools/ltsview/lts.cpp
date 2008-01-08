@@ -1496,9 +1496,6 @@ void LTS::loadTrace(std::string const& path)
   }
   else 
   {
-    // To satisfy pretty printing preconditions.
-    gsEnableConstructorFunctions();
-
     Simulation* sim = new Simulation();
     // Initialize simulation with initial state of the LTS;
     State* initState;

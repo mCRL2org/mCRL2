@@ -74,7 +74,7 @@ class my_program: public lps::filter_program
 
 int main(int argc, char* argv[])
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   std::string input_filename;
   std::string output_filename;

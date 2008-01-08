@@ -6,7 +6,7 @@ using namespace lps;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   if (argc < 4)
   {

@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
 using namespace lps;
@@ -22,7 +23,7 @@ using namespace lps::data_expr;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   data_variable d("d:D");
   data_variable d0("d0:D");

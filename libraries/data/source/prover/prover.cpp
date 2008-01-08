@@ -26,7 +26,6 @@ using namespace ::mcrl2::utilities;
       gsDebugMsg("Flag:\n  Time limit: %d, \n", f_time_limit);
       f_processed = false;
 
-      gsEnableConstructorFunctions();
       switch (a_rewrite_strategy) {
         case (GS_REWR_INNER): {
           f_rewriter = createRewriter(data_spec, GS_REWR_INNER);

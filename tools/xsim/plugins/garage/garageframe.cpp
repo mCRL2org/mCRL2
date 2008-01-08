@@ -104,8 +104,6 @@ void GarageFrame::InitialiseFrame()
   stateIndex = -1;
   simulator = NULL;
   canvas->InitialiseCanvas();
-  //enable constructor functions
-  gsEnableConstructorFunctions();
 }
 
 

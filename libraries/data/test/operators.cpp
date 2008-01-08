@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_operation.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;
@@ -27,7 +28,7 @@ class D: public aterm_appl
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   aterm t      = make_term("[1,2]");
   aterm_appl a = data_variable("d:D");

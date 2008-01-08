@@ -18,7 +18,6 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
-#include "mcrl2/core/core_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -28,7 +27,7 @@ using boost::format;
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
   
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;

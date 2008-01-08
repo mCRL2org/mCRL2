@@ -38,7 +38,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/linear_process.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <mcrl2/data/data.h>
 #include <mcrl2/data/utility.h>
@@ -352,9 +352,9 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
 }
 
-int main(int argc, char** argv) {
-
-  MCRL2_CORE_LIBRARY_INIT(argv)
+int main(int argc, char** argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
 
   tool_options options;
 

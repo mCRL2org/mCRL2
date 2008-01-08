@@ -60,7 +60,7 @@ std::string SPECIFICATION =
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();

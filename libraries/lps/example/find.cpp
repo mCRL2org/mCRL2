@@ -46,7 +46,7 @@ bool occurs_in(data_expression d, data_variable v)
 
 int main(int argc, char **argv)
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   linear_process lps = spec.process();

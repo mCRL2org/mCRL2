@@ -15,14 +15,14 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
 using namespace lps;
 
 int test_main(int argc, char** argv )
 {
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   sort_expression X("X");
   sort_expression Y("Y");

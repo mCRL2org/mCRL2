@@ -17,7 +17,7 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/struct.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
 #include <fstream>
@@ -762,7 +762,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 int main(int argc, char* argv[]) {
 
-  MCRL2_CORE_LIBRARY_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
   try {
     LPS_Conf_Check v_lps_conf_check;

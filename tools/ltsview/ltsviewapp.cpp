@@ -128,7 +128,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  MCRL2_ATERM_INIT(&lpCmdLine) 
+  int local_var;
+  MCRL2_ATERM_INIT(local_var, &lpCmdLine) 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
@@ -145,7 +146,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 #else
 int main(int argc, char **argv) {
 
-  MCRL2_ATERM_INIT(argv)
+  MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;

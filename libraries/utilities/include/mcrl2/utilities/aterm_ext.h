@@ -34,10 +34,18 @@ namespace mcrl2 {
 //statement. Failing to do so may lead to crashes when the garbage collector
 //is started.
 
-//MCRL2_ATERM_INIT(p) initialises the ATerm library using
-//p as the bottom of the stack
-#define MCRL2_ATERM_INIT(p)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(p));
+//MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
+//one of the parameters as the bottom of the stack. The parameter that is
+//actually depends on the platform:
+//- &argc on Windows platforms
+//- argv on non-Windows platforms
+#ifdef __WINDOWS__
+#define MCRL2_ATERM_INIT(argc, argv)\
+  ATinit(0, 0, reinterpret_cast<ATerm*>(&argc));
+#else
+#define MCRL2_ATERM_INIT(argc, argv)\
+  ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
+#endif //__WINDOWS__
 
 //MCRL2_ATERM_INIT_DEBUG(p) initialises the ATerm library with debugging
 //information using p as the bottom of the stack

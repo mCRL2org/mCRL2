@@ -319,8 +319,7 @@ void PrintHelp(char *Name)
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERM_INIT(argv)
-
+  MCRL2_ATERM_INIT(argc, argv)
 
   t_options     options;
   std::string mcrl2spec; 

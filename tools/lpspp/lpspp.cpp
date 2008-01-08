@@ -21,7 +21,7 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
 using namespace mcrl2::utilities;
@@ -59,9 +59,9 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 
 //implementation
 
-int main(int argc, char* argv[]) {
-
-  MCRL2_CORE_LIBRARY_INIT(argv)
+int main(int argc, char* argv[])
+{
+  MCRL2_ATERM_INIT(argc, argv)
 
   //declarations for parsing the specification
   char *SpecFileName   = NULL;

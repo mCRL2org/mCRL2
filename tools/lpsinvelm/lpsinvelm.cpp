@@ -23,7 +23,7 @@
 #include "mcrl2/utilities/version_info.h"
 #include <string>
 #include <fstream>
-#include "mcrl2/core/core_init.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
 
@@ -496,9 +496,9 @@ using namespace mcrl2::utilities;
 
 // Main function ----------------------------------------------------------------------------------
 
-  int main(int argc, char* argv[]) {
-
-    MCRL2_CORE_LIBRARY_INIT(argv)
+  int main(int argc, char* argv[])
+  {
+    MCRL2_ATERM_INIT(argc, argv)
 
     LPS_Inv_Elm v_lps_inv_elm;
 
