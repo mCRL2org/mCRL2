@@ -21,10 +21,10 @@
 //
 /// \brief Formats in which traces can be saved on disk
 /// There are several formats for traces.
-/// The tfMcrl2 format saves a trace as an mcrl2 term in ATerm internal.
+/// The tfMcrl2 format saves a trace as an mCRL2 term in ATerm internal format.
 /// This is a compact but unreadable format.
 /// The tfPlain format is an ascii representation of the trace, which is
-/// human readable but only contains the actions and not time or state information. 
+/// human readable but only contains the actions and no time or state information. 
 /// tfUnknown is only used to read traces, when it is
 /// not known what the format is. In this case it is determined based
 /// on the format of the input file.
@@ -35,7 +35,7 @@ enum TraceFormat { tfMcrl2, tfPlain, tfUnknown };
 /// tag as a positive real number. Between two actions, before the first action and after the last
 /// action there can be a state. In the current version of the trace library an action, a state and
 /// a time tag are arbitrary expressions of sort AtermAppl. It is expected that this will change
-/// in the near future to match the data types used in the lps library.
+/// in the near future to match the data types used in the LPS library.
 /// 
 /// An important property of a state is its current position. All operations on a state
 /// operate with respect to its current position. A trace can be traversed by increasing
@@ -52,25 +52,21 @@ class Trace
 	public:
 /// \brief Default constructor for an empty trace.
 /// \details This is the default constructor for an empty trace. The current position
-/// and length of trace are set to 0. The initial state, its outgoing action
-/// and time are set to NULL. Initially space is reserved for 64 actions,
-/// states and time tags which is increased by need.
+/// and length of trace are set to 0. The initial state and time are set to NULL.
 		Trace();
 /// \brief Construct the trace in the basis of an input stream.
 /// \details A trace is read from the input stream. If the format is tfUnknown it
-/// is automatically determined what the format of the trace is. At
-/// termination the current position of the trace is at the end of the trace,
-/// after the last action.
+/// is automatically determined what the format of the trace is.
 /// \param[in] is The input stream from which the trace is read.
 /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
+/// \exception std::runtime_error message in case of failure
 		Trace(std::istream &is, TraceFormat tf = tfUnknown);
 /// \brief Construct the trace on the basis of an input file.
 /// \details A trace is read from the input file. If the format is tfUnknown it
-/// is automatically determined what the format of the trace is. At
-/// termination the current position of the trace is at the end of the trace,
-/// after the last action.
+/// is automatically determined what the format of the trace is.
 /// \param[in] filename The name of the file from which the trace is read.
 /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
+/// \exception std::runtime_error message in case of failure
 		Trace(std::string const& filename, TraceFormat tf = tfUnknown);
 /// \brief Destructor for the trace.
 /// \details Destructor for the trace. It frees all the associated memory of the trace.
@@ -83,7 +79,7 @@ class Trace
 
 /// \brief Set the current position after the pos'th action of the trace
 /// \details Set the current position after the pos'th action of the trace. The
-/// initial position corresponds to pos=0. If pos is larger or equal to
+/// initial position corresponds to pos=0. If pos is larger than
 /// the length of the trace, no new position is set.
 /// \param[in] pos The new position in the trace.
 		void setPosition(unsigned int pos);
@@ -105,22 +101,24 @@ class Trace
 /// the current position NULL is returned.
 /// \return The state at the current position of the trace.
 		ATermAppl currentState();
-/// \brief Get the outgoing action from the current position in the trace
+/// \brief Get the outgoing action from the current position in the trace and
+//  move to the next position
 /// \details This routine returns the action at the current position of the
-/// trace. This actions is always defined.
+/// trace and moves to the next position in the trace. When the current position
+/// is at the end of the trace, nothing happens and NULL is returned.
 /// \return An ATermAppl representing the action at the current position of the
-/// trace.
+/// trace. This is NULL when at the end of the trace.
 		ATermAppl nextAction();
-/// \brief Get the time of the current action from the current state in the trace
-/// \details Get the time of the current action from the current state in the trace. If 
-/// the current action is untimed, NULL is returned.
+/// \brief Get the time of the current state in the trace
+/// \details Get the time of the current state in the trace. This is the time at which
+/// the last action occurred (if any).
 /// \return An ATermAppl representing the current time, or NULL if the time is not defined.
 		ATermAppl currentTime();
 
-/// \brief Truncates the trace from the current position.
-/// \details This function removes the action at the current position and all
+/// \brief Truncates the trace at the current position.
+/// \details This function removes the mext action at the current position and all
 /// subsequent actions, times and states. The state and the time at the current
-/// position remain untouched. The length is set to the current position.
+/// position remain untouched.
 		void truncate();
 
 /// \brief
@@ -142,31 +140,13 @@ class Trace
 		bool canSetState();
 
 
-/// \brief Not documented. Use nextAction.
-/// \details
-/// \param [in]
-/// \return
-		ATermAppl getAction();
-
-/// \brief Not documented.  Use currentState.
-/// \details
-/// \param [in]
-/// \return
-		ATermAppl getState();
-
-/// \brief Not documented. Use currentTime.
-/// \details
-/// \param [in]
-/// \return
-		ATermAppl getTime();
-
-
 /// \brief Replace the trace with the content of the stream.
 /// \details The trace is replaced with the trace in the stream.
 /// If a problem occurs while reading the stream, a core dump occurs.
 /// If the format is tfPlain the trace can only consist of actions.
 /// \param [in] is The stream from which the trace is read.
 /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
+/// \exception std::runtime_error message in case of failure
 		void load(std::istream &is, TraceFormat tf = tfUnknown);
 
 /// \brief Replace the trace with the trace in the file.
@@ -174,10 +154,9 @@ class Trace
 /// If the format is tfPlain the trace can only consist of actions.
 /// \param [in] filename The name of the file from which the trace is read.
 /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
-/// \retval true The string was successfully read from the file.
-/// \retval false A problem occurred when reading the string from the file.
+/// \exception std::runtime_error message in case of failure
 
-		bool load(std::string const& filename, TraceFormat tf = tfUnknown);
+		void load(std::string const& filename, TraceFormat tf = tfUnknown);
 
 /// \brief Output the trace into the indicated stream.
 /// \details Output the trace into the indicated stream. 
@@ -185,6 +164,7 @@ class Trace
 /// \param [in] os The stream to which the trace is written.
 /// \param [in] tf The format used to represent the trace in the stream. If 
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
+/// \exception std::runtime_error message in case of failure
 
 		void save(std::ostream &os, TraceFormat tf = tfMcrl2);
 
@@ -193,10 +173,9 @@ class Trace
 /// \param [in] filename The name of the file that is written.
 /// \param [in] tf The format used to represent the trace in the stream. If 
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
-/// \return A boolean is returned to indicate whether writing of the trace
-/// was successful.
+/// \exception std::runtime_error message in case of failure
 
-		bool save(std::string const& filename, TraceFormat tf = tfMcrl2);
+		void save(std::string const& filename, TraceFormat tf = tfMcrl2);
 
 	private:
 		ATermAppl *states;
@@ -207,6 +186,7 @@ class Trace
 		unsigned int pos;
 
 		void init();
+                void cleanup();
 
 		TraceFormat detectFormat(std::istream &is);
 		void loadMcrl2(std::istream &is);

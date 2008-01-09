@@ -1489,13 +1489,16 @@ void LTS::visit(State* s) {
 void LTS::loadTrace(std::string const& path)
 {
   Trace tr;
-  if (!tr.load(path))
+  try
+  {
+    tr.load(path);
+  } catch (...)
   {
     std::string error = "Error loading file: " + path;
     mediator->reportError(error);
+    return;
   }
-  else 
-  {
+    
     Simulation* sim = new Simulation();
     // Initialize simulation with initial state of the LTS;
     State* initState;
@@ -1535,7 +1538,7 @@ void LTS::loadTrace(std::string const& path)
     while (tr.getPosition() != tr.getLength())
     {
       std::string action = PrintPart_CXX(ATgetArgument(
-                                          ATgetArgument(tr.getAction(),0),0),
+                                          ATgetArgument(tr.nextAction(),0),0),
                                          ppDefault);
 
       std::vector<Transition*> posTrans = sim->getPosTrans();
@@ -1614,7 +1617,6 @@ void LTS::loadTrace(std::string const& path)
 
     // Set simulation to the LTS
     simulation = sim;
-  }
 }
 
 void LTS::generateBackTrace()

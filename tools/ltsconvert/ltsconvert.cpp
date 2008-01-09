@@ -856,16 +856,6 @@ int main(int argc, char **argv)
     {
       return (1);
     }
-/*    if ( (lpsfile != "") && !(
-               ((outtype == lts_mcrl2) && (l.get_type() != lts_mcrl2)) ||
-               ((outtype == lts_mcrl) && (l.get_type() != lts_fsm)) ||
-               ((outtype == lts_fsm) && ((l.get_type() == lts_mcrl2) || (l.get_type() == lts_mcrl)))
-               ) )
-    {
-      gsWarningMsg("ignoring --lps option as it is not usable with this input/output combination\n");
-      lpsfile = "";
-    }*/
-
  
     if ( equivalence != lts_eq_none )
     {

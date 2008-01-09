@@ -278,7 +278,7 @@ static ATerm apply_hiding(ATerm act)
       }
       if ( find(tau_actions->begin(),tau_actions->end(),s) != tau_actions->end() )
       {
-        act = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATtrue));
+        act = label_name[label_tau];
       }
     }
   }
@@ -323,17 +323,7 @@ int ReadData(lts &l)
    nlabel = l.num_labels() + 1; // +1 for tau label
    AllocData();
    label_tau = nlabel-1;
-   if ( l.get_type() == lts_mcrl2 )
-   {
-     label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
-#ifdef MCRL2_BCG
-   } else if ( l.get_type() == lts_bcg )
-   {
-     label_name[label_tau] = (ATerm) ATmakeAppl0(ATmakeAFun("i",0,ATtrue));
-#endif
-   } else {
-     label_name[label_tau] = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATtrue));
-   }
+   label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
    transition_iterator i(&l);
    for (; i.more(); ++i) 
       {
@@ -349,22 +339,17 @@ static void pp_lts(lts &l)
 {
   for (unsigned int i=0; i<l.num_labels(); i++)
   {
-    l.set_label(i,(ATerm) ATmakeAppl0(ATmakeAFun(PrintPart_CXX(l.label_value(i),ppDefault).c_str(),0,ATtrue)),l.is_tau(i));
+    if ( ATisAppl(l.label_value(i)) && gsIsMultAct((ATermAppl) l.label_value(i)) )
+    {
+      l.set_label(i,(ATerm) ATmakeAppl0(ATmakeAFun(PrintPart_CXX(l.label_value(i),ppDefault).c_str(),0,ATtrue)),l.is_tau(i));
+    }
   }
 }
 
 void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2) 
    {
-     if ( l1.get_type() != l2.get_type() )
-     {
-       if ( l1.get_type() == lts_mcrl2 )
-       {
-         pp_lts(l1);
-       } else if ( l2.get_type() == lts_mcrl2 )
-       {
-         pp_lts(l2);
-       }
-     }
+   pp_lts(l1);
+   pp_lts(l2);
 
    second_lts_states_offset = l1.num_states();
    int offset = second_lts_states_offset;
@@ -373,17 +358,7 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
    nlabel = l1.num_labels()+l2.num_labels()+1; 
    AllocData();
    label_tau = nlabel-1;
-   if ( l1.get_type() == lts_mcrl2 )
-   {
-     label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
-#ifdef MCRL2_BCG
-   } else if ( l1.get_type() == lts_bcg )
-   {
-     label_name[label_tau] = (ATerm) ATmakeAppl0(ATmakeAFun("i",0,ATtrue));
-#endif
-   } else {
-     label_name[label_tau] = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATtrue));
-   }
+   label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
 
    for (transition_iterator i(&l1); i.more(); ++i)
       {
@@ -619,7 +594,7 @@ int ReturnEquivalenceClasses(int initState, ATbool
 int WriteData(lts &l, int initState, bool omit_tauloops)
     {
     int newState = ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse);
-    l.reset(l.get_type(),false);
+    l.reset(false);
     WriteTransitions(l);
     l.set_initial_state(newState);
     return 1;     

@@ -126,9 +126,9 @@ p_lts::p_lts(lts *l)
   lts_object = l;
 }
 
-lts::lts(lts_type type, bool state_info, bool label_info) : p_lts(this)
+lts::lts(bool state_info, bool label_info) : p_lts(this)
 {
-  init(type,state_info,label_info);
+  init(state_info,label_info);
 }
 
 lts::lts(string &filename, lts_type type) : p_lts(this)
@@ -160,12 +160,12 @@ lts::~lts()
   free(transitions);
 }
 
-void lts::reset(lts_type type, bool state_info, bool label_info)
+void lts::reset(bool state_info, bool label_info)
 {
-  clear(type,state_info,label_info);
+  clear(state_info,label_info);
 }
 
-void p_lts::init(lts_type type, bool state_info, bool label_info)
+void p_lts::init(bool state_info, bool label_info)
 {
   states_size = 0;
   nstates = 0;
@@ -180,12 +180,12 @@ void p_lts::init(lts_type type, bool state_info, bool label_info)
   ntransitions = 0;
   transitions = NULL;
   
-  this->type = type;
+  this->type = lts_none;
   this->state_info = state_info;
   this->label_info = label_info;
 }
 
-void p_lts::clear(lts_type type, bool state_info, bool label_info)
+void p_lts::clear(bool state_info, bool label_info)
 {
   if ( state_values != NULL )
   {
@@ -200,7 +200,7 @@ void p_lts::clear(lts_type type, bool state_info, bool label_info)
   }
   free(transitions);
 
-  init(type,state_info,label_info);
+  init(state_info,label_info);
 }
 
 lts_type p_lts::detect_type(string const& filename)

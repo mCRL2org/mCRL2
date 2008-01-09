@@ -352,12 +352,11 @@ namespace lts
 
     public:
       /** Creates an empty LTS.
-       * \param[in] type The LTS format.
        * \param[in] state_info Indicates whether state parameter information
        * will be present.
        * \param[in] label_info Indicates whether label information will be
        * present. */
-      lts(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
+      lts(bool state_info = true, bool label_info = true);
       /** Creates an LTS and reads its data from a file.
        * \param[in] filename The name of the file from which the data will be
        * read.
@@ -375,12 +374,11 @@ namespace lts
       ~lts();
 
       /** Clears the LTS data. 
-       * \param[in] type The new LTS format.
        * \param[in] state_info Indicates whether state parameter information
        * will be present.
        * \param[in] label_info Indicates whether label information will be
        * present. */
-      void reset(lts_type type = lts_mcrl2, bool state_info = true, bool label_info = true);
+      void reset(bool state_info = true, bool label_info = true);
 
       /** Reads LTS data from a file. This is not supported for Dot files.
        * \param[in] filename The name of the file from which data will be read.
@@ -530,7 +528,9 @@ namespace lts
        * \param[in] creator The creator string.*/
       void set_creator(std::string creator);
       
-      /** Gets the format of this LTS.
+      /** Gets the type of the file of the last succesful call to load. Note
+       * that this does not mean that the information currently in the object
+       * is still in this format.
        * \return The format of this LTS. */
       lts_type get_type();
 

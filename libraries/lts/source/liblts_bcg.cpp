@@ -115,9 +115,24 @@ bool p_lts::write_to_bcg(string const& filename)
 
   char *buf = NULL;
   unsigned int buf_size = 0;
+  bool warn_non_i = true;
+  bool warn_i = true;
   for (unsigned int i=0; i<ntransitions; i++)
   {
     string label_str = p_label_value_str(transitions[i].label);
+    if ( taus[transitions[i].label] )
+    {
+      if ( warn_non_i && (label_str != "i") )
+      {
+        gsWarningMsg("LTS contains silent steps that are not labelled 'i'; saving as BCG means they are replaced by 'i'.\n");
+        warn_non_i = false;
+      }
+      label_str = "i";
+    } else if ( warn_i && (label_str == "i") )
+    {
+      gsWarningMsg("LTS contains label 'i' without being marked as silent step; saving as BCG means it is assumed to be a silent step.\n");
+      warn_i = false;
+    }
     if ( label_str.size() > buf_size )
     {
       if ( buf_size == 0 )

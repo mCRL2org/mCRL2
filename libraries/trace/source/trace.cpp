@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <stdexcept>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
@@ -96,24 +97,7 @@ void Trace::init()
 	// XXX set times[0] to gsMakeTime(0.0)?
 }
 
-Trace::Trace()
-{
-	init();
-}
-
-Trace::Trace(istream &is, TraceFormat tf)
-{
-	init();
-	load(is,tf);
-}
-
-Trace::Trace(string const& filename, TraceFormat tf)
-{
-	init();
-	load(filename,tf);
-}
-
-Trace::~Trace()
+void Trace::cleanup()
 {
 	ATunprotectArray((ATerm *) times);
 	ATunprotectArray((ATerm *) actions);
@@ -129,6 +113,41 @@ Trace::~Trace()
 	}
 }
 
+
+Trace::Trace()
+{
+	init();
+}
+
+Trace::Trace(istream &is, TraceFormat tf)
+{
+	init();
+	try
+	{
+		load(is,tf);
+	} catch ( ... ) {
+		cleanup();
+		throw;
+	}
+}
+
+Trace::Trace(string const& filename, TraceFormat tf)
+{
+	init();
+	try
+	{
+		load(filename,tf);
+	} catch ( ... ) {
+		cleanup();
+		throw;
+	}
+}
+
+Trace::~Trace()
+{
+	cleanup();
+}
+
 void Trace::resetPosition()
 {
 	pos = 0;
@@ -136,7 +155,7 @@ void Trace::resetPosition()
 
 void Trace::setPosition(unsigned int pos)
 {
-	if ( pos < len )
+	if ( pos <= len )
 	{
 		this->pos = pos;
 	}
@@ -164,12 +183,14 @@ ATermAppl Trace::currentTime()
 
 ATermAppl Trace::nextAction()
 {
+	ATermAppl act = actions[pos];
+	
 	if ( pos < len )
 	{
-		return actions[pos++];
-	} else {
-		return NULL;
+		pos++;
 	}
+
+	return act;
 }
 
 void Trace::truncate()
@@ -226,34 +247,16 @@ bool Trace::canSetState()
 }
 
 
-ATermAppl Trace::getAction()
-{
-	ATermAppl act = actions[pos];
-	
-	if ( pos < len )
-	{
-		pos++;
-	}
-
-	return act;
-}
-
-ATermAppl Trace::getState()
-{
-	return states[pos];
-}
-
-ATermAppl Trace::getTime()
-{
-	return times[pos];
-}
-
 TraceFormat Trace::detectFormat(istream &is)
 {
 	char buf[TRACE_MCRL2_MARKER_SIZE];
 	TraceFormat fmt = tfPlain;
 
 	is.read(buf,TRACE_MCRL2_MARKER_SIZE);
+        if ( !is.good() )
+        {
+          throw runtime_error("could not read from stream");
+        }
 
 	if ( (is.gcount() == TRACE_MCRL2_MARKER_SIZE) && !strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
 	{
@@ -261,6 +264,10 @@ TraceFormat Trace::detectFormat(istream &is)
 	}
 
 	is.seekg(-is.gcount(),ios::cur);
+        if ( !is.good() )
+        {
+          throw runtime_error("could set position in stream");
+        }
 
 	return fmt;
 }
@@ -274,13 +281,30 @@ ATerm readATerm(istream &is)
 
 	while ( !is.eof() )
 	{
-		buf = (char *) realloc(buf,buf_size*sizeof(char));
+		char *new_buf = (char *) realloc(buf,buf_size*sizeof(char));
+                if ( new_buf == NULL )
+                {
+                  free(buf);
+                  throw runtime_error("not enough memory to read ATerm");
+                }
+                buf = new_buf;
+
 		is.read(buf+len,buf_size-len);
+                if ( !is.good() )
+                {
+                  free(buf);
+                  throw runtime_error("could not read ATerm from stream");
+                }
+
 		len+=is.gcount();
 		buf_size = buf_size * 2;
 	}
 
 	ATerm t = ATreadFromBinaryString((unsigned char *) buf,len);
+        if ( t == NULL )
+        {
+          throw runtime_error("failed to read ATerm from stream");
+        }
 
 	free(buf);
 
@@ -291,13 +315,16 @@ void Trace::loadMcrl2(istream &is)
 {
 	char buf[TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE];
 	is.read(buf,TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE);
-
-	assert(!strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE));
+        if ( !is.good() || strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
+        {
+          throw runtime_error("stream does not contain an mCRL2 trace");
+        }
 
 	resetPosition();
 	truncate();
 
-	ATermList trace = (ATermList) readATerm(is); //XXX
+	ATermList trace = (ATermList) readATerm(is);
+        assert( ATgetType(trace) == AT_LIST );
 
 	for (; !ATisEmpty(trace); trace=ATgetNext(trace))
 	{
@@ -332,7 +359,11 @@ void Trace::loadPlain(istream &is)
 	while ( !is.eof() )
 	{
 		is.getline(buf,MAX_LINE_SIZE);
-		if  ( is.gcount() > 0 )
+                if ( !is.good() ) 
+                {
+                  throw runtime_error("error while reading from stream");
+                }
+		if ( is.gcount() > 0 )
 		{
 			// XXX need to parse trace
 			addAction(ATmakeAppl0(ATmakeAFun(buf,0,ATfalse)));
@@ -344,38 +375,55 @@ void Trace::loadPlain(istream &is)
 
 void Trace::load(istream &is, TraceFormat tf)
 {
-	if ( tf == tfUnknown )
+	try
 	{
-		tf = detectFormat(is);
-	}
 
-	switch ( tf )
+		if ( tf == tfUnknown )
+		{
+			tf = detectFormat(is);
+		}
+
+		switch ( tf )
+		{
+			case tfMcrl2:
+				loadMcrl2(is);
+				break;
+			case tfPlain:
+				loadPlain(is);
+				break;
+			default:
+				break;
+		}
+
+	} catch ( runtime_error err )
 	{
-		case tfMcrl2:
-			loadMcrl2(is);
-			break;
-		case tfPlain:
-			loadPlain(is);
-			break;
-		default:
-			break;
+		string s;
+		s = "error loading trace (";
+		s += err.what();
+		s += ")";
+		throw runtime_error(s);
 	}
 }
 
-bool Trace::load(string const& filename, TraceFormat tf)
+void Trace::load(string const& filename, TraceFormat tf)
 {
 	ifstream is(filename.c_str(),ifstream::binary|ifstream::in);
 
 	if ( !is.is_open() )
 	{
-		return false;
+		throw runtime_error("error loading trace (could not open file)");
 	}
 
-	load(is, tf);
+	try
+	{
+		load(is, tf);
+	} catch (...)
+	{
+		is.close();
+		throw;
+	}
 
 	is.close();
-
-	return true;
 }
 
 void Trace::saveMcrl2(ostream &os)
@@ -402,11 +450,22 @@ void Trace::saveMcrl2(ostream &os)
 		}
 	}
 
+	// write marker
 	os << TRACE_MCRL2_MARKER;
 	os.write(TRACE_MCRL2_VERSION,TRACE_MCRL2_VERSION_SIZE);
+	if ( os.bad() )
+	{
+		throw runtime_error("could not write to stream");
+	}
+
+	// write trace
 	int len;
-	const char *bs = (const char *) ATwriteToBinaryString((ATerm) trace,&len); //XXX
+	const char *bs = (const char *) ATwriteToBinaryString((ATerm) trace,&len); //XXX no error handling?
 	os.write(bs,len);
+	if ( os.bad() )
+	{
+		throw runtime_error("could not write to stream");
+	}
 }
 
 void Trace::savePlain(ostream &os)
@@ -420,35 +479,54 @@ void Trace::savePlain(ostream &os)
 			os << ATwriteToString((ATerm) actions[i]);
 		}
 		os << endl;
+		if ( os.bad() )
+		{
+			throw runtime_error("could not write to stream");
+		}
 	}
 }
 
 void Trace::save(ostream &os, TraceFormat tf)
 {
-	switch ( tf )
+	try
 	{
-		case tfMcrl2:
-			saveMcrl2(os);
-			break;
-		case tfPlain:
-			savePlain(os);
-			break;
-		default:
-			break;
+		switch ( tf )
+		{
+			case tfMcrl2:
+				saveMcrl2(os);
+				break;
+			case tfPlain:
+				savePlain(os);
+				break;
+			default:
+				break;
+		}
+	} catch (runtime_error err)
+	{
+		string s;
+		s = "error saving trace (";
+		s += err.what();
+		s += ")";
+		throw runtime_error(s);
 	}
 }
 
-bool Trace::save(string const& filename, TraceFormat tf)
+void Trace::save(string const& filename, TraceFormat tf)
 {
 	ofstream os(filename.c_str(),ofstream::binary|ofstream::out|ofstream::trunc);
 	if ( !os.is_open() )
 	{
-		return false;
+		throw runtime_error("error saving trace (could not open file)");
 	}
 
-	save(os, tf);
+	try
+	{
+		save(os, tf);
+	} catch (...)
+	{
+	        os.close();
+		throw;
+	}
 
 	os.close();
-
-	return true;
 }

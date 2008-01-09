@@ -410,14 +410,9 @@ ATermList StandardSimulator::traceRedo()
 
 void StandardSimulator::LoadTrace(const string &filename)
 {
-	Trace tr;
-	if ( !tr.load(filename) )
-	{
-	        string s = "cannot load trace from file '"+filename+"'";
-                throw s;
-	}
+	Trace tr(filename);
 
-	ATerm state = (ATerm) tr.getState();
+	ATerm state = (ATerm) tr.currentState();
 	ATermList newtrace = ATmakeList0();
 
 	if ( (state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL) )
@@ -436,7 +431,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 
 	ATermAppl act;
         unsigned int idx = 0;
-	while ( (act = tr.getAction()) != NULL )
+	while ( (act = tr.nextAction()) != NULL )
 	{
             idx++;
 	    nextstategen = nextstate->getNextStates(state,nextstategen);
@@ -449,7 +444,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 		    {
 			    if ( ATisEqual(Transition,act) )
 			    {
-				    if ( (tr.getState() == NULL) || ((NewState = nextstate->parseStateVector(tr.getState(),NewState)) != NULL) )
+				    if ( (tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL) )
 				    {
 					    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 					    state = NewState;
@@ -478,7 +473,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 			    string t = PrintPart_CXX((ATerm) Transition, ppDefault);
 			    if ( s == t )
 			    {
-				    if ( (tr.getState() == NULL) || ((NewState = nextstate->parseStateVector(tr.getState(),NewState)) != NULL) )
+				    if ( (tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL) )
 				    {
 					    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 					    state = NewState;
@@ -521,11 +516,7 @@ void StandardSimulator::SaveTrace(const string &filename)
 	        }
 	}
 
-	if ( !tr.save(filename) )
-	{
-		string s = "cannot save trace to file '"+filename+"'";
-                throw s;
-	}
+	tr.save(filename);
 }
 
 void StandardSimulator::SetCurrentState(ATerm state)

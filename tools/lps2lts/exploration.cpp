@@ -264,7 +264,15 @@ static bool savetrace(string const &info, ATerm state, ATermTable backpointers, 
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
 
-  return trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+  try
+  {
+    trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+  } catch ( ... )
+  {
+    return false;
+  }
+
+  return true;
 }
 
 std::string lts_generation_options::generate_trace_file_name(std::string const& info, std::string const& extension) {

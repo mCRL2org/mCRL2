@@ -49,12 +49,12 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   os << "nodesep = 0.05;" << endl;
   ATermAppl act;
   int i = 0;
-  while ( (act = trace.getAction()) != NULL )
+  while ( (act = trace.nextAction()) != NULL )
   {
     os << i << " [label=\"";
-    if ( trace.getState() != NULL )
+    if ( trace.currentState() != NULL )
     {
-      print_state(os,trace.getState());
+      print_state(os,trace.currentState());
     }
     if ( i == 0 )
     {
@@ -74,9 +74,9 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
     i++;
   }
   os << i << " [label=\"";
-  if ( trace.getState() != NULL )
+  if ( trace.currentState() != NULL )
   {
-    print_state(os,trace.getState());
+    print_state(os,trace.currentState());
   }
   os << "\"];" << endl;
   os << "}" << endl;
@@ -87,7 +87,7 @@ static void trace2aut(ostream &os, Trace &trace)
   os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
   ATermAppl act;
   int i = 0;
-  while ( (act = trace.getAction()) != NULL )
+  while ( (act = trace.nextAction()) != NULL )
   {
     os << "(" << i << ",\"";
     if ( gsIsMultAct(act) )
