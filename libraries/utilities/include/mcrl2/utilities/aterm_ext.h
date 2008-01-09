@@ -39,20 +39,20 @@ namespace mcrl2 {
 //actually depends on the platform:
 //- &argv on Windows platforms
 //- argv on non-Windows platforms
-#if defined(__WINDOWS__) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT(argc, argv)\
   ATinit(0, 0, reinterpret_cast<ATerm*>(&argv));
 #else
 #define MCRL2_ATERM_INIT(argc, argv)\
   ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
-#endif //defined(__WINDOWS__) || defined(__MINGW32__)
+#endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 //MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
 //debugging information enabled, using one of the parameters as the bottom
 //of the stack. The parameter that is actually depends on the platform:
 //- &argv on Windows platforms
 //- argv on non-Windows platforms
-#if defined(__WINDOWS__) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
   ATinit(3, debug_args, reinterpret_cast<ATerm*>(&argv));
@@ -60,7 +60,7 @@ namespace mcrl2 {
 #define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
   ATinit(3, debug_args, reinterpret_cast<ATerm*>(argv));
-#endif //defined(__WINDOWS__) || defined(__MINGW32__)
+#endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 
 //-------------------------------------------------------------------------
