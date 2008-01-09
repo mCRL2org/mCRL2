@@ -468,7 +468,7 @@ pbes<> make_pbes(const string fileName){
   else
     {
 */
-  ps = new (struct spbes);
+  ps = new spbes;
   pos = 0; add(' ',0,0); pos++;  // convenient
   parsePBES(fileName);
 

@@ -46,7 +46,7 @@ using namespace data_expr;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE} t_phase;
 
 //t_tool_options represents the options of the tool 
-typedef struct t_tool_options {
+typedef struct {
   bool pretty;
   bool norewrite;
   bool nosumelm;
@@ -54,7 +54,7 @@ typedef struct t_tool_options {
   string action_rename_filename;
   string infilename;
   string outfilename;
-};
+} t_tool_options;
 
 //Functions used by the main program
 //----------------------------------

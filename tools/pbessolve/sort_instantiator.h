@@ -22,7 +22,7 @@ using namespace lps;
 // for a given sort, or set of sorts
 
 
-typedef struct s_del {
+typedef struct {
   sort_expression s;
   data_expression_list del;
 } t_sdel;

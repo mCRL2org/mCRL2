@@ -8,12 +8,12 @@
 
 #define MAXSIZE 1000
 
-typedef struct spbes {
+typedef struct {
   char op[MAXSIZE]; 
   int arg1[MAXSIZE];
   int arg2[MAXSIZE];
   int nops;
-} *t_pbes_simple;
+} spbes, *t_pbes_simple;
 
 
 t_pbes_simple ps;

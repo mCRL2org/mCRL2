@@ -16,7 +16,7 @@ alias xsim : : <wx>no ;
 
 alias sim_shared
        : [ obj simbase.o : simbase.cpp /libraries//lps ]
-         [ obj simulator.o : simulator.cpp /libraries//lps ]
+         [ obj simulator.o : simulator.cpp /libraries//lps /libraries//trace ]
        ;
 
 exe xsim
@@ -40,6 +40,7 @@ exe sim
        : sim.cpp
          sim_shared
          /libraries//lps
+         /libraries//trace
        : <toolset>msvc:<library>/libraries//getopt
        ;
 

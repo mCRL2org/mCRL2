@@ -44,14 +44,14 @@ using namespace ::mcrl2::utilities;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
 
 //t_tool_options represents the options of the tool
-typedef struct t_tool_options {
+typedef struct {
   bool pretty;
   bool timed;
   t_phase end_phase;
   string formfilename;
   string infilename;
   string outfilename;
-};
+} t_tool_options;
 
 //Functions used by the main program
 //----------------------------------
