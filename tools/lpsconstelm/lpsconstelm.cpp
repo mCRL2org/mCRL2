@@ -73,11 +73,12 @@ class lpsConstElm {
   public:
 
     lpsConstElm();
-
+    lpsConstElm(int argc, char** argv);
     ~lpsConstElm();
 
   private:
 
+    void parse_command_line(int argc, char** argv);
     void getDatVarRec(aterm_appl t);
     atermpp::set< lps::data_variable > getUsedFreeVars(aterm_appl input);
     ATermAppl rewrite(ATermAppl t);
@@ -104,6 +105,7 @@ class lpsConstElm {
 
   public:
 
+    bool execute();
     void removeSingleton(int n);
     void output();
     void setSaveFile(std::string const& x);
@@ -258,10 +260,12 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-lpsConstElm::lpsConstElm() {
-  safeguard = ATtableCreate(10000,50);
-  rewr = NULL;
+lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) { }
+
+lpsConstElm::lpsConstElm(int argc, char** argv) : safeguard(ATtableCreate(10000,50)), rewr(NULL) {
+  parse_command_line(argc, argv);
 }
+
 lpsConstElm::~lpsConstElm() {
   delete rewr;
   ATtableDestroy(safeguard);
@@ -1086,7 +1090,7 @@ void lpsConstElm::filter() {
   }
 }
 
-void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
+void lpsConstElm::parse_command_line(int argc, char** argv) {
   namespace po = boost::program_options;
 
   po::options_description description;
@@ -1120,11 +1124,11 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
   p.add("file_names", -1);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).options(cmdline_options).positional(p).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
 
   if (vm.count("help")) {
-    std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+    std::cerr << "Usage: "<< argv[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
               << "Removes constant process parameters from the LPS read from standard input or INFILE." << std::endl
               << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
               << std::endl << description;
@@ -1137,11 +1141,11 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
     exit (0);
   }
 
-  constelm.setVerbose(0 < vm.count("verbose"));
-  constelm.setDebug(0 < vm.count("debug"));
-  constelm.setNoSingleton(0 < vm.count("no-singleton"));
-  constelm.setAllTrue(0 < vm.count("no-condition"));
-  constelm.setReachable(0 == vm.count("no-reachable"));
+  setVerbose(0 < vm.count("verbose"));
+  setDebug(0 < vm.count("debug"));
+  setNoSingleton(0 < vm.count("no-singleton"));
+  setAllTrue(0 < vm.count("no-condition"));
+  setReachable(0 == vm.count("no-reachable"));
 
   if (vm.count("file_names")){
     file_names = vm["file_names"].as< std::vector< std::string > >();
@@ -1149,7 +1153,7 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
 
   if (file_names.size() == 0){
     /* Read from standard input */
-    if (!constelm.readStream()) {
+    if (!readStream()) {
       exit (1);
     }
   }
@@ -1159,14 +1163,20 @@ void parse_command_line(int ac, char** av, lpsConstElm& constelm) {
     exit (0);
   }
   else {
-    if (!constelm.loadFile(file_names[0])) {
+    if (!loadFile(file_names[0])) {
       exit (1);
     }
 
     if (file_names.size() == 2) {
-      constelm.setSaveFile(file_names[1]);
+      setSaveFile(file_names[1]);
     }
   }
+}
+
+bool lpsConstElm::execute() {
+  filter();
+  output();
+  return true;
 }
 
 int main(int argc, char** argv)
@@ -1174,17 +1184,9 @@ int main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-#endif
-    lpsConstElm constelm;
-
-    parse_command_line(argc,argv,constelm);
-
-    constelm.filter();
-    constelm.output();
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return 0;
   }
 #endif
-
-  return 0;
+  return lpsConstElm(argc, argv).execute();
 }
