@@ -281,7 +281,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  MCRL2_CORE_LIBRARY_INIT(&lpCmdLine)
+  int local_var;
+  MCRL2_ATERM_INIT(local_var, &lpCmdLine)
 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
