@@ -37,21 +37,30 @@ namespace mcrl2 {
 //MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
 //one of the parameters as the bottom of the stack. The parameter that is
 //actually depends on the platform:
-//- &argc on Windows platforms
+//- &argv on Windows platforms
 //- argv on non-Windows platforms
 #ifdef __WINDOWS__
 #define MCRL2_ATERM_INIT(argc, argv)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(&argc));
+  ATinit(0, 0, reinterpret_cast<ATerm*>(&argv));
 #else
 #define MCRL2_ATERM_INIT(argc, argv)\
   ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
 #endif //__WINDOWS__
 
-//MCRL2_ATERM_INIT_DEBUG(p) initialises the ATerm library with debugging
-//information using p as the bottom of the stack
-#define MCRL2_ATERM_INIT_DEBUG(p)\
-    char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
-    ATinit(3, debug_args, reinterpret_cast<ATerm*>(p));
+//MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
+//debugging information enabled, using one of the parameters as the bottom
+//of the stack. The parameter that is actually depends on the platform:
+//- &argv on Windows platforms
+//- argv on non-Windows platforms
+#ifdef __WINDOWS__
+#define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
+  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
+  ATinit(3, debug_args, reinterpret_cast<ATerm*>(&argv));
+#else
+#define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
+  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
+  ATinit(3, debug_args, reinterpret_cast<ATerm*>(argv));
+#endif //__WINDOWS__
 
 
 //-------------------------------------------------------------------------
