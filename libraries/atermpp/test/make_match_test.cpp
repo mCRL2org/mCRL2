@@ -58,9 +58,9 @@ void test_make_match()
   x = match(make_term("PBES(f(0),[1,2,3],g(2),[a,b])"), "PBES(<term>,[<list>],<term>,[<list>])", a, l, b, m);
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_make_match();
   return 0;
 }

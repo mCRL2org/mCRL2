@@ -128,9 +128,9 @@ void test_operators()
   }
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_algorithm();
   test_operators();

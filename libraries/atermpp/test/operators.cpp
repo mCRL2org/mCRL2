@@ -22,9 +22,9 @@ class D: public aterm_appl
 // This program is for checking if some standard operators on aterms
 // are defined and don't lead to ambiguities.
 
-int test_main(int, char*[])
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   aterm t      = make_term("[1,2]");
   aterm_appl a = make_term("f(x)");

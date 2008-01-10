@@ -55,9 +55,9 @@ void foo()
   std::cout << "appl[2] = " << appl[2] << std::endl;
 }
 
-int test_main(int, char*[])
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
   foo();
 
   return 0;

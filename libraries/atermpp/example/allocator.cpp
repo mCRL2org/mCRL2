@@ -44,10 +44,9 @@ void on_destroy(A* p)
   cout << "inside on_destroy(A*)" << endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   aterm_appl t0 = make_term("f(g(x,y),h(x),f(y,z(u,v)))");
   aterm_appl t1 = make_term("f(a)");

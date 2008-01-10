@@ -37,9 +37,9 @@ void test_dictionary()
   BOOST_CHECK(dict.get(a) == aterm()); 
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_dictionary();
   return 0;
 }

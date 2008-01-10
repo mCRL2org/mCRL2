@@ -31,9 +31,9 @@
 using namespace std;
 using namespace atermpp;
 
-int test_main(int, char*[])
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
   aterm_int i(10);
   aterm_real r(2.5);
   aterm_appl f(function_symbol("f", 2), aterm("x"), aterm("y"));

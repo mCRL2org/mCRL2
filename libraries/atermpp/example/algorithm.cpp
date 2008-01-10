@@ -74,10 +74,9 @@ void test_replace()
   assert(c == make_term("x"));
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find();
   test_replace();

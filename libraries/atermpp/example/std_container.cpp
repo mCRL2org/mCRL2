@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/atermpp/list.h"
@@ -27,7 +28,7 @@ using namespace atermpp;
 class A
 {
   template <typename T>
-  friend struct aterm_traits;
+  friend struct atermpp::aterm_traits;
 
   protected:
     ATerm x;
@@ -94,10 +95,9 @@ namespace atermpp {
   };
 } // namespace atermpp
 
-int main()
+int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   // deque
   atermpp::deque<aterm_appl> d;

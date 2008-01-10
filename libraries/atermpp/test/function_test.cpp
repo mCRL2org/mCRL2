@@ -59,9 +59,9 @@ void test_aterm_function()
   BOOST_CHECK(f.argument(0) == g);
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATERM_LIBRARY_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_aterm_function();
   return 0;
 }
