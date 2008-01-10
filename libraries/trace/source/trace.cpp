@@ -359,10 +359,15 @@ void Trace::loadPlain(istream &is)
 	while ( !is.eof() )
 	{
 		is.getline(buf,MAX_LINE_SIZE);
-                if ( !is.good() ) 
-                {
-                  throw runtime_error("error while reading from stream");
-                }
+		if ( !is.good() ) 
+		{
+			throw runtime_error("error while reading from stream");
+		}
+		if ( s.length() > 0 && s[s.length()-1] = '\r' )
+		{ // remove CR
+			s.resize(s.length()-1);
+		}
+
 		if ( is.gcount() > 0 )
 		{
 			// XXX need to parse trace

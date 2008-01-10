@@ -260,13 +260,17 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) { }
+lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) { 
+  p_spec.protect();
+}
 
 lpsConstElm::lpsConstElm(int argc, char** argv) : safeguard(ATtableCreate(10000,50)), rewr(NULL) {
+  p_spec.protect();
   parse_command_line(argc, argv);
 }
 
 lpsConstElm::~lpsConstElm() {
+  p_spec.unprotect();
   delete rewr;
   ATtableDestroy(safeguard);
 }
