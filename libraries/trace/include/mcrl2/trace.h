@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////
 //
 /// \brief Formats in which traces can be saved on disk
-/// There are several formats for traces.
+/// \details Formats in which traces can be saved on disk. There are several formats for traces.
 /// The tfMcrl2 format saves a trace as an mCRL2 term in ATerm internal format.
 /// This is a compact but unreadable format.
 /// The tfPlain format is an ascii representation of the trace, which is
@@ -31,7 +31,7 @@
 enum TraceFormat { tfMcrl2, tfPlain, tfUnknown };
 
 /// \brief This class contains a trace consisting of a sequence of (timed) actions possibly with intermediate states
-/// This class contains a trace. A trace is a sequence of actions. Actions can have a time
+/// \details This class contains a trace. A trace is a sequence of actions. Actions can have a time
 /// tag as a positive real number. Between two actions, before the first action and after the last
 /// action there can be a state. In the current version of the trace library an action, a state and
 /// a time tag are arbitrary expressions of sort AtermAppl. It is expected that this will change
@@ -121,22 +121,27 @@ class Trace
 /// position remain untouched.
 		void truncate();
 
-/// \brief
-/// \details
-/// \param [in]
+/// \brief Add an action to the current trace.
+/// \details Add an action to the current trace at the current position. The current
+/// position is increased and the length of the trace is set to this new current position.
+/// The old actions in the trace at the current at higher positions are removed.
+/// \param [in] action The action to be stored in the trace.
+/// \param [in] time The time to be associated with the current action and state.
 /// \return
 		void addAction(ATermAppl action, ATermAppl time = NULL);
 
-/// \brief
-/// \details
-/// \param [in]
-/// \return
+/// \brief Set the state at the current position.
+/// \details Set the state at the current position. If an action is set, the state
+/// that is reached is set to NULL. If this state is NULL it can be set once.
+/// \param [in] state The new state.
+/// \return The return value indicates whether the state is set.
 		bool setState(ATermAppl state);
 
-/// \brief
-/// \details
-/// \param [in]
-/// \return
+/// \brief Determine whether a state can still be set.
+/// \details Initially a state is set to NULL. It can be set only once. This function
+/// returns whether a state can still be set to a new value.
+/// \retval true The state can be set to a new value.
+/// \retval false The state can not be set to a new value.
 		bool canSetState();
 
 
