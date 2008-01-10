@@ -1,0 +1,10 @@
+
+The Annotated Term Library was developed at the CWI by
+  Pieter Olivier <olivierp@cwi.nl>, and
+  Hayco de Jong  <jong@cwi.nl>
+
+The ATermTables were later re-implemented by Jan-Friso Groote
+
+Several people have contributed to the ATerm library by hinting
+at bugs, sending in bugfixes, pointing out efficiency improvements,
+or in general providing helpful comment: thanks!
