@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 
       (cout << "? ").flush();
       getline(cin, s);
-      if ( s.length() > 0 && s[s.length()-1] = '\r' )
+      if ( (s.length() > 0) && (s[s.length()-1] == '\r') )
       { // remove CR
         s.resize(s.length()-1);
       }
