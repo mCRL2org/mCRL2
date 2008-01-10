@@ -1,0 +1,24 @@
+[article mCRL2.atermpp
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2007 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+        A C++ layer for the ATerm Library.
+    ]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+    ]
+]
+
+[/  Images   ]
+
+[def __note__              [$images/note.png]]
+[def __alert__             [$images/caution.png]]
+[def __detail__            [$images/note.png]]
+[def __tip__               [$images/tip.png]]
+
+[include atermpp_introduction.qbk]
+[include atermpp_whatis.qbk]
+[include atermpp_programming.qbk]
+
