@@ -6,7 +6,7 @@
 //
 /// \file mcrl2/trace.h
 /// \brief This library allows to flexibly manipulate traces.
-/// This library allows to build, traverse and store traces.
+/// \details This library allows to build, traverse and store traces.
 /// Traces are sequences of state-action-time triples.
 /// The state is a vector of data values, the action is the outgoing
 /// action in this state, and the time is an absolute
