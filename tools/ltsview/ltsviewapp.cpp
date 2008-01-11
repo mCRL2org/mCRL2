@@ -8,6 +8,7 @@
 /// \brief Add your file description here.
 
 #include <string>
+#include <mcrl2/utilities/aterm_ext.h>
 
 std::string lts_file_argument;
 
@@ -15,7 +16,6 @@ std::string lts_file_argument;
 #include <wx/wx.h>
 //SQuADT protocol interface
 #include <mcrl2/utilities/squadt_interface.h>
-#include <mcrl2/utilities/aterm_ext.h>
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   private:
