@@ -8,7 +8,6 @@
 /// \brief Add your file description here.
 
 #include <string>
-#include <mcrl2/utilities/aterm_ext.h>
 
 std::string lts_file_argument;
 
@@ -71,6 +70,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 #include <wx/cmdline.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include <mcrl2/utilities/aterm_ext.h>
 #include "ltsviewapp.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
