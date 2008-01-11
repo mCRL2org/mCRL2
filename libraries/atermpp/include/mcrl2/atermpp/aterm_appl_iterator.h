@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_appl_iterator.h
-/// \brief Add your file description here.
+/// \brief Iterator for term_appl.
 
 #ifndef MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
 #define MCRL2_ATERMPP_ATERM_APPL_ITERATOR_H
@@ -15,9 +15,8 @@
 
 namespace atermpp {
 
-//---------------------------------------------------------//
-//                     term_appl_iterator
-//---------------------------------------------------------//
+/// Iterator for term_appl.
+///
 template <typename Value>
 class term_appl_iterator: public boost::iterator_facade<
         term_appl_iterator<Value>,         // Derived
@@ -27,9 +26,13 @@ class term_appl_iterator: public boost::iterator_facade<
     >
 {
  public:
+    /// Constructor.
+    ///
     term_appl_iterator()
     {}
 
+    /// Constructor.
+    ///
     term_appl_iterator(ATerm* t)
       : m_term(t)
     {}

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_list_iterator.h
-/// \brief Add your file description here.
+/// \brief Iterator for term_list.
 
 #ifndef MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
@@ -16,15 +16,15 @@
 namespace atermpp {
 
   // needed for conversion of the return type of ATgetFirst
+  /// \internal
   template <class T>
   struct term_list_iterator_traits
   {
     typedef ATerm value_type;
   };
 
-//---------------------------------------------------------//
-//                     term_list_iterator
-//---------------------------------------------------------//
+/// \brief Iterator for term_list.
+///
 template <typename Value>
 class term_list_iterator: public boost::iterator_facade<
         term_list_iterator<Value>,         // Derived
@@ -34,18 +34,17 @@ class term_list_iterator: public boost::iterator_facade<
     >
 {
  public:
+    /// Constructor.
+    ///
     term_list_iterator()
       : m_list(ATempty)
     {}
 
+    /// Constructor.
+    ///
     term_list_iterator(ATermList l)
       : m_list(l)
     {}
-
-//    template <typename Term>
-//    term_list_iterator(term_list<Term> l)
-//      : m_list(l.to_ATermList())
-//    {}
 
  private:
     friend class boost::iterator_core_access;

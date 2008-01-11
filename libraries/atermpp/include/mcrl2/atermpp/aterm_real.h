@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_real.h
-/// \brief Add your file description here.
+/// \brief Term containing a real value.
 
 #ifndef MCRL2_ATERMPP_ATERM_REAL_H
 #define MCRL2_ATERMPP_ATERM_REAL_H
@@ -22,17 +22,25 @@ namespace atermpp
   class aterm_real: public aterm_base
   {
     public:
+      /// Constructor.
+      ///
       aterm_real()
       {}
       
+      /// Constructor.
+      ///
       aterm_real(double value)
         : aterm_base(ATmakeReal(value))
       {}
       
+      /// Constructor.
+      ///
       aterm_real(ATermReal t)
         : aterm_base(t)
       {}
   
+      /// Constructor.
+      ///
       aterm_real(ATerm t)
         : aterm_base(t)
       {
@@ -54,6 +62,8 @@ namespace atermpp
         return reinterpret_cast<ATermReal>(m_term);
       }
 
+      /// Assignment operator.
+      ///
       aterm_real& operator=(aterm_base t)
       {
         assert(t.type() == AT_REAL);
@@ -69,6 +79,8 @@ namespace atermpp
       }
   }; 
 
+  /// \overload
+  ///
   template <>
   struct aterm_traits<aterm_real>
   {

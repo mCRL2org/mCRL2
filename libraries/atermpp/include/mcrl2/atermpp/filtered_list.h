@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/filtered_list.h
-/// \brief Add your file description here.
+/// \brief Filtered list, based on boost filter_iterator.
 
 #ifndef MCRL2_ATERMPP_FILTERED_LIST_H
 #define MCRL2_ATERMPP_FILTERED_LIST_H
@@ -15,9 +15,8 @@
 
 namespace atermpp {
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // filtered_list
-  /// \brief represents a filtered term_list
+  /// \brief Represents a filtered list. The range [begin(), end()[ is filtered
+  /// according to a predicate.
   ///
   template <typename List, typename Predicate>
   class filtered_list: public List
@@ -26,8 +25,12 @@ namespace atermpp {
       const Predicate& m_predicate;
     
     public:
+      /// The iterator type of the filtered list.
+      ///
       typedef boost::filter_iterator<Predicate, typename List::const_iterator> iterator;
 
+      /// Constructor.
+      ///
       filtered_list(List l, Predicate predicate)
         : List(l), m_predicate(predicate)
       {

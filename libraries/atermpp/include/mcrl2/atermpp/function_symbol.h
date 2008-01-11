@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/function_symbol.h
-/// \brief Add your file description here.
+/// \brief Function symbol class.
 
 #ifndef MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
@@ -15,19 +15,22 @@
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                    function_symbol
-  //---------------------------------------------------------//
+  /// Function symbol.
+  ///
   class function_symbol
   {
     protected:
       AFun m_function;
   
     public:
+      /// Constructor.
+      ///
       function_symbol(const std::string& name, int arity, bool quoted = false)
         : m_function(ATmakeAFun(const_cast<char*>(name.c_str()), arity, quoted ? ATtrue : ATfalse))
       {}
       
+      /// Constructor.
+      ///
       function_symbol(AFun function):
         m_function(function)
       {}

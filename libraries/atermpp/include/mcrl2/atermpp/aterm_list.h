@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_list.h
-/// \brief Add your file description here.
+/// \brief List of terms.
 
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
@@ -45,11 +45,7 @@ namespace {
 
 namespace atermpp {
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // term_list
-  /// \brief represents a singly linked list of terms (ATermList).
-  ///
-  /// N.B. This is intended as a replacement for the term_list of the atermpp library.
+  /// Singly linked list of terms. The template argument denotes the type of the elements.
   ///
   template <typename Term>
   class term_list: public aterm_base
@@ -130,6 +126,8 @@ namespace atermpp {
           m_term = void2term(list2void(ATinsert(list(), aterm(*(--last)))));
       }
 
+      /// Assignment operator.
+      ///
       term_list<Term>& operator=(aterm_base t)
       {
         assert(t.type() == AT_LIST);
@@ -137,17 +135,13 @@ namespace atermpp {
         return *this;
       }
 
+      /// Assignment operator.
+      ///
       term_list<Term>& operator=(ATermList t)
       {
         m_term = reinterpret_cast<ATerm>(t);
         return *this;
       }
-
-      /// The destructor.
-      ///
-
-      /// The assignment operator                                                                                                                                                        
-      ///
 
       /// Returns a const_iterator pointing to the beginning of the term_list.
       ///
@@ -177,21 +171,11 @@ namespace atermpp {
       bool empty() const
       { return ATisEmpty(list()) == ATtrue; }
 
-      ///
-      /// Creates an term_list with n elements, each of which is a copy of T().
-      ///
-
-      ///
-      /// Creates an term_list with n copies of t.
-      ///
-
-      ///
       /// Returns the first element.
       ///
       Term front() const
       { return Term(void2appl(term2void(aterm_get_first(list())))); }
 
-      ///
       /// pos must be a valid iterator in *this. The return value is an iterator prev such that ++prev == pos. Complexity: linear in the number of iterators in the range [begin(), pos).
       ///
       const_iterator previous(const_iterator pos) const
@@ -221,12 +205,10 @@ namespace atermpp {
       }     
   };
 
-  ///
   /// A term_list with elements of type aterm.
   ///
   typedef term_list<aterm> aterm_list;
 
-  ///
   /// Returns the first element of the list l.
   ///
   template <typename Term>
@@ -236,7 +218,6 @@ namespace atermpp {
     return *l.begin();
   }
 
-  ///
   /// Returns the list obtained by inserting a new element at the beginning.
   ///
   template <typename Term>
@@ -246,7 +227,6 @@ namespace atermpp {
     return term_list<Term>(ATinsert(l, aterm_traits<Term>::term(elem)));
   }
 
-  ///
   /// Returns the list obtained by inserting a new element at the end. Note
   /// that the complexity of this function is O(n), with n the number of
   /// elements in the list!!!
@@ -258,7 +238,6 @@ namespace atermpp {
     return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
   }
 
-  ///
   /// Returns the list obtained by removing the first element.
   ///
   template <typename Term>
@@ -268,7 +247,6 @@ namespace atermpp {
     return term_list<Term>(aterm_get_next(l));
   }
 
-  ///
   /// Returns the list with the elements in reversed order.
   ///
   template <typename Term>
@@ -278,7 +256,6 @@ namespace atermpp {
     return term_list<Term>(ATreverse(l));
   }
 
-  ///
   /// Applies the function f to all elements of the list and returns the result.
   ///
   template <typename Term, typename Function>
@@ -293,7 +270,6 @@ namespace atermpp {
     return reverse(result);
   }
 
-  ///
   /// Return the concatenation of the lists l and m.
   ///
   template <typename Term>
@@ -301,7 +277,6 @@ namespace atermpp {
   term_list<Term> operator+(term_list<Term> l, term_list<Term> m)
   { return term_list<Term>(ATconcat(l, m)); }
 
-  ///
   /// Return the concatenation of the list l and the element t.
   ///
   template <typename Term>
@@ -309,7 +284,6 @@ namespace atermpp {
   term_list<Term> operator+(term_list<Term> l, Term t)
   { return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); }
 
-  ///
   /// Return the concatenation of the element t and the list l.
   ///
   template <typename Term>
@@ -317,6 +291,8 @@ namespace atermpp {
   term_list<Term> operator+(Term t, term_list<Term> l)
   { return push_front(l, t); }
 
+  /// \overload
+  ///
   template <typename Term>
   struct aterm_traits<term_list<Term> >
   {
@@ -328,36 +304,42 @@ namespace atermpp {
     static ATerm* ptr(term_list<Term>& t)    { return &t.term(); }
   };
 
+  /// Equality operator.
   template <typename Term>
   bool operator==(const term_list<Term>& x, const term_list<Term>& y)
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
   
+  /// Equality operator.
   template <typename Term>
   bool operator==(const term_list<Term>& x, ATermList y)
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATtrue;
   }
   
+  /// Equality operator.
   template <typename Term>
   bool operator==(ATermList x, const term_list<Term>& y)
   {
     return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
 
+  /// Inequality operator.
   template <typename Term>
   bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATfalse;
   }
   
+  /// Inequality operator.
   template <typename Term>
   bool operator!=(const term_list<Term>& x, ATermList y)
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATfalse;
   }
   
+  /// Inequality operator.
   template <typename Term>
   bool operator!=(ATermList x, const term_list<Term>& y)
   {

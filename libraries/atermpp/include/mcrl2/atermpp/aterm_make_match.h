@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_make_match.h
-/// \brief Add your file description here.
+/// \brief Includes for make_term and match.
 
 #ifndef MCRL2_ATERMPP_ATERM_MAKE_MATCH_H
 #define MCRL2_ATERMPP_ATERM_MAKE_MATCH_H
@@ -14,10 +14,8 @@
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //             aterm_make / aterm_match
-  //---------------------------------------------------------//
-  
+  /// Make a term from a string pattern.
+  ///
   inline
   aterm make_term(const std::string& pattern)
   {

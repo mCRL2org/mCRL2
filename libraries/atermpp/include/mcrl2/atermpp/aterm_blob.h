@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_blob.h
-/// \brief Add your file description here.
+/// \brief Term containing a binary object.
 
 #ifndef MCRL2_ATERMPP_ATERM_BLOB_H
 #define MCRL2_ATERMPP_ATERM_BLOB_H
@@ -15,19 +15,24 @@
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                     aterm_blob
-  //---------------------------------------------------------//
+  /// Term containing a binary object.
+  ///
   class aterm_blob: public aterm_base
   {
    public:
+      /// Constructor.
+      ///
       aterm_blob()
       {}
 
+      /// Constructor.
+      ///
       aterm_blob(ATermBlob t)
         : aterm_base(t)
       {}
 
+      /// Constructor.
+      ///
       aterm_blob(ATerm t)
         : aterm_base(t)
       {
@@ -52,6 +57,8 @@ namespace atermpp
         : aterm_base(ATmakeBlob(size, data))
       {}
 
+      /// Assignment operator.
+      ///
       aterm_blob& operator=(aterm_base t)
       {
         assert(t.type() == AT_BLOB);
@@ -74,6 +81,8 @@ namespace atermpp
       }
   };
 
+  /// \overload
+  ///
   template <>
   struct aterm_traits<aterm_blob>
   {

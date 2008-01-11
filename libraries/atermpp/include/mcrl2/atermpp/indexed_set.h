@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/indexed_set.h
-/// \brief Add your file description here.
+/// \brief Indexed set.
 
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
@@ -16,6 +16,8 @@
 
 namespace atermpp
 {
+  /// \internal
+  ///
   struct indexed_set_deleter
   {
     void operator()(ATermIndexedSet s)
@@ -24,9 +26,8 @@ namespace atermpp
     }
   }; 
   
-  //---------------------------------------------------------//
-  //                     indexed_set
-  //---------------------------------------------------------//
+  /// Indexed set. N.B. Copies of an indexed_set refer to the same object.
+  ///
   class indexed_set
   {
    protected:

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_match.h
-/// \brief Add your file description here.
+/// \brief Generate match functions using boost preprocessor library.
 
 // ======================================================================
 //
@@ -49,7 +49,7 @@
 #  define TEXT1(z, n, _) T ## n& t ## n
 #  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 
-// specialization pattern
+/// Match terms based on patterns.
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 bool match(const aterm& t, const std::string& pattern, BOOST_PP_ENUM(n, TEXT1, nil))
 {

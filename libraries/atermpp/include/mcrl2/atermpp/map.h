@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/map.h
-/// \brief Add your file description here.
+/// \brief Protected map and multimap containers.
 
 #ifndef MCRL2_ATERMPP_MAP_H
 #define MCRL2_ATERMPP_MAP_H
@@ -18,33 +18,45 @@
 
 namespace atermpp {
 
+/// Protected map container.
+///
 template<class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key,T> > >
 class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
 {
   public:
+    /// Constructor.
+    ///
     map()
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     explicit map(const Compare& comp)
       : std::map<Key, T, Compare, Allocator>(comp)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     map(const Compare& comp, const Allocator& a)
       : std::map<Key, T, Compare, Allocator>(comp, a)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     map(const map& right)
       : std::map<Key, T, Compare, Allocator>(right)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     map(InIt first, InIt last)
       : std::map<Key, T, Compare, Allocator>(first, last)
@@ -52,6 +64,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp)
       : std::map<Key, T, Compare, Allocator>(first, last, comp)
@@ -59,6 +73,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::map<Key, T, Compare, Allocator>(first, last, comp, a)
@@ -66,11 +82,15 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
    
+    /// Destructor.
+    ///
     ~map()
     {
       ATunprotectProtectedATerm(this);
     }
 
+    /// Protects the elements from being garbage collected.
+    ///
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
@@ -84,33 +104,45 @@ std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, C
     }
 };
 
+/// Protected multimap container.
+///
 template<class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key,T> > >
 class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATerm
 {
   public:
+    /// Constructor.
+    ///
     multimap()
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     explicit multimap(const Compare& comp)
       : std::multimap<Key, T, Compare, Allocator>(comp)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     multimap(const Compare& comp, const Allocator& a)
       : std::multimap<Key, T, Compare, Allocator>(comp, a)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     multimap(const multimap& right)
       : std::multimap<Key, T, Compare, Allocator>(right)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     multimap(InIt first, InIt last)
       : std::multimap<Key, T, Compare, Allocator>(first, last)
@@ -118,6 +150,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp)
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp)
@@ -125,6 +159,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::multimap<Key, T, Compare, Allocator>(first, last, comp, a)
@@ -132,11 +168,15 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
       ATprotectProtectedATerm(this);
     }
    
+    /// Destructor.
+    ///
     ~multimap()
     {
       ATunprotectProtectedATerm(this);
     }
 
+    /// Protects the elements from being garbage collected.
+    ///
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION

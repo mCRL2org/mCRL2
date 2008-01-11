@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm.h
-/// \brief Add your file description here.
+/// \brief The aterm class.
 
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
@@ -18,7 +18,8 @@
 
 namespace atermpp
 {
-  /// \internal
+  /// Base class for aterm.
+  ///
   class aterm_base
   {
     template <typename T>
@@ -34,39 +35,55 @@ namespace atermpp
       { return m_term; }
 
     public:
+      /// Constructor.
+      ///
       aterm_base()
         : m_term(0)
       {}
       
+      /// Constructor.
+      ///
       aterm_base(ATerm term)
         : m_term(term)
       {
       }
 
+      /// Constructor.
+      ///
       aterm_base(ATermList term)
         : m_term(reinterpret_cast<ATerm>(term))
       {}
   
+      /// Constructor.
+      ///
       aterm_base(ATermInt term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
+      /// Constructor.
+      ///
       aterm_base(ATermReal term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
+      /// Constructor.
+      ///
       aterm_base(ATermBlob term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
   
+      /// Constructor.
+      ///
       aterm_base(ATermAppl term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
+      /// Constructor.
+      ///
       aterm_base(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
@@ -108,6 +125,8 @@ namespace atermpp
       { return std::string(ATwriteToString(m_term)); }
   };
 
+  /// \overload
+  ///
   template <>                           
   struct aterm_traits<aterm_base>
   {                                     
@@ -128,7 +147,6 @@ namespace atermpp
   }
 
   /// Writes a string representation of the aterm t to the stream out.
-  ///
   inline
   std::ostream& operator<<(std::ostream& out, const aterm_base& t)
   {
@@ -142,45 +160,66 @@ namespace atermpp
   class aterm: public aterm_base
   {
     public:
+      /// Constructor.
+      ///
       aterm() {}
 
+      /// Constructor.
+      ///
       aterm(aterm_base term)
         : aterm_base(term)
       { }
 
+      /// Constructor.
+      ///
       aterm(ATerm term)
         : aterm_base(term)
       { }
 
+      /// Constructor.
+      ///
       aterm(ATermList term)
         : aterm_base(term)
       { }
   
+      /// Constructor.
+      ///
       aterm(ATermInt term)
         : aterm_base(term)
       { }
   
+      /// Constructor.
+      ///
       aterm(ATermReal term)
         : aterm_base(term)
       { }
   
+      /// Constructor.
+      ///
       aterm(ATermBlob term)
         : aterm_base(term)
       { }
   
+      /// Constructor.
+      ///
       aterm(ATermAppl term)
         : aterm_base(term)
       { }
 
+      /// Constructor.
+      ///
       aterm(const std::string& s)
         : aterm_base(s)
       { }
 
-      // allow conversion to ATerm
+      /// Conversion operator.
+      ///
       operator ATerm() const
       { return m_term; } 
   }; 
 
+  /// \overload
+  ///
   template <>                           
   struct aterm_traits<aterm>            
   {                                     
@@ -286,36 +325,42 @@ namespace atermpp
     return ATremoveAnnotation(t, label);
   }
 
+  /// Equality operator.
   inline
   bool operator==(const aterm& x, const aterm& y)
   {
     return ATisEqual(x, y) == ATtrue;
   }
   
+  /// Equality operator.
   inline
   bool operator==(const aterm& x, ATerm y)
   {
     return ATisEqual(x, y) == ATtrue;
   }
   
+  /// Equality operator.
   inline
   bool operator==(const ATerm& x, aterm y)
   {
     return ATisEqual(x, y) == ATtrue;
   }
 
+  /// Inequality operator.
   inline
   bool operator!=(const aterm& x, const aterm& y)
   {
     return ATisEqual(x, y) == ATfalse;
   }
   
+  /// Inequality operator.
   inline
   bool operator!=(const aterm& x, ATerm y)
   {
     return ATisEqual(x, y) == ATfalse;
   }
   
+  /// Inequality operator.
   inline
   bool operator!=(const ATerm& x, aterm y)
   {

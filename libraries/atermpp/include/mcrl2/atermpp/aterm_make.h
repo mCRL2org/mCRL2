@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_make.h
-/// \brief Add your file description here.
+/// \brief Generate make_term functions using boost preprocessor library.
 
 // ======================================================================
 //
@@ -50,6 +50,7 @@
 #  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 #  define TEXT3(z, n, _) aterm_traits<T ## n>::term(t ## n)
 
+/// Make a term with a fixed number of arguments.
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 aterm make_term(const std::string& format, BOOST_PP_ENUM(n, TEXT1, nil))
 {

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_int.h
-/// \brief Add your file description here.
+/// \brief Term containing an integer.
 
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
@@ -14,15 +14,18 @@
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                    aterm_int
-  //---------------------------------------------------------//
+  /// Term containing an integer.
+  ///
   class aterm_int: public aterm_base
   {
     public:
+      /// Constructor.
+      ///
       aterm_int()
       {} 
 
+      /// Constructor.
+      ///
       aterm_int(ATermInt t)
         : aterm_base(t)
       {}
@@ -35,6 +38,8 @@ namespace atermpp
         assert(type() == AT_INT);
       }
 
+      /// Constructor.
+      ///
       aterm_int(int value)
         : aterm_base(ATmakeInt(value))
       {}
@@ -46,6 +51,8 @@ namespace atermpp
         return reinterpret_cast<ATermInt>(m_term);
       }
 
+      /// Assignment operator.
+      ///
       aterm_int& operator=(aterm_base t)
       {
         assert(t.type() == AT_INT);
@@ -61,6 +68,8 @@ namespace atermpp
       }
   };
 
+  /// \overload
+  ///
   template <>
   struct aterm_traits<aterm_int>
   {

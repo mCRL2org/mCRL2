@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/deque.h
-/// \brief Add your file description here.
+/// \brief Protected deque container.
 
 #ifndef MCRL2_ATERMPP_DEQUE_H
 #define MCRL2_ATERMPP_DEQUE_H
@@ -17,45 +17,61 @@
 
 namespace atermpp {
 
+/// Protected deque container.
+///
 template <class T, class Allocator = std::allocator<T> >
 class deque: public std::deque<T, Allocator>, IProtectedATerm
 {
   public:
+    /// Constructor.
+    ///
     deque()
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     explicit deque(const Allocator& a)
       : std::deque<T, Allocator>(a)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     explicit deque(typename std::deque<T, Allocator>::size_type count)
       : std::deque<T, Allocator>(count)
     {
       ATprotectProtectedATerm(this);
     }
     
+    /// Constructor.
+    ///
     deque(typename std::deque<T, Allocator>::size_type count, const T& val)
       : std::deque<T, Allocator>(count, val)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     deque(typename std::deque<T, Allocator>::size_type count, const T& val, const Allocator& a)
       : std::deque<T, Allocator>(count, val, a)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     deque(const deque& right)
       : std::deque<T, Allocator>(right)
     {
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
         deque(InIt first, InIt last)
       : std::deque<T, Allocator>(first, last)
@@ -63,6 +79,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
+    /// Constructor.
+    ///
     template<class InIt>
         deque(InIt first, InIt last, const Allocator& a)
       : std::deque<T, Allocator>(first, last, a)
@@ -70,11 +88,15 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
+    /// Destructor.
+    ///
     ~deque()
     {
       ATunprotectProtectedATerm(this);
     }
 
+    /// Protects the elements from being garbage collected.
+    ///
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION

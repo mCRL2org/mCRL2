@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/atermpp.h
-/// \brief Add your file description here.
+/// \brief Convenience header file containing many includes.
 
 #ifndef MCRL2_ATERMPP_ATERMPP_H
 #define MCRL2_ATERMPP_ATERMPP_H

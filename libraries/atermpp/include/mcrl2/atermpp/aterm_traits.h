@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_traits.h
-/// \brief Add your file description here.
+/// \brief Traits class for terms.
 
 #ifndef MCRL2_ATERMPP_ATERM_TRAITS_H
 #define MCRL2_ATERMPP_ATERM_TRAITS_H

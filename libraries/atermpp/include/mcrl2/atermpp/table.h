@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/table.h
-/// \brief Add your file description here.
+/// \brief Table.
 
 #ifndef MCRL2_ATERMPP_TABLE_H
 #define MCRL2_ATERMPP_TABLE_H
@@ -16,6 +16,8 @@
 
 namespace atermpp
 {
+  /// \internal
+  ///
   struct table_deleter
   {
     void operator()(ATermTable t)
@@ -24,9 +26,8 @@ namespace atermpp
     }
   };
 
-  //---------------------------------------------------------//
-  //                     table
-  //---------------------------------------------------------//
+  /// Table containing ATerms. N.B. Copies of a table refer to the same object.
+  ///
   class table
   {
    protected:

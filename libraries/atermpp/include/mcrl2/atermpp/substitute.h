@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/substitute.h
-/// \brief Add your file description here.
+/// \brief Substitution of terms.
 
 #ifndef MCRL2_ATERMPP_SUBSTITUTE_H
 #define MCRL2_ATERMPP_SUBSTITUTE_H
@@ -24,10 +24,14 @@ struct substitution
   aterm m_src;
   aterm m_dest;
   
+  /// Constructor.
+  ///
   substitution(aterm src, aterm dest)
     : m_src(src), m_dest(dest)
   {}
   
+  /// Function call operator.
+  ///
   aterm operator()(aterm t) const
   {
     return atermpp::replace(t, m_src, m_dest);
@@ -49,12 +53,16 @@ struct list_substitution
   Src m_src;
   Dest m_dest;
   
+  /// Constructor.
+  ///
   list_substitution(Src src, Dest dest)
     : m_src(src), m_dest(dest)
   {
     assert(src.size() == dest.size());
   }
   
+  /// Function call operator.
+  ///
   aterm operator()(aterm t) const
   {
     typename Src::const_iterator i;

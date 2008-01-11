@@ -147,7 +147,6 @@ namespace atermpp
   /// aterm_appl x;
   /// bool b = f(x);
   /// std::pair<aterm_appl, bool> result = r(x);
-  ///
   template <typename Term, typename ReplaceFunction, typename CheckFunction>
   Term checked_replace(Term t, CheckFunction f, ReplaceFunction r)
   {

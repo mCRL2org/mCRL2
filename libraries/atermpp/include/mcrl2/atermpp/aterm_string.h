@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_string.h
-/// \brief Add your file description here.
+/// \brief Term containing a string.
 
 #ifndef MCRL2_ATERMPP_ATERM_STRING_H
 #define MCRL2_ATERMPP_ATERM_STRING_H
@@ -19,21 +19,26 @@ namespace atermpp
 {
   using detail::str2appl;
   
-  //---------------------------------------------------------//
-  //                    aterm_string
-  //---------------------------------------------------------//
+  /// Term containing a string.
+  ///
   class aterm_string: public aterm_appl
   {
     public:
+      /// Constructor.
+      ///
       aterm_string()
       {} 
 
+      /// Constructor.
+      ///
       aterm_string(ATermAppl t)
         : aterm_appl(t)
       {
         assert(aterm_appl(t).size() == 0);
       }
   
+      /// Constructor.
+      ///
       aterm_string(aterm_appl t)
         : aterm_appl(t)
       {
@@ -58,6 +63,8 @@ namespace atermpp
         assert(aterm_appl(m_term).size() == 0);
       }
 
+      /// Assignment operator.
+      ///
       aterm_string& operator=(aterm_base t)
       {
         assert(t.type() == AT_APPL);
@@ -66,12 +73,16 @@ namespace atermpp
         return *this;
       }
 
+      /// Conversion to string.
+      ///
       operator std::string() const
       {
         return function().name();
       }
   };
 
+  /// \overload
+  ///
   template <>
   struct aterm_traits<aterm_string>
   {

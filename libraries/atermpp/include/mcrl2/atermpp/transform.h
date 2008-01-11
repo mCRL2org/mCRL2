@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/transform.h
-/// \brief Add your file description here.
+/// \brief Transform algorithm.
 
 #ifndef MCRL2_ATERMPP_TRANSFORM_H
 #define MCRL2_ATERMPP_TRANSFORM_H
