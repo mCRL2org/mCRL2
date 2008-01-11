@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_access.h
-/// \brief Add your file description here.
+/// \brief Convenience functions for accessing the child nodes of aterm_appl and aterm_list. 
 
 #ifndef MCRL2_ATERMPP_ATERM_ACCESS_H
 #define MCRL2_ATERMPP_ATERM_ACCESS_H
@@ -16,9 +16,6 @@
 
 namespace atermpp
 {
-//  using atermpp::aterm_appl;
-//  using atermpp::aterm_list;
-
   /// Returns the first child of t casted to an aterm_appl.
   inline
   aterm_appl arg1(ATermAppl t)

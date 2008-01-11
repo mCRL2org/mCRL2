@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/dictionary.h
-/// \brief Add your file description here.
+/// \brief Dictionary based on ATerms.
 
 #ifndef MCRL2_ATERMPP_DICTIONARY_H
 #define MCRL2_ATERMPP_DICTIONARY_H
@@ -15,9 +15,8 @@
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                     dictionary
-  //---------------------------------------------------------//
+  /// \brief Dictionary based on ATerms.
+  ///
   class dictionary: public aterm, boost::noncopyable
   {
    public:

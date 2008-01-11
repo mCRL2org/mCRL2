@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_appl.h
-/// \brief Add your file description here.
+/// \brief The term_appl class represents function application.
 
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
@@ -20,9 +20,9 @@
 /// Namespace containing all ATerm++ functionality
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                     term_appl
-  //---------------------------------------------------------//
+  /// A term that models function application. The template argument
+  /// denotes the type of the arguments.
+  ///
   template <typename Term>
   class term_appl: public aterm_base
   {
@@ -75,19 +75,27 @@ namespace atermpp
       ///
       typedef term_appl_iterator<Term> const_iterator;
 
+      /// Default constructor.
+      ///
       term_appl()
       {}
 
+      /// Constructor.
+      ///
       term_appl(ATerm term)
         : aterm_base(term)
       {
         assert(type() == AT_APPL);
       }
 
+      /// Constructor.
+      ///
       term_appl(ATermAppl term)
         : aterm_base(term)
       {}
 
+      /// Constructor.
+      ///
       term_appl(function_symbol sym, term_list<Term> args)
         : aterm_base(ATmakeApplList(sym, args))
       {}
@@ -98,6 +106,8 @@ namespace atermpp
         : aterm_base(t)
       {}
 
+      /// Constructor.
+      ///
       template <typename Iter>
       term_appl(function_symbol sym, Iter first, Iter last)
       {
@@ -109,6 +119,8 @@ namespace atermpp
         m_term = ATmakeApplArray(sym, &(arguments.front()));
       }
 
+      /// Constructor.
+      ///
       term_appl(function_symbol sym)
         : aterm_base(ATmakeAppl0(sym))
       {
@@ -123,6 +135,8 @@ namespace atermpp
         return reinterpret_cast<ATermAppl>(m_term);
       }
 
+      /// Assignment operator.
+      ///
       term_appl<Term>& operator=(aterm_base t)
       {
         assert(t.type() == AT_APPL);
@@ -130,13 +144,14 @@ namespace atermpp
         return *this;
       }
 
+      /// Assignment operator.
+      ///
       term_appl<Term>& operator=(ATermAppl t)
       {
         m_term = reinterpret_cast<ATerm>(t);
         return *this;
       }
 
-      ///
       /// Returns the size of the term_list.
       ///
       size_type size() const
@@ -156,25 +171,15 @@ namespace atermpp
         return const_iterator(((ATerm *)(m_term) + ARG_OFFSET + size()));
       }
   
-      ///
       /// Returns the largest possible size of the term_list.
       ///
       size_type max_size() const
       { return (std::numeric_limits<unsigned long>::max)(); }
 
-      ///
       /// true if the list's size is 0.
       ///
       bool empty() const
       { return size() == 0; }
-
-      ///
-      /// Creates an term_list with n elements, each of which is a copy of T().
-      ///
-
-      ///
-      /// Creates an term_list with n copies of t.
-      ///
 
       /// Get the function symbol (function_symbol) of the application.
       ///
@@ -182,18 +187,24 @@ namespace atermpp
       {
         return function_symbol(ATgetAFun(appl()));
       }
-  
+ 
+      /// Returns true if the term is quoted.
+      /// 
       bool is_quoted() const
       {
         return function().is_quoted();
       }
 
+      /// Returns the i-th argument.
+      /// 
       Term operator()(unsigned int i) const
       {
         return Term(ATgetArgument(appl(), i));
       }
   
       /// Returns a copy of the term with the i-th child replaced by t.
+      /// DEPRECATED!
+      ///
       term_appl<Term> set_argument(Term t, unsigned int i)
       {
         return ATsetArgument(appl(), t, i);
@@ -201,6 +212,7 @@ namespace atermpp
 
       /// Get the i-th argument of the application.
       /// DEPRECATED!
+      ///
       aterm argument(unsigned int i) const
       {
         return aterm(ATgetArgument(appl(), i));
@@ -208,17 +220,19 @@ namespace atermpp
 
       /// Get the list of arguments of the application.
       /// DEPRECATED!
+      ///
       term_list<Term> argument_list() const
       {
         return term_list<Term>(ATgetArguments(appl()));
       }
   };
 
-  ///
   /// A term_appl with children of type aterm.
   ///
   typedef term_appl<aterm> aterm_appl;
 
+  /// \overload
+  ///
   template <typename Term>
   struct aterm_traits<term_appl<Term> >
   {
@@ -230,36 +244,48 @@ namespace atermpp
     static ATerm* ptr(term_appl<Term>& t)    { return &t.term(); }
   };
 
+  /// Equality operator.
+  ///
   template <typename Term>
   bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
   }
   
+  /// Equality operator.
+  ///
   template <typename Term>
   bool operator==(const term_appl<Term>& x, ATermAppl y)
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
   }
   
+  /// Equality operator.
+  ///
   template <typename Term>
   bool operator==(ATermAppl x, const term_appl<Term>& y)
   {
     return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
   }
 
+  /// Inequality operator.
+  ///
   template <typename Term>
   bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
   }
   
+  /// Inequality operator.
+  ///
   template <typename Term>
   bool operator!=(const term_appl<Term>& x, ATermAppl y)
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATfalse;
   }
   
+  /// Inequality operator.
+  ///
   template <typename Term>
   bool operator!=(ATermAppl x, const term_appl<Term>& y)
   {

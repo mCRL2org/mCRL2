@@ -5,7 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_allocator.h
-/// \brief Add your file description here.
+/// \brief An allocator class for ATerms. Unfortunately it is not usable,
+/// due to incompatibilities between compilers.
 
 #ifndef MCRL2_ATERMPP_ATERM_ALLOCATOR_H
 #define MCRL2_ATERMPP_ATERM_ALLOCATOR_H
@@ -34,6 +35,8 @@
 
 namespace atermpp {
 
+   /// Is called when num elements are allocated at memory location p.
+   ///
    // general case; works only for T = ATerm, ATermList, ...
    template <class T>
    void on_allocate(T* p, std::size_t num)
@@ -43,6 +46,8 @@ namespace atermpp {
      ATprotectArray(p, num);
    }
 
+   /// Is called when the memory at location p is freed.
+   ///
    template <class T>
    void on_deallocate(T* p, std::size_t num)
    {
@@ -50,16 +55,22 @@ namespace atermpp {
      ATunprotectArray(p);
    }
 
+   /// Is called when an element is constructed at memory location p.
+   ///
    template <class T>
    void on_construct(T* p)
    {
    }
 
+   /// Is called when the element at location p is destroyed.
+   ///
    template <class T>
    void on_destroy(T* p)
    {
    }
 
+   /// Allocator for ATerms. To be used with standard library containers.
+   ///
    template <class T>
    class aterm_allocator {
      public:
@@ -72,42 +83,54 @@ namespace atermpp {
        typedef const T&       const_reference;
        typedef T              value_type;
 
-       // rebind aterm_allocator to type U
+       /// Rebind aterm_allocator to type U.
+       ///
        template <class U>
        struct rebind {
            typedef aterm_allocator<U> other;
        };
 
-       // return address of values
+       /// Return address of value.
+       ///
        pointer address (reference value) const {
            return &value;
        }
+
+       /// Return address of value.
+       ///
        const_pointer address (const_reference value) const {
            return &value;
        }
 
-       /* constructors and destructor
-        * - nothing to do because the aterm_allocator has no state
-        */
+       /// Default constructor.
+       ///
        aterm_allocator() throw() {
        }
 
+       /// Copy constructor.
+       ///
        aterm_allocator(const aterm_allocator&) throw() {
        }
 
+       /// Copy constructor.
+       ///
        template <class U>
          aterm_allocator (const aterm_allocator<U>&) throw() {
        }
 
+       /// Default destructor.
+       ///
        ~aterm_allocator() throw() {
        }
 
-       // return maximum number of elements that can be allocated
+       /// Returns the maximum number of elements that can be allocated.
+       ///
        size_type max_size () const throw() {
            return std::numeric_limits<std::size_t>::max() / sizeof(T);
        }
 
-       // allocate but don't initialize num elements of type T
+       /// Allocates but doesn't initialize num elements of type T.
+       ///
        pointer allocate (size_type num)
        {
 #ifdef ATERM_DEBUG_ALLOCATOR
@@ -115,13 +138,15 @@ static int n = 0;
 n += num;
 std::cout << "aterm_allocator.allocate(" << num << ") " << n << " elements allocated\n";
 #endif // ATERM_DEBUG_ALLOCATOR
+
          // allocate memory with global new
          pointer p = (pointer)(::operator new(num*sizeof(T)));
          on_allocate(p, num);
          return p;
        }
 
-       // initialize elements of allocated storage p with value value
+       /// Initialize elements of allocated storage p with value value.
+       ///
        void construct (pointer p, const T& value) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;
@@ -132,7 +157,8 @@ std::cout << "aterm_allocator.construct() " << ++n << " elements constructed" <<
            new((void*)p)T(value);
        }
 
-       // destroy elements of initialized storage p
+       /// Destroy elements of initialized storage p.
+       ///
        void destroy (pointer p) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;
@@ -143,7 +169,8 @@ std::cout << "aterm_allocator.destroy() " << ++n << " elements destroyed" << std
            p->~T();
        }
 
-       // deallocate storage p of deleted elements
+       /// Deallocate storage p of deleted elements.
+       ///
        void deallocate (pointer p, size_type num) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;
@@ -156,12 +183,16 @@ std::cout << "aterm_allocator.deallocate(" << num << ") " << n << " elements dea
        }
    };
 
-   // return that all specializations of this aterm_allocator are interchangeable
+   /// Return that all specializations of this aterm_allocator are interchangeable.
+   ///
    template <class T1, class T2>
    bool operator== (const aterm_allocator<T1>&,
                     const aterm_allocator<T2>&) throw() {
        return true;
    }
+
+   /// Return that not all specializations of this aterm_allocator are interchangeable.
+   ///
    template <class T1, class T2>
    bool operator!= (const aterm_allocator<T1>&,
                     const aterm_allocator<T2>&) throw() {

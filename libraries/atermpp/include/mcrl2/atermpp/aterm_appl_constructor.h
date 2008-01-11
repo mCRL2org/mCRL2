@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_appl_constructor.h
-/// \brief Add your file description here.
+/// \brief Use the boost preprocessor library to generate constructors.
 
 // ======================================================================
 //
@@ -50,6 +50,8 @@
 #  define TEXT2(z, n, _) a ## n
 #  define ATMAKEAPPL(i) BOOST_PP_CAT(ATmakeAppl,i)
 
+    /// Construct a term with a fixed number of arguments.
+    ///
     term_appl(function_symbol sym, BOOST_PP_ENUM(n, TEXT1, nil))
       : aterm_base(ATMAKEAPPL(n)(sym, BOOST_PP_ENUM(n, TEXT2, nil)))
     {
