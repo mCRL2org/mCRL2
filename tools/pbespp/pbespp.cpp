@@ -187,7 +187,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     OutputStream = stdout;
     gsDebugMsg("output to stdout.\n");
   } else {  
-    OutputStream = fopen(OutputFileName, "wb");
+    OutputStream = fopen(OutputFileName, "w");
     if (OutputStream == NULL) {
       gsErrorMsg("could not open output file '%s' for writing ",
         OutputFileName);

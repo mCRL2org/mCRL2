@@ -534,7 +534,7 @@ void RewriterCompilingInnermost::tree2dot(ATermAppl tree, char *name, char *file
 	FILE *f;
 	int num_states = 0;
 
-	if ( (f = fopen(filename,"wb")) == NULL )
+	if ( (f = fopen(filename,"w")) == NULL )
 	{
 		perror("fopen");
 		return;
@@ -1613,7 +1613,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification Da
   sprintf(t,"%s.so",s);
   file_so = strdup(t);
 
-  f = fopen(file_c,"wb");
+  f = fopen(file_c,"w");
   if ( f == NULL )
   {
 	  perror("fopen");

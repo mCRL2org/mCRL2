@@ -110,7 +110,7 @@ static char *pn2gsGetText(ticpp::Element* cur);
 bool perform_task(char const* InFileName, FILE* OutStream);
 
 bool perform_task(char const* InFileName, char const* OutFileName) {
-  FILE* OutStream = fopen(OutFileName,"wb");
+  FILE* OutStream = fopen(OutFileName,"w");
   
   if (OutStream == 0) {
     gsErrorMsg("cannot open file '%s' for writing\n", OutFileName);

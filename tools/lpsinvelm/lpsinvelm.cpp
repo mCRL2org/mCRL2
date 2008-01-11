@@ -407,7 +407,7 @@ using namespace mcrl2::utilities;
     void LPS_Inv_Elm::read_input() {
 
       //parse the invariant formula from infilename
-      std::ifstream instream(f_invariant_file_name, std::ifstream::in|std::ifstream::binary);
+      std::ifstream instream(f_invariant_file_name);
       if (!instream.is_open()) {
         gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name);
         exit(1);

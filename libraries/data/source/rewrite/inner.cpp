@@ -203,7 +203,7 @@ void RewriterInnermost::tree2dot(ATermAppl tree, char *name, char *filename)
 	FILE *f;
 	int num_states = 0;
 
-	if ( (f = fopen(filename,"wb")) == NULL )
+	if ( (f = fopen(filename,"w")) == NULL )
 	{
 		perror("fopen");
 		return;

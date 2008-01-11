@@ -717,7 +717,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //parse the action rename file
   gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
-  ifstream formstream(action_rename_filename.c_str(), ifstream::in|ifstream::binary);
+  ifstream formstream(action_rename_filename.c_str());
   if (!formstream.is_open()) {
     gsErrorMsg("cannot open formula file '%s'\n", action_rename_filename.c_str());
     return NULL;

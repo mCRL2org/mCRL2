@@ -163,7 +163,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   {
     //store the result
 
-   FILE *outstream = fopen(options.outfilename.c_str(), "wb");
+   FILE *outstream = fopen(options.outfilename.c_str(), "w");
    if (outstream != NULL) {
        fputs (mcrl2spec.c_str(), outstream); 
        fclose(outstream);
@@ -271,7 +271,7 @@ ATermAppl translate_file(t_options &options)
     result = parse_stream(cin);
   } else {
     //parse specification from infilename
-    ifstream instream(options.infilename.c_str(), ifstream::in|ifstream::binary);
+    ifstream instream(options.infilename.c_str());
     if (!instream.is_open()) 
 	{
       gsErrorMsg("cannot open input file '%s'\n", options.infilename.c_str());
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
         printf("%s",mcrl2spec.c_str());
       } else { //outfilename != NULL
         //open output filename
-        FILE *outstream = fopen(options.outfilename.c_str(), "wb");
+        FILE *outstream = fopen(options.outfilename.c_str(), "w");
         if (outstream == NULL) {
           gsErrorMsg("cannot open output file '%s'\n", options.outfilename.c_str());
           return 1;
