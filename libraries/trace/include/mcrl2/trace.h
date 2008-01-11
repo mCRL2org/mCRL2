@@ -17,6 +17,14 @@
 #include <iostream>
 #include <string>
 
+namespace mcrl2 {
+/** \brief The main trace namespace.
+ * \details This namespace contains all data structures and members of the
+ * trace library.
+ */
+namespace trace {
+
+
 ////////////////////////////////////////////////////////////
 //
 /// \brief Formats in which traces can be saved on disk
@@ -199,3 +207,6 @@ class Trace
 		void saveMcrl2(std::ostream &os);
 		void savePlain(std::ostream &os);
 };
+
+}
+}

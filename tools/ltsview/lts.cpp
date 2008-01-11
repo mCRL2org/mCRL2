@@ -15,6 +15,7 @@
 
 using namespace Utils;
 using namespace std;
+using namespace mcrl2::trace;
 
 LTS::LTS(Mediator* owner) {
   mediator = owner;

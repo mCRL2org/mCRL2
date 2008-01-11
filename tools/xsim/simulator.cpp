@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::trace;
 
 
 
