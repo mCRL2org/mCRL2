@@ -102,7 +102,7 @@ class Trace
 /// \return The state at the current position of the trace.
 		ATermAppl currentState();
 /// \brief Get the outgoing action from the current position in the trace and
-//  move to the next position
+///  move to the next position
 /// \details This routine returns the action at the current position of the
 /// trace and moves to the next position in the trace. When the current position
 /// is at the end of the trace, nothing happens and NULL is returned.

@@ -1,4 +1,4 @@
-/* \mainpage Trace Reference Manual
+/** \mainpage Trace Reference Manual
  *
  * The Trace library provides functionality for storing, retrieving and 
  * manipulating traces. A trace consists of a sequence of triples with
@@ -9,4 +9,3 @@
  * More information about this library can be found in the <a
  * href="http://www.mcrl2.org/wiki/index.php/Trace_Library">Trace User Manual</a>.
  */
-
