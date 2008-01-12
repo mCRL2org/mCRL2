@@ -36,7 +36,7 @@ edge::edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
   double x2 = N2->GetX();
   double y1 = N1->GetY();
   double y2 = N2->GetY();  
-  double radius = N1->get_radius();
+  double radius = N1->GetRadius();
   // Initial position of control points is exactly between the nodes, if the nodes are not in the same place.
   // If they are in the same place, we put it diagonally above the node
   if (x1 == x2 && y1 == y2) {
@@ -61,7 +61,7 @@ void edge::get_spline_control_points(wxPoint *points)
   double end_x = get_x_pos2();
   double end_y = get_y_pos2();
 
-  double node_radius = N1->get_radius();
+  double node_radius = N1->GetRadius();
 
   double control_x = get_x_control();
   double control_y = get_y_control();
@@ -146,7 +146,7 @@ void edge::get_arrow_points(wxPoint *points)
   double end_x = get_x_pos2();
   double end_y = get_y_pos2();
 
-  double node_radius = N1->get_radius();
+  double node_radius = N1->GetRadius();
 
   // We calculate the distance from control point until the end of the 
   // edge. 
@@ -388,8 +388,8 @@ void edge::set_control(double new_x, double new_y) {
   control_point_dist = sqrt( (x_1 - new_x) * (x_1 - new_x) + (y_1 - new_y) * (y_1 - new_y) );
   double node_dist = sqrt( ( x_1 - x_2) * (x_1 - x_2) + (y_1 - y_2) * (y_1 - y_2) );
   
-  if ((node_dist == 0) && (control_point_dist < 2*N1->get_radius())) {
-    control_point_dist = N1->get_radius() * 2;
+  if ((node_dist == 0) && (control_point_dist < 2*N1->GetRadius())) {
+    control_point_dist = N1->GetRadius() * 2;
   } else if ( node_dist != 0 )
   {
     control_point_dist = control_point_dist / node_dist;

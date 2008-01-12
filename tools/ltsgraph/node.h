@@ -27,27 +27,97 @@ using namespace std;
 class Node
 {
 public:
-  Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState);
+  Node(unsigned int _num, double _posX, double _posY, wxString const& _lbl, bool _initState);
   void OnPaint(wxDC * ptrDC);
-  unsigned int Get_num();
-  double GetX(); 
-  double GetY();
-  wxColour GetNodeColour();
-  void SetNodeColour(wxColour const&);
-  wxColour GetBorderColour();
-  void SetBorderColour(wxColour const&);
-  int get_radius();
-  string Get_lbl();
-  void SetXY(double, double);
-  void ForceSetXY(double, double);//set the x and y even if the node is locked
-  bool IsLocked();
-  void Lock();
-  void Unlock();
-  bool LabelVisible();
-  void ShowLabels();
-  void HideLabels();
-  void SetRadius(int);
-  bool IsInitState();
+
+  inline unsigned int Get_num() const {
+    return num;
+  }
+
+  inline double GetX() const {
+    return posX;
+  }
+
+  inline double GetY() const {
+    return posY;
+  }
+
+  inline void SetX(double _posX) {
+    posX = _posX;
+  }
+
+  inline void SetY(double _posY) {
+    posY = _posY;
+  }
+
+  inline wxColour GetNodeColour() const {
+    return node_colour;
+  };
+
+  inline void SetNodeColour(wxColour const& c) {
+    node_colour = c;
+  }
+
+  inline wxColour GetBorderColour() const {
+    return border_colour;
+  }
+
+  inline void SetBorderColour(wxColour const& c) {
+    border_colour = c;
+  }
+
+  inline int GetRadius() const {
+    return radius;
+  }
+
+  inline void SetRadius(int r) {
+    radius = r;
+  }
+
+  std::string GetLabel() const {
+    return std::string(lbl.fn_str());
+  }
+
+  inline void SetXY(double _x, double _y) {
+    if (!locked) {
+      posX = _x;
+      posY = _y;
+    }
+  }
+
+  inline void ForceSetXY(double _x, double _y) { //set the x and y even if the node is locked
+    posX = _x;
+    posY = _y;
+  }
+
+  inline bool IsLocked() {
+    return locked;
+  }
+
+  inline void Lock() {
+    locked = true;
+  }
+
+  inline void Unlock() {
+    locked = false;
+  }
+
+  inline bool LabelVisible() {
+    return labelsVisible;
+  }
+
+  inline void ShowLabels() {
+    labelsVisible = true;
+  }
+
+  inline void HideLabels() {
+    labelsVisible = false;
+  }
+
+  inline bool IsInitState() {
+    return initState;
+  }
+
   wxColour get_node_colour();
   wxColour get_border_colour();
   void set_node_colour(wxColour colour);
@@ -56,17 +126,17 @@ public:
   //TODO (CT): Maybe make a reset for node colour?
 
 private:
-  int radius;
-  bool locked;
-  bool labelsVisible;
+
   double posX;
   double posY;
+  int radius;
+  bool locked;
+  bool initState;
+  bool labelsVisible;
   wxString lbl;
   unsigned int num;
-  bool initState;
   wxColour node_colour;
   wxColour border_colour;
-
 };
 
 

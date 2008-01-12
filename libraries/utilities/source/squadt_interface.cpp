@@ -220,7 +220,7 @@ namespace mcrl2 {
        * \param[in] d the display object that contains the data to communicate
        **/
       void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
-        boost::shared_ptr < ::tipi::layout::tool_display > dsp(&d,
+        boost::shared_ptr< ::tipi::layout::tool_display > dsp(&d,
                               ::utility::trivial_deleter< ::tipi::layout::tool_display >());
 
         m_communicator->send_display_layout(dsp);

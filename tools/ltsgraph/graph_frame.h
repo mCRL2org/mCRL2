@@ -93,7 +93,7 @@ public:
   void export_svg(wxString filename);
   void CreateBackup(wxCommandEvent& event);
   void Resize(wxSize);
-  void ReplaceAfterDrag(wxPoint);
+  void ReplaceAfterDrag(wxPoint, bool = false);
   void FixNode();
 
   void OnOpen(wxCommandEvent& event);
@@ -132,7 +132,6 @@ private:
   double EdgeStiffness;   //stiffness of the edge
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
-  int steps_taken;
   int node_radius;
   string inputFileName;
 
@@ -195,6 +194,7 @@ class ViewPort : public wxPanel {
 	  void ReleaseLeft(wxMouseEvent& event);
 	  void PressRight(wxMouseEvent& event);//to fix a node
          
+          bool   selected_node_is_locked;
           Node * selected_node; //Pointer to the node that was last clicked. NULL if none.
 	  edge * selected_edge;
 

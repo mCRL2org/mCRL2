@@ -11,41 +11,25 @@
 static const wxColour &border_color      = *wxBLACK;
 static const wxColour &border_color_init = *wxRED;
 
-Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState) : 
-             posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
+Node::Node(unsigned int _num, double _posX, double _posY, wxString const& _lbl, bool _initState) : 
+             posX(_posX), posY(_posY), initState(_initState), lbl(_lbl), num(_num)
 {
   locked = false;
   labelsVisible = true;
   node_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
   radius = CIRCLE_RADIUS;
 
-  if (initState) {
-    border_colour = border_color_init;
-  }
-  else {
-    border_colour = border_color;
-  }
-  
+  border_colour = (initState) ? border_color_init : border_color;
 }
 
 void Node::OnPaint(wxDC * ptrDC) 
 {
-  wxColour color;
-  color = node_colour;
-
   //Circle
-  int pen_size;
-  if (initState) {
-    pen_size = 2;
-  }
-  else {
-    pen_size = 1;
-  }
-
+  int pen_size = (initState) ? 2 : 1;
 		
   wxPen pen = wxPen(border_colour, pen_size, wxSOLID);
   ptrDC->SetPen(pen);
-  wxBrush myBrush(color,wxSOLID );
+  wxBrush myBrush(node_colour,wxSOLID );
   ptrDC->SetBrush(myBrush);
   ptrDC->DrawCircle((wxCoord)posX,(wxCoord)posY,radius);
 
@@ -74,83 +58,6 @@ void Node::OnPaint(wxDC * ptrDC)
   }
 }
 
-unsigned int Node::Get_num() {
-    return num;
-}
-
-double Node::GetX() {
-    return posX;
-}
-
-double Node::GetY() {
-    return posY;
-}
-
-wxColour Node::GetNodeColour() {
-    return node_colour;
-}
-
-void Node::SetNodeColour(wxColour const& c) {
-    node_colour = c;
-}
-
-void Node::SetBorderColour(wxColour const& c) {
-    border_colour = c;
-}
-
-wxColour Node::GetBorderColour() {
-    return border_colour;
-}
-
-string Node::Get_lbl() {
-	string st_lbl = string(lbl.fn_str());
-	return st_lbl;
-}
-
-bool Node::IsLocked(){
-  return locked;
-}
-
-bool Node::IsInitState(){
-  return initState;
-}
-
-void Node::Lock() {
-  locked = true;
-}
-
-void Node::Unlock() {
-  locked = false;
-}
-
-bool Node::LabelVisible() {
-	return labelsVisible;
-}
-
-void Node::ShowLabels() {
-		labelsVisible = true;
-} 
-
-void Node::HideLabels() {
-		labelsVisible = false;
-} 
-
-void Node::SetXY(double _x, double _y) {
-  if (!locked) {
-    posX = _x;
-    posY = _y;
-  }
-}
-
-void Node::ForceSetXY(double _x, double _y) {
-    posX = _x;
-    posY = _y;
-}
-
-void Node::SetRadius(int newRadius) {
-	radius = newRadius;
-}
-
 void Node::set_node_colour(wxColour colour) {
   node_colour = colour;
 }
@@ -168,14 +75,5 @@ wxColour Node::get_border_colour() {
 }
 
 void Node::reset_border_colour() {
-  if (initState) {
-    border_colour = border_color_init;
-  }
-  else {
-    border_colour = border_color;
-  }
-}
-
-int Node::get_radius() {
-  return radius;
+  border_colour = (initState) ? border_color_init : border_color;
 }

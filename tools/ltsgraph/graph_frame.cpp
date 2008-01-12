@@ -8,6 +8,9 @@
 #include "workarounds.h"
 #include "mcrl2/utilities/version_info.h"
 
+#include <stack>
+#include <map>
+
 static const wxColour &border_colour_selected = *wxBLUE;
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -54,8 +57,7 @@ static vector<Node*> vectNode;
 static vector<edge*> vectEdge;
 
 static double GenRandom(const int &max) {
-    int CircleRadius = 0;
-    return static_cast <double> (rand()%max+CircleRadius);
+    return static_cast <double> (rand()%max);
 }
 
 GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
@@ -68,7 +70,6 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   StopOpti = true;
   StoppedOpti = true;
   curve_edges = false;
-  steps_taken = 0;
 
 
   // values below are reset later when the right panel is setuped
@@ -140,7 +141,7 @@ void GraphFrame::BuildLayout() {
   wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
   wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
-  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 2000, 100, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 200, 0, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -419,104 +420,96 @@ void GraphFrame::on_btn_label_text( wxCommandEvent& /* event */) {
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
 
-  	//leftPanel->sz = leftPanel->GetSize();
-        // Set the title of the frame to ltsgraph - LTSfile
-        wxString title = wxT("LTSGraph - ");
-        title.append(LTSfile);
-        SetTitle(title);
+  //leftPanel->sz = leftPanel->GetSize();
+  // Set the title of the frame to ltsgraph - LTSfile
+  wxString title = wxT("LTSGraph - ");
+  title.append(LTSfile);
+  SetTitle(title);
+  
+  string st_LTSfile = string(LTSfile.fn_str());
+  
+  //Find extension
+  string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
+  
+  //initialize file name
+  inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
+  inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
+  
+  if (ext != "ltsgraph") {
+    //read lts file
+    lts mylts;
+    
+    if (mylts.read_from(st_LTSfile)) {
+    	
+      //Information about graph
+      initialStateLabel->SetLabel(wxString::Format(wxT("%u"), mylts.initial_state()));
+      numberOfStatesLabel->SetLabel(wxString::Format(wxT("%u"), mylts.num_states()));
+      numberOfTransitionsLabel->SetLabel(wxString::Format(wxT("%u"), mylts.num_transitions()));
+      numberOfLabelsLabel->SetLabel(wxString::Format(wxT("%u"), mylts.num_labels()));
+      		
+      //initialize vectNode
+      int randX = leftPanel->Get_Width()  - 2*node_radius;
+      int randY = leftPanel->Get_Height() - 4*node_radius;
 
-  	string st_LTSfile = string(LTSfile.fn_str());
+      std::map< size_t, Node* > number_to_node;
 
-	//Find extension
-	string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
+      for (state_iterator si = mylts.get_states(); si.more(); ++si) {
+        // The node used to contain the state number used by the input, this is changed to the index to fix a serious bug
+        Node* new_node = new Node(vectNode.size(), GenRandom(randX), GenRandom(randY), wxString::Format(wxT("%d"), *si), (mylts.initial_state() == *si));
 
-	//initialize file name
-	inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
-	inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
+        new_node->SetRadius(node_radius);
 
-	if (ext != "ltsgraph") {
+        //Init circle radius
+        number_to_node[*si] = new_node;
 
-          //read lts file
-          lts mylts;
+        vectNode.push_back(new_node);
+      }   
 
-	  if (mylts.read_from(st_LTSfile)) {
-	
-	    //Information about graph
-	    wxString text;
-	    text.Printf(wxT("%u"),mylts.initial_state());
-	    initialStateLabel->SetLabel(text);
-	    text.Printf(wxT("%u"),mylts.num_states());
-	    numberOfStatesLabel->SetLabel(text);
-	    text.Printf(wxT("%u"),mylts.num_transitions());
-	    numberOfTransitionsLabel->SetLabel(text);
-	    text.Printf(wxT("%u"),mylts.num_labels());
-	    numberOfLabelsLabel->SetLabel(text);
-		
-	    //initialize vectNode
-	
-	    state_iterator si = mylts.get_states();
-					
-	    wxString tmp;
-	    
-            int randX = leftPanel->Get_Width()  - 2*node_radius;
-	    int randY = leftPanel->Get_Height() - 4*node_radius;
-	
-	
-	    for(unsigned int i=0; si.more(); i++) {
-	      tmp.sprintf(wxT("%d"), *si);
-	      wxString * Slbl_Node = new wxString(tmp);
-
-	      vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, (mylts.initial_state() == *si) ));
-
-	      delete Slbl_Node;
-	      ++si;
-	    }   
-				//NaturalLength = (400 / vectNode.size())+8;
-			
-				//initialize vectEdge
-	
-				transition_iterator ti = mylts.get_transitions();
-			
-				for(unsigned int i=0; (ti.more()); i++) 
-				{
-				
-                                        std::string node_label = mylts.label_value_str(ti.label());
-                                       	wxString * Slbl_Edge = new wxString(node_label.c_str(), wxConvLocal);
-	
-					for (size_t n = 0; n < vectNode.size(); n++) { 
-						if (vectNode[n]->Get_num() == ti.from()) { 
-							for (size_t m = 0; m < vectNode.size(); m++) { 
-									if (vectNode[m]->Get_num() == ti.to()) 
-										vectEdge.push_back(new edge(vectNode[n],vectNode[m],*Slbl_Edge));
-							}
-						}
-						//Init circle radius
-						vectNode[n]->SetRadius(node_radius);
-					}
-			
-					delete Slbl_Edge;       
-					++ ti;
-				}
-				optimizeGraph->Enable(true);
-				stopOptimize->Enable(false);
-				btnOptiStop->Enable(true);
-				export_to->Enable(true);
-				backupCreate->Enable(true);
-                                update_coordinates();
-				Refresh();
-			}
-			else 
-			{
-				cout << "Error : cannot read " << st_LTSfile << endl;
-				exit(0);
-			}
-		}
-		else { //restore a backup
-			
-			RestoreBackup();
- 
-		}
+      //NaturalLength = (400 / vectNode.size())+8;
+      
+      //initialize vectEdge
+      for (transition_iterator ti = mylts.get_transitions(); ti.more(); ++ti) {
+        // todo error detection ...
+        vectEdge.push_back(new edge(number_to_node[ti.from()], number_to_node[ti.to()], wxString(mylts.label_value_str(ti.label()).c_str(), wxConvLocal)));
+      }
+      
+      optimizeGraph->Enable(true);
+      stopOptimize->Enable(false);
+      btnOptiStop->Enable(true);
+      export_to->Enable(true);
+      backupCreate->Enable(true);
+      update_coordinates();
+      Refresh();
+    }
+    else {
+      wxMessageDialog(0, wxT("Error: cannot read LTS from file `") + LTSfile + wxT("'"), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+    }
+  }
+  else { //restore a backup
+    RestoreBackup();
+  }
 }
+
+// Helper for moving nodes with separated data for display and positioning
+static std::stack< Node* > moved_vertices;
+
+// Helper structure for OptimizeDrawing() method
+struct vertex_and_forces {
+  double x;
+  double y;
+  double x_force;
+  double y_force;
+
+  vertex_and_forces(double cx, double cy) : x(cx), y(cy), x_force(0), y_force(0) {
+  }
+
+  void apply_force() {
+    x += x_force;
+    y += y_force;
+
+    x_force = y_force = 0;
+  }
+};
 
 bool GraphFrame::OptimizeDrawing(double precision) {
   /* A short explanation is required here:
@@ -531,161 +524,180 @@ bool GraphFrame::OptimizeDrawing(double precision) {
    * function should return wether the required precision was achieved. which
    * it doesn't if it stops before calculation.
    */
-  int skip_steps = 0;
-  if ( !StopOpti) {
+  static int steps_taken = 0;
+
+  if (!StopOpti) {
     EdgeStiffness = sliderEdgeStiffness->GetValue();
     NodeStrength  = sliderNodeStrength->GetValue();
     NaturalLength = sliderNaturalLength->GetValue();
     node_radius  = spinNodeRadius->GetValue();
-    skip_steps = slider_speedup->GetValue();
   }
-  else {
+  else if (vectNode.size() == 0) {
     return false;
   }
-	
-  DECL_A(arraySumForceX,double,vectNode.size() << 1);
-  double* arraySumForceY = &arraySumForceX[vectNode.size()];
 
-  double WindowWidth  = (double)leftPanel->Get_Width();
-  double WindowHeight = (double)leftPanel->Get_Height();
+  // Temporary measure to see whether vectNode is still the same (assuming that vectNode[0] changes in that case)
+  static Node* recogniser  = 0;
 
-  // Reset the forces to 0, to begin with.
-	// Set the nodes' radius value
-  for (size_t i = 0; i<vectNode.size(); i++) {
-    arraySumForceX[i]=0.0;
-    arraySumForceY[i]=0.0;
-    vectNode[i]->SetRadius(node_radius);  
-  
-    //Calculate forces
-    double x1 = vectNode[i]->GetX();
-    double y1 = vectNode[i]->GetY();
+  // vectNode[i].GetX() == vertices.x && vectNode[i].GetY() == vertices.y
+  static std::vector< vertex_and_forces > vertices;
 
-    // First calculate the repulsing force for node i with respect to
-    // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (size_t j = 0; j<vectNode.size(); j++) {
-      if (i != j) {
-        double x2 = vectNode[j]->GetX();
-        double y2 = vectNode[j]->GetY();
-        double x2Minx1 = x1 - x2;
-        double y2Miny1 = y1 - y2;
-        
-        //Euclidean distance
-        double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
+  // Copy of node positions that do not need to change for drawing (in so doing
+  // avoiding the numeric instability resulting from scaling to match viewport)
+  if (recogniser != vectNode[0]) {
+    recogniser = vectNode[0];
 
-        if (distance > 1) {
-          // below the force is divided by the vectNode.size()^2 to
-          // compensate for the fact that for all nodes a force
-          // is summed. Otherwise the forces would be extremely big.
-          double s = NodeStrength / (distance * distance * distance);
-          
-          arraySumForceX[i] += s * x2Minx1;
-          arraySumForceY[i] += s * y2Miny1;
-        }
-        else {
-          // If the nodes are on top of each other, they must have
-          // a repulsing force, away from each other. The direction
-          // is determined by the node number. We arbitrarily take
-          // 1 as a repulsing force.
+    vertices.clear();
+    vertices.reserve(vectNode.size());
 
-          if (i>j) { 
-            arraySumForceX[i] += node_radius / 2;
-            arraySumForceY[i] += node_radius / 2;
-          }
-          else { arraySumForceX[i] += - node_radius / 2;
-            arraySumForceY[i] += - node_radius / 2;
-          }
-        }
-      }
+    for (std::vector< Node* >::const_iterator i = vectNode.begin(); i != vectNode.end(); ++i) {
+      vertices.push_back(vertex_and_forces((*i)->GetX(), (*i)->GetY()));
     }
+  }
 
-    // Add a tiny center petal force to center the whole
-    // graph on the screen
-    
-    arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
-    arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
-
-    FREE_A(arraySumForceX);
-  } 
+  const double saves_division = log(NaturalLength);
 
   // Finally calculate the attracting forces of the edges.  
-  for (size_t n = 0; n < vectEdge.size(); n++) { 
-    Node* n1=vectEdge[n]->get_n1();
-    Node* n2=vectEdge[n]->get_n2();
-
-    double x1=n1->GetX();
-    double x2=n2->GetX();
-    double y1=n1->GetY();
-    double y2=n2->GetY();
-
-    double x2Minx1 = x2 - x1;
-    double y2Miny1 = y2 - y1;
-    double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
-
-    if (distance>0.1) { 
+  if (EdgeStiffness) {
+    for (std::vector< edge* >::const_iterator i = vectEdge.begin(); i != vectEdge.end(); ++i) { 
+      vertex_and_forces& p1 = vertices[(*i)->get_n1()->Get_num()];
+      vertex_and_forces& p2 = vertices[(*i)->get_n2()->Get_num()];
+ 
+      const double xdiff = p2.x - p1.x;
+      const double ydiff = p2.y - p1.y;
+      const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
+ 
       // Linear approach : 
       // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
       // Logarithmic approach : 
-      double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
-
-      arraySumForceX[n1->Get_num()] += s * x2Minx1;
-      arraySumForceY[n1->Get_num()] += s * y2Miny1;
-      arraySumForceX[n2->Get_num()] -= s * x2Minx1;
-      arraySumForceY[n2->Get_num()] -= s * y2Miny1;
+      const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
+ 
+      if (0 < force_shared_component && force_shared_component < 1) { // 0 < s disallows repulsion
+        const double sx = force_shared_component * xdiff;
+        const double sy = force_shared_component * ydiff;
+ 
+        p1.x_force += sx;
+        p1.y_force += sy;
+        p2.x_force -= sx;
+        p2.y_force -= sy;
+      }
     }
   }
 
-  //Replace the nodes & edges according to their new position
-  for (size_t i = 0; i<vectNode.size(); i++) {
-    double newX = 0;
-    double newY = 0;
-
-    newX = vectNode[i]->GetX() + arraySumForceX[i];
-    newY = vectNode[i]->GetY() + arraySumForceY[i];
-    
-    
-    //Check whether positions are outside of the window
-
-    if (newX + node_radius  > leftPanel->Get_Width()) {
-        newX = leftPanel->Get_Width() - node_radius ;
-    }
-    if (newX < node_radius) {
-        newX = node_radius ;
-    }
-
-    if (newY + node_radius > leftPanel->Get_Height()) {
-        newY = leftPanel->Get_Height() - node_radius ;
-    }
-
-    if (newY < node_radius) {
-        newY = node_radius;
-    }
-    
-    vectNode[i]->SetXY( newX , newY );
-  }
-
-  //Calculate the just achieved precision of the drawing
+  // Replace the nodes & edges according to their new position (sum of forces for all vertices and both components)
   double achieved_precision = 0.0;
 
-  for (size_t i = 0; i<vectNode.size(); i++) 
-  { 
-    achieved_precision += fabs(arraySumForceX[i])+fabs(arraySumForceY[i]);
-  }
-  
-  // compensate for the number of nodes
-  achieved_precision=achieved_precision / vectNode.size();
+  // minimum and maximum of vertex coordinates (only for scaling to viewport)
+  double xmin = std::numeric_limits< double >::max();
+  double xmax = std::numeric_limits< double >::min();
+  double ymin = std::numeric_limits< double >::max();
+  double ymax = std::numeric_limits< double >::min();
 
-  if (skip_steps == 0 || steps_taken == 0) {
+  for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
+    // First calculate the repulsing force for node i with respect to
+    // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
+    for (std::vector< vertex_and_forces >::iterator j = i; j != vertices.end(); ++j) { 
+      const double xdiff = j->x - i->x;
+      const double ydiff = j->y - i->y;
+      
+      //Euclidean distance
+      const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
+
+      const double force_shared_component = (node_radius < distance) ?
+                      NodeStrength / (distance * distance * distance) : 0.5;
+
+      const double sx = force_shared_component * xdiff;
+      const double sy = force_shared_component * ydiff;
+
+      i->x_force -= sx;
+      i->y_force -= sy;
+      j->x_force += sx;
+      j->y_force += sy;
+    }
+
+    if (!vectNode[i - vertices.begin()]->IsLocked()) {
+      // Calculate the just achieved precision of the drawing
+      achieved_precision += fabs(i->x_force) + fabs(i->y_force);
+
+      i->apply_force();
+    }
+    else {
+      i->x_force = 0;
+      i->y_force = 0;
+    }
+
+    if (i->x < xmin) {
+      xmin = i->x;
+    }
+    else if (xmax < i->x) {
+      xmax = i->x;
+    }
+
+    if (i->y < ymin) {
+      ymin = i->y;
+    }
+    else if (ymax < i->y) {
+      ymax = i->y;
+    }
+  }
+
+  // As of this point the positioning algorithm is finished, however some
+  // viewport specific transformation must be done. In a redesign positioning
+  // and display should be separated.
+  if (slider_speedup->GetValue() < ++steps_taken || !moved_vertices.empty()) {
+    // Scale such that all nodes have a position within the viewport (relative
+    // distances are respected up to numeric precision)
+    double window_width  = static_cast < double > (leftPanel->Get_Width());
+    double window_height = static_cast < double > (leftPanel->Get_Height());
+ 
+    double xscale = (window_width  - 2 * node_radius) / (xmax - xmin);
+    double yscale = (window_height - 2 * node_radius) / (ymax - ymin);
+ 
+    const double xcentre = (xmin + xmax) / 2;
+    const double ycentre = (ymin + ymax) / 2;
+ 
+    if (1 < xscale) {
+      xscale = 1;
+    }
+    if (1 < yscale) {
+      yscale = 1;
+    }
+
+    const double half_window_height = window_height / 2;
+    const double half_window_width  = window_width / 2;
+
+    if (slider_speedup->GetValue() < steps_taken) {
+      steps_taken = 0;
+
+      for (size_t i = 0; i != vectNode.size(); ++i) {
+        const double xdiff = vertices[i].x - xcentre;
+        const double ydiff = vertices[i].y - ycentre;
+  
+        vectNode[i]->SetXY(xdiff * xscale + half_window_width, ydiff * yscale + half_window_height);
+    
+        vectNode[i]->SetRadius(node_radius);  
+      }
+    }
+
+    // Replace moved nodes
+    if (!moved_vertices.empty()) {
+      do {
+        size_t moved = moved_vertices.top()->Get_num();
+     
+        vertices[moved].x = (vectNode[moved]->GetX() - half_window_width) / xscale + xcentre;
+        vertices[moved].y = (vectNode[moved]->GetY() - half_window_height) / yscale + ycentre;
+   
+        moved_vertices.pop();
+      }
+      while (!moved_vertices.empty());
+    }
+
     update_coordinates();
+
     Refresh();
   }
 
-  if (skip_steps != 0) {
-    steps_taken = (steps_taken + 1) % skip_steps;
-  }
-
-
-
-  return achieved_precision<precision;
+  return achieved_precision < vectNode.size() * precision;
 }
 
 void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
@@ -702,6 +714,8 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
     }
     vectEdge[n]->on_paint(myDC);
   }
+
+  int radius = spinNodeRadius->GetValue();
       
   for (size_t n = 0; n < vectNode.size(); n++) {
     // Set the radius of the nodes
@@ -711,7 +725,6 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
     else {
       vectNode[n]->HideLabels();
     }
-    int radius = spinNodeRadius->GetValue();
     vectNode[n]->SetRadius(radius);
     vectNode[n]->OnPaint(myDC);
   }
@@ -789,7 +802,7 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
 			StructNodeLatex.num = vectNode[n]->Get_num();
 			StructNodeLatex.x   = vectNode[n]->GetX();
 			StructNodeLatex.y   = vectNode[n]->GetY();
-			StructNodeLatex.lbl = vectNode[n]->Get_lbl();
+			StructNodeLatex.lbl = vectNode[n]->GetLabel();
 
 			vectNodeLatex.push_back(StructNodeLatex);
 	}
@@ -844,15 +857,15 @@ void GraphFrame::export_svg(wxString export_file_name) {
     struct_node_svg.num = vectNode[n]->Get_num();
     struct_node_svg.x = vectNode[n]->GetX();
     struct_node_svg.y = vectNode[n]->GetY();
-    struct_node_svg.radius = vectNode[n]->get_radius();
-    struct_node_svg.label = vectNode[n]->Get_lbl();
+    struct_node_svg.radius = vectNode[n]->GetRadius();
+    struct_node_svg.label = vectNode[n]->GetLabel();
     struct_node_svg.red = vectNode[n]->get_node_colour().Red();
     struct_node_svg.green = vectNode[n]->get_node_colour().Green();
     struct_node_svg.blue = vectNode[n]->get_node_colour().Blue();
 
     double label_x;
     //Adjust label x position according to the length
-    wxString lbl(vectNode[n]->Get_lbl().c_str(), wxConvLocal);
+    wxString lbl(vectNode[n]->GetLabel().c_str(), wxConvLocal);
     switch (lbl.Length()) {
       case 1:  label_x = vectNode[n]->GetX()-POS_NODE_LBL_X;  break;
       case 2:  label_x = vectNode[n]->GetX()-POS_NODE_LBL_X-3;break;
@@ -873,7 +886,7 @@ void GraphFrame::export_svg(wxString export_file_name) {
     struct_edge_svg.start_y = vectEdge[n]->get_y_pos1();
     struct_edge_svg.end_x = vectEdge[n]->get_x_pos2();
     struct_edge_svg.end_y = vectEdge[n]->get_y_pos2();
-    struct_edge_svg.end_radius = vectEdge[n]->get_n2()->get_radius();
+    struct_edge_svg.end_radius = vectEdge[n]->get_n2()->GetRadius();
     vectEdge[n]->get_spline_control_points(struct_edge_svg.spline_control_points);
     vectEdge[n]->get_arrow_points(struct_edge_svg.arrow_points);
     struct_edge_svg.lbl = vectEdge[n]->get_lbl();
@@ -995,11 +1008,11 @@ void GraphFrame::RestoreBackup() {
 
 void GraphFrame::Resize(wxSize sz2) {
 
-	double diff_x = (double) sz2.GetWidth() / (double) leftPanel->Get_Width();
+  double diff_x = (double) sz2.GetWidth() / (double) leftPanel->Get_Width();
   double diff_y = (double) sz2.GetHeight() / (double) leftPanel->Get_Height();
 
-  for (size_t m = 0; m < vectNode.size(); m++) 
-  { vectNode[m]->ForceSetXY(vectNode[m]->GetX() * diff_x, 
+  for (size_t m = 0; m < vectNode.size(); ++m) {
+    vectNode[m]->ForceSetXY(vectNode[m]->GetX() * diff_x, 
                        vectNode[m]->GetY() * diff_y);
     // We use ForceSetXY here, otherwise the pin can fall out of the window.
   }
@@ -1012,7 +1025,7 @@ void GraphFrame::FindNode(wxPoint pt) {
   leftPanel->selection = none_t;
 
   for (size_t n = 0; n < vectNode.size(); n++) {
-    double radius = vectNode[n]->get_radius();
+    double radius = vectNode[n]->GetRadius();
     double node_x = vectNode[n]->GetX();
     double node_y = vectNode[n]->GetY();
 
@@ -1041,10 +1054,16 @@ void GraphFrame::FindNode(wxPoint pt) {
 
 }
 
-void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
+void GraphFrame::ReplaceAfterDrag(wxPoint pt, bool b) {
    switch(leftPanel->selection) {
      case (node_t):
        leftPanel->selected_node->ForceSetXY(pt.x,pt.y);//redefine node coord
+
+       if (b) {
+         leftPanel->selected_node->Unlock();
+       }
+
+       moved_vertices.push(leftPanel->selected_node);
        break;
      case (edge_t):
        leftPanel->selected_edge->set_control(pt.x, pt.y);
@@ -1059,13 +1078,14 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt) {
 }
 
 void GraphFrame::FixNode() {
-
-    if (leftPanel->selected_node->IsLocked()) { 
-      leftPanel->selected_node->Unlock();
-    }
-    else { 
-      leftPanel->selected_node->Lock();
-    }
+  if (leftPanel->selected_node->IsLocked()) { 
+    leftPanel->selected_node->Unlock();
+    leftPanel->selected_node_is_locked = false;
+  }
+  else { 
+    leftPanel->selected_node->Lock();
+    leftPanel->selected_node_is_locked = true;
+  }
 }
 
 
@@ -1132,7 +1152,7 @@ void GraphFrame::update_coordinates() {
 ////////////////////////////////VIEWPORT CLASS IMPLEMENTATION////////////////////////////////
 
 ViewPort::ViewPort(wxWindow * parent, const wxPoint& pos, const wxSize& size, long style) 
-  : wxPanel(parent, wxID_ANY, pos, size, style) { 
+  : wxPanel(parent, wxID_ANY, pos, size, style), selected_node_is_locked(false) { 
 
   GF = static_cast<GraphFrame*>(GetParent()->GetParent());
   selection = none_t;
@@ -1201,6 +1221,7 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
     case node_t:
       // Give the node a colour to identify it on-screen.
       selected_node->set_border_colour(border_colour_selected);
+      selected_node->Lock();
       // Activate button for colour picking
       GF->enable_btn_colour_picker();
       GF->disable_btn_label_colour();
@@ -1232,38 +1253,44 @@ void ViewPort::Drag(wxMouseEvent& event) {
   int node_radius = GF->get_node_radius();
 
   if(event.Dragging() && !event.Moving() && !event.Entering() && !event.Leaving()) {
+    wxPoint pt_end = event.GetPosition();//Find the destination 
+
     if (selection == node_t) {
-      wxPoint pt_end = event.GetPosition();//Find the destination 
-      if (pt_end.x > node_radius && pt_end.x < sz.GetWidth()-node_radius  && pt_end.y > node_radius && pt_end.y < sz.GetHeight()-node_radius) {
-        GF->ReplaceAfterDrag(pt_end);
-        GF->update_coordinates();
-        Refresh();
+      if (pt_end.x <= node_radius || pt_end.x >= sz.GetWidth()-node_radius  ||
+          pt_end.y <= node_radius || pt_end.y >= sz.GetHeight()-node_radius) {
+
+        return;
       }
     }
     else if (selection == edge_t) {
-      wxPoint pt_end = event.GetPosition(); //Find the destination
-      if (pt_end.x > ctrl_radius && pt_end.x < sz.GetWidth() - ctrl_radius && pt_end.y > ctrl_radius && pt_end.y < sz.GetHeight() - ctrl_radius) {
-        GF->ReplaceAfterDrag(pt_end);
-        GF->update_coordinates();
-        Refresh();
+      if (pt_end.x <= ctrl_radius || pt_end.x >= sz.GetWidth() - ctrl_radius ||
+          pt_end.y <= ctrl_radius || pt_end.y >= sz.GetHeight() - ctrl_radius) {
+
+        return;
       }
     } 
     else if (selection == edge_label_t) {
-      wxPoint pt_end = event.GetPosition(); //Find the destination
       /* Calculate height and width of the label */
       double label_width =  selected_edge->get_label_higher_x() - selected_edge->get_label_lower_x();
       double label_height = selected_edge->get_label_higher_y() - selected_edge->get_label_lower_y();
       
-      if (pt_end.x > label_width && pt_end.x < sz.GetWidth() - label_width && pt_end.y > label_height && pt_end.y < sz.GetHeight() - label_height) {
-        GF->ReplaceAfterDrag(pt_end);
-        GF->update_coordinates();
-        Refresh();
+      if (pt_end.x <= label_width  || pt_end.x >= sz.GetWidth() - label_width ||
+          pt_end.y <= label_height || pt_end.y >= sz.GetHeight() - label_height) {
+
+        return;
       }
-   }
+    }
+
+    GF->ReplaceAfterDrag(pt_end);
+    GF->update_coordinates();
+    Refresh();
   }
 }
 
 void ViewPort::ReleaseLeft(wxMouseEvent& event) {
+  if (selection == node_t) {
+    GF->ReplaceAfterDrag(event.GetPosition(), !selected_node_is_locked);
+  }
 }    
 
 void ViewPort::PressRight(wxMouseEvent& event) {
