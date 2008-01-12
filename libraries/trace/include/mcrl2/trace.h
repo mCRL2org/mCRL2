@@ -12,14 +12,15 @@
 /// action in this state, and the time is an absolute
 /// real number indicating the current time or NULL if the trace 
 /// is untimed.
+/// \author Muck van Weerdenburg
 
 #include <aterm2.h>
 #include <iostream>
 #include <string>
 
 namespace mcrl2 {
-/** \brief The main trace namespace.
- * \details This namespace contains all data structures and members of the
+/** \brief The namespace for traces.
+ * \details The namespace trace contains all data structures and members of the
  * trace library.
  */
 namespace trace {
@@ -36,7 +37,11 @@ namespace trace {
 /// tfUnknown is only used to read traces, when it is
 /// not known what the format is. In this case it is determined based
 /// on the format of the input file.
-enum TraceFormat { tfMcrl2, tfPlain, tfUnknown };
+enum TraceFormat 
+  { tfMcrl2,  /**< Format is stored as an ATerm */
+    tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
+    tfUnknown /**< This value indicates that the format is unknown */
+  };
 
 /// \brief This class contains a trace consisting of a sequence of (timed) actions possibly with intermediate states
 /// \details This class contains a trace. A trace is a sequence of actions. Actions can have a time
