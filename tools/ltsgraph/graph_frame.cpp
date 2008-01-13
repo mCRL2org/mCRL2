@@ -8,7 +8,7 @@
 #include "workarounds.h"
 #include "mcrl2/utilities/version_info.h"
 
-#include <stack>
+#include <deque>
 #include <map>
 
 static const wxColour &border_colour_selected = *wxBLUE;
@@ -488,7 +488,7 @@ void GraphFrame::Init(wxString LTSfile) {
 }
 
 // Helper for moving nodes with separated data for display and positioning
-static std::stack< Node* > moved_vertices;
+static std::deque< Node* > moved_vertices;
 
 // Helper structure for OptimizeDrawing() method
 struct vertex_and_forces {
@@ -663,6 +663,19 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     const double half_window_height = window_height / 2;
     const double half_window_width  = window_width / 2;
 
+    // Replace moved nodes
+    if (!moved_vertices.empty()) {
+      do {
+        size_t moved = moved_vertices.front()->Get_num();
+     
+        vertices[moved].x = (vectNode[moved]->GetX() - half_window_width) / xscale + xcentre;
+        vertices[moved].y = (vectNode[moved]->GetY() - half_window_height) / yscale + ycentre;
+   
+        moved_vertices.pop_front();
+      }
+      while (!moved_vertices.empty());
+    }
+
     if (slider_speedup->GetValue() < steps_taken) {
       steps_taken = 0;
 
@@ -674,19 +687,6 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     
         vectNode[i]->SetRadius(node_radius);  
       }
-    }
-
-    // Replace moved nodes
-    if (!moved_vertices.empty()) {
-      do {
-        size_t moved = moved_vertices.top()->Get_num();
-     
-        vertices[moved].x = (vectNode[moved]->GetX() - half_window_width) / xscale + xcentre;
-        vertices[moved].y = (vectNode[moved]->GetY() - half_window_height) / yscale + ycentre;
-   
-        moved_vertices.pop();
-      }
-      while (!moved_vertices.empty());
     }
 
     update_coordinates();
@@ -1060,7 +1060,7 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt, bool b) {
          leftPanel->selected_node->Unlock();
        }
 
-       moved_vertices.push(leftPanel->selected_node);
+       moved_vertices.push_front(leftPanel->selected_node);
        break;
      case (edge_t):
        leftPanel->selected_edge->set_control(pt.x, pt.y);
@@ -1287,6 +1287,8 @@ void ViewPort::Drag(wxMouseEvent& event) {
 void ViewPort::ReleaseLeft(wxMouseEvent& event) {
   if (selection == node_t) {
     GF->ReplaceAfterDrag(event.GetPosition(), !selected_node_is_locked);
+
+    Refresh();
   }
 }    
 
