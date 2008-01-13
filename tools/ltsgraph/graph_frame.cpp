@@ -56,10 +56,6 @@ static const int ctrl_radius = 3;
 static vector<Node*> vectNode;
 static vector<edge*> vectEdge;
 
-static double GenRandom(const int &max) {
-    return static_cast <double> (rand()%max);
-}
-
 GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
   : wxFrame(NULL, -1, title, pos, size, style) {
 
@@ -142,9 +138,9 @@ void GraphFrame::BuildLayout() {
   wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
   sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 200, 0, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 6, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 3 * node_radius, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 50, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
   
 
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
@@ -448,14 +444,15 @@ void GraphFrame::Init(wxString LTSfile) {
       numberOfLabelsLabel->SetLabel(wxString::Format(wxT("%u"), mylts.num_labels()));
       		
       //initialize vectNode
-      int randX = leftPanel->Get_Width()  - 2*node_radius;
-      int randY = leftPanel->Get_Height() - 4*node_radius;
+      int xmax = leftPanel->Get_Width()  - 2*node_radius;
+      int ymax = leftPanel->Get_Height() - 2*node_radius;
 
       std::map< size_t, Node* > number_to_node;
 
       for (state_iterator si = mylts.get_states(); si.more(); ++si) {
         // The node used to contain the state number used by the input, this is changed to the index to fix a serious bug
-        Node* new_node = new Node(vectNode.size(), GenRandom(randX), GenRandom(randY), wxString::Format(wxT("%d"), *si), (mylts.initial_state() == *si));
+        Node* new_node = new Node(vectNode.size(), static_cast< double > (rand() % xmax + node_radius),
+                                                   static_cast< double > (rand() % ymax + node_radius), wxString::Format(wxT("%d"), *si), (mylts.initial_state() == *si));
 
         new_node->SetRadius(node_radius);
 
@@ -555,10 +552,10 @@ bool GraphFrame::OptimizeDrawing(double precision) {
     }
   }
 
-  const double saves_division = log(NaturalLength);
-
   // Finally calculate the attracting forces of the edges.  
   if (EdgeStiffness) {
+    const double saves_division = log(NaturalLength);
+
     for (std::vector< edge* >::const_iterator i = vectEdge.begin(); i != vectEdge.end(); ++i) { 
       vertex_and_forces& p1 = vertices[(*i)->get_n1()->Get_num()];
       vertex_and_forces& p2 = vertices[(*i)->get_n2()->Get_num()];
@@ -572,7 +569,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
       // Logarithmic approach : 
       const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
  
-      if (0 < force_shared_component && force_shared_component < 1) { // 0 < s disallows repulsion
+      if (force_shared_component < 1) { // 0 < s disallows repulsion
         const double sx = force_shared_component * xdiff;
         const double sy = force_shared_component * ydiff;
  
@@ -596,7 +593,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
     // First calculate the repulsing force for node i with respect to
     // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (std::vector< vertex_and_forces >::iterator j = i; j != vertices.end(); ++j) { 
+    for (std::vector< vertex_and_forces >::iterator j = i + 1; j != vertices.end(); ++j) { 
       const double xdiff = j->x - i->x;
       const double ydiff = j->y - i->y;
       
