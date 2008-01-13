@@ -94,7 +94,6 @@ public:
   void CreateBackup(wxCommandEvent& event);
   void Resize(wxSize);
   void ReplaceAfterDrag(wxPoint, bool = false);
-  void FixNode();
 
   void OnOpen(wxCommandEvent& event);
   void OnQuit(wxCommandEvent& event);//When the user clicks on the Quit menu

@@ -1077,18 +1077,6 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt, bool b) {
       
 }
 
-void GraphFrame::FixNode() {
-  if (leftPanel->selected_node->IsLocked()) { 
-    leftPanel->selected_node->Unlock();
-    leftPanel->selected_node_is_locked = false;
-  }
-  else { 
-    leftPanel->selected_node->Lock();
-    leftPanel->selected_node_is_locked = true;
-  }
-}
-
-
 wxString GraphFrame::GetInfoCurrentNode(Node* info_node) const {
 
   wxString text;
@@ -1205,7 +1193,6 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
     selected_edge->set_label_selected(false);
     selected_edge = 0;
   }
-  
  
   // Find the node that is clicked (if any)
   GF->FindNode(pt_start);
@@ -1253,7 +1240,7 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
 void ViewPort::Drag(wxMouseEvent& event) {
   int node_radius = GF->get_node_radius();
 
-  if(event.Dragging() && !event.Moving() && !event.Entering() && !event.Leaving()) {
+  if(event.LeftIsDown() && event.Dragging() && !event.Moving() && !event.Entering() && !event.Leaving()) {
     wxPoint pt_end = event.GetPosition();//Find the destination 
 
     if (selection == node_t) {
@@ -1315,7 +1302,14 @@ void ViewPort::PressRight(wxMouseEvent& event) {
   GF->FindNode(pt_fix);
 
   if (selection == node_t) {
-    GF->FixNode();
+    selected_node_is_locked = selected_node->IsLocked();
+
+    if (selected_node_is_locked) { 
+      selected_node->Unlock();
+    }
+    else { 
+      selected_node->Lock();
+    }
     // Give the node a colour to identify it on-screen.
     selected_node->set_border_colour(border_colour_selected);
     // Activate button for colour picking
