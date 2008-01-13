@@ -1198,12 +1198,12 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
   //Reset all colours and selections
   if (selected_node) {
     selected_node->reset_border_colour();
-    selected_node = NULL;
+    selected_node = 0;
   }
   if (selected_edge) {
     selected_edge->set_control_selected(false);
     selected_edge->set_label_selected(false);
-    selected_edge = NULL;
+    selected_edge = 0;
   }
   
  
@@ -1221,6 +1221,7 @@ void ViewPort::PressLeft(wxMouseEvent& event) {
     case node_t:
       // Give the node a colour to identify it on-screen.
       selected_node->set_border_colour(border_colour_selected);
+      selected_node_is_locked = selected_node->IsLocked();
       selected_node->Lock();
       // Activate button for colour picking
       GF->enable_btn_colour_picker();
@@ -1302,12 +1303,12 @@ void ViewPort::PressRight(wxMouseEvent& event) {
   //Reset all colours and selections
   if (selected_node) {
     selected_node->reset_border_colour();
-    selected_node = NULL;
+    selected_node = 0;
   }
   if (selected_edge) {
     selected_edge->set_control_selected(false);
     selected_edge->set_label_selected(false);
-    selected_edge = NULL;
+    selected_edge = 0;
   }
 
   //Find the node concerned by the fixing
