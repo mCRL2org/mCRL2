@@ -532,6 +532,9 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   else if (vectNode.size() == 0) {
     return false;
   }
+  else {
+    return false;
+  }
 
   // Temporary measure to see whether vectNode is still the same (assuming that vectNode[0] changes in that case)
   static Node* recogniser  = 0;
@@ -641,7 +644,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   // As of this point the positioning algorithm is finished, however some
   // viewport specific transformation must be done. In a redesign positioning
   // and display should be separated.
-  if (slider_speedup->GetValue() < ++steps_taken || !moved_vertices.empty()) {
+  if ((!StopOpti && slider_speedup->GetValue() < ++steps_taken) || !moved_vertices.empty()) {
     // Scale such that all nodes have a position within the viewport (relative
     // distances are respected up to numeric precision)
     double window_width  = static_cast < double > (leftPanel->Get_Width());
