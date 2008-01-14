@@ -18,6 +18,7 @@
 #include <boost/foreach.hpp>
 
 #include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/visitors.hpp"
 
 #include <tipi/detail/controller.ipp>
 
@@ -26,7 +27,6 @@
 #include "task_monitor.hpp"
 #include "executor.hpp"
 #include "command.hpp"
-#include "extractor.hpp"
 #include "processor.hpp"
 #include "executor.hpp"
 
@@ -129,6 +129,51 @@ namespace squadt {
   }
 
   /**
+   * \brief Simple processor that queries a tool's capabilities
+   *
+   * Extracts the tool information that is important for operation of the tool
+   * manager.
+   **/
+  class extractor : public execution::task_monitor {
+
+    public:
+
+      /** \brief Starts the extraction */
+      bool operator()(boost::weak_ptr < extractor > const& e, boost::shared_ptr < tool > const& t) {
+        struct local {
+          static void store_capabilities(boost::weak_ptr < extractor > e, boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < tool > t) {
+            boost::shared_ptr < extractor > guard(e.lock());
+       
+            if (guard) {
+              t->m_capabilities.reset(new tipi::tool::capabilities);
+       
+              tipi::visitors::restore(*t->m_capabilities, m->to_string());
+            }
+          }
+        };
+       
+        bool return_value = false;
+       
+        boost::shared_ptr < extractor > guard(e.lock());
+        
+        if (guard) {
+          add_handler(tipi::message_capabilities, bind(&local::store_capabilities, e, _1, t));
+       
+          /* Await connection */
+          if (await_connection(5)) {
+            request_tool_capabilities();
+        
+            return_value = await_message(tipi::message_capabilities, 1).get() != 0;
+          }
+        
+          finish();
+        }
+       
+        return return_value;
+      }
+    };
+
+  /**
    * \param[in] t the tool to run
    *
    * \attention This function blocks.
@@ -150,7 +195,7 @@ namespace squadt {
 
     if (p.get() != 0) {
       /* Start extracting */
-      return e->extract(e, t);
+      return (*e)(e, t);
     }
 
     return false;
@@ -180,12 +225,12 @@ namespace squadt {
 
     for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
 #if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
-      path path_to_binary(std::string(*t).append(".exe"));
-#else
-      path path_to_binary(*t);
-#endif
+      path path_to_binary(std::string(basename(path(*t))).append(".exe");
 
-#if defined(__APPLE__)
+      path_to_binary = default_path / path_to_binary;
+#elif defined(__APPLE__)
+      path path_to_binary(*t);
+
       if (extension(path_to_binary).empty()) {
         path_to_binary = default_path / path_to_binary;
       }
@@ -193,7 +238,9 @@ namespace squadt {
         path_to_binary = default_path.branch_path() / path_to_binary;
       }
 #else
-      path_to_binary = default_path.branch_path() / path_to_binary;
+      path path_to_binary(basename(*t));
+
+      path_to_binary = default_path / path_to_binary;
 #endif
 
       tools.push_back(boost::shared_ptr < tool > (new tool(basename(*t), path_to_binary)));
