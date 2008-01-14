@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/pbes_initializer.h
-/// \brief Add your file description here.
+/// \brief The class pbes_initializer.
 
 #ifndef MCRL2_PBES_PBES_INITIALIZER_H
 #define MCRL2_PBES_PBES_INITIALIZER_H
@@ -22,7 +22,7 @@ namespace lps {
 
 using atermpp::aterm_appl;
 
-/// \brief initial state of a pbes
+/// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
 class pbes_initializer: public aterm_appl
 {
@@ -31,10 +31,14 @@ class pbes_initializer: public aterm_appl
     propositional_variable_instantiation m_variable;
 
   public:
+    /// Constructor.
+    ///
     pbes_initializer()
       : aterm_appl(detail::constructPBInit())
     {}
 
+    /// Constructor.
+    ///
     pbes_initializer(data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
@@ -44,6 +48,8 @@ class pbes_initializer: public aterm_appl
     {
     }
 
+    /// Constructor.
+    ///
     pbes_initializer(aterm_appl t)
       : aterm_appl(t)
     {
@@ -60,7 +66,7 @@ class pbes_initializer: public aterm_appl
       return m_free_variables;
     }
 
-    /// Returns the sequence of variable.
+    /// Returns the sequence of variables.
     ///
     propositional_variable_instantiation variable() const
     {
@@ -76,10 +82,7 @@ class pbes_initializer: public aterm_appl
       return pbes_initializer(f(aterm(*this)));
     }     
 
-    /// Returns true if
-    /// <ul>
-    /// <li></li>
-    /// </ul>
+    /// Returns true (there are no well typedness checks defined yet).
     ///
     bool is_well_typed() const
     {
@@ -89,7 +92,7 @@ class pbes_initializer: public aterm_appl
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::pbes_initializer;
@@ -106,5 +109,6 @@ struct aterm_traits<pbes_initializer>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES_INITIALIZER_H

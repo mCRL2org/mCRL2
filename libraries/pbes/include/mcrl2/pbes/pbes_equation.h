@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes_equation.h
-/// \brief Add your file description here.
+/// \brief The class pbes_equation.
 
 #ifndef MCRL2_PBES_PBES_EQUATION_H
 #define MCRL2_PBES_PBES_EQUATION_H
@@ -23,8 +23,6 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 
-///////////////////////////////////////////////////////////////////////////////
-// pbes_equation
 /// \brief pbes equation.
 ///
 class pbes_equation: public aterm_appl
@@ -35,10 +33,14 @@ class pbes_equation: public aterm_appl
     pbes_expression        m_formula;  // the right hand side
 
   public:
+    /// Constructor.
+    ///
     pbes_equation()
       : aterm_appl(detail::constructPBEqn())
     {}
 
+    /// Constructor.
+    ///
     pbes_equation(aterm_appl t)
       : aterm_appl(t)
     {
@@ -49,6 +51,8 @@ class pbes_equation: public aterm_appl
       m_formula  = pbes_expression(*i);
     }
 
+    /// Constructor.
+    ///
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
       : aterm_appl(gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
@@ -57,7 +61,8 @@ class pbes_equation: public aterm_appl
     {
     }
 
-    // allow assignment to aterms
+    /// Assignment operator.
+    ///
     pbes_equation& operator=(aterm t)
     {
       m_term = t;
@@ -86,7 +91,7 @@ class pbes_equation: public aterm_appl
     }
     
     /// Returns true if the predicate formula on the right hand side contains no predicate variables.
-    /// (Comment Wieger: is_const would be a better name)
+    // (Comment Wieger: is_const would be a better name)
     ///
     bool is_solved() const
     {
@@ -149,15 +154,13 @@ class pbes_equation: public aterm_appl
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// pbes_equation_list
 /// \brief singly linked list of data expressions
 ///
 typedef term_list<pbes_equation> pbes_equation_list;
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp {
 
 using lps::pbes_equation;
@@ -169,8 +172,9 @@ struct term_list_iterator_traits<pbes_equation>
 };
 
 } // namespace atermpp
+/// \endcond
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::pbes_equation;
@@ -187,5 +191,6 @@ struct aterm_traits<pbes_equation>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES_EQUATION_H

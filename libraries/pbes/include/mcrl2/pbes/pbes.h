@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes.h
-/// \brief Contains the pbes class.
+/// \brief The class pbes.
 
 #ifndef MCRL2_PBES_PBES_H
 #define MCRL2_PBES_PBES_H
@@ -45,7 +45,7 @@ using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 
-/// \internal
+/// \cond INTERNAL_DOCS
 struct normalize_pbes_equation
 {
   pbes_equation operator()(const pbes_equation& e) const
@@ -53,6 +53,7 @@ struct normalize_pbes_equation
     return normalize(e);
   }
 };
+/// \endcond
 
 /// Computes the free variables that occur in the sequence [first, last[
 /// of pbes equations.
@@ -89,8 +90,6 @@ std::set<data_variable> compute_quantifier_variables(Iterator first, Iterator la
   return visitor.variables;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// pbes
 /// \brief parameterized boolean equation system
 ///
 // <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
@@ -135,9 +134,13 @@ class pbes
     }
 
   public:
+    /// Constructor.
+    ///
     pbes()
     {}
 
+    /// Constructor.
+    ///
     pbes(data_specification data,
          const Container& equations,
          propositional_variable_instantiation initial_state)
@@ -150,6 +153,8 @@ class pbes
       assert(detail::check_rule_PBES(term()));
     }
 
+    /// Constructor.
+    ///
     pbes(data_specification data,
          const Container& equations,
          const atermpp::set<data_variable>& free_variables,
@@ -164,12 +169,14 @@ class pbes
     }
 
     /// Returns the data specification.
+    ///
     const data_specification& data() const
     {
       return m_data;
     }
 
     /// Returns the data specification.
+    ///
     data_specification& data()
     {
       return m_data;
@@ -190,18 +197,21 @@ class pbes
     }
 
     /// Returns the declared free variables of the pbes.
+    ///
     const atermpp::set<data_variable>& free_variables() const
     {
       return m_free_variables;
     }
 
     /// Returns the declared free variables of the pbes.
+    ///
     atermpp::set<data_variable>& free_variables()
     {
       return m_free_variables;
     }
 
     /// Returns the initial state.
+    ///
     propositional_variable_instantiation initial_state() const
     {
       return m_initial_state;
@@ -313,6 +323,7 @@ class pbes
     }
 
     /// Returns true if the pbes is normalized.
+    ///
     bool is_normalized() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -492,7 +503,6 @@ class pbes
 };
 
 /// Computes the free variables that occur in the pbes.
-///
 template <typename Container>
 std::set<data_variable> compute_free_variables(const pbes<Container>& p)
 {
@@ -501,7 +511,7 @@ std::set<data_variable> compute_free_variables(const pbes<Container>& p)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::pbes;
@@ -518,5 +528,6 @@ struct aterm_traits<pbes<Container> >
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES_H

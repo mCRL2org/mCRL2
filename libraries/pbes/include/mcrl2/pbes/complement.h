@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file complement.h
-/// \brief Add your file description here.
+/// \brief The complement function for pbes expressions.
 //
 // Comp ( val(b) ) = val (! b)
 // 
@@ -43,41 +43,57 @@ namespace lps {
 /// inwards towards a data expression.
 struct complement_builder: public pbes_expression_builder
 {
+  /// \overload
+  ///
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
   {
     return data_expr::not_(d);
   }
 
+  /// \overload
+  ///
   pbes_expression visit_true(const pbes_expression& /* e */)
   {
     return pbes_expr::false_();;
   }
 
+  /// \overload
+  ///
   pbes_expression visit_false(const pbes_expression& /* e */)
   {
     return pbes_expr::true_();;
   }
 
+  /// \overload
+  ///
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
     return pbes_expr::or_(visit(left), visit(right));
   }
 
+  /// \overload
+  ///
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
     return pbes_expr::and_(visit(left), visit(right));
   }    
 
+  /// \overload
+  ///
   pbes_expression visit_forall(const pbes_expression& /* e */, const data_variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr::exists(variables, visit(expression));
   }
 
+  /// \overload
+  ///
   pbes_expression visit_exists(const pbes_expression& /* e */, const data_variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr::forall(variables, visit(expression));
   }
 
+  /// \overload
+  ///
   pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
     throw std::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + pp(v));

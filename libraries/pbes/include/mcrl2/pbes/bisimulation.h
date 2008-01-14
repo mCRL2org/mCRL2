@@ -1,3 +1,15 @@
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/pbes/rename.h
+/// \brief Bisimulation algorithms.
+
+#ifndef MCRL2_PBES_BISIMULATION_H
+#define MCRL2_PBES_BISIMULATION_H
+
 #include <algorithm>
 #include <iterator>
 #include <set>
@@ -15,6 +27,7 @@
 
 namespace lps {
 
+/// \cond INTERNAL_DOCS
 inline
 pbes_expression step(const linear_process& m, const summand& m_summand, const linear_process& s, identifier_string X)
 {
@@ -59,7 +72,9 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
   }
   return p::multi_and(terms.begin(), terms.end());
 }
+/// \endcond
 
+/// Returns a pbes that expresses strong bisimulation between the process specifications M and S.
 inline
 pbes<> strong_bisimulation(const specification& M, const specification& S)
 { 
@@ -114,3 +129,5 @@ pbes<> strong_bisimulation(const specification& M, const specification& S)
 }
 
 } // namespace lps
+
+#endif // MCRL2_PBES_BISIMULATION_H

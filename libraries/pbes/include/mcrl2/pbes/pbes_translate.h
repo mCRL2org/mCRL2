@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes_translate.h
-/// \brief Add your file description here.
+/// \brief The pbes_translate algorithm.
 
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
@@ -24,12 +24,12 @@
 
 namespace lps {
   
-/// \brief Translates a state_formula and a specification to a pbes
+/// \brief Translates a state_formula and a specification to a pbes. If the pbes evaluates
+/// to true, the formula holds for the specification.
 /// \param formula the state formula
 /// \param spec the specification
 /// \param determines whether the timed or untimed variant of the algorithm is chosen
-/// \return the resulting pbes
-
+/// \return The resulting pbes
 pbes<> pbes_translate(const state_formula& formula, const specification& spec, bool timed = false)
 {
   using namespace detail;

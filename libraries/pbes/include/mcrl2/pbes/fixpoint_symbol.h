@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/fixpoint_symbol.h
-/// \brief Add your file description here.
+/// \brief The class fixpoint_symbol.
 
 #ifndef MCRL2_PBES_FIXPOINT_SYMBOL_H
 #define MCRL2_PBES_FIXPOINT_SYMBOL_H
@@ -23,26 +23,29 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 
-///////////////////////////////////////////////////////////////////////////////
-// fixpoint_symbol
-/// \brief pbes fixpoint symbol (mu or nu)
+/// \brief Pbes fixpoint symbol (mu or nu).
 ///
 // <FixPoint>     ::= Mu
 //                  | Nu
 class fixpoint_symbol: public aterm_appl
 {
   public:
+    /// Constructor.
+    ///
     fixpoint_symbol()
       : aterm_appl(detail::constructFixPoint())
     {}
 
+    /// Constructor.
+    ///
     fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_FixPoint(m_term));
     }
     
-    // allow assignment to aterms
+    /// Assignment operator.
+    ///
     fixpoint_symbol& operator=(aterm t)
     {
       m_term = t;
@@ -80,7 +83,7 @@ class fixpoint_symbol: public aterm_appl
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::fixpoint_symbol;
@@ -97,5 +100,6 @@ struct aterm_traits<fixpoint_symbol>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/utility.h
-/// \brief Add your file description here.
+/// \brief Utility functions for the pbes library.
 
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H

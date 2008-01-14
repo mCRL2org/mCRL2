@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes_expression.h
-/// \brief Add your file description here.
+/// \brief The class pbes_expression.
 
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
@@ -28,8 +28,6 @@ using atermpp::list_arg2;
 inline
 bool is_bes(aterm_appl t);
 
-///////////////////////////////////////////////////////////////////////////////
-// pbes_expression
 /// \brief pbes expression
 ///
 // <PBExpr>       ::= <DataExpr>
@@ -45,10 +43,14 @@ bool is_bes(aterm_appl t);
 class pbes_expression: public aterm_appl
 {
   public:
+    /// Constructor.
+    ///
     pbes_expression()
       : aterm_appl(detail::constructPBExpr())
     {}
 
+    /// Constructor.
+    ///
     pbes_expression(aterm_appl term)
       : aterm_appl(term)
     {
@@ -72,8 +74,6 @@ class pbes_expression: public aterm_appl
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// pbes_expression_list
 /// \brief singly linked list of data expressions
 ///
 typedef term_list<pbes_expression> pbes_expression_list;
@@ -341,7 +341,7 @@ bool is_bes(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::pbes_expression;
@@ -358,5 +358,6 @@ struct aterm_traits<pbes_expression>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

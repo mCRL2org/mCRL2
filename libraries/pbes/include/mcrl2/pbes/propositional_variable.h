@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/propositional_variable.h
-/// \brief Add your file description here.
+/// \brief The classes propositional_variable and propositional_variable_instantiation.
 
 #ifndef LPS_PROPOSITIONAL_VARIABLE
 #define LPS_PROPOSITIONAL_VARIABLE
@@ -27,8 +27,7 @@ using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 using lps::detail::parse_variable;
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A propositional variable declaration
+/// \brief A propositional variable declaration.
 ///
 // <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
 class propositional_variable: public aterm_appl
@@ -38,11 +37,14 @@ class propositional_variable: public aterm_appl
     data_variable_list m_parameters;
 
   public:
+    /// Constructor.
+    ///
     propositional_variable()
       : aterm_appl(detail::constructPropVarDecl())
     {}
 
-    // example: "X(d:D,e:E)"
+    /// Constructor.
+    ///
     propositional_variable(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
@@ -51,6 +53,8 @@ class propositional_variable: public aterm_appl
       m_term      = reinterpret_cast<ATerm>(gsMakePropVarDecl(m_name, m_parameters));
     }
 
+    /// Constructor.
+    ///
     propositional_variable(aterm_appl t)
       : aterm_appl(t)
     {
@@ -60,6 +64,8 @@ class propositional_variable: public aterm_appl
       m_parameters = *i;
     }
 
+    /// Constructor.
+    ///
     propositional_variable(identifier_string name, data_variable_list parameters)
       : aterm_appl(gsMakePropVarDecl(name, parameters)),
         m_name(name),
@@ -67,7 +73,7 @@ class propositional_variable: public aterm_appl
     {
     }
 
-    /// Returns the term containing the name of the propositional variable.
+    /// Returns the name of the propositional variable.
     ///
     identifier_string name() const
     {
@@ -82,8 +88,6 @@ class propositional_variable: public aterm_appl
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// propositional_variable_list
 /// \brief singly linked list of propositional variable declarations
 ///
 typedef term_list<propositional_variable> propositional_variable_list;
@@ -95,8 +99,7 @@ bool is_propositional_variable(aterm_appl t)
   return gsIsPropVarDecl(t);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A propositional variable instantiation
+/// \brief A propositional variable instantiation.
 ///
 // <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
 class propositional_variable_instantiation: public aterm_appl
@@ -106,11 +109,14 @@ class propositional_variable_instantiation: public aterm_appl
     data_expression_list m_parameters;
 
   public:
+    /// Constructor.
+    ///
     propositional_variable_instantiation()
       : aterm_appl(detail::constructPropVarInst())
     {}
 
-    // example: "X(d:D,e:E)"
+    /// Constructor.
+    ///
     propositional_variable_instantiation(std::string s)
     {
       std::pair<std::string, data_expression_list> p = parse_variable(s);
@@ -119,6 +125,8 @@ class propositional_variable_instantiation: public aterm_appl
       m_term        = reinterpret_cast<ATerm>(gsMakePropVarInst(m_name, m_parameters));
     }
 
+    /// Constructor.
+    ///
     propositional_variable_instantiation(aterm_appl t)
       : aterm_appl(t)
     {
@@ -128,6 +136,8 @@ class propositional_variable_instantiation: public aterm_appl
       m_parameters = *i;
     }
 
+    /// Constructor.
+    ///
     propositional_variable_instantiation(identifier_string name, data_expression_list parameters)
       : aterm_appl(gsMakePropVarInst(name, parameters)),
         m_name(name),
@@ -150,8 +160,6 @@ class propositional_variable_instantiation: public aterm_appl
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// propositional_variable_instantiation_list
 /// \brief singly linked list of propositional variables instantiations
 ///
 typedef term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
@@ -165,7 +173,7 @@ bool is_propositional_variable_instantiation(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::propositional_variable;
@@ -194,5 +202,6 @@ struct aterm_traits<propositional_variable_instantiation>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // LPS_PROPOSITIONAL_VARIABLE

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes_expression_builder.h
-/// \brief Add your file description here.
+/// \brief Visitor class for rebuilding a pbes expression.
 
 #ifndef MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
 #define MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
@@ -17,64 +17,91 @@ namespace lps {
 
 /// Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
+/// If a visit_<node> function returns pbes_expression(), the recursion is continued
+/// in the children of this node, otherwise not.
 // TODO: rebuilding expressions with ATerms is very expensive. So it is probably
 // more efficient to  check if the children of a node have actually changed,
 // before rebuilding it.
 struct pbes_expression_builder
 {
+  /// Destructor.
+  ///
   virtual ~pbes_expression_builder()
   { }
-  
+
+  /// Visit data expression node.
+  ///
   virtual pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
   {
     return pbes_expression();
   }
 
+  /// Visit true node.
+  ///
   virtual pbes_expression visit_true(const pbes_expression& /* e */)
   {
     return pbes_expression();
   }
 
+  /// Visit false node.
+  ///
   virtual pbes_expression visit_false(const pbes_expression& /* e */)
   {
     return pbes_expression();
   }
 
+  /// Visit not node.
+  ///
   virtual pbes_expression visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
   {
     return pbes_expression();
   }
 
+  /// Visit and node.
+  ///
   virtual pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }
 
+  /// Visit or node.
+  ///
   virtual pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }    
 
+  /// Visit imp node.
+  ///
   virtual pbes_expression visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }
 
+  /// Visit forall node.
+  ///
   virtual pbes_expression visit_forall(const pbes_expression& /* e */, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
+  /// Visit exists node.
+  ///
   virtual pbes_expression visit_exists(const pbes_expression& /* e */, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
+  /// Visit propositional variable node.
+  ///
   virtual pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
   {
     return pbes_expression();
   }
   
+  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// By default a std::runtime_error exception will be generated.
+  ///
   virtual pbes_expression visit_unknown(const pbes_expression& e)
   {
     throw std::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
