@@ -8,6 +8,8 @@
 #include "workarounds.h"
 #include "mcrl2/utilities/version_info.h"
 
+#include <wx/colour.h>
+
 #include <deque>
 #include <map>
 
@@ -139,7 +141,7 @@ void GraphFrame::BuildLayout() {
 	
   sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 200, 0, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 6, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 3 * node_radius, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   slider_speedup = new wxSlider(rightPanel, wxID_ANY, 50, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
   
 
@@ -570,15 +572,13 @@ bool GraphFrame::OptimizeDrawing(double precision) {
       // Logarithmic approach : 
       const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
  
-      if (force_shared_component < 1) { // 0 < s disallows repulsion
-        const double sx = force_shared_component * xdiff;
-        const double sy = force_shared_component * ydiff;
+      const double sx = force_shared_component * xdiff;
+      const double sy = force_shared_component * ydiff;
  
-        p1.x_force += sx;
-        p1.y_force += sy;
-        p2.x_force -= sx;
-        p2.y_force -= sy;
-      }
+      p1.x_force += sx;
+      p1.y_force += sy;
+      p2.x_force -= sx;
+      p2.y_force -= sy;
     }
   }
 
@@ -685,7 +685,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
         const double xdiff = vertices[i].x - xcentre;
         const double ydiff = vertices[i].y - ycentre;
   
-        vectNode[i]->SetXY(xdiff * xscale + half_window_width, ydiff * yscale + half_window_height);
+        vectNode[i]->ForceSetXY(xdiff * xscale + half_window_width, ydiff * yscale + half_window_height);
     
         vectNode[i]->SetRadius(node_radius);  
       }
