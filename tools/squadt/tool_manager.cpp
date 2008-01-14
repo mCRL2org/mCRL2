@@ -188,7 +188,7 @@ namespace squadt {
     boost::shared_ptr < extractor > e(new extractor());
 
     execute(*t, boost::filesystem::current_path().string(),
-               boost::dynamic_pointer_cast < execution::task_monitor > (e), false);
+               boost::dynamic_pointer_cast < execution::task_monitor > (e), true);
 
     /* Wait until the process has been identified */
     boost::shared_ptr < execution::process > p(e->get_process(true));

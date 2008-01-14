@@ -10,6 +10,7 @@
 #define NAME "squadt"
 
 #include <boost/bind.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
@@ -52,18 +53,24 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
     if (c) {
       tipi::utility::logger::log_level default_log_level = 1;
 
-      if (parser.Found(wxT("c"))) {
-        if (0 < parser.GetParamCount()) {
-          action = boost::bind(&squadt::GUI::main::project_new, _1, std::string(parser.GetParam(0).fn_str()), std::string());
+      if (0 < parser.GetParamCount()) {
+        boost::filesystem::path target(std::string(parser.GetParam(0).fn_str()));
+
+        if (!target.has_root_path()) {
+          target = boost::filesystem::initial_path() / target;
+        }
+
+        if (parser.Found(wxT("c"))) {
+          action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
         }
         else {
-          std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << std::string(parser.GetParam(0).fn_str());
-
-          return (false);
+          action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
         }
       }
-      else if (0 < parser.GetParamCount()) {
-        action = boost::bind(&squadt::GUI::main::project_open, _1, std::string(parser.GetParam(0).fn_str()));
+      if (parser.Found(wxT("c"))) {
+        std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << std::string(parser.GetParam(0).fn_str());
+       
+        return (false);
       }
       if (parser.Found(wxT("d"))) {
         default_log_level = 3;
