@@ -19,6 +19,7 @@ class Mediator {
     virtual void      addMarkRule() = 0;
     virtual void      applyMarkStyle(Utils::MarkStyle ms) = 0;
     virtual void      editMarkRule(const int index) = 0;
+    virtual std::string getVersionString() = 0;
     virtual Utils::RGB_Color getNewRuleColour() = 0;
     virtual void      markAction(std::string label) = 0;
     virtual void      notifyRenderingFinished() = 0;

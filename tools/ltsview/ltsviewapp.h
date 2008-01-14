@@ -35,6 +35,7 @@ class LTSViewApp : public wxApp, public Mediator {
     void	  applyMarkStyle(Utils::MarkStyle ms);
     void	  editMarkRule(const int index);
     Utils::RGB_Color getNewRuleColour();
+    std::string getVersionString();
     void	  markAction(std::string label);
     void	  notifyRenderingFinished();
     void	  notifyRenderingStarted();
@@ -66,6 +67,9 @@ class LTSViewApp : public wxApp, public Mediator {
 
     void          loadTrace(std::string const& path);
     void          generateBackTrace();
+
+    void printHelp();
+    void printVersion();
 
     DECLARE_EVENT_TABLE()
 };

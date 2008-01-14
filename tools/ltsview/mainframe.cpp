@@ -13,7 +13,6 @@
 //#include <time.h>
 #include "ids.h"
 #include "icons/main_window.xpm"
-#include "mcrl2/utilities/version_info.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -396,8 +395,8 @@ void MainFrame::setFileInfo(wxFileName fn) {
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
-  wxString msg = wxString();
-  msg += wxString(get_version_information("LTSView").c_str(),wxConvLocal);
+  wxString msg = wxT("LTSView version");
+  msg += wxString(mediator->getVersionString().c_str(),wxConvLocal);
   msg += wxT("\n");
   msg += wxT("\n");
   msg += wxT("Tool for interactive visualisation of state transition systems.\n");

@@ -71,6 +71,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <mcrl2/utilities/aterm_ext.h>
+#include "mcrl2/utilities/version_info.h"
 #include "ltsviewapp.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
@@ -85,7 +86,48 @@ BEGIN_EVENT_TABLE(LTSViewApp, wxApp)
   EVT_CHAR(MainFrame::onKeyDown)
 END_EVENT_TABLE()
 
+void LTSViewApp::printHelp() {
+  cerr << "Usage: ltsview [OPTION] [INFILE]" << endl;
+  cerr << "Start the LTSView application and open INFILE. If INFILE is not" << endl;
+  cerr << "supplied then LTSView is started without opening an LTS." << endl;
+  cerr << endl;
+  cerr << "INFILE should be in the FSM format." << endl;
+  cerr << endl;
+  cerr << "OPTION can be any of the following:" << endl;
+  cerr << "  -h, --help     display this help message and terminate" << endl;
+  cerr << "  -v, --version  display version information and terminate" << endl;
+}
+
+void LTSViewApp::printVersion() {
+  cerr << "version:" << getVersionString() << endl;
+}
+
 bool LTSViewApp::OnInit() {
+  wxCmdLineParser cmdParser(argc,argv);
+  cmdParser.AddSwitch(wxT("h"),wxT("help"),
+      wxT("display this help message and terminate"),wxCMD_LINE_OPTION_HELP);
+  cmdParser.AddSwitch(wxT("v"),wxT("version"),
+      wxT("display version information and terminate"));
+  cmdParser.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+
+  if (cmdParser.Parse(false) > 0) {
+    return false;
+  }
+  if (cmdParser.Found(wxT("h"))) {
+    printHelp();
+    return false;
+  }
+  if (cmdParser.Found(wxT("v"))) {
+    printVersion();
+    return false;
+  }
+  if (cmdParser.GetParamCount() > 1) {
+    cerr << "Too many command line parameters specified" << endl;
+  }
+  if (cmdParser.GetParamCount() > 0) {
+    lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
+  }
+
   lts = NULL;
   markStyle = NO_MARKS;
   rankStyle = ITERATIVE;
@@ -102,16 +144,6 @@ bool LTSViewApp::OnInit() {
   mainFrame->Layout();
 
   wxInitAllImageHandlers();
-
-  wxCmdLineParser cmdParser(argc,argv);
-
-  cmdParser.AddParam(wxT("INFILE"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL);
-
-  if (cmdParser.Parse() == 0) {
-    if (cmdParser.GetParamCount() > 0) {
-      lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
-    }
-  }
 
   if (!lts_file_argument.empty()) {
     wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
@@ -163,10 +195,14 @@ int main(int argc, char **argv) {
 #endif
 
 int LTSViewApp::OnExit() {
-  if (lts!=NULL) delete lts;
+  if (lts != NULL) delete lts;
   delete settings;
   delete visualizer;
   return 0;
+}
+
+std::string LTSViewApp::getVersionString() {
+  return get_version_information("");
 }
 
 void LTSViewApp::openFile(string fileName) {
@@ -184,7 +220,7 @@ void LTSViewApp::openFile(string fileName) {
     mainFrame->showMessage("Error loading file",msg);
     return;
   }
-  if (lts!=NULL) delete lts;
+  if (lts != NULL) delete lts;
   lts = newlts;
   // first remove all unreachable states
   lts->trim();
@@ -232,7 +268,6 @@ void LTSViewApp::openFile(string fileName) {
 
   mainFrame->setMarkedStatesInfo(0);
   mainFrame->setMarkedTransitionsInfo(0);
-
 }
 
 void LTSViewApp::setRankStyle(RankStyle rs) {
