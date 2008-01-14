@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/tools.h
-/// \brief Add your file description here.
+/// \file mcrl2/lps/mcrl22lps.h
+/// \brief The mcrl22lps algorithm.
 
 #ifndef MCRL2_LPS_MCRL22LPS_H
 #define MCRL2_LPS_MCRL22LPS_H
@@ -18,7 +18,7 @@
 
 namespace lps {
 
-  /// Linearises the specification.
+  /// Generates a linearized process specification from a specification in text.
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
   {   

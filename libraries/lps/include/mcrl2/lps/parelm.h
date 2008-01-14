@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/parelm.h
-/// \brief Add your file description here.
+/// \brief The parelm algorithm.
 
 #ifndef MCRL2_LPS_PARELM_H
 #define MCRL2_LPS_PARELM_H
@@ -25,8 +25,8 @@
 
 namespace lps {
 
-/// returns the data variables that appear in the condition, action or time of
-/// the summands in the sequence [first, last[
+/// Returns the data variables that appear in the condition, action or time of
+/// the summands in the sequence [first, last[.
 template <typename Iterator>
 std::set<data_variable> transition_variables(Iterator first, Iterator last)
 {

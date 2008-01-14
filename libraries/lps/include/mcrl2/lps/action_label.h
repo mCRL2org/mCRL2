@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/action_label.h
-/// \brief Add your file description here.
+/// \brief The class action_label.
 
 #ifndef MCRL2_LPS_ACTION_LABEL_H
 #define MCRL2_LPS_ACTION_LABEL_H
@@ -33,10 +33,14 @@ class action_label: public aterm_appl
     sort_expression_list m_sorts;
 
   public:
+    /// Constructor.
+    ///
     action_label()
       : aterm_appl(detail::constructActId())
     {}
 
+    /// Constructor.
+    ///
     action_label(aterm_appl t)
      : aterm_appl(t)
     {
@@ -46,6 +50,8 @@ class action_label: public aterm_appl
       m_sorts = *i;
     }
 
+    /// Constructor.
+    ///
     action_label(const identifier_string& name, const sort_expression_list &sorts)
      : aterm_appl(gsMakeActId(name, sorts)),
        m_name(name),
@@ -76,8 +82,6 @@ class action_label: public aterm_appl
     }     
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_label_list
 /// \brief singly linked list of action labels
 typedef term_list<action_label> action_label_list;
 
@@ -90,7 +94,7 @@ bool is_action_label(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::action_label;
@@ -107,5 +111,6 @@ struct aterm_traits<action_label>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_ACTION_LABEL_H

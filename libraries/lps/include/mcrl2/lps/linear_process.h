@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/linear_process.h
-/// \brief Add your file description here.
+/// \brief The class linear_process.
 
 #ifndef MCRL2_LPS_LINEAR_PROCESS_H
 #define MCRL2_LPS_LINEAR_PROCESS_H
@@ -31,6 +31,7 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 
+/// \cond INTERNAL_DOCS
 struct is_non_delta_summand
 {
   bool operator()(const summand& s) const
@@ -38,7 +39,9 @@ struct is_non_delta_summand
     return !s.is_delta();
   }
 };
+/// \endcond
 
+/// Filtered list containing non-delta summands.
 typedef atermpp::filtered_list<summand_list, is_non_delta_summand> non_delta_summand_list;
 
 class linear_process; // prototype declaration
@@ -58,10 +61,14 @@ class linear_process: public aterm_appl
     summand_list       m_summands;
 
   public:
+    /// Constructor.
+    ///
     linear_process()
       : aterm_appl(detail::constructLinearProcess())
     {}
 
+    /// Constructor.
+    ///
     linear_process(data_variable_list free_variables,
         data_variable_list process_parameters,
         summand_list       summands
@@ -72,6 +79,8 @@ class linear_process: public aterm_appl
        m_summands          (summands          )
     { }
 
+    /// Constructor.
+    ///
     linear_process(aterm_appl lps)
       : aterm_appl(lps)
     {
@@ -302,7 +311,7 @@ linear_process set_summands(linear_process l, summand_list summands)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::linear_process;
@@ -319,5 +328,6 @@ struct aterm_traits<linear_process>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

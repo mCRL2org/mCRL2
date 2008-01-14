@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/process_initializer.h
-/// \brief Add your file description here.
+/// \brief The class process_initializer.
 
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
@@ -24,7 +24,7 @@ namespace lps {
 
 using atermpp::aterm_appl;
 
-/// \brief initial state of a linear process
+/// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 class process_initializer: public aterm_appl
 {
@@ -33,10 +33,14 @@ class process_initializer: public aterm_appl
     data_assignment_list m_assignments;
 
   public:
+    /// Constructor.
+    ///
     process_initializer()
       : aterm_appl(detail::constructLinearProcessInit())
     {}
 
+    /// Constructor.
+    ///
     process_initializer(data_variable_list free_variables,
                         data_assignment_list assignments
                        )
@@ -46,6 +50,8 @@ class process_initializer: public aterm_appl
     {
     }
 
+    /// Constructor.
+    ///
     process_initializer(aterm_appl t)
       : aterm_appl(t)
     {
@@ -109,7 +115,7 @@ class process_initializer: public aterm_appl
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::process_initializer;
@@ -126,5 +132,6 @@ struct aterm_traits<process_initializer>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

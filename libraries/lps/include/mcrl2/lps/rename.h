@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/rename.h
-/// \brief Add your file description here.
+/// \brief Algorithms for renaming parameters in lps data structures.
 
 #ifndef MCRL2_LPS_RENAME_H
 #define MCRL2_LPS_RENAME_H
@@ -26,7 +26,7 @@
 
 namespace lps {
 
-/// \internal
+/// \cond INTERNAL_DOCS
 /// Generates a renaming of process parameters of the process p. The parameters are
 /// renamed according to the given identifier generator, and well typedness constraints
 /// are taken into account. The result consists of two vectors (src, dest) that specify
@@ -57,6 +57,7 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
   }
   return std::make_pair(src, dest);
 }
+/// \endcond
 
 /// Renames the process parameters in the process p using the given identifier generator.
 template <typename IdentifierGenerator>

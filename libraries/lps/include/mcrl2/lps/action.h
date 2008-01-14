@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/action.h
-/// \brief Add your file description here.
+/// \brief The class action.
 
 #ifndef MCRL2_LPS_ACTION_H
 #define MCRL2_LPS_ACTION_H
@@ -21,9 +21,7 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
-///////////////////////////////////////////////////////////////////////////////
-// action
-/// \brief Represents an action
+/// \brief Represents an action.
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
 class action: public aterm_appl
@@ -33,10 +31,14 @@ class action: public aterm_appl
     data_expression_list m_arguments;
 
   public:
+    /// Constructor.
+    ///
     action()
       : aterm_appl(detail::constructAction())
     {}
 
+    /// Constructor.
+    ///
     action(aterm_appl t)
      : aterm_appl(t)
     {
@@ -46,6 +48,8 @@ class action: public aterm_appl
       m_arguments = data_expression_list(*i);
     }
 
+    /// Constructor.
+    ///
     action(const action_label& label, const data_expression_list& arguments)
      : aterm_appl(gsMakeAction(label, arguments)),
        m_label(label),
@@ -75,8 +79,6 @@ class action: public aterm_appl
     }     
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_list
 /// \brief singly linked list of actions
 typedef term_list<action> action_list;
 
@@ -106,7 +108,7 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::action;
@@ -123,5 +125,6 @@ struct aterm_traits<action>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_ACTION_H

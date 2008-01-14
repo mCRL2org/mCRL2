@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/specification.h
-/// \brief Add your file description here.
+/// \brief The class specification.
 
 #ifndef MCRL2_LPS_SPECIFICATION_H
 #define MCRL2_LPS_SPECIFICATION_H
@@ -31,9 +31,7 @@ using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 using atermpp::aterm_traits;
 
-///////////////////////////////////////////////////////////////////////////////
-// Specification
-/// \brief mCRL2 specification
+/// \brief Linear process specification.
 ///
 // sort ...;
 //
@@ -69,24 +67,23 @@ class specification: public aterm_appl
     }
 
   public:
+    /// Constructor.
+    ///
     specification()
       : aterm_appl(detail::constructProcSpec())
-    {
-//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-//      assert(is_well_typed());
-//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
-    }
+    { }
 
+    /// Constructor.
+    ///
     specification(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_ProcSpec(m_term));
       init_term(t);
-//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-//      assert(is_well_typed());
-//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
+    /// Constructor.
+    ///
     specification(
         data_specification  data         ,
         action_label_list   action_labels,
@@ -107,9 +104,6 @@ class specification: public aterm_appl
           initial_process
         )
       );
-//#ifndef MCRL2_NO_WELL_TYPEDNESS_CHECKS
-//      assert(is_well_typed());
-//#endif // MCRL2_NO_WELL_TYPEDNESS_CHECKS
     }
 
     /// Reads the LPS from file. Returns true if the operation succeeded.
@@ -315,7 +309,7 @@ specification repair_free_variables(const specification& spec)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::specification;
@@ -332,5 +326,6 @@ struct aterm_traits<specification>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_SPECIFICATION_H

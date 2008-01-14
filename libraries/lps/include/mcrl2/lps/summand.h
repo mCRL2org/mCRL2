@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/summand.h
-/// \brief Add your file description here.
+/// \brief The class summand.
 
 #ifndef MCRL2_LPS_SUMMAND_H
 #define MCRL2_LPS_SUMMAND_H
@@ -28,8 +28,6 @@ namespace lps {
 
 using atermpp::aterm_appl;
 
-///////////////////////////////////////////////////////////////////////////////
-// summand
 /// \brief LPS summand.
 ///
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
@@ -50,10 +48,14 @@ class summand: public aterm_appl
     data_assignment_list m_assignments;
 
   public:
+    /// Constructor.
+    ///
     summand()
       : aterm_appl(detail::constructLinearProcessSummand())
     {}
 
+    /// Constructor.
+    ///
     summand(aterm_appl t)
      : aterm_appl(t)
     {
@@ -320,14 +322,12 @@ summand set_assignments(summand s, data_assignment_list assignments)
                 );
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// summand_list
 /// \brief singly linked list of summands
 typedef term_list<summand> summand_list;
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::summand;
@@ -344,5 +344,6 @@ struct aterm_traits<summand>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_SUMMAND_H
