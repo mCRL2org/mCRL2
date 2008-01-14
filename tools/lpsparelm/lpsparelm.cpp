@@ -33,12 +33,22 @@ struct tool_configuration {
     try {
       lps_specification.load(input_file);
      
+    }
+    catch (std::exception& e) {
+      // XXX problem: the exceptions have bad descriptions, resorting to manual handling
+      std::cerr << "Fatal: could not read from file `" << input_file << "'" << std::endl;
+
+      return false;
+    }
+
+    try {
       lps::specification r = lps::parelm(lps_specification);
 
       r.save(output_file);
     }
-    catch (std::exception e) {
-      std::cerr << e.what() << std::endl;
+    catch (std::exception& e) {
+      // XXX problem: the exceptions have bad descriptions, resorting to manual handling
+      std::cerr << "Fatal: could not write to file `" << output_file << "'" << std::endl;
 
       return false;
     }
