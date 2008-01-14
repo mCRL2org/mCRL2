@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_assignment.h
-/// \brief Add your file description here.
+/// \brief The class data_assignment.
 
 #ifndef MCRL2_DATA_DATA_ASSIGNMENT_H
 #define MCRL2_DATA_DATA_ASSIGNMENT_H
@@ -25,11 +25,8 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::aterm;
 
-///////////////////////////////////////////////////////////////////////////////
-// data_assignment
-/// \brief data_assignment is an assignment to a data variable.
+/// \brief data_assignment is an assignment of a data expression to a data variable.
 ///
-// syntax: data_assignment(data_variable lhs, data_expression rhs)
 class data_assignment: public aterm_appl
 {
   protected:
@@ -37,10 +34,14 @@ class data_assignment: public aterm_appl
     data_expression m_rhs;         // right hand side of the assignment
 
   public:
+    /// Constructor.
+    ///             
     data_assignment()
       : aterm_appl(detail::constructPBExpr())
     {}
 
+    /// Constructor.
+    ///             
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
@@ -50,6 +51,8 @@ class data_assignment: public aterm_appl
       m_rhs = data_expression(*i);
     }
 
+    /// Constructor.
+    ///             
     data_assignment(data_variable lhs, data_expression rhs)
      : 
        aterm_appl(gsMakeDataVarIdInit(lhs, rhs)),
@@ -146,6 +149,7 @@ struct assignment_list_substitution
 {
   const data_assignment_list& m_assignments;
 
+  /// \internal
   struct compare_assignment_lhs
   {
     data_variable m_variable;
@@ -160,6 +164,7 @@ struct assignment_list_substitution
     }
   };
 
+  /// \internal
   struct assignment_list_substitution_helper
   {
     const data_assignment_list& l;
@@ -186,6 +191,8 @@ struct assignment_list_substitution
     }
   };
   
+  /// Constructor.
+  ///
   assignment_list_substitution(const data_assignment_list& assignments)
     : m_assignments(assignments)
   {}

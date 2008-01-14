@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_specification.h
-/// \brief Add your file description here.
+/// \brief The class data_specification.
 
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
@@ -40,9 +40,8 @@ struct has_result_sort
   }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// data_specification
-/// \brief data specification
+/// \brief A data specification is merely a struct containing
+/// sequences of sorts, constructors, mappings and equations.
 ///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
@@ -50,20 +49,29 @@ class data_specification: public aterm_appl
 {
 
   protected:
-    sort_expression_list          m_sorts;
-    data_operation_list      m_constructors;
-    data_operation_list      m_mappings;
-    data_equation_list m_equations;
+    sort_expression_list m_sorts;
+    data_operation_list  m_constructors;
+    data_operation_list  m_mappings;
+    data_equation_list   m_equations;
 
   public:
-    typedef sort_expression_list::iterator          sort_iterator;
-    typedef data_operation_list::iterator      function_iterator;
-    typedef data_equation_list::iterator equation_iterator;
+    /// Iterator for the sequence of sorts.
+    typedef sort_expression_list::iterator sort_iterator;
+      
+    /// Iterator for the sequences of constructors and mappings.
+    typedef data_operation_list::iterator  function_iterator;
 
+    /// Iterator for the sequence of equations.
+    typedef data_equation_list::iterator   equation_iterator;
+
+    /// Constructor.
+    ///             
     data_specification()
       : aterm_appl(detail::constructDataSpec())
     {}
 
+    /// Constructor.
+    ///             
     data_specification(aterm_appl t)
       : aterm_appl(t)
     {
@@ -75,6 +83,8 @@ class data_specification: public aterm_appl
       m_equations    = data_equation_list(aterm_appl(*i++).argument(0));
     }
 
+    /// Constructor.
+    ///             
     data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
       : aterm_appl(gsMakeDataSpec(
                       gsMakeSortSpec(sorts),

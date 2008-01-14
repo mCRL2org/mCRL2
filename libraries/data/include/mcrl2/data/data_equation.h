@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_equation.h
-/// \brief Add your file description here.
+/// \brief The class data_equation.
 
 #ifndef MCRL2_DATA_DATA_EQUATION_H
 #define MCRL2_DATA_DATA_EQUATION_H
@@ -23,9 +23,11 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::aterm;
 
-///////////////////////////////////////////////////////////////////////////////
-// data_equation
-/// \brief data equation.
+/// \brief A conditional data equation. The equality holds if
+/// the condition evaluates to true. A declaration of variables
+/// that can be used in the expressions is included. The condition
+/// is optional. In case there is no condition, it has the value
+/// nil.
 ///
 //<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
 //                     <DataExpr>, <DataExpr>)
@@ -40,10 +42,14 @@ class data_equation: public aterm_appl
   public:
     typedef data_variable_list::iterator variable_iterator;
 
+    /// Constructor.
+    ///             
     data_equation()
       : aterm_appl(detail::constructDataEqn())
     {}
 
+    /// Constructor.
+    ///             
     data_equation(aterm_appl t)
      : aterm_appl(t)
     {
@@ -56,6 +62,8 @@ class data_equation: public aterm_appl
       assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
     } 
 
+    /// Constructor.
+    ///             
     data_equation(data_variable_list variables,
                   data_expression    condition,
                   data_expression    lhs,
@@ -125,8 +133,6 @@ class data_equation: public aterm_appl
     }   
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// data_equation_list
 /// \brief singly linked list of data equations
 ///
 typedef term_list<data_equation> data_equation_list;

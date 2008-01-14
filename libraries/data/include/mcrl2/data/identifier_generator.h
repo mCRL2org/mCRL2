@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/identifier_generator.h
-/// \brief Add your file description here.
+/// \brief The class identifier_generator.
 
 #ifndef MCRL2_DATA_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_IDENTIFIER_GENERATOR_H
@@ -17,30 +17,38 @@
 namespace lps {
 
 /// A class that generates identifiers. A context is maintained
-/// containing already used identifiers.
+/// containing already used identifiers. This class is useful for
+/// algorithms that have to avoid name clashes.
 ///
 /// Using the operator()() and operator()(std::string) fresh
-/// identifiers can be generated that do not appear in the
-/// context.
+/// identifiers are generated that do not appear in the context.
 class identifier_generator
 {
   public:
+    /// Constructor.
+    ///
     identifier_generator()
     {}
 
+    /// Destructor.
+    ///
     virtual ~identifier_generator()
     {}
 
     /// Clears the context.
+    ///
     virtual void clear_context() = 0;
 
     /// Adds the identifier s to the context.
+    ///
     virtual void add_identifier(identifier_string s) = 0;
 
     /// Removes the identifier s from the context.
+    ///
     virtual void remove_identifier(identifier_string s) = 0;
 
     /// Adds identifiers of term t to the context.
+    ///
     template <typename Term>
     void add_to_context(Term t)
     {
@@ -52,6 +60,7 @@ class identifier_generator
     }
 
     /// Adds identifiers of term t to the context.
+    ///
     template <typename Container>
     void add_identifiers(const Container& c)
     {
@@ -62,6 +71,7 @@ class identifier_generator
     }
 
     /// Removes identifiers of term t from the context.
+    ///
     template <typename Term>
     void remove_from_context(Term t)
     {
@@ -73,10 +83,12 @@ class identifier_generator
     }
 
     /// Returns true if the identifier s appears in the context.
+    ///
     virtual bool has_identifier(identifier_string s) const = 0;
 
     /// Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
+    ///
     virtual identifier_string operator()(const std::string& hint)
     {
       identifier_string id(hint);

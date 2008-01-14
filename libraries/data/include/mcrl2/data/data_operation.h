@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_operation.h
-/// \brief Add your file description here.
+/// \brief The class data_operation.
 
 #ifndef MCRL2_DATA_DATA_OPERATION_H
 #define MCRL2_DATA_DATA_OPERATION_H
@@ -23,23 +23,27 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::arg1;
 
-///////////////////////////////////////////////////////////////////////////////
-// data_operation
-/// \brief operation on data.
+/// \brief An operation on data.
 ///
 class data_operation: public data_expression
 {
   public:
+    /// Constructor.
+    ///             
     data_operation()
       : data_expression(detail::constructOpId())
     {}
 
+    /// Constructor.
+    ///             
     data_operation(aterm_appl t)
      : data_expression(t)
     {
       assert(detail::check_rule_OpId(m_term));
     }
 
+    /// Constructor.
+    ///             
     data_operation(identifier_string name, sort_expression s)
      : data_expression(gsMakeOpId(name, s))
     {}
@@ -52,8 +56,6 @@ class data_operation: public data_expression
     }
   };
                                                             
-///////////////////////////////////////////////////////////////////////////////
-// data_operation_list
 /// \brief singly linked list of data operations
 ///
 typedef term_list<data_operation> data_operation_list;

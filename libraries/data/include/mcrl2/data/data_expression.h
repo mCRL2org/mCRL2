@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_expression.h
-/// \brief Add your file description here.
+/// \brief The class data_expression.
 
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
@@ -26,8 +26,6 @@ using atermpp::aterm;
 // prototypes
 class data_expression;
 
-///////////////////////////////////////////////////////////////////////////////
-// data_expression_list
 /// \brief singly linked list of data expressions
 ///
 typedef term_list<data_expression> data_expression_list;
@@ -40,16 +38,22 @@ typedef term_list<data_expression> data_expression_list;
 class data_expression: public aterm_appl
 {
   public:
+    /// Constructor.
+    ///             
     data_expression()
       : aterm_appl(detail::constructDataExpr())
     {}
 
+    /// Constructor.
+    ///             
     data_expression(aterm_appl term)
       : aterm_appl(term)
     {
       assert(detail::check_rule_DataExprOrNil(m_term));
     }
 
+    /// Constructor.
+    ///             
     data_expression(ATermAppl term)
       : aterm_appl(term)
     {
@@ -82,16 +86,16 @@ bool is_data_expression(aterm_appl t)
   return gsIsDataExpr(t);
 }
 
-/// DEPRECATED Returns the head of the data expression t.
-///
+/// Returns the head of the data expression t.
+/// \deprecated
 inline
 data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 {
   return gsGetDataExprHead(t);
 }
 
-/// DEPRECATED Returns the arguments of the data expression t.
-///
+/// Returns the arguments of the data expression t.
+/// \deprecated
 inline
 data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
 {

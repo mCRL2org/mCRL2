@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/utility.h
-/// \brief Add your file description here.
+/// \brief Utility functions of the data library.
 
 #ifndef MCRL2_DATA_UTILITY_H
 #define MCRL2_DATA_UTILITY_H
@@ -184,10 +184,14 @@ class fresh_variable_generator
     std::string m_hint;                  // used as a hint for operator()()
 
   public:
+    /// Constructor.
+    ///
     fresh_variable_generator()
      : m_sort(sort_expr::real()), m_hint("t")
     { }
 
+    /// Constructor.
+    ///
     template <typename Term>
     fresh_variable_generator(Term context, sort_expression s = sort_expr::real(), std::string hint = "t")
     {

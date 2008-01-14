@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/xyz_identifier_generator.h
-/// \brief Add your file description here.
+/// \brief Class that generates identifiers in the range X, Y, Z, X0, Y0, Z0, X1, ...
 
 #ifndef MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
@@ -30,6 +30,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     char m_char; // character of last generated identifier
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
+    ///
     std::string next()
     {
       switch (m_char) {
@@ -51,10 +52,14 @@ class xyz_identifier_generator: public multiset_identifier_generator
     }
 
   public:
+    /// Constructor.
+    ///
     xyz_identifier_generator()
      : m_index(-2), m_char('Z')
     {}
 
+    /// Constructor.
+    ///
     template <typename Term>
     xyz_identifier_generator(Term t)
      : m_index(-2), m_char('Z')
@@ -65,6 +70,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
+    ///
     identifier_string operator()(const std::string& hint)
     {
       identifier_string result(hint);

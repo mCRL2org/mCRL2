@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/postfix_identifier_generator.h
-/// \brief Add your file description here.
+/// \brief The class postfix_identifier_generator.
 
 #ifndef MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
@@ -14,13 +14,15 @@
 
 namespace lps {
 
-/// Uses the given postfix as a hint for creating new names.
+/// Uses the given postfix as a hint for generating identifiers.
 class postfix_identifier_generator: public set_identifier_generator
 {
   protected:
     std::string m_postfix;
 
   public:
+    /// Constructor.
+    ///
     postfix_identifier_generator(std::string postfix)
       : m_postfix(postfix)
     {}

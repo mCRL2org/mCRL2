@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_expression_replace.h
-/// \brief Contains some functions for replacing data expressions in a term.
+/// \brief Contains a function for replacing data expressions in an arbitrary term.
 
 #ifndef MCRL2_DATA_DATA_EXPRESSION_REPLACE_H
 #define MCRL2_DATA_DATA_EXPRESSION_REPLACE_H

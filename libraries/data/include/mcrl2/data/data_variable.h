@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_variable.h
-/// \brief Add your file description here.
+/// \brief The class data_variable.
 
 #ifndef MCRL2_DATA_DATA_VARIABLE_H
 #define MCRL2_DATA_DATA_VARIABLE_H
@@ -33,10 +33,14 @@ using atermpp::arg1;
 class data_variable: public data_expression
 {
   public:
+    /// Constructor.
+    ///             
     data_variable()
       : data_expression(detail::constructDataVarId())
     {}
 
+    /// Constructor.
+    ///             
     data_variable(aterm_appl t)
      : data_expression(t)
     {
@@ -55,10 +59,14 @@ class data_variable: public data_expression
       m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), sort_expression(type)));
     }
 
+    /// Constructor.
+    ///             
     data_variable(identifier_string name, const sort_expression& s)
      : data_expression(gsMakeDataVarId(name, s))
     {}
 
+    /// Constructor.
+    ///             
     data_variable(const std::string& name, const sort_expression& s)
      : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
@@ -71,8 +79,6 @@ class data_variable: public data_expression
     }
   };
                                                             
-///////////////////////////////////////////////////////////////////////////////
-// data_variable_list
 /// \brief singly linked list of data variables
 ///
 typedef term_list<data_variable> data_variable_list;

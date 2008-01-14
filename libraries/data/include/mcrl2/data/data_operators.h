@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_operators.h
-/// \brief Add your file description here.
+/// \brief Some operators for list concatenation.
 
 #ifndef MCRL2_DATA_DATA_OPERATORS_H
 #define MCRL2_DATA_DATA_OPERATORS_H

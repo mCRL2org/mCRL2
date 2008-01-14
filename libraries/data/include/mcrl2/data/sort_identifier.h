@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/sort_identifier.h
-/// \brief Add your file description here.
+/// \brief Class sort_identifier.
 
 #ifndef MCRL2_DATA_SORT_ID_H
 #define MCRL2_DATA_SORT_ID_H
@@ -21,25 +21,23 @@ using atermpp::term_list;
 
 class sort_identifier;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_id_list
 /// \brief singly linked list of sorts
 ///
 typedef term_list<sort_identifier> sort_identifier_list;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort
 /// \brief sort id.
 ///
 //<SortId>       ::= SortId(<String>)
 class sort_identifier: public sort_expression
 {
   public:
+    /// Constructor.
+    ///
     sort_identifier()
       : sort_expression(detail::constructSortId())
     {}
 
-    /// Constructs a sort with internal representation t.
+    /// Constructor.
     ///
     sort_identifier(ATermAppl t)
       : sort_expression(t)
@@ -47,31 +45,36 @@ class sort_identifier: public sort_expression
       assert(detail::check_rule_SortId(m_term));
     }
 
+    /// Constructor.
+    ///
     sort_identifier(aterm_appl t)
       : sort_expression(t)
     {
       assert(detail::check_rule_SortId(m_term));
     }
 
+    /// Constructor.
+    ///
     sort_identifier(identifier_string name)
       : sort_expression(gsMakeSortId(name))
     {
       assert(detail::check_rule_SortId(m_term));
     }
 
-    /// Constructs a sort from a string.
+    /// Constructor.
     ///
     sort_identifier(std::string s)
       : sort_expression(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
 
-    /// Returns the name of the sort id.
+    /// Returns the name of the sort identifier.
+    ///
     identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
     
-    /// Returns true if it is a sort of type A -> B.
+    /// \overload
     ///
     bool is_arrow() const
     {

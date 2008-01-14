@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/set_identifier_generator.h
-/// \brief Add your file description here.
+/// \brief The classes set_identifier_generator and multiset_identifier_generator.
 
 #ifndef MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H
@@ -29,9 +29,13 @@ class set_identifier_generator: public identifier_generator
     atermpp::set<identifier_string> m_identifiers;
 
   public:
+    /// Constructor.
+    ///
     set_identifier_generator()
     {}
 
+    /// Constructor.
+    ///
     template <typename Term>
     set_identifier_generator(Term t)
     {
@@ -84,9 +88,13 @@ class multiset_identifier_generator: public identifier_generator
     atermpp::multiset<identifier_string> m_identifiers;
 
   public:
+    /// Constructor.
+    ///
     multiset_identifier_generator()
     {}
 
+    /// Constructor.
+    ///
     template <typename Term>
     multiset_identifier_generator(Term t)
     {

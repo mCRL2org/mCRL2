@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/sort_utility.h
-/// \brief Add your file description here.
+/// \brief Utility functions for sorts.
 
 #ifndef MCRL2_DATA_SORT_UTILITY_H
 #define MCRL2_DATA_SORT_UTILITY_H

@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data.h
-/// \brief Add your file description here.
+/// \brief Contains includes of frequently used header files.
 
 #ifndef MCRL2_DATA_DATA_H
 #define MCRL2_DATA_DATA_H

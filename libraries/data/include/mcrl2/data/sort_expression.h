@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/sort_expression_expression.h
-/// \brief Add your file description here.
+/// \brief The class sort_expression.
 
 #ifndef MCRL2_DATA_SORT_EXPRESSION_H
 #define MCRL2_DATA_SORT_EXPRESSION_H
@@ -28,17 +28,13 @@ using atermpp::term_list;
 
 class sort_expression;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_expression_list
 /// \brief singly linked list of sort expressions
 ///
 typedef term_list<sort_expression> sort_expression_list;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_expression
 /// \brief sort expression.
 ///
-/// Either a sort id or a sort arrow.
+/// A sort expression can either be a sort identifier or a sort arrow.
 /// 
 //<SortExpr>    ::= <SortId>
 //                | SortList(<SortExpr>)                                   (- di)
@@ -52,11 +48,13 @@ typedef term_list<sort_expression> sort_expression_list;
 class sort_expression: public aterm_appl
 {
   public:
+    /// Constructor.
+    ///
     sort_expression()
       : aterm_appl(detail::constructSortId())
     {}
 
-    /// Constructs a sort_expression with internal representation t.
+    /// Constructor.
     ///
     sort_expression(ATermAppl t)
       : aterm_appl(t)
@@ -64,13 +62,15 @@ class sort_expression: public aterm_appl
       assert(detail::check_rule_SortExpr(m_term));
     }
 
+    /// Constructor.
+    ///
     sort_expression(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_SortExpr(m_term));
     }
 
-    /// Constructs a sort_expression from a string.
+    /// Constructor.
     ///
     sort_expression(std::string s)
       : aterm_appl(gsMakeSortId(gsString2ATermAppl(s.c_str())))
@@ -98,7 +98,8 @@ sort_expression arrow(sort_expression_list domain, sort_expression range)
   return gsMakeSortArrow(domain, range);
 }
 
-/// DEPRECATED Returns the domain sorts of s.
+/// Returns the domain sorts of s.
+/// \deprecated
 ///
 inline
 sort_expression_list domain_sorts(sort_expression s)
@@ -106,7 +107,8 @@ sort_expression_list domain_sorts(sort_expression s)
   return gsGetSortExprDomain(s);
 }
 
-/// DEPRECATED Returns the range sort of s.
+/// Returns the range sort of s.
+/// \deprecated
 ///
 inline
 sort_expression result_sort(sort_expression s)
@@ -114,11 +116,12 @@ sort_expression result_sort(sort_expression s)
   return gsGetSortExprResult(s);
 }
 
-/// DEPRECATED Returns the source of the sort.
+/// Returns the source of the sort.
 /// <ul>
 /// <li>source(A) = []</li>
 /// <li>source(A->B) = [A]</li>
 /// </ul>
+/// \deprecated
 ///
 inline
 sort_expression_list source(sort_expression s)
@@ -129,11 +132,12 @@ sort_expression_list source(sort_expression s)
     return atermpp::make_list(s);
 }
 
-/// DEPRECATED Returns the target of the sort.
+/// Returns the target of the sort.
 /// <ul>
 /// <li>target(A) = A</li>
 /// <li>target(A->B) = B</li>
 /// </ul>
+/// \deprecated
 ///
 inline
 sort_expression target(sort_expression s)

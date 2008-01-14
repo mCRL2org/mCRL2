@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data_application.h
-/// \brief Add your file description here.
+/// \brief The class data_application.
 
 #ifndef MCRL2_DATA_DATA_APPLICATION_H
 #define MCRL2_DATA_DATA_APPLICATION_H
@@ -21,24 +21,28 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
-///////////////////////////////////////////////////////////////////////////////
-// data_application
-/// \brief data application.
+/// \brief Data application.
 ///
 // DataAppl(<DataExpr>, <DataExpr>+)
 class data_application: public data_expression
 {
   public:
+    /// Constructor.
+    ///
     data_application()
       : data_expression(detail::constructDataAppl())
     {}
 
+    /// Constructor.
+    ///
     data_application(aterm_appl t)
      : data_expression(t)
     {
       assert(detail::check_term_DataAppl(m_term));
     }
 
+    /// Constructor.
+    ///
     data_application(data_expression expr, data_expression_list args)
      : data_expression(gsMakeDataAppl(expr, args))
     {}
@@ -58,8 +62,6 @@ class data_application: public data_expression
     }
   };
 
-///////////////////////////////////////////////////////////////////////////////
-// data_application_list
 /// \brief singly linked list of data applications
 ///
 typedef term_list<data_application> data_application_list;

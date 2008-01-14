@@ -5,23 +5,24 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/rewriter.h
-/// \brief Add your file description here.
+/// \brief The class rewriter.
 
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
+#include <boost/shared_ptr.hpp>
 #include "mcrl2/data/rewrite.h"
 
 /// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
 namespace lps {
 
-///////////////////////////////////////////////////////////////////////////////
-// rewriter
-/// \brief rewriter.
+/// \brief A rewriter class. This class is a wrapper for the Rewriter class.
+/// The purpose of this class is to hide the internal Rewriter format from the
+/// user, and to offer a common C++ interface.
 class rewriter
 {
   private:
-    Rewriter* m_rewriter;
+    boost::shared_ptr<Rewriter> m_rewriter;
 
   public:
     enum strategy
@@ -36,6 +37,22 @@ class rewriter
 	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
     };
 
+    /// Represents a substitution of the form data_variable := data_expression.
+    /// Substitutions are created using the member function make_substitution.
+    /// Suppose that a user has a sequence [first, last[ of substitutions that
+    /// must be applied to a large number of terms, before feeding them to the
+    /// rewriter. Then it is efficient to do it as follows:
+    /// \code
+    /// rewriter r;
+    /// std::vector<rewriter::substitution> s;
+    /// std::vector<aterm> v;
+    /// // fill s and v
+    /// for (std::vector<aterm>::iterator i = v.begin(); i != v.end(); ++i)
+    /// {
+    ///   *i = r(*i, s.begin(), s.end());
+    /// }
+    /// \endcode
+    ///
     struct substitution
     {
       friend class rewriter;
@@ -50,13 +67,15 @@ class rewriter
         { }
     };
     
-    /// Constructs a rewriter from data specification d.
+    /// Constructor.
     ///
     rewriter(data_specification d, strategy s = jitty)
     {
       m_rewriter = createRewriter(d, static_cast<RewriteStrategy>(s));
     }
 
+    /// Destructor.
+    ///
     ~rewriter()
     {
       delete m_rewriter;
@@ -93,6 +112,8 @@ class rewriter
 		  return result;
 		}
 
+    /// Creates the substitution variable := value.
+    ///
     substitution make_substitution(const data_variable& variable, const data_expression& value)
     {
       return substitution(variable, m_rewriter->toRewriteFormat(value));

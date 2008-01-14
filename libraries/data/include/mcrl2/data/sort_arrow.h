@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/sort_arrow.h
-/// \brief Add your file description here.
+/// \brief The class sort_arrow.
 
 #ifndef MCRL2_DATA_SORT_ARROW_H
 #define MCRL2_DATA_SORT_ARROW_H
@@ -21,14 +21,10 @@ using atermpp::term_list;
 
 class sort_arrow;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_expression_list
 /// \brief singly linked list of sorts
 ///
 typedef term_list<sort_arrow> sort_arrow_list;
 
-///////////////////////////////////////////////////////////////////////////////
-// sort_arrow
 /// \brief sort arrow.
 ///
 /// Models sorts of shape <tt>A -\> B</tt>.
@@ -43,11 +39,13 @@ typedef term_list<sort_arrow> sort_arrow_list;
 class sort_arrow: public sort_expression
 {
   public:
+    /// Constructor.
+    ///
     sort_arrow()
       : aterm_appl(detail::constructSortArrow())
     {}
 
-    /// Constructs a sort with internal representation t.
+    /// Constructor.
     ///
     sort_arrow(ATermAppl t)
       : aterm_appl(t)
@@ -55,19 +53,23 @@ class sort_arrow: public sort_expression
       assert(detail::check_rule_SortArrow(m_term));
     }
 
+    /// Constructor.
+    ///
     sort_arrow(aterm_appl t)
       : aterm_appl(t)
     {
       assert(detail::check_rule_SortArrow(m_term));
     }
    
+    /// Constructor.
+    ///
     sort_arrow(sort_expression_list arguments, sort_expression result)
       : aterm_appl(gsMakeSortArrow(arguments, result))
     {
       assert(detail::check_rule_SortArrow(m_term));
     }
    
-    /// Returns true if it is a sort of type A -> B.
+    /// \overload
     ///
     bool is_arrow() const
     {
