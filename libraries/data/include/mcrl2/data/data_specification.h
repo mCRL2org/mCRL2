@@ -25,7 +25,7 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 
-/// \internal
+/// \cond INTERNAL_DOCS
 struct has_result_sort
 {
   sort_expression m_result;
@@ -39,6 +39,7 @@ struct has_result_sort
     return result_sort(f.sort()) == m_result;
   }
 };
+/// \endcond
 
 /// \brief A data specification is merely a struct containing
 /// sequences of sorts, constructors, mappings and equations.
@@ -214,7 +215,7 @@ data_specification set_equations(data_specification s, data_equation_list equati
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_specification;
@@ -231,5 +232,6 @@ struct aterm_traits<data_specification>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

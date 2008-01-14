@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/sort_expression_expression.h
+/// \file mcrl2/data/sort_expression.h
 /// \brief The class sort_expression.
 
 #ifndef MCRL2_DATA_SORT_EXPRESSION_H
@@ -19,7 +19,6 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/struct.h"
 
-/// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
 namespace lps {
 
 using atermpp::aterm;
@@ -205,7 +204,7 @@ namespace sort_expr {
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::sort_expression;
@@ -222,5 +221,6 @@ struct aterm_traits<sort_expression>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H

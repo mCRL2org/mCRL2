@@ -16,7 +16,7 @@
 
 namespace lps {
 
-/// \internal
+/// \cond INTERNAL_DOCS
 struct data_variable_map_replace_helper
 {
   const std::map<data_variable, data_expression>& m_replacements;
@@ -43,6 +43,7 @@ struct data_variable_map_replace_helper
     }
   }
 };
+/// \endcond
 
 /// Replaces all data_variables in the term t using the specified map of replacements.
 template <typename Term>

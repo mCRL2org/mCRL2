@@ -149,7 +149,7 @@ struct assignment_list_substitution
 {
   const data_assignment_list& m_assignments;
 
-  /// \internal
+  /// \cond INTERNAL_DOCS
   struct compare_assignment_lhs
   {
     data_variable m_variable;
@@ -164,7 +164,6 @@ struct assignment_list_substitution
     }
   };
 
-  /// \internal
   struct assignment_list_substitution_helper
   {
     const data_assignment_list& l;
@@ -190,6 +189,7 @@ struct assignment_list_substitution
       }
     }
   };
+  /// \endcond
   
   /// Constructor.
   ///
@@ -213,7 +213,7 @@ struct assignment_list_substitution
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_assignment;
@@ -228,6 +228,7 @@ struct aterm_traits<data_assignment>
   static ATerm term(data_assignment t)     { return t.term(); }
   static ATerm* ptr(data_assignment& t)    { return &t.term(); }
 };
+/// \endcond
 
 } // namespace atermpp
 

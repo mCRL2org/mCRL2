@@ -459,7 +459,7 @@ namespace data_expr {
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_expression;
@@ -476,5 +476,6 @@ struct aterm_traits<data_expression>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H

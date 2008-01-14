@@ -12,7 +12,6 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-/// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
 namespace lps {
 
 using atermpp::aterm;
@@ -100,7 +99,7 @@ bool is_sort_arrow(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::sort_arrow;
@@ -117,5 +116,6 @@ struct aterm_traits<sort_arrow>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_SORT_ARROW_H

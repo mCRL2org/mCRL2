@@ -146,7 +146,7 @@ bool is_data_equation(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_equation;
@@ -163,5 +163,6 @@ struct aterm_traits<data_equation>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_EQUATION_H

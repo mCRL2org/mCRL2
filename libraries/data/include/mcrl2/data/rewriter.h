@@ -86,9 +86,8 @@ class rewriter
 		  return m_rewriter.get()->rewrite((ATermAppl) t);
 		}
 
-		/// \brief Rewrites a data expression, and on the fly applies the substitutions
+		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
 		/// in the sequence [first, last[.
-		/// \param d The term to be rewritten.
 		/// \return The normal form of d.
 		// Question: is this function guaranteed to terminate?
 		///

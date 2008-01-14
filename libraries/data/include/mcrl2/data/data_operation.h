@@ -69,7 +69,7 @@ bool is_data_operation(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_operation;
@@ -86,5 +86,6 @@ struct aterm_traits<data_operation>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_OPERATION_H

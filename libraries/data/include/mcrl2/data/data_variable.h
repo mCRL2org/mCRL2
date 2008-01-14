@@ -99,7 +99,7 @@ data_expression_list make_data_expression_list(data_variable_list l)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_variable;
@@ -116,5 +116,6 @@ struct aterm_traits<data_variable>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_VARIABLE_H

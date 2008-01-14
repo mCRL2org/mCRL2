@@ -91,7 +91,7 @@ bool is_sort_identifier(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::sort_identifier;
@@ -108,5 +108,6 @@ struct aterm_traits<sort_identifier>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_SORT_ID_H

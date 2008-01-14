@@ -75,7 +75,7 @@ bool is_data_application(aterm_appl t)
 
 } // namespace lps
 
-/// \internal
+/// \cond INTERNAL_DOCS
 namespace atermpp
 {
 using lps::data_application;
@@ -92,5 +92,6 @@ struct aterm_traits<data_application>
 };
 
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_DATA_DATA_APPLICATION_H
