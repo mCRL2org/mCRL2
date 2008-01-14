@@ -125,7 +125,7 @@ namespace atermpp
       { return std::string(ATwriteToString(m_term)); }
   };
 
-  /// \overload
+  /// \internal
   ///
   template <>                           
   struct aterm_traits<aterm_base>
@@ -218,7 +218,7 @@ namespace atermpp
       { return m_term; } 
   }; 
 
-  /// \overload
+  /// \internal
   ///
   template <>                           
   struct aterm_traits<aterm>            

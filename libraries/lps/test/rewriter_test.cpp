@@ -153,11 +153,14 @@ void test1()
   
   cout << pp(data_application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
+  
+  // test destructor
+  rewriter r1 = r;
 }
 
-int test_main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test1();
 

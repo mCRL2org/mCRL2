@@ -81,7 +81,7 @@ namespace atermpp
       }
   };
 
-  /// \overload
+  /// \internal
   ///
   template <>
   struct aterm_traits<aterm_blob>

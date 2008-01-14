@@ -41,9 +41,9 @@ struct replace_variables
   }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   using namespace lps::data_expr;
 

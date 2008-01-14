@@ -291,7 +291,7 @@ namespace atermpp {
   term_list<Term> operator+(Term t, term_list<Term> l)
   { return push_front(l, t); }
 
-  /// \overload
+  /// \internal
   ///
   template <typename Term>
   struct aterm_traits<term_list<Term> >

@@ -17,9 +17,9 @@ using namespace atermpp;
 using namespace lps;
 using namespace lps::detail;
 
-int main()
+int main(int argc, char* argv[])
 {
-  MCRL2_CORE_CORE_INIT()
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   specification spec1 = mcrl22lps(ABP_SPECIFICATION);
   specification spec2(spec1.data(),

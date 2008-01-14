@@ -74,7 +74,7 @@ class my_program: public lps::filter_program
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   std::string input_filename;
   std::string output_filename;
@@ -117,9 +117,9 @@ int main(int argc, char* argv[])
                        output_extension,
                        input_filename,
                        output_filename,
-                       var_map.count("quiet"),
-                       var_map.count("verbose"),
-                       var_map.count("debug")
+                       var_map.count("quiet") != 0,
+                       var_map.count("verbose") != 0,
+                       var_map.count("debug") != 0
                       );
 
     if (var_map.count("help"))

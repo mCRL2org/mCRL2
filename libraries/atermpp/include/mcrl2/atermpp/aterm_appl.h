@@ -231,7 +231,7 @@ namespace atermpp
   ///
   typedef term_appl<aterm> aterm_appl;
 
-  /// \overload
+  /// \internal
   ///
   template <typename Term>
   struct aterm_traits<term_appl<Term> >

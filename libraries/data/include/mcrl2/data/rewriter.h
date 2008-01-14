@@ -18,7 +18,9 @@ namespace lps {
 
 /// \brief A rewriter class. This class is a wrapper for the Rewriter class.
 /// The purpose of this class is to hide the internal Rewriter format from the
-/// user, and to offer a common C++ interface.
+/// user, and to offer a common C++ interface. Note that copies of a rewriter
+/// share the same rewriter object.
+///
 class rewriter
 {
   private:
@@ -70,16 +72,8 @@ class rewriter
     /// Constructor.
     ///
     rewriter(data_specification d, strategy s = jitty)
-    {
-      m_rewriter = createRewriter(d, static_cast<RewriteStrategy>(s));
-    }
-
-    /// Destructor.
-    ///
-    ~rewriter()
-    {
-      delete m_rewriter;
-    }
+      : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
+    { }
 
 		/// \brief Rewrites a data expression.
 		/// \param d The term to be rewritten.
@@ -88,8 +82,8 @@ class rewriter
 		///
 		data_expression operator()(const data_expression& d) const
 		{
-		  ATerm t = m_rewriter->toRewriteFormat(d);
-		  return m_rewriter->rewrite((ATermAppl) t);
+		  ATerm t = m_rewriter.get()->toRewriteFormat(d);
+		  return m_rewriter.get()->rewrite((ATermAppl) t);
 		}
 
 		/// \brief Rewrites a data expression, and on the fly applies the substitutions
@@ -101,14 +95,14 @@ class rewriter
 		template <typename Iter>
 		data_expression operator()(const data_expression& d, Iter first, Iter last) const
 		{
-		  ATerm t = m_rewriter->toRewriteFormat(d);
+		  ATerm t = m_rewriter.get()->toRewriteFormat(d);
 		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
 		  for (Iter i = first; i != last; ++i)
 		  {
-		    m_rewriter->setSubstitution(i->m_variable, i->m_value);
+		    m_rewriter.get()->setSubstitution(i->m_variable, i->m_value);
 		  }
-		  data_expression result = m_rewriter->rewrite((ATermAppl) t);
-		  m_rewriter->clearSubstitutions();
+		  data_expression result = m_rewriter.get()->rewrite((ATermAppl) t);
+		  m_rewriter.get()->clearSubstitutions();
 		  return result;
 		}
 
@@ -116,21 +110,21 @@ class rewriter
     ///
     substitution make_substitution(const data_variable& variable, const data_expression& value)
     {
-      return substitution(variable, m_rewriter->toRewriteFormat(value));
+      return substitution(variable, m_rewriter.get()->toRewriteFormat(value));
     }
 
     /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.
     ///
     bool add_rule(const data_equation& eq)
     {
-      return m_rewriter->addRewriteRule(eq);
+      return m_rewriter.get()->addRewriteRule(eq);
     }
 
     /// Removes the equation eq from the rewriter rules.
     ///
     void remove_rule(const data_equation& eq)
     {
-      m_rewriter->removeRewriteRule(eq);
+      m_rewriter.get()->removeRewriteRule(eq);
     }
 };
 

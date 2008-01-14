@@ -25,12 +25,12 @@ using namespace lps;
 using namespace lps::detail;
 using boost::format;
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   
   specification spec = mcrl22lps(ABP_SPECIFICATION);
-  cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;
+  cout << "check_term_SpecV1(spec) = " << check_term_SpecV1(spec) << endl;
 
   aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
   cout << "check_rule_OpId(f1) = " << check_rule_OpId(f1) << endl;

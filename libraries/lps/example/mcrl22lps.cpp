@@ -19,7 +19,7 @@ using namespace lps::detail;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   string infile(argv[1]);
   specification spec = mcrl22lps(read_text(infile));

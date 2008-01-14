@@ -11,7 +11,6 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
-#include "mcrl2/core/core_init.h"
 #include "gc.h"
 
 const std::string SPECIFICATION =
@@ -27,9 +26,9 @@ const std::string SPECIFICATION =
 "                                         \n"
 "init P(0);                               \n";
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   std::stringstream spec_stream;
   spec_stream << SPECIFICATION;

@@ -29,7 +29,7 @@ struct aterm_traits
   static T* ptr(T& t)             { return &t; }
 };
 
-/// \overload
+/// \internal
 ///
 template <>
 struct aterm_traits<ATerm>
@@ -42,7 +42,7 @@ struct aterm_traits<ATerm>
   static ATerm* ptr(ATerm& t)         { return &t; }
 };
 
-/// \overload
+/// \internal
 ///
 template <>
 struct aterm_traits<ATermList>
@@ -55,7 +55,7 @@ struct aterm_traits<ATermList>
   static ATerm* ptr(ATermList& t)     { return reinterpret_cast<ATerm*>(&t); }
 };
 
-/// \overload
+/// \internal
 ///
 template <>
 struct aterm_traits<ATermAppl>
@@ -68,7 +68,7 @@ struct aterm_traits<ATermAppl>
   static ATerm* ptr(ATermAppl& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \overload
+/// \internal
 ///
 template <>                           
 struct aterm_traits<ATermBlob>        
@@ -81,7 +81,7 @@ struct aterm_traits<ATermBlob>
   static ATerm* ptr(ATermBlob& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \overload
+/// \internal
 ///
 template <>                           
 struct aterm_traits<ATermReal>        
@@ -94,7 +94,7 @@ struct aterm_traits<ATermReal>
   static ATerm* ptr(ATermReal& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \overload
+/// \internal
 ///
 template <>                           
 struct aterm_traits<ATermInt>         
