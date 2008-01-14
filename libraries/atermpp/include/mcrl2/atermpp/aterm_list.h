@@ -17,31 +17,32 @@
 #include "mcrl2/atermpp/detail/aterm_conversion.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 
+/// \cond INTERNAL_DOCS
 namespace {
   // In the ATerm library the following functions are #define's:
-  
+  //
   // #define   ATgetNext(l)  ((l)->tail)
   // #define   ATgetFirst(l) ((l)->head)
+  //
+  // So we need to turn them into proper functions.
   
-  /// \internal
   inline ATermList aterm_get_next(ATermList l)
   {
     return ATgetNext(l);
   }
   
-  /// \internal
   inline ATerm aterm_get_first(ATermList l)
   {
     return ATgetFirst(l);
   }
 
-  /// \internal
   inline
   int aterm_get_length(ATermList l)
   {
     return ATgetLength(l);
   }
 }
+/// \endcond
 
 namespace atermpp {
 
@@ -291,8 +292,7 @@ namespace atermpp {
   term_list<Term> operator+(Term t, term_list<Term> l)
   { return push_front(l, t); }
 
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   template <typename Term>
   struct aterm_traits<term_list<Term> >
   {
@@ -303,6 +303,7 @@ namespace atermpp {
     static ATerm term(term_list<Term> t)     { return t.term(); }
     static ATerm* ptr(term_list<Term>& t)    { return &t.term(); }
   };
+  /// \endcond
 
   /// Equality operator.
   template <typename Term>

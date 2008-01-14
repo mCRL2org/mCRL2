@@ -79,8 +79,7 @@ namespace atermpp
       }
   }; 
 
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   template <>
   struct aterm_traits<aterm_real>
   {
@@ -91,6 +90,7 @@ namespace atermpp
     static ATerm term(aterm_real t)     { return t.term(); }
     static ATerm* ptr(aterm_real& t)    { return &t.term(); }
   };
+  /// \endcond
 
 } // namespace atermpp
 

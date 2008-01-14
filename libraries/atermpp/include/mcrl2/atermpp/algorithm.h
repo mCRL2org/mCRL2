@@ -18,7 +18,7 @@
 namespace atermpp
 {
   /// \brief Calls op(elem) for subterms of the term t.
-  /// \ret a copy of the (internally modified) op.
+  /// \return a copy of the (internally modified) op.
   /// The function op must have the signature bool op(aterm_appl t).
   /// When op(t) is false, the children of t are skipped.
   template <typename UnaryFunction, typename Term>
@@ -115,7 +115,7 @@ namespace atermpp
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
 
-  /// \internal
+  /// \cond INTERNAL_DOCS
   template <typename ReplaceFunction, typename CheckFunction>
   struct checked_replace_helper
   {
@@ -138,6 +138,7 @@ namespace atermpp
       }
     }
   };
+  /// \endcond
 
   /// Replaces subterms in the term t. Each subterm for which f(s) returns true
   /// is replaced by r(s), and the recursion is not continued.

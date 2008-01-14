@@ -125,8 +125,7 @@ namespace atermpp
       { return std::string(ATwriteToString(m_term)); }
   };
 
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   template <>                           
   struct aterm_traits<aterm_base>
   {                                     
@@ -137,6 +136,7 @@ namespace atermpp
     static ATerm term(aterm_base t)          { return t.term(); }
     static ATerm* ptr(aterm_base& t)         { return &t.term(); }
   };
+  /// \endcond
 
   /// Returns true if x has the default value of an aterm. In the ATerm Library
   /// this value is given by ATfalse.
@@ -218,8 +218,7 @@ namespace atermpp
       { return m_term; } 
   }; 
 
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   template <>                           
   struct aterm_traits<aterm>            
   {                                     
@@ -230,6 +229,7 @@ namespace atermpp
     static ATerm term(aterm t)          { return t.term(); }
     static ATerm* ptr(aterm& t)         { return &t.term(); }
   };
+  /// \endcond
 
   /// Read an aterm from string.
   /// This function parses a character string into an aterm.

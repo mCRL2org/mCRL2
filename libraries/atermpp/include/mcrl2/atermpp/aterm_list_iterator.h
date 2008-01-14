@@ -15,13 +15,14 @@
 
 namespace atermpp {
 
+  /// \cond INTERNAL_DOCS
   // needed for conversion of the return type of ATgetFirst
-  /// \internal
   template <class T>
   struct term_list_iterator_traits
   {
     typedef ATerm value_type;
   };
+  /// \endcond
 
 /// \brief Iterator for term_list.
 ///
@@ -49,19 +50,18 @@ class term_list_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// \internal
+    /// \cond INTERNAL_DOCS
     bool equal(term_list_iterator const& other) const
     { return this->m_list == other.m_list; }
 
-    /// \internal
     const Value dereference() const
     {
       return Value(typename term_list_iterator_traits<Value>::value_type(ATgetFirst(m_list)));
     }
 
-    /// \internal
     void increment()
     { m_list = ATgetNext(m_list); }
+    /// \endcond
 
     ATermList m_list;
 };

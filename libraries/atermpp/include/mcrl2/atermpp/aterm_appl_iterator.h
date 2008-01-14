@@ -40,23 +40,21 @@ class term_appl_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// \internal
+    /// \cond INTERNAL_DOCS
     bool equal(term_appl_iterator const& other) const
     { return this->m_term == other.m_term; }
 
-    /// \internal
     const Value dereference() const
     {
       return Value(*m_term);
     }
 
-    /// \internal
     void increment()
     { m_term++; }
 
-    /// \internal
     void decrement()
     { m_term--; }
+    /// \endcond
 
     ATerm* m_term;
 };

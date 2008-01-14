@@ -231,8 +231,7 @@ namespace atermpp
   ///
   typedef term_appl<aterm> aterm_appl;
 
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   template <typename Term>
   struct aterm_traits<term_appl<Term> >
   {
@@ -243,6 +242,7 @@ namespace atermpp
     static ATerm term(term_appl<Term> t)     { return t.term(); }
     static ATerm* ptr(term_appl<Term>& t)    { return &t.term(); }
   };
+  /// \endcond
 
   /// Equality operator.
   ///

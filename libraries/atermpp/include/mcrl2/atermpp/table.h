@@ -16,8 +16,7 @@
 
 namespace atermpp
 {
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   struct table_deleter
   {
     void operator()(ATermTable t)
@@ -25,6 +24,7 @@ namespace atermpp
       ATtableDestroy(t);
     }
   };
+  /// \endcond
 
   /// Table containing ATerms. N.B. Copies of a table refer to the same object.
   ///

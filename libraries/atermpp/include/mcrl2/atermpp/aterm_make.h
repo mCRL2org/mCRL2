@@ -31,6 +31,7 @@
 #    include <boost/preprocessor/punctuation/comma_if.hpp>
 #    include <boost/preprocessor/iteration/iterate.hpp>
 
+/// The default maximum for the number of parameters of make_term.
 #    ifndef ATERM_MAKE_MAX_SIZE
 #      define ATERM_MAKE_MAX_SIZE 10  // default maximum size is 10
 #    endif

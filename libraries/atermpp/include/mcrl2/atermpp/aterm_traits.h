@@ -20,17 +20,26 @@ namespace atermpp {
 template <typename T>
 struct aterm_traits
 {
-  typedef void* aterm_type; 
+  /// The type of the aterm pointer (ATermAppl / ATermList ...)
+  typedef void* aterm_type;
+
+  /// Protects the term t from garbage collection.
   static void protect(T* t)       {}
+
+  /// Unprotects the term t from garbage collection.
   static void unprotect(T* t)     {}
+
+  /// Marks t for garbage collection.
   static void mark(T t)           {}
+
+  /// Returns the ATerm that corresponds to the term t.
   static T term(const T& t)       { return t; }
+
+  /// Returns a pointer to the ATerm that corresponds to the term t.
   static const T* ptr(const T& t) { return &t; }
-  static T* ptr(T& t)             { return &t; }
 };
 
-/// \internal
-///
+/// \cond INTERNAL_DOCS
 template <>
 struct aterm_traits<ATerm>
 {
@@ -42,8 +51,6 @@ struct aterm_traits<ATerm>
   static ATerm* ptr(ATerm& t)         { return &t; }
 };
 
-/// \internal
-///
 template <>
 struct aterm_traits<ATermList>
 {
@@ -55,8 +62,6 @@ struct aterm_traits<ATermList>
   static ATerm* ptr(ATermList& t)     { return reinterpret_cast<ATerm*>(&t); }
 };
 
-/// \internal
-///
 template <>
 struct aterm_traits<ATermAppl>
 {
@@ -68,8 +73,6 @@ struct aterm_traits<ATermAppl>
   static ATerm* ptr(ATermAppl& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \internal
-///
 template <>                           
 struct aterm_traits<ATermBlob>        
 {                                     
@@ -81,8 +84,6 @@ struct aterm_traits<ATermBlob>
   static ATerm* ptr(ATermBlob& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \internal
-///
 template <>                           
 struct aterm_traits<ATermReal>        
 {                                     
@@ -94,8 +95,6 @@ struct aterm_traits<ATermReal>
   static ATerm* ptr(ATermReal& t)     { return reinterpret_cast<ATerm*>(&t); }
 };                                    
                                       
-/// \internal
-///
 template <>                           
 struct aterm_traits<ATermInt>         
 {                                     
@@ -106,6 +105,7 @@ struct aterm_traits<ATermInt>
   static ATerm term(ATermInt t)       { return reinterpret_cast<ATerm>(t); }
   static ATerm* ptr(ATermInt& t)      { return reinterpret_cast<ATerm*>(&t); }
 };                                    
+/// \endcond
                                       
 } // namespace atermpp
 

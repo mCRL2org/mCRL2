@@ -16,8 +16,7 @@
 
 namespace atermpp
 {
-  /// \internal
-  ///
+  /// \cond INTERNAL_DOCS
   struct indexed_set_deleter
   {
     void operator()(ATermIndexedSet s)
@@ -25,6 +24,7 @@ namespace atermpp
       ATindexedSetDestroy(s);
     }
   }; 
+  /// \endcond
   
   /// Indexed set. N.B. Copies of an indexed_set refer to the same object.
   ///
