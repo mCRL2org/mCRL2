@@ -893,45 +893,9 @@ namespace squadt {
   }
 
   void processor::monitor::tool_configuration(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > c) {
-    assert(t.get() == owner.lock().get());
-
-    /* collect set of output arguments of the existing configuration */
-    std::set < tipi::object const* > old_outputs;
-
-    tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
-
-    for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-      old_outputs.insert(static_cast < tipi::object const* > (&*i));
-    }
-
-    /* Wait until the tool has connected and identified itself */
-    if (await_connection()) {
-      /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
-      send_configuration(c);
-
-      /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(tipi::message_configuration).get() != 0) {
-        /* End tool execution */
-        finish();
-
-        boost::shared_ptr < tipi::configuration > configuration(get_configuration());
-
-        /* Operation completed successfully */
-        t->impl->process_configuration(configuration, old_outputs, false);
-      }
-    }
-    else {
-      /* End tool execution */
-      finish();
-    }
-  }
-
-  void processor::monitor::tool_operation(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > const& c) {
-    assert(t.get() == owner.lock().get());
-
-    boost::shared_ptr < processor > guard(owner.lock());
-
-    if (guard) {
+    try {
+      assert(t.get() == owner.lock().get());
+     
       /* collect set of output arguments of the existing configuration */
       std::set < tipi::object const* > old_outputs;
      
@@ -948,44 +912,90 @@ namespace squadt {
      
         /* Wait until configuration is accepted, or the tool has terminated */
         if (await_message(tipi::message_configuration).get() != 0) {
-          /* Do not let process status influence return status */
-          clear_handlers(tipi::message_task_done);
+          /* End tool execution */
+          finish();
      
-          send_start_signal();
+          boost::shared_ptr < tipi::configuration > configuration(get_configuration());
      
-          if (await_completion()) {
-            boost::shared_ptr < tipi::configuration > configuration(get_configuration());
+          /* Operation completed successfully */
+          t->impl->process_configuration(configuration, old_outputs, false);
+        }
+      }
+      else {
+        /* End tool execution */
+        finish();
+      }
+    }
+    catch(std::exception& e) {
+      get_logger().log(1, "Fatal exception occured:" + std::string(e.what()));
+    }
+  }
 
-            /* Operation completed successfully */
-            t->impl->process_configuration(configuration, old_outputs);
+  void processor::monitor::tool_operation(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > const& c) {
+    assert(t.get() == owner.lock().get());
      
-            /* Successful, set new status */
-            boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+    try {
+      boost::shared_ptr < processor > guard(owner.lock());
      
-            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-              o->status = object_descriptor::reproducible_up_to_date;
+      if (guard) {
+        /* collect set of output arguments of the existing configuration */
+        std::set < tipi::object const* > old_outputs;
+       
+        tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
+       
+        for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
+          old_outputs.insert(static_cast < tipi::object const* > (&*i));
+        }
+       
+        /* Wait until the tool has connected and identified itself */
+        if (await_connection()) {
+          /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
+          send_configuration(c);
+       
+          /* Wait until configuration is accepted, or the tool has terminated */
+          if (await_message(tipi::message_configuration).get() != 0) {
+            /* Do not let process status influence return status */
+            clear_handlers(tipi::message_task_done);
+       
+            send_start_signal();
+       
+            if (await_completion()) {
+              boost::shared_ptr < tipi::configuration > configuration(get_configuration());
+     
+              /* Operation completed successfully */
+              t->impl->process_configuration(configuration, old_outputs);
+       
+              /* Successful, set new status */
+              boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+       
+              BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+                o->status = object_descriptor::reproducible_up_to_date;
+              }
             }
-          }
-          else {
-            /* Task completed unsuccessfully, set new status */
-            boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
-     
-            BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
-              o->status = object_descriptor::reproducible_out_of_date;
+            else {
+              /* Task completed unsuccessfully, set new status */
+              boost::iterator_range< processor::output_object_iterator > output_range(guard->get_output_iterators());
+       
+              BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
+                o->status = object_descriptor::reproducible_out_of_date;
+              }
             }
           }
         }
       }
+     
+      /* End tool execution */
+      finish();
+     
+      /* Force the project manager to do a status update */
+      boost::shared_ptr < project_manager > g(t->impl->manager);
+     
+      if (g.get() != 0) {
+        g->update_status(t);
+      }
     }
-
-    /* End tool execution */
-    finish();
-
-    /* Force the project manager to do a status update */
-    boost::shared_ptr < project_manager > g(t->impl->manager);
-
-    if (g.get() != 0) {
-      g->update_status(t);
+    catch(std::exception& e) {
+      get_logger().log(1, "Fatal exception occured:" + std::string(e.what()));
     }
   }
 

@@ -13,6 +13,7 @@
 #include "gui/resources.hpp"
 #include "gui/dialog/project_settings.hpp"
 #include "gui/dialog/preferences.hpp"
+#include "settings_manager.hpp"
 #include "tool_manager.hpp"
 
 #include <wx/menu.h>
@@ -269,11 +270,19 @@ namespace squadt {
     }
 
     void main::quit() {
-      if (project_view != 0) {
-        remove_project_view(project_view);
+      try {
+        if (project_view != 0) {
+          remove_project_view(project_view);
+        }
+       
+        global_build_system.shutdown();
       }
-
-      global_build_system.shutdown();
+      catch (std::exception& e) {
+        wxMessageDialog(0, wxT("Some settings could not be saved due to a write error.\n\n")
+                           wxT("Please check the permissions of all files in ") +
+                           wxString(global_build_system.get_settings_manager()->path_to_user_settings().c_str(), wxConvLocal),
+                           wxT("Fatal: save settings failed"), wxOK).ShowModal();
+      }
 
       Destroy();
     }

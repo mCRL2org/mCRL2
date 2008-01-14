@@ -563,22 +563,26 @@ bool GraphFrame::OptimizeDrawing(double precision) {
       vertex_and_forces& p1 = vertices[(*i)->get_n1()->Get_num()];
       vertex_and_forces& p2 = vertices[(*i)->get_n2()->Get_num()];
  
-      const double xdiff = p2.x - p1.x;
-      const double ydiff = p2.y - p1.y;
-      const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
- 
-      // Linear approach : 
-      // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
-      // Logarithmic approach : 
-      const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
- 
-      const double sx = force_shared_component * xdiff;
-      const double sy = force_shared_component * ydiff;
- 
-      p1.x_force += sx;
-      p1.y_force += sy;
-      p2.x_force -= sx;
-      p2.y_force -= sy;
+      if (&p1 != &p2) {
+        const double xdiff = p2.x - p1.x;
+        const double ydiff = p2.y - p1.y;
+        const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
+      
+        // Linear approach : 
+        // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
+        // Logarithmic approach : 
+        const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
+      
+        if (force_shared_component < 1) {
+          const double sx = force_shared_component * xdiff;
+          const double sy = force_shared_component * ydiff;
+      
+          p1.x_force += sx;
+          p1.y_force += sy;
+          p2.x_force -= sx;
+          p2.y_force -= sy;
+        }
+      }
     }
   }
 

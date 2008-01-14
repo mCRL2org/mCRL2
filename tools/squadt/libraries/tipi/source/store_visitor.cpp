@@ -86,6 +86,7 @@ namespace tipi {
                                 ::utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_help_stream(p.string().c_str(), std::ios_base::out) {
 
+    m_help_stream.exceptions(std::ofstream::failbit|std::ofstream::badbit);
   }
 
   inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
