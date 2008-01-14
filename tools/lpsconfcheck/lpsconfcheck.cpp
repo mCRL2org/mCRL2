@@ -664,11 +664,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::read_input() {
       
       if (!f_invariant_file_name.empty()) {
-        //f_invariant = (ATermAppl) read_ATerm_from_file(f_invariant_file_name, "invariant");
         std::ifstream instream(f_invariant_file_name.c_str());
       
-        instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
-      
+        //XXX commented out because it always raised exceptions, rendering the program useless
+        //instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
+
         if (!instream.is_open()) {
           throw std::runtime_error("cannot open input file '" + f_invariant_file_name + "'");
         }

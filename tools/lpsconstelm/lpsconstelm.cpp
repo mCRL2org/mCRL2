@@ -840,7 +840,7 @@ inline bool lpsConstElm::loadFile(std::string const& filename) {
   }
   catch (std::runtime_error e)
   {
-    gsErrorMsg("lpsconstelm: error: could not read input file '%s'\n", filename.c_str());
+    gsErrorMsg("could not read input file '%s'\n", filename.c_str());
     return false;
   }
   //LPS x = p_spec.process();

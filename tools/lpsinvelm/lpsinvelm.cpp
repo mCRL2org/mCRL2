@@ -385,9 +385,9 @@ using namespace mcrl2::utilities;
       } else {
         if (v_number_of_remaining_arguments > 0) {
           f_lps_file_name = strdup(a_argv[optind]);
-          if (v_number_of_remaining_arguments == 2) {
-            f_output_file_name = strdup(a_argv[optind + 1]);
-          }
+        }
+        if (v_number_of_remaining_arguments == 2) {
+          f_output_file_name = strdup(a_argv[optind + 1]);
         }
       }
       if (f_invariant_file_name == 0) {
@@ -406,6 +406,23 @@ using namespace mcrl2::utilities;
 
     void LPS_Inv_Elm::read_input() {
 
+      //read the LPS
+      lps::specification lps_specification;
+      try {
+        lps_specification.load((f_lps_file_name == 0)?"-":f_lps_file_name);
+      } catch (std::exception) {
+        gsErrorMsg("could not read LPS from '%s'\n", (f_lps_file_name == 0)?"stdin":f_lps_file_name);
+        exit(1);
+      }
+
+      if (!lps_specification.is_well_typed()) {
+        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", (f_lps_file_name == 0)?"stdin":f_lps_file_name);
+        exit(1);
+      }
+
+      // temporary measure until the invariant and confluence checkers use the lps framework
+      f_lps = (ATermAppl) lps_specification;
+
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name);
       if (!instream.is_open()) {
@@ -418,29 +435,18 @@ using namespace mcrl2::utilities;
       if(!f_invariant){
         exit(1);
       }
-
-      lps::specification lps_specification(f_lps);
-
-      if (lps_specification.is_well_typed()) {
-        // temporary measure until the invariant and confluence checkers use the lps framework
-        f_lps = (ATermAppl) lps_specification;
-
-        //typecheck the invariant formula
-        f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
-        if(!f_invariant){
-          gsErrorMsg("Typechecking of the invariant formula failed.\n");
-          exit(1);
-        }
-       
-        //data implement the invariant formula
-        f_invariant = implement_data_data_expr(f_invariant,lps_specification);
-        if(!f_invariant){
-          gsErrorMsg("Data implementation of the invariant formula failed.\n");
-          exit(1);
-        }
+      
+      //typecheck the invariant formula
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
+      if(!f_invariant){
+        gsErrorMsg("Typechecking of the invariant formula failed.\n");
+        exit(1);
       }
-      else {
-        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", f_lps_file_name);
+     
+      //data implement the invariant formula
+      f_invariant = implement_data_data_expr(f_invariant,lps_specification);
+      if(!f_invariant){
+        gsErrorMsg("Data implementation of the invariant formula failed.\n");
         exit(1);
       }
     }
@@ -490,7 +496,7 @@ using namespace mcrl2::utilities;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        ATwriteToNamedSAFFile((ATerm) f_lps, f_output_file_name);
+        ATwriteToNamedSAFFile((ATerm) f_lps, (f_output_file_name == 0)?"-":f_output_file_name);
       }
     }
 
