@@ -71,8 +71,8 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   // values below are reset later when the right panel is setuped
   EdgeStiffness = 1.0; 
   NodeStrength = 1000.0; 
-  NaturalLength = 20.0;
   node_radius = 10;
+  NaturalLength = 20.0;
 
   BuildLayout();
 
@@ -462,8 +462,6 @@ void GraphFrame::Init(wxString LTSfile) {
         vectNode.push_back(new_node);
       }   
 
-      //NaturalLength = (400 / vectNode.size())+8;
-      
       //initialize vectEdge
       for (transition_iterator ti = mylts.get_transitions(); ti.more(); ++ti) {
         // todo error detection ...
@@ -526,8 +524,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   if (!StopOpti) {
     EdgeStiffness = sliderEdgeStiffness->GetValue();
     NodeStrength  = sliderNodeStrength->GetValue();
-    NaturalLength = sliderNaturalLength->GetValue();
-    node_radius  = spinNodeRadius->GetValue();
+    node_radius   = spinNodeRadius->GetValue();
+    NaturalLength = 2 * node_radius + sliderNaturalLength->GetValue();
   }
   else if (vectNode.size() == 0) {
     return false;
@@ -587,12 +585,6 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   // Replace the nodes & edges according to their new position (sum of forces for all vertices and both components)
   double achieved_precision = 0.0;
 
-  // minimum and maximum of vertex coordinates (only for scaling to viewport)
-  double xmin = std::numeric_limits< double >::max();
-  double xmax = std::numeric_limits< double >::min();
-  double ymin = std::numeric_limits< double >::max();
-  double ymax = std::numeric_limits< double >::min();
-
   for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
     // First calculate the repulsing force for node i with respect to
     // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
@@ -625,37 +617,44 @@ bool GraphFrame::OptimizeDrawing(double precision) {
       i->x_force = 0;
       i->y_force = 0;
     }
-
-    if (i->x < xmin) {
-      xmin = i->x;
-    }
-    else if (xmax < i->x) {
-      xmax = i->x;
-    }
-
-    if (i->y < ymin) {
-      ymin = i->y;
-    }
-    else if (ymax < i->y) {
-      ymax = i->y;
-    }
   }
 
   // As of this point the positioning algorithm is finished, however some
   // viewport specific transformation must be done. In a redesign positioning
   // and display should be separated.
   if ((!StopOpti && slider_speedup->GetValue() < ++steps_taken) || !moved_vertices.empty()) {
-    // Scale such that all nodes have a position within the viewport (relative
-    // distances are respected up to numeric precision)
+    // minimum and maximum of vertex coordinates (only for scaling to viewport)
+    double xmin = std::numeric_limits< double >::max();
+    double xmax = std::numeric_limits< double >::min();
+    double ymin = std::numeric_limits< double >::max();
+    double ymax = std::numeric_limits< double >::min();
+
+    // compute bounding box parameters
+    for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
+      if (i->x < xmin) {
+        xmin = i->x;
+      }
+      if (xmax < i->x) {
+        xmax = i->x;
+      }
+     
+      if (i->y < ymin) {
+        ymin = i->y;
+      }
+      if (ymax < i->y) {
+        ymax = i->y;
+      }
+    }
+
     double window_width  = static_cast < double > (leftPanel->Get_Width());
     double window_height = static_cast < double > (leftPanel->Get_Height());
  
-    double xscale = (window_width  - 2 * node_radius) / (xmax - xmin);
+    double xcentre = (xmin + xmax) / 2;
+    double ycentre = (ymin + ymax) / 2;
+
+    double xscale = (window_height - 2 * node_radius) / (xmax - xmin);
     double yscale = (window_height - 2 * node_radius) / (ymax - ymin);
- 
-    const double xcentre = (xmin + xmax) / 2;
-    const double ycentre = (ymin + ymax) / 2;
- 
+
     if (1 < xscale) {
       xscale = 1;
     }
