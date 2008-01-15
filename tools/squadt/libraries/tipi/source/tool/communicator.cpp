@@ -110,11 +110,15 @@ namespace tipi {
     void communicator::send_configuration() {
       boost::shared_ptr < configuration > c(boost::static_pointer_cast < communicator_impl > (impl)->current_configuration);
 
-      c->set_fresh(false);
+      assert(c);
 
-      message m(tipi::visitors::store(*c), tipi::message_configuration);
- 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
+      if (c) {
+        c->set_fresh(false);
+
+        message m(tipi::visitors::store(*c), tipi::message_configuration);
+
+        boost::static_pointer_cast < communicator_impl > (impl)->send_message(m);
+      }
     }
  
     /**
@@ -144,7 +148,7 @@ namespace tipi {
           if (!d.expired()) {
             std::string c;
            
-            {
+            if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
               tipi::store_visitor v(c);
            
               v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < ::tipi::display::element_identifier > (e));
@@ -201,7 +205,7 @@ namespace tipi {
     void communicator::send_display_data(layout::element const* e) {
       std::string        c;
 
-      {
+      if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
         tipi::store_visitor v(c);
 
         v.visit(*e,reinterpret_cast < ::tipi::display::element_identifier> (e));

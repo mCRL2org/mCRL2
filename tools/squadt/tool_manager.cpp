@@ -223,7 +223,7 @@ namespace squadt {
 
     for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
 #if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
-      path path_to_binary(std::string(basename(path(*t))).append(".exe");
+      path path_to_binary(std::string(boost::filesystem::basename(path(*t))).append(".exe"));
 
       path_to_binary = default_path / path_to_binary;
 #elif defined(__APPLE__)
@@ -236,7 +236,7 @@ namespace squadt {
         path_to_binary = default_path.branch_path() / path_to_binary;
       }
 #else
-      path path_to_binary(basename(*t));
+      path path_to_binary(boost::filesystem::basename(*t));
 
       path_to_binary = default_path / path_to_binary;
 #endif

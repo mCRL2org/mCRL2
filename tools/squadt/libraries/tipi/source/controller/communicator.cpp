@@ -53,9 +53,12 @@ namespace tipi {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_capabilities);
     }
  
-    /* Send the selected input configuration */
+    /**
+     * \pre c.get != 0
+     * Send the selected input configuration
+     **/
     void communicator::send_configuration(boost::shared_ptr < tipi::configuration > const& c) {
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(visitors::store(*c), tipi::message_configuration));
+        boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(visitors::store(*c), tipi::message_configuration));
     }
  
     /* Request a tool to terminate */
@@ -171,11 +174,13 @@ namespace tipi {
           if (g.get() != 0) {
             std::string c; 
       
-            try { 
+            try {
               tipi::store_visitor v(c); 
       
-              v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
-                display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
+              if (dynamic_cast< tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) { // safe to do reinterpret cast
+                v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
+                  display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
+              }
             } 
             catch (bool) {
               // find failed for some reason

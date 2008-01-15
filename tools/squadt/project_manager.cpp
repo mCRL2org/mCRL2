@@ -66,7 +66,6 @@ namespace squadt {
     if (filesystem::exists(store) && filesystem::is_directory(store)) {
       if (!filesystem::exists(project_file)) {
         if (b) {
-std::cerr << "store " << store << std::endl;
           import_directory(store);
 
           /* Create initial project description file */
