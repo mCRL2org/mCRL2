@@ -1,107 +1,22 @@
-import doxygen ;
 import quickbook ;
 
-doxygen atermppdoc
-     :
-       ../../atermpp/include/atermpp/algorithm.h
-       ../../atermpp/include/atermpp/aterm.h
-       ../../atermpp/include/atermpp/aterm_access.h
-       ../../atermpp/include/atermpp/aterm_allocator.h
-       ../../atermpp/include/atermpp/aterm_appl.h
-       ../../atermpp/include/atermpp/aterm_appl_iterator.h
-       ../../atermpp/include/atermpp/aterm_blob.h
-       ../../atermpp/include/atermpp/aterm_int.h
-       ../../atermpp/include/atermpp/aterm_list.h
-       ../../atermpp/include/atermpp/aterm_list_iterator.h
-       ../../atermpp/include/atermpp/aterm_place_holder.h
-       ../../atermpp/include/atermpp/aterm_real.h
-       ../../atermpp/include/atermpp/aterm_string.h
-       ../../atermpp/include/atermpp/aterm_traits.h
-       ../../atermpp/include/atermpp/atermpp.h
-       ../../atermpp/include/atermpp/deque.h
-       ../../atermpp/include/atermpp/dictionary.h
-       ../../atermpp/include/atermpp/function_symbol.h
-       ../../atermpp/include/atermpp/indexed_set.h
-       ../../atermpp/include/atermpp/list.h
-       ../../atermpp/include/atermpp/make_list.h
-       ../../atermpp/include/atermpp/map.h
-       ../../atermpp/include/atermpp/set.h
-       ../../atermpp/include/atermpp/substitute.h
-       ../../atermpp/include/atermpp/table.h
-       ../../atermpp/include/atermpp/transform.h
-       ../../atermpp/include/atermpp/utility.h
-       ../../atermpp/include/atermpp/vector.h
-     :
-       <prefix>atermpp
-       <doxygen:param>EXTRACT_ALL=YES
-       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
-       <doxygen:param>EXTRACT_PRIVATE=NO
-       <doxygen:param>ENABLE_PREPROCESSING=YES
-       <doxygen:param>MACRO_EXPANSION=YES
-       <doxygen:param>EXPAND_ONLY_PREDEF=YES
-       <doxygen:param>SEARCH_INCLUDES=YES
-       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
-     ;
-
-doxygen datadoc
-     : [ glob ../include/mcrl2/data/*.h ]
-     : <prefix>mcrl2
-       <doxygen:param>EXTRACT_ALL=YES
-       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
-       <doxygen:param>EXTRACT_PRIVATE=NO
-       <doxygen:param>ENABLE_PREPROCESSING=YES
-       <doxygen:param>MACRO_EXPANSION=YES
-       <doxygen:param>EXPAND_ONLY_PREDEF=YES
-       <doxygen:param>SEARCH_INCLUDES=YES
-       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
-     ;
-
-doxygen lpsdoc
-     : [ glob ../include/mcrl2/lps/*.h ]
-     : <prefix>mcrl2
-       <doxygen:param>EXTRACT_ALL=YES
-       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
-       <doxygen:param>EXTRACT_PRIVATE=NO
-       <doxygen:param>ENABLE_PREPROCESSING=YES
-       <doxygen:param>MACRO_EXPANSION=YES
-       <doxygen:param>EXPAND_ONLY_PREDEF=YES
-       <doxygen:param>SEARCH_INCLUDES=YES
-       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
-     ;
-
-doxygen pbesdoc
-     : [ glob ../include/mcrl2/pbes/*.h ]
-     : <prefix>mcrl2
-       <doxygen:param>EXTRACT_ALL=YES
-       <doxygen:param>HIDE_UNDOC_MEMBERS=NO
-       <doxygen:param>EXTRACT_PRIVATE=NO
-       <doxygen:param>ENABLE_PREPROCESSING=YES
-       <doxygen:param>MACRO_EXPANSION=YES
-       <doxygen:param>EXPAND_ONLY_PREDEF=YES
-       <doxygen:param>SEARCH_INCLUDES=YES
-       <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
-     ;
-
-xml manual
+xml lps
     :
-        manual.qbk
+        lps.qbk
     ;
 
 boostbook standalone
     :
-        manual
+        lps
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png
         <xsl:param>boost.image.alt=mCRL2
         <xsl:param>boost.image.w=294
         <xsl:param>boost.image.h=70
-        <xsl:param>boost.root=../../../lps/include
+        <xsl:param>boost.root=../../../mcrl2/lps/include
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
         <xsl:param>chunk.section.depth=3
-        <dependency>atermppdoc
-        <dependency>datadoc
-        <dependency>lpsdoc
-        <dependency>pbesdoc
     ;
+
