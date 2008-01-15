@@ -236,7 +236,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n\n",sort_expr);
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
     }
   }
   gsDebugMsg ("type checking sort expression part phase finished\n");
@@ -270,13 +270,13 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   gsDebugMsg ("type checking data expression part read-in phase finished\n");
   
   if(gsIsNotInferred(sort_expr)){
-    gsErrorMsg("type checking of data expressions failed (%T is not a sort expression)\n\n",sort_expr);
+    gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
     goto done;
   }
 
   if(gstcIsSortExprDeclared(sort_expr)){
     if(!gsIsDataExpr(data_expr)){
-      gsErrorMsg("type checking of data expressions failed (%T is not a data expression)\n\n",data_expr);
+      gsErrorMsg("type checking of data expression failed (%T is not a data expression)\n",data_expr);
       goto done;
     }
 
@@ -289,7 +289,7 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   if(destroy_vars) ATtableDestroy(Vars);
 
   if(Type) Result=data;
-  else gsErrorMsg("type checking of data expressions failed.\n\n");
+  else gsErrorMsg("type checking of data expressions failed\n");
 
 
   gsDebugMsg ("type checking data expression part phase finished\n");
@@ -330,11 +330,11 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n\n",sort_expr);
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
     }
   }
   else {
-      gsErrorMsg("Reading Sorts from LPS failed.\n\n");
+      gsErrorMsg("reading Sorts from LPS failed\n");
   }
 
   gstcDataDestroy();
@@ -357,7 +357,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
 
   gstcDataInit();
 
-  gsDebugMsg ("type checking of data expressions read-in phase started\n");
+  gsDebugMsg ("type checking of data expression read-in phase started\n");
 
   //XXX read-in from LPS (not finished)
   if (gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) &&
@@ -365,10 +365,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
       gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false) &&
       gstcReadInActs((ATermList) lps_spec.action_labels()))
   {
-    gsDebugMsg ("type checking of data expressions read-in phase finished\n");
+    gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
     if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
-      gsErrorMsg("type checking of data expressions failed (%T is not a sort expression)\n\n",sort_expr);
+      gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
     } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
       bool destroy_vars=(!Vars);
       if(destroy_vars) Vars=ATtableCreate(63,50);
@@ -376,7 +376,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
         ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
 	if(!NewVars){
 	  if(destroy_vars) ATtableDestroy(Vars);
-          gsErrorMsg("the parameters of the LPS cannot be used as variables\n\n");
+          gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
           goto finally;
         }
 	else Vars=NewVars;
@@ -386,10 +386,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
       ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?gsMakeSortUnknown():sort_expr);
       if(destroy_vars) ATtableDestroy(Vars);
       if(Type && !gsIsSortUnknown(Type)) Result=data;
-      else gsErrorMsg("type checking of data expressions failed.\n\n");
+      else gsErrorMsg("type checking of data expression failed\n");
     }
   } else {
-    gsErrorMsg("Reading from LPS failed.\n\n");
+    gsErrorMsg("reading from LPS failed\n");
   }
 
 finally:
@@ -423,7 +423,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
         ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
         if(!NewVars){
           ATtableDestroy(Vars);
-          gsErrorMsg("The parameters of the LPS cannot be used as variables\n\n");
+          gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
           goto finally;
         }
         else Vars=NewVars;
@@ -444,11 +444,11 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
       ATtableDestroy(Vars);
     }
     else {
-      gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n\n",mult_act);
+      gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n",mult_act);
     }
   }
   else {
-      gsErrorMsg("Reading from LPS failed.\n\n");
+      gsErrorMsg("reading from LPS failed\n");
   }
     
 finally:
@@ -489,7 +489,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
     if(gstcReadInConstructors()){
        if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
          if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
-           gsWarningMsg("Ignoring the previous error(s), the formula will be typechecked without action label information.\n");
+           gsWarningMsg("ignoring the previous error(s), the formula will be ypechecked without action label information\n");
          gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
          ATermTable Vars=ATtableCreate(63,50);
@@ -497,7 +497,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
            ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
            if(!NewVars){
              ATtableDestroy(Vars);
-             gsErrorMsg("The parameters of the LPS cannot be used as variables\n\n");
+             gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
              goto finally;
            }
            else Vars=NewVars;
@@ -513,7 +513,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
          ATtableDestroy(StateVars);
        }
        else {
-         gsErrorMsg("Reading functions from LPS failed.\n");
+         gsErrorMsg("reading functions from LPS failed\n");
        }
     }
     else {
@@ -521,7 +521,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
     }
   }  
   else {
-    gsErrorMsg("Reading sorts from LPS failed.\n");
+    gsErrorMsg("reading sorts from LPS failed\n");
   }
 	
 finally:
@@ -547,7 +547,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
     if(gstcReadInConstructors()){
        if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
          if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
-           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information.\n");
+           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
          gsDebugMsg ("type checking of action rename specification read-in phase of LPS finished\n");
 
          ATermAppl data_spec = ATAgetArgument(ar_spec, 0);
@@ -638,15 +638,15 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
          gsDebugMsg ("type checking phase finished\n");
        }
        else {
-         gsErrorMsg("Reading functions from LPS failed.\n");
+         gsErrorMsg("reading functions from LPS failed\n");
        }
     }
     else {
-      gsErrorMsg("Reading structure constructors from LPS failed.\n");
+      gsErrorMsg("reading structure constructors from LPS failed\n");
     }
   }
   else {
-    gsErrorMsg("Reading sorts from LPS failed.\n");
+    gsErrorMsg("reading sorts from LPS failed\n");
   }
 
 finally:

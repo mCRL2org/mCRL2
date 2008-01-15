@@ -15,9 +15,13 @@
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
+#include <fstream>
 
 using namespace ::mcrl2::utilities;
 
@@ -25,21 +29,20 @@ using namespace ::mcrl2::utilities;
   /// \section section_introduction Introduction
   /// This document provides information on the internals of the tool.
   /// \section section_additional_info Additional information
-  /// More information about the tool and the classes used can be found in the corresponding man files.
+  /// More information about the tool and the classes used can be found in the corresponding tool manual page.
 
 // Class LPS_Form_Check ---------------------------------------------------------------------------
 
   /// \brief The class LPS_Form_Check uses an instance of the class Formula_Checker to check whether
-  /// \brief or not the formulas in the list specified by LPS_Form_Check::f_formulas_file_name are
-  /// \brief tautologies or contradictions.
+  /// \brief or not the formula specified by LPS_Form_Check::f_formula_file_name is a tautology or a contradiction.
 
   class LPS_Form_Check {
     private:
       /// \brief The command entered to invoke the tool lpsformcheck.
       char* f_tool_command;
 
-      /// \brief The name of the file containing the list of formulas that is checked.
-      char* f_formulas_file_name;
+      /// \brief The name of the file containing the formula that is checked.
+      char* f_formula_file_name;
 
       /// \brief The name of the file containing the LPS.
       /// \brief If this string is 0, the input is read from stdin.
@@ -88,64 +91,54 @@ using namespace ::mcrl2::utilities;
       /// \brief Uses the library getopt to determine which command line options are used.
       void get_options(int a_argc, char* a_argv[]);
 
-      /// \brief Checks and indicates whether or not the formulas in the list specified by
-      /// \brief LPS_Form_Check::f_formulas_file_name are tautologies or contradictions.
-      void check_formulas();
+      /// \brief Checks and indicates whether or not the formula specified by
+      /// \brief LPS_Form_Check::f_formula_file_name is a tautology or a contradiction.
+      void check_formula();
   };
 
   // Class LPS_Form_Check - Functions declared private --------------------------------------------
 
     void LPS_Form_Check::print_help() {
       fprintf(stderr,
-        "Usage: %s [OPTION]... [INFILE] {--formulas=FORMULAS}\n"
-        "All formulas in the list of formulas in internal mCRL2 format as found in\n"
-        "FORMULAS are checked using the data specification of the mCRL2 LPS as found in\n"
-        "INFILE. The tool indicates whether each formula is a tautology or a\n"
-        "contradiction. If the tool is unable to determine whether a formula is a\n"
-        "tautology or a contradiction, it indicates this fact.\n"
-        "If INFILE is not specified, the LPS is read from stdin.\n"
+        "Usage: %s [OPTION]... [INFILE] {--formula=FORMFILE}\n"
+        "Checks whether the formula (a boolean expression in mCRL2 format) in FORMFILE\n"
+        "holds using the data specification of the mCRL2 LPS in INFILE.\n"
+        "If INFILE is not present, stdin is used.\n"
         "\n"
-        "Mandatory arguments to long options are mandatory for short options too.\n"
-        "  -f, --formulas=FORMULAS         Use the list of formulas in internal mCRL2\n"
-        "                                  format as found in FORMULAS as input.\n"
-        "  -c, --counter-example           Give a valuation for which the current\n"
-        "                                  formula does not hold, in case the current\n"
-        "                                  formula is neither a contradiction nor a\n"
-        "                                  tautology.\n"
-        "  -w, --witness                   Give a valuation for which the current\n"
-        "                                  formula holds, in case the current formula\n"
-        "                                  is neither a contradiction nor a tautology.\n"
-        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD if it\n"
-        "                                  is impossible to determine whether a formula\n"
-        "                                  is a contradiction or a tautology. PREFIX\n"
-        "                                  will be used as prefix of the output files.\n"
-        "  -h, --help                      Display this help and terminate.\n"
-        "      --version                   Display version information and terminate.\n"
-        "  -q, --quiet                     Do not display warning messages.\n"
-        "  -v, --verbose                   Display concise intermediate messages.\n"
-        "  -d, --debug                     Display detailed intermediate messages.\n"
-        "  -r, --rewriter=STRATEGY         Use the specified STRATEGY as rewrite\n"
-        "                                  strategy:\n"
-        "                                  - 'inner' for the innermost rewrite strategy\n"
-        "                                  - 'innerc' for the compiled innermost rewrite\n"
-        "                                    strategy\n"
-        "                                  - 'jitty' for the jitty rewrite strategy\n"
-        "                                  - 'jittyc' for the compiled jitty rewrite\n"
-        "                                    strategy.\n"
-        "                                  By default, the jitty rewrite strategy is\n"
-        "                                  used.\n"
-        "  -t, --time-limit=SECONDS        Spend at most the specified number of SECONDS\n"
-        "                                  on proving a single formula.\n"
-        "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
-        "                                  inconsistent paths from BDDs:\n"
+        "The following OPTIONs can be used:\n"
+        "  -fFORMFILE, --formula=FORMFILE  use the formula in FORMFILE as input\n"
+        "  -c, --counter-example           return a valuation for which the formula does\n"
+        "                                  not hold, in case it is neither a\n"
+        "                                  contradiction nor a tautology\n"
+        "  -w, --witness                   return a valuation for which the formula\n"
+        "                                  holds, in case it is neither a contradiction\n"
+        "                                  nor a tautology\n"
+        "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD if it\n"
+        "                                  is impossible to determine whether the formula\n"
+        "                                  is a contradiction or a tautology; PREFIX\n"
+        "                                  will be used as prefix of the output files\n"
+        "  -h, --help                      display this help and terminate\n"
+        "      --version                   display version information and terminate\n"
+        "  -q, --quiet                     do not display warning messages\n"
+        "  -v, --verbose                   display concise intermediate messages\n"
+        "  -d, --debug                     display detailed intermediate messages\n"
+        "  -rNAME, --rewriter=NAME         use rewrite strategy NAME:\n"
+        "                                  - 'inner' for the innermost rewriter\n"
+        "                                  - 'innerc' for the compiled innermost rewriter\n"
+        "                                  - 'jitty' for the jitty rewriter (default)\n"
+        "                                  - 'jittyc' for the compiled jitty rewriter\n"
+        "  -tLIMIT, --time-limit=LIMIT     spend at most LIMIT seconds on proving the\n"
+        "                                  formula\n"
+        "  -zSOLVER, --smt-solver=SOLVER   use SOLVER to remove inconsistent paths from\n"
+        "                                  the internally used BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
-        "                                  - 'cvc' for the SMT solver CVC3.\n"
+        "                                  - 'cvc' for the SMT solver CVC3\n"
 #ifdef HAVE_CVC
         "                                  - 'cvc-fast' for the fast implementation\n"
-        "                                    of the SMT solver CVC3.\n"
+        "                                    of the SMT solver CVC3\n"
 #endif
         "                                  By default, no path elimination is applied.\n"
-        " -o, --induction                  Apply induction on lists.\n",
+        "  -o, --induction                  apply induction on lists\n",
         f_tool_command
       );
     }
@@ -162,7 +155,7 @@ using namespace ::mcrl2::utilities;
 
     LPS_Form_Check::LPS_Form_Check() {
       f_tool_command = 0;
-      f_formulas_file_name = 0;
+      f_formula_file_name = 0;
       f_lps_file_name = 0;
       f_counter_example = false;
       f_witness = false;
@@ -177,8 +170,8 @@ using namespace ::mcrl2::utilities;
     // --------------------------------------------------------------------------------------------
 
     LPS_Form_Check::~LPS_Form_Check() {
-      free(f_formulas_file_name);
-      f_formulas_file_name = 0;
+      free(f_formula_file_name);
+      f_formula_file_name = 0;
       free(f_lps_file_name);
       f_lps_file_name = 0;
       free(f_dot_file_name);
@@ -195,7 +188,7 @@ using namespace ::mcrl2::utilities;
       const char* v_short_options = "f:cwp:hqvdr:t:z:o";
 
       struct option v_long_options[] = {
-        {"formulas",         required_argument, 0, 'f'},
+        {"formula",          required_argument, 0, 'f'},
         {"counter-example",  no_argument,       0, 'c'},
         {"witness",          no_argument,       0, 'w'},
         {"print-dot",        required_argument, 0, 'p'},
@@ -217,7 +210,7 @@ using namespace ::mcrl2::utilities;
       while (v_option != -1) {
         switch (v_option) {
           case 'f':
-            f_formulas_file_name = strdup(optarg);
+            f_formula_file_name = strdup(optarg);
             break;
           case 'c':
             f_counter_example = true;
@@ -253,15 +246,13 @@ using namespace ::mcrl2::utilities;
             } else if (strcmp(optarg, "innerc") == 0) {
               f_strategy = GS_REWR_INNERC;
             } else {
-              gsErrorMsg("option -s has illegal argument '%s'\n", optarg);
-              exit(1);
+              throw std::runtime_error("option -s has illegal argument '" + std::string(optarg) + "'");
             }
             break;
           case 't':
             sscanf(optarg, "%d", &f_time_limit);
             if (f_time_limit <= 0) {
-              gsErrorMsg("The time-limit must be greater than or equal to one.\n");
-              exit(0);
+              throw std::runtime_error("the time-limit must be greater than or equal to one");
             }
             break;
           case 'z':
@@ -277,8 +268,7 @@ using namespace ::mcrl2::utilities;
               f_solver_type = solver_type_cvc_fast;
 #endif
             } else {
-              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
-              exit(1);
+              throw std::runtime_error("option -z has illegal argument '" + std::string(optarg) + "'");
             }
             break;
           case 'o':
@@ -293,7 +283,7 @@ using namespace ::mcrl2::utilities;
 
       int v_number_of_remaining_arguments = a_argc - optind;
       if (v_number_of_remaining_arguments > 1) {
-        gsErrorMsg("%s: too many arguments\n", NAME);
+        fprintf(stderr, "%s: too many arguments\n", NAME);
         print_more_info();
         exit(1);
       } else {
@@ -301,8 +291,8 @@ using namespace ::mcrl2::utilities;
           f_lps_file_name = strdup(a_argv[optind]);
         }
       }
-      if (f_formulas_file_name == 0) {
-        gsErrorMsg("%s: a file containing a list of formulas must be specified using the option --formulas=FORMULAS.\n", NAME);
+      if (f_formula_file_name == 0) {
+        fprintf(stderr, "%s: a formula file must be specified using the option --formula=FORMFILE.\n", NAME);
         print_more_info();
         exit(1);
       }
@@ -314,30 +304,44 @@ using namespace ::mcrl2::utilities;
     /// specified by LPS_Form_Check::f_file_name. The method determines and indicates whether or not the
     /// formulas in the list are tautologies or contradictions using the data equations of the LPS.
 
-    void LPS_Form_Check::check_formulas() {
+    void LPS_Form_Check::check_formula() {
 
-      ATermList v_formulas = (ATermList) ATreadFromNamedFile(f_formulas_file_name);
-
-      if (!v_formulas) {
-        throw std::runtime_error("error loading formulas from `" + std::string(f_formulas_file_name) + "'");
-      }
-
+      //Load LPS
       lps::specification lps_specification;
-
-      lps_specification.load(f_lps_file_name);
-
-      if (lps_specification.is_well_typed()) {
-        // temporary measure, until the invariant and confluence checkers use the lps framework
-        ATermAppl v_lps = (ATermAppl) lps_specification;
-
-        Formula_Checker v_formula_checker(
-          ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
-
-        v_formula_checker.check_formulas(v_formulas);
+      lps_specification.load((f_lps_file_name == 0)?"-":f_lps_file_name);
+      if (!lps_specification.is_well_typed()) {
+        throw std::runtime_error("invalid mCRL2 LPS read from " + std::string((f_lps_file_name == 0)?"stdin":f_lps_file_name));
       }
-      else {
-        throw std::runtime_error("Invalid mCRL2 LPS read from " + std::string(f_lps_file_name));
+      // temporary measure, until the invariant and confluence checkers use the lps framework
+      ATermAppl v_lps = (ATermAppl) lps_specification;
+
+      gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name);
+      //open the formula from f_formula_file_name
+      std::ifstream instream(f_formula_file_name);
+      if (!instream.is_open()) {
+        throw std::runtime_error("cannot open formula file '" + std::string(f_formula_file_name) + "'");
       }
+      //parse the formula
+      ATermAppl f_formula = parse_data_expr(instream);
+      instream.close();
+      if(!f_formula){
+        throw std::runtime_error("cannot parse formula from '" + std::string(f_formula_file_name) + "'");
+      }
+      //typecheck the formula
+      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), lps_specification, true);
+      if(!f_formula){
+        throw std::runtime_error("type checking formula from '" + std::string(f_formula_file_name) + "' failed");
+      }
+      //implement data in the formula
+      f_formula = implement_data_data_expr(f_formula,lps_specification);
+      if(!f_formula){
+        throw std::runtime_error("implementation of data types in the formula from '" + std::string(f_formula_file_name) + "' failed");
+      }
+
+      //check formula
+      Formula_Checker v_formula_checker(
+        ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
+      v_formula_checker.check_formulas(ATmakeList1((ATerm) f_formula));
     }
 
 // Main function ----------------------------------------------------------------------------------
@@ -350,11 +354,10 @@ using namespace ::mcrl2::utilities;
       LPS_Form_Check v_lps_form_check;
 
       v_lps_form_check.get_options(argc, argv);
-      v_lps_form_check.check_formulas();
+      v_lps_form_check.check_formula();
     }
     catch (std::exception& e) {
-      gsErrorMsg("Fatal: %s\n", e.what());
- 
+      gsErrorMsg("%s\n", e.what());
       exit(1);
     }
 

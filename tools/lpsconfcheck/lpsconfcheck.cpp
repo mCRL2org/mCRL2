@@ -418,64 +418,57 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::print_help() {
       fprintf(stderr,
         "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-        "This tool checks which tau-summands of the mCRL2 LPS as found in INFILE are\n"
-        "confluent and marks them by renaming them to ctau. The resulting LPS is\n"
-        "written to the file named OUTFILE.\n"
-        "If INFILE is not specified, the LPS is read from stdin. If OUTFILE is not\n"
-        "specified, the resulting LPS is written to stdout.\n"
+        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, mark them by\n"
+        "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present\n"
+        "stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
-        "Mandatory arguments to long options are mandatory for short options too.\n"
-        "  -i, --invariant=INVARIANT       Use the formula (a boolean expression in mCRL2\n"
-        "                                  format) as found in INVARIANT as invariant.\n"
-        "  -g. --generate-invariants       Try to prove that the reduced confluence\n"
+        "The following OPTIONs can be used:\n"
+        "  -iINVFILE, --invariant=INVFILE  use the formula (a boolean expression in mCRL2\n"
+        "                                  format) in INVFILE as invariant\n"
+        "  -g. --generate-invariants       try to prove that the reduced confluence\n"
         "                                  condition is an invariant of the LPS, in case\n"
-        "                                  the confluence condition is not a tautology.\n"
-        "  -s, --summand=NUMBER            Check the summand with number NUMBER only.\n"
-        "  -n, --no-check                  Do not check if the invariant holds before\n"
-        "                                  checking for confluence.\n"
-        "  -m, --no-marking                Do not mark the confluent tau-summands. Since\n"
+        "                                  the confluence condition is not a tautology\n"
+        "  -sNUMBER, --summand=NUMBER      check the summand with number NUMBER only\n"
+        "  -n, --no-check                  do not check if the invariant holds before\n"
+        "                                  checking for confluence\n"
+        "  -m, --no-marking                do not mark the confluent tau-summands; since\n"
         "                                  there are no changes made to the LPS, nothing\n"
-        "                                  is written to OUTFILE.\n"
-        "  -a, --check-all                 Check the confluence of tau-summands\n"
-        "                                  regarding all other summands, instead of\n"
-        "                                  continuing with the next tau-summand as soon\n"
-        "                                  as a summand is encountered that is not\n"
-        "                                  confluent with the current tau-summand.\n"
-        "  -c, --counter-example           Give a valuation for which the confluence\n"
+        "                                  is written to OUTFILE\n"
+        "  -a, --check-all                 check the confluence of tau-summands regarding\n"
+        "                                  all other summands, instead of continuing with\n"
+        "                                  the next tau-summand as soon as a summand is\n"
+        "                                  encountered that is not confluent with the\n"
+        "                                  current tau-summand\n"
+        "  -c, --counter-example           display a valuation for which the confluence\n"
         "                                  condition does not hold, in case the\n"
         "                                  encountered condition is neither a\n"
-        "                                  contradiction nor a tautolgy.\n"
-        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD in case\n"
-        "                                  two summands cannot be proven confluent.\n"
+        "                                  contradiction nor a tautolgy\n"
+        "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD in case\n"
+        "                                  two summands cannot be proven confluent;\n"
         "                                  PREFIX will be used as prefix of the output\n"
-        "                                  files.\n"
-        "  -h, --help                      Display this help and terminate.\n"
-        "      --version                   Display version information and terminate.\n"
-        "  -q, --quiet                     Do not display warning messages.\n"
-        "  -v, --verbose                   Display concise intermediate messages.\n"
-        "  -d, --debug                     Display detailed intermediate messages.\n"
-        "  -r, --rewriter=STRATEGY         Use the specified STRATEGY as rewrite\n"
-        "                                  strategy:\n"
-        "                                  - 'inner' for the innermost rewrite strategy\n"
-        "                                  - 'innerc' for the compiled innermost rewrite\n"
-        "                                    strategy\n"
-        "                                  - 'jitty' for the jitty rewrite strategy\n"
-        "                                  - 'jittyc' for the compiled jitty rewrite\n"
-        "                                    strategy.\n"
-        "                                  By default, the jitty rewrite strategy is\n"
-        "                                  used.\n"
-        "  -t, --time-limit=SECONDS        Spend at most the specified number of SECONDS\n"
-        "                                  on proving a single formula.\n"
-        "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
-        "                                  inconsistent paths from BDDs:\n"
+        "                                  files\n"
+        "  -h, --help                      display this help and terminate\n"
+        "      --version                   display version information and terminate\n"
+        "  -q, --quiet                     do not display warning messages\n"
+        "  -v, --verbose                   display concise intermediate messages\n"
+        "  -d, --debug                     display detailed intermediate messages\n"
+        "  -rNAME, --rewriter=NAME         use rewrite strategy NAME:\n"
+        "                                  - 'inner' for the innermost rewriter\n"
+        "                                  - 'innerc' for the compiled innermost rewriter\n"
+        "                                  - 'jitty' for the jitty rewriter (default)\n"
+        "                                  - 'jittyc' for the compiled jitty rewriter\n"
+        "  -t, --time-limit=SECONDS        spend at most LIMIT seconds on proving a\n"
+        "                                  single formula.\n"
+        "  -z --smt-solver=SOLVER          use SOLVER to remove inconsistent paths from\n"
+        "                                  the internally used BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
-        "                                  - 'cvc' for the SMT solver CVC3.\n"
+        "                                  - 'cvc' for the SMT solver CVC3\n"
 #ifdef CVC_LITE_LIB
         "                                  - 'cvc-fast' for the fast implementation\n"
-        "                                    of the SMT solver CVC Lite.\n"
+        "                                    of the SMT solver CVC3\n"
 #endif
         "                                  By default, no path elimination is applied.\n"
-        "  -o, --induction                 Apply induction on lists.\n",
+        "  -o, --induction                 apply induction on lists\n",
         f_tool_command
       );
     }
@@ -491,6 +484,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   // Class LPS_Conf_Check - Functions declared public ---------------------------------------------
 
     LPS_Conf_Check::LPS_Conf_Check() : f_input_file_name("-"), f_output_file_name("-") {
+      f_dot_file_name = "";
       f_tool_command = 0;
       f_summand_number = 0;
       f_generate_invariants = false;
@@ -607,8 +601,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
           case 't':
             sscanf(optarg, "%d", &f_time_limit);
             if (f_time_limit <= 0) {
-              gsErrorMsg("The time-limit must be greater than or equal to one.\n");
-              exit(0);
+              gsErrorMsg("the time-limit must be greater than or equal to one.\n");
+              exit(1);
             }
             break;
           case 'z':
@@ -720,7 +714,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       if (!f_invariant_file_name.empty()) {
         if (!f_no_check) {
           Invariant_Checker v_invariant_checker(
-            f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, const_cast < char* > (f_dot_file_name.c_str()));
+            f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, (f_dot_file_name == "")?0:const_cast < char* > (f_dot_file_name.c_str()));
 
           return v_invariant_checker.check_invariant(f_invariant);
         }
@@ -741,7 +735,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
         f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_no_marking, f_check_all, f_counter_example,
-        f_generate_invariants, const_cast < char* > (f_dot_file_name.c_str()));
+        f_generate_invariants, (f_dot_file_name == "")?0:const_cast < char* > (f_dot_file_name.c_str()));
 
       f_lps = v_confluence_checker.check_confluence_and_mark(f_invariant, f_summand_number);
     }
