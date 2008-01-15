@@ -1,0 +1,12 @@
+% generate trace as follows:
+%
+%   mcrl22lps abc.mcrl2 abc.lps; echo -e "0\n0\n0\ns abc.trc\nq" | sim abc.lps
+%
+% generate hex-string from trace as follows:
+%
+%   hexdump -ve '"\\\x" 1/1 "%02x"' abc.trc
+
+act a,c;
+    b: Pos#Bool;
+
+init a.b(1,true).c.delta;

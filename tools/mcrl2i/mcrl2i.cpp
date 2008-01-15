@@ -259,7 +259,7 @@ void print_help(FILE *f, char *Name)
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"
     "  -q, --quiet              do not display warning messages\n"
-    "  -v, --verbose            display consise intermediate messages\n"
+    "  -v, --verbose            display concise intermediate messages\n"
     "  -d, --debug              display detailed intermediate messages\n",
     Name,
     help_gsMessage

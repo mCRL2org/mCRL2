@@ -1,0 +1,14 @@
+import testing ;
+
+project libraries/trace/test
+   : requirements
+       <use>/boost//headers
+       <source>/libraries//core
+       <source>/libraries//trace
+   ;
+
+test-suite lps
+    :
+      [ run read_plain.cpp ]
+      [ run read_mcrl2.cpp ]
+    ;
