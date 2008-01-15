@@ -1,6 +1,30 @@
 Changes between toolset releases July 2007 and January 2008
 
- - Numerous bug fixes, some notes:
+ - Added full support for the verification of modal formulas with data using
+   lps2pbes and pbes2bool.
+ - Improved handling of time in the lineariser (mcrl22lps). Sometimes this slows
+   the lineariser down. Added flags to suppress time if needed.
+ - Improvement of the pretty print functions lpspp en pbespp that
+   print linear processes and parameterised boolean equation systems.
+ - Added simulation support to ltsview and improved its layout.
+ - Added documentation for all libraries and tools on the website
+ - Functionality of sim is the same as that of xsim (as far as allowed with
+   a command line interface)
+ - Improvements to lpspp (pretty printer) output
+ - Migrated from cvclite to cvc3 as supported external SMT-solver
+ - Added tools:
+
+    + chi2mcrl2, translates a subset of chi to mcrl2
+    + lpsactionrename, selectively renames or hides actions in linear processes
+    + pbesrewr, applies the rewriter to simplify data expressions in PBESes
+
+ - Removed tools (because dataelm is now a library routine applied in
+   other tools):
+
+    + lpsdataelm
+
+ - Numerous bug fixes
+ - Notes:
 
     - do not use LPS or PBES files produced with the previous release;
       regenerate them with the tools in this release
@@ -13,20 +37,3 @@ Changes between toolset releases July 2007 and January 2008
          format, automatic conversion is not possible so projects must be
          recreated manually
 
- - Significant performance improvements most notably in mcrl22lps and pbes2bool
- - Added simulation support to ltsview and improved its layout.
- - Added documentation for all libraries and tools on the website
- - Functionality of sim is the same as that of xsim (as far as allowed with
-   a command line interface)
- - Improvements to lpspp and pbespp (pretty printers) output
- - Migrated from cvclite to cvc3 as supported external SMT-solver
- - Added full support for verification of modal formulas with data
- - Added tools:
-
-    + Chi2mCRL2, translates a subset of chi to mCRL2
-    + lpsactionrename, selectively hides actions in linear processes
-    + pbesrewr, applies the rewriter to simplify data expressions in PBESes
-
- - Removed tools:
-
-    + lpsdataelm, functionality has been integrated into the other tools
