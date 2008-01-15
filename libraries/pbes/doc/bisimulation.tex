@@ -1,0 +1,174 @@
+
+\documentclass{article}
+\usepackage{fullpage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
+%TCIDATA{LastRevised=Tuesday, January 15, 2008 15:07:02}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+%\input{tcilatex}
+\begin{document}
+
+
+\section{Bisimulation algorithms}
+
+Let%
+\begin{eqnarray*}
+M(d) &=&\sum\limits_{i\in I_{M}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e)) \\
+S(d) &=&\sum\limits_{i\in I_{S}}\sum_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(d,e)\cdot M(g_{i}(d,e))
+\end{eqnarray*}%
+be two linear processes, such that $I_{M}\cap I_{S}=\emptyset $. $M$ is
+called the model and $S$ the specification. The expression $a_{i}(d,e)$ can
+be a multi-action, or have one of the special values $\delta $ or $\tau $.
+We define four pbes equation systems that express some kind of bisimulation
+equivalence between $M$ and $S$.
+
+\subsection{Branching Bisimulation}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\[
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d,d^{\prime }), \\
+&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\
+E_{1} & := & \{Y_{i}^{p,q}(d,d^{\prime },e)=close_{i}^{p,q}(d,d^{\prime
+},e)|i\in I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+\end{array}%
+\]%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{i}^{p,q}(d,d^{\prime },e)) \\
+close_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau
+\}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+Y_{i}^{p,q}(d^{\prime },g_{j}(d^{\prime },e^{\prime }),e^{\prime })) \\
+&&\bigvee (X^{p,q}(d,d^{\prime })\wedge step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{
+\begin{array}{cl}
+a_{i}=\tau : & X^{p,q}(g_{i}(d,e),d^{\prime }) \\
+a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
+}:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge (a_{i}(d,e)=a_{j}(d^{\prime
+},e^{\prime }))\wedge X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
+\end{array}%
+\right.
+\end{eqnarray*}
+
+\subsection{Strong Bisimulation}
+
+\emph{sbisim}$(M,S)=\nu E$, where%
+\[
+\begin{array}{ccl}
+E & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d,d^{\prime }), \\
+&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\}%
+\end{array}%
+\]%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{j\in I_{q}}\exists
+_{e^{\prime }:E_{j}}.c_{j}(d^{\prime },e^{\prime })\wedge
+(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))
+\end{eqnarray*}
+
+\subsection{Weak Bisimulation}
+
+\emph{wbisim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\[
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d,d^{\prime }), \\
+&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\
+E_{1} & := & \{Y_{1,i}^{p,q}(d,d^{\prime },e)=close_{1,i}^{p,q}(d,d^{\prime
+},e), \\
+&  & Y_{2,i}^{p,q}(d,d^{\prime })=close_{2,i}^{p,q}(d,d^{\prime })|i\in
+I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+\end{array}%
+\]%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{1,i}^{p,q}(d,d^{\prime },e)) \\
+close_{1,i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in
+I_{q}|a_{j}=\tau \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime
+},e^{\prime })\wedge Y_{1,i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }),e))\vee
+step_{i}^{p,q}(d,d^{\prime },e) \\
+&& \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{
+\begin{array}{cl}
+a_{i}=\tau : & close_{2,i}^{p,q}(g_{i}(d,e),d^{\prime }) \\
+a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
+}:E_{j}}.(a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime }))\wedge
+X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
+\end{array}%
+\right.  \\
+close_{2,i}^{p,q}(d,d^{\prime }) &=&X^{p,q}(d,d^{\prime })\vee
+\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau \}}c_{j}(d^{\prime },e^{\prime
+})\wedge Y_{2,i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }))
+\end{eqnarray*}
+
+\subsection{Branching Bisimulation Equivalence}
+
+\emph{brbsim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
+\[
+\begin{array}{ccl}
+E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d,d^{\prime }), \\
+&  & X^{M,S}(d,d^{\prime })=X^{S,M}(d,d^{\prime }), \\
+&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\
+E_{1} & := & \{Y_{i}^{p,q}(d,d^{\prime },e)=close_{i}^{p,q}(d,d^{\prime
+},e)|i\in I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+\end{array}%
+\]%
+with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
+\begin{eqnarray*}
+match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
+_{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{i}^{p,q}(d,d^{\prime },e)) \\
+close_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau
+\}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
+Y_{i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }),e)) \\
+&&\bigvee (X^{p,q}(d,d^{\prime })\wedge step_{i}^{p,q}(d,d^{\prime },e)) \\
+step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{
+\begin{array}{cl}
+a_{i}=\tau : & X^{p,q}(g_{i}(d,e),d^{\prime }) \\
+a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
+}:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge (a_{i}(d,e)=a_{j}(d^{\prime
+},e^{\prime }))\wedge X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
+\end{array}%
+\right.
+\end{eqnarray*}
+
+\end{document}
