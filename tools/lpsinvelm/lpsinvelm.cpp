@@ -143,19 +143,20 @@ using namespace mcrl2::utilities;
 
     void LPS_Inv_Elm::print_help() {
       fprintf(stderr,
-        "Usage: %s [OPTION]... [INFILE [OUTFILE]] {--invariant=INVFILE}\n"
-        "Checks whether the invariant (a boolean expression in mCRL2 format) in INVFILE\n"
-        "holds for the mCRL2 LPS in INFILE. If this is the case, the tool eliminates all\n"
-        "summands of the LPS whose condition violates the invariant, and writes the\n"
-        "result to OUTFILE.\n"
+        "Usage: %s [OPTION]... -iINVFILE [INFILE [OUTFILE]]\n"
+        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
+        "INVFILE is an invariant of the linear process specification (LPS) in INFILE.\n"
+        "If this is the case, the tool eliminates all summands of the LPS whose condition\n"
+        "violates the invariant, and writes the result to OUTFILE.\n"
+        "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
+        "\n"
         "The tool can also be used to simplify the conditions of the summands of the\n"
         "given LPS.\n"
-        "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
         "The following OPTIONs can be used:\n"
         "  -iINVFILE, --invariant=INVFILE  use the invariant in INVFILE as input\n"
-        "  -sNUMBER, --summand=NUMBER      eliminate or simplify the summand with number\n"
-        "                                  NUMBER only\n"
+        "  -sNUM, --summand=NUM            eliminate or simplify the summand with number\n"
+        "                                  NUM only\n"
         "  -n, --no-check                  do not check if the invariant holds before\n"
         "                                  eliminating unreachable summands\n"
         "  -e, --no-elimination            do not eliminate or simplify summands\n"
@@ -194,7 +195,7 @@ using namespace mcrl2::utilities;
         "                                  - 'cvc-fast' for the fast implementation\n"
         "                                    of the SMT solver CVC3\n"
 #endif
-        "                                  By default, no path elimination is applied.\n"
+        "                                  by default, no path elimination is applied\n"
         "  -o, --induction                 apply induction on lists\n",
         f_tool_command
       );

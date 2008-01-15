@@ -100,17 +100,17 @@ using namespace ::mcrl2::utilities;
 
     void LPS_Form_Check::print_help() {
       fprintf(stderr,
-        "Usage: %s [OPTION]... [INFILE] {--formula=FORMFILE}\n"
-        "Checks whether the formula (a boolean expression in mCRL2 format) in FORMFILE\n"
-        "holds using the data specification of the mCRL2 LPS in INFILE.\n"
-        "If INFILE is not present, stdin is used.\n"
+        "Usage: %s [OPTION]... -fFORMFILE [INFILE]\n"
+        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
+        "FORMFILE holds for the data specification of the linear process specification\n"
+        "(LPS) in INFILE. If INFILE is not present, stdin is used.\n"
         "\n"
         "The following OPTIONs can be used:\n"
         "  -fFORMFILE, --formula=FORMFILE  use the formula in FORMFILE as input\n"
-        "  -c, --counter-example           return a valuation for which the formula does\n"
+        "  -c, --counter-example           display a valuation for which the formula does\n"
         "                                  not hold, in case it is neither a\n"
         "                                  contradiction nor a tautology\n"
-        "  -w, --witness                   return a valuation for which the formula\n"
+        "  -w, --witness                   display a valuation for which the formula\n"
         "                                  holds, in case it is neither a contradiction\n"
         "                                  nor a tautology\n"
         "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD if it\n"
@@ -137,8 +137,8 @@ using namespace ::mcrl2::utilities;
         "                                  - 'cvc-fast' for the fast implementation\n"
         "                                    of the SMT solver CVC3\n"
 #endif
-        "                                  By default, no path elimination is applied.\n"
-        "  -o, --induction                  apply induction on lists\n",
+        "                                  by default, no path elimination is applied\n"
+        "  -o, --induction                 apply induction on lists\n",
         f_tool_command
       );
     }

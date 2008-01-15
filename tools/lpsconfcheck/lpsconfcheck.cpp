@@ -418,9 +418,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::print_help() {
       fprintf(stderr,
         "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, mark them by\n"
-        "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present\n"
-        "stdin is used. If OUTFILE is not present, stdout is used.\n"
+        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them\n"
+        "by renaming them to ctau, and write the result to OUTFILE. If INFILE is not\n"
+        "present stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
         "The following OPTIONs can be used:\n"
         "  -iINVFILE, --invariant=INVFILE  use the formula (a boolean expression in mCRL2\n"
@@ -428,7 +428,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         "  -g. --generate-invariants       try to prove that the reduced confluence\n"
         "                                  condition is an invariant of the LPS, in case\n"
         "                                  the confluence condition is not a tautology\n"
-        "  -sNUMBER, --summand=NUMBER      check the summand with number NUMBER only\n"
+        "  -sNUM, --summand=NUM            check the summand with number NUM only\n"
         "  -n, --no-check                  do not check if the invariant holds before\n"
         "                                  checking for confluence\n"
         "  -m, --no-marking                do not mark the confluent tau-summands; since\n"
@@ -457,9 +457,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         "                                  - 'innerc' for the compiled innermost rewriter\n"
         "                                  - 'jitty' for the jitty rewriter (default)\n"
         "                                  - 'jittyc' for the compiled jitty rewriter\n"
-        "  -t, --time-limit=SECONDS        spend at most LIMIT seconds on proving a\n"
-        "                                  single formula.\n"
-        "  -z --smt-solver=SOLVER          use SOLVER to remove inconsistent paths from\n"
+        "  -tLIMIT, --time-limit=LIMIT     spend at most LIMIT seconds on proving a\n"
+        "                                  single formula\n"
+        "  -zSOLVER --smt-solver=SOLVER    use SOLVER to remove inconsistent paths from\n"
         "                                  the internally used BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
         "                                  - 'cvc' for the SMT solver CVC3\n"
@@ -467,7 +467,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         "                                  - 'cvc-fast' for the fast implementation\n"
         "                                    of the SMT solver CVC3\n"
 #endif
-        "                                  By default, no path elimination is applied.\n"
+        "                                  by default, no path elimination is applied\n"
         "  -o, --induction                 apply induction on lists\n",
         f_tool_command
       );
