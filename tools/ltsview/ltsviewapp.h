@@ -21,6 +21,7 @@
 class LTSViewApp : public wxApp, public Mediator {
   private:
     LTS *lts;
+    unsigned int colourCounter;
     GLCanvas *glCanvas;
     MainFrame *mainFrame;
     Settings *settings;

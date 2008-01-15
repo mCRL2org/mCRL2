@@ -132,6 +132,7 @@ bool LTSViewApp::OnInit() {
   markStyle = NO_MARKS;
   rankStyle = ITERATIVE;
   fsmStyle = false;
+  colourCounter = 0;
   settings = new Settings();
   mainFrame = new MainFrame(this,settings);
   visualizer = new Visualizer(this,settings);
@@ -396,10 +397,70 @@ void LTSViewApp::editMarkRule(const int index) {
 Utils::RGB_Color LTSViewApp::getNewRuleColour()
 {
   // TODO implement
+  colourCounter = (colourCounter + 1) % 9;
+
   RGB_Color result;
-  result.r = 255;
-  result.g = 255;
-  result.b = 255;
+
+  switch(colourCounter)
+  {
+    case 0: 
+      { result.r = 228;
+        result.g = 26;
+        result.b = 28;
+        break;
+      }
+    case 1:
+      { result.r = 55;
+        result.g = 126;
+        result.b = 184;
+        break;
+      }
+    case 2:
+      { result.r = 77;
+        result.g = 175;
+        result.b = 74;
+        break;
+      }
+    case 3:
+      { result.r = 152;
+        result.g = 78;
+        result.b = 163;
+        break;
+      }
+    case 4:
+      { result.r = 255;
+        result.g = 127;
+        result.b = 0;
+        break;
+      }
+    case 5:
+      { result.r = 255;
+        result.g = 255;
+        result.b = 51;
+        break;
+      }
+    case 6:
+      { result.r = 166;
+        result.g = 86;
+        result.b = 40;
+        break;
+      }
+    case 7:
+     { result.r = 247;
+       result.g = 129;
+       result.b = 191;
+       break;
+     }
+    case 8:
+     { result.r = 153;
+       result.g = 153;
+       result.b = 153;
+       break;
+     }
+  }
+
+
+
 
   return result;
 }

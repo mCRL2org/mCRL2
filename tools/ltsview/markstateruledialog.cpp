@@ -57,15 +57,9 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
   int f = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int b = 5;
   
-  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Parameter:")),0,f,b);
-  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Relation:")),0,f,b);
-  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Values:")),0,f,b);
-  controlSizer->Add(parameterListBox,0,f,b);
-  controlSizer->Add(relationListBox,0,f,b);
-  controlSizer->Add(valuesListBox,0,f,b);
+  controlSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Rule Colour: ")), 
+                                     0, f, b);
 
-  controlSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Rule Colour: ")), 0, f, b);
-  
   ruleClrButton = new mcrl2::utilities::wxColorButton(
                                     this, this, wxID_ANY, wxDefaultPosition, 
                                     wxSize(25,25));
@@ -73,7 +67,16 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
     mediator->getNewRuleColour()));
 
   controlSizer->Add(ruleClrButton, 0, f,b);
+  controlSizer->AddStretchSpacer();
+  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Parameter:")),0,f,b);
+  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Relation:")),0,f,b);
+  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Values:")),0,f,b);
+  controlSizer->Add(parameterListBox,0,f,b);
+  controlSizer->Add(relationListBox,0,f,b);
+  controlSizer->Add(valuesListBox,0,f,b);
 
+  
+  
   mainSizer->Add(controlSizer,0,wxEXPAND|wxALL,b);
   mainSizer->Add(new wxStaticLine(this,wxID_ANY),0,wxEXPAND|wxALL,b);
   mainSizer->Add(CreateButtonSizer(wxOK|wxCANCEL),0,wxEXPAND|wxALL,b);

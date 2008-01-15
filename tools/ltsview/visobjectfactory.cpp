@@ -19,19 +19,22 @@ class VisObject
     VisObject();
     ~VisObject();
     float* getMatrixP() const;
-    RGB_Color getColor() const;
+    RGB_Color getColor() const; //TODO This doesn't seem to be used;
     Point3D getCoordinates() const;
     int getPrimitive() const;
     void setColor(Utils::RGB_Color c);
+    void setTextureColours(std::vector<Utils::RGB_Color>& colours);
     void setPrimitive(int p);
     void draw(PrimitiveFactory *pf,unsigned char alpha);
+    void drawWithTexture(PrimitiveFactory *pf, unsigned char alpha);
     void addIdentifier(int id);
   private:
     float* matrix;
     RGB_Color color;
+    GLubyte** texture;
+    int numColours;
     int primitive;
     vector<int> identifiers;
-                
 };
 
 VisObject::VisObject() {
@@ -39,10 +42,21 @@ VisObject::VisObject() {
 	color.r = 150;
 	color.g = 150;
 	color.b = 150;
+        numColours = 0;
 }
 
 VisObject::~VisObject() {
-	free(matrix);
+  free(matrix);
+  
+  if(numColours > 0)
+  {
+    for(int i = 0; i < numColours; ++i)
+    {
+      free((void*) texture[i]);
+    }
+
+    free(texture);
+  }
 }
 
 float* VisObject::getMatrixP() const {
@@ -66,6 +80,29 @@ void VisObject::setColor(RGB_Color c) {
 	color = c;
 }
 
+void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
+{
+  if(colours.size() > 0)
+  {
+    numColours = colours.size();
+
+    texture = (GLubyte**) malloc(colours.size() * sizeof(GLubyte*));
+
+    for(size_t i = 0; i < colours.size(); ++i)
+    {
+      texture[i] = (GLubyte*) malloc(4* sizeof(GLubyte));
+      texture[i][0] = (GLubyte)colours[i].r;
+      texture[i][1] = (GLubyte)colours[i].g;
+      texture[i][2] = (GLubyte)colours[i].b;
+      texture[i][3] = (GLubyte) 255; //TODO 
+    }
+  }
+
+
+
+  
+}
+
 void VisObject::setPrimitive(int p) {
 	primitive = p;
 }
@@ -82,6 +119,49 @@ void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha) {
     glPopName();
   }
 	glPopMatrix();
+}
+
+void VisObject::drawWithTexture(PrimitiveFactory *pf, unsigned char alpha)
+{
+  if (numColours > 0)
+  {
+    GLubyte tex[3][4] = {{255, 0, 0, 255},
+                         {0, 255, 0, 255},
+                         {0, 0, 255, 255}};
+    //TODO Necessary?
+    for(int i = 0; i < numColours; ++i)
+    {
+      texture[i][4] = alpha;
+    }
+    // TODO: Taken from the Red Book, might be improved by culling/rewrite code
+    GLuint texName;
+  
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+ 
+    glGenTextures(1, &texName);
+    glBindTexture(GL_TEXTURE_1D, texName);
+
+
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, numColours, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, tex);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+    glBindTexture(GL_TEXTURE_1D, texName);
+
+    glEnable(GL_TEXTURE_1D);
+  }
+  
+  draw(pf, alpha);
+  
+  if (numColours > 0)
+  {
+    glDisable(GL_TEXTURE_1D);
+  }
 }
 
 void VisObject::addIdentifier(int id)
@@ -119,7 +199,7 @@ void VisObjectFactory::sortObjects(Point3D viewpoint) {
 
 void VisObjectFactory::drawObjects(PrimitiveFactory *pf,unsigned char alpha) {
 	for (unsigned int i = 0; i < objects_sorted.size(); ++i) {
-		objects_sorted[i]->draw(pf,alpha);
+		objects_sorted[i]->drawWithTexture(pf,alpha);
 	}
 }
 
