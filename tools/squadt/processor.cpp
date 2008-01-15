@@ -545,7 +545,7 @@ namespace squadt {
    * \pre !is_active() and t.get() == this
    **/
   void processor_impl::run(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
-    if (!is_active()) {
+    if (!is_active() && c) {
       if (b || 0 < inputs.size()) {
         boost::shared_ptr < project_manager > g(manager);
 
@@ -600,7 +600,7 @@ namespace squadt {
   void processor_impl::update(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
     assert(t->impl.get() == this);
 
-    if (!is_active()) {
+    if (!is_active() && c) {
       if (b || 0 < inputs.size()) {
 
         update_configuration(*c);
