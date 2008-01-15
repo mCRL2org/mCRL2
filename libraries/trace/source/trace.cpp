@@ -252,10 +252,11 @@ TraceFormat Trace::detectFormat(istream &is)
 	TraceFormat fmt = tfPlain;
 
 	is.read(buf,TRACE_MCRL2_MARKER_SIZE);
-        if ( !is.good() )
+        if ( is.bad() )
         {
           throw runtime_error("could not read from stream");
         }
+        is.clear();
 
 	if ( (is.gcount() == TRACE_MCRL2_MARKER_SIZE) && !strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
 	{
@@ -263,7 +264,7 @@ TraceFormat Trace::detectFormat(istream &is)
 	}
 
 	is.seekg(-is.gcount(),ios::cur);
-        if ( !is.good() )
+        if ( is.fail() )
         {
           throw runtime_error("could set position in stream");
         }
@@ -289,7 +290,7 @@ ATerm readATerm(istream &is)
                 buf = new_buf;
 
 		is.read(buf+len,buf_size-len);
-                if ( !is.good() )
+                if ( is.bad() )
                 {
                   free(buf);
                   throw runtime_error("could not read ATerm from stream");
@@ -298,6 +299,7 @@ ATerm readATerm(istream &is)
 		len+=is.gcount();
 		buf_size = buf_size * 2;
 	}
+        is.clear();
 
 	ATerm t = ATreadFromBinaryString((unsigned char *) buf,len);
         if ( t == NULL )
@@ -314,10 +316,11 @@ void Trace::loadMcrl2(istream &is)
 {
 	char buf[TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE];
 	is.read(buf,TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE);
-        if ( !is.good() || strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
+        if ( is.bad() || strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
         {
           throw runtime_error("stream does not contain an mCRL2 trace");
         }
+        is.clear();
 
 	resetPosition();
 	truncate();
@@ -358,7 +361,7 @@ void Trace::loadPlain(istream &is)
 	while ( !is.eof() )
 	{
 		is.getline(buf,MAX_LINE_SIZE);
-		if ( !is.good() ) 
+		if ( is.bad() ) 
 		{
 			throw runtime_error("error while reading from stream");
 		}
@@ -373,6 +376,7 @@ void Trace::loadPlain(istream &is)
 			addAction(ATmakeAppl0(ATmakeAFun(buf,0,ATfalse)));
 		}
 	}
+        is.clear();
 
 	resetPosition();
 }
