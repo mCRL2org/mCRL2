@@ -94,8 +94,7 @@ inline ATermList ATinsertUnique(ATermList list, ATerm el)
  **/
 inline bool ATisApplOrNull(ATerm t)
 {
-  if (t == NULL) return true;
-  return ATgetType(t) == AT_APPL;
+  return (t == 0) || ATgetType(t) == AT_APPL;
 }
 
 /**
@@ -105,8 +104,7 @@ inline bool ATisApplOrNull(ATerm t)
  **/
 inline bool ATisListOrNull(ATerm t)
 {
-  if (t == NULL) return true;
-  return ATgetType(t) == AT_LIST;
+  return (t == 0) || ATgetType(t) == AT_LIST;
 }
 
 /**

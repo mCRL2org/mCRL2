@@ -23,9 +23,9 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>diagraphica release Winter 2008, (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
+	<string>diagraphica release January 2008, (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
 	<key>CFBundleLongVersionString</key>
-	<string>Winter 2008 release, (c) 2005-2008 OAS, TUE, NL</string>
+	<string>January 2008 release, (c) 2005-2008 OAS, TUE, NL</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2005-2008 OAS, TUE, NL</string>
 	<key>LSRequiresCarbon</key>

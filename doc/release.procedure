@@ -1,0 +1,13 @@
+Procedure:
+
+ * test shared and static build of the source distribution
+
+ * Update OS X bundle meta information:
+ 
+     tools/x/x.plist, where x an arbitrary tool name
+
+ * Update toolset version tag.
+
+     edit TOOLSET_VERSION in libraries/utilities/include/mcrl2/utilities/version_info.h
+
+ * create tag

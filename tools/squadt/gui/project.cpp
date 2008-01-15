@@ -702,11 +702,11 @@ namespace squadt {
             gui_builder.schedule_update(boost::bind(&project::report_conflict, this,
                 wxString(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
                   "The original file will be restored.") % (*j)->get_location() % tp->get_tool()->get_name()).c_str(), wxConvLocal)));
-       
+
             (*j)->self_check();
-       
+
             boost::shared_ptr < processor > g((*j)->get_generator());
-       
+
             if (g.get() != 0) {
               manager->update_status(g);
             }
