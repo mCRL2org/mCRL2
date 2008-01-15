@@ -1,39 +1,29 @@
-Changes between toolset releases July 2007 and January 2008
+Changes between toolset releases July 2007 and January 2008:
 
- - Added full support for the verification of modal formulas with data using
-   lps2pbes and pbes2bool.
- - Improved handling of time in the lineariser (mcrl22lps). Sometimes this slows
-   the lineariser down. Added flags to suppress time if needed.
- - Improvement of the pretty print functions lpspp en pbespp that
-   print linear processes and parameterised boolean equation systems.
- - Added simulation support to ltsview and improved its layout.
- - Added documentation for all libraries and tools on the website
- - Functionality of sim is the same as that of xsim (as far as allowed with
-   a command line interface)
- - Improvements to lpspp (pretty printer) output
- - Migrated from cvclite to cvc3 as supported external SMT-solver
- - Added tools:
-
-    + chi2mcrl2, translates a subset of chi to mcrl2
-    + lpsactionrename, selectively renames or hides actions in linear processes
-    + pbesrewr, applies the rewriter to simplify data expressions in PBESes
-
- - Removed tools (because dataelm is now a library routine applied in
-   other tools):
-
-    + lpsdataelm
-
- - Numerous bug fixes
- - Notes:
-
-    - do not use LPS or PBES files produced with the previous release;
-      regenerate them with the tools in this release
-
-    - SQuADT specific:
-
-       - the tool catalog must be regenerated to add newly connected tools; to
-         do this manually remove .squadt/tool_catalog in the home directory
-       - old project files cannot be loaded due to a limitation of the old
-         format, automatic conversion is not possible so projects must be
-         recreated manually
-
+- Added full support for the verification of modal formulas with data using
+  lps2pbes and pbes2bool.
+- Improved handling of time in the lineariser (mcrl22lps). Sometimes this
+  slows the lineariser down. Added flags to suppress time if needed.
+- Improvement of the output of the pretty printers (lpspp and pbespp) that
+  print linear processes and parameterised boolean equation systems.
+- Added simulation support to ltsview and improved its layout.
+- Added documentation for all libraries and tools on the website.
+- Functionality of sim is the same as that of xsim (as far as allowed with
+  a command line interface).
+- Migrated from CVC Lite to CVC3 as supported external SMT-solver.
+- Added tools:
+  + chi2mcrl2: translates a subset of Chi to mCRL2
+  + lpsactionrename: selectively renames or hides actions in linear processes
+  + pbesrewr: applies the rewriter to simplify data expressions in PBESes
+- Removed tools:
+  + lpsdataelm (its functionality has been integrated in other tools)
+- Numerous bug fixes.
+- Notes:
+  + LPS or PBES files produced with the previous release cannot be used
+    anymore. They need to be regenerated using the tools in this release.
+  + SQuADT specific:
+    - The tool catalog must be regenerated to add newly connected tools;
+      to do this manually remove .squadt/tool_catalog in the home directory.
+    - Old project files cannot be loaded due to a limitation of the old
+      format, automatic conversion is not possible so projects must be
+      recreated manually.
