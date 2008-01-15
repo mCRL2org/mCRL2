@@ -50,6 +50,7 @@ namespace squadt {
    **/
   void project_manager_impl::load(const boost::filesystem::path& l, bool b) {
     using namespace boost;
+    using namespace boost::filesystem;
 
     assert(!l.empty());
 
@@ -57,7 +58,7 @@ namespace squadt {
       store = l.branch_path();
     }
     else {
-      store = (filesystem::is_directory(l)) ? l : l.branch_path();
+      store = (exists(l) && !is_directory(l)) ? l.branch_path() : l;
     }
 
     filesystem::path project_file = store / filesystem::path(settings_manager::project_definition_base_name);
@@ -65,7 +66,8 @@ namespace squadt {
     if (filesystem::exists(store) && filesystem::is_directory(store)) {
       if (!filesystem::exists(project_file)) {
         if (b) {
-          import_directory(l);
+std::cerr << "store " << store << std::endl;
+          import_directory(store);
 
           /* Create initial project description file */
           visitors::store(*this, project_file);

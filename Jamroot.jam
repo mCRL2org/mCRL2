@@ -19,6 +19,7 @@ include $(BUILD_TOOLS)/building.jam ;
 project toolset
        : build-dir $(BUILD_TOP)
        : requirements
+          <define>PREFIX=\\\"$(prefix)\\\"
           <define>_FILE_OFFSET_BITS=64
           <define>MCRL2_REVISION=\\\"$(BUILD_TAG)\\\"
           <toolset>msvc:<pch>off

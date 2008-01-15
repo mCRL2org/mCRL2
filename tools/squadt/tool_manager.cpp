@@ -30,8 +30,6 @@
 #include "processor.hpp"
 #include "executor.hpp"
 
-#include <mcrl2/setup.h>
-
 namespace squadt {
 
   using execution::command;
@@ -306,7 +304,7 @@ namespace squadt {
 
   /** \brief Get the list of known tools */
   tool_manager::tool_const_sequence tool_manager_impl::get_tools() const {
-    return (boost::make_iterator_range(tools));
+    return tool_manager::tool_const_sequence(tools);
   }
   /// \endcond
 

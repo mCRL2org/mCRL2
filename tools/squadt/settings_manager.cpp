@@ -11,8 +11,6 @@
 #include <exception>
 #include <cstdio>
 
-#include <mcrl2/setup.h>
-
 #include "settings_manager.hpp"
 
 namespace squadt {
@@ -52,20 +50,8 @@ namespace squadt {
     }
   }
 
-  std::string settings_manager::path_to_system_settings() const {
-    return (system_settings_path.native_file_string());
-  }
-
   std::string settings_manager::path_to_default_binaries() const {
-    return (TOOL_DIRECTORY);
-  }
-
-  std::string settings_manager::path_to_images() const {
-    return ((system_settings_path / path("images")).native_file_string());
-  }
-
-  std::string settings_manager::path_to_schemas() const {
-    return ((system_settings_path / path("schemas")).native_file_string());
+    return (bf::path(PREFIX)/ bf::path("bin")).string();
   }
 
   /**
@@ -83,8 +69,7 @@ namespace squadt {
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
   settings_manager::settings_manager(path const& h, path const& u) : home_directory(h),
-                user_settings_path((h / u)),
-                system_settings_path(DATA_DIRECTORY, boost::filesystem::no_check) {
+                user_settings_path((h / u)) {
 
     ensure_directories_exist();
   }
@@ -95,8 +80,7 @@ namespace squadt {
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
   settings_manager::settings_manager(path const& h) : home_directory(h),
-                user_settings_path((h / path(default_profile_directory, boost::filesystem::native))),
-                system_settings_path(DATA_DIRECTORY, boost::filesystem::no_check) {
+                user_settings_path((h / path(default_profile_directory, boost::filesystem::native))) {
 
     ensure_directories_exist();
   }
@@ -127,33 +111,6 @@ namespace squadt {
 
   std::string settings_manager::path_to_user_settings() const {
     return (user_settings_path.native_file_string());
-  }
-
-  /**
-   * \param[in] n a complete path, relative to the path to the images
-   *
-   * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
-   **/
-  std::string settings_manager::path_to_images(path const& n) const {
-    return ((system_settings_path / path("images") / n).native_file_string());
-  }
-
-  /**
-   * \param[in] n a complete path, relative to the path to the schemas
-   *
-   * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
-   **/
-  std::string settings_manager::path_to_schemas(path const& n) const {
-    return ((system_settings_path / path("schemas") / n).native_file_string());
-  }
-
-  /**
-   * \param[in] n a complete path relative to the path to the system settings path
-   *
-   * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
-   **/
-  std::string settings_manager::path_to_system_settings(path const& n) const {
-    return ((system_settings_path / n).native_file_string());
   }
 
   /**
