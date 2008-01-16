@@ -14,6 +14,7 @@ exe ltsview
         lts.cpp
         ltsviewapp.cpp
         mainframe.cpp
+        markdialog.cpp
         markstateruledialog.cpp
         primitivefactory.cpp
         primitives.cpp
@@ -22,6 +23,7 @@ exe ltsview
         settingsdialog.cpp
         simulation.cpp
         simreader.cpp
+        simdialog.cpp
         state.cpp
         transition.cpp
         utils.cpp

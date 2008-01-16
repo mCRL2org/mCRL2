@@ -20,6 +20,8 @@ namespace IDs
     myID_PAN,
     myID_ROTATE,
     myID_INFO,
+    myID_MARK,
+    myID_SIM,
     // Drawing style identifiers
     myID_CONES_STYLE,
     myID_TUBES_STYLE,

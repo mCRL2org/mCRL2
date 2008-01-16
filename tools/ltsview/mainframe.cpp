@@ -35,6 +35,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_DISPLAY_WIREFRAME,MainFrame::onDisplay)
   EVT_MENU  (wxID_PREFERENCES,MainFrame::onSettings)
   EVT_MENU  (myID_INFO,MainFrame::onInfo)
+  EVT_MENU  (myID_MARK,MainFrame::onMark)
+  EVT_MENU  (myID_SIM, MainFrame::onSim)
   EVT_MENU  (myID_PAN,MainFrame::onActivateTool)
   EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
@@ -52,7 +54,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_STOP_FORCE_DIRECTED, MainFrame::onStopForceDirected)
   EVT_MENU  (myID_RESET_STATE_POSITIONS, MainFrame::onResetStatePositions)
 
-  EVT_BUTTON(wxID_RESET, MainFrame::onResetButton)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
   EVT_CHOICE(myID_MARK_ANYALL, MainFrame::onMarkAnyAll)
   EVT_LISTBOX_DCLICK(myID_MARK_RULES, MainFrame::onMarkRuleEdit)
@@ -61,24 +62,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(myID_ADD_RULE, MainFrame::onAddMarkRuleButton)
   EVT_BUTTON(myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton)
 
-  EVT_BUTTON(myID_SIM_START_BUTTON, MainFrame::onSimStartButton)
-  EVT_BUTTON(myID_SIM_RESET_BUTTON, MainFrame::onSimResetButton)
-  EVT_BUTTON(myID_SIM_STOP_BUTTON, MainFrame::onSimStopButton)
-
-  EVT_LIST_ITEM_SELECTED(myID_SIM_TRANSITIONS_VIEW, 
-                         MainFrame::onSimTransitionSelected)
-  EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW, 
-                          MainFrame::onSimTransitionActivated)
-  EVT_CHAR(MainFrame::onKeyDown)
-  EVT_BUTTON(myID_SIM_TRIGGER_BUTTON, MainFrame::onSimTriggerButton)
-  EVT_BUTTON(myID_SIM_UNDO_BUTTON, MainFrame::onSimUndoButton)
-  EVT_BUTTON(myID_SIM_BT_BUTTON, MainFrame::onGenerateBackTraceButton)
 //  EVT_IDLE(MainFrame::onIdle)
   EVT_CLOSE(MainFrame::onClose)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(Mediator* owner,Settings* ss)
-  : wxFrame(NULL,wxID_ANY,wxT("LTSView")), simReader(NULL) {
+  : wxFrame(NULL,wxID_ANY,wxT("LTSView"))  {
 //  previousTime = 0.0;
 //  frameCount = 0;
   mediator = owner;
@@ -87,6 +76,8 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   savePicDialog = NULL;
   settingsDialog = NULL;
   infoDialog = new InfoDialog(this);
+  simDialog = new SimDialog(this, mediator);
+  markDialog = new MarkDialog(this, mediator);
 
   SetIcon(wxIcon(main_window));
 
@@ -96,6 +87,12 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   
   SetSize(800,600);
   CentreOnScreen();
+}
+
+void MainFrame::setSim(Simulation* sim)
+{
+  //this->sim = sim;
+  simDialog->setSim(sim);
 }
 
 void MainFrame::setupMenuBar() {
@@ -164,6 +161,10 @@ void MainFrame::setupMenuBar() {
   toolMenu->AppendRadioItem(myID_ZOOM,wxT("&Zoom\tA"),wxT("Zoom tool"));
   toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tF"),wxT("Rotate tool"));
   toolMenu->AppendSeparator();
+  toolMenu->Append(myID_SIM, wxT("S&imulation\tI"), 
+                                  wxT("Shows simulation dialog"));
+  toolMenu->Append(myID_MARK, wxT("&Mark\tM"), wxT("Shows mark dialog"));
+  toolMenu->AppendSeparator();
   toolMenu->Append(myID_START_FORCE_DIRECTED,wxT("Start &force directed"),
     wxT("Starts force directed state positioning algorithm"));
   toolMenu->Append(myID_STOP_FORCE_DIRECTED,wxT("Stop f&orce directed"),
@@ -171,7 +172,7 @@ void MainFrame::setupMenuBar() {
   toolMenu->Append(myID_RESET_STATE_POSITIONS,wxT("R&eset state positions"),
     wxT("Assign states to their default positions"));
   toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
-
+  
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   
   menuBar->Append(fileMenu, wxT("&File"));
@@ -183,206 +184,19 @@ void MainFrame::setupMenuBar() {
 }
 
 void MainFrame::setupMainArea() {
-  wxFlexGridSizer* mainSizer = new wxFlexGridSizer(1,2,0,0);
+  wxFlexGridSizer* mainSizer = new wxFlexGridSizer(1,1,0,0);
   mainSizer->AddGrowableCol(0);
   mainSizer->AddGrowableRow(0);
 
-  wxPanel* rightPanel = new wxPanel(this,wxID_ANY);
-  setupRightPanel(rightPanel);
 
   int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
   glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
   
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
-  mainSizer->Add(rightPanel,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
   
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
-}
-
-void MainFrame::setupRightPanel(wxPanel* panel) {
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(1,1,0,0);
-  sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(0);
-
-//  int lf = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
-//  int rf = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
-  // setup the bottom part (notebook)
-  wxNotebook* bottomNotebook = new wxNotebook(panel, wxID_ANY);
-  wxScrolledWindow* markPanel = new wxScrolledWindow(bottomNotebook,wxID_ANY);
-  markPanel->SetScrollRate(0,5);
-  setupMarkPanel(markPanel);
-  bottomNotebook->AddPage(markPanel, wxT("Mark"), false);
-
-  wxScrolledWindow* simPanel = new wxScrolledWindow(bottomNotebook, wxID_ANY);
-  simPanel->SetScrollRate(0,5);
-  setupSimPanel(simPanel);
-  bottomNotebook->AddPage(simPanel, wxT("Simulation"), false); 
-
-  
-  sizer->Add(bottomNotebook, 0, wxEXPAND | wxALL, 5);
-  sizer->Fit(panel);
-  panel->SetSizer(sizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void MainFrame::setupMarkPanel(wxPanel* panel) {
-  wxFlexGridSizer* markSizer = new wxFlexGridSizer(6,1,0,0);
-  markSizer->AddGrowableCol(0);
-  markSizer->AddGrowableRow(4);
-  markSizer->AddGrowableRow(5);
-
-  int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int border = 3;
-  
-  nomarksRadio = new wxRadioButton(panel,myID_MARK_RADIOBUTTON,wxT("No marks"),
-      wxDefaultPosition,wxDefaultSize,wxRB_GROUP);
-  nomarksRadio->SetValue(true);
-  markDeadlocksRadio = new wxRadioButton(panel,myID_MARK_RADIOBUTTON,
-      wxT("Mark deadlocks"));
-  markStatesRadio = new wxRadioButton(panel,myID_MARK_RADIOBUTTON,
-      wxT("Mark states"));
-  markTransitionsRadio = new wxRadioButton(panel,myID_MARK_RADIOBUTTON,
-      wxT("Mark transitions"));
-    
-  markSizer->Add(nomarksRadio,0,flags,border);
-  markSizer->Add(markDeadlocksRadio,0,flags,border);
-  markSizer->Add(markStatesRadio,0,flags,border);
-  markSizer->Add(markTransitionsRadio,0,flags,border);
-  
-  wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,panel,
-      wxT("Mark states"));
-
-  //TODO: Name correct?
-  wxString choices[3] = { wxT("Match any of the following"),
-      wxT("Match all of the following"), wxT("Match the following separately") };
-
-  markAnyAllChoice = new wxChoice(panel,myID_MARK_ANYALL,wxDefaultPosition,
-      wxDefaultSize,3,choices);
-  markAnyAllChoice->SetSelection(0);
-  markStatesSizer->Add(markAnyAllChoice,0,flags,border);
-  
-  markStatesListBox = new wxCheckListBox(panel,myID_MARK_RULES,
-      wxDefaultPosition,wxSize(200,100),0,NULL,
-      wxLB_SINGLE|wxLB_NEEDED_SB|wxLB_HSCROLL);
-  //markStatesListBox->SetMinSize(wxSize(200,-1));
-  markStatesSizer->Add(markStatesListBox,1,flags|wxEXPAND,border);
-  wxBoxSizer* addremoveSizer = new wxBoxSizer(wxHORIZONTAL);
-  addremoveSizer->Add(new wxButton(panel,myID_ADD_RULE,wxT("Add")),0,flags,
-      border);
-  addremoveSizer->Add(new wxButton(panel,myID_REMOVE_RULE,wxT("Remove")),0,
-      flags,border);
-
-  markStatesSizer->Add(addremoveSizer,0,flags,border);
-  
-  wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(wxVERTICAL,
-      panel,wxT("Mark transitions"));
-  markTransitionsListBox = new wxCheckListBox(panel,myID_MARK_TRANSITIONS,
-      wxDefaultPosition,wxSize(200,-1),0,NULL,wxLB_SINGLE|wxLB_SORT|
-      wxLB_NEEDED_SB|wxLB_HSCROLL);
-  markTransitionsListBox->SetMinSize(wxSize(200,-1));
-  markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,border);
-  
-  markSizer->Add(markStatesSizer,0,wxEXPAND|wxALL,border);
-  markSizer->Add(markTransitionsSizer,0,wxEXPAND|wxALL,border);
-  markSizer->Fit(panel);
-  panel->SetSizer(markSizer);
-  panel->Fit();
-  panel->Layout();
-}
-
-void MainFrame::setupSimPanel(wxPanel* panel) {
-  // Container for all elements in tab.
-  wxFlexGridSizer* simSizer = new wxFlexGridSizer(3, 1, 0, 0);
-  simSizer->AddGrowableCol(0);
-  simSizer->AddGrowableRow(1);
-  simSizer->AddGrowableRow(2);
-
-  int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
-  int border = 3;
-
-  // Buttons for general simulation control: start, backtrace, reset, stop
-  wxFlexGridSizer* simButtonSizer = new wxFlexGridSizer(2, 2, 0, 0);
-  simButtonSizer->AddGrowableCol(0);
-  simButtonSizer->AddGrowableCol(1);
-
-  simStartButton = new wxButton(panel, myID_SIM_START_BUTTON, wxT("Start"));
-  simStartButton->Disable();
-
-  // TODO: Rephrase button label?
-  simBTButton = new wxButton(panel, myID_SIM_BT_BUTTON, wxT("Backtrace"));
-  simBTButton->Disable();
-
-  simResetButton = new wxButton(panel, myID_SIM_RESET_BUTTON,
-                                          wxT("Reset"));
-  simResetButton->Disable();
-
-  simStopButton  = new wxButton(panel, myID_SIM_STOP_BUTTON,
-                                          wxT("Stop"));
-  simStopButton->Disable();
-
-  simButtonSizer->Add(simStartButton, 0, flags, border);
-  simButtonSizer->Add(simStopButton,  0, flags, border);
-  simButtonSizer->Add(simBTButton, 0, flags, border);
-  simButtonSizer->Add(simResetButton, 0, flags, border);
-  
-
-  simSizer->Add(simButtonSizer, 1, flags, border);
-
-  // List of transitions and buttons to fire these transitions and go back one
-  // step
-  wxStaticBoxSizer* simTransSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
-    wxT("Transitions"));
-  int listViewStyle = wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|
-                      wxLC_SINGLE_SEL;
-
-  simTransView = new wxListView(panel, myID_SIM_TRANSITIONS_VIEW, 
-    wxDefaultPosition, wxSize(200, 100), listViewStyle);
-  //simTransView->SetMaxSize(wxSize(200, 100));
-  simTransView->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
-  simTransView->InsertColumn(1, wxT("State change"), wxLIST_FORMAT_LEFT);
-  simTransView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
-
-  simTransSizer->Add(simTransView, 1, flags|wxEXPAND, border);
-
-  wxBoxSizer* triggerUndoSizer = new wxBoxSizer(wxHORIZONTAL);
-  simTriggerButton = new wxButton(panel, myID_SIM_TRIGGER_BUTTON,
-                                         wxT("Trigger"));
-  simTriggerButton->Disable();
-  triggerUndoSizer->Add(simTriggerButton, 0, flags, border);
-
-  simUndoButton = new wxButton(panel, myID_SIM_UNDO_BUTTON, wxT("Undo"));
-  simUndoButton->Disable();
-  triggerUndoSizer->Add(simUndoButton, 0, flags, border);
-  simTransSizer->Add(triggerUndoSizer, 0, flags, border);
-
-  simSizer->Add(simTransSizer, 0, wxEXPAND|wxALL, border);
-
-
-  // Information about current state
-  /*wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
-                                                         wxT("Current state"));
-  simStateView = new wxListView(panel, myID_SIM_STATE_VIEW, 
-                                         wxDefaultPosition, wxSize(200, 100), 
-                                         listViewStyle);
-  simStateView->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
-  simStateView->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
-  simStateView->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
-
-  simStateSizer->Add(simStateView, 1, flags|wxEXPAND, border);
-  simSizer->Add(simStateSizer, 0, wxEXPAND|wxALL, border);*/
-  
-  panel->SetSizer(simSizer);
-  panel->Fit();
-  panel->Layout();
-
-  // Now the panel has been laid out, we can get fill up the columns
-  simTransView->SetColumnWidth(1, simTransView->GetClientSize().GetWidth() - 
-                               simTransView->GetColumnWidth(0));
-  /*simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() - 
-                               simStateView->GetColumnWidth(0));*/
 }
 
 GLCanvas* MainFrame::getGLCanvas() const {
@@ -405,6 +219,8 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   msg += wxT("See: F. van Ham, H. van de Wetering and J.J. van Wijk, ");
   msg += wxT("\"Visualization of State Transition Graphs\". ");
   msg += wxT("Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n");
+  msg += wxT("\n");
+  msg += wxT("The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n");
   msg += wxT("\n");
   msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
   msg += wxT("For information see http://www.mcrl2.org\n");
@@ -523,8 +339,16 @@ void MainFrame::onInfo(wxCommandEvent& /*event*/) {
   infoDialog->Show();
 }
 
-void MainFrame::onResetButton(wxCommandEvent& /*event*/) {
+void MainFrame::onMark(wxCommandEvent& /*event*/)
+{
+  markDialog->Show();
 }
+
+void MainFrame::onSim(wxCommandEvent& /*event*/)
+{
+  simDialog->Show();
+}
+
 
 void MainFrame::onMarkRadio(wxCommandEvent& event) {
   wxRadioButton* buttonClicked = (wxRadioButton*)event.GetEventObject();
@@ -614,58 +438,6 @@ void MainFrame::onResetStatePositions(wxCommandEvent& /*event*/) {
   glCanvas->resetStatePositions();
 }
 
-// Simulation event handlers implementations
-void MainFrame::onSimStartButton(wxCommandEvent& event) {
-  mediator->startSim();
-}
-
-void MainFrame::onSimResetButton(wxCommandEvent& event) {
-  sim->resetSim();
-}
-
-void MainFrame::onSimStopButton(wxCommandEvent& event) {
-  sim->stop();
-}
-
-void MainFrame::onSimTransitionSelected(wxListEvent& event) {
-  // Get index of transition that was selected
-  int trans = event.GetIndex();
-
-  // Choose trans to be the next transition
-  sim->chooseTrans(trans);
-  
-}
-
-void MainFrame::onSimTransitionActivated(wxListEvent& event) {
-  onSimTransitionSelected(event);
-  sim->followTrans();
-}
-
-void MainFrame::onKeyDown(wxKeyEvent& event)
-{
-  // Workaround: Catch the space
-  if (event.GetKeyCode() == WXK_SPACE)
-  {
-  }
-  else
-  {
-    event.Skip();
-  }
-}
-
-void MainFrame::onSimTriggerButton(wxCommandEvent& event) {
-  sim->followTrans();
-}
-
-void MainFrame::onSimUndoButton(wxCommandEvent& event) {
-  sim->undoStep();
-}
-
-void MainFrame::onGenerateBackTraceButton(wxCommandEvent& event)
-{
-  mediator->generateBackTrace();
-}
-
 void MainFrame::createProgressDialog(const string title,const string text) {
   progDialog = new wxProgressDialog(wxString(title.c_str(),wxConvUTF8),
       wxString(text.c_str(),wxConvUTF8),100,this,
@@ -716,38 +488,21 @@ void MainFrame::setMarkedTransitionsInfo(int number) {
 }
 
 void MainFrame::addMarkRule(wxString str) {
-  markStatesListBox->Append(str);
-  markStatesListBox->Check(markStatesListBox->GetCount()-1,true);
-  markStatesRadio->SetValue(true);
-  markStatesListBox->GetParent()->Fit();
-  Layout();
+  markDialog->addMarkRule(str);
+
 }
 
 void MainFrame::replaceMarkRule(int index,wxString str) {
-  bool isChecked = markStatesListBox->IsChecked(index);
-  markStatesListBox->SetString(index,str);
-  markStatesListBox->Check(index,isChecked);
-  markStatesRadio->SetValue(true);
+  markDialog->replaceMarkRule(index, str);
+
 }
   
 void MainFrame::resetMarkRules() {
-  markStatesListBox->Clear();
-  markAnyAllChoice->SetSelection(0);
-  nomarksRadio->SetValue(true);
-  markStatesListBox->GetParent()->Fit();
-  Layout();
+  markDialog->resetMarkRules();
 }
 
 void MainFrame::setActionLabels(vector< string > &labels) {
-  wxArrayString strLabels;
-  strLabels.Alloc(labels.size());
-  for (vector<string>::iterator it = labels.begin(); it != labels.end(); ++it) {
-    strLabels.Add(wxString(it->c_str(),wxConvLocal));
-  }
-  strLabels.Sort();
-  markTransitionsListBox->Set(strLabels);
-  markTransitionsListBox->GetParent()->Fit();
-  Layout();
+  markDialog->setActionLabels(labels);
 }
 
 void MainFrame::startRendering() {
@@ -782,109 +537,6 @@ void MainFrame::addParameter(int i,std::string par) {
 
 void MainFrame::setParameterValue(int i,std::string value) {
   infoDialog->setParameterValue(i,value);
-}
-
-void MainFrame::refresh() {
-  if (sim != NULL) {
-    // There is a simulation, so we can request information from it.
-    if (!sim->getStarted()) {
-      // The simulation has not yet been started, enable the start button.
-      simStartButton->Enable();
-      simResetButton->Disable();
-      simStopButton->Disable();
-      simBTButton->Disable();
-
-      // Clear the list view
-      simTransView->DeleteAllItems();
-    }
-    else {
-      // The simluation has been started, disable start button, enable stop and 
-      // reset buttons
-      simStartButton->Disable();
-
-      simResetButton->Enable();
-      simStopButton->Enable();
-      simBTButton->Enable();
-
-
-      // Refresh the transition list
-      simTransView->DeleteAllItems();
-
-      vector<Transition*> posTrans = sim->getPosTrans();
-      
-      State* currState = sim->getCurrState();
-      
-      // Get the possible transitions
-      for(size_t i = 0; i < posTrans.size(); ++i) {
-        int labelId = posTrans[i]->getLabel();
-        string label = mediator->getActionLabel(labelId);
-
-        simTransView->InsertItem(i, wxString(label.c_str(), wxConvLocal));
-
-        // Determine the state change this action will effectuate.
-        State* nextState = posTrans[i]->getEndState();
-        
-        wxString stateChange = wxT("");
-        if ((nextState != NULL) && (currState != NULL)) {
-          for(int j = 0; j < mediator->getNumberOfParams(); ++j) {
-            string nextVal = mediator->getParValue(j, 
-                                       nextState->getParameterValue(j));
-            if (mediator->getParValue(j, currState->getParameterValue(j)) !=
-                nextVal) {
-              stateChange += wxString(mediator->getParName(j).c_str(), 
-                               wxConvLocal) +  
-                            wxT(":=") + 
-                            wxString(nextVal.c_str(), wxConvLocal) +
-                            wxT(",");
-            }
-          }
-          // Remove last comma. There always is one since an empty transition 
-          // does not exist
-          stateChange.RemoveLast();
-        }
-        // Add stateChange value to the list
-        simTransView->SetItem(i, 1, stateChange);
-      }
-      
-      // Display selected transition
-      int chosenTrans = sim->getChosenTransi();
-
-      if(chosenTrans != -1) {
-        simTransView->Select(chosenTrans);
-      }
-      
-      // Trigger and undo buttons
-      if(chosenTrans != -1) {
-        simTriggerButton->Enable();
-      }
-      else {
-        simTriggerButton->Disable();
-      }
-
-      if(sim->getTransHis().size() != 0) {
-        simUndoButton->Enable();
-      }
-      else {
-        simUndoButton->Disable();
-      }
-    }
-  }
-  Layout();
-}
-
-void MainFrame::selChange() {
-  // There always is a simulation to inform us of a selection change.
-  int j = sim->getChosenTransi();
-
-  if(j != -1) 
-  {
-    simTransView->Select(j);
-    simTriggerButton->Enable();
-  }
-  else 
-  {
-    simTriggerButton->Disable();
-  }
 }
 
 void MainFrame::reportError(std::string const& error)

@@ -489,6 +489,11 @@ void Visualizer::updateColors() {
           } else {
             c = RGB_WHITE; 
           }
+
+          if (markStyle == MARK_MULTI)
+          {
+            // TODO: Add textures to cluster.
+          }
           if (cl->isSelected()) {
             c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
           }
@@ -509,14 +514,11 @@ void Visualizer::sortClusters(Point3D viewpoint) {
 }
 
 bool Visualizer::isMarked(Cluster* c) {
-  if (c != NULL) {
-    return ((markStyle == MARK_STATES && c->hasMarkedState()) ||
+  return c != NULL &&
+           ((markStyle == MARK_STATES && c->hasMarkedState()) ||
             (markStyle == MARK_MULTI && c->hasMarkedState())  ||
             (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
             (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
-  } else {
-    return false;
-  }
 }
 
 // ------------- STATES --------------------------------------------------------
@@ -854,7 +856,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
         glPopName();
         glPopMatrix();
         
-        if(isMarked(s))
+        if(isMultiMarked(s))
         {
           glDisable(GL_TEXTURE_1D);
 

@@ -18,15 +18,16 @@
 #include <wx/progdlg.h>
 
 #include "infodialog.h"
+#include "simdialog.h"
+#include "markdialog.h"
 #include "settingsdialog.h"
 #include "savepicdialog.h"
 #include "glcanvas.h"
 #include "mediator.h"
 #include "settings.h"
-#include "simreader.h"
 
 
-class MainFrame : public wxFrame, public simReader {
+class MainFrame : public wxFrame {
   public:
     MainFrame(Mediator* owner,Settings* ss);
     void addMarkRule(wxString str);
@@ -47,10 +48,11 @@ class MainFrame : public wxFrame, public simReader {
     void onVisStyle(wxCommandEvent& event);
     void onFSMStyle(wxCommandEvent& event);
     void onRemoveMarkRuleButton(wxCommandEvent& event);
-    void onResetButton(wxCommandEvent& event);
     void onResetView(wxCommandEvent& event);
     void onSettings(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
+    void onMark(wxCommandEvent& event);
+    void onSim(wxCommandEvent& event);
     void onMarkAnyAll(wxCommandEvent& event);
     void onMarkRadio(wxCommandEvent& event);
     void onMarkRuleActivate(wxCommandEvent& event);
@@ -60,21 +62,12 @@ class MainFrame : public wxFrame, public simReader {
     void onZoomInBelow(wxCommandEvent& event);
     void onZoomInAbove(wxCommandEvent& event);
     void onZoomOut(wxCommandEvent& event);
-    // Simulation event handlers
-    void onSimStartButton(wxCommandEvent& event);
-    void onSimResetButton(wxCommandEvent& event);
-    void onSimStopButton(wxCommandEvent& event);
-    void onSimTransitionSelected(wxListEvent& event);
-    void onSimTransitionActivated(wxListEvent& event);
-    void onKeyDown(wxKeyEvent& event);
-    void onSimTriggerButton(wxCommandEvent& event);
-    void onSimUndoButton(wxCommandEvent& event);
     void onGenerateBackTraceButton(wxCommandEvent& event);
     void onStartForceDirected(wxCommandEvent& event);
     void onStopForceDirected(wxCommandEvent& event);
     void onResetStatePositions(wxCommandEvent& event);
   
-
+    void setSim(Simulation* sim);
     void replaceMarkRule(int index, wxString str);
     void resetMarkRules();
     void setActionLabels(std::vector< std::string > &labels);
@@ -94,10 +87,6 @@ class MainFrame : public wxFrame, public simReader {
     
     void reportError(std::string const& error);
    
-
-    // Implemented for simReader interface
-    virtual void refresh();
-    virtual void selChange();
 //    void  onIdle(wxIdleEvent &event);/* needed for computing the frame rate */
   private:
 //    double previousTime; /* needed for computing the frame rate (FPS) */
@@ -116,29 +105,15 @@ class MainFrame : public wxFrame, public simReader {
     SavePicDialog*    savePicDialog;
     SettingsDialog*   settingsDialog;
     InfoDialog*       infoDialog;
+    MarkDialog*       markDialog;
+    SimDialog*        simDialog;
     Settings*         settings;
     wxFlexGridSizer*  selSizer;
     wxMenu*           toolMenu;
 
-    // Buttons for simulation
-    wxButton* simStartButton;
-    wxButton* simBTButton;
-    wxButton* simResetButton;
-    wxButton* simStopButton;
-    wxButton* simTriggerButton;
-    wxButton* simUndoButton;
-
-    // List views used in simulation
-    wxListView* simTransView; // Transition information
-//    wxListView* simStateView; // State information
-
     void setupMainArea();
     void setupMenuBar();
-    void setupRightPanel(wxPanel* panel);
-    void setupMarkPanel(wxPanel* panel);
-    void setupSimPanel(wxPanel* panel);
 
-//    void setupSettingsPanel(wxPanel* panel);
 
     DECLARE_EVENT_TABLE()
 };
