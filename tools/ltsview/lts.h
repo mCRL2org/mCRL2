@@ -48,6 +48,9 @@ class LTS {
     int  getNumMarkedStates() const;
     int  getNumMarkedTransitions() const;
     int  getNumRanks() const;
+    int  getMaxRanks() const;  // Returns the maximal rank of the structure, 
+                               // that is, the highest rank a cluster would have
+                               // in a non-zoomed in structure
     int  getNumStates() const;
     int  getNumTransitions() const;
     int  getNumParameters() const;

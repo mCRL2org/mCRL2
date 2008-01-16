@@ -457,9 +457,9 @@ void Visualizer::updateColors() {
   if (markStyle == NO_MARKS) {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
         settings->getRGB(InterpolateColor2),
-        lts->getNumRanks(),
+        lts->getMaxRanks(),
         settings->getBool(LongInterpolation));
-    for (r = 0; r < lts->getNumRanks(); ++r) {
+    for (r = 0; r < lts->getMaxRanks(); ++r) {
       for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
         Cluster* cl = lts->getClusterAtRank(r,i);
         if (cl != NULL) {
@@ -479,7 +479,7 @@ void Visualizer::updateColors() {
       }
     }
   } else {
-    for (r = 0; r < lts->getNumRanks(); ++r) {
+    for (r = 0; r < lts->getMaxRanks(); ++r) {
       for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
         Cluster* cl = lts->getClusterAtRank(r,i);
         if (cl != NULL) {

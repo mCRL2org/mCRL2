@@ -368,6 +368,18 @@ Cluster* LTS::getClusterAtRank(int r,int i) const {
 }
 
 int LTS::getNumRanks() const {
+  int offset = 0;
+  while(clustersInRank[offset].empty())
+  {
+    ++offset;
+  }
+
+
+  return clustersInRank.size() - offset;
+}
+
+int LTS::getMaxRanks() const
+{
   return clustersInRank.size();
 }
 
