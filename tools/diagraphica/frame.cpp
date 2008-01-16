@@ -33,6 +33,7 @@ Frame::Frame(
         wxString( title ) )
 // ------------------------
 {
+	SetAutoLayout(true);
     initFrame();
 }
 
@@ -902,8 +903,8 @@ void Frame::clearOuput()
     lblNumNodes->SetLabel( wxT("") );
     lblNumEdges->SetLabel( wxT("") );
     
-    buttonClustAttr->Enable( false );
-    buttonTraceAttr->Enable( false );
+    //buttonClustAttr->Enable( false );
+    //buttonTraceAttr->Enable( false );
 
     listCtrlAttr->DeleteAllItems();
     listCtrlDomain->DeleteAllItems();
@@ -978,6 +979,10 @@ void Frame::initFrame()
     framePlot = NULL;
     // cluster frame only shown on request
     frameClust = NULL;
+	
+	// fit everything after positioning sash positions
+	Layout();
+    Fit();
 }
 
 
@@ -1225,7 +1230,7 @@ void Frame::initSplitterFrame()
         this,
         ID_SPLITTER_FRAME, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterFrame->SetSashGravity( 0.0 );
-    splitterFrame->SetMinimumPaneSize( 20 );
+    splitterFrame->SetMinimumPaneSize( 200 );
     sizerFrame->Add(
         splitterFrame,
         1,
@@ -1234,7 +1239,7 @@ void Frame::initSplitterFrame()
     // init children
     initSplitterLft();
     initSplitterRgt();
-    
+	
     // split window
     splitterFrame->SplitVertically(
         splitterLft,
@@ -1251,7 +1256,7 @@ void Frame::initSplitterLft()
         splitterFrame,
         ID_SPLITTER_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterLft->SetSashGravity( 1.0 );
-    splitterLft->SetMinimumPaneSize( 20 );
+    splitterLft->SetMinimumPaneSize( 100 );
 	
     // init children
     initSplitterTopLft();
@@ -1272,8 +1277,8 @@ void Frame::initSplitterTopLft()
     splitterTopLft = new wxSplitterWindow(
         splitterLft,
         ID_SPLITTER_TOP_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
-    splitterTopLft->SetSashGravity( 0.6 );
-    splitterTopLft->SetMinimumPaneSize( 20 );
+    splitterTopLft->SetSashGravity( 1.0 );
+    splitterTopLft->SetMinimumPaneSize( 100 );
 
     // init children
     initPanelTopTopLft();
@@ -1301,6 +1306,7 @@ void Frame::initPanelTopTopLft()
         wxVSCROLL |
         wxRAISED_BORDER );
 	panelTopTopLft->SetSizer( sizerTopTopLft );
+	sizerTopTopLft->Fit(panelTopTopLft);
     panelTopTopLft->SetScrollRate( 10, 10 );
     
     // init children
@@ -1322,7 +1328,7 @@ void Frame::initLabelsGraphInfo()
     sizerTopTopLft->Add(
         box,
         0,        // vert no stretch
-        wxEXPAND  // hori stretch
+        wxSHAPED  // hori stretch
         | wxALL,  // border around
         5 );
 
@@ -1419,12 +1425,12 @@ void Frame::initListCtrlAttr()
         wxLC_REPORT |
         wxLC_HRULES |
         wxLC_VRULES );
-    sizerTopTopLft->Add(
+
+	sizerTopTopLft->Add(
         listCtrlAttr,
-        1,          // vert stretch
-        wxEXPAND |  // hori stretch
-        wxALL,      // specify border
-        5 );
+        1,	
+		wxEXPAND | wxBOTTOM |wxLEFT,	// vert & hori stretch, border all around
+        10 );
 
     // add drop target
     listCtrlAttr->SetDropTarget( 
@@ -1464,7 +1470,7 @@ void Frame::initListCtrlAttr()
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 5, colItem );
     listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
-
+	
     // reset ptr
     lbl = NULL;
 }
@@ -1474,7 +1480,19 @@ void Frame::initListCtrlAttr()
 void Frame::initButtonsAttr()
 // --------------------------
 {
-    // cluster button
+    /*
+	// init static box
+    wxStaticBoxSizer* box = new wxStaticBoxSizer(
+        wxHORIZONTAL,
+        panelTopTopLft,
+        wxString( wxT( "" ) ) );
+	sizerTopTopLft->Add(
+        box,
+        0,        // vert no stretch
+		wxALL,  // border around
+        0 );
+		
+	// cluster button
     buttonClustAttr = new wxButton(
         panelTopTopLft,
         ID_BUTTON_CLUST_ATTR,
@@ -1483,12 +1501,12 @@ void Frame::initButtonsAttr()
         wxDefaultSize );
     buttonClustAttr->Enable( false );
 
-    sizerTopTopLft->Add( 
+    box->Add( 
         buttonClustAttr,
         0,                           // vert stretch
         wxALIGN_RIGHT |              // hori stretch
         wxLEFT | wxRIGHT | wxBOTTOM, // border
-        5 );
+        2 );
 
     // trace button
     buttonTraceAttr = new wxButton(
@@ -1499,12 +1517,14 @@ void Frame::initButtonsAttr()
         wxDefaultSize );
     buttonTraceAttr->Enable( false );
 
-    sizerTopTopLft->Add( 
+    box->Add( 
         buttonTraceAttr,
-        0,                           // vert stretch
-        wxALIGN_RIGHT |              // hori stretch
+        0,                    
+        wxALIGN_RIGHT |             
         wxLEFT | wxRIGHT | wxBOTTOM, // border
-        5 );
+        2 );
+		
+	*/
 }
 
 
@@ -1523,6 +1543,7 @@ void Frame::initPanelBotTopLft()
         wxVSCROLL |
         wxRAISED_BORDER );
     panelBotTopLft->SetSizer( sizerBotTopLft );
+	sizerBotTopLft->Fit(panelBotTopLft);
     panelBotTopLft->SetScrollRate( 10, 10 );
 
     // children
@@ -1559,7 +1580,7 @@ void Frame::initListCtrlDomain()
         listCtrlDomain,
         1,         // vert stretch
         wxEXPAND | // hori stretch
-        wxALL,     // border
+        wxLEFT,     // border
         5 );
     
     // add drop target
@@ -1603,16 +1624,15 @@ void Frame::initPanelBotLft()
 // --------------------------
 {
     // init panel
-    sizerBotLft = new wxBoxSizer( wxVERTICAL );
+    sizerBotLft = new wxBoxSizer( wxHORIZONTAL );
     panelBotLft = new wxScrolledWindow(
         splitterLft,
         ID_PANEL_BOT_LFT,
         wxDefaultPosition,
         wxDefaultSize,
-        wxHSCROLL |
-        wxVSCROLL |
-        wxRAISED_BORDER );
+        wxRAISED_BORDER);
     panelBotLft->SetSizer( sizerBotLft );
+	sizerBotLft->Fit(panelBotLft);
     panelBotLft->SetScrollRate( 10, 10 );
 
     // children
@@ -1628,18 +1648,11 @@ void Frame::initCanvasThree()
         mediator,
         panelBotLft,
         ID_CANVAS_RGT );
-    canvasThree->SetMinSize( wxSize( 150, 100 ) );
-
-    /*
-    sizerCanvasThree->Add(
-        canvasThree,
-        1,
-        wxEXPAND );
-    */
+		
     sizerBotLft->Add(
         canvasThree,
         1,
-        wxEXPAND );
+        wxEXPAND | wxALL, 10 );
 }
 
 
@@ -1652,16 +1665,16 @@ void Frame::initSplitterRgt()
         splitterFrame,
         ID_SPLITTER_RGT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterRgt->SetSashGravity( 1.0 );
-    splitterRgt->SetMinimumPaneSize( 20 );
+    splitterRgt->SetMinimumPaneSize( 100 );
 
     // init children
     initPanelTopRgt();
-    initSplitterBotRgt();
+    initPanelBotRgt();
     
     // split window
     splitterRgt->SplitHorizontally(
         panelTopRgt,
-        splitterBotRgt );
+        panelBotRgt );
 }
 
 
@@ -1680,6 +1693,7 @@ void Frame::initPanelTopRgt()
         wxVSCROLL |
         wxRAISED_BORDER );
     panelTopRgt->SetSizer( sizerTopRgt );
+	sizerTopRgt->Fit(panelTopRgt);
     panelTopRgt->SetScrollRate( 10, 10 );
     //panelTopRgt->SetWindowStyle( wxNO_BORDER );
 
@@ -1699,12 +1713,13 @@ void Frame::initCanvasOne()
         mediator,
         panelTopRgt,
         ID_CANVAS_MAIN );
-    canvasOne->SetMinSize( wxSize( 150, 100 ) );
+    canvasOne->SetMinSize( panelTopRgt->GetSize() );
     
     sizerTopRgt->Add(
         canvasOne,
         1,
-        wxEXPAND );
+        wxEXPAND | wxALL, 10 );
+	
 }
 
 
@@ -1774,45 +1789,22 @@ void Frame::initToolbarEdit()
 
 
 // -----------------------------
-void Frame::initSplitterBotRgt()
-// -----------------------------
-{
-    // init splitter window
-    splitterBotRgt = new wxSplitterWindow(
-        splitterRgt,
-        ID_SPLITTER_BOT_RGT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
-    splitterBotRgt->SetSashGravity( 0.0 );
-    splitterBotRgt->SetMinimumPaneSize( 20 );
-    
-    // init children
-    initPanelLftBotRgt();
-    //initPanelRgtBotRgt();
-    // split window
-    /*
-    splitterBotRgt->SplitVertically(
-        panelLftBotRgt,
-        panelRgtBotRgt );
-    */
-    splitterBotRgt->Initialize( panelLftBotRgt );
-}
-
-
-// -----------------------------
-void Frame::initPanelLftBotRgt()
+void Frame::initPanelBotRgt()
 // -----------------------------
 {
     // init panel
-    sizerLftBotRgt = new wxBoxSizer( wxHORIZONTAL );
-    panelLftBotRgt = new wxScrolledWindow(
-        splitterBotRgt,
-        ID_PANEL_LFT_BOT_RGT,
+    sizerBotRgt = new wxBoxSizer( wxHORIZONTAL );
+    panelBotRgt = new wxScrolledWindow(
+        splitterRgt,
+        ID_PANEL_BOT_RGT,
         wxDefaultPosition,
         wxDefaultSize,
         wxHSCROLL |
         wxVSCROLL |
         wxRAISED_BORDER );
-    panelLftBotRgt->SetSizer( sizerLftBotRgt );
-    panelLftBotRgt->SetScrollRate( 10, 10 );
+    panelBotRgt->SetSizer( sizerBotRgt );
+	sizerBotRgt->Fit(panelBotRgt);
+    panelBotRgt->SetScrollRate( 10, 10 );
     
     // children
     initCanvasTwo();
@@ -1825,37 +1817,15 @@ void Frame::initCanvasTwo()
 {
     canvasTwo = new GLCanvas(
         mediator,
-        panelLftBotRgt,
+        panelBotRgt,
         ID_CANVAS_LFT );
-    canvasTwo->SetMinSize( wxSize( 150, 100 ) );
+    canvasTwo->SetMinSize( wxSize( 0, 0 ) );
     
-    sizerLftBotRgt->Add(
+    sizerBotRgt->Add(
         canvasTwo,
         1,
-        wxEXPAND );
+        wxEXPAND | wxALL, 10  );
 }
-
-
-// --------------------------------
-void Frame::initPanelRgtBotRgt()
-// --------------------------------
-{
-    sizerRgtBotRgt = new wxBoxSizer( wxVERTICAL );
-    panelRgtBotRgt = new wxScrolledWindow(
-        splitterBotRgt,
-        ID_PANEL_RGT_BOT_RGT,
-        wxDefaultPosition,
-        wxDefaultSize,
-        wxHSCROLL |
-        wxVSCROLL |
-        wxRAISED_BORDER );
-    panelRgtBotRgt->SetSizer( sizerRgtBotRgt );
-    panelRgtBotRgt->SetScrollRate( 10, 10 );
-
-    // children
-    initTextCtrl();
-}
-
 
 // -----------------------
 void Frame::initTextCtrl()
@@ -1873,7 +1843,7 @@ void Frame::initTextCtrl()
     
     sizerRgtBotRgt->Add( 
         textCtrl,
-        1,         // vert stretch
+        0,         // vert stretch
         wxEXPAND | // hori stretch
         wxALL,     // border
         5 ); 
@@ -2616,9 +2586,11 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // enable cluster & trace buttons
         if ( listCtrlAttr->GetSelectedItemCount() > 0 )
         {
-            buttonClustAttr->Enable( true );
+            /*
+			buttonClustAttr->Enable( true );
             if ( mediator->getView() == Mediator::VIEW_TRACE )
                 buttonTraceAttr->Enable( true );
+			*/
         }
         
         // hide toolbar
@@ -2692,21 +2664,20 @@ void Frame::onMenuBar( wxCommandEvent &e )
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
         }
         
-        // show 2nd panel
+        // show 2nd panel (panelBotRgt)
         int w, h;
         splitterRgt->GetSize( &w, &h );
-        /*
         splitterRgt->SplitHorizontally( 
             panelTopRgt,
             panelBotRgt );
-        */
-        splitterRgt->SplitHorizontally( 
-            panelTopRgt,
-            splitterBotRgt );
         splitterRgt->SetSashPosition( (int)(sashRatioRgt*h) );
-        
-        panelTopRgt->Layout();
-        canvasOne->Refresh();
+		
+		 // show panelBotLft panel
+        splitterLft->GetSize( &w, &h );
+        splitterLft->SplitHorizontally( 
+            splitterTopLft,
+            panelBotLft );
+        splitterLft->SetSashPosition( (int)(sashRatioLft*h) );
     }
     else if ( e.GetId() == ID_MENU_ITEM_MODE_EDIT )
     {
@@ -2717,8 +2688,8 @@ void Frame::onMenuBar( wxCommandEvent &e )
         menuBar->EnableTop( 2, false );
 
         // disable cluster & trace buttons
-        buttonClustAttr->Enable( false );
-        buttonTraceAttr->Enable( false );
+        //buttonClustAttr->Enable( false );
+        //buttonTraceAttr->Enable( false );
         
         // show toolbar
         toolBarEdit->Show( true );
@@ -2738,19 +2709,17 @@ void Frame::onMenuBar( wxCommandEvent &e )
         int w, h;
         splitterRgt->GetSize( &w, &h );
         sashRatioRgt = splitterRgt->GetSashPosition()/(double)h;
-        //splitterRgt->Unsplit( panelBotRgt );
-        splitterRgt->Unsplit( splitterBotRgt );
-        
-        panelTopRgt->Layout();
-        //panelBotRgt->Layout();
-        splitterBotRgt->Layout();
-
-        canvasOne->Refresh();
+        splitterRgt->Unsplit( panelBotRgt );
+		
+		// hide panelBotLft panel
+        splitterLft->GetSize( &w, &h );
+        sashRatioLft = splitterLft->GetSashPosition()/(double)h;
+		splitterLft->Unsplit( panelBotLft );
     }
     else if ( e.GetId() == ID_MENU_ITEM_VIEW_SIM )
     {
         attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
-        buttonTraceAttr->Enable( false );
+        //buttonTraceAttr->Enable( false );
 
         // update visualizers
         mediator->handleSetViewSim();
@@ -2762,7 +2731,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( listCtrlAttr->GetSelectedItemCount() > 0 )
         {
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, true );
-            buttonTraceAttr->Enable( true );
+            //buttonTraceAttr->Enable( true );
         }
         
         // update visualizers
@@ -2827,6 +2796,10 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // shut down app
         Close();
     }
+	
+	// fit everything after handling the request
+	Fit();
+	Layout();
 }
 
 
@@ -2879,9 +2852,11 @@ void Frame::onListCtrlSelect( wxListEvent &e )
         }
         else if ( mediator->getMode() == Mediator::MODE_ANALYSIS )
         {
-            buttonClustAttr->Enable( true );
+            /*
+			buttonClustAttr->Enable( true );
             if ( mediator->getView() == Mediator::VIEW_TRACE )
                 buttonTraceAttr->Enable( true );
+			*/
 
             if ( listCtrlAttr->GetSelectedItemCount() == 0 )
             {
@@ -4055,6 +4030,37 @@ void Frame::onRadioBox( wxCommandEvent &e )
 }
 */
 
+// --------------------------------------
+void Frame::onSplitterDoubleClick( wxSplitterEvent &e)
+// --------------------------------------
+{
+	if(e.GetId() == ID_SPLITTER_FRAME)
+	{
+		// minimize the splitterLeft pane
+		splitterFrame->SetSashPosition( splitterFrame->GetMinimumPaneSize(), true );
+	}
+	else if(e.GetId() == ID_SPLITTER_LFT)
+	{
+		// minimize the panelBotLft pane
+		splitterLft->SetSashPosition( ( 0 - splitterLft->GetMinimumPaneSize() ), true );
+	}
+	else if(e.GetId() == ID_SPLITTER_TOP_LFT)
+	{
+		// minimize the panelBotTopLft pane
+		splitterTopLft->SetSashPosition( ( 0 - splitterTopLft->GetMinimumPaneSize() ), true );
+	}
+	else if(e.GetId() == ID_SPLITTER_RGT)
+	{
+		// minimize the panelBotRgt pane
+		splitterRgt->SetSashPosition( ( 0 - splitterRgt->GetMinimumPaneSize() ), true );
+	}
+	
+	// fit everything after minimizing panes
+	Layout();
+    Fit();
+}
+
+
 // -- implement event table -----------------------------------------
 
 
@@ -4080,6 +4086,11 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_EDITOR, Frame::onMenuBar )
     EVT_MENU( wxID_ABOUT, Frame::onMenuBar )
     EVT_MENU( wxID_CLOSE, Frame::onMenuBar )
+	// splitter windows
+	EVT_SPLITTER_DCLICK( ID_SPLITTER_FRAME, Frame::onSplitterDoubleClick )
+	EVT_SPLITTER_DCLICK( ID_SPLITTER_LFT, Frame::onSplitterDoubleClick )
+	EVT_SPLITTER_DCLICK( ID_SPLITTER_TOP_LFT, Frame::onSplitterDoubleClick )
+	EVT_SPLITTER_DCLICK( ID_SPLITTER_RGT, Frame::onSplitterDoubleClick )
     // attributes & domain
     EVT_LIST_ITEM_SELECTED( ID_LIST_CTRL_ATTR, Frame::onListCtrlSelect )
     EVT_LIST_ITEM_DESELECTED( ID_LIST_CTRL_ATTR, Frame::onListCtrlSelect )

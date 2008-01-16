@@ -174,7 +174,7 @@ private:
     
     void initSplitterBotRgt();  // 3
 
-    void initPanelLftBotRgt();  // 4
+    void initPanelBotRgt();  // 4
     void initCanvasTwo();       // 5
     void initPanelRgtBotRgt();  // 4
     void initCanvasThree();     // 5
@@ -213,6 +213,7 @@ private:
     void onTool( wxCommandEvent &e );
     void onButton( wxCommandEvent &e );
     void onRadioBox( wxCommandEvent &e );
+	void onSplitterDoubleClick( wxSplitterEvent &e);
     
     // -- menu bar --------------------------------------------------
     wxMenuBar* menuBar;
@@ -252,16 +253,16 @@ private:
     // -- right panel -----------------------------------------------
     wxSplitterWindow* splitterRgt;
     double            sashRatioRgt;
+	double			  sashRatioLft;
     
     wxBoxSizer*       sizerTopRgt;
     wxScrolledWindow* panelTopRgt;
     GLCanvas*         canvasOne;
     wxToolBar*        toolBarEdit;
 
-    wxSplitterWindow* splitterBotRgt;
     
-    wxBoxSizer*       sizerLftBotRgt;
-    wxScrolledWindow* panelLftBotRgt;
+    wxBoxSizer*       sizerBotRgt;
+    wxScrolledWindow* panelBotRgt;
     GLCanvas*         canvasTwo;
     
     wxBoxSizer*       sizerRgtBotRgt;
@@ -355,7 +356,7 @@ private:
         ID_SPLITTER_BOT_RGT,
         ID_PANEL_LFT_BOT_RGT,
         ID_CANVAS_LFT,
-        ID_PANEL_RGT_BOT_RGT,
+        ID_PANEL_BOT_RGT,
         ID_CANVAS_RGT,
         
         ID_FRAME_SETTINGS,
