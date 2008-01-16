@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file dataimpl.h
+/// \file data_implementation.h
 
 #ifndef MCRL2_DATAIMPL_H
 #define MCRL2_DATAIMPL_H
@@ -20,7 +20,7 @@
  *     structure after the type checking phase.
  * \post The datatypes of spec are implemented as higher-order abstract data
  *     types.
- * \ret if the data implementation went ok, an equivalent version of spec is
+ * \ret if the data implementation went well, an equivalent version of spec is
  *     returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -33,7 +33,7 @@ ATermAppl implement_data_spec(ATermAppl spec);
  *     lps_spec represents an LPS specification
  * \post The datatypes of sort_expr are implemented as higher-order abstract data
  *     types in lps_spec
- * \ret if the data implementation went ok, an equivalent version of sort_expr
+ * \ret if the data implementation went well, an equivalent version of sort_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -47,7 +47,7 @@ ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
  *     lps_spec represents an LPS specification
  * \post The datatypes of data_expr are implemented as higher-order abstract data
  *     types in lps_spec
- * \ret if the data implementation went ok, an equivalent version of data_expr
+ * \ret if the data implementation went well, an equivalent version of data_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -61,7 +61,7 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr,
  *     lps_spec represents an LPS specification
  * \post The datatypes of spec are implemented as higher-order abstract data
  *     types in lps_spec
- * \ret if the data implementation went ok, an equivalent version of mult_act
+ * \ret if the data implementation went well, an equivalent version of mult_act
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -75,7 +75,7 @@ ATermAppl implement_data_mult_act(ATermAppl mult_act,
  *     lps_spec represents an LPS specification
  * \post The datatypes of proc_expr are implemented as higher-order abstract data
  *     types in lps_spec
- * \ret if the data implementation went ok, an equivalent version of proc_expr
+ * \ret if the data implementation went well, an equivalent version of proc_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -89,7 +89,7 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
  *     lps_spec represents an LPS specification
  * \post The datatypes of spec are implemented as higher-order abstract data
  *     types in lps_spec
- * \ret if the data implementation went ok, an equivalent version of state_frm
+ * \ret if the data implementation went well, an equivalent version of state_frm
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
@@ -104,7 +104,7 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
  * \post The datatypes in action_rename_spec are implemented as higher-order
  *     abstract data types types and the data types of lps_spec are added
  *     to the data types of ar_spec.
- * \ret if the data implementation went ok, an equivalent version of
+ * \ret if the data implementation went well, an equivalent version of
  *     ar_spec is returned that adheres to the internal ATerm
  *     structure after data implementation, also containing the data
  *     specification of lps_spec
