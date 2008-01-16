@@ -19,7 +19,7 @@ level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
 - make >= 3.80: package make [required]
 - wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg [recommended]
-   + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
+  + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
 - flex >= 2.5.4a-12: package flex [optional]
@@ -28,41 +28,47 @@ of the packages is mentioned (required, recommended or optional):
 - python: package python [optional]
 
 The required packages enable the following tools:
-+ mcrl22lps:    translate an mCRL2 specification into a linear process
-                specification (LPS)
-+ lpspp:        pretty print an LPS as an mCRL2 specification
-+ lpsinfo:      print basic information of an LPS
-+ sim:          text based simulator for LPSs
-+ lpsrewr:      rewrite data expressions in an LPS
-+ lpsdataelm:   remove unused parts of the data specification of an LPS
-+ lpsconstelm:  remove constant process parameters from an LPS
-+ lpssumelm:    remove summation variables from an LPS
-+ lpsparelm:    remove unused process parameters from an LPS
-+ lpsuntime:    remove time from an LPS
-+ lpsformcheck: check formulas using the data specification of an LPS
-+ lpsinvelm:    check invariants and use these to simplify an LPS 
-+ lps2lts:      generate a labelled transition system (LTS) from an LPS
-+ ltsinfo:      print basic information of an LTS
-+ ltsconvert:   convert an LTS, possibly using minimisation
-+ ltscompare:   compare two LTS's
-+ tracepp:      pretty print a trace
-+ tbf2lps:      convert an mCRL LPS to an mCRL2 LPS
-+ lps2torx:     provide TorX with an explorer interface using an LPS
-+ pnml2mcrl2:   convert classic Petri nets in the PNML format to mCRL2
-+ pbesinfo:     print basic information of a parameterised boolean
-                equation system (PBES)
++ mcrl22lps:       translate an mCRL2 specification into a linear process
+                   specification (LPS)
++ lpspp:           pretty print an LPS as an mCRL2 specification
++ lpsinfo:         print basic information of an LPS
++ sim:             text based simulator for LPSs
++ lpsrewr:         rewrite data expressions in an LPS
++ lpsconstelm:     remove constant process parameters from an LPS
++ lpssumelm:       remove summation variables from an LPS
++ lpsparelm:       remove unused process parameters from an LPS
++ lpsuntime:       remove time from an LPS
++ lpsdecluster:    make summuation variables of an LPS superfluous by
+                   splitting summands
++ lpsbinary:       replace enumerated sorts by bit vectors in an LPS
++ lpsactionrename: rename actions in an LPS
++ lpsformcheck:    check formulas using the data specification of an LPS
++ lpsinvelm:       check invariants and use these to simplify an LPS 
++ lpsconfcheck:    mark confluent tau-transitions of an LPS
++ lps2pbes:        convert a state formula and an LPS into a parameterised
+                   boolean equation system (PBES)
++ pbes2bes:        convert a PBES to a boolean equation system (BES)
++ pbes2bool:       solves a PBES or outputs or outputs an equivalent BES
++ pbesinfo:        print basic information of a parameterised boolean
+                   equation system (PBES)
++ pbespp:          pretty print a PBES
++ pbesrewr:        rewrite data expressions in a PBES
++ lps2lts:         generate a labelled transition system (LTS) from an LPS
++ ltsinfo:         print basic information of an LTS
++ ltsconvert:      convert an LTS, possibly using minimisation
++ ltscompare:      compare two LTS's
++ tracepp:         pretty print a trace
++ tbf2lps:         convert an mCRL LPS to an mCRL2 LPS
++ lps2torx:        provide TorX with an explorer interface using an LPS
++ chi2mcrl2:       translates a Chi specification into an mCRL2 specification
++ pnml2mcrl2:      convert classic Petri nets in the PNML format to mCRL2
 
 The recommended packages for wxWidgets enable the following tools:
 + xsim:        graphical simulator for LPSs
 + ltsgraph:    visualise an LTS in 2D using spring model techniques
 + ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
++ diagraphica: interatively analyse an LTS in FSM format
 + squadt:      systems quality analysis and design toolset
-
-Note: at this moment the toolset does not properly install without wxWidgets.
-A workaround is to do a manual install after make. The cause of this is a bug
-in Boost Build v2 (build environment) for which no easy workaround seems
-possible at this time. At least no solution that does not bring back problems
-that have been solved with the last significant changes to the build procedure.
 
 Any of the default icon location packages ensures that any of the above tools
 do not generate warnings on missing icons.
