@@ -17,6 +17,7 @@
 #include "lts.h"
 #include "visualizer.h"
 #include "utils.h"
+#include "markmanager.h"
 
 class LTSViewApp : public wxApp, public Mediator {
   private:
@@ -26,48 +27,54 @@ class LTSViewApp : public wxApp, public Mediator {
     MainFrame *mainFrame;
     Settings *settings;
     Visualizer *visualizer;
+    MarkManager *markManager;
     Utils::RankStyle rankStyle;
-    Utils::MarkStyle markStyle;
     bool fsmStyle;
+    void applyMarkStyle();
 
   public:
-    void	  activateMarkRule(const int index,const bool activate);
-    void	  addMarkRule();
-    void	  applyMarkStyle(Utils::MarkStyle ms);
-    void	  editMarkRule(const int index);
+    virtual int OnExit();
+    virtual bool OnInit();
+    void activateMarkRule(int index,bool activate);
+    void addMarkRule();
+    void editMarkRule(int index);
+    Utils::MarkStyle getMarkStyle();
+    Utils::MatchStyle getMatchStyle();
+    bool isMarked(State *s);
+    bool isMarked(Cluster *s);
+    bool isMarked(Transition *t);
+    Utils::RGB_Color getMarkRuleColor(int mr);
     Utils::RGB_Color getNewRuleColour();
     std::string getVersionString();
-    void	  markAction(std::string label);
-    void	  notifyRenderingFinished();
-    void	  notifyRenderingStarted();
-    virtual int  OnExit();
-    virtual bool OnInit();
-    void	  openFile(std::string fileName);
-    void	  removeMarkRule(const int index);
-    void	  setMatchAnyMarkRule(int i);
-    void	  setRankStyle(Utils::RankStyle rs);
-    void	  setVisStyle(Utils::VisStyle vs);
-    void	  setFSMStyle(bool b);
-    void	  unmarkAction(std::string label);
-    void          startSim();
-    int           getNumberOfParams() const;
-    std::string   getActionLabel(const int i) const;
-    std::string   getParName(const int i) const;
-    std::string   getParValue(const int i, const int j) const;
-    void          selectStateByID(const int id);
-    void          selectCluster(const int rank, const int pos);
-    void          deselect();
-    int           getNumberOfObjects();
+    void notifyRenderingFinished();
+    void notifyRenderingStarted();
+    void openFile(std::string fileName);
+    void removeMarkRule(int mr);
+    void setActionMark(std::string label,bool b);
+    void setMarkStyle(Utils::MarkStyle ms);
+    void setMatchStyle(Utils::MatchStyle ms);
+    void setRankStyle(Utils::RankStyle rs);
+    void setVisStyle(Utils::VisStyle vs);
+    void setFSMStyle(bool b);
+    void startSim();
+    int getNumberOfParams() const;
+    std::string getActionLabel(const int i) const;
+    std::string getParName(const int i) const;
+    std::string getParValue(const int i, const int j) const;
+    void selectStateByID(const int id);
+    void selectCluster(const int rank, const int pos);
+    void deselect();
+    int getNumberOfObjects();
     
-    void          zoomInBelow();
-    void          zoomInAbove();
-    void          zoomOutTillTop();
-    void          zoomOut();
+    void zoomInBelow();
+    void zoomInAbove();
+    void zoomOutTillTop();
+    void zoomOut();
 
-    void          reportError(std::string const& error);
+    void reportError(std::string const& error);
 
-    void          loadTrace(std::string const& path);
-    void          generateBackTrace();
+    void loadTrace(std::string const& path);
+    void generateBackTrace();
 
     void printHelp();
     void printVersion();

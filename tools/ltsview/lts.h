@@ -19,14 +19,43 @@
 #include "utils.h"
 #include "simreader.h"
 
+class LTS;
+
+class Cluster_iterator {
+  public:
+    Cluster_iterator(LTS *l,bool rev=false);
+    ~Cluster_iterator();
+    void operator++();
+    Cluster* operator*();
+    bool is_end();
+  private:
+    bool reverse;
+    int rank;
+    unsigned int cluster;
+    LTS *lts;
+    void next();
+    bool is_ok();
+};
+
+class State_iterator {
+  public:
+    State_iterator(LTS *l);
+    ~State_iterator();
+    void operator++();
+    State* operator*();
+    bool is_end();
+  private:
+    std::list<State*>::iterator state_it;
+    LTS *lts;
+};
+
 class LTS {
   public:
 
     LTS( Mediator* owner );
     ~LTS();
-    void activateMarkRule(const int index,const bool activate);
+
     int  addLabel(std::string label);
-    void addMarkRule(Utils::MarkRule* r,int index=-1);
     int  addParameter(std::string parname,std::string partype);
     void addParameterValue(int parindex,std::string parvalue);
     void addCluster(Cluster* c);
@@ -37,70 +66,57 @@ class LTS {
     void clusterStates(Utils::RankStyle rs);
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
-    Cluster* getClusterAtRank(int r, int c) const;
     State* getInitialState() const;
     std::string getLabel(int labindex);
-    int  getMatchAnyMarkRule() const;
-    Utils::MarkRule* getMarkRule(const int index) const;
-    int  getNumClusters() const;
-    int  getNumClustersAtRank(int r) const;
-    int  getNumDeadlocks();
-    int  getNumMarkedStates() const;
-    int  getNumMarkedTransitions() const;
-    int  getNumRanks() const;
+    int getLabelIndex(std::string label);
+    Cluster_iterator getClusterIterator(bool reverse=false);
+    State_iterator getStateIterator();
+    int getNumClusters() const;
+    int getNumDeadlocks();
+    int getNumLabels();
+    int getNumRanks() const;
+    int getNumStates() const;
+    int getNumTransitions() const;
+    int getNumParameters() const;
+    int getNumParameterValues(int parindex) const;
     int  getMaxRanks() const;  // Returns the maximal rank of the structure, 
                                // that is, the highest rank a cluster would have
                                // in a non-zoomed in structure
-    int  getNumStates() const;
-    int  getNumTransitions() const;
-    int  getNumParameters() const;
-    int  getNumParameterValues(int parindex) const;
     
     std::string getParameterName(int parindex) ;
     std::string getParameterType(int parindex) ;
     std::string getParameterValue(int parindex,int valindex);
-    State*      selectStateByID(int id);
-    void        selectCluster(const int rank, const int pos);
-    void        deselect();
-    void markAction(std::string label);
-    void markClusters();
+    State* selectStateByID(int id);
+    void selectCluster(const int rank, const int pos);
+    void deselect();
     void positionClusters(bool fsmstyle);
     void positionStates();
     void rankStates(Utils::RankStyle rs);
-    void removeMarkRule(const int index);
-    void replaceMarkRule(int index, Utils::MarkRule* mr);
     void setInitialState(State* s);
-    void setMatchAnyMarkRule(int i);
-    void unmarkAction(std::string label);
     
     void trim();
 
-    int         getZoomLevel() const;
-    void        setZoomLevel(const int level);
+    int getZoomLevel() const;
+    void setZoomLevel(const int level);
     // Zooming procedures.
     // Zooms into the structure starting from the initial cluster/state and upto
     // selectedCluster, if any. 
-    LTS*        zoomIntoAbove(); 
-
+    LTS* zoomIntoAbove(); 
     // Zooms into the structure starting from the selectedCluster, upto the
     // end of the structure. 
-    LTS*        zoomIntoBelow();
-
+    LTS* zoomIntoBelow();
     // Zooms out to the previous level.
-    LTS*        zoomOut();
-    void        setLastCluster(Cluster* c);
-    void        setPreviousLevel(LTS* prev);
-    LTS*        getPreviousLevel() const;
-    void        fromAbove();
+    LTS* zoomOut();
+    void setLastCluster(Cluster* c);
+    void setPreviousLevel(LTS* prev);
+    LTS* getPreviousLevel() const;
+    void fromAbove();
 
     // Method for simulation
     Simulation* getSimulation() const;
 
-
     // Methods getting information from parents while zooming in
     Cluster* getSelectedCluster() const;
-    std::vector<Utils::MarkRule*> getMarkRules() const; 
-    bool* getActionMarked(const int i) const;
 
     // Loads a trace stored in location path and constructs a simulation from
     // it.
@@ -115,20 +131,15 @@ class LTS {
     Mediator* mediator;
     Simulation* simulation;
     bool lastWasAbove;
-    int matchAny;
     int zoomLevel;
     int deadlockCount;
     int transitionCount;
-    int markedTransitionCount;
-    int countMarkedTransitions();
-    LTS*        previousLevel;
-    State*     initialState;
-    State*      selectedState;
-    Cluster*    selectedCluster;
-    Cluster*    lastCluster;
-    std::list< State* > markedStates;
-    std::list< State* > unmarkedStates;
-    std::vector< Utils::MarkRule* > markRules;
+    LTS* previousLevel;
+    State* initialState;
+    State* selectedState;
+    Cluster* selectedCluster;
+    Cluster* lastCluster;
+    std::list< State* > states;
     std::vector< std::vector< Cluster* > > clustersInRank;
 
     // State vector info
@@ -139,7 +150,6 @@ class LTS {
     // Labels
     std::vector< std::string > labels;
     std::map< std::string,int > labels_inv;
-    std::vector< bool* > label_marks;
 
     // Used for translating free variables from a trace to their instantiation 
     // in the LTS
@@ -148,8 +158,6 @@ class LTS {
     // Methods
     void clearRanksAndClusters();
     void clusterTree(State* s,Cluster *c,bool cyclic);
-    void processAddedMarkRule( Utils::MarkRule* r );
-    void processRemovedMarkRule( Utils::MarkRule* r );
 
     // Methods for positioning states based on Frank van Ham's heuristics
     void edgeLengthBottomUp(std::vector< State* > &undecided); 
@@ -168,6 +176,9 @@ class LTS {
 
     void resolveClusterSlots();
     void visit(State* s);
+
+    friend class Cluster_iterator;
+    friend class State_iterator;
 };
 
 #endif // LTS_H

@@ -30,14 +30,13 @@
 class MainFrame : public wxFrame {
   public:
     MainFrame(Mediator* owner,Settings* ss);
-    void addMarkRule(wxString str);
+    void addMarkRule(wxString str,int mr);
     void createProgressDialog(const std::string title,const std::string text);
     GLCanvas* getGLCanvas() const;
     void loadTitle();
 
     void onAbout(wxCommandEvent &event);
     void onActivateTool(wxCommandEvent& event);
-    void onAddMarkRuleButton(wxCommandEvent& event);
     void onDisplay(wxCommandEvent& event);
     void onExit(wxCommandEvent& event);
     void onClose(wxCloseEvent& event);
@@ -47,17 +46,11 @@ class MainFrame : public wxFrame {
     void onRankStyle(wxCommandEvent& event);
     void onVisStyle(wxCommandEvent& event);
     void onFSMStyle(wxCommandEvent& event);
-    void onRemoveMarkRuleButton(wxCommandEvent& event);
     void onResetView(wxCommandEvent& event);
     void onSettings(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
     void onMark(wxCommandEvent& event);
     void onSim(wxCommandEvent& event);
-    void onMarkAnyAll(wxCommandEvent& event);
-    void onMarkRadio(wxCommandEvent& event);
-    void onMarkRuleActivate(wxCommandEvent& event);
-    void onMarkRuleEdit(wxCommandEvent& event);
-    void onMarkTransition(wxCommandEvent& event);
     
     void onZoomInBelow(wxCommandEvent& event);
     void onZoomInAbove(wxCommandEvent& event);
@@ -68,7 +61,7 @@ class MainFrame : public wxFrame {
     void onResetStatePositions(wxCommandEvent& event);
   
     void setSim(Simulation* sim);
-    void replaceMarkRule(int index, wxString str);
+    void replaceMarkRule(wxString str,int index);
     void resetMarkRules();
     void setActionLabels(std::vector< std::string > &labels);
     void setFileInfo(wxFileName fn);

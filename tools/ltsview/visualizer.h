@@ -23,7 +23,6 @@ class Visualizer: public Subscriber {
     float sin_obt;
     LTS* lts;
     VisObjectFactory *visObjectFactory;
-    Utils::MarkStyle markStyle;
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
     Settings* settings;
@@ -42,10 +41,6 @@ class Visualizer: public Subscriber {
     void drawLoop(State* state);
     void drawStates(Cluster* root,bool simulating);
     void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
-    bool isMarked(Cluster* c);
-    bool isMarked(State* s);
-    bool isMultiMarked(State* s);
-    bool isMarked(Transition* s);
 
     void traverseTree(bool co);
     void traverseTreeC(Cluster *root, bool topClosed, int rot);
@@ -67,7 +62,7 @@ class Visualizer: public Subscriber {
     Utils::VisStyle getVisStyle() const;
     void notify(SettingID s);
     void setLTS(LTS *l,bool compute_ratio);
-    void setMarkStyle(Utils::MarkStyle ms);
+    void notifyMarkStyleChanged();
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates(bool simulating);

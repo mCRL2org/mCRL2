@@ -67,8 +67,7 @@ Utils::VisStyle Visualizer::getVisStyle() const {
   return visStyle;
 }
 
-void Visualizer::setMarkStyle(Utils::MarkStyle ms) {
-  markStyle = ms;
+void Visualizer::notifyMarkStyleChanged() {
   update_colors = true;
 }
 
@@ -94,12 +93,12 @@ void Visualizer::notify(SettingID s) {
     case InterpolateColor1:
     case InterpolateColor2:
     case LongInterpolation:
-      if (markStyle == NO_MARKS) {
+      if (mediator->getMarkStyle() == NO_MARKS) {
         update_colors = true;
       }
       break;
     case MarkedColor:
-      if (markStyle != NO_MARKS) {
+      if (mediator->getMarkStyle() != NO_MARKS) {
         update_colors = true;
       }
       break;
@@ -452,57 +451,44 @@ float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
 }
 
 void Visualizer::updateColors() {
-  int r,i,j;
+  Cluster *cl;
   RGB_Color c;
-  if (markStyle == NO_MARKS) {
+  if (mediator->getMarkStyle() == NO_MARKS) {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
         settings->getRGB(InterpolateColor2),
         lts->getMaxRanks(),
         settings->getBool(LongInterpolation));
-    for (r = 0; r < lts->getMaxRanks(); ++r) {
-      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
-        Cluster* cl = lts->getClusterAtRank(r,i);
-        if (cl != NULL) {
-          c = ipr.getColor(r);
-          if(cl->isSelected()) {
-            c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
-          }
-          // set color of cluster[r,i]
-          visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-          // and its branches
-          for (j = 0; j < cl->getNumBranchVisObjects(); ++j) {
-            if (cl->getBranchVisObject(j) != -1) {
-              visObjectFactory->updateObjectColor(cl->getBranchVisObject(j),c);
-            }
-          }
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+      cl = *ci;
+      c = ipr.getColor(cl->getRank());
+      if (cl->isSelected()) {
+        c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
+      }
+      // set color of cluster cl
+      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+      // and its branches
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
+        if (cl->getBranchVisObject(i) != -1) {
+          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
         }
       }
     }
   } else {
-    for (r = 0; r < lts->getMaxRanks(); ++r) {
-      for (i = 0; i < lts->getNumClustersAtRank(r); ++i) {
-        Cluster* cl = lts->getClusterAtRank(r,i);
-        if (cl != NULL) {
-          // set color of cluster[r,i]
-          if (isMarked(cl)) {
-            c = settings->getRGB(MarkedColor);
-          } else {
-            c = RGB_WHITE; 
-          }
-
-          if (markStyle == MARK_MULTI)
-          {
-            // TODO: Add textures to cluster.
-          }
-          if (cl->isSelected()) {
-            c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
-          }
-          visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-          for (j = 0; j < cl->getNumBranchVisObjects(); ++j) {
-            if (cl->getBranchVisObject(j) != -1) {
-              visObjectFactory->updateObjectColor(cl->getBranchVisObject(j),c);
-            }
-          }
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+      cl = *ci;
+      // set color of cluster cl
+      if (mediator->isMarked(cl)) {
+        c = settings->getRGB(MarkedColor);
+      } else {
+        c = RGB_WHITE; 
+      }
+      if (cl->isSelected()) {
+        c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
+      }
+      visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
+        if (cl->getBranchVisObject(i) != -1) {
+          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
         }
       }
     }
@@ -513,13 +499,14 @@ void Visualizer::sortClusters(Point3D viewpoint) {
   visObjectFactory->sortObjects(viewpoint);
 }
 
+/*
 bool Visualizer::isMarked(Cluster* c) {
   return c != NULL &&
            ((markStyle == MARK_STATES && c->hasMarkedState()) ||
             (markStyle == MARK_MULTI && c->hasMarkedState())  ||
             (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
             (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
-}
+}*/
 
 // ------------- STATES --------------------------------------------------------
 
@@ -553,7 +540,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
   if (lts->getZoomLevel() == currState->getZoomLevel())
   {
-    if(isMarked(currState))
+    if(mediator->isMarked(currState))
     {
       c = settings->getRGB(MarkedColor);
     }
@@ -600,7 +587,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
 
       glPushName(endState->getID());
 
-      if (isMarked(endState))
+      if (mediator->isMarked(endState))
       {
         c = settings->getRGB(MarkedColor);
       }
@@ -648,7 +635,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     if(lts->getZoomLevel() == s->getZoomLevel()
         && drawnStates.find(s) == drawnStates.end())
     {
-      if (isMarked(s))
+      if (mediator->isMarked(s))
       {
         c = settings->getRGB(MarkedColor);
       }
@@ -794,49 +781,53 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
       if(!(simulating && s->isSimulated())) 
       {
         RGB_Color c;
-
-
         //GLubyte texture[5][4];
         GLuint texName;
 
-        if (isMarked(s)) {
-          c = settings->getRGB(MarkedColor);
-
-        }
-        else if (isMultiMarked(s))
+        if (!mediator->isMarked(s))
         {
-          GLubyte texture[s->nrRulesMatched()][4];
           c = settings->getRGB(StateColor);
-
-          for(unsigned int i = 0; i < s->nrRulesMatched(); ++i)
+        }
+        else
+        {
+          if (mediator->getMatchStyle() != MATCH_MULTI)
           {
-            RGB_Color c1 = s->getRuleColour(i);
-            texture[i][0] = (GLubyte) c1.r;
-            texture[i][1] = (GLubyte) c1.g;
-            texture[i][2] = (GLubyte) c1.b;
-            texture[i][3] = (GLubyte) 255;
-          }
-          // Bind the texture created above, set textures on. (From Red Book)
-          
-          glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            c = settings->getRGB(MarkedColor);
+          } 
+          else
+          {
+            GLubyte texture[s->getNumMatchedRules()][4];
+            c = settings->getRGB(StateColor);
 
-          glGenTextures(1, &texName);
-          glBindTexture(GL_TEXTURE_1D, texName);
+            vector< int > state_rules;
+            s->getMatchedRules(state_rules);
+            for(unsigned int i = 0; i < state_rules.size(); ++i)
+            {
+              RGB_Color c1 = mediator->getMarkRuleColor(state_rules[i]);
+              texture[i][0] = (GLubyte) c1.r;
+              texture[i][1] = (GLubyte) c1.g;
+              texture[i][2] = (GLubyte) c1.b;
+              texture[i][3] = (GLubyte) 255;
+            }
+            // Bind the texture created above, set textures on. (From Red Book)
+            
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-          glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glGenTextures(1, &texName);
+            glBindTexture(GL_TEXTURE_1D, texName);
 
-          glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, s->nrRulesMatched(), 0, 
-                       GL_RGBA, GL_UNSIGNED_BYTE, texture);
-          
-          glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-          glBindTexture(GL_TEXTURE_1D, texName);
-          glEnable(GL_TEXTURE_1D);
-        } 
-        else {
-          c = settings->getRGB(StateColor);
+            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, s->getNumMatchedRules(), 0, 
+                         GL_RGBA, GL_UNSIGNED_BYTE, texture);
+            
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+            glBindTexture(GL_TEXTURE_1D, texName);
+            glEnable(GL_TEXTURE_1D);
+          } 
         }
 
         if (s->isSelected()) {
@@ -856,7 +847,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
         glPopName();
         glPopMatrix();
         
-        if(isMultiMarked(s))
+        if(mediator->isMarked(s))
         {
           glDisable(GL_TEXTURE_1D);
 
@@ -876,6 +867,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
   }
 }
 
+/*
 bool Visualizer::isMarked(State* s) {
   return ((markStyle == MARK_STATES && s->isMarked()) || 
           (markStyle == MARK_DEADLOCKS && s->isDeadlock()));
@@ -884,7 +876,7 @@ bool Visualizer::isMarked(State* s) {
 bool Visualizer::isMultiMarked(State* s) 
 {
   return (markStyle == MARK_MULTI && s->isMarked());
-}
+}*/
 
 // ------------- FORCE DIRECTED ------------------------------------------------
 
@@ -1137,7 +1129,7 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp) {
         {
           // Draw transition from root to endState
           if (disp_bp && outTransition->isBackpointer()) {
-            if (isMarked(outTransition)) {
+            if (mediator->isMarked(outTransition)) {
               RGB_Color c = settings->getRGB(MarkedColor);
               glColor4ub(c.r,c.g,c.b,255);
             } else {
@@ -1147,7 +1139,7 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp) {
             drawBackPointer(s,endState);
           }
           if (disp_fp && !outTransition->isBackpointer()) {
-            if (isMarked(outTransition)) {
+            if (mediator->isMarked(outTransition)) {
               RGB_Color c = settings->getRGB(MarkedColor);
               glColor4ub(c.r,c.g,c.b,255);
             } else {
@@ -1162,7 +1154,7 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp) {
       if (disp_fp && s->getNumLoops() > 0) {
         bool hasMarkedLoop = false;
         for (int i = 0; i < s->getNumLoops() && !hasMarkedLoop; ++i) {
-          if (isMarked(s->getLoop(i))) {
+          if (mediator->isMarked(s->getLoop(i))) {
             hasMarkedLoop = true;
           }
         }
@@ -1204,7 +1196,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     {
       // Draw transition from beginState to endState
       if (currTrans->isBackpointer() && draw_bp) {
-        if (isMarked(currTrans)) {
+        if (mediator->isMarked(currTrans)) {
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
@@ -1215,7 +1207,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
         drawBackPointer(beginState, endState);
       }
       if (!currTrans->isBackpointer() && draw_fp) {
-        if (isMarked(currTrans)) {
+        if (mediator->isMarked(currTrans)) {
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
@@ -1250,7 +1242,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
           RGB_Color c = settings->getRGB(SimPosColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
-        if (isMarked(currTrans)) {
+        if (mediator->isMarked(currTrans)) {
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
@@ -1267,7 +1259,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
           RGB_Color c = settings->getRGB(SimPosColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
-        if (isMarked(currTrans)) {
+        if (mediator->isMarked(currTrans)) {
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
@@ -1368,6 +1360,7 @@ void Visualizer::drawLoop(State* state) {
   glEnd();
 }
 
+/*
 bool Visualizer::isMarked(Transition* t) {
   return markStyle == MARK_TRANSITIONS && t->isMarked();
-}
+}*/

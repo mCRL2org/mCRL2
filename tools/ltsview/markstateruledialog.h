@@ -21,22 +21,23 @@ class MarkStateRuleDialog : public wxDialog {
   public:
     MarkStateRuleDialog(wxWindow* parent,Mediator* owner,LTS* alts);
     ~MarkStateRuleDialog();
-    Utils::MarkRule*	getMarkRule();
-    wxString	getMarkRuleString();
-    void	onParameterChoice(wxCommandEvent& event);
-    void	setMarkRule(Utils::MarkRule* mr);
+    int getParamIndex();
+    bool getNegated();
+    void getValues(std::vector<bool> &vals);
+    Utils::RGB_Color getColor();
+    wxString getMarkRuleString();
+    void setData(int p,Utils::RGB_Color col,bool neg,std::vector<bool> &vals);
+    void onParameterChoice(wxCommandEvent& event);
   private:
-    Mediator*	mediator;
-    std::map< wxString, int >	parameterIndices;
-    wxListBox*	parameterListBox;
-    wxListBox*	relationListBox;
+    Mediator* mediator;
+    std::map< wxString, int > parameterIndices;
+    wxListBox* parameterListBox;
+    wxListBox* relationListBox;
     mcrl2::utilities::wxColorButton* ruleClrButton;
-    std::map< wxString, int >	valueIndices;
-    wxCheckListBox*	valuesListBox;
+    std::map< wxString, int > valueIndices;
+    wxCheckListBox* valuesListBox;
     LTS*  lts;
-
     void loadValues(wxString paramName);
-
     DECLARE_EVENT_TABLE();
 };
 

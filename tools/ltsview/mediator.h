@@ -11,45 +11,54 @@
 #define MEDIATOR_H
 #include <string>
 #include "utils.h"
+#include "state.h"
+#include "cluster.h"
+#include "transition.h"
 
 class Mediator {
   public:
     virtual ~Mediator() {}
-    virtual void      activateMarkRule(const int index,const bool activate) = 0;
-    virtual void      addMarkRule() = 0;
-    virtual void      applyMarkStyle(Utils::MarkStyle ms) = 0;
-    virtual void      editMarkRule(const int index) = 0;
+    virtual void activateMarkRule(int index,bool activate) = 0;
+    virtual void addMarkRule() = 0;
+    virtual void editMarkRule(int index) = 0;
     virtual std::string getVersionString() = 0;
+    virtual Utils::RGB_Color getMarkRuleColor(int mr) = 0;
     virtual Utils::RGB_Color getNewRuleColour() = 0;
-    virtual void      markAction(std::string label) = 0;
-    virtual void      notifyRenderingFinished() = 0;
-    virtual void      notifyRenderingStarted() = 0;
-    virtual void      openFile(std::string fileName) = 0;
-    virtual void      removeMarkRule(const int index) = 0;
-    virtual void      setMatchAnyMarkRule(int i) = 0;
-    virtual void      setRankStyle(Utils::RankStyle rs) = 0;
-    virtual void      setVisStyle(Utils::VisStyle vs) = 0;
-    virtual void      setFSMStyle(bool b) = 0;
-    virtual void      unmarkAction(std::string label) = 0;
-    virtual void      selectStateByID(const int id) = 0;
-    virtual void      selectCluster(const int rank, const int pos) = 0;
-    virtual void      deselect() = 0;
-    virtual int       getNumberOfObjects() = 0;
-    virtual void      zoomInBelow() = 0;
-    virtual void      zoomInAbove() = 0;
-    virtual void      zoomOutTillTop() = 0;
-    virtual void      zoomOut() = 0;
+    virtual void setActionMark(std::string label,bool b) = 0;
+    virtual void notifyRenderingFinished() = 0;
+    virtual void notifyRenderingStarted() = 0;
+    virtual void openFile(std::string fileName) = 0;
+    virtual void removeMarkRule(int index) = 0;
+    virtual void setMarkStyle(Utils::MarkStyle ms) = 0;
+    virtual void setMatchStyle(Utils::MatchStyle ms) = 0;
+    virtual void setRankStyle(Utils::RankStyle rs) = 0;
+    virtual void setVisStyle(Utils::VisStyle vs) = 0;
+    virtual void setFSMStyle(bool b) = 0;
+    virtual void selectStateByID(const int id) = 0;
+    virtual void selectCluster(const int rank, const int pos) = 0;
+    virtual void deselect() = 0;
+    virtual int getNumberOfObjects() = 0;
+    virtual void zoomInBelow() = 0;
+    virtual void zoomInAbove() = 0;
+    virtual void zoomOutTillTop() = 0;
+    virtual void zoomOut() = 0;
+
+    virtual Utils::MatchStyle getMatchStyle() = 0;
+    virtual Utils::MarkStyle getMarkStyle() = 0;
+    virtual bool isMarked(State *s) = 0;
+    virtual bool isMarked(Cluster *s) = 0;
+    virtual bool isMarked(Transition *t) = 0;
 
     // Reports an error to the user through a message box.
-    virtual void      reportError(std::string const& error) = 0;
+    virtual void reportError(std::string const& error) = 0;
 
 
     // Loads a trace from path
-    virtual void      loadTrace(std::string const& path) = 0;
+    virtual void loadTrace(std::string const& path) = 0;
 
 
     // Simulation start. 
-    virtual void      startSim() = 0;
+    virtual void startSim() = 0;
 
     // Returns action label of transition with index i
     virtual std::string getActionLabel(const int i) const = 0;

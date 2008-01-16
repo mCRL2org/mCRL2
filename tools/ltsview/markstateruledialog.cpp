@@ -12,6 +12,7 @@
 #include "ids.h"
 #include "utils.h"
 
+using namespace std;
 using namespace IDs;
 using namespace Utils;
 
@@ -20,24 +21,24 @@ BEGIN_EVENT_TABLE(MarkStateRuleDialog,wxDialog)
 END_EVENT_TABLE()
 
 MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
-		LTS	*alts)
+    LTS *alts)
  : wxDialog(parent,wxID_ANY,wxT("Add mark state rule"),wxDefaultPosition) {
 
   mediator = owner;
-	lts = alts;
+  lts = alts;
 
   wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
   wxFlexGridSizer* controlSizer = new wxFlexGridSizer(3,3,0,0);
   
   int numParams = lts->getNumParameters();
   wxArrayString paramChoices;
-	wxString str;
+  wxString str;
   paramChoices.Alloc(numParams);
-	for (int i = 0; i < numParams; ++i) {
-		str = wxString(lts->getParameterName(i).c_str(),wxConvLocal);
-		parameterIndices[str] = i;
-		paramChoices.Add(str);
-	}
+  for (int i = 0; i < numParams; ++i) {
+    str = wxString(lts->getParameterName(i).c_str(),wxConvLocal);
+    parameterIndices[str] = i;
+    paramChoices.Add(str);
+  }
   paramChoices.Sort();
   wxString relChoices[2] = { wxT("is an element of"),
     wxT("is not an element of") };
@@ -46,13 +47,13 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
 
   parameterListBox = new wxListBox(this,myID_PARAMETER_CHOICE,
       wxDefaultPosition,lbSize,paramChoices,wxLB_SINGLE|wxLB_HSCROLL|
-			wxLB_NEEDED_SB);
+      wxLB_NEEDED_SB);
   parameterListBox->SetSelection(0);
   relationListBox = new wxListBox(this,wxID_ANY,wxDefaultPosition,lbSize,2,
-			relChoices);
+      relChoices);
   relationListBox->SetSelection(0);
   valuesListBox = new wxCheckListBox(this,wxID_ANY,wxDefaultPosition,lbSize,0,
-			NULL,wxLB_SINGLE|wxLB_HSCROLL|wxLB_NEEDED_SB|wxLB_SORT);
+      NULL,wxLB_SINGLE|wxLB_HSCROLL|wxLB_NEEDED_SB|wxLB_SORT);
   
   int f = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int b = 5;
@@ -86,107 +87,90 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,Mediator* owner,
   Layout();
   
   if (paramChoices.Count() > 0) {
-		loadValues(paramChoices[0]);
-	}
+    loadValues(paramChoices[0]);
+  }
 }
 
 MarkStateRuleDialog::~MarkStateRuleDialog() {
 }
 
 void MarkStateRuleDialog::loadValues(wxString paramName) {
-	int p = parameterIndices[paramName];
-	wxArrayString values;
-	wxString str;
-	valueIndices.clear();
-	for (int i = 0; i < lts->getNumParameterValues(p); ++i) {
-		wxString str = wxString(lts->getParameterValue(p,i).c_str(),wxConvLocal);
-		values.Add(str);
-		valueIndices[str] = i;
-	}
-	values.Sort();
-	valuesListBox->Set(values);
+  int p = parameterIndices[paramName];
+  wxArrayString values;
+  wxString str;
+  valueIndices.clear();
+  for (int i = 0; i < lts->getNumParameterValues(p); ++i) {
+    wxString str = wxString(lts->getParameterValue(p,i).c_str(),wxConvLocal);
+    values.Add(str);
+    valueIndices[str] = i;
+  }
+  values.Sort();
+  valuesListBox->Set(values);
 }
 
 void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event) {
   loadValues(event.GetString());
 }
 
-void MarkStateRuleDialog::setMarkRule(MarkRule* mr) {
-  wxString paramName = wxString(lts->getParameterName(mr->paramIndex).c_str(),
-			wxConvLocal);
+void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,vector<bool> &vals) {
+  wxString paramName = wxString(lts->getParameterName(p).c_str(),wxConvLocal);
   parameterListBox->SetStringSelection(paramName);
   loadValues(paramName);
-  
-  ruleClrButton->SetBackgroundColour(RGB_to_wxC(mr->colour));
 
-  if (!mr->isNegated) {
-    relationListBox->SetSelection(0);
-    for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
-      if (mr->valueSet[i]) {
-        valuesListBox->Check(valuesListBox->FindString(wxString(
-	  lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
-	  true);
-      }
-    }
-  }
-  else {
-    relationListBox->SetSelection(1);
-    for (int i = 0; i < lts->getNumParameterValues(mr->paramIndex); ++i) {
-      if (!mr->valueSet[i]) {
-        valuesListBox->Check(valuesListBox->FindString(wxString(
-	  lts->getParameterValue(mr->paramIndex,i).c_str(),wxConvLocal)),
-	  true);
-      }
+  ruleClrButton->SetBackgroundColour(RGB_to_wxC(col));
+
+  relationListBox->SetSelection(neg ? 1 : 0);
+
+  for (int i = 0; i < lts->getNumParameterValues(p); ++i) {
+    if (vals[i]) {
+      valuesListBox->Check(valuesListBox->FindString(wxString(
+        lts->getParameterValue(p,i).c_str(),wxConvLocal)),true);
     }
   }
 }
 
-MarkRule* MarkStateRuleDialog::getMarkRule() {
+int MarkStateRuleDialog::getParamIndex() {
   int parIndex = parameterListBox->GetSelection();
   if (parIndex == wxNOT_FOUND) {
-		return NULL;
-	}
-
-  MarkRule* result = new MarkRule;
-  result->paramIndex = parameterIndices[parameterListBox->GetString(parIndex)];
-  result->isActivated = true;
-  result->isNegated = (relationListBox->GetSelection() == 1);
-  result->valueSet.assign(valuesListBox->GetCount(),true);
-  result->colour = wxC_to_RGB(ruleClrButton->GetBackgroundColour());  
-
-  if (relationListBox->GetSelection() == 0) {
-    for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i) {
-      result->valueSet[valueIndices[valuesListBox->GetString(i)]] =
-				valuesListBox->IsChecked(i);
-    }
+    return -1;
   }
-  else {
-    for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i) {
-      result->valueSet[valueIndices[valuesListBox->GetString(i)]] =
-				!valuesListBox->IsChecked(i);
-    }
-  }  
-  return result;
+  return parameterIndices[parameterListBox->GetString(parIndex)];
+}
+
+bool MarkStateRuleDialog::getNegated() {
+  return (relationListBox->GetSelection() == 1);
+}
+
+void MarkStateRuleDialog::getValues(std::vector<bool> &vals) {
+  vals.assign(valuesListBox->GetCount(),false);
+  for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i) {
+    vals[valueIndices[valuesListBox->GetString(i)]] =
+      valuesListBox->IsChecked(i);
+  }
+}
+
+Utils::RGB_Color MarkStateRuleDialog::getColor() {
+  return wxC_to_RGB(ruleClrButton->GetBackgroundColour());
 }
 
 wxString MarkStateRuleDialog::getMarkRuleString() {
   int parIndex = parameterListBox->GetSelection();
   if (parIndex == wxNOT_FOUND) {
-		return wxEmptyString;
-	}
+    return wxEmptyString;
+  }
   
   wxString result = parameterListBox->GetString(parIndex);
   if (relationListBox->GetSelection() == 0) {
-		result += wxT(" in { ");
-	} else {
-		result += wxT(" not in { ");
-	}
+    result += wxT(" in { ");
+  } else {
+    result += wxT(" not in { ");
+  }
   bool isfirst = true;
   for (unsigned int i = 0 ; i < valuesListBox->GetCount(); ++i) {
     if (valuesListBox->IsChecked(i)) {
       if (!isfirst) {
-				result += wxT(", ");
-			}
+        result += wxT(", ");
+      }
       result += valuesListBox->GetString( i );
       isfirst = false;
     }

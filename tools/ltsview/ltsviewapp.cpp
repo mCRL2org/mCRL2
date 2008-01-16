@@ -128,13 +128,13 @@ bool LTSViewApp::OnInit() {
   }
 
   lts = NULL;
-  markStyle = NO_MARKS;
   rankStyle = ITERATIVE;
   fsmStyle = false;
   colourCounter = 0;
   settings = new Settings();
   mainFrame = new MainFrame(this,settings);
   visualizer = new Visualizer(this,settings);
+  markManager = new MarkManager();
   glCanvas = mainFrame->getGLCanvas();
   glCanvas->setVisualizer(visualizer);
   
@@ -237,13 +237,14 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->updateProgressDialog(67,"Positioning clusters");
   lts->positionClusters(fsmStyle);
 
+  markManager->setLTS(lts,true);
   visualizer->setLTS(lts,true);
   
   mainFrame->updateProgressDialog(83,"Positioning states");
   lts->positionStates();
   
   mainFrame->updateProgressDialog(100,"Done");
-  visualizer->setMarkStyle(NO_MARKS);
+  visualizer->notifyMarkStyleChanged();
 
   glCanvas->enableDisplay();
   glCanvas->resetView();
@@ -286,7 +287,7 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
 
       mainFrame->updateProgressDialog(40,"Setting cluster info");
       lts->computeClusterInfo();
-      lts->markClusters();
+      markManager->markClusters();
       
       mainFrame->updateProgressDialog(60,"Positioning clusters");
       lts->positionClusters(fsmStyle);
@@ -330,67 +331,86 @@ void LTSViewApp::setFSMStyle(bool b) {
 
 void LTSViewApp::addMarkRule() {
   if (lts != NULL) {
-    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
-        lts);
-    msrDialog->CentreOnParent();
-    if (msrDialog->ShowModal() == wxID_OK) {
-      MarkRule* markrule = msrDialog->getMarkRule();
-      if (markrule != NULL) {
-        lts->addMarkRule(markrule);
-        mainFrame->addMarkRule(msrDialog->getMarkRuleString());
-        if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
-        {
-          applyMarkStyle(MARK_STATES);
-        }
-        else
-        {
-          applyMarkStyle(markStyle);
+    MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
+    msrdlg->CentreOnParent();
+    if (msrdlg->ShowModal() == wxID_OK) {
+      if (msrdlg->getParamIndex() != -1) {
+        vector<bool> vals;
+        msrdlg->getValues(vals);
+        int mr = markManager->createMarkRule(msrdlg->getParamIndex(),
+            msrdlg->getNegated(),msrdlg->getColor(),vals);
+        mainFrame->addMarkRule(msrdlg->getMarkRuleString(),mr);
+
+        if (markManager->getMarkStyle() != MARK_STATES) {
+          setMarkStyle(MARK_STATES);
+        } else {
+          applyMarkStyle();
         }
       }
     }
-    msrDialog->Close();
-    msrDialog->Destroy();
+    msrdlg->Close();
+    msrdlg->Destroy();
   }
 }
 
-void LTSViewApp::removeMarkRule(const int index) {
-  lts->removeMarkRule(index);
-  if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
-  {
-    applyMarkStyle(MARK_STATES);
-  }
-  else
-  {
-    applyMarkStyle(markStyle);
+void LTSViewApp::removeMarkRule(int mr) {
+  markManager->removeMarkRule(mr);
+  if (markManager->getMarkStyle() != MARK_STATES) {
+    setMarkStyle(MARK_STATES);
+  } else {
+    applyMarkStyle();
   }
 }
 
-void LTSViewApp::editMarkRule(const int index) {
+void LTSViewApp::editMarkRule(int mr) {
   if (lts != NULL) {
-    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog(mainFrame,this,
-        lts);
-    bool oldActivated = lts->getMarkRule(index)->isActivated;
-    msrDialog->setMarkRule(lts->getMarkRule(index));
-    msrDialog->CentreOnParent();
-    if (msrDialog->ShowModal() == wxID_OK) {
-      MarkRule* markrule = msrDialog->getMarkRule();
-      if (markrule != NULL) {
-        markrule->isActivated = oldActivated;
-        lts->replaceMarkRule(index,markrule);
-        mainFrame->replaceMarkRule(index,msrDialog->getMarkRuleString());
-        if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
-        {
-          applyMarkStyle(MARK_STATES);
-        }
-        else
-        {
-          applyMarkStyle(markStyle);
+    MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
+    vector< bool > vals;
+    markManager->getMarkRuleValues(mr,vals);
+    msrdlg->setData(markManager->getMarkRuleParam(mr),
+        markManager->getMarkRuleColor(mr),markManager->getMarkRuleNegated(mr),
+        vals);
+    msrdlg->CentreOnParent();
+    if (msrdlg->ShowModal() == wxID_OK) {
+      if (msrdlg->getParamIndex() != -1) {
+        msrdlg->getValues(vals);
+        markManager->setMarkRuleData(mr,msrdlg->getParamIndex(),
+            msrdlg->getNegated(),msrdlg->getColor(),vals);
+        mainFrame->replaceMarkRule(msrdlg->getMarkRuleString(),mr);
+        if (markManager->getMarkStyle() != MARK_STATES) {
+          setMarkStyle(MARK_STATES);
+        } else {
+          applyMarkStyle();
         }
       }
     }
-    msrDialog->Close();
-    msrDialog->Destroy();
+    msrdlg->Close();
+    msrdlg->Destroy();
   }
+}
+
+Utils::MarkStyle LTSViewApp::getMarkStyle() {
+  return markManager->getMarkStyle();
+}
+
+Utils::MatchStyle LTSViewApp::getMatchStyle() {
+  return markManager->getMatchStyle();
+}
+
+bool LTSViewApp::isMarked(State* s) {
+  return markManager->isMarked(s);
+}
+
+bool LTSViewApp::isMarked(Cluster* c) {
+  return markManager->isMarked(c);
+}
+
+bool LTSViewApp::isMarked(Transition* t) {
+  return markManager->isMarked(t);
+}
+
+Utils::RGB_Color LTSViewApp::getMarkRuleColor(int mr) {
+  return markManager->getMarkRuleColor(mr);
 }
 
 Utils::RGB_Color LTSViewApp::getNewRuleColour()
@@ -457,71 +477,56 @@ Utils::RGB_Color LTSViewApp::getNewRuleColour()
        break;
      }
   }
-
-
-
-
   return result;
 }
 
-void LTSViewApp::activateMarkRule( const int index, const bool activate ) {
+void LTSViewApp::activateMarkRule(int mr,bool activate) {
   if (lts != NULL) {
-    lts->activateMarkRule(index,activate);
-    if (markStyle != MARK_STATES && markStyle != MARK_MULTI)
-    {
-      applyMarkStyle(MARK_STATES);
-    }
-    else
-    {
-      applyMarkStyle(markStyle);
+    markManager->setMarkRuleActivated(mr,activate);
+    if (markManager->getMarkStyle() != MARK_STATES) {
+      setMarkStyle(MARK_STATES);
+    } else {
+      applyMarkStyle();
     }
   }
 }
 
-void LTSViewApp::setMatchAnyMarkRule(int i) {
-  if (lts != NULL) {
-    lts->setMatchAnyMarkRule(i);
-    if ( i == 2)
-    { 
-      applyMarkStyle(MARK_MULTI);
-    }
-    else
-    {
-      applyMarkStyle(MARK_STATES);
-    }
+void LTSViewApp::setMatchStyle(Utils::MatchStyle ms) {
+  if (lts == NULL) return;
+  markManager->setMatchStyle(ms);
+  if (markManager->getMarkStyle() != MARK_STATES) {
+    setMarkStyle(MARK_STATES);
+  } else {
+    applyMarkStyle();
   }
 }
 
-void LTSViewApp::markAction(string label) {
-  lts->markAction(label);
-  applyMarkStyle(MARK_TRANSITIONS);
+void LTSViewApp::setActionMark(string label,bool b) {
+  markManager->setActionMark(label,b);
+  setMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSViewApp::unmarkAction(string label) {
-  lts->unmarkAction(label);
-  applyMarkStyle(MARK_TRANSITIONS);
+void LTSViewApp::setMarkStyle(Utils::MarkStyle ms) {
+  markManager->setMarkStyle(ms);
+  applyMarkStyle();
 }
 
-void LTSViewApp::applyMarkStyle(MarkStyle ms) {
+void LTSViewApp::applyMarkStyle() {
+  if (lts == NULL) return;
 
-  if (lts == NULL) {
-    return;
-  }
-
-  markStyle = ms;
-  switch (markStyle) {
+  switch (markManager->getMarkStyle()) {
     case MARK_DEADLOCKS:
       mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
       mainFrame->setMarkedTransitionsInfo(0);
       break;
-    case MARK_MULTI:
     case MARK_STATES:
-      mainFrame->setMarkedStatesInfo(lts->getNumMarkedStates());
+      mainFrame->setMarkedStatesInfo(markManager->getNumMarkedStates());
       mainFrame->setMarkedTransitionsInfo(0);
       break;
     case MARK_TRANSITIONS:
       mainFrame->setMarkedStatesInfo(0);
-      mainFrame->setMarkedTransitionsInfo(lts->getNumMarkedTransitions());
+      mainFrame->setMarkedTransitionsInfo(
+          markManager->getNumMarkedTransitions());
       break;
     case NO_MARKS:
     default:
@@ -529,7 +534,7 @@ void LTSViewApp::applyMarkStyle(MarkStyle ms) {
       mainFrame->setMarkedTransitionsInfo(0);
       break;
   }
-  visualizer->setMarkStyle(markStyle);
+  visualizer->notifyMarkStyleChanged();
   glCanvas->display();
 }
 
@@ -636,11 +641,12 @@ void LTSViewApp::zoomInBelow()
   LTS* newLTS = lts->zoomIntoBelow();
   deselect();
   lts = newLTS;
+  markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
       lts->getNumTransitions(),lts->getNumClusters(),
       lts->getNumRanks());
-  applyMarkStyle(markStyle);
+  applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -650,11 +656,12 @@ void LTSViewApp::zoomInAbove()
   LTS* newLTS = lts->zoomIntoAbove();
   deselect();
   lts = newLTS;
+  markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
      lts->getNumTransitions(),lts->getNumClusters(),
      lts->getNumRanks()); 
-  applyMarkStyle(markStyle);
+  applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
@@ -674,11 +681,12 @@ void LTSViewApp::zoomOut()
   LTS* oldLTS = lts;
   lts = oldLTS->zoomOut();
   oldLTS->deselect();
+  markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
     lts->getNumTransitions(),lts->getNumClusters(),
     lts->getNumRanks()); 
-  applyMarkStyle(markStyle);
+  applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 

@@ -14,6 +14,7 @@ exe ltsview
         lts.cpp
         ltsviewapp.cpp
         mainframe.cpp
+        markmanager.cpp
         markdialog.cpp
         markstateruledialog.cpp
         primitivefactory.cpp

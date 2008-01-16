@@ -16,8 +16,6 @@ State::State() {
   positionRadius = 0.0f;
   positionAngle = -1.0f;
   id = 0;
-  marked = false;
-  markAllEmpty = false;
   simulated = false;
   selected = false;
   zoomLevel = 0;
@@ -49,80 +47,25 @@ void State::addParameterValue(int valindex) {
 	stateVector.push_back(valindex);
 }
 
+void State::addMatchedRule(int mr) {
+  matchedRules.insert(mr);
+}
+
+//returns true iff an element has actually been removed
+bool State::removeMatchedRule(int mr) {
+  return (matchedRules.erase(mr) > 0);
+}
+
+void State::getMatchedRules(std::vector< int > &mrs) {
+  mrs.assign(matchedRules.begin(),matchedRules.end());
+}
+
+int State::getNumMatchedRules() {
+  return matchedRules.size();
+}
+
 bool State::isDeadlock() const {
   return (outTransitions.size() + loops.size() == 0);
-}
-
-bool State::isMarked() const {
-  return marked && (markAllEmpty ||(rulesMatched.size() > 0));
-}
-
-
-unsigned int State::nrRulesMatched() const {
-  return rulesMatched.size();
-}
-
-void State::setMarking(bool b)
-{
-  marked = b;
-}
-
-void State::setMarkAllEmpty(bool b)
-{
-  markAllEmpty = b;
-}
-
-int State::mark(Utils::MarkRule* rule) {
-  bool found = false;
-
-  for(std::vector<Utils::MarkRule*>::iterator it = rulesMatched.begin();
-      it != rulesMatched.end() && !found; ++it)
-  {
-    if ((*it) == rule)
-    {
-      found = true;
-    }
-  }
-
-  if (!found)
-  {
-    rulesMatched.push_back(rule);
-  }
-
-  return rulesMatched.size();
-}
-
-Utils::RGB_Color State::getRuleColour(unsigned int i)
-{
-  if (i < rulesMatched.size())
-  {
-    return rulesMatched[i]->colour;
-  }
-  else
-  {
-    Utils::RGB_Color result = {0, 0, 0};
-    return result;
-  }
-}
-
-
-int State::unmark(Utils::MarkRule* rule) {
-  // Search for rule in rulesMatched, and erase it.
-
-  std::vector<Utils::MarkRule*>::iterator it = rulesMatched.begin();
-  while(it != rulesMatched.end())
-  {
-    if ((*it) == rule)
-    {
-      it = rulesMatched.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-
-  return rulesMatched.size();
 }
 
 bool State::isSelected() const {
@@ -136,7 +79,6 @@ void State::select() {
 void State::deselect() {
   selected = false;
 }
-
 
 int State::getID() {
 	return id;
@@ -285,20 +227,4 @@ void State::resetVelocity() {
 
 void State::setVelocity(Vect v) {
   velocity = v;
-}
-
-
-void State::mark()
-{
-  marked = true;
-}
-
-void State::unmark()
-{
-  marked = false;
-}
-
-bool State::isMarkedNoRule()
-{
-  return marked;
 }

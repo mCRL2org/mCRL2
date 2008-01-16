@@ -26,8 +26,8 @@ class MarkDialog: public wxDialog {
     void onMarkRuleEdit(wxCommandEvent& event);
     void onMarkTransition(wxCommandEvent& event);
     
-    void addMarkRule(wxString str); 
-    void replaceMarkRule(int index, wxString str);
+    void addMarkRule(wxString str,int mr); 
+    void replaceMarkRule(wxString str, int mr);
     void resetMarkRules();    
     void setActionLabels(std::vector<std::string> &labels);
     

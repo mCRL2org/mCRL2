@@ -54,14 +54,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_STOP_FORCE_DIRECTED, MainFrame::onStopForceDirected)
   EVT_MENU  (myID_RESET_STATE_POSITIONS, MainFrame::onResetStatePositions)
 
-  EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio)
-  EVT_CHOICE(myID_MARK_ANYALL, MainFrame::onMarkAnyAll)
-  EVT_LISTBOX_DCLICK(myID_MARK_RULES, MainFrame::onMarkRuleEdit)
-  EVT_CHECKLISTBOX(myID_MARK_RULES, MainFrame::onMarkRuleActivate)
-  EVT_CHECKLISTBOX(myID_MARK_TRANSITIONS, MainFrame::onMarkTransition)
-  EVT_BUTTON(myID_ADD_RULE, MainFrame::onAddMarkRuleButton)
-  EVT_BUTTON(myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton)
-
 //  EVT_IDLE(MainFrame::onIdle)
   EVT_CLOSE(MainFrame::onClose)
 END_EVENT_TABLE()
@@ -349,61 +341,6 @@ void MainFrame::onSim(wxCommandEvent& /*event*/)
   simDialog->Show();
 }
 
-
-void MainFrame::onMarkRadio(wxCommandEvent& event) {
-  wxRadioButton* buttonClicked = (wxRadioButton*)event.GetEventObject();
-
-  if (buttonClicked == nomarksRadio)
-    mediator->applyMarkStyle(NO_MARKS);
-  else if (buttonClicked == markDeadlocksRadio)
-    mediator->applyMarkStyle(MARK_DEADLOCKS);
-  else if (buttonClicked == markStatesRadio)
-    mediator->applyMarkStyle(MARK_STATES);
-  else if (buttonClicked == markTransitionsRadio)
-    mediator->applyMarkStyle(MARK_TRANSITIONS);
-}
-
-void MainFrame::onMarkRuleActivate(wxCommandEvent& event) {
-  int i = event.GetInt();
-  mediator->activateMarkRule(i, markStatesListBox->IsChecked(i));
-  markStatesRadio->SetValue(true);
-}
-
-void MainFrame::onMarkRuleEdit(wxCommandEvent& event) {
-  mediator->editMarkRule(event.GetSelection());
-}
-
-void MainFrame::onMarkAnyAll(wxCommandEvent& event) {
-  mediator->setMatchAnyMarkRule(event.GetSelection());
-  markStatesRadio->SetValue(true);
-}
-
-void MainFrame::onAddMarkRuleButton(wxCommandEvent& /*event*/) {
-  mediator->addMarkRule();
-}
-
-void MainFrame::onRemoveMarkRuleButton(wxCommandEvent& /*event*/) {
-  int sel_index = markStatesListBox->GetSelection();
-  if (sel_index != wxNOT_FOUND) {
-    markStatesListBox->Delete(sel_index);
-    mediator->removeMarkRule(sel_index);
-    markStatesRadio->SetValue(true);
-    markStatesListBox->GetParent()->Fit();
-    Layout();
-  }
-}
-
-void MainFrame::onMarkTransition(wxCommandEvent& event) {
-  int i = event.GetInt();
-  if (markTransitionsListBox->IsChecked(i)) {
-    mediator->markAction(string(markTransitionsListBox->GetString(i).fn_str()));
-  } else {
-    mediator->unmarkAction(string(
-          markTransitionsListBox->GetString(i).fn_str()));
-  }
-  markTransitionsRadio->SetValue(true);
-}
-
 void MainFrame::onZoomInBelow(wxCommandEvent& event)
 {
   mediator->zoomInBelow();
@@ -487,14 +424,12 @@ void MainFrame::setMarkedTransitionsInfo(int number) {
   infoDialog->setNumMarkedTransitions(number);
 }
 
-void MainFrame::addMarkRule(wxString str) {
-  markDialog->addMarkRule(str);
-
+void MainFrame::addMarkRule(wxString str,int mr) {
+  markDialog->addMarkRule(str,mr);
 }
 
-void MainFrame::replaceMarkRule(int index,wxString str) {
-  markDialog->replaceMarkRule(index, str);
-
+void MainFrame::replaceMarkRule(wxString str,int mr) {
+  markDialog->replaceMarkRule(str,mr);
 }
   
 void MainFrame::resetMarkRules() {

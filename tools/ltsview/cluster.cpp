@@ -28,11 +28,10 @@ Cluster::Cluster(int r) {
   baseRadius = 0.0f;
   topRadius = 0.0f;
   deadlock = false;
-  markedStates = 0;
-  marking = false;
-  markAllEmpty = false;
+  numMarkedStatesAll = 0;
+  numMarkedStatesAny = 0;
   visObject = -1;
-  markedTransitionCount = 0;
+  numMarkedTransitions = 0;
   rank = r;
   selected = false;
   severedDescendantsC = 0;
@@ -705,75 +704,33 @@ float Cluster::getBaseRadius() const {
   return baseRadius;
 }
 
-void Cluster::setMarkAllEmpty(bool b) {
-  markAllEmpty = b;
-}
-
-bool Cluster::getMarking() const {
-  return marking;
-}
-
-void Cluster::setMarking(bool b) {
-  marking = b;
-}
-
-bool Cluster::hasMarkedState() const {
-  return ((markAllEmpty ||markedStates > 0) && marking == true);
-}
-
 bool Cluster::hasMarkedTransition() const {
-  return (markedTransitionCount > 0);
+  return (numMarkedTransitions > 0);
 }
 
-
-void Cluster::markState(Utils::MarkRule* rule)
-{
-  markedStates = 0;
-  
-  for(vector<State*>::iterator it = states.begin(); it != states.end(); ++it)
-  {
-    State* s = (*it);
-    s->setMarkAllEmpty(false);
-    if ( rule->valueSet[s->getParameterValue(rule->paramIndex)])
-    {
-      s->setMarking(true);
-      marking = true;
-      markedStates += s->mark(rule);
-    }
-    else if(s->isMarked())
-    {
-      markedStates += s->nrRulesMatched();
-    }
-  }
+void Cluster::addMatchedRule(int mr) {
+  matchedRules.insert(mr);
 }
 
-void Cluster::unmarkState(Utils::MarkRule* rule)
-{
-  markedStates = 0;
+void Cluster::removeMatchedRule(int mr) {
+  matchedRules.erase(mr);
+}
 
-  for(vector<State*>::iterator it = states.begin(); it != states.end(); ++it)
-  {
-    State* s = (*it);
-    if (rule->valueSet[s->getParameterValue(rule->paramIndex)])
-    {
-      s->setMarking(false);
-      markedStates += s->unmark(rule);
+/*
+void Cluster::getMatchedRules(std::vector< int > &mrs) {
+  mrs.assign(matchedRules.begin(),matchedRules.end());
+}
+*/
+int Cluster::setActionMark(int l,bool b) {
+  map<int,int>::iterator li = actionLabelCounts.find(l);
+  if (li != actionLabelCounts.end()) {
+    if (b) {
+      numMarkedTransitions += li->second;
+    } else {
+      numMarkedTransitions -= li->second;
     }
   }
-}
-
-int Cluster::markActionLabel(int l) {
-  if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
-    markedTransitionCount += actionLabelCounts[l];
-  }
-  return markedTransitionCount;
-}
-
-int Cluster::unmarkActionLabel(int l) {
-  if (actionLabelCounts.find(l) != actionLabelCounts.end()) {
-    markedTransitionCount -= actionLabelCounts[l];
-  }
-  return markedTransitionCount;
+  return numMarkedTransitions;
 }
 
 bool Cluster::hasDeadlock() const {
@@ -823,8 +780,22 @@ bool Cluster::isSelected() const
   return selected;
 }
 
+int Cluster::getNumMarkedTransitions() {
+  return numMarkedTransitions;
+}
 
-int Cluster::getMarkedTransitionCount() const
-{
-  return markedTransitionCount;
+int Cluster::getNumMarkedStatesAll() {
+  return numMarkedStatesAll;
+}
+
+int Cluster::getNumMarkedStatesAny() {
+  return numMarkedStatesAny;
+}
+
+void Cluster::setNumMarkedStatesAll(int n) {
+  numMarkedStatesAll = n;
+}
+
+void Cluster::setNumMarkedStatesAny(int n) {
+  numMarkedStatesAny = n;
 }

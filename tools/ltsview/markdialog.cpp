@@ -96,30 +96,39 @@ void MarkDialog::onMarkRadio(wxCommandEvent& event)
   wxRadioButton* buttonClicked = (wxRadioButton*)event.GetEventObject();
 
   if (buttonClicked == nomarksRadio)
-    mediator->applyMarkStyle(NO_MARKS);
+    mediator->setMarkStyle(NO_MARKS);
   else if (buttonClicked == markDeadlocksRadio)
-    mediator->applyMarkStyle(MARK_DEADLOCKS);
+    mediator->setMarkStyle(MARK_DEADLOCKS);
   else if (buttonClicked == markStatesRadio)
-    mediator->applyMarkStyle(MARK_STATES);
+    mediator->setMarkStyle(MARK_STATES);
   else if (buttonClicked == markTransitionsRadio)
-    mediator->applyMarkStyle(MARK_TRANSITIONS);
+    mediator->setMarkStyle(MARK_TRANSITIONS);
 }
 
 void MarkDialog::onMarkRuleActivate(wxCommandEvent& event) 
 {
   int i = event.GetInt();
-  mediator->activateMarkRule(i, markStatesListBox->IsChecked(i));
+  mediator->activateMarkRule(
+      *(static_cast<int*>(markStatesListBox->GetClientData(i))),
+      markStatesListBox->IsChecked(i));
   markStatesRadio->SetValue(true);
 }
 
 void MarkDialog::onMarkRuleEdit(wxCommandEvent& event)
 {
-  mediator->editMarkRule(event.GetSelection());
+  mediator->editMarkRule(
+      *(static_cast<int*>(markStatesListBox->GetClientData(event.GetInt()))));
 }
 
 void MarkDialog::onMarkAnyAll(wxCommandEvent& event)
 {
-  mediator->setMatchAnyMarkRule(event.GetSelection());
+  if (event.GetSelection() == 0) {
+    mediator->setMatchStyle(MATCH_ANY);
+  } else if (event.GetSelection() == 1) {
+    mediator->setMatchStyle(MATCH_ALL);
+  } else if (event.GetSelection() == 2) {
+    mediator->setMatchStyle(MATCH_MULTI);
+  }
   markStatesRadio->SetValue(true);
 }
 
@@ -128,9 +137,9 @@ void MarkDialog::onAddMarkRuleButton(wxCommandEvent& /*event*/)
   mediator->addMarkRule();
 }
 
-void MarkDialog::addMarkRule(wxString str)
+void MarkDialog::addMarkRule(wxString str,int mr)
 {
-  markStatesListBox->Append(str);
+  markStatesListBox->Append(str,new int(mr));
   markStatesListBox->Check(markStatesListBox->GetCount()-1,true);
   markStatesRadio->SetValue(true);
   markStatesListBox->GetParent()->Fit();
@@ -139,38 +148,48 @@ void MarkDialog::addMarkRule(wxString str)
 
 void MarkDialog::onRemoveMarkRuleButton(wxCommandEvent& /*event*/)
 {
-  int sel_index = markStatesListBox->GetSelection();
-  if (sel_index != wxNOT_FOUND) {
-    markStatesListBox->Delete(sel_index);
-    mediator->removeMarkRule(sel_index);
+  int i = markStatesListBox->GetSelection();
+  if (i != wxNOT_FOUND) {
+    int *p = static_cast<int*>(markStatesListBox->GetClientData(i));
+    markStatesListBox->Delete(i);
+    mediator->removeMarkRule(*p);
     markStatesRadio->SetValue(true);
     markStatesListBox->GetParent()->Fit();
     Layout();
+    delete p;
   }
 }
 
 void MarkDialog::onMarkTransition(wxCommandEvent& event)
 {
   int i = event.GetInt();
-  if (markTransitionsListBox->IsChecked(i)) {
-    mediator->markAction(string(markTransitionsListBox->GetString(i).fn_str()));
-  } else {
-    mediator->unmarkAction(string(
-          markTransitionsListBox->GetString(i).fn_str()));
-  }
+  mediator->setActionMark(
+      static_cast<string>(markTransitionsListBox->GetString(i).fn_str()),
+      markTransitionsListBox->IsChecked(i));
   markTransitionsRadio->SetValue(true);
 }
 
-void MarkDialog::replaceMarkRule(int index, wxString str)
+void MarkDialog::replaceMarkRule(wxString str,int mr)
 {
-  bool isChecked = markStatesListBox->IsChecked(index);
-  markStatesListBox->SetString(index,str);
-  markStatesListBox->Check(index,isChecked);
+  unsigned int i = 0;
+  while (i < markStatesListBox->GetCount() && 
+      mr != *(static_cast<int*>(markStatesListBox->GetClientData(i)))) {
+    ++i;
+  }
+  if (i == markStatesListBox->GetCount()) {
+    return;
+  }
+  bool isChecked = markStatesListBox->IsChecked(i);
+  markStatesListBox->SetString(i,str);
+  markStatesListBox->Check(i,isChecked);
   markStatesRadio->SetValue(true);
 }
 
 void MarkDialog::resetMarkRules()
 {
+  for (unsigned int i = 0; i < markStatesListBox->GetCount(); ++i) {
+    delete static_cast<int*>(markStatesListBox->GetClientData(i));
+  }
   markStatesListBox->Clear();
   markAnyAllChoice->SetSelection(0);
   nomarksRadio->SetValue(true);

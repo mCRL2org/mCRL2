@@ -16,12 +16,12 @@ namespace Utils {
   const double PI = 3.14159265359;
   const unsigned int NUM_RINGS = 2;
 
-  enum RankStyle      {ITERATIVE,CYCLIC};
-  enum MarkStyle      {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS,
-                       MARK_MULTI};
-  enum VisStyle	      {CONES,TUBES};
+  enum RankStyle {ITERATIVE,CYCLIC};
+  enum MarkStyle {NO_MARKS,MARK_DEADLOCKS,MARK_STATES,MARK_TRANSITIONS };
+  enum MatchStyle {MATCH_ANY,MATCH_ALL,MATCH_MULTI};
+  enum VisStyle {CONES,TUBES};
   // Allows picking processor to identify type of item picked.
-  enum PickState      {STATE, CLUSTER, SIMSTATE, PICKNONE}; 
+  enum PickState {STATE, CLUSTER, SIMSTATE, PICKNONE}; 
 
   struct RGB_Color {
     unsigned char r;
@@ -45,15 +45,6 @@ namespace Utils {
     float x;
     float y;
     float z;
-  };
-
-  struct MarkRule {
-    int paramIndex;
-    bool isActivated;
-    bool isNegated;
-    RGB_Color colour; // Colour asociated with this mark rule.
-    std::vector< bool > valueSet;
-
   };
 
   struct Vect {
