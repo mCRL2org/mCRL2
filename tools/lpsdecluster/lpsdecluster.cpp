@@ -472,13 +472,13 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   std::string rewriter;
 
   desc.add_options()
+      ("finite,f",    "only instantiate variables whose sorts are finite")
       ("help,h",      "display this help")
+      ("version",     "display version information")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("finite,f",    "only decluster finite sorts")
       ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"), "use rewriter arg (default 'jitty');"
                       "available rewriters are inner, jitty, innerc and jittyc")
-      ("version",     "display version information")
   ;
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -503,7 +503,9 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   
   if (0 < vm.count("help")) {
     cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Decluster the LPS in INFILE and store the result to OUTFILE" << endl;
+    cerr << "Instantiate the summation variables of the linear process specification (LPS)" << endl;
+    cerr << "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is" << endl;
+    cerr << "used. If OUTFILE is not present, stdout is used." << endl;
 
     cerr << endl;
     cerr << desc;

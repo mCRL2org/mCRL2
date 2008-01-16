@@ -709,13 +709,12 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 
   desc.add_options()
       ("help,h",      "display this help")
+      ("version",     "display version information")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
       ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"),
                        "use rewriter arg (default 'jitty');"
                       "available rewriters are inner, jitty, innerc and jittyc")
-
-      ("version",     "display version information")
   ;
   po::options_description hidden("Hidden options");
   hidden.add_options()
@@ -739,7 +738,9 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 
   if (vm.count("help")) {
     cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Apply binary to the LPS in INFILE and store the result to OUTFILE" << endl;
+    cerr << "Replace enumerated sort variables by vectors of boolean variables in the LPS in" << endl;
+    cerr << "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used." << endl;
+    cerr << "If OUTFILE is not present, stdout is used" << endl;
 
     cerr << endl;
     cerr << desc;
