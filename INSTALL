@@ -1,13 +1,16 @@
 Installation Instructions
 *************************
 
+
 Supported compiler suites
 =========================
 
 The following compiler suites are supported:
 - GCC versions 3.4 and higher
-- MSVC 8.0 (requires service pack 1)
 - Apple's patched gcc distributed with XCode 2.4.1 and higher
+
+Support for the following compiler suites is in experimental phase:
+- MSVC 8.0 SP1 and higher
 
 
 Packages (Debian)
@@ -15,67 +18,38 @@ Packages (Debian)
 
 The package names given here are used in Debian. Most of the time they are
 called the same on other systems. Only top-level packages are mentioned; lower
-level packages are (usually) automatically installed. Furthermore, the status
-of the packages is mentioned (required, recommended or optional):
-- make >= 3.80: package make [required]
-- wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg [recommended]
-  + for the ltsview tool wxWidgets must be build with OpenGL support (--with-opengl)
+level packages are (usually) automatically installed.
+
+The following packages are required:
+- make >= 3.80: package make
+
+The following packages are recommended:
+- wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg
+
+These packages enable the following tools:
+- diagraphica (wxWidgets must be compiled with OpenGL support)
+- ltsgraph
+- ltsview (wxWidgets must be compiled with OpenGL support)
+- squadt
+- xsim
+
+The following packages are optional:
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
+
+Any of the default icon location packages ensures that any of the above tools
+do not generate warnings on missing icons.
+
+The following optional packages are only needed for developers:
 - flex >= 2.5.4a-12: package flex [optional]
 - bison >= 2.0: package bison [optional]
 - doxygen: package doxygen [optional]
 - python: package python [optional]
 
-The required packages enable the following tools:
-+ mcrl22lps:       translate an mCRL2 specification into a linear process
-                   specification (LPS)
-+ lpspp:           pretty print an LPS as an mCRL2 specification
-+ lpsinfo:         print basic information of an LPS
-+ sim:             text based simulator for LPSs
-+ lpsrewr:         rewrite data expressions in an LPS
-+ lpsconstelm:     remove constant process parameters from an LPS
-+ lpssumelm:       remove superfluous summation variables from an LPS
-+ lpsparelm:       remove unused process parameters from an LPS
-+ lpsuntime:       remove time from an LPS
-+ lpsdecluster:    instantiate summation variables of an LPS
-+ lpsbinary:       replace enumerated sort variables by vectors of boolean
-                   variables in an LPS
-+ lpsactionrename: rename actions in an LPS
-+ lpsformcheck:    check formulas using the data specification of an LPS
-+ lpsinvelm:       check invariants and use these to simplify an LPS 
-+ lpsconfcheck:    mark confluent tau-transitions of an LPS
-+ lps2pbes:        convert a state formula and an LPS into a parameterised
-                   boolean equation system (PBES)
-+ pbes2bes:        convert a PBES to a boolean equation system (BES)
-+ pbes2bool:       solves a PBES or outputs or outputs an equivalent BES
-+ pbesinfo:        print basic information of a parameterised boolean
-                   equation system (PBES)
-+ pbespp:          pretty print a PBES
-+ pbesrewr:        rewrite data expressions in a PBES
-+ lps2lts:         generate a labelled transition system (LTS) from an LPS
-+ ltsinfo:         print basic information of an LTS
-+ ltsconvert:      convert an LTS, possibly using minimisation
-+ ltscompare:      compare two LTS's
-+ tracepp:         pretty print a trace
-+ tbf2lps:         convert an mCRL LPS to an mCRL2 LPS
-+ lps2torx:        provide TorX with an explorer interface using an LPS
-+ chi2mcrl2:       translates a Chi specification into an mCRL2 specification
-+ pnml2mcrl2:      convert classic Petri nets in the PNML format to mCRL2
-
-The recommended packages for wxWidgets enable the following tools:
-+ xsim:        graphical simulator for LPSs
-+ ltsgraph:    visualise an LTS in 2D using spring model techniques
-+ ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
-+ diagraphica: interatively analyse an LTS in FSM format
-+ squadt:      systems quality analysis and design toolset
-
-Any of the default icon location packages ensures that any of the above tools
-do not generate warnings on missing icons.
-
 The packages for flex, bison, and python are used to generate source code.
 The package for doxygen is used to generate html documentation for the web
-page. These packages are only needed for developers of the toolset.
+page.
+
 
 Installation
 ============
