@@ -48,7 +48,7 @@ GLCanvas::GLCanvas(
     SetWindowStyle( wxWANTS_CHARS /*| wxSUNKEN_BORDER*/ );
 
     wxToolTip::Enable( true );
-    wxToolTip::SetDelay( 0 );
+    wxToolTip::SetDelay( 1 );
     
     scaleFactor  = 1.0;
     xTranslation = 0.0;
