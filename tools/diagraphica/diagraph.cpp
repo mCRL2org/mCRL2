@@ -1932,6 +1932,7 @@ void DiaGraph::handleEditDOF(
         this,
         graph,
         canvasColChooser );
+	canvasColChooser->Refresh();
 
     // opacity chooser
     if ( opaChooser != NULL )
@@ -1944,6 +1945,7 @@ void DiaGraph::handleEditDOF(
         this,
         graph,
         canvasOpaChooser );
+		canvasOpaChooser->Refresh();
 }
 
 

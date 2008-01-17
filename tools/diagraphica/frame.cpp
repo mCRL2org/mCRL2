@@ -2208,6 +2208,8 @@ void Frame::initCanvasOpaDOF()
 
     // reset ptr
     lbl = NULL;
+	frameDOF->Layout();
+	frameDOF->Fit();
 }
 
 
