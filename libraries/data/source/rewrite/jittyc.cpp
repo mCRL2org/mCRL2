@@ -2958,8 +2958,8 @@ void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSp
   fill_always_rewrite_array();
 #endif
 
-  s = (char *) malloc(20);
-  sprintf(s,"jittyc_%i",getpid());
+  s = (char *) malloc(50);
+  sprintf(s,"jittyc_%i_%lx",getpid(),(long) this);
   t = (char *) malloc(100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
   
   sprintf(t,"%s.c",s);

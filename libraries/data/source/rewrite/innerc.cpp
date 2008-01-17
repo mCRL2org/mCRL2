@@ -1602,8 +1602,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification Da
 
   ATtableDestroy(tmp_eqns);
 
-  s = (char *) malloc(20);
-  sprintf(s,"innerc_%i",getpid());
+  s = (char *) malloc(50);
+  sprintf(s,"innerc_%i_%lx",getpid(),(long) this);
   t = (char *) malloc(100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
 
   sprintf(t,"%s.c",s);
@@ -1717,9 +1717,9 @@ void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification Da
     }
   fprintf(f,              ");\n");
   fprintf(f,  "\n"
-              "ftype%i *int2func%i;\n",i,i);
+              "static ftype%i *int2func%i;\n",i,i);
   }
-  fprintf(f,  "ftype1 *int2func;\n");
+  fprintf(f,  "static ftype1 *int2func;\n");
 
   //
   // Implement substitution functions

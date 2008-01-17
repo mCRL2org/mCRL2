@@ -82,8 +82,7 @@ class rewriter
 		///
 		data_expression operator()(const data_expression& d) const
 		{
-		  ATerm t = m_rewriter.get()->toRewriteFormat(d);
-		  return m_rewriter.get()->rewrite((ATermAppl) t);
+		  return m_rewriter.get()->rewrite(d);
 		}
 
 		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
@@ -94,13 +93,12 @@ class rewriter
 		template <typename Iter>
 		data_expression operator()(const data_expression& d, Iter first, Iter last) const
 		{
-		  ATerm t = m_rewriter.get()->toRewriteFormat(d);
 		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
 		  for (Iter i = first; i != last; ++i)
 		  {
 		    m_rewriter.get()->setSubstitution(i->m_variable, i->m_value);
 		  }
-		  data_expression result = m_rewriter.get()->rewrite((ATermAppl) t);
+		  data_expression result = m_rewriter.get()->rewrite(d);
 		  m_rewriter.get()->clearSubstitutions();
 		  return result;
 		}
