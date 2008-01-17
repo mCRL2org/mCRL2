@@ -1,7 +1,5 @@
 Procedure:
 
- * test shared and static build of the source distribution
-
  * Update OS X bundle meta information:
  
      tools/x/x.plist, where x an arbitrary tool name
@@ -10,4 +8,40 @@ Procedure:
 
      edit TOOLSET_VERSION in libraries/utilities/include/mcrl2/utilities/version_info.h
 
- * create tag
+ * build, test, and upload the source distribution
+
+   - build from the root of the repository.
+
+      packaging/generate_source_distribution.sh trunk .
+
+   - test shared and static build 
+
+      ./configure --prefix=/tmp/mcrl2
+      make test
+
+      make bjam
+      ./build/bin/bjam -j3 --install link=static
+
+      rm -rm /tmp/mcrl2
+
+      make bjam
+      ./build/bin/bjam -j3 --install link=shared
+
+   - upload to mcrl2@www.win.tue.nl/www/dowload/release/
+
+ * build, test, and upload the windows binary distribution
+
+   - build and test
+
+     ./configure --prefix=C:/mcrl2 --with-wx=...
+
+     make test
+
+     make bjam
+     ./build/bin/bjam -j3 --install link=shared
+
+   - add CHANGES en README to C:/mcrl2
+
+   - create zip file and upload to mcrl2@www.win.tue.nl/www/download/release
+
+ * update download section of the website
