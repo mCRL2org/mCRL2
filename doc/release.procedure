@@ -27,6 +27,10 @@ Procedure:
       make bjam
       ./build/bin/bjam -j3 --install link=shared
 
+   - add README, CHANGES, COPYING and LICENSE_1_0.txt to the installation directory
+   
+   - create self-extracting zip-file of the installation directory
+
    - upload to mcrl2@www.win.tue.nl/www/dowload/release/
 
  * build, test, and upload the windows binary distribution
