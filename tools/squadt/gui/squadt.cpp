@@ -81,7 +81,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
       }
       if (parser.Found(wxT("h"))) {
         std::cout <<
-        "Usage: " << argv[0] << " [OPTION]... [PATH]\n"
+        "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [PATH]\n"
         "Graphical environment that provides a uniform interface for using all kinds of\n"
         "other connected tools. If PATH is provided, it provides an existing project in\n"
         "PATH.\n"

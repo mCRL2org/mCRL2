@@ -91,7 +91,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 }
 #endif
 
-void print_help(char *name) {
+void print_help(std::string const &name) {
   cout << "Usage: " << name << " [INFILE]"
        << endl << "Draw graphs and optimize their layout in a graphical environment."
        << endl << "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file"
@@ -124,7 +124,7 @@ class GraphApp : public wxApp
       }
 
       if ( cmdln.Found(wxT("h")) ) {
-        print_help(argv[0]);
+        print_help(std::string(wxString(argv[0]).fn_str()));
         return false;
       }
 

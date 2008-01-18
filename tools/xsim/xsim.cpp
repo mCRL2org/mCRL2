@@ -140,7 +140,7 @@ using namespace mcrl2::core;
 
   if (cmdln.Found(wxT("h"))) {
     std::cout <<
-    "Usage: " << argv[0] << " [OPTION]... [INFILE]\n"
+    "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [INFILE]\n"
     "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
     "loaded into the simulator.\n"
     "\n"

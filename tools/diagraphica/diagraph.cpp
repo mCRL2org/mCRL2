@@ -145,7 +145,7 @@ bool parse_command_line(
 
     if (cmdln.Found(wxT("h"))) {
       std::cout <<
-      "Usage: " << argv[0] << " [OPTION]... [INFILE]\n"
+      "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [INFILE]\n"
       "Multivariate state visualization and simulation analysis techniques for labelled\n"
       "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be\n"
       "loaded by the tool.\n"
