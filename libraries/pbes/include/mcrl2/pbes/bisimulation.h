@@ -43,11 +43,11 @@ class bisimulation_algorithm
     /// Maps summands to strings.
     name_map summand_names;
 
-    /// Store a pointer to the model.
-    const lps::linear_process* model_ptr;
+    /// Store the ATerm of the model.
+    ATermAppl model_ptr;
 
-    /// Store a pointer to the specification.
-    const lps::linear_process* spec_ptr;
+    /// Store a ATerm of the specification.
+    ATermAppl spec_ptr;
 
     /// Returns a name of an action_list.
     std::string action_list_name(action_list l) const
@@ -72,7 +72,7 @@ class bisimulation_algorithm
     /// Returns true if p is the linear process of the model.
     bool is_from_model(const linear_process& p) const
     {
-      return &p == model_ptr;
+      return ATermAppl(p) == model_ptr;
     }
 
     /// Returns a name of a linear process.
@@ -226,8 +226,8 @@ public:
       summand_names.clear();
       set_summand_names(model, "M_");
       set_summand_names(spec, "S_");
-      model_ptr = &model;
-      spec_ptr = &spec;
+      model_ptr = ATermAppl(model);
+      spec_ptr  = ATermAppl(spec);
       assert(is_from_model(model));
       assert(!is_from_model(spec));
     }
@@ -526,6 +526,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
                            data_variable_list d, data_variable_list d1) const
     {
       using namespace pbes_expr;
+
       //const data_variable_list& d  = p.process_parameters();
       //const data_variable_list& d1 = q.process_parameters();
       data_variable_list        gi = i->next_state(p.process_parameters());
@@ -537,9 +538,26 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         {
           continue;
         }
-        const data_expression&    cj = j->condition();
-        data_variable_list        gj = j->next_state(q.process_parameters());
-        pbes_expression expr = and_(cj, var(Y2(p, q, i), d + gj));
+        // d' == q.process_parameters()
+        // e' == j->summand_variables()
+        data_expression    cj  = j->condition();                        // cj == cj(d',e')
+        data_variable_list gj  = j->next_state(q.process_parameters()); // gj == gj(d',e')
+        data_variable_list e1  = j->summation_variables();              // e1 == e'
+
+        // replace d' by d1 (if needed)
+        if (d1 != q.process_parameters())
+        {
+          cj = cj.substitute(make_list_substitution(q.process_parameters(), d1));
+          gj = gj.substitute(make_list_substitution(q.process_parameters(), d1));
+        }
+
+        // replace e' (e1) by fresh variables e'' (e1_new)
+        std::set<std::string> used_names = find_variable_name_strings(atermpp::make_list(p, q));
+        data_variable_list e1_new = fresh_variables(e1, used_names);
+        data_expression    cj_new = cj.substitute(make_list_substitution(e1, e1_new));
+        data_variable_list gj_new = gj.substitute(make_list_substitution(e1, e1_new));
+
+        pbes_expression expr = exists(e1_new, and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
       }
       return or_(var(X(p, q), d + d1), multi_or(v.begin(), v.end()));
