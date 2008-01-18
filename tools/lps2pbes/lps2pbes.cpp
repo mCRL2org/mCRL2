@@ -8,13 +8,13 @@
 /// \brief Add your file description here.
 
 #define NAME "lps2pbes"
+#define AUTHOR "Alexander van Dam, Aad Mathijssen and Wieger Wesselink"
 
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <climits>
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
@@ -323,7 +323,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   bool opt_timed = false;
   string formfilename = "";
   #define SHORT_OPTIONS "f:p:ehqtvd"
-  #define VERSION_OPTION CHAR_MAX + 1
+  #define VERSION_OPTION 0x1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
     { "timed",     no_argument,        NULL,  't' },
@@ -367,7 +367,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
         print_help(argv[0]);
         exit(0);
       case VERSION_OPTION: /* version */
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         exit(0);
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -522,14 +522,13 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
 static void print_help(char *name)
 {
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [OPTION]... -f FILE [INFILE [OUTFILE]]\n"
     "Convert the state formula in FILE and the LPS in INFILE to a parameterised\n"
-    "boolean equation system (PBES) and save it to OUTFILE.\n"
-    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
-    "used.\n"
+    "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not\n"
+    "present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "Options:\n"
     "  -fFILE, --formula=FILE      use the state formula from FILE\n"
     "  -t, --timed                 use the timed version of the algorithm, even for\n"
     "                              untimed LPS's\n"
@@ -542,8 +541,10 @@ static void print_help(char *name)
     "      --version               display version information and terminate\n"
     "  -q, --quiet                 do not display warning messages\n"
     "  -v, --verbose               display concise intermediate messages\n"
-    "  -d, --debug                 display detailed intermediate messages\n",
-    name
+    "  -d, --debug                 display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , name
   );
 }
 

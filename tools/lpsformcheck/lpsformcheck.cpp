@@ -7,7 +7,8 @@
 /// \file lpsformcheck.cpp
 /// \brief Add your file description here.
 
-#define  NAME      "lpsformcheck"
+#define NAME "lpsformcheck"
+#define AUTHOR "Luc Engelen"
 
 #include "mcrl2/formula_checker.h"
 #include "getopt.h"
@@ -100,13 +101,13 @@ using namespace mcrl2::core;
   // Class LPS_Form_Check - Functions declared private --------------------------------------------
 
     void LPS_Form_Check::print_help() {
-      fprintf(stderr,
+      fprintf(stdout,
         "Usage: %s [OPTION]... -fFORMFILE [INFILE]\n"
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
         "FORMFILE holds for the data specification of the linear process specification\n"
         "(LPS) in INFILE. If INFILE is not present, stdin is used.\n"
         "\n"
-        "The following OPTIONs can be used:\n"
+        "Options:\n"
         "  -fFORMFILE, --formula=FORMFILE  use the formula in FORMFILE as input\n"
         "  -c, --counter-example           display a valuation for which the formula does\n"
         "                                  not hold, in case it is neither a\n"
@@ -139,8 +140,10 @@ using namespace mcrl2::core;
         "                                    of the SMT solver CVC3\n"
 #endif
         "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n",
-        f_tool_command
+        "  -o, --induction                 apply induction on lists\n"
+        "\n"
+        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+        , f_tool_command
       );
     }
 
@@ -226,7 +229,7 @@ using namespace mcrl2::core;
             print_help();
             exit(0);
           case 0x1:
-            print_version_information(NAME);
+            print_version_information(NAME, AUTHOR);
             exit(0);
           case 'q':
             gsSetQuietMsg();

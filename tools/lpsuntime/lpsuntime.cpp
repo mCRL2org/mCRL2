@@ -23,6 +23,7 @@
 //
 
 #define NAME "lpsuntime"
+#define AUTHOR "Jeroen Keiren"
 
 //C++
 #include <exception>
@@ -328,16 +329,20 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::notify(vm);
       
   if (vm.count("help")) {
-    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Untime the LPS in INFILE and store the result to OUTFILE" << endl;
-    cerr << endl;
-    cerr << desc;
-
+    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+    cout << "Remove time from the linear process specification (LPS) in INFILE and write the" << endl;
+    cout << "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not" << endl;
+    cout << "present, stdout is used." << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
     exit (0);
   }
       
   if (vm.count("version")) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit (0);
   }
 

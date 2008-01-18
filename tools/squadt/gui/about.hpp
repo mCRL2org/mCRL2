@@ -11,6 +11,9 @@
 #include <wx/msgdlg.h>
 #include "mcrl2/utilities/version_info.h"
 
+#define NAME "SQuADT"
+#define AUTHOR "Jeroen van der Wulp"
+
 #define STRINGIFY(x) EXPAND(x)
 #define EXPAND(x) #x
 
@@ -33,16 +36,13 @@ namespace squadt {
      * \param[in] p the message to print
      **/
     inline about::about(wxWindow* p) : wxMessageDialog(p,
-       wxString(get_version_information("SQuADT").c_str(), wxConvLocal) +
+       wxString(get_version_information(NAME, AUTHOR).c_str(), wxConvLocal) +
+       //wxT("\n")
+       //wxT("A controlled environment that provides a graphical user interface that helps users to ")
+       //wxT("interact with all kinds of connected tools. The goal is to simplify the use of these ")
+       //wxT("tools especially in combination with each other.\n")
        wxT("\n")
-       wxT("\n")
-       wxT("A controlled environment that provides a graphical user interface that helps users to ")
-       wxT("interact with all kinds of connected tools. The goal is to simplify the use of these ")
-       wxT("tools especially in combination with each other.\n")
-       wxT("\n")
-       wxT("Developed by Jeroen van der Wulp\n")
-       wxT("\n")
-       wxT("This tool is distributed as part of the mCRL2 toolset.\n")
+       wxT("This tool is part of the mCRL2 toolset.\n")
        wxT("For information see http://www.mcrl2.org\n")
        wxT("\n")
        wxT("For feature requests or bug reports,\n")

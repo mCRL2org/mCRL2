@@ -27,6 +27,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 #define NAME "chi2mcrl2"
+#define AUTHOR "Frank Stappers"
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
 
@@ -211,7 +212,7 @@ static bool parse_command_line(int argc, char *argv[],t_options &options)
         PrintHelp(argv[0]);
         return false;
       case VersionOption: /* version */
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return false;
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -301,19 +302,23 @@ void PrintMoreInfo(char *Name)
 
 void PrintHelp(char *Name)
 {
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-	"Translates the Chi specifiation in INFILE and writes the resulting mCRL2 \n"
-	"OUTFILE. if OUTFILE is not present, stdout is used. If INFILE is not present\n"
+    "Translates the Chi specifiation in INFILE and writes the resulting mCRL2 \n"
+    "OUTFILE. if OUTFILE is not present, stdout is used. If INFILE is not present\n"
     "stdin is used.\n"
     "\n"
-    "  -h, --help            Display this help and terminate.\n"
-    "      --version         Display version information and terminate.\n"
-    "  -q, --quiet           Do not display warning messages.\n"
-    "  -v, --verbose         Display concise intermediate messages.\n"
-    "  -d, --debug           Display detailed intermediate messages.\n"
-    "  -n, --nostatepar      No state parameters are generated when translating chi processes.\n",
-    Name);
+    "Options:\n"
+    "  -n, --no-state        no state parameters are generated when translating Chi\n"
+    "                        processes\n"
+    "  -h, --help            display this help and terminate\n"
+    "      --version         display version information and terminate\n"
+    "  -q, --quiet           do not display warning messages\n"
+    "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 // Main 

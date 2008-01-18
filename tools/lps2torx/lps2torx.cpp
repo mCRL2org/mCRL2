@@ -7,6 +7,7 @@
 /// \file lps2torx.cpp
 
 #define NAME "lps2torx"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <stdio.h>
 #include <errno.h>
@@ -153,8 +154,10 @@ static void print_help(FILE *f, char *Name)
     "  -u, --unused-data       do not remove unused parts of the data specification\n"
     "  -c, --vector            store state in a vector (fastest, default)\n"
     "  -r, --tree              store state in a tree (for memory efficiency)\n"
-    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'jitty')\n",
-    Name);
+    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'jitty')\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 int main(int argc, char **argv)
@@ -192,10 +195,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr, argv[0]);
+        print_help(stdout, argv[0]);
         return 0;
       case 0:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         quiet = true;

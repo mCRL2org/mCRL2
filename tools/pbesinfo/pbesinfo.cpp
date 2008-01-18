@@ -18,6 +18,7 @@
 // ======================================================================
 
 #define NAME "pbesinfo"
+#define AUTHOR "Alexander van Dam"
 
 //C++
 #include <cstdio>
@@ -82,17 +83,21 @@ t_tool_options parse_command_line(int argc, char** argv)
 	
 	if (vm.count("help"))
 	{
-		cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl;
-		cerr << "Print basic information on the PBES in INFILE." << endl;
-		cerr << endl;
-		cerr << desc;
+		cout << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl;
+		cout << "Print basic information on the PBES in INFILE. If INFILE is not present, stdin" << endl;
+                cout << "is used." << endl;
+		cout << endl;
+                cout << "Options:" << endl;
+		cout << desc;
+		cout << endl;
+                cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
 		
 		exit(0);
 	}
 	
 	if (vm.count("version"))
 	{
-                print_version_information(NAME);
+                print_version_information(NAME, AUTHOR);
 		exit(0);
 	}
 

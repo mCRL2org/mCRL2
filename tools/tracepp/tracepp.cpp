@@ -7,6 +7,7 @@
 /// \file tracepp.cpp
 
 #define NAME "tracepp"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <iostream>
 #include <fstream>
@@ -117,21 +118,22 @@ static void print_help(FILE *f, char *Name)
     "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE\n"
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
-    "  -h, --help            display this help message\n"
-    "      --version         display version information\n"
-    "  -q, --quiet           do not display any unrequested information\n"
+    "Options:\n"
+    "  -h, --help            display this help message and terminate\n"
+    "      --version         display version information and terminate\n"
+    "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n"
     "\n"
-    "The output formats that can be chosen are the following. By default --plain is\n"
-    "assumed.\n"
-    "\n"
+    "Conversion options:\n"
     "  -p, --plain           write trace in plain format (default)\n"
     "  -m, --mcrl2           write trace in mCRL2 trace format\n"
     "  -D, --dot             write trace in dot format\n"
     "  -a, --aut             write trace in aut format\n"
-/*    "  -s, --svc             write trace in svc format\n"*/,
-    Name
+/*    "  -s, --svc             write trace in svc format\n"*/
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name
   );
 }
 
@@ -165,10 +167,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr, argv[0]);
+        print_help(stdout, argv[0]);
         return 0;
       case 0x1:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         quiet = true;

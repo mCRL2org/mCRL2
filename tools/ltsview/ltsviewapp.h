@@ -76,7 +76,7 @@ class LTSViewApp : public wxApp, public Mediator {
     void loadTrace(std::string const& path);
     void generateBackTrace();
 
-    void printHelp();
+    void printHelp(std::string const& name);
     void printVersion();
 
     DECLARE_EVENT_TABLE()

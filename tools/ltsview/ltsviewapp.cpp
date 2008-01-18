@@ -9,6 +9,9 @@
 
 #include <string>
 
+#define NAME "ltsview"
+#define AUTHOR "Bas Ploeger and Carst Tankink"
+
 std::string lts_file_argument;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -85,20 +88,23 @@ IMPLEMENT_APP_NO_MAIN(LTSViewApp)
 BEGIN_EVENT_TABLE(LTSViewApp, wxApp)
 END_EVENT_TABLE()
 
-void LTSViewApp::printHelp() {
-  cerr << "Usage: ltsview [OPTION] [INFILE]" << endl;
-  cerr << "Start the LTSView application and open INFILE. If INFILE is not" << endl;
-  cerr << "supplied then LTSView is started without opening an LTS." << endl;
-  cerr << endl;
-  cerr << "INFILE should be in the FSM format." << endl;
-  cerr << endl;
-  cerr << "OPTION can be any of the following:" << endl;
-  cerr << "  -h, --help     display this help message and terminate" << endl;
-  cerr << "      --version  display version information and terminate" << endl;
+void LTSViewApp::printHelp(std::string const &name) {
+  cout <<         "Usage: " << name << "[OPTION]... [INFILE]"
+       << endl << "Start the LTSView application and open INFILE. If INFILE is not"
+       << endl << "supplied then LTSView is started without opening an LTS."
+       << endl
+       << endl << "INFILE should be in the FSM format."
+       << endl
+       << endl << "Options:"
+       << endl << "  -h, --help     display this help message and terminate"
+       << endl << "      --version  display version information and terminate"
+       << endl
+       << endl << "Report bugs at <http://www.mcrl2.org/issuetracker>."
+       << endl;
 }
 
 void LTSViewApp::printVersion() {
-  cerr << getVersionString() << endl;
+  cout << getVersionString();
 }
 
 bool LTSViewApp::OnInit() {
@@ -113,7 +119,7 @@ bool LTSViewApp::OnInit() {
     return false;
   }
   if (cmdParser.Found(wxT("h"))) {
-    printHelp();
+    printHelp(argv[0]);
     return false;
   }
   if (cmdParser.Found(wxT("version"))) {
@@ -202,7 +208,7 @@ int LTSViewApp::OnExit() {
 }
 
 std::string LTSViewApp::getVersionString() {
-  return get_version_information("LTSView");
+  return get_version_information(NAME, AUTHOR);
 }
 
 void LTSViewApp::openFile(string fileName) {

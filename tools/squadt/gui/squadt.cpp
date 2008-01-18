@@ -8,6 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "squadt"
+#define AUTHOR "Jeroen van der Wulp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -79,18 +80,22 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         default_log_level = 2;
       }
       if (parser.Found(wxT("h"))) {
-        std::cout << "Usage: " << argv[0] << " [OPTION] [PATH]\n"
-                  << "Graphical environment that provides a uniform interface for using all kinds\n"
-                  << "of other connected tools.\n"
-                  << "\n"
-                  << "Mandatory arguments to long options are mandatory for short options too.\n"
-                  << "  -c, --create          create new project in PATH\n"
-                  << "  -d, --debug           produce lots of debug output\n"
-                  << "  -h, --help            display this help message\n"
-                  << "  -q, --quiet           represses unnecessary output\n"
-                  << "  -v, --verbose         display additional information during operation\n"
-                  << "      --version         display version information\n"
-                  << "\n";
+        std::cout <<
+        "Usage: " << argv[0] << " [OPTION]... [PATH]\n"
+        "Graphical environment that provides a uniform interface for using all kinds of\n"
+        "other connected tools. If PATH is provided, it provides an existing project in\n"
+        "PATH.\n"
+        "\n"
+        "Options:\n"
+        "  -c, --create          create new project in PATH\n"
+        "  -h, --help            display this help message\n"
+        "      --version         display version information\n"
+        "  -q, --quiet           represses unnecessary output\n"
+        "  -v, --verbose         display additional information during operation\n"
+        "  -d, --debug           produce lots of debug output\n"
+        "\n"
+        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+        ;
  
         return (false);
       }
@@ -98,7 +103,7 @@ bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt:
         default_log_level = 0;
       }
       if (parser.Found(wxT("version"))) {
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return (false);
       }
 

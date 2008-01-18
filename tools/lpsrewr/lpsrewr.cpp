@@ -7,6 +7,7 @@
 /// \file lpsrewr.cpp
 
 #define NAME "lpsrewr"
+#define AUTHOR "Aad Mathijssen"
 
 #include <stdio.h>
 #include <errno.h>
@@ -15,7 +16,6 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
-#include <limits.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   unsigned long int  opt_bench_times = 0;
   RewriteStrategy opt_strat = GS_REWR_JITTY;
   #define SHORT_OPTIONS "hqvb:R:"
-  #define VERSION_OPTION CHAR_MAX + 1
+  #define VERSION_OPTION 0x1
   struct option long_options[] = {
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         print_help(argv[0]);
         return 0;
       case VERSION_OPTION: /* version */
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q': /* quite */
         gsSetQuietMsg();
@@ -213,20 +213,22 @@ int main(int argc, char **argv)
 
 static void print_help(char *Name)
 {
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE.\n"
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
     "used.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -b, --benchmark=NUM   rewrite specification NUM times; do not save output\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'jitty')\n",
-    Name
+    "Options:\n"
+    "  -h, --help               display this help message and terminate\n"
+    "      --version            display version information and terminate\n"
+    "  -q, --quiet              do not display warning messages\n"
+    "  -v, --verbose            display concise intermediate messages\n"
+    "  -bNUM, --benchmark=NUM   rewrite specification NUM times; do not save output\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name
   );
 }
 

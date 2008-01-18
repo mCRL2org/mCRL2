@@ -5,6 +5,7 @@
 /// \file ./lpsconstelm.cpp
 
 #define NAME "lpsconstelm"
+#define AUTHOR "Frank Stappers"
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
@@ -1133,16 +1134,22 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
   po::notify(vm);
 
   if (vm.count("help")) {
-    std::cerr << "Usage: "<< argv[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
-              << "Removes constant process parameters from the LPS read from standard input or INFILE." << std::endl
-              << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
-              << std::endl << description;
-
+    std::cout <<
+    "Usage: "<< argv[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+    "Remove constant process parameters from the LPS in INFILE and write the result\n"
+    "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
+    "stdin is used.\n"
+    "\n"
+    "Options:\n"
+    << description <<
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    ;
     exit (0);
   }
 
   if (vm.count("version")) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit (0);
   }
 

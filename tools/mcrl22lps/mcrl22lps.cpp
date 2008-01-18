@@ -8,11 +8,11 @@
 /// \brief Add your file description here.
 
 #define NAME "mcrl22lps"
+#define AUTHOR "Jan Friso Groote"
 
 #include <cassert>
 #include <stdbool.h>
 #include <getopt.h>
-#include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -424,7 +424,7 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
   bool opt_add_delta = false;
   t_phase opt_end_phase = phNone;
   #define ShortOptions   "0123cnrwbaofep:hqvdmgD"
-  #define VersionOption  CHAR_MAX + 1
+  #define VersionOption  0x1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },
     { "regular",     no_argument,       NULL, '1' },
@@ -532,7 +532,7 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
         PrintHelp(argv[0]);
         return false;
       case VersionOption: /* version */
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return false;
       case 'q': /* quiet */
         gsSetQuietMsg();
@@ -693,12 +693,13 @@ void PrintMoreInfo(char *Name)
 
 void PrintHelp(char *Name)
 {
-  fprintf(stderr,
+  fprintf(stdout,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to\n"
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used.\n"
     "\n"
+    "Options:\n"
     "  -0, --stack           the LPS is generated using stack datatypes;\n"
     "                        useful when -1 and -2 do not work\n"
     "  -1, --regular         if the specification is regular, the LPS is generated\n"
@@ -728,7 +729,7 @@ void PrintHelp(char *Name)
     "                        effectively reducing the number of delta summands drastically\n"
     "                        in the resulting linear process. Speeds up linearisation\n"
     "  -e, --check-only      check syntax and static semantics; do not linearise\n"
-    "  -pPHASE, --end-phase=PHASE     \n"
+    "  -pPHASE, --end-phase=PHASE\n"
     "                        stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
@@ -736,8 +737,10 @@ void PrintHelp(char *Name)
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
-    Name);
+    "  -d, --debug           display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 // Main 

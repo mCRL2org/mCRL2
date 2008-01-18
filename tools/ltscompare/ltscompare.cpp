@@ -7,6 +7,7 @@
 /// \file ltscompare.cpp
 
 #define NAME "ltscompare"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
 #include <getopt.h>
@@ -65,20 +66,22 @@ static void print_help(FILE *f, char *Name)
     "Options --in1 and --in2 can beused to force the input format of INFILE1 and\n"
     "INFILE2, respectively.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help gsMessage and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning gsMessages\n"
-    "  -v, --verbose         display concise intermediate gsMessages\n"
-    "  -f, --formats         list accepted formats\n"
-    "  -i, --in1=FORMAT      use FORMAT as the format for INFILE1 (or stdin)\n"
-    "  -j, --in2=FORMAT      use FORMAT as the format for INFILE2\n"
-    "  -s, --strong          use strong bisimulation equivalence (default)\n"
-    "  -b, --branching       use branching bisimulation equivalence\n"
-    "      --tau=ACTNAMES    consider actions with a name in the comma separated\n"
-    "                        list ACTNAMES to be a internal (tau) actions in\n"
-    "                        addition to those defined as such by the input\n",
-    Name);
+    "Options:\n"
+    "  -s, --strong            use strong bisimulation equivalence (default)\n"
+    "  -b, --branching         use branching bisimulation equivalence\n"
+    "      --tau=ACTNAMES      consider actions with a name in the comma separated\n"
+    "                          list ACTNAMES to be a internal (tau) actions in\n"
+    "                          addition to those defined as such by the input\n"
+    "  -f, --formats           list accepted formats\n"
+    "  -iFORMAT, --in1=FORMAT  use FORMAT as the format for INFILE1 (or stdin)\n"
+    "  -jFORMAT, --in2=FORMAT  use FORMAT as the format for INFILE2\n"
+    "  -h, --help              display this help gsMessage and terminate\n"
+    "      --version           display version information and terminate\n"
+    "  -q, --quiet             do not display warning gsMessages\n"
+    "  -v, --verbose           display concise intermediate gsMessages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 int main(int argc, char **argv)
@@ -114,10 +117,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr,argv[0]);
+        print_help(stdout,argv[0]);
         return 0;
       case VersionOption:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'v':
         verbose = true;

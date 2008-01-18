@@ -7,6 +7,7 @@
 /// \file mcrl2i.cpp
 
 #define NAME "mcrl2i"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <iostream>
 #include <sstream>
@@ -255,15 +256,17 @@ void print_help(FILE *f, char *Name)
     "\n"
     "%s"
     "\n"
-    "The following command line options are available.\n"
+    "Options:\n"
     "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"
     "  -q, --quiet              do not display warning messages\n"
     "  -v, --verbose            display concise intermediate messages\n"
-    "  -d, --debug              display detailed intermediate messages\n",
-    Name,
-    help_gsMessage
+    "  -d, --debug              display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name
+    , help_gsMessage
   );
 }
 
@@ -274,7 +277,7 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATermAppl Spec;
   #define sopts "hqvdR:"
-  #define version_option CHAR_MAX + 1
+  #define version_option 0x1
   struct option lopts[] = {
     { "help",     no_argument,  NULL,  'h' },
     { "version",  no_argument,  NULL,  version_option },
@@ -295,10 +298,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr, argv[0]);
+        print_help(stdout, argv[0]);
         return 0;
       case version_option:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         quiet = true;

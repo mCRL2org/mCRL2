@@ -7,6 +7,7 @@
 /// \file xsim.cpp
 
 #define NAME "xsim"
+#define AUTHOR "Muck van Weerdenburg"
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsim.h"
@@ -138,23 +139,27 @@ using namespace mcrl2::core;
   }
 
   if (cmdln.Found(wxT("h"))) {
-    std::cerr << "Usage: " << NAME << " [OPTION]... [INFILE]\n"
-              << "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
-              << "loaded into the simulator.\n"
-              << "\n"
-              << "Options:\n"
-              << "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-              << "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
-              << "  -h, --help               display this help and terminate\n"
-              << "      --version            display version information and terminate\n"
-              << "  -q, --quiet              do not display warning messages\n"
-              << "  -v, --verbose            display concise intermediate messages\n"
-              << "  -d, --debug              display detailed intermediate messages\n";
+    std::cout <<
+    "Usage: " << argv[0] << " [OPTION]... [INFILE]\n"
+    "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
+    "loaded into the simulator.\n"
+    "\n"
+    "Options:\n"
+    "  -y, --dummy              replace free variables in the LPS with dummy values\n"
+    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
+    "  -h, --help               display this help and terminate\n"
+    "      --version            display version information and terminate\n"
+    "  -q, --quiet              do not display warning messages\n"
+    "  -v, --verbose            display concise intermediate messages\n"
+    "  -d, --debug              display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    ;
     return false;
   }
 
   if (cmdln.Found(wxT("version"))) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     return false;
   }
 

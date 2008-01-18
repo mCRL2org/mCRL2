@@ -20,6 +20,7 @@
 
 
 #define NAME "pbes2bool"
+#define AUTHOR "Jan Friso Groote"
 
 //C++
 #include <ostream>
@@ -430,11 +431,14 @@ t_tool_options parse_command_line(int argc, char** argv)
 
   if (vm.count("help"))
   {
-    cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-    cerr << "Solves PBES from stdin or INFILE, or outputs an equivalent BES." << endl;
-    cerr << "By default the result is written to stdout, otherwise to OUTFILE." << endl;
-    cerr << endl;
-    cerr << desc;
+    cout << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+    cout << "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is" << endl;
+    cout << "not present, stdin is used. If OUTFILE is not present, stdout is used." << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
 
     exit(0);
   }
@@ -461,7 +465,7 @@ t_tool_options parse_command_line(int argc, char** argv)
 
   if (vm.count("version"))
   {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit(0);
   }
 

@@ -5,6 +5,7 @@
 /// \file ./lpsparelm.cpp
 
 #define NAME "lpsparelm"
+#define AUTHOR "Jeroen van der Wulp and Wieger Wesselink"
 
 #include <exception>
 
@@ -92,16 +93,22 @@ struct tool_configuration {
     }
        
     if (vm.count("help")) {
-      std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
-                << "Removes unused parameters from the LPS read from standard input or INFILE." << std::endl
-                << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
-                << std::endl << description;
-  
+      std::cout <<
+      "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+      "Remove unused parameters from the LPS in INFILE and write the result to OUTFILE.\n"
+      "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n" 
+      "used.\n"
+      "\n"
+      "Options:\n"
+      << description <<
+      "\n"
+      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+      ;
       exit (0);
     }
           
     if (vm.count("version")) {
-      print_version_information(NAME);
+      print_version_information(NAME, AUTHOR);
       exit (0);
     }
   

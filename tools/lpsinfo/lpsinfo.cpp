@@ -5,6 +5,7 @@
 /// \file ./lpsinfo.cpp
 
 #define NAME "lpsinfo"
+#define AUTHOR "Frank Stappers"
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -105,16 +106,19 @@ void parse_command_line(int ac, char** av) {
   po::notify(vm);
       
   if (vm.count("help")) {
-    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE]" << endl;
-    cerr << "Print basic information on the LPS in INFILE." << endl;
-    cerr << endl;
-    cerr << desc;
+    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE]" << endl;
+    cout << "Print basic information on the LPS in INFILE." << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
 
     exit (0);
   }
       
   if (vm.count("version")) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit (0);
   }
 

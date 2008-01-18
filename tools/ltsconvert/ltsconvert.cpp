@@ -7,6 +7,7 @@
 /// \file ltsconvert.cpp
 
 #define NAME "ltsconvert"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
 #include <getopt.h>
@@ -510,21 +511,21 @@ static void print_help(FILE *f, char *Name)
     "used to force the input and output formats.\n"
     "\n"
     "Options:\n"
+    "      --no-reach         do not perform a reachability check on the input LTS\n"
+    "  -n, --no-state         leave out state information when saving in dot format\n"
+    "  -D, --determinise      determinise LTS\n"
+    "  -lFILE, --lps=FILE     use FILE as the LPS from which the input LTS was\n"
+    "                         generated; this is needed to store the correct\n"
+    "                         parameter names of states when saving in fsm format and\n"
+    "                         to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
+    "  -f, --formats          list accepted formats\n"
+    "  -iFORMAT, --in=FORMAT  use FORMAT as the input format\n"
+    "  -oFORMAT, --out=FORMAT use FORMAT as the output format\n"
     "  -h, --help             display this help message and terminate\n"
     "      --version          display version information and terminate\n"
     "  -q, --quiet            do not display any unrequested information\n"
     "  -v, --verbose          display concise intermediate messages\n"
     "  -d, --debug            display detailed intermediate messages\n"
-    "  -f, --formats          list accepted formats\n"
-    "  -iFORMAT, --in=FORMAT  use FORMAT as the input format\n"
-    "  -oFORMAT, --out=FORMAT use FORMAT as the output format\n"
-    "  -lFILE, --lps=FILE     use FILE as the LPS from which the input LTS was\n"
-    "                         generated; this is needed to store the correct\n"
-    "                         parameter names of states when saving in fsm format and\n"
-    "                         to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
-    "      --no-reach         do not perform a reachability check on the input LTS\n"
-    "  -n, --no-state         leave out state information when saving in dot format\n"
-    "  -D, --determinise      determinise LTS\n"
     "\n"
     "Minimisation options:\n"
     "      --none             do not minimise (default)\n"
@@ -537,8 +538,10 @@ static void print_help(FILE *f, char *Name)
     "                         bisimulation class a state belongs to (only for mCRL2)\n"
     "      --tau=ACTNAMES     consider actions with a name in the comma separated\n"
     "                         list ACTNAMES to be internal (tau) actions in\n"
-    "                         addition to those defined as such by the input\n",
-    Name);
+    "                         addition to those defined as such by the input\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 void reachability_check(lts &l)
@@ -694,10 +697,10 @@ int main(int argc, char **argv)
       switch ( opt )
       {
         case 'h':
-          print_help(stderr,argv[0]);
+          print_help(stdout,argv[0]);
           return 0;
         case VersionOption:
-          print_version_information(NAME);
+          print_version_information(NAME, AUTHOR);
           return 0;
         case 'v':
           verbose = true;

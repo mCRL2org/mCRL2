@@ -8,6 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "pnml2mcrl2"
+#define AUTHOR "Johfra Kamphuis and Yaroslav Usenko"
 
 #include <sstream>
 #include <cstdio>
@@ -2253,30 +2254,33 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   // PrintHelp prints and contains the Help-text.
   //==================================================
   void PrintHelp(char *Name){
-    fprintf(stderr,
-	    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-	    "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
-	    "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,\n"
-	    "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
-	    "\n"
-	    "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
-	    "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
-	    "not taken into account.\n"
-	    "With the -p option turned on, more functionality is supported.\n"
-	    "\n"
-    
-	    "  -h, --help             display help information\n"
-	    "  -q, --quiet            do not display warning messages\n"
-	    "  -d, --debug            turn on the display of detailed intermediate messages\n"
-            "  -e[NUM], --error [NUM] __error action will happen if a place gets NUM or more tokens (default is 2)\n"
-            "  -i, --hide             hide (rename to tau) all transition monitoring actions\n"
-            "                         to hide all but one action edit the generated file and remove that action from the hide list\n"                              
-	    "  -p, --no_rec_par       generate places in which the result is non-recursive\n"
-	    "                         with this flag turned on, inhibitor and reset arcs\n"
-	    "                         are translated!\n"
-	    "  -v, --verbose          turn on the display of short intermediate messages\n"
-	    "      --version          display version information\n",
-	    Name);
+    fprintf(stdout,
+      "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
+      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,\n"
+      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
+      "\n"
+      "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
+      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
+      "not taken into account.\n"
+      "With the -p option turned on, more functionality is supported.\n"
+      "\n"
+      "Options:\n"    
+      "  -e[NUM], --error[=NUM] an __error action will happen if a place gets NUM or\n"
+      "                         more tokens (default is 2)\n"
+      "  -i, --hide             hide (rename to tau) all transition monitoring actions\n"
+      "                         to hide all but one action edit the generated file and\n"
+      "                         remove that action from the hide list\n" 
+      "  -p, --no_rec_par       generate places in which the result is non-recursive;\n"
+      "                         also translate inhibitor and reset arcs\n"
+      "  -h, --help             display this help and terminate\n"
+      "      --version          display version information and terminate\n"
+      "  -q, --quiet            do not display warning messages\n"
+      "  -v, --verbose          display concise intermediate messages\n"
+      "  -d, --debug            display detailed intermediate messages\n"
+      "\n"
+      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+      , Name);
   }
 
   //==================================================
@@ -2485,7 +2489,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
           gsSetVerboseMsg();
           break;
         case 0: /* version */
-          print_version_information(NAME);
+          print_version_information(NAME, AUTHOR);
           return 0;
         default:
           break;

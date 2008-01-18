@@ -5,6 +5,7 @@
 /// \file ./txt2pbes.cpp
 
 #define NAME "txt2pbes" 
+#define AUTHOR "Simona Orzan" 
 
 // #define debug
  
@@ -480,18 +481,22 @@ pbes<> make_pbes(const string fileName){
   return pbes_simple_to_pbes();
 }
 
-void print_help(void)
+void print_help(const char *name)
 {
-  fprintf(stderr,
-    "\nUsage: txt2pbes [OPTION]... [INFILE [OUTFILE]]\n"
-    "Parses the content of INFILE into a pbes specification.The result is written to OUTFILE\n"
-    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
-    "used.\n"
+  fprintf(stdout,
+    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+    "Parse the contents of INFILE as a PBES and write the result to OUTFILE. If\n"
+    "INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n"
+    "\n"
+    "Options:\n"
     "  -s, --syntax          display the syntax (and examples) of the expected text input\n"    	  
     "  -h, --help            display this help and terminate\n"
     "      --version         display version information and terminate\n"
     "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , name
   );
 }
 
@@ -538,7 +543,7 @@ void parse_command_line(int argc, char **argv)
 //==========================
 {
 #define SHORT_OPTIONS "shqvd"
-#define VERSION_OPTION CHAR_MAX + 1
+#define VERSION_OPTION 0x1
   struct option long_options[] = {
     { "syntax",  no_argument, NULL,  's' },
     { "help",    no_argument, NULL,  'h' },
@@ -556,10 +561,10 @@ void parse_command_line(int argc, char **argv)
       print_syntax();
       exit(0);
     case 'h': /* help */
-      print_help();
+      print_help(argv[0]);
       exit(0);
     case VERSION_OPTION: /* version */
-      print_version_information(NAME);
+      print_version_information(NAME, AUTHOR);
       exit(0);
     case 'q': /* quiet */
       gsSetQuietMsg();

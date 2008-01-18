@@ -5,6 +5,7 @@
 /// \file ./ltsgraph.cpp
 
 #define NAME "ltsgraph"
+#define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
 
 // Graphical shell
 #include "graph_frame.h"
@@ -90,16 +91,20 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 }
 #endif
 
-void print_help() {
-  cout << "Usage: " << NAME << " [INFILE]\n"
-       << "Draw graphs and optimize their layout in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
-       << "the tool will use this file as input for drawing.\n"
-       << "\n"
-       << "Use left click to drag the nodes and right click to fix the nodes. \n"
-       << "\n"
-       << "Mandatory arguments to long options are mandatory for short options too.\n"
-       << "  -h, --help            display this help message\n"
-       << "  --version             displays version information and exits \n";
+void print_help(char *name) {
+  cout << "Usage: " << name << " [INFILE]"
+       << endl << "Draw graphs and optimize their layout in a graphical environment."
+       << endl << "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file"
+       << endl << "as input for drawing."
+       << endl
+       << endl << "Use left click to drag the nodes and right click to fix the nodes."
+       << endl
+       << endl << "Options:"
+       << endl << "  -h, --help            display this help message and terminate"
+       << endl << "      --version         displays version information and terminate"
+       << endl
+       << endl << "Report bugs at <http://www.mcrl2.org/issuetracker>."
+       << endl;
 }
 
 class GraphApp : public wxApp
@@ -119,12 +124,12 @@ class GraphApp : public wxApp
       }
 
       if ( cmdln.Found(wxT("h")) ) {
-        print_help();
+        print_help(argv[0]);
         return false;
       }
 
       if (cmdln.Found(wxT("version")) ) {
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return false;
       }
 

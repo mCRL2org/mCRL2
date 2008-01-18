@@ -5,6 +5,7 @@
 /// \file ./pbessolve.cpp
 
 #define NAME "pbessolve" 
+#define AUTHOR "Simona Orzan" 
  
 //C++ 
 #include <cstdio> 
@@ -211,16 +212,19 @@ t_tool_options parse_command_line(int argc, char** argv)
   po::notify(vm); 
    
   if (vm.count("help")) { 
-    cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl; 
-    cerr << "Solves the PBES from stdin or INFILE." << endl; 
-    cerr << "The result is written to stdout." << endl; 
-    cerr << endl; 
-    cerr << desc; 
+    cout << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl; 
+    cout << "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not" << endl;
+    cout << "present, stdin is used." << endl; 
+    cout << endl; 
+    cout << "Options:" << endl;
+    cout << desc; 
+    cout << endl; 
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
     exit(0); 
   } 
    
   if (vm.count("version")) { 
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit(0); 
   } 
    

@@ -23,6 +23,7 @@
 //
 
 #define NAME "lpsbinary"
+#define AUTHOR "Jeroen Keiren"
 
 //C++
 #include <cstdio>
@@ -738,19 +739,22 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::notify(vm);
 
   if (vm.count("help")) {
-    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Replace enumerated sort variables by vectors of boolean variables in the LPS in" << endl;
-    cerr << "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used." << endl;
-    cerr << "If OUTFILE is not present, stdout is used" << endl;
+    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+    cout << "Replace enumerated sort variables by vectors of boolean variables in the LPS in" << endl;
+    cout << "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used." << endl;
+    cout << "If OUTFILE is not present, stdout is used" << endl;
 
-    cerr << endl;
-    cerr << desc;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
 
     exit (0);
   }
 
   if (vm.count("version")) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit (0);
   }
 

@@ -18,6 +18,7 @@
 // ======================================================================
 
 #define NAME "pbesrewr"
+#define AUTHOR "Jan Friso Groote"
 
 //C++
 #include <cstdio>
@@ -91,17 +92,22 @@ t_tool_options parse_command_line(int argc, char** argv)
   
   if (vm.count("help"))
   {
-    cerr << "Usage: " << argv[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Rewrite the PBES in INFILE and remove quantified variables." << endl;
-    cerr << endl;
-    cerr << desc;
+    cout << "Usage: " << argv[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
+    cout << "Rewrite the PBES in INFILE, remove quantified variables and write the resulting" << endl;
+    cout << "PBES to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not" << endl;
+    cout << "present, stdout is used" << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
     
     exit(0);
   }
   
   if (vm.count("version"))
   {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit(0);
   }
 

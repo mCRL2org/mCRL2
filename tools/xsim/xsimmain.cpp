@@ -40,6 +40,9 @@
 # define wxFD_CHANGE_DIR wxCHANGE_DIR
 #endif
 
+#define NAME "XSim"
+#define AUTHOR "Muck van Weerdenburg"
+
 using namespace std;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -702,13 +705,11 @@ void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
   wxString ttl = wxT("About XSim");
   wxString msg = wxString();
-  msg += wxString(get_version_information("XSim").c_str(),wxConvLocal);
+  msg += wxString(get_version_information(NAME, AUTHOR).c_str(),wxConvLocal);
+  //msg += wxT("\n");
+  //msg += wxT("Tool for simulation of linear process specifications.\n");
   msg += wxT("\n");
-  msg += wxT("\n");
-  msg += wxT("Tool for simulation of linear process specifications.\n");
-  msg += wxT("Developed by Muck van Weerdenburg.\n");
-  msg += wxT("\n");
-  msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  msg += wxT("This tool is part of the mCRL2 toolset.\n");
   msg += wxT("For information see http://www.mcrl2.org\n");
   msg += wxT("\n");
   msg += wxT("For feature requests or bug reports,\n");

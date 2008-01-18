@@ -17,23 +17,34 @@
  * \brief toolset version string
  **/
 #define MCRL2_VERSION "January 2008"
+#define MCRL2_COPYRIGHT_YEAR "2008"
 
 /**
  * \brief Gets a string that describes the toolset version information
  * \param[in] tool_name the name of the tool
+ * \param[in] tool_author the author of the tool
  **/
-inline std::string get_version_information(std::string const& tool_name) {
+inline std::string get_version_information(const std::string &tool_name, const std::string &tool_author)
+{
   std::string text(tool_name);
-
-  return text.append(" " MCRL2_VERSION " (revision " MCRL2_REVISION ")");
+  text.append(" " MCRL2_VERSION " (revision " MCRL2_REVISION ")\n");
+  text.append("Copyright (C) " MCRL2_COPYRIGHT_YEAR " Eindhoven University of Technology.\n");
+  text.append("This is free software.  You may redistribute copies of it under the\n");
+  text.append("terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n");
+  text.append("There is NO WARRANTY, to the extent permitted by law.\n");
+  text.append("\n");
+  text.append("Written by " + tool_author + ".\n");
+  return text;
 }
 
 /**
  * \brief Prints toolset version information
  * \param[in] tool_name the name of the tool
+ * \param[in] tool_author the author of the tool
  **/
-inline void print_version_information(std::string const& tool_name) {
-  std::cerr << get_version_information(tool_name) << std::endl;
+inline void print_version_information(const std::string &tool_name, const std::string &tool_author)
+{
+  std::cout << get_version_information(tool_name, tool_author);
 }
 
 #endif //MCRL2_UTILITIES_VERSION_INFO_H

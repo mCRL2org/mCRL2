@@ -116,6 +116,7 @@ int main(int argc, char **argv) {
 // -- command line --------------------------------------------------
 
 #define NAME "diagraphica"
+#define AUTHOR "A. Johannes Pretorius"
 
 // parse command line 
 bool parse_command_line(
@@ -138,22 +139,25 @@ bool parse_command_line(
     }
 
     if (cmdln.Found(wxT("version"))) {
-      print_version_information(NAME);
+      print_version_information(NAME, AUTHOR);
     return false;
     }
 
     if (cmdln.Found(wxT("h"))) {
-    std::cout << "Usage: " << NAME << " [OPTION]... [INFILE]\n"
-              << "DiaGraphica is a prototype for the interactive visual analysis of multivariate\n" 
-              << "state transition graphs. If INFILE is supplied it will be loaded into\n"
-              << "DiaGraphica.\n"
-              << "\n"
-              << "Options:\n"
-              << "  -h, --help               display this help and terminate\n"
-              << "      --version            display version information and terminate\n"
-              << "  -q, --quiet              do not display warning messages\n"
-              << "  -v, --verbose            display concise intermediate messages\n"
-              << "  -d, --debug              display detailed intermediate messages\n";
+      std::cout <<
+      "Usage: " << argv[0] << " [OPTION]... [INFILE]\n"
+      "Multivariate state visualization and simulation analysis techniques for labelled\n"
+      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be\n"
+      "loaded by the tool.\n"
+      "\n"
+      "Options:\n"
+      "  -h, --help               display this help and terminate\n"
+      "      --version            display version information and terminate\n"
+      "  -q, --quiet              do not display warning messages\n"
+      "  -v, --verbose            display concise intermediate messages\n"
+      "  -d, --debug              display detailed intermediate messages\n"
+      "\n"
+      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n";
     return false;
     }
 

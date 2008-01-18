@@ -7,6 +7,7 @@
 /// \file tbf2lps.cpp
 
 #define NAME "tbf2lps"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <stdio.h>
 #include <errno.h>
@@ -15,7 +16,6 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
-#include <limits.h>
 #include "mcrl2/core/struct.h"
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
@@ -38,14 +38,20 @@ static void print_help(FILE *f, char *Name)
     "- mappings and, or: Bool # Bool -> Bool are replaced by &&, ||\n"
     "- mapping eq: S # S -> Bool is replaced by ==, for all sorts S\n"
     "\n"
-    "  -n, --no-conv-map     do not apply the conversion of mappings and, or and eq\n"
-    "      --no-conv-cons    do not apply the conversion of constructors T and F\n"
-    "  -h, --help            display this help and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
-    Name);
+    "Options:\n"
+    "  -n, --no-conv-map   do not apply the conversion of mappings and, or and eq\n"
+    "      --no-conv-cons  do not apply the conversion of constructors T and F\n"
+    "                      note that this conversion is really needed for the toolset\n"
+    "                      to know what true and false are (e.g. simulation and state\n"
+    "                      space generation will not be possible)\n"
+    "  -h, --help          display this help and terminate\n"
+    "      --version       display version information and terminate\n"
+    "  -q, --quiet         do not display warning messages\n"
+    "  -v, --verbose       display concise intermediate messages\n"
+    "  -d, --debug         display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 int main(int argc, char **argv)
@@ -54,8 +60,8 @@ int main(int argc, char **argv)
 
   FILE *InStream, *OutStream;
   #define sopts "hqvdn"
-  #define version_option CHAR_MAX + 1
-  #define no_conv_cons_option CHAR_MAX + 2
+  #define version_option 0x1
+  #define no_conv_cons_option 0x2
   struct option lopts[] = {
     { "help",          no_argument,  NULL,  'h' },
     { "version",       no_argument,  NULL,  version_option },
@@ -79,10 +85,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr, argv[0]);
+        print_help(stdout, argv[0]);
         return 0;
       case version_option:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         opt_quiet = true;

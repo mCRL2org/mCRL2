@@ -1,4 +1,4 @@
-//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
+//  Written by Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -9,6 +9,9 @@
 #include "mcrl2/utilities/version_info.h"
 
 #include <map>
+
+#define NAME "LTSGraph"
+#define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
 
 static const wxColour &border_colour_selected = *wxBLUE;
 
@@ -684,13 +687,9 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
   wxString caption = wxT("About LTSGraph");
   wxString content = wxString();
-  content += wxString(get_version_information("LTSGraph").c_str(),wxConvLocal);
+  content += wxString(get_version_information(NAME, AUTHOR).c_str(),wxConvLocal);
   content += wxT("\n");
-  content += wxT("\n");
-  content += wxT("Tool for visualising labelled transition systems.\n");
-  content += wxT("Developed by Didier Le Lann and Carst Tankink.\n");
-  content += wxT("\n");
-  content += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  content += wxT("This tool is part of the mCRL2 toolset.\n");
   content += wxT("For information see http://www.mcrl2.org\n");
   content += wxT("\n");
   content += wxT("For feature requests or bug reports,\n");

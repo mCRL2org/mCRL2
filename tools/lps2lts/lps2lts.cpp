@@ -7,6 +7,7 @@
 /// \file lps2lts.cpp
 
 #define NAME "lps2lts"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
 #include <getopt.h>
@@ -130,8 +131,9 @@ static void print_help(FILE *f, const char *Name)
     "                           maximum depth\n"
     "  -D, --deadlock           detect deadlocks (i.e. for every deadlock a message\n"
     "                           is printed)\n"
-    "  -aNAME*, --action=NAME*  detect actions from NAME* (i.e. print a message for\n"
-    "                           every occurrence)\n"
+    "  -aNAME*, --action=NAME*  detect actions from NAME*, a comma-separated list of\n"
+    "                           action names; a message is printed for every\n"
+    "                           occurrence of one of these action names\n"
     "  -t[NUM], --trace[=NUM]   write at most NUM traces to states detected with the\n"
     "                           --deadlock or --action options\n"
     "                           (NUM is 10 by default)\n"
@@ -159,8 +161,10 @@ static void print_help(FILE *f, const char *Name)
     "      --svc                alias for --out=mcrl2\n"
     "      --no-info            do not add state information to OUTFILE\n"
     "      --init-tsize=NUM     set the initial size of the internally used hash\n"
-    "                           tables (default is 10000)\n",
-    Name);
+    "                           tables (default is 10000)\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 int main(int argc, char **argv)
@@ -252,10 +256,10 @@ int main(int argc, char **argv)
     switch ( opt )
     {
       case 'h':
-        print_help(stderr, argv[0]);
+        print_help(stdout, argv[0]);
         return 0;
       case 0:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         lgopts.quiet = true;

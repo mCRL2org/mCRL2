@@ -22,6 +22,7 @@
 // ======================================================================
 
 #define NAME "lpsdecluster"
+#define AUTHOR "Jeroen Keiren"
 
 //C++
 #include <exception>
@@ -503,19 +504,21 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
   po::notify(vm);
   
   if (0 < vm.count("help")) {
-    cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE] [OUTFILE]" << endl;
-    cerr << "Instantiate the summation variables of the linear process specification (LPS)" << endl;
-    cerr << "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is" << endl;
-    cerr << "used. If OUTFILE is not present, stdout is used." << endl;
+    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+    cout << "Instantiate the summation variables of the linear process specification (LPS)" << endl;
+    cout << "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is" << endl;
+    cout << "used. If OUTFILE is not present, stdout is used." << endl;
 
-    cerr << endl;
-    cerr << desc;
-
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << desc;
+    cout << endl;
+    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
     exit (0);
   }
       
   if (0 < vm.count("version")) {
-    print_version_information(NAME);
+    print_version_information(NAME, AUTHOR);
     exit (0);
   }
 

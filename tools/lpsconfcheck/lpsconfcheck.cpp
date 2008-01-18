@@ -7,7 +7,8 @@
 /// \file lpsconfcheck.cpp
 /// \brief Add your file description here.
 
-#define  NAME      "lpsconfcheck"
+#define NAME "lpsconfcheck"
+#define AUTHOR "Luc Engelen"
 
 #include "mcrl2/confluence_checker.h"
 #include "mcrl2/invariant_checker.h"
@@ -417,13 +418,13 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   // Class LPS_Conf_Check - Functions declared private --------------------------------------------
 
     void LPS_Conf_Check::print_help() {
-      fprintf(stderr,
+      fprintf(stdout,
         "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
         "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them\n"
         "by renaming them to ctau, and write the result to OUTFILE. If INFILE is not\n"
         "present stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
-        "The following OPTIONs can be used:\n"
+        "Options:\n"
         "  -iINVFILE, --invariant=INVFILE  use the formula (a boolean expression in mCRL2\n"
         "                                  format) in INVFILE as invariant\n"
         "  -g. --generate-invariants       try to prove that the reduced confluence\n"
@@ -469,8 +470,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         "                                    of the SMT solver CVC3\n"
 #endif
         "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n",
-        f_tool_command
+        "  -o, --induction                 apply induction on lists\n"
+        "\n"
+        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+        , f_tool_command
       );
     }
 
@@ -574,7 +577,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
             print_help();
             exit(0);
           case 0x1:
-            print_version_information(NAME);
+            print_version_information(NAME, AUTHOR);
             exit(0);
           case 'q':
             gsSetQuietMsg();

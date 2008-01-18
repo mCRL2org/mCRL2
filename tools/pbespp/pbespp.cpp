@@ -6,13 +6,13 @@
 //
 /// \file pbespp.cpp
 
-#define  NAME      "pbespp"
+#define NAME "pbespp"
+#define AUTHOR "Aad Mathijssen"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <limits.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   t_pp_format opt_pp_format = ppDefault;
   //declarations for getopt  
   #define ShortOptions      "f:hqvd"
-  #define VersionOption     CHAR_MAX + 1
+  #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"format"    , required_argument, NULL, 'f'},
     {"help"      , no_argument,       NULL, 'h'},
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
         PrintUsage(argv[0]);
         return 0; 
       case VersionOption: 
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return 0;
       case 'q':
         gsSetQuietMsg();
@@ -232,11 +232,12 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
 }
 
 void PrintUsage(char *Name) {
-  fprintf(stderr, 
+  fprintf(stdout, 
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE\n"
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
+    "Options:\n"
     "  -fFORMAT, --format=FORMAT\n"
     "                        print the PBES in the specificied FORMAT:\n"
     "                        - 'default' for an PBES specification (default)\n"
@@ -252,8 +253,10 @@ void PrintUsage(char *Name) {
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
-    Name
+    "  -d, --debug           display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name
   );
 }
 

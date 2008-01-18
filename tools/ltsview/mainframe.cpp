@@ -203,7 +203,6 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   wxString ttl = wxT("About LTSView");
   wxString msg = wxString(mediator->getVersionString().c_str(),wxConvLocal);
   msg += wxT("\n");
-  msg += wxT("\n");
   msg += wxT("Tool for interactive visualisation of state transition systems.\n");
   msg += wxT("Developed by Bas Ploeger and Carst Tankink.\n");
   msg += wxT("\n");
@@ -214,7 +213,7 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
   msg += wxT("\n");
   msg += wxT("The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n");
   msg += wxT("\n");
-  msg += wxT("This tool is distributed as part of the mCRL2 toolset.\n");
+  msg += wxT("This tool is part of the mCRL2 toolset.\n");
   msg += wxT("For information see http://www.mcrl2.org\n");
   msg += wxT("\n");
   msg += wxT("For feature requests or bug reports,\n");

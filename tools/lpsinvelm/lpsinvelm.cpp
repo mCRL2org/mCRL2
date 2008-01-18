@@ -8,6 +8,7 @@
 /// \brief Add your file description here.
 
 #define NAME "lpsinvelm"
+#define AUTHOR "Luc Engelen"
 
 #include "mcrl2/invariant_eliminator.h"
 #include "mcrl2/invariant_checker.h"
@@ -144,7 +145,7 @@ using namespace mcrl2::core::detail;
   // Class LPS_Inv_Elm - Functions declared private --------------------------------------------
 
     void LPS_Inv_Elm::print_help() {
-      fprintf(stderr,
+      fprintf(stdout,
         "Usage: %s [OPTION]... -iINVFILE [INFILE [OUTFILE]]\n"
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
         "INVFILE is an invariant of the linear process specification (LPS) in INFILE.\n"
@@ -155,7 +156,7 @@ using namespace mcrl2::core::detail;
         "The tool can also be used to simplify the conditions of the summands of the\n"
         "given LPS.\n"
         "\n"
-        "The following OPTIONs can be used:\n"
+        "Options:\n"
         "  -iINVFILE, --invariant=INVFILE  use the invariant in INVFILE as input\n"
         "  -sNUM, --summand=NUM            eliminate or simplify the summand with number\n"
         "                                  NUM only\n"
@@ -198,8 +199,10 @@ using namespace mcrl2::core::detail;
         "                                    of the SMT solver CVC3\n"
 #endif
         "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n",
-        f_tool_command
+        "  -o, --induction                 apply induction on lists\n"
+        "\n"
+        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+        , f_tool_command
       );
     }
 
@@ -314,7 +317,7 @@ using namespace mcrl2::core::detail;
             print_help();
             exit(0);
           case 0x1:
-            print_version_information(NAME);
+            print_version_information(NAME, AUTHOR);
             exit(0);
           case 'q':
             gsSetQuietMsg();

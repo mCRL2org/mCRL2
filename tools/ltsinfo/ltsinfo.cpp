@@ -7,6 +7,7 @@
 /// \file ltsinfo.cpp
 
 #define NAME "ltsinfo"
+#define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
 #include <getopt.h>
@@ -257,20 +258,22 @@ static void print_help(FILE *f, char *Name)
     "to force the format for INFILE.\n"
     "\n"
     "Options:\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display any unrequested information\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "  -f, --formats         list accepted formats\n"
-    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n"
     "  -eEQ, --equiv=EQ      use equivalence EQ for deterministic check\n"
     "                        EQ can be one of the following:\n"
     "                          none     - do not do deterministic check\n"
     "                          isomorph - isomorphism (default)\n"
     "                          strong   - strong bisimilarity\n"
-    "                          branch   - branching bisimilarity\n",
-    Name);
+    "                          branch   - branching bisimilarity\n"
+    "  -f, --formats         list accepted formats\n"
+    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n"
+    "  -h, --help            display this help message and terminate\n"
+    "      --version         display version information and terminate\n"
+    "  -q, --quiet           do not display any unrequested information\n"
+    "  -v, --verbose         display concise intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n"
+    "\n"
+    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
+    , Name);
 }
 
 bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_options &opts) {
@@ -301,10 +304,10 @@ bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_optio
     switch ( opt )
     {
       case 'h':
-        print_help(stderr,argv[0]);
+        print_help(stdout,argv[0]);
         return (false);
       case VersionOption:
-        print_version_information(NAME);
+        print_version_information(NAME, AUTHOR);
         return (false);
       case 'v':
         verbose = true;
