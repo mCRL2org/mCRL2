@@ -18,6 +18,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 int test_main(int argc, char** argv)
 {
