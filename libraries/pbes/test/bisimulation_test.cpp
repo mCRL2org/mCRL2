@@ -47,15 +47,23 @@ const std::string ABP_SPECIFICATION =
 void test_bisimulation()
 {
   specification abp_spec = lps::mcrl22lps(ABP_SPECIFICATION);
-  pbes<> abp_pbes = strong_bisimulation(abp_spec, abp_spec);
-  bool abp_result = pbes2bool(abp_pbes);
-  BOOST_CHECK(abp_result);
+  pbes<> bb  = branching_bisimulation(abp_spec, abp_spec);
+  pbes<> sb  = strong_bisimulation(abp_spec, abp_spec);
+  pbes<> wb  = weak_bisimulation(abp_spec, abp_spec);
+  pbes<> sbe = branching_bisimulation_equivalence(abp_spec, abp_spec);
+
+  BOOST_CHECK(bb .is_well_typed());
+  BOOST_CHECK(sb .is_well_typed());
+  BOOST_CHECK(wb .is_well_typed());
+  BOOST_CHECK(sbe.is_well_typed());
+ 
+  //bool abp_result = pbes2bool(abp_pbes);
+  //BOOST_CHECK(abp_result);
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
-
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_bisimulation();
   
   return 0;

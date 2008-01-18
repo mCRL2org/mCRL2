@@ -135,6 +135,14 @@ class summand: public aterm_appl
       return m_delta;
     }
 
+    /// Returns true if the multi-action corresponding to this summand is 
+    /// equal to tau.
+    ///
+    bool is_tau() const
+    {
+      return !is_delta() && actions().size() == 1 && gsIsTau(actions().front());
+    }
+
     /// Returns true if time is available.
     ///
     bool has_time() const
@@ -169,6 +177,14 @@ class summand: public aterm_appl
     data_assignment_list assignments() const
     {
       return m_assignments;
+    }
+
+    /// Returns the next state corresponding to this summand.
+    /// \param process_parameters The process parameters of the linear process that contains the summand.
+    ///
+    data_variable_list next_state(const data_variable_list& process_parameters) const
+    {
+      return process_parameters.substitute(assignment_list_substitution(assignments()));
     }
 
     /// Applies a substitution to this summand and returns the result.

@@ -11,6 +11,7 @@
 #define MCRL2_DATA_IDENTIFIER_GENERATOR_H
 
 #include <string>
+#include <sstream>
 #include <boost/format.hpp>
 
 namespace lps {
@@ -84,7 +85,7 @@ class identifier_generator
     /// Returns true if the identifier s appears in the context.
     ///
     virtual bool has_identifier(identifier_string s) const = 0;
-
+   
     /// Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     ///
@@ -93,8 +94,12 @@ class identifier_generator
       identifier_string id(hint);
       int index = 0;
       while (has_identifier(id))
-      {   
-        std::string name = str(boost::format(hint + "%02d") % index++);
+      {
+        std::ostringstream out;
+        out << hint << index;
+        std::string name = out.str();
+// TODO: why doesn't this work???        
+//        std::string name = str(boost::format(hint + "%02d") % index++);
         id = identifier_string(name);
       }
       add_to_context(id);

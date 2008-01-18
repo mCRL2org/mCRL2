@@ -21,7 +21,6 @@
 #include <cstdlib>
 #include "mcrl2/core/messaging.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
