@@ -98,8 +98,11 @@ class identifier_generator
       int index = 0;
       while (has_identifier(id))
       {
+        std::ostringstream out;
+        out << hint << index;
+        std::string name = out.str();
 // TODO: why doesn't this work???        
-        std::string name = str(boost::format(hint + "%02d") % index++);
+//        std::string name = str(boost::format(hint + "%02d") % index++);
         id = identifier_string(name);
       }
       add_to_context(id);
