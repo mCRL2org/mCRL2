@@ -479,15 +479,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       const action_list         ai = i->actions();
       if (i->is_tau())
       {
-        std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
-        {
-          const data_expression&    cj = j->condition();
-          data_variable_list        gj = j->next_state(q.process_parameters());
-          pbes_expression expr = and_(cj, var(Y2(p, q, i), gi + gj));
-          v.push_back(expr);
-        }
-        return or_(var(X(p, q), gi + d1), multi_or(v.begin(), v.end()));
+        return close2(p, q, i, gi, d1);
       }
       else
       {
@@ -498,7 +490,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           const data_variable_list& e1 = j->summation_variables();
           data_variable_list        gj = j->next_state(q.process_parameters());
           const action_list         aj = j->actions();
-          pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
+          pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }
         return multi_or(v.begin(), v.end());
@@ -530,11 +522,12 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 
     /// The close2 function.
     ///
-    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i) const
+    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i,
+                           data_variable_list d, data_variable_list d1) const
     {
       using namespace pbes_expr;
-      const data_variable_list& d  = p.process_parameters();
-      const data_variable_list& d1 = q.process_parameters();
+      //const data_variable_list& d  = p.process_parameters();
+      //const data_variable_list& d1 = q.process_parameters();
       data_variable_list        gi = i->next_state(p.process_parameters());
       const action_list         ai = i->actions();
       std::vector<pbes_expression> v;
@@ -576,8 +569,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         const data_variable_list& e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(m, s, i), d + d1 + e), close1(m, s, i));
         pbes_equation e2(mu(), propositional_variable(Y1(s, m, i), d + d1 + e), close1(s, m, i));
-        pbes_equation e3(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i));
-        pbes_equation e4(mu(), propositional_variable(Y2(s, m, i), d + d1), close2(s, m, i));
+        pbes_equation e3(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i, d, d1));
+        pbes_equation e4(mu(), propositional_variable(Y2(s, m, i), d + d1), close2(s, m, i, d, d1));
         equations.push_back(e1);
         equations.push_back(e2);
         equations.push_back(e3);

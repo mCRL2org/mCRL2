@@ -65,9 +65,11 @@ bool process(t_tool_options const& tool_options);
 inline
 bool pbes2bool(const lps::pbes<>& p, t_tool_options options = t_tool_options())
 {
+  lps::pbes<> q = p;
+  q.normalize();
   options.infilename = "pbes2bool.in";
   options.outfilename = "pbes2bool.out";
-  p.save(options.infilename);
+  q.save(options.infilename);
   return process(options); 
 }
 
