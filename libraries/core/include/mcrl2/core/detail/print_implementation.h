@@ -1699,7 +1699,7 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPBExpr)(OutStream, ATAgetArgument(PBExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsStateImp(PBExpr)) {
+  } else if (gsIsPBESImp(PBExpr)) {
     //print implication
     PRINT_FUNC(dbg_prints)("printing implication\n");
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
