@@ -46,19 +46,19 @@ class action_formula: public aterm_appl
 {
   public:
     action_formula()
-      : aterm_appl(detail::constructActFrm())
+      : aterm_appl(mcrl2::core::detail::constructActFrm())
     {}
 
     action_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(detail::check_rule_ActFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
     action_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_ActFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
     /// \brief Applies a substitution to this action_formula and returns the result

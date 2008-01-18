@@ -9,11 +9,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 
-#ifdef __cplusplus
 namespace mcrl2 {
-  namespace utilities {
-    extern "C" {
-#endif
+  namespace core {
 
     //Message printing options
     //------------------------
@@ -208,9 +205,6 @@ namespace mcrl2 {
       GS_DEBUG_MSG_FUNC(FuncName,Format)
     }
 
-#ifdef __cplusplus
-    }
   }
 }
-#endif
 

@@ -155,6 +155,7 @@ extern char* yytext; */
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 #endif
 
@@ -194,13 +195,13 @@ bool is_number(std::string s);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 62 "chiparser.yy"
+#line 63 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
-#line 204 "chiparser.hpp"
+/* Line 2616 of glr.c.  */
+#line 205 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

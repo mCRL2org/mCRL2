@@ -37,6 +37,7 @@
 using namespace lps;
 using namespace atermpp;
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 
 class lpsConstElm {
   private:

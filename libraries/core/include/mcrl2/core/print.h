@@ -21,9 +21,8 @@
 ///t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace mcrl2 {
+  namespace core {
 
 //This file contains C specific printing functions
 
@@ -58,9 +57,8 @@ int gsfprintf(FILE *stream, const char *format, ...);
 ///- '%F' for the printing of AFun's
 int gsvfprintf(FILE *stream, const char *format, va_list args);
 
-#ifdef __cplusplus
+  }
 }
-#endif
 
 #ifdef __cplusplus
 #include <ostream>

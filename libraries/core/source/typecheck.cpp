@@ -8,9 +8,11 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core::detail;
+
+namespace mcrl2 {
+  namespace core {
 
 // Static data 
 // system constants and functions 
@@ -3807,4 +3809,7 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
 
   assert(0);
   return NULL;
+}
+
+  }
 }

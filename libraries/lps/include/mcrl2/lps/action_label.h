@@ -13,7 +13,6 @@
 #include <cassert>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace lps {
@@ -36,7 +35,7 @@ class action_label: public aterm_appl
     /// Constructor.
     ///
     action_label()
-      : aterm_appl(detail::constructActId())
+      : aterm_appl(mcrl2::core::detail::constructActId())
     {}
 
     /// Constructor.
@@ -44,7 +43,7 @@ class action_label: public aterm_appl
     action_label(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_ActId(m_term));
+      assert(check_rule_ActId(m_term));
       aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;

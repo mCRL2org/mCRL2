@@ -17,6 +17,8 @@
 #include "garageframe.h"
 #include <sstream>
 
+using namespace mcrl2::core::detail;
+
 BEGIN_EVENT_TABLE(GarageFrame,wxFrame)
     EVT_CLOSE(GarageFrame::OnCloseWindow)
     EVT_MOVE(GarageFrame::OnMoveWindow)

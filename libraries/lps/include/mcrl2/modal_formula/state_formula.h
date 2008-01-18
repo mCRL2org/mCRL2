@@ -55,19 +55,19 @@ class state_formula: public aterm_appl
 {
   public:
     state_formula()
-      : aterm_appl(detail::constructStateFrm())
+      : aterm_appl(mcrl2::core::detail::constructStateFrm())
     {}
 
     state_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(detail::check_rule_StateFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
     }
 
     state_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_StateFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
     }
 
     /// Returns true if the formula is timed.

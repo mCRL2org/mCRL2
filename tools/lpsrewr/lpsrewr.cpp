@@ -23,6 +23,8 @@
 #include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 //Functions used by the main program
 static void print_help(char *Name);

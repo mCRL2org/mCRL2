@@ -36,6 +36,7 @@
 using namespace std;
 using namespace lps;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 //Type definitions
 //----------------

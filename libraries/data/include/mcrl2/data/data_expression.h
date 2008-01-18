@@ -13,7 +13,6 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -49,7 +48,7 @@ class data_expression: public aterm_appl
     data_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(detail::check_rule_DataExprOrNil(m_term));
+      assert(mcrl2::core::detail::check_rule_DataExprOrNil(m_term));
     }
 
     /// Constructor.
@@ -57,7 +56,7 @@ class data_expression: public aterm_appl
     data_expression(ATermAppl term)
       : aterm_appl(term)
     {
-      assert(detail::check_rule_DataExprOrNil(m_term));
+      assert(mcrl2::core::detail::check_rule_DataExprOrNil(m_term));
     }
 
     /// Returns the sort of the data expression.
@@ -65,7 +64,7 @@ class data_expression: public aterm_appl
     sort_expression sort() const
     {
       ATermAppl result = gsGetSort(*this);
-      assert(!gsIsSortUnknown(result));
+      assert(!mcrl2::core::detail::gsIsSortUnknown(result));
       return sort_expression(result);
     }
 
@@ -117,7 +116,7 @@ namespace data_expr {
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
   /// \brief Returns true if the term t is equal to nil
-  inline bool is_nil(aterm_appl t) { return t == gsMakeNil(); }
+  inline bool is_nil(aterm_appl t) { return t == mcrl2::core::detail::gsMakeNil(); }
 
   /// \brief Returns true if the term t is equal to true
   inline bool is_true(aterm_appl t) { return gsIsDataExprTrue(t); }
@@ -138,10 +137,10 @@ namespace data_expr {
   inline bool is_implies(aterm_appl t) { return gsIsDataExprImp(t); }
 
   /// \brief Returns true if the term t is a binder
-  inline bool is_binder(aterm_appl t) { return gsIsBinder(t); }
+  inline bool is_binder(aterm_appl t) { return mcrl2::core::detail::gsIsBinder(t); }
 
   /// \brief Returns true if the term t is a where expression
-  inline bool is_where(aterm_appl t) { return gsIsWhr(t); }
+  inline bool is_where(aterm_appl t) { return mcrl2::core::detail::gsIsWhr(t); }
 
   /// \brief Returns true if the term t has type real
   inline bool is_real(aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
@@ -163,13 +162,13 @@ namespace data_expr {
   // that we know we are working with a Binder before we take the binding operator.
 
   /// \brief Returns true if the term t is an existial quantification
-  inline bool is_exists(aterm_appl t) { return gsIsBinder(t) && gsIsExists(aterm_appl(t(0))); }
+  inline bool is_exists(aterm_appl t) { return mcrl2::core::detail::gsIsBinder(t) && mcrl2::core::detail::gsIsExists(aterm_appl(t(0))); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(aterm_appl t) { return gsIsBinder(t) && gsIsForall(aterm_appl(t(0))); }
+  inline bool is_forall(aterm_appl t) { return mcrl2::core::detail::gsIsBinder(t) && mcrl2::core::detail::gsIsForall(aterm_appl(t(0))); }
 
   /// \brief Returns true if the term t is a lambda expression
-  inline bool is_lambda(aterm_appl t) { return gsIsBinder(t) && gsIsLambda(aterm_appl(t(0))); }
+  inline bool is_lambda(aterm_appl t) { return mcrl2::core::detail::gsIsBinder(t) && mcrl2::core::detail::gsIsLambda(aterm_appl(t(0))); }
 
   /// \brief Returns a real with value i
   // TODO: a function gsMakaDataExprReal_int will be added by Aad

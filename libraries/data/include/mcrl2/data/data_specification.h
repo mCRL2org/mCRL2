@@ -25,6 +25,8 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 
+using namespace mcrl2::core::detail;
+
 /// \cond INTERNAL_DOCS
 struct has_result_sort
 {
@@ -68,7 +70,7 @@ class data_specification: public aterm_appl
     /// Constructor.
     ///             
     data_specification()
-      : aterm_appl(detail::constructDataSpec())
+      : aterm_appl(mcrl2::core::detail::constructDataSpec())
     {}
 
     /// Constructor.
@@ -76,7 +78,7 @@ class data_specification: public aterm_appl
     data_specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_DataSpec(m_term));
+      assert(check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
       m_sorts        = sort_expression_list(aterm_appl(*i++).argument(0));
       m_constructors = data_operation_list(aterm_appl(*i++).argument(0));

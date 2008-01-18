@@ -13,7 +13,10 @@
 #define PRINT_C
 #include "mcrl2/core/detail/print_implementation.h"
 
-extern "C" {
+using namespace mcrl2::core::detail;
+
+namespace mcrl2 {
+  namespace core {
 
 void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format)
 {
@@ -206,4 +209,5 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
   return result;
 }
 
+  }
 }

@@ -23,6 +23,7 @@
 #include <fstream>
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
   /// \mainpage lpsconfcheck
   /// \section section_introduction Introduction

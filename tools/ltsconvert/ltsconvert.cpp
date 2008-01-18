@@ -20,6 +20,8 @@
 
 using namespace ::mcrl2::lts;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&, bool perform_reachability_check);
 bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);

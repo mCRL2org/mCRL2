@@ -51,6 +51,7 @@ using namespace std;
 using namespace atermpp;
 using namespace lps;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 namespace po = boost::program_options;
 

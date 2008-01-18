@@ -17,6 +17,8 @@
 #include "mcrl2/core/struct.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 /// \brief Class that provides information on sort expressions.
 class Sort_Info {

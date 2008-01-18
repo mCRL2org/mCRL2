@@ -2826,7 +2826,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlAttr->GetItemData( item ) != e.GetIndex() )
+                if ( (int) listCtrlAttr->GetItemData( item ) != e.GetIndex() )
                 {
                     listCtrlAttr->SetItemState(
                         item, 
@@ -2994,7 +2994,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != e.GetIndex() )
+                if ( (int) listCtrlClust->GetItemData( item ) != e.GetIndex() )
                 {
                     listCtrlClust->SetItemState(
                         item, 
@@ -3023,7 +3023,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 wxLIST_STATE_SELECTED );
             while( item != -1 )
             {
-                if ( listCtrlClust->GetItemData( item ) != e.GetIndex() )
+                if ( (int) listCtrlClust->GetItemData( item ) != e.GetIndex() )
                 {
                     if ( selCount > 2 )
                     {

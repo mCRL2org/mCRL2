@@ -36,7 +36,7 @@ class pbes_equation: public aterm_appl
     /// Constructor.
     ///
     pbes_equation()
-      : aterm_appl(detail::constructPBEqn())
+      : aterm_appl(mcrl2::core::detail::constructPBEqn())
     {}
 
     /// Constructor.
@@ -44,7 +44,7 @@ class pbes_equation: public aterm_appl
     pbes_equation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_PBEqn(m_term));
+      assert(mcrl2::core::detail::check_rule_PBEqn(m_term));
       iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);

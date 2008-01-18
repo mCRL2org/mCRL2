@@ -20,6 +20,8 @@
 #include "mcrl2/lps/linear_process.h"
 
 using namespace ::mcrl2::utilities;
+namespace mcrl2 {
+  namespace core {
 
 //local declarations
 //------------------
@@ -2551,3 +2553,5 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
   *p_sort_refs = ATreverse(sort_refs);
 }
 
+  }
+}

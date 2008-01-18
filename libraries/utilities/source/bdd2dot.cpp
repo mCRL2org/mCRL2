@@ -17,6 +17,7 @@
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 #endif
 
 // Class BDD2Dot --------------------------------------------------------------------------------

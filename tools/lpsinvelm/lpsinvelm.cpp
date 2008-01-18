@@ -26,6 +26,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction

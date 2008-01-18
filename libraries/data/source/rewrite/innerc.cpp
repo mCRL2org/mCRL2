@@ -14,6 +14,8 @@
 #include "mcrl2/core/messaging.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
 {
@@ -89,6 +91,8 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "mcrl2/data/rewrite/innerc.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #define INNERC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
 #define INNERC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")

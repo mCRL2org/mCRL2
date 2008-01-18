@@ -46,7 +46,7 @@ class pbes_expression: public aterm_appl
     /// Constructor.
     ///
     pbes_expression()
-      : aterm_appl(detail::constructPBExpr())
+      : aterm_appl(mcrl2::core::detail::constructPBExpr())
     {}
 
     /// Constructor.
@@ -54,7 +54,7 @@ class pbes_expression: public aterm_appl
     pbes_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(detail::check_rule_PBExpr(m_term));
+      assert(mcrl2::core::detail::check_rule_PBExpr(m_term));
     }
 
     /// Applies a substitution to this pbes expression and returns the result.

@@ -36,7 +36,7 @@ class process_initializer: public aterm_appl
     /// Constructor.
     ///
     process_initializer()
-      : aterm_appl(detail::constructLinearProcessInit())
+      : aterm_appl(mcrl2::core::detail::constructLinearProcessInit())
     {}
 
     /// Constructor.
@@ -55,7 +55,7 @@ class process_initializer: public aterm_appl
     process_initializer(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_term_LinearProcessInit(m_term));
+      assert(check_term_LinearProcessInit(m_term));
       aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_assignments    = *i;

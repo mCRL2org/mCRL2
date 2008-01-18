@@ -23,6 +23,7 @@
 //Temporary workaround for the passing of the determinism
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 
 typedef struct {
   mcrl2::lts::lts_equivalence determinism_equivalence;

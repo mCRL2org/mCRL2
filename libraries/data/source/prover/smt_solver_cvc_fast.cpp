@@ -11,6 +11,7 @@
 #include "mcrl2/utilities/utilities.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 // Class Sort_And_Type ----------------------------------------------------------------------------
   // Class Sort_And_Type - Functions declared public ----------------------------------------------

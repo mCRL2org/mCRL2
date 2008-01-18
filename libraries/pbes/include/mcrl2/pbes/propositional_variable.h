@@ -15,7 +15,6 @@
 #include <utility>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/lps/detail/data_utility.h"
@@ -40,7 +39,7 @@ class propositional_variable: public aterm_appl
     /// Constructor.
     ///
     propositional_variable()
-      : aterm_appl(detail::constructPropVarDecl())
+      : aterm_appl(mcrl2::core::detail::constructPropVarDecl())
     {}
 
     /// Constructor.
@@ -58,7 +57,7 @@ class propositional_variable: public aterm_appl
     propositional_variable(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_PropVarDecl(m_term));
+      assert(mcrl2::core::detail::check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;
@@ -112,7 +111,7 @@ class propositional_variable_instantiation: public aterm_appl
     /// Constructor.
     ///
     propositional_variable_instantiation()
-      : aterm_appl(detail::constructPropVarInst())
+      : aterm_appl(mcrl2::core::detail::constructPropVarInst())
     {}
 
     /// Constructor.
@@ -130,7 +129,7 @@ class propositional_variable_instantiation: public aterm_appl
     propositional_variable_instantiation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_PropVarInst(m_term));
+      assert(mcrl2::core::detail::check_rule_PropVarInst(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;

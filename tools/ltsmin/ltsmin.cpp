@@ -18,6 +18,7 @@
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 #endif
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 

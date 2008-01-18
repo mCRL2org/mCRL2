@@ -21,6 +21,8 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
+using namespace mcrl2::core;
+
 /// \brief Represents an action.
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
@@ -34,7 +36,7 @@ class action: public aterm_appl
     /// Constructor.
     ///
     action()
-      : aterm_appl(detail::constructAction())
+      : aterm_appl(mcrl2::core::detail::constructAction())
     {}
 
     /// Constructor.
@@ -42,7 +44,7 @@ class action: public aterm_appl
     action(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_Action(m_term));
+      assert(check_rule_Action(m_term));
       aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
       m_arguments = data_expression_list(*i);

@@ -35,9 +35,13 @@
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/detail/data_reconstruct.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+
+
+namespace mcrl2 {
+  namespace core { 
+    namespace detail {
 
 //declarations
 //------------
@@ -2093,4 +2097,6 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
     return -1;
   }
 }
-
+    } //namespace detail
+  }   //namespace core
+}     //namespace mcrl2

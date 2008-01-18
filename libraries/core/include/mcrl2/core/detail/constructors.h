@@ -12,7 +12,9 @@
 
 #include "mcrl2/core/detail/struct_core.h" // gsString2ATermAppl
 
-namespace lps {
+namespace mcrl2 {
+
+namespace core {
 
 namespace detail {
 
@@ -2175,8 +2177,11 @@ ATermAppl constructPBExpr()
 }
 //--- end generated code
 
+
 } // namespace detail
 
-} // namespace lps
+} // namespace core
+
+} // mcrl2
 
 #endif // LPS_DETAIL_CONSTRUCTORS

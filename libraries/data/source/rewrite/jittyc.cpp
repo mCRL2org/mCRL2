@@ -22,6 +22,8 @@
 #include "mcrl2/core/messaging.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
 {
@@ -100,6 +102,8 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "mcrl2/data/rewrite/jittyc.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace std;
 
 #define JITTYC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")

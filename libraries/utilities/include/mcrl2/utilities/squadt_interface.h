@@ -207,7 +207,8 @@ namespace mcrl2 {
       };
   
 #ifndef NO_MCRL2_TOOL_FACILITIES
-      using ::mcrl2::utilities::messageType;
+      using ::mcrl2::core::messageType;
+      
   
       /** \brief Used to relay messages generated using core::print */
       template < >
@@ -215,13 +216,13 @@ namespace mcrl2 {
         tipi::report::type report_type;
   
         switch (t) {
-          case gs_notice:
+          case mcrl2::core::gs_notice:
             report_type = tipi::report::notice;
             break;
-          case gs_warning:
+          case mcrl2::core::gs_warning:
             report_type = tipi::report::warning;
             break;
-          case gs_error:
+          case mcrl2::core::gs_error:
           default:
             report_type = tipi::report::error;
             break;
@@ -231,17 +232,17 @@ namespace mcrl2 {
       }  
 
       inline void mcrl2_tool_interface::initialise() {
-        gsSetCustomMessageHandler(relay_message< messageType >);
+        mcrl2::core::gsSetCustomMessageHandler(relay_message< messageType >);
   
         tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
   
-        gsSetNormalMsg();
+        mcrl2::core::gsSetNormalMsg();
   
         if (2 < l) {
-          gsSetVerboseMsg();
+          mcrl2::core::gsSetVerboseMsg();
   
           if (3 < l) {
-            gsSetDebugMsg();
+            mcrl2::core::gsSetDebugMsg();
           }
         }
 
@@ -250,7 +251,7 @@ namespace mcrl2 {
   
       inline void mcrl2_tool_interface::finalise() {
         /* Unregister message relay */
-        gsSetCustomMessageHandler(0);
+        mcrl2::core::gsSetCustomMessageHandler(0);
       }
 #endif
 

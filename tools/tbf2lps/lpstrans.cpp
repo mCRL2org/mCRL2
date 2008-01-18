@@ -30,6 +30,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 bool is_mCRL_spec(ATermAppl spec)
 {

@@ -22,9 +22,8 @@
 #endif
 #include <aterm2.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace mcrl2 {
+  namespace core {
 
 
 // Sort expressions
@@ -1569,8 +1568,7 @@ bool gsIsPBExpr(ATermAppl Term);
 ///\return Term is a fixpoint
 bool gsIsFixpoint(ATermAppl Term);
 
-#ifdef __cplusplus
+  }
 }
-#endif
 
 #endif /// MCRL2_LIBSTRUCT_H

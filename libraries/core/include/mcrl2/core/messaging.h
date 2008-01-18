@@ -21,11 +21,8 @@
 
 #include <workarounds.h>
 
-#ifdef __cplusplus
 namespace mcrl2 {
-  namespace utilities {
-    extern "C" {
-#endif
+  namespace core {
 
   
       //Message printing options
@@ -86,10 +83,7 @@ namespace mcrl2 {
 #   define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
 #  endif
 
-#ifdef __cplusplus
-    }
   }
 }
-#endif
 
 #endif

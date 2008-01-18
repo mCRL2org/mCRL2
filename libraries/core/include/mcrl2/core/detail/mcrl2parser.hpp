@@ -143,6 +143,8 @@
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 #endif
 
 //Global precondition: the ATerm library has been initialised
@@ -181,13 +183,13 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 66 "mcrl2parser.yy"
+#line 68 "mcrl2parser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2604 of glr.c.  */
-#line 191 "mcrl2parser.hpp"
+/* Line 2616 of glr.c.  */
+#line 193 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

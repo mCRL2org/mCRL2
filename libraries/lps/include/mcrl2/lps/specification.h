@@ -70,7 +70,7 @@ class specification: public aterm_appl
     /// Constructor.
     ///
     specification()
-      : aterm_appl(detail::constructProcSpec())
+      : aterm_appl(mcrl2::core::detail::constructProcSpec())
     { }
 
     /// Constructor.
@@ -78,7 +78,7 @@ class specification: public aterm_appl
     specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_ProcSpec(m_term));
+      assert(check_rule_ProcSpec(m_term));
       init_term(t);
     }
 
@@ -111,7 +111,7 @@ class specification: public aterm_appl
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !detail::check_rule_ProcSpec(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !check_rule_ProcSpec(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in specification::load(): could not read from file " + filename));
       init_term(aterm_appl(t));
       if (!is_well_typed())

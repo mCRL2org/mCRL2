@@ -18,6 +18,7 @@
 #include <limits.h>
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 
 bool CAsttransform::StrcmpIsFun( const char* str, ATermAppl aterm) 

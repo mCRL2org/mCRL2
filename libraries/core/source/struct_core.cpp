@@ -16,11 +16,12 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
 
-extern "C" {
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
 
 ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
 {
@@ -49,4 +50,6 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
   }
 }
 
-} // extern "C"
+   } //namespace detail
+ }   //namespace core
+}    //namespace mcrl2

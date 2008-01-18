@@ -64,7 +64,7 @@ class linear_process: public aterm_appl
     /// Constructor.
     ///
     linear_process()
-      : aterm_appl(detail::constructLinearProcess())
+      : aterm_appl(mcrl2::core::detail::constructLinearProcess())
     {}
 
     /// Constructor.
@@ -84,7 +84,7 @@ class linear_process: public aterm_appl
     linear_process(aterm_appl lps)
       : aterm_appl(lps)
     {
-      assert(detail::check_term_LinearProcess(m_term));
+      assert(check_term_LinearProcess(m_term));
 
       // unpack LPS(.,.,.) term
       aterm_appl::iterator i = lps.begin();

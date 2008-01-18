@@ -13,7 +13,7 @@
 //#include "mcrl2/lts/detail/liblts_private.h"
 
 using namespace std;
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 
 namespace mcrl2
 {

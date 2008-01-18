@@ -12,7 +12,6 @@
 
 #include <string>
 #include <boost/format.hpp>
-#include "mcrl2/core/identifier_string.h"
 
 namespace lps {
 

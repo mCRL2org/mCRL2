@@ -5,6 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file typecheck.h
+///
+/// \brief A library for type checking (parts of) the internal mCRL2 data structure.
 
 #ifndef PARSER_TYPECHECK_H
 #define PARSER_TYPECHECK_H
@@ -12,6 +14,9 @@
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
 
+namespace mcrl2 {
+  namespace core {
+ 
 //Global preconditions:
 //- the ATerm library has been initialised
 
@@ -137,5 +142,8 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, lps::specification &lps_
  *      NULL is returned.
  **/
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec);
+ 
+  }
+}
 
 #endif // PARSER_TYPECHECK_H

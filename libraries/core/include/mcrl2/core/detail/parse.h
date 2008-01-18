@@ -5,6 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file parse.h
+///
+/// \brief A library for parsing stream into the internal mCRL2 format
 
 #ifndef MCRL2_PARSE_H
 #define MCRL2_PARSE_H
@@ -13,6 +15,10 @@
 #include <vector>
 #include <aterm2.h>
 
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
+  
 //Global precondition: the ATerm library has been initialised
 
 /** \pre     se_stream is an input stream from which can be read       
@@ -63,5 +69,9 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
   *         NULL, otherwise
 **/ 
 ATermAppl parse_action_rename_spec(std::istream &sf_stream);
+
+    }
+  }
+}
 
 #endif // MCRL2_PARSE_H

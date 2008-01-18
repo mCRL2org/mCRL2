@@ -35,6 +35,7 @@
 #include "mcrl2/data/sort_identifier.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 using namespace lps;
 using namespace data_expr;
@@ -403,9 +404,9 @@ void rename_renamerule_variables(lps::data_expression& rcond, lps::action& rleft
     }
   }
 
-  rcond = atermpp::partial_replace(rcond, detail::make_data_variable_replacer(src, dest));
-  rleft = atermpp::partial_replace(rleft, detail::make_data_variable_replacer(src, dest));
-  rright = atermpp::partial_replace(rright, detail::make_data_variable_replacer(src, dest));
+  rcond = atermpp::partial_replace(rcond, lps::detail::make_data_variable_replacer(src, dest));
+  rleft = atermpp::partial_replace(rleft, lps::detail::make_data_variable_replacer(src, dest));
+  rright = atermpp::partial_replace(rright, lps::detail::make_data_variable_replacer(src, dest));
 }
 
 lps::specification rewrite_lps(lps::specification lps){
@@ -496,8 +497,8 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
   lps::data_variable_list rule_vars = lps::data_variable_list(*j);
 
   std::set<identifier_string> used_names;
-  used_names.insert(boost::make_transform_iterator(rule_vars.begin(), detail::data_variable_name()),
-                    boost::make_transform_iterator(rule_vars.end()  , detail::data_variable_name())
+  used_names.insert(boost::make_transform_iterator(rule_vars.begin(), lps::detail::data_variable_name()),
+                    boost::make_transform_iterator(rule_vars.end()  , lps::detail::data_variable_name())
                    );
 
   lps::postfix_identifier_generator generator("_S");

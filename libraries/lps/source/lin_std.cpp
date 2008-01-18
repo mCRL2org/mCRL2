@@ -35,9 +35,9 @@
 #include "mcrl2/core/alpha.h"
 
 // For Aterm library extension functions
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #define STRINGLENGTH 256
 

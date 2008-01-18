@@ -16,9 +16,9 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum/standard.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

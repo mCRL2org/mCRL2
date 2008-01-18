@@ -27,6 +27,8 @@
 
 using namespace std;
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::lts;
 
 ATermAppl *parse_action_list(const char *s, int *len)

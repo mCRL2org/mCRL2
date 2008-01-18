@@ -24,6 +24,7 @@
 #include <fstream>
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
   /// \mainpage lpsformcheck
   /// \section section_introduction Introduction

@@ -30,7 +30,7 @@ class data_application: public data_expression
     /// Constructor.
     ///
     data_application()
-      : data_expression(detail::constructDataAppl())
+      : data_expression(mcrl2::core::detail::constructDataAppl())
     {}
 
     /// Constructor.
@@ -38,13 +38,13 @@ class data_application: public data_expression
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_term_DataAppl(m_term));
+      assert(mcrl2::core::detail::check_term_DataAppl(m_term));
     }
 
     /// Constructor.
     ///
     data_application(data_expression expr, data_expression_list args)
-     : data_expression(gsMakeDataAppl(expr, args))
+     : data_expression(mcrl2::core::detail::gsMakeDataAppl(expr, args))
     {}
 
     /// Returns the head of the data application.
@@ -70,7 +70,7 @@ typedef term_list<data_application> data_application_list;
 inline
 bool is_data_application(aterm_appl t)
 {
-  return gsIsDataAppl(t);
+  return mcrl2::core::detail::gsIsDataAppl(t);
 }
 
 } // namespace lps

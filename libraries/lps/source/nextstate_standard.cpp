@@ -16,9 +16,8 @@
 #include <mcrl2/lps/nextstate/standard.h>
 #include "mcrl2/core/messaging.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))

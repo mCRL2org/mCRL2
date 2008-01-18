@@ -51,7 +51,7 @@ class summand: public aterm_appl
     /// Constructor.
     ///
     summand()
-      : aterm_appl(detail::constructLinearProcessSummand())
+      : aterm_appl(mcrl2::core::detail::constructLinearProcessSummand())
     {}
 
     /// Constructor.
@@ -59,7 +59,7 @@ class summand: public aterm_appl
     summand(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_LinearProcessSummand(m_term));
+      assert(check_rule_LinearProcessSummand(m_term));
       aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data_variable_list(*i++);
@@ -230,7 +230,7 @@ class summand: public aterm_appl
       }
 
       // check 5)
-      if (detail::sequence_contains_duplicates(
+      if (sequence_contains_duplicates(
                boost::make_transform_iterator(m_assignments.begin(), detail::data_assignment_lhs()),
                boost::make_transform_iterator(m_assignments.end()  , detail::data_assignment_lhs())
               )

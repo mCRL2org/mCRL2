@@ -34,7 +34,7 @@ class sort_identifier: public sort_expression
     /// Constructor.
     ///
     sort_identifier()
-      : sort_expression(detail::constructSortId())
+      : sort_expression(mcrl2::core::detail::constructSortId())
     {}
 
     /// Constructor.
@@ -42,7 +42,7 @@ class sort_identifier: public sort_expression
     sort_identifier(ATermAppl t)
       : sort_expression(t)
     {
-      assert(detail::check_rule_SortId(m_term));
+      assert(mcrl2::core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.
@@ -50,7 +50,7 @@ class sort_identifier: public sort_expression
     sort_identifier(aterm_appl t)
       : sort_expression(t)
     {
-      assert(detail::check_rule_SortId(m_term));
+      assert(mcrl2::core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.
@@ -58,7 +58,7 @@ class sort_identifier: public sort_expression
     sort_identifier(identifier_string name)
       : sort_expression(gsMakeSortId(name))
     {
-      assert(detail::check_rule_SortId(m_term));
+      assert(mcrl2::core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.

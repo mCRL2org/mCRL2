@@ -34,7 +34,7 @@ class pbes_initializer: public aterm_appl
     /// Constructor.
     ///
     pbes_initializer()
-      : aterm_appl(detail::constructPBInit())
+      : aterm_appl(mcrl2::core::detail::constructPBInit())
     {}
 
     /// Constructor.
@@ -53,7 +53,7 @@ class pbes_initializer: public aterm_appl
     pbes_initializer(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_term_PBInit(m_term));
+      assert(mcrl2::core::detail::check_term_PBInit(m_term));
       aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_variable = propositional_variable_instantiation(*i);

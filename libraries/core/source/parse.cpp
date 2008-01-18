@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace mcrl2 {
+  namespace core {
+   namespace detail {
 //Global precondition: the ATerm library has been initialised
 
 ATermAppl parse_tagged_stream(const string &tag, istream &stream);
@@ -61,3 +64,8 @@ ATermAppl parse_tagged_stream(const string &tag, istream &stream) {
   delete streams;
   return result;
 }
+
+    }
+  }
+}
+

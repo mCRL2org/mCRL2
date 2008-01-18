@@ -5,6 +5,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_implementation.h
+///
+/// \brief A library for specifying data types in a 
+/// specification as higher order data types.
 
 #ifndef MCRL2_DATAIMPL_H
 #define MCRL2_DATAIMPL_H
@@ -12,6 +15,9 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/lps/specification.h"
+
+namespace mcrl2 {
+  namespace core {
 
 /// \pre Global preconditions:
 //       - the ATerm library has been initialised
@@ -217,4 +223,6 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);
 
+  }
+}
 #endif // MCRL2_DATAIMPL_H

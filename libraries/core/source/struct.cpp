@@ -17,11 +17,11 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core::detail;
 
-extern "C" {
+namespace mcrl2 {
+  namespace core {
 
 //Local declarations
 //------------------
@@ -3832,4 +3832,6 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
   }
 }
 
-} // extern "C"
+  }
+}
+

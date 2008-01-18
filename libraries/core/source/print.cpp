@@ -15,6 +15,7 @@
 #include "mcrl2/core/detail/print_implementation.h"
 
 using namespace std;
+using namespace mcrl2::core::detail;
 
 void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
   t_pp_format pp_format)

@@ -25,6 +25,8 @@
 #include "mcrl2/utilities/version_info.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 //local declarations
 

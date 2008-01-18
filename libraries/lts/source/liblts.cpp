@@ -18,9 +18,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/setup.h"
 
-#ifdef __cplusplus
-using namespace mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #ifdef MCRL2_BCG
 #include <bcg_user.h>

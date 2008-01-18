@@ -17,6 +17,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 /// \brief Extracts information from data expressions
 /// The class Expression_Info provides information about the structure of data expressions.

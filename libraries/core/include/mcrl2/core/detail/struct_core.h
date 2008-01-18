@@ -20,9 +20,10 @@
 #include <ctype.h>
 #include <assert.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
 
 //Global precondition: the ATerm library has been initialised
 
@@ -3368,8 +3369,8 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
 //     "sk" as a quoted ATermAppl constant, where k is the smallest natural
 //     number such that "sk" does not occur in Term, otherwise
 
-#ifdef __cplusplus
+    }
+  }
 }
-#endif
 
 #endif // MCRL2_LIBSTRUCT_CORE_H

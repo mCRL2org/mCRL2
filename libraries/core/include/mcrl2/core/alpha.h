@@ -12,7 +12,13 @@
 
 #include <aterm2.h>
 
+namespace mcrl2 {
+  namespace core {
+
 /// Applies an alphabet reduction to a specification
 ATermAppl gsAlpha(ATermAppl Spec);
+
+  }
+}
 
 #endif // PARSER_LIBALPHA_H

@@ -17,6 +17,8 @@
 
 #include "aterm2.h"
 
+using namespace mcrl2::core::detail;
+
 /**
  * \brief Converts to textual representation for a boolean
  * \param[in] b the boolean to convert

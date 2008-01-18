@@ -45,7 +45,7 @@ class data_assignment: public aterm_appl
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_DataVarIdInit(m_term));
+      assert(mcrl2::core::detail::check_rule_DataVarIdInit(m_term));
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
@@ -55,7 +55,7 @@ class data_assignment: public aterm_appl
     ///             
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_appl(gsMakeDataVarIdInit(lhs, rhs)),
+       aterm_appl(mcrl2::core::detail::gsMakeDataVarIdInit(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -106,7 +106,7 @@ typedef term_list<data_assignment> data_assignment_list;
 inline
 bool is_data_assignment(aterm_appl t)
 {
-  return gsIsDataVarIdInit(t);
+  return mcrl2::core::detail::gsIsDataVarIdInit(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

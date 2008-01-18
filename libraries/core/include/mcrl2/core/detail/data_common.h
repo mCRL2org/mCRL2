@@ -15,6 +15,8 @@
 #include "mcrl2/core/struct.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 // --------------------------
 // Auxiliary list operations

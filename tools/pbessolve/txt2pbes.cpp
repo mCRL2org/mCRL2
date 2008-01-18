@@ -74,7 +74,8 @@
 
 using namespace std; 
 using namespace lps; 
-using namespace mcrl2::utilities; 
+using namespace mcrl2::utilities;
+using namespace mcrl2::core; 
 using namespace pbes_expr;
  
 namespace po = boost::program_options; 

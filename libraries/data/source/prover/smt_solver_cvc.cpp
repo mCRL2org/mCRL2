@@ -9,6 +9,7 @@
 #include <iostream>
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 
 // Class SMT_Solver_CVC ----------------------------------------------------------------------

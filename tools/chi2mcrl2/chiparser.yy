@@ -22,6 +22,7 @@ extern char* yytext; */
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 #endif
 

@@ -14,7 +14,7 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
 
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 
 namespace mcrl2

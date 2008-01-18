@@ -16,7 +16,7 @@
 #include "mcrl2/fsmparser.hpp"
 
 #ifdef __cplusplus
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 #endif
 
 //using namespace std;

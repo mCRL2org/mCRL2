@@ -150,7 +150,7 @@ class pbes
         m_initial_state(initial_state)
     {
       m_free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
-      assert(detail::check_rule_PBES(term()));
+      assert(mcrl2::core::detail::check_rule_PBES(term()));
     }
 
     /// Constructor.
@@ -165,7 +165,7 @@ class pbes
         m_free_variables(free_variables),
         m_initial_state(initial_state)
     {
-      assert(detail::check_rule_PBES(term()));
+      assert(mcrl2::core::detail::check_rule_PBES(term()));
     }
 
     /// Returns the data specification.
@@ -222,7 +222,7 @@ class pbes
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !detail::check_rule_PBES(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !mcrl2::core::detail::check_rule_PBES(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
       init_term(aterm_appl(t));

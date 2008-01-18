@@ -19,6 +19,7 @@
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 #endif
 
 inline static Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2) {

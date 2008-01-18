@@ -33,7 +33,7 @@ class fixpoint_symbol: public aterm_appl
     /// Constructor.
     ///
     fixpoint_symbol()
-      : aterm_appl(detail::constructFixPoint())
+      : aterm_appl(mcrl2::core::detail::constructFixPoint())
     {}
 
     /// Constructor.
@@ -41,7 +41,7 @@ class fixpoint_symbol: public aterm_appl
     fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_FixPoint(m_term));
+      assert(mcrl2::core::detail::check_rule_FixPoint(m_term));
     }
     
     /// Assignment operator.

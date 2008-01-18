@@ -17,6 +17,7 @@
 #include "mcrl2/core/messaging.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 int test_main(int argc, char** argv)
 {

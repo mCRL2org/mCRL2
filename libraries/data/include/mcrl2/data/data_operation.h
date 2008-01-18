@@ -31,7 +31,7 @@ class data_operation: public data_expression
     /// Constructor.
     ///             
     data_operation()
-      : data_expression(detail::constructOpId())
+      : data_expression(mcrl2::core::detail::constructOpId())
     {}
 
     /// Constructor.
@@ -39,13 +39,13 @@ class data_operation: public data_expression
     data_operation(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_rule_OpId(m_term));
+      assert(mcrl2::core::detail::check_rule_OpId(m_term));
     }
 
     /// Constructor.
     ///             
     data_operation(identifier_string name, sort_expression s)
-     : data_expression(gsMakeOpId(name, s))
+     : data_expression(mcrl2::core::detail::gsMakeOpId(name, s))
     {}
 
     /// Returns the name of the data_operation.
@@ -64,7 +64,7 @@ typedef term_list<data_operation> data_operation_list;
 inline
 bool is_data_operation(aterm_appl t)
 {
-  return gsIsOpId(t);
+  return mcrl2::core::detail::gsIsOpId(t);
 }
 
 } // namespace lps

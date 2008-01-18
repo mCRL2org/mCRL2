@@ -34,19 +34,19 @@ class regular_formula: public aterm_appl
 {
   public:
     regular_formula()
-      : aterm_appl(detail::constructRegFrm())
+      : aterm_appl(mcrl2::core::detail::constructRegFrm())
     {}
 
     regular_formula(ATermAppl t)
       : aterm_appl(aterm_appl(t))
     {
-      assert(detail::check_rule_RegFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
     regular_formula(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_RegFrm(m_term));
+      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
     /// Applies a substitution to this regular formula and returns the result.

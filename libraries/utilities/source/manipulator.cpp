@@ -16,6 +16,8 @@
 #include <mcrl2/utilities/manipulator.h>
 #include <mcrl2/utilities/info.h>
 
+using namespace mcrl2::core;
+
 // Class ATerm_Manipulator ------------------------------------------------------------------------
   // Class ATerm_Manipulator - Functions declared public ------------------------------------------
 

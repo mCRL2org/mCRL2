@@ -24,6 +24,11 @@
 #include "mcrl2/core/messaging.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+
+namespace mcrl2 {
+  namespace core {
+   namespace detail {
 
 // declarations
 // ----------------------------------------------
@@ -1826,4 +1831,6 @@ void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_con
   }
   gsDebugMsg("Done reconstructing structured sorts\n");
 }
-
+    } //namespace detail
+  }   //namespace core
+}     //namespace mcrl2

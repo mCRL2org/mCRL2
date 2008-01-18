@@ -11,9 +11,12 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+
+namespace mcrl2 {
+  namespace core {
 
 static ATermAppl gsApplyAlpha(ATermAppl a);
 static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
@@ -2320,4 +2323,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
   ATtableDestroy(syncs);
   ATtableDestroy(untypes);
   return Spec;
+}
+
+  }
 }

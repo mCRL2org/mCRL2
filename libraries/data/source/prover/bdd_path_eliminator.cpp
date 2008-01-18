@@ -8,6 +8,7 @@
 #include "time.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 // Class BDD_Path_Eliminator ----------------------------------------------------------------------
   // Class BDD_Path_Eliminator - functions declared private ---------------------------------------

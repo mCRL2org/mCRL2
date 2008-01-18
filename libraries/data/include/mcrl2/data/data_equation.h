@@ -53,7 +53,7 @@ class data_equation: public aterm_appl
     data_equation(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_DataEqn(m_term));
+      assert(mcrl2::core::detail::check_rule_DataEqn(m_term));
       aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
@@ -69,7 +69,7 @@ class data_equation: public aterm_appl
                   data_expression    lhs,
                   data_expression    rhs
                  )
-     : aterm_appl(gsMakeDataEqn(variables, condition, lhs, rhs)),
+     : aterm_appl(mcrl2::core::detail::gsMakeDataEqn(variables, condition, lhs, rhs)),
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
@@ -141,7 +141,7 @@ typedef term_list<data_equation> data_equation_list;
 inline
 bool is_data_equation(aterm_appl t)
 {
-  return gsIsDataEqn(t);
+  return mcrl2::core::detail::gsIsDataEqn(t);
 }
 
 } // namespace lps

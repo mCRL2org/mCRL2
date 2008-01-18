@@ -21,6 +21,7 @@
 #include "mcrl2/data/rewrite/with_prover.h"
 
 using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
 RewriterProver::RewriterProver(lps::data_specification DataSpec, RewriteStrategy strat)
 {

@@ -59,6 +59,7 @@
 using namespace std;
 using namespace lps;
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using bes::bes_expression;
 
 using atermpp::make_substitution;

@@ -21,7 +21,9 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 
 
-namespace lps {
+namespace mcrl2 {
+
+namespace core {
 
 namespace detail {
 
@@ -3844,6 +3846,7 @@ bool check_term_ActTrue(Term t)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace core
 
+} // namespace mcrl2
 #endif // MCRL2_BASIC_DETAIL_SOUNDNESS_CHECKS_H

@@ -31,6 +31,8 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_traits;
 
+using namespace mcrl2::core::detail;
+
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
 std::set<identifier_string> identifiers(Term t)

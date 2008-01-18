@@ -38,6 +38,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 
 #ifndef GARAGEFRAMEDLL
 class GarageFrame : public wxFrame, public SimulatorViewInterface

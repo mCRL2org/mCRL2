@@ -12,7 +12,7 @@
 #include "mcrl2/lts/detail/bsim.h"
 
 #ifdef __cplusplus
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 #endif
 

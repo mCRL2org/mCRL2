@@ -34,7 +34,7 @@
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
  
-void xsim_message_handler(mcrl2::utilities::messageType msg_type, const char *msg);
+void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -119,6 +119,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
                         bool& dummies, std::string& lps_file_argument) {
 
   using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
   wxCmdLineParser cmdln(argc,argv);
 
@@ -199,9 +200,10 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 }
 
 static XSim *this_xsim = NULL;
-void xsim_message_handler(mcrl2::utilities::messageType msg_type, const char *msg)
+void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 {
   using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
 
   if ( this_xsim == NULL )
   {

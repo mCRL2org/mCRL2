@@ -25,6 +25,7 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::arg1;
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
 /// \brief data variable
@@ -36,7 +37,7 @@ class data_variable: public data_expression
     /// Constructor.
     ///             
     data_variable()
-      : data_expression(detail::constructDataVarId())
+      : data_expression(mcrl2::core::detail::constructDataVarId())
     {}
 
     /// Constructor.
@@ -44,7 +45,7 @@ class data_variable: public data_expression
     data_variable(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_rule_DataVarId(m_term));
+      assert(mcrl2::core::detail::check_rule_DataVarId(m_term));
     }
 
     /// Constructor for strings like "d:D".
@@ -56,19 +57,19 @@ class data_variable: public data_expression
       assert (idx != std::string::npos);
       std::string name = s.substr(0, idx);
       std::string type = s.substr(idx+1);
-      m_term = reinterpret_cast<ATerm>(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), sort_expression(type)));
+      m_term = reinterpret_cast<ATerm>(mcrl2::core::detail::gsMakeDataVarId(mcrl2::core::detail::gsString2ATermAppl(name.c_str()), lps::sort_expression(type)));
     }
 
     /// Constructor.
     ///             
     data_variable(identifier_string name, const sort_expression& s)
-     : data_expression(gsMakeDataVarId(name, s))
+     : data_expression(mcrl2::core::detail::gsMakeDataVarId(name, s))
     {}
 
     /// Constructor.
     ///             
     data_variable(const std::string& name, const sort_expression& s)
-     : data_expression(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
+     : data_expression(mcrl2::core::detail::gsMakeDataVarId(mcrl2::core::detail::gsString2ATermAppl(name.c_str()), s))
     {}
 
     /// Returns the name of the data_variable.
@@ -87,7 +88,7 @@ typedef term_list<data_variable> data_variable_list;
 inline
 bool is_data_variable(aterm_appl t)
 {
-  return gsIsDataVarId(t);
+  return mcrl2::core::detail::gsIsDataVarId(t);
 }
 
 /// \brief Converts a data_variable_list to a data_expression_list.
