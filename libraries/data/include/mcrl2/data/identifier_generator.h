@@ -99,7 +99,7 @@ class identifier_generator
       while (has_identifier(id))
       {
 // TODO: why doesn't this work???        
-//        std::string name = str(boost::format(hint + "%02d") % index++);
+        std::string name = str(boost::format(hint + "%02d") % index++);
         id = identifier_string(name);
       }
       add_to_context(id);
