@@ -16,7 +16,10 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
+
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
 
 // --------------------------
 // Auxiliary list operations
@@ -254,6 +257,10 @@ ATerm beta_reduce_term(ATerm Term);
 /// \ret Part with capture avoiding substitution of the substitutions in Substs
 //       performed on it.
 ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs);
+
+    }
+  }
+} 
 
 #endif //MCRL2_DATA_COMMON_H
 

@@ -22,7 +22,7 @@
 using namespace ::mcrl2::utilities;
 namespace mcrl2 {
   namespace core {
-
+   namespace detail {
 //local declarations
 //------------------
 
@@ -2552,6 +2552,6 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
   *p_sort_ids = ATreverse(sort_ids);  
   *p_sort_refs = ATreverse(sort_refs);
 }
-
-  }
-}
+    } // namespace detail
+  }   // namespace core
+}     // namespace mcrl2

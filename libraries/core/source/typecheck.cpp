@@ -9,11 +9,10 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace ::mcrl2::utilities;
-using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
   namespace core {
-
+    namespace detail {
 // Static data 
 // system constants and functions 
 typedef struct { 
@@ -3811,5 +3810,6 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
   return NULL;
 }
 
+    }
   }
 }

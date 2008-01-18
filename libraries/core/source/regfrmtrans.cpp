@@ -25,6 +25,10 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 #endif
 
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
+
 //local declarations
 //------------------
 
@@ -240,4 +244,8 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
     done = !gsOccurs((ATerm) result, (ATerm) terms);
   }
   return result;  
-}
+} 
+
+    } // namespace detail
+  }   // namespace core
+}     // namespace mcrl2

@@ -16,6 +16,10 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 
+namespace mcrl2 {
+  namespace core {
+    namespace detail {
+
 // Static declarations
 // -------------------
 static void get_free_vars_appl(ATermAppl data_expr, ATermList bound_vars,
@@ -552,4 +556,6 @@ ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs)
   ATermList context = ATmakeList0();
   return capture_avoiding_substs(Part, Substs, &context);
 }
-
+    } // namespace detail
+  }   // namespace core
+}     // namespace mcrl2

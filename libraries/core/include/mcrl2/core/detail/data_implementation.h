@@ -18,6 +18,7 @@
 
 namespace mcrl2 {
   namespace core {
+    namespace detail {
 
 /// \pre Global preconditions:
 //       - the ATerm library has been initialised
@@ -223,6 +224,8 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);
 
+
+    }
   }
 }
 #endif // MCRL2_DATAIMPL_H
