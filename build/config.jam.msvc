@@ -1,0 +1,48 @@
+# 
+# Copy to build/config.jam to build with MSVC
+#
+rule import_user_config {
+  import toolset ;
+
+  # For C/C++ programs
+  toolset.using msvc ;
+}
+
+# Build specific settings
+BUILD_OPTIONS  = "" ;
+ADDRESS_MODEL ?= 32 ;
+LINK_VARIANT  ?= shared ;
+BUILD_VARIANT ?=  ;
+LINK_VARIANT  ?= shared ;
+BUILD_VARIANT ?= custom ;
+
+# Library specific variables
+WX_CPPFLAGS        = "/IC:/wxWidgets/lib/vc_lib/mswd /IC:/wxWidgets/include" ;
+WX_BASE_LDFLAGS    = "rpcrt4.lib kernel32.lib user32.lib gdi32.lib ole32.lib oleaut32.lib comctl32.lib comdlg32.lib uuid.lib advapi32.lib shell32.lib /LIBPATH:C:/wxWidgets/lib/vc_lib wxmsw28d_core.lib wxbase28d.lib wxtiffd.lib wxpngd.lib wxzlibd.lib wxjpegd.lib" ;
+WX_GL_LDFLAGS      = "$(WX_BASE_LDFLAGS) wxmsw28d_gl.lib" ;
+
+OPENGL_NAME        = "opengl32" ;
+OPENGL_IPATH       = "" ;
+OPENGL_LPATH       = "" ;
+
+CADP_HEADERS       = "" ;
+CADP_LIBRARIES     = "" ;
+
+USE_CVC            = "" ;
+
+BOOST_INCLUDE_PATH = "" ;
+BOOST_LIBRARY_PATH = "" ;
+
+prefix      = [ MATCH "^--prefix=(.+)" : [ modules.peek : ARGV ] ] ;
+exec_prefix = [ MATCH "^--exec-prefix=(.+)" : [ modules.peek : ARGV ] ] ;
+
+# Installation related variables
+prefix      ?= "c:/mcrl2" ;
+exec_prefix ?= "c:/mcrl2" ;
+
+BIN_DIR         = "$(prefix)/bin" ;
+LIB_DIR         = "$(prefix)/lib/mcrl2" ;
+DATA_DIR        = "$(prefix)/share/mcrl2" ;
+INCLUDE_DIR     = "$(prefix)/include/mcrl2" ;
+MAN_DIR         = "$(prefix)/share/man" ;
+
