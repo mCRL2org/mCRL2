@@ -16,6 +16,8 @@
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/detail/algorithms.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
   /// Generates a linearized process specification from a specification in text.
@@ -38,5 +40,7 @@ namespace lps {
   }
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_MCRL22LPS_H

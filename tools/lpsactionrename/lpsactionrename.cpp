@@ -34,11 +34,13 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/sort_identifier.h"
 
+using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+using namespace mcrl2;
+using namespace mcrl2::data::data_expr;
 using namespace std;
-using namespace lps;
-using namespace data_expr;
 
 //Type definitions
 //----------------
@@ -550,7 +552,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
     rule_old_action =  lps::action(*++j);
     new_element = *++j;
 
-    if(is_action(new_element)){
+    if(lps::is_action(new_element)){
       rule_new_action =  lps::action(new_element);
       to_tau = false;
       to_delta = false;
@@ -564,7 +566,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
     //rename all previously used variables
     rename_renamerule_variables(rule_condition, rule_old_action, rule_new_action, generator);
 
-    lps_summands = summand_list();
+    lps_summands = lps::summand_list();
     //go through the summands of the old lps
     gsVerboseMsg("summands found: %i\n", lps_old_summands.size());
     for(lps::summand_list::iterator losi = lps_old_summands.begin(); losi != lps_old_summands.end(); ++losi){

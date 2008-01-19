@@ -17,6 +17,8 @@
 #include "mcrl2/data/detail/free_variables.h"
 #include "mcrl2/atermpp/algorithm.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -36,5 +38,7 @@ void collect_free_variables(const summand& s, const std::set<data_variable>& bou
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_FREE_VARIABLES_H

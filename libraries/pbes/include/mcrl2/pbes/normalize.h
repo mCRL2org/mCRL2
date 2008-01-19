@@ -14,9 +14,11 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
 
 /// Visitor for checking if a pbes expression is normalized.
 struct is_normalized_visitor : public pbes_expression_visitor
@@ -47,7 +49,7 @@ struct is_normalized_visitor : public pbes_expression_visitor
 inline
 pbes_expression normalize(pbes_expression f)
 {
-  using namespace lps::pbes_expr;
+  using namespace pbes_expr;
 
   if (is_not(f))
   {
@@ -111,6 +113,8 @@ pbes_equation normalize(const pbes_equation& e)
   return pbes_equation(e.symbol(), e.variable(), normalize(e.formula()));
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_NORMALIZE_H

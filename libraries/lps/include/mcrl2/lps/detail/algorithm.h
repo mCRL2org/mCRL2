@@ -22,6 +22,8 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
+namespace mcrl2 {
+
 namespace lps {
   
 namespace detail {
@@ -145,5 +147,7 @@ data_variable_name_replacer<T1, T2> make_data_variable_name_replacer(const T1& t
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_ALGORITHM_H

@@ -32,6 +32,7 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
@@ -311,7 +312,7 @@ int main(int argc, char **argv)
     stateformat,
     createEnumerator(
       Spec,
-      createRewriter(lps::data_specification(ATAgetArgument(Spec,0)),strat),
+      createRewriter(data_specification(ATAgetArgument(Spec,0)),strat),
       true
     ),
     true

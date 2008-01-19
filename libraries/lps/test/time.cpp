@@ -16,8 +16,8 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
 
 std::string SPECIFICATION = 
 "% This file contains the alternating bit protocol, as described in W.J.    \n"

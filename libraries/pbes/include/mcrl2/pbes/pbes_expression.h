@@ -16,15 +16,17 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm_appl;
 using atermpp::arg1;
 using atermpp::arg2;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
-using namespace mcrl2::data;
-using namespace mcrl2::core::detail;
+using namespace data;
+using namespace core::detail;
 
 // prototype
 inline
@@ -48,7 +50,7 @@ class pbes_expression: public aterm_appl
     /// Constructor.
     ///
     pbes_expression()
-      : aterm_appl(mcrl2::core::detail::constructPBExpr())
+      : aterm_appl(core::detail::constructPBExpr())
     {}
 
     /// Constructor.
@@ -56,7 +58,7 @@ class pbes_expression: public aterm_appl
     pbes_expression(aterm_appl term)
       : aterm_appl(term)
     {
-      assert(mcrl2::core::detail::check_rule_PBExpr(m_term));
+      assert(core::detail::check_rule_PBExpr(m_term));
     }
 
     /// Applies a substitution to this pbes expression and returns the result.
@@ -72,7 +74,7 @@ class pbes_expression: public aterm_appl
     ///
     bool is_bes() const
     {
-      return lps::is_bes(*this);
+      return mcrl2::pbes_system::is_bes(*this);
     }
 };
 
@@ -341,22 +343,24 @@ bool is_bes(aterm_appl t)
   return false;
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::pbes_expression;
+using mcrl2::pbes_system::pbes_expression;
 
 template<>
 struct aterm_traits<pbes_expression>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::pbes_expression t)   { t.protect(); }
-  static void unprotect(lps::pbes_expression t) { t.unprotect(); }
-  static void mark(lps::pbes_expression t)      { t.mark(); }
-  static ATerm term(lps::pbes_expression t)     { return t.term(); }
-  static ATerm* ptr(lps::pbes_expression& t)    { return &t.term(); }
+  static void protect(pbes_expression t)   { t.protect(); }
+  static void unprotect(pbes_expression t) { t.unprotect(); }
+  static void mark(pbes_expression t)      { t.mark(); }
+  static ATerm term(pbes_expression t)     { return t.term(); }
+  static ATerm* ptr(pbes_expression& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

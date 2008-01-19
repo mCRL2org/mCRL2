@@ -22,7 +22,9 @@
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
@@ -405,22 +407,24 @@ using atermpp::list_arg2;
     return atermpp::find_if(*this, state_frm::is_timed_subterm()) != aterm();
   }
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 /// \internal
 namespace atermpp
 {
-using lps::state_formula;
+using mcrl2::modal::state_formula;
 
 template<>
 struct aterm_traits<state_formula>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::state_formula t)   { t.protect(); }
-  static void unprotect(lps::state_formula t) { t.unprotect(); }
-  static void mark(lps::state_formula t)      { t.mark(); }
-  static ATerm term(lps::state_formula t)     { return t.term(); }
-  static ATerm* ptr(lps::state_formula& t)    { return &t.term(); }
+  static void protect(state_formula t)   { t.protect(); }
+  static void unprotect(state_formula t) { t.unprotect(); }
+  static void mark(state_formula t)      { t.mark(); }
+  static ATerm term(state_formula t)     { return t.term(); }
+  static ATerm* ptr(state_formula& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

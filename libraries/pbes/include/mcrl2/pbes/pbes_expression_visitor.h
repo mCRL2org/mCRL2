@@ -12,9 +12,11 @@
 
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
 
 /// A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
@@ -230,6 +232,8 @@ struct pbes_expression_visitor
   }
 };
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_VISITOR_H

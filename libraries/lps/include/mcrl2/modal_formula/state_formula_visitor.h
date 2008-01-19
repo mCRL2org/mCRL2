@@ -13,7 +13,9 @@
 #include <stdexcept>
 #include "mcrl2/modal_formula/state_formula.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -305,6 +307,8 @@ struct state_formula_visitor
   }
 };
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_STATE_FORMULA_VISITOR_H

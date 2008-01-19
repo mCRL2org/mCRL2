@@ -14,8 +14,7 @@
 
 #include "sort_functions.h"
 
-using namespace lps;
-using namespace pbes_expr;
+using namespace mcrl2::pbes_system::pbes_expr;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;;
 

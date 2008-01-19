@@ -7,16 +7,16 @@
 /// \file sort_functions.h
 /// \brief Add your file description here.
 
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/data/data.h"
 
+using namespace mcrl2::data;
 
-lps::sort_expression_list get_sorts(lps::data_variable_list v);
+sort_expression_list get_sorts(data_variable_list v);
 
-bool check_finite(lps::data_operation_list fl, lps::sort_expression s);
+bool check_finite(data_operation_list fl, sort_expression s);
 
-bool check_finite_list(lps::data_operation_list fl, lps::sort_expression_list s);
+bool check_finite_list(data_operation_list fl, sort_expression_list s);
 
-lps::data_expression_list enumerate_constructors(lps::data_operation_list fl, lps::sort_expression s);
+data_expression_list enumerate_constructors(data_operation_list fl, sort_expression s);
 
-lps::data_expression_list create_data_expression_list(lps::data_operation f, std::vector< lps::data_expression_list > dess);
+data_expression_list create_data_expression_list(data_operation f, std::vector< data_expression_list > dess);

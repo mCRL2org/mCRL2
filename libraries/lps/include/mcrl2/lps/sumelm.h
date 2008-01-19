@@ -12,11 +12,15 @@
 
 #include "mcrl2/lps/specification.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
   specification sumelm(const specification& s);
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_SUMELM_H
 

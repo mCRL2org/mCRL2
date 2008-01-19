@@ -21,7 +21,9 @@
 #include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 namespace detail {
 
@@ -44,10 +46,10 @@ struct quantifier_rename_builder: public pbes_expression_builder
   {
     for (std::vector<data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
-      if (std::find(boost::make_transform_iterator(i->begin(), mcrl2::data::detail::data_variable_name()),
-                    boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name()),
+      if (std::find(boost::make_transform_iterator(i->begin(), data::detail::data_variable_name()),
+                    boost::make_transform_iterator(i->end()  , data::detail::data_variable_name()),
                     name
-                   ) != boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name())
+                   ) != boost::make_transform_iterator(i->end()  , data::detail::data_variable_name())
          )
       {
         return true;
@@ -125,6 +127,8 @@ quantifier_rename_builder<IdentifierGenerator> make_quantifier_rename_builder(Id
 
 } // namespace detail
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_DETAIL_QUANTIFIER_RENAME_BUILDER_H

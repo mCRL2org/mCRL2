@@ -24,6 +24,8 @@
 #include "mcrl2/lps/detail/linear_process_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using namespace mcrl2::data;
@@ -74,7 +76,7 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
 inline
 linear_process rename_process_parameters(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string postfix)
 {
-  lps::postfix_identifier_generator generator(postfix);
+  postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(p, generator);
 }
@@ -99,7 +101,7 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
 inline
 specification rename_process_parameters(const specification& spec, const std::set<identifier_string>& forbidden_names, const std::string postfix)
 {
-  lps::postfix_identifier_generator generator(postfix);
+  postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(spec, generator);
 }
@@ -135,7 +137,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
 inline
 linear_process rename_free_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix)
 {
-  lps::postfix_identifier_generator generator(postfix);
+  postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_free_variables(p, generator);
 }
@@ -178,11 +180,13 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 inline
 linear_process rename_summation_variables(const linear_process& p, const std::set<identifier_string>& forbidden_names, const std::string& postfix)
 {
-  lps::postfix_identifier_generator generator(postfix);
+  postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_summation_variables(p, generator);
 }
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_RENAME_H

@@ -22,9 +22,13 @@
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
+using namespace lps;
+using namespace modal;
   
 /// \brief Translates a state_formula and a specification to a pbes. If the pbes evaluates
 /// to true, the formula holds for the specification.
@@ -78,7 +82,7 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
     using namespace pbes_timed;
     data_variable T = fresh_variable(make_list(f, lps), sort_expr::real(), "T");
     aterm_list context = make_list(T, spec.initial_process(), lps, f);
-    lps = detail::make_timed_lps(lps, context);
+    lps = lps::detail::make_timed_lps(lps, context);
     e = E(f, f, lps, T);
   }
 
@@ -116,6 +120,8 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   return result;
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES_TRANSLATE_H

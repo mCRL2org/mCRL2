@@ -13,9 +13,11 @@
 #include <stdexcept>
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
 
 /// Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
@@ -168,6 +170,8 @@ struct pbes_expression_builder
   }
 };
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_BUILDER_H

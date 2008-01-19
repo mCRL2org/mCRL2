@@ -74,10 +74,12 @@
 
 
 using namespace std; 
-using namespace lps; 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core; 
-using namespace pbes_expr;
+using namespace mcrl2::data; 
+using namespace mcrl2::lps; 
+using namespace mcrl2::pbes_system; 
+using namespace mcrl2::pbes_system::pbes_expr;
  
 namespace po = boost::program_options; 
  
@@ -102,9 +104,9 @@ data_expression to_nat_expression(int n)
   switch (ps->op[n])
     {  
     case '0': 
-      return (lps::data_expr::nat(0));
+      return (data_expr::nat(0));
     case '1': 
-      return (lps::data_expr::nat(1));
+      return (data_expr::nat(1));
     case 'i': case 'j': case 'k':
       {
 	string s("");s = s +  ps->op[n] + ":Nat";
@@ -113,7 +115,7 @@ data_expression to_nat_expression(int n)
 	return (dv);
       }
     case '+':
-      return (lps::data_expr::plus(to_nat_expression(ps->arg1[n]),
+      return (data_expr::plus(to_nat_expression(ps->arg1[n]),
 				   to_nat_expression(ps->arg2[n])));
       // default should be unreachable
     default: return (data_expr::nat(0));
@@ -131,9 +133,9 @@ data_expression to_bool_expression(int n)
  switch (ps->op[n])
     {  
     case 'T': 
-      return (lps::data_expr::true_());
+      return (data_expr::true_());
     case 'F': 
-      return (lps::data_expr::false_());
+      return (data_expr::false_());
     case 'a': case 'b': case 'c':
       {
 	string s("");s = s +  ps->op[n] + ":Nat";
@@ -142,18 +144,18 @@ data_expression to_bool_expression(int n)
 	return (dv);
       };
     case '<': 
-      return (lps::data_expr::less(to_nat_expression(ps->arg1[n]),
+      return (data_expr::less(to_nat_expression(ps->arg1[n]),
 				   to_nat_expression(ps->arg2[n])));     
     case '=': 
-      return(lps::data_expr::equal_to(to_nat_expression(ps->arg1[n]),
+      return(data_expr::equal_to(to_nat_expression(ps->arg1[n]),
 				      to_nat_expression(ps->arg2[n])));
     case '!':
-      return (lps::data_expr::not_(to_bool_expression(ps->arg1[n])));
+      return (data_expr::not_(to_bool_expression(ps->arg1[n])));
     case '&':
-      return (lps::data_expr::and_(to_bool_expression(ps->arg1[n]),
+      return (data_expr::and_(to_bool_expression(ps->arg1[n]),
 				   to_bool_expression(ps->arg2[n])));
     case '|':
-      return (lps::data_expr::or_(to_bool_expression(ps->arg1[n]),
+      return (data_expr::or_(to_bool_expression(ps->arg1[n]),
 				   to_bool_expression(ps->arg2[n])));
       // default should be unreachable
     default: return (data_expr::true_());
@@ -210,9 +212,9 @@ pbes_expression to_pbes_expression(int n){
     {
       // TRUE, FALSE
     case 'T':  
-      res = lps::pbes_expr::true_(); break;
+      res = pbes_expr::true_(); break;
     case 'F':  
-      res = lps::pbes_expr::false_(); break;
+      res = pbes_expr::false_(); break;
       // IDPROP
     case 'a': case 'b': case 'c': 
       {
@@ -249,20 +251,20 @@ pbes_expression to_pbes_expression(int n){
       }      
       // nat_expr LESS,IS nat_expr
     case '<': 
-      res = val(lps::data_expr::less(to_nat_expression(ps->arg1[n]),
+      res = val(data_expr::less(to_nat_expression(ps->arg1[n]),
 				     to_nat_expression(ps->arg2[n])));
       break;
     case '=': 
-      res = val(lps::data_expr::equal_to(to_nat_expression(ps->arg1[n]),
+      res = val(data_expr::equal_to(to_nat_expression(ps->arg1[n]),
 					 to_nat_expression(ps->arg2[n])));
       break;
       // pbes_expression EN,OF pbes_expression
     case '&':
-      res = lps::pbes_expr::and_(to_pbes_expression(ps->arg1[n]),
+      res = pbes_expr::and_(to_pbes_expression(ps->arg1[n]),
 				 to_pbes_expression(ps->arg2[n]));
       break;
     case '|':
-      res = lps::pbes_expr::or_(to_pbes_expression(ps->arg1[n]),
+      res = pbes_expr::or_(to_pbes_expression(ps->arg1[n]),
 				to_pbes_expression(ps->arg2[n]));
       break;
       // NEG pbes_expression 
@@ -270,7 +272,7 @@ pbes_expression to_pbes_expression(int n){
       // since there is no pbes_expression constructor
       // for negation
     case '!':
-      res = val(lps::data_expr::not_(to_bool_expression(ps->arg1[n])));      
+      res = val(data_expr::not_(to_bool_expression(ps->arg1[n])));      
       break;
     default: 
       gsErrorMsg("cannot parse pbes_expression"); exit(0);
@@ -382,7 +384,7 @@ data_expression_list standard_instance(data_variable_list dv){
 
 // functie van Muck
 // fills in Bool and Nat
-lps::data_specification get_minimal_data_spec()
+data_specification get_minimal_data_spec()
 {
   std::stringstream ss;
   //  ss << "map i:Nat; b:Bool; init delta;";
@@ -404,7 +406,7 @@ lps::data_specification get_minimal_data_spec()
   cerr<<"ready\n";
 #endif
 
-  lps::specification spec(r);
+  specification spec(r);
   return spec.data();
 }
 

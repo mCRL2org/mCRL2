@@ -19,13 +19,16 @@
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 using atermpp::aterm;
 using atermpp::term_list;
 using mcrl2::data::detail::parse_variable;
+using namespace mcrl2::lps;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula
@@ -86,6 +89,8 @@ using atermpp::arg2;
 using atermpp::arg3;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
   /// \brief Returns the expression d
   inline
@@ -260,12 +265,14 @@ using atermpp::list_arg2;
 
 } // namespace act_frm
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 /// \internal
 namespace atermpp
 {
-using lps::action_formula;
+using mcrl2::modal::action_formula;
 
 template<>
 struct aterm_traits<action_formula>

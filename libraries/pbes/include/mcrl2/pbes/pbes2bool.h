@@ -63,9 +63,9 @@ bool process(t_tool_options const& tool_options);
 // TODO: currently the pbes2bool algorithm expects input from a file, and
 // writes the result to a file. That should be changed.
 inline
-bool pbes2bool(const lps::pbes<>& p, t_tool_options options = t_tool_options())
+bool pbes2bool(const mcrl2::pbes_system::pbes<>& p, t_tool_options options = t_tool_options())
 {
-  lps::pbes<> q = p;
+  mcrl2::pbes_system::pbes<> q = p;
   q.normalize();
   options.infilename = "pbes2bool.in";
   options.outfilename = "pbes2bool.out";

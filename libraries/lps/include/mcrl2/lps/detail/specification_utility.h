@@ -13,6 +13,8 @@
 #include <vector>
 #include "mcrl2/data/data.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -65,5 +67,7 @@ using namespace mcrl2::data;
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_SPECIFICATION_UTILITY_H

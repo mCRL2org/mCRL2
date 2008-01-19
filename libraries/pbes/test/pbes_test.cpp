@@ -17,7 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_translate.h"
-#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
@@ -26,8 +26,11 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::detail;
 
 const std::string SPECIFICATION =
 "act a:Nat;                               \n"
@@ -591,7 +594,7 @@ void test_pbes_expression_builder()
 void test_quantifier_rename_builder()
 {
   using namespace pbes_expr;
-  namespace d = lps::data_expr; 
+  namespace d = data_expr; 
 
   data_variable mN("m:N");
   data_variable nN("n:N");

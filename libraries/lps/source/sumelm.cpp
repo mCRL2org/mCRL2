@@ -18,8 +18,10 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 #endif
-using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::lps;
+using namespace mcrl2::data::data_expr;
+
+namespace mcrl2 {
 
 namespace lps {
 
@@ -363,3 +365,4 @@ namespace lps {
 
 } // namespace lps
 
+} // namespace mcrl2

@@ -23,6 +23,8 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using namespace mcrl2::data;
@@ -102,5 +104,7 @@ specification parelm(const specification& spec)
 }
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_PARELM_H

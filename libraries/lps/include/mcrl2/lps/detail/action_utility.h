@@ -14,6 +14,8 @@
 #include "mcrl2/lps/action.h"
 #include "mcrl2/data/detail/data_utility.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -64,5 +66,7 @@ bool check_action_label_sorts(action_label_list action_labels, const std::set<so
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_ACTION_UTILITY_H

@@ -19,8 +19,8 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
 
 const std::string SPECIFICATION =
 "% Test Case 3                                                     \n"

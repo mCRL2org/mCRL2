@@ -39,12 +39,14 @@
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
-using namespace mcrl2::data;
+using namespace data;
 
 /// \cond INTERNAL_DOCS
 struct normalize_pbes_equation
@@ -151,7 +153,7 @@ class pbes
         m_initial_state(initial_state)
     {
       m_free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
-      assert(mcrl2::core::detail::check_rule_PBES(term()));
+      assert(core::detail::check_rule_PBES(term()));
     }
 
     /// Constructor.
@@ -166,7 +168,7 @@ class pbes
         m_free_variables(free_variables),
         m_initial_state(initial_state)
     {
-      assert(mcrl2::core::detail::check_rule_PBES(term()));
+      assert(core::detail::check_rule_PBES(term()));
     }
 
     /// Returns the data specification.
@@ -223,7 +225,7 @@ class pbes
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !mcrl2::core::detail::check_rule_PBES(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
       init_term(aterm_appl(t));
@@ -302,7 +304,7 @@ class pbes
       atermpp::set<propositional_variable> result;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        atermpp::find_all_if(i->formula(), state_frm::is_var, std::inserter(result, result.end()));
+        atermpp::find_all_if(i->formula(), modal::state_frm::is_var, std::inserter(result, result.end()));
       }
       return result;
     }
@@ -510,12 +512,14 @@ std::set<data_variable> compute_free_variables(const pbes<Container>& p)
   return compute_free_variables(p.equations().begin(), p.equations().end());
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::pbes;
+using mcrl2::pbes_system::pbes;
 
 template<typename Container>
 struct aterm_traits<pbes<Container> >

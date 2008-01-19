@@ -12,7 +12,8 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-using namespace pbes_expr;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 
 
 //auxiliary function that composes two prenex forms into a new prenex form
@@ -75,7 +76,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_and
   (const pbes_expression& f, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     pbes_expression pleft = visit(left); // prenex form left
     pbes_expression pright = visit(right); // prenex form right
     return (join(pleft,pright,true));
@@ -84,7 +85,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_or
   (const pbes_expression& f, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     pbes_expression pleft = visit(left); // prenex form left
     pbes_expression pright = visit(right); // prenex form right
     return (join(pleft,pright,false));
@@ -100,21 +101,21 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_forall
   (const pbes_expression& f, const data_variable_list& variables, const pbes_expression& expression)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     return forall(variables, visit(expression));
   }
 
   pbes_expression visit_exists
   (const pbes_expression& f, const data_variable_list& variables, const pbes_expression& expression)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     return exists(variables, visit(expression));
   }
 
   pbes_expression visit_var
   (const pbes_expression& f, const identifier_string& /* n */, const data_expression_list& /* l */)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     return f;
   }
 };

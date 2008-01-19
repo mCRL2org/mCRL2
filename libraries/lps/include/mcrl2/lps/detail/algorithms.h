@@ -29,6 +29,8 @@
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -106,7 +108,7 @@ namespace detail {
   }
   
   inline
-  state_formula translate_regular_formula(ATermAppl formula)
+  modal::state_formula translate_regular_formula(ATermAppl formula)
   {
     ATermAppl result = translate_reg_frms(formula);
     if (result == NULL)
@@ -117,5 +119,7 @@ namespace detail {
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // LPS_DETAIL_LPS2PBES

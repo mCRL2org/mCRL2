@@ -60,9 +60,9 @@
 #include "bes.h"
 
 using namespace std;
-using namespace lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::lps;
 using bes::bes_expression;
 
 using atermpp::make_substitution;

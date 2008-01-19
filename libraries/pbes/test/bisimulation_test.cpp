@@ -4,6 +4,8 @@
 #include "mcrl2/pbes/pbes2bool.h"
 
 using namespace atermpp;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
 
 const std::string ABP_SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
@@ -46,7 +48,7 @@ const std::string ABP_SPECIFICATION =
 
 void test_bisimulation()
 {
-  specification abp_spec = lps::mcrl22lps(ABP_SPECIFICATION);
+  specification abp_spec = mcrl22lps(ABP_SPECIFICATION);
   pbes<> bb  = branching_bisimulation(abp_spec, abp_spec);
   pbes<> sb  = strong_bisimulation(abp_spec, abp_spec);
   pbes<> wb  = weak_bisimulation(abp_spec, abp_spec);

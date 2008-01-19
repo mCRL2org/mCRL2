@@ -24,6 +24,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2;
 
 static void print_help(FILE *f, char *Name)
 {

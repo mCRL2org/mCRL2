@@ -15,6 +15,8 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/lps/specification.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -171,5 +173,7 @@ namespace lps {
   };
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_FILTER_PROGRAM_H

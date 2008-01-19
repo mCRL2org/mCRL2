@@ -34,7 +34,8 @@
 #include "mcrl2/utilities/version_info.h"
 
 using namespace std;
-using namespace lps;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -433,7 +434,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
   t_phase end_phase = tool_options.end_phase;
 
   //open infilename
-  lps::specification lps_spec = lps::specification();
+  specification lps_spec;
   if (infilename == "") {
     try
     {
@@ -511,7 +512,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //generate PBES from state formula and LPS
   gsVerboseMsg("generating PBES from state formula and LPS...\n");
-  pbes<> p = lps::pbes_translate(state_formula(result), lps_spec, tool_options.timed);
+  pbes<> p = pbes_translate(state_formula(result), lps_spec, tool_options.timed);
   result = ATermAppl(p);
   if (result == NULL) {
     return NULL;

@@ -12,7 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/mcrl22lps.h>
 
-using namespace lps;
+using namespace mcrl2::lps;
 
 // Parameter i should be removed
 const std::string case_1(

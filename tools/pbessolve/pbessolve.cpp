@@ -48,14 +48,14 @@
 #include "gauss.h" 
  
 using namespace std; 
-using namespace lps; 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core; 
+using namespace mcrl2::lps; 
+using namespace mcrl2::pbes_system; 
  
 using atermpp::make_substitution; 
  
 using namespace ::mcrl2::utilities;
-using namespace mcrl2::core;
 
 namespace po = boost::program_options; 
  

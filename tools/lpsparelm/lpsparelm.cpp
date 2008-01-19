@@ -29,7 +29,7 @@ struct tool_configuration {
   }
 
   bool execute() {
-    lps::specification lps_specification;
+    mcrl2::lps::specification lps_specification;
     
     try {
       lps_specification.load(input_file);
@@ -43,7 +43,7 @@ struct tool_configuration {
     }
 
     try {
-      lps::specification r = lps::parelm(lps_specification);
+      mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
 
       r.save(output_file);
     }

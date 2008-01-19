@@ -16,6 +16,8 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -96,10 +98,12 @@ bool is_action_label(aterm_appl t)
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::action_label;
+using mcrl2::lps::action_label;
 
 template<>
 struct aterm_traits<action_label>

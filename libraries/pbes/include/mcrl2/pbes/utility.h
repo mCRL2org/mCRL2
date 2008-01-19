@@ -23,9 +23,11 @@
 // JFG:
 #include "mcrl2/data/rewrite.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
 
 /// \brief Returns all propositional variables that occur in the term t
 template <typename Term>
@@ -754,6 +756,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 }
 
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_UTILITY_H

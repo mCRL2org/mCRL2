@@ -16,6 +16,8 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/linear_process.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -55,5 +57,7 @@ namespace detail {
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_LINEAR_PROCESS_UTILITY_H

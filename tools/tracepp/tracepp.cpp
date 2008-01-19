@@ -26,6 +26,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
+using namespace mcrl2;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };
 

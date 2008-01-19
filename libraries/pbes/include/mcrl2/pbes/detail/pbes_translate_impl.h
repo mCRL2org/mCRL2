@@ -32,12 +32,16 @@
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 namespace detail {
 
 using atermpp::aterm_appl;
 using atermpp::make_substitution;
+using modal::state_formula;
+using namespace lps;
 
 inline
 std::string pp(std::set<data_variable> s)
@@ -109,7 +113,7 @@ inline
 data_variable_list mu_variables(state_formula f)
 {
   assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_assignment_list l = state_frm::mu_params(f);
+  data_assignment_list l = modal::state_frm::mu_params(f);
   data_variable_list result;
   for(data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
@@ -123,7 +127,7 @@ inline
 data_expression_list mu_expressions(state_formula f)
 {
   assert(gsIsStateMu(f) || gsIsStateNu(f));
-  data_assignment_list l = state_frm::mu_params(f);
+  data_assignment_list l = modal::state_frm::mu_params(f);
   data_expression_list result;
   for(data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
@@ -266,8 +270,8 @@ struct equal_data_parameters_builder
   /// Adds the expression 'a == b' to result.
   void operator()()
   {
-    namespace d = lps::data_expr;
-    namespace p = lps::pbes_expr;
+    namespace d = data::data_expr;
+    namespace p = pbes_expr;
 
     atermpp::vector<pbes_expression> v;
     std::vector<action>::const_iterator i, j;
@@ -289,7 +293,7 @@ struct equal_data_parameters_builder
 inline
 pbes_expression equal_data_parameters(action_list a, action_list b)
 {
-  namespace p = lps::pbes_expr;
+  namespace p = pbes_expr;
 
   // make copies of a and b and sort them
   std::vector<action> va(a.begin(), a.end()); // protection not needed
@@ -336,8 +340,8 @@ struct not_equal_data_parameters_builder
   /// Adds the expression 'a == b' to result.
   void operator()()
   {
-    namespace d = lps::data_expr;
-    namespace p = lps::pbes_expr;
+    namespace d = data::data_expr;
+    namespace p = pbes_expr;
 
     atermpp::vector<pbes_expression> v;
     std::vector<action>::const_iterator i, j;
@@ -359,7 +363,7 @@ struct not_equal_data_parameters_builder
 inline
 pbes_expression not_equal_data_parameters(action_list a, action_list b)
 {
-  namespace p = lps::pbes_expr;
+  namespace p = pbes_expr;
 
   // make copies of a and b and sort them
   std::vector<action> va(a.begin(), a.end());
@@ -390,7 +394,7 @@ pbes_expression not_equal_data_parameters(action_list a, action_list b)
 inline
 data_variable_list Par(identifier_string x, data_variable_list l, state_formula f)
 {
-  using namespace lps::state_frm;
+  using namespace modal::state_frm;
 
   if (is_data(f)) {
     return data_variable_list();
@@ -438,12 +442,14 @@ data_variable_list Par(identifier_string x, data_variable_list l, state_formula 
 
 namespace pbes_timed
 {
+  using namespace modal;
+  
   inline
   pbes_expression sat_top(timed_action a, action_formula b)
   {
-    using namespace lps::act_frm;
-    namespace d = lps::data_expr;
-    namespace p = lps::pbes_expr;
+    using namespace modal::act_frm;
+    namespace d = data::data_expr;
+    namespace p = pbes_expr;
 
     pbes_expression result;
 
@@ -487,10 +493,10 @@ namespace pbes_timed
   inline
   pbes_expression RHS(state_formula f0, state_formula f, linear_process lps, data_variable T, std::set<std::string>& context)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     using lps::summand_list;
-    namespace s = lps::state_frm;
-    namespace d = lps::data_expr;
+    namespace s = modal::state_frm;
+    namespace d = data::data_expr;
 
     pbes_expression result;
 
@@ -628,7 +634,7 @@ namespace pbes_timed
   inline
   atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps, data_variable T)
   {
-    using namespace lps::state_frm;
+    using namespace modal::state_frm;
     atermpp::vector<pbes_equation> result;
 
     if (is_data(f)) {
@@ -680,11 +686,13 @@ namespace pbes_timed
 
 namespace pbes_untimed
 {
+  using namespace modal;
+  
   inline
   pbes_expression sat_top(action_list a, action_formula b)
   {
-    using namespace lps::act_frm;
-    namespace p = lps::pbes_expr;
+    using namespace modal::act_frm;
+    namespace p = pbes_expr;
 
     pbes_expression result;
 
@@ -731,9 +739,9 @@ namespace pbes_untimed
   inline
   pbes_expression RHS(state_formula f0, state_formula f, linear_process lps, std::set<std::string>& context)
   {
-    using namespace lps::pbes_expr;
+    using namespace pbes_expr;
     using lps::summand_list;
-    namespace s = lps::state_frm;
+    namespace s = modal::state_frm;
 
     pbes_expression result;
 
@@ -837,7 +845,7 @@ namespace pbes_untimed
   inline
   atermpp::vector<pbes_equation> E(state_formula f0, state_formula f, linear_process lps)
   {
-    using namespace lps::state_frm;
+    using namespace modal::state_frm;
     atermpp::vector<pbes_equation> result;
 
     if (is_data(f)) {
@@ -889,6 +897,8 @@ namespace pbes_untimed
 
 } // namespace detail
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_DETAIL_PBES_TRANSLATE_IMPL_H

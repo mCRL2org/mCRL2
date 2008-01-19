@@ -18,11 +18,13 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
-using namespace mcrl2::data;
+using namespace data;
 
 /// \brief pbes equation.
 ///
@@ -37,7 +39,7 @@ class pbes_equation: public aterm_appl
     /// Constructor.
     ///
     pbes_equation()
-      : aterm_appl(mcrl2::core::detail::constructPBEqn())
+      : aterm_appl(core::detail::constructPBEqn())
     {}
 
     /// Constructor.
@@ -45,7 +47,7 @@ class pbes_equation: public aterm_appl
     pbes_equation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_PBEqn(m_term));
+      assert(core::detail::check_rule_PBEqn(m_term));
       iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
@@ -96,7 +98,7 @@ class pbes_equation: public aterm_appl
     ///
     bool is_solved() const
     {
-      aterm t = atermpp::find_if(ATermAppl(m_formula), state_frm::is_var);
+      aterm t = atermpp::find_if(ATermAppl(m_formula), modal::state_frm::is_var);
       return t == aterm(); // true if nothing was found
     }
 
@@ -117,9 +119,9 @@ class pbes_equation: public aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (mcrl2::data::detail::sequence_contains_duplicates(
-             boost::make_transform_iterator(variable().parameters().begin(), mcrl2::data::detail::data_variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , mcrl2::data::detail::data_variable_name())
+      if (data::detail::sequence_contains_duplicates(
+             boost::make_transform_iterator(variable().parameters().begin(), data::detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , data::detail::data_variable_name())
             )
          )
       {
@@ -130,11 +132,11 @@ class pbes_equation: public aterm_appl
       // check 2)
       detail::quantifier_visitor qvisitor;
       qvisitor.visit(formula());
-      if (mcrl2::data::detail::sequences_do_overlap(
-             boost::make_transform_iterator(variable().parameters().begin(), mcrl2::data::detail::data_variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , mcrl2::data::detail::data_variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.begin()     , mcrl2::data::detail::data_variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.end()       , mcrl2::data::detail::data_variable_name())
+      if (data::detail::sequences_do_overlap(
+             boost::make_transform_iterator(variable().parameters().begin(), data::detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , data::detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.begin()     , data::detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.end()       , data::detail::data_variable_name())
            )
          )
       {
@@ -159,12 +161,14 @@ class pbes_equation: public aterm_appl
 ///
 typedef term_list<pbes_equation> pbes_equation_list;
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp {
 
-using lps::pbes_equation;
+using mcrl2::pbes_system::pbes_equation;
 
 template <>
 struct term_list_iterator_traits<pbes_equation>
@@ -178,7 +182,7 @@ struct term_list_iterator_traits<pbes_equation>
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::pbes_equation;
+using mcrl2::pbes_system::pbes_equation;
 
 template<>
 struct aterm_traits<pbes_equation>

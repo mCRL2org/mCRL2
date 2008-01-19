@@ -11,7 +11,7 @@
 #include <string>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/modal_formula/detail/read_text.h"
 
 using namespace std;

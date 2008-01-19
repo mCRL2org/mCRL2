@@ -25,6 +25,8 @@
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -207,7 +209,7 @@ class specification: public aterm_appl
       }
 
       // check 4)
-      if (!(lps::detail::check_action_label_sorts(action_labels(), declared_sorts)))
+      if (!(detail::check_action_label_sorts(action_labels(), declared_sorts)))
       {
         std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
         return false;
@@ -216,7 +218,7 @@ class specification: public aterm_appl
       // check 5)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
       {
-        if (!(lps::detail::check_action_labels(i->actions(), declared_labels)))
+        if (!(detail::check_action_labels(i->actions(), declared_labels)))
         {
           std::cerr << "specification::is_well_typed() failed: some of the labels occurring in the actions " << pp(i->actions()) << " are not declared in the action specification " << pp(action_labels()) << std::endl;
           return false;
@@ -310,20 +312,22 @@ specification repair_free_variables(const specification& spec)
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::specification;
+using mcrl2::lps::specification;
 
 template<>
 struct aterm_traits<specification>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::specification t)   { t.protect(); }
-  static void unprotect(lps::specification t) { t.unprotect(); }
-  static void mark(lps::specification t)      { t.mark(); }
-  static ATerm term(lps::specification t)     { return t.term(); }
-  static ATerm* ptr(lps::specification& t)    { return &t.term(); }
+  static void protect(specification t)   { t.protect(); }
+  static void unprotect(specification t) { t.unprotect(); }
+  static void mark(specification t)      { t.mark(); }
+  static ATerm term(specification t)     { return t.term(); }
+  static ATerm* ptr(specification& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

@@ -20,14 +20,16 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/detail/data_utility.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
-using mcrl2::data::detail::parse_variable;
-using namespace mcrl2::data;
-using namespace mcrl2::core::detail;
+using data::detail::parse_variable;
+using namespace data;
+using namespace core::detail;
 
 /// \brief A propositional variable declaration.
 ///
@@ -42,7 +44,7 @@ class propositional_variable: public aterm_appl
     /// Constructor.
     ///
     propositional_variable()
-      : aterm_appl(mcrl2::core::detail::constructPropVarDecl())
+      : aterm_appl(core::detail::constructPropVarDecl())
     {}
 
     /// Constructor.
@@ -60,7 +62,7 @@ class propositional_variable: public aterm_appl
     propositional_variable(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_PropVarDecl(m_term));
+      assert(core::detail::check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;
@@ -114,7 +116,7 @@ class propositional_variable_instantiation: public aterm_appl
     /// Constructor.
     ///
     propositional_variable_instantiation()
-      : aterm_appl(mcrl2::core::detail::constructPropVarInst())
+      : aterm_appl(core::detail::constructPropVarInst())
     {}
 
     /// Constructor.
@@ -132,7 +134,7 @@ class propositional_variable_instantiation: public aterm_appl
     propositional_variable_instantiation(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_PropVarInst(m_term));
+      assert(core::detail::check_rule_PropVarInst(m_term));
       iterator i = t.begin();
       m_name = *i++;
       m_parameters = *i;
@@ -173,13 +175,15 @@ bool is_propositional_variable_instantiation(aterm_appl t)
   return gsIsPropVarInst(t);
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::propositional_variable;
-using lps::propositional_variable_instantiation;
+using mcrl2::pbes_system::propositional_variable;
+using mcrl2::pbes_system::propositional_variable_instantiation;
 
 template<>
 struct aterm_traits<propositional_variable>

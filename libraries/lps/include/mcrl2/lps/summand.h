@@ -24,6 +24,8 @@
 #include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -345,10 +347,12 @@ typedef term_list<summand> summand_list;
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::summand;
+using mcrl2::lps::summand;
 
 template<>
 struct aterm_traits<summand>

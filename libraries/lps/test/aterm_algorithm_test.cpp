@@ -20,9 +20,9 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::data_expr;
+using namespace mcrl2::lps::detail;
 
 std::string SPECIFICATION = 
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
@@ -100,7 +100,7 @@ data_variable find_variable(Term t)
 
 void test_find_variable()
 {
-  using namespace lps::data_expr;
+  using namespace mcrl2::lps::data_expr;
 
   data_variable d("d:D");
   data_variable e("e:E");

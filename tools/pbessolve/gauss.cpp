@@ -56,6 +56,9 @@ int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 using namespace pbes_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
 
 sort_instantiator si;
 
@@ -82,7 +85,7 @@ pbes_solver::pbes_solver(pbes<> p_pbes_spec,
 {
   pbes_spec = p_pbes_spec;
   
-  lps::data_specification ds = pbes_spec.data();
+  data_specification ds = pbes_spec.data();
   SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: 
     ((solver=="fast")?solver_type_cvc_fast:
      solver_type_cvc);
@@ -115,7 +118,7 @@ atermpp::vector<pbes_equation> pbes_solver::solve()
   
  // instantiate all finite sorts from the specification
  // (better: instantiate later, when needed...)
-  lps::data_specification ds = pbes_spec.data();
+  data_specification ds = pbes_spec.data();
   sort_expression_list finite_sorts;
   sort_expression_list sl = ds.sorts();
   si.set_data_operation_list(ds.constructors());
@@ -201,7 +204,7 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
 #ifdef debug
     gsVerboseMsg("Double vars removed: %s\n",pp(pnorm_uni).c_str());
 #endif
-    defX =  pbes_expression_to_prenex(pnorm_uni); 
+    defX =  lps::pbes_expression_to_prenex(pnorm_uni); 
 #ifdef debug
     gsVerboseMsg("in PNF: %s\n",pp(defX).c_str());
 #endif    
@@ -521,7 +524,7 @@ data_expression pbes_to_data(pbes_expression e)
 //======================================================================
 {
  namespace dname = mcrl2::data::data_expr;
- namespace pname = lps::pbes_expr;
+ namespace pname = pbes_expr;
  namespace sname = mcrl2::data::sort_expr;
  
  if (dname::is_true(d))
@@ -640,7 +643,7 @@ data_expression pbes_to_data(pbes_expression e)
   // arg1 is not reliable
  
  namespace dname = mcrl2::data::data_expr;
- namespace pname = lps::pbes_expr;
+ namespace pname = pbes_expr;
  namespace sname = mcrl2::data::sort_expr;
  
  data_expression head = DEPRECATED_FUNCTION_HEAD(d);

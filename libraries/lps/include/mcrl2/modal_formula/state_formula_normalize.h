@@ -12,7 +12,9 @@
 
 #include "mcrl2/modal_formula/state_formula_builder.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 /// \internal
 /// Puts a logical not around state variables named X
@@ -26,7 +28,7 @@ struct state_variable_negation
   
   aterm_appl operator()(aterm_appl t) const
   {
-    using namespace lps::state_frm;
+    using namespace modal::state_frm;
 
     if (is_var(t) && (var_name(t) == X))
     {
@@ -45,7 +47,7 @@ struct state_variable_negation
 inline
 state_formula normalize(state_formula f)
 {
-  using namespace lps::state_frm;
+  using namespace modal::state_frm;
 
   if (is_not(f))
   {
@@ -132,6 +134,8 @@ state_formula normalize(state_formula f)
   return state_formula();
 }
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H

@@ -16,7 +16,9 @@
 #include <algorithm>
 #include <iterator>
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 namespace detail {
 
@@ -45,6 +47,8 @@ std::string read_text(const std::string& filename, bool warn=false)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_DETAIL_READ_TEXT_H

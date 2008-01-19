@@ -13,16 +13,18 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/detail/algorithms.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
-#include "mcrl2/pbes/detail/tools.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
+using namespace mcrl2::modal;
+using namespace mcrl2::modal::detail;
 
 const std::string SPECIFICATION =
 "act a:Nat;                              \n"
@@ -326,7 +328,7 @@ void test_rename()
   set_identifier_generator generator;
   generator.add_identifiers(identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
-  BOOST_CHECK(pp(formula) == "(mu X00. X00) && (mu X. X)");
+  BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)");
 
   generator = set_identifier_generator();
   generator.add_identifiers(identifiers(spec));
@@ -334,7 +336,7 @@ void test_rename()
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
-  BOOST_CHECK(pp(formula) == "mu X. mu X00. X00");
+  BOOST_CHECK(pp(formula) == "mu X. mu X0. X0");
 }
 
 void test_normalize()

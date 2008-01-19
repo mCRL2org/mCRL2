@@ -16,6 +16,8 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 namespace detail {
@@ -70,5 +72,7 @@ specification remove_parameters(const specification& spec, const std::set<data_v
 } // namespace detail
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_DETAIL_REMOVE_PARAMETERS_H

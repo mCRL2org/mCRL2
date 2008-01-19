@@ -18,7 +18,8 @@
 
 #define PREDVAR_MARK '$'
 
-using namespace lps;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
 
 /// A class implementing the Gauss elimination algorithm
 /// for pb equation systems.

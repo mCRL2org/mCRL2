@@ -7,8 +7,8 @@
 /// \file algorithms.h
 /// \brief Add your file description here.
 
-#ifndef PBES_DETAIL_LPS2PBES
-#define PBES_DETAIL_LPS2PBES
+#ifndef MCRL2_MODAL_FORMULA_DETAIL_ALGORITHMS_H
+#define MCRL2_MODAL_FORMULA_DETAIL_ALGORITHMS_H
 
 #include <stdexcept>
 #include <sstream>
@@ -25,11 +25,15 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 namespace detail {
 
 using namespace mcrl2::core::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::modal;
 
   inline
   ATermAppl parse_state_formula(std::istream& from)
@@ -66,8 +70,23 @@ using namespace mcrl2::core::detail;
       throw std::runtime_error("formula translation error");
     return result;
   }
+
+  inline
+  state_formula mcf2statefrm(const std::string& formula_text, const specification& spec)
+  {
+    std::stringstream formula_stream;
+    formula_stream << formula_text;
+    ATermAppl f = parse_state_formula(formula_stream);
+    f = type_check_state_formula(f, spec);
+    f = implement_data_state_formula(f, spec);
+    f = translate_regular_formula(f);
+    return f;
+  }
+
 } // namespace detail
 
-} // namespace lps
+} // namespace modal
 
-#endif // PBES_DETAIL_LPS2PBES
+} // namespace mcrl2
+
+#endif // MCRL2_MODAL_FORMULA_DETAIL_ALGORITHMS_H

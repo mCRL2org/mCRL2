@@ -21,8 +21,10 @@ using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 #endif
 
-using namespace lps;
-using namespace pbes_expr;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 
 //Prototype
 static bool add_used_sort(ATermAppl expr, ATermIndexedSet s);

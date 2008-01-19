@@ -455,7 +455,7 @@ static lts_extra get_extra(lts_type type, string const &lps_file, bool print_dot
       {
         if ( gsIsSpecV1(spec) )
         {
-          return lts_extra(new lps::specification(spec)); // XXX Ugh!
+          return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
         } else {
           return lts_extra((ATerm) spec);
         }

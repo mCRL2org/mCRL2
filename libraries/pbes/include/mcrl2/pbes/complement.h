@@ -37,9 +37,11 @@
 #include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
 
 /// Visitor that pushes a negation in a PBES expression as far as possible
 /// inwards towards a data expression.
@@ -111,6 +113,8 @@ pbes_expression complement(const pbes_expression p)
   return complement_builder().visit(p);
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_COMPLEMENT_H

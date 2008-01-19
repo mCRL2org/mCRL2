@@ -15,6 +15,13 @@ exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 test-suite pbes
     :
       [ run_with_input lps2pbes_test.cpp : pbes : test ]
-      [ run pbes_test.cpp ]
+      #[ run pbes_test.cpp ]
       [ run bisimulation_test.cpp ]
+    ;
+
+install dist
+    :
+      generate_lps2pbes_result
+    :
+      <location>dist
     ;

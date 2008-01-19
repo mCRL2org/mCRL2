@@ -57,12 +57,12 @@
 #include "bes.h"
 
 using namespace std;
-using namespace lps;
-using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using bes::bes_expression;
-
 using atermpp::make_substitution;
+using namespace mcrl2::core;
+using namespace mcrl2::utilities;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
+using bes::bes_expression;
 
 namespace po = boost::program_options;
 
@@ -355,8 +355,8 @@ static void assign_variables_in_tree(
 }
 
 
-// static ATermAppl store_as_tree(lps::pbes_expression p)
-static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
+// static ATermAppl store_as_tree(pbes_expression p)
+static ATermAppl store_as_tree(propositional_variable_instantiation p)
 /* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3 
  * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
  * returned, which is a balanced tree flushed to the right. For each input the resulting
@@ -403,7 +403,7 @@ static ATermAppl store_as_tree(lps::propositional_variable_instantiation p)
 //and translate to pbes expression to a bes_expression in BDD format.
 
 static bes::bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                   const lps::pbes_expression p,
+                   const pbes_expression p,
                    atermpp::indexed_set &variable_index,
                    unsigned long &nr_of_generated_variables,
                    const bool to_bdd,
@@ -685,7 +685,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
         assert(elist==current_variable_instantiation.parameters().end());
       }
       
-      lps::pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
+      pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       
       bes::bes_expression new_bes_expression=

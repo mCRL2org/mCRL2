@@ -25,6 +25,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::lps;
 
   /// \mainpage lpsconfcheck
   /// \section section_introduction Introduction
@@ -683,7 +684,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         f_invariant = gsMakeOpIdTrue();
       }
 
-      lps::specification lps_specification;
+      specification lps_specification;
       
       lps_specification.load(f_input_file_name);
 

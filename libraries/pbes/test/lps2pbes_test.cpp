@@ -16,14 +16,15 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/modal_formula/detail/read_text.h"
 #include "test_specifications.h"
 
 using namespace std;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
+using namespace mcrl2::pbes_system;
 namespace fs = boost::filesystem;
 
 const std::string ABP_SPECIFICATION =

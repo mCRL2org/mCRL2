@@ -19,10 +19,12 @@
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm_appl;
-using namespace mcrl2::data;
+using namespace data;
 
 /// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
@@ -36,7 +38,7 @@ class pbes_initializer: public aterm_appl
     /// Constructor.
     ///
     pbes_initializer()
-      : aterm_appl(mcrl2::core::detail::constructPBInit())
+      : aterm_appl(core::detail::constructPBInit())
     {}
 
     /// Constructor.
@@ -55,7 +57,7 @@ class pbes_initializer: public aterm_appl
     pbes_initializer(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_term_PBInit(m_term));
+      assert(core::detail::check_term_PBInit(m_term));
       aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_variable = propositional_variable_instantiation(*i);
@@ -92,12 +94,14 @@ class pbes_initializer: public aterm_appl
     }
 };
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::pbes_initializer;
+using mcrl2::pbes_system::pbes_initializer;
 
 template<>
 struct aterm_traits<pbes_initializer>

@@ -18,11 +18,13 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/struct.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
-using namespace mcrl2::core::detail;
+using namespace core::detail;
 
 /// \brief Pbes fixpoint symbol (mu or nu).
 ///
@@ -34,7 +36,7 @@ class fixpoint_symbol: public aterm_appl
     /// Constructor.
     ///
     fixpoint_symbol()
-      : aterm_appl(mcrl2::core::detail::constructFixPoint())
+      : aterm_appl(core::detail::constructFixPoint())
     {}
 
     /// Constructor.
@@ -42,7 +44,7 @@ class fixpoint_symbol: public aterm_appl
     fixpoint_symbol(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_FixPoint(m_term));
+      assert(core::detail::check_rule_FixPoint(m_term));
     }
     
     /// Assignment operator.
@@ -82,22 +84,24 @@ class fixpoint_symbol: public aterm_appl
     }
 };
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::fixpoint_symbol;
+using mcrl2::pbes_system::fixpoint_symbol;
 
 template<>
 struct aterm_traits<fixpoint_symbol>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::fixpoint_symbol t)   { t.protect(); }
-  static void unprotect(lps::fixpoint_symbol t) { t.unprotect(); }
-  static void mark(lps::fixpoint_symbol t)      { t.mark(); }
-  static ATerm term(lps::fixpoint_symbol t)     { return t.term(); }
-  static ATerm* ptr(lps::fixpoint_symbol& t)    { return &t.term(); }
+  static void protect(fixpoint_symbol t)   { t.protect(); }
+  static void unprotect(fixpoint_symbol t) { t.unprotect(); }
+  static void mark(fixpoint_symbol t)      { t.mark(); }
+  static ATerm term(fixpoint_symbol t)     { return t.term(); }
+  static ATerm* ptr(fixpoint_symbol& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

@@ -148,7 +148,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     backpointers = NULL;
   }
  
-  nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator((ATermAppl) Spec,createRewriter(lps::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
+  nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator((ATermAppl) Spec,createRewriter(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
  
   if ( lgopts->priority_action != "" )
   {

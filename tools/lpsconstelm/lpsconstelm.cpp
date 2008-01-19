@@ -35,10 +35,13 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
 
-using namespace lps;
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2;
 
 class lpsConstElm {
   private:
@@ -626,7 +629,7 @@ void lpsConstElm::removeSingleton(int n)
 //
 inline void lpsConstElm::output() {
   lps::linear_process p_process = p_spec.process();
-  summand_list rebuild_summandlist;
+  lps::summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
   //
@@ -680,7 +683,7 @@ inline void lpsConstElm::output() {
 
     //Rebuild actions
     //
-    action_list rebuild_actions;
+    lps::action_list rebuild_actions;
     for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end() ; i++){
       data_expression_list argumentList;
 	  for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){

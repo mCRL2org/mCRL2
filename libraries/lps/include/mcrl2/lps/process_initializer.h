@@ -20,6 +20,8 @@
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 #include "mcrl2/data/detail/sequence_algorithm.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -117,10 +119,12 @@ class process_initializer: public aterm_appl
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::process_initializer;
+using mcrl2::lps::process_initializer;
 
 template<>
 struct aterm_traits<process_initializer>

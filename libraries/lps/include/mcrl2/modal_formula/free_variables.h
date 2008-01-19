@@ -12,7 +12,9 @@
 
 #include "mcrl2/modal_formula/state_formula_visitor.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 namespace state_frm {
 
@@ -116,6 +118,8 @@ std::set<data_variable> compute_free_state_formula_variables(const state_formula
   return visitor.result;
 }
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_FREE_VARIABLES_H

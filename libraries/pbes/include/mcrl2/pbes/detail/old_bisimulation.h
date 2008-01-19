@@ -25,7 +25,9 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace pbes_system {
 
 namespace detail {
 
@@ -33,7 +35,7 @@ namespace detail {
 inline
 pbes_expression step(const linear_process& m, const summand& m_summand, const linear_process& s, identifier_string X)
 {
-  namespace p = lps::pbes_expr;
+  namespace p = pbes_expr;
 
   atermpp::vector<pbes_expression> terms;
   for (non_delta_summand_list::iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
@@ -58,8 +60,8 @@ pbes_expression step(const linear_process& m, const summand& m_summand, const li
 inline
 pbes_expression match(const linear_process& m, const linear_process& s, identifier_string X)
 {
-  namespace d = lps::data_expr;
-  namespace p = lps::pbes_expr;
+  namespace d = data::data_expr;
+  namespace p = pbes_expr;
 
   atermpp::vector<pbes_expression> terms;
   for (non_delta_summand_list::iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
@@ -81,7 +83,7 @@ inline
 pbes<> strong_bisimulation(const specification& M, const specification& S)
 { 
   using atermpp::make_list;
-  namespace p = lps::pbes_expr;
+  namespace p = pbes_expr;
 
   linear_process m = M.process();
   linear_process s = S.process();
@@ -132,6 +134,8 @@ pbes<> strong_bisimulation(const specification& M, const specification& S)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_BISIMULATION_H

@@ -19,7 +19,9 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
@@ -65,12 +67,14 @@ class regular_formula: public aterm_appl
 ///
 typedef term_list<regular_formula> regular_formula_list;
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 /// \internal
 namespace atermpp
 {
-using lps::regular_formula;
+using mcrl2::modal::regular_formula;
 
 template<>
 struct aterm_traits<regular_formula>

@@ -10,7 +10,6 @@
 #include "sort_functions.h"
 #include "mcrl2/data/sort_utility.h"
 
-using namespace lps;
 using namespace std;
 
 sort_expression_list get_sorts(data_variable_list v)

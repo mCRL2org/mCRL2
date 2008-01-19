@@ -20,6 +20,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using namespace mcrl2::data;
@@ -174,5 +176,7 @@ specification constelm(const specification& spec, Rewriter& r, bool verbose = fa
 }
 
 } // namespace lps
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_CONSTELM_H

@@ -46,10 +46,12 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
 using namespace mcrl2::data::data_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2;
 
 namespace po = boost::program_options;
 
@@ -130,10 +132,10 @@ bool has_time(lps::linear_process& lps)
 }
 
 ///\ret specification, in which all delta summands have been removed, and replaced with a single true->delta
-lps::specification remove_deltas(const lps::specification& specification) {
+lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;
-  for (summand_list::iterator i = specification.process().summands().begin(); i != specification.process().summands().end(); ++i)
+  for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
   {
     if (!(i->is_delta()))
     {
@@ -151,15 +153,15 @@ lps::specification remove_deltas(const lps::specification& specification) {
   summands = push_front(summands, delta_summand);
   summands = atermpp::reverse(summands);
 
-  result = set_lps(specification, set_summands(specification.process(), summands));
+  result = set_lps(spec, set_summands(spec.process(), summands));
 
   return result;
 }
 
 ///Returns an LPS specification in which the timed arguments have been rewritten
-lps::specification untime(const lps::specification& specification) {
+lps::specification untime(const lps::specification& spec) {
   lps::specification untime_specification; // Updated specification
-  lps::linear_process lps = specification.process(); // Original lps
+  lps::linear_process lps = spec.process(); // Original lps
   lps::linear_process untime_lps; // Updated lps
   lps::summand_list untime_summand_list; // Updated summand list
   lps::data_variable_list untime_process_parameters; // Updated process parameters
@@ -172,12 +174,12 @@ lps::specification untime(const lps::specification& specification) {
   if (!has_time(lps))
   {
     gsVerboseMsg("LPS has no time, only removing deltas, and replacing with one true->delta summand\n");
-    return remove_deltas(specification);
+    return remove_deltas(spec);
   }
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = fresh_variable(aterm_appl(specification), mcrl2::data::sort_expr::real(), "last_action_time");
+  last_action_time = fresh_variable(spec, mcrl2::data::sort_expr::real(), "last_action_time");
   untime_process_parameters = push_back(lps.process_parameters(), last_action_time);
       
   // Transpose the original summand list, and see if there are summands with time
@@ -213,7 +215,7 @@ lps::specification untime(const lps::specification& specification) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	mcrl2::data::data_variable time_var = fresh_variable(aterm_appl(specification), lps::sort_expr::real(), "time_var");
+	mcrl2::data::data_variable time_var = fresh_variable(spec, lps::sort_expr::real(), "time_var");
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
@@ -259,13 +261,13 @@ lps::specification untime(const lps::specification& specification) {
   untime_lps = lps::linear_process(lps.free_variables(), untime_process_parameters, untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
-  untime_initial_assignments = push_back(specification.initial_process().assignments(), data_assignment(last_action_time, real(0)));
+  untime_initial_assignments = push_back(spec.initial_process().assignments(), data_assignment(last_action_time, real(0)));
 
   // Create new specification, this equals original specification, except for the new LPS.
-  untime_specification = lps::specification(specification.data(), 
-			                    specification.action_labels(),
+  untime_specification = lps::specification(spec.data(), 
+			                    spec.action_labels(),
 					    untime_lps, //new LPS
-					    process_initializer(specification.initial_process().free_variables(),
+					    process_initializer(spec.initial_process().free_variables(),
                                             untime_initial_assignments)
 					   );
 

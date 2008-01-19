@@ -16,7 +16,7 @@
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
-using namespace lps;
+using namespace mcrl2::lps;
 
 // Parameter i should be removed
 const std::string case_1(
@@ -69,7 +69,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  using namespace lps;
+  using namespace mcrl2::lps;
 
   specification s0;
   specification s1;

@@ -15,7 +15,9 @@
 #include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/data/utility.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
@@ -109,6 +111,8 @@ state_formula rename_data_variables(const state_formula& f, IdentifierGenerator&
   return data_variable_map_replace(f, replacements);
 }
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_STATE_VARIABLE_RENAME_H

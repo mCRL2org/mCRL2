@@ -33,7 +33,7 @@ namespace bes
   using atermpp::aterm_appl;
   using atermpp::arg1;
   using atermpp::arg2;
-  using lps::fixpoint_symbol;
+  using mcrl2::pbes_system::fixpoint_symbol;
 
 
 // a bes variable_type is an unsigned long. 

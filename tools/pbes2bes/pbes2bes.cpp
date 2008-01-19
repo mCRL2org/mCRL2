@@ -44,9 +44,10 @@
 #include "sort_functions.h"
 
 using namespace std;
-using namespace lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::pbes_system;
 
 using atermpp::make_substitution;
 
@@ -117,7 +118,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, t_tool_options tool_options);
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts);
 identifier_string create_propvar_name(identifier_string propvar_name, data_expression_list finite_exp);
 atermpp::vector<pbes_equation> sort_names(vector< identifier_string > names_order, atermpp::vector<pbes_equation> to_sort);
-ATermAppl FindDummy(ATermAppl sort, lps::pbes<> current_spec, ATermList no_dummy);
+ATermAppl FindDummy(ATermAppl sort, pbes<> current_spec, ATermList no_dummy);
 //----------------------------------
 
 

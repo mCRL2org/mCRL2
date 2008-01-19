@@ -26,6 +26,8 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/free_variables.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -314,10 +316,12 @@ linear_process set_summands(linear_process l, summand_list summands)
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::linear_process;
+using mcrl2::lps::linear_process;
 
 template<>
 struct aterm_traits<linear_process>

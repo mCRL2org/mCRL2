@@ -29,9 +29,12 @@
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::data;
+namespace pbes_system {
+
+using namespace data;
+using namespace lps;
 
 /// Base class for bisimulation algorithms.
 class bisimulation_algorithm
@@ -723,6 +726,8 @@ pbes<> branching_bisimulation_equivalence(const specification& model, const spec
   return branching_bisimulation_equivalence_algorithm().run(model, spec);
 }
 
-} // namespace lps
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_BISIMULATION_H

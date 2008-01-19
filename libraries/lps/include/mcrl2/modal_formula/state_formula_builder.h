@@ -13,7 +13,9 @@
 #include <stdexcept>
 #include "mcrl2/modal_formula/state_formula.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace modal {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -225,6 +227,8 @@ struct state_formula_builder
   }
 };
 
-} // namespace lps
+} // namespace modal
+
+} // namespace mcrl2
 
 #endif // MCRL2_PBES_STATE_FORMULA_BUILDER_H

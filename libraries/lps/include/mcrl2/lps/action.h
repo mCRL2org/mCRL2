@@ -16,6 +16,8 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 
+namespace mcrl2 {
+
 namespace lps {
 
 using atermpp::aterm_appl;
@@ -111,10 +113,12 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace lps
 
+} // namespace mcrl2
+
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::action;
+using mcrl2::lps::action;
 
 template<>
 struct aterm_traits<action>

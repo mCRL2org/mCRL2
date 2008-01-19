@@ -26,6 +26,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2;
 
   /// \mainpage lpsformcheck
   /// \section section_introduction Introduction
