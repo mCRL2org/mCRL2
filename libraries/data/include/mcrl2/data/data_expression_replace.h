@@ -14,7 +14,9 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// \cond INTERNAL_DOCS
 struct data_expression_map_replace_helper
@@ -48,6 +50,8 @@ Term data_expression_map_replace(Term t, const std::map<data_expression, data_ex
   return atermpp::checked_replace(t, is_data_expression, data_expression_map_replace_helper(replacements));
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_REPLACE_H

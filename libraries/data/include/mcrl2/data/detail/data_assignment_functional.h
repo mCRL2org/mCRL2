@@ -13,7 +13,9 @@
 #include <set>
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -58,6 +60,8 @@ struct has_left_hand_side_in
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H

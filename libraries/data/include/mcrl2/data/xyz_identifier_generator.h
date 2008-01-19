@@ -12,7 +12,9 @@
 
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// A class that generates identifiers. A context is maintained
 /// containing already used identifiers. The context is stored
@@ -89,6 +91,8 @@ class xyz_identifier_generator: public multiset_identifier_generator
     }
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H

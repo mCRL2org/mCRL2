@@ -16,7 +16,7 @@
 class RewriterInnermost: public Rewriter
 {
 	public:
-		RewriterInnermost(lps::data_specification DataSpec);
+		RewriterInnermost(mcrl2::data::data_specification DataSpec);
 		~RewriterInnermost();
 
 		RewriteStrategy getStrategy();

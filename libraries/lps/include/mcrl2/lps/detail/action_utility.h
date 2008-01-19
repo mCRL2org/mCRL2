@@ -12,7 +12,7 @@
 
 #include <set>
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/detail/data_utility.h"
+#include "mcrl2/data/detail/data_utility.h"
 
 namespace lps {
 

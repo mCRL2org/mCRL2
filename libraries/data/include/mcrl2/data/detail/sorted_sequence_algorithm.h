@@ -7,14 +7,16 @@
 /// \file sorted_sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
-#define MCRL2_LPS_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#define MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
 #include <set>
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -44,6 +46,8 @@ std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
 
-#endif // MCRL2_LPS_SORTED_DETAIL_SEQUENCE_ALGORITHM_H
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_SORTED_DETAIL_SEQUENCE_ALGORITHM_H

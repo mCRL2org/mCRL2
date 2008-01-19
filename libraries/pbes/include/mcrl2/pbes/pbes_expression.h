@@ -23,6 +23,8 @@ using atermpp::arg1;
 using atermpp::arg2;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
 // prototype
 inline

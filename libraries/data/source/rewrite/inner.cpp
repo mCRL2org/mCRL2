@@ -1105,7 +1105,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 	return a;
 }
 
-RewriterInnermost::RewriterInnermost(lps::data_specification DataSpec)
+RewriterInnermost::RewriterInnermost(mcrl2::data::data_specification DataSpec)
 {
 	ATermList l,m,n;
 	ATermTable tmp_eqns;

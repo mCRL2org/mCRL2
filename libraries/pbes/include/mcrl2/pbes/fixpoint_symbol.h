@@ -22,6 +22,7 @@ namespace lps {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
+using namespace mcrl2::core::detail;
 
 /// \brief Pbes fixpoint symbol (mu or nu).
 ///

@@ -17,6 +17,8 @@ namespace lps {
 
 namespace detail {
 
+using namespace mcrl2::data;
+
   /// Create a list containing the left hand sides of the initial assignments.
   ///
   inline

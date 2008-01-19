@@ -17,11 +17,14 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::arg1;
+using namespace core;
 
 /// \brief An operation on data.
 ///
@@ -31,7 +34,7 @@ class data_operation: public data_expression
     /// Constructor.
     ///             
     data_operation()
-      : data_expression(mcrl2::core::detail::constructOpId())
+      : data_expression(detail::constructOpId())
     {}
 
     /// Constructor.
@@ -39,13 +42,13 @@ class data_operation: public data_expression
     data_operation(aterm_appl t)
      : data_expression(t)
     {
-      assert(mcrl2::core::detail::check_rule_OpId(m_term));
+      assert(detail::check_rule_OpId(m_term));
     }
 
     /// Constructor.
     ///             
     data_operation(identifier_string name, sort_expression s)
-     : data_expression(mcrl2::core::detail::gsMakeOpId(name, s))
+     : data_expression(detail::gsMakeOpId(name, s))
     {}
 
     /// Returns the name of the data_operation.
@@ -64,15 +67,17 @@ typedef term_list<data_operation> data_operation_list;
 inline
 bool is_data_operation(aterm_appl t)
 {
-  return mcrl2::core::detail::gsIsOpId(t);
+  return detail::gsIsOpId(t);
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::data_operation;
+using mcrl2::data::data_operation;
 
 template<>
 struct aterm_traits<data_operation>

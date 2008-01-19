@@ -17,7 +17,7 @@
 class RewriterProver: public Rewriter
 {
 	public:
-		RewriterProver(lps::data_specification DataSpec, RewriteStrategy strat);
+		RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat);
 		~RewriterProver();
 
 		RewriteStrategy getStrategy();

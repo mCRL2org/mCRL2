@@ -25,7 +25,7 @@ namespace detail {
 template <typename OutputIterator>
 void collect_free_variables(const summand& s, const std::set<data_variable>& bound_variables, OutputIterator dest)
 {
-  atermpp::for_each(s, detail::make_data_variable_collector(bound_variables.begin(),
+  atermpp::for_each(s, mcrl2::data::detail::make_data_variable_collector(bound_variables.begin(),
                                                             bound_variables.end(),
                                                             s.summation_variables().begin(),
                                                             s.summation_variables().end(),

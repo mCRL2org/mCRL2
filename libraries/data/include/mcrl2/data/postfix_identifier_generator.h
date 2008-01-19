@@ -12,7 +12,9 @@
 
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// Uses the given postfix as a hint for generating identifiers.
 class postfix_identifier_generator: public set_identifier_generator
@@ -43,6 +45,8 @@ class postfix_identifier_generator: public set_identifier_generator
     }   
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H

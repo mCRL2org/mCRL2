@@ -17,7 +17,7 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
+using namespace mcrl2::data;
 
 class D: public aterm_appl
 {

@@ -22,6 +22,7 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 
 using namespace mcrl2::core;
+using namespace mcrl2::data;
 
 /// \brief Represents an action.
 ///
@@ -105,7 +106,7 @@ bool equal_signatures(const action& a, const action& b)
   if (a_args.size() != b_args.size())
     return false;
 
-  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), detail::equal_data_expression_sort());
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
 }
 
 } // namespace lps

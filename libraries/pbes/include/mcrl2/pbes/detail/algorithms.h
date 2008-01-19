@@ -18,6 +18,10 @@
 #include <fstream>
 #include "aterm2.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/parse.h"
+#include "mcrl2/core/detail/typecheck.h"
+#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -25,8 +29,10 @@ namespace lps {
 
 namespace detail {
 
+using namespace mcrl2::core::detail;
+
   inline
-  ATermAppl parse_state_formula(istream& from)
+  ATermAppl parse_state_formula(std::istream& from)
   {
     ATermAppl result = parse_state_frm(from);
     if (result == NULL)

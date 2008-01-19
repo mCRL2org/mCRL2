@@ -29,9 +29,9 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/lps/detail/data_utility.h"
-#include "mcrl2/lps/detail/sequence_algorithm.h"
-#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_initializer.h"
@@ -44,6 +44,7 @@ namespace lps {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
+using namespace mcrl2::data;
 
 /// \cond INTERNAL_DOCS
 struct normalize_pbes_equation

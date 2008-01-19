@@ -270,7 +270,7 @@ using namespace mcrl2::core;
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      lps::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      mcrl2::data::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
       f_induction(data_spec)

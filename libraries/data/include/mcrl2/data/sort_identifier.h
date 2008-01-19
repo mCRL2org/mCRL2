@@ -11,13 +11,17 @@
 #define MCRL2_DATA_SORT_ID_H
 
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/core/identifier_string.h"
 
-/// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
+using namespace core::detail;
+using core::identifier_string;
 
 class sort_identifier;
 
@@ -34,7 +38,7 @@ class sort_identifier: public sort_expression
     /// Constructor.
     ///
     sort_identifier()
-      : sort_expression(mcrl2::core::detail::constructSortId())
+      : sort_expression(core::detail::constructSortId())
     {}
 
     /// Constructor.
@@ -42,7 +46,7 @@ class sort_identifier: public sort_expression
     sort_identifier(ATermAppl t)
       : sort_expression(t)
     {
-      assert(mcrl2::core::detail::check_rule_SortId(m_term));
+      assert(core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.
@@ -50,7 +54,7 @@ class sort_identifier: public sort_expression
     sort_identifier(aterm_appl t)
       : sort_expression(t)
     {
-      assert(mcrl2::core::detail::check_rule_SortId(m_term));
+      assert(core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.
@@ -58,7 +62,7 @@ class sort_identifier: public sort_expression
     sort_identifier(identifier_string name)
       : sort_expression(gsMakeSortId(name))
     {
-      assert(mcrl2::core::detail::check_rule_SortId(m_term));
+      assert(core::detail::check_rule_SortId(m_term));
     }
 
     /// Constructor.
@@ -89,12 +93,14 @@ bool is_sort_identifier(aterm_appl t)
   return gsIsSortId(t);
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::sort_identifier;
+using mcrl2::data::sort_identifier;
 
 template<>
 struct aterm_traits<sort_identifier>

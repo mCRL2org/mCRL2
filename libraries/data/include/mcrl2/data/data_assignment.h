@@ -19,11 +19,14 @@
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::aterm;
+using namespace core;
 
 /// \brief data_assignment is an assignment of a data expression to a data variable.
 ///
@@ -45,7 +48,7 @@ class data_assignment: public aterm_appl
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_DataVarIdInit(m_term));
+      assert(detail::check_rule_DataVarIdInit(m_term));
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
@@ -55,7 +58,7 @@ class data_assignment: public aterm_appl
     ///             
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_appl(mcrl2::core::detail::gsMakeDataVarIdInit(lhs, rhs)),
+       aterm_appl(detail::gsMakeDataVarIdInit(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -106,7 +109,7 @@ typedef term_list<data_assignment> data_assignment_list;
 inline
 bool is_data_assignment(aterm_appl t)
 {
-  return mcrl2::core::detail::gsIsDataVarIdInit(t);
+  return detail::gsIsDataVarIdInit(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,12 +214,14 @@ struct assignment_list_substitution
     }
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::data_assignment;
+using mcrl2::data::data_assignment;
 
 template<>
 struct aterm_traits<data_assignment>

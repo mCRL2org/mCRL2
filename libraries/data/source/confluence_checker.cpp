@@ -409,7 +409,7 @@ using namespace mcrl2::core;
     ):
       f_disjointness_checker(ATAgetArgument(a_lps, 2)),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(lps::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lps)) {
         gsErrorMsg("An action named \'ctau\' already exists.\n");

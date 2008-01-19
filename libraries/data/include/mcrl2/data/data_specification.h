@@ -17,15 +17,16 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/lps/detail/data_utility.h"
-#include "mcrl2/lps/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-
-using namespace mcrl2::core::detail;
+using namespace core::detail;
 
 /// \cond INTERNAL_DOCS
 struct has_result_sort
@@ -70,7 +71,7 @@ class data_specification: public aterm_appl
     /// Constructor.
     ///             
     data_specification()
-      : aterm_appl(mcrl2::core::detail::constructDataSpec())
+      : aterm_appl(core::detail::constructDataSpec())
     {}
 
     /// Constructor.
@@ -78,7 +79,7 @@ class data_specification: public aterm_appl
     data_specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_DataSpec(m_term));
+      assert(core::detail::check_rule_DataSpec(m_term));
       aterm_appl::iterator i = t.begin();
       m_sorts        = sort_expression_list(aterm_appl(*i++).argument(0));
       m_constructors = data_operation_list(aterm_appl(*i++).argument(0));
@@ -119,7 +120,7 @@ class data_specification: public aterm_appl
     /// Returns the constructors of the data specification that have s as their target.
     data_operation_list constructors(sort_expression s) const
     {
-      atermpp::vector<lps::data_operation> result;
+      atermpp::vector<data_operation> result;
 
       typedef boost::filter_iterator<has_result_sort, data_operation_list::iterator> FilterIter;
       has_result_sort predicate(s);
@@ -215,12 +216,14 @@ data_specification set_equations(data_specification s, data_equation_list equati
                            );
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::data_specification;
+using mcrl2::data::data_specification;
 
 template<>
 struct aterm_traits<data_specification>

@@ -15,6 +15,8 @@
 
 namespace lps {
 
+using namespace mcrl2::data;
+
 /// Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns pbes_expression(), the recursion is continued

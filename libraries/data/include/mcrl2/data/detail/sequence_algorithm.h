@@ -7,14 +7,16 @@
 /// \file sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H
-#define MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#define MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
 #include <set>
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -66,6 +68,8 @@ std::set<typename Container::value_type> make_set(const Container& c)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
 
-#endif // MCRL2_LPS_DETAIL_SEQUENCE_ALGORITHM_H
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H

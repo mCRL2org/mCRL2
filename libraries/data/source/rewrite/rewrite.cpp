@@ -25,7 +25,7 @@ using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 #endif
 
-using namespace lps;
+using namespace mcrl2::data;
 
 Rewriter::Rewriter()
 {

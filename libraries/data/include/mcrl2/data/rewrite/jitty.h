@@ -14,7 +14,7 @@
 class RewriterJitty: public Rewriter
 {
 	public:
-		RewriterJitty(lps::data_specification DataSpec);
+		RewriterJitty(mcrl2::data::data_specification DataSpec);
 		~RewriterJitty();
 
 		RewriteStrategy getStrategy();

@@ -57,7 +57,7 @@ NextState *createNextState(
       createEnumerator(
         spec,
         createRewriter(
-          lps::data_specification((ATermAppl) ATgetArgument(spec, 0)),
+          mcrl2::data::data_specification((ATermAppl) ATgetArgument(spec, 0)),
           rewrite_strategy
         ),
         true,

@@ -25,6 +25,7 @@
 
 namespace lps {
 
+using namespace mcrl2::data;
 
 /// \brief Returns all propositional variables that occur in the term t
 template <typename Term>

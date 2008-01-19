@@ -19,13 +19,14 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/struct.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
-
-using namespace mcrl2::core;
+using namespace core;
 
 class sort_expression;
 
@@ -52,7 +53,7 @@ class sort_expression: public aterm_appl
     /// Constructor.
     ///
     sort_expression()
-      : aterm_appl(mcrl2::core::detail::constructSortId())
+      : aterm_appl(detail::constructSortId())
     {}
 
     /// Constructor.
@@ -60,7 +61,7 @@ class sort_expression: public aterm_appl
     sort_expression(ATermAppl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_SortExpr(m_term));
+      assert(detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructor.
@@ -68,20 +69,20 @@ class sort_expression: public aterm_appl
     sort_expression(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_SortExpr(m_term));
+      assert(detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructor.
     ///
     sort_expression(std::string s)
-      : aterm_appl(mcrl2::core::detail::gsMakeSortId(mcrl2::core::detail::gsString2ATermAppl(s.c_str())))
+      : aterm_appl(detail::gsMakeSortId(detail::gsString2ATermAppl(s.c_str())))
     {}
     
     /// Returns true if it is a sort_expression of type A -> B.
     ///
     bool is_arrow() const
     {
-      return mcrl2::core::detail::gsIsSortArrow(*this);
+      return detail::gsIsSortArrow(*this);
     }
 };
 
@@ -89,14 +90,14 @@ class sort_expression: public aterm_appl
 inline
 bool is_sort_expression(aterm_appl t)
 {
-  return mcrl2::core::detail::gsIsSortId(t) || mcrl2::core::detail::gsIsSortArrow(t);
+  return detail::gsIsSortId(t) || detail::gsIsSortArrow(t);
 }
 
 /// Returns the sort_expression 'domain -> range'.
 inline
 sort_expression arrow(sort_expression_list domain, sort_expression range)
 {
-  return mcrl2::core::detail::gsMakeSortArrow(domain, range);
+  return detail::gsMakeSortArrow(domain, range);
 }
 
 /// Returns the domain sorts of s.
@@ -204,21 +205,24 @@ namespace sort_expr {
 
 } // namespace sort_expr
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
+using mcrl2::data::sort_expression;
 
 template<>
-struct aterm_traits<lps::sort_expression>
+struct aterm_traits<sort_expression>
 {
   typedef ATermAppl aterm_type;
-  static void protect(lps::sort_expression t)   { t.protect(); }
-  static void unprotect(lps::sort_expression t) { t.unprotect(); }
-  static void mark(lps::sort_expression t)      { t.mark(); }
-  static ATerm term(lps::sort_expression t)     { return t.term(); }
-  static ATerm* ptr(lps::sort_expression& t)    { return &t.term(); }
+  static void protect(sort_expression t)   { t.protect(); }
+  static void unprotect(sort_expression t) { t.unprotect(); }
+  static void mark(sort_expression t)      { t.mark(); }
+  static ATerm term(sort_expression t)     { return t.term(); }
+  static ATerm* ptr(sort_expression& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

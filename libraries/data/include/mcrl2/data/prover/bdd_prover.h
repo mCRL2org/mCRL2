@@ -112,7 +112,7 @@ class BDD_Prover: public Prover {
     /// to 0, no time limit will be enforced
     /// precondition: the argument passed as parameter a_lps is an LPS
     BDD_Prover(
-      lps::data_specification data_spec,
+      mcrl2::data::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

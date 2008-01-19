@@ -23,6 +23,8 @@
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace lps {
+
+using namespace mcrl2::data;
   
 /// \brief Translates a state_formula and a specification to a pbes. If the pbes evaluates
 /// to true, the formula holds for the specification.

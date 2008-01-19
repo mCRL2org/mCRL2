@@ -12,11 +12,14 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
+using namespace core::detail;
 
 class sort_arrow;
 
@@ -41,31 +44,31 @@ class sort_arrow: public sort_expression
     /// Constructor.
     ///
     sort_arrow()
-      : aterm_appl(detail::constructSortArrow())
+      : sort_expression(core::detail::constructSortArrow())
     {}
 
     /// Constructor.
     ///
     sort_arrow(ATermAppl t)
-      : aterm_appl(t)
+      : sort_expression(t)
     {
-      assert(detail::check_rule_SortArrow(m_term));
+      assert(core::detail::check_term_SortArrow(m_term));
     }
 
     /// Constructor.
     ///
     sort_arrow(aterm_appl t)
-      : aterm_appl(t)
+      : sort_expression(t)
     {
-      assert(detail::check_rule_SortArrow(m_term));
+      assert(core::detail::check_term_SortArrow(m_term));
     }
    
     /// Constructor.
     ///
     sort_arrow(sort_expression_list arguments, sort_expression result)
-      : aterm_appl(gsMakeSortArrow(arguments, result))
+      : sort_expression(gsMakeSortArrow(arguments, result))
     {
-      assert(detail::check_rule_SortArrow(m_term));
+      assert(core::detail::check_term_SortArrow(m_term));
     }
    
     /// \overload
@@ -97,12 +100,14 @@ bool is_sort_arrow(aterm_appl t)
   return gsIsSortArrow(t);
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::sort_arrow;
+using mcrl2::data::sort_arrow;
 
 template<>
 struct aterm_traits<sort_arrow>

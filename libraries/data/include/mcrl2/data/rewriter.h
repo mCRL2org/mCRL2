@@ -13,8 +13,9 @@
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/data/rewrite.h"
 
-/// The namespace of the mCRL2 tool set (will be renamed to mcrl2).
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// \brief A rewriter class. This class is a wrapper for the Rewriter class.
 /// The purpose of this class is to hide the internal Rewriter format from the
@@ -125,6 +126,8 @@ class rewriter
     }
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_REWRITER_H

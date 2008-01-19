@@ -23,7 +23,7 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 
-RewriterProver::RewriterProver(lps::data_specification DataSpec, RewriteStrategy strat)
+RewriterProver::RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();

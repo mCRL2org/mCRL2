@@ -20,13 +20,15 @@
 
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
-#include "mcrl2/lps/detail/data_utility.h"
+#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -62,6 +64,8 @@ struct data_variable_sort: public std::unary_function<data_variable, sort_expres
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H

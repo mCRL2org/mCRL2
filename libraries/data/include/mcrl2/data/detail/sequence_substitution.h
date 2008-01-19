@@ -7,15 +7,17 @@
 /// \file sequence_substitution.h
 /// \brief Add your file description here.
 
-#ifndef PBES_DETAIL_SEQUENCE_SUBSTITUTION_H
-#define PBES_DETAIL_SEQUENCE_SUBSTITUTION_H
+#ifndef MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#define MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
 
 #include <algorithm>
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -91,6 +93,8 @@ sequence_substitution<Container> make_sequence_substitution(const Container& c)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
 
-#endif // PBES_DETAIL_SEQUENCE_SUBSTITUTION_H
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H

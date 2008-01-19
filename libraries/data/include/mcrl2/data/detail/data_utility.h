@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/data_utility.h
+/// \file mcrl2/data/detail/data_utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_DATA_UTILITY_H
-#define MCRL2_LPS_DETAIL_DATA_UTILITY_H
+#ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
+#define MCRL2_DATA_DETAIL_DATA_UTILITY_H
 
 #include <algorithm>
 #include <iterator>
@@ -21,7 +21,9 @@
 
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -174,6 +176,8 @@ std::vector<std::string> variable_strings(data_variable_list t)
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
 
-#endif // MCRL2_LPS_DETAIL_DATA_UTILITY_H
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_DETAIL_DATA_UTILITY_H

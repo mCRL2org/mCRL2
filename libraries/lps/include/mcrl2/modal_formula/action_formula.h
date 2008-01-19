@@ -25,7 +25,7 @@ using atermpp::aterm_appl;
 using atermpp::aterm_list;
 using atermpp::aterm;
 using atermpp::term_list;
-using lps::detail::parse_variable;
+using mcrl2::data::detail::parse_variable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula

@@ -14,7 +14,9 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// \cond INTERNAL_DOCS
 struct data_variable_map_replace_helper
@@ -52,6 +54,8 @@ Term data_variable_map_replace(Term t, const std::map<data_variable, data_expres
   return atermpp::checked_replace(t, is_data_variable, data_variable_map_replace_helper(replacements));
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_VARIABLE_REPLACE_H

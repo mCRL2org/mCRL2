@@ -22,6 +22,8 @@
 
 namespace lps {
 
+using namespace mcrl2::data;
+
 /// Returns zero or more constant process parameters of the process p with initial state init.
 /// The result is returned as a map m that maps the constant parameters to their
 /// constant value.

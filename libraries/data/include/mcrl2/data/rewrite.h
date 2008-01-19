@@ -190,7 +190,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter *createRewriter(lps::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
+Rewriter *createRewriter(mcrl2::data::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.

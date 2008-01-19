@@ -12,9 +12,11 @@
 
 #include <cassert>
 #include "mcrl2/data/data.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/data_specification.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// Test is a term is a sort, and if it is equal to s
 struct compare_sort
@@ -57,15 +59,15 @@ inline data_operation_list get_constructors(const data_operation_list& fl, const
 ///\ret true if f has 1 or more arguments, false otherwise
 inline bool has_arguments(const data_operation& f)
 {
-  return !gsIsSortId(aterm_appl(f.argument(1)));
+  return !core::detail::gsIsSortId(aterm_appl(f.argument(1)));
 }
 
 //prototype
-bool is_finite(const data_operation_list& fl, const sort_expression& s, const lps::sort_expression_list visited);
+bool is_finite(const data_operation_list& fl, const sort_expression& s, const mcrl2::data::sort_expression_list visited);
 
 ///\ret true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-inline bool is_finite(const data_operation_list& fl, const lps::sort_expression_list& sl, const lps::sort_expression_list visited = lps::sort_expression_list())
+inline bool is_finite(const data_operation_list& fl, const mcrl2::data::sort_expression_list& sl, const mcrl2::data::sort_expression_list visited = mcrl2::data::sort_expression_list())
 {
   bool result = true;
   
@@ -89,7 +91,7 @@ inline bool is_finite(const data_operation_list& fl, const lps::sort_expression_
 
 ///\pre fl is a list of constructors
 ///\ret sort s is finite
-inline bool is_finite(const data_operation_list& fl, const sort_expression& s, const lps::sort_expression_list visited = lps::sort_expression_list())
+inline bool is_finite(const data_operation_list& fl, const sort_expression& s, const mcrl2::data::sort_expression_list visited = mcrl2::data::sort_expression_list())
 {
   bool result = true;
   data_operation_list cl = get_constructors(fl, s);
@@ -123,6 +125,8 @@ inline bool is_constructorsort(const sort_expression &s,const data_specification
 }
 
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_SORT_UTILITY_H

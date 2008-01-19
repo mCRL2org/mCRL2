@@ -13,12 +13,15 @@
 #include <cassert>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace lps {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label

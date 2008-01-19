@@ -16,10 +16,13 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
+using namespace core;
 
 /// \brief Data application.
 ///
@@ -30,7 +33,7 @@ class data_application: public data_expression
     /// Constructor.
     ///
     data_application()
-      : data_expression(mcrl2::core::detail::constructDataAppl())
+      : data_expression(detail::constructDataAppl())
     {}
 
     /// Constructor.
@@ -38,13 +41,13 @@ class data_application: public data_expression
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(mcrl2::core::detail::check_term_DataAppl(m_term));
+      assert(detail::check_term_DataAppl(m_term));
     }
 
     /// Constructor.
     ///
     data_application(data_expression expr, data_expression_list args)
-     : data_expression(mcrl2::core::detail::gsMakeDataAppl(expr, args))
+     : data_expression(detail::gsMakeDataAppl(expr, args))
     {}
 
     /// Returns the head of the data application.
@@ -70,15 +73,17 @@ typedef term_list<data_application> data_application_list;
 inline
 bool is_data_application(aterm_appl t)
 {
-  return mcrl2::core::detail::gsIsDataAppl(t);
+  return detail::gsIsDataAppl(t);
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::data_application;
+using mcrl2::data::data_application;
 
 template<>
 struct aterm_traits<data_application>

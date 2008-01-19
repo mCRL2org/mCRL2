@@ -158,7 +158,7 @@ using namespace mcrl2::core;
       ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_counter_example, bool a_all_violations, char* a_dot_file_name
     ):
-      f_bdd_prover(lps::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_init = ATAgetArgument(a_lps, 3);
       f_summands = ATLgetArgument(ATAgetArgument(a_lps, 2), 2);

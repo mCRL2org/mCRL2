@@ -24,12 +24,14 @@
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace lps {
+
+using namespace mcrl2::data;
 
 /// Base class for bisimulation algorithms.
 class bisimulation_algorithm

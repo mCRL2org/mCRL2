@@ -14,7 +14,9 @@
 #include <set>
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 namespace detail {
 
@@ -73,6 +75,8 @@ make_data_variable_collector(InputIterator1 first1,
 
 } // namespace detail
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DETAIL_FREE_VARIABLES_H

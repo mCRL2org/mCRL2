@@ -10,11 +10,14 @@
 #ifndef MCRL2_PBES_DETAIL_QUANTIFIER_VISITOR_H
 #define MCRL2_PBES_DETAIL_QUANTIFIER_VISITOR_H
 
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace lps {
 
 namespace detail {
+
+using namespace mcrl2::data;
 
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
 struct quantifier_visitor: public pbes_expression_visitor
@@ -51,10 +54,10 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor
   {
     for (std::vector<data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
-      if (std::find(boost::make_transform_iterator(i->begin(), detail::data_variable_name()),
-                    boost::make_transform_iterator(i->end()  , detail::data_variable_name()),
+      if (std::find(boost::make_transform_iterator(i->begin(), mcrl2::data::detail::data_variable_name()),
+                    boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name()),
                     name
-                   ) != boost::make_transform_iterator(i->end()  , detail::data_variable_name())
+                   ) != boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name())
          )
       {
         return true;

@@ -12,7 +12,9 @@
 
 #include "mcrl2/data/data.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 /// \brief Returns the concatenation of the lists l and m
 inline
@@ -38,6 +40,8 @@ data_expression_list operator+(data_expression_list l, data_variable v)
   return l + data_expression(aterm_appl(v));
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_OPERATORS_H

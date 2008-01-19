@@ -32,7 +32,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
-using namespace lps;
+using namespace mcrl2::data;
 
 struct add_zero
 {
@@ -93,7 +93,7 @@ struct data_assignment_list_replacer
 
 void test_replace()
 {
-  using namespace lps::data_expr;
+  using namespace mcrl2::data::data_expr;
 
   data_variable d("d:D");
   data_variable e("e:D");
@@ -113,7 +113,7 @@ void test_replace()
 
 void test_data_assignment_list()
 {
-  using namespace lps::data_expr;
+  using namespace mcrl2::data::data_expr;
 
   data_variable d1("d1:D");
   data_variable d2("d2:D");

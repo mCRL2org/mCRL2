@@ -18,10 +18,10 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 
-lps::data_expression test_substitution(lps::data_expression d)
+mcrl2::data::data_expression test_substitution(mcrl2::data::data_expression d)
 {
   data_variable a("i:Int");
   data_expression b = data_expression(gsMakeDataExprInt("4"));

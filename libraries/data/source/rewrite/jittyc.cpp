@@ -24,7 +24,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
 {
 	gsErrorMsg("compiling JITty rewriter is not available\n");
 	exit(1);
@@ -2889,7 +2889,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   //PRINT_AR
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(lps::data_specification DataSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -3682,7 +3682,7 @@ static void cleanup_file(char *f)
   free(f);
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(lps::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

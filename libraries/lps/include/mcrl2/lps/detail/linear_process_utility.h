@@ -24,8 +24,8 @@ namespace detail {
   std::set<identifier_string> process_parameter_names(const linear_process& p)
   {
     std::set<identifier_string> result;
-    result.insert(boost::make_transform_iterator(p.process_parameters().begin(), detail::data_variable_name()),
-                  boost::make_transform_iterator(p.process_parameters().end()  , detail::data_variable_name()));
+    result.insert(boost::make_transform_iterator(p.process_parameters().begin(), mcrl2::data::detail::data_variable_name()),
+                  boost::make_transform_iterator(p.process_parameters().end()  , mcrl2::data::detail::data_variable_name()));
     return result;
   }
 
@@ -33,8 +33,8 @@ namespace detail {
   std::set<identifier_string> free_variable_names(const linear_process& p)
   {
     std::set<identifier_string> result;
-    result.insert(boost::make_transform_iterator(p.free_variables().begin(), detail::data_variable_name()),
-                  boost::make_transform_iterator(p.free_variables().end()  , detail::data_variable_name()));
+    result.insert(boost::make_transform_iterator(p.free_variables().begin(), mcrl2::data::detail::data_variable_name()),
+                  boost::make_transform_iterator(p.free_variables().end()  , mcrl2::data::detail::data_variable_name()));
     return result;
   }
 
@@ -45,8 +45,8 @@ namespace detail {
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
       result.insert(
-        boost::make_transform_iterator(i->summation_variables().begin(), detail::data_variable_name()),
-        boost::make_transform_iterator(i->summation_variables().end(),   detail::data_variable_name())
+        boost::make_transform_iterator(i->summation_variables().begin(), mcrl2::data::detail::data_variable_name()),
+        boost::make_transform_iterator(i->summation_variables().end(),   mcrl2::data::detail::data_variable_name())
       );
     }
     return result;

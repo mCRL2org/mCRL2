@@ -132,7 +132,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     CVC3::Expr SMT_Solver_CVC_Fast::translate_clause(ATermAppl a_clause) {
-      using namespace lps::data_expr;
+      using namespace mcrl2::data::data_expr;
 
       if (is_not(a_clause)) {
         return translate_not(a_clause);

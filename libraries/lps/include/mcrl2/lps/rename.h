@@ -22,9 +22,11 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/detail/linear_process_utility.h"
-#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
 namespace lps {
+
+using namespace mcrl2::data;
 
 /// \cond INTERNAL_DOCS
 /// Generates a renaming of process parameters of the process p. The parameters are

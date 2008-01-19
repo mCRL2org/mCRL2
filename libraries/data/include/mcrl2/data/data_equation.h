@@ -17,11 +17,14 @@
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::aterm;
+using namespace core;
 
 /// \brief A conditional data equation. The equality holds if
 /// the condition evaluates to true. A declaration of variables
@@ -53,7 +56,7 @@ class data_equation: public aterm_appl
     data_equation(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(mcrl2::core::detail::check_rule_DataEqn(m_term));
+      assert(detail::check_rule_DataEqn(m_term));
       aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
@@ -69,7 +72,7 @@ class data_equation: public aterm_appl
                   data_expression    lhs,
                   data_expression    rhs
                  )
-     : aterm_appl(mcrl2::core::detail::gsMakeDataEqn(variables, condition, lhs, rhs)),
+     : aterm_appl(detail::gsMakeDataEqn(variables, condition, lhs, rhs)),
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
@@ -141,15 +144,17 @@ typedef term_list<data_equation> data_equation_list;
 inline
 bool is_data_equation(aterm_appl t)
 {
-  return mcrl2::core::detail::gsIsDataEqn(t);
+  return detail::gsIsDataEqn(t);
 }
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-using lps::data_equation;
+using mcrl2::data::data_equation;
 
 template<>
 struct aterm_traits<data_equation>

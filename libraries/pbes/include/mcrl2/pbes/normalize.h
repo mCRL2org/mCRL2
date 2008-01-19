@@ -16,6 +16,8 @@
 
 namespace lps {
 
+using namespace mcrl2::data;
+
 /// Visitor for checking if a pbes expression is normalized.
 struct is_normalized_visitor : public pbes_expression_visitor
 {

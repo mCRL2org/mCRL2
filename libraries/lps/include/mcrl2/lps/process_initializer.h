@@ -18,11 +18,13 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
-#include "mcrl2/lps/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 
 namespace lps {
 
 using atermpp::aterm_appl;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
 /// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
@@ -99,9 +101,9 @@ class process_initializer: public aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), detail::data_assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , detail::data_assignment_lhs())
+      if (mcrl2::data::detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), mcrl2::data::detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , mcrl2::data::detail::data_assignment_lhs())
               )
          )
       {

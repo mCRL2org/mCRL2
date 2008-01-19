@@ -20,18 +20,19 @@
 
 #include "boost/format.hpp"
 #include "mcrl2/data/data.h"
-#include "mcrl2/lps/detail/data_utility.h"
+#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
 
-namespace lps {
+namespace mcrl2 {
+
+namespace data {
 
 using atermpp::aterm;
 using atermpp::aterm_traits;
-
-using namespace mcrl2::core::detail;
+using namespace detail;
 
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
@@ -65,7 +66,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   for (data_variable_list::iterator k = t.begin(); k != t.end(); ++k)
   {
     identifier_string name(std::string(k->name()) + postfix);
-    result = push_front(result, data_variable(gsMakeDataVarId(name, k->sort())));
+    result = push_front(result, data_variable(name, k->sort()));
   }
   return atermpp::reverse(result);
 }
@@ -131,7 +132,7 @@ template <typename Term>
 data_variable fresh_variable(Term context, sort_expression s, std::string hint)
 {
   identifier_string id = fresh_identifier(context, hint);
-  return data_variable(gsMakeDataVarId(id, s));
+  return data_variable(id, s);
 }
 
 /// \brief Returns all data variables that occur in the term t
@@ -260,7 +261,7 @@ class fresh_variable_generator
         id = identifier_string(name);
       }
       m_identifiers.insert(id);
-      return data_variable(gsMakeDataVarId(id, m_sort));
+      return data_variable(id, m_sort);
     }
 
     /// Returns a unique variable with the same sort as the variable v, and with
@@ -277,10 +278,12 @@ class fresh_variable_generator
         id = identifier_string(name);
       }
       m_identifiers.insert(id);
-      return data_variable(gsMakeDataVarId(id, v.sort()));
+      return data_variable(id, v.sort());
     }
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_UTILITY_H

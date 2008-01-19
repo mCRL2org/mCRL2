@@ -12,7 +12,7 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/lps/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -22,6 +22,7 @@ namespace lps {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
+using namespace mcrl2::data;
 
 /// \brief pbes equation.
 ///
@@ -116,9 +117,9 @@ class pbes_equation: public aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (detail::sequence_contains_duplicates(
-             boost::make_transform_iterator(variable().parameters().begin(), detail::data_variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , detail::data_variable_name())
+      if (mcrl2::data::detail::sequence_contains_duplicates(
+             boost::make_transform_iterator(variable().parameters().begin(), mcrl2::data::detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , mcrl2::data::detail::data_variable_name())
             )
          )
       {
@@ -129,11 +130,11 @@ class pbes_equation: public aterm_appl
       // check 2)
       detail::quantifier_visitor qvisitor;
       qvisitor.visit(formula());
-      if (detail::sequences_do_overlap(
-             boost::make_transform_iterator(variable().parameters().begin(), detail::data_variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , detail::data_variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.begin()     , detail::data_variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.end()       , detail::data_variable_name())
+      if (mcrl2::data::detail::sequences_do_overlap(
+             boost::make_transform_iterator(variable().parameters().begin(), mcrl2::data::detail::data_variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , mcrl2::data::detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.begin()     , mcrl2::data::detail::data_variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.end()       , mcrl2::data::detail::data_variable_name())
            )
          )
       {

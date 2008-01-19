@@ -11,16 +11,21 @@
 #define MCRL2_PBES_DETAIL_PBES_FUNCTIONAL_H
 
 #include <functional>
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/pbes/pbes_equation.h"
 
 namespace lps {
 
 namespace detail {
 
+using namespace mcrl2::core;
+using namespace mcrl2::data;
+
 /// \brief Function object that returns the name of the binding variable of a pbes equation
 struct pbes_equation_variable_name: public std::unary_function<data_variable, identifier_string>
 {
-  identifier_string operator()(const pbes_equation& e) const
+  mcrl2::core::identifier_string operator()(const lps::pbes_equation& e) const
   {
     return e.variable().name();
   }

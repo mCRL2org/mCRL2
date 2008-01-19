@@ -18,7 +18,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/pbes/detail/sequence_substitution.h"
+#include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace lps {
@@ -44,10 +44,10 @@ struct quantifier_rename_builder: public pbes_expression_builder
   {
     for (std::vector<data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
-      if (std::find(boost::make_transform_iterator(i->begin(), detail::data_variable_name()),
-                    boost::make_transform_iterator(i->end()  , detail::data_variable_name()),
+      if (std::find(boost::make_transform_iterator(i->begin(), mcrl2::data::detail::data_variable_name()),
+                    boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name()),
                     name
-                   ) != boost::make_transform_iterator(i->end()  , detail::data_variable_name())
+                   ) != boost::make_transform_iterator(i->end()  , mcrl2::data::detail::data_variable_name())
          )
       {
         return true;

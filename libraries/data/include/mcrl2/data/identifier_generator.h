@@ -10,14 +10,18 @@
 #ifndef MCRL2_DATA_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_IDENTIFIER_GENERATOR_H
 
+#include <set>
 #include <string>
 #include <sstream>
 #include <boost/format.hpp>
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/utility.h"
 
-namespace lps {
+namespace mcrl2 {
 
-using namespace mcrl2::core;
+namespace data {
+
+using namespace core;
 
 /// A class that generates identifiers. A context is maintained
 /// containing already used identifiers. This class is useful for
@@ -110,6 +114,8 @@ class identifier_generator
     }
 };
 
-} // namespace lps
+} // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_IDENTIFIER_GENERATOR_H

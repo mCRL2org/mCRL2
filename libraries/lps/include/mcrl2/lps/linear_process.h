@@ -22,14 +22,17 @@
 #include "mcrl2/data/utility.h"        // find_variables
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/lps/detail/sequence_algorithm.h"
-#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/free_variables.h"
 
 namespace lps {
 
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
+using namespace mcrl2::core::detail;
 
 /// \cond INTERNAL_DOCS
 struct is_non_delta_summand
@@ -155,13 +158,13 @@ class linear_process: public aterm_appl
 
       // TODO: the efficiency of this implementation is not optimal
       std::set<data_variable> result;
-      std::set<data_variable> parameters = detail::make_set(process_parameters());
+      std::set<data_variable> parameters = mcrl2::data::detail::make_set(process_parameters());
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        std::set<data_variable> summation_variables = detail::make_set(i->summation_variables());
+        std::set<data_variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
         std::set<data_variable> used_variables = find_variables(make_list(i->condition(), i->actions(), i->time(), i->assignments()));
-        std::set<data_variable> bound_variables = detail::set_union(parameters, summation_variables);
-        std::set<data_variable> free_variables = detail::set_difference(used_variables, bound_variables);
+        std::set<data_variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
+        std::set<data_variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());
       }
       return result;
@@ -183,7 +186,7 @@ class linear_process: public aterm_appl
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // check 1)
-      std::set<data_variable> declared_free_variables  = detail::make_set(free_variables());
+      std::set<data_variable> declared_free_variables  = mcrl2::data::detail::make_set(free_variables());
       std::set<data_variable> occurring_free_variables = compute_free_variables(*this);
       if (!(std::includes(declared_free_variables.begin(),
                           declared_free_variables.end(),
@@ -208,14 +211,14 @@ class linear_process: public aterm_appl
       }
 
       // check 2)
-      if (!detail::unique_names(m_process_parameters))
+      if (!mcrl2::data::detail::unique_names(m_process_parameters))
       {
         std::cerr << "linear_process::is_well_typed() failed: process parameters " << pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!detail::unique_names(m_free_variables))
+      if (!mcrl2::data::detail::unique_names(m_free_variables))
       {
         std::cerr << "linear_process::is_well_typed() failed: free variables " << pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
@@ -229,7 +232,7 @@ class linear_process: public aterm_appl
       }
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!detail::check_variable_names(i->summation_variables(), names))
+        if (!mcrl2::data::detail::check_variable_names(i->summation_variables(), names))
         {
           std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
           return false;
@@ -239,7 +242,7 @@ class linear_process: public aterm_appl
       // check 5)
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!detail::check_assignment_variables(i->assignments(), m_process_parameters))
+        if (!mcrl2::data::detail::check_assignment_variables(i->assignments(), m_process_parameters))
         {
           std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
@@ -262,10 +265,10 @@ inline
 std::set<data_variable> compute_free_variables(const linear_process& process)
 {
   std::set<data_variable> result;
-  std::set<data_variable> process_parameters = detail::make_set(process.process_parameters());
+  std::set<data_variable> process_parameters = mcrl2::data::detail::make_set(process.process_parameters());
   for (summand_list::iterator i = process.summands().begin(); i != process.summands().end(); ++i)
   {
-    detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
+    lps::detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
   }
   return result;
 }

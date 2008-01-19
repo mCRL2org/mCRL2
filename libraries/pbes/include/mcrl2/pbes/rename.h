@@ -10,10 +10,13 @@
 #ifndef MCRL2_PBES_RENAME_H
 #define MCRL2_PBES_RENAME_H
 
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 
 namespace lps {
+
+using namespace mcrl2::data;
 
 /// Renames quantifier variables in the expression p, such that within the scope
 /// of a quantifier variable, no other quantifier variables or free variables
@@ -22,7 +25,7 @@ inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data_variable_list& free_variables)
 {
   multiset_identifier_generator generator(free_variables);
-  return detail::make_quantifier_rename_builder(generator).visit(p);
+  return lps::detail::make_quantifier_rename_builder(generator).visit(p);
 }
 
 } // namespace lps

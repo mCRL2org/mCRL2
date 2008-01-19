@@ -14,6 +14,8 @@
 
 namespace lps {
 
+using namespace mcrl2::data;
+
 /// A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
 /// must be overridden to add behavior. If the visit_<node> function returns true,

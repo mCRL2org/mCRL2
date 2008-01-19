@@ -22,11 +22,13 @@
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/action_utility.h"
-#include "mcrl2/lps/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 
 namespace lps {
 
 using atermpp::aterm_appl;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
 /// \brief LPS summand.
 ///
@@ -239,7 +241,7 @@ class summand: public aterm_appl
       }
 
       // check 4)
-      if (!detail::unique_names(m_summation_variables))
+      if (!mcrl2::data::detail::unique_names(m_summation_variables))
       {
         std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
         return false;
@@ -247,8 +249,8 @@ class summand: public aterm_appl
 
       // check 5)
       if (sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), detail::data_assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , detail::data_assignment_lhs())
+               boost::make_transform_iterator(m_assignments.begin(), mcrl2::data::detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , mcrl2::data::detail::data_assignment_lhs())
               )
          )
       {

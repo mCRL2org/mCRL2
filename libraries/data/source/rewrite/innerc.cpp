@@ -16,7 +16,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
 {
 	gsMessage("error: compiling Innermost rewriter is not available\n");
 	exit(1);
@@ -1517,7 +1517,7 @@ static int getArity(ATermAppl op)
   return ATgetLength(gsGetSortExprDomain(sort));
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(lps::data_specification DataSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -2241,7 +2241,7 @@ static void cleanup_file(char *f)
   free(f);
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(lps::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

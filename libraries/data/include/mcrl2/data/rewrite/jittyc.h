@@ -19,7 +19,7 @@ typedef unsigned int* nfs_array;
 class RewriterCompilingJitty: public Rewriter
 {
 	public:
-		RewriterCompilingJitty(lps::data_specification DataSpec);
+		RewriterCompilingJitty(mcrl2::data::data_specification DataSpec);
 		~RewriterCompilingJitty();
 
 		RewriteStrategy getStrategy();
@@ -85,7 +85,7 @@ class RewriterCompilingJitty: public Rewriter
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
 		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
-		void CompileRewriteSystem(lps::data_specification DataSpec);
+		void CompileRewriteSystem(mcrl2::data::data_specification DataSpec);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);

@@ -17,14 +17,17 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
-#include "mcrl2/lps/detail/data_utility.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/detail/data_utility.h"
 
 namespace lps {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
-using lps::detail::parse_variable;
+using mcrl2::data::detail::parse_variable;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 
 /// \brief A propositional variable declaration.
 ///

@@ -19,7 +19,7 @@ using namespace mcrl2::core;
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      lps::data_specification data_spec,
+      mcrl2::data::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit
     ) {

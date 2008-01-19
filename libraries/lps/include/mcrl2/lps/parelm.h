@@ -20,10 +20,12 @@
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
 namespace lps {
+
+using namespace mcrl2::data;
 
 /// Returns the data variables that appear in the condition, action or time of
 /// the summands in the sequence [first, last[.
