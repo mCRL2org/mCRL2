@@ -2,9 +2,9 @@
 #define SETTINGS_H
 
 // Locations
-#define PLUGIN_DIRECTORY "/Users/omnidot/Applications/mcrl2//lib/mcrl2/plugins"
-#define DATA_DIRECTORY   "/Users/omnidot/Applications/mcrl2//share/mcrl2"
-#define TOOL_DIRECTORY   "/Users/omnidot/Applications/mcrl2//bin"
+#define PLUGIN_DIRECTORY "C:/mcrl2/lib/mcrl2/plugins"
+#define DATA_DIRECTORY   "C:/mcrl2/share/mcrl2"
+#define TOOL_DIRECTORY   "C:/mcrl2/bin"
 
 // Build options
 #define CC               "gcc"
@@ -22,8 +22,8 @@
 #define SLDFLAGS         ""
 
 // Preprocessor and linker options for the ATerm library
-#define ATERM_CPPFLAGS   "-m32 -I\"/Users/omnidot/Applications/mcrl2//include/mcrl2/aterm\""
-#define ATERM_LDFLAGS    "-L\"/Users/omnidot/Applications/mcrl2//lib/mcrl2\" -lATerm"
+#define ATERM_CPPFLAGS   "-m32 -I\"c:/mcrl2/include/mcrl2/aterm\""
+#define ATERM_LDFLAGS    "-L\"c:/mcrl2/lib/mcrl2\" -lATerm"
 
 //#define MCRL2_BCG
 
