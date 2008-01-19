@@ -174,7 +174,7 @@ int main(int argc, char **argv)
     PrintRewriteStrategy(stderr, opt_strat);  
     fprintf(stderr, "...\n");
   }
-  rewr = createRewriter(lps::data_specification(ATAgetArgument(result,0)), opt_strat);
+  rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(result,0)), opt_strat);
 
   //rewrite result
   if (opt_benchmark) {

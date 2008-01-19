@@ -120,12 +120,6 @@ namespace mcrl2 {
       
         protected:
 
-          // name of the prover used in messages
-          static char* name();
-
-          // calls exec
-          static void exec();
-
           // \brief Calls one of the exec functions
           static bool execute(std::string const& benchmark);
 
@@ -150,7 +144,7 @@ namespace mcrl2 {
       
         private:
       
-          inline static char* name() {
+          inline static char const* name() {
             return "CVC3";
           }
       
@@ -183,7 +177,7 @@ namespace mcrl2 {
       
         private:
       
-          inline static char* name() {
+          inline static char const* name() {
             return "Ario";
           }
       

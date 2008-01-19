@@ -32,9 +32,9 @@
 
 
 
+using namespace mcrl2::data;
 
 // CLASS SORT_INSTANTIATOR
-
 
 //======================================================================
 // enumerates all possible data expressions constructed by sort s

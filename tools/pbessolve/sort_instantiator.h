@@ -15,27 +15,23 @@
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/sort_utility.h"
 
-using namespace lps;
-
 // enumerates finite sorts
 // i.e., produces all possible instantiations
 // for a given sort, or set of sorts
-
-
 typedef struct {
-  sort_expression s;
-  data_expression_list del;
+  mcrl2::data::sort_expression s;
+  mcrl2::data::data_expression_list del;
 } t_sdel;
   
   
 class sort_instantiator {
  private:
   std::vector<t_sdel> instantiated_sorts;
-  data_operation_list fl;
+  mcrl2::data::data_operation_list fl;
  public:
   sort_instantiator() {};
-  void set_data_operation_list(data_operation_list flist);
-  void instantiate_sorts(lps::sort_expression_list sl);
-  data_expression_list get_enumeration(sort_expression s);    
-  bool is_finite(sort_expression s);
+  void set_data_operation_list(mcrl2::data::data_operation_list flist);
+  void instantiate_sorts(mcrl2::data::sort_expression_list sl);
+  mcrl2::data::data_expression_list get_enumeration(mcrl2::data::sort_expression s);    
+  bool is_finite(mcrl2::data::sort_expression s);
 } ;
