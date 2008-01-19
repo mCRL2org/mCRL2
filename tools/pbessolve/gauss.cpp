@@ -408,8 +408,8 @@ data_expression pbes_to_data(pbes_expression e)
 //======================================================================
 {
  using namespace pbes_expr;
- namespace dname = lps::data_expr;
- namespace sname = lps::sort_expr;
+ namespace dname = mcrl2::data::data_expr;
+ namespace sname = mcrl2::data::sort_expr;
  
 #ifdef debug2
  gsVerboseMsg("P2D: %s\n",pp(e).c_str());
@@ -520,9 +520,9 @@ data_expression pbes_to_data(pbes_expression e)
  pbes_expression data_to_pbes_lazy(data_expression d)
 //======================================================================
 {
- namespace dname = lps::data_expr;
+ namespace dname = mcrl2::data::data_expr;
  namespace pname = lps::pbes_expr;
- namespace sname = lps::sort_expr;
+ namespace sname = mcrl2::data::sort_expr;
  
  if (dname::is_true(d))
    return pname::true_();
@@ -639,9 +639,9 @@ data_expression pbes_to_data(pbes_expression e)
 
   // arg1 is not reliable
  
- namespace dname = lps::data_expr;
+ namespace dname = mcrl2::data::data_expr;
  namespace pname = lps::pbes_expr;
- namespace sname = lps::sort_expr;
+ namespace sname = mcrl2::data::sort_expr;
  
  data_expression head = DEPRECATED_FUNCTION_HEAD(d);
  if (is_data_variable(head))
@@ -930,7 +930,7 @@ data_expression data_expression_simplify
 (data_expression d, data_variable_list *fv, BDD_Prover *prover)
 //======================================================================
 {
-  namespace dname = lps::data_expr;
+  namespace dname = mcrl2::data::data_expr;
   
   data_expression e = d;
   

@@ -81,7 +81,7 @@ void sort_instantiator::set_data_operation_list (data_operation_list flist)
   fl = flist;
 }
 
-void sort_instantiator::instantiate_sorts (lps::sort_expression_list sl)
+void sort_instantiator::instantiate_sorts (mcrl2::data::sort_expression_list sl)
 {
   for (sort_expression_list::iterator ss = sl.begin(); ss != sl.end(); ss++){
     t_sdel new_isort;
@@ -102,7 +102,7 @@ data_expression_list sort_instantiator::get_enumeration (sort_expression ss)
 
 bool sort_instantiator::is_finite(sort_expression s) 
 {
-  return lps::is_finite(fl,s);
+  return mcrl2::data::is_finite(fl,s);
 };
 
 // END CLASS   SORT_INSTANTIATOR

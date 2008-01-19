@@ -47,7 +47,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::data::data_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
@@ -177,7 +177,7 @@ lps::specification untime(const lps::specification& specification) {
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = fresh_variable(aterm_appl(specification), lps::sort_expr::real(), "last_action_time");
+  last_action_time = fresh_variable(aterm_appl(specification), mcrl2::data::sort_expr::real(), "last_action_time");
   untime_process_parameters = push_back(lps.process_parameters(), last_action_time);
       
   // Transpose the original summand list, and see if there are summands with time
@@ -213,11 +213,11 @@ lps::specification untime(const lps::specification& specification) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	lps::data_variable time_var = fresh_variable(aterm_appl(specification), lps::sort_expr::real(), "time_var");
+	mcrl2::data::data_variable time_var = fresh_variable(aterm_appl(specification), lps::sort_expr::real(), "time_var");
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
-	untime_condition = and_(i->condition(), lps::data_expr::greater(time_var, data_expression(last_action_time)));
+	untime_condition = and_(i->condition(), mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)));
 
 
 	// Extend original assignments to include t.i(d,e.i)
