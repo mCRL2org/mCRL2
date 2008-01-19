@@ -89,7 +89,7 @@ BEGIN_EVENT_TABLE(LTSViewApp, wxApp)
 END_EVENT_TABLE()
 
 void LTSViewApp::printHelp(std::string const &name) {
-  cout <<         "Usage: " << name << "[OPTION]... [INFILE]"
+  cout <<         "Usage: " << name << " [OPTION]... [INFILE]"
        << endl << "Start the LTSView application and open INFILE. If INFILE is not"
        << endl << "supplied then LTSView is started without opening an LTS."
        << endl
@@ -119,7 +119,7 @@ bool LTSViewApp::OnInit() {
     return false;
   }
   if (cmdParser.Found(wxT("h"))) {
-    printHelp(argv[0]);
+    printHelp(std::string(wxString(argv[0]).fn_str()));
     return false;
   }
   if (cmdParser.Found(wxT("version"))) {
