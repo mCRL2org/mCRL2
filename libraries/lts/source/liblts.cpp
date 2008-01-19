@@ -16,7 +16,6 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/setup.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
