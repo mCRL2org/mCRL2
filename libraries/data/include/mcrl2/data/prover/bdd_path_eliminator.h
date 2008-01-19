@@ -6,8 +6,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/data/prover/bdd_simplifier.h"
-#include "mcrl2/data/prover/smt_solver_ario.h"
-#include "mcrl2/data/prover/smt_solver_cvc.h"
+#include "mcrl2/data/prover/smt_lib_solver.h"
 #include "mcrl2/data/prover/smt_solver_cvc_fast.h"
 #include "mcrl2/utilities/bdd_manipulator.h"
 #include "mcrl2/utilities/bdd_info.h"

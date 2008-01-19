@@ -132,9 +132,17 @@ using namespace mcrl2::core;
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
       if (a_solver_type == solver_type_ario) {
-        f_smt_solver = new SMT_Solver_Ario();
+        if (mcrl2::data::prover::ario_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::data::prover::ario_smt_solver();
+
+          return;
+        }
       } else if (a_solver_type == solver_type_cvc) {
-        f_smt_solver = new SMT_Solver_CVC();
+        if (mcrl2::data::prover::cvc_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::data::prover::cvc_smt_solver();
+
+          return;
+        }
       } else if (a_solver_type == solver_type_cvc_fast) {
 #ifdef HAVE_CVC
         f_smt_solver = new SMT_Solver_CVC_Fast();
@@ -146,8 +154,9 @@ using namespace mcrl2::core;
         gsErrorMsg("An unknown SMT solver type was passed as argument.\n");
       }
 #else
-      gsErrorMsg("An unknown SMT solver type was passed as argument.\n");
+      gsErrorMsg("No SMT solvers available on this platform.\n");
 #endif // _MSC_VER
+      exit(1);
     }
 
     // --------------------------------------------------------------------------------------------

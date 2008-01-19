@@ -8,6 +8,7 @@
 #include "mcrl2/data/prover/smt_solver.h"
 #include "mcrl2/utilities/expression_info.h"
 #include "mcrl2/utilities/sort_info.h"
+
 #include <string>
 
   /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
@@ -88,5 +89,122 @@ class SMT_LIB_Solver: public SMT_Solver {
     SMT_LIB_Solver();
     virtual ~SMT_LIB_Solver();
 };
+
+namespace mcrl2 {
+  namespace data {
+    namespace prover {
+
+      /**
+       * Template class for SMT provers that come as an external binary and use the
+       * SMT-lib format. Input to the tool is specified on standard input,
+       * output is read from standard output and matches one of the strings:
+       * "sat", "unsat", "unknown".
+       *
+       * Parameter T follows the curiously recurring template pattern (CRTP). Type T
+       * is required to have the name and exec methods as in the example below.
+       *
+       *  \code
+       *  class cvc_smt_solver : public binary_smt_solver< cvc_smt_solver > {
+       *    inline static char* name() {
+       *      return "CVC3";
+       *    }
+       * 
+       *    inline static void exec() {
+       *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
+       *    }
+       *  };
+       *  \endcode
+       **/
+      template < typename T >
+      class binary_smt_solver {
+      
+        protected:
+
+          // name of the prover used in messages
+          static char* name();
+
+          // calls exec
+          static void exec();
+
+          // \brief Calls one of the exec functions
+          static bool execute(std::string const& benchmark);
+
+        public:
+
+          // \brief Checks the availability/usability of the prover
+          static bool usable();
+      };
+
+#if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+      /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
+      /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
+      /// of propositional formulas. To use the solver CVC / the directory containing
+      /// the corresponding executable must be in the path.
+      ///
+      /// The static method usable can be used to check checks if CVC's executable is indeed available.
+      ///
+      /// The method SMT_Solver_CVC::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+      /// indicates whether or not this formula is satisfiable. 
+      class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_solver > {
+        friend class binary_smt_solver< cvc_smt_solver >;
+      
+        private:
+      
+          inline static char* name() {
+            return "CVC3";
+          }
+      
+          inline static void exec() {
+            ::execlp("cvc3", "cvc3", "-lang", "smt-lib", 0);
+          }
+      
+        public:
+      
+          /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+          /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+          /// clauses
+          bool is_satisfiable(ATermList a_formula) {
+            translate(a_formula);
+
+            return execute(f_benchmark);
+          }
+      };
+
+      /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver Ario 1.1
+      /// (http://www.eecs.umich.edu/~ario/) to determine the satisfiability of propositional formulas. To use the solver Ario
+      /// 1.1, the directory containing the corresponding executable must be in the path.
+      ///
+      /// The static method usable can be used to check checks if CVC's executable is indeed available.
+      ///
+      /// The method is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+      /// indicates whether or not this formula is satisfiable. 
+      class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_smt_solver > {
+        friend class binary_smt_solver< ario_smt_solver >;
+      
+        private:
+      
+          inline static char* name() {
+            return "Ario";
+          }
+      
+          inline static void exec() {
+            ::execlp("ario", "ario", 0);
+          }
+      
+        public:
+      
+          /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+          /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+          /// clauses
+          bool is_satisfiable(ATermList a_formula) {
+            translate(a_formula);
+
+            return execute(f_benchmark);
+          }
+      };
+#endif
+    }
+  }
+}
 
 #endif

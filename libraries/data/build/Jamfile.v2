@@ -22,8 +22,6 @@ alias data.main
        : <use>/libraries/lps//headers
          <use>/libraries/core//headers
          <use>/libraries/utilities//headers
-         <toolset>gcc:<use>/libraries//pstream
-         <toolset>darwin:<use>/libraries//pstream
          <use>/site-config//cvc
        : <threading>single
        : <use>headers
