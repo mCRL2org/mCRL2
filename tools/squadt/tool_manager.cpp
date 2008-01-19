@@ -50,7 +50,7 @@ namespace squadt {
   /// \cond INTERNAL_DOCS
   const long tool_manager_impl::default_port = 10949;
 
-  char const* tool_manager_impl::default_tools[] = {"diagraphica.app", "lps2pbes", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
+  char const* tool_manager_impl::default_tools[] = {"diagraphica.app", "lps2pbes", "lpsactionrename", "lpsbinary", "lpsconstelm", "lpsdecluster", "lpsinfo",
                                                     "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm", "ltsconvert", "ltsinfo",
                                                     "ltsgraph.app", "ltsview.app", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim.app", 0};
 

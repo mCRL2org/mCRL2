@@ -27,7 +27,7 @@ for library in aterm pstream svc ticpp getopt {
 }
 
 # Additional library
-use-project /libraries/tipi            : $(TOP)/tools/squadt/libraries/tipi/build ;
+use-project /libraries/tipi : $(TOP)/tools/squadt/libraries/tipi/build ;
 
 # Shared build large large mcrl2 library
 lib mcrl2
