@@ -13,7 +13,6 @@ project core
 obj mcrl2parser.o
        : source/mcrl2parser.cpp
        : <use>/libraries/utilities//headers
-         <use>/libraries/data//headers
          <include>../include/mcrl2/core/detail
        ;
 
@@ -33,7 +32,6 @@ alias core.main
          source/data_reconstruct.cpp
          source/alpha.cpp
        : <use>/libraries/lps//headers
-         <use>/libraries/data//headers
          <use>/libraries/utilities//headers
        : <threading>single
        : <os>LINUX:<library>/site-config//m
@@ -44,7 +42,6 @@ alias core.main
 lib core
        : core.main
        : <link>static
-         <use>/libraries/data//headers
        :
        : <library>/libraries//aterm
          <library>/libraries//data
@@ -55,7 +52,6 @@ lib core
 alias core
        : /libraries//mcrl2
        : <link>shared
-         <use>/libraries/data//headers
        ;
 
 alias core.alias
