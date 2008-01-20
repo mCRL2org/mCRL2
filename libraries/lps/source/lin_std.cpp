@@ -8951,7 +8951,7 @@ static ATermAppl transform(
   determinewhetherprocessescanterminate(init);
   init=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
   if (determinewhetherprocessescontaintime(init) && !(add_delta))
-  { gsMessage("Warning: specification contains time due to translating c->p to c->p<>delta@0. Use -D to suppress.\n");
+  { gsMessage("Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add delta summands in Squadt or -D as commandline option to suppress.\n");
   }
   pcrlprocesslist=collectPcrlProcesses(init);
 
