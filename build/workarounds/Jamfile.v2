@@ -8,8 +8,8 @@ project workarounds
        ;
 
 # Cygwin
-alias configuration : : <os>CYGWIN :
-       : <include>$(TOP)/build/workarounds
+alias configuration : : <os>CYGWIN <toolset>gcc :
+       : <include>$(TOP)/build/workarounds/cygwin
        ;
 
 # MinGW
