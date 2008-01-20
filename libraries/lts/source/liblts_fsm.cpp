@@ -140,13 +140,13 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
     } else if ( type == lts_mcrl ) {
       for (unsigned int i=0; i<nstates; i++)
       {
-	ATermList m = ATmakeList0();
+        ATermList m = ATmakeList0();
         for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
         {
           ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
-	  m = ATinsert(m,a);
+          m = ATinsert(m,a);
         }
-	state_values[i] = (ATerm) m;
+        state_values[i] = (ATerm) m;
       }
     }
     return true;
@@ -170,38 +170,6 @@ bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lps::speci
 
 bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 {
-  // create arrays for fan in/out
-  unsigned int *in  = (unsigned int*) malloc(nstates*sizeof(unsigned int));
-  unsigned int *out = (unsigned int*) malloc(nstates*sizeof(unsigned int));
-  if( (in==NULL) || (out==NULL) )
-  {
-    gsErrorMsg("malloc failed"); 
-    exit(1);
-  }
-
-  // initialize arrays
-  for(unsigned int i=0; i<nstates; i++)
-  {
-    in[i]  = 0;
-    out[i] = 0;
-  }
-
-  // compute fan in, fan out, and edges
-  gsVerboseMsg("computing fan in/out...\n");
-  unsigned int max_in = 0;
-  unsigned int max_out = 0;
-  for(unsigned int i=0; i<ntransitions; i++)
-  {
-    if ( (++out[transitions[i].from]) > max_out )
-    {
-      max_out = out[transitions[i].from];
-    }
-    if ( (++in[transitions[i].to]) > max_in )
-    {
-      max_in = in[transitions[i].to];
-    }
-  }
-
   // determine number of state parameters
   unsigned int num_params;
   if ( (type != lts_none) && state_info && (nstates > 0) )
@@ -266,18 +234,17 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     } else {
       if ( type == lts_mcrl )
       {
-	std::string s;
-	s = ATwriteToString(ATgetFirst(ATLgetFirst(params)));
-	s = s.substr(1,s.size()-3);
+        std::string s;
+        s = ATwriteToString(ATgetFirst(ATLgetFirst(params)));
+        s = s.substr(1,s.size()-3);
         os << s << "(" << ATgetLength(vals) << ") ";
-	s = ATwriteToString(ATgetFirst(ATgetNext(ATLgetFirst(params))));
-	s = s.substr(1,s.size()-2);
-        os << s << " ";
+        s = ATwriteToString(ATgetFirst(ATgetNext(ATLgetFirst(params))));
+        s = s.substr(1,s.size()-2);
+        os << s;
       } else { // type == lts_mcrl2
         PrintPart_CXX(os,ATgetFirst(ATLgetFirst(params)),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
         PrintPart_CXX(os,ATgetFirst(ATgetNext(ATLgetFirst(params))),ppDefault);
-        os << " ";
       }
 
       params = ATgetNext(params);
@@ -300,24 +267,6 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
     os << std::endl;;
   }
-
-  // print additional "parameters"
-  os << "fan_in(" << max_in+1 << ") Nat ";
-  for (unsigned int i=0; i<=max_in; i++)
-  {
-    os << " \"" << i << "\"";
-  }
-  os << std::endl;
-
-  os << "fan_out(" << max_out+1 << ") Nat ";
-  for (unsigned int i=0; i<=max_out; i++)
-  {
-    os << " \"" << i << "\"";
-  }
-  os << std::endl;
- 
-  os << "node_nr(0)" << std::endl;
-
 
   // print states
   gsVerboseMsg("writing states...\n");
@@ -349,9 +298,12 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     for(unsigned int j=0; !ATisEmpty(state_pars); state_pars=ATgetNext(state_pars),j++)
     {
       ATerm val = ATgetFirst(state_pars);
-      os << ATindexedSetGetIndex(set[j],val) << " ";
+      if (j > 0) {
+        os << " ";
+      }
+      os << ATindexedSetGetIndex(set[j],val);
     }
-    os << in[idx] << " " << out[idx] << " " << i+1 << std::endl;
+    os << std::endl;
   }
   
 
@@ -392,8 +344,6 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
   }
   free(set);
-  free(out);
-  free(in);
 
   return true;
 }

@@ -43,13 +43,10 @@
      SECSEP = 259,
      LPAR = 260,
      RPAR = 261,
-     FANIN = 262,
-     FANOUT = 263,
-     NODENR = 264,
-     ARROW = 265,
-     NUMBER = 266,
-     ID = 267,
-     QUOTED = 268
+     ARROW = 262,
+     NUMBER = 263,
+     ID = 264,
+     QUOTED = 265
    };
 #endif
 /* Tokens.  */
@@ -57,26 +54,23 @@
 #define SECSEP 259
 #define LPAR 260
 #define RPAR 261
-#define FANIN 262
-#define FANOUT 263
-#define NODENR 264
-#define ARROW 265
-#define NUMBER 266
-#define ID 267
-#define QUOTED 268
+#define ARROW 262
+#define NUMBER 263
+#define ID 264
+#define QUOTED 265
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "fsmparser.yy"
+#line 31 "fsmparser.yy"
 {
   ATermAppl aterm;
   int number;
 }
-/* Line 1529 of yacc.c.  */
-#line 80 "fsmparser.hpp"
+/* Line 1489 of yacc.c.  */
+#line 74 "fsmparser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

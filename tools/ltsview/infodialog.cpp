@@ -3,7 +3,8 @@
 #include <algorithm>
 
 InfoDialog::InfoDialog(wxWindow* parent) :
-  wxDialog(parent,wxID_ANY,wxT("Info"),wxDefaultPosition) {
+  wxDialog(parent,wxID_ANY,wxT("Info"),wxDefaultPosition,wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER) {
   
   int lf = wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   

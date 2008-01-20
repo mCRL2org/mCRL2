@@ -10,15 +10,16 @@
 using namespace std;
 using namespace Utils;
 
-State::State() {
+State::State(int aid,vector<int> &sv) {
   cluster = NULL;
   rank = 0;
   positionRadius = 0.0f;
   positionAngle = -1.0f;
-  id = 0;
+  id = aid;
   simulated = false;
   selected = false;
   zoomLevel = 0;
+  stateVector = sv;
 }
 
 State::~State() {
@@ -41,10 +42,6 @@ void State::addOutTransition(Transition* trans) {
 
 void State::addLoop(Transition* trans) {
   loops.push_back(trans);
-}
-
-void State::addParameterValue(int valindex) {
-	stateVector.push_back(valindex);
 }
 
 void State::addMatchedRule(int mr) {

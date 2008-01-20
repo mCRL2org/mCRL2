@@ -10,7 +10,6 @@
 #ifndef LTS_H
 #define LTS_H
 #include <vector>
-#include <list>
 #include <map>
 #include "mediator.h"
 #include "state.h"
@@ -45,7 +44,7 @@ class State_iterator {
     State* operator*();
     bool is_end();
   private:
-    std::list<State*>::iterator state_it;
+    std::vector<State*>::iterator state_it;
     LTS *lts;
 };
 
@@ -56,12 +55,12 @@ class LTS {
     ~LTS();
 
     int  addLabel(std::string label);
-    int  addParameter(std::string parname,std::string partype);
-    void addParameterValue(int parindex,std::string parvalue);
+    void addParameter(std::string parname,std::string partype,
+        std::vector<std::string> &parvalues);
     void addCluster(Cluster* c);
     void addClusterAndBelow(Cluster* c);
-    void addState(State* s);
-    void addTransition(Transition* t);
+    void addState(int sid,std::vector<int> &sv);
+    void addTransition(int bs,int es,int l);
     void clearStatePositions();
     void clusterStates(Utils::RankStyle rs);
     void computeClusterInfo();
@@ -79,7 +78,7 @@ class LTS {
     int getNumTransitions() const;
     int getNumParameters() const;
     int getNumParameterValues(int parindex) const;
-    int  getMaxRanks() const;  // Returns the maximal rank of the structure, 
+    int getMaxRanks() const;  // Returns the maximal rank of the structure, 
                                // that is, the highest rank a cluster would have
                                // in a non-zoomed in structure
     
@@ -92,7 +91,6 @@ class LTS {
     void positionClusters(bool fsmstyle);
     void positionStates();
     void rankStates(Utils::RankStyle rs);
-    void setInitialState(State* s);
     
     void trim();
 
@@ -139,7 +137,7 @@ class LTS {
     State* selectedState;
     Cluster* selectedCluster;
     Cluster* lastCluster;
-    std::list< State* > states;
+    std::vector< State* > states;
     std::vector< std::vector< Cluster* > > clustersInRank;
 
     // State vector info

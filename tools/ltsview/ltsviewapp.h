@@ -4,11 +4,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsviewapp.h
-/// \brief Add your file description here.
+/// \file 
+/// \brief Contains the LTSView application class.
 
-#ifndef LTSVIEWAPP_H
-#define LTSVIEWAPP_H
+#ifndef LTSVIEW_H
+#define LTSVIEW_H
 #include <wx/wx.h>
 #include <string>
 #include "mediator.h"
@@ -19,7 +19,7 @@
 #include "utils.h"
 #include "markmanager.h"
 
-class LTSViewApp : public wxApp, public Mediator {
+class LTSView : public wxApp, public Mediator {
   private:
     LTS *lts;
     unsigned int colourCounter;
@@ -83,6 +83,6 @@ class LTSViewApp : public wxApp, public Mediator {
 };
 
 
-DECLARE_APP(LTSViewApp)
+DECLARE_APP(LTSView)
 
 #endif

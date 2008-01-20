@@ -92,9 +92,6 @@ Number     [0]|([1-9][0-9]*)
 "("	  { posNo += YYLeng(); return LPAR; }
 ")"	  { posNo += YYLeng(); return RPAR; }
 "->"	  { posNo += YYLeng(); return ARROW; }
-"fan_in"  { posNo += YYLeng(); return FANIN; }
-"fan_out" { posNo += YYLeng(); return FANOUT; }
-"node_nr" { posNo += YYLeng(); return NODENR; }
 {Id}	  { processId(); return ID; }
 {Quoted}  { processQuoted(); return QUOTED; }
 {Number}  { processNumber(); return NUMBER; }

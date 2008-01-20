@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsviewapp.cpp
-/// \brief Add your file description here.
+/// \file
+/// \brief Contains implementation of the LTSView application.
 
 #include <string>
 
@@ -83,12 +83,12 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 
 using namespace std;
 using namespace Utils;
-IMPLEMENT_APP_NO_MAIN(LTSViewApp)
+IMPLEMENT_APP_NO_MAIN(LTSView)
 
-BEGIN_EVENT_TABLE(LTSViewApp, wxApp)
+BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
-void LTSViewApp::printHelp(std::string const &name) {
+void LTSView::printHelp(std::string const &name) {
   cout <<         "Usage: " << name << " [OPTION]... [INFILE]"
        << endl << "Start the LTSView application and open INFILE. If INFILE is not"
        << endl << "supplied then LTSView is started without opening an LTS."
@@ -103,11 +103,11 @@ void LTSViewApp::printHelp(std::string const &name) {
        << endl;
 }
 
-void LTSViewApp::printVersion() {
+void LTSView::printVersion() {
   cout << getVersionString();
 }
 
-bool LTSViewApp::OnInit() {
+bool LTSView::OnInit() {
   wxCmdLineParser cmdParser(argc,argv);
   cmdParser.AddSwitch(wxT("h"),wxT("help"),
       wxT("display this help message and terminate"),wxCMD_LINE_OPTION_HELP);
@@ -200,18 +200,18 @@ int main(int argc, char **argv) {
 }
 #endif
 
-int LTSViewApp::OnExit() {
+int LTSView::OnExit() {
   if (lts != NULL) delete lts;
   delete settings;
   delete visualizer;
   return 0;
 }
 
-std::string LTSViewApp::getVersionString() {
+std::string LTSView::getVersionString() {
   return get_version_information(NAME, AUTHOR);
 }
 
-void LTSViewApp::openFile(string fileName) {
+void LTSView::openFile(string fileName) {
   glCanvas->disableDisplay();
 
   mainFrame->createProgressDialog("Opening file","Parsing file");
@@ -277,7 +277,7 @@ void LTSViewApp::openFile(string fileName) {
   mainFrame->setMarkedTransitionsInfo(0);
 }
 
-void LTSViewApp::setRankStyle(RankStyle rs) {
+void LTSView::setRankStyle(RankStyle rs) {
   if (rankStyle != rs) {
     rankStyle = rs;
     if (lts != NULL) {
@@ -315,14 +315,14 @@ void LTSViewApp::setRankStyle(RankStyle rs) {
   }
 }
 
-void LTSViewApp::setVisStyle(VisStyle vs) {
+void LTSView::setVisStyle(VisStyle vs) {
   if (visualizer->getVisStyle() != vs) {
     visualizer->setVisStyle(vs);
     glCanvas->display();
   }
 }
 
-void LTSViewApp::setFSMStyle(bool b) {
+void LTSView::setFSMStyle(bool b) {
   if (b != fsmStyle) {
     fsmStyle = b;
     if (lts != NULL) {
@@ -335,7 +335,7 @@ void LTSViewApp::setFSMStyle(bool b) {
   }
 }
 
-void LTSViewApp::addMarkRule() {
+void LTSView::addMarkRule() {
   if (lts != NULL) {
     MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
     msrdlg->CentreOnParent();
@@ -359,7 +359,7 @@ void LTSViewApp::addMarkRule() {
   }
 }
 
-void LTSViewApp::removeMarkRule(int mr) {
+void LTSView::removeMarkRule(int mr) {
   markManager->removeMarkRule(mr);
   if (markManager->getMarkStyle() != MARK_STATES) {
     setMarkStyle(MARK_STATES);
@@ -368,7 +368,7 @@ void LTSViewApp::removeMarkRule(int mr) {
   }
 }
 
-void LTSViewApp::editMarkRule(int mr) {
+void LTSView::editMarkRule(int mr) {
   if (lts != NULL) {
     MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
     vector< bool > vals;
@@ -395,31 +395,31 @@ void LTSViewApp::editMarkRule(int mr) {
   }
 }
 
-Utils::MarkStyle LTSViewApp::getMarkStyle() {
+Utils::MarkStyle LTSView::getMarkStyle() {
   return markManager->getMarkStyle();
 }
 
-Utils::MatchStyle LTSViewApp::getMatchStyle() {
+Utils::MatchStyle LTSView::getMatchStyle() {
   return markManager->getMatchStyle();
 }
 
-bool LTSViewApp::isMarked(State* s) {
+bool LTSView::isMarked(State* s) {
   return markManager->isMarked(s);
 }
 
-bool LTSViewApp::isMarked(Cluster* c) {
+bool LTSView::isMarked(Cluster* c) {
   return markManager->isMarked(c);
 }
 
-bool LTSViewApp::isMarked(Transition* t) {
+bool LTSView::isMarked(Transition* t) {
   return markManager->isMarked(t);
 }
 
-Utils::RGB_Color LTSViewApp::getMarkRuleColor(int mr) {
+Utils::RGB_Color LTSView::getMarkRuleColor(int mr) {
   return markManager->getMarkRuleColor(mr);
 }
 
-Utils::RGB_Color LTSViewApp::getNewRuleColour()
+Utils::RGB_Color LTSView::getNewRuleColour()
 {
   // TODO implement
   colourCounter = (colourCounter + 1) % 9;
@@ -486,7 +486,7 @@ Utils::RGB_Color LTSViewApp::getNewRuleColour()
   return result;
 }
 
-void LTSViewApp::activateMarkRule(int mr,bool activate) {
+void LTSView::activateMarkRule(int mr,bool activate) {
   if (lts != NULL) {
     markManager->setMarkRuleActivated(mr,activate);
     if (markManager->getMarkStyle() != MARK_STATES) {
@@ -497,7 +497,7 @@ void LTSViewApp::activateMarkRule(int mr,bool activate) {
   }
 }
 
-void LTSViewApp::setMatchStyle(Utils::MatchStyle ms) {
+void LTSView::setMatchStyle(Utils::MatchStyle ms) {
   if (lts == NULL) return;
   markManager->setMatchStyle(ms);
   if (markManager->getMarkStyle() != MARK_STATES) {
@@ -507,17 +507,17 @@ void LTSViewApp::setMatchStyle(Utils::MatchStyle ms) {
   }
 }
 
-void LTSViewApp::setActionMark(string label,bool b) {
+void LTSView::setActionMark(string label,bool b) {
   markManager->setActionMark(label,b);
   setMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSViewApp::setMarkStyle(Utils::MarkStyle ms) {
+void LTSView::setMarkStyle(Utils::MarkStyle ms) {
   markManager->setMarkStyle(ms);
   applyMarkStyle();
 }
 
-void LTSViewApp::applyMarkStyle() {
+void LTSView::applyMarkStyle() {
   if (lts == NULL) return;
 
   switch (markManager->getMarkStyle()) {
@@ -544,15 +544,15 @@ void LTSViewApp::applyMarkStyle() {
   glCanvas->display();
 }
 
-void LTSViewApp::notifyRenderingStarted() {
+void LTSView::notifyRenderingStarted() {
   mainFrame->startRendering();
 }
 
-void LTSViewApp::notifyRenderingFinished() {
+void LTSView::notifyRenderingFinished() {
   mainFrame->stopRendering();
 }
 
-void LTSViewApp::startSim() {
+void LTSView::startSim() {
   Simulation* sim = lts->getSimulation();
 
   sim->start();
@@ -561,7 +561,7 @@ void LTSViewApp::startSim() {
   selectStateByID(sim->getCurrState()->getID());
 }
 
-int LTSViewApp::getNumberOfParams() const {
+int LTSView::getNumberOfParams() const {
   if (lts != NULL)
   {
     return lts->getNumParameters();
@@ -571,7 +571,7 @@ int LTSViewApp::getNumberOfParams() const {
     return 0;
   }
 }
-string LTSViewApp::getActionLabel(const int i) const {
+string LTSView::getActionLabel(const int i) const {
   if (lts != NULL)
   {
     return lts->getLabel(i);
@@ -582,7 +582,7 @@ string LTSViewApp::getActionLabel(const int i) const {
   }
 }
 
-string LTSViewApp::getParName(const int i) const {
+string LTSView::getParName(const int i) const {
   if (lts != NULL)
   {
     return lts->getParameterName(i);
@@ -593,7 +593,7 @@ string LTSViewApp::getParName(const int i) const {
   }
 }
 
-string LTSViewApp::getParValue(const int i, const int j) const {
+string LTSView::getParValue(const int i, const int j) const {
   if (lts != NULL)
   {
     return lts->getParameterValue(i, j);
@@ -605,7 +605,7 @@ string LTSViewApp::getParValue(const int i, const int j) const {
 }
 
 
-void LTSViewApp::selectStateByID(const int id) {
+void LTSView::selectStateByID(const int id) {
   if (lts != NULL) {
     State* s = lts->selectStateByID(id);
     lts->getSimulation()->setInitialState(s);
@@ -616,7 +616,7 @@ void LTSViewApp::selectStateByID(const int id) {
   }
 }
 
-void LTSViewApp::selectCluster(const int rank, const int pos) 
+void LTSView::selectCluster(const int rank, const int pos) 
 {
   if (lts != NULL) 
   {
@@ -624,14 +624,14 @@ void LTSViewApp::selectCluster(const int rank, const int pos)
   }
 }
 
-void LTSViewApp::deselect() {
+void LTSView::deselect() {
   if (lts != NULL)
   {
     lts->deselect();
   }
 }
 
-int LTSViewApp::getNumberOfObjects() {
+int LTSView::getNumberOfObjects() {
   int result = 0;
 
   if (lts != NULL) {
@@ -642,7 +642,7 @@ int LTSViewApp::getNumberOfObjects() {
   return result;
 }
 
-void LTSViewApp::zoomInBelow()
+void LTSView::zoomInBelow()
 {
   LTS* newLTS = lts->zoomIntoBelow();
   deselect();
@@ -657,7 +657,7 @@ void LTSViewApp::zoomInBelow()
   mainFrame->setSim(lts->getSimulation());
 }
 
-void LTSViewApp::zoomInAbove()
+void LTSView::zoomInAbove()
 {
   LTS* newLTS = lts->zoomIntoAbove();
   deselect();
@@ -672,7 +672,7 @@ void LTSViewApp::zoomInAbove()
   mainFrame->setSim(lts->getSimulation());
 }
 
-void LTSViewApp::zoomOutTillTop()
+void LTSView::zoomOutTillTop()
 {
   LTS* oldLTS = lts;
   do
@@ -682,7 +682,7 @@ void LTSViewApp::zoomOutTillTop()
   }  while (lts != oldLTS);
 }
 
-void LTSViewApp::zoomOut()
+void LTSView::zoomOut()
 {
   LTS* oldLTS = lts;
   lts = oldLTS->zoomOut();
@@ -702,20 +702,20 @@ void LTSViewApp::zoomOut()
   }
 }
 
-void LTSViewApp::loadTrace(std::string const& path)
+void LTSView::loadTrace(std::string const& path)
 {
   lts->loadTrace(path);
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 }
 
-void LTSViewApp::reportError(std::string const& error) 
+void LTSView::reportError(std::string const& error) 
 {
   mainFrame->reportError(error);
 }
 
 
-void LTSViewApp::generateBackTrace()
+void LTSView::generateBackTrace()
 {
   lts->generateBackTrace();
 }

@@ -102,8 +102,6 @@ void MainFrame::setupMenuBar() {
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
     wxT("Open a trace for this file"));
   fileMenu->AppendSeparator();
-  fileMenu->Append(myID_INFO, wxT("&Information..."),wxT("Show information"));
-  fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
     
   viewMenu->Append(wxID_RESET, wxT("&Reset viewpoint\tF2"),
@@ -153,9 +151,11 @@ void MainFrame::setupMenuBar() {
   toolMenu->AppendRadioItem(myID_ZOOM,wxT("&Zoom\tA"),wxT("Zoom tool"));
   toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tF"),wxT("Rotate tool"));
   toolMenu->AppendSeparator();
-  toolMenu->Append(myID_SIM, wxT("S&imulation\tI"), 
-                                  wxT("Shows simulation dialog"));
-  toolMenu->Append(myID_MARK, wxT("&Mark\tM"), wxT("Shows mark dialog"));
+  toolMenu->Append(myID_INFO, wxT("&Information...\tCtrl+I"),
+      wxT("Show information dialog"));
+  toolMenu->Append(myID_SIM, wxT("Sim&ulation...\tCtrl+S"),
+      wxT("Show simulation dialog"));
+  toolMenu->Append(myID_MARK, wxT("&Mark...\tCtrl+M"), wxT("Show mark dialog"));
   toolMenu->AppendSeparator();
   toolMenu->Append(myID_START_FORCE_DIRECTED,wxT("Start &force directed"),
     wxT("Starts force directed state positioning algorithm"));

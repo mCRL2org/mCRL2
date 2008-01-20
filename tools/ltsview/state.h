@@ -28,12 +28,11 @@
 
 class State {
   public:
-    State();
+    State(int aid,std::vector<int> &sv);
     ~State();
     void addInTransition(Transition* trans);
     void addLoop(Transition* trans);
     void addOutTransition(Transition* trans);
-    void addParameterValue(int valindex);
     void center();
     void deselect();
 

@@ -12,6 +12,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
 #include <algorithm>
+#include <iostream>
 
 using namespace Utils;
 using namespace std;
@@ -196,7 +197,7 @@ LTS::~LTS()
   {
     // This LTS is the top level LTS, so delete all its contents.
     unsigned int i,r;
-    list< State* >::iterator li;
+    vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li) {
       delete *li;
     }
@@ -228,16 +229,11 @@ State_iterator LTS::getStateIterator() {
   return State_iterator(this);
 }
 
-int LTS::addParameter(string parname,string partype) {
+void LTS::addParameter(string parname,string partype,
+    vector<string> &parvalues) {
   parameterNames.push_back(parname);
   parameterTypes.push_back(partype);
-  vector< string > v;
-  valueTable.push_back(v);
-  return parameterNames.size()-1;
-}
-
-void LTS::addParameterValue(int parindex,string parvalue) {
-  valueTable[parindex].push_back(parvalue);
+  valueTable.push_back(parvalues);
 }
 
 string LTS::getParameterName(int parindex) {
@@ -253,30 +249,22 @@ string LTS::getParameterValue(int parindex,int valindex) {
 }
 
 State* LTS::selectStateByID(int id) {
-  list< State* >::iterator li;
-  State *s;
-  for (li = states.begin(); li != states.end(); ++li) {
-    s = *li;
-    if (s->getID() == id) {
-      s->select();
-      // For fast deselection
-      selectedCluster = NULL;
-      selectedState = s;
+  State *s = states[id];
+  s->select();
+  // For fast deselection
+  selectedCluster = NULL;
+  selectedState = s;
 
-      // If we are simulating, see if this is a state we can select.
-      if ((simulation != NULL) && (simulation->getStarted()))
-      { 
-        vector< Transition* > posTrans = simulation->getPosTrans();
-        for (size_t i = 0; i < posTrans.size(); ++i)
-        {
-          if (posTrans[i]->getEndState()->getID() == selectedState->getID())
-          {
-            simulation->chooseTrans(i);
-          }
-        }
+  // If we are simulating, see if this is a state we can select.
+  if ((simulation != NULL) && (simulation->getStarted()))
+  { 
+    vector< Transition* > posTrans = simulation->getPosTrans();
+    for (size_t i = 0; i < posTrans.size(); ++i)
+    {
+      if (posTrans[i]->getEndState()->getID() == selectedState->getID())
+      {
+        simulation->chooseTrans(i);
       }
-      // Escape from function
-      return selectedState;
     }
   }
   return selectedState;
@@ -331,11 +319,6 @@ int LTS::addLabel(string label) {
   return labels.size()-1;
 }
 
-void LTS::setInitialState(State* s) {
-  initialState = s;
-  simulation->setInitialState(s);
-}
-
 void LTS::addCluster(Cluster* c)
 {
   unsigned int rank = c->getRank();
@@ -374,12 +357,28 @@ void LTS::addClusterAndBelow(Cluster* c)
 }
 
 
-void LTS::addState( State* s )
+void LTS::addState(int sid,vector<int> &sv)
 {
-  states.push_back( s );
+  State *s = new State(sid,sv);
+  if (sid == 0) {
+    initialState = s;
+    simulation->setInitialState(s);
+  }
+  states.push_back(s);
 }
 
-void LTS::addTransition(Transition* t) {
+void LTS::addTransition(int bs,int es,int l) {
+  if (bs != es) {
+    State *s1 = states[bs];
+    State *s2 = states[es];
+    Transition* t = new Transition(s1,s2,l);
+    s1->addOutTransition(t);
+    s2->addInTransition(t);
+  } else {
+    State *s = states[bs];
+    Transition* t = new Transition(s,s,l);
+    s->addLoop(t);
+  }
   ++transitionCount;
 }
 
@@ -419,7 +418,7 @@ int LTS::getNumDeadlocks() {
   if (deadlockCount == -1) {
     // a value of -1 indicates that we have to compute it
     deadlockCount = 0;
-    list< State* >::iterator state_it;
+    vector< State* >::iterator state_it;
     for (state_it  = states.begin(); state_it != states.end(); ++state_it) {
       if ((**state_it).isDeadlock()) {
         ++deadlockCount;
@@ -438,7 +437,7 @@ int LTS::getNumTransitions() const {
 }
 
 void LTS::clearRanksAndClusters() {
-  list< State* >::iterator it;
+  vector< State* >::iterator it;
   for (it = states.begin(); it != states.end(); ++it) {
     (*it)->setRank(-1);
     (*it)->setCluster(NULL);
@@ -591,7 +590,7 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
 void LTS::computeClusterInfo() {
   State* s;
   Cluster* c;
-  list< State* >::iterator li;
+  vector< State* >::iterator li;
   int t;
   for (li = states.begin(); li != states.end(); ++li) {
     s = *li;
@@ -910,7 +909,7 @@ LTS* LTS::zoomOut() {
         parent = child->getAncestor();
       } while (child != initialState->getCluster());
     }
-    list< State* >::iterator li;
+    vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li) {
       (*li)->setZoomLevel(zoomLevel - 1);
     }
@@ -963,16 +962,20 @@ void LTS::setZoomLevel(const int level)
 void LTS::trim() {
   // removes unreachable parts from the LTS
   visit(initialState);
-  list<State*>::iterator li = states.begin();
-  while (li != states.end()) {
-    if ((*li)->isSelected()) {
-      (*li)->deselect();
-      ++li;
+  vector<State*> temp;
+  vector<State*>::iterator li;
+  State *s;
+  for (li = states.begin(); li != states.end(); ++li) {
+    s = *li;
+    if (s->isSelected()) {
+      s->deselect();
+      s->setID(temp.size());
+      temp.push_back(s);
     } else {
-      delete (*li);
-      li = states.erase(li);
+      delete s;
     }
   }
+  states.swap(temp);
 }
 
 void LTS::visit(State* s) {

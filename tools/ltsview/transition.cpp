@@ -12,11 +12,8 @@ using namespace Utils;
 
 // Constructor and Destructor
 
-Transition::Transition(State* bs,State* es,int lbl) {
-  beginState = bs;
-  endState = es;
-  label = lbl;
-  marked = NULL;
+Transition::Transition(State* bs,State* es,int lbl)
+: beginState(bs), endState(es), label(lbl), marked(NULL) {
 }
 
 Transition::~Transition() {
