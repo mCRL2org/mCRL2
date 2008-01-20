@@ -12,7 +12,7 @@ exe ltsview
         glcanvas.cpp
         infodialog.cpp
         lts.cpp
-        ltsviewapp.cpp
+        ltsview.cpp
         mainframe.cpp
         markmanager.cpp
         markdialog.cpp

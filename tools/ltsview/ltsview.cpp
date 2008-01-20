@@ -75,7 +75,7 @@ bool squadt_interactor::perform_task(tipi::configuration&) {
 #include <wx/image.h>
 #include <mcrl2/utilities/aterm_ext.h>
 #include "mcrl2/utilities/version_info.h"
-#include "ltsviewapp.h"
+#include "ltsview.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
 #include "settings.h"
