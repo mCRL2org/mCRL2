@@ -15,9 +15,9 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/struct.h"
 
 namespace mcrl2 {
 
@@ -26,7 +26,6 @@ namespace data {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
-using namespace core;
 
 class sort_expression;
 
@@ -53,7 +52,7 @@ class sort_expression: public aterm_appl
     /// Constructor.
     ///
     sort_expression()
-      : aterm_appl(detail::constructSortId())
+      : aterm_appl(core::detail::constructSortId())
     {}
 
     /// Constructor.
@@ -61,7 +60,7 @@ class sort_expression: public aterm_appl
     sort_expression(ATermAppl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_SortExpr(m_term));
+      assert(core::detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructor.
@@ -69,20 +68,20 @@ class sort_expression: public aterm_appl
     sort_expression(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(detail::check_rule_SortExpr(m_term));
+      assert(core::detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructor.
     ///
     sort_expression(std::string s)
-      : aterm_appl(detail::gsMakeSortId(detail::gsString2ATermAppl(s.c_str())))
+      : aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
     
     /// Returns true if it is a sort_expression of type A -> B.
     ///
     bool is_arrow() const
     {
-      return detail::gsIsSortArrow(*this);
+      return core::detail::gsIsSortArrow(*this);
     }
 };
 
@@ -90,14 +89,14 @@ class sort_expression: public aterm_appl
 inline
 bool is_sort_expression(aterm_appl t)
 {
-  return detail::gsIsSortId(t) || detail::gsIsSortArrow(t);
+  return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
 }
 
 /// Returns the sort_expression 'domain -> range'.
 inline
 sort_expression arrow(sort_expression_list domain, sort_expression range)
 {
-  return detail::gsMakeSortArrow(domain, range);
+  return core::detail::gsMakeSortArrow(domain, range);
 }
 
 /// Returns the domain sorts of s.
@@ -106,7 +105,7 @@ sort_expression arrow(sort_expression_list domain, sort_expression range)
 inline
 sort_expression_list domain_sorts(sort_expression s)
 {
-  return gsGetSortExprDomain(s);
+  return core::gsGetSortExprDomain(s);
 }
 
 /// Returns the range sort of s.
@@ -115,7 +114,7 @@ sort_expression_list domain_sorts(sort_expression s)
 inline
 sort_expression result_sort(sort_expression s)
 {
-  return gsGetSortExprResult(s);
+  return core::gsGetSortExprResult(s);
 }
 
 /// Returns the source of the sort.
@@ -157,35 +156,35 @@ namespace sort_expr {
   inline
   sort_expression real()
   {
-    return gsMakeSortExprReal();
+    return core::gsMakeSortExprReal();
   }
   
   /// Returns the predefined sort_expression int.
   inline
   sort_expression int_()
   {
-    return gsMakeSortExprInt();
+    return core::gsMakeSortExprInt();
   }
   
   /// Returns the predefined sort_expression pos.
   inline
   sort_expression pos()
   {
-    return gsMakeSortExprPos();
+    return core::gsMakeSortExprPos();
   }
   
   /// Returns the predefined sort_expression nat.
   inline
   sort_expression nat()
   {
-    return gsMakeSortExprNat();
+    return core::gsMakeSortExprNat();
   }
   
   /// Returns the predefined sort_expression bool.
   inline
   sort_expression bool_()
   {
-    return gsMakeSortExprBool();
+    return core::gsMakeSortExprBool();
   }
 
   /// \brief Returns true if the term t equals the sort_expression real

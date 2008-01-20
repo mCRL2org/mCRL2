@@ -21,8 +21,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using namespace core;
-
 /// A class that generates identifiers. A context is maintained
 /// containing already used identifiers. This class is useful for
 /// algorithms that have to avoid name clashes.
@@ -48,19 +46,19 @@ class identifier_generator
 
     /// Adds the identifier s to the context.
     ///
-    virtual void add_identifier(identifier_string s) = 0;
+    virtual void add_identifier(core::identifier_string s) = 0;
 
     /// Removes the identifier s from the context.
     ///
-    virtual void remove_identifier(identifier_string s) = 0;
+    virtual void remove_identifier(core::identifier_string s) = 0;
 
     /// Adds identifiers of term t to the context.
     ///
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<identifier_string> s = identifiers(t);
-      for (std::set<identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
+      std::set<core::identifier_string> s = identifiers(t);
+      for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         add_identifier(*i);
       }
@@ -82,8 +80,8 @@ class identifier_generator
     template <typename Term>
     void remove_from_context(Term t)
     {
-      std::set<identifier_string> s = identifiers(t);
-      for (std::set<identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
+      std::set<core::identifier_string> s = identifiers(t);
+      for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         remove_identifier(*i);
       }
@@ -91,14 +89,14 @@ class identifier_generator
 
     /// Returns true if the identifier s appears in the context.
     ///
-    virtual bool has_identifier(identifier_string s) const = 0;
+    virtual bool has_identifier(core::identifier_string s) const = 0;
    
     /// Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     ///
-    virtual identifier_string operator()(const std::string& hint)
+    virtual core::identifier_string operator()(const std::string& hint)
     {
-      identifier_string id(hint);
+      core::identifier_string id(hint);
       int index = 0;
       while (has_identifier(id))
       {
@@ -107,7 +105,7 @@ class identifier_generator
         std::string name = out.str();
 // TODO: why doesn't this work???        
 //        std::string name = str(boost::format(hint + "%02d") % index++);
-        id = identifier_string(name);
+        id = core::identifier_string(name);
       }
       add_to_context(id);
       return id;

@@ -16,8 +16,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace data;
-
 /// A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
 /// must be overridden to add behavior. If the visit_<node> function returns true,
@@ -40,7 +38,7 @@ struct pbes_expression_visitor
   
   /// Visit data expression node.
   ///
-  virtual bool visit_data_expression(const pbes_expression& e, const data_expression& d)
+  virtual bool visit_data_expression(const pbes_expression& e, const data::data_expression& d)
   {
     return continue_recursion;
   }
@@ -124,7 +122,7 @@ struct pbes_expression_visitor
 
   /// Visit forall node.
   ///
-  virtual bool visit_forall(const pbes_expression& e, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual bool visit_forall(const pbes_expression& e, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return continue_recursion;
   }
@@ -136,7 +134,7 @@ struct pbes_expression_visitor
 
   /// Visit exists node.
   ///
-  virtual bool visit_exists(const pbes_expression& e, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual bool visit_exists(const pbes_expression& e, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return continue_recursion;
   }
@@ -209,7 +207,7 @@ struct pbes_expression_visitor
       }
       leave_imp();
     } else if (is_forall(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       bool result = visit_forall(e, qvars, qexpr);
       if (result) {
@@ -217,7 +215,7 @@ struct pbes_expression_visitor
       }
       leave_forall();
     } else if (is_exists(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       bool result = visit_exists(e, qvars, qexpr);
       if (result) {

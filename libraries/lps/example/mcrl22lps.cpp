@@ -13,16 +13,14 @@
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/modal_formula/detail/read_text.h"
 
-using namespace std;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2;
 
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  string infile(argv[1]);
-  specification spec = mcrl22lps(read_text(infile));
+  std::string infile(argv[1]);
+  lps::specification spec = lps::mcrl22lps(modal::detail::read_text(infile));
   spec.save(argv[2]);
 
   return 0;

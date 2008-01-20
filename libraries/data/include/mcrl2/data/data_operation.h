@@ -24,7 +24,6 @@ namespace data {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::arg1;
-using namespace core;
 
 /// \brief An operation on data.
 ///
@@ -34,7 +33,7 @@ class data_operation: public data_expression
     /// Constructor.
     ///             
     data_operation()
-      : data_expression(detail::constructOpId())
+      : data_expression(core::detail::constructOpId())
     {}
 
     /// Constructor.
@@ -42,18 +41,18 @@ class data_operation: public data_expression
     data_operation(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_rule_OpId(m_term));
+      assert(core::detail::check_rule_OpId(m_term));
     }
 
     /// Constructor.
     ///             
-    data_operation(identifier_string name, sort_expression s)
-     : data_expression(detail::gsMakeOpId(name, s))
+    data_operation(core::identifier_string name, sort_expression s)
+     : data_expression(core::detail::gsMakeOpId(name, s))
     {}
 
     /// Returns the name of the data_operation.
     ///
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return arg1(*this);
     }
@@ -67,7 +66,7 @@ typedef term_list<data_operation> data_operation_list;
 inline
 bool is_data_operation(aterm_appl t)
 {
-  return detail::gsIsOpId(t);
+  return core::detail::gsIsOpId(t);
 }
 
 } // namespace data

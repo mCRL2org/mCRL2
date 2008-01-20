@@ -57,6 +57,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::lps;
+using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -506,7 +507,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       {
         if (!elts.empty())
         {
-          r = or_(r, lps::data_expr::equal_to(arg, elts.front()));
+          r = or_(r, data::data_expr::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }

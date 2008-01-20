@@ -21,8 +21,9 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
+using namespace mcrl2::lps;
 using boost::format;
 
 int main(int argc, char* argv[])

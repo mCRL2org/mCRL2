@@ -16,6 +16,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2;
 
 namespace mcrl2 {
   namespace core {
@@ -214,7 +215,7 @@ inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls
 {
   assert(data_decls_is_initialised(data_decls));
   if (!data_decls_equal(data_decls, get_data_decls(lps_spec))) {
-    lps::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
+    data::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
     lps_spec = lps::set_data_specification(lps_spec, data);
   }
 }

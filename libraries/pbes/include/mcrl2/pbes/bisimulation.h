@@ -130,50 +130,50 @@ class bisimulation_algorithm
 public:
     /// Creates an identifier string.
     ///
-    identifier_string X(const linear_process& p, const linear_process& q) const
+    core::identifier_string X(const linear_process& p, const linear_process& q) const
     {
       std::string s = "X" + process_name(p) + process_name(q);
-      return identifier_string(s);
+      return core::identifier_string(s);
     }
 
     /// Creates an identifier string.
     ///
-    identifier_string Y(const linear_process& p, const linear_process& q) const
+    core::identifier_string Y(const linear_process& p, const linear_process& q) const
     {
       std::string s = "Y" + process_name(p) + process_name(q);
-      return identifier_string(s);
+      return core::identifier_string(s);
     }
 
     /// Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
     ///
-    identifier_string Y(const linear_process& p, const linear_process& q, my_iterator i) const
+    core::identifier_string Y(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y" + process_name(p) + process_name(q) + "_" + summand_name(i);
-      return identifier_string(s);
+      return core::identifier_string(s);
     }
 
     /// Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
     ///
-    identifier_string Y1(const linear_process& p, const linear_process& q, my_iterator i) const
+    core::identifier_string Y1(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y1" + process_name(p) + process_name(q) + "_" + summand_name(i);
-      return identifier_string(s);
+      return core::identifier_string(s);
     }
 
     /// Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
     ///
-    identifier_string Y2(const linear_process& p, const linear_process& q, my_iterator i) const
+    core::identifier_string Y2(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y2" + process_name(p) + process_name(q) + "_" + summand_name(i);
-      return identifier_string(s);
+      return core::identifier_string(s);
     }
 
     /// Returns a propositional variable.
     ///
-    propositional_variable_instantiation var(identifier_string name, data_variable_list parameters) const
+    propositional_variable_instantiation var(core::identifier_string name, data_variable_list parameters) const
     {
       return propositional_variable_instantiation(name, make_data_expression_list(parameters));
     }
@@ -204,17 +204,17 @@ public:
     ///
     linear_process resolve_name_clashes(const linear_process& p, const linear_process& q)
     {
-      std::set<identifier_string> used_names;
-      used_names.insert(boost::make_transform_iterator(p.process_parameters().begin(), detail::data_variable_name()),
-                        boost::make_transform_iterator(p.process_parameters().end()  , detail::data_variable_name())
+      std::set<core::identifier_string> used_names;
+      used_names.insert(boost::make_transform_iterator(p.process_parameters().begin(), data::detail::data_variable_name()),
+                        boost::make_transform_iterator(p.process_parameters().end()  , data::detail::data_variable_name())
                        );
-      used_names.insert(boost::make_transform_iterator(p.free_variables().begin(), detail::data_variable_name()),
-                        boost::make_transform_iterator(p.free_variables().end()  , detail::data_variable_name())
+      used_names.insert(boost::make_transform_iterator(p.free_variables().begin(), data::detail::data_variable_name()),
+                        boost::make_transform_iterator(p.free_variables().end()  , data::detail::data_variable_name())
                        );
       for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
       {
-        used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), detail::data_variable_name()),
-                          boost::make_transform_iterator(i->summation_variables().end()  , detail::data_variable_name())
+        used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), data::detail::data_variable_name()),
+                          boost::make_transform_iterator(i->summation_variables().end()  , data::detail::data_variable_name())
                          );
       }
       linear_process result = q;
@@ -403,7 +403,6 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr;
-      const data_variable_list& d1 = q.process_parameters();
       data_variable_list gi = i->next_state(p.process_parameters());
 
       std::vector<pbes_expression> result;
@@ -508,7 +507,6 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr;
       std::vector<pbes_expression> v;
-      const data_variable_list& d  = p.process_parameters();
       const data_variable_list& d1 = q.process_parameters();
       for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
       {

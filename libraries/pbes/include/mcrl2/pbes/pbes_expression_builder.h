@@ -17,8 +17,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace data;
-
 /// Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns pbes_expression(), the recursion is continued
@@ -35,7 +33,7 @@ struct pbes_expression_builder
 
   /// Visit data expression node.
   ///
-  virtual pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
+  virtual pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
     return pbes_expression();
   }
@@ -84,14 +82,14 @@ struct pbes_expression_builder
 
   /// Visit forall node.
   ///
-  virtual pbes_expression visit_forall(const pbes_expression& /* e */, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual pbes_expression visit_exists(const pbes_expression& /* e */, const data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
@@ -149,12 +147,12 @@ struct pbes_expression_builder
       pbes_expression result = visit_imp(e, left, right);
       return (result == pbes_expression()) ? imp(visit(left), visit(right)) : result;
     } else if (is_forall(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       pbes_expression result = visit_forall(e, qvars, qexpr);
       return (result == pbes_expression()) ? forall(qvars, visit(qexpr)) : result;
     } else if (is_exists(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       pbes_expression result = visit_exists(e, qvars, qexpr);
       return (result == pbes_expression()) ? exists(qvars, visit(qexpr)) : result;

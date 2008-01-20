@@ -33,7 +33,7 @@ namespace detail {
 
 /// \cond INTERNAL_DOCS
 inline
-pbes_expression step(const linear_process& m, const summand& m_summand, const linear_process& s, identifier_string X)
+pbes_expression step(const lps::linear_process& m, const lps::summand& m_summand, const lps::linear_process& s, core::identifier_string X)
 {
   namespace p = pbes_expr;
 
@@ -45,10 +45,10 @@ pbes_expression step(const linear_process& m, const summand& m_summand, const li
     ATermList list =
       m.process_parameters().substitute(assignment_list_substitution(m_summand.assignments())) +
       s.process_parameters().substitute(assignment_list_substitution(i->assignments()));
-    data_expression_list params(list);
+    data::data_expression_list params(list);
     pbes_expression term3 = propositional_variable_instantiation(X, params);
 
-    data_variable_list sumvars = i->summation_variables();
+    data::data_variable_list sumvars = i->summation_variables();
     pbes_expression expr = p::and_(term1, p::and_(term2, term3));
 
     pbes_expression term = p::exists(sumvars, expr);
@@ -58,7 +58,7 @@ pbes_expression step(const linear_process& m, const summand& m_summand, const li
 }
 
 inline
-pbes_expression match(const linear_process& m, const linear_process& s, identifier_string X)
+pbes_expression match(const linear_process& m, const linear_process& s, core::identifier_string X)
 {
   namespace d = data::data_expr;
   namespace p = pbes_expr;
@@ -69,7 +69,7 @@ pbes_expression match(const linear_process& m, const linear_process& s, identifi
     pbes_expression term1 = i->condition();
     pbes_expression term2 = step(m, *i, s, X);
 
-    data_variable_list sumvars = i->summation_variables();
+    data::data_variable_list sumvars = i->summation_variables();
     pbes_expression expr = p::or_(p::val(d::not_(term1)), term2);
     pbes_expression term = p::forall(sumvars, expr);
     terms.push_back(term);
@@ -89,32 +89,32 @@ pbes<> strong_bisimulation(const specification& M, const specification& S)
   linear_process s = S.process();
     
   // Resolve name clashes between m and s
-  std::set<identifier_string> used_names;
-  used_names.insert(boost::make_transform_iterator(m.process_parameters().begin(), detail::data_variable_name()),
-                    boost::make_transform_iterator(m.process_parameters().end()  , detail::data_variable_name())
+  std::set<core::identifier_string> used_names;
+  used_names.insert(boost::make_transform_iterator(m.process_parameters().begin(), data::detail::data_variable_name()),
+                    boost::make_transform_iterator(m.process_parameters().end()  , data::detail::data_variable_name())
                    );
-  used_names.insert(boost::make_transform_iterator(m.free_variables().begin(), detail::data_variable_name()),
-                    boost::make_transform_iterator(m.free_variables().end()  , detail::data_variable_name())
+  used_names.insert(boost::make_transform_iterator(m.free_variables().begin(), data::detail::data_variable_name()),
+                    boost::make_transform_iterator(m.free_variables().end()  , data::detail::data_variable_name())
                    );
-  for (summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
+  for (lps::summand_list::iterator i = m.summands().begin(); i != m.summands().end(); ++i)
   {
-    used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), detail::data_variable_name()),
-                      boost::make_transform_iterator(i->summation_variables().end()  , detail::data_variable_name())
+    used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), data::detail::data_variable_name()),
+                      boost::make_transform_iterator(i->summation_variables().end()  , data::detail::data_variable_name())
                      );
   }
-  s = rename_process_parameters(s, used_names, "_S");
-  s = rename_free_variables(s, used_names, "_S");
-  s = rename_summation_variables(s, used_names, "_S");
+  s = lps::rename_process_parameters(s, used_names, "_S");
+  s = lps::rename_free_variables(s, used_names, "_S");
+  s = lps::rename_summation_variables(s, used_names, "_S");
 
-  identifier_string ms_name = fresh_identifier(make_list(M, S), "Xms");
-  identifier_string sm_name = fresh_identifier(make_list(S, M), "Xsm");
+  core::identifier_string ms_name = data::fresh_identifier(make_list(M, S), "Xms");
+  core::identifier_string sm_name = data::fresh_identifier(make_list(S, M), "Xsm");
 
-  data_variable_list ms_parameters = m.process_parameters() + s.process_parameters();
-  data_variable_list sm_parameters = s.process_parameters() + m.process_parameters();
+  data::data_variable_list ms_parameters = m.process_parameters() + s.process_parameters();
+  data::data_variable_list sm_parameters = s.process_parameters() + m.process_parameters();
 
   propositional_variable Xms(ms_name, ms_parameters);
   propositional_variable Xsm(sm_name, sm_parameters); 
-  propositional_variable_instantiation Xms_init(ms_name, data_expression_list() + ms_parameters);
+  propositional_variable_instantiation Xms_init(ms_name, data::data_expression_list() + ms_parameters);
 
   pbes_expression ms_formula = p::and_(match(m, s, ms_name), match(s, m, sm_name));
   pbes_expression sm_formula = Xms_init;
@@ -123,11 +123,11 @@ pbes<> strong_bisimulation(const specification& M, const specification& S)
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xms, ms_formula));
   eqn.push_back(pbes_equation(fixpoint_symbol::nu(), Xsm, sm_formula));
 
-  atermpp::set<data_variable> free_variables;
+  atermpp::set<data::data_variable> free_variables;
   std::copy(m.free_variables().begin(), m.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
   std::copy(s.free_variables().begin(), s.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
 
-  data_specification data = M.data();
+  data::data_specification data = M.data();
   propositional_variable_instantiation init(ms_name, M.initial_process().state() + S.initial_process().state());
   return pbes<>(data, eqn, free_variables, init);
 }

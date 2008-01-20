@@ -7,8 +7,8 @@
 /// \file mcrl2/modal_formula/mucalculus.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_ACTION_FORMULA_H
-#define MCRL2_BASIC_ACTION_FORMULA_H
+#ifndef MCRL2_MODAL_ACTION_FORMULA_H
+#define MCRL2_MODAL_ACTION_FORMULA_H
 
 #include <iostream> // for debugging
 
@@ -27,8 +27,6 @@ using atermpp::aterm_appl;
 using atermpp::aterm_list;
 using atermpp::aterm;
 using atermpp::term_list;
-using mcrl2::data::detail::parse_variable;
-using namespace mcrl2::lps;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula
@@ -94,7 +92,7 @@ using namespace mcrl2::core::detail;
 
   /// \brief Returns the expression d
   inline
-  action_formula data(data_expression d)
+  action_formula data(data::data_expression d)
   {
     return action_formula(aterm_appl(d));
   }
@@ -103,107 +101,107 @@ using namespace mcrl2::core::detail;
   inline
   action_formula true_()
   {
-    return action_formula(gsMakeActTrue());
+    return action_formula(core::detail::gsMakeActTrue());
   }
   
   /// \brief Returns the expression false
   inline
   action_formula false_()
   {
-    return action_formula(gsMakeActFalse());
+    return action_formula(core::detail::gsMakeActFalse());
   }
   
   /// \brief Returns not applied to p
   inline
   action_formula not_(action_formula p)
   {
-    return action_formula(gsMakeActNot(p));
+    return action_formula(core::detail::gsMakeActNot(p));
   }
   
   /// \brief Returns and applied to p and q
   inline
   action_formula and_(action_formula p, action_formula q)
   {
-    return action_formula(gsMakeActAnd(p,q));
+    return action_formula(core::detail::gsMakeActAnd(p,q));
   }
   
   /// \brief Returns or applied to p and q
   inline
   action_formula or_(action_formula p, action_formula q)
   {
-    return action_formula(gsMakeActOr(p,q));
+    return action_formula(core::detail::gsMakeActOr(p,q));
   }
   
   /// \brief Returns imp applied to p and q
   inline
   action_formula imp(action_formula p, action_formula q)
   {
-    return action_formula(gsMakeActImp(p,q));
+    return action_formula(core::detail::gsMakeActImp(p,q));
   }
   
   /// \brief Returns the universal quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  action_formula forall(data_variable_list l, action_formula p)
+  action_formula forall(data::data_variable_list l, action_formula p)
   {
     assert(!l.empty());
-    return action_formula(gsMakeActForall(l, p));
+    return action_formula(core::detail::gsMakeActForall(l, p));
   }
 
   /// \brief Returns the existential quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  action_formula exists(data_variable_list l, action_formula p)
+  action_formula exists(data::data_variable_list l, action_formula p)
   {
     assert(!l.empty());
-    return action_formula(gsMakeActExists(l, p));
+    return action_formula(core::detail::gsMakeActExists(l, p));
   }
 
   /// \brief Returns the 'p at d'
   inline
-  action_formula at(action_formula p, data_expression d)
+  action_formula at(action_formula p, data::data_expression d)
   {
-    return action_formula(gsMakeActAt(p,d));
+    return action_formula(core::detail::gsMakeActAt(p,d));
   }
 
   /// \brief Returns true if the term t is a multi action
-  inline bool is_mult_act(aterm_appl t) { return gsIsMultAct(t); }
+  inline bool is_mult_act(aterm_appl t) { return core::detail::gsIsMultAct(t); }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(aterm_appl t) { return gsIsDataExpr(t); }
+  inline bool is_data(aterm_appl t) { return core::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(aterm_appl t) { return gsIsActTrue(t); }
+  inline bool is_true(aterm_appl t) { return core::detail::gsIsActTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(aterm_appl t) { return gsIsActFalse(t); }
+  inline bool is_false(aterm_appl t) { return core::detail::gsIsActFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(aterm_appl t) { return gsIsActNot(t); }
+  inline bool is_not(aterm_appl t) { return core::detail::gsIsActNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(aterm_appl t) { return gsIsActAnd(t); }
+  inline bool is_and(aterm_appl t) { return core::detail::gsIsActAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(aterm_appl t) { return gsIsActOr(t); }
+  inline bool is_or(aterm_appl t) { return core::detail::gsIsActOr(t); }
 
   /// \brief Returns true if the term t is an implication expression
-  inline bool is_imp(aterm_appl t) { return gsIsActImp(t); }
+  inline bool is_imp(aterm_appl t) { return core::detail::gsIsActImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(aterm_appl t) { return gsIsActForall(t); }
+  inline bool is_forall(aterm_appl t) { return core::detail::gsIsActForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(aterm_appl t) { return gsIsActExists(t); }
+  inline bool is_exists(aterm_appl t) { return core::detail::gsIsActExists(t); }
 
   /// \brief Returns true if the term t is an at expression
-  inline bool is_at(aterm_appl t) { return gsIsActAt(t); }
+  inline bool is_at(aterm_appl t) { return core::detail::gsIsActAt(t); }
 
   /// \brief Returns the parameters of an action formula
   inline
-  action_list mult_params(action_formula t)
+  lps::action_list mult_params(action_formula t)
   {
-    assert(gsIsMultAct(t));
+    assert(core::detail::gsIsMultAct(t));
     return list_arg1(t);
   }
   
@@ -211,7 +209,7 @@ using namespace mcrl2::core::detail;
   inline
   action_formula not_arg(action_formula t)
   {
-    assert(gsIsActNot(t));
+    assert(core::detail::gsIsActNot(t));
     return arg1(t);
   }
   
@@ -219,7 +217,7 @@ using namespace mcrl2::core::detail;
   inline
   action_formula lhs(action_formula t)
   {
-    assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
+    assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return arg1(t);
   }
   
@@ -227,15 +225,15 @@ using namespace mcrl2::core::detail;
   inline
   action_formula rhs(action_formula t)
   {
-    assert(gsIsActAnd(t) || gsIsActOr(t) || gsIsActImp(t));
+    assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return arg2(t);
   }
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data_variable_list quant_vars(action_formula t)
+  data::data_variable_list quant_vars(action_formula t)
   {
-    assert(gsIsActExists(t) || gsIsActForall(t));
+    assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return list_arg1(t);
   }
   
@@ -243,7 +241,7 @@ using namespace mcrl2::core::detail;
   inline
   action_formula quant_form(action_formula t)
   {
-    assert(gsIsActExists(t) || gsIsActForall(t));
+    assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return arg2(t);
   }
   
@@ -251,15 +249,15 @@ using namespace mcrl2::core::detail;
   inline
   action_formula at_form(action_formula t)
   {
-    assert(gsIsActAt(t));
+    assert(core::detail::gsIsActAt(t));
     return arg1(t);
   }
   
   /// \brief Returns the time of an at expression
   inline
-  data_expression at_time(action_formula t)
+  data::data_expression at_time(action_formula t)
   {
-    assert(gsIsActAt(t));
+    assert(core::detail::gsIsActAt(t));
     return arg2(t);
   }
 
@@ -287,4 +285,4 @@ struct aterm_traits<action_formula>
 
 } // namespace atermpp
 
-#endif // MCRL2_BASIC_ACTION_FORMULA_H
+#endif // MCRL2_MODAL_ACTION_FORMULA_H

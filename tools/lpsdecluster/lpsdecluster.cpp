@@ -52,6 +52,7 @@ using namespace std;
 using namespace atermpp;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
@@ -235,14 +236,14 @@ struct compare_data_variable
 
 ///\ret variable v occurs in l.
 template <typename data_type>
-bool occurs_in(data_type l, lps::data_variable v)
+bool occurs_in(data_type l, data_variable v)
 {
   return find_if(l, compare_data_variable(v)) != aterm();
 }
 
 
 ///\ret a list of all data_variables of sort s in vl
-lps::data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
+data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
@@ -257,7 +258,7 @@ lps::data_variable_list get_occurrences(const data_variable_list& vl, const sort
 }
 
 ///\ret the list of all data_variables in vl, which are unequal to v
-lps::data_variable_list filter(const data_variable_list& vl, const data_variable& v)
+data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 {
   gsDebugMsg("filter:vl = %s, v = %s\n", vl.to_string().c_str(), v.to_string().c_str());
   data_variable_list result;
@@ -273,7 +274,7 @@ lps::data_variable_list filter(const data_variable_list& vl, const data_variable
 }
 
 ///\ret the list of all date_variables in vl, that are not in rl
-lps::data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
+data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
 {
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)

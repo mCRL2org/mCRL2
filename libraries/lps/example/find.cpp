@@ -21,9 +21,10 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
-using namespace lps::detail;
+using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
+using namespace mcrl2::lps;
 
 struct compare_variable
 {

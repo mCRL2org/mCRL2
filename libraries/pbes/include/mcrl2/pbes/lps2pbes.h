@@ -21,12 +21,8 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace lps;
-using namespace modal;
-using namespace modal::detail;
-
   inline
-  pbes<> lps2pbes(const specification& spec, const state_formula& formula, bool timed)
+  pbes<> lps2pbes(const lps::specification& spec, const modal::state_formula& formula, bool timed)
   {
     return pbes_translate(formula, spec, timed);
   }
@@ -35,8 +31,8 @@ using namespace modal::detail;
   pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {
     pbes<> result;
-    specification spec = mcrl22lps(spec_text);
-    state_formula f = mcf2statefrm(formula_text, spec);
+    lps::specification spec = lps::mcrl22lps(spec_text);
+    modal::state_formula f = modal::detail::mcf2statefrm(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }
 

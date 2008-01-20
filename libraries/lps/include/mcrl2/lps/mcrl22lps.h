@@ -32,10 +32,10 @@ namespace lps {
     std::stringstream spec_stream;
     spec_stream << spec;
 
-    ATermAppl result = parse_specification(spec_stream);
-    result = type_check_specification(result);
-    result = alpha_reduce(result);
-    result = implement_data_specification(result);
+    ATermAppl result = detail::parse_specification(spec_stream);
+    result           = detail::type_check_specification(result);
+    result           = detail::alpha_reduce(result);
+    result           = detail::implement_data_specification(result);
     return linearise(result, options);
   }
 

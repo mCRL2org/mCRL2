@@ -5,7 +5,10 @@
 #include "mcrl2/pbes/bisimulation.h"
 
 using namespace std;
-using namespace lps;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 namespace po = boost::program_options;
 
 std::string print_type(int type)

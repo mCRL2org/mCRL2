@@ -7,11 +7,11 @@
 /// \file mcrl2/modal_formula/mucalculus.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_MUCALCULUS_H
-#define MCRL2_BASIC_MUCALCULUS_H
+#ifndef MCRL2_MODAL_MUCALCULUS_H
+#define MCRL2_MODAL_MUCALCULUS_H
 
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
-#endif // MCRL2_BASIC_MUCALCULUS_H
+#endif // MCRL2_MODAL_MUCALCULUS_H

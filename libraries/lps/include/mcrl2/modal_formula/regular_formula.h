@@ -7,8 +7,8 @@
 /// \file mcrl2/modal_formula/regular_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_REGULAR_FORMULA_H
-#define MCRL2_BASIC_REGULAR_FORMULA_H
+#ifndef MCRL2_MODAL_REGULAR_FORMULA_H
+#define MCRL2_MODAL_REGULAR_FORMULA_H
 
 #include <iostream> // for debugging
 
@@ -89,4 +89,4 @@ struct aterm_traits<regular_formula>
 
 } // namespace atermpp
 
-#endif // MCRL2_BASIC_REGULAR_FORMULA_H
+#endif // MCRL2_MODAL_REGULAR_FORMULA_H

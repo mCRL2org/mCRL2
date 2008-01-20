@@ -26,6 +26,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2;
 #endif
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
@@ -446,9 +447,9 @@ static ATermList get_lps_params(lps::linear_process &lps)
 {
   ATermList params = ATmakeList0();
 
-  lps::data_variable_list pars = lps.process_parameters();
-  lps::data_variable_list::iterator pb = pars.begin();
-  lps::data_variable_list::iterator pe = pars.end();
+  data::data_variable_list pars = lps.process_parameters();
+  data::data_variable_list::iterator pb = pars.begin();
+  data::data_variable_list::iterator pe = pars.end();
   for (; pb != pe; pb++)
   {
     ATermAppl p = *pb;

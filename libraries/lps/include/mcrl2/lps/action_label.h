@@ -22,8 +22,6 @@ namespace lps {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
-using namespace mcrl2::data;
-using namespace mcrl2::core::detail;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
@@ -33,8 +31,8 @@ using namespace mcrl2::core::detail;
 class action_label: public aterm_appl
 {
   protected:
-    identifier_string m_name;
-    sort_expression_list m_sorts;
+    core::identifier_string m_name;
+    data::sort_expression_list m_sorts;
 
   public:
     /// Constructor.
@@ -48,7 +46,7 @@ class action_label: public aterm_appl
     action_label(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_ActId(m_term));
+      assert(core::detail::check_rule_ActId(m_term));
       aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;
@@ -56,22 +54,22 @@ class action_label: public aterm_appl
 
     /// Constructor.
     ///
-    action_label(const identifier_string& name, const sort_expression_list &sorts)
-     : aterm_appl(gsMakeActId(name, sorts)),
+    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
+     : aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}
 
     /// Returns the name of the action label.
     ///
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return m_name;
     }
 
     /// Returns the sorts of the action label
     ///
-    sort_expression_list sorts() const
+    data::sort_expression_list sorts() const
     {
       return m_sorts;
     }
@@ -93,7 +91,7 @@ typedef term_list<action_label> action_label_list;
 inline
 bool is_action_label(aterm_appl t)
 {
-  return gsIsActId(t);
+  return core::detail::gsIsActId(t);
 };
 
 } // namespace lps

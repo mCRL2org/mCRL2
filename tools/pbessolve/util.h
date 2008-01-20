@@ -1,4 +1,4 @@
-
+using namespace mcrl2::data;
 
 
 //  Copyright 2007 Simona Orzan. Distributed under the Boost

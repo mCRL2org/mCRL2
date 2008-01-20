@@ -10,10 +10,8 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_variable.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
@@ -21,12 +19,11 @@ namespace mcrl2 {
 namespace pbes_system {
 
 using atermpp::aterm_appl;
+using atermpp::term_list;
 using atermpp::arg1;
 using atermpp::arg2;
 using atermpp::list_arg1;
 using atermpp::list_arg2;
-using namespace data;
-using namespace core::detail;
 
 // prototype
 inline
@@ -86,40 +83,40 @@ typedef term_list<pbes_expression> pbes_expression_list;
 namespace pbes_expr {
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(pbes_expression t) { return gsIsDataExpr(t); }
+  inline bool is_data(pbes_expression t) { return core::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(pbes_expression t) { return gsIsPBESTrue(t); }
+  inline bool is_true(pbes_expression t) { return core::detail::gsIsPBESTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(pbes_expression t) { return gsIsPBESFalse(t); }
+  inline bool is_false(pbes_expression t) { return core::detail::gsIsPBESFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(pbes_expression t) { return gsIsPBESNot(t); }
+  inline bool is_not(pbes_expression t) { return core::detail::gsIsPBESNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(pbes_expression t) { return gsIsPBESAnd(t); }
+  inline bool is_and(pbes_expression t) { return core::detail::gsIsPBESAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(pbes_expression t) { return gsIsPBESOr(t); }
+  inline bool is_or(pbes_expression t) { return core::detail::gsIsPBESOr(t); }
 
   /// \brief Returns true if the term t is an imp expression
-  inline bool is_imp(pbes_expression t) { return gsIsPBESImp(t); }
+  inline bool is_imp(pbes_expression t) { return core::detail::gsIsPBESImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(pbes_expression t) { return gsIsPBESForall(t); }
+  inline bool is_forall(pbes_expression t) { return core::detail::gsIsPBESForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(pbes_expression t) { return gsIsPBESExists(t); }
+  inline bool is_exists(pbes_expression t) { return core::detail::gsIsPBESExists(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
-  inline bool is_propositional_variable_instantiation(pbes_expression t) { return gsIsPropVarInst(t); }
+  inline bool is_propositional_variable_instantiation(pbes_expression t) { return core::detail::gsIsPropVarInst(t); }
 
   /// Conversion of a pbes expression to a data expression.
   /// \pre The pbes expression must be of the form val(d) for
   /// some data variable d.
   inline
-  data_expression val_arg(pbes_expression t)
+  data::data_expression val_arg(pbes_expression t)
   {
     assert(is_data(t));
     return aterm_appl(t);
@@ -127,7 +124,7 @@ namespace pbes_expr {
 
   /// Conversion of a data expression to a pbes expression.
   inline
-  pbes_expression val(data_expression d)
+  pbes_expression val(data::data_expression d)
   {
     return pbes_expression(aterm_appl(d));
   }
@@ -136,14 +133,14 @@ namespace pbes_expr {
   inline
   pbes_expression true_()
   {
-    return pbes_expression(gsMakePBESTrue());
+    return pbes_expression(core::detail::gsMakePBESTrue());
   }
 
   /// \brief Returns the expression false
   inline
   pbes_expression false_()
   {
-    return pbes_expression(gsMakePBESFalse());
+    return pbes_expression(core::detail::gsMakePBESFalse());
   }
   
   /// \brief Returns not applied to p
@@ -155,7 +152,7 @@ namespace pbes_expr {
     else if(is_false(p))
       return true_();
     else
-      return pbes_expression(gsMakePBESNot(p));
+      return pbes_expression(core::detail::gsMakePBESNot(p));
   }
   
   /// \brief Returns and applied to p and q
@@ -171,7 +168,7 @@ namespace pbes_expr {
     else if(is_false(q))
       return false_();
     else
-      return pbes_expression(gsMakePBESAnd(p,q));
+      return pbes_expression(core::detail::gsMakePBESAnd(p,q));
   }
   
   /// \brief Returns or applied to p and q
@@ -187,7 +184,7 @@ namespace pbes_expr {
     else if(is_false(q))
       return p;
     else
-      return pbes_expression(gsMakePBESOr(p,q));
+      return pbes_expression(core::detail::gsMakePBESOr(p,q));
   }
   
   /// \brief Returns imp applied to p and q
@@ -199,27 +196,27 @@ namespace pbes_expr {
     else if(is_true(q))
       return true_();
     else
-      return pbes_expression(gsMakePBESImp(p,q));
+      return pbes_expression(core::detail::gsMakePBESImp(p,q));
   }
   
   /// \brief Returns the universal quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
   inline
-  pbes_expression forall(data_variable_list l, pbes_expression p)
+  pbes_expression forall(data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
       return p;
-    return pbes_expression(gsMakePBESForall(l, p));
+    return pbes_expression(core::detail::gsMakePBESForall(l, p));
   }
   
   /// \brief Returns the existential quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
   inline
-  pbes_expression exists(data_variable_list l, pbes_expression p)
+  pbes_expression exists(data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
       return p;
-    return pbes_expression(gsMakePBESExists(l, p));
+    return pbes_expression(core::detail::gsMakePBESExists(l, p));
   }
 
   /// \brief Returns or applied to the sequence of pbes expressions [first, last[
@@ -258,7 +255,7 @@ namespace pbes_expr {
   inline
   pbes_expression not_arg(pbes_expression t)
   {
-    assert(gsIsPBESNot(t));
+    assert(core::detail::gsIsPBESNot(t));
     return arg1(t);
   }
   
@@ -266,7 +263,7 @@ namespace pbes_expr {
   inline
   pbes_expression lhs(pbes_expression t)
   {
-    assert(gsIsPBESAnd(t) || gsIsPBESOr(t) || gsIsPBESImp(t));
+    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
     return arg1(t);
   }
   
@@ -274,15 +271,15 @@ namespace pbes_expr {
   inline
   pbes_expression rhs(pbes_expression t)
   {
-    assert(gsIsPBESAnd(t) || gsIsPBESOr(t) || gsIsPBESImp(t));
+    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
     return arg2(t);
   }
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data_variable_list quant_vars(pbes_expression t)
+  data::data_variable_list quant_vars(pbes_expression t)
   {
-    assert(gsIsPBESExists(t) || gsIsPBESForall(t));
+    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
     return list_arg1(t);
   }
   
@@ -290,23 +287,23 @@ namespace pbes_expr {
   inline
   pbes_expression quant_expr(pbes_expression t)
   {
-    assert(gsIsPBESExists(t) || gsIsPBESForall(t));
+    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
     return arg2(t);
   }
   
   /// \brief Returns the name of a propositional variable expression
   inline
-  identifier_string var_name(pbes_expression t)
+  core::identifier_string var_name(pbes_expression t)
   {
-    assert(gsIsPropVarInst(t));
+    assert(core::detail::gsIsPropVarInst(t));
     return arg1(t);
   }
   
   /// \brief Returns the value of a propositional variable expression
   inline
-  data_expression_list var_val(pbes_expression t)
+  data::data_expression_list var_val(pbes_expression t)
   {
-    assert(gsIsPropVarInst(t));
+    assert(core::detail::gsIsPropVarInst(t));
     return list_arg2(t);
   }
 

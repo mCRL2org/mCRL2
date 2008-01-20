@@ -24,7 +24,7 @@ namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
-using namespace data;
+using atermpp::term_list;
 
 /// \brief pbes equation.
 ///
@@ -57,7 +57,7 @@ class pbes_equation: public aterm_appl
     /// Constructor.
     ///
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
-      : aterm_appl(gsMakePBEqn(symbol, variable, expr)),
+      : aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
         m_variable(variable),
         m_formula(expr)

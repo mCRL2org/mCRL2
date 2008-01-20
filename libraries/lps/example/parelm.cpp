@@ -1,15 +1,16 @@
+#include <string>
 #include "mcrl2/lps/parelm.h"
 
-using namespace lps;
+using namespace mcrl2;
 
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  string infile(argv[1]);
-  specification spec1;
+  std::string infile(argv[1]);
+  lps::specification spec1;
   spec1.load(argv[1]);
-  specification spec2 = parelm(spec1);
+  lps::specification spec2 = lps::parelm(spec1);
   spec2.save(argv[2]);
 
   return 0;

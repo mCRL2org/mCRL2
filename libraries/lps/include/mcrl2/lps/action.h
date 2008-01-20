@@ -24,7 +24,6 @@ using atermpp::aterm_appl;
 using atermpp::term_list;
 
 using namespace mcrl2::core;
-using namespace mcrl2::data;
 
 /// \brief Represents an action.
 ///
@@ -33,7 +32,7 @@ class action: public aterm_appl
 {
   protected:
     action_label m_label;
-    data_expression_list m_arguments;
+    data::data_expression_list m_arguments;
 
   public:
     /// Constructor.
@@ -47,16 +46,16 @@ class action: public aterm_appl
     action(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(check_rule_Action(m_term));
+      assert(core::detail::check_rule_Action(m_term));
       aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
-      m_arguments = data_expression_list(*i);
+      m_arguments = data::data_expression_list(*i);
     }
 
     /// Constructor.
     ///
-    action(const action_label& label, const data_expression_list& arguments)
-     : aterm_appl(gsMakeAction(label, arguments)),
+    action(const action_label& label, const data::data_expression_list& arguments)
+     : aterm_appl(core::detail::gsMakeAction(label, arguments)),
        m_label(label),
        m_arguments(arguments)
     {}
@@ -70,7 +69,7 @@ class action: public aterm_appl
 
     /// Returns the arguments of the action.
     ///
-    data_expression_list arguments() const
+    data::data_expression_list arguments() const
     {
       return m_arguments;
     }
@@ -91,7 +90,7 @@ typedef term_list<action> action_list;
 inline
 bool is_action(aterm_appl t)
 {
-  return gsIsAction(t);
+  return core::detail::gsIsAction(t);
 }
 
 /// Returns true if the actions a and b have the same label, and the sorts of the
@@ -102,8 +101,8 @@ bool equal_signatures(const action& a, const action& b)
   if (a.label() != b.label())
     return false;
 
-  const data_expression_list& a_args = a.arguments();
-  const data_expression_list& b_args = b.arguments();
+  const data::data_expression_list& a_args = a.arguments();
+  const data::data_expression_list& b_args = b.arguments();
   
   if (a_args.size() != b_args.size())
     return false;

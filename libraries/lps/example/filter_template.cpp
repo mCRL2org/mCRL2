@@ -15,7 +15,7 @@
 #include "mcrl2/lps/detail/filter_program.h"
 
 using namespace std;
-using namespace lps;
+using namespace mcrl2::lps;
 namespace po = boost::program_options;
 
 /// The version of the program.
@@ -32,7 +32,7 @@ const char* output_extension = ".lps";
 
 /// The filter program.
 ///
-class my_program: public lps::filter_program
+class my_program: public filter_program
 {
  public:
     my_program(const std::string& name,

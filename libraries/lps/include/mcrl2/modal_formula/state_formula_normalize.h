@@ -7,8 +7,8 @@
 /// \file mcrl2/modal_formula/state_formula_normalize.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H
-#define MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H
+#ifndef MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
+#define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula_builder.h"
 
@@ -20,9 +20,9 @@ namespace modal {
 /// Puts a logical not around state variables named X
 struct state_variable_negation
 {
-  identifier_string X;
+  core::identifier_string X;
   
-  state_variable_negation(identifier_string X_)
+  state_variable_negation(core::identifier_string X_)
     : X(X_)
   {}
   
@@ -53,7 +53,7 @@ state_formula normalize(state_formula f)
   {
     f = not_arg(f); // remove the not
     if (is_data(f)) {
-      return data_expr::not_(f);
+      return data::data_expr::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {
@@ -138,4 +138,4 @@ state_formula normalize(state_formula f)
 
 } // namespace mcrl2
 
-#endif // MCRL2_BASIC_STATE_FORMULA_NORMALIZE_H
+#endif // MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H

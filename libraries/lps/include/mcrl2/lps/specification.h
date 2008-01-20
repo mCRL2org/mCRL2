@@ -29,10 +29,10 @@ namespace mcrl2 {
 
 namespace lps {
 
+using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;
 using atermpp::aterm_traits;
-using namespace mcrl2::data;
 
 /// \brief Linear process specification.
 ///
@@ -52,7 +52,7 @@ using namespace mcrl2::data;
 class specification: public aterm_appl
 {
   protected:
-    data_specification   m_data;
+    data::data_specification   m_data;
     action_label_list    m_action_labels;
     linear_process       m_process;
     process_initializer  m_initial_process;
@@ -81,14 +81,14 @@ class specification: public aterm_appl
     specification(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_rule_ProcSpec(m_term));
+      assert(core::detail::check_rule_ProcSpec(m_term));
       init_term(t);
     }
 
     /// Constructor.
     ///
     specification(
-        data_specification  data         ,
+        data::data_specification  data         ,
         action_label_list   action_labels,
         linear_process      lps          ,
         process_initializer initial_process
@@ -100,9 +100,9 @@ class specification: public aterm_appl
         m_initial_process(initial_process)
     {
       m_term = reinterpret_cast<ATerm>(
-        gsMakeSpecV1(
+        core::detail::gsMakeSpecV1(
           data,
-          gsMakeActSpec(action_labels),
+          core::detail::gsMakeActSpec(action_labels),
           lps,
           initial_process
         )
@@ -114,7 +114,7 @@ class specification: public aterm_appl
     void load(const std::string& filename)
     {
       aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !check_rule_ProcSpec(aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !core::detail::check_rule_ProcSpec(aterm_appl(t)))
         throw std::runtime_error(std::string("Error in specification::load(): could not read from file " + filename));
       init_term(aterm_appl(t));
       if (!is_well_typed())
@@ -149,7 +149,7 @@ class specification: public aterm_appl
 
     /// Returns the data specification.
     ///
-    data_specification data() const
+    data::data_specification data() const
     { return m_data; }
 
     /// Returns a sequence of action labels. This sequence includes all
@@ -181,7 +181,7 @@ class specification: public aterm_appl
     ///
     bool is_well_typed() const
     {
-      std::set<sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
+      std::set<data::sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
       std::set<action_label> declared_labels = mcrl2::data::detail::make_set(action_labels());
 
       // check 1)
@@ -249,7 +249,7 @@ class specification: public aterm_appl
 
 /// \brief Sets the data specification of spec and returns the result
 inline
-specification set_data_specification(specification spec, data_specification data)
+specification set_data_specification(specification spec, data::data_specification data)
 {
   return specification(data,
                        spec.action_labels(),
@@ -295,11 +295,11 @@ specification set_initial_process(specification spec, process_initializer initia
 inline
 specification repair_free_variables(const specification& spec)
 {
-  data_variable_list fv1 = spec.process().free_variables();
-  data_variable_list fv2 = spec.initial_process().free_variables();
-  std::set<data_variable> freevars(fv1.begin(), fv1.end());
+  data::data_variable_list fv1 = spec.process().free_variables();
+  data::data_variable_list fv2 = spec.initial_process().free_variables();
+  std::set<data::data_variable> freevars(fv1.begin(), fv1.end());
   freevars.insert(fv2.begin(), fv2.end());
-  data_variable_list new_free_vars(freevars.begin(), freevars.end());
+  data::data_variable_list new_free_vars(freevars.begin(), freevars.end());
 
   linear_process      new_process = set_free_variables(spec.process(), new_free_vars);
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());

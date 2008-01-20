@@ -1,14 +1,13 @@
+#include <string>
 #include "mcrl2/lps/parelm.h"
 
-using namespace atermpp;
-using namespace std;
-using namespace lps;
+using namespace mcrl2;
 
 void test_parelm(std::string spec_text)
 {
-  specification spec = mcrl22lps(spec_text);
-  linear_process p = spec.process();
-  linear_process q = parelm(p);
+  lps::specification spec = lps::mcrl22lps(spec_text);
+  lps::linear_process p   = lps::spec.process();
+  lps::linear_process q   = lps::parelm(p);
   std::cout << "<before>\n" << pp(p) << std::endl;
   std::cout << "<after>\n"  << pp(q) << std::endl;
   std::cout << "------------------------------------------------------------------------" << std::endl;

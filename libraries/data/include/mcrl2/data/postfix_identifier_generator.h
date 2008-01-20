@@ -31,14 +31,14 @@ class postfix_identifier_generator: public set_identifier_generator
 
     /// Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
-    virtual identifier_string operator()(const std::string& hint)
+    virtual core::identifier_string operator()(const std::string& hint)
     {
-      identifier_string id(hint);
+      core::identifier_string id(hint);
       int index = 0;
       while (has_identifier(id))
       {   
         std::string name = str(boost::format(hint + m_postfix + "%02d") % index++);
-        id = identifier_string(name);
+        id = core::identifier_string(name);
       }
       add_to_context(id);
       return id;

@@ -20,8 +20,9 @@
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
-using namespace mcrl2::lps::data_expr;
 using namespace mcrl2::lps::detail;
 
 std::string SPECIFICATION = 
@@ -100,8 +101,6 @@ data_variable find_variable(Term t)
 
 void test_find_variable()
 {
-  using namespace mcrl2::lps::data_expr;
-
   data_variable d("d:D");
   data_variable e("e:E");
   data_expression d_e = and_(d, e); 

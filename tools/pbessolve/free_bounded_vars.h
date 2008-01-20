@@ -8,6 +8,7 @@
 #include "mcrl2/atermpp/substitute.h"
 #include "util.h"
 
+using namespace mcrl2::data;
 
 std::set<std::string> context;
 

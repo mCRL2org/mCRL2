@@ -18,8 +18,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace data;
-
 /// Visitor for checking if a pbes expression is normalized.
 struct is_normalized_visitor : public pbes_expression_visitor
 {
@@ -55,7 +53,7 @@ pbes_expression normalize(pbes_expression f)
   {
     f = not_arg(f); // remove the not
     if (is_data(f)) {
-      return data_expr::not_(f);
+      return data::data_expr::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {

@@ -45,9 +45,9 @@ struct equal_data_expression_sort: public std::binary_function<data_expression, 
 };
 
 /// \brief Function object that returns the name of a data variable
-struct data_variable_name: public std::unary_function<data_variable, identifier_string>
+struct data_variable_name: public std::unary_function<data_variable, core::identifier_string>
 {
-  identifier_string operator()(const data_variable& v) const
+  core::identifier_string operator()(const data_variable& v) const
   {
     return v.name();
   }

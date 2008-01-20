@@ -15,8 +15,12 @@
 #include "mcrl2/modal_formula/detail/read_text.h"
 
 using namespace std;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::modal;
+using namespace mcrl2::modal::detail;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 
 int main(int argc, char* argv[])
 {

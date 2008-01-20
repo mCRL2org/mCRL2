@@ -164,9 +164,9 @@ lps::specification untime(const lps::specification& spec) {
   lps::linear_process lps = spec.process(); // Original lps
   lps::linear_process untime_lps; // Updated lps
   lps::summand_list untime_summand_list; // Updated summand list
-  lps::data_variable_list untime_process_parameters; // Updated process parameters
-  lps::data_variable last_action_time; // Extra parameter to display the last action time
-  lps::data_assignment_list untime_initial_assignments; // Updated initial assignments
+  data::data_variable_list untime_process_parameters; // Updated process parameters
+  data::data_variable last_action_time; // Extra parameter to display the last action time
+  data::data_assignment_list untime_initial_assignments; // Updated initial assignments
 
   gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
   
@@ -191,9 +191,9 @@ lps::specification untime(const lps::specification& spec) {
     gsVerboseMsg("Untiming summand %d\n", j);
 
     // Declarations within scope of for-loop
-    lps::data_variable_list untime_summation_variables; //Updated set of summation variables
-    lps::data_expression untime_condition; //Updated condition
-    lps::data_assignment_list untime_assignments; //Updated assignments (or next state)
+    data::data_variable_list untime_summation_variables; //Updated set of summation variables
+    data::data_expression untime_condition; //Updated condition
+    data::data_assignment_list untime_assignments; //Updated assignments (or next state)
     lps::summand untime_summand; //Updated summand
 
     // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
@@ -205,7 +205,7 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = i->summation_variables();
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = and_(i->condition(), lps::data_expr::greater(i->time(),data_expression(last_action_time)));
+	untime_condition = and_(i->condition(), data::data_expr::greater(i->time(),data_expression(last_action_time)));
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
@@ -215,7 +215,7 @@ lps::specification untime(const lps::specification& spec) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	mcrl2::data::data_variable time_var = fresh_variable(spec, lps::sort_expr::real(), "time_var");
+	mcrl2::data::data_variable time_var = fresh_variable(spec, data::sort_expr::real(), "time_var");
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument

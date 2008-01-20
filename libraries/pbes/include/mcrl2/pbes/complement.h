@@ -41,17 +41,15 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace data;
-
 /// Visitor that pushes a negation in a PBES expression as far as possible
 /// inwards towards a data expression.
 struct complement_builder: public pbes_expression_builder
 {
   /// \overload
   ///
-  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    return data_expr::not_(d);
+    return data::data_expr::not_(d);
   }
 
   /// \overload
@@ -84,14 +82,14 @@ struct complement_builder: public pbes_expression_builder
 
   /// \overload
   ///
-  pbes_expression visit_forall(const pbes_expression& /* e */, const data_variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr::exists(variables, visit(expression));
   }
 
   /// \overload
   ///
-  pbes_expression visit_exists(const pbes_expression& /* e */, const data_variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr::forall(variables, visit(expression));
   }

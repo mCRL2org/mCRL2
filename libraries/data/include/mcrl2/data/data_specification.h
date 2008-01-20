@@ -90,11 +90,11 @@ class data_specification: public aterm_appl
     /// Constructor.
     ///             
     data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
-      : aterm_appl(gsMakeDataSpec(
-                      gsMakeSortSpec(sorts),
-                      gsMakeConsSpec(constructors),
-                      gsMakeMapSpec(mappings),
-                      gsMakeDataEqnSpec(equations)
+      : aterm_appl(core::detail::gsMakeDataSpec(
+                      core::detail::gsMakeSortSpec(sorts),
+                      core::detail::gsMakeConsSpec(constructors),
+                      core::detail::gsMakeMapSpec(mappings),
+                      core::detail::gsMakeDataEqnSpec(equations)
                      )
                    ),
         m_sorts(sorts),

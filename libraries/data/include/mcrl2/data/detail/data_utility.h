@@ -69,7 +69,7 @@ std::pair<std::string, data_expression_list> parse_variable(std::string s)
 inline
 bool unique_names(data_variable_list variables)
 {
-  std::set<identifier_string> variable_names;
+  std::set<core::identifier_string> variable_names;
   for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
   {
     variable_names.insert(i->name());
@@ -141,7 +141,7 @@ bool check_variable_sorts(const VariableContainer& variables, const std::set<sor
 
 /// Returns true if names of the given variables are not contained in names.
 inline
-bool check_variable_names(data_variable_list variables, const std::set<identifier_string>& names)
+bool check_variable_names(data_variable_list variables, const std::set<core::identifier_string>& names)
 {
   for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
   {

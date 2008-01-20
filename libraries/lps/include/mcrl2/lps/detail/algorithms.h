@@ -38,7 +38,7 @@ namespace detail {
   inline
   ATermAppl parse_specification(std::istream& from)
   {
-    ATermAppl result = parse_spec(from);
+    ATermAppl result = core::detail::parse_spec(from);
     if (result == NULL)
       throw std::runtime_error("parse error");
     return result;
@@ -47,7 +47,7 @@ namespace detail {
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
-    ATermAppl result = type_check_spec(spec);
+    ATermAppl result = core::detail::type_check_spec(spec);
     if (result == NULL)
       throw std::runtime_error("type check error");
     return result;
@@ -56,7 +56,7 @@ namespace detail {
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
-    ATermAppl result = gsAlpha(spec);
+    ATermAppl result = core::gsAlpha(spec);
     if (result == NULL)
       throw std::runtime_error("alpha reduction error");
     return result;
@@ -65,7 +65,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = implement_data_spec(spec);
+    ATermAppl result = core::detail::implement_data_spec(spec);
     if (result == NULL)
       throw std::runtime_error("data implementation error");
     return result;
@@ -83,7 +83,7 @@ namespace detail {
   inline
   ATermAppl parse_state_formula(istream& from)
   {
-    ATermAppl result = parse_state_frm(from);
+    ATermAppl result = core::detail::parse_state_frm(from);
     if (result == NULL)
       throw std::runtime_error("parse error in parse_state_frm()");
     return result;
@@ -92,7 +92,7 @@ namespace detail {
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, specification spec)
   {
-    ATermAppl result = type_check_state_frm(formula, spec);
+    ATermAppl result = core::detail::type_check_state_frm(formula, spec);
     if (result == NULL)
       throw std::runtime_error("type check error");
     return result;
@@ -101,7 +101,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, specification spec)
   {
-    ATermAppl result = implement_data_state_frm(formula, spec);
+    ATermAppl result = core::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw std::runtime_error("data implementation error");
     return result;
@@ -110,7 +110,7 @@ namespace detail {
   inline
   modal::state_formula translate_regular_formula(ATermAppl formula)
   {
-    ATermAppl result = translate_reg_frms(formula);
+    ATermAppl result = core::detail::translate_reg_frms(formula);
     if (result == NULL)
       throw std::runtime_error("formula translation error");
     return result;

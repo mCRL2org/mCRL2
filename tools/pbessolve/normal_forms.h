@@ -12,6 +12,7 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
+using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 
@@ -33,8 +34,6 @@ static pbes_expression join
  
   return (op?pbes_expr::and_(left,right):pbes_expr::or_(left,right));
 }
-
-namespace lps {
 
 /// Visitor that transforms a pbes expression to a prenex normal form
 /// (i.e., all quantifiers pulled to the beginning of the expression).
@@ -133,5 +132,3 @@ pbes_expression pbes_expression_to_prenex(const pbes_expression& f)
 {  
   return pbes_expression_prenex_builder().visit(f);
 }
-
-} // namespace lps

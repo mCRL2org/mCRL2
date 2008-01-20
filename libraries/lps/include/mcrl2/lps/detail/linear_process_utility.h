@@ -23,32 +23,32 @@ namespace lps {
 namespace detail {
 
   inline
-  std::set<identifier_string> process_parameter_names(const linear_process& p)
+  std::set<core::identifier_string> process_parameter_names(const linear_process& p)
   {
-    std::set<identifier_string> result;
-    result.insert(boost::make_transform_iterator(p.process_parameters().begin(), mcrl2::data::detail::data_variable_name()),
-                  boost::make_transform_iterator(p.process_parameters().end()  , mcrl2::data::detail::data_variable_name()));
+    std::set<core::identifier_string> result;
+    result.insert(boost::make_transform_iterator(p.process_parameters().begin(), data::detail::data_variable_name()),
+                  boost::make_transform_iterator(p.process_parameters().end()  , data::detail::data_variable_name()));
     return result;
   }
 
   inline
-  std::set<identifier_string> free_variable_names(const linear_process& p)
+  std::set<core::identifier_string> free_variable_names(const linear_process& p)
   {
-    std::set<identifier_string> result;
-    result.insert(boost::make_transform_iterator(p.free_variables().begin(), mcrl2::data::detail::data_variable_name()),
-                  boost::make_transform_iterator(p.free_variables().end()  , mcrl2::data::detail::data_variable_name()));
+    std::set<core::identifier_string> result;
+    result.insert(boost::make_transform_iterator(p.free_variables().begin(), data::detail::data_variable_name()),
+                  boost::make_transform_iterator(p.free_variables().end()  , data::detail::data_variable_name()));
     return result;
   }
 
   inline
-  std::set<identifier_string> summand_variable_names(const linear_process& p)
+  std::set<core::identifier_string> summand_variable_names(const linear_process& p)
   {
-    std::set<identifier_string> result;
+    std::set<core::identifier_string> result;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
       result.insert(
-        boost::make_transform_iterator(i->summation_variables().begin(), mcrl2::data::detail::data_variable_name()),
-        boost::make_transform_iterator(i->summation_variables().end(),   mcrl2::data::detail::data_variable_name())
+        boost::make_transform_iterator(i->summation_variables().begin(), data::detail::data_variable_name()),
+        boost::make_transform_iterator(i->summation_variables().end(),   data::detail::data_variable_name())
       );
     }
     return result;

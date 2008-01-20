@@ -25,16 +25,15 @@ namespace mcrl2 {
 namespace lps {
 
 using atermpp::aterm_appl;
-using namespace mcrl2::data;
-using namespace mcrl2::core::detail;
+using atermpp::aterm;
 
 /// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 class process_initializer: public aterm_appl
 {
   protected:
-    data_variable_list   m_free_variables;
-    data_assignment_list m_assignments;
+    data::data_variable_list   m_free_variables;
+    data::data_assignment_list m_assignments;
 
   public:
     /// Constructor.
@@ -45,10 +44,10 @@ class process_initializer: public aterm_appl
 
     /// Constructor.
     ///
-    process_initializer(data_variable_list free_variables,
-                        data_assignment_list assignments
+    process_initializer(data::data_variable_list free_variables,
+                        data::data_assignment_list assignments
                        )
-     : aterm_appl(gsMakeLinearProcessInit(free_variables, assignments)),
+     : aterm_appl(core::detail::gsMakeLinearProcessInit(free_variables, assignments)),
        m_free_variables(free_variables),
        m_assignments(assignments)
     {
@@ -59,7 +58,7 @@ class process_initializer: public aterm_appl
     process_initializer(aterm_appl t)
       : aterm_appl(t)
     {
-      assert(check_term_LinearProcessInit(m_term));
+      assert(core::detail::check_term_LinearProcessInit(m_term));
       aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_assignments    = *i;
@@ -67,21 +66,21 @@ class process_initializer: public aterm_appl
 
     /// Returns the sequence of free variables.
     ///
-    data_variable_list free_variables() const
+    data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// Returns the sequence of assignments.
     ///
-    data_assignment_list assignments() const
+    data::data_assignment_list assignments() const
     {
       return m_assignments;
     }
 
     /// Returns the initial state of the LPS.
     ///
-    data_expression_list state() const
+    data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
@@ -104,8 +103,8 @@ class process_initializer: public aterm_appl
     {
       // check 1)
       if (mcrl2::data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), mcrl2::data::detail::data_assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , mcrl2::data::detail::data_assignment_lhs())
+               boost::make_transform_iterator(m_assignments.begin(), data::detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , data::detail::data_assignment_lhs())
               )
          )
       {

@@ -24,14 +24,13 @@ namespace mcrl2 {
 namespace pbes_system {
 
 using atermpp::aterm_appl;
-using namespace data;
 
 /// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
 class pbes_initializer: public aterm_appl
 {
   protected:
-    data_variable_list   m_free_variables;
+    data::data_variable_list   m_free_variables;
     propositional_variable_instantiation m_variable;
 
   public:
@@ -43,10 +42,10 @@ class pbes_initializer: public aterm_appl
 
     /// Constructor.
     ///
-    pbes_initializer(data_variable_list free_variables,
+    pbes_initializer(data::data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
-     : aterm_appl(gsMakePBInit(free_variables, variable)),
+     : aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
        m_free_variables(free_variables),
        m_variable(variable)
     {
@@ -65,7 +64,7 @@ class pbes_initializer: public aterm_appl
 
     /// Returns the sequence of free variables.
     ///
-    data_variable_list free_variables() const
+    data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }

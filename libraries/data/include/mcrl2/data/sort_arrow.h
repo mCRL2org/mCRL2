@@ -66,7 +66,7 @@ class sort_arrow: public sort_expression
     /// Constructor.
     ///
     sort_arrow(sort_expression_list arguments, sort_expression result)
-      : sort_expression(gsMakeSortArrow(arguments, result))
+      : sort_expression(core::detail::gsMakeSortArrow(arguments, result))
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
@@ -97,7 +97,7 @@ class sort_arrow: public sort_expression
 inline
 bool is_sort_arrow(aterm_appl t)
 {
-  return gsIsSortArrow(t);
+  return core::detail::gsIsSortArrow(t);
 }
 
 } // namespace data

@@ -14,8 +14,8 @@
 #include "mcrl2/data/data.h"
 
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 
 // replace d with d0
 aterm_appl replace_d_d0(aterm_appl t)
@@ -44,8 +44,6 @@ struct replace_variables
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  using namespace lps::data_expr;
 
   data_variable d("d:D");
   data_variable d0("d0:D");

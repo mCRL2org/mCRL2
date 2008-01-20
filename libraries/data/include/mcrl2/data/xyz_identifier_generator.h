@@ -73,16 +73,16 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
     ///
-    identifier_string operator()(const std::string& hint)
+    core::identifier_string operator()(const std::string& hint)
     {
-      identifier_string result(hint);
+      core::identifier_string result(hint);
 
       if (m_identifiers.find(hint) != m_identifiers.end())
       {
         m_index = -2;
         m_char = 'Z';
         do {
-          result = identifier_string(next());
+          result = core::identifier_string(next());
         } while (m_identifiers.find(result) != m_identifiers.end());
       }
 

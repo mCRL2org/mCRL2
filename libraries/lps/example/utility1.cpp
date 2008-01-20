@@ -17,8 +17,9 @@
 #include "mcrl2/data/utility.h"
 
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 
 int main(int argc, char* argv[])
 {

@@ -26,10 +26,8 @@ namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
+using atermpp::term_list;
 using atermpp::read_from_named_file;
-using data::detail::parse_variable;
-using namespace data;
-using namespace core::detail;
 
 /// \brief A propositional variable declaration.
 ///
@@ -37,8 +35,8 @@ using namespace core::detail;
 class propositional_variable: public aterm_appl
 {
   protected:
-    identifier_string m_name;
-    data_variable_list m_parameters;
+    core::identifier_string m_name;
+    data::data_variable_list m_parameters;
 
   public:
     /// Constructor.
@@ -51,10 +49,10 @@ class propositional_variable: public aterm_appl
     ///
     propositional_variable(std::string s)
     {
-      std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name      = identifier_string(p.first);
+      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      m_name      = core::identifier_string(p.first);
       m_parameters = p.second;
-      m_term      = reinterpret_cast<ATerm>(gsMakePropVarDecl(m_name, m_parameters));
+      m_term      = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
     /// Constructor.
@@ -70,8 +68,8 @@ class propositional_variable: public aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable(identifier_string name, data_variable_list parameters)
-      : aterm_appl(gsMakePropVarDecl(name, parameters)),
+    propositional_variable(core::identifier_string name, data::data_variable_list parameters)
+      : aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {
@@ -79,14 +77,14 @@ class propositional_variable: public aterm_appl
 
     /// Returns the name of the propositional variable.
     ///
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return m_name;
     }
 
     /// Returns the parameters of the propositional variable.
     ///
-    data_variable_list parameters() const
+    data::data_variable_list parameters() const
     {
       return m_parameters;
     }
@@ -100,7 +98,7 @@ typedef term_list<propositional_variable> propositional_variable_list;
 inline
 bool is_propositional_variable(aterm_appl t)
 {
-  return gsIsPropVarDecl(t);
+  return core::detail::gsIsPropVarDecl(t);
 }
 
 /// \brief A propositional variable instantiation.
@@ -109,8 +107,8 @@ bool is_propositional_variable(aterm_appl t)
 class propositional_variable_instantiation: public aterm_appl
 {
   protected:
-    identifier_string m_name;
-    data_expression_list m_parameters;
+    core::identifier_string m_name;
+    data::data_expression_list m_parameters;
 
   public:
     /// Constructor.
@@ -123,10 +121,10 @@ class propositional_variable_instantiation: public aterm_appl
     ///
     propositional_variable_instantiation(std::string s)
     {
-      std::pair<std::string, data_expression_list> p = parse_variable(s);
-      m_name        = identifier_string(p.first);
+      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      m_name        = core::identifier_string(p.first);
       m_parameters = p.second;
-      m_term        = reinterpret_cast<ATerm>(gsMakePropVarInst(m_name, m_parameters));
+      m_term        = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
     }
 
     /// Constructor.
@@ -142,8 +140,8 @@ class propositional_variable_instantiation: public aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable_instantiation(identifier_string name, data_expression_list parameters)
-      : aterm_appl(gsMakePropVarInst(name, parameters)),
+    propositional_variable_instantiation(core::identifier_string name, data::data_expression_list parameters)
+      : aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {
@@ -151,14 +149,14 @@ class propositional_variable_instantiation: public aterm_appl
 
     /// Returns the term containing the name of the propositional variable.
     ///
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return m_name;
     }
 
     /// Returns the parameters of the propositional variable.
     ///
-    data_expression_list parameters() const
+    data::data_expression_list parameters() const
     {
       return m_parameters;
     }
@@ -172,7 +170,7 @@ typedef term_list<propositional_variable_instantiation> propositional_variable_i
 inline
 bool is_propositional_variable_instantiation(aterm_appl t)
 {
-  return gsIsPropVarInst(t);
+  return core::detail::gsIsPropVarInst(t);
 }
 
 } // namespace pbes_system

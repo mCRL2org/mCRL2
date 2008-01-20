@@ -8,25 +8,23 @@
 /// \brief Add your file description here.
 
 #include <iostream>
+#include <cassert>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
-using namespace std;
-using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2;
 
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec1 = mcrl22lps(ABP_SPECIFICATION);
-  specification spec2(spec1.data(),
-                      spec1.action_labels(),
-                      spec1.process(),
-                      spec1.initial_process()
-                     );
+  lps::specification spec1 = lps::mcrl22lps(ABP_SPECIFICATION);
+  lps::specification spec2(spec1.data(),
+                           spec1.action_labels(),
+                           spec1.process(),
+                           spec1.initial_process()
+                          );
   assert(spec1 == spec2);
 
   return 0;

@@ -16,6 +16,8 @@
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 
 int test_main(int argc, char** argv)

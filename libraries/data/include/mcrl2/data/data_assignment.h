@@ -26,7 +26,6 @@ namespace data {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 using atermpp::aterm;
-using namespace core;
 
 /// \brief data_assignment is an assignment of a data expression to a data variable.
 ///
@@ -40,7 +39,7 @@ class data_assignment: public aterm_appl
     /// Constructor.
     ///             
     data_assignment()
-      : aterm_appl(detail::constructPBExpr())
+      : aterm_appl(core::detail::constructPBExpr())
     {}
 
     /// Constructor.
@@ -48,7 +47,7 @@ class data_assignment: public aterm_appl
     data_assignment(aterm_appl t)
      : aterm_appl(t)
     {
-      assert(detail::check_rule_DataVarIdInit(m_term));
+      assert(core::detail::check_rule_DataVarIdInit(m_term));
       aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
@@ -58,7 +57,7 @@ class data_assignment: public aterm_appl
     ///             
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_appl(detail::gsMakeDataVarIdInit(lhs, rhs)),
+       aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -109,7 +108,7 @@ typedef term_list<data_assignment> data_assignment_list;
 inline
 bool is_data_assignment(aterm_appl t)
 {
-  return detail::gsIsDataVarIdInit(t);
+  return core::detail::gsIsDataVarIdInit(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

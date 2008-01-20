@@ -36,10 +36,10 @@ using namespace detail;
 
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
-std::set<identifier_string> identifiers(Term t)
+std::set<core::identifier_string> identifiers(Term t)
 {
-  std::set<identifier_string> result;
-  find_all_if(aterm_traits<Term>::term(t), is_identifier_string, std::inserter(result, result.end()));
+  std::set<core::identifier_string> result;
+  find_all_if(aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
   return result;
 }
 
@@ -65,7 +65,7 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   data_variable_list result;
   for (data_variable_list::iterator k = t.begin(); k != t.end(); ++k)
   {
-    identifier_string name(std::string(k->name()) + postfix);
+    core::identifier_string name(std::string(k->name()) + postfix);
     result = push_front(result, data_variable(name, k->sort()));
   }
   return atermpp::reverse(result);
@@ -101,13 +101,13 @@ struct postfix_identifier_creator
 
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename IdentifierCreator>
-identifier_string fresh_identifier(const std::set<identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+core::identifier_string fresh_identifier(const std::set<core::identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
   int index = 0;
-  identifier_string s;
+  core::identifier_string s;
   do
   {
-    s = identifier_string(id_creator(hint, index++));
+    s = core::identifier_string(id_creator(hint, index++));
   }
   while(context.find(s) != context.end());
   return s;
@@ -115,14 +115,14 @@ identifier_string fresh_identifier(const std::set<identifier_string>& context, c
 
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term, class IdentifierCreator>
-identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
   return fresh_identifier(identifiers(context), hint, id_creator);
 }
 
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term>
-identifier_string fresh_identifier(const Term& context, const std::string& hint)
+core::identifier_string fresh_identifier(const Term& context, const std::string& hint)
 {
   return fresh_identifier(context, hint, default_identifier_creator());
 }
@@ -131,7 +131,7 @@ identifier_string fresh_identifier(const Term& context, const std::string& hint)
 template <typename Term>
 data_variable fresh_variable(Term context, sort_expression s, std::string hint)
 {
-  identifier_string id = fresh_identifier(context, hint);
+  core::identifier_string id = fresh_identifier(context, hint);
   return data_variable(id, s);
 }
 
@@ -147,13 +147,13 @@ std::set<data_variable> find_variables(Term t)
 
 /// \brief Returns all names of data variables that occur in the term t
 template <typename Term>
-std::set<identifier_string> find_variable_names(Term t)
+std::set<core::identifier_string> find_variable_names(Term t)
 {
   // find all data variables in t
   std::set<data_variable> variables;
   atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
 
-  std::set<identifier_string> result;
+  std::set<core::identifier_string> result;
   for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
   {
     result.insert(j->name());
@@ -182,7 +182,7 @@ std::set<std::string> find_variable_name_strings(Term t)
 class fresh_variable_generator
 {
   protected:
-    atermpp::set<identifier_string> m_identifiers;
+    atermpp::set<core::identifier_string> m_identifiers;
     sort_expression m_sort;                    // used for operator()()
     std::string m_hint;                  // used as a hint for operator()()
 
@@ -244,7 +244,7 @@ class fresh_variable_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<identifier_string> ids = identifiers(t);
+      std::set<core::identifier_string> ids = identifiers(t);
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 
@@ -253,12 +253,12 @@ class fresh_variable_generator
     ///
     data_variable operator()()
     {
-      identifier_string id(m_hint);
+      core::identifier_string id(m_hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(m_hint + "%02d") % index++);
-        id = identifier_string(name);
+        id = core::identifier_string(name);
       }
       m_identifiers.insert(id);
       return data_variable(id, m_sort);
@@ -270,12 +270,12 @@ class fresh_variable_generator
     data_variable operator()(data_variable v)
     {
       std::string hint = v.name();
-      identifier_string id(hint);
+      core::identifier_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
       {   
         std::string name = str(boost::format(hint + "%02d") % index++);
-        id = identifier_string(name);
+        id = core::identifier_string(name);
       }
       m_identifiers.insert(id);
       return data_variable(id, v.sort());

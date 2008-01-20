@@ -19,20 +19,18 @@ namespace pbes_system {
 
 namespace detail {
 
-using namespace data;
-
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
 struct quantifier_visitor: public pbes_expression_visitor
 {
-  std::set<data_variable> variables;
+  std::set<data::data_variable> variables;
 
-  bool visit_forall(const pbes_expression& e, const data_variable_list& v, const pbes_expression&)
+  bool visit_forall(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
   {
     variables.insert(v.begin(), v.end());
     return stop_recursion;
   }
 
-  bool visit_exists(const pbes_expression& e, const data_variable_list& v, const pbes_expression&)
+  bool visit_exists(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
   {
     variables.insert(v.begin(), v.end());
     return stop_recursion;
@@ -43,18 +41,18 @@ struct quantifier_visitor: public pbes_expression_visitor
 /// variables of free variables with the same name.
 struct quantifier_name_clash_visitor: public pbes_expression_visitor
 {
-  std::vector<data_variable_list> quantifier_stack;
+  std::vector<data::data_variable_list> quantifier_stack;
   bool result;
-  data_variable name_clash; // if result is true, then this attribute contains the conflicting variable
+  data::data_variable name_clash; // if result is true, then this attribute contains the conflicting variable
 
   quantifier_name_clash_visitor()
     : result(false)
   {}
 
   /// returns true if the quantifier_stack contains a data variable with the given name
-  bool is_in_quantifier_stack(identifier_string name) const
+  bool is_in_quantifier_stack(core::identifier_string name) const
   {
-    for (std::vector<data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (std::vector<data::data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
       if (std::find(boost::make_transform_iterator(i->begin(), data::detail::data_variable_name()),
                     boost::make_transform_iterator(i->end()  , data::detail::data_variable_name()),
@@ -70,13 +68,13 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor
 
   // Add variables to the quantifier stack, and add replacements for the name clashes to replacements.
   // Returns the number of replacements that were added.
-  void push(const data_variable_list& variables)
+  void push(const data::data_variable_list& variables)
   {
     if (result)
     {
       return;
     }
-    for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+    for (data::data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (is_in_quantifier_stack(i->name()))
       {
@@ -97,7 +95,7 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor
     quantifier_stack.pop_back();
   }
 
-  bool visit_forall(const pbes_expression& e, const data_variable_list& v, const pbes_expression&)
+  bool visit_forall(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
   {
     push(v);
     return continue_recursion;
@@ -108,7 +106,7 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor
     pop();
   }
 
-  bool visit_exists(const pbes_expression& e, const data_variable_list& v, const pbes_expression&)
+  bool visit_exists(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
   {
     push(v);
     return continue_recursion;

@@ -26,33 +26,29 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using namespace data;
-using namespace lps;
-using namespace modal;
-  
-/// \brief Translates a state_formula and a specification to a pbes. If the pbes evaluates
-/// to true, the formula holds for the specification.
+/// \brief Translates a modal::state_formula and a lps::specification to a pbes. If the pbes evaluates
+/// to true, the formula holds for the lps::specification.
 /// \param formula the state formula
-/// \param spec the specification
+/// \param spec the lps::specification
 /// \param determines whether the timed or untimed variant of the algorithm is chosen
 /// \return The resulting pbes
-pbes<> pbes_translate(const state_formula& formula, const specification& spec, bool timed = false)
+pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)
 {
   using namespace detail;
-  using namespace state_frm;
+  using namespace modal::state_frm;
 
-  state_formula f = formula;
-  std::set<identifier_string> formula_variable_names = find_variable_names(formula);
-  std::set<identifier_string> spec_variable_names = find_variable_names(spec);
-  std::set<identifier_string> spec_names = identifiers(spec);
+  modal::state_formula f = formula;
+  std::set<core::identifier_string> formula_variable_names = data::find_variable_names(formula);
+  std::set<core::identifier_string> spec_variable_names = data::find_variable_names(spec);
+  std::set<core::identifier_string> spec_names = data::identifiers(spec);
 
   // rename data variables in f, to prevent name clashes with data variables in spec 
-  set_identifier_generator generator;
+  data::set_identifier_generator generator;
   generator.add_identifiers(spec_variable_names);
-  f = rename_data_variables(f, generator);
+  f = modal::rename_data_variables(f, generator);
 
   // rename predicate variables in f, to prevent name clashes
-  xyz_identifier_generator xyz_generator;
+  data::xyz_identifier_generator xyz_generator;
   xyz_generator.add_identifiers(spec_names);  
   xyz_generator.add_identifiers(formula_variable_names);  
   f = rename_predicate_variables(f, xyz_generator);
@@ -60,11 +56,11 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   // wrap the formula inside a 'nu' if needed
   if (!is_mu(f) && !is_nu(f))
   {
-    aterm_list context = make_list(f, spec);
-    identifier_string X = fresh_identifier(context, std::string("X"));
-    f = nu(X, data_assignment_list(), f);
+    atermpp::aterm_list context = make_list(f, spec);
+    core::identifier_string X = data::fresh_identifier(context, std::string("X"));
+    f = nu(X, data::data_assignment_list(), f);
   }  
-  linear_process lps = spec.process();
+  lps::linear_process lps = spec.process();
   atermpp::vector<pbes_equation> e;
 
   if (formula.has_time() || spec.process().has_time())
@@ -80,8 +76,8 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   else
   {
     using namespace pbes_timed;
-    data_variable T = fresh_variable(make_list(f, lps), sort_expr::real(), "T");
-    aterm_list context = make_list(T, spec.initial_process(), lps, f);
+    data::data_variable T = fresh_variable(make_list(f, lps), data::sort_expr::real(), "T");
+    atermpp::aterm_list context = make_list(T, spec.initial_process(), lps, f);
     lps = lps::detail::make_timed_lps(lps, context);
     e = E(f, f, lps, T);
   }
@@ -89,28 +85,28 @@ pbes<> pbes_translate(const state_formula& formula, const specification& spec, b
   // create initial state
   assert(e.size() > 0);
   pbes_equation e1 = e.front();
-  identifier_string Xe(e1.variable().name());
+  core::identifier_string Xe(e1.variable().name());
   assert(is_mu(f) || is_nu(f));
-  identifier_string Xf = mu_name(f);
-  data_expression_list fi = mu_expressions(f);
-  data_expression_list pi = spec.initial_process().state();
-  atermpp::set<data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
+  core::identifier_string Xf = mu_name(f);
+  data::data_expression_list fi = mu_expressions(f);
+  data::data_expression_list pi = spec.initial_process().state();
+  atermpp::set<data::data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
 
   pbes<> result;
   if (!timed)
   {   
-    propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data_variable_list(), f));
+    propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::data_variable_list(), f));
     result = pbes<>(spec.data(), e, free_variables, init);
   }
   else
   {
-    propositional_variable_instantiation init(Xe, data_expr::real(0) + fi + pi + Par(Xf, data_variable_list(), f));  
-    data_specification data_spec = spec.data();   
+    propositional_variable_instantiation init(Xe, data::data_expr::real(0) + fi + pi + Par(Xf, data::data_variable_list(), f));  
+    data::data_specification data_spec = spec.data();   
 
     // add sort real to data_spec (if needed)
-    if (std::find(spec.data().sorts().begin(), spec.data().sorts().end(), sort_expr::real()) == spec.data().sorts().end())
+    if (std::find(spec.data().sorts().begin(), spec.data().sorts().end(), data::sort_expr::real()) == spec.data().sorts().end())
     {
-      data_spec = set_sorts(data_spec, push_front(data_spec.sorts(), sort_expr::real()));
+      data_spec = data::set_sorts(data_spec, push_front(data_spec.sorts(), data::sort_expr::real()));
     }
 
     result = pbes<>(data_spec, e, free_variables, init);

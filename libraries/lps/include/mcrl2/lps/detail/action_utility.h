@@ -22,14 +22,14 @@ namespace detail {
 
 /// Returns true if the sorts of the given actions are contained in sorts.
 inline
-bool check_action_sorts(action_list actions, const std::set<sort_expression>& sorts)
+bool check_action_sorts(action_list actions, const std::set<data::sort_expression>& sorts)
 {
   for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
   {
-    const sort_expression_list& s = i->label().sorts();
-    for (sort_expression_list::iterator j = s.begin(); j != s.end(); ++j)
+    const data::sort_expression_list& s = i->label().sorts();
+    for (data::sort_expression_list::iterator j = s.begin(); j != s.end(); ++j)
     {
-      if (!check_sort(*j, sorts))
+      if (!data::detail::check_sort(*j, sorts))
         return false;
     }
   }
@@ -50,13 +50,13 @@ bool check_action_labels(action_list actions, const std::set<action_label>& labe
 
 /// Returns true if the sorts of the given action labels are contained in sorts.
 inline
-bool check_action_label_sorts(action_label_list action_labels, const std::set<sort_expression>& sorts)
+bool check_action_label_sorts(action_label_list action_labels, const std::set<data::sort_expression>& sorts)
 {
   for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
   {
-    for (sort_expression_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    for (data::sort_expression_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
     {
-      if (!check_sort(*j, sorts))
+      if (!data::detail::check_sort(*j, sorts))
         return false;
     }
   }

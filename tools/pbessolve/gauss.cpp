@@ -204,7 +204,7 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
 #ifdef debug
     gsVerboseMsg("Double vars removed: %s\n",pp(pnorm_uni).c_str());
 #endif
-    defX =  lps::pbes_expression_to_prenex(pnorm_uni); 
+    defX =  pbes_expression_to_prenex(pnorm_uni); 
 #ifdef debug
     gsVerboseMsg("in PNF: %s\n",pp(defX).c_str());
 #endif    

@@ -21,11 +21,8 @@ namespace pbes_system {
 
 namespace detail {
 
-using namespace core;
-using namespace data;
-
 /// \brief Function object that returns the name of the binding variable of a pbes equation
-struct pbes_equation_variable_name: public std::unary_function<data_variable, identifier_string>
+struct pbes_equation_variable_name: public std::unary_function<data::data_variable, core::identifier_string>
 {
   core::identifier_string operator()(const pbes_equation& e) const
   {

@@ -30,14 +30,15 @@ namespace detail {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
+using atermpp::apply;
 
 /// Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
 struct make_timed_lps_summand
 {
-  fresh_variable_generator& m_generator;
+  data::fresh_variable_generator& m_generator;
 
-  make_timed_lps_summand(fresh_variable_generator& generator)
+  make_timed_lps_summand(data::fresh_variable_generator& generator)
     : m_generator(generator)
   {}
 
@@ -45,8 +46,8 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data_variable v = m_generator();
-      summand_ = set_time(summand_, data_expression(v));
+      data::data_variable v = m_generator();
+      summand_ = set_time(summand_, data::data_expression(v));
       summand_ = set_summation_variables(summand_, summand_.summation_variables() + v);
     }
     return summand_;
@@ -58,7 +59,7 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, aterm context)
 {
-  fresh_variable_generator generator(context);
+  data::fresh_variable_generator generator(context);
   summand_list new_summands = apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
@@ -79,7 +80,7 @@ struct data_variable_replacer
   
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
-    if (!is_data_variable(t))
+    if (!data::is_data_variable(t))
     {
       return std::pair<aterm_appl, bool>(t, true); // continue the recursion
     }
@@ -119,18 +120,18 @@ struct data_variable_name_replacer
   
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
-    if (!is_data_variable(t))
+    if (!data::is_data_variable(t))
     {
       return std::pair<aterm_appl, bool>(t, true); // continue the recursion
     }
-    data_variable v(t);
+    data::data_variable v(t);
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
     for (; i != src_.end(); ++i, ++j)
     {
       if (v.name() == *i)
       {
-        return std::pair<aterm_appl, bool>(data_variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<aterm_appl, bool>(data::data_variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
     return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion

@@ -24,7 +24,6 @@ namespace pbes_system {
 
 using atermpp::aterm;
 using atermpp::aterm_appl;
-using namespace core::detail;
 
 /// \brief Pbes fixpoint symbol (mu or nu).
 ///
@@ -59,28 +58,28 @@ class fixpoint_symbol: public aterm_appl
     ///
     static fixpoint_symbol mu()
     {
-      return fixpoint_symbol(gsMakeMu());
+      return fixpoint_symbol(core::detail::gsMakeMu());
     }
 
     /// Returns the nu symbol.
     ///
     static fixpoint_symbol nu()
     {
-      return fixpoint_symbol(gsMakeNu());
+      return fixpoint_symbol(core::detail::gsMakeNu());
     }
 
     /// Returns true if the symbol is mu.
     ///
     bool is_mu() const
     {
-      return gsIsMu(*this);
+      return core::detail::gsIsMu(*this);
     }
 
     /// Returns true if the symbol is nu.
     ///
     bool is_nu() const
     {
-      return gsIsNu(*this);
+      return core::detail::gsIsNu(*this);
     }
 };
 

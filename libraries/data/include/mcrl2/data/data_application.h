@@ -22,7 +22,6 @@ namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::term_list;
-using namespace core;
 
 /// \brief Data application.
 ///
@@ -33,7 +32,7 @@ class data_application: public data_expression
     /// Constructor.
     ///
     data_application()
-      : data_expression(detail::constructDataAppl())
+      : data_expression(core::detail::constructDataAppl())
     {}
 
     /// Constructor.
@@ -41,27 +40,27 @@ class data_application: public data_expression
     data_application(aterm_appl t)
      : data_expression(t)
     {
-      assert(detail::check_term_DataAppl(m_term));
+      assert(core::detail::check_term_DataAppl(m_term));
     }
 
     /// Constructor.
     ///
     data_application(data_expression expr, data_expression_list args)
-     : data_expression(detail::gsMakeDataAppl(expr, args))
+     : data_expression(core::detail::gsMakeDataAppl(expr, args))
     {}
 
     /// Returns the head of the data application.
     ///
     data_expression head() const
     {
-      return gsGetDataExprHead(*this);
+      return core::gsGetDataExprHead(*this);
     }
 
     /// Returns the arguments of the data expression.
     ///
     data_expression_list arguments() const
     {
-      return gsGetDataExprArgs(*this);
+      return core::gsGetDataExprArgs(*this);
     }
   };
 
@@ -73,7 +72,7 @@ typedef term_list<data_application> data_application_list;
 inline
 bool is_data_application(aterm_appl t)
 {
-  return detail::gsIsDataAppl(t);
+  return core::detail::gsIsDataAppl(t);
 }
 
 } // namespace data

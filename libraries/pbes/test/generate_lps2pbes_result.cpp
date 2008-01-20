@@ -20,6 +20,8 @@
 using namespace atermpp;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
+using namespace mcrl2::modal;
+using namespace mcrl2::modal::detail;
 using namespace mcrl2::pbes_system;
 
 int main(int argc, char** argv)

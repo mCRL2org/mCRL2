@@ -16,8 +16,10 @@
 //Rewriter
 #include "mcrl2/data/rewrite.h"
 
-using namespace lps;
-using namespace pbes_expr;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 
 int main(int argc, char** argv)
 {

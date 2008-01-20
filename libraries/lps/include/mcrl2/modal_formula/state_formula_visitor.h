@@ -7,8 +7,8 @@
 /// \file mcrl2/modal_formula/state_formula_visitor.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_STATE_FORMULA_VISITOR_H
-#define MCRL2_BASIC_STATE_FORMULA_VISITOR_H
+#ifndef MCRL2_MODAL_STATE_FORMULA_VISITOR_H
+#define MCRL2_MODAL_STATE_FORMULA_VISITOR_H
 
 #include <stdexcept>
 #include "mcrl2/modal_formula/state_formula.h"
@@ -42,7 +42,7 @@ struct state_formula_visitor
   virtual ~state_formula_visitor()
   { }
   
-  virtual bool visit_data_expression(const state_formula& /* e */, const data_expression& d)
+  virtual bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
     return true;
   }
@@ -77,12 +77,12 @@ struct state_formula_visitor
     return true;
   }    
 
-  virtual bool visit_forall(const state_formula& /* e */, const data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual bool visit_forall(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
 
-  virtual bool visit_exists(const state_formula& /* e */, const data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual bool visit_exists(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
@@ -102,7 +102,7 @@ struct state_formula_visitor
     return true;
   }
 
-  virtual bool visit_yaled_timed(const state_formula& /* e */, const data_expression& /* d */)
+  virtual bool visit_yaled_timed(const state_formula& /* e */, const data::data_expression& /* d */)
   {
     return true;
   }
@@ -112,22 +112,22 @@ struct state_formula_visitor
     return true;
   }
 
-  virtual bool visit_delay_timed(const state_formula& /* e */, const data_expression& /* d */)
+  virtual bool visit_delay_timed(const state_formula& /* e */, const data::data_expression& /* d */)
   {
     return true;
   }
 
-  virtual bool visit_var(const state_formula& /* e */, const identifier_string& /* n */, const data_expression_list& /* l */)
+  virtual bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& /* l */)
   {
     return true;
   }
 
-  virtual bool visit_mu(const state_formula& /* e */, const identifier_string& /* n */, const data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual bool visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
 
-  virtual bool visit_nu(const state_formula& /* e */, const identifier_string& /* n */, const data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual bool visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
@@ -238,7 +238,7 @@ struct state_formula_visitor
         visit(right);
       }
     } else if (is_forall(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const state_formula& qexpr = quant_form(e);
       bool result = visit_forall(e, qvars, qexpr);
       if (result)
@@ -246,7 +246,7 @@ struct state_formula_visitor
         visit(qexpr);
       }
     } else if (is_exists(e)) {
-      const data_variable_list& qvars = quant_vars(e);
+      const data::data_variable_list& qvars = quant_vars(e);
       const state_formula& qexpr = quant_form(e);
       bool result = visit_exists(e, qvars, qexpr);
       if (result)
@@ -272,20 +272,20 @@ struct state_formula_visitor
     } else if (is_yaled(e)) {
       visit_yaled(e);
     } else if(is_yaled_timed(e)) {
-      const data_expression& t = time(e);
+      const data::data_expression& t = time(e);
       visit_yaled_timed(e, t);
     } else if (is_delay(e)) {
       visit_delay(e);
     } else if(is_delay_timed(e)) {
-      const data_expression& t = time(e);
+      const data::data_expression& t = time(e);
       visit_delay_timed(e, t);
     } else if(is_var(e)) {
-      const identifier_string& n = var_name(e);
-      const data_expression_list& l = var_val(e);
+      const core::identifier_string& n = var_name(e);
+      const data::data_expression_list& l = var_val(e);
       visit_var(e, n, l);
     } else if(is_mu(e)) {
-      const identifier_string& n = mu_name(e);
-      const data_assignment_list& a = mu_params(e);
+      const core::identifier_string& n = mu_name(e);
+      const data::data_assignment_list& a = mu_params(e);
       const state_formula& f = mu_form(e);
       bool result = visit_mu(e, n, a, f);
       if (result)
@@ -293,8 +293,8 @@ struct state_formula_visitor
         visit(f);
       }
     } else if(is_nu(e)) {
-      const identifier_string& n = mu_name(e);
-      const data_assignment_list& a = mu_params(e);
+      const core::identifier_string& n = mu_name(e);
+      const data::data_assignment_list& a = mu_params(e);
       const state_formula& f = mu_form(e);
       bool result = visit_nu(e, n, a, f);
       if (result)
@@ -311,4 +311,4 @@ struct state_formula_visitor
 
 } // namespace mcrl2
 
-#endif // MCRL2_BASIC_STATE_FORMULA_VISITOR_H
+#endif // MCRL2_MODAL_STATE_FORMULA_VISITOR_H

@@ -28,7 +28,7 @@ namespace data {
 class set_identifier_generator: public identifier_generator
 {
   protected:
-    atermpp::set<identifier_string> m_identifiers;
+    atermpp::set<core::identifier_string> m_identifiers;
 
   public:
     /// Constructor.
@@ -51,25 +51,25 @@ class set_identifier_generator: public identifier_generator
     }
 
     /// Adds the identifier s to the context.
-    void add_identifier(identifier_string s)
+    void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
     /// Removes one occurrence of the identifier s from the context.
-    void remove_identifier(identifier_string s)
+    void remove_identifier(core::identifier_string s)
     {
       m_identifiers.erase(s);
     }
 
     /// Returns true if the identifier s appears in the context.
-    bool has_identifier(identifier_string s) const
+    bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
     /// Returns the context.
-    const atermpp::set<identifier_string>& context() const
+    const atermpp::set<core::identifier_string>& context() const
     {
       return m_identifiers;
     }
@@ -87,7 +87,7 @@ class set_identifier_generator: public identifier_generator
 class multiset_identifier_generator: public identifier_generator
 {
   protected:
-    atermpp::multiset<identifier_string> m_identifiers;
+    atermpp::multiset<core::identifier_string> m_identifiers;
 
   public:
     /// Constructor.
@@ -110,15 +110,15 @@ class multiset_identifier_generator: public identifier_generator
     }
 
     /// Adds the identifier s to the context.
-    void add_identifier(identifier_string s)
+    void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
     /// Removes one occurrence of the identifier s from the context.
-    void remove_identifier(identifier_string s)
+    void remove_identifier(core::identifier_string s)
     {
-      atermpp::multiset<identifier_string>::iterator i = m_identifiers.find(s);
+      atermpp::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
       if (i != m_identifiers.end())
       {
         m_identifiers.erase(i);
@@ -126,13 +126,13 @@ class multiset_identifier_generator: public identifier_generator
     }
 
     /// Returns true if the identifier s appears in the context.
-    bool has_identifier(identifier_string s) const
+    bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
     /// Returns the context.
-    const atermpp::multiset<identifier_string>& context() const
+    const atermpp::multiset<core::identifier_string>& context() const
     {
       return m_identifiers;
     }

@@ -15,10 +15,11 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
-#include "mcrl2/pbes/detail/tools.h"
+#include "mcrl2/pbes/lps2pbes.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 

@@ -7,8 +7,8 @@
 /// \file mcrl2/modal_formula/state_formula_rename.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_BASIC_STATE_VARIABLE_RENAME_H
-#define MCRL2_BASIC_STATE_VARIABLE_RENAME_H
+#ifndef MCRL2_MODAL_STATE_VARIABLE_RENAME_H
+#define MCRL2_MODAL_STATE_VARIABLE_RENAME_H
 
 #include <deque>
 #include "mcrl2/modal_formula/state_formula_builder.h"
@@ -25,7 +25,7 @@ template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formula_builder
 {
   IdentifierGenerator& generator;
-  std::deque<std::pair<identifier_string, identifier_string> > replacements; // may also contain pairs with identical values
+  std::deque<std::pair<core::identifier_string, core::identifier_string> > replacements; // may also contain pairs with identical values
 
   state_formula_predicate_variable_rename_builder(IdentifierGenerator& generator)
     : generator(generator)
@@ -33,9 +33,9 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
 
   /// Generates a new name for n, and adds a replacement to the replacement stack.
   /// Returns the new name.
-  identifier_string push(const identifier_string& n)
+  core::identifier_string push(const core::identifier_string& n)
   {
-    identifier_string new_name = generator(n);
+    core::identifier_string new_name = generator(n);
     replacements.push_front(std::make_pair(n, new_name));
     return new_name;
   }
@@ -43,14 +43,14 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// Removes the last added replacement.
   void pop()
   {
-    std::pair<identifier_string, identifier_string> p = replacements.front();
+    std::pair<core::identifier_string, core::identifier_string> p = replacements.front();
     replacements.pop_front();
   }
 
-  state_formula visit_var(const state_formula& e, const identifier_string& n, const data_expression_list& l)
+  state_formula visit_var(const state_formula& e, const core::identifier_string& n, const data::data_expression_list& l)
   {
-    identifier_string new_name = n;
-    for (std::deque<std::pair<identifier_string, identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
+    core::identifier_string new_name = n;
+    for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
     {
       if (i->first == n)
       {
@@ -61,17 +61,17 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     return state_frm::var(new_name, l);
   }
 
-  state_formula visit_mu(const state_formula& e, const identifier_string& n, const data_assignment_list& a, const state_formula& f)
+  state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
   {
-    identifier_string new_name = push(n);
+    core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
     pop();
     return state_frm::mu(new_name, a, new_formula);
   }
 
-  state_formula visit_nu(const state_formula& e, const identifier_string& n, const data_assignment_list& a, const state_formula& f)
+  state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
   {
-    identifier_string new_name = push(n);
+    core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
     pop();
     return state_frm::nu(new_name, a, new_formula);
@@ -98,21 +98,21 @@ template <typename IdentifierGenerator>
 state_formula rename_data_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data_variable> src = lps::find_variables(f);
+  std::set<data::data_variable> src = data::find_variables(f);
 
   // create a mapping of replacements
-  std::map<data_variable, data_expression> replacements;
+  std::map<data::data_variable, data::data_expression> replacements;
 
-  for (std::set<data_variable>::iterator i = src.begin(); i != src.end(); ++i)
+  for (std::set<data::data_variable>::iterator i = src.begin(); i != src.end(); ++i)
   {
-    replacements[*i] = data_variable(generator(i->name()), i->sort());
+    replacements[*i] = data::data_variable(generator(i->name()), i->sort());
   }
 
-  return data_variable_map_replace(f, replacements);
+  return data::data_variable_map_replace(f, replacements);
 }
 
 } // namespace modal
 
 } // namespace mcrl2
 
-#endif // MCRL2_BASIC_STATE_VARIABLE_RENAME_H
+#endif // MCRL2_MODAL_STATE_VARIABLE_RENAME_H

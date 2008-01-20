@@ -18,6 +18,7 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 #endif
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::data::data_expr;
 
@@ -153,7 +154,7 @@ namespace lps {
   data_expression swap_equality(data_expression t)
   {
     assert(is_equal_to(t));
-    return lps::data_expr::equal_to(rhs(t), lhs(t));
+    return data::data_expr::equal_to(rhs(t), lhs(t));
   }
 
   ///Apply substitution to the righthand sides of the assignments in dl
@@ -183,9 +184,9 @@ namespace lps {
     int num_removed = 0;
     lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
-    lps::data_variable_list new_summation_variables;
+    data_variable_list new_summation_variables;
 
-    for(lps::data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
+    for(data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
     {
       data_variable v = *i;
 
@@ -314,7 +315,7 @@ namespace lps {
 
     //Apply elimination and store result
     std::map<data_expression, data_expression> substitutions;
-    lps::data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
+    data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
 
     //Apply the substitutions that were returned from the recursive call
     new_summand = summand(new_summand.summation_variables(),

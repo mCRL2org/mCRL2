@@ -60,7 +60,7 @@ class sort_identifier: public sort_expression
     /// Constructor.
     ///
     sort_identifier(identifier_string name)
-      : sort_expression(gsMakeSortId(name))
+      : sort_expression(core::detail::gsMakeSortId(name))
     {
       assert(core::detail::check_rule_SortId(m_term));
     }
@@ -68,12 +68,12 @@ class sort_identifier: public sort_expression
     /// Constructor.
     ///
     sort_identifier(std::string s)
-      : sort_expression(gsMakeSortId(gsString2ATermAppl(s.c_str())))
+      : sort_expression(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
 
     /// Returns the name of the sort identifier.
     ///
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
@@ -90,7 +90,7 @@ class sort_identifier: public sort_expression
 inline
 bool is_sort_identifier(aterm_appl t)
 {
-  return gsIsSortId(t);
+  return core::detail::gsIsSortId(t);
 }
 
 } // namespace data

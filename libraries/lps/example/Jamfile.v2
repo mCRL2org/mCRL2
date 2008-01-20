@@ -9,7 +9,6 @@ project libraries/lps/example
 
 exe constelm        : constelm.cpp : ;
 exe parelm          : parelm.cpp : ;
-exe garbage         : garbage.cpp : ;
 exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp : ;
 exe filter_template : filter_template.cpp : ;
@@ -23,7 +22,6 @@ install dist
      constelm
      parelm
      term_replace
-     garbage
      constructors
      spec
      filter_template

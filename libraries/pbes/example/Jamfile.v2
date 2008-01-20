@@ -11,12 +11,10 @@ project libraries/pbes/example
 
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
-#exe pbes_expression_conversion : pbes_expression_conversion.cpp : <include>. ;
 
 install dist
    :
      bisimulation
      lps2pbes
-#     pbes_expression_conversion
    :
    ;

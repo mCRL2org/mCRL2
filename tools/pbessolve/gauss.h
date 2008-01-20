@@ -18,6 +18,7 @@
 
 #define PREDVAR_MARK '$'
 
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
