@@ -1,9 +1,11 @@
 \documentclass{article}
 \usepackage[UKenglish]{babel}
+\usepackage{pslatex}
 \usepackage{graphicx}
 \usepackage{calc}
 \usepackage{latexsym,amssymb,amsfonts,amsthm,amsmath}
 \usepackage{float}
+\usepackage{xspace}
 \usepackage[top=3cm,left=3cm,bottom=3cm,right=3cm]{geometry}
 
 \title{A Protocol for Interactively Controlling Software Tools\\DRAFT}
@@ -12,6 +14,7 @@
 \newtheorem{example}{Example}
 
 \newcommand{\msg}[1]{\texttt{#1}}
+\newcommand{\squadt}{SQuADT\xspace}
 
 \makeatletter
 \renewcommand{\paragraph}{\@startsection
@@ -28,67 +31,110 @@
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 
  \section{Introduction}
 
-  The communication protocol described in this document has been designed out
-  of need for an abstract control layer for an interactive tool integration
-  platform. In which a tool is a software program that can be used to fulfil
-  certain tasks. There existed a set of very concrete ideas of the platform
-  itself, and the protocol has been designed to fit some of its specific needs.
-
-  There exists a proof-of-concept implementation of the platform mentioned
-  previously in the shape of a desktop application called deskSQuADT. The first
-  part of the name refers to the fact that it is a desktop application, and the
-  second part stands for Systems Quality, Analysis and Design Toolset.  The
-  deskSQuADT application is distributed as part of the mCRL2 toolset (see
-  \cite{groote_et_al:DSP:2007:862}), a collection of tools around the formal
-  modelling language mCRL2 that can be used for verification and analysis.  In
-  and by itself deskSQuADT cannot be called a toolset, but the idea is that it
-  integrates the tools that are connected, in this case some of the mCRL2
-  tools.   The protocol described in this document is currently the primary
-  means by which tools are connected.
-%  Nevertheless the protocol that is the subject of this document is described
-%  as independent as possible from the system in order to show that it, or at
-%  the very least the underlying ideas, can be used outside it as well.
-
-  The deskSQuADT application is by no means meant to be functionally complete
-  in any way. There are plenty ideas on what works and what should be changed
-  in possible future versions.  There are also a lot of ideas for future
-  extension, for instance to make communication between tools controlled by
-  deskSQuADT possible as well.  It is not necessarily the intention to
-  incorporate all of such functionality into one protocol. The scope of this
-  protocol is to interactively control single tools in much the same way as in
-  which the standalone tool would be used.
+  In September 2005 work started on an integration platform for the tools in
+  the mCRL2 toolset, and tools like it. The mCRL2 toolset (see
+  \cite{groote_et_al:DSP:2007:862}) is a collection of tools around the formal
+  modelling language mCRL2 that can be used for formal verification and analysis.
+  Most of the tools have a traditional command line interface and today not
+  everyone is comfortable with this way of working.  The goal of the platform
+  is to unlock the toolset for a broader audience by making it easier to use
+  without having too much knowledge about the specifics of every tool. In
+  addition there is other integration-level functionality like automation of
+  common tasks often involving multiple tools.
   
-  The functionality added by the system becomes visible when using a
-  combination of tools subsequently or concurrently. The benefits are found at
-  the level of integration: overview of data dependencies, guarding data
-  consistency of data and (semi-)automated task execution.
+  Conceptually this integration framework is a communication layer between
+  tools and the user. It provides means to execute and terminate tools and feed
+  output of tools as input to other tools. The \squadt desktop application
+  represents the interface to the user built on top of the framework. The name
+  \squadt, stands for (Systems Quality, Analysis and Design Toolset), which
+  refers to the kind of tasks that can be performed with connected tools.
+  Communication with the user occurs my means of a graphical user interface, in
+  terms of files and tools operating on those files.
+  %  Ever since the first version, \squadt communicates with tools using the
+  %  communication protocol described in this document.
+  
+  The current level of integration between tools, as implemented in \squadt, is
+  as follows. Tools can be started and stopped on demand and all communication
+  between tools is uni-directional and occurs through files. In particular if
+  one tool produces a file and another reads it and those tools are never
+  running at the same moment. This behaviour is easily explained by looking at
+  the mCRL2 tools that only communicate in such a fashion.
 
-  In abstract, the platform provides a number of facilities that can be used by
-  tools to communicate with the user. The tools provide services that are made
-  accessible to the user of the platform. The platform acts as a controller
-  (possibly for multiple tools at the same time) and therefore the system will
-  mostly be referred to as (the) controller in the remainder of this document.
-  Similarly, a tool is the communication partner of the controller.
-%  \\[4pt]
-%  The protocol described in this document is designed to be as minimal as
-%  possible around the core ideas behind the system. Some care was taken to
-%  allow future extensions.
+  Integration between tools means communication and co-operation between those
+  tools. This also means that the tools involved must have functionality that
+  can be combined in some useful way. The user is assumed to provide one or
+  more files that contain data that serve as a starting point from which to
+  apply a combination of tools in order to achieve certain goals. These
+  together form a project context from within which \squadt operates.
+  In such a context the following are integration level functionality provided by \squadt:
+   \begin{itemize}
+    \item visual (and interactive) overview of data interdependencies,
+    \item guards data consistency,
+    \item (semi-)automated task execution.
+   \end{itemize}
+  The core of the graphical user interface of \squadt is a visualisation of all
+  files in a project and the dependencies created by tool execution. The data
+  in files is static and tools create the dependency relations between the
+  files. The last two points require a more elaborate explanation.
+  
+  Data is considered consistent when the tool that produced it communicates
+  that it has produced a file that contains this data. So establishing data
+  consistency is all up to the tool that produces the data. Note that
+  consistency can be a relative notion, file $b$ is consistent if it respects a
+  certain relation $\gamma$ with file $a$: $a \gamma b$. The functionality that
+  \squadt offers in this respect is two-fold. First it prevents that two tools
+  write to the same file within the project. Meaning that as long as a tool is
+  running that is writing a file this file cannot be read by another tool.
+  Second, using file interdependencies, all possible inconsistencies across
+  files are taken into account.  If a file $a$ changes, this fact is
+  recursively propagated to all files that depend on $a$, and the user is
+  notified of the possibly arisen inconsistencies.
 
-  The remainder of this text is structured as follows. First the important
-  concepts are introduced, to give the reader an overview of things involved.
-  Next a high level overview of the protocol is presented. It specifies the
-  structure of communication: what is communicated and in what way. This is
-  followed by a more detailed description of the protocol consisting of design
-  choices along with motivation and concrete syntax and semantics of messages
-  by means of examples.
+  Tools are meant to help perform tasks and must often be configured to do
+  those tasks. Most of the time this means reading data from file(s) and
+  producing other file(s). The point (semi-)automated task execution means that
+  tasks can be repeated without or with minimal user interaction. Once a task
+  has been configured, \squadt stores this configuration and it can be used to
+  start a tool on-demand and redo the task.
+
+  All of the functionality described above can be obtained by using existing
+  tools and their command line interfaces. A non-interactive command line
+  interface essentially makes it possible to store task configuration. Some
+  problems with this approach are:
+  \begin{itemize}
+   \item Command line interfaces are not standardised, especially not across
+         platforms
+   \item Not every tool has a command line interface and does not provide other
+         means of automated task configuration
+   \item It is unclear what constitutes the output of a tool when it is run,
+         for successful integration this fact must be communicated to its
+         environment (the integration framework).
+  \end{itemize}
+  An abstract communication interface can solve all these problems in a more
+  elegant fashion. This text introduces such an interface: a communication
+  protocol used for controlling tools.
+
+%  In abstract, the platform provides a number of facilities that can be used by
+%  tools to communicate with the user. The tools provide services that are made
+%  accessible to the user of the platform. The platform acts as a controller
+%  (possibly for multiple tools at the same time) and therefore the system will
+%  mostly be referred to as (the) controller in the remainder of this document.
+%  Similarly, a tool is the communication partner of the controller.
+
+  The remainder of this text is structured as follows. Starting with the next
+  section the important concepts are introduced. This give the reader an
+  overview of things involved.  This is followed by a high level overview of
+  the protocol. It specifies the structure of communication: what is
+  communicated and in what way. This is followed by a more detailed description
+  of the protocol consisting of design choices along with motivation and
+  concrete syntax and semantics of messages by means of examples.
 
 % IDE comparison
 % note control aspect: user asserts control over a tool by means of the system
-
- \pagebreak
 
  \section{Concepts}
 

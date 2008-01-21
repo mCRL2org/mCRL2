@@ -49,6 +49,5 @@ namespace squadt {
        wxT("please visit http://www.mcrl2.org/issuetracker\n"),
        wxT("About SQuADT"), wxOK|wxICON_INFORMATION) {
     }
-  
   }
 }
