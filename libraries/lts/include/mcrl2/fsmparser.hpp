@@ -69,7 +69,7 @@ typedef union YYSTYPE
   ATermAppl aterm;
   int number;
 }
-/* Line 1489 of yacc.c.  */
+/* Line 1529 of yacc.c.  */
 #line 74 "fsmparser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
