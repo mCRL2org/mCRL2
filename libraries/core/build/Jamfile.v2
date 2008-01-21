@@ -33,6 +33,7 @@ alias core.main
          source/data_reconstruct.cpp
          source/alpha.cpp
        : <use>/libraries/lps//headers
+         <use>/libraries/aterm//headers
          <use>/libraries/utilities//headers
        : <threading>single
        : <os>LINUX:<library>/site-config//m
@@ -45,7 +46,6 @@ lib core
        : <link>static
        :
        : <library>/libraries//aterm
-         <library>/libraries//data
          <library>/libraries//utilities
          <toolset>gcc:<linkflags>-Wl,-export-dynamic
        ;

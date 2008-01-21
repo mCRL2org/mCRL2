@@ -37,7 +37,7 @@ lib data
        : data.main
        : <link>static
        :
-       : <use>/libraries/core//headers
+       : <library>/libraries/core
          <use>/libraries/data//headers
        ;
 
