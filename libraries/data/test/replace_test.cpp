@@ -29,6 +29,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
@@ -138,12 +139,43 @@ void test_data_assignment_list()
   BOOST_CHECK(t0 == t2);
 }
 
+void test_data_variable_replace()
+{
+  using namespace mcrl2::data::data_expr;
+
+  data_variable d1("d1:D");
+  data_variable d2("d2:D");
+  data_variable d3("d3:D");
+  data_variable_list variables;
+  variables = push_front(variables, d1);
+  variables = push_front(variables, d2);
+  variables = push_front(variables, d3);
+
+  data_variable x("x:X");
+  data_variable y("y:X");
+  data_variable z("z:X");
+  data_expression e1 = equal_to(x, y);
+  data_expression e2 = z;
+  data_expression e3 = y;
+  data_expression_list replacements;
+  replacements = push_front(replacements, e1);
+  replacements = push_front(replacements, e2);
+  replacements = push_front(replacements, e3);
+
+  data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
+  data_expression t1 = replace_data_variable_sequence(t, variables, replacements);
+  std::cerr << "t  == " << pp(t) << std::endl;
+  std::cerr << "t1 == " << pp(t1) << std::endl;
+  BOOST_CHECK(false);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
   test_replace();
   test_data_assignment_list();
+  test_data_variable_replace();
 
   return 0;
 }
