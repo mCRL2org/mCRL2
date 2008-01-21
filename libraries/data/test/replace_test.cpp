@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iterator>
+#include <list>
 #include <vector>
 #include <boost/test/minimal.hpp>
 
@@ -162,11 +163,22 @@ void test_data_variable_replace()
   replacements = push_front(replacements, e2);
   replacements = push_front(replacements, e3);
 
+  std::vector<data_variable> v;
+  v.push_back(d1);
+  v.push_back(d2);
+  v.push_back(d3);
+  std::list<data_expression> l;
+  l.push_back(e1);
+  l.push_back(e2);
+  l.push_back(e3);
+
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
   data_expression t1 = replace_data_variable_sequence(t, variables, replacements);
+  data_expression t2 = replace_data_variable_sequence(t, v, l);
   std::cerr << "t  == " << pp(t) << std::endl;
   std::cerr << "t1 == " << pp(t1) << std::endl;
-  BOOST_CHECK(false);
+  std::cerr << "t2 == " << pp(t2) << std::endl;
+  BOOST_CHECK(t1 == t2);
 }
 
 int test_main(int argc, char** argv)
