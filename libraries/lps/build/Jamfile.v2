@@ -17,8 +17,8 @@ alias lps.main
          source/sumelm.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp
-       : <use>/libraries/core//headers
-         <use>/libraries/data//headers
+       : <use>/libraries/data//headers
+         <use>/libraries/utilities//headers
          <use>/libraries/pbes//headers
          <use>/libraries/lps//headers
        : <threading>single
@@ -26,12 +26,9 @@ alias lps.main
 
 lib lps
        : lps.main
-         /libraries//core
-         /libraries//data
        : <link>static
        :
-       : <library>/libraries//core
-         <library>/libraries//data
+       : <library>/libraries//data
          <use>/libraries/lps//headers
        ;
 
@@ -44,13 +41,13 @@ alias lps.alias
        : lps.main
        :
        :
-       : <use>/libraries/core//headers
-         <use>/libraries/data//headers
+       : <use>/libraries/data//headers
          <use>/libraries/lps//headers
        ;
 
 alias headers 
        : [ glob-tree *.h *.hpp : .svn ]
+       : <use>/libraries/data//headers
        ;
 
 explicit lps.main lps.alias ;

@@ -19,13 +19,11 @@ alias data.main
          source/formula_checker.cpp
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
-       : <use>/libraries/lps//headers
-         <use>/libraries/core//headers
+       : <use>/libraries/core//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc
        : <threading>single
        : <use>headers
-         <use>/libraries/lps//headers
          <use>/libraries/core//headers
          <library>/site-config//cvc
          <os>LINUX:<library>/site-config//m   # for rewrite
@@ -44,7 +42,6 @@ lib data
 alias data
        : /libraries//mcrl2
        : <link>shared
-         <use>/libraries/lps//headers
          <use>/libraries/core//headers
        ;
 
@@ -55,7 +52,6 @@ alias data.alias
 alias headers
        : [ glob-tree *.h *.hpp : .svn ]
        : <use>/libraries/core//headers
-         <use>/libraries/lps//headers
        ;
 
 explicit data.main data.alias ;
