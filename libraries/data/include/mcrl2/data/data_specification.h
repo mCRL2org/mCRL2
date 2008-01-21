@@ -144,6 +144,36 @@ class data_specification: public aterm_appl
       return m_equations;
     }
 
+    /// Returns a valid data expression according to this data specification
+    /// of the given sort s. If no valid expression can be found, data_expression()
+    /// is returned. The aim is to return a minimal term, using constructor
+    /// terms as much as possible.
+    data_expression default_expression(sort_expression s) const
+    {
+/*
+      // check if there is a constant constructor for s
+      sort_expression_list::iterator i = std::find_if(spec.sorts().begin(), spec.sorts().end(), is_constant_sort());
+      if (i != spec.sorts().end())
+      {
+        return data_expression(...*i..., is_constant_sort());
+      }
+      
+      // check if there is a constant mapping for s
+      sort_expression_list::iterator i = std::find_if(spec.mappings().begin(), spec.mappings().end(), is_constant_mapping());
+      if (i != spec.mappings().end())
+      {
+        return data_expression(...*i...);
+      }
+      
+      // recursively traverse constructor functions
+      ...
+      
+      // recursively traverse mappings
+      ...   
+*/
+      return data_expression();
+    }
+
     /// Returns true if
     /// <ul>
     /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
