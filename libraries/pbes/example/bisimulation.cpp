@@ -18,7 +18,7 @@ std::string print_type(int type)
     case 0: return "branching bisimulation";
     case 1: return "strong bisimulation";
     case 2: return "weak bisimulation";
-    case 3: return "branching bisimulation equivalence";
+    case 3: return "branching simulation equivalence";
   }
   return "unknown type";
 }
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
       "  0 : branching bisimulation\n"
       "  1 : strong bisimulation\n"
       "  2 : weak bisimulation\n"
-      "  3 : branching bisimulation equivalence\n"
+      "  3 : branching simulation equivalence\n"
       "\n"
       "Options"
     );
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
       case 0: result = branching_bisimulation(M, S); break;
       case 1: result = strong_bisimulation(M, S); break;
       case 2: result = weak_bisimulation(M, S); break;
-      case 3: result = branching_bisimulation_equivalence(M, S); break;
+      case 3: result = branching_simulation_equivalence(M, S); break;
     }
     if (normalize)
     {

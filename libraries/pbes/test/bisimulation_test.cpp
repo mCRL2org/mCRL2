@@ -52,15 +52,15 @@ void test_bisimulation()
   pbes<> bb  = branching_bisimulation(abp_spec, abp_spec);
   pbes<> sb  = strong_bisimulation(abp_spec, abp_spec);
   pbes<> wb  = weak_bisimulation(abp_spec, abp_spec);
-  pbes<> sbe = branching_bisimulation_equivalence(abp_spec, abp_spec);
+  pbes<> sbe = branching_simulation_equivalence(abp_spec, abp_spec);
 
   BOOST_CHECK(bb .is_well_typed());
   BOOST_CHECK(sb .is_well_typed());
   BOOST_CHECK(wb .is_well_typed());
   BOOST_CHECK(sbe.is_well_typed());
  
-  //bool abp_result = pbes2bool(abp_pbes);
-  //BOOST_CHECK(abp_result);
+  bool abp_result = pbes2bool(bb);
+  BOOST_CHECK(bb);
 }
 
 int test_main(int argc, char** argv)

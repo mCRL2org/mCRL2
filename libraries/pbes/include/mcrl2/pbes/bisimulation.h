@@ -294,7 +294,22 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       data_variable_list gi = i->next_state(p.process_parameters());
       if (i->is_tau())
       {
-        return var(X(p, q), gi + d1);
+        std::vector<pbes_expression> v;
+        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        {
+          if (!j->is_tau())
+          {
+            continue;
+          }
+          const data_expression&    cj = j->condition();
+          const data_variable_list& e1 = j->summation_variables();
+          data_variable_list        gj = j->next_state(q.process_parameters());
+          const action_list         ai = i->actions();
+          const action_list         aj = j->actions();
+          pbes_expression expr = exists(e1, and_(cj, var(X(p, q), gi + gj)));
+          v.push_back(expr);
+        }
+        return or_(multi_or(v.begin(), v.end()), var(X(p, q), gi + d1));
       }
       else
       {
@@ -609,84 +624,14 @@ pbes<> weak_bisimulation(const specification& model, const specification& spec)
 }
 
 //--------------------------------------------------------------//
-//                 branching bisimulation equivalence
+//                 branching simulation equivalence
 //--------------------------------------------------------------//
 
-/// Algorithm class for branching bisimulation equivalence.
-class branching_bisimulation_equivalence_algorithm : public bisimulation_algorithm
+/// Algorithm class for branching simulation equivalence.
+class branching_simulation_equivalence_algorithm : public branching_bisimulation_algorithm
 {
   public:
-    /// The match function.
-    ///
-    pbes_expression match(const linear_process& p, const linear_process& q) const
-    {
-      using namespace pbes_expr;
-      std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
-      {
-        const data_expression&    ci = i->condition();
-        const data_variable_list& d  = p.process_parameters();
-        const data_variable_list& e  = i->summation_variables();
-        const data_variable_list& d1 = q.process_parameters();
-        pbes_expression expr = forall(e, imp(ci, var(Y(p, q, i), d + d1 + e)));
-        result.push_back(expr);
-      }
-      return multi_and(result.begin(), result.end());
-    }
-
-    /// The step function.
-    ///
-    pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
-    {
-      using namespace pbes_expr;
-      const data_variable_list& d1 = q.process_parameters();
-      data_variable_list gi = i->next_state(p.process_parameters());
-      if (i->is_tau())
-      {
-        return var(X(p, q), gi + d1);
-      }
-      else
-      {
-        std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
-        {
-          const data_expression&    cj = j->condition();
-          const data_variable_list& e1 = j->summation_variables();
-          data_variable_list        gj = j->next_state(q.process_parameters());
-          const action_list         ai = i->actions();
-          const action_list         aj = j->actions();
-          pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
-          v.push_back(expr);
-        }
-        return multi_or(v.begin(), v.end());
-      }
-    }
-
-    /// The close function.
-    ///
-    pbes_expression close(const linear_process& p, const linear_process& q, my_iterator i) const
-    {
-      using namespace pbes_expr;
-      std::vector<pbes_expression> v;
-      const data_variable_list& d  = p.process_parameters();
-      const data_variable_list& d1 = q.process_parameters();
-      const data_variable_list& e  = i->summation_variables();
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
-      {
-        if (!j->is_tau())
-        {
-          continue;
-        }
-        const data_expression&    cj = j->condition();
-        const data_variable_list& e1 = j->summation_variables();
-        data_variable_list        gj = j->next_state(q.process_parameters());
-        pbes_expression expr = exists(e1, and_(cj, var(Y(p, q, i), d + gj + e)));
-        v.push_back(expr);
-      }
-      return or_(multi_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
-    }
-
-    /// Returns a pbes that expresses branching bisimulation equivalence between
+    /// Returns a pbes that expresses branching simulation equivalence between
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
@@ -718,10 +663,10 @@ class branching_bisimulation_equivalence_algorithm : public bisimulation_algorit
     }
 };
 
-/// Returns a pbes that expresses branching bisimulation equivalence between two specifications.
-pbes<> branching_bisimulation_equivalence(const specification& model, const specification& spec)
+/// Returns a pbes that expresses branching simulation equivalence between two specifications.
+pbes<> branching_simulation_equivalence(const specification& model, const specification& spec)
 {
-  return branching_bisimulation_equivalence_algorithm().run(model, spec);
+  return branching_simulation_equivalence_algorithm().run(model, spec);
 }
 
 } // namespace pbes_system
