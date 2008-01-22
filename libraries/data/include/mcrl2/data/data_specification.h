@@ -146,8 +146,12 @@ class data_specification: public aterm_appl
 
     /// Returns a valid data expression according to this data specification
     /// of the given sort s. If no valid expression can be found, data_expression()
-    /// is returned. The aim is to return a minimal term, using constructor
-    /// terms as much as possible.
+    /// is returned. It returns a minimal term of at most three nested function
+    /// symbols. When selecting function symbols, constructor symbols have a
+    /// preference over mappings. For each sort, the same term is returned.
+    /// Currently, only expressions for basic sorts are delivered. For function
+    /// sorts data_expression() is returned.
+    ///
     data_expression default_expression(sort_expression s) const
     {
 /*
