@@ -44,97 +44,6 @@
 
 /* COMMON STUFF */
 
-static IntegerStore integerStore;
-static int initialized = 0;
-
-/**
- * Creates a store for integers.
- * Returns a reference to an empty store.
- */
-static IntegerStore createIntegerStore(){
-	IntegerStore integerStore = (IntegerStore) AT_malloc(sizeof(struct _IntegerStore));
-	if(integerStore == NULL) ATerror("Unable to allocate integer store.\n");
-	
-	integerStore->blocks = NULL;
-	integerStore->nrOfBlocks = 0;
-	
-	return integerStore;
-}
-
-/**
- * Releases the allocate memory for the given store.
- * All integers that where referenced through this store will become invalid after invoking this function.
- * NOTE: Do not call this function before all binary writers have been destroyed.
- */
-void ATdestroyIntegerStore(){
-	if(initialized){
-		unsigned int i = integerStore->nrOfBlocks;
-		unsigned int **blocks = integerStore->blocks;
-		while(i > 0){
-			AT_free(blocks[--i]);
-		}
-		AT_free(blocks);
-		
-		AT_free(integerStore);
-		integerStore = NULL;
-		
-		initialized = 0;
-	}
-}
-
-/**
- * Adds an additional block of integers to the integer store.
- */
-static void addBlockToIntegerStore(){
-	unsigned int *block;
-	unsigned int value, i;
-	
-	unsigned int nrOfBlocks = integerStore->nrOfBlocks;
-	
-	if((nrOfBlocks & INTEGERSTOREBLOCKSINCREMENTMASK) == 0){
-		integerStore->blocks = (unsigned int**) AT_realloc(integerStore->blocks, (nrOfBlocks + INTEGERSTOREBLOCKSINCREMENT) * sizeof(unsigned int*));
-		if(integerStore->blocks == NULL) ATerror("Unable to allocate block of integers for the integer store.\n");
-	}
-	
-	block = (unsigned int*) AT_malloc(INTEGERSTOREBLOCKSIZE * sizeof(unsigned int));
-	if(block == NULL) ATerror("Unable to allocate additional block of integers for the integer store.\n");
-	
-	integerStore->blocks[nrOfBlocks] = block;
-	integerStore->nrOfBlocks = ++nrOfBlocks;
-	
-	value = nrOfBlocks * INTEGERSTOREBLOCKSIZE;
-	i = INTEGERSTOREBLOCKSIZE;
-	do{
-		block[--i] = --value;
-	}while(i > 0);
-}
-
-/**
- * Returns a reference to the memory location that holds the value of given (unsigned) integer.
- * NOTE: You are required to access the integers in this store sequencially to some degree (with jumps that are less then DEFAULTINTEGERSTOREBLOCKSIZE).
- * Failure to comply with this rule will result in undefined behaviour (and probably a segmentation fault).
- * This limitation was intended by design.
- */
-static unsigned int* getIntPtr(unsigned int value){
-	unsigned int blockNr = value >> INTEGERSTOREBLOCKSIZEBITS;
-	if(integerStore->nrOfBlocks == blockNr) addBlockToIntegerStore();
-	
-	return &(integerStore->blocks[blockNr][value & INTEGERSTOREBLOCKSIZEMASK]);
-}
-
-/**
- * Initialized the integer store.
- * NOTE: This function MUST be called before any binary writer is constructed.
- */
-void ATinitializeIntegerStore(){
-	if(!initialized){
-		integerStore = createIntegerStore();
-		addBlockToIntegerStore();
-		initialized = 1;
-	}
-}
-
-
 /**
  * Creates a protected memory stack.
  * 
@@ -476,17 +385,17 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 		SymEntry symEntry = at_lookup_table[fun];
 		unsigned int funHash = (unsigned int)((unsigned long) symEntry);
 		
-		HashTable hashTable = binaryWriter->sharedSymbols;
-		unsigned int *id = (unsigned int*) HTgetElement(hashTable, symEntry, funHash);
+		IDMappings sharedSymbols = binaryWriter->sharedSymbols;
+		int id = IMgetID(sharedSymbols, symEntry, funHash);
 		
 		unsigned int header = getHeader((ATerm) arg);
 		
-		if(id != NULL){
+		if(id != -1){
 			header |= FUNSHARED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
 			
-			writeInt(*id, byteBuffer);
+			writeInt(id, byteBuffer);
 		}else{
 			unsigned int remaining;
 			
@@ -515,9 +424,9 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 			memcpy(byteBuffer->currentPos, name, bytesToWrite);
 			byteBuffer->currentPos += bytesToWrite;
 			
-			id = getIntPtr(binaryWriter->currentSharedSymbolKey++);
+			id = binaryWriter->currentSharedSymbolKey++;
 			
-			HTputElement(hashTable, symEntry, funHash, id);
+			IMmakeIDMapping(sharedSymbols, symEntry, funHash, id);
 		}
 	}else{
 		char* name = ATgetName(fun);
@@ -619,10 +528,10 @@ BinaryWriter ATcreateBinaryWriter(ATerm term){
 	binaryWriter->stackSize = DEFAULTSTACKSIZE;
 	binaryWriter->stackPosition = 0;
 	
-	binaryWriter->sharedTerms = HTcreateHashTable(0.75, defaultEqCheck);
+	binaryWriter->sharedTerms = IMcreateIDMappings(0.75);
 	binaryWriter->currentSharedTermKey = 0;
 	
-	binaryWriter->sharedSymbols = HTcreateHashTable(0.75, defaultEqCheck);
+	binaryWriter->sharedSymbols = IMcreateIDMappings(0.75);
 	binaryWriter->currentSharedSymbolKey = 0;
 	
 	binaryWriter->currentTerm = term;
@@ -654,9 +563,9 @@ int ATisFinishedWriting(BinaryWriter binaryWriter){
 void ATdestroyBinaryWriter(BinaryWriter binaryWriter){
 	AT_free(binaryWriter->stack);
 	
-	HTdestroyHashTable(binaryWriter->sharedTerms, 0);
+	IMdestroyIDMappings(binaryWriter->sharedTerms);
 	
-	HTdestroyHashTable(binaryWriter->sharedSymbols, 0);
+	IMdestroyIDMappings(binaryWriter->sharedSymbols);
 	
 	AT_free(binaryWriter);
 }
@@ -669,12 +578,12 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 	ATerm currentTerm = binaryWriter->currentTerm;
 	
 	while(currentTerm != NULL && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE){
-		ShortHashNumber termHash = ADDR_TO_SHORT_HNR(currentTerm);
-		unsigned int *id = (unsigned int*) HTgetElement(binaryWriter->sharedTerms, currentTerm, termHash);
-		if(id != NULL){
+		unsigned int termHash = (unsigned int)((unsigned long) currentTerm);
+		int id = IMgetID(binaryWriter->sharedTerms, currentTerm, termHash);
+		if(id != -1){
 			*(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
 			byteBuffer->currentPos++;
-			writeInt(*id, byteBuffer);
+			writeInt(id, byteBuffer);
 			
 			binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
 		}else{
@@ -705,8 +614,8 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 			
 			/* Don't add the term to the shared list until we are completely done with it. */
 			if(binaryWriter->indexInTerm == 0){
-				id = getIntPtr(binaryWriter->currentSharedTermKey++);
-				HTputElement(binaryWriter->sharedTerms, currentTerm, termHash, id);
+				id = binaryWriter->currentSharedTermKey++;
+				IMmakeIDMapping(binaryWriter->sharedTerms, currentTerm, termHash, id);
 			}else break;
 		}
 		
@@ -1290,8 +1199,6 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
 		return ATfalse;
 	}
 	
-	ATinitializeIntegerStore();
-	
 	binaryWriter = ATcreateBinaryWriter(aTerm);
 	byteBuffer = ATcreateByteBuffer(65536);
 	
@@ -1344,12 +1251,12 @@ ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename){
 	if(strcmp(filename, "-") == 0){
 		return ATwriteToSAFFile(aTerm, stdout);
 	}
-	
-        file = fopen(filename, "wb");
+
+	file = fopen(filename, "wb");
 	if(file == NULL){
-               	ATwarning("Unable to open file for writing: %s\n", filename);
-               	return ATfalse;
-        }
+		ATwarning("Unable to open file for writing: %s\n", filename);
+		return ATfalse;
+	}
 	
 	result = ATwriteToSAFFile(aTerm, file);
 	
@@ -1392,6 +1299,7 @@ ATerm ATreadFromSAFFile(FILE *file){
 			return NULL;
 		}
 		blockSize = ((unsigned char) sizeBytes[0]) + (((unsigned char) sizeBytes[1]) << 8);
+		if(blockSize == 0) blockSize = 65536;
 		
 		ATresetByteBuffer(byteBuffer);
 		byteBuffer->limit = blockSize;
@@ -1471,8 +1379,6 @@ char* ATwriteToSAFString(ATerm aTerm, int *length){
 	if(root == NULL) ATerror("Unable to allocate space for BufferNode.\n");
 	last = root;
 	
-	ATinitializeIntegerStore();
-	
 	do{
 		BufferNode *current;
 		ByteBuffer byteBuffer = ATcreateByteBuffer(65536);
@@ -1531,6 +1437,7 @@ ATerm ATreadFromSAFString(char *data, int length){
 		ByteBuffer byteBuffer;
 		int blockSize = (unsigned char) data[position++];
 		blockSize += ((unsigned char) data[position++]) << 8;
+		if(blockSize == 0) blockSize = 65536;
 		byteBuffer = ATwrapBuffer(data + position, blockSize); /* Move the window to the next block. */
 		
 		ATdeserialize(binaryReader, byteBuffer);

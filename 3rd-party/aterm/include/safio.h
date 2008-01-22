@@ -3,7 +3,7 @@
 
 #include "aterm1.h"
 #include "aterm2.h"
-#include "hashtable.h"
+#include "idmappings.h"
 
 #define SAF_IDENTIFICATION_TOKEN '?'
 
@@ -13,15 +13,6 @@ extern "C"
 #endif /* __cplusplus */
 
 /* Stores */
-typedef struct _IntegerStore{
-	unsigned int **blocks;
-	unsigned int nrOfBlocks;
-} *IntegerStore;
-
-void ATinitializeIntegerStore();
-
-void ATdestroyIntegerStore();
-
 typedef struct _ProtectedMemoryStack{
 	ATerm **blocks;
 	unsigned int *freeBlockSpaces;
@@ -69,11 +60,11 @@ typedef struct _BinaryWriter{
 	int stackSize;
 	int stackPosition;
 	
-	HashTable sharedTerms;
-	unsigned int currentSharedTermKey;
+	IDMappings sharedTerms;
+	int currentSharedTermKey;
 	
-	HashTable sharedSymbols;
-	unsigned int currentSharedSymbolKey;
+	IDMappings sharedSymbols;
+	int currentSharedSymbolKey;
 	
 	ATerm currentTerm;
 	unsigned int indexInTerm;

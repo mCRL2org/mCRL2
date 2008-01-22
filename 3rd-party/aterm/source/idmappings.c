@@ -1,4 +1,4 @@
-#include "hashtable.h"
+#include "idmappings.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -20,7 +20,7 @@ struct Entry{
 	void *key;
 	unsigned int hash;
 	
-	void *value;
+	unsigned int value;
 	
 	Entry *next;
 };
@@ -62,7 +62,7 @@ static EntryCache createEntryCache(){
 
 /**
  * Frees the memory associated with the given entry cache.
- * NOTE: Do NOT invoke this method with the entry cache of a hashtable that is still in use.
+ * NOTE: Do NOT invoke this method with the entry cache of a idMapping that is still in use.
  */
 static void destroyEntryCache(EntryCache entryCache){
 	int i = entryCache->nrOfBlocks;
@@ -129,14 +129,6 @@ inline static void releaseEntry(EntryCache entryCache, Entry *entry){
 	entryCache->freeList = entry;
 }
 
-/** 
- * Checks if two keys match. The hash is passed as well, because if that doesn't match neither do the keys 
- * (int == int is cheaper then comparing the content of two keys). 
- */
-static unsigned int matches(HashTable hashTable, unsigned int hash, void* key, Entry *entry){
-	return (key == entry->key || (hash == entry->hash && (hashTable->eqCheckFunc)(key, entry->key)));
-}
-
 /**
  * This function protects against weak hashes in which only the high-order bits are occupied for example 
  * (we don't want too many stuff ending up in the same bucket). This is nessecary because we use a 'order of 2' 
@@ -147,29 +139,29 @@ static unsigned int supplementalHash(unsigned int h){
 }
 
 /**
- * This function takes care of the resizing of the entry table (when nessecary).
+ * This function takes care of the resizing of the entry table (when necessary).
  * The capacity will be doubled when we run out of space.
  */
-static void ensureTableCapacity(HashTable hashTable){
-	Entry **oldTable = hashTable->table;
+static void ensureTableCapacity(IDMappings idMappings){
+	Entry **oldTable = idMappings->table;
 	
-	unsigned int currentTableSize = hashTable->tableSize;
-	if(hashTable->load >= hashTable->threshold){
+	unsigned int currentTableSize = idMappings->tableSize;
+	if(idMappings->load >= idMappings->threshold){
 		unsigned int hashMask;
 		int i = currentTableSize - 1;
 		
 		unsigned int newTableSize = currentTableSize << 1;
 		Entry **table = (Entry**) calloc(newTableSize, sizeof(Entry*));
 		if(table == NULL){
-			printf("The hashtable was unable to allocate memory for extending the entry table.\n");
+			printf("The idMapping was unable to allocate memory for extending the entry table.\n");
 			exit(1);
 		}
-		hashTable->table = table;
-		hashTable->tableSize = newTableSize;
+		idMappings->table = table;
+		idMappings->tableSize = newTableSize;
 		
 		hashMask = newTableSize - 1;
-		hashTable->hashMask = hashMask;
-		hashTable->threshold <<= 1;
+		idMappings->hashMask = hashMask;
+		idMappings->threshold <<= 1;
 		
 		do{
 			Entry *e = oldTable[i];
@@ -195,60 +187,57 @@ static void ensureTableCapacity(HashTable hashTable){
 }
 
 /**
- * Creates a new HashTable.
+ * Creates a new ID mappings table.
  */
-HashTable HTcreateHashTable(float loadPercentage, int (*eqCheckFunc)(void*, void*)){
+IDMappings IMcreateIDMappings(float loadPercentage){
 	unsigned int tableSize = 1 << DEFAULTTABLEBITSIZE;
 	
-	HashTable hashTable = (HashTable) malloc(sizeof(struct _HashTable));
-	if(hashTable == NULL){
-		printf("Unable to allocate memory for creating a hashtable.\n");
+	IDMappings idMappings = (IDMappings) malloc(sizeof(struct _IDMappings));
+	if(idMappings == NULL){
+		printf("Unable to allocate memory for creating a idMapping.\n");
 		exit(1);
 	}
 	
-	hashTable->entryCache = createEntryCache();
+	idMappings->entryCache = createEntryCache();
 	
-	hashTable->table = (Entry**) calloc(tableSize, sizeof(Entry*));
-	if(hashTable->table == NULL){
-		printf("The hashtable was unable to allocate memory for the entry table.\n");
+	idMappings->table = (Entry**) calloc(tableSize, sizeof(Entry*));
+	if(idMappings->table == NULL){
+		printf("The idMapping was unable to allocate memory for the entry table.\n");
 		exit(1);
 	}
-	hashTable->tableSize = tableSize;
+	idMappings->tableSize = tableSize;
 	
-	hashTable->hashMask = tableSize - 1;
-	hashTable->threshold = tableSize * loadPercentage;
+	idMappings->hashMask = tableSize - 1;
+	idMappings->threshold = tableSize * loadPercentage;
 	
-	hashTable->load = 0;
+	idMappings->load = 0;
 	
-	hashTable->eqCheckFunc = eqCheckFunc;
-	
-	return hashTable;
+	return idMappings;
 }
 
 /**
- * Inserts an element in the table.
- * If an element with the same key is already present in the table the value of that entry will be replaced and returned by this function so the 'exception' can be handled by the caller;
- * otherwise NULL will be returned.
+ * Inserts an ID mapping in the table.
+ * If an entry with the same key is already present in the table the ID of that entry will be replaced and returned by this function so the 'exception' can be handled by the caller;
+ * otherwise -1 will be returned.
  */
-void* HTputElement(HashTable hashTable, void *key, unsigned int h, void *value){
+int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value){
 	unsigned int bucketPos;
 	Entry **table;
 	Entry *currentEntry, *entry;
 	
 	unsigned int hash = supplementalHash(h);
 	
-	ensureTableCapacity(hashTable);
+	ensureTableCapacity(idMappings);
 	
-	bucketPos = hash & hashTable->hashMask;
-	table = hashTable->table;
+	bucketPos = hash & idMappings->hashMask;
+	table = idMappings->table;
 	currentEntry = table[bucketPos];
 	
 	entry = currentEntry;
 	while(entry != NULL){
-		/* If the key is already present just replace the value */
-		if(matches(hashTable, hash, key, entry)){
-			void *oldValue = entry->value;
-			if(oldValue != NULL && oldValue != key) free(oldValue); /* Free the old value if needed, but only if it isn't pointing to the same thing as the key */
+		/* If the key is already present just replace the ID. */
+		if(entry->key == key){
+			unsigned int oldValue = entry->value;
 			
 			entry->value = value;
 			
@@ -259,57 +248,55 @@ void* HTputElement(HashTable hashTable, void *key, unsigned int h, void *value){
 	}
 	
 	/* Insert the new entry at the start of the bucket and link it with the colliding entries (if present). */
-	entry = getEntry(hashTable->entryCache);
+	entry = getEntry(idMappings->entryCache);
 	entry->hash = hash;
 	entry->key = key;
 	entry->value = value;
 	entry->next = currentEntry;
 	
 	table[bucketPos] = entry;
-	hashTable->load++;
+	idMappings->load++;
 	
-	return NULL;
+	return -1;
 }
 
 /**
- * Retrieves an element from the table that matches the given key and hashcode.
- * If no matching entry can be found NULL will be returned.
+ * Retrieves an ID from the table that matches the given key and hashcode.
+ * If no matching entry can be found -1 will be returned.
  */
-void* HTgetElement(HashTable hashTable, void *key, unsigned int h){
+int IMgetID(IDMappings idMappings, void *key, unsigned int h){
 	unsigned int hash = supplementalHash(h);
 	
-	unsigned int bucketPos = hash & hashTable->hashMask;
-	Entry *entry = hashTable->table[bucketPos];
-	while(entry != NULL && !matches(hashTable, hash, key, entry)){
+	unsigned int bucketPos = hash & idMappings->hashMask;
+	Entry *entry = idMappings->table[bucketPos];
+	while(entry != NULL && entry->key != key){
 		entry = entry->next;
 	}
 	
-	if(entry == NULL) return NULL;
+	if(entry == NULL) return -1;
 	return entry->value;
 }
 
 /**
- * Removes the element associated with the given key and hashcode from the table.
+ * Removes the entry associated with the given key and hashcode from the table.
  */
-void HTremoveElement(HashTable hashTable, void *key, unsigned int h, int delValue){
+void IMremoveIDMapping(IDMappings idMappings, void *key, unsigned int h){
 	unsigned int hash = supplementalHash(h);
 	
-	unsigned int bucketPos = hash & hashTable->hashMask;
-	Entry **table = hashTable->table;
+	unsigned int bucketPos = hash & idMappings->hashMask;
+	Entry **table = idMappings->table;
 	Entry *entry = table[bucketPos];
 	
 	Entry *previousEntry = NULL;
 	while(entry != NULL){
-		if(matches(hashTable, hash, key, entry)){
+		if(entry->key == key){
 			Entry *nextEntry = entry->next;
 			if(previousEntry == NULL) table[bucketPos] = nextEntry;
 			else previousEntry->next = nextEntry;
 			
-			hashTable->load--;
+			idMappings->load--;
 			
-			if(delValue == 1) free(entry->value);
-			
-			releaseEntry(hashTable->entryCache, entry);
+			releaseEntry(idMappings->entryCache, entry);
 			
 			return;
 		}
@@ -319,48 +306,21 @@ void HTremoveElement(HashTable hashTable, void *key, unsigned int h, int delValu
 }
 
 /**
- * Returns the number of elements in the table.
+ * Returns the number of entries in the table.
  */
-int HTgetSize(HashTable hashTable){
-	return hashTable->load;
+unsigned int IMgetSize(IDMappings idMappings){
+	return idMappings->load;
 }
 
 /**
- * Destroys the given hashtable.
- * NOTE: with the 'delValue' flag you can indicate if you want the values to be freed or not (1 = free, 0 = don't free).
- * (Keep in mind that freeing the values can potentially be a slow process).
- * The keys will naturally not be freed, since they are still reachable elsewhere.
+ * Destroys the given ID mappings table.
  */
-void HTdestroyHashTable(HashTable hashTable, int delValue){
-	Entry **table = hashTable->table;
+void IMdestroyIDMappings(IDMappings idMappings){
+	Entry **table = idMappings->table;
 	
-	if(delValue == 1){
-		int i = hashTable->tableSize;
-		do{
-			Entry *entry = table[--i];
-			Entry *nextEntry = NULL;
-			while(entry != NULL){
-				nextEntry = entry->next;
-				
-				free(entry->value);
-				
-				entry = nextEntry;
-			}
-		}while(i > 0);
-	}
-	
-	destroyEntryCache(hashTable->entryCache);
+	destroyEntryCache(idMappings->entryCache);
 	
 	free(table);
 	
-	free(hashTable);
-}
-
-/**
- * A standard equality check just compares pointers (match = 1, 0 otherwise).
- * (Note that the match function of the hashtable check on pointer equality before invoking this function, which just returns false).
- * If a more detailed check is required it should be implemented by the user and passed to the HTcreateHashTable function.
- */
-int defaultEqCheck(void *a, void *b){
-	return 0;
+	free(idMappings);
 }
