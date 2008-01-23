@@ -3,13 +3,11 @@ import testing ;
 # Runs a tool on a set of input files with command line arguments
 #
 # tool        the executable to run (target of an exe rule)
-# prefix      a prefix used for possible output files
-# suffix      suffix of possible output files (extension part)
 # options     positional options to the tool (excluding names of input/output files)
 # path        the path relative to which input files are searched
 # extensions  the extensions of files that are considered input
 #
-rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensions + ) {
+rule run_tool_on_examples ( tool : options * : paths + : extensions + ) {
   import path ;
 
   for path in $(paths) {
@@ -22,25 +20,14 @@ rule run_tool_on_examples ( tool prefix suffix ? : options * : paths + : extensi
 
     for file in $(files) {
       local target = [ MATCH "^(.+)[.][^.]+$" : [ path.basename $(file) ] ] ;
-      local output ;
  
-      if ($(suffix)) {
-        output = [ path.native $(BUILD_TOP)/$(target).$(suffix) ] ;
-      }
- 
-      results += [
-        run $(tool)
-               : $(options)
-                 "\"$(file)\""
-                 $(output)
-               : # input files
-               : # requirements
-               : $(target)-$(suffix)
-      ] ;
+      testing.make-test run
+      	 : $(tool)
+         : <testing.arg>$(options)
+           <testing.input-file>$(file)
+         : $(target:B)-test ;
     }
   }
-
-  return $(results) ;
 }
 
 # Runs a program on a set of input files in a given directory

@@ -49,6 +49,9 @@ use-project /workarounds               : build/workarounds ;
 
 include $(TOP)/build/config.jam ;
 
+# Helper rules for regession testing
+include $(BUILD_TOOLS)/testing.jam ;
+
 # Gets option arguments from options passed on the command line primarily and
 # otherwise the BUILD_OPTIONS variable
 rule get_option ( name : default ) {
