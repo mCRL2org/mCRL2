@@ -23,10 +23,10 @@ mcrl2-library data
          <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc
-       : <threading>single
-       : <library>/libraries/core//headers
-         <library>/site-config//cvc
          <os>LINUX:<library>/site-config//m   # for rewrite
-         <os>CYGWIN:<library>/site-config//m  # for rewrite
          <os>LINUX:<library>/site-config//dl  # for rewrite
+         <os>CYGWIN:<library>/site-config//m  # for rewrite
+       : <threading>single
+       : <library>/libraries/core
+         <library>/site-config//cvc
        ;

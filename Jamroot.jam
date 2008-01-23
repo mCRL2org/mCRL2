@@ -88,19 +88,30 @@ else {
   libdir = $(prefix) ;
 }
 
-# Generate default build options
-for option in $(BUILD_OPTIONS) {
+# Extract build requirements from command line options
+for option in [ modules.peek : ARGV ] {
   local temporary = [ MATCH ([^=]+)= : $(option) ] ;
 
   if $(temporary) {
     value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
 
-    if ! [ MATCH (--).* : $(option) ] {
+    if ! [ MATCH ^(-).* : $(option) ] {
       build-options += <$(temporary)>$(value) ;
     }
   }
-  else if ! [ MATCH (--) : $(option) ] {
-    build-options += $(option) ;
+}
+# Extract build requirements imported from build/config.jam
+for option in $(BUILD_OPTIONS) {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    if ! [ feature.get-values $(temporary) : $(build-options) ] {
+      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+     
+      if ! [ MATCH ^(-).* : $(option) ] {
+        build-options += <$(temporary)>$(value) ;
+      }
+    }
   }
 }
 
@@ -436,20 +447,20 @@ if [ path.exists ./tools ] {
     alias $(name).alias : $(name).main : $(requirements) ;
   
     if $(sources) {
-      if ! [ MATCH "^link=(static)" : $(DEFAULT_BUILD_OPTIONS) [ modules.peek : ARGV ] ] {
+      if [ feature.get-values link : $(build-options) ] != static {
         # shared library target
-        alias $(name) : /libraries//mcrl2 : <link>shared ;
+        alias $(name) : /libraries//mcrl2 : <link>shared : : $(requirements) ;
       }
       else {
         # static library target
-        lib $(name) : $(name).main : <link>static : : $(usage-requirements) ;
+        lib $(name) : $(name).main : <link>static : : $(requirements) $(usage-requirements) ;
       }
     }
     else {
       alias $(name) : : : : $(requirements) ;
     }
   
-    alias headers : : $(requirements) ;
+    alias headers : : $(requirements) : : $(requirements) ;
   
     install-libraries $(name) ;
   
