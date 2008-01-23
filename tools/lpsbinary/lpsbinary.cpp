@@ -742,7 +742,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
 
   if (vm.count("help")) {
     cout << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-    cout << "Replace enumerated sort variables by vectors of boolean variables in the LPS in" << endl;
+    cout << "Replace finite sort variables by vectors of boolean variables in the LPS in" << endl;
     cout << "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used." << endl;
     cout << "If OUTFILE is not present, stdout is used" << endl;
 
