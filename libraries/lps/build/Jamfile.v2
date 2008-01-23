@@ -15,6 +15,7 @@ alias lps.main
        : source/lin_std.cpp
          source/dataelm.cpp
          source/sumelm.cpp
+         source/untime.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp
        : <use>/libraries/data//headers
