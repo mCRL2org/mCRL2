@@ -4,27 +4,18 @@ project toolset/xsim/plugins/garage
        : default-build <threading>multi
        ;
 
-alias xsim_garage_view : : <wx>no ;
-alias xsim_garage_view : : <wx>yes <link>static ;
-
-lib xsim_garage_view
+plugin xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
          /libraries//lps
-         /tools/xsim//sim_base_gui
-         /tools/xsim//sim_shared
+         /tools/xsim//xsim_core
          /site-config//wx_gl
        : <define>GARAGEFRAMEDLL
-         <toolset>darwin:<bundle>yes
          <wx>yes
-         <link>shared
-         <runtime-link>shared
        ;
 
-alias garage : : <wx>no ;
-
-exe garage
+tool garage
        : xmain.cpp
          garageframe.cpp
          garagecanvas.cpp

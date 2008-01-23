@@ -2,20 +2,14 @@ project toolset/diagraphica
   : build-dir $(BUILD_TOP)/diagraphica
   ;
 
-alias diagraphica : : <wx>no ;
-
-exe diagraphica
+tool diagraphica
       : [ glob *.cpp ]
         /libraries/utilities//spinctrlfloat
         /libraries/utilities//colorbutton
         /libraries//ticpp
         /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
-        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
         <wx>yes
       ;
 
-install-binaries install
-      : diagraphica
-      ;
+install-tools diagraphica ;

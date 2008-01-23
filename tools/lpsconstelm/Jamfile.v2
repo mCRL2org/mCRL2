@@ -2,14 +2,11 @@ project lpsconstelm
        : build-dir $(BUILD_TOP)/lpsconstelm
        ;
 
-exe lpsconstelm
+tool lpsconstelm
        : lpsconstelm.cpp
-         /libraries//core
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
-         <include>.
        ;
 
-install-binaries install
-       : lpsconstelm ;
+install-tools lpsconstelm ;

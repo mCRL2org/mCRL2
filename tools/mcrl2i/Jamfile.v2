@@ -2,14 +2,11 @@ project toolset/mcrl2i
        : build-dir $(BUILD_TOP)/mcrl2i
        ;
 
-exe mcrl2i
+tool mcrl2i
        : mcrl2i.cpp
          /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
+         <status>experimental
        ;
 
-install-binaries install
-       : mcrl2i
-       :
-       : <status>experimental
-       ;
+install-tools mcrl2i ;

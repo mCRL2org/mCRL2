@@ -2,14 +2,12 @@ project toolset/ltsinfo
        : build-dir $(BUILD_TOP)/ltsinfo
        ;
 
-exe ltsinfo
+tool ltsinfo
        : ltsinfo.cpp
          /libraries//core
          /libraries//lts
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : ltsinfo ;
+install-tools ltsinfo ;

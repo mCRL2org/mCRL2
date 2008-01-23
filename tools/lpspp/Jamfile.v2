@@ -3,12 +3,11 @@ project toolset/lpspp
        : build-dir $(BUILD_TOP)/lpspp
        ;
 
-exe lpspp
+tool lpspp
        : lpspp.cpp
          /libraries//core
        : <include>.
          <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : lpspp ;
+install-tools lpspp ;

@@ -2,14 +2,11 @@ project ltsconvert
        : build-dir $(BUILD_TOP)/ltsconvert
        ;
 
-exe ltsconvert
+tool ltsconvert
        : ltsconvert.cpp
          /libraries//lts
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : ltsconvert
-       ;
+install-tools ltsconvert ;

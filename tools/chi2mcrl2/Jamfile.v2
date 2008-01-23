@@ -2,18 +2,14 @@ project toolset/chi2mcrl2
        : build-dir $(BUILD_TOP)/chi2mcrl2
        ;
 
-exe chi2mcrl2
+tool chi2mcrl2
        : chi2mcrl2.cpp
          chiparser.cpp
          chilexer.cpp
          translate.cpp
-         /libraries//aterm
          /libraries//core
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : chi2mcrl2
-       ;
+install-tools chi2mcrl2 ;

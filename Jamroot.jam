@@ -1,3 +1,38 @@
+# 
+# Main build description containing custom rules to make project descriptions more compact.
+#
+#  Options:
+#
+#   Build:
+#
+#    --disable-squadt-support       disables squadt support in tools
+#   
+#    --enable-debug                 sets: debug-symbols=on runtime-debugging=on
+#   
+#    --enable-profile               sets: profiling=on
+#
+#    --enable-optimisation          sets: optimization=speed inlining=full
+#
+#    --enable-experimental          activates building/installing of tools that are marked experimental
+#
+#    --enable-deprecated            activates building/installing of tools that are marked deprecated
+#
+#   Installation:
+#
+#    --prefix                       directory relative to which tools/libraries, documentation and examples are
+#                                   installed, unless one of the following options is also specified
+#
+#    --libdir                       directory where libraries are installed
+#
+
+import path ;
+import feature ;
+import property ;
+import package ;
+import feature ;
+import option ;
+
+# Constants for commonly used paths
 path-constant TOP             : . ;
 path-constant BUILD_TOOLS     : ./build/boost_build.v2 ; # Common build directory
 path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
@@ -12,38 +47,140 @@ use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
 use-project /workarounds               : build/workarounds ;
 
-import path ;
+include $(TOP)/build/config.jam ;
 
-include $(BUILD_TOOLS)/building.jam ;
+# Gets option arguments from options passed on the command line primarily and
+# otherwise the BUILD_OPTIONS variable
+rule get_option ( name : default ) {
+  local result = [ MATCH --$(name)=(.*) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
 
+  if $(result) {
+    return $(result[1]) ;
+  }
+  else {
+    return $(default) ;
+  }
+}
+
+rule is_option ( name : default ) {
+  local result = [ MATCH --($(name)) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
+
+  if $(result) {
+    return $(result[1]) ;
+  }
+  else {
+    return $(default) ;
+  }
+}
+
+prefix = $(TOP)/build/stage ;
+
+# Set installation/stage locations
+if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  prefix     = [ get_option prefix     : $(prefix) ] ;
+  bindir     = [ get_option bindir     : $(prefix)/bin ] ;
+  libdir     = [ get_option libdir     : $(prefix)/lib/mcrl2 ] ;
+  includedir = [ get_option includedir : $(prefix)/include/mcrl2 ] ;
+  datadir    = [ get_option datadir    : $(prefix)/share/mcrl2 ] ;
+}
+else {
+  bindir = $(prefix) ;
+  libdir = $(prefix) ;
+}
+
+# Generate default build options
+for option in $(BUILD_OPTIONS) {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+
+    if ! [ MATCH (--).* : $(option) ] {
+      build-options += <$(temporary)>$(value) ;
+    }
+  }
+  else if ! [ MATCH (--) : $(option) ] {
+    build-options += $(option) ;
+  }
+}
+
+# Make sure the build tag variable is defined
+if ! $(BUILD_TAG) {
+  local revision = [ SHELL "svnversion -n \"$(TOP)\"" ] ;
+
+  if ! $(revision) {
+    $(revision) = "unknown" ;
+  }
+
+  link-variant = [ feature.get-values link : $(build-options) <link>shared ] ;
+
+  BUILD_TAG = "$(revision)-$(link-variant[1])" ;
+}
+ 
+# Enable/disable squadt connectivity code in tools
+feature.feature squadt-support : yes no ;
+
+# Top project
 project toolset
        : build-dir $(BUILD_TOP)
        : requirements
-          <define>PREFIX=\"\\\"$(prefix)\\\"\"
-          <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
           <define>_FILE_OFFSET_BITS=64
           <toolset>msvc:<pch>off
-          <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
           <use>/workarounds//configuration
           <link>static,<squadt-support>yes:<threading>multi
+          $(build-options)
        : default-build
-          <address-model>$(ADDRESS_MODEL)
-          $(DEFAULT_BUILD_OPTIONS)
+          <link>shared
        ;
 
-include $(BUILD_TOOLS)/installing.jam ;
+# Feature for building/installing optional tools/libraries
+feature.feature install : no yes ;
 
+# Feature to mark tools as basic experimental or deprecated
+feature.feature status : basic experimental deprecated : composite ;
+
+if [ is_option enable-experimental : no ] = no {
+  ECHO "Notice: not building experimental tools!" ;
+
+  feature.compose <status>experimental : <install>no ;
+}
+if [ is_option enable-deprecated : no ] = no {
+  ECHO "Notice: not building deprecated tools!" ;
+
+  feature.compose <status>deprecated : <install>no ;
+}
+
+# Specifies that squadt connectivity is implemented in a tool
+feature.feature squadt-connectivity : none implemented : incidental composite ;
+
+if [ is_option disable-squadt-support : no ] = no {
+  feature.feature squadt-interface : enabled disabled : symmetric optional ;
+
+  feature.compose <squadt-connectivity>implemented
+        : <squadt-interface>enabled
+          <threading>multi
+          <library>/libraries/utilities//squadt_interface
+        ;
+}
+else {
+  ECHO "Notice: not building squadt support in tools!" ;
+
+  feature.set-default squadt-support : no ;
+
+  feature.feature squadt-interface : disabled enabled : implicit incidental ;
+
+  feature.compose <squadt-connectivity>implemented
+        : <squadt-interface>disabled
+        ;
+}
+
+# Only from the root of the source tree
 if [ path.exists ./tools ] {
   import set ;
   import regex ;
 
   root  = [ path.make $(TOP) ] ; 
   tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
-
-  # tools with new directory layout
-  local ftools = [ MATCH $(root)/tools/(.*)/build/.* : [ glob $(TOP)/tools/*/build/Jamfile.v2 ] ] ;
-
-  tools += $(ftools) ;
 
   local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
   local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
@@ -58,118 +195,268 @@ if [ path.exists ./tools ] {
   # Register tool projects
   for tool in $(targets) {
     # Register tool projects
-    if ! $(tool) in $(ftools) {
-      use-project /tools/$(tool) : tools/$(tool) ;
-    }
-    else {
-      use-project /tools/$(tool) : tools/$(tool)/build ;
-    }
+    use-project /tools/$(tool) : tools/$(tool) ;
   }
 
   # Install when requested
   if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
     # Introduce tool targets
     for tool in $(targets) {
-      alias $(tool) : /tools/$(tool) ;
+      alias $(tool) : stage ;
     }
 
     if ! $(tools) in $(targets) {
       ECHO "Building selected tools :" $(targets) ;
-
-      targets = /tools/$(targets) ;
-    }
-    else {
-      targets += /tools/$(targets) build-plugins ;
     }
 
-#    stage build
-#            : $(targets)
-#            : <location>$(BUILD_TOP)/tools
-#              <install-type>EXE
-#              <hardcode-dll-paths>true
-#            ;
+    targets = /tools/$(targets)//stage ;
 
-    stage build-plugins
-            : $(plugins)
-            : <location>$(BUILD_TOP)/plugins
-              <install-type>SHARED_LIB
-            ;
+    alias stage : $(targets) : <location>build/stage ;
   }
   else {
     feature.set-default install : yes ;
 
     if ! $(tools) in $(targets) {
-      ECHO "Installing selected tools :" $(targets) ;
+      ECHO "Installing selected tools only :" $(targets) ;
 
       # Introduce tool targets
       for tool in $(targets) {
         alias $(tool) : install ;
       }
 
-      alias install
-              : /tools/$(targets)//install
-                install-shared-libraries
-              ;
-
-      targets = /tools/$(targets) ;
+      targets = /tools/$(targets)//install ;
     }
     else {
-      ECHO "Complete toolset installation in progress!" ;
-
       # Complete install
-      alias install
-              : /tools/$(targets)//install
-                install-examples
-                install-headers
-              : <os>MACOSX,<wx>yes:<source>install-mac-bundles
-                <dll-path>$(LIB_DIR)
-                <dependency>install-shared-libraries
-              ;
+      targets = /tools/$(tools)//install /libraries//install-all install-examples ;
 
       # General examples
-      stage install-examples
+      install install-examples
               : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
-              : <location>$(DATA_DIR)
+              : <location>$(datadir)
                 <install-source-root>.
               ;
- 
-      stage install-headers
-              : /libraries/aterm//headers
-              : <location>$(INCLUDE_DIR)/aterm
-                <install-source-root>3rd-party/aterm/include
-              ;
-
-      targets = /tools/$(tools) ;
     }
 
-  #  stage install-static-libraries
-  #          : $(targets)
-  #          : <location>$(LIB_DIR)
-  #            <install-dependencies>on <install-type>STATIC_LIB
-  #          ;
+    alias install : $(targets) ;
+  }
 
-    stage install-shared-libraries
-            : $(targets)//install
-            : <location>$(LIB_DIR)
-              <dll-path>$(LIB_DIR)
-              <install-dependencies>on <install-type>SHARED_LIB
-            ;
+  rule install-tools ( executables * : requirements * ) {
+    local rule-name   = install ;
+    local destination = $(bindir) ;
+    local targets ;
 
-    stage install-shared-libraries
-            : $(targets)
-            : <location>$(BIN_DIR)
-              <dll-path>$(LIB_DIR)
-              <os>NT
-              <install-dependencies>on <install-type>SHARED_LIB
-            ;
+    if [ feature.defaults <install> ] != <install>yes {
+      rule-name   = stage ;
+      destination = $(TOP)/build/stage ;
+    }
+ 
+    if $(rule-name) = install {
+      if [ modules.peek : NT ] {
+        install shared-libraries : $(executables) : <install-dependencies>on <install-type>SHARED_LIB <location>$(bindir) ;
+      }
+      else {
+        install shared-libraries : $(executables) : <install-dependencies>on <install-type>LIB <location>$(libdir) ;
+      }
 
-    stage install-shared-libraries
-            : $(targets)
-            : <location>$(BIN_DIR)
-              <dll-path>$(LIB_DIR)
-              <os>CYGWIN
-              <install-dependencies>on <install-type>SHARED_LIB
-            ;
+      targets = shared-libraries ; 
+    }
+
+    # OS X bundle installation
+    if [ modules.peek : OS ] = MACOSX {
+      import build/macosx/mac-bundle ;
+
+      # wxWidgets support is activated, so creation of application bundles may be required
+      bundles = [ MATCH (.*).plist : [ glob *.plist ] ] ;
+
+      # Create bundle targets
+      for bundle in $(bundles) {
+        mac-bundle $(bundle).app
+             : $(bundle)
+               $(bundle).plist
+               $(bundle).icns
+             : <location>$(prefix)
+             ;
+      }
+
+      executables = [ set.difference $(executables) : $(bundles) ] ;
+
+      if $(bundles) && $(WX_CPPFLAGS) {
+        targets += $(bundles).app ;
+      }
+    }
+
+    if $(executables) {
+      install other : $(executables) : $(requirements) <install-dependencies>off <install-type>EXE <location>$(destination) ;
+
+      if [ property.select source : $(requirements) ] {
+        local plugin-targets = [ feature.get-values source : $(requirements) ] ;
+
+        targets += $(plugin-targets)//$(rule-name) ;
+      }
+
+      targets += other ;
+    }
+
+    alias $(rule-name) : $(targets) ;
+  
+    local c = [ project.current ] ;
+  
+    module [ $(c).project-module ] {
+      explicit stage install ;
+    }
+  }
+  
+  rule install-libraries ( libraries * : requirements * ) {
+    local headers = [ glob-tree *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
+  
+    if [ feature.defaults <install> ] = <install>yes {
+      # Get install location information
+      if ! [ property.select location : $(requirements) ] {
+        requirements += <location>$(libdir) ;
+      }
+
+      if [ modules.peek : NT ] {
+        install install-library : $(libraries) : <install-type>SHARED_LIB $(requirements) ;
+      }
+      else {
+        install install-library : $(libraries) : <install-type>LIB $(requirements) ;
+      }
+
+      requirements = [ property.change $(requirements) : <location> $(includedir) ] ;
+
+      # Instal header files
+      if ! [ MATCH $(root)/.*(include/mcrl2/.*) : $(headers) ] {
+        requirements += <install-source-root>../include ;
+      }
+      else {
+        # filter out headers not in mcrl2 directory
+        headers = [ MATCH (.*/include/mcrl2/.*) : $(headers) ] ;
+   
+        requirements += <install-source-root>../include/mcrl2 ;
+      }
+
+      install install-headers : [ MATCH $(root)/.*(include/.*) : $(headers) ] : $(requirements) ;
+
+      alias install : install-headers install-library ;
+    }
+    else {
+      install stage : $(libraries) : <location>$(TOP)/build/stage ;
+    }
+
+    local c = [ project.current ] ;
+  
+    module [ $(c).project-module ] {
+      explicit stage install install-library ;
+    }
+  }
+  
+  # For plugins (dynamic linked libraries)
+  rule plugin ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+    local make_alias = false ;
+
+    if [ feature.defaults <link> ] != <link>shared {
+      make_alias = true ;
+    }
+    if [ property.select opengl : $(requirements) ] {
+      if [ feature.get-values opengl : $(requirements) ] = yes {
+        if $(OPENGL_NAME) {
+          make_alias = true ;
+        }
+      }
+    }
+    if [ property.select wx : $(requirements) ] {
+      if [ feature.get-values wx : $(requirements) ] = yes {
+        if ! $(WX_CPPFLAGS) {
+          make_alias = true ;
+        }
+      }
+    }
+  
+    requirements = [ property.remove opengl status wx : $(requirements) ] ;
+  
+    if $(make_alias) = true {
+      alias $(name) ;
+    }
+    else {
+      lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
+
+      install-libraries $(name) : <location>$(libdir)/plugins ;
+    }
+  }
+  
+  # Target for a tool in the mcrl2 toolset
+  rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+    local make_alias = false ;
+    local additional-requirements = <define>PREFIX=\"\\\"$(prefix)\\\"\"
+                                    <define>PLUGINDIR=\"\\\"$(libdir)/plugins\\\"\"
+                                    <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\" ;
+  
+    if [ property.select status : $(requirements) ] {
+      # do not install if the expanded property set contains <install>
+      if [ property.select install : [ feature.expand [ property.select status : $(requirements) ] ] ] {
+        make_alias = true ;
+      }
+    }
+    if [ property.select opengl : $(requirements) ] {
+      if [ feature.get-values opengl : $(requirements) ] = yes {
+        if $(OPENGL_NAME) {
+          make_alias = true ;
+        }
+      }
+    }
+    if [ property.select wx : $(requirements) ] {
+      if [ feature.get-values wx : $(requirements) ] = yes {
+        if ! $(WX_CPPFLAGS) {
+          make_alias = true ;
+        }
+      }
+  
+      additional-requirements += <toolset>darwin:<linkflags>"-undefined dynamic_lookup" 
+                                 <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
+                                 <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows" ;
+    }
+
+    requirements = [ property.remove opengl status wx : $(requirements) ] ;
+  
+    if $(make_alias) = true {
+      alias $(name) ;
+    }
+    else {
+      exe $(name) : $(sources) : $(requirements) $(additional-requirements) : $(defaults) : $(usage-requirements) ;
+    }
+  }
+  
+  # Target for a library that is part of the big mcrl2 library when link=static
+  rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+    # main build target
+    alias $(name).main : $(sources) : $(requirements) : $(defaults) ;
+  
+    # build target for inclusion by mcrl2 library
+    alias $(name).alias : $(name).main : $(requirements) ;
+  
+    if $(sources) {
+      if ! [ MATCH "^link=(static)" : $(DEFAULT_BUILD_OPTIONS) [ modules.peek : ARGV ] ] {
+        # shared library target
+        alias $(name) : /libraries//mcrl2 : <link>shared ;
+      }
+      else {
+        # static library target
+        lib $(name) : $(name).main : <link>static : : $(usage-requirements) ;
+      }
+    }
+    else {
+      alias $(name) : : : : $(requirements) ;
+    }
+  
+    alias headers : : $(requirements) ;
+  
+    install-libraries $(name) ;
+  
+    local c = [ project.current ] ;
+  
+    module [ $(c).project-module ] {
+      explicit $(name).main $(name).alias $(name) headers ;
+    }
   }
 }
-

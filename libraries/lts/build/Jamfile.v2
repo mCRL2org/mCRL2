@@ -7,44 +7,13 @@ project lts
           <include>../include
        ;
 
-alias lts.main
+mcrl2-library lts
        : [ glob source/*.cpp ]
-       : <use>/libraries/core//headers
-         <use>/libraries/svc//headers
+       : <use>/libraries/svc//headers
          <use>/libraries/lps//headers
-         <use>/libraries/data//headers
          <library>/site-config//BCG
        : <threading>single
        : <library>/site-config//BCG
-       ;
-
-lib lts
-       : lts.main
-         /libraries//core
-         /libraries//svc
-       : <link>static
-       :
-       : <library>/libraries//core
+         <library>/libraries//lps
          <library>/libraries//svc
        ;
-
-alias lts
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias lts.alias
-       : lts.main
-       : <use>headers
-       ;
-
-alias headers
-       : [ glob-tree *.h *.hpp : .svn ]
-       :
-       :
-       : <use>/libraries/core//headers
-         <use>/libraries/svc//headers
-       ;
-
-explicit lts.main lts.alias ;
-

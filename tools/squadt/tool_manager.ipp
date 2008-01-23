@@ -17,7 +17,7 @@
 namespace squadt {
   /// \cond INTERNAL_DOCS
 
-  class tool_manager_impl : public tipi::controller::communicator, public utility::visitable {
+  class tool_manager_impl : private tipi::controller::communicator, public utility::visitable {
     friend class tool_manager;
     friend class processor_impl;
 

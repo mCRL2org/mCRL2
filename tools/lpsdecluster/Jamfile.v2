@@ -2,13 +2,11 @@ project lpsdecluster
        : build-dir $(BUILD_TOP)/lpsdecluster
        ;
 
-exe lpsdecluster
+tool lpsdecluster
        : lpsdecluster.cpp
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : lpsdecluster
-       ;
+install-tools lpsdecluster ;

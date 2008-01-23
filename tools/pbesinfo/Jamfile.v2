@@ -2,14 +2,11 @@ project toolset/pbesinfo
        : build-dir $(BUILD_TOP)/pbesinfo
        ;
 
-exe pbesinfo
+tool pbesinfo
        : pbesinfo.cpp
-         /libraries//core
          /libraries//lps
          /libraries//pbes
          /site-config//boost_program_options
-       : <include>.
        ;
 
-install-binaries install
-       : pbesinfo ;
+install-tools pbesinfo ;

@@ -2,14 +2,11 @@ project lpsparelm
        : build-dir $(BUILD_TOP)/lpsparelm
        ;
 
-exe lpsparelm
+tool lpsparelm
        : lpsparelm.cpp
-         /libraries//core
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
-         <include>.
        ;
 
-install-binaries install
-       : lpsparelm ;
+install-tools lpsparelm ;

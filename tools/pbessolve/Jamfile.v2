@@ -1,43 +1,32 @@
 project toolset/pbessolve
        : build-dir $(BUILD_TOP)/pbessolve
+       : requirements
+          <library>/libraries//lps
+          <library>/libraries//pbes
        ;
 
 obj gauss.o
        : gauss.cpp
-         /libraries//lps
-         /libraries//pbes
          /site-config//boost_program_options
-       : <include>.
        ;
 
 obj sort_instantiator.o
        : sort_instantiator.h sort_instantiator.cpp
-         /libraries//lps
-         /libraries//pbes
          /site-config//boost_program_options
-       : <include>.
        ;
 
-exe pbessolve
+tool pbessolve
        : pbessolve.cpp
 	 sort_instantiator.o
 	 gauss.o
-	 /libraries//lps
-         /libraries//pbes
          /site-config//boost_program_options
-       : <include>.
-       ;
-
-exe txt2pbes
-       : txt2pbes.cpp
-         /libraries//lps
-         /libraries//pbes
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
-       ;
-
-install-binaries install
-       : pbessolve txt2pbes
-       :
        : <status>experimental
        ;
+
+tool txt2pbes
+       : txt2pbes.cpp
+       : <toolset>msvc:<library>/libraries//getopt
+         <status>experimental
+       ;
+
+install-tools pbessolve txt2pbes ;

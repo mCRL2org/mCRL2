@@ -1,28 +1,33 @@
 project toolset/xsim
        : build-dir $(BUILD_TOP)/xsim
+       : requirements
+          <use>/libraries/lps//headers
+          <use>/libraries/trace//headers
        ;
-
-alias sim_base_gui : : <wx>no ;
-
-obj sim_base_gui
-       : simbasegui.cpp
-         /libraries//trace
-         /libraries//lps
-         /site-config//wx_base
-       : <wx>yes
-       ;
-
-alias xsim : : <wx>no ;
 
 alias sim_shared
-       : [ obj simbase.o : simbase.cpp /libraries//lps ]
-         [ obj simulator.o : simulator.cpp /libraries//lps /libraries//trace ]
+       : [ obj simbase.o   : simbase.cpp  ]
+         [ obj simulator.o : simulator.cpp ]
        ;
 
-exe xsim
-       : xsim.cpp
+obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ;
+
+alias xsim_core
+       : simbasegui.o
          sim_shared
-         sim_base_gui
+       ;
+
+explicit sim_shared simbasegui.o xsim_core ;
+
+local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
+
+for plugin in $(plugins) {
+  use-project /xsim-$(plugin) : plugins/$(plugin) ;
+}
+
+tool xsim
+       : xsim.cpp
+         xsim_core
          simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
@@ -30,13 +35,11 @@ exe xsim
          /libraries//lps
          /site-config//wx_base
        : <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
-         <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
-         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
          <squadt-connectivity>implemented
          <wx>yes
        ;
 
-exe sim
+tool sim
        : sim.cpp
          sim_shared
          /libraries//lps
@@ -44,13 +47,4 @@ exe sim
        : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : xsim sim 
-       : <dependency>install-plugins
-       ;
-
-local plugins  = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
-
-install-plugins install-plugins
-       : plugins/$(plugins)
-       ;
+install-tools xsim sim : <source>/xsim-$(plugins) ;

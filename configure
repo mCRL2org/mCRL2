@@ -664,7 +664,6 @@ host_os
 BJAM
 BJAM_CXX
 HOST_OS
-ADDRESS_MODEL
 CC
 CFLAGS
 LDFLAGS
@@ -698,17 +697,9 @@ WX_BASE_LDFLAGS
 WX_GL_LDFLAGS
 LIBOBJS
 BUILD_VARIANT
-LINK_VARIANT
-BUILD_OPTIONS
 IATERM_CPPFLAGS
 IATERM_LDFLAGS
-PREFIX_DIR
-EXEC_PREFIX_DIR
-DATA_DIR
-LIB_DIR
-BIN_DIR
-INCLUDE_DIR
-MAN_DIR
+BUILD_OPTIONS
 R_CFLAGS
 R_SCFLAGS
 R_CXXFLAGS
@@ -1964,7 +1955,7 @@ case $host in
     ;;
 esac
 
-
+BUILD_OPTIONS="address-model=${ADDRESS_MODEL}"
 
 # Checks for programs.
 ac_ext=c
@@ -3787,9 +3778,9 @@ if test "x$enable_debug" = xyes; then
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
   BUILD_VARIANT=""
-  BUILD_OPTIONS="debug-symbols=on runtime-debugging=on $BUILD_OPTIONS"
+  BUILD_OPTIONS="${BUILD_OPTIONS} debug-symbols=on runtime-debugging=on"
   if test "x$enable_optimisation" = xyes; then
-   BUILD_OPTIONS="optimization=speed $BUILD_OPTIONS"
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=speed"
   fi
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
@@ -3797,7 +3788,7 @@ else
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
   BUILD_VARIANT="release"
   if test "x$enable_optimisation" = xno; then
-   BUILD_OPTIONS="optimization=off $BUILD_OPTIONS"
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=off"
   fi
 fi
 
@@ -3809,7 +3800,7 @@ fi
 
 if test "x$enable_profile" = xyes; then
   BUILD_VARIANT=""
-  BUILD_OPTIONS="profiling=on $BUILD_OPTIONS"
+  BUILD_OPTIONS="profiling=on ${BUILD_OPTIONS}"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
@@ -3822,9 +3813,9 @@ if test "${with_static+set}" = set; then
 fi
 
 if test "x$enable_static" = xyes; then
-  LINK_VARIANT="static"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=static"
 else
-  LINK_VARIANT="shared"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=shared"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -6401,7 +6392,6 @@ _ACEOF
 fi
 done
 
-
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
@@ -6411,8 +6401,6 @@ if test "x$exec_prefix" = xNONE
 then
   exec_prefix='${prefix}'
 fi
-
-
 
 
 
@@ -6436,26 +6424,25 @@ else
 
 fi
 
-PREFIX_DIR="${prefix}"
-eval EXEC_PREFIX_DIR="${exec_prefix}"
+# Set install path related settings
+BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\""
 
-prefix="\$(prefix)"
-
-eval INCLUDE_DIR="${includedir}/mcrl2"
-eval "eval DATA_DIR=${datadir}/mcrl2"
-eval "eval MAN_DIR=${mandir}"
-eval "eval BIN_DIR=${bindir}"
-eval "eval LIB_DIR=${libdir}/mcrl2"
-
-includedir="$includedir/mcrl2"
-datadir="$datadir/mcrl2"
-libdir="$libdir/mcrl2"
-
-
-
-
-
-
+eval "eval includedir=${includedir}"
+if test ! "${prefix}/include" = "${includedir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --includedir=\"${includedir}\""
+fi
+eval "eval bindir=${bindir}"
+if test ! "${prefix}/bin" = "${bindir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --bindir=\"${bindir}\""
+fi
+eval "eval libdir=${libdir}"
+if test ! "${prefix}/lib" = "${libdir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --libdir=\"${libdir}\""
+fi
+eval "eval datadir=${datadir}"
+if test ! "${prefix}/share" = "${datadir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --datadir=\"${datadir}\""
+fi
 
 
 
@@ -7186,7 +7173,6 @@ host_os!$host_os$ac_delim
 BJAM!$BJAM$ac_delim
 BJAM_CXX!$BJAM_CXX$ac_delim
 HOST_OS!$HOST_OS$ac_delim
-ADDRESS_MODEL!$ADDRESS_MODEL$ac_delim
 CC!$CC$ac_delim
 CFLAGS!$CFLAGS$ac_delim
 LDFLAGS!$LDFLAGS$ac_delim
@@ -7220,24 +7206,21 @@ WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim
 WX_GL_LDFLAGS!$WX_GL_LDFLAGS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 BUILD_VARIANT!$BUILD_VARIANT$ac_delim
-LINK_VARIANT!$LINK_VARIANT$ac_delim
-BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
 IATERM_CPPFLAGS!$IATERM_CPPFLAGS$ac_delim
 IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
-PREFIX_DIR!$PREFIX_DIR$ac_delim
-EXEC_PREFIX_DIR!$EXEC_PREFIX_DIR$ac_delim
-DATA_DIR!$DATA_DIR$ac_delim
-LIB_DIR!$LIB_DIR$ac_delim
-BIN_DIR!$BIN_DIR$ac_delim
-INCLUDE_DIR!$INCLUDE_DIR$ac_delim
-MAN_DIR!$MAN_DIR$ac_delim
+BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
 R_CFLAGS!$R_CFLAGS$ac_delim
 R_SCFLAGS!$R_SCFLAGS$ac_delim
 R_CXXFLAGS!$R_CXXFLAGS$ac_delim
 R_SCXXFLAGS!$R_SCXXFLAGS$ac_delim
+R_CPPFLAGS!$R_CPPFLAGS$ac_delim
+R_LDFLAGS!$R_LDFLAGS$ac_delim
+R_SLDFLAGS!$R_SLDFLAGS$ac_delim
+USE_BCG!$USE_BCG$ac_delim
+LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 93; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -7256,52 +7239,6 @@ fi
 
 cat >>$CONFIG_STATUS <<_ACEOF
 cat >"\$tmp/subs-1.sed" <<\CEOF$ac_eof
-/@[a-zA-Z_][a-zA-Z_0-9]*@/!b
-_ACEOF
-sed '
-s/[,\\&]/\\&/g; s/@/@|#_!!_#|/g
-s/^/s,@/; s/!/@,|#_!!_#|/
-:n
-t n
-s/'"$ac_delim"'$/,g/; t
-s/$/\\/; p
-N; s/^.*\n//; s/[,\\&]/\\&/g; s/@/@|#_!!_#|/g; b n
-' >>$CONFIG_STATUS <conf$$subs.sed
-rm -f conf$$subs.sed
-cat >>$CONFIG_STATUS <<_ACEOF
-CEOF$ac_eof
-_ACEOF
-
-
-ac_delim='%!_!# '
-for ac_last_try in false false false false false :; do
-  cat >conf$$subs.sed <<_ACEOF
-R_CPPFLAGS!$R_CPPFLAGS$ac_delim
-R_LDFLAGS!$R_LDFLAGS$ac_delim
-R_SLDFLAGS!$R_SLDFLAGS$ac_delim
-USE_BCG!$USE_BCG$ac_delim
-LTLIBOBJS!$LTLIBOBJS$ac_delim
-_ACEOF
-
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 5; then
-    break
-  elif $ac_last_try; then
-    { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
-echo "$as_me: error: could not make $CONFIG_STATUS" >&2;}
-   { (exit 1); exit 1; }; }
-  else
-    ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
-  fi
-done
-
-ac_eof=`sed -n '/^CEOF[0-9]*$/s/CEOF/0/p' conf$$subs.sed`
-if test -n "$ac_eof"; then
-  ac_eof=`echo "$ac_eof" | sort -nru | sed 1q`
-  ac_eof=`expr $ac_eof + 1`
-fi
-
-cat >>$CONFIG_STATUS <<_ACEOF
-cat >"\$tmp/subs-2.sed" <<\CEOF$ac_eof
 /@[a-zA-Z_][a-zA-Z_0-9]*@/!b end
 _ACEOF
 sed '
@@ -7559,7 +7496,7 @@ s&@builddir@&$ac_builddir&;t t
 s&@abs_builddir@&$ac_abs_builddir&;t t
 s&@abs_top_builddir@&$ac_abs_top_builddir&;t t
 $ac_datarootdir_hack
-" $ac_file_inputs | sed -f "$tmp/subs-1.sed" | sed -f "$tmp/subs-2.sed" >$tmp/out
+" $ac_file_inputs | sed -f "$tmp/subs-1.sed" >$tmp/out
 
 test -z "$ac_datarootdir_hack$ac_datarootdir_seen" &&
   { ac_out=`sed -n '/\${datarootdir}/p' "$tmp/out"`; test -n "$ac_out"; } &&

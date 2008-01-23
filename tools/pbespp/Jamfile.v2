@@ -2,13 +2,10 @@ project toolset/pbespp
        : build-dir $(BUILD_TOP)/pbespp
        ;
 
-exe pbespp
+tool pbespp
        : pbespp.cpp
-         /libraries//core
          /libraries//pbes
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : pbespp ;
+install-tools pbespp ;

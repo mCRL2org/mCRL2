@@ -64,13 +64,13 @@ namespace transport {
 
     boost::recursive_mutex::scoped_lock l(lock);
 
-    /* Disconnect all peers */
-    disconnect();
-  
-    /* Clean up listeners */
+    /* Shutdown listeners */
     for (listener_list::iterator i = listeners.begin(); i != listeners.end(); ++i) {
       (*i)->shutdown();
     }
+
+    /* Disconnect all peers */
+    disconnect();
   }
 
   /**

@@ -4,14 +4,12 @@ project lps
        : requirements
           <include>../include
           <dependency>/boost//headers
-          <dependency>/libraries//atermpp
        : usage-requirements
           <include>../include
           <dependency>/boost//headers
-          <dependency>/libraries//atermpp
        ;
 
-alias lps.main
+mcrl2-library lps
        : source/lin_std.cpp
          source/binary.cpp
          source/dataelm.cpp
@@ -21,36 +19,8 @@ alias lps.main
          source/nextstate.cpp
          source/nextstate_standard.cpp
        : <use>/libraries/data//headers
-         <use>/libraries/utilities//headers
          <use>/libraries/pbes//headers
-         <use>/libraries/lps//headers
+         <use>/libraries/atermpp//headers
        : <threading>single
-       ;
-
-lib lps
-       : lps.main
-       : <link>static
-       :
        : <library>/libraries//data
-         <use>/libraries/lps//headers
        ;
-
-alias lps
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias lps.alias
-       : lps.main
-       :
-       :
-       : <use>/libraries/data//headers
-         <use>/libraries/lps//headers
-       ;
-
-alias headers 
-       : [ glob-tree *.h *.hpp : .svn ]
-       : <use>/libraries/data//headers
-       ;
-
-explicit lps.main lps.alias ;

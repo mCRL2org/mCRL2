@@ -2,17 +2,14 @@ project toolset/ltsmin
        : build-dir $(BUILD_TOP)/ltsmin
        ;
 
-exe ltsmin
+tool ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
          /libraries//core
          /libraries//svc
        : <toolset>msvc:<library>/libraries//getopt
+         <status>deprecated
        ;
 
-install-binaries install
-       : ltsmin
-       :
-       : <status>deprecated
-       ;
+install-tools ltsmin ;

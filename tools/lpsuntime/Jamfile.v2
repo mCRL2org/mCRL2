@@ -2,14 +2,11 @@ project lpsuntime
        : build-dir $(BUILD_TOP)/lpsuntime
        ;
 
-exe lpsuntime
+tool lpsuntime
        : lpsuntime.cpp
-         /libraries//core
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
-         <include>.
        ;
 
-install-binaries install
-       : lpsuntime ;
+install-tools lpsuntime ;

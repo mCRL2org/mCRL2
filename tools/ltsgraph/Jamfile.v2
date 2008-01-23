@@ -2,9 +2,7 @@ project toolset/ltsgraph
        : build-dir $(BUILD_TOP)/ltsgraph
        ;
 
-alias ltsgraph : : <wx>no ;
-
-exe ltsgraph
+tool ltsgraph
        : [ glob *.cpp ]
          /libraries/utilities//spinctrlfloat
          /libraries//core
@@ -12,10 +10,6 @@ exe ltsgraph
          /site-config//wx_base
        : <wx>yes
          <squadt-connectivity>implemented
-         <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
-         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
        ;
 
-install-binaries install
-       : ltsgraph
-       ;
+install-tools ltsgraph ;

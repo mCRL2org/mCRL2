@@ -7,35 +7,10 @@ project libraries/trace
           <include>../include
        ;
 
-alias trace.main
+mcrl2-library trace
        : source/trace.cpp
        : <use>/libraries/core//headers
          <use>/libraries/utilities//headers
        : <threading>single
-       ;
-
-lib trace
-       : trace.main
-       : <link>static
-       :
        : <library>/libraries//core
        ;
-
-alias trace
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias trace.alias
-       : trace.main
-       :
-       :
-       : <use>/libraries/core//headers
-       ;
-
-alias headers 
-       : [ glob-tree *.h *.hpp : .svn ]
-       : <use>/libraries/core//headers
-       ;
-
-explicit trace.main trace.alias ;

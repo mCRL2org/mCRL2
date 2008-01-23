@@ -1,36 +1,17 @@
 project atermpp
        : source-location ..
        : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+       : usage-requirements
+          <include>../include
        ;
 
-alias atermpp.main
+mcrl2-library atermpp
        :
        : <use>/boost//headers
          <use>/libraries/aterm//headers
        :
        : <use>/boost//headers
+         <library>/libraries//aterm
        ;
-
-alias atermpp
-       : atermpp.main
-       : <link>static
-       :
-       : <dependency>/libraries//aterm
-       ;
-
-alias atermpp
-       : # /libraries//mcrl2
-       : <link>shared
-       :
-       : <include>../include
-       ;
-
-alias headers
-       : [ glob-tree *.h *.hpp : .svn ]
-       :
-       :
-       : <include>../include
-         <use>/libraries/aterm//headers
-       ;
-
-explicit atermpp.main ;

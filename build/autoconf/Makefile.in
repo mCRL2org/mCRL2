@@ -1,8 +1,8 @@
 HOST_OS            = "@HOST_OS@"
 
 # Installation directories
-prefix             = "@PREFIX_DIR@"
-exec_prefix        = "@EXEC_PREFIX_DIR@"
+prefix             = "@prefix@"
+exec_prefix        = "@exec_prefix@"
 bindir             = "@bindir@"
 libdir             = "@libdir@"
 datadir            = "@datarootdir@"

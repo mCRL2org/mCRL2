@@ -2,14 +2,10 @@ project toolset/lpsformcheck
   : build-dir $(BUILD_TOP)/lpsformcheck
   ;
 
-exe lpsformcheck
+tool lpsformcheck
        : lpsformcheck.cpp
          /libraries//lps
-       : <include>.
-#         <toolset>gcc:<define>CVC_LITE_LIB
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : lpsformcheck
-       ;
+install-tools lpsformcheck ;

@@ -2,13 +2,10 @@ project toolset/lps2torx
        : build-dir $(BUILD_TOP)/lps2torx
        ;
 
-exe lps2torx
+tool lps2torx
        : lps2torx.cpp
-         /libraries/lps
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+         /libraries//lps
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : lps2torx
-       ;
+install-tools lps2torx ;

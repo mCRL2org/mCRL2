@@ -2,14 +2,11 @@ project lpssumelm
        : build-dir $(BUILD_TOP)/lpssumelm
        ;
 
-exe lpssumelm
+tool lpssumelm
        : lpssumelm.cpp
-         /libraries//core
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
-         <include>.
        ;
 
-install-binaries install
-       : lpssumelm ;
+install-tools lpssumelm ;

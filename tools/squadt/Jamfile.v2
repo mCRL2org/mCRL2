@@ -9,19 +9,14 @@ import sequence ;
 source_files = [ glob *.cpp gui/*.cpp gui/dialog/*.cpp ] ;
 source_files = [ set.difference $(source_files) : [ glob ./squadt_proxy.cpp ] ] ;
 
-alias squadt : : <wx>no ;
-
-exe squadt
+tool squadt
       : [ sequence.insertion-sort $(source_files) ]
         /site-config//wx_base
         /site-config//boost_md5
         /libraries//ticpp
         /libraries/tipi//controller_interface
-      : <wx>yes
-        <use>/libraries/utilities//headers
-        <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
-        <os>NT,<toolset>gcc:<linkflags>"-Wl,-subsystem:windows -mwindows"
-        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
+      : <use>/libraries/utilities//headers
+        <wx>yes
       ;
 
 exe squadt_proxy
@@ -29,8 +24,6 @@ exe squadt_proxy
       : <library>/libraries/tipi//tool_interface
       ;
 
-install-binaries install
-      : squadt
-      ;
-
 explicit squadt_proxy ;
+
+install-tools squadt ;

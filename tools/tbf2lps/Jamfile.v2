@@ -2,13 +2,11 @@ project toolset/tbf2lps
        : build-dir $(BUILD_TOP)/tbf2lps
        ;
 
-exe tbf2lps
+tool tbf2lps
        : tbf2lps.cpp
          lpstrans.cpp
          /libraries//core
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : tbf2lps ;
+install-tools tbf2lps ;

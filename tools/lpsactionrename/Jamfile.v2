@@ -2,15 +2,11 @@ project toolset/lpsactionrename
        : build-dir $(BUILD_TOP)/lpsactionrename
        ;
 
-exe lpsactionrename
+tool lpsactionrename
        : lpsactionrename.cpp
          /libraries//lps
-         /libraries//data
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : lpsactionrename
-       ;
+install-tools lpsactionrename ;

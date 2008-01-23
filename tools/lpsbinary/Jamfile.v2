@@ -2,13 +2,11 @@ project lpsbinary
        : build-dir $(BUILD_TOP)/lpsbinary
        ;
 
-exe lpsbinary
+tool lpsbinary
        : lpsbinary.cpp
          /libraries//lps
          /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : lpsbinary
-       ;
+install-tools lpsbinary ;

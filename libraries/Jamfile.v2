@@ -46,3 +46,4 @@ lib mcrl2
           <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         ;
 
+alias install-all : /libraries/ticpp//install /libraries/tipi//install /libraries/$(libraries)//install : <toolset>msvc:<source>/libraries/getopt//install ;

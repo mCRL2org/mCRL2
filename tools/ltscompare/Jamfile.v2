@@ -2,12 +2,10 @@ project toolset/ltscompare
        : build-dir $(BUILD_TOP)/ltscompare
        ;
 
-exe ltscompare
+tool ltscompare
        : ltscompare.cpp
          /libraries//lts
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : ltscompare ;
+install-tools ltscompare ;

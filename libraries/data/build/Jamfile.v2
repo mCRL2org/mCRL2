@@ -9,7 +9,7 @@ project data
           <os>NT:<define>NO_DYNLOAD
        ;
 
-alias data.main
+mcrl2-library data
        : source/enum.cpp
          source/enum_standard.cpp
          source/confluence_checker.cpp
@@ -20,38 +20,13 @@ alias data.main
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
        : <use>/libraries/core//headers
+         <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc
        : <threading>single
-       : <use>headers
-         <use>/libraries/core//headers
+       : <library>/libraries/core//headers
          <library>/site-config//cvc
          <os>LINUX:<library>/site-config//m   # for rewrite
          <os>CYGWIN:<library>/site-config//m  # for rewrite
          <os>LINUX:<library>/site-config//dl  # for rewrite
        ;
-
-lib data
-       : data.main
-       : <link>static
-       :
-       : <library>/libraries/core
-         <use>/libraries/data//headers
-       ;
-
-alias data
-       : /libraries//mcrl2
-       : <link>shared
-         <use>/libraries/core//headers
-       ;
-
-alias data.alias
-       : data.main
-       ;
-
-alias headers
-       : [ glob-tree *.h *.hpp : .svn ]
-       : <use>/libraries/core//headers
-       ;
-
-explicit data.main data.alias ;

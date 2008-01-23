@@ -10,44 +10,40 @@ import generators ;
 import targets ;
 import project ;
 import path ;
-import feature : feature ;
+import feature ;
 import toolset : flags ;
 import "class" : new ;
+import notfile ;
 
 type.register MAC_APPLICATION_BUNDLE : app ;
 
-feature icon : : free path ;
-feature info : : free path ;
+feature.feature icon : : free path ;
+feature.feature info : : free path ;
 
-generators.register-standard $(__name__).make-bundle : EXE : MAC_APPLICATION_BUNDLE ;
+generators.register-standard $(__name__).make : EXE : MAC_APPLICATION_BUNDLE ;
 
-flags $(__name__).make-bundle INFO <info> ;
-flags $(__name__).make-bundle ICON <icon> ;
-flags $(__name__).make-bundle LOCATION <location> ;
+flags $(__name__).make INFO <info> ;
+flags $(__name__).make ICON <icon> ;
+flags $(__name__).make LOCATION <location> ;
 
 SAMPLE_R = $(__name__:P)/sample.r ;
 
-actions quietly make-bundle {
+actions make {
   mkdir -p $(LOCATION)/$(<:BS)/Contents/MacOS
   mkdir -p $(LOCATION)/$(<:BS)/Contents/Resources
   echo 'APPL????' > $(LOCATION)/$(<:BS)/Contents/PkgInfo
   cp $(INFO) $(LOCATION)/$(<:BS)/Contents/Info.plist
   cp $(ICON) $(LOCATION)/$(<:BS)/Contents/Resources
+  cp $(>) $(LOCATION)/$(<:BS)/Contents/MacOS
 
-  /Developer/Tools/Rez -t APPL -d __DARWIN__ -d __WXMAC__ Carbon.r $(SAMPLE_R) -o $(LOCATION)/bin/$(>:BS)
-
-  ln -f $(LOCATION)/bin/$(>:BS) $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
+  /Developer/Tools/Rez -t APPL -d __DARWIN__ -d __WXMAC__ Carbon.r $(SAMPLE_R) -o $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
   /Developer/Tools/SetFile -a C $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
-}
-
-actions quietly existing rez {
-  /Developer/Tools/Rez -t APPL -o $(>) $(SAMPLE_R)
 }
 
 rule mac-bundle ( target : executable info icon : requirements * : default-build * ) {
   local project  = [ project.current ] ;
 
-  requirements += <action>make-bundle ;
+  requirements += <action>make ;
 
   if [ MATCH "\.(icns)" : $(icon) ] {
     requirements += <icon>$(icon) ;
@@ -63,6 +59,10 @@ rule mac-bundle ( target : executable info icon : requirements * : default-build
     error "missing info file (.plist)" ;
   }
 
+  if ! [ feature.get-values <location> : $(requirements) ] {
+    error "missing location feature" ;
+  }
+
   targets.main-target-alternative
      [ new typed-target $(target) : $(project) : MAC_APPLICATION_BUNDLE
      : [ targets.main-target-sources $(executable) : $(target) ]
@@ -73,17 +73,4 @@ rule mac-bundle ( target : executable info icon : requirements * : default-build
   return $(target) ;
 }
 
-rule mac-rez ( sources + ) {
-  if [ modules.peek OS ] = MACOSX {
-    import notfile ;
-
-    for s in $(sources) {
-      notfile rez-$(s) : @$(__name__).rez : $(s) ;
-    }
-  }
-
-  return $(sources) ;
-}
-
 IMPORT $(__name__) : mac-bundle : : mac-bundle ;
-IMPORT $(__name__) : mac-rez : : mac-rez ;

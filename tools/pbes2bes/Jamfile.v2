@@ -1,25 +1,20 @@
 project toolset/pbes2bes
    : build-dir $(BUILD_TOP)/pbes2bes
    : requirements
-       <source>/libraries//lps
-       <source>/libraries//pbes
+      <library>/libraries//lps
+      <library>/libraries//pbes
    ;
 
-exe pbes2bes
+tool pbes2bes
        : pbes2bes.cpp
          /site-config//boost_program_options
-       : <include>.
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
-exe pbes2bool
+tool pbes2bool
        : pbes2bool.cpp
          /site-config//boost_program_options
-       : <include>.
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : pbes2bes pbes2bool
-       :
-       ;
+install-tools pbes2bes pbes2bool ;

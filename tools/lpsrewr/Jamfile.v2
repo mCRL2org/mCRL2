@@ -2,12 +2,10 @@ project toolset/lpsrewr
        : build-dir $(BUILD_TOP)/lpsrewr
        ;
 
-exe lpsrewr
+tool lpsrewr
        : lpsrewr.cpp
          /libraries//data
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : lpsrewr ;
+install-tools lpsrewr ;

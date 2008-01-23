@@ -3,6 +3,8 @@ project libraries/utilities
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
+          <include>../../core/include      # Circular dependency
+          <include>../../data/include      # Circular dependency
        : usage-requirements
           <include>../include
        ;
@@ -48,35 +50,14 @@ alias squadt_interface.alias
       : <use>headers
       ;
 
-alias utilities.main
+mcrl2-library utilities
       : source/aterm_ext.cpp
         source/numeric_string.cpp
         source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
-      : <use>/libraries/aterm//headers
-        <use>/libraries/core//headers
-        <use>/libraries/data//headers
+      : <use>/boost//headers
+        <use>/libraries/atermpp//headers
+      :
+      : <library>/libraries//aterm
       ;
-
-lib utilities
-      : utilities.main 
-      : <link>static
-        <library>/libraries//aterm
-      ;
-
-alias utilities
-      : /libraries//mcrl2
-      : <link>shared
-      ;
-
-alias utilities.alias
-      : utilities.main
-      ;
-
-alias headers
-       : [ glob-tree *.h *.hpp : .svn ]
-       : <use>/boost//headers
-       :
-       : <use>/boost//headers
-       ;

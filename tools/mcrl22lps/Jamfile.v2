@@ -2,7 +2,7 @@ project toolset/mcrl22lps
        : build-dir $(BUILD_TOP)/mcrl22lps
        ;
 
-exe mcrl22lps
+tool mcrl22lps
        : mcrl22lps.cpp
          /libraries//utilities
          /libraries//lps
@@ -10,8 +10,4 @@ exe mcrl22lps
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : mcrl22lps
-       :
-       ;
-
+install-tools mcrl22lps ;

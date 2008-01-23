@@ -4,8 +4,54 @@ project site-config
 
 include $(TOP)/build/config.jam ;
 
+import regex ;
+import feature ;
+
+# Helper rule for extracting compiler/linker options from strings (unix oriented)
+rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
+  local splitted                  = [ regex.split $(ldflags) " -" ] ;
+  local library_search_paths ;
+  local library_link_paths ;
+  local library_names ;
+  local framework_names ;
+
+  for part in $(splitted) {
+    if [ MATCH "^-?L(.*)$" : $(part) ] {
+      local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
+
+      library_search_paths += <search>$(search_path) ;
+#      library_link_paths += <link>shared:<dll-path>$(search_path) ;
+    }
+    else if [ MATCH "^-?l(.*)$" : $(part) ] {
+      local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
+
+      lib $(name)$(library_name)
+          :
+          : <name>$(library_name) $(library_search_paths)
+          :
+          : $(framework_names) $(library_link_paths)
+          ;
+
+      library_names += $(name)$(library_name) ;
+    }
+    else if [ MATCH "-?framework (.*)$" : $(part) ] {
+      local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
+
+      framework_names += <framework>$(framework_name) ;
+    }
+  }
+
+  alias $(name) : $(library_names) : $(requirements) : $(default) : $(usage-requirements) ;
+}
+
+if [ modules.peek : OS ] != MACOSX {
+  feature.feature bundle : yes no ;
+}
+
 # OpenGL library
 if $(OPENGL_NAME) {
+  feature.feature opengl : yes no : optional incidental ;
+
   lib GLU : : <os>NT <name>glu32 ;
   lib GLU : : <os>CYGWIN <name>glu32 ;
   
@@ -24,15 +70,20 @@ if $(OPENGL_NAME) {
     }
   }
 }
+else {
+  ECHO "Notice: Not building tools that depend on OpenGL!" ;
+  feature.feature opengl : no yes : optional ;
+}
 
 if $(WX_CPPFLAGS) {
+  feature.feature wx : yes no : optional incidental ;
+
   libraries_from_string wx_base
 	: $(WX_BASE_LDFLAGS)
         : <threading>multi
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <define>USING_WX
-          <wx>yes
           <toolset>msvc:<user-interface>gui
         ;
 
@@ -43,15 +94,14 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <define>USING_WX
-          <wx>yes
           <toolset>msvc:<user-interface>gui
           <library>opengl
         ;
   }
 }
 else {
-  alias wx_base : : : : <wx>no ;
-  alias wx_gl : : : : <wx>no ;
+  ECHO "Notice: Not building tools that depend on wxWidgets!" ;
+  feature.feature wx : no yes : optional ;
 }
 
 if $(BOOST_LIBRARY_PATH) {

@@ -3,20 +3,12 @@ project toolset/xsim/plugins/trace
        : default-build <threading>multi
        ;
 
-alias xsim_trace_view : : <wx>no ;
-
-alias xsim_trace_view : : <wx>yes <link>static ;
-
-lib xsim_trace_view
+plugin xsim_trace_view
        : xsimtracedll.cpp
-         /tools/xsim//sim_base_gui
-         /tools/xsim//sim_shared
+         /tools/xsim//xsim_core
          /libraries//data
          /site-config//wx_base
        : <include>../..
-         <toolset>darwin:<bundle>yes
          <wx>yes
-         <link>shared
-         <runtime-link>shared
        ;
 

@@ -11,44 +11,11 @@ project pbes
           <dependency>/libraries//atermpp
        ;
 
-alias pbes.main
+mcrl2-library pbes
        : source/sort_functions.cpp
          source/pbes_rewrite.cpp
          source/pbes2bool.cpp
-       : <use>/libraries/core//headers
-         <use>/libraries/data//headers
-         <use>/libraries/lps//headers
+       : <use>/libraries/data//headers
        : <threading>single
-       ;
-
-lib pbes
-       : pbes.main
-         /libraries//core
-         /libraries//data
-         /libraries//lps
-       : <link>static
-       :
-       : <library>/libraries//core
-         <library>/libraries//data
-         <library>/libraries//lps
-       ;
-
-alias pbes
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias pbes.alias
-       : pbes.main
-       :
-       :
-       : <use>/libraries/core//headers
-         <use>/libraries/data//headers
-         <use>/libraries/lps//headers
-       ;
-
-explicit pbes.alias ;
-
-alias headers
-       : [ glob-tree *.h *.hpp : .svn ]
+       : <library>/libraries//data
        ;

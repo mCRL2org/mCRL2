@@ -2,13 +2,11 @@ project toolset/pbesrewr
        : build-dir $(BUILD_TOP)/pbesrewr
        ;
 
-exe pbesrewr
+tool pbesrewr
        : pbesrewr.cpp
          /libraries//lps
          /libraries//pbes
          /site-config//boost_program_options
-       : <include>.
        ;
 
-install-binaries install
-       : pbesrewr ;
+install-tools pbesrewr ;

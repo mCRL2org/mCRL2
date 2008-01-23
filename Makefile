@@ -12,7 +12,7 @@ build/Makefile:
 
 clean:
 	@$(RM) -r autom4te.cache core core.* tags build/bin/.jamdeps
-	$(RM) -rf build/bin/*
+	$(RM) -rf build/bin/* build/stage
 
 distclean: clean
 	@$(RM) -r build/Makefile config.log config.status build/config.jam tools/setup.h

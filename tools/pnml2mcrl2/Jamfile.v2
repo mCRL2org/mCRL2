@@ -2,14 +2,12 @@ project toolset/pnml2mcrl2
        : build-dir $(BUILD_TOP)/pnml2mcrl2
        ;
 
-exe pnml2mcrl2
+tool pnml2mcrl2
        : pnml2mcrl2.cpp
          /libraries//core
          /libraries//ticpp
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : pnml2mcrl2 ;
+install-tools pnml2mcrl2 ;

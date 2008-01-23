@@ -31,9 +31,6 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
-// For PLUGIN_DIRECTORY
-#include <mcrl2/setup.h>
-
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_SAVE wxSAVE
@@ -540,7 +537,7 @@ void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 
     wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), filter);
 
-    dialog.SetDirectory(wxString(wxT(PLUGIN_DIRECTORY), wxConvLocal));
+    dialog.SetDirectory(wxString(wxT(PLUGINDIR), wxConvLocal));
 
     if ( dialog.ShowModal() == wxID_OK )
     {

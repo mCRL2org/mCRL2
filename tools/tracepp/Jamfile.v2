@@ -2,13 +2,11 @@ project toolset/tracepp
        : build-dir $(BUILD_TOP)/tracepp
        ;
 
-exe tracepp
+tool tracepp
        : tracepp.cpp
          /libraries//core
          /libraries//trace
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+       : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-binaries install
-       : tracepp ;
+install-tools tracepp ;

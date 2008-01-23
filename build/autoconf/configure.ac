@@ -70,7 +70,7 @@ case $host in
     ;;
 esac
 
-AC_SUBST([ADDRESS_MODEL],[])
+BUILD_OPTIONS="address-model=${ADDRESS_MODEL}"
 
 # Checks for programs.
 AC_PROG_CPP
@@ -186,9 +186,9 @@ if test "x$enable_debug" = xyes; then
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
   BUILD_VARIANT=""
-  BUILD_OPTIONS="debug-symbols=on runtime-debugging=on $BUILD_OPTIONS"
+  BUILD_OPTIONS="${BUILD_OPTIONS} debug-symbols=on runtime-debugging=on"
   if test "x$enable_optimisation" = xyes; then
-   BUILD_OPTIONS="optimization=speed $BUILD_OPTIONS"
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=speed"
   fi
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
@@ -196,7 +196,7 @@ else
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
   BUILD_VARIANT="release"
   if test "x$enable_optimisation" = xno; then
-   BUILD_OPTIONS="optimization=off $BUILD_OPTIONS"
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=off"
   fi
 fi
 AC_SUBST([BFLAGS],[])
@@ -207,7 +207,7 @@ AC_ARG_ENABLE(
 )
 if test "x$enable_profile" = xyes; then
   BUILD_VARIANT=""
-  BUILD_OPTIONS="profiling=on $BUILD_OPTIONS"
+  BUILD_OPTIONS="profiling=on ${BUILD_OPTIONS}"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
@@ -218,9 +218,9 @@ AC_ARG_WITH(
   AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
 if test "x$enable_static" = xyes; then
-  LINK_VARIANT="static"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=static"
 else
-  LINK_VARIANT="shared"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=shared"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -529,7 +529,6 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strdup])
-
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
@@ -541,8 +540,6 @@ then
 fi
 
 AC_SUBST([BUILD_VARIANT],[])
-AC_SUBST([LINK_VARIANT],[])
-AC_SUBST([BUILD_OPTIONS])
 
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
@@ -559,28 +556,27 @@ else
   AC_SUBST([IATERM_LDFLAGS],["${ATERM_LDFLAGS} -lATerm"])
 fi
 
-PREFIX_DIR="${prefix}"
-eval EXEC_PREFIX_DIR="${exec_prefix}"
+# Set install path related settings
+BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\""
 
-prefix="\$(prefix)"
+eval "eval includedir=${includedir}"
+if test ! "${prefix}/include" = "${includedir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --includedir=\"${includedir}\""
+fi
+eval "eval bindir=${bindir}"
+if test ! "${prefix}/bin" = "${bindir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --bindir=\"${bindir}\""
+fi
+eval "eval libdir=${libdir}"
+if test ! "${prefix}/lib" = "${libdir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --libdir=\"${libdir}\""
+fi
+eval "eval datadir=${datadir}"
+if test ! "${prefix}/share" = "${datadir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --datadir=\"${datadir}\""
+fi
 
-eval INCLUDE_DIR="${includedir}/mcrl2"
-eval "eval DATA_DIR=${datadir}/mcrl2"
-eval "eval MAN_DIR=${mandir}"
-eval "eval BIN_DIR=${bindir}"
-eval "eval LIB_DIR=${libdir}/mcrl2"
-
-includedir="$includedir/mcrl2"
-datadir="$datadir/mcrl2"
-libdir="$libdir/mcrl2"
-
-AC_SUBST([PREFIX_DIR],[])
-AC_SUBST([EXEC_PREFIX_DIR],[])
-AC_SUBST([DATA_DIR],[])
-AC_SUBST([LIB_DIR],[])
-AC_SUBST([BIN_DIR],[])
-AC_SUBST([INCLUDE_DIR],[])
-AC_SUBST([MAN_DIR],[])
+AC_SUBST([BUILD_OPTIONS])
 
 # Runtime compilation flags
 AC_SUBST([R_CFLAGS],[])

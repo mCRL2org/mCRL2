@@ -2,7 +2,7 @@ project lps2lts
        : build-dir $(BUILD_TOP)/lps2lts
        ;
 
-exe lps2lts
+tool lps2lts
        : lps2lts.cpp
          exploration.cpp
 	 lts.cpp
@@ -13,5 +13,4 @@ exe lps2lts
          <squadt-connectivity>implemented
        ;
 
-install-binaries install
-       : lps2lts ;
+install-tools lps2lts ;

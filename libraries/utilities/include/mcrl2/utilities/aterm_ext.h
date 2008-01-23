@@ -16,7 +16,6 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/core/messaging.h"
 
 #include <workarounds.h>
 
