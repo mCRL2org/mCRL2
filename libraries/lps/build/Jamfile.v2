@@ -15,6 +15,7 @@ alias lps.main
        : source/lin_std.cpp
          source/binary.cpp
          source/dataelm.cpp
+         source/decluster.cpp
          source/sumelm.cpp
          source/untime.cpp
          source/nextstate.cpp
