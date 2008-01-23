@@ -358,41 +358,66 @@ void decluster_summand(const lps::specification& specification, const lps::summa
   gsVerboseMsg("processing...");
   // sol is a solution in internal rewriter format
   ATermList sol;
-  while (sols->next(&sol))
+  int summand_count = nr_summands; // Used for removing elements in case of an error.
+  bool error = false; // Flag enumerator error to break loop.
+  while (sols->next(&sol) && !error)
   {
-    data_assignment_list substitutions; 
-
-    // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
-    aterm_list solution = aterm_list(sol);
-
-    // Translate internal rewriter solution to lps data_assignment_list
-    for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
+    if (sols->errorOccurred())
     {
-      // lefthandside of substitution
-      data_variable var = data_variable(ATgetArgument(ATerm(*i), 0));
+      // If an error occurs in enumerating, remove all summands that
+      // have been added to result thus far, and re-add the original.
+      // This prevents problems e.g. in case of a sort without constructors.
+      gsVerboseMsg("An error occurred in enumeration, removing already added summands\n");
+      error = true;
 
-      // righthandside of substitution in internal rewriter format
-      ATerm arg = ATgetArgument(ATerm(*i),1);
-
-      // righthandside of substitution in lps format
-      data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
-
-      // Substitution to be performed
-      data_assignment substitution = data_assignment(var, res);
-      substitutions = push_front(substitutions, substitution);
+      for (int i = summand_count; i < nr_summands; ++i)
+      {
+        result = pop_front(result);
+      }
+      nr_summands = summand_count;
     }
-    gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
+    else
+    {
+      data_assignment_list substitutions; 
+      // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
+      aterm_list solution = aterm_list(sol);
 
-    summand s = summand(new_vars,
-                                summand_.condition().substitute(assignment_list_substitution(substitutions)),
-                                summand_.is_delta(),
-                                summand_.actions().substitute(assignment_list_substitution(substitutions)),
-                                summand_.time().substitute(assignment_list_substitution(substitutions)),
-                                summand_.assignments().substitute(assignment_list_substitution(substitutions))
-                                );
-    
-    result = push_front(result, s);
-    ++nr_summands;
+      // Translate internal rewriter solution to lps data_assignment_list
+      for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
+      {
+        // lefthandside of substitution
+        data_variable var = data_variable(ATgetArgument(ATerm(*i), 0));
+
+        // righthandside of substitution in internal rewriter format
+        ATerm arg = ATgetArgument(ATerm(*i),1);
+
+        // righthandside of substitution in lps format
+        data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
+
+        // Substitution to be performed
+        data_assignment substitution = data_assignment(var, res);
+        substitutions = push_front(substitutions, substitution);
+      }
+      gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
+
+      summand s = summand(new_vars,
+                                  summand_.condition().substitute(assignment_list_substitution(substitutions)),
+                                  summand_.is_delta(),
+                                  summand_.actions().substitute(assignment_list_substitution(substitutions)),
+                                  summand_.time().substitute(assignment_list_substitution(substitutions)),
+                                  summand_.assignments().substitute(assignment_list_substitution(substitutions))
+                                  );
+      
+      result = push_front(result, s);
+      ++nr_summands;
+    }
+  }
+
+  if (nr_summands == summand_count)
+  {
+    gsVerboseMsg("No summands were added, adding original summand\n");
+    ++ nr_summands;
+    result = push_front(result, summand_);
   }
 
   gsVerboseMsg("done...\n");
