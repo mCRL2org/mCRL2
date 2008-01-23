@@ -34,8 +34,6 @@
 
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
-#include <mcrl2/atermpp/aterm_list.h>
-#include <mcrl2/atermpp/algorithm.h>
 
 #include "mcrl2/utilities/version_info.h"
 #include "mcrl2/core/messaging.h"
@@ -45,8 +43,6 @@
 #include <mcrl2/lps/sumelm.h>
 
 using namespace std;
-using namespace atermpp;
-using namespace mcrl2::data::data_expr;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
