@@ -13,3 +13,4 @@ lib ticpp
        : <define>TIXML_USE_TICPP
        ;
 
+install-libraries ticpp ;

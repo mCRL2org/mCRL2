@@ -4,3 +4,4 @@ project getopt
 
 lib getopt : getopt.c getopt1.c : <include>.. : : <include>.. ;
 
+install-libraries getopt ;

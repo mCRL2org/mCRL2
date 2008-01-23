@@ -194,7 +194,7 @@ local rule get-library-name ( path )
     else if $(match4) { return $(match4[0]) ; }
     else if $(match5) { return "" ; }
     else if --dump-tests in [ modules.peek : ARGV ] 
-    { 
+    {
         # The 'run' rule and others might be used outside boost. In that case,
         # just return the path, since the 'library name' makes no sense.
         return $(path) ;

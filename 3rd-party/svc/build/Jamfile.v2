@@ -9,7 +9,7 @@ project svc
           <include>../include
        ;
 
-alias svc.main
+mcrl2-library svc
        : blocklist.c
          code.c
          compress.c
@@ -22,25 +22,7 @@ alias svc.main
        : <toolset>darwin:<cflags>"-fno-common"
          <use>/libraries/aterm//headers
        : <threading>single
-       ;
-
-lib svc
-       : svc.main
-       : <link>static
-       :
        : <library>/libraries//aterm
        ;
 
-alias svc
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias svc.alias
-       : svc.main
-       : <use>headers
-       ;
-
-alias headers : : : : <include>../include <use>/libraries/aterm//headers ;
-
-explicit svc.main svc.alias ;
+install-libraries svc ;
