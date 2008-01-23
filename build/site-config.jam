@@ -72,6 +72,7 @@ if $(OPENGL_NAME) {
 }
 else {
   ECHO "Notice: Not building tools that depend on OpenGL!" ;
+
   feature.feature opengl : no yes : optional ;
 }
 
@@ -101,6 +102,7 @@ if $(WX_CPPFLAGS) {
 }
 else {
   ECHO "Notice: Not building tools that depend on wxWidgets!" ;
+
   feature.feature wx : no yes : optional ;
 }
 
@@ -169,6 +171,7 @@ if $(CADP_HEADERS) {
   alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) ;
 }
 else {
+  ECHO "Notice: BCG format support for LTS library disabled!" ;
   alias BCG : : : : ;
 }
 

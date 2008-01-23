@@ -321,7 +321,7 @@ if [ path.exists ./tools ] {
   
   rule install-libraries ( libraries * : requirements * ) {
     local headers = [ glob-tree *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
-  
+
     if [ feature.defaults <install> ] = <install>yes {
       # Get install location information
       if ! [ property.select location : $(requirements) ] {
@@ -389,6 +389,10 @@ if [ path.exists ./tools ] {
   
     if $(make_alias) = true {
       alias $(name) ;
+
+      # For incomplete builds (for instance without wxWidgets dependent tools)
+      alias install ;
+      alias stage ;
     }
     else {
       lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
@@ -444,7 +448,7 @@ if [ path.exists ./tools ] {
     if $(sources) {
       if [ feature.get-values link : $(build-options) ] != static {
         # build target for inclusion by mcrl2 library
-        alias $(name).alias : $(sources) : $(requirements) : $(defaults) ;
+        alias $(name).alias : $(sources) : $(requirements) : $(defaults) : $(requirements) ;
   
         # shared library target
         alias $(name) : /libraries//mcrl2 : <link>shared : : $(requirements) ;
