@@ -5,9 +5,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file pbes2bool.cpp
-/// \brief Add your file description here.
-// TODO: 
-// Improve the quality of counterexamples when using approximation.
+/// \brief Solver of parameterised boolean equation systems.
+/// \details This file contains the routines for the pbes2bool
+/// tool that can solve parameterised boolean equation systems
+/// by translating them to boolean equation systems and then 
+/// solving them with an adapted Gauss elimination procedure.
 
 // ======================================================================
 //
@@ -41,6 +43,8 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/lps/dataelm.h"
 
@@ -49,6 +53,7 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/map.h"
 #include "_aterm.h"
 
 //Tool-specific
@@ -215,6 +220,72 @@ static void print_counter_example(bes::equations &bes_equations,
   }
 }
 
+// static data_expression dummyterm(sort_expression s)
+//           //         ATermAppl targetsort,
+//           //         specificationbasictype *spec,
+//           //         int max_nesting_depth)
+//{ /* This procedure yields a term of the requested sort.
+//     First, it tries to find a constant constructor. If it cannot
+//     be found, a constant mapping is sought. If this cannot be
+//     found a new dummy constant mapping of the requested sort is made. */
+//
+//  /* First search for a constant constructor */
+//
+//  for (int i=0 ; (i<maxobject) ; i++ )
+//  {
+//    if ((objectdata[i].object==func)&&
+//        (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
+//    { return objectdata[i].objectname;
+//    }
+//  }
+//
+//  /* Second search for a constant mapping */
+//
+//  for (int i=0 ; (i<maxobject) ; i++ )
+//  { if ((objectdata[i].object==map)&&
+//        (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
+//    { return objectdata[i].objectname;
+//    }
+//  }
+//
+//  /* Third search for a function or constructor applied to
+// *      dummyterms of the appropriate sort, with a smaller nesting
+// *           depth */
+//
+//  if (max_nesting_depth>0)
+//  { for (int i=0 ; (i<maxobject) ; i++ )
+//    { if (((objectdata[i].object==func)||(objectdata[i].object==map))&&
+//           (objectdata[i].targetsort==targetsort))
+//      { /* The function found cannot be a constant */
+//        ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
+//        unsigned int arity=ATgetLength(argumentsorts);
+//        ATermList arguments=ATempty;
+//        for(unsigned int j=0; j<arity; j++)
+//        { ATerm t=(ATerm)dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1);
+//          if (t==NULL)
+//          { goto FAIL;
+//          }
+//          arguments=ATinsert(arguments,t);
+//          argumentsorts=ATgetNext(argumentsorts);
+//        }
+//        arguments=ATreverse(arguments);
+//        return gsMakeDataApplList(objectdata[i].objectname,arguments);
+//      }
+//    }
+//  }
+//
+//  FAIL:
+//
+//  /* Third construct a new constant, and yield it. */
+//
+//  snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
+//  ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
+//  insertmapping(dummymapping,spec);
+//  return dummymapping;
+//
+//}
+
+
 template <typename Container>
 static void do_lazy_algorithm(pbes<Container> pbes_spec, 
                               t_tool_options tool_options,
@@ -249,6 +320,8 @@ bool process(t_tool_options const& tool_options)
   data_specification data = pbes_spec.data();
   Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
   assert(rewriter != 0);
+
+
   calculate_bes(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
   if (!tool_options.opt_construct_counter_example)
   { variable_index.reset();
@@ -287,14 +360,14 @@ void calculate_bes(pbes<> pbes_spec,
                    atermpp::indexed_set &variable_index,
                    Rewriter *rewriter)
 {
-  /* if (!pbes_spec.is_well_formed())
+  if (!pbes_spec.is_well_typed())
   {
-    gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+    gsErrorMsg("The PBES is not well formed. Abort computation. \n");
     exit(1);
-  } */
+  } 
   if (!pbes_spec.is_closed())
   {
-    gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+    gsErrorMsg("The PBES contains free variables. Computation aborted.\n");
     exit(1);
   } 
 
@@ -600,11 +673,32 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
   unsigned long rank=1;
 
+  // Remove free variables by replacing them by arbitrary variables
+  // First construct using the set of free_variables a map where 
+  // each free_variable has an associated default_term.
+
+  atermpp::set< data_variable > free_variables=pbes_spec.free_variables();
+  std::map< data_variable, data_expression > default_assignment;
+
+  for(atermpp::set< data_variable >::iterator v=free_variables.begin() ;
+      v!=free_variables.end() ; v++)
+  { default_assignment[*v]=data.default_expression(v->sort());
+    if (default_assignment[*v]==data_expression()) // no term could be constructed 
+    { gsErrorMsg("Cannot construct default expression for a free variable of sort %P\n",
+                   (ATermAppl)(v->sort()));
+      exit(1);
+    }
+  }
+
+  // pbes_spec=data_variable_map_replace(pbes_spec,default_assignment);
+
   for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   { 
     pbes_equations.put(eqi->variable().name(), 
-        pbes_equation(eqi->symbol(),eqi->variable(),
-            pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options.opt_precompile_pbes)));
+        data_variable_map_replace(
+            pbes_equation(eqi->symbol(),eqi->variable(),
+                pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options.opt_precompile_pbes)),
+            default_assignment));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
       rank=rank+1;

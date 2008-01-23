@@ -137,6 +137,19 @@ class data_specification: public aterm_appl
       return m_mappings;
     }
 
+    /// Returns the mappings of the data specification that have s as their target.
+    ///
+    data_operation_list mappings(sort_expression s) const
+    {
+      atermpp::vector<data_operation> result;
+      typedef boost::filter_iterator<has_result_sort, data_operation_list::iterator> FilterIter;
+      has_result_sort predicate(s);
+      FilterIter first(predicate, m_mappings.begin(), m_mappings.end());
+      FilterIter last(predicate, m_mappings.end(), m_mappings.end());
+      std::copy(first, last, std::back_inserter(result));
+      return data_operation_list(result.begin(), result.end());
+    }
+
     /// Returns the equations of the data specification.
     ///
     data_equation_list equations() const
@@ -152,7 +165,8 @@ class data_specification: public aterm_appl
     /// Currently, only expressions for basic sorts are delivered. For function
     /// sorts data_expression() is returned.
     ///
-    data_expression default_expression(sort_expression s) const
+    data_expression default_expression(sort_expression s, unsigned int max_recursion_depth=3) 
+    // data_expression default_expression(sort_expression s) const
     {
 /*
       // check if there is a constant constructor for s
@@ -161,20 +175,29 @@ class data_specification: public aterm_appl
       {
         return data_expression(...*i..., is_constant_sort());
       }
+*/
+
+      // check if there is a constant constructor for s
+      data_operation_list::iterator i = std::find_if(constructors(s).begin(), 
+                                                     constructors(s).end(), 
+                                                     detail::is_constant_operation());
+      if (i != constructors().end())
+      {
+        return data_expression((aterm_appl)*i);
+      }
       
       // check if there is a constant mapping for s
-      sort_expression_list::iterator i = std::find_if(spec.mappings().begin(), spec.mappings().end(), is_constant_mapping());
-      if (i != spec.mappings().end())
+      i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
+      if (i != mappings().end())
       {
-        return data_expression(...*i...);
+        return data_expression((aterm_appl)*i);
       }
       
       // recursively traverse constructor functions
-      ...
+      // ...
       
       // recursively traverse mappings
-      ...   
-*/
+      // ...   
       return data_expression();
     }
 
