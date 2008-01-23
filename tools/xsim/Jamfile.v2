@@ -34,7 +34,7 @@ tool xsim
          /libraries//trace
          /libraries//lps
          /site-config//wx_base
-       : <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
+       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
          <squadt-connectivity>implemented
          <wx>yes
        ;

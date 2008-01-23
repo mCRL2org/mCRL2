@@ -40,8 +40,5 @@ mcrl2-library core
        : <threading>single
        : <library>/libraries//atermpp
          <library>/libraries//utilities
-         <os>LINUX:<library>/site-config//m
-         <os>LINUX:<library>/site-config//dl
-         <os>CYGWIN:<library>/site-config//m
-         <toolset>gcc,<link>static:<linkflags>-Wl,-export-dynamic
+         <toolset>gcc,<link>static:<linkflags>-export-dynamic
        ;
