@@ -301,7 +301,7 @@ if [ path.exists ./tools ] {
     if $(executables) {
       install other : $(executables) : $(requirements) <install-dependencies>off <install-type>EXE <location>$(destination) ;
 
-      if [ property.select source : $(requirements) ] {
+      if [ property.select source : $(requirements) ] && [ feature.get-values link : $(build-options) ] != static {
         local plugin-targets = [ feature.get-values source : $(requirements) ] ;
 
         targets += $(plugin-targets)//$(rule-name) ;
@@ -367,7 +367,7 @@ if [ path.exists ./tools ] {
   rule plugin ( name : sources * : requirements * : defaults * : usage-requirements * ) {
     local make_alias = false ;
 
-    if [ feature.defaults <link> ] != <link>shared {
+    if [ feature.get-values link : $(build-options) ] = static {
       make_alias = true ;
     }
     if [ property.select opengl : $(requirements) ] {

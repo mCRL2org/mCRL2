@@ -10,10 +10,8 @@ alias sim_shared
          [ obj simulator.o : simulator.cpp ]
        ;
 
-obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ;
-
 alias xsim_core
-       : simbasegui.o
+       : [ obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ]
          sim_shared
        ;
 

@@ -93,4 +93,4 @@ alias tool_interface       : tipi-tool       : <link>static ;
 alias controller_interface : tipi            : <link>shared ;
 alias controller_interface : tipi-controller : <link>static ;
 
-install-libraries tipi ;
+install-libraries tool_interface controller_interface ;
