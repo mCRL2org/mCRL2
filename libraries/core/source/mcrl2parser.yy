@@ -44,7 +44,7 @@ extern ATermIndexedSet parser_protect_table;
 #define yytrue 1
 #endif
 
-#define YYMAXDEPTH 160000
+#define YYMAXDEPTH 320000
 
 //local declarations
 ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);

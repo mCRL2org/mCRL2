@@ -151,7 +151,7 @@ typedef union YYSTYPE
 	char *str;
 	int num;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 156 "fsmparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

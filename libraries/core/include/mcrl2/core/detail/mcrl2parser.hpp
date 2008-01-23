@@ -160,7 +160,7 @@ extern ATermIndexedSet parser_protect_table;
 #define yytrue 1
 #endif
 
-#define YYMAXDEPTH 160000
+#define YYMAXDEPTH 320000
 
 //local declarations
 ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
@@ -188,7 +188,7 @@ typedef union YYSTYPE
   ATermAppl appl;
   ATermList list;
 }
-/* Line 2616 of glr.c.  */
+/* Line 2604 of glr.c.  */
 #line 193 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
