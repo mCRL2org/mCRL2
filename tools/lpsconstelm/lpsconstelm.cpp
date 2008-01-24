@@ -1,4 +1,4 @@
-//  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
+///  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -281,12 +281,24 @@ lpsConstElm::~lpsConstElm() {
 }
 
 void lpsConstElm::getDatVarRec(aterm_appl t) {
-  if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t)) != p_freeVarSet.end())){
-    p_foundFreeVars.insert(t);
+  if( gsIsDataVarId(t) ) 
+    {
+      if ( !p_freeVarSet.empty() &&  (p_freeVarSet.find(data_variable(t)) != p_freeVarSet.end())){
+      p_foundFreeVars.insert(t);
+    }
   };
 
-  for(aterm_appl::iterator i = t.begin(); i!= t.end();i++) {
-    getDatVarRec(aterm_appl(*i));
+  if(gsIsDataAppl(t) )
+  {
+    getDatVarRec( ATAgetArgument( t, 0 ) );
+    
+    ATermList z = (ATermList) ATgetArgument(t,1);
+
+    while (!ATisEmpty(z))
+    {
+      getDatVarRec( (aterm_appl) ATgetFirst(z) );
+      z = ATgetNext(z);
+    } 
   }
 }
 
@@ -756,11 +768,12 @@ inline void lpsConstElm::output() {
   atermpp::set< mcrl2::data::data_variable > foundVars;
   atermpp::set< mcrl2::data::data_variable > initial_free_variables;
   usedFreeVars.empty();
+
   for(atermpp::vector< mcrl2::data::data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
-       foundVars = getUsedFreeVars(aterm_appl(*i));
-       for(atermpp::set< mcrl2::data::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
-         initial_free_variables.insert(*k);
-       }
+     foundVars = getUsedFreeVars(aterm_appl(*i));
+     for(atermpp::set< mcrl2::data::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
+       initial_free_variables.insert(*k);
+     }
   }
 
   // Rebuild spec
