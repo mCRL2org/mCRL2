@@ -327,9 +327,9 @@ static void save_error_trace(ATerm state)
     if ( saved_ok )
     {
       lgopts->error_trace_saved = true;
-      gsVerboseMsg("saved trace to error in '%s_trace.trc'.\n",basefilename);
+      gsVerboseMsg("saved trace to error in '%s_error.trc'.\n",basefilename);
     } else {
-      gsVerboseMsg("trace to error could not be saved in '%s_trace.trc'.\n",basefilename);
+      gsVerboseMsg("trace to error could not be saved in '%s_error.trc'.\n",basefilename);
     }
     fflush(stderr);
   }
