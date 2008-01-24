@@ -26,16 +26,11 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "simulator.h"
 
-// For PLUGIN_DIRECTORY
-#include <mcrl2/setup.h>
-
 using namespace std;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
-
-
 
 StandardSimulator::StandardSimulator()
 {

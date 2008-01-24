@@ -15,7 +15,7 @@ clean:
 	$(RM) -rf build/bin/* build/stage
 
 distclean: clean
-	@$(RM) -r build/Makefile config.log config.status build/config.jam tools/setup.h
+	@$(RM) -rf build/Makefile config.log config.status build/config.jam libraries/utilities/include/mcrl2/setup.h
 	$(RM) -rf build/bin
 
 parsers: mcrl2parser chiparser ltsview-fsmparser liblts-fsmparser

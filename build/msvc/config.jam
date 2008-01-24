@@ -8,11 +8,8 @@ rule import_user_config {
   toolset.using msvc ;
 }
 
-# Build specific settings
+# Build specific settings (default command line options to bjam)
 BUILD_OPTIONS  = "" ;
-ADDRESS_MODEL ?= 32 ;
-LINK_VARIANT  ?= static ;
-BUILD_VARIANT ?= custom ;
 
 # Library specific variables
 # WX_CPPFLAGS        = "/IC:/wxWidgets/lib/vc_lib/mswd /IC:/wxWidgets/include" ;
@@ -22,16 +19,3 @@ BUILD_VARIANT ?= custom ;
 OPENGL_NAME        = "opengl32" ;
 # OPENGL_IPATH       = "" ;
 # OPENGL_LPATH       = "" ;
-
-prefix      = [ MATCH "^--prefix=(.+)" : [ modules.peek : ARGV ] ] ;
-exec_prefix = [ MATCH "^--exec-prefix=(.+)" : [ modules.peek : ARGV ] ] ;
-
-# Installation related variables
-prefix      ?= "c:/mcrl2" ;
-exec_prefix ?= "c:/mcrl2" ;
-
-# This will be removed in the future.
-BIN_DIR         = "$(prefix)/bin" ;
-LIB_DIR         = "$(prefix)/lib/mcrl2" ;
-DATA_DIR        = "$(prefix)/share/mcrl2" ;
-INCLUDE_DIR     = "$(prefix)/include/mcrl2" ;
