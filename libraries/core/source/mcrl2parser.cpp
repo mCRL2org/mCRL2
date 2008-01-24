@@ -6338,7 +6338,7 @@ yypdumpstack (yyGLRStack* yystackp)
 
 
 #line 2523 "mcrl2parser.yy"
- 
+
 
 ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
 {

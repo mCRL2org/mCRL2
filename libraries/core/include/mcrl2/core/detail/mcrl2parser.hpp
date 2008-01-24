@@ -160,7 +160,7 @@ extern ATermIndexedSet parser_protect_table;
 #define yytrue 1
 #endif
 
-#define YYMAXDEPTH 320000
+#define YYMAXDEPTH 640000
 
 //local declarations
 ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
@@ -178,7 +178,7 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and action rename rules in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(parser_protect_table, (ATerm) lhs, &b); }
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
