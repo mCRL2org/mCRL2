@@ -303,6 +303,12 @@ bool process(t_tool_options const& tool_options)
 {
   //Load PBES
   pbes<> pbes_spec = load_pbes(tool_options);
+  if (!pbes_spec.is_well_typed())
+  { gsErrorMsg("The pbes is not well typed\n");
+    exit(1);
+  }
+  pbes_spec.normalize();  // normalize the pbes, such that the equations do not contain negations
+                          // and implications.
 
   //Throw away unused parts of data specification
   if (tool_options.opt_data_elm)
@@ -337,7 +343,7 @@ bool process(t_tool_options const& tool_options)
   }
   else 
   { 
-    gsMessage("The pbes is %svalid\n", solve_bes(tool_options,bes_equations,variable_index) ? "" : "not ");
+    gsMessage("The solution for the initial variable of the pbes is %s\n", solve_bes(tool_options,bes_equations,variable_index) ? "true" : "false");
 
     if (tool_options.opt_construct_counter_example)
     { print_counter_example(bes_equations,
@@ -694,11 +700,17 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
   for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   { 
-    pbes_equations.put(eqi->variable().name(), 
-        data_variable_map_replace(
-            pbes_equation(eqi->symbol(),eqi->variable(),
-                pbes_expression_rewrite_and_simplify(eqi->formula(),rewriter,tool_options.opt_precompile_pbes)),
-            default_assignment));
+    pbes_equations.put(
+            eqi->variable().name(), 
+            pbes_equation(
+                eqi->symbol(),
+                eqi->variable(),
+                pbes_expression_rewrite_and_simplify(
+                      data_variable_map_replace(
+                              eqi->formula(),
+                              default_assignment),
+                rewriter,
+                tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
       rank=rank+1;
@@ -760,6 +772,9 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
             propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
 
         current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
+        assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in 
+                                                // a right hand side, and not in the left hand side
+                                                // of an equation.      
   
         data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
       

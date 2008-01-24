@@ -237,21 +237,27 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     { 
     data::data_expression d = (data::data_expression)rewriter->rewriteInternal(rewriter->toRewriteFormat(p));
       if (is_true_in_internal_rewrite_format(d,rewriter))
-         result = true_();
+      { result = true_();
+      }
       else if (is_false_in_internal_rewrite_format(d,rewriter))
-         result = false_();
+      { result = false_();
+      }
       else
-         result = val(d);
+      { result = val(d);
+      }
     }
     else
     { 
       data::data_expression d = rewriter->rewrite(p);
       if (data::data_expr::is_true(d))
-        result = true_();
+      { result = true_();
+      }
       else if (data::data_expr::is_false(d))
-        result = false_();
+      { result = false_();
+      }
       else
-        result = val(d);
+      { result = val(d);
+      }
     }
   }
   

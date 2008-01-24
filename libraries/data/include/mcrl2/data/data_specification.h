@@ -165,39 +165,51 @@ class data_specification: public aterm_appl
     /// Currently, only expressions for basic sorts are delivered. For function
     /// sorts data_expression() is returned.
     ///
-    data_expression default_expression(sort_expression s, unsigned int max_recursion_depth=3) 
+    data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3) 
     // data_expression default_expression(sort_expression s) const
     {
-/*
-      // check if there is a constant constructor for s
-      sort_expression_list::iterator i = std::find_if(spec.sorts().begin(), spec.sorts().end(), is_constant_sort());
-      if (i != spec.sorts().end())
-      {
-        return data_expression(...*i..., is_constant_sort());
-      }
-*/
 
       // check if there is a constant constructor for s
       data_operation_list::iterator i = std::find_if(constructors(s).begin(), 
                                                      constructors(s).end(), 
                                                      detail::is_constant_operation());
       if (i != constructors().end())
-      {
+      { 
         return data_expression((aterm_appl)*i);
       }
       
       // check if there is a constant mapping for s
       i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
       if (i != mappings().end())
-      {
+      { 
         return data_expression((aterm_appl)*i);
       }
       
-      // recursively traverse constructor functions
-      // ...
-      
-      // recursively traverse mappings
-      // ...   
+      /* if (max_recursion_depth>0)
+      { // recursively traverse constructor functions
+        i = std::find_if(constructors(s).begin(),
+                         constructors(s).end(),
+                         detail::is_not_a_constant_operation());
+        if (i != constructors().end())
+        { 
+          sort_expression_list argument_sorts=sort_arrow((*i).sort()).argument_sorts();
+          data_expression_list arguments;
+          for(sort_expression_list::iterator j=argument_sorts.begin();
+              j!=argument_sorts.end(); j++)
+          { data_expression t=default_expression(*j,max_recursion_depth-1);
+            if (t==data_expression())
+            { return t;
+            }
+            arguments=list(arguments,t);
+          }
+          arguments=arguments.reverse();
+          return data_application((aterm_appl)*i,arguments);
+        }
+  
+        
+        // recursively traverse mappings
+        // ...   
+      } */
       return data_expression();
     }
 

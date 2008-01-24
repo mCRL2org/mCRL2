@@ -113,6 +113,15 @@ struct is_constant_operation
   }
 };
 
+/// Function object for checking if an operator is a not a constant sort.
+struct is_not_a_constant_operation
+{
+  bool operator()(aterm_appl t) const
+  { data_operation op=t;
+    return is_sort_expression(op.sort()) && sort_expression(op.sort()).is_arrow();
+  }
+};
+
 /// Returns true if the domain sorts and the range sort of the given sort s are
 /// contained in sorts.
 
