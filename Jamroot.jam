@@ -5,32 +5,44 @@
 #
 #   Build:
 #
-#    --disable-squadt-support       disables squadt support in tools
-#   
 #    --enable-debug                 sets: debug-symbols=on runtime-debugging=on
 #   
 #    --enable-profile               sets: profiling=on
 #
 #    --enable-optimisation          sets: optimization=speed inlining=full
 #
+#    --disable-squadt-support       disables squadt support in tools
+#   
 #    --enable-experimental          activates building/installing of tools that are marked experimental
 #
 #    --enable-deprecated            activates building/installing of tools that are marked deprecated
 #
 #   Installation:
 #
-#    --prefix                       directory relative to which tools/libraries, documentation and examples are
-#                                   installed, unless one of the following options is also specified
+#    --prefix                       directory relative to which tools/libraries, documentation and examples
+#                                   are installed, unless one of the following options is also specified
+#
+#    --bindir                       directory where binaries are installed
 #
 #    --libdir                       directory where libraries are installed
 #
+#    --includedir                   directory where header files are installed
+#
+#    --datadir                      directory where data is installed
+#
+#    --destdir                      direcory that is prepended to all of the above paths for installation,
+#                                   the built takes place as-if everything would be installed according to
+#                                   be above arguments (for binary packaging)
+#
 
+import set ;
 import path ;
 import feature ;
 import property ;
 import package ;
 import feature ;
 import option ;
+import regex ;
 
 # Constants for commonly used paths
 path-constant TOP             : . ;
@@ -76,21 +88,6 @@ rule is_option ( name : default ) {
   }
 }
 
-prefix = $(TOP)/build/stage ;
-
-# Set installation/stage locations
-if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
-  prefix     = [ get_option prefix     : $(prefix) ] ;
-  bindir     = [ get_option bindir     : $(prefix)/bin ] ;
-  libdir     = [ get_option libdir     : $(prefix)/lib/mcrl2 ] ;
-  includedir = [ get_option includedir : $(prefix)/include/mcrl2 ] ;
-  datadir    = [ get_option datadir    : $(prefix)/share/mcrl2 ] ;
-}
-else {
-  bindir = $(prefix) ;
-  libdir = $(prefix) ;
-}
-
 # Extract build requirements from command line options
 for option in [ modules.peek : ARGV ] {
   local temporary = [ MATCH ([^=]+)= : $(option) ] ;
@@ -112,7 +109,7 @@ for option in $(BUILD_OPTIONS) {
       value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
      
       if ! [ MATCH ^(-).* : $(option) ] {
-        build-options += <$(temporary)>$(value) ;
+        build-options += $(value:G=<$(temporary)>) ;
       }
     }
   }
@@ -131,8 +128,32 @@ if ! $(BUILD_TAG) {
   BUILD_TAG = "$(revision)-$(link-variant[1])" ;
 }
  
+prefix = $(TOP)/build/stage ;
+
+# Set installation/stage locations
+if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  prefix     = [ get_option prefix     : $(prefix) ] ;
+  bindir     = [ get_option bindir     : $(prefix)/bin ] ;
+  libdir     = [ get_option libdir     : $(prefix)/lib/mcrl2 ] ;
+  includedir = [ get_option includedir : $(prefix)/include/mcrl2 ] ;
+  datadir    = [ get_option datadir    : $(prefix)/share/mcrl2 ] ;
+}
+else {
+  bindir = $(prefix) ;
+  libdir = $(prefix)/lib ;
+}
+
+# Feature for building/installing optional tools/libraries
+feature.feature install : no yes ;
+
 # Enable/disable squadt connectivity code in tools
 feature.feature squadt-support : yes no ;
+
+# Feature to mark tools as basic experimental or deprecated
+feature.feature status : basic experimental deprecated : composite ;
+
+# Specifies that squadt connectivity is implemented in a tool
+feature.feature squadt-connectivity : none implemented : incidental composite ;
 
 # Top project
 project toolset
@@ -144,56 +165,45 @@ project toolset
           <link>static,<squadt-support>yes:<threading>multi
           <toolset>gcc,<link>static:<linkflags>-export-dynamic
           $(build-options)
+          <dll-path>$(libdir)
        : default-build
           <link>$(link-variant)
        ;
 
-# Feature for building/installing optional tools/libraries
-feature.feature install : no yes ;
-
-# Feature to mark tools as basic experimental or deprecated
-feature.feature status : basic experimental deprecated : composite ;
-
-if [ is_option enable-experimental : no ] = no {
-  ECHO "Notice: not building experimental tools!" ;
-
-  feature.compose <status>experimental : <install>no ;
-}
-if [ is_option enable-deprecated : no ] = no {
-  ECHO "Notice: not building deprecated tools!" ;
-
-  feature.compose <status>deprecated : <install>no ;
-}
-
-# Specifies that squadt connectivity is implemented in a tool
-feature.feature squadt-connectivity : none implemented : incidental composite ;
-
-if [ is_option disable-squadt-support : no ] = no {
-  feature.feature squadt-interface : enabled disabled : symmetric optional ;
-
-  feature.compose <squadt-connectivity>implemented
-        : <squadt-interface>enabled
-          <threading>multi
-          <library>/libraries/utilities//squadt_interface
-        ;
-}
-else {
-  ECHO "Notice: not building squadt support in tools!" ;
-
-  feature.set-default squadt-support : no ;
-
-  feature.feature squadt-interface : disabled enabled : implicit incidental ;
-
-  feature.compose <squadt-connectivity>implemented
-        : <squadt-interface>disabled
-        ;
-}
-
 # Only from the root of the source tree
 if [ path.exists ./tools ] {
-  import set ;
-  import regex ;
-
+  if [ is_option enable-experimental : no ] = no {
+    ECHO "Notice: not building experimental tools!" ;
+  
+    feature.compose <status>experimental : <install>no ;
+  }
+  if [ is_option enable-deprecated : no ] = no {
+    ECHO "Notice: not building deprecated tools!" ;
+  
+    feature.compose <status>deprecated : <install>no ;
+  }
+  
+  if [ is_option disable-squadt-support : no ] = no {
+    feature.feature squadt-interface : enabled disabled : symmetric optional ;
+  
+    feature.compose <squadt-connectivity>implemented
+          : <squadt-interface>enabled
+            <threading>multi
+            <library>/libraries/utilities//squadt_interface
+          ;
+  }
+  else {
+    ECHO "Notice: not building squadt support in tools!" ;
+  
+    feature.set-default squadt-support : no ;
+  
+    feature.feature squadt-interface : disabled enabled : implicit incidental ;
+  
+    feature.compose <squadt-connectivity>implemented
+          : <squadt-interface>disabled
+          ;
+  }
+   
   root  = [ path.make $(TOP) ] ; 
   tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
 
@@ -231,6 +241,17 @@ if [ path.exists ./tools ] {
   else {
     feature.set-default install : yes ;
 
+    # Add prefix for packaging
+    if [ get_option destdir : no ] != no {
+      local destdir  = [ get_option destdir : "" ] ;
+ 
+      prefix     = $(destdir)$(prefix) ;
+      bindir     = $(destdir)$(bindir) ;
+      libdir     = $(destdir)$(libdir) ;
+      includedir = $(destdir)$(includedir) ;
+      datadir    = $(destdir)$(datadir) ;
+    }
+
     if ! $(tools) in $(targets) {
       ECHO "Installing selected tools only :" $(targets) ;
 
@@ -266,7 +287,7 @@ if [ path.exists ./tools ] {
       destination = $(TOP)/build/stage ;
     }
  
-    if $(rule-name) = install {
+    if $(executables) {
       if [ modules.peek : NT ] {
         install shared-libraries : $(executables) : <install-dependencies>on <install-type>SHARED_LIB <location>$(bindir) ;
       }
