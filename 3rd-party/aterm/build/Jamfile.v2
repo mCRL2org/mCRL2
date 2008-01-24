@@ -4,9 +4,9 @@ project aterm
        : requirements
           <toolset>darwin:<cflags>-std=c99
           <toolset>gcc:<cflags>-std=c99
-          <include>../include
+          <include>../include/aterm
        : usage-requirements
-          <include>../include
+          <include>../include/aterm
        ;
 
 mcrl2-library aterm

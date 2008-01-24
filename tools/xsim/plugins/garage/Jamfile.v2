@@ -4,6 +4,8 @@ project toolset/xsim/plugins/garage
        : default-build <threading>multi
        ;
 
+use-project /tools/xsim : ../../ ;
+
 plugin xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
