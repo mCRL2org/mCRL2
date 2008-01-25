@@ -37,6 +37,7 @@
 #include "mcrl2/pbes/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
 namespace mcrl2 {
@@ -133,6 +134,50 @@ class pbes
       m_free_variables.insert(init_freevars.begin(), init_freevars.end());
 
       m_equations = Container(eqn.begin(), eqn.end());
+    }
+
+    /// Returns the predicate variables appearing in the left hand side of an equation.
+    atermpp::set<propositional_variable> compute_declared_variables() const
+    {
+      atermpp::set<propositional_variable> result;
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        result.insert(i->variable());
+      }
+      return result;
+    }
+
+    /// Checks if the sorts of the variables in both lists are equal.
+    bool equal_sorts(data::data_variable_list v, data::data_expression_list w) const
+    {
+      if (v.size() != w.size())
+      {
+        return false;
+      }
+      data::data_variable_list::iterator i = v.begin();
+      data::data_expression_list::iterator j = w.begin();
+      for ( ; i != v.end(); ++i, ++j)
+      {
+        if (i->sort() != j->sort())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// Checks if the variable instantiation v appears in the sequence of variable declarations [first, last[.
+    template <typename Iter>
+    bool is_declared_in(Iter first, Iter last, propositional_variable_instantiation v) const
+    {
+      for (Iter i = first; i != last; ++i)
+      {
+        if (i->name() == v.name() && equal_sorts(i->parameters(), v.parameters()))
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
   public:
@@ -293,17 +338,38 @@ class pbes
       return result;
     }
 
+    /// Returns the set of occurring variable instantiations of the pbes, i.e.
+    /// the variables that occur in the right hand side of an equation.
+    ///
+    atermpp::set<propositional_variable_instantiation> occurring_variable_instantiations() const
+    {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
+      atermpp::set<propositional_variable_instantiation> result;
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        detail::occurring_variable_visitor visitor;
+        visitor.visit(i->formula());
+        result.insert(visitor.variables.begin(), visitor.variables.end());
+      }
+      return result;
+    }
+
     /// Returns the set of occurring variables of the pbes, i.e.
     /// the variables that occur in the right hand side of an equation.
     ///
     atermpp::set<propositional_variable> occurring_variables() const
     {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
       atermpp::set<propositional_variable> result;
+      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
+      std::map<identifier_string, propositional_variable> declared_variables;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        atermpp::find_all_if(i->formula(), modal::state_frm::is_var, std::inserter(result, result.end()));
+        declared_variables[i->variable().name()] = i->variable();
+      }
+      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      {
+        result.insert(declared_variables[i->name()]);
       }
       return result;
     }
@@ -379,12 +445,12 @@ class pbes
     /// <li>the sorts occurring in the free variables of the equations are declared in the data specification</li>
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
     /// <li>the sorts occurring in the quantifier variables of the equations are declared in the data specification </li>
-    ///
     /// <li>the binding variables of the equations have unique names (well formedness)</li>
     /// <li>the free variables occurring in the equations are declared in free_variables()</li>
     /// <li>the free variables occurring in the equations with the same name are identical</li>
     /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
-    ///
+    /// <li>the predicate variables occurring in the equations appear in the left hand side of one of the equations</li>
+    /// <li>the predicate variable occurring in the initial state appears in the left hand side of one of the equations</li>
     /// <li>the data specification is well typed</li>
     /// </ul>
     ///
@@ -397,6 +463,8 @@ class pbes
       const atermpp::set<data::data_variable>& declared_free_variables = free_variables();
       std::set<data::data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
       std::set<data::data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
+      atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
+      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
       // check 1)
       if (!data::detail::check_sorts(
@@ -495,6 +563,23 @@ class pbes
       }
 
       // check 8)
+      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      {
+        if (!is_declared_in(declared_variables.begin(), declared_variables.end(), *i))
+        {
+          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << pp(*i) << " does not appear in the left hand side of the equations!" << std::endl;
+          return false;
+        }
+      }
+
+      // check 9)
+      if (!is_declared_in(declared_variables.begin(), declared_variables.end(), initial_state()))
+      {
+        std::cerr << "pbes::is_well_typed() failed: the initial state " << pp(initial_state()) << " does not appear in the left hand side of the equations!" << std::endl;
+        return false;
+      }
+
+      // check 10)
       if (!data().is_well_typed())
       {
         return false;
