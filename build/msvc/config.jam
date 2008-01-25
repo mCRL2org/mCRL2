@@ -14,9 +14,7 @@ BUILD_OPTIONS  = "link=static" ;
 # Library specific variables
 #WX_PREFIX          = "C:/wxWidgets" ;
 #WX_CPPFLAGS        = "/I$(WX_PREFIX)/lib/vc_lib/msw /I$(WX_PREFIX)/include" ;
-#WX_BASE_LDFLAGS    = "rpcrt4.lib kernel32.lib user32.lib gdi32.lib ole32.lib oleaut32.lib comctl32.lib"
-#                     "comdlg32.lib uuid.lib advapi32.lib shell32.lib /LIBPATH:$(WX_PREFIX)/lib/vc_lib"
-#                     "wxmsw28_core.lib wxbase28d.lib wxtiffd.lib wxpngd.lib wxzlibd.lib wxjpegd.lib" ;
+#WX_BASE_LDFLAGS    = "rpcrt4.lib kernel32.lib user32.lib gdi32.lib ole32.lib oleaut32.lib comctl32.lib comdlg32.lib uuid.lib advapi32.lib shell32.lib /LIBPATH:$(WX_PREFIX)/lib/vc_lib wxmsw28_core.lib wxbase28d.lib wxtiffd.lib wxpngd.lib wxzlibd.lib wxjpegd.lib" ;
 #WX_GL_LDFLAGS      = "$(WX_BASE_LDFLAGS) wxmsw28_gl.lib" ;
 
 OPENGL_NAME        = "opengl32" ;
