@@ -135,7 +135,7 @@ if ! $(BUILD_TAG) {
   BUILD_TAG = "$(revision)-$(link-variant[1])" ;
 }
  
-prefix = $(TOP)/build/stage ;
+prefix = [ path.make $(TOP)/build/stage ] ;
 
 # Set installation/stage locations
 if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
@@ -148,15 +148,15 @@ if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
     ECHO "" ;
   }
 
-  prefix     = [ get_option prefix     : $(prefix) ] ;
-  bindir     = [ get_option bindir     : $(prefix)/bin ] ;
-  libdir     = [ get_option libdir     : $(prefix)/lib/mcrl2 ] ;
-  includedir = [ get_option includedir : $(prefix)/include/mcrl2 ] ;
-  datadir    = [ get_option datadir    : $(prefix)/share/mcrl2 ] ;
+  prefix     = [ get_option prefix     : [ path.make $(prefix) ] ] ;
+  bindir     = [ get_option bindir     : [ path.make $(prefix)/bin ] ] ;
+  libdir     = [ get_option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
+  includedir = [ get_option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
+  datadir    = [ get_option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
 }
 else {
-  bindir = $(prefix) ;
-  libdir = $(prefix)/lib ;
+  bindir = [ path.make $(prefix) ] ;
+  libdir = [ path.make $(prefix)/lib ] ;
 }
 
 # Feature for building/installing optional tools/libraries
@@ -361,7 +361,7 @@ rule install-tools ( executables * : requirements * ) {
 }
 
 rule install-libraries ( libraries * : requirements * ) {
-  local headers = [ glob-tree *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
+  local headers = [ glob-tree README *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
 
   if [ feature.defaults <install> ] = <install>yes {
     # Get install location information
@@ -438,9 +438,11 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
     alias stage ;
   }
   else {
+    local plugin-prefix = [ path.make $(libdir)/plugins ] ;
+
     lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
 
-    install-libraries $(name) : <location>$(libdir)/plugins ;
+    install-libraries $(name) : <location>$(plugin-prefix) ;
   }
 }
 
