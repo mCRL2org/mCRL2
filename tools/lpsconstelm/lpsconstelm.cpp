@@ -804,7 +804,7 @@ inline void lpsConstElm::output() {
   gsVerboseMsg("lpsconstelm: ===== Replacements =====\n");
   for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
   { 
-    gsVerboseMsg("lpsconstelm: The contant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
+    gsVerboseMsg("lpsconstelm: constant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
   } 
 
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
