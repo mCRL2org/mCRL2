@@ -366,11 +366,11 @@ rule install-libraries ( libraries * : requirements * ) {
   if [ feature.defaults <install> ] = <install>yes {
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
-      if [ modules.peek : NT ] {
-        requirements += <location>$(libdir) ;
+      if [ modules.peek : NT ] && [ feature.get-values link : $(build-options) ] != static {
+        requirements += <location>$(bindir) ;
       }
       else {
-        requirements += <location>$(bindir) ;
+        requirements += <location>$(libdir) ;
       }
     }
 
