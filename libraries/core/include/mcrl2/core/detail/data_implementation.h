@@ -93,9 +93,9 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
 
 /** \pre state_frm represents a state formula that adheres to the internal ATerm
  *     structure after the type checking phase.
- *     lps_spec represents an LPS specification
+ *     spec represents an LPS specification before data implementation
  * \post The datatypes of spec are implemented as higher-order abstract data
- *     types in lps_spec
+ *     types in spec
  * \return if the data implementation went well, an equivalent version of state_frm
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
@@ -103,7 +103,7 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
  *     NULL is returned.
  **/
 ATermAppl implement_data_state_frm(ATermAppl state_frm,
-  lps::specification &lps_spec);
+  ATermAppl& spec);
 
 /** \pre ar_spec represents an action rename specification that
  *     adheres to the internal ATerm structure after the type checking fase.

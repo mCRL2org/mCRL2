@@ -121,7 +121,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
 
 /** \pre  state_formula represents an mCRL2 state formula that adheres to the
  *      initial internal ATerm structure.
- *      lps_spec represents an LPS specification
+ *      spec represents an LPS specification before data implementation
  *      use_vars_from_lps says if the parameters of the LPS can be used in the data expression
  * \post state_formula is type checked using the declarations from lps_spec
  * \return  if type checking went well, an equivalent version of state_formula is
@@ -130,7 +130,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_state_frm(ATermAppl state_formula, lps::specification &lps_spec, bool use_vars_from_lps=false);
+ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec, bool use_vars_from_lps=false);
 
 /** \pre  ar_spec represents an action rename specification that adheres to the
  *      initial internal ATerm structure.

@@ -88,18 +88,20 @@ namespace detail {
       throw std::runtime_error("parse error in parse_state_frm()");
     return result;
   }
-  
+
+  /// \pre spec is a specification before data implementation
   inline
-  ATermAppl type_check_state_formula(ATermAppl formula, specification spec)
+  ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
     ATermAppl result = core::detail::type_check_state_frm(formula, spec);
     if (result == NULL)
       throw std::runtime_error("type check error");
     return result;
   }
-  
+ 
+  /// \pre spec is a specification before data implementation
   inline
-  ATermAppl implement_data_state_formula(ATermAppl formula, specification spec)
+  ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
     ATermAppl result = core::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)

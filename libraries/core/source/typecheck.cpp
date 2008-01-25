@@ -465,7 +465,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
   return proc_expr;
 }
 
-ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec, bool use_vars_from_lps)
+ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl lps_spec, bool use_vars_from_lps)
 {
   //check correctness of the state formula in state_formula using
   //the LPS specification in lps_spec as follows:
@@ -485,17 +485,24 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lps::specification &lps_spec
 
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
+  ATermAppl data_spec = ATAgetArgument(lps_spec, 0);
+  ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+  ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
+  ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
+  ATermList action_labels = ATLgetArgument(ATAgetArgument(lps_spec, 1), 0);
+  ATermList process_parameters = ATLgetArgument(ATAgetArgument(lps_spec, 2), 1);
+
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
+  if(gstcReadInSorts(sorts,false)){
     if(gstcReadInConstructors()){
-       if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
-         if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
+       if(gstcReadInFuncs(ATconcat(constructors,mappings),false)){
+         if(!gstcReadInActs(action_labels))
            gsWarningMsg("ignoring the previous error(s), the formula will be ypechecked without action label information\n");
          gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
          ATermTable Vars=ATtableCreate(63,50);
          if(use_vars_from_lps) {
-           ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
+           ATermTable NewVars=gstcAddVars2Table(Vars,process_parameters);
            if(!NewVars){
              ATtableDestroy(Vars);
              gsErrorMsg("the parameters of the LPS cannot be used as variables\n");

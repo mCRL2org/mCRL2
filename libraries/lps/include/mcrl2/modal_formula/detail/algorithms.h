@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/specification.h"
@@ -40,8 +41,10 @@ namespace detail {
     return result;
   }
   
+  /// type check a state formula against spec,
+  /// spec is a specification before data implementation.
   inline
-  ATermAppl type_check_state_formula(ATermAppl formula, lps::specification spec)
+  ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
     ATermAppl result = core::detail::type_check_state_frm(formula, spec);
     if (result == NULL)
@@ -49,8 +52,11 @@ namespace detail {
     return result;
   }
   
+  /// implement sorts and data expressions in formula,
+  /// using the data from spec. spec is a specification before data
+  /// implementation.
   inline
-  ATermAppl implement_data_state_formula(ATermAppl formula, lps::specification spec)
+  ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
     ATermAppl result = core::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
@@ -67,15 +73,19 @@ namespace detail {
     return result;
   }
 
+  // spec may be updated as the data implementation of the state formula
+  // may cause internal names to change.
   inline
-  state_formula mcf2statefrm(const std::string& formula_text, const lps::specification& spec)
+  state_formula mcf2statefrm(const std::string& formula_text, lps::specification& spec)
   {
     std::stringstream formula_stream;
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
-    f = type_check_state_formula(f, spec);
-    f = implement_data_state_formula(f, spec);
+    ATermAppl reconstructed_spec = mcrl2::core::detail::reconstruct_spec(spec);
+    f = type_check_state_formula(f, reconstructed_spec);
+    f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
+    spec = lps::specification(reconstructed_spec);
     return f;
   }
 

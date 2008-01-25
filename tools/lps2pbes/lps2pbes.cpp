@@ -24,6 +24,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -478,9 +479,11 @@ ATermAppl create_pbes(t_tool_options tool_options)
     return result;
   }
 
+  ATermAppl reconstructed_spec = reconstruct_spec(lps_spec);
+
   //type check formula
   gsVerboseMsg("type checking...\n");
-  result = type_check_state_frm(result, lps_spec);
+  result = type_check_state_frm(result, reconstructed_spec);
   if (result == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
@@ -491,7 +494,7 @@ ATermAppl create_pbes(t_tool_options tool_options)
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = implement_data_state_frm(result, lps_spec);
+  result = implement_data_state_frm(result, reconstructed_spec);
   if (result == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
@@ -499,6 +502,9 @@ ATermAppl create_pbes(t_tool_options tool_options)
   if (end_phase == PH_DATA_IMPL) {
     return result;
   }
+
+  //update lps_spec with the newly implemented specification
+  lps_spec = specification(reconstructed_spec);
 
   //translate regular formulas in terms of state and action formulas
   gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");

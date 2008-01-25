@@ -210,6 +210,18 @@ inline t_data_decls get_data_decls(lps::specification &lps_spec)
   return data_decls;
 }
 
+/// \ret data declarations of spec
+inline t_data_decls get_data_decls(ATermAppl spec)
+{
+  t_data_decls data_decls;
+  ATermAppl data_spec =  ATAgetArgument(spec, 0);
+  data_decls.sorts =     ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+  data_decls.cons_ops =  ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
+  data_decls.ops =       ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
+  data_decls.data_eqns = ATLgetArgument(ATAgetArgument(data_spec, 3), 0);
+  return data_decls;
+}
+
 /// \ret lps_spec in which the data declarations are replaced by data_decls
 inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
 {
@@ -218,6 +230,24 @@ inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls
     data::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
     lps_spec = lps::set_data_specification(lps_spec, data);
   }
+}
+
+/// \ret spec in which the data declarations are replaced by data_decls
+inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
+{
+  assert(data_decls_is_initialised(data_decls));
+  if (!data_decls_equal(data_decls, get_data_decls(spec))) {
+    ATermAppl sorts = gsMakeSortSpec(data_decls.sorts);
+    ATermAppl cons_ops = gsMakeConsSpec(data_decls.cons_ops);
+    ATermAppl ops = gsMakeMapSpec(data_decls.ops);
+    ATermAppl data_eqns = gsMakeDataEqnSpec(data_decls.data_eqns);
+    ATermAppl data_spec = gsMakeDataSpec(sorts, cons_ops, ops, data_eqns);
+    spec = gsMakeSpecV1(data_spec,
+                        ATAgetArgument(spec, 1),
+                        ATAgetArgument(spec, 2),
+                        ATAgetArgument(spec, 3));
+  }
+  return spec;
 }
 
 /// \pre spec is a specification that adheres to the internal syntax of an
