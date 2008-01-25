@@ -13,9 +13,9 @@ tool squadt
       : [ sequence.insertion-sort $(source_files) ]
         /site-config//wx_base
         /site-config//boost_md5
-        /libraries//ticpp
         /libraries/tipi//controller_interface
       : <use>/libraries/utilities//headers
+        <dependency>/libraries//ticpp
         <wx>yes
       ;
 

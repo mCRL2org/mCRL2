@@ -366,15 +366,15 @@ rule install-libraries ( libraries * : requirements * ) {
   if [ feature.defaults <install> ] = <install>yes {
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
-      requirements += <location>$(libdir) ;
+      if [ modules.peek : NT ] {
+        requirements += <location>$(libdir) ;
+      }
+      else {
+        requirements += <location>$(bindir) ;
+      }
     }
 
-    if [ modules.peek : NT ] {
-      install install-library : $(libraries) : <install-type>SHARED_LIB $(requirements) ;
-    }
-    else {
-      install install-library : $(libraries) : <install-type>LIB $(requirements) ;
-    }
+    install install-library : $(libraries) : <install-type>LIB $(requirements) ;
 
     requirements = [ property.change $(requirements) : <location> $(includedir) ] ;
 
@@ -382,11 +382,11 @@ rule install-libraries ( libraries * : requirements * ) {
     if [ MATCH $(root)/.*(include/mcrl2/.*) : $(headers) ] {
       # filter out headers not in mcrl2 directory
       headers = [ MATCH (.*/include/mcrl2/.*) : $(headers) ] ;
- 
+
       requirements += <install-source-root>../include/mcrl2 ;
     }
     else {
-      headers = [ MATCH (.*/include/.*) : $(headers) ] ;
+      headers = [ MATCH (.*/include/$(libraries)/.*) : $(headers) ] ;
 
       requirements += <install-source-root>../include ;
     }

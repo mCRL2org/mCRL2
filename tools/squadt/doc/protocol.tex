@@ -76,10 +76,14 @@
     \item guards data consistency,
     \item (semi-)automated task execution.
    \end{itemize}
-  The core of the graphical user interface of \squadt is a visualisation of all
-  files in a project and the dependencies created by tool execution. The data
-  in files is static and tools create the dependency relations between the
-  files. The last two points require a more elaborate explanation.
+
+  \noindent The core of the graphical user interface of \squadt is a
+  visualisation of all files in a project and the dependencies created by tool
+  execution. Tool application creates the dependency relation between the files
+  that are fed as input and the new files that are produced as output. One
+  important restriction with regard to the dependency relation is that data in
+  files is constant for tools that are fed the file as input. Meaning that
+  tools are not allowed manipulate input files.
   
   Data is considered consistent when the tool that produced it communicates
   that it has produced a file that contains this data. So establishing data
@@ -107,16 +111,36 @@
   problems with this approach are:
   \begin{itemize}
    \item Command line interfaces are not standardised, especially not across
-         platforms
-   \item Not every tool has a command line interface and does not provide other
-         means of automated task configuration
-   \item It is unclear what constitutes the output of a tool when it is run,
-         for successful integration this fact must be communicated to its
-         environment (the integration framework).
+         platforms.
+   \item For the environment it is difficult to infer the output of a tool
+         after it has completed.
+   \item Not every tool has a command line interface and most do not provide
+         other means of automated task configuration.
   \end{itemize}
-  An abstract communication interface can solve all these problems in a more
-  elegant fashion. This text introduces such an interface: a communication
-  protocol used for controlling tools.
+
+  \noindent For successful integration in \squadt some details about tool
+  execution must be known. Important aspects on the integration level are what
+  files will be fed to a tool as input, and what files will be produced as
+  output. The framework has to ensure that input files exist before invoking
+  the tool, and that files produced as output \emph{during} tool execution do
+  not also exist as a result of other tool applications in the project. When
+  tools are allowed to execute concurrently this means that either all outputs
+  of a tool need to be known before tool execution, or there must be a
+  mechanism in place that can keep track of the names of output files and
+  resolve conflicts.
+  
+  Strict conventions on the use of command-line interfaces could go a long way
+  towards providing all of the above. The unidirectional nature of the
+  command-line interface as communication channel makes it very inflexible for
+  the purpose at hand. The big practical show-stopper is that on some platforms
+  programs with a GUI cannot be started from the command line. A bidirectional
+  communication channel and an abstract communication interface allows more
+  flexibility in solving the above problems in a more elegant fashion. A
+  popular approach of such an interface is WSDL (see \cite{2001-WSDL}) the
+  interface that is used to power web services.  This text introduces another
+  such interface that is more suitable for tools that are not designed as a
+  web service. Our focus here lies on controlling tools from start to finish: a
+  communication protocol used for controlling tools.
 
 %  In abstract, the platform provides a number of facilities that can be used by
 %  tools to communicate with the user. The tools provide services that are made
@@ -138,29 +162,35 @@
 
  \section{Concepts}
 
-   This document describes the design of a communication protocol that will be
-   used by a system that targets integration of software tools. There are lots
-   of examples of software tools that all have different functionality. Not
-   every tool can be used in combination with every other tool. For any kind of
-   integration some form of communication between tools is required. The system
-   has the task to enable and direct the communication between tools.  This
-   section functions as introduction to the important concepts on top of which
-   the protocol is designed.
+   There are lots of examples of software tools that all have different
+   functionality and interfaces. Considering integration between tools is only
+   useful when there is a meaningful way in which the tools can be used
+   together in order to obtain a result that any of the individual tools can't.
+   An integration framework does not extend the functionality of tools, it
+   merely offers a simplified way of using combinations of tools.
+ 
+   An integration framework for tools works across the boundaries of single
+   tools. Automating aspects of tool execution sometimes requires the means to
+   circumvent user interaction that would be part of normal tool behaviour. To
+   give the integration framework direct control of tools from start to finish
+   allows it to function as an orchestrator. 
 
-  \subsection{System}
+   This section functions as introduction to the important concepts around
+   which a communication protocol wil be built in later sections.
 
-   The system is an anonymous software application for interactive software tool
-   integration. A key concept is that the system is an intermediary between the
-   user and a set of tools that can be controlled. A concrete example of such a
-   system is the deskSQuADT application.
+  \subsection{Integration Framework}
+
+   The \squadt application is a tool for interactive software tool integration.
+   A key concept is that the system is an intermediary between the user and a
+   set of tools that can be controlled.
 
    As main task the system is responsible for running tools and directing
    communication between tools. Other tasks are:
    
     \begin{itemize}
      \item help guide users to find tools that offer the desired functionality
-     \item and automate frequently (re)occurring tasks that involve running one or more tools
-     \item provide a uniform manner for users to interact with tools
+     \item automate frequently (re)occurring tasks that involves running tools
+     \item offer a uniform way in which users can interact with tools
     \end{itemize}
 
    There are some more but the ones mentioned directly affect the design of the
