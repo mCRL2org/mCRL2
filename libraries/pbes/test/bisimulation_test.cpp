@@ -59,8 +59,10 @@ void test_bisimulation()
   BOOST_CHECK(wb .is_well_typed());
   BOOST_CHECK(sbe.is_well_typed());
  
-  bool abp_result = pbes2bool(bb);
-  BOOST_CHECK(bb);
+  BOOST_CHECK(pbes2bool(bb ));
+  BOOST_CHECK(pbes2bool(sb ));
+  BOOST_CHECK(pbes2bool(wb ));
+  BOOST_CHECK(pbes2bool(sbe));
 }
 
 int test_main(int argc, char** argv)

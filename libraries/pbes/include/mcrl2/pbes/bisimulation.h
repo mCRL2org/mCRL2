@@ -94,14 +94,14 @@ class bisimulation_algorithm
     }
 
     /// Used for initializing summand names.
-    void set_summand_names(const linear_process& p, std::string prefix)
+    void set_summand_names(const linear_process& p)
     {
       set_identifier_generator generator;
       for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
       {
         std::string name = generator(action_list_name(i->actions()));
         ATermAppl t = *i;
-        summand_names[t] = prefix + name;
+        summand_names[t] = name;
       }
     }
 
@@ -229,8 +229,8 @@ public:
     void init(const linear_process& model, const linear_process& spec)
     {
       summand_names.clear();
-      set_summand_names(model, "M_");
-      set_summand_names(spec, "S_");
+      set_summand_names(model);
+      set_summand_names(spec);
       model_ptr = ATermAppl(model);
       spec_ptr  = ATermAppl(spec);
       assert(is_from_model(model));
@@ -255,6 +255,7 @@ public:
       propositional_variable_instantiation init(X(m, s), M.initial_process().state() + S.initial_process().state());
 
       pbes<> result(data, equations, free_variables, init);
+      assert(result.is_closed());
       return result;
     }
 };

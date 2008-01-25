@@ -136,17 +136,6 @@ class pbes
       m_equations = Container(eqn.begin(), eqn.end());
     }
 
-    /// Returns the predicate variables appearing in the left hand side of an equation.
-    atermpp::set<propositional_variable> compute_declared_variables() const
-    {
-      atermpp::set<propositional_variable> result;
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        result.insert(i->variable());
-      }
-      return result;
-    }
-
     /// Checks if the sorts of the variables in both lists are equal.
     bool equal_sorts(data::data_variable_list v, data::data_expression_list w) const
     {
@@ -374,13 +363,13 @@ class pbes
       return result;
     }
 
-    /// Returns true if all occurring variables are binding variables.
+    /// Returns true if all occurring variables are binding variables, and the initial state variable is a binding variable.
     ///
     bool is_closed() const
     {
       atermpp::set<propositional_variable> bnd = binding_variables();
       atermpp::set<propositional_variable> occ = occurring_variables();
-      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end());
+      return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
     }
 
     /// Applies normalization to the equations of the pbes.
@@ -449,8 +438,6 @@ class pbes
     /// <li>the free variables occurring in the equations are declared in free_variables()</li>
     /// <li>the free variables occurring in the equations with the same name are identical</li>
     /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
-    /// <li>the predicate variables occurring in the equations appear in the left hand side of one of the equations</li>
-    /// <li>the predicate variable occurring in the initial state appears in the left hand side of one of the equations</li>
     /// <li>the data specification is well typed</li>
     /// </ul>
     ///
@@ -463,16 +450,7 @@ class pbes
       const atermpp::set<data::data_variable>& declared_free_variables = free_variables();
       std::set<data::data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
       std::set<data::data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
-      atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
-      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
-/*
-std::cerr << "<well_typed>" << std::endl;
-for (atermpp::set<propositional_variable>::iterator i = declared_variables.begin(); i != declared_variables.end(); ++i)
-{
-  std::cerr << "<decl>" << pp(*i) << std::endl;
-}
-*/
       // check 1)
       if (!data::detail::check_sorts(
               boost::make_transform_iterator(declared_free_variables.begin(), data::detail::data_variable_sort()),
@@ -570,23 +548,6 @@ for (atermpp::set<propositional_variable>::iterator i = declared_variables.begin
       }
 
       // check 8)
-      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
-      {
-        if (!is_declared_in(declared_variables.begin(), declared_variables.end(), *i))
-        {
-          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << pp(*i) << " does not appear in the left hand side of the equations!" << std::endl;
-          return false;
-        }
-      }
-
-      // check 9)
-      if (!is_declared_in(declared_variables.begin(), declared_variables.end(), initial_state()))
-      {
-        std::cerr << "pbes::is_well_typed() failed: the initial state " << pp(initial_state()) << " does not appear in the left hand side of the equations!" << std::endl;
-        return false;
-      }
-
-      // check 10)
       if (!data().is_well_typed())
       {
         return false;

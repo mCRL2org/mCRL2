@@ -113,6 +113,7 @@ pbes<> pbes_translate(const modal::state_formula& formula, const lps::specificat
   }
   result.normalize();
   assert(result.is_normalized());
+  assert(result.is_closed());
   return result;
 }
 
