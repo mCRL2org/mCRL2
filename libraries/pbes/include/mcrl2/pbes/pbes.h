@@ -362,7 +362,7 @@ class pbes
     {
       atermpp::set<propositional_variable> result;
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
-      std::map<identifier_string, propositional_variable> declared_variables;
+      std::map<core::identifier_string, propositional_variable> declared_variables;
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         declared_variables[i->variable().name()] = i->variable();
@@ -466,6 +466,13 @@ class pbes
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
+/*
+std::cerr << "<well_typed>" << std::endl;
+for (atermpp::set<propositional_variable>::iterator i = declared_variables.begin(); i != declared_variables.end(); ++i)
+{
+  std::cerr << "<decl>" << pp(*i) << std::endl;
+}
+*/
       // check 1)
       if (!data::detail::check_sorts(
               boost::make_transform_iterator(declared_free_variables.begin(), data::detail::data_variable_sort()),
