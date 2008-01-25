@@ -8957,7 +8957,9 @@ static ATermAppl transform(
 
   if (pcrlprocesslist==ATempty) 
   { gsErrorMsg("there are no pCRL processes to be linearized\n"); 
-    stop();
+    // Note that this can occur with a specification 
+    // proc P(x:Int) = P(x); init P(1);
+    exit(1);
   }
 
   /* Second, transform into GNF with possibly variables as a head,
