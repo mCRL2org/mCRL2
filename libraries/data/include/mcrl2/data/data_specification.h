@@ -14,6 +14,7 @@
 #include <boost/iterator/filter_iterator.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"
@@ -57,6 +58,10 @@ class data_specification: public aterm_appl
     data_operation_list  m_constructors;
     data_operation_list  m_mappings;
     data_equation_list   m_equations;
+    // The following map contains for each sort a default term of that particular
+    // sort. Each default term remains valid, as long as no constructors or mappings
+    // are removed from the specification.
+    atermpp::map < sort_expression, data_expression > default_expression_map;
 
   public:
     /// Iterator for the sequence of sorts.
@@ -159,15 +164,30 @@ class data_specification: public aterm_appl
 
     /// Returns a valid data expression according to this data specification
     /// of the given sort s. If no valid expression can be found, data_expression()
-    /// is returned. It returns a minimal term of at most three nested function
+    /// is returned. It returns a minimal term with by default at most three nested function
     /// symbols. When selecting function symbols, constructor symbols have a
     /// preference over mappings. For each sort, the same term is returned.
     /// Currently, only expressions for basic sorts are delivered. For function
     /// sorts data_expression() is returned.
-    ///
+    /// <P>
+    /// Terms that are generated are stored in a map such that they do not have to be
+    /// generated more than once. When generating a term the nesting depth is taken into
+    /// account. When the term is taken from the map, the nesting depth is ignored.
+    /// So, generating a term with nesting depth 10, and subsequentely with nesting depth
+    /// 1 can still yield a term of nesting depth larger than 1, because the earlier
+    /// generated term is returned.
     data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3) 
     // data_expression default_expression(sort_expression s) const
     {
+      // first check whether a term has already been constructed for this sort.
+
+      data_expression result;
+      atermpp::map < sort_expression,data_expression >::iterator l=default_expression_map.find(s);
+      
+      if (l!=default_expression_map.end())
+      { // a default data_expression is found.
+        return l->second;
+      }
 
       // check if there is a constant constructor for s
       data_operation_list::iterator i = std::find_if(constructors(s).begin(), 
@@ -175,41 +195,70 @@ class data_specification: public aterm_appl
                                                      detail::is_constant_operation());
       if (i != constructors().end())
       { 
-        return data_expression((aterm_appl)*i);
+        result=data_expression((aterm_appl)*i);
+        default_expression_map.insert(std::make_pair(s,result));
+        return result;
       }
       
       // check if there is a constant mapping for s
       i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
       if (i != mappings().end())
       { 
-        return data_expression((aterm_appl)*i);
+        result=data_expression((aterm_appl)*i);
+        default_expression_map.insert(std::make_pair(s,result));
+        return result;
       }
       
-      /* if (max_recursion_depth>0)
+      if (max_recursion_depth>0)
       { // recursively traverse constructor functions
-        i = std::find_if(constructors(s).begin(),
-                         constructors(s).end(),
-                         detail::is_not_a_constant_operation());
-        if (i != constructors().end())
-        { 
-          sort_expression_list argument_sorts=sort_arrow((*i).sort()).argument_sorts();
-          data_expression_list arguments;
-          for(sort_expression_list::iterator j=argument_sorts.begin();
-              j!=argument_sorts.end(); j++)
-          { data_expression t=default_expression(*j,max_recursion_depth-1);
-            if (t==data_expression())
-            { return t;
+        for(data_operation_list::iterator i=constructors(s).begin();
+            i!=constructors(s).end(); i++)
+        { if (i->sort().is_arrow())
+          { sort_expression_list argument_sorts=domain_sorts((*i).sort());
+            data_expression_list arguments;
+            sort_expression_list::iterator j;
+            for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
+            { data_expression t=default_expression(*j,max_recursion_depth-1);
+              if (t==data_expression())
+              { break;
+              }
+              else arguments=push_front(arguments,t);
             }
-            arguments=list(arguments,t);
+            if (j==argument_sorts.end())
+            { // a suitable set of arguments is found
+              arguments=reverse(arguments);
+              result=data_application((aterm_appl)*i,arguments);
+              default_expression_map.insert(std::make_pair(s,result));
+              return result;
+            }
           }
-          arguments=arguments.reverse();
-          return data_application((aterm_appl)*i,arguments);
         }
   
-        
         // recursively traverse mappings
-        // ...   
-      } */
+        for(data_operation_list::iterator i=mappings(s).begin();
+            i!=mappings(s).end(); i++)
+        { if (i->sort().is_arrow())                 
+          { sort_expression_list argument_sorts=domain_sorts((*i).sort());
+            data_expression_list arguments;
+            sort_expression_list::iterator j;
+            for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
+            { data_expression t=default_expression(*j,max_recursion_depth-1);
+              if (t==data_expression())
+              { break;
+              }
+              else arguments=push_front(arguments,t);
+            }
+            if (j==argument_sorts.end())
+            { // a suitable set of arguments is found
+              arguments=reverse(arguments);
+              result=data_application((aterm_appl)*i,arguments);
+              default_expression_map.insert(std::make_pair(s,result));
+              return result;
+            }
+          }
+        }
+      }
+
       return data_expression();
     }
 

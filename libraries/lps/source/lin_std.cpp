@@ -158,7 +158,7 @@ static enumeratedtype *create_enumeratedtype
                 (int n,specificationbasictype *spec);
 
 typedef enum { none, 
-               map, 
+               _map, 
                func, 
                act, 
                proc, 
@@ -581,7 +581,7 @@ static long insertmapping(
                ATermAppl mapping,
                specificationbasictype *spec)
 { spec->maps=ATinsertA(spec->maps,mapping);
-  return insertConstructorOrFunction(mapping,map);
+  return insertConstructorOrFunction(mapping,_map);
 }
 
 static ATermList getnames(ATermAppl multiAction)
@@ -4472,7 +4472,7 @@ static ATermAppl dummyterm(
   /* Second search for a constant mapping */
 
   for (int i=0 ; (i<maxobject) ; i++ )
-  { if ((objectdata[i].object==map)&&
+  { if ((objectdata[i].object==_map)&&
         (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
     { return objectdata[i].objectname;
     }
@@ -4484,7 +4484,7 @@ static ATermAppl dummyterm(
 
   if (max_nesting_depth>0)
   { for (int i=0 ; (i<maxobject) ; i++ )
-    { if (((objectdata[i].object==func)||(objectdata[i].object==map))&&
+    { if (((objectdata[i].object==func)||(objectdata[i].object==_map))&&
            (objectdata[i].targetsort==targetsort))
       { /* The function found cannot be a constant */
         ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);

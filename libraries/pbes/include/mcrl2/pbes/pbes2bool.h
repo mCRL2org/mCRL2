@@ -66,7 +66,6 @@ inline
 bool pbes2bool(const mcrl2::pbes_system::pbes<>& p, t_tool_options options = t_tool_options())
 {
   mcrl2::pbes_system::pbes<> q = p;
-  q.normalize();
   options.infilename = "pbes2bool.in";
   options.outfilename = "pbes2bool.out";
   q.save(options.infilename);

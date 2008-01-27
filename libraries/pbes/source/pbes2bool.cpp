@@ -307,6 +307,10 @@ bool process(t_tool_options const& tool_options)
   { gsErrorMsg("The pbes is not well typed\n");
     exit(1);
   }
+  if (!pbes_spec.is_closed())
+  { gsErrorMsg("The pbes contains free pbes variables\n");
+    exit(1);
+  }
   pbes_spec.normalize();  // normalize the pbes, such that the equations do not contain negations
                           // and implications.
 
