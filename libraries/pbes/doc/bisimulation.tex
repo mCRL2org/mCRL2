@@ -1,4 +1,3 @@
-%\input{tcilatex}
 
 
 \documentclass{article}
@@ -10,7 +9,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, January 22, 2008 11:19:29}
+%TCIDATA{LastRevised=Monday, January 28, 2008 09:08:28}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -37,7 +36,7 @@
 \newtheorem{solution}[theorem]{Solution}
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
-%\input{tcilatex}
+
 \begin{document}
 
 
@@ -74,7 +73,7 @@ match^{p,q}(d,d^{\prime }) &=&\bigwedge\limits_{i\in I_{p}}\forall
 _{e:E_{i}}.(c_{i}(d,e)\Rightarrow Y_{i}^{p,q}(d,d^{\prime },e)) \\
 close_{i}^{p,q}(d,d^{\prime },e) &=&\bigvee\limits_{\{j\in I_{q}|a_{j}=\tau
 \}}\exists _{e^{\prime }:E_{j}}.(c_{j}(d^{\prime },e^{\prime })\wedge
-Y_{i}^{p,q}(d^{\prime },g_{j}(d^{\prime },e^{\prime }),e^{\prime })) \\
+Y_{i}^{p,q}(d,g_{j}(d^{\prime },e^{\prime }),e)) \\
 &&\vee (X^{p,q}(d,d^{\prime })\wedge step_{i}^{p,q}(d,d^{\prime },e)) \\
 step_{i}^{p,q}(d,d^{\prime },e) &=&\left\{ 
 \begin{array}{cl}

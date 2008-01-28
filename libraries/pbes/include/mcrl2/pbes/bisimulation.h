@@ -337,6 +337,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       std::vector<pbes_expression> v;
       const data_variable_list& d  = p.process_parameters();
       const data_variable_list& d1 = q.process_parameters();
+      const data_variable_list& e  = i->summation_variables();
       for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
       {
         if (!j->is_tau())
@@ -346,7 +347,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         const data_expression&    cj = j->condition();
         const data_variable_list& e1 = j->summation_variables();
         data_variable_list        gj = j->next_state(q.process_parameters());
-        pbes_expression expr = exists(e1, and_(cj, var(Y(p, q, i), d1 + gj + e1)));
+        pbes_expression expr = exists(e1, and_(cj, var(Y(p, q, i), d + gj + e)));
         v.push_back(expr);
       }
       return or_(multi_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
