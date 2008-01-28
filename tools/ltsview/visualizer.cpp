@@ -796,18 +796,19 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
           } 
           else
           {
-            GLubyte texture[s->getNumMatchedRules()][4];
+            GLubyte *texture = (GLubyte*)malloc(s->getNumMatchedRules() * 4 * 
+                sizeof(GLubyte));
             c = settings->getRGB(StateColor);
 
             vector< int > state_rules;
             s->getMatchedRules(state_rules);
-            for(unsigned int i = 0; i < state_rules.size(); ++i)
+            for(unsigned int i = 0; i < state_rules.size(); i += 4)
             {
               RGB_Color c1 = mediator->getMarkRuleColor(state_rules[i]);
-              texture[i][0] = (GLubyte) c1.r;
-              texture[i][1] = (GLubyte) c1.g;
-              texture[i][2] = (GLubyte) c1.b;
-              texture[i][3] = (GLubyte) 255;
+              texture[i]   = (GLubyte) c1.r;
+              texture[i+1] = (GLubyte) c1.g;
+              texture[i+2] = (GLubyte) c1.b;
+              texture[i+3] = (GLubyte) 255;
             }
             // Bind the texture created above, set textures on. (From Red Book)
             
@@ -827,6 +828,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
 
             glBindTexture(GL_TEXTURE_1D, texName);
             glEnable(GL_TEXTURE_1D);
+            free(texture);
           } 
         }
 
