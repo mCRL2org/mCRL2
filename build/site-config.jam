@@ -9,35 +9,61 @@ import feature ;
 
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
 rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
-  local splitted                  = [ regex.split $(ldflags) " -" ] ;
+  local splitted ;
   local library_search_paths ;
   local library_link_paths ;
   local library_names ;
   local framework_names ;
 
+  if [ modules.peek : NT ] {
+    splitted = [ regex.split $(ldflags) " " ] ;
+  }
+  else {
+    splitted = [ regex.split $(ldflags) " -" ] ;
+  }
+
   for part in $(splitted) {
-    if [ MATCH "^-?L(.*)$" : $(part) ] {
-      local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
-
-      library_search_paths += <search>$(search_path) ;
-#      library_link_paths += <link>shared:<dll-path>$(search_path) ;
-    }
-    else if [ MATCH "^-?l(.*)$" : $(part) ] {
-      local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
-
-      lib $(name)$(library_name)
-          :
-          : <name>$(library_name) $(library_search_paths)
-          :
-          : $(framework_names) $(library_link_paths)
-          ;
-
-      library_names += $(name)$(library_name) ;
-    }
-    else if [ MATCH "-?framework (.*)$" : $(part) ] {
-      local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
-
-      framework_names += <framework>$(framework_name) ;
+    if $(part) {
+      if [ MATCH "^-?L(.*)$" : $(part) ] {
+        local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
+     
+        library_search_paths += <search>$(search_path) ;
+#        library_link_paths += <link>shared:<dll-path>$(search_path) ;
+      }
+      else if [ MATCH "^-?l(.*)$" : $(part) ] {
+        local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
+     
+        lib $(name)$(library_name)
+            :
+            : <name>$(library_name) $(library_search_paths)
+            :
+            : $(framework_names) $(library_link_paths)
+            ;
+     
+        library_names += $(name)$(library_name) ;
+      }
+      else if [ MATCH "-?framework (.*)$" : $(part) ] { # OS X specific
+        local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
+     
+        framework_names += <framework>$(framework_name) ;
+      }
+      else if [ modules.peek : NT ] {
+        if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] { # MSVC specific
+          local search_path = [ MATCH "/LIBPATH(.*)$" : $(part) ] ;
+      
+          library_search_paths += <search>$(search_path) ;
+        }
+        else if ! [ MATCH "-.*" : $(part) ] {
+          lib $(name)$(part)
+              :
+              : <name>$(part) $(library_search_paths)
+              :
+              : $(framework_names) $(library_link_paths)
+              ;
+         
+          library_names += $(name)$(part) ;
+        }
+      }
     }
   }
 
