@@ -56,7 +56,7 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
         local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
      
         library_search_paths += <search>$(search_path) ;
-#        library_link_paths += <link>shared:<dll-path>$(search_path) ;
+        library_link_paths += <link>shared:<xdll-path>$(search_path) ;
       }
       else if [ MATCH "^-?l(.*)$" : $(part) ] {
         local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
@@ -123,7 +123,7 @@ if $(OPENGL_NAME) {
 else {
   print-notice "Not building tools that depend on OpenGL!" ;
 
-  feature.feature opengl : no yes : optional ;
+  feature.set-default opengl : no ;
 }
 
 if $(WX_CPPFLAGS) {
