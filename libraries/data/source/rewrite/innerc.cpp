@@ -645,7 +645,7 @@ static ATermList create_sequence(ATermList rule, int *var_cnt)
 		}
 	}
 	//ATfprintf(stderr,"rseq: %t\n",rseq);
-	if ( ATisAppl(cond) )
+	if ( ATisAppl(cond) && gsIsNil((ATermAppl) cond) )
 		rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
 	else
 		rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));

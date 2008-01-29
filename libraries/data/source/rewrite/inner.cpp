@@ -310,7 +310,7 @@ static ATermList create_sequence(ATermAppl rule, int *var_cnt)
 		}
 	}
 	//ATfprintf(stderr,"rseq: %t\n",rseq);
-	if ( ATisAppl(cond) )
+	if ( ATisAppl(cond) && gsIsNil((ATermAppl) cond) )
 		rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
 	else
 		rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
@@ -788,7 +788,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
 	} else {
 		tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
 	}
-	//ATprintf("tree: %t\n",tree);
+	//ATfprintf(stderr,"tree(%t): %t\n",int2term[opid],tree);
 	
 	finalise_build_pars(&init_pars);
 	
