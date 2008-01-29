@@ -16,11 +16,8 @@ class fsm_lexer
     ATermAppl typeId;
     ATermTable labelTable;
     
-    AFun const_ATtypeid;
-    AFun const_ATparmid;
+    AFun const_ATtype;
     AFun const_ATvalue;
-    AFun const_ATstate;
-    AFun const_ATparam;
 
     mcrl2::lts::lts *fsm_lts;
 };

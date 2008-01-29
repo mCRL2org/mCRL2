@@ -73,6 +73,9 @@ params :
 
 param :
   ID
+    {
+      fsm_lexer_obj->typeId = $1;
+    }
   cardinality type_def
   ;
 
@@ -89,7 +92,7 @@ type_def :
       if (!ignore_par[num_pars])
       {
         fsm_lexer_obj->typeValues = ATempty;
-        fsm_lexer_obj->typeId = $1;
+        fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) $1);
       }
     }
   type_values

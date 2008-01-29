@@ -176,16 +176,10 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   
   protect_table = ATindexedSetCreate(10000,50);
 
-  const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
-  ATprotectAFun( const_ATtypeid );
-  const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
-  ATprotectAFun( const_ATparmid );
+  const_ATtype = ATmakeAFun( "Type", 2, ATfalse );
+  ATprotectAFun( const_ATtype );
   const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
   ATprotectAFun( const_ATvalue );
-  const_ATstate = ATmakeAFun( "State", 2, ATfalse );
-  ATprotectAFun( const_ATstate );
-  const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
-  ATprotectAFun( const_ATparam );
   stateVector = ATempty;
   ATprotectList( &stateVector );
   valueTable = ATempty;
@@ -208,11 +202,8 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   }
     
   // CLEAN UP
-  ATunprotectAFun( const_ATtypeid );
-  ATunprotectAFun( const_ATparmid );
+  ATunprotectAFun( const_ATtype );
   ATunprotectAFun( const_ATvalue );
-  ATunprotectAFun( const_ATstate );
-  ATunprotectAFun( const_ATparam );
   ATunprotectList( &stateVector );
   ATunprotectList( &valueTable );
   ATunprotectList( &stateId );
