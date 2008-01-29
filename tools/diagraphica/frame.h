@@ -45,6 +45,7 @@ public:
     void setStatusText( const string &msg );
     void setOutputText( const string &msg );
     void appOutputText( const string &msg );
+    void enableEditMode( const bool &enable);
     
     void setFileOptionsActive();
     void setEditModeSelect();

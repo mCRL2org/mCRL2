@@ -84,6 +84,13 @@ void Frame::appOutputText( const string &msg )
     //textCtrl->AppendText( wxString( msg.c_str(), wxConvUTF8 ) );
 }
 
+// -------------------------------------------
+void Frame::enableEditMode(const bool &enable)
+{
+	modeMenu->Enable( ID_MENU_ITEM_MODE_EDIT, enable);
+}
+// -------------------------------------------
+
 
 // -------------------------------
 void Frame::setFileOptionsActive()
@@ -1074,6 +1081,7 @@ void Frame::initMenuBar()
         wxString( wxT( "&Edit mode" ) ),
         wxString( wxT( "Changes to edit mode" ) ) );
     modeMenu->Check( ID_MENU_ITEM_MODE_EDIT, false );
+    modeMenu->Enable( ID_MENU_ITEM_MODE_EDIT, false);
     menuBar->Append(
         modeMenu,
         wxString( wxT( "&Mode" ) ) );
@@ -1096,6 +1104,17 @@ void Frame::initMenuBar()
 
     // attribute menu
     attributeMenu = new wxMenu();
+    attributeMenu->Append(
+        ID_MENU_ITEM_ATTR_CLUST, 
+        wxString( wxT( "Cluster nodes" ) ),
+        wxString( wxT( "Cluster nodes based on selected attributes" ) ) );
+    attributeMenu->Enable( ID_MENU_ITEM_ATTR_CLUST, false );
+    attributeMenu->Append(
+        ID_MENU_ITEM_ATTR_TRACE, 
+        wxString( wxT( "View trace" ) ),
+        wxString( wxT( "View trace based on selected attributes" ) ) );
+    attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
+    attributeMenu->AppendSeparator();
     attributeMenu->Append( 
         ID_MENU_ITEM_ATTR_DISTR_PLOT,
         wxString( wxT( "Distribution plot" ) ),
@@ -1127,18 +1146,7 @@ void Frame::initMenuBar()
         wxString( wxT( "Delete" ) ),
         wxString( wxT( "Delete attribute" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_DELETE, false );
-    attributeMenu->AppendSeparator();
-    attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_CLUST, 
-        wxString( wxT( "Cluster nodes" ) ),
-        wxString( wxT( "Cluster nodes based on selected attributes" ) ) );
-    attributeMenu->Enable( ID_MENU_ITEM_ATTR_CLUST, false );
-    attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_TRACE, 
-        wxString( wxT( "View trace" ) ),
-        wxString( wxT( "View trace based on selected attributes" ) ) );
-    attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
-    attributeMenu->AppendSeparator();
+    attributeMenu->AppendSeparator();    
     attributeMenu->Append(
         ID_MENU_ITEM_ATTR_PARTITION,
         wxString( wxT( "Partition" ) ),
@@ -1822,7 +1830,7 @@ void Frame::initCanvasTwo()
         mediator,
         panelBotRgt,
         ID_CANVAS_LFT );
-    canvasTwo->SetMinSize( wxSize( 0, 0 ) );
+    //canvasTwo->SetMinSize( wxSize( 0, 0 ) );
     
     sizerBotRgt->Add(
         canvasTwo,
@@ -2672,6 +2680,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
             splitterTopLft,
             panelBotLft );
         splitterLft->SetSashPosition( (int)(sashRatioLft*h) );
+
     }
     else if ( e.GetId() == ID_MENU_ITEM_MODE_EDIT )
     {
@@ -2680,6 +2689,8 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // show view menu
 //        menuBar->Remove( 2 );
         menuBar->EnableTop( 2, false );
+        
+        
 
         // disable cluster & trace buttons
         //buttonClustAttr->Enable( false );
@@ -2709,6 +2720,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         splitterLft->GetSize( &w, &h );
         sashRatioLft = splitterLft->GetSashPosition()/(double)h;
 		splitterLft->Unsplit( panelBotLft );
+
     }
     else if ( e.GetId() == ID_MENU_ITEM_VIEW_SIM )
     {
@@ -3105,6 +3117,15 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             wxMenu menu;
         
             // group & ungroup
+            menu.Append(
+                ID_MENU_ITEM_ATTR_CLUST, 
+                wxT( "Cluster nodes" ),
+                wxT( "Cluster nodes based on selected attributes" ) );
+            menu.Append(
+                ID_MENU_ITEM_ATTR_TRACE, 
+                wxT( "View trace" ),
+                wxT( "View trace based on selected attributes" ) );
+            menu.AppendSeparator();
             menu.Append( 
                 ID_MENU_ITEM_ATTR_DISTR_PLOT,
                 wxT( "Distribution plot" ),
@@ -3130,16 +3151,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 ID_MENU_ITEM_ATTR_DELETE, 
                 wxT( "Delete" ),
                 wxT( "Delete attribute" ) );
-            menu.AppendSeparator();
-            menu.Append(
-                ID_MENU_ITEM_ATTR_CLUST, 
-                wxT( "Cluster nodes" ),
-                wxT( "Cluster nodes based on selected attributes" ) );
-            menu.Append(
-                ID_MENU_ITEM_ATTR_TRACE, 
-                wxT( "View trace" ),
-                wxT( "View trace based on selected attributes" ) );
-            menu.AppendSeparator();
+            menu.AppendSeparator();            
             menu.Append(
                 ID_MENU_ITEM_ATTR_PARTITION,
                 wxString( wxT( "Partition" ) ),

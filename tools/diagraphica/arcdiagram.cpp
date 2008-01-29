@@ -10,6 +10,9 @@
 
 #include <limits>
 #include "arcdiagram.h"
+#include <iostream>
+
+using namespace std;
 
 
 // -- init static variables -----------------------------------------
@@ -2168,10 +2171,10 @@ void ArcDiagram::onTimer( wxTimerEvent &e )
 // ----------------------------------------------------
 void ArcDiagram::handleHits( const vector< int > &ids )
 // ----------------------------------------------------
-{
+{	
     // leaves
     if ( ids.size() == 1 )
-    {
+    {    	
         if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
         {
             currIdxDgrm = -1;
@@ -2229,10 +2232,11 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         // interact with leaf nodes
         else if ( ids[1] == ID_LEAF_NODE )
         {
-            if ( mouseButton == MSE_BUTTON_DOWN &&
+            if ( mouseClick == MSE_CLICK_SINGLE &&
                  mouseDrag == MSE_DRAG_FALSE && 
                  mouseSide == MSE_SIDE_LFT )
             {
+            	handleShowDiagram( ids[2] );
                 if ( mediator->getView() == Mediator::VIEW_TRACE )
                 {
                     mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
@@ -2242,7 +2246,6 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                       mouseDrag == MSE_DRAG_FALSE &&
                       mouseSide == MSE_SIDE_LFT )
             {
-                handleShowDiagram( ids[2] );
             }
             /*
             else if ( mouseSide == MSE_SIDE_RGT )
@@ -2273,10 +2276,9 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         // interact with diagrams
         else if ( ids[1] == ID_DIAGRAM )
         {
-            canvas->clearToolTip();
-
-            if ( mouseSide   == MSE_SIDE_LFT &&
-                 mouseButton == MSE_BUTTON_DOWN &&
+            canvas->clearToolTip();			
+            if ( mouseClick == MSE_CLICK_SINGLE &&
+            	 mouseSide   == MSE_SIDE_LFT &&
                  mouseDrag   == MSE_DRAG_FALSE )
             {
                 dragIdxDgrm = ids[2];

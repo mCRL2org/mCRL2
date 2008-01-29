@@ -421,6 +421,9 @@ void DiaGraph::openFile( const string &path )
 
     // clear status msg
     frame->setStatusText( "" );
+    
+    // enable edit mode    
+    frame->enableEditMode( true );
 }
 
 
