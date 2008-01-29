@@ -16,6 +16,7 @@ R_SLDFLAGS="-shared"
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
 BJAM=build/bin/bjam
+BUILD_OPTIONS="--no-display-notice"
 
 # Setting host OS
 case $host in
@@ -70,7 +71,7 @@ case $host in
     ;;
 esac
 
-BUILD_OPTIONS="address-model=${ADDRESS_MODEL}"
+BUILD_OPTIONS="${BUILD_OPTIONS} address-model=${ADDRESS_MODEL}"
 
 # Checks for programs.
 AC_PROG_CPP

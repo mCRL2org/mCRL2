@@ -24,6 +24,8 @@
 #
 #    --enable-deprecated            activates building/installing of tools that are marked deprecated
 #
+#    --no-display-notice            configuration notice message are not printed
+#
 #   Installation:
 #
 #    --prefix                       directory relative to which tools/libraries, documentation and examples
@@ -60,20 +62,29 @@ path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (package
 # Activate header cache
 modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
 
-# The known sub projects
-use-project /site-config               : build ;
-use-project /boost                     : 3rd-party/boost ;
-use-project /libraries                 : libraries ;
-use-project /workarounds               : build/workarounds ;
+# Feature for building/installing tools that use opengl
+feature.feature opengl : yes no : optional incidental ;
+
+# Feature for building/installing tools that use wxWidgets
+feature.feature wx : yes no : optional incidental ;
+
+# Feature for building/installing optional tools/libraries
+feature.feature install : no yes ;
+
+# Enable/disable squadt connectivity code in tools
+feature.feature squadt-support : yes no ;
+
+# Feature to mark tools as basic experimental or deprecated
+feature.feature status : basic experimental deprecated : composite ;
+
+# Specifies that squadt connectivity is implemented in a tool
+feature.feature squadt-connectivity : none implemented : incidental composite ;
 
 include $(TOP)/build/config.jam ;
 
-# Helper rules for regession testing
-include $(BUILD_TOOLS)/testing.jam ;
-
 # Gets option arguments from options passed on the command line primarily and
 # otherwise the BUILD_OPTIONS variable
-rule get_option ( name : default ) {
+rule get-option ( name : default ) {
   local result = [ MATCH --$(name)=(.*) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
 
   if $(result) {
@@ -84,7 +95,7 @@ rule get_option ( name : default ) {
   }
 }
 
-rule is_option ( name : default ) {
+rule is-option ( name : default ) {
   local result = [ MATCH --($(name)) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
 
   if $(result) {
@@ -95,32 +106,21 @@ rule is_option ( name : default ) {
   }
 }
 
-# Extract build requirements from command line options
-for option in [ modules.peek : ARGV ] {
-  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
-
-  if $(temporary) {
-    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-
-    if ! [ MATCH ^(-).* : $(option) ] {
-      build-options += <$(temporary)>$(value) ;
-    }
+# Prints message
+rule print-notice ( message ) {
+  if [ is-option no-display-notice : no ] = no {
+    ECHO "Notice: $(message)" ;
   }
 }
-# Extract build requirements imported from build/config.jam
-for option in $(BUILD_OPTIONS) {
-  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
 
-  if $(temporary) {
-    if ! [ feature.get-values $(temporary) : $(build-options) ] {
-      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-     
-      if ! [ MATCH ^(-).* : $(option) ] {
-        build-options += $(value:G=<$(temporary)>) ;
-      }
-    }
-  }
-}
+# The known sub projects
+use-project /site-config               : build ;
+use-project /boost                     : 3rd-party/boost ;
+use-project /libraries                 : libraries ;
+use-project /workarounds               : build/workarounds ;
+
+# Helper rules for regession testing
+include $(BUILD_TOOLS)/testing.jam ;
 
 local link-variant = [ feature.get-values link : $(build-options) <link>shared ] ;
 
@@ -139,7 +139,7 @@ prefix = [ path.make $(TOP)/build/stage ] ;
 
 # Set installation/stage locations
 if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
-  if [ get_option prefix : no ] = no {
+  if [ get-option prefix : no ] = no {
     ECHO "Warning: missing final installation path!" ;
     ECHO "" ;
     ECHO "  This path information is needed for several tools e.g. xsim and squadt." ;
@@ -148,28 +148,16 @@ if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
     ECHO "" ;
   }
 
-  prefix     = [ get_option prefix     : [ path.make $(prefix) ] ] ;
-  bindir     = [ get_option bindir     : [ path.make $(prefix)/bin ] ] ;
-  libdir     = [ get_option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
-  includedir = [ get_option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
-  datadir    = [ get_option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
+  prefix     = [ get-option prefix     : [ path.make $(prefix) ] ] ;
+  bindir     = [ get-option bindir     : [ path.make $(prefix)/bin ] ] ;
+  libdir     = [ get-option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
+  includedir = [ get-option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
+  datadir    = [ get-option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
 }
 else {
   bindir = [ path.make $(prefix) ] ;
   libdir = [ path.make $(prefix)/lib ] ;
 }
-
-# Feature for building/installing optional tools/libraries
-feature.feature install : no yes ;
-
-# Enable/disable squadt connectivity code in tools
-feature.feature squadt-support : yes no ;
-
-# Feature to mark tools as basic experimental or deprecated
-feature.feature status : basic experimental deprecated : composite ;
-
-# Specifies that squadt connectivity is implemented in a tool
-feature.feature squadt-connectivity : none implemented : incidental composite ;
 
 # Top project
 project toolset
@@ -188,18 +176,18 @@ project toolset
 
 # Only from the root of the source tree
 if [ path.exists ./tools ] {
-  if [ is_option enable-experimental : no ] = no {
-    ECHO "Notice: not building experimental tools!" ;
+  if [ is-option enable-experimental : no ] = no {
+    print-notice "not building experimental tools!" ;
   
     feature.compose <status>experimental : <install>no ;
   }
-  if [ is_option enable-deprecated : no ] = no {
-    ECHO "Notice: not building deprecated tools!" ;
+  if [ is-option enable-deprecated : no ] = no {
+    print-notice "not building deprecated tools!" ;
   
     feature.compose <status>deprecated : <install>no ;
   }
   
-  if [ is_option disable-squadt-support : no ] = no {
+  if [ is-option disable-squadt-support : no ] = no {
     feature.feature squadt-interface : enabled disabled : symmetric optional ;
   
     feature.compose <squadt-connectivity>implemented
@@ -209,7 +197,7 @@ if [ path.exists ./tools ] {
           ;
   }
   else {
-    ECHO "Notice: not building squadt support in tools!" ;
+    print-notice "not building squadt support in tools!" ;
   
     feature.set-default squadt-support : no ;
   
@@ -258,8 +246,8 @@ if [ path.exists ./tools ] {
     feature.set-default install : yes ;
 
     # Add prefix for packaging
-    if [ get_option destdir : no ] != no {
-      local destdir  = [ get_option destdir : "" ] ;
+    if [ get-option destdir : no ] != no {
+      local destdir  = [ get-option destdir : "" ] ;
  
       prefix     = $(destdir)$(prefix) ;
       bindir     = $(destdir)$(bindir) ;

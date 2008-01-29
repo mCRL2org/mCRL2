@@ -18,20 +18,18 @@ ifeq ($(HOST_OS),WINDOWS)
 BJAM_BUILD         = build.bat runtime-link=static link=static
 endif
 
-BOOST_BUILD       := $(BJAM) --prefix=${prefix} @BUILD_OPTIONS@
+BOOST_BUILD       := $(BJAM) @BUILD_OPTIONS@
 
 # Creates an application bundle on Mac OS X
 .PHONY: all bjam install tools test
 
-all: $(BJAM) tools
-
-install: $(BJAM)
-	$(BOOST_BUILD) --install
-
-tools:
+all: $(BJAM) config.status
 	$(BOOST_BUILD)
 
-test: $(BJAM)
+install: $(BJAM) config.status
+	$(BOOST_BUILD) --install
+
+test: $(BJAM) config.status
 	$(BJAM) ./status --preserve-test-targets
 
 # Build boost build tool

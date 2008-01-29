@@ -7,6 +7,34 @@ include $(TOP)/build/config.jam ;
 import regex ;
 import feature ;
 
+# Extract build requirements from command line options
+for option in [ modules.peek : ARGV ] {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+
+    if ! [ MATCH ^(-).* : $(option) ] {
+      build-options += <$(temporary)>$(value) ;
+    }
+  }
+}
+
+# Extract build requirements imported from build/config.jam
+for option in $(BUILD_OPTIONS) {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    if ! [ feature.get-values $(temporary) : $(build-options) ] {
+      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+     
+      if ! [ MATCH ^(-).* : $(option) ] {
+        build-options += $(value:G=<$(temporary)>) ;
+      }
+    }
+  }
+}
+
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
 rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
   local splitted ;
@@ -70,14 +98,8 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
   alias $(name) : $(library_names) : $(requirements) : $(default) : $(usage-requirements) ;
 }
 
-if [ modules.peek : OS ] != MACOSX {
-  feature.feature bundle : yes no ;
-}
-
 # OpenGL library
 if $(OPENGL_NAME) {
-  feature.feature opengl : yes no : optional incidental ;
-
   lib GLU : : <os>NT <name>glu32 ;
   lib GLU : : <os>CYGWIN <name>glu32 ;
   
@@ -95,15 +117,16 @@ if $(OPENGL_NAME) {
       lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU <os>CYGWIN:<library>GLU ;
     }
   }
+
+  explicit opengl GLU ;
 }
 else {
-  ECHO "Notice: Not building tools that depend on OpenGL!" ;
+  print-notice "Not building tools that depend on OpenGL!" ;
 
   feature.feature opengl : no yes : optional ;
 }
 
 if $(WX_CPPFLAGS) {
-  feature.feature wx : yes no : optional incidental ;
 
   libraries_from_string wx_base
 	: $(WX_BASE_LDFLAGS)
@@ -111,6 +134,7 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <define>USING_WX
+          <wx>yes
           <toolset>msvc:<user-interface>gui
         ;
 
@@ -121,15 +145,17 @@ if $(WX_CPPFLAGS) {
         :
         : <cxxflags>$(WX_CPPFLAGS)
           <define>USING_WX
+          <wx>yes
+          <opengl>yes
           <toolset>msvc:<user-interface>gui
           <library>opengl
         ;
   }
 }
 else {
-  ECHO "Notice: Not building tools that depend on wxWidgets!" ;
+  print-notice "Not building tools that depend on wxWidgets!" ;
 
-  feature.feature wx : no yes : optional ;
+  feature.set-default wx : no ;
 }
 
 if $(BOOST_LIBRARY_PATH) {
@@ -159,6 +185,8 @@ rule boost_library ( name : use-local-boost ? : use-system-boost ? ) {
   else {
     alias boost_$(name) : /boost//$(name) : <threading>multi ;
   }
+
+  explicit boost_$(name) ;
 }
 
 boost_library filesystem ;
@@ -197,7 +225,8 @@ if $(CADP_HEADERS) {
   alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) ;
 }
 else {
-  ECHO "Notice: BCG format support for LTS library disabled!" ;
+  print-notice "BCG format support for LTS library disabled!" ;
+
   alias BCG : : : : ;
 }
 
@@ -222,3 +251,6 @@ if $(USE_CVC) {
 else {
   alias cvc ;
 }
+
+IMPORT $(__name__) : get-option is-option
+                   : : get-option is-option ;
