@@ -296,6 +296,10 @@ static void compute_structured_sort_decls(t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx,
                              ATermList* p_substs);
 
+//!\brief Determine, based on the context, whether sort is a list, set of bag
+//sort.
+static bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx);
+
 // implementation
 // ----------------------------------------------
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
@@ -1587,7 +1591,7 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
     ATermAppl sort = ATAgetFirst(l);
-    if (!is_bag_sort_id(sort) && !is_set_sort_id(sort) && !is_list_sort_id(sort)) {
+    if (!is_set_bag_list_sort(sort, p_ctx)) {
       if ((p_ctx->num_sort_cons_equations[sort] != (p_ctx->num_sort_constructors[sort] * p_ctx->num_sort_constructors[sort]))) {
         if (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1) {
           non_struct_sorts = ATinsert(non_struct_sorts, (ATerm) sort);
@@ -1782,6 +1786,7 @@ void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_con
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
           } else {
             ATermAppl sort_name = ATAgetArgument(sort, 0);
+            assert(ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) == -1); // Do not add duplicate sorts
             p_data_decls->sorts = ATinsert(p_data_decls->sorts,
                                     (ATerm) gsMakeSortRef(sort_name, gsMakeSortExprList(element_sort)));
           }
@@ -1831,6 +1836,28 @@ void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_con
   }
   gsDebugMsg("Done reconstructing structured sorts\n");
 }
+
+// This is a workaround to determine whether a sort might also be a list sort.
+// For conciseness this has been taken together with the check for being a set
+// or bag sort. Note that the hackish solution is not needed in case of sets or
+// bags, because these do not have constructors.
+bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
+{
+  // simple sort ids
+  if (is_set_sort_id(sort) || is_bag_sort_id(sort) || is_list_sort_id(sort)) {
+    return true;
+  }
+
+  // sort references
+  ATermList constructors = p_ctx->sort_constructors[sort].elements();
+  if(p_ctx->num_sort_constructors[sort] == 2 &&
+         (ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)) {
+        // sort is a list sort
+    return true;
+  }
+  return false;
+}
+
     } //namespace detail
   }   //namespace core
 }     //namespace mcrl2
