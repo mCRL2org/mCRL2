@@ -16,7 +16,7 @@ R_SLDFLAGS="-shared"
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
 BJAM=build/bin/bjam
-BUILD_OPTIONS="--no-display-notice"
+BUILD_OPTIONS="variant=release --no-display-notice"
 
 # Setting host OS
 case $host in
