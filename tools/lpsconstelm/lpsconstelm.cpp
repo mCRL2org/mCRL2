@@ -19,6 +19,7 @@
 #include <iterator>
 #include <fstream>
 #include <stdio.h>
+#include <stdlib.h>
 
 //Boost
 #include <boost/program_options.hpp>
@@ -112,7 +113,7 @@ class lpsConstElm {
 
     bool execute();
     void removeSingleton(int n);
-    void output();
+    bool output();
     void setSaveFile(std::string const& x);
     void printSet();
     bool loadFile(std::string const& filename);
@@ -124,7 +125,7 @@ class lpsConstElm {
     void setAllTrue(bool b);
     void setReachable(bool b);
     void printSetVar();
-    void filter();
+    bool filter();
 };
 
 // Squadt protocol interface and utility pseudo-library
@@ -639,7 +640,7 @@ void lpsConstElm::removeSingleton(int n)
 // and removing the constant process parameters from the list of process.
 // Constant parameters (stored in p_S)
 //
-inline void lpsConstElm::output() {
+inline bool lpsConstElm::output() {
   lps::linear_process p_process = p_spec.process();
   lps::summand_list rebuild_summandlist;
 
@@ -819,8 +820,11 @@ inline void lpsConstElm::output() {
   else {
     if(!rebuild_spec.save(p_outputfile)) {
        gsErrorMsg("lpsconstelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
+       exit(EXIT_FAILURE);
     }
   }
+  
+  return true;
 }
 
 // Set output file
@@ -944,7 +948,7 @@ void lpsConstElm::printSetVar() {
 
 // The constelm filter
 //
-void lpsConstElm::filter() {
+bool lpsConstElm::filter() {
 
   //---------------------------------------------------------------
   //---------------------   Init begin   --------------------------
@@ -1110,6 +1114,8 @@ void lpsConstElm::filter() {
     gsVerboseMsg("lpsconstelm: Number of removed process parameters: %d\n", p_S.size());
     printSetVar();
   }
+ 
+  return true;
 }
 
 void lpsConstElm::parse_command_line(int argc, char** argv) {
@@ -1161,12 +1167,12 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
     "\n"
     "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
     ;
-    exit (0);
+    exit (EXIT_SUCCESS);
   }
 
   if (vm.count("version")) {
     print_version_information(NAME, AUTHOR);
-    exit (0);
+    exit (EXIT_SUCCESS);
   }
 
   setVerbose(0 < vm.count("verbose"));
@@ -1182,17 +1188,17 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
   if (file_names.size() == 0){
     /* Read from standard input */
     if (!readStream()) {
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   }
   else if (2 < file_names.size()) {
     std::cerr << "lpsconstelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< std::endl;
 
-    exit (0);
+    exit(EXIT_SUCCESS);
   }
   else {
     if (!loadFile(file_names[0])) {
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
     if (file_names.size() == 2) {
@@ -1202,9 +1208,9 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
 }
 
 bool lpsConstElm::execute() {
-  filter();
-  output();
-  return true;
+  bool b1 = filter();
+  bool b2 = output();
+  return (b1 && b2);
 }
 
 int main(int argc, char** argv)
@@ -1216,5 +1222,5 @@ int main(int argc, char** argv)
     return 0;
   }
 #endif
-  return lpsConstElm(argc, argv).execute();
+  exit(lpsConstElm(argc, argv).execute() ? EXIT_SUCCESS : EXIT_FAILURE );
 }
