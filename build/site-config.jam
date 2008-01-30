@@ -50,7 +50,7 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
       }
       else if [ modules.peek : NT ] {
         if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] { # MSVC specific
-          local search_path = [ MATCH "/LIBPATH(.*)$" : $(part) ] ;
+          local search_path = [ MATCH "/LIBPATH:(.*)$" : $(part) ] ;
       
           library_search_paths += <search>$(search_path) ;
         }
