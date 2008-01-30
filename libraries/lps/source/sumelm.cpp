@@ -96,11 +96,9 @@ namespace lps {
   {
     // First apply already present substitutions to rhs
     data_expression new_rhs = sumelm_replace(rhs, replacements);
-    gsDebugMsg("Adding substitution %s := %s\n", pp(lhs).c_str(), pp(new_rhs).c_str());
     for (std::map<data_expression, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
     {
       if (i->second == lhs) {
-        gsDebugMsg("Changing substitution %s := %s into %s := %s\n", pp(i->first).c_str(), pp(i->second).c_str(), pp(i->first).c_str(), pp(new_rhs).c_str());
         i->second = new_rhs;
       }
     }
