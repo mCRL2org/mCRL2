@@ -17,8 +17,8 @@ alias colorbutton   : colorbutton.o ;
 obj spinctrlfloat.o : source/spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 obj colorbutton.o   : source/colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 
-# Dummy for when squadt support is not desired
-alias squadt_interface.main
+# mCRL2 Tool for SQuADt interface
+obj squadt_interface
       : source/squadt_interface.cpp
       : <threading>multi
         <use>/libraries/tipi//tool_interface
@@ -28,26 +28,6 @@ alias squadt_interface.main
       : <library>/libraries/tipi//tool_interface
         <toolset>darwin:<framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
-      ;
-
-# mCRL2 Tool for SQuADt interface
-lib mcrl2_squadt
-      : squadt_interface.main
-      ;
-
-alias squadt_interface
-      : mcrl2_squadt
-      : <link>static
-      ;
-
-alias squadt_interface
-      : mcrl2_squadt
-      : <link>shared
-      ;
-
-alias squadt_interface.alias
-      : squadt_interface.main
-      : <use>headers
       ;
 
 mcrl2-library utilities

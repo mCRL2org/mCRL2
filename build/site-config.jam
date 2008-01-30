@@ -7,34 +7,6 @@ include $(TOP)/build/config.jam ;
 import regex ;
 import feature ;
 
-# Extract build requirements from command line options
-for option in [ modules.peek : ARGV ] {
-  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
-
-  if $(temporary) {
-    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-
-    if ! [ MATCH ^(-).* : $(option) ] {
-      build-options += <$(temporary)>$(value) ;
-    }
-  }
-}
-
-# Extract build requirements imported from build/config.jam
-for option in $(BUILD_OPTIONS) {
-  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
-
-  if $(temporary) {
-    if ! [ feature.get-values $(temporary) : $(build-options) ] {
-      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-     
-      if ! [ MATCH ^(-).* : $(option) ] {
-        build-options += $(value:G=<$(temporary)>) ;
-      }
-    }
-  }
-}
-
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
 rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
   local splitted ;
@@ -56,7 +28,7 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
         local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
      
         library_search_paths += <search>$(search_path) ;
-        library_link_paths += <link>shared:<xdll-path>$(search_path) ;
+        library_link_paths += <link>shared:<dll-path>$(search_path) ;
       }
       else if [ MATCH "^-?l(.*)$" : $(part) ] {
         local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
@@ -65,7 +37,8 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
             :
             : <name>$(library_name) $(library_search_paths)
             :
-            : $(framework_names) $(library_link_paths)
+            : $(framework_names)
+              $(library_link_paths)
             ;
      
         library_names += $(name)$(library_name) ;

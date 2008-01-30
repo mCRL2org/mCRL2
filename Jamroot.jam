@@ -122,6 +122,34 @@ use-project /workarounds               : build/workarounds ;
 # Helper rules for regession testing
 include $(BUILD_TOOLS)/testing.jam ;
 
+# Extract build requirements from command line options
+for option in [ modules.peek : ARGV ] {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+
+    if ! [ MATCH ^(-).* : $(option) ] {
+      build-options += <$(temporary)>$(value) ;
+    }
+  }
+}
+
+# Extract build requirements imported from build/config.jam
+for option in $(BUILD_OPTIONS) {
+  local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+
+  if $(temporary) {
+    if ! [ feature.get-values $(temporary) : $(build-options) ] {
+      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+     
+      if ! [ MATCH ^(-).* : $(option) ] {
+        build-options += $(value:G=<$(temporary)>) ;
+      }
+    }
+  }
+}
+
 local link-variant = [ feature.get-values link : $(build-options) <link>shared ] ;
 
 # Make sure the build tag variable is defined
@@ -294,13 +322,13 @@ rule install-tools ( executables * : requirements * ) {
 
   if $(executables) {
     if [ modules.peek : NT ] {
-      install shared-libraries : $(executables) : <install-dependencies>on <install-type>SHARED_LIB <location>$(bindir) ;
+#      install shared-libraries : $(executables) : <install-dependencies>on <install-type>SHARED_LIB <location>$(bindir) ;
     }
     else {
-      install shared-libraries : $(executables) : <install-dependencies>on <install-type>LIB <location>$(libdir) ;
+#      install shared-libraries : $(executables) : <install-dependencies>on <install-type>LIB <location>$(libdir) ;
     }
 
-    targets = shared-libraries ; 
+#    targets = shared-libraries ; 
   }
 
   # OS X bundle installation
@@ -362,7 +390,7 @@ rule install-libraries ( libraries * : requirements * ) {
       }
     }
 
-    install install-library : $(libraries) : <install-type>LIB $(requirements) ;
+    install install-library : $(libraries) : <install-dependencies>on <install-type>LIB $(requirements) ;
 
     requirements = [ property.change $(requirements) : <location> $(includedir) ] ;
 
@@ -430,7 +458,12 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 
     lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
 
-    install-libraries $(name) : <location>$(plugin-prefix) ;
+    if [ feature.defaults <install> ] = <install>yes {
+      install install : $(name) : <location>$(plugin-prefix) ;
+    }
+    else {
+      install stage : $(name) : <location>$(plugin-prefix) ;
+    }
   }
 }
 
