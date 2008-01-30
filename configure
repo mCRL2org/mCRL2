@@ -696,7 +696,6 @@ WX_CPPFLAGS
 WX_BASE_LDFLAGS
 WX_GL_LDFLAGS
 LIBOBJS
-BUILD_VARIANT
 IATERM_CPPFLAGS
 IATERM_LDFLAGS
 BUILD_OPTIONS
@@ -1901,7 +1900,7 @@ R_SLDFLAGS="-shared"
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
 BJAM=build/bin/bjam
-BUILD_OPTIONS="variant=release --no-display-notice"
+BUILD_OPTIONS="--no-display-notice"
 
 # Setting host OS
 case $host in
@@ -3778,7 +3777,7 @@ if test "x$enable_debug" = xyes; then
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
-  BUILD_VARIANT=""
+  BUILD_VARIANT="debug"
   BUILD_OPTIONS="${BUILD_OPTIONS} debug-symbols=on runtime-debugging=on"
   if test "x$enable_optimisation" = xyes; then
    BUILD_OPTIONS="${BUILD_OPTIONS} optimization=speed"
@@ -3800,7 +3799,7 @@ if test "${enable_profile+set}" = set; then
 fi
 
 if test "x$enable_profile" = xyes; then
-  BUILD_VARIANT=""
+  BUILD_VARIANT="profile"
   BUILD_OPTIONS="profiling=on ${BUILD_OPTIONS}"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -6403,8 +6402,6 @@ then
   exec_prefix='${prefix}'
 fi
 
-
-
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
@@ -6426,7 +6423,7 @@ else
 fi
 
 # Set install path related settings
-BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\""
+BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\" variant=${BUILD_VARIANT}"
 
 eval "eval includedir=${includedir}"
 if test ! "${prefix}/include" = "${includedir}"; then
@@ -6462,7 +6459,7 @@ R_SLDFLAGS="$R_SLDFLAGS"
 
 
 { echo "$as_me:$LINENO: result:
-   Configured $BUILD_VARIANT variant-build using libraries:
+   Configured $BUILD_VARIANT build using libraries:
 
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
@@ -6474,7 +6471,7 @@ R_SLDFLAGS="$R_SLDFLAGS"
    Some tools will not be built if any of these libraries are missing.
 " >&5
 echo "${ECHO_T}
-   Configured $BUILD_VARIANT variant-build using libraries:
+   Configured $BUILD_VARIANT build using libraries:
 
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
@@ -7206,7 +7203,6 @@ WX_CPPFLAGS!$WX_CPPFLAGS$ac_delim
 WX_BASE_LDFLAGS!$WX_BASE_LDFLAGS$ac_delim
 WX_GL_LDFLAGS!$WX_GL_LDFLAGS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
-BUILD_VARIANT!$BUILD_VARIANT$ac_delim
 IATERM_CPPFLAGS!$IATERM_CPPFLAGS$ac_delim
 IATERM_LDFLAGS!$IATERM_LDFLAGS$ac_delim
 BUILD_OPTIONS!$BUILD_OPTIONS$ac_delim
@@ -7221,7 +7217,7 @@ USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 93; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 92; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

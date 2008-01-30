@@ -133,6 +133,9 @@ for option in [ modules.peek : ARGV ] {
       build-options += <$(temporary)>$(value) ;
     }
   }
+  else if $(option) in debug profile release {
+    build-options += <variant>$(option) ;
+  }
 }
 
 # Extract build requirements imported from build/config.jam

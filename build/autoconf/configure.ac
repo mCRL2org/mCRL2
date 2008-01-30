@@ -16,7 +16,7 @@ R_SLDFLAGS="-shared"
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
 BJAM=build/bin/bjam
-BUILD_OPTIONS="variant=release --no-display-notice"
+BUILD_OPTIONS="--no-display-notice"
 
 # Setting host OS
 case $host in
@@ -186,7 +186,7 @@ if test "x$enable_debug" = xyes; then
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
-  BUILD_VARIANT=""
+  BUILD_VARIANT="debug"
   BUILD_OPTIONS="${BUILD_OPTIONS} debug-symbols=on runtime-debugging=on"
   if test "x$enable_optimisation" = xyes; then
    BUILD_OPTIONS="${BUILD_OPTIONS} optimization=speed"
@@ -207,7 +207,7 @@ AC_ARG_ENABLE(
   AS_HELP_STRING([--enable-profile],[adds profiling support to libraries and executables])
 )
 if test "x$enable_profile" = xyes; then
-  BUILD_VARIANT=""
+  BUILD_VARIANT="profile"
   BUILD_OPTIONS="profiling=on ${BUILD_OPTIONS}"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -540,8 +540,6 @@ then
   exec_prefix='${prefix}'
 fi
 
-AC_SUBST([BUILD_VARIANT],[])
-
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
@@ -558,7 +556,7 @@ else
 fi
 
 # Set install path related settings
-BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\""
+BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\" variant=${BUILD_VARIANT}"
 
 eval "eval includedir=${includedir}"
 if test ! "${prefix}/include" = "${includedir}"; then
@@ -589,7 +587,7 @@ AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
 AC_SUBST([R_SLDFLAGS],["$R_SLDFLAGS"])
 
 AC_MSG_RESULT([
-   Configured $BUILD_VARIANT variant-build using libraries:
+   Configured $BUILD_VARIANT build using libraries:
 
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
