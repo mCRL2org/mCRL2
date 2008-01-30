@@ -14,12 +14,14 @@
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -74,67 +76,6 @@ const std::string SPECIFICATION =
 "                                                 \n"
 "init P(_0);                                      \n"
 ;
-
-struct sort_has_name
-{
-  std::string m_name;
-    
-  sort_has_name(std::string name)
-    : m_name(name)
-  {}
-  
-  bool operator()(sort_expression s) const
-  {
-    return is_sort_identifier(s) && std::string(sort_identifier(s).name()) == s;
-  }
-};
-
-struct data_operation_has_name
-{
-  std::string m_name;
-    
-  data_operation_has_name(std::string name)
-    : m_name(name)
-  {}
-  
-  bool operator()(data_operation c) const
-  {
-    return std::string(c.name()) == m_name;
-  }
-};
-
-/// Find the mapping named s.
-data_operation find_mapping(data_specification data, std::string s)
-{
-  data_operation_list::iterator i = std::find_if(data.mappings().begin(), data.mappings().end(), data_operation_has_name(s));
-  if (i == data.mappings().end())
-  {
-    return data_operation();
-  }
-  return *i;
-}
-
-/// Find the constructor named s.
-data_operation find_constructor(data_specification data, std::string s)
-{
-  data_operation_list::iterator i = std::find_if(data.constructors().begin(), data.constructors().end(), data_operation_has_name(s));
-  if (i == data.constructors().end())
-  {
-    return data_operation();
-  }
-  return *i;
-}
-
-/// Find the sort named s.
-sort_expression find_sort(data_specification data, std::string s)
-{
-  sort_expression_list::iterator i = std::find_if(data.sorts().begin(), data.sorts().end(), sort_has_name(s));
-  if (i == data.sorts().end())
-  {
-    return sort_expression();
-  }
-  return *i;
-}
 
 void test1()
 {

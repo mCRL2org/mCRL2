@@ -14,6 +14,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data_operation.h"
+#include "mcrl2/data/sort_arrow.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
@@ -33,6 +34,7 @@ int test_main(int argc, char** argv)
   sort_expression AB = arrow(lA, B);
   sort_expression_list lAB = make_list(A,B);
   sort_expression BC = arrow(lB, C);
+  sort_expression_list lBC = make_list(B,C);
   sort_expression CD = arrow(lC, D);
 
   sort_expression s;
@@ -82,6 +84,11 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
   BOOST_CHECK(std::find(src.begin(), src.end(), B) != src.end());
   BOOST_CHECK(tgt == CD);
+
+  // check if (A x B) -> C != A -> (B x C)
+  sort_expression s1 = sort_arrow(lAB, C);
+  sort_expression s2 = sort_arrow(lA, BC);
+  BOOST_CHECK(s1 != s2);
 
   return 0;
 }
