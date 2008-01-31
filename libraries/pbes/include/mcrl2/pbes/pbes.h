@@ -187,12 +187,12 @@ class pbes
     {
       for (Iter i = first; i != last; ++i)
       {
-        if (!equal_sorts(i->parameters(), v.parameters()))
+        if (i->name() == v.name() && !equal_sorts(i->parameters(), v.parameters()))
         {
-          return false;
+          return true;
         }
       }
-      return true;
+      return false;
     }
 
   public:

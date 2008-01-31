@@ -1,5 +1,4 @@
 
-
 \documentclass{article}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{fullpage}
@@ -9,7 +8,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, January 28, 2008 09:08:28}
+%TCIDATA{LastRevised=Thursday, January 31, 2008 15:27:07}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -36,6 +35,7 @@
 \newtheorem{solution}[theorem]{Solution}
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{tcilatex}
 
 \begin{document}
 
@@ -61,10 +61,12 @@ some kind of bisimulation equivalence between $M$ and $S$.
 \[
 \begin{array}{ccl}
 E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
-match^{S,M}(d,d^{\prime }), \\ 
-&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\ 
-E_{1} & := & \{Y_{i}^{p,q}(d,d^{\prime },e)=close_{i}^{p,q}(d,d^{\prime
-},e)|i\in I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
 \end{array}%
 \]%
 with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
@@ -94,8 +96,8 @@ X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))%
 \[
 \begin{array}{ccl}
 E & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
-match^{S,M}(d,d^{\prime }), \\ 
-&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\}%
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\}%
 \end{array}%
 \]%
 with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
@@ -113,13 +115,17 @@ X^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))
 \emph{wbisim}$(M,S)=\nu E_{2}\mu E_{1}$, where%
 \[
 \begin{array}{ccl}
-E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
-match^{S,M}(d,d^{\prime }), \\ 
-&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\ 
-E_{1} & := & \{Y_{1,i}^{p,q}(d,d^{\prime },e)=close_{1,i}^{p,q}(d,d^{\prime
-},e), \\ 
-&  & Y_{2,i}^{p,q}(d,d^{\prime })=close_{2,i}^{p,q}(d,d^{\prime })|i\in
-I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+E_{3} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{2} & := & \{Y_{1,i}^{M,S}(d,d^{\prime },e)=close_{1,i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{2,i}^{M,S}(d,d^{\prime })=close_{2,i}^{M,S}(d,d^{\prime })|i\in
+I_{M}, \\ 
+&  & Y_{1,i}^{S,M}(d^{\prime },d,e)=close_{1,i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}, \\ 
+&  & Y_{2,i}^{S,M}(d^{\prime },d)=close_{2,i}^{S,M}(d^{\prime },d)|i\in
+I_{S}\}%
 \end{array}%
 \]%
 with for all $i\in I_{p}$ and $(p,q)\in \{(M,S),(S,M)\}$:%
@@ -136,13 +142,13 @@ a_{i}=\tau : & close_{2,i}^{p,q}(g_{i}(d,e),d^{\prime }) \\
 a_{i}\neq \tau : & \bigvee\limits_{j\in I_{q}}\exists _{e^{\prime
 }:E_{j}}.\left( c_{j}(d^{\prime },e^{\prime })\wedge
 a_{i}(d,e)=a_{j}(d^{\prime },e^{\prime })\wedge
-close_{2,i}^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))\right)%
+close_{2,i}^{p,q}(g_{i}(d,e),g_{j}(d^{\prime },e^{\prime }))\right) 
 \end{array}%
-\right. \\
+\right.  \\
 close_{2,i}^{p,q}(d,d^{\prime }) &=&X^{p,q}(d,d^{\prime })\vee
 \bigvee\limits_{\{j\in I_{q}|a_{j}=\tau \}}\left( \exists _{e^{\prime
 }:E_{j}}c_{j}(d^{\prime },e^{\prime })\wedge Y_{2,i}^{p,q}(d,g_{j}(d^{\prime
-},e^{\prime }))\right)
+},e^{\prime }))\right) 
 \end{eqnarray*}
 
 \subsection{Branching Simulation Equivalence}
@@ -151,11 +157,13 @@ close_{2,i}^{p,q}(d,d^{\prime }) &=&X^{p,q}(d,d^{\prime })\vee
 \[
 \begin{array}{ccl}
 E_{2} & := & \{X^{M,S}(d,d^{\prime })=match^{M,S}(d,d^{\prime })\wedge
-match^{S,M}(d,d^{\prime }), \\ 
-&  & X^{M,S}(d,d^{\prime })=X^{S,M}(d,d^{\prime }), \\ 
-&  & X^{S,M}(d,d^{\prime })=X^{M,S}(d,d^{\prime })\} \\ 
-E_{1} & := & \{Y_{i}^{p,q}(d,d^{\prime },e)=close_{i}^{p,q}(d,d^{\prime
-},e)|i\in I_{p}\wedge (p,q)\in \{(M,S),(S,M)\}\}%
+match^{S,M}(d^{\prime },d), \\ 
+&  & X^{M,S}(d,d^{\prime })=X^{S,M}(d^{\prime },d), \\ 
+&  & X^{S,M}(d^{\prime },d)=X^{M,S}(d,d^{\prime })\} \\ 
+E_{1} & := & \{Y_{i}^{M,S}(d,d^{\prime },e)=close_{i}^{M,S}(d,d^{\prime
+},e)|i\in I_{M}, \\ 
+&  & Y_{i}^{S,M}(d^{\prime },d,e)=close_{i}^{S,M}(d^{\prime },d,e)|i\in
+I_{S}\}%
 \end{array}%
 \]%
 with $match$, $close$, and $step$ defined exactly the same as in branching

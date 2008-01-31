@@ -376,9 +376,13 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       {
         const data_variable_list& e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
-        pbes_equation e2(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
         equations.push_back(e1);
-        equations.push_back(e2);
+      }
+      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      {
+        const data_variable_list& e  = i->summation_variables();
+        pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
+        equations.push_back(e1);
       }
 
       return build_pbes(equations, model, set_lps(spec, s));
@@ -606,13 +610,17 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       {
         const data_variable_list& e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(m, s, i), d + d1 + e), close1(m, s, i));
-        pbes_equation e2(mu(), propositional_variable(Y1(s, m, i), d1 + d + e), close1(s, m, i));
-        pbes_equation e3(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i, d, d1));
-        pbes_equation e4(mu(), propositional_variable(Y2(s, m, i), d1 + d), close2(s, m, i, d, d1));
+        pbes_equation e2(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i, d, d1));
         equations.push_back(e1);
         equations.push_back(e2);
-        equations.push_back(e3);
-        equations.push_back(e4);
+      }
+      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      {
+        const data_variable_list& e  = i->summation_variables();
+        pbes_equation e1(mu(), propositional_variable(Y1(s, m, i), d1 + d + e), close1(s, m, i));
+        pbes_equation e2(mu(), propositional_variable(Y2(s, m, i), d1 + d), close2(s, m, i, d1, d));
+        equations.push_back(e1);
+        equations.push_back(e2);
       }
 
       return build_pbes(equations, model, set_lps(spec, s));
@@ -656,9 +664,13 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
       {
         const data_variable_list& e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
-        pbes_equation e2(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
         equations.push_back(e1);
-        equations.push_back(e2);
+      }
+      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      {
+        const data_variable_list& e  = i->summation_variables();
+        pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
+        equations.push_back(e1);
       }
 
       return build_pbes(equations, model, set_lps(spec, s));
