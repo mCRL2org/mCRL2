@@ -142,7 +142,18 @@ class summand: public aterm_appl
     ///
     bool is_tau() const
     {
-      return !is_delta() && actions().size() == 1 && core::detail::gsIsTau(actions().front());
+      // return !is_delta() && actions().size() == 1 && core::detail::gsIsTau(actions().front());
+      
+      /*
+      // Written by Luc Engelen; no idea what it does.
+      ATermAppl v_multi_action_or_delta = ATAgetArgument(*this, 2);
+      if (gsIsMultAct(v_multi_action_or_delta)) {
+        return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
+      } else {
+        return false;
+      }
+      */
+      return !is_delta() && actions().empty();
     }
 
     /// Returns true if time is available.

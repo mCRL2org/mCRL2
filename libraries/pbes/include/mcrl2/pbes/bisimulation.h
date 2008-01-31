@@ -62,7 +62,12 @@ class bisimulation_algorithm
       {
         out << (i != l.begin() ? "-" : "") << std::string(i->label().name());
       }
-      return out.str();
+      std::string result = out.str();
+      if (result == "")
+      {
+        result = "tau";
+      }
+      return result;
     }
 
     /// Returns the name associated with i.
