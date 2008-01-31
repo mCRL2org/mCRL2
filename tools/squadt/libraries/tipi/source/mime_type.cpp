@@ -25,7 +25,7 @@ namespace tipi {
     if (regex_match(s, matches, sregex((main= +(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))) >> !('/' >>
                                              (sub= +(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))))))) {
 
-      if (matches.size() == 3 && !matches[2].str().empty()) {
+      if (matches.size() == 3 && (matches[2].length() != 0)) {
         m_sub = matches[2];
 
         const char* const* x = &main_type_as_string[0];
