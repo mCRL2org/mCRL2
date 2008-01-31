@@ -101,7 +101,6 @@ sort_expression arrow(sort_expression_list domain, sort_expression range)
 
 /// Returns the domain sorts of s.
 /// \deprecated
-///
 inline
 sort_expression_list domain_sorts(sort_expression s)
 {
@@ -110,7 +109,6 @@ sort_expression_list domain_sorts(sort_expression s)
 
 /// Returns the range sort of s.
 /// \deprecated
-///
 inline
 sort_expression result_sort(sort_expression s)
 {
@@ -123,7 +121,6 @@ sort_expression result_sort(sort_expression s)
 /// <li>source(A->B) = [A]</li>
 /// </ul>
 /// \deprecated
-///
 inline
 sort_expression_list source(sort_expression s)
 {
@@ -139,7 +136,6 @@ sort_expression_list source(sort_expression s)
 /// <li>target(A->B) = B</li>
 /// </ul>
 /// \deprecated
-///
 inline
 sort_expression target(sort_expression s)
 {

@@ -136,6 +136,17 @@ class pbes
       m_equations = Container(eqn.begin(), eqn.end());
     }
 
+    /// Returns the predicate variables appearing in the left hand side of an equation.
+    atermpp::set<propositional_variable> compute_declared_variables() const
+    {
+      atermpp::set<propositional_variable> result;
+      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        result.insert(i->variable());
+      }
+      return result;
+    }
+
     /// Checks if the sorts of the variables in both lists are equal.
     bool equal_sorts(data::data_variable_list v, data::data_expression_list w) const
     {
@@ -155,7 +166,7 @@ class pbes
       return true;
     }
 
-    /// Checks if the variable instantiation v appears in the sequence of variable declarations [first, last[.
+    /// Checks if the variable instantiation v appears with the right type in the sequence of variable declarations [first, last[.
     template <typename Iter>
     bool is_declared_in(Iter first, Iter last, propositional_variable_instantiation v) const
     {
@@ -167,6 +178,21 @@ class pbes
         }
       }
       return false;
+    }
+
+
+    /// Checks if the variable instantiation v has a conflict with the sequence of variable declarations [first, last[.
+    template <typename Iter>
+    bool has_conflicting_type(Iter first, Iter last, propositional_variable_instantiation v) const
+    {
+      for (Iter i = first; i != last; ++i)
+      {
+        if (!equal_sorts(i->parameters(), v.parameters()))
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
   public:
@@ -438,6 +464,8 @@ class pbes
     /// <li>the free variables occurring in the equations are declared in free_variables()</li>
     /// <li>the free variables occurring in the equations with the same name are identical</li>
     /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
+    /// <li>the predicate variable instantiations occurring in the equations match with their declarations</li>
+    /// <li>the predicate variable instantiation occurring in the initial state matches with the declaration</li>
     /// <li>the data specification is well typed</li>
     /// </ul>
     ///
@@ -450,6 +478,8 @@ class pbes
       const atermpp::set<data::data_variable>& declared_free_variables = free_variables();
       std::set<data::data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
       std::set<data::data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
+      atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
+      atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
       // check 1)
       if (!data::detail::check_sorts(
@@ -548,6 +578,23 @@ class pbes
       }
 
       // check 8)
+      for (atermpp::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      {
+        if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
+        {
+          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << pp(*i) << " conflicts with its declaration!" << std::endl;
+          return false;
+        }
+      }
+
+      // check 9)
+      if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
+      {
+        std::cerr << "pbes::is_well_typed() failed: the initial state " << pp(initial_state()) << " conflicts with its declaration!" << std::endl;
+        return false;
+      }
+
+      // check 10)
       if (!data().is_well_typed())
       {
         return false;
