@@ -415,7 +415,9 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 
   for(atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
           i!=disjunction_set.end() ; i++)
-  { if (pbes_expr::is_false(t))
+  { 
+    // std::cerr << "DISJUNCTION " << pp(*i) << "\n";
+    if (pbes_expr::is_false(t))
     { t=*i;
     }
     else
@@ -454,6 +456,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                    Rewriter *rewriter,
                    const bool use_internal_rewrite_format)
 { 
+  // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
   pbes_expression result;
 
@@ -485,14 +488,18 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
+    
+    // std::cerr << "SUB&REWR OR: " << pp(p) << "\n";
     pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
                  data, rewriter,use_internal_rewrite_format);
+    // std::cerr << "SUB&REWR OR LEFT: " << pp(left) << "\n";
     if (is_true(left))
     { result = true_();
     }
     else 
     { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
                  data, rewriter,use_internal_rewrite_format);
+      // std::cerr << "SUB&REWR OR RIGHT: " << pp(right) << "\n";
       if (is_true(right))
       { result = true_();
       }
@@ -504,6 +511,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
       else result = or_(left,right);
     }
+   // std::cerr << "SUB&REWR OR RESULT: " << pp(result) << "\n";
   }
   else if (is_true(p))
   { // p is True
@@ -614,9 +622,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   }
   else if (is_exists(p))
   { 
+    // std::cerr << "EXISTS_: " << pp(p) << "\n";
     data::data_variable_list data_vars = quant_vars(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter,use_internal_rewrite_format);
-
+    // std::cerr << "REWRITTEN EXPR " << pp(expr) << "\n";
     // If no data_vars
     if (data_vars.empty())
     { 
@@ -678,10 +687,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   }
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_true(r)) /* the resulting expression is true, so we can terminate */
-                  { 
+                  { // std::cerr << "Return true\n";
                     return pbes_expr::true_();
                   }
                   else 
@@ -710,6 +720,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
       result=make_disjunction(disjunction_set);
     }
+    // std::cerr << "Return result " << pp(result) << "\n";
   }
   else if (is_propositional_variable_instantiation(p))
   { // p is a propositional variable
@@ -741,8 +752,9 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
     }
     else
-    {
+    { 
       data::data_expression d = rewriter->rewrite(p);
+      // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
       if (data::data_expr::is_true(d))
       { result = pbes_expr::true_();
       }

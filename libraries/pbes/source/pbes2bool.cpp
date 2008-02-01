@@ -303,6 +303,7 @@ bool process(t_tool_options const& tool_options)
 {
   //Load PBES
   pbes<> pbes_spec = load_pbes(tool_options);
+  
   if (!pbes_spec.is_well_typed())
   { gsErrorMsg("The pbes is not well typed\n");
     exit(1);
@@ -311,6 +312,12 @@ bool process(t_tool_options const& tool_options)
   { gsErrorMsg("The pbes contains free pbes variables\n");
     exit(1);
   }
+
+  if (!pbes_spec.instantiate_free_variables())
+  { gsErrorMsg("Fail to instantiate all free variables in the pbes.\n");
+    exit(1);
+  }
+
   pbes_spec.normalize();  // normalize the pbes, such that the equations do not contain negations
                           // and implications.
 
@@ -687,32 +694,37 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   // First construct using the set of free_variables a map where 
   // each free_variable has an associated default_term.
 
-  atermpp::set< data_variable > free_variables=pbes_spec.free_variables();
-  std::map< data_variable, data_expression > default_assignment;
+  // atermpp::set< data_variable > free_variables=pbes_spec.free_variables();
+  // std::map< data_variable, data_expression > default_assignment;
 
-  for(atermpp::set< data_variable >::iterator v=free_variables.begin() ;
-      v!=free_variables.end() ; v++)
-  { default_assignment[*v]=data.default_expression(v->sort());
-    if (default_assignment[*v]==data_expression()) // no term could be constructed 
-    { gsErrorMsg("Cannot construct default expression for a free variable of sort %P\n",
-                   (ATermAppl)(v->sort()));
-      exit(1);
-    }
-  }
+  // for(atermpp::set< data_variable >::iterator v=free_variables.begin() ;
+  //     v!=free_variables.end() ; v++)
+  // { default_assignment[*v]=data.default_expression(v->sort());
+  //   if (default_assignment[*v]==data_expression()) // no term could be constructed 
+  //   { gsErrorMsg("Cannot construct default expression for a free variable of sort %P\n",
+  //                  (ATermAppl)(v->sort()));
+   //    exit(1);
+  //   }
+  // }
 
   // pbes_spec=data_variable_map_replace(pbes_spec,default_assignment);
 
   for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
-  { 
+  { // cerr << "PUT EQUATION: " << eqi->variable().name() << "===" << pbes_expression_rewrite_and_simplify(
+  //                    data_variable_map_replace(
+  //                            eqi->formula(),
+  //                         default_assignment),
+  //              rewriter,
+  //              tool_options.opt_precompile_pbes) << "\n";
     pbes_equations.put(
             eqi->variable().name(), 
             pbes_equation(
                 eqi->symbol(),
                 eqi->variable(),
                 pbes_expression_rewrite_and_simplify(
-                      data_variable_map_replace(
+      //                data_variable_map_replace(
                               eqi->formula(),
-                              default_assignment),
+      //                      default_assignment),
                 rewriter,
                 tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
@@ -792,6 +804,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           }
           else
           { 
+            // std::cerr << "SUBSTITUTION " << pp(*vlist) << ":=" << pp(*elist) << "\n";
             rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
           }
           elist++;
@@ -799,6 +812,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
         assert(elist==current_variable_instantiation.parameters().end());
       }
       
+      // std::cerr << "--------------------------------------\n";
       pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       
@@ -813,6 +827,12 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                         bes_equations,
                         variable_to_be_processed,
                         tool_options.opt_store_as_tree);
+
+      for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+               vlist!=current_pbeq.variable().parameters().end() ; vlist++)
+      { rewriter->clearSubstitution(*vlist);
+      }
+
   
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
       { // find a variable in the new_bes_expression from which `variable' to be
