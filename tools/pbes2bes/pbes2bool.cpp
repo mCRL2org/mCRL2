@@ -364,225 +364,233 @@ int main(int argc, char** argv)
 t_tool_options parse_command_line(int argc, char** argv)
 {
   t_tool_options tool_options;
-  string opt_outputformat;
-  string opt_strategy;
-  bool opt_precompile_pbes=false;
-  bool opt_use_hashtables=false;
-  bool opt_construct_counter_example=false;
-  bool opt_store_as_tree=false;
-  bool opt_data_elm=true;
 
-  string opt_rewriter;
-  vector< string > file_names;
-
-  po::options_description desc;
-
-  desc.add_options()
-      ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
-       "The following strategies are available:\n"
-       "0) Compute all boolean equations which can be reached from the initial state, without"
-       "any optimization (default). This is is the most data efficient option per generated equation.\n"
-       "1) Optimize by immediately substituting the the right hand sides for already investigated"
-       "variables that are true or false when generating a expression. This is as memory efficient as 0.\n"
-       "2) In addition to 1, also substitute variables that are true or false into an already generated"
-       "right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,"
-       "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables"
-       "have become unreachable as these do not have to be investigated. Depending on the PBES, this can"
-       "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
-       "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
-       "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
-       "needed to generate an equation substantially")
-      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
-       "inner   interpreting innermost rewriter,\n"
-       "jitty   interpreting just in time rewriter (default),\n"
-       "innerc  compiling innermost rewriter (not for Windows),\n"
-       "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
-      ("counter,c", "Print at the end a tree labelled with instantiations of the left hand side of"
-       "equations. This tree is an indication of how pbes2bool came to the validity/invalidity of the PBES.")
-      ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
-      ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
-      ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
-               "available outputformats are none, vasy and cwi")
-      ("tree,r", "store state in a tree (for memory efficiency)")
-      ("unused-data,u","do not remove unused parts of the data specification")
-      ("verbose,v",  "turn on the display of short intermediate gsMessages")
-      ("debug,d",    "turn on the display of detailed intermediate gsMessages")
-      ("version",    "display version information")
-      ("help,h",    "display this help")
-      ;
-
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("file_names",  po::value< vector< string > >(), "input/output files")
-      ;
-
-  po::options_description cmdline_options;
-  cmdline_options.add(desc).add(hidden);
-
-  po::options_description visible("Allowed options");
-  visible.add(desc);
-
-  po::positional_options_description p;
-  p.add("file_names", -1);
-
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("help"))
-  {
-    cout << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-    cout << "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is" << endl;
-    cout << "not present, stdin is used. If OUTFILE is not present, stdout is used." << endl;
-    cout << endl;
-    cout << "Options:" << endl;
-    cout << desc;
-    cout << endl;
-    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
-
-    exit(0);
-  }
- 
-  if (vm.count("precompile"))
-  { opt_precompile_pbes=true;
-  }
-
-  if (vm.count("hashtables"))
-  { opt_use_hashtables=true;
-  }
-
-  if (vm.count("counter"))
-  { opt_construct_counter_example=true;
-  }
- 
-  if (vm.count("tree"))
-  { opt_store_as_tree=true;
-  }
-
-  if (vm.count("unused-data"))
-  { opt_data_elm=false;
-  }
-
-  if (vm.count("version"))
-  {
-    print_version_information(NAME, AUTHOR);
-    exit(0);
-  }
-
-  if (vm.count("debug"))
-  {
-    gsSetDebugMsg();
-  }
-
-  if (vm.count("verbose"))
-  {
-    gsSetVerboseMsg();
-  }
-
-  if (vm.count("output")) // Output format
-  {
-    opt_outputformat = vm["output"].as< string >();
-    if (!((opt_outputformat == "none") || (opt_outputformat == "vasy") || (opt_outputformat == "cwi")))
-    {
-      gsErrorMsg("Unknown outputformat specified. Available outputformats are none, vasy and cwi\n");
-      exit(1);
-    }
-  }
-
-  if (vm.count("strategy")) // Bes solving strategy (currently only one available)
-  {
-    opt_strategy = vm["strategy"].as< string >();
-    if (!(opt_strategy == "0" || opt_strategy == "1" || opt_strategy == "2" || opt_strategy == "3" ))
-    {
-      gsErrorMsg("Unknown strategy specified. The available strategies are 0, 1, 2, and 3\n");
-      exit(1);
-    }
-  }
-
-  if (vm.count("rewriter")) // Select the rewiter to be used
-  { 
-    opt_rewriter = vm["rewriter"].as< string >();
-    if (!(opt_rewriter == "inner") &&
-        !(opt_rewriter == "jitty") &&
-        !(opt_rewriter == "innerc") &&
-        !(opt_rewriter == "jittyc"))
-    { 
-      gsErrorMsg("Unknown rewriter specified. Available rewriters are inner, jitty, innerc and jittyc\n");
-      exit(1);
-    }
-
-        
-  }
+  try {
+    string opt_outputformat;
+    string opt_strategy;
+    bool opt_precompile_pbes=false;
+    bool opt_use_hashtables=false;
+    bool opt_construct_counter_example=false;
+    bool opt_store_as_tree=false;
+    bool opt_data_elm=true;
   
-  if (vm.count("file_names"))
-  {
-    file_names = vm["file_names"].as< vector< string > >();
-  }
-
-  string infilename;
-  string outfilename;
-  if (file_names.size() == 0)
-  {
-    // Read from and write to stdin
-    infilename = "-";
-    outfilename = "-";
-  }
-  else if ( 2 < file_names.size())
-  {
-    cerr << NAME << ": Too many arguments" << endl;
-    exit(1);
-  }
-  else
-  {
-    infilename = file_names[0];
-    if (file_names.size() == 2)
+    string opt_rewriter;
+    vector< string > file_names;
+  
+    po::options_description desc;
+  
+    desc.add_options()
+        ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
+         "The following strategies are available:\n"
+         "0) Compute all boolean equations which can be reached from the initial state, without"
+         "any optimization (default). This is is the most data efficient option per generated equation.\n"
+         "1) Optimize by immediately substituting the the right hand sides for already investigated"
+         "variables that are true or false when generating a expression. This is as memory efficient as 0.\n"
+         "2) In addition to 1, also substitute variables that are true or false into an already generated"
+         "right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,"
+         "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables"
+         "have become unreachable as these do not have to be investigated. Depending on the PBES, this can"
+         "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
+         "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
+         "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
+         "needed to generate an equation substantially")
+        ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
+         "inner   interpreting innermost rewriter,\n"
+         "jitty   interpreting just in time rewriter (default),\n"
+         "innerc  compiling innermost rewriter (not for Windows),\n"
+         "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
+        ("counter,c", "Print at the end a tree labelled with instantiations of the left hand side of"
+         "equations. This tree is an indication of how pbes2bool came to the validity/invalidity of the PBES.")
+        ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
+        ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
+        ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
+                 "available outputformats are none, vasy and cwi")
+        ("tree,r", "store state in a tree (for memory efficiency)")
+        ("unused-data,u","do not remove unused parts of the data specification")
+        ("verbose,v",  "turn on the display of short intermediate gsMessages")
+        ("debug,d",    "turn on the display of detailed intermediate gsMessages")
+        ("version",    "display version information")
+        ("help,h",    "display this help")
+        ;
+  
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+        ("file_names",  po::value< vector< string > >(), "input/output files")
+        ;
+  
+    po::options_description cmdline_options;
+    cmdline_options.add(desc).add(hidden);
+  
+    po::options_description visible("Allowed options");
+    visible.add(desc);
+  
+    po::positional_options_description p;
+    p.add("file_names", -1);
+  
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
+    po::notify(vm);
+  
+    if (vm.count("help"))
     {
-      outfilename = file_names[1];
+      cout << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
+      cout << "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is" << endl;
+      cout << "not present, stdin is used. If OUTFILE is not present, stdout is used." << endl;
+      cout << endl;
+      cout << "Options:" << endl;
+      cout << desc;
+      cout << endl;
+      cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
+  
+      exit(0);
+    }
+   
+    if (vm.count("precompile"))
+    { opt_precompile_pbes=true;
+    }
+  
+    if (vm.count("hashtables"))
+    { opt_use_hashtables=true;
+    }
+  
+    if (vm.count("counter"))
+    { opt_construct_counter_example=true;
+    }
+   
+    if (vm.count("tree"))
+    { opt_store_as_tree=true;
+    }
+  
+    if (vm.count("unused-data"))
+    { opt_data_elm=false;
+    }
+  
+    if (vm.count("version"))
+    {
+      print_version_information(NAME, AUTHOR);
+      exit(0);
+    }
+  
+    if (vm.count("debug"))
+    {
+      gsSetDebugMsg();
+    }
+  
+    if (vm.count("verbose"))
+    {
+      gsSetVerboseMsg();
+    }
+  
+    if (vm.count("output")) // Output format
+    {
+      opt_outputformat = vm["output"].as< string >();
+      if (!((opt_outputformat == "none") || (opt_outputformat == "vasy") || (opt_outputformat == "cwi")))
+      {
+        gsErrorMsg("Unknown outputformat specified. Available outputformats are none, vasy and cwi\n");
+        exit(1);
+      }
+    }
+  
+    if (vm.count("strategy")) // Bes solving strategy (currently only one available)
+    {
+      opt_strategy = vm["strategy"].as< string >();
+      if (!(opt_strategy == "0" || opt_strategy == "1" || opt_strategy == "2" || opt_strategy == "3" ))
+      {
+        gsErrorMsg("Unknown strategy specified. The available strategies are 0, 1, 2, and 3\n");
+        exit(1);
+      }
+    }
+  
+    if (vm.count("rewriter")) // Select the rewiter to be used
+    { 
+      opt_rewriter = vm["rewriter"].as< string >();
+      if (!(opt_rewriter == "inner") &&
+          !(opt_rewriter == "jitty") &&
+          !(opt_rewriter == "innerc") &&
+          !(opt_rewriter == "jittyc"))
+      { 
+        gsErrorMsg("Unknown rewriter specified. Available rewriters are inner, jitty, innerc and jittyc\n");
+        exit(1);
+      }
+  
+          
+    }
+    
+    if (vm.count("file_names"))
+    {
+      file_names = vm["file_names"].as< vector< string > >();
+    }
+  
+    string infilename;
+    string outfilename;
+    if (file_names.size() == 0)
+    {
+      // Read from and write to stdin
+      infilename = "-";
+      outfilename = "-";
+    }
+    else if ( 2 < file_names.size())
+    {
+      cerr << NAME << ": Too many arguments" << endl;
+      exit(1);
     }
     else
     {
-      outfilename = "-";
+      infilename = file_names[0];
+      if (file_names.size() == 2)
+      {
+        outfilename = file_names[1];
+      }
+      else
+      {
+        outfilename = "-";
+      }
     }
+    
+    tool_options.infilename = infilename;
+    tool_options.outfilename = outfilename;
+    
+    tool_options.opt_outputformat = opt_outputformat;
+  
+    if (opt_strategy=="0")
+    { tool_options.opt_strategy=lazy;
+    }
+    else if (opt_strategy=="1")
+    { tool_options.opt_strategy=optimize;
+    }
+    else if (opt_strategy=="2")
+    { tool_options.opt_strategy=on_the_fly;
+    }
+    else if (opt_strategy=="3")
+    { tool_options.opt_strategy=on_the_fly_with_fixed_points;
+    }
+    else assert(0); // Unknown strategy. Should not occur here, as there is a check for this above.
+    
+    if (opt_rewriter=="inner")
+    { tool_options.rewrite_strategy=GS_REWR_INNER;
+    }
+    else if (opt_rewriter=="jitty")
+    { tool_options.rewrite_strategy=GS_REWR_JITTY;
+    }
+    else if (opt_rewriter=="innerc")
+    { tool_options.rewrite_strategy=GS_REWR_INNERC;
+    }
+    else if (opt_rewriter=="jittyc")
+    { tool_options.rewrite_strategy=GS_REWR_JITTYC;
+    }
+    else assert(0); // Unknown rewriter specified. Should have been caught above.
+  
+    tool_options.opt_precompile_pbes=opt_precompile_pbes;
+    tool_options.opt_construct_counter_example=opt_construct_counter_example;
+    tool_options.opt_store_as_tree=opt_store_as_tree;
+    tool_options.opt_data_elm=opt_data_elm;
+    tool_options.opt_use_hashtables=opt_use_hashtables;
   }
-  
-  tool_options.infilename = infilename;
-  tool_options.outfilename = outfilename;
-  
-  tool_options.opt_outputformat = opt_outputformat;
+  catch (std::exception& e) {
+    gsErrorMsg("%s\n", e.what());
 
-  if (opt_strategy=="0")
-  { tool_options.opt_strategy=lazy;
+    exit(1);
   }
-  else if (opt_strategy=="1")
-  { tool_options.opt_strategy=optimize;
-  }
-  else if (opt_strategy=="2")
-  { tool_options.opt_strategy=on_the_fly;
-  }
-  else if (opt_strategy=="3")
-  { tool_options.opt_strategy=on_the_fly_with_fixed_points;
-  }
-  else assert(0); // Unknown strategy. Should not occur here, as there is a check for this above.
-  
-  if (opt_rewriter=="inner")
-  { tool_options.rewrite_strategy=GS_REWR_INNER;
-  }
-  else if (opt_rewriter=="jitty")
-  { tool_options.rewrite_strategy=GS_REWR_JITTY;
-  }
-  else if (opt_rewriter=="innerc")
-  { tool_options.rewrite_strategy=GS_REWR_INNERC;
-  }
-  else if (opt_rewriter=="jittyc")
-  { tool_options.rewrite_strategy=GS_REWR_JITTYC;
-  }
-  else assert(0); // Unknown rewriter specified. Should have been caught above.
-
-  tool_options.opt_precompile_pbes=opt_precompile_pbes;
-  tool_options.opt_construct_counter_example=opt_construct_counter_example;
-  tool_options.opt_store_as_tree=opt_store_as_tree;
-  tool_options.opt_data_elm=opt_data_elm;
-  tool_options.opt_use_hashtables=opt_use_hashtables;
-  
+    
   return tool_options;
 }
