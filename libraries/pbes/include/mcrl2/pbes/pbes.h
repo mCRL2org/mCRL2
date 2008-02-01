@@ -314,9 +314,9 @@ class pbes
     bool instantiate_free_variables()
     {
       std::set<data::data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
-      atermpp::vector<data::data_variable> src;  // the variables that will be replaced
-      atermpp::vector<data::data_variable> dest; // the corresponding replacements
-      atermpp::vector<data::data_variable> fail; // the variables that could not be replaced
+      atermpp::vector<data::data_variable> src;    // the variables that will be replaced
+      atermpp::vector<data::data_expression> dest; // the corresponding replacements
+      atermpp::vector<data::data_variable> fail;   // the variables that could not be replaced
 
       for (typename std::set<data::data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
       {
