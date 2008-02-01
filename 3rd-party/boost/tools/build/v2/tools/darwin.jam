@@ -111,7 +111,7 @@ rule link.dll
 # "-Wl,-dylib_install_name $(LINKPATH[1])/$(<:BS)"
 actions link.dll bind LIBRARIES
 {
-   $(CONFIG_COMMAND) -L"$(LINKPATH)" "-Wl,-install_name,$(RPATH[1])/$(<:BS)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
+   $(CONFIG_COMMAND) -L"$(LINKPATH)" "-Wl,-dylib_install_name,$(RPATH[1])/$(<:BS)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
 }
 
 actions piecemeal archive
