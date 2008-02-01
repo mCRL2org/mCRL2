@@ -42,7 +42,7 @@ struct quantifier_rename_builder: public pbes_expression_builder
   {}
 
   /// returns true if the quantifier_stack contains a data variable with the given name
-  bool is_in_quantifier_stack(identifier_string name) const
+  bool is_in_quantifier_stack(core::identifier_string name) const
   {
     for (std::vector<data::data_variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {

@@ -18,6 +18,7 @@
 #include <utility>
 #include <sstream>
 #include <string>
+#include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data.h"
@@ -226,7 +227,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
     }
     else
     {
-      gsWarningMsg("Saving in CWI format not possible. Saving result in binary format.\n");
+      core::gsWarningMsg("Saving in CWI format not possible. Saving result in binary format.\n");
       if (!pbes_spec.save(outfilename, true))
       {
         core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());

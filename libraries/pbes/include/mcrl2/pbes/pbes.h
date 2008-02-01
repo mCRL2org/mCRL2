@@ -313,15 +313,15 @@ class pbes
     /// Returns true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
-      std::set<data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
-      atermpp::vector<data_variable> src;  // the variables that will be replaced
-      atermpp::vector<data_variable> dest; // the corresponding replacements
-      atermpp::vector<data_variable> fail; // the variables that could not be replaced
+      std::set<data::data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
+      atermpp::vector<data::data_variable> src;  // the variables that will be replaced
+      atermpp::vector<data::data_variable> dest; // the corresponding replacements
+      atermpp::vector<data::data_variable> fail; // the variables that could not be replaced
 
-      for (typename std::set<data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+      for (typename std::set<data::data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
       {
-        data_expression d = m_data.default_expression(*i);
-        if (d == data_expression())
+        data::data_expression d = m_data.default_expression(*i);
+        if (d == data::data_expression())
         {
           fail.push_back(d);
         }
