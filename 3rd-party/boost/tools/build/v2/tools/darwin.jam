@@ -72,8 +72,6 @@ flags darwin.compile OPTIONS : -Wno-long-double -no-cpp-precomp  -gdwarf-2  ;
 
 flags darwin.link FRAMEWORK <framework> ;
 
-flags darwin.link DYLIB_INSTALL_LOCATION <dylib-install-location> ;
-
 flags darwin.link.dll OPTIONS <bundle>no : -dynamiclib ;
 flags darwin.link.dll OPTIONS <bundle>yes : -bundle -undefined dynamic_lookup ;
 
@@ -113,7 +111,7 @@ rule link.dll
 # "-Wl,-dylib_install_name $(LINKPATH[1])/$(<:BS)"
 actions link.dll bind LIBRARIES
 {
-   $(CONFIG_COMMAND) -L"$(LINKPATH)" "-Wl,-install_name,$(DYLIB_INSTALL_LOCATION)/$(<:BS)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
+   $(CONFIG_COMMAND) -L"$(LINKPATH)" "-Wl,-install_name,$(RPATH[1])/$(<:BS)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
 }
 
 actions piecemeal archive
