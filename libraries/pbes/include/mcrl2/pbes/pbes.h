@@ -27,6 +27,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/data_utility.h"
@@ -305,6 +306,38 @@ class pbes
           return false;
       }
       return true;
+    }
+
+    /// Attempts to eliminate the free variables of the pbes, by substituting a default
+    /// value for them. The sequence of free variables is updated according to this.
+    /// Returns true if all free variables were eliminated.
+    bool instantiate_free_variables()
+    {
+      std::set<data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
+      atermpp::vector<data_variable> src;  // the variables that will be replaced
+      atermpp::vector<data_variable> dest; // the corresponding replacements
+      atermpp::vector<data_variable> fail; // the variables that could not be replaced
+
+      for (typename std::set<data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+      {
+        data_expression d = m_data.default_expression(*i);
+        if (d == data_expression())
+        {
+          fail.push_back(d);
+        }
+        else
+        {
+          src.push_back(*i);
+          dest.push_back(d);
+        }
+      }
+      for (typename Container::iterator i = equations().begin(); i != equations().end(); ++i)
+      {
+        *i = pbes_equation(i->symbol(), i->variable(), data::replace_data_variable_sequence(i->formula(), src, dest));
+      }
+      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::replace_data_variable_sequence(m_initial_state.parameters(), src, dest));
+      m_free_variables.insert(fail.begin(), fail.end());
+      return m_free_variables.empty();
     }
 
     /// Writes the pbes to file and returns true if the operation succeeded.

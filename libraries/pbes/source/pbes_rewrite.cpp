@@ -11,8 +11,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/substitute.h"
-
-#include "sort_functions.h"
+#include "mcrl2/data/sort_utility.h"
 
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace ::mcrl2::utilities;
