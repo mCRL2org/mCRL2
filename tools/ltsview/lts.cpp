@@ -12,7 +12,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
 #include <algorithm>
-#include <iostream>
 
 using namespace Utils;
 using namespace std;
@@ -250,23 +249,28 @@ string LTS::getParameterValue(int parindex,int valindex) {
 
 State* LTS::selectStateByID(int id) {
   State *s = states[id];
-  s->select();
-  // For fast deselection
-  selectedCluster = NULL;
-  selectedState = s;
-
-  // If we are simulating, see if this is a state we can select.
-  if ((simulation != NULL) && (simulation->getStarted()))
-  { 
-    vector< Transition* > posTrans = simulation->getPosTrans();
-    for (size_t i = 0; i < posTrans.size(); ++i)
-    {
-      if (posTrans[i]->getEndState()->getID() == selectedState->getID())
+  
+  if (s)
+  {
+    s->select();
+    // For fast deselection
+    selectedCluster = NULL;
+    selectedState = s;
+  
+    // If we are simulating, see if this is a state we can select.
+    if ((simulation != NULL) && (simulation->getStarted()))
+    { 
+      vector< Transition* > posTrans = simulation->getPosTrans();
+      for (size_t i = 0; i < posTrans.size(); ++i)
       {
-        simulation->chooseTrans(i);
+        if (posTrans[i]->getEndState()->getID() == selectedState->getID())
+        {
+          simulation->chooseTrans(i);
+        }
       }
     }
   }
+
   return selectedState;
 }
 

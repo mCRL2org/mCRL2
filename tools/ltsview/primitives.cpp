@@ -28,24 +28,33 @@ void P_Sphere::draw() {
 }
 
 void P_Sphere::reshape(int N,float *coss,float *sins) {
-  int i,j,k;
+  int i,j,k,l;
   GLfloat* vertices = (GLfloat*)malloc(3*((N-1)*N+2)*sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc(((N-1)*N+2)*sizeof(GLfloat));
+
   vertices[0] = 0;
   vertices[1] = 0;
   vertices[2] = -1;
+
+  texCoords[0] = 0;
+
   k = 3;
+  l = 1;
+
   for (j=1; j<N; ++j) {
     for (i=0; i<2*N; i+=2) {
       vertices[k]   = sins[j] * coss[i];
       vertices[k+1] = sins[j] * sins[i];
       vertices[k+2] = -coss[j];
+      texCoords[l] = sins[j] * coss[i];
       k += 3;
+      ++l;
     }
   }
   vertices[k]   = 0;
   vertices[k+1] = 0;
   vertices[k+2] = 1;
-
+  texCoords[l] = 0;
   int M = N+2;
 
   GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
@@ -83,8 +92,10 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   }
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glVertexPointer(3,GL_FLOAT,0,vertices);
   glNormalPointer(GL_FLOAT,0,vertices);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_bot);
     glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_top);
@@ -94,6 +105,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
     }
   glEndList();
   free(vertices);
+  free(texCoords);
   free(is_bot);
   free(is_mid);
   free(is_top);
@@ -119,20 +131,20 @@ P_SimpleSphere::P_SimpleSphere() {
                          0,  S,   C,
                          0,  0,   1 };
 
-  GLfloat texCoords[] = {0.5, 
-                         0.0,
-                         1.0, 
-                         0.0,
-                         1.0,
-                         0.0,
-                         1.0,
+  GLfloat texCoords[] = {0.0, 
+                         S,
                          0.0, 
-                         1.0,
+                        -S,
                          0.0,
                          1.0,
                          0.0,
-                         1.0,
-                         0.5
+                        -1.0, 
+                         0.0,
+                         S,
+                         0.0,
+                        -S,
+                         0.0,
+                         0.0
                          };
 
   GLuint is_bot[] = { 0,1,2,3,4,1 };
