@@ -309,6 +309,38 @@ namespace pbes_expr {
 
 } // namespace pbes_expr
 
+/// Unoptimized versions of logical operators for pbes expressions.
+namespace pbes_expr_unoptimized {
+
+  /// \brief Returns not applied to p
+  inline
+  pbes_expression not_(pbes_expression p)
+  {
+    return pbes_expression(core::detail::gsMakePBESNot(p));
+  }
+  
+  /// \brief Returns and applied to p and q
+  inline
+  pbes_expression and_(pbes_expression p, pbes_expression q)
+  {
+    return pbes_expression(core::detail::gsMakePBESAnd(p,q));
+  }
+  
+  /// \brief Returns or applied to p and q
+  inline
+  pbes_expression or_(pbes_expression p, pbes_expression q)
+  {
+    return pbes_expression(core::detail::gsMakePBESOr(p,q));
+  }
+  
+  /// \brief Returns imp applied to p and q
+  inline
+  pbes_expression imp(pbes_expression p, pbes_expression q)
+  {
+    return pbes_expression(core::detail::gsMakePBESImp(p,q));
+  } 
+} // namespace pbes_expr_unoptimized
+
 /// \brief Returns true if the pbes expression t is a boolean expression
 inline
 bool is_bes(aterm_appl t)

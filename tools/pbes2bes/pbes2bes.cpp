@@ -47,6 +47,33 @@ struct t_tool_options {
 	string outfilename;
 };
 
+bool process(t_tool_options tool_options)
+{
+  pbes<> pbes_spec = load_pbes(tool_options.infilename);
+
+  if (!pbes_spec.is_well_typed())
+  {
+    core::gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+  }
+
+  if (!pbes_spec.is_closed())
+  {
+    core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+  }
+
+  if (tool_options.opt_strategy == "finite")
+  {
+    pbes_spec = do_finite_algorithm(pbes_spec);
+  }
+  else if (tool_options.opt_strategy == "lazy")
+  {
+    pbes_spec = do_lazy_algorithm(pbes_spec);
+  }
+  save_pbes(pbes_spec, tool_options.outfilename, tool_options.opt_outputformat);
+
+  return true;
+}
+
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
@@ -343,32 +370,6 @@ t_tool_options parse_command_line(int argc, char** argv)
 	return tool_options;
 }
 
-void run(int argc, char* argv[])
-{
-  t_tool_options tool_options = parse_command_line(argc, argv);
-  pbes<> pbes_spec = load_pbes(tool_options.infilename);
-
-  if (!pbes_spec.is_well_typed())
-  {
-    core::gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-  }
-
-  if (!pbes_spec.is_closed())
-  {
-    core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-  }
-
-  if (tool_options.opt_strategy == "finite")
-  {
-    pbes_spec = do_finite_algorithm(pbes_spec);
-  }
-  else if (tool_options.opt_strategy == "lazy")
-  {
-    pbes_spec = do_lazy_algorithm(pbes_spec);
-  }
-  save_pbes(pbes_spec, tool_options.outfilename, tool_options.opt_outputformat);
-}
-
 //Main Program
 //------------
 /// \brief Main program for pbes2bes
@@ -380,7 +381,7 @@ int main(int argc, char** argv)
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
 
-  run(argc, argv);
+  process(parse_command_line(argc, argv));
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
