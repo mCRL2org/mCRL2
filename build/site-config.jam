@@ -4,6 +4,7 @@ project site-config
 
 include $(TOP)/build/config.jam ;
 
+import os ;
 import regex ;
 import feature ;
 
@@ -15,11 +16,11 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
   local library_names ;
   local framework_names ;
 
-  if [ modules.peek : NT ] {
-    splitted = [ regex.split $(ldflags) " " ] ;
+  if [ os.name ] = NT {
+    splitted = [ regex.split " $(ldflags)" " " ] ;
   }
   else {
-    splitted = [ regex.split $(ldflags) " -" ] ;
+    splitted = [ regex.split " $(ldflags)" " -" ] ;
   }
 
   for part in $(splitted) {
@@ -43,13 +44,17 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
      
         library_names += $(name)$(library_name) ;
       }
+      else if [ MATCH "^-?m(.*)$" : $(part) ] {
+      }
+      else if [ MATCH "^-?Wl(.*)$" : $(part) ] {
+      }
       else if [ MATCH "-?framework (.*)$" : $(part) ] { # OS X specific
         local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
      
         framework_names += <framework>$(framework_name) ;
       }
-      else if [ modules.peek : NT ] {
-        if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] { # MSVC specific
+      else if [ modules.peek : NT ] { # MSVC specific
+        if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] {
           local search_path = [ MATCH "/LIBPATH:(.*)$" : $(part) ] ;
       
           library_search_paths += <search>$(search_path) ;
