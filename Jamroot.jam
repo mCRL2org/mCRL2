@@ -31,6 +31,8 @@
 #    --prefix                       directory relative to which tools/libraries, documentation and examples
 #                                   are installed, unless one of the following options is also specified
 #
+#                                   Note: always do a clean build after changing the prefix!
+#
 #    --bindir                       directory where binaries are installed
 #
 #    --libdir                       directory where libraries are installed
@@ -81,6 +83,11 @@ feature.feature status : basic experimental deprecated : composite ;
 feature.feature squadt-connectivity : none implemented : incidental composite ;
 
 include $(TOP)/build/config.jam ;
+
+# Install when requested
+if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  feature.set-default install : yes ;
+}
 
 # Gets option arguments from options passed on the command line primarily and
 # otherwise the BUILD_OPTIONS variable
@@ -168,26 +175,30 @@ if ! $(BUILD_TAG) {
  
 prefix = [ path.make $(TOP)/build/stage ] ;
 
-# Set installation/stage locations
-if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
-  if [ get-option prefix : no ] = no {
-    ECHO "Warning: missing final installation path!" ;
-    ECHO "" ;
-    ECHO "  This path information is needed for several tools e.g. xsim and squadt." ;
-    ECHO "" ;
-    ECHO "Hint: Use --prefix=<directory> argument." ;
-    ECHO "" ;
-  }
+if [ get-option prefix : no ] = no {
+  ECHO "Warning: missing final installation path!" ;
+  ECHO "" ;
+  ECHO "  This path information is needed at build time on some platforms to correctly install the toolset." ;
+  ECHO "" ;
+  ECHO "Hint: Use --prefix=<directory> argument." ;
+  ECHO "" ;
+}
 
+# Set installation/stage locations
+if [ feature.defaults <install> ] = <install>yes {
   prefix     = [ get-option prefix     : [ path.make $(prefix) ] ] ;
   bindir     = [ get-option bindir     : [ path.make $(prefix)/bin ] ] ;
   libdir     = [ get-option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
+  plugindir  = [ path.make $(libdir)/plugins ] ;
   includedir = [ get-option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
   datadir    = [ get-option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
 }
 else {
-  bindir = [ path.make $(prefix) ] ;
-  libdir = [ path.make $(prefix)/lib ] ;
+  local install-prefix = [ get-option prefix : [ path.make $(prefix) ] ] ;
+
+  bindir    = [ path.make $(prefix) ] ;
+  libdir    = [ get-option libdir : [ path.make $(install-prefix)/lib/mcrl2 ] ] ;
+  plugindir = [ path.make $(prefix)/plugins ] ;
 }
 
 # Top project
@@ -258,8 +269,7 @@ if [ path.exists ./tools ] {
     use-project /tools/$(tool) : tools/$(tool) ;
   }
 
-  # Install when requested
-  if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  if [ feature.defaults <install> ] != <install>yes {
     # Introduce tool targets
     for tool in $(targets) {
       alias $(tool) : stage ;
@@ -274,8 +284,6 @@ if [ path.exists ./tools ] {
     alias stage : $(targets) : <location>build/stage ;
   }
   else {
-    feature.set-default install : yes ;
-
     # Add prefix for packaging
     if [ get-option destdir : no ] != no {
       local destdir  = [ get-option destdir : "" ] ;
@@ -299,13 +307,19 @@ if [ path.exists ./tools ] {
     }
     else {
       # Complete install
-      targets = /tools/$(tools)//install /libraries//install-all install-examples ;
+      targets = /tools/$(tools)//install /libraries//install-all install-examples install-remaining-boost ;
 
       # General examples
       install install-examples
               : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
               : <location>$(datadir)
                 <install-source-root>.
+              ;
+
+      install install-remaining-boost
+              : /site-config//boost_program_options
+                /site-config//boost_signals
+              : <location>$(libdir)
               ;
     }
 
@@ -457,15 +471,13 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
     alias stage ;
   }
   else {
-    local plugin-prefix = [ path.make $(libdir)/plugins ] ;
-
     lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
 
     if [ feature.defaults <install> ] = <install>yes {
-      install install : $(name) : <location>$(plugin-prefix) ;
+      install install : $(name) : <location>$(plugindir) ;
     }
     else {
-      install stage : $(name) : <location>$(plugin-prefix) ;
+      install stage : $(name) : <location>$(plugindir) ;
     }
   }
 }
