@@ -200,8 +200,8 @@ static void newobject(int n)
   assert(n>=0);
 
   if (n>=maxobject)
-  { int newsize=(n>=2*maxobject?
-                  (n<1024?1024:(n+1)):2*maxobject);
+  { int newsize=(n>=16*maxobject?
+                  (n<1024?1024:(n+1)):16*maxobject);
     if (maxobject==0)
     { objectdata=(objectdatatype *)malloc(newsize*sizeof(objectdatatype));
     }
@@ -220,8 +220,8 @@ static void newobject(int n)
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
     }
     if (objectdata==NULL)
-    { gsErrorMsg("failed to resize objectdata to %d\n",2*maxobject); 
-      stop();
+    { gsErrorMsg("failed to resize objectdata to %d\n",newsize); 
+      exit(1);
     }
     
     for(long i=0 ; i<maxobject ; i++)
