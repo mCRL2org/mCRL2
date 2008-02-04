@@ -713,7 +713,6 @@ void DiaGraph::appOutputText( const int &val )
     frame->appOutputText( msg );
 }
 
-
 // -------------------------------------
 void DiaGraph::getColor( ColorRGB &col )
 // -------------------------------------
@@ -1953,6 +1952,26 @@ void DiaGraph::handleEditDOF(
         graph,
         canvasOpaChooser );
 		canvasOpaChooser->Refresh();
+}
+
+// -------------------------------------------
+void DiaGraph::setDOFColorSelected( )
+// -------------------------------------------
+// ------------------------------------------------------------------
+// Highlight the Color Option in the Edit DOF Menu
+// ------------------------------------------------------------------
+{
+    frame->setDOFColorSelected();
+}
+
+// -------------------------------------------
+void DiaGraph::setDOFOpacitySelected( )
+// -------------------------------------------
+// ------------------------------------------------------------------
+// Highlight the Opacity Option in the Edit DOF Menu
+// ------------------------------------------------------------------
+{
+    frame->setDOFOpacitySelected();
 }
 
 

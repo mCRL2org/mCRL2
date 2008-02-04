@@ -178,6 +178,9 @@ public:
         const int &selIdx ) = 0;
     virtual void handleDOFSel( const int &DOFIdx ) = 0;
     
+    virtual void setDOFColorSelected() = 0;
+	virtual void setDOFOpacitySelected() = 0;
+    
     virtual void handleSetDOFTextStatus( 
         const int &DOFIdx,
         const int &status ) = 0;

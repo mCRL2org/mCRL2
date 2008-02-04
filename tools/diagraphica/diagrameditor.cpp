@@ -10,6 +10,8 @@
 
 
 #include "diagrameditor.h"
+#include <iostream>
+using namespace std;
 
 
 // -- constructors and destructor -----------------------------------
@@ -392,19 +394,28 @@ void DiagramEditor::handleDOFColAdd(
 // ---------------------------------
 {
     Shape* s = NULL;
-
+	
     int sizeShapes = diagram->getSizeShapes();
     for ( int i = 0; i < sizeShapes; ++i )    
     {
-        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL )
+        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR || 
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_YCTR ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_HGT  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_WTH  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_AGL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
         {
             s = diagram->getShape( i );
             break;
         }
-    }
+    }    
 
     if ( s != NULL )
     {
+    	s->setModeEdtDOFCol();
+            mediator->handleDOFColActivate();
+            mediator->handleDOFOpaDeactivate();
         s->getDOFCol()->addValue( hue );
         s->addDOFColYValue( y );
     }
@@ -446,7 +457,7 @@ void DiagramEditor::handleDOFColUpdate(
 void DiagramEditor::handleDOFColClear(
     const int &idx )
 // -----------------------------------
-{
+{	
     Shape* s = NULL;
 
     int sizeShapes = diagram->getSizeShapes();
@@ -491,7 +502,13 @@ void DiagramEditor::handleDOFOpaAdd(
     int sizeShapes = diagram->getSizeShapes();
     for ( int i = 0; i < sizeShapes; ++i )    
     {
-        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
+        if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR || 
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_YCTR ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_HGT  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_WTH  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_AGL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL  ||
+             diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
         {
             s = diagram->getShape( i );
             break;
@@ -500,6 +517,9 @@ void DiagramEditor::handleDOFOpaAdd(
 
     if ( s != NULL )
     {
+    	s->setModeEdtDOFOpa();
+            mediator->handleDOFColDeactivate();
+            mediator->handleDOFOpaActivate();
         s->getDOFOpa()->addValue( hue );
         s->addDOFOpaYValue( y );
     }

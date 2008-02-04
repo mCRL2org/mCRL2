@@ -50,6 +50,9 @@ public:
     void setFileOptionsActive();
     void setEditModeSelect();
     void setEditModeDOF();
+    
+    void setDOFColorSelected();
+	void setDOFOpacitySelected();
 
     // -- display functions -----------------------------------------
     void displNumNodes( const int &val );

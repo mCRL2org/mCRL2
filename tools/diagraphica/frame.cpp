@@ -122,6 +122,22 @@ void Frame::setEditModeDOF()
         toolBarEdit->ToggleTool( ID_TOOL_DOF, true );
 }
 
+// -------------------------------------------
+void Frame::setDOFColorSelected( )
+// -------------------------------------------
+{
+	if(listCtrlDOF != NULL)
+		listCtrlDOF->SetItemState(5, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+// -------------------------------------------
+void Frame::setDOFOpacitySelected( )
+// -------------------------------------------
+{
+	if(listCtrlDOF != NULL)
+		listCtrlDOF->SetItemState(6, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
 
 // ----------------------------------------
 void Frame::displNumNodes( const int &val )
@@ -2007,20 +2023,23 @@ void Frame::initFrameDOF()
 // -----------------------
 {
     // init frame
-    sizerFrameDOF = new wxBoxSizer( wxVERTICAL );
+    sizerFrameDOF = new wxBoxSizer( wxHORIZONTAL );
     frameDOF = new PopupFrame(
         mediator,
         this,
         ID_FRAME_DOF,
         wxString( wxT( "Degrees of freedom" ) ),
-        wxDefaultPosition,
+        wxPoint(350,250),
         wxSize( 
-            (int)(0.25*this->GetSize().GetWidth()),
+            (int)(0.27*this->GetSize().GetWidth()),
             (int)(0.50*this->GetSize().GetHeight()) ) );
     frameDOF->SetSizer( sizerFrameDOF );
 
     // init children
     initPanelDOF();
+    
+    frameDOF->Layout();
+    frameDOF->Fit();
 
     // show
     frameDOF->Show();
@@ -2046,35 +2065,38 @@ void Frame::initPanelDOF()
     sizerFrameDOF->Add(
         panelDOF,
         1,
-        wxEXPAND );
+        wxEXPAND );  
 
     // init children
     initListCtrlDOF();
     //initTextOptionsDOF();
     initCanvasColDOF();
     initCanvasOpaDOF();
+
 }
 
 // --------------------------
 void Frame::initListCtrlDOF()
 // --------------------------
 {
+	wxSize* size = new wxSize(180,180);
     // init list
     listCtrlDOF = new wxListCtrl(
         panelDOF,
         ID_LIST_CTRL_DOF,
         wxDefaultPosition,
-        wxDefaultSize,
+        *size,
         wxLC_REPORT |
         wxLC_HRULES |
         wxLC_VRULES |
-        wxLC_SINGLE_SEL );
+        wxLC_SINGLE_SEL ); 
+        
     sizerDOF->Add(
-        listCtrlDOF,
-        1,
-        wxEXPAND |
-        wxALL,
-        5 );
+       listCtrlDOF,
+       0,
+       wxEXPAND |
+       wxALL,
+       5 );  
 
     // init as drop target
     listCtrlDOF->SetDropTarget( 
@@ -2104,6 +2126,7 @@ void Frame::initListCtrlDOF()
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlDOF->InsertColumn( 3, colItem );
     listCtrlDOF->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
+
 }
 
 /*
@@ -2208,8 +2231,6 @@ void Frame::initCanvasOpaDOF()
 
     // reset ptr
     lbl = NULL;
-	frameDOF->Layout();
-	frameDOF->Fit();
 }
 
 

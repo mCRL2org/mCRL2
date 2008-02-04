@@ -65,7 +65,7 @@ public:
     void setOutputText( const int &msg );
     void appOutputText( const string &msg );
     void appOutputText( const int &msg );
-
+	
     void getColor( ColorRGB &col );
     void handleCloseFrame( PopupFrame* f );
     
@@ -181,6 +181,9 @@ public:
         const vector< int > &attrIndcs,
         const int &selIdx );
     void handleDOFSel( const int &DOFIdx );
+    
+    void setDOFColorSelected();
+	void setDOFOpacitySelected();
 
     void handleSetDOFTextStatus( 
         const int &DOFIdx,

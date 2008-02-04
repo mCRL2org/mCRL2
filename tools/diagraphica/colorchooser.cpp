@@ -116,6 +116,8 @@ void ColorChooser::handleMouseLftDownEvent(
     const int &y )
 // ----------------------------------------
 {
+	mediator->handleDOFColActivate();
+	mediator->setDOFColorSelected();
     if ( active == true )
     {
         Visualizer::handleMouseLftDownEvent( x, y );

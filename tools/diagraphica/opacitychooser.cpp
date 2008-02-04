@@ -116,6 +116,8 @@ void OpacityChooser::handleMouseLftDownEvent(
     const int &y )
 // ------------------------------------------
 {
+	mediator->handleDOFOpaActivate();
+	mediator->setDOFOpacitySelected();
     if ( active == true )
     {
         Visualizer::handleMouseLftDownEvent( x, y );
