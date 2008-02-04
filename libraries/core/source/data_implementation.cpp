@@ -1806,7 +1806,7 @@ void impl_sort_nat(t_data_decls *p_data_decls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList nl = ATmakeList1((ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(62,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(74,
       //equality (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprEq(zero, gsMakeDataExprCNat(p)), f),
@@ -1964,44 +1964,107 @@ void impl_sort_nat(t_data_decls *p_data_decls)
         gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
         gsMakeDataExprNot(b)),
       //quotient after division (Pos -> Pos -> Nat)
-      (ATerm) gsMakeDataEqn(pql, nil,         
-         gsMakeDataExprDiv(p, q),
-         gsMakeDataExprFirst(gsMakeDataExprDivMod(p, q))),
-      //old implementation of div
-      //(ATerm) gsMakeDataEqn(pql,
-      //   gsMakeDataExprGTE(p, q),
-      //   gsMakeDataExprDiv(p, q),
-      //   gsMakeDataExprCNat(gsMakeDataExprSucc(
-      //     gsMakeDataExprDiv(gsMakeDataExprGTESubt(p, q), q)))),
-      //(ATerm) gsMakeDataEqn(pql,
-      //   gsMakeDataExprLT(p, q),
-      //   gsMakeDataExprDiv(p, q),
-      //   gsMakeDataExprC0()),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprDiv(p, one),
+         gsMakeDataExprCNat(p)),
+      (ATerm) gsMakeDataEqn(bpl, nil,
+         gsMakeDataExprDiv(one, gsMakeDataExprCDub(b, p)),
+         zero),
+      (ATerm) gsMakeDataEqn(bpql, nil,
+         gsMakeDataExprDiv(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(f, q)),
+         gsMakeDataExprDiv(p, q)),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLTE(p, q),
+         gsMakeDataExprDiv(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q)),
+         zero),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLT(q, p),
+         gsMakeDataExprDiv(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprFirst(
+           gsMakeDataExprGDivMod(
+             gsMakeDataExprDivMod(p, gsMakeDataExprCDub(t, q)),
+             f,
+             gsMakeDataExprCDub(t, q)
+           )
+           //XXX The line above is the normal form of the line below, needed
+           //for consistency with lpsrewr.
+           //gsMakeDataExprDivMod(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q))
+         )),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLTE(p, q),
+         gsMakeDataExprDiv(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprIf(gsMakeDataExprEq(p, q),
+           gsMakeDataExprCNat(one), zero
+         )),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLT(q, p),
+         gsMakeDataExprDiv(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprFirst(
+           gsMakeDataExprGDivMod(
+             gsMakeDataExprDivMod(p, gsMakeDataExprCDub(t, q)),
+             t,
+             gsMakeDataExprCDub(t, q)
+           )
+           //XXX The line above is the normal form of the line below, needed
+           //for consistency with lpsrewr.
+           //gsMakeDataExprDivMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q))
+         )),
       //quotient after division (Nat -> Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprDiv(zero, p), zero),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprDiv(gsMakeDataExprCNat(p), q),
-         //gsMakeDataExprDiv(p, q)),
-         gsMakeDataExprFirst(gsMakeDataExprDivMod(p, q))),
+         gsMakeDataExprDiv(p, q)),
       //remainder after division (Pos -> Pos -> Nat)
-      (ATerm) gsMakeDataEqn(pql, nil,         
-         gsMakeDataExprMod(p, q),
-         gsMakeDataExprLast(gsMakeDataExprDivMod(p, q))),
-      //old implementation of mod
-      //(ATerm) gsMakeDataEqn(pql,
-      //   gsMakeDataExprGTE(p, q),
-      //   gsMakeDataExprMod(p, q),
-      //   gsMakeDataExprMod(gsMakeDataExprGTESubt(p, q), q)),
-      //(ATerm) gsMakeDataEqn(pql,
-      //   gsMakeDataExprLT(p, q),
-      //   gsMakeDataExprMod(p, q),
-      //   gsMakeDataExprCNat(p)),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprMod(p, one),
+         zero),
+      (ATerm) gsMakeDataEqn(bpl, nil,
+         gsMakeDataExprMod(one, gsMakeDataExprCDub(b, p)),
+         gsMakeDataExprCNat(one)),
+      (ATerm) gsMakeDataEqn(bpql, nil,
+         gsMakeDataExprMod(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(f, q)),
+         gsMakeDataExprDub(b, gsMakeDataExprMod(p, q))),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLTE(p, q),
+         gsMakeDataExprMod(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprCNat(gsMakeDataExprCDub(f, p))),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLT(q, p),
+         gsMakeDataExprMod(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprLast(
+           gsMakeDataExprGDivMod(
+             gsMakeDataExprDivMod(p, gsMakeDataExprCDub(t, q)),
+             f,
+             gsMakeDataExprCDub(t, q)
+           )
+           //XXX The line above is the normal form of the line below, needed
+           //for consistency with lpsrewr.
+           //gsMakeDataExprDivMod(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(t, q))
+         )),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLTE(p, q),
+         gsMakeDataExprMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprIf(gsMakeDataExprEq(p, q),
+           zero, gsMakeDataExprCNat(gsMakeDataExprCDub(t, p))
+         )),
+      (ATerm) gsMakeDataEqn(pql,
+         gsMakeDataExprLT(q, p),
+         gsMakeDataExprMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q)),
+         gsMakeDataExprLast(
+           gsMakeDataExprGDivMod(
+             gsMakeDataExprDivMod(p, gsMakeDataExprCDub(t, q)),
+             t,
+             gsMakeDataExprCDub(t, q)
+           )
+           //XXX The line above is the normal form of the line below, needed
+           //for consistency with lpsrewr.
+           //gsMakeDataExprDivMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q))
+         )),
       //remainder after division (Nat -> Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprMod(zero, p), zero),
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
-         //gsMakeDataExprMod(p, q))
-         gsMakeDataExprLast(gsMakeDataExprDivMod(p, q)))
+         gsMakeDataExprMod(p, q))
     ), p_data_decls->data_eqns);
 }
 
