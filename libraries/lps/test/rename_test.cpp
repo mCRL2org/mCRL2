@@ -96,7 +96,7 @@ void test_rename()
   std::cout << "<spec>" << pp(spec) << std::endl;
   std::cout << "<spec2>" << pp(spec2) << std::endl;
   BOOST_CHECK(spec2.process().process_parameters().size() == 1);
-  BOOST_CHECK(spec2.process().process_parameters().front().name() == identifier_string("b"));
+  BOOST_CHECK(spec.process().process_parameters().front().name() == spec2.process().process_parameters().front().name());
 }
 
 int test_main(int argc, char* argv[])
