@@ -134,7 +134,7 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
   // simulation = new Simulation();
   simulation = previousLevel->getSimulation();
 
-  for (int i = 0; i < previousLevel->getNumParameters(); ++i)
+  for (unsigned int i = 0; i < previousLevel->getNumParameters(); ++i)
   {
     parameterNames.push_back(previousLevel->getParameterName(i));
     parameterTypes.push_back(previousLevel->getParameterType(i));
@@ -301,7 +301,7 @@ int LTS::getNumLabels() {
   return labels.size();
 }
 
-int LTS::getNumParameters() const {
+unsigned int LTS::getNumParameters() const {
   return parameterNames.size();
 }
 

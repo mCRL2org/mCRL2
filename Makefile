@@ -29,8 +29,8 @@ liblts-fsmparser:
 
 ltsview-fsmparser:
 	cd tools/ltsview; \
-	flex -Pfsm -ofsmlexer.cpp fsmlexer.ll; \
-	bison -p fsm -d -o fsmparser.cpp fsmparser.yy
+	flex -+ -ofsmlexer.cpp fsmlexer.ll; \
+	bison -d -o fsmparser.cpp fsmparser.yy
 
 mcrl2parser:
 	cd libraries/core/source; \

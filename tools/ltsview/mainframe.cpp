@@ -271,6 +271,15 @@ void MainFrame::onClose(wxCloseEvent &event) {
   if (settingsDialog != NULL) {
     settingsDialog->Destroy();
   }
+  if (progDialog != NULL) {
+    progDialog->Destroy();
+  }
+  if (savePicDialog != NULL) {
+    savePicDialog->Destroy();
+  }
+  infoDialog->Destroy();
+  simDialog->Destroy();
+  markDialog->Destroy();
   glCanvas->stopForceDirected();
   event.Skip();
 }

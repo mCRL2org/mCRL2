@@ -6,6 +6,7 @@ tool ltsview
       : cluster.cpp
         conedb.cpp
         fileloader.cpp
+        fsmlexer.cpp
         fsmparser.cpp
         glcanvas.cpp
         infodialog.cpp

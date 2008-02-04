@@ -204,6 +204,7 @@ int LTSView::OnExit() {
   if (lts != NULL) delete lts;
   delete settings;
   delete visualizer;
+  delete markManager;
   return 0;
 }
 
@@ -218,7 +219,11 @@ void LTSView::openFile(string fileName) {
   mainFrame->updateProgressDialog(0,"Parsing file");
   LTS* newlts = new LTS(this);
   try {
-    FileLoader::loadFile(fileName,newlts);
+    ltsview::FileLoader floader = ltsview::FileLoader(newlts);
+    if (!floader.parse_file(fileName))
+    {
+      throw "Parsing failed.";
+    }
   }
   catch (string msg) {
     delete newlts;
@@ -260,7 +265,7 @@ void LTSView::openFile(string fileName) {
       lts->getNumTransitions(),lts->getNumClusters(),
       lts->getNumRanks());
   mainFrame->resetParameters();
-  for (int i = 0; i < lts->getNumParameters(); ++i) {
+  for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
     mainFrame->addParameter(i,lts->getParameterName(i));
   }
   mainFrame->resetMarkRules();
@@ -609,7 +614,7 @@ void LTSView::selectStateByID(const int id) {
   if (lts != NULL) {
     State* s = lts->selectStateByID(id);
     lts->getSimulation()->setInitialState(s);
-    for (int i = 0; i < lts->getNumParameters(); ++i) {
+    for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
       mainFrame->setParameterValue(i,lts->getParameterValue(i,
             s->getParameterValue(i)));
     }

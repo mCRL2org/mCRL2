@@ -92,7 +92,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 
 %option c++
 %option prefix="chiyy"
-%option nounput
+%option nounput noyywrap
 
 %%
 [ \t]      { col_nr += YYLeng(); /* whitespace */ }

@@ -76,7 +76,7 @@ class LTS {
     int getNumRanks() const;
     int getNumStates() const;
     int getNumTransitions() const;
-    int getNumParameters() const;
+    unsigned int getNumParameters() const;
     int getNumParameterValues(int parindex) const;
     int getMaxRanks() const;  // Returns the maximal rank of the structure, 
                                // that is, the highest rank a cluster would have

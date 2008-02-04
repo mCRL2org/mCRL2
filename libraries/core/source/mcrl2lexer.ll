@@ -75,7 +75,7 @@ Number     "0"|([1-9][0-9]*)
 
 %option c++
 %option prefix="mcrl2yy"
-%option nounput
+%option nounput noyywrap
 
 %%
 

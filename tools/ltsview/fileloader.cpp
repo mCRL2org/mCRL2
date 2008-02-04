@@ -4,33 +4,44 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file fileloader.cpp
-/// \brief Add your file description here.
+/// \file
+/// \brief Implementation of the FileLoader for loading FSM files
 
+#include <fstream>
+#include <sstream>
 #include "fileloader.h"
-#include "fsmparser.h"
-using namespace std;
-using namespace Utils;
+#include "fsmparser.hpp"
+#include "fsmlexer.h"
 
-void FileLoader::loadFile( const string fileName, LTS* const lts )
-// pre: lts points to an empty LTS object
+namespace ltsview {
+
+FileLoader::FileLoader(LTS* _lts)
+  : lts(_lts) 
 {
-  string ext = fileName.substr( fileName.find_last_of( "." ) + 1, string::npos );
-  string ext_lc = ext;
-  for ( unsigned int i = 0 ; i < ext.size() ; ++i )
-  {
-    ext_lc[i] = tolower(ext_lc[i]);
-  }
-
-  if ( ext_lc != "fsm" )
-  {
-    throw string( "Unknown file extension: " + ext );
-  }
-  else    
-    loadFSMFile( fileName, lts );
 }
 
-void FileLoader::loadFSMFile( const string fileName, LTS* const lts )
+bool FileLoader::parse_file(const std::string& _filename)
 {
-  parseFSMfile( fileName, lts );
+  filename = _filename;
+  std::ifstream in(filename.c_str());
+  
+  ltsview::LTSViewFSMLexer scanner(&in);
+  lexer = &scanner;
+
+  ltsview::LTSViewFSMParser parser(*this);
+  return (parser.parse() == 0);
+}
+
+void FileLoader::error(const class location &l, const std::string &m)
+{
+  std::ostringstream oss;
+  oss << "Parse error at " << l << ": " << m;
+  throw oss.str();
+}
+
+void FileLoader::error(const std::string &m)
+{
+  throw "Parse error: " + m;
+}
+
 }
