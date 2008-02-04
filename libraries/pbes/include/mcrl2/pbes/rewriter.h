@@ -147,12 +147,12 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
 
   bool is_true(const pbes_expression& p) const
   {
-    return pbes_expr::is_true(p) || data_expr::is_true(p);
+    return pbes_expr::is_true(p) || data::data_expr::is_true(p);
   }
 
   bool is_false(const pbes_expression& p) const
   {
-    return pbes_expr::is_false(p) || data_expr::is_false(p);
+    return pbes_expr::is_false(p) || data::data_expr::is_false(p);
   }
 
   /// Visit data expression node.
