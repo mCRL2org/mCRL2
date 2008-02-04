@@ -1944,6 +1944,7 @@ static ATermList substitute_assignmentlist(
 
   assert(replacelhs==0 || replacelhs==1);
   assert(replacerhs==0 || replacerhs==1);
+  assert(ATgetLength(terms)==ATgetLength(vars));
 
   if (parameters==ATempty)
   { assert(assignments==ATempty);
@@ -6466,7 +6467,12 @@ static ATermAppl allowblockcomposition(
                     summand); 
     }
     else
-    { /* first remove free variables from sumvars */
+    { /* first remove free variables from sumvars 
+         I fail to see the point of this operation, esp. here.
+         At this point it takes a lot of time without 
+         seemingly bringing any advantage. 
+
+         Therefore I comment it out. JFG 3/2/2008 
 
       ATermList newsumvars=ATempty;
       for( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars))
@@ -6476,7 +6482,7 @@ static ATermAppl allowblockcomposition(
         { newsumvars=ATinsertA(newsumvars,sumvar);
         }
       }
-      sumvars=newsumvars;
+      sumvars=newsumvars; */
 
       if (gsIsDataExprTrue(condition))
       { resultsimpledeltasumlist=ATinsertA(
@@ -7640,9 +7646,93 @@ static ATermAppl getUltimateDelayCondition(
 }
 
 
+/******** make_unique_variables **********************/
+
+static ATermList make_unique_variables(ATermList variable_list,char * hint)
+{ /* This function generates a list of variables with the same sorts
+     as in variable_list, where all names are unique */ 
+
+  static char scratch[STRINGLENGTH];
+
+  ATermAppl sort=NULL;
+
+  if (variable_list==ATempty) return ATempty;
+
+  ATermAppl variable=ATAgetFirst(variable_list);
+  sort=ATAgetArgument(variable,1);
+
+  snprintf(scratch,STRINGLENGTH,"%s%s%s",
+                      ATSgetArgument(variable,0),
+                      (hint==""?"":"_"),
+                      hint);
+
+  ATermAppl new_variable=getfreshvariable(scratch,sort);
+
+  return ATinsertA(
+            make_unique_variables(ATgetNext(variable_list),hint),
+            new_variable);
+}
+
+/******** make_parameters_and_variables_unique **********************/
+
+static ATermAppl make_parameters_and_sum_variables_unique(ATermAppl t, char *hint="")
+{  
+  ATermList init=linGetInit(t);
+  ATermList pars=linGetParameters(t);
+  ATermList summands=linGetSums(t);
+  ATermList resultsummands=ATempty;
+
+  ATermList unique_pars=make_unique_variables(pars,hint);
+  assert(ATgetLength(unique_pars)==ATgetLength(pars));
+  init=substitute_assignmentlist(unique_pars,pars,init,pars,1,0);  // Only substitute the variables
+                                                                   // the variables at the lhs.
+
+  for( ; summands!=ATempty ; summands=ATgetNext(summands) )
+  {
+    ATermAppl summand=ATAgetFirst(summands);
+    ATermList sumvars=linGetSumVars(summand);
+    ATermList unique_sumvars=make_unique_variables(sumvars,hint);
+    assert(ATgetLength(unique_sumvars)==ATgetLength(sumvars));
+    ATermAppl condition=linGetCondition(summand);
+    ATermAppl multiaction=linGetMultiAction(summand);
+    ATermAppl actiontime=linGetActionTime(summand);
+    ATermList nextstate=linGetNextState(summand);
+
+    condition=substitute_data(unique_pars,pars,condition);
+    condition=substitute_data(unique_sumvars,sumvars,condition);
+
+    actiontime=substitute_time(unique_pars,pars,actiontime);
+    actiontime=substitute_time(unique_sumvars,sumvars,actiontime);
+
+    multiaction=substitute_multiaction(unique_pars,pars,multiaction),
+    multiaction=substitute_multiaction(unique_sumvars,sumvars,multiaction),
+
+    nextstate=substitute_assignmentlist(unique_pars,pars,nextstate,pars,1,1);
+    nextstate=substitute_assignmentlist(unique_sumvars,sumvars,nextstate,unique_pars,0,1);
+
+    resultsummands=ATinsertA(resultsummands,
+                             gsMakeLinearProcessSummand(
+                                           unique_sumvars,
+                                           condition,
+                                           multiaction,
+                                           actiontime,
+                                           nextstate));
+
+  }
+
+  return linMakeInitProcSpec(
+               init,
+               unique_pars,
+               resultsummands);
+}
+
+
+
+
+
 /**************** parallel composition ******************************/
 
-static ATermList combinesumlist(
+static ATermList combine_summand_lists(
                      ATermList sumlist1, 
                      ATermList sumlist2, 
                      ATermList par1, 
@@ -7654,9 +7744,10 @@ static ATermList combinesumlist(
 
 
 { ATermList resultsumlist=NULL;
-  ATermList rename1_list=NULL, rename2_list=NULL, allpars=NULL,
-            sums1renaming=NULL, sums2renaming=NULL;
+  // ATermList rename1_list=NULL, rename2_list=NULL, sums1renaming=NULL, sums2renaming=NULL;
+  ATermList allpars=NULL;
   
+  assert(rename_list==ATempty);
   allpars=ATconcat(par1,par3);
   resultsumlist=ATempty;
 
@@ -7666,35 +7757,38 @@ static ATermList combinesumlist(
                        "timevar",realsort);
   ATermAppl ultimatedelaycondition=
              (add_delta?gsMakeDataExprTrue():
-              substitute_data(rename_list,par2,
-                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec)));
+              // substitute_data(rename_list,par2,
+                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
   { ATermAppl summand1=ATAgetFirst(walker1);
 
     ATermList sumvars1=linGetSumVars(summand1);
-    ATermList sumvars1new=ATempty;
+    // ATermList sumvars1new=ATempty;
     ATermAppl multiaction1=linGetMultiAction(summand1);
     ATermAppl actiontime1=linGetActionTime(summand1); 
     ATermAppl condition1=linGetCondition(summand1);
     ATermList nextstate1=linGetNextState(summand1); 
 
-    rename1_list=construct_renaming(
+    /* rename1_list=construct_renaming(
                        allpars,
                        sumvars1,
                        &sumvars1new,
-                       &sums1renaming);
+                       &sums1renaming); */
 
-    condition1=substitute_data(rename1_list,sums1renaming,condition1);
-    actiontime1=substitute_time(rename1_list,sums1renaming,actiontime1);
+    // assert(rename1_list==ATempty); // Creating_rename1_list is superfluous
+
+    /* condition1=substitute_data(rename1_list,sums1renaming,condition1);
+    actiontime1=substitute_time(rename1_list,sums1renaming,actiontime1); */
 
     if (multiaction1!=terminationAction)
     { 
       if (actiontime1==gsMakeNil())
       { if (!gsIsDataExprTrue(ultimatedelaycondition))
         { actiontime1=timevar;
-          sumvars1new=ATinsertA(sumvars1new,timevar);
+          sumvars1=ATinsertA(sumvars1,timevar);
+          // sumvars1new=ATinsertA(sumvars1new,timevar);
           condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
         }
       }
@@ -7715,16 +7809,18 @@ static ATermList combinesumlist(
           ATinsertA(
             resultsumlist,
             gsMakeLinearProcessSummand(
-               sumvars1new,
+               // sumvars1new,
+               sumvars1,
                condition1,
-               substitute_multiaction(rename1_list,sums1renaming,multiaction1), 
+               multiaction1, //substitute_multiaction(rename1_list,sums1renaming,multiaction1), 
                actiontime1,
-               substitute_assignmentlist(
+               nextstate1));
+               /* substitute_assignmentlist(
                                rename1_list,
                                sums1renaming,
                                nextstate1,
                                par1,
-                               0,1)));
+                               0,1))); */
       }
     }
   }
@@ -7743,7 +7839,7 @@ static ATermList combinesumlist(
   { 
     ATermAppl summand2=ATAgetFirst(walker2);
     ATermList sumvars2=linGetSumVars(summand2);
-    ATermList sumvars2new=ATempty;
+    // ATermList sumvars2new=ATempty;
     ATermAppl multiaction2=linGetMultiAction(summand2);
     ATermAppl actiontime2=linGetActionTime(summand2); 
     ATermAppl condition2=linGetCondition(summand2);
@@ -7752,20 +7848,23 @@ static ATermList combinesumlist(
     if (multiaction2!=terminationAction)
     { 
 
-      rename2_list=construct_renaming(
+      /* rename2_list=construct_renaming(
                            allpars,
                            sumvars2,
                            &sumvars2new,
                            &sums2renaming);
+      assert(rename2_list==ATempty);
+       
       actiontime2=substitute_time(rename_list,par2,
                    substitute_time(rename2_list,sums2renaming,actiontime2)),
       condition2=substitute_data(rename_list,par2,
-                     substitute_data(rename2_list,sums2renaming,condition2));
+                     substitute_data(rename2_list,sums2renaming,condition2)); */
 
       if (actiontime2==gsMakeNil())
       { if (!gsIsDataExprTrue(ultimatedelaycondition))
         { actiontime2=timevar;
-          sumvars2new=ATinsertA(sumvars2new,timevar);
+          // sumvars2new=ATinsertA(sumvars2new,timevar);
+          sumvars2=ATinsertA(sumvars2,timevar);
           condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
         }
       }
@@ -7787,12 +7886,13 @@ static ATermList combinesumlist(
           ATinsertA(
             resultsumlist,
             gsMakeLinearProcessSummand(
-               sumvars2new,
+               sumvars2, // sumvars2new,
                condition2,
-               substitute_multiaction(rename_list,par2,
-                   substitute_multiaction(rename2_list,sums2renaming,multiaction2)), 
+               multiaction2, /* substitute_multiaction(rename_list,par2,
+                   substitute_multiaction(rename2_list,sums2renaming,multiaction2)), */
                actiontime2,
-               substitute_assignmentlist(
+               nextstate2
+               /* substitute_assignmentlist(
                          rename2_list,
                          sums2renaming,
                          substitute_assignmentlist(
@@ -7800,9 +7900,9 @@ static ATermList combinesumlist(
                                par2,
                                nextstate2,
                                parametersOfsumlist2,
-                               1,1),
+                               1,1), 
                          par3,
-                         0,1)));
+                         0,1)*/ ));
       }
     }
   }
@@ -7814,14 +7914,15 @@ static ATermList combinesumlist(
   { ATermAppl summand1=ATAgetFirst(walker1);
 
     ATermList sumvars1=linGetSumVars(summand1);
-    ATermList sumvars1new=ATempty;
+    // ATermList sumvars1new=ATempty;
     ATermAppl multiaction1=linGetMultiAction(summand1);
     ATermAppl actiontime1=linGetActionTime(summand1);
     ATermAppl condition1=linGetCondition(summand1);
     ATermList nextstate1=linGetNextState(summand1);
 
-    rename1_list=construct_renaming(allpars,
-                                    sumvars1,&sumvars1new,&sums1renaming);
+    /* rename1_list=construct_renaming(allpars,
+                                     sumvars1,&sumvars1new,&sums1renaming);
+    assert(rename1_list==ATempty);
     multiaction1=substitute_multiaction(
                            rename1_list,
                            sums1renaming,
@@ -7834,23 +7935,23 @@ static ATermList combinesumlist(
                      0,1);
     actiontime1= substitute_time(rename1_list,sums1renaming,actiontime1);
     condition1= substitute_data(rename1_list,sums1renaming,condition1);
-
+    */
     for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
     {
       ATermAppl summand2=ATAgetFirst(walker2);
       ATermList sumvars2=linGetSumVars(summand2);
-      ATermList sumvars2new=ATempty;
+      // ATermList sumvars2new=ATempty;
       ATermAppl multiaction2=linGetMultiAction(summand2);
       ATermAppl actiontime2=linGetActionTime(summand2);
       ATermAppl condition2=linGetCondition(summand2);
       ATermList nextstate2=linGetNextState(summand2);
       
-      rename2_list=construct_renaming(
+      /* rename2_list=construct_renaming(
                ATconcat(sumvars1new,allpars),
                sumvars2,&sumvars2new,&sums2renaming);
-
-      
+      assert(rename2_list==ATempty);
+      */
       if ((multiaction1==terminationAction)==(multiaction2==terminationAction))
       { ATermAppl multiaction3=NULL;
         if ((multiaction1==terminationAction)&&(multiaction2==terminationAction))
@@ -7859,19 +7960,20 @@ static ATermList combinesumlist(
         else 
         { multiaction3=linMergeMultiAction(
                              multiaction1,
-                             substitute_multiaction(rename_list,par2,
+                             /* substitute_multiaction(rename_list,par2,
                                 substitute_multiaction(
                                              rename2_list,
-                                             sums2renaming,
-                                             multiaction2)));
+                                             sums2renaming,*/
+                                             multiaction2); //));
 
         }
-        ATermList allsums=ATconcat(sumvars1new,sumvars2new);
-        actiontime2=substitute_time(rename_list,par2,
+        // ATermList allsums=ATconcat(sumvars1new,sumvars2new);
+        ATermList allsums=ATconcat(sumvars1,sumvars2);
+        /* actiontime2=substitute_time(rename_list,par2,
                 substitute_time(rename2_list,sums2renaming,actiontime2));
   
         condition2=substitute_data(rename_list,par2,
-                substitute_data(rename2_list,sums2renaming,condition2));
+                substitute_data(rename2_list,sums2renaming,condition2)); */
         ATermAppl condition3= gsMakeDataExprAnd(condition1,condition2);
   
         ATermAppl actiontime3=NULL;
@@ -7899,7 +8001,7 @@ static ATermList combinesumlist(
           }
         }
   
-        nextstate2=substitute_assignmentlist(
+        /* nextstate2=substitute_assignmentlist(
                      rename2_list,
                      sums2renaming,
                      substitute_assignmentlist(
@@ -7909,7 +8011,7 @@ static ATermList combinesumlist(
                           parametersOfsumlist2,
                           1,1),
                      par3,
-                     0,1);
+                     0,1); */
   
         ATermList nextstate3=ATconcat(nextstate1,nextstate2);
         
@@ -7945,22 +8047,27 @@ static ATermAppl parallelcomposition(
   ATermList renaming=NULL;
   ATermList result=NULL;
   ATermList pars2renaming=NULL;
-  
+
+  gsVerboseMsg(
+    "- calculating parallel composition: %d || %d = ",
+    ATgetLength(linGetSums(t1)),
+    ATgetLength(linGetSums(t2)));
+
   init1=linGetInit(t1);
   init2=linGetInit(t2);
   pars1=linGetParameters(t1);
   pars2=linGetParameters(t2);
   
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
-  result=combinesumlist(
+  assert(renaming==ATempty && pars2renaming==ATempty);
+
+
+  result=combine_summand_lists(
     linGetSums(t1),
     linGetSums(t2),
     pars1,pars2renaming,pars3,renaming,spec,pars2);
 
-  gsVerboseMsg(
-    "- calculating parallel composition: %d || %d = %d\n",
-    ATgetLength(linGetSums(t1)),
-    ATgetLength(linGetSums(t2)), ATgetLength(result));
+  gsVerboseMsg("%d resulting summands\n",ATgetLength(result));
 
   return linMakeInitProcSpec(
                ATconcat(init1,
@@ -8005,7 +8112,7 @@ static ATermAppl generateLPEmCRLterm(
                    int canterminate,
                    specificationbasictype *spec,
                    int regular)
-{ 
+{  
   if (gsIsProcess(t)) 
   { 
     ATermAppl t3=namecomposition(ATAgetArgument(t,0),ATLgetArgument(t,1),
@@ -8014,6 +8121,7 @@ static ATermAppl generateLPEmCRLterm(
                               canterminate,
                               spec,
                               regular));
+    t3=make_parameters_and_sum_variables_unique(t3); 
     return t3;
   }
   
@@ -8172,6 +8280,7 @@ static ATermAppl generateLPEmCRL(
   { ATermAppl t3=generateLPEpCRL(procIdDecl,
         (canterminate&&objectdata[n].canterminate),objectdata[n].containstime,spec,regular);
     t3=replaceArgumentsByAssignmentsIPS(t3); 
+    t3=make_parameters_and_sum_variables_unique(t3,ATSgetArgument(objectdata[n].objectname,0));
     return t3;
   }
   /* process is a mCRLdone ATerm */
