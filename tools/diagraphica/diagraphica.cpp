@@ -1958,7 +1958,7 @@ void DiaGraph::handleEditDOF(
 void DiaGraph::setDOFColorSelected( )
 // -------------------------------------------
 // ------------------------------------------------------------------
-// Highlight the Color Option in the Edit DOF Menu
+// Select the Color Item in the Edit DOF Menu
 // ------------------------------------------------------------------
 {
     frame->setDOFColorSelected();
@@ -1968,7 +1968,7 @@ void DiaGraph::setDOFColorSelected( )
 void DiaGraph::setDOFOpacitySelected( )
 // -------------------------------------------
 // ------------------------------------------------------------------
-// Highlight the Opacity Option in the Edit DOF Menu
+// Select the Opacity Item in the Edit DOF Menu
 // ------------------------------------------------------------------
 {
     frame->setDOFOpacitySelected();
