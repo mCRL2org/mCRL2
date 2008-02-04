@@ -382,7 +382,7 @@ int main(int argc, char **argv)
   gsMessage("mCRL2 interpreter (type :h for help)\n");
 
   rewr = createRewriter(spec.data(),strat);
-  e = createEnumerator(spec,rewr);
+  e = createEnumerator(spec.data(),rewr);
   variables = ATtableCreate(50,50);
   assignments = ATtableCreate(50,50);
 
@@ -434,7 +434,7 @@ int main(int argc, char **argv)
             delete e;
             delete rewr;
             rewr = createRewriter(spec.data(),strat);
-            e = createEnumerator(spec,rewr);
+            e = createEnumerator(spec.data(),rewr);
           }
         } else if ( (s.substr(0,2) == "t ") || (s.substr(0,5) == "type ") )
         {

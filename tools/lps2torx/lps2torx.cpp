@@ -311,7 +311,7 @@ int main(int argc, char **argv)
     !usedummies,
     stateformat,
     createEnumerator(
-      Spec,
+      data_specification(ATAgetArgument(Spec,0)),
       createRewriter(data_specification(ATAgetArgument(Spec,0)),strat),
       true
     ),

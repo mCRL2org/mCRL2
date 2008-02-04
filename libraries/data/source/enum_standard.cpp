@@ -558,9 +558,8 @@ static ATermList map_ATreverse(ATermList l)
   }
 }
 
-EnumeratorStandard::EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_up_rewriter)
+EnumeratorStandard::EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter)
 {
-        ATermAppl data_spec = ATAgetArgument(spec, 0);
 	info.rewr_obj = r;
 	clean_up_rewr_obj = clean_up_rewriter;
 

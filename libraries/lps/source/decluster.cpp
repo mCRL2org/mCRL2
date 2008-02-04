@@ -274,7 +274,7 @@ lps::specification decluster(const lps::specification& specification, Rewriter& 
   gsVerboseMsg("Input: %d summands.\n", lps.summands().size());
 
   // Some use of internal format because we need it for the rewriter
-  EnumeratorStandard enumerator = EnumeratorStandard(specification, &r);
+  EnumeratorStandard enumerator = EnumeratorStandard(specification.data(), &r);
 
   lps::summand_list sl = decluster_summands(specification, lps.summands(), enumerator, finite_only);
   lps = set_summands(lps, sl);

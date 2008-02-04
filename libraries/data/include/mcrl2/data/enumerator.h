@@ -14,9 +14,8 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
-// TODO: remove the dependency on the LPS library!
 
 namespace mcrl2 {
 
@@ -27,15 +26,12 @@ class enumerator
   protected:
     Enumerator* m_enumerator;
     Rewriter* m_rewriter;
-    lps::specification m_specification;
 
   public:
     enumerator(const data_specification& data_spec)
     {
-      lps::specification spec;
-      m_specification = lps::set_data_specification(spec, data_spec);
       m_rewriter = createRewriter(data_spec);
-      m_enumerator = createEnumerator(m_specification, m_rewriter);
+      m_enumerator = createEnumerator(data_spec, m_rewriter);
     }
     
     ~enumerator()
@@ -59,7 +55,7 @@ class enumerator
         // l is of the form [subst(x,expr)] where expr is in rewriter format
         atermpp::aterm_appl tmp = utilities::ATAgetFirst(l);
         data_expression d(m_rewriter->fromRewriteFormat(tmp(1)));
-        std::cout << "<d>" << pp(d) << std::endl;
+        result.push_back(d);
       }     
       return result;
     }

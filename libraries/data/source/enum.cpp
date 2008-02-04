@@ -18,12 +18,12 @@ Enumerator::~Enumerator()
 {
 }
 
-Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
+Enumerator *createEnumerator(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
 {
 	switch ( strategy )
 	{
 		case ENUM_STANDARD:
-			return new EnumeratorStandard(spec, r,clean_up_rewriter);
+			return new EnumeratorStandard(data_spec, r,clean_up_rewriter);
 		default:
 			return NULL;
 	}

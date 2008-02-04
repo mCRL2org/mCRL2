@@ -40,7 +40,7 @@ typedef struct {
 class EnumeratorStandard : public Enumerator
 {
 	public:
-		EnumeratorStandard(ATermAppl spec, Rewriter *r, bool clean_up_rewriter = false);
+		EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter = false);
 		~EnumeratorStandard();
 
 		ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);

@@ -174,7 +174,6 @@ void test_rewriter()
     pbes_expression e = i->formula();
     std::cout << pp(e) << " -> " << pp(pbesr(e)) << std::endl;
   }
-  BOOST_CHECK(false);
 }
 
 /*

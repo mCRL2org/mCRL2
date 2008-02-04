@@ -480,7 +480,7 @@ specification binary(const lps::specification& spec,
   table new_parameters_table(128, 50);
   table enumerated_elements_table(128,50);
 
-  EnumeratorStandard enumerator = EnumeratorStandard(spec, &r);
+  EnumeratorStandard enumerator = EnumeratorStandard(spec.data(), &r);
 
   // This needs to be done in a counter-intuitive order because of the well-typedness checks
   // (they make sure we can't build up an intermediate result!)
