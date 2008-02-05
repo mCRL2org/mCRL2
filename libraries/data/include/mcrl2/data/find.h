@@ -1,0 +1,35 @@
+// Author(s): Wieger Wesselink
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/find.h
+/// \brief Search functions of the data library.
+
+#ifndef MCRL2_DATA_FIND_H
+#define MCRL2_DATA_FIND_H
+
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/detail/data_functional.h"
+
+namespace mcrl2 {
+
+namespace data {
+
+using atermpp::aterm;
+using atermpp::aterm_traits;
+
+/// Returns true if the term has a given variable as subterm.
+template <typename Term>
+bool find_data_variable(Term t, const data_variable& d)
+{
+  return atermpp::partial_find_if(t, detail::compare_data_variable(d), core::detail::gsIsDataVarId) != atermpp::aterm();
+}
+
+} // namespace data
+
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_FIND_H

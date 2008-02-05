@@ -193,6 +193,41 @@ namespace detail {
     }
   }
 
+//--- partial find --------------------------------------------------------//
+
+  template <typename MatchPredicate, typename StopPredicate>
+  void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
+  {
+    if (t.type() == AT_APPL)
+    {
+      if (match(aterm_appl(t)))
+      {
+        throw found_term_exception(aterm_appl(t)); // report the match
+      }
+      if (stop(aterm_appl(t)))
+      {
+        return; // nothing was found
+      }
+    }
+    if (t.type() == AT_LIST)
+    {
+      for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+      {
+        partial_find_if_impl(*i, match, stop);
+      }
+    }
+    else if (t.type() == AT_APPL)
+    {
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        partial_find_if_impl(*i, match, stop);
+      }
+    }
+    else {
+      return;
+    }
+  }
+
 //--- replace -------------------------------------------------------------//
 
   template <typename ReplaceFunction>

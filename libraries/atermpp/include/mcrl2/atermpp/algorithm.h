@@ -41,6 +41,23 @@ namespace atermpp
     return aterm();
   }
 
+  /// Finds a subterm of t that matches the predicate op. If no matching subterm is found,
+  /// aterm() is returned. The term is only partially traversed. If the stop predicate
+  /// returns false in a subterm, the recursion is not continued.
+  /// \param match The predicate that determines if a subterm is a match
+  /// \param stop The predicte that determines if the recursion should not be continued in a subterm
+  template <typename Term, typename MatchPredicate, typename StopPredicate>
+  aterm partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
+  {
+    try {
+      detail::partial_find_if_impl(aterm_traits<Term>::term(t), match, stop);
+    }
+    catch (detail::found_term_exception e) {
+      return e.t;
+    }
+    return aterm();
+  }
+
   /// Finds all subterms of t that match the predicate op, and writes the found terms
   /// to the destination range starting with destBegin.
   template <typename Term, typename UnaryPredicate, typename OutputIterator>

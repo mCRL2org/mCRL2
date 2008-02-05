@@ -20,4 +20,5 @@ test-suite lps
       [ run operators.cpp ]
       [ run replace_test.cpp ]
       [ run sort_test.cpp ]
+      [ run find_test.cpp ]
     ;

@@ -37,6 +37,22 @@ namespace detail {
 using atermpp::aterm;
 using atermpp::aterm_traits;
 
+/// \brief Function object that determines if a term is equal to a given data variable.
+struct compare_data_variable: public std::unary_function<atermpp::aterm, bool>
+{
+  const data_variable& v_;
+  
+  compare_data_variable(const data_variable& v)
+   : v_(v)
+  {}
+  
+  template <typename Term>
+  bool operator()(Term t) const
+  {
+    return v_ == t;
+  }
+};
+
 /// Function object that returns true if the expressions x and y have the same sort.
 struct equal_data_expression_sort: public std::binary_function<data_expression, data_expression, bool>
 {
