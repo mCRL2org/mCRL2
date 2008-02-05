@@ -90,7 +90,7 @@ const std::string ABP_SPECIFICATION =
 
 void test_sort_enumeration()
 {
-  using namespace sort_expr;
+  using namespace data_expr;
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   data_specification data = spec.data();
@@ -107,8 +107,19 @@ void test_sort_enumeration()
   }
 
   enumerator e(spec.data());
-  sort_expression s1 = bool_();
-  std::vector<data_expression> v = e.enumerate_finite_sort(s1);
+  sort_expression s1 = sort_expr::bool_();
+  atermpp::vector<data_expression> v = e.enumerate_finite_sort(s1);
+
+  data_variable d1(core::identifier_string("d1"), sort_expr::bool_());
+  data_variable d2(core::identifier_string("d2"), sort_expr::bool_());
+  data_variable d3(core::identifier_string("d3"), sort_expr::bool_());
+  std::vector<data_variable> vars;
+  vars.push_back(d1);
+  vars.push_back(d2);
+  data_expression t = and_(data_expr::equal_to(d1, d2), data_expr::not_equal_to(d1,d3));
+  atermpp::set<data_expression> w = e.enumerate_expression_values(t, vars.begin(), vars.end());
+  std::cout << "<variables>" << pp(data_expression_list(w.begin(), w.end())) << std::endl;
+  BOOST_CHECK(false);
 }
 
 void test_sort_equality()
@@ -136,7 +147,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  test_sort_equality();
+  //test_sort_equality();
   test_sort_enumeration();
 
   return 0;

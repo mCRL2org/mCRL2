@@ -24,6 +24,9 @@ namespace data {
 ///
 class rewriter
 {
+  friend class single_term_rewriter;
+  friend class enumerator;
+  
   private:
     boost::shared_ptr<Rewriter> m_rewriter;
 
@@ -63,6 +66,10 @@ class rewriter
       ATermAppl m_variable;
       ATerm m_value;
 
+      substitution()
+        : m_variable(0), m_value(0)
+      { }
+        
       protected:
         substitution(ATermAppl variable, ATerm value)
           : m_variable(variable),
@@ -124,6 +131,42 @@ class rewriter
     {
       m_rewriter.get()->removeRewriteRule(eq);
     }
+};
+
+/// Rewriter for rewriting a single term multiple times with different substitutions.
+/// For this special case, this rewriter is more efficient than the default rewriter.
+class single_term_rewriter
+{
+  rewriter& m_rewriter;
+  ATerm m_phi; // expression in internal rewriter format
+
+  public:
+    /// Constructor.
+    /// \param phi The term to be rewritten.
+    single_term_rewriter(rewriter& r, const data_expression& phi)
+      : m_rewriter(r)
+    {
+      m_phi = m_rewriter.m_rewriter.get()->toRewriteFormat(phi);
+    }   
+
+		/// \brief Rewrites the data expression phi that has been passed through the constructor,
+		/// and on the fly applies the substitutions in the sequence [first, last[.
+		/// \return The normal form of phi.
+		///
+		template <typename Iter>
+		data_expression operator()(Iter first, Iter last) const
+		{
+		  Rewriter* r = m_rewriter.m_rewriter.get();
+
+		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
+		  for (Iter i = first; i != last; ++i)
+		  {
+		    r->setSubstitution(i->m_variable, i->m_value);
+		  }
+		  data_expression result = r->fromRewriteFormat(r->rewriteInternal(m_phi));
+		  r->clearSubstitutions();
+		  return result;
+		}
 };
 
 } // namespace data

@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/sort_utility1.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/detail/data_utility.h"
@@ -30,19 +31,24 @@ using atermpp::aterm_list;
 using namespace core::detail;
 
 /// \cond INTERNAL_DOCS
-struct has_result_sort
-{
-  sort_expression m_result;
 
-  has_result_sort(sort_expression target)
-    : m_result(target)
-  {}
+namespace detail {
 
-  bool operator()(data_operation f)
+  struct has_result_sort
   {
-    return result_sort(f.sort()) == m_result;
-  }
-};
+    sort_expression m_result;
+  
+    has_result_sort(sort_expression target)
+      : m_result(target)
+    {}
+  
+    bool operator()(data_operation f)
+    {
+      return result_sort(f.sort()) == m_result;
+    }
+  };
+} // namespace detail
+
 /// \endcond
 
 /// \brief A data specification is merely a struct containing
@@ -58,10 +64,14 @@ class data_specification: public aterm_appl
     data_operation_list  m_constructors;
     data_operation_list  m_mappings;
     data_equation_list   m_equations;
+
     // The following map contains for each sort a default term of that particular
     // sort. Each default term remains valid, as long as no constructors or mappings
     // are removed from the specification.
     atermpp::map < sort_expression, data_expression > default_expression_map;
+
+    /// Caches if a sort is finite or not.
+    std::map<data::sort_expression, bool> m_finite_sorts;  
 
   public:
     /// Iterator for the sequence of sorts.
@@ -127,8 +137,8 @@ class data_specification: public aterm_appl
     {
       atermpp::vector<data_operation> result;
 
-      typedef boost::filter_iterator<has_result_sort, data_operation_list::iterator> FilterIter;
-      has_result_sort predicate(s);
+      typedef boost::filter_iterator<detail::has_result_sort, data_operation_list::iterator> FilterIter;
+      detail::has_result_sort predicate(s);
       FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
       FilterIter last(predicate, m_constructors.end(), m_constructors.end());
       std::copy(first, last, std::back_inserter(result));
@@ -147,8 +157,8 @@ class data_specification: public aterm_appl
     data_operation_list mappings(sort_expression s) const
     {
       atermpp::vector<data_operation> result;
-      typedef boost::filter_iterator<has_result_sort, data_operation_list::iterator> FilterIter;
-      has_result_sort predicate(s);
+      typedef boost::filter_iterator<detail::has_result_sort, data_operation_list::iterator> FilterIter;
+      detail::has_result_sort predicate(s);
       FilterIter first(predicate, m_mappings.begin(), m_mappings.end());
       FilterIter last(predicate, m_mappings.end(), m_mappings.end());
       std::copy(first, last, std::back_inserter(result));
@@ -260,6 +270,20 @@ class data_specification: public aterm_appl
       }
 
       return data_expression();
+    }
+
+    /// Returns true if the sort s has a finite number of values.
+    /// For efficiency, the results of this function are cached.
+    bool is_finite(sort_expression s)
+    {
+      std::map<sort_expression, bool>::const_iterator i = m_finite_sorts.find(s);
+      if (i != m_finite_sorts.end())
+      {
+        return i->second;
+      }
+      bool b = data::is_finite(constructors(), s);
+      m_finite_sorts[s] = b;
+      return m_finite_sorts[s];
     }
 
     /// Returns true if

@@ -105,7 +105,7 @@ namespace lps {
     replacements[lhs] = new_rhs;
   }
 
-  ///Used to assist in occurs_in function.
+  ///Used to assist in occurs_in_expression function.
   struct compare_data_variable
   {
     aterm v;
@@ -123,7 +123,7 @@ namespace lps {
   ///pre: true
   ///ret: data_variable v occurs in d.
   template <typename data_type>
-  bool occurs_in(data_type d, data_variable v)
+  bool occurs_in_expression(data_type d, data_variable v)
   {
     return find_if(aterm_appl(d), compare_data_variable(v)) != aterm();
   }
@@ -190,8 +190,8 @@ namespace lps {
 
       //Check whether variable occurs in other terms of summand
       //If variable occurs leave the variable, so add variable to new list
-      if (occurs_in(summand_.condition(), v) || occurs_in(summand_.actions(), v)
-          || occurs_in(summand_.time(), v) || occurs_in(summand_.assignments(), v))
+      if (occurs_in_expression(summand_.condition(), v) || occurs_in_expression(summand_.actions(), v)
+          || occurs_in_expression(summand_.time(), v) || occurs_in_expression(summand_.assignments(), v))
       {
         new_summation_variables = push_front(new_summation_variables, v);
       } else {
@@ -276,8 +276,8 @@ namespace lps {
       //substitution in summation_variables is done in calling function.
       if (is_data_variable(lhs(working_condition)))
       {
-        if (occurs_in(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
-            !occurs_in(rhs(working_condition), lhs(working_condition)))
+        if (occurs_in_expression(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
+            !occurs_in_expression(rhs(working_condition), lhs(working_condition)))
         {
           if (substitutions.count(lhs(working_condition)) == 0)
           {

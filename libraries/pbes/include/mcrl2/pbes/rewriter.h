@@ -12,7 +12,6 @@
 
 #include <set>
 #include <vector>
-#include "boost/ptr_container/ptr_vector.hpp"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/data_variable_replace.h"
@@ -21,49 +20,6 @@
 namespace mcrl2 {
 
 namespace pbes_system {
-
-struct enumerate_arguments_function
-{
-  const pbes_expression& m_expr;
-  const std::vector<data::data_variable>& m_src;
-  const std::vector<data::data_expression>& m_dest;
-  std::vector<pbes_expression>& m_expressions;
-
-  enumerate_arguments_function(const pbes_expression& expr,
-                               const std::vector<data::data_variable>& src,
-                               const std::vector<data::data_expression>& dest,
-                               std::vector<pbes_expression>& expressions
-                              )
-    : m_expr(expr), m_src(src), m_dest(dest), m_expressions(expressions)
-  {}
-
-  void operator()()
-  {
-    m_expressions.push_back(replace_data_variable_sequence(m_expr, m_src, m_dest));
-  }
-};
-  
-/// This function generates all possible sequences of data expressions
-/// [x1, ..., xn] where n = distance(last, first), such that x1 is
-/// an element of *first, x2 an element of *(++first) etc. The sequences
-/// are stored in the output range [i, i+n[, and for each such range
-/// the function f is called.
-template <typename Iter, typename Function>
-void enumerate_arguments(Iter first, Iter last, std::vector<data::data_expression>::iterator i, Function f)
-{
-  if (first == last)
-  {
-    f();
-  }
-  else
-  {
-    for (std::vector<data::data_expression>::iterator j = first->begin(); j != first->end(); ++j)
-    {
-      *i = *j;
-      enumerate_arguments(first + 1, last, i + 1, f);
-    }
-  }
-}
 
 template <class DataRewriter>
 struct pbes_rewrite_expression_builder: public pbes_expression_builder
@@ -76,12 +32,6 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
   /// but are not used (until the current node).
   std::set<data::data_variable> unused_quantifier_variables;
 
-  /// Caches if a sort is finite or not.
-  std::map<data::sort_expression, bool> finite_sorts;
-
-  /// Caches the ranges of values of finite sorts.
-  std::map<data::sort_expression, std::vector<data::data_expression> > finite_sort_values;
-
   /// Constructor.
   ///
   pbes_rewrite_expression_builder(DataRewriter& r, const data::data_specification& data)
@@ -90,34 +40,6 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
       m_data(data)
   { }
 
-  /// Returns all possible values of the finite sort s.
-  /// For efficiency, the values of this function are cached.
-  std::vector<data::data_expression>& enumerate_values(data::sort_expression s)
-  {
-    std::map<data::sort_expression, std::vector<data::data_expression> >::iterator i = finite_sort_values.find(s);
-    if (i != finite_sort_values.end())
-    {
-      return i->second;
-    }
-    std::vector<data::data_expression> v = m_enumerator.enumerate_finite_sort(s);
-    finite_sort_values[s] = v;
-    return finite_sort_values[s];
-  }
-
-  /// Returns if the sort s is finite.
-  /// For efficiency, the values of this function are cached.
-  bool is_finite_sort(data::sort_expression s)
-  {
-    std::map<data::sort_expression, bool>::const_iterator i = finite_sorts.find(s);
-    if (i != finite_sorts.end())
-    {
-      return i->second;
-    }
-    bool b = data::is_finite(m_data.constructors(), s);
-    finite_sorts[s] = b;
-    return finite_sorts[s];
-  }
-  
   /// Adds the given variables to the set of unused quantifier variables.
   void push(data::data_variable_list variables)
   {
