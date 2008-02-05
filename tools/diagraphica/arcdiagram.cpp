@@ -2172,184 +2172,192 @@ void ArcDiagram::onTimer( wxTimerEvent &e )
 void ArcDiagram::handleHits( const vector< int > &ids )
 // ----------------------------------------------------
 {	
-    // leaves
-    if ( ids.size() == 1 )
-    {    	
-        if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
-        {
-            currIdxDgrm = -1;
-            updateMarkBundles();
-
-            mediator->handleUnshowFrame();
-        }
-        canvas->clearToolTip();
-    }
-    else
+    if ( mouseButton == MSE_BUTTON_DOWN )
     {
-        // interact with bundles
-        if ( ids[1] == ID_BUNDLES )
+        if ( mouseDrag == MSE_DRAG_TRUE )
         {
-            currIdxDgrm = -1;
-            handleHoverBundle( ids[2] );
-        }
-        // interact with tree nodes
-        else if ( ids[1] == ID_TREE_NODE )
-        {
-            currIdxDgrm = -1;
-            updateMarkBundles();
-            mediator->handleUnshowFrame();
+        	if ( mouseSide == MSE_SIDE_LFT )
+            {
+            	if ( ids[1] == ID_DIAGRAM )
+            	{
+                	handleDragDiagram(ids[2]);
+                }                
+            }
+       }
+    }
+    else // mouse button up
+    {
+       
+    	if ( ids.size() == 1 )  // leaves
+    	{    	
+        	if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
+        	{
+            	currIdxDgrm = -1;
+            	updateMarkBundles();
 
-            if ( mouseButton == MSE_BUTTON_DOWN &&
-                 mouseDrag == MSE_DRAG_FALSE )
-            {
-                if ( mouseSide == MSE_SIDE_LFT )
-                {
-                    /*
-                    *mediator << "expand or collapse\n";
-                    */
+            	mediator->handleUnshowFrame();
+        	}
+        	canvas->clearToolTip();
+    	}
+    	else
+    	{
+        	// interact with bundles
+        	if ( ids[1] == ID_BUNDLES )
+        	{
+            	currIdxDgrm = -1;
+           		handleHoverBundle( ids[2] );
+        	}
+        	// interact with tree nodes
+        	else if ( ids[1] == ID_TREE_NODE )
+        	{
+            	currIdxDgrm = -1;
+            	updateMarkBundles();
+            	mediator->handleUnshowFrame();
 
-                    //Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
-                    //vector< int > v;
-                    //hitClust->getCoord( v );
+            	if ( mouseButton == MSE_BUTTON_DOWN &&
+                	mouseDrag == MSE_DRAG_FALSE )
+            	{
+                	if ( mouseSide == MSE_SIDE_LFT )
+                	{
+                    	/*
+                    	*mediator << "expand or collapse\n";
+                    	*/
 
-                    //graph->clearSubClusters( v );
-                    //geomChanged = true;
-                }
-                /*
-                else if ( mouseSide == MSE_SIDE_RGT )
-                {
-                    Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
-                    mediator->handleEditClust( hitClust );
-                    hitClust = NULL;
-                }
-                */
-            }
-            else
-            {
-                handleHoverCluster( ids[2], ids[3] );
-            }
-        }
-        // interact with leaf nodes
-        else if ( ids[1] == ID_LEAF_NODE )
-        {
-            if ( mouseClick == MSE_CLICK_SINGLE &&
-                 mouseDrag == MSE_DRAG_FALSE && 
-                 mouseSide == MSE_SIDE_LFT )
-            {
-            	handleShowDiagram( ids[2] );
-                if ( mediator->getView() == Mediator::VIEW_TRACE )
-                {
-                    mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
-                }
-            }
-            else if ( mouseClick == MSE_CLICK_DOUBLE &&
-                      mouseDrag == MSE_DRAG_FALSE &&
-                      mouseSide == MSE_SIDE_LFT )
-            {
-            }
-            /*
-            else if ( mouseSide == MSE_SIDE_RGT )
-            {
-                Cluster* hitClust = graph->getLeaf( ids[2] );
-                mediator->handleEditClust( hitClust );
-                hitClust = NULL;
-            }
-            */
-            else
-            {
-                currIdxDgrm = -1;
-                updateMarkBundles();
-                mediator->handleUnshowFrame();
+                    	//Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
+                    	//vector< int > v;
+                    	//hitClust->getCoord( v );
+
+                    	//graph->clearSubClusters( v );
+                    	//geomChanged = true;
+                	}
+                	/*
+                	else if ( mouseSide == MSE_SIDE_RGT )
+                	{
+                    	Cluster* hitClust = mapPosToClust[ids[2]][ids[3]];
+                    	mediator->handleEditClust( hitClust );
+                    	hitClust = NULL;
+                	}
+                	*/
+            	}
+            	else
+            	{
+                	handleHoverCluster( ids[2], ids[3] );
+            	}
+        	}
+        	// interact with leaf nodes
+        	else if ( ids[1] == ID_LEAF_NODE )
+        	{
+            	if ( mouseClick == MSE_CLICK_SINGLE &&
+                 	mouseDrag == MSE_DRAG_FALSE && 
+                 	mouseSide == MSE_SIDE_LFT )
+            	{
+            		handleShowDiagram( ids[2] );
+                	if ( mediator->getView() == Mediator::VIEW_TRACE )
+                	{
+                    	mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
+                	}
+            	}
+            	else if ( mouseClick == MSE_CLICK_DOUBLE &&
+                      	mouseDrag == MSE_DRAG_FALSE &&
+                      	mouseSide == MSE_SIDE_LFT )
+            	{
+            	}
+            	else
+            	{
+                	currIdxDgrm = -1;
+                	updateMarkBundles();
+                	mediator->handleUnshowFrame();
                 
-                handleHoverCluster( mapPosToClust.size()-1, ids[2] );
-            }
-        }
-        // interact with bar tree
-        else if ( ids[1] == ID_BAR_TREE )
-        {
-            currIdxDgrm = -1;
-            updateMarkBundles();
-            mediator->handleUnshowFrame();
+                	handleHoverCluster( mapPosToClust.size()-1, ids[2] );
+            	}
+        	}
+        	// interact with bar tree
+        	else if ( ids[1] == ID_BAR_TREE )
+        	{
+            	currIdxDgrm = -1;
+            	updateMarkBundles();
+            	mediator->handleUnshowFrame();
             
-            handleHoverBarTree( ids[2], ids[3] );
-        }
-        // interact with diagrams
-        else if ( ids[1] == ID_DIAGRAM )
-        {
-            canvas->clearToolTip();			
-            if ( mouseClick == MSE_CLICK_SINGLE &&
-            	 mouseSide   == MSE_SIDE_LFT &&
-                 mouseDrag   == MSE_DRAG_FALSE )
-            {
-                dragIdxDgrm = ids[2];
-                currIdxDgrm = ids[2];
-                updateMarkBundles();
+            	handleHoverBarTree( ids[2], ids[3] );
+        	}
+        	// interact with diagrams
+        	else if ( ids[1] == ID_DIAGRAM )
+        	{
+            	canvas->clearToolTip();			
+            	if ( mouseClick == MSE_CLICK_SINGLE &&
+            	 	mouseSide   == MSE_SIDE_LFT &&
+                 	mouseDrag   == MSE_DRAG_FALSE )
+            	{
+                	dragIdxDgrm = ids[2];
+                	currIdxDgrm = ids[2];
+                	updateMarkBundles();
                 
-                if ( ids.size() == 4 )
-                {
-                    if ( ids[3] == ID_DIAGRAM_CLSE )
-                        handleShowDiagram( ids[2] );
-                    else if ( ids[3] == ID_DIAGRAM_MORE )
-                    {
-                        // show menu
-                        if ( mediator->getView() == Mediator::VIEW_SIM )
-                            mediator->handleSendDgrm( this, true, false, false, true, true );
-                        else if ( mediator->getView() == Mediator::VIEW_TRACE )
-                            mediator->handleSendDgrm( this, false, true, true, true, true );
+                	if ( ids.size() == 4 )
+                	{
+                    	if ( ids[3] == ID_DIAGRAM_CLSE )
+                        	handleShowDiagram( ids[2] );
+                    	else if ( ids[3] == ID_DIAGRAM_MORE )
+                    	{
+                        	// show menu
+                        	if ( mediator->getView() == Mediator::VIEW_SIM )
+                            	mediator->handleSendDgrm( this, true, false, false, true, true );
+                        	else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                            	mediator->handleSendDgrm( this, false, true, true, true, true );
 
-                        showMenu = true;
+                        	showMenu = true;
 
-                        // no mouseup event is generated reset manually
-                        dragIdxDgrm = -1;
-                        mouseButton = MSE_BUTTON_UP;
-                        mouseSide   = MSE_SIDE_LFT;
-                        mouseClick  = MSE_CLICK_SINGLE;
-                        mouseDrag   = MSE_DRAG_FALSE;
-                    }
-                    else if ( ids[3] == ID_DIAGRAM_RWND )
-                        handleRwndDiagram( ids[2] );
-                    else if ( ids[3] == ID_DIAGRAM_PREV )
-                        handlePrevDiagram( ids[2] );
-                    else if ( ids[3] == ID_DIAGRAM_PLAY )
-                        handlePlayDiagram( ids[2] );
-                    else if ( ids[3] == ID_DIAGRAM_NEXT )
-                        handleNextDiagram( ids[2] );
-                }
-            }
-            else if ( mouseSide   == MSE_SIDE_RGT &&
-                      mouseButton == MSE_BUTTON_DOWN /*&&
-                      mouseDrag   == MSE_DRAG_FALSE*/ )
-            {
-                // show menu
-                if ( mediator->getView() == Mediator::VIEW_SIM )
-                    mediator->handleSendDgrm( this, true, false, false, true, true );
-                else if ( mediator->getView() == Mediator::VIEW_TRACE )
-                    mediator->handleSendDgrm( this, false, true, true, true, true );
+                        	// no mouseup event is generated reset manually
+                        	dragIdxDgrm = -1;
+                        	mouseButton = MSE_BUTTON_UP;
+                        	mouseSide   = MSE_SIDE_LFT;
+                        	mouseClick  = MSE_CLICK_SINGLE;
+                        	mouseDrag   = MSE_DRAG_FALSE;
+                    	}
+                    	else if ( ids[3] == ID_DIAGRAM_RWND )
+                        	handleRwndDiagram( ids[2] );
+                    	else if ( ids[3] == ID_DIAGRAM_PREV )
+                        	handlePrevDiagram( ids[2] );
+                    	else if ( ids[3] == ID_DIAGRAM_PLAY )
+                        	handlePlayDiagram( ids[2] );
+                    	else if ( ids[3] == ID_DIAGRAM_NEXT )
+                        	handleNextDiagram( ids[2] );
+                	}
+            	}
+            	else if ( 	mouseSide   == MSE_SIDE_RGT &&
+                      	mouseButton == MSE_BUTTON_DOWN /*&&
+                      	mouseDrag   == MSE_DRAG_FALSE*/ )
+            	{
+                	// show menu
+                	if ( mediator->getView() == Mediator::VIEW_SIM )
+                    	mediator->handleSendDgrm( this, true, false, false, true, true );
+                	else if ( mediator->getView() == Mediator::VIEW_TRACE )
+                    	mediator->handleSendDgrm( this, false, true, true, true, true );
 
-                showMenu = true;
+                	showMenu = true;
 
-                // no mouseup event is generated reset manually
-                dragIdxDgrm = -1;
-                mouseButton = MSE_BUTTON_UP;
-                mouseSide   = MSE_SIDE_RGT;
-                mouseClick  = MSE_CLICK_SINGLE;
-                mouseDrag   = MSE_DRAG_FALSE;
-            }
-            else
-            {
-                canvas->clearToolTip();
+                	// no mouseup event is generated reset manually
+                	dragIdxDgrm = -1;
+                	mouseButton = MSE_BUTTON_UP;
+                	mouseSide   = MSE_SIDE_RGT;
+                	mouseClick  = MSE_CLICK_SINGLE;
+                	mouseDrag   = MSE_DRAG_FALSE;
+            	}
+            	else
+            	{
+                	canvas->clearToolTip();
 
-                currIdxDgrm = ids[2];
-                updateMarkBundles();
+                	currIdxDgrm = ids[2];
+                	updateMarkBundles();
 
-                ColorRGB col;
-                VisUtils::mapColorCoolBlue( col );
-                mediator->handleShowFrame(
-                    framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
-                    attrsDgrm[currIdxDgrm],
-                    col );
-            }
-        }
+                	ColorRGB col;
+                	VisUtils::mapColorCoolBlue( col );
+                	mediator->handleShowFrame(
+                    	framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
+                    	attrsDgrm[currIdxDgrm],
+                	    col );
+            	}
+        	}
+    	}
     }
 }
 
@@ -2468,6 +2476,20 @@ void ArcDiagram::handleDragDiagram()
         posDgrm[dragIdxDgrm].x += (x2-x1);
         posDgrm[dragIdxDgrm].y += (y2-y1);
     }
+}
+
+// ---------------------------------
+void ArcDiagram::handleDragDiagram(const int &dgrmIdx)
+// ---------------------------------
+{
+	double x1, y1;
+    double x2, y2;
+    
+    canvas->getWorldCoords( xMousePrev, yMousePrev, x1, y1 );
+    canvas->getWorldCoords( xMouseCur,  yMouseCur,  x2, y2 );
+    
+    posDgrm[dgrmIdx].x += (x2-x1);
+    posDgrm[dgrmIdx].y += (y2-y1);
 }
 
 

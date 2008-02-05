@@ -11,6 +11,9 @@
 
 #include "timeseries.h"
 
+#include <iostream>
+using namespace std;
+
 
 // -- static variables ----------------------------------------------
 
@@ -1117,85 +1120,39 @@ void TimeSeries::handleHits( const vector< int > &ids )
                     }
                 }
             }
-            else if ( mouseDrag == MSE_DRAG_FALSE )
-            {
-                if ( mouseSide == MSE_SIDE_LFT )
-                {
-                    if ( ids[1] == ID_SLIDER )
-                    {
-                        if ( ids.size() == 3 )
-                        {
-                            if ( ids[2] == ID_SLIDER_HDL )
-                                dragStatus = DRAG_STATUS_SLDR;
-                            else if ( ids[2] == ID_SLIDER_HDL_LFT )
-                                dragStatus = DRAG_STATUS_SLDR_LFT;
-                            else if ( ids[2] == ID_SLIDER_HDL_RGT )
-                                dragStatus = DRAG_STATUS_SLDR_RGT;
-                        }
-                        else
-                        {
-                            dragStatus = DRAG_STATUS_SLDR;
-                            handleHitSlider();
-                        }
-                    }
-                    else if ( ids[1] == ID_ITEMS )
-                    {
-                        if ( mouseClick == MSE_CLICK_SINGLE )
-                        {
-                            handleHitItems( ids[2] );
-                            dragStatus = DRAG_STATUS_ITMS;
-                        }
-                        else if ( mouseClick == MSE_CLICK_DOUBLE )
-                            handleShowDiagram( ids[2] );;
-                    }
-                    else if ( ids[1] == ID_DIAGRAM )
-                    {
-                        if ( ids.size() == 4 )
-                        {
-                            if ( ids[3] == ID_DIAGRAM_CLSE )
-                                handleShowDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_MORE )
-                            {
-                                currIdxDgrm = ids[2];
-                                mediator->handleSendDgrm( this, false, false, false, true, false );
-                            }
-                            else if ( ids[3] == ID_DIAGRAM_RWND )
-                                handleRwndDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_PREV )
-                                handlePrevDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_PLAY )
-                                handlePlayDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_NEXT )
-                                handleNextDiagram( ids[2] );
-                        }
-                        else
-                            dragStatus = DRAG_STATUS_DGRM;
-                    }
-                }
-                else if ( mouseSide == MSE_SIDE_RGT )
-                {
-                    if ( mouseButton == MSE_BUTTON_DOWN )
-                    {
-                        /*
-                        if ( ids[1] == ID_ITEMS )
-                            *mediator << "show menu\n";
-                        else
-                        */
-                        if ( ids[1] == ID_DIAGRAM )
-                            mediator->handleSendDgrm( this, false, false, false, true, false );
-                    }
-                }
-            }
-
         }
         // mouse button up
         else
         {
             dragDistNodes = 0.0;
-            dragStatus = DRAG_STATUS_NONE;
+            dragStatus = DRAG_STATUS_NONE;            
 
-            if ( ids.size() > 2 && ids[1] == ID_DIAGRAM )
+            if ( mouseSide == MSE_SIDE_LFT && ids.size() > 2 && ids[1] == ID_DIAGRAM )
             {
+            	if ( ids.size() == 4 && mouseClick == MSE_CLICK_SINGLE )
+                {
+                	if ( ids[3] == ID_DIAGRAM_CLSE )
+                    {
+                       	handleShowDiagram( ids[2] );
+                       	cerr << "Close" << endl;
+                    }
+                    else if ( ids[3] == ID_DIAGRAM_MORE )
+                    {
+                    	currIdxDgrm = ids[2];
+                       	mediator->handleSendDgrm( this, false, false, false, true, false );
+                    }
+                    else if ( ids[3] == ID_DIAGRAM_RWND )
+                      	handleRwndDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_PREV )
+                       	handlePrevDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_PLAY )
+                       	handlePlayDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_NEXT )
+                       	handleNextDiagram( ids[2] );
+                }
+                else
+                	dragStatus = DRAG_STATUS_DGRM;
+                
                 mouseOverIdx = -1;
                 currIdxDgrm = ids[2];
 
@@ -1221,14 +1178,53 @@ void TimeSeries::handleHits( const vector< int > &ids )
                     frame = NULL;
                 }
             }
-            else if ( ids.size() > 2 && 
+            else if ( mouseClick == MSE_CLICK_SINGLE && mouseSide == MSE_SIDE_LFT && ids[1] == ID_SLIDER )
+            {
+                if ( ids.size() == 3 )
+                {
+                	if ( ids[2] == ID_SLIDER_HDL )
+                      	dragStatus = DRAG_STATUS_SLDR;
+                    else if ( ids[2] == ID_SLIDER_HDL_LFT )
+                       	dragStatus = DRAG_STATUS_SLDR_LFT;
+                    else if ( ids[2] == ID_SLIDER_HDL_RGT )
+                       	dragStatus = DRAG_STATUS_SLDR_RGT;
+                }
+                else
+                {
+                   	dragStatus = DRAG_STATUS_SLDR;
+                    handleHitSlider();
+                }
+            }
+            else if ( mouseSide == MSE_SIDE_LFT && ids.size() > 2 && 
                       ( ids[1] == ID_ITEMS && attributes.size() > 0 ) )
             {
-                mouseOverIdx = ids[2];
-                currIdxDgrm = -1;
+            	if ( mouseClick == MSE_CLICK_SINGLE )
+                {
+                	handleHitItems( ids[2] );
+                	dragStatus = DRAG_STATUS_ITMS;
+                }
+                else if ( mouseClick == MSE_CLICK_DOUBLE )
+                {                        	
+                	handleShowDiagram( ids[2] );
+                }
+                //mouseOverIdx = ids[2];
+                //currIdxDgrm = -1;
 
-                mediator->handleMarkFrameClust( this );
-                mediator->handleUnshowFrame();
+                //mediator->handleMarkFrameClust( this );
+                //mediator->handleUnshowFrame();
+            }
+            else if( mouseSide == MSE_SIDE_RGT && mouseClick == MSE_CLICK_SINGLE )
+            {
+               	if ( mouseButton == MSE_BUTTON_DOWN )
+                {
+                	/*
+                    if ( ids[1] == ID_ITEMS )
+                    *mediator << "show menu\n";
+                    else
+                    */
+                    if ( ids[1] == ID_DIAGRAM )
+                    	mediator->handleSendDgrm( this, false, false, false, true, false );
+                }
             }
             else
             {

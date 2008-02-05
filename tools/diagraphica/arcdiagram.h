@@ -163,6 +163,7 @@ protected:
 
     void handleShowDiagram( const int &dgrmIdx );
     void handleDragDiagram();
+    void handleDragDiagram( const int &dgrmIdx );
     void handleRwndDiagram( const size_t &dgrmIdx );
     void handlePrevDiagram( const size_t &dgrmIdx );
     void handlePlayDiagram( const size_t &dgrmIdx );
