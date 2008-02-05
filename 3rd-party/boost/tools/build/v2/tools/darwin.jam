@@ -121,7 +121,7 @@ for local sdk in $(.macosx-sdk)
         -mmacosx-version-min=$(sdk)
         ;
     flags darwin.link OPTIONS <macosx-version>$(sdk) :
-        -isysroot $(.macosx-sdk.$(sdk))
+#        -isysroot $(.macosx-sdk.$(sdk))
         -mmacosx-version-min=$(sdk)
         ;
 }
