@@ -26,7 +26,7 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
 {
   const propositional_variable_instantiation& v_;
   
-  compare_data_variable(const propositional_variable_instantiation& v)
+  compare_propositional_variable_instantiation(const propositional_variable_instantiation& v)
    : v_(v)
   {}
   
