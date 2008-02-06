@@ -12,6 +12,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/sort_utility.h"
+#include "mcrl2/data/detail/data_functional.h"
 
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace ::mcrl2::utilities;
@@ -206,24 +207,10 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 	return result;
 }
 
-struct compare_data_variable
-{
-  aterm v;
-
-  compare_data_variable(data_variable v_)
-    : v(aterm_appl(v_))
-  {}
-  
-  bool operator()(aterm t) const
-  {
-    return v == t;
-  }
-};
-
 ///\ret variable v occurs in l.
 bool occurs_inL(aterm_appl l, data_variable v)
 {
-  return find_if(l, compare_data_variable(v)) != aterm();
+  return find_if(l, data::detail::compare_data_variable(v)) != aterm();
 }
 
 pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)

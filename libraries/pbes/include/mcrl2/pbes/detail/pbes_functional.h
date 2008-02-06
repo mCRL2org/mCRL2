@@ -21,7 +21,7 @@ namespace pbes_system {
 
 namespace detail {
 
-/// \brief Function object that determines if a term is equal to a given data variable.
+/// \brief Function object that determines if a term is equal to a given propositional variable instantiation.
 struct compare_propositional_variable_instantiation: public std::unary_function<atermpp::aterm, bool>
 {
   const propositional_variable_instantiation& v_;

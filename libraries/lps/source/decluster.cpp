@@ -11,6 +11,7 @@
 #include <mcrl2/data/sort_utility.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/data/detail/data_functional.h"
 
 //Enumerator
 #include <mcrl2/data/enum/standard.h>
@@ -37,26 +38,11 @@ namespace lps {
 // Helper functions
 /////
 
-///Used to assist in occurs_in function.
-struct compare_data_variable
-{
-  aterm v;
-
-  compare_data_variable(data_variable v_)
-    : v(aterm_appl(v_))
-  {}
-  
-  bool operator()(aterm t) const
-  {
-    return v == t;
-  }
-};
-
 ///\ret variable v occurs in l.
 template <typename data_type>
 bool occurs_in(data_type l, data_variable v)
 {
-  return find_if(l, compare_data_variable(v)) != aterm();
+  return find_if(l, data::detail::compare_data_variable(v)) != aterm();
 }
 
 
