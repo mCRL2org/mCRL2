@@ -303,7 +303,7 @@ if [ path.exists ./tools ] {
         alias $(tool) : install ;
       }
 
-      targets = /tools/$(targets)//install ;
+      targets = /tools/$(targets)//install /libraries//install-all ;
     }
     else {
       # Complete install

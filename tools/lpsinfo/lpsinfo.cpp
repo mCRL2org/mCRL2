@@ -48,7 +48,7 @@ bool        verbose = false;
 std::string file_name;
 
 /* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
-bool is_tau_summand(ATermAppl a_summand) {
+static inline bool is_tau_summand(ATermAppl a_summand) {
     ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
     if (gsIsMultAct(v_multi_action_or_delta)) {
       return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
@@ -57,20 +57,20 @@ bool is_tau_summand(ATermAppl a_summand) {
     }
   }
 
-int get_number_of_tau_summands(lps::linear_process lps) {
+static inline int get_number_of_tau_summands(lps::linear_process lps) {
   int numOfTau = 0;
-  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); currentSummand++){ 
+  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
 	if ( is_tau_summand(*currentSummand)){
-		numOfTau++;
+		++numOfTau;
 	}
   }
   return numOfTau;
 }
 
-int get_number_of_used_actions(lps::linear_process lps){
+static inline int get_number_of_used_actions(lps::linear_process lps){
   std::set<action_label > actionSet;
-  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); currentSummand++){ 
-	for(lps::action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); currentAction++){
+  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+	for(lps::action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); ++currentAction){
 		actionSet.insert(currentAction->label());
 	}
   }
