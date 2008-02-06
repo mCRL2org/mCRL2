@@ -10,7 +10,8 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
+//#include <boost/ptr_container/ptr_vector.hpp>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -79,8 +80,8 @@ namespace detail {
 class enumerator
 {
   protected:
-    Enumerator* m_enumerator;
     rewriter m_rewriter;
+    boost::shared_ptr<Enumerator> m_enumerator;
 
     typedef std::map<data_variable, atermpp::vector<rewriter::substitution> > substition_map;
 
@@ -109,14 +110,9 @@ class enumerator
 
   public:
     enumerator(const data_specification& data_spec)
-      : m_rewriter(data_spec)
+      : m_rewriter(data_spec),
+        m_enumerator(createEnumerator(data_spec, m_rewriter.m_rewriter.get()))
     {
-      m_enumerator = createEnumerator(data_spec, m_rewriter.m_rewriter.get());
-    }
-    
-    ~enumerator()
-    {
-      delete m_enumerator;
     }
     
     /// Returns all possible values of the finite sort s.
@@ -127,7 +123,7 @@ class enumerator
 
       // find all elements of sort s by enumerating all valuations of dummy
       // that make the expression "true" true
-      EnumeratorSolutions* sols = m_enumerator->findSolutions(atermpp::make_list(dummy), m_rewriter.m_rewriter.get()->toRewriteFormat(data_expr::true_()));
+      EnumeratorSolutions* sols = m_enumerator.get()->findSolutions(atermpp::make_list(dummy), m_rewriter.m_rewriter.get()->toRewriteFormat(data_expr::true_()));
       ATermList l; // variable to store a solution
       while (sols->next(&l)) // get next solution
       {
@@ -148,7 +144,7 @@ class enumerator
     atermpp::set<data_expression> enumerate_expression_values(const data_expression& phi, Iter first, Iter last)
     {
       single_term_rewriter r(m_rewriter, phi);
-//      boost::ptr_vector<atermpp::vector<rewriter::substitution> > substitution_sequences;
+//      boost::ptr_vector<atermpp::vector<rewriter::substitution> > substitution_sequences; // this fails miserably...
       std::vector<atermpp::vector<rewriter::substitution> > substitution_sequences;
       for (Iter i = first; i != last; ++i)
       {

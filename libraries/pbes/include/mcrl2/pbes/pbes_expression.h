@@ -175,22 +175,26 @@ namespace pbes_expr {
   } 
   
   /// \brief Returns the universal quantification of the expression p over the variables in l.
-  /// If l is empty, p is returned.
   inline
   pbes_expression forall(data::data_variable_list l, pbes_expression p)
   {
+    // TODO: Due to a bug in the gs library this check has to be added.
     if (l.empty())
+    {
       return p;
+    }
     return pbes_expression(core::detail::gsMakePBESForall(l, p));
   }
   
   /// \brief Returns the existential quantification of the expression p over the variables in l.
-  /// If l is empty, p is returned.
   inline
   pbes_expression exists(data::data_variable_list l, pbes_expression p)
   {
+    // TODO: Due to a bug in the gs library this check has to be added.
     if (l.empty())
+    {
       return p;
+    }
     return pbes_expression(core::detail::gsMakePBESExists(l, p));
   }
 
@@ -334,6 +338,31 @@ namespace pbes_expr {
       using namespace pbes_expr;
       return core::detail::join(first, last, optimized::and_, true_());
     }
+
+    /// \brief Returns the universal quantification of the expression p over the variables in l.
+    /// If l is empty, p is returned.
+    inline
+    pbes_expression forall(data::data_variable_list l, pbes_expression p)
+    {
+      if (l.empty())
+      {
+        return p;
+      }
+      return pbes_expr::forall(l, p);
+    }
+    
+    /// \brief Returns the existential quantification of the expression p over the variables in l.
+    /// If l is empty, p is returned.
+    inline
+    pbes_expression exists(data::data_variable_list l, pbes_expression p)
+    {
+      if (l.empty())
+      {
+        return p;
+      }
+      return pbes_expr::exists(l, p);
+    }
+
   } // namespace optimized
 
 } // namespace pbes_expr

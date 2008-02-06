@@ -20,7 +20,7 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/data/rewriter.h"
-//#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriter2.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
@@ -62,15 +62,24 @@ data_variable bool_(std::string name)
   return data_variable(core::identifier_string(name) , sort_expr::bool_());
 }
 
+template <typename Rewriter>
+void test_expression(pbes_expression p, Rewriter r)
+{
+  std::cout << pp(p) << " -> " << pp(r(p)) << std::endl;
+}
+
 void test_rewriter()
 {
+  using namespace pbes_expr;
+
   specification spec    = mcrl22lps(SPECIFICATION);
+  data::rewriter datar(spec.data());
+  pbes_system::rewriter<data::rewriter> pbesr(datar, spec.data());
+
   //state_formula formula = mcf2statefrm(FORMULA, spec);
   //bool timed = false;
   //pbes<> p = lps2pbes(spec, formula, timed);
-  //data::rewriter datar(spec.data());
-  //pbes_system::rewriter<data::rewriter> pbesr(datar, spec.data());
-  //
+  
   //for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   //{
   //  pbes_expression e = i->formula();
@@ -89,7 +98,16 @@ void test_rewriter()
   data_variable n2 = nat("n2");
   data_variable n3 = nat("n3");
 
-  pbes_expression p = n;
+  data_expression T = data_expr::true_();
+  data_expression F = data_expr::false_();
+
+  test_expression(T, pbesr);
+  test_expression(F, pbesr);
+  test_expression(and_(T, T), pbesr);
+  test_expression(and_(T, F), pbesr);
+  test_expression(and_(F, F), pbesr);
+  test_expression(imp(T, b), pbesr);
+  BOOST_CHECK(false);
 }
 
 int test_main(int argc, char** argv)
