@@ -288,7 +288,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = forall(e, imp(ci, var(Y(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
-      return multi_and(result.begin(), result.end());
+      return join_and(result.begin(), result.end());
     }
 
     /// The step function.
@@ -315,7 +315,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = exists(e1, and_(cj, var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
-        return or_(multi_or(v.begin(), v.end()), var(X(p, q), gi + d1));
+        return or_(join_or(v.begin(), v.end()), var(X(p, q), gi + d1));
       }
       else
       {
@@ -330,7 +330,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
-        return multi_or(v.begin(), v.end());
+        return join_or(v.begin(), v.end());
       }
     }
 
@@ -355,7 +355,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = exists(e1, and_(cj, var(Y(p, q, i), d + gj + e)));
         v.push_back(expr);
       }
-      return or_(multi_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
+      return or_(join_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
     }
 
     /// Returns a pbes that expresses branching bisimulation between
@@ -421,7 +421,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = forall(e, imp(ci, step(p, q, i)));
         result.push_back(expr);
       }
-      return multi_and(result.begin(), result.end());
+      return join_and(result.begin(), result.end());
     }
 
     /// The step function.
@@ -442,7 +442,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
         result.push_back(expr);
       }
-      return multi_or(result.begin(), result.end());
+      return join_or(result.begin(), result.end());
     }
 
     /// Returns a pbes that expresses strong bisimulation between
@@ -496,7 +496,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = forall(e, imp(ci, var(Y1(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
-      return multi_and(result.begin(), result.end());
+      return join_and(result.begin(), result.end());
     }
 
     /// The step function.
@@ -523,7 +523,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }
-        return multi_or(v.begin(), v.end());
+        return join_or(v.begin(), v.end());
       }
     }
 
@@ -546,7 +546,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = exists(e1, and_(cj, var(Y1(p, q, i), d1 + gj + e1)));
         v.push_back(expr);
       }
-      return or_(multi_or(v.begin(), v.end()), step(p, q, i));
+      return or_(join_or(v.begin(), v.end()), step(p, q, i));
     }
 
     /// The close2 function.
@@ -589,7 +589,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = exists(e1_new, and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
       }
-      return or_(var(X(p, q), d + d1), multi_or(v.begin(), v.end()));
+      return or_(var(X(p, q), d + d1), join_or(v.begin(), v.end()));
     }
 
     /// Returns a pbes that expresses weak bisimulation between

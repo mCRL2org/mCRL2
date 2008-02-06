@@ -26,7 +26,6 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -286,7 +285,7 @@ struct equal_data_parameters_builder
         v.push_back(p::val(d::equal_to(*i1, *i2)));
       }
     }
-    result.push_back(p::multi_and(v.begin(), v.end()));
+    result.push_back(p::join_and(v.begin(), v.end()));
   }
 };
 
@@ -317,7 +316,7 @@ pbes_expression equal_data_parameters(lps::action_list a, lps::action_list b)
   atermpp::vector<pbes_expression> z;
   equal_data_parameters_builder f(va, vb, z);
   forall_permutations(intervals.begin(), intervals.end(), f);
-  pbes_expression result = p::multi_or(z.begin(), z.end());
+  pbes_expression result = p::join_or(z.begin(), z.end());
   return result;
 }
 
@@ -356,7 +355,7 @@ struct not_equal_data_parameters_builder
         v.push_back(p::val(d::not_equal_to(*i1, *i2)));
       }
     }
-    result.push_back(p::multi_or(v.begin(), v.end()));
+    result.push_back(p::join_or(v.begin(), v.end()));
   }
 };
 
@@ -387,7 +386,7 @@ pbes_expression not_equal_data_parameters(lps::action_list a, lps::action_list b
   atermpp::vector<pbes_expression> z;
   not_equal_data_parameters_builder f(va, vb, z);
   forall_permutations(intervals.begin(), intervals.end(), f);
-  pbes_expression result = p::multi_and(z.begin(), z.end());
+  pbes_expression result = p::join_and(z.begin(), z.end());
   return result;
 }
 
@@ -555,7 +554,7 @@ namespace pbes_timed
         pbes_expression p = forall(y, imp(and_(and_(p1, p2), p3), rhs));
         v.push_back(p);
       }
-      result = multi_and(v.begin(), v.end());
+      result = join_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha = s::mod_act(f);
@@ -589,7 +588,7 @@ namespace pbes_timed
         pbes_expression p = exists(y, and_(and_(and_(p1, p2), p3), rhs));
         v.push_back(p);
       }
-      result = multi_or(v.begin(), v.end());
+      result = join_or(v.begin(), v.end());
     } else if (s::is_delay_timed(f)) {
       data::data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
@@ -601,7 +600,7 @@ namespace pbes_timed
         pbes_expression p = exists(yk, and_(val(ck), val(d::less_equal(t, tk))));
         v.push_back(p);
       }
-      result = or_(multi_or(v.begin(), v.end()), val(d::less_equal(t, T)));
+      result = or_(join_or(v.begin(), v.end()), val(d::less_equal(t, T)));
     } else if (s::is_yaled_timed(f)) {
       data::data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
@@ -613,7 +612,7 @@ namespace pbes_timed
         pbes_expression p = exists(yk, and_(val(d::not_(ck)), val(d::greater(t, tk))));
         v.push_back(p);
       }
-      result = and_(multi_or(v.begin(), v.end()), val(d::greater(t, T)));
+      result = and_(join_or(v.begin(), v.end()), val(d::greater(t, T)));
     } else if (s::is_var(f)) {
       core::identifier_string X = s::var_name(f);
       data::data_expression_list d = s::var_val(f);
@@ -795,7 +794,7 @@ namespace pbes_untimed
         pbes_expression p = forall(y, imp(and_(p1, p2), rhs));
         v.push_back(p);
       }
-      result = multi_and(v.begin(), v.end());
+      result = join_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha(s::mod_act(f));
@@ -824,7 +823,7 @@ namespace pbes_untimed
         pbes_expression p = exists(y, and_(and_(p1, p2), rhs));
         v.push_back(p);
       }
-      result = multi_or(v.begin(), v.end());
+      result = join_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
       core::identifier_string X = s::var_name(f);
       data::data_expression_list d = s::var_val(f);

@@ -221,12 +221,12 @@ namespace pbes_expr {
 
   /// \brief Returns or applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
-  inline pbes_expression multi_or(FwdIt first, FwdIt last)
+  inline pbes_expression join_or(FwdIt first, FwdIt last)
   {
     using namespace pbes_expr;
   
     if(first == last)
-      return pbes_expr::false_();
+      return false_();
     pbes_expression result = *first++;
     while(first != last)
     {
@@ -237,12 +237,12 @@ namespace pbes_expr {
   
   /// \brief Returns and applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
-  inline pbes_expression multi_and(FwdIt first, FwdIt last)
+  inline pbes_expression join_and(FwdIt first, FwdIt last)
   {
     using namespace pbes_expr;
   
     if(first == last)
-      return pbes_expr::true_();
+      return true_();
     pbes_expression result = *first++;
     while(first != last)
     {
@@ -250,7 +250,7 @@ namespace pbes_expr {
     }
     return result;
   }
-  
+
   /// \brief Returns the argument of an expression of type not
   inline
   pbes_expression not_arg(pbes_expression t)
@@ -305,6 +305,60 @@ namespace pbes_expr {
   {
     assert(core::detail::gsIsPropVarInst(t));
     return list_arg2(t);
+  }
+
+  /// \cond INTERNAL_DOCS
+  namespace detail { 
+    inline
+    void split_and_impl(const pbes_expression& expr, atermpp::set<pbes_expression>& result)
+    {
+      if (pbes_expr::is_and(expr))
+      {
+        split_and_impl(lhs(expr), result);
+        split_and_impl(rhs(expr), result);
+      }
+      else
+      {
+        result.insert(expr);
+      }
+    }
+    
+    inline
+    void split_or_impl(const pbes_expression& expr, atermpp::set<pbes_expression>& result)
+    {
+      if (pbes_expr::is_and(expr))
+      {
+        split_or_impl(lhs(expr), result);
+        split_or_impl(rhs(expr), result);
+      }
+      else
+      {
+        result.insert(expr);
+      }
+    }  
+  } // namespace detail
+  /// \endcond
+
+  /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a 
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main 
+  /// function symbol.
+  inline
+  atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
+  {
+    atermpp::set<pbes_expression> result;
+    detail::split_or_impl(expr, result);
+    return result;
+  }
+  
+  /// Given a pbes expression of the form p1 && p2 && .... && pn, this will yield a 
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main 
+  /// function symbol.
+  inline
+  atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
+  {
+    atermpp::set<pbes_expression> result;
+    detail::split_and_impl(expr, result);
+    return result;
   }
 
 } // namespace pbes_expr

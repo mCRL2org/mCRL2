@@ -131,6 +131,12 @@ class rewriter
     {
       m_rewriter.get()->removeRewriteRule(eq);
     }
+    
+    /// \deprecated
+    Rewriter* get_rewriter()
+    {
+      return m_rewriter.get();
+    }
 };
 
 /// Rewriter for rewriting a single term multiple times with different substitutions.

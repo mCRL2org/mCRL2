@@ -31,6 +31,24 @@ bool find_propositional_variable(Term t, const propositional_variable_instantiat
                                  ) != atermpp::aterm();
 }
 
+/// \brief Returns all propositional variables that occur in the term t
+template <typename Term>
+std::set<propositional_variable> find_propositional_variables(Term t)
+{
+  std::set<propositional_variable> variables;
+  atermpp::find_all_if(t, is_propositional_variable, std::inserter(variables, variables.end()));
+  return variables;
+}
+
+/// \brief Returns all propositional variable instantiations that occur in the term t
+template <typename Term>
+std::set<propositional_variable_instantiation> find_propositional_variable_instantiations(Term t)
+{
+  std::set<propositional_variable_instantiation> variables;
+  atermpp::find_all_if(t, is_propositional_variable_instantiation, std::inserter(variables, variables.end()));
+  return variables;
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

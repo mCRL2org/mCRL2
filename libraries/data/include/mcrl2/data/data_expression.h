@@ -267,7 +267,7 @@ namespace data_expr {
   /// \brief Returns or applied to the sequence of data expressions [first, last[
   /// This function contains optimizations for true and false arguments.
   template <typename FwdIt>
-  data_expression multi_or(FwdIt first, FwdIt last)
+  data_expression join_or(FwdIt first, FwdIt last)
   {
     using namespace data_expr;
 
@@ -284,7 +284,7 @@ namespace data_expr {
   /// \brief Returns and_ applied to the sequence of data expressions [first, last[
   /// This function contains optimizations for true and false arguments.
   template <typename FwdIt>
-  data_expression multi_and(FwdIt first, FwdIt last)
+  data_expression join_and(FwdIt first, FwdIt last)
   {
     using namespace data_expr;
 

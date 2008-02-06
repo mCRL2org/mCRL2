@@ -24,7 +24,7 @@
 
 
 //
-#include "mcrl2/pbes/utility.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/data/utility.h"

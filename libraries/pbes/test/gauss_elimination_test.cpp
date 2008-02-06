@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"

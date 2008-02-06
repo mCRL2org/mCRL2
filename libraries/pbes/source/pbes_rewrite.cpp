@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/pbes/find.h"
 
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace ::mcrl2::utilities;
@@ -99,7 +100,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 			{
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
-				result = multi_and(and_list.begin(), and_list.end());
+				result = join_and(and_list.begin(), and_list.end());
 			}
 			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
 			{
@@ -137,7 +138,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 			{
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
-				result = multi_or(or_list.begin(), or_list.end());
+				result = join_or(or_list.begin(), or_list.end());
 			}
 			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
 			{

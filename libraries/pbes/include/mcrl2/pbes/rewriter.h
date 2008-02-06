@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/rewriter.h
-/// \brief Rewriter for pbes expressions.
+/// \brief Rewriters for pbes expressions.
 
 #ifndef MCRL2_PBES_REWRITER_H
 #define MCRL2_PBES_REWRITER_H
@@ -120,7 +120,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
     }
     if (is_true(right))
     {
-      return left;
+      return visit(left);
     }
     if (left == right)
     {
@@ -140,11 +140,11 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
     }
     if (is_false(left))
     {
-      return right;
+      return visit(right);
     }
     if (is_false(right))
     {
-      return left;
+      return visit(left);
     }
     if (left == right)
     {
@@ -231,7 +231,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
                         finite_variables_replacements.begin(),
                         enumerate_arguments_function(expr1, finite_variables, finite_variables_replacements, v)
                        );
-    return forall(data::data_variable_list(variables1.begin(), variables1.end()), multi_and(v.begin(), v.end()));
+    return forall(data::data_variable_list(variables1.begin(), variables1.end()), join_and(v.begin(), v.end()));
   }
 
   /// Visit exists node.
@@ -262,7 +262,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
                         finite_variables_replacements.begin(),
                         enumerate_arguments_function(expr1, finite_variables, finite_variables_replacements, v)
                        );
-    return exists(data::data_variable_list(variables1.begin(), variables1.end()), multi_or(v.begin(), v.end()));
+    return exists(data::data_variable_list(variables1.begin(), variables1.end()), join_or(v.begin(), v.end()));
   }
 
   /// Visit propositional variable node.
@@ -296,6 +296,7 @@ class rewriter
 		  return m_builder.visit(p);
 		}
 };
+
 
 } // namespace pbes_system
 

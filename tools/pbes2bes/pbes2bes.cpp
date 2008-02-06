@@ -24,6 +24,7 @@
 
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 
 //LPS-Framework
@@ -31,7 +32,7 @@
 #include "mcrl2/pbes/io.h"
 
 using namespace std;
-using namespace mcrl2::utilities;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;

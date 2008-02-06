@@ -20,7 +20,7 @@
 #include "mcrl2/data/data_variable_replace.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/utility.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/propositional_variable_replace.h"
 #include "pbes_rewrite.h"
 
