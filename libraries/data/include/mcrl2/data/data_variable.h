@@ -14,6 +14,7 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"

@@ -288,14 +288,14 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = forall(e, imp(ci, var(Y(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
-      return join_and(result.begin(), result.end());
+      return optimized::join_and(result.begin(), result.end());
     }
 
     /// The step function.
     ///
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const data_variable_list& d1 = q.process_parameters();
       data_variable_list gi = i->next_state(p.process_parameters());
       if (i->is_tau())
@@ -338,7 +338,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression close(const linear_process& p, const linear_process& q, my_iterator i) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       std::vector<pbes_expression> v;
       const data_variable_list& d  = p.process_parameters();
       const data_variable_list& d1 = q.process_parameters();
@@ -362,7 +362,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const linear_process& m = model.process();
       linear_process s = resolve_name_clashes(m, spec.process());
       init(m, s);
@@ -412,7 +412,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       std::vector<pbes_expression> result;
       for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
       {
@@ -428,7 +428,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       data_variable_list gi = i->next_state(p.process_parameters());
 
       std::vector<pbes_expression> result;
@@ -449,7 +449,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const linear_process& m = model.process();
       linear_process s = resolve_name_clashes(m, spec.process());
       init(m, s);
@@ -485,7 +485,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       std::vector<pbes_expression> result;
       for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
       {
@@ -503,7 +503,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const data_variable_list& d1 = q.process_parameters();
       data_variable_list        gi = i->next_state(p.process_parameters());
       const action_list         ai = i->actions();
@@ -531,7 +531,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     ///
     pbes_expression close1(const linear_process& p, const linear_process& q, my_iterator i) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       std::vector<pbes_expression> v;
       const data_variable_list& d1 = q.process_parameters();
       for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
@@ -554,7 +554,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i,
                            data_variable_list d, data_variable_list d1) const
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
 
       //const data_variable_list& d  = p.process_parameters();
       //const data_variable_list& d1 = q.process_parameters();
@@ -596,7 +596,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const linear_process& m = model.process();
       linear_process s = resolve_name_clashes(m, spec.process());
       init(m, s);
@@ -650,7 +650,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
-      using namespace pbes_expr;
+      using namespace pbes_expr::optimized;
       const linear_process& m = model.process();
       linear_process s = resolve_name_clashes(m, spec.process());
       init(m, s);

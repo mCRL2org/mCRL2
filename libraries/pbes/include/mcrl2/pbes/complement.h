@@ -70,14 +70,14 @@ struct complement_builder: public pbes_expression_builder
   ///
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    return pbes_expr::or_(visit(left), visit(right));
+    return pbes_expr::optimized::or_(visit(left), visit(right));
   }
 
   /// \overload
   ///
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    return pbes_expr::and_(visit(left), visit(right));
+    return pbes_expr::optimized::and_(visit(left), visit(right));
   }    
 
   /// \overload

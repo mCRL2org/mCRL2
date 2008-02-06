@@ -89,8 +89,7 @@ void test_rewriter()
   data_variable n2 = nat("n2");
   data_variable n3 = nat("n3");
 
-  using namespace pbes_expr_unoptimized;
-  pbes_expression p = ;
+  pbes_expression p = n;
 }
 
 int test_main(int argc, char** argv)

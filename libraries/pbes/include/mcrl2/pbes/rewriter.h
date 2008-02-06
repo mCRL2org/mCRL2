@@ -177,7 +177,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
     }
     if (is_false(right))
     {
-      return visit(pbes_expr_unoptimized::not_(left));
+      return visit(not_(left));
     }
     return pbes_expression(); // continue recursion
   }

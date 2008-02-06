@@ -10,8 +10,11 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
+#include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/data_variable.h"
+#include "mcrl2/core/detail/join.h"
+#include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
@@ -142,62 +145,34 @@ namespace pbes_expr {
   {
     return pbes_expression(core::detail::gsMakePBESFalse());
   }
-  
+
   /// \brief Returns not applied to p
   inline
   pbes_expression not_(pbes_expression p)
   {
-    if(is_true(p))
-      return false_();
-    else if(is_false(p))
-      return true_();
-    else
-      return pbes_expression(core::detail::gsMakePBESNot(p));
+    return pbes_expression(core::detail::gsMakePBESNot(p));
   }
   
   /// \brief Returns and applied to p and q
   inline
   pbes_expression and_(pbes_expression p, pbes_expression q)
   {
-    if(is_true(p))
-      return q;
-    else if(is_false(p))
-      return false_();
-    if(is_true(q))
-      return p;
-    else if(is_false(q))
-      return false_();
-    else
-      return pbes_expression(core::detail::gsMakePBESAnd(p,q));
+    return pbes_expression(core::detail::gsMakePBESAnd(p,q));
   }
   
   /// \brief Returns or applied to p and q
   inline
   pbes_expression or_(pbes_expression p, pbes_expression q)
   {
-    if(is_true(p))
-      return true_();
-    else if(is_false(p))
-      return q;
-    if(is_true(q))
-      return true_();
-    else if(is_false(q))
-      return p;
-    else
-      return pbes_expression(core::detail::gsMakePBESOr(p,q));
+    return pbes_expression(core::detail::gsMakePBESOr(p,q));
   }
   
   /// \brief Returns imp applied to p and q
   inline
   pbes_expression imp(pbes_expression p, pbes_expression q)
   {
-    if(is_true(p))
-      return q;
-    else if(is_true(q))
-      return true_();
-    else
-      return pbes_expression(core::detail::gsMakePBESImp(p,q));
-  }
+    return pbes_expression(core::detail::gsMakePBESImp(p,q));
+  } 
   
   /// \brief Returns the universal quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
@@ -221,34 +196,16 @@ namespace pbes_expr {
 
   /// \brief Returns or applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
-  inline pbes_expression join_or(FwdIt first, FwdIt last)
+  pbes_expression join_or(FwdIt first, FwdIt last)
   {
-    using namespace pbes_expr;
-  
-    if(first == last)
-      return false_();
-    pbes_expression result = *first++;
-    while(first != last)
-    {
-      result = or_(result, *first++);
-    }
-    return result;
+    return core::detail::join(first, last, or_, false_());
   }
   
   /// \brief Returns and applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
-  inline pbes_expression join_and(FwdIt first, FwdIt last)
+  pbes_expression join_and(FwdIt first, FwdIt last)
   {
-    using namespace pbes_expr;
-  
-    if(first == last)
-      return true_();
-    pbes_expression result = *first++;
-    while(first != last)
-    {
-      result = and_(result, *first++);
-    }
-    return result;
+    return core::detail::join(first, last, and_, true_());
   }
 
   /// \brief Returns the argument of an expression of type not
@@ -307,38 +264,6 @@ namespace pbes_expr {
     return list_arg2(t);
   }
 
-  /// \cond INTERNAL_DOCS
-  namespace detail { 
-    inline
-    void split_and_impl(const pbes_expression& expr, atermpp::set<pbes_expression>& result)
-    {
-      if (pbes_expr::is_and(expr))
-      {
-        split_and_impl(lhs(expr), result);
-        split_and_impl(rhs(expr), result);
-      }
-      else
-      {
-        result.insert(expr);
-      }
-    }
-    
-    inline
-    void split_or_impl(const pbes_expression& expr, atermpp::set<pbes_expression>& result)
-    {
-      if (pbes_expr::is_and(expr))
-      {
-        split_or_impl(lhs(expr), result);
-        split_or_impl(rhs(expr), result);
-      }
-      else
-      {
-        result.insert(expr);
-      }
-    }  
-  } // namespace detail
-  /// \endcond
-
   /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a 
   /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main 
   /// function symbol.
@@ -346,7 +271,7 @@ namespace pbes_expr {
   atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
   {
     atermpp::set<pbes_expression> result;
-    detail::split_or_impl(expr, result);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, lhs, rhs);
     return result;
   }
   
@@ -357,43 +282,61 @@ namespace pbes_expr {
   atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
   {
     atermpp::set<pbes_expression> result;
-    detail::split_and_impl(expr, result);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, lhs, rhs);
     return result;
   }
 
+  namespace optimized {
+    /// \brief Returns not applied to p, and simplifies the result.
+    inline
+    pbes_expression not_(pbes_expression p)
+    {
+      using namespace pbes_expr;
+      return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns and applied to p and q, and simplifies the result.
+    inline
+    pbes_expression and_(pbes_expression p, pbes_expression q)
+    {
+      using namespace pbes_expr;
+      return core::detail::optimized_and(p, q, and_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns or applied to p and q, and simplifies the result.
+    inline
+    pbes_expression or_(pbes_expression p, pbes_expression q)
+    {
+      using namespace pbes_expr;
+      return core::detail::optimized_or(p, q, or_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns imp applied to p and q, and simplifies the result.
+    inline
+    pbes_expression imp(pbes_expression p, pbes_expression q)
+    {
+      using namespace pbes_expr;
+      return core::detail::optimized_imp(p, q, imp, not_, true_(), is_true, false_(), is_false);
+    }
+
+    /// \brief Returns or applied to the sequence of pbes expressions [first, last[
+    template <typename FwdIt>
+    inline pbes_expression join_or(FwdIt first, FwdIt last)
+    {
+      using namespace pbes_expr;
+      return core::detail::join(first, last, optimized::or_, false_());
+    }
+    
+    /// \brief Returns and applied to the sequence of pbes expressions [first, last[
+    template <typename FwdIt>
+    inline pbes_expression join_and(FwdIt first, FwdIt last)
+    {
+      using namespace pbes_expr;
+      return core::detail::join(first, last, optimized::and_, true_());
+    }
+  } // namespace optimized
+
 } // namespace pbes_expr
-
-/// Unoptimized versions of logical operators for pbes expressions.
-namespace pbes_expr_unoptimized {
-
-  /// \brief Returns not applied to p
-  inline
-  pbes_expression not_(pbes_expression p)
-  {
-    return pbes_expression(core::detail::gsMakePBESNot(p));
-  }
-  
-  /// \brief Returns and applied to p and q
-  inline
-  pbes_expression and_(pbes_expression p, pbes_expression q)
-  {
-    return pbes_expression(core::detail::gsMakePBESAnd(p,q));
-  }
-  
-  /// \brief Returns or applied to p and q
-  inline
-  pbes_expression or_(pbes_expression p, pbes_expression q)
-  {
-    return pbes_expression(core::detail::gsMakePBESOr(p,q));
-  }
-  
-  /// \brief Returns imp applied to p and q
-  inline
-  pbes_expression imp(pbes_expression p, pbes_expression q)
-  {
-    return pbes_expression(core::detail::gsMakePBESImp(p,q));
-  } 
-} // namespace pbes_expr_unoptimized
 
 /// \brief Returns true if the pbes expression t is a boolean expression
 inline

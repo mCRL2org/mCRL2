@@ -13,6 +13,8 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/join.h"
+#include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2 {
@@ -222,12 +224,7 @@ namespace data_expr {
   inline
   data_expression not_(data_expression p)
   {
-    if (is_true(p))
-      return false_();
-    else if (is_false(p))
-      return true_();
-    else
-      return data_expression(core::gsMakeDataExprNot(p));
+    return data_expression(core::gsMakeDataExprNot(p));
   }
 
   /// \brief Returns and applied to p and q
@@ -235,16 +232,7 @@ namespace data_expr {
   inline
   data_expression and_(data_expression p, data_expression q)
   {
-    if (is_true(p))
-      return q;
-    else if (is_false(p))
-      return false_();
-    if (is_true(q))
-      return p;
-    else if (is_false(q))
-      return false_();
-    else
-      return data_expression(core::gsMakeDataExprAnd(p,q));
+    return data_expression(core::gsMakeDataExprAnd(p,q));
   }
 
   /// \brief Returns or applied to p and q
@@ -252,50 +240,21 @@ namespace data_expr {
   inline
   data_expression or_(data_expression p, data_expression q)
   {
-    if (is_true(p))
-      return true_();
-    else if (is_false(p))
-      return q;
-    if (is_true(q))
-      return true_();
-    else if (is_false(q))
-      return p;
-    else
-      return data_expression(core::gsMakeDataExprOr(p,q));
+    return data_expression(core::gsMakeDataExprOr(p,q));
   }
 
   /// \brief Returns or applied to the sequence of data expressions [first, last[
-  /// This function contains optimizations for true and false arguments.
   template <typename FwdIt>
   data_expression join_or(FwdIt first, FwdIt last)
   {
-    using namespace data_expr;
-
-    if (first == last)
-      return data_expr::false_();
-    data_expression result = *first++;
-    while (first != last)
-    {
-      result = or_(result, *first++);
-    }
-    return result;
+    return core::detail::join(first, last, or_, false_());
   }
-
-  /// \brief Returns and_ applied to the sequence of data expressions [first, last[
-  /// This function contains optimizations for true and false arguments.
+  
+  /// \brief Returns and applied to the sequence of data expressions [first, last[
   template <typename FwdIt>
   data_expression join_and(FwdIt first, FwdIt last)
   {
-    using namespace data_expr;
-
-    if (first == last)
-      return data_expr::true_();
-    data_expression result = *first++;
-    while (first != last)
-    {
-      result = and_(result, *first++);
-    }
-    return result;
+    return core::detail::join(first, last, and_, true_());
   }
 
   /// \brief Returns true if t is a negate expression
@@ -454,6 +413,48 @@ namespace data_expr {
   {
     return core::gsMakeDataExprIf(i, t, e);
   }
+
+  namespace optimized {
+    /// \brief Returns not applied to p, and simplifies the result.
+    inline
+    data_expression not_(data_expression p)
+    {
+      using namespace data_expr;
+      return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns and applied to p and q, and simplifies the result.
+    inline
+    data_expression and_(data_expression p, data_expression q)
+    {
+      using namespace data_expr;
+      return core::detail::optimized_and(p, q, and_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns or applied to p and q, and simplifies the result.
+    inline
+    data_expression or_(data_expression p, data_expression q)
+    {
+      using namespace data_expr;
+      return core::detail::optimized_or(p, q, or_, true_(), is_true, false_(), is_false);
+    }
+    
+    /// \brief Returns or applied to the sequence of data expressions [first, last[
+    template <typename FwdIt>
+    inline data_expression join_or(FwdIt first, FwdIt last)
+    {
+      using namespace data_expr;
+      return core::detail::join(first, last, optimized::or_, false_());
+    }
+    
+    /// \brief Returns and applied to the sequence of data expressions [first, last[
+    template <typename FwdIt>
+    inline data_expression join_and(FwdIt first, FwdIt last)
+    {
+      using namespace data_expr;
+      return core::detail::join(first, last, optimized::and_, true_());
+    }
+  } // namespace optimized
 
 } // namespace data_expr
 
