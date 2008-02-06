@@ -10,7 +10,7 @@
 //LPS framework
 #include "mcrl2/lps/specification.h"
 
-//C++
+//C/C++
 #include <iostream>
 #include <vector>
 #include <set>
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 
 //Boost
 #include <boost/program_options.hpp>
@@ -44,6 +45,14 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
+template <class T>
+inline std::string to_string (const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
+
 class lpsConstElm {
   private:
     ATermTable                            safeguard;
@@ -60,15 +69,22 @@ class lpsConstElm {
     atermpp::set< int >                       p_S;
     atermpp::set< lps::summand >          p_visitedSummands;
     atermpp::set< mcrl2::data::data_expression >      p_variableList;
+    atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > > p_changed_assignements_per_cycle;
     int                                   p_newVarCounter;
     bool                                  p_verbose;
     bool                                  p_nosingleton;
     bool                                  p_alltrue;
     bool                                  p_reachable;
+    bool                                  p_show;
+    std::string                           p_logfile;
+    std::string                           p_logstring;
     std::string                           p_filenamein;
     lps::specification                    p_spec;
-    atermpp::set< sort_expression >           p_singletonSort;
+    atermpp::set< sort_expression >       p_singletonSort;
     Rewriter*                             rewr;
+
+    atermpp::map< mcrl2::data::data_variable, atermpp::vector < mcrl2::data::data_expression > > p_parameter_trace ;
+    int p_cycle;   
 
     //Only used by getDataVarIDs
     atermpp::set< mcrl2::data::data_variable >        p_foundFreeVars;
@@ -124,6 +140,7 @@ class lpsConstElm {
     void setNoSingleton(bool b);
     void setAllTrue(bool b);
     void setReachable(bool b);
+    void setShow(bool b);
     void printSetVar();
     bool filter();
 };
@@ -379,12 +396,7 @@ inline bool lpsConstElm::compare(data_expression x, data_expression y) {
 // returns whether the given data_expression is false
 //
 inline bool lpsConstElm::conditionTest(data_expression x) {
-  if (p_alltrue){return true;};
-  //----------          Debug
-  //gsDebugMsg("\033[33m %s\n", pp(x).c_str());
-  //gsDebugMsg("\033[30m %s\033[0m\n", pp(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))).c_str());
-  //----------          Debug
-  return (!(data_expr::is_false(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))))));
+  return (p_alltrue || (!(data_expr::is_false(data_expression(rewrite(data_expression(p_substitute(x, p_currentState))))))));
 }
 
 // returns whether the currentState and NextState differ
@@ -401,18 +413,29 @@ inline bool lpsConstElm::cmpCurrToNext() {
           p_currentState.at(index) = p_nextState.at(index);
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]);
+ 
+            if (p_show)
+            {
+              p_changed_assignements_per_cycle[p_cycle].push_back(std::make_pair(*i, p_nextState.at(index)));
+            }
+
             //----------          Debug
-            //gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
-            //gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+            // gsVerboseMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+            // gsVerboseMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
             //----------          Debug
           }
         }
       } else {
         if (!inFreeVarList( p_nextState.at(index).rhs() )){
            if (!compare(i->rhs(), p_nextState.at(index).rhs())){
+              if (p_show)
+              {
+                p_changed_assignements_per_cycle[p_cycle].push_back(std::make_pair(*i, p_nextState.at(index)));
+              }
               //----------          Debug
-              //gsDebugMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
-              //gsDebugMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+              // gsVerboseMsg("\033[34m OLD:    %s\n", pp(*i).c_str());
+              // gsVerboseMsg("\033[32m NEW:    %s\033[0m\n", pp(p_nextState.at(index)).c_str());
+              // gsVerboseMsg("\033[33m Different  \033[0m\n");
               //----------          Debug
               p_newCurrentState.at(index) = newExpression(*i) ;
       	p_currentState.at(index) = p_currentState.at(index);
@@ -433,13 +456,13 @@ inline bool lpsConstElm::cmpCurrToNext() {
 void lpsConstElm::detectVar(int n) {
  // every process parameter...
  for(int i = 0; i != n; i++ ){
-   // ...that is found to be constant (i.e. that is not in the set of
+   // ...that is marked  as a constant (i.e. that is not in the set of
    // variable parameters)...
    if ( p_V.find(i) == p_V.end() ) {
      // ...and contains a summation variable...
      data_expression t = p_currentState.at(i).rhs();
      if ( recDetectVar(t, sum_vars) || recDetectVar(t, p_variableList) ) {
-       // ...is actually a variable parameter
+       // ...is actually a non constant parameter
        p_V.insert(i);
      }
    }
@@ -673,6 +696,80 @@ inline bool lpsConstElm::output() {
   atermpp::vector< mcrl2::data::data_expression > variablePPexpr;
   for(atermpp::set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
     variablePPexpr.push_back(p_initAssignments.at(*i).rhs());
+  }
+
+  if (p_show)
+  {
+    p_logstring.append( "\"Cycle\"");
+    for (int i = 0; i != p_cycle; ++i)
+    {
+      p_logstring.append( "\t\"" + to_string( i ) + "\"" ) ;
+    }
+    p_logstring.append( "\n" ); 
+
+    for ( atermpp::map< mcrl2::data::data_variable, atermpp::vector< mcrl2::data::data_expression > >::iterator i = p_parameter_trace.begin()
+        ; i != p_parameter_trace.end()
+        ; ++i  )
+    {
+      p_logstring.append( "\"" + pp(i->first) + "\"" ) ; 
+    
+      int count = 0; 
+      bool changed = false;     
+
+      for ( atermpp::vector< mcrl2::data::data_expression >::iterator j = i->second.begin()
+          ; j != i->second.end()
+          ; ++j )
+      {
+        bool printed = false;
+        atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > >::iterator it_capc = p_changed_assignements_per_cycle.find(count) ;
+   
+        if ( it_capc != p_changed_assignements_per_cycle.end() )
+        {
+          if ( !(it_capc->second.empty()) )
+          {
+
+            for ( atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > >::iterator  it_ca  = it_capc->second.begin()
+                  ; it_ca != it_capc->second.end()
+                  ; ++it_ca )
+            {
+              if ( i->first == it_ca->first.lhs() ) 
+              {
+                p_logstring.append("\t\""+ pp(it_ca->second.rhs()) + "\"" );
+                changed = printed = true;
+              }            
+            } 
+          }
+        }
+        if (!printed)
+        {
+          if (changed)
+          {
+            p_logstring.append( "\t\"Not Constant\""); 
+          } else { 
+            p_logstring.append( "\t\"" + pp(*j) + "\"" ); 
+          }  
+         
+        }
+        ++count;
+      }
+      p_logstring.append( "\n" ); 
+    }
+
+   //
+   // Write to file
+   //
+
+   FILE * pFile;
+
+   pFile = fopen (p_logfile.c_str() ,"w");
+  
+   if (pFile == NULL)
+   {
+     gsErrorMsg("lpsconstelm: Can not write to the CSV log-file: %s. Writing of the log-file is omitted.\n", p_logfile.c_str() ); 
+   } else {
+     fprintf (pFile, p_logstring.c_str() );
+     fclose (pFile);
+   }
   }
 
   //Remove process parameters in in summand
@@ -940,6 +1037,13 @@ inline void lpsConstElm::setReachable(bool b) {
   p_reachable = b;
 }
 
+// If p_show is true, a change trace for each parameter parameter is given
+// Note: Has to be set
+//
+inline void lpsConstElm::setShow(bool b) {
+  p_show = b;
+}
+
 // Prints the data_variable which are constant
 //
 void lpsConstElm::printSetVar() {
@@ -957,13 +1061,27 @@ bool lpsConstElm::filter() {
   bool    same        ;
   bool    foundFake = true;
   int     counter  = 0;
-  int     cycle    = 0;
+  p_cycle = 0;
   p_newVarCounter  = 0;
 
   lps::linear_process p_process = p_spec.process();
   rewr           = createRewriter(p_spec.data());
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
+
+  if (p_show)
+  {
+    
+    for( data::data_assignment_list::iterator i = initial_assignments.begin()
+       ; i != initial_assignments.end()
+       ; ++i
+       )
+    {
+      p_parameter_trace[i->lhs()].push_back( i->rhs());
+    }
+  }
+  
+
   for(mcrl2::data::data_assignment_list::iterator i = initial_assignments.begin(); i != initial_assignments.end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;
 //      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
@@ -1013,7 +1131,7 @@ bool lpsConstElm::filter() {
     same = false;
     while (!same){
       same = true;
-      gsVerboseMsg("lpsconstelm: Cycle %d\n", cycle++);
+      gsVerboseMsg("lpsconstelm: Cycle %d\n", p_cycle++);
       //int summandnr = 1;
       for(summand_list::iterator currentSummand = p_process.summands().begin(); currentSummand != p_process.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
@@ -1030,11 +1148,24 @@ bool lpsConstElm::filter() {
         }
       }
       p_currentState = p_newCurrentState;
+
+      if (p_show)
+      {
+         for( atermpp::vector< mcrl2::data::data_assignment >::iterator i = p_currentState.begin()
+            ; i != p_currentState.end()
+            ; ++i
+            )
+        {
+          p_parameter_trace[i->lhs()].push_back( i->rhs());
+        }
+      }
+
     }
 
     //---------------------------------------------------------------
     //---------------------   Body end   ----------------------------
     //---------------------------------------------------------------
+ 
 
     // remove detected constants in case the value contains summation
     // variables or non constant parameter variables
@@ -1044,14 +1175,14 @@ bool lpsConstElm::filter() {
       int diff = p_V.size()-n;
       if ( diff == 1 )
       {
-        gsVerboseMsg("lpsconstelm: reset 1 parameter to variable because its value contained summation variables\n");
+        gsVerboseMsg("lpsconstelm: 1 parameter is marked constant. The parameter contains is a sum variable. Therefore the parameter is not substituted.\n");
       } else if ( diff > 1 )
       {
-        gsVerboseMsg("lpsconstelm: reset %d parameters to variable because their values contained summation variables\n", diff);
+        gsVerboseMsg("lpsconstelm: %d parameters are marked constant. The parameters contain sum variables. Therefore the parameters are not substituted.\n", diff);
       }
     }
 
-    //---------------------FeeVar aftercheck-------------------------
+    //---------------------FreeVar aftercheck-------------------------
     //
     //                      |
     //                      |
@@ -1062,7 +1193,7 @@ bool lpsConstElm::filter() {
     //   init: P(_,_)
     //
     //                                Each _ is a unique FreeVariable
-    // The arrow is detected with the FeeVar aftercheck
+    // The arrow is shows the detection of a constant variable in the FreeVar aftercheck
 
     if(!p_freeVarSet.empty()){
       gsVerboseMsg("lpsconstelm: Free Variable checkup:\n");
@@ -1075,11 +1206,13 @@ bool lpsConstElm::filter() {
 
       p_currentState = p_newCurrentState;
       if (p_verbose){
-        gsVerboseMsg("lpsconstelm:   Detected %d fake constant process parameters\n", p_V.size() - n);
+        gsVerboseMsg("lpsconstelm: Detected %d fake constant process parameters\n", p_V.size() - n);
         foundFake = ((p_V.size() - n) != 0);
       }
 
     }
+
+    p_cycle++;
 
   }
 
@@ -1125,12 +1258,14 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
 
   /* Name of the file to read input from (or standard input: "-") */
   std::vector < std::string > file_names;
+  std::vector < std::string > csv_names;
 
   description.add_options()
     ("no-singleton", "do not remove sorts consisting of a single element")
     ("no-condition", "all summand conditions are set true (faster)")
     ("no-reachable", "does not remove summands which are not visited")
     ("verbose,v",    "turn on the display of short intermediate messages")
+    ("csv,c",po::value< std::vector< std::string > >(), "stores the value changes of the process parameters in a CSV file separated by tabs")
     ("debug,d",      "turn on the display of detailed intermediate messages")
     ("version",      "display version information")
     ("help,h",       "display this help")
@@ -1181,6 +1316,28 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
   setAllTrue(0 < vm.count("no-condition"));
   setReachable(0 == vm.count("no-reachable"));
 
+  if(vm.count("csv"))
+  {
+    setShow(0 < vm.count("csv")); 
+    csv_names = vm["csv"].as< std::vector< std::string > >();
+  
+    gsDebugMsg( "Output file %s", csv_names[0].c_str() );
+
+    if (csv_names.size() == 0)
+    {
+      std::cerr << "csv option requires a single OUTPUT file (too few arguments)"<< std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    if (csv_names.size()>1)
+    {
+      std::cerr << "csv option requires a single OUTPUT file (too many arguments)"<< std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    p_logfile = csv_names[0] ;
+  }
+
   if (vm.count("file_names")){
     file_names = vm["file_names"].as< std::vector< std::string > >();
   }
@@ -1193,8 +1350,7 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
   }
   else if (2 < file_names.size()) {
     std::cerr << "lpsconstelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< std::endl;
-
-    exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
   }
   else {
     if (!loadFile(file_names[0])) {
