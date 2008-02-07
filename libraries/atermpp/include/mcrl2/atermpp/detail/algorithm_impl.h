@@ -228,6 +228,46 @@ namespace detail {
     }
   }
 
+  template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+  void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
+  {
+    typedef typename iterator_value<OutputIterator>::type value_type;
+
+    if (t.type() == AT_APPL)
+    {
+      if (match(aterm_appl(t)))
+      {
+        aterm_appl a(t);
+        value_type v(a);
+        *destBegin++ = a;
+      }
+    }
+    if (t.type() == AT_LIST)
+    {
+      for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+      {
+        if (!stop(aterm_appl(*i)))
+        {
+          partial_find_all_if_impl(*i, match, stop, destBegin);
+        }
+      }
+    } 
+    else if (t.type() == AT_APPL)
+    {
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        if (!stop(aterm_appl(*i)))
+        {
+          partial_find_all_if_impl(*i, match, stop, destBegin);
+        }
+      }
+    }
+    else
+    {
+      return;
+    }
+  }
+
 //--- replace -------------------------------------------------------------//
 
   template <typename ReplaceFunction>

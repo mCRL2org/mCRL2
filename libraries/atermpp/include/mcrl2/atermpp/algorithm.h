@@ -45,7 +45,7 @@ namespace atermpp
   /// aterm() is returned. The term is only partially traversed. If the stop predicate
   /// returns false in a subterm, the recursion is not continued.
   /// \param match The predicate that determines if a subterm is a match
-  /// \param stop The predicte that determines if the recursion should not be continued in a subterm
+  /// \param stop The predicate that determines if the recursion should not be continued in a subterm
   template <typename Term, typename MatchPredicate, typename StopPredicate>
   aterm partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
   {
@@ -66,6 +66,20 @@ namespace atermpp
     OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
     detail::find_all_if_impl(aterm_traits<Term>::term(t), op, i);
   }
+
+  /// Finds all subterms of t that match the predicate op, and writes the found terms
+  /// to the destination range starting with destBegin.
+  /// The term is only partially traversed. If the stop predicate
+  /// returns false in a subterm, the recursion is not continued.
+  /// \param match The predicate that determines if a subterm is a match
+  /// \param stop The predicate that determines if the recursion should not be continued in a subterm
+  template <typename Term, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+  void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
+  {
+    OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
+    detail::partial_find_all_if_impl(aterm_traits<Term>::term(t), match, stop, i);
+  }
+
 
   /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
