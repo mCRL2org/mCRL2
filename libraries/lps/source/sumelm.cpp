@@ -1,6 +1,7 @@
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 #include <mcrl2/atermpp/aterm_list.h>
+#include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
 
 //LPS Framework
@@ -68,6 +69,7 @@ namespace lps {
   /// Replaces all data expressions in the term t using the specified map of replacements.
   ///
   template <typename Term>
+  static inline
   Term sumelm_replace(Term t, const std::map<data_expression, data_expression>& replacements)
   {
     return atermpp::partial_replace(t, sumelm_replace_helper(replacements));
@@ -76,7 +78,8 @@ namespace lps {
   /// Replaces all data expressions in the right hand sides of the list, using
   /// the specified map of replacements.
   ///
-  data_assignment_list sumelm_data_assignment_list_replace(data_assignment_list t,
+  static inline
+  data_assignment_list sumelm_data_assignment_list_replace(const data_assignment_list& t,
                          const std::map<data_expression, data_expression>& replacements)
   {
     data_assignment_list result;
@@ -92,6 +95,7 @@ namespace lps {
   /// Adds replacement lhs := rhs to the specified map of replacements.
   /// All replacements that have lhs as a right hand side will be changed to
   /// have rhs as a right hand side.
+  static inline
   void sumelm_add_replacement(std::map<data_expression, data_expression>& replacements,
                          const data_expression lhs, const data_expression rhs)
   {
@@ -106,18 +110,20 @@ namespace lps {
     replacements[lhs] = new_rhs;
   }
 
+  
   ///pre: true
   ///ret: data_variable v occurs in d.
   template <typename data_type>
-  bool occurs_in_expression(data_type d, data_variable v)
+  static inline
+  bool occurs_in_expression(const data_type d, const data_variable v)
   {
-    return find_if(aterm_appl(d), data::detail::compare_data_variable(v)) != aterm();
+    return partial_find_if(aterm_appl(d), data::detail::compare_data_variable(v), is_sort_expression) != aterm();
   }
 
   ///pre: is_and(t) || is_equal_to(t)
   ///ret: lefthandside of t
-  inline
-  data_expression lhs(data_expression t)
+  static inline
+  data_expression lhs(const data_expression t)
   {
     assert(is_and(t) || is_equal_to(t));
     return data_expression(ATAelementAt(ATLgetArgument(t, 1), 0));
@@ -125,8 +131,8 @@ namespace lps {
 
   ///pre: is_and(t) || is_equal_to(t)
   ///ret: righthandside of t
-  inline
-  data_expression rhs(data_expression t)
+  static inline
+  data_expression rhs(const data_expression t)
   {
     assert(is_and(t) || is_equal_to(t));
     return data_expression(ATAelementAt(ATLgetArgument(t, 1), 1));
@@ -134,14 +140,15 @@ namespace lps {
 
   ///pre: is_equal_to(t); t is of form a == b
   ///ret: b == a
-  inline
-  data_expression swap_equality(data_expression t)
+  static inline
+  data_expression swap_equality(const data_expression t)
   {
     assert(is_equal_to(t));
     return data::data_expr::equal_to(rhs(t), lhs(t));
   }
 
   ///Apply substitution to the righthand sides of the assignments in dl
+  static inline
   data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_assignment& substitution)
   {
     data_assignment_list result;
@@ -162,6 +169,7 @@ namespace lps {
 
   ///Apply a simple form of sum elimination in the case a summation
   ///variable does not occur within the summand at all
+  static inline
   lps::summand remove_unused_variables(const lps::summand& summand_)
   {
     //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
@@ -170,14 +178,22 @@ namespace lps {
     // New summation variable list, all variables in this list occur in other terms in the summand.
     data_variable_list new_summation_variables;
 
+    // Construct a set with all variables occurring in the summand.
+    // This reduces the running time from O(|summand| * |summation variables|)
+    // to O(|summand| + |summation variables|)
+    atermpp::set<data_expression> occurring_vars;
+    partial_find_all_if(summand_.condition(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.actions(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.time(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.assignments(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+
     for(data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
     {
       data_variable v = *i;
 
       //Check whether variable occurs in other terms of summand
       //If variable occurs leave the variable, so add variable to new list
-      if (occurs_in_expression(summand_.condition(), v) || occurs_in_expression(summand_.actions(), v)
-          || occurs_in_expression(summand_.time(), v) || occurs_in_expression(summand_.assignments(), v))
+      if (occurring_vars.find(v) != occurring_vars.end())
       {
         new_summation_variables = push_front(new_summation_variables, v);
       } else {
@@ -194,28 +210,6 @@ namespace lps {
     return new_summand;
   }
 
-  ///Take a specification and apply sum elimination to its summands
-  lps::specification remove_unused_variables_(const lps::specification& specification)
-  {
-    gsVerboseMsg("Removing unused variables from summands\n");
-
-    lps::linear_process lps = specification.process();
-    lps::specification new_specification;
-    lps::summand_list new_summand_list;
-
-    int index = 0;
-    for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
-    {
-      gsVerboseMsg("Summand %d: ", ++index);
-      new_summand_list = push_front(new_summand_list, remove_unused_variables(*i));
-    }
-    new_summand_list = reverse(new_summand_list);
-
-    new_specification = set_lps(specification, set_summands(lps, new_summand_list));
-
-    return new_specification;
-  }
-
   //Recursively apply sum elimination on a summand.
   //We build up a list of substitutions that need to be made in substitutions
   //the caller of this function needs to apply substitutions to the summand
@@ -225,11 +219,8 @@ namespace lps {
   //should hold.
   //The new condition is built up on the return path of the recursion, so
   //the last exit of the recursion is the new condition of the summand.
-  //
-  //Note that filtering the summation variables should (for now) be done in the calling
-  //function, by applying remove_unused_variables_ on the result, because that is a little
-  //more efficient.
   //!!!INTERNAL USE ONLY!!!
+  static inline
   data_expression recursive_substitute_equalities(const summand& summand_,
                                                   data_expression working_condition,
                                                   std::map<data_expression, data_expression>& substitutions)
@@ -293,6 +284,7 @@ namespace lps {
   ///This checks the following:
   ///X(..) = sum d. d=e -> a(..) . X(..)
   ///and returns X(..) = e -> a(..) . X(..)
+  static inline
   lps::summand substitute_equalities(const lps::summand& summand_)
   {
     lps::summand new_summand = summand_;
@@ -316,6 +308,7 @@ namespace lps {
 
   ///Take an lps specification, apply equality sum elimination to it,
   ///and return an lps specification
+  static inline
   lps::specification substitute_equalities_(const lps::specification& specification)
   {
     gsVerboseMsg("Substituting equality conditions in summands\n");
@@ -344,8 +337,7 @@ namespace lps {
 
     lps::specification new_specification = specification;
     new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_
-    //new_specification = remove_unused_variables_(new_specification); // This should be enabled whenever a flag for disabling substitute_equalities_ is added
-    return new_specification;
+    return new_specification; 
   }
 
 } // namespace lps
