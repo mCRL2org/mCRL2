@@ -42,7 +42,9 @@ namespace detail {
   }
   
   /// type check a state formula against spec,
-  /// spec is a specification before data implementation.
+  /// spec is a lps specification before data implementation, or
+  /// a pbes specification before data implementation, or
+  /// a data specification before data implementation.
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
@@ -53,8 +55,10 @@ namespace detail {
   }
   
   /// implement sorts and data expressions in formula,
-  /// using the data from spec. spec is a specification before data
-  /// implementation.
+  /// using the data from spec. 
+  /// spec is a lps specification before data implementation, or
+  /// a pbes specification before data implementation, or
+  /// a data specification before data implementation.
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {

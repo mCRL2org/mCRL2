@@ -235,7 +235,7 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
 
 ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 {
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   int occ =
     gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
     gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);

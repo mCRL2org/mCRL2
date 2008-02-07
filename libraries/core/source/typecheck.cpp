@@ -263,40 +263,42 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   ATermAppl data_spec=NULL;
   if(spec) data_spec = ATAgetArgument(spec, 0);
   if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
-  // Check sorts for loops
-  // Unwind sorts to enable equiv and subtype relations
-  if(!spec || gstcReadInConstructors()) {
-  if(!spec || gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                               ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
-  gsDebugMsg ("type checking data expression part read-in phase finished\n");
-  
-  if(gsIsNotInferred(sort_expr)){
-    gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
-    goto done;
-  }
+    // Check sorts for loops
+    // Unwind sorts to enable equiv and subtype relations
+    if(!spec || gstcReadInConstructors()) {
+      if(!spec || gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                                   ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+        gsDebugMsg ("type checking data expression part read-in phase finished\n");
+        
+        if(gsIsNotInferred(sort_expr)){
+          gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
+        }
+        else
+        {
+          if(gstcIsSortExprDeclared(sort_expr)){
+            if(!gsIsDataExpr(data_expr)){
+              gsErrorMsg("type checking of data expression failed (%T is not a data expression)\n",data_expr);
+            }
+            else
+            {
+              bool destroy_vars=(!Vars);
+              if(destroy_vars) Vars=ATtableCreate(63,50);
 
-  if(gstcIsSortExprDeclared(sort_expr)){
-    if(!gsIsDataExpr(data_expr)){
-      gsErrorMsg("type checking of data expression failed (%T is not a data expression)\n",data_expr);
-      goto done;
+              ATermAppl data=data_expr;
+              ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
+
+              if(destroy_vars) ATtableDestroy(Vars);
+
+              if(Type) Result=data;
+              else gsErrorMsg("type checking of data expressions failed\n");
+
+              gsDebugMsg ("type checking data expression part phase finished\n");
+            }
+          }
+        }
+      }
     }
-
-  bool destroy_vars=(!Vars);
-  if(destroy_vars) Vars=ATtableCreate(63,50);
-
-  ATermAppl data=data_expr;
-  ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
-
-  if(destroy_vars) ATtableDestroy(Vars);
-
-  if(Type) Result=data;
-  else gsErrorMsg("type checking of data expressions failed\n");
-
-
-  gsDebugMsg ("type checking data expression part phase finished\n");
-  }}}}
-
-  done:
+  }
 
   if (Result != NULL) {
     gsDebugMsg("return %T\n", Result);
@@ -371,7 +373,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
       gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
     } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
-      bool destroy_vars=(!Vars);
+      bool destroy_vars=(Vars == NULL);
       if(destroy_vars) Vars=ATtableCreate(63,50);
       if(use_vars_from_lps) {
         ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
@@ -380,7 +382,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
           gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
           goto finally;
         }
-	else Vars=NewVars;
+	else
+        {
+          Vars=NewVars;
+        }
       }
 
       ATermAppl data=data_expr;
@@ -465,14 +470,15 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
   return proc_expr;
 }
 
-ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl lps_spec, bool use_vars_from_lps)
+ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec, bool use_vars_from_lps)
 {
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   //check correctness of the state formula in state_formula using
-  //the LPS specification in lps_spec as follows:
+  //the LPS specification in spec as follows:
   //1) determine the types of actions according to the definitions
-  //   in lps_spec
+  //   in spec
   //2) determine the types of data expressions according to the
-  //   definitions in lps_spec
+  //   definitions in spec
   //3) check for name conflicts of data variable declarations in
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
@@ -485,23 +491,44 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl lps_spec, bool use
 
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
-  ATermAppl data_spec = ATAgetArgument(lps_spec, 0);
+  ATermAppl data_spec = NULL;
+  ATermList action_labels = NULL;
+  ATermList process_parameters = NULL;
+  if (gsIsDataSpec(spec))
+  {
+    data_spec = spec;
+  }
+  else
+  {
+    data_spec = ATAgetArgument(spec, 0);
+    if (gsIsSpecV1(spec))
+    {
+      action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
+      process_parameters = ATLgetArgument(ATAgetArgument(spec, 2), 1);
+    }
+  }
+
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
   ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
   ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
-  ATermList action_labels = ATLgetArgument(ATAgetArgument(lps_spec, 1), 0);
-  ATermList process_parameters = ATLgetArgument(ATAgetArgument(lps_spec, 2), 1);
 
   //XXX read-in from LPS (not finished)
   if(gstcReadInSorts(sorts,false)){
     if(gstcReadInConstructors()){
        if(gstcReadInFuncs(ATconcat(constructors,mappings),false)){
-         if(!gstcReadInActs(action_labels))
-           gsWarningMsg("ignoring the previous error(s), the formula will be ypechecked without action label information\n");
+         if (action_labels != NULL)
+         {
+           if(!gstcReadInActs(action_labels))
+             gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
+         }
+         else
+         {
+           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
+         }
          gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
          ATermTable Vars=ATtableCreate(63,50);
-         if(use_vars_from_lps) {
+         if(use_vars_from_lps && process_parameters != NULL) {
            ATermTable NewVars=gstcAddVars2Table(Vars,process_parameters);
            if(!NewVars){
              ATtableDestroy(Vars);

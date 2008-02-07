@@ -93,7 +93,8 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
 
 /** \pre state_frm represents a state formula that adheres to the internal ATerm
  *     structure after the type checking phase.
- *     spec represents an LPS specification before data implementation
+ *     spec represents either an LPS specification, a PBES or a data
+ *     specification, all before data implementation
  * \post The datatypes of spec are implemented as higher-order abstract data
  *     types in spec
  * \return if the data implementation went well, an equivalent version of state_frm

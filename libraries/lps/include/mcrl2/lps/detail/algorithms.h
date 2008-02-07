@@ -89,7 +89,8 @@ namespace detail {
     return result;
   }
 
-  /// \pre spec is a specification before data implementation
+  /// \pre spec is a {lps specification, pbes specification, data specification}
+  /// before data implementation
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
@@ -99,7 +100,8 @@ namespace detail {
     return result;
   }
  
-  /// \pre spec is a specification before data implementation
+  /// \pre spec is a {lps specification, pbes specification, data specification}
+  /// before data implementation
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
