@@ -114,6 +114,7 @@ class lpsConstElm {
     void detectVar(int n);
     bool recDetectVarList(mcrl2::data::data_expression_list l, atermpp::set<data_expression> &S);
     bool recDetectVar(mcrl2::data::data_expression t, atermpp::set<mcrl2::data::data_expression> &S);
+    bool DetectVariableProcessParamtersInDataAppl (aterm_appl t); 
     template <typename Term>
     atermpp::term_list<Term> vectorToList(atermpp::vector<Term> y);
     template <typename Term>
@@ -320,6 +321,33 @@ void lpsConstElm::getDatVarRec(aterm_appl t) {
   }
 }
 
+
+bool lpsConstElm::DetectVariableProcessParamtersInDataAppl (aterm_appl t) {
+// Returns true if a variable process parameter is detected
+// Returns false all process parameters are constant
+  if( gsIsDataVarId(t) ) 
+    {
+      return (p_variableList.find(data_variable(t)) != p_variableList.end());
+    }
+
+  if(gsIsDataAppl(t) )
+  {
+    bool returnvalue = DetectVariableProcessParamtersInDataAppl( ATAgetArgument( t, 0 ) );
+    
+    ATermList z = (ATermList) ATgetArgument(t,1);
+
+    while (!ATisEmpty(z) && !returnvalue )
+    {
+      returnvalue = returnvalue || DetectVariableProcessParamtersInDataAppl( (aterm_appl) ATgetFirst(z) );
+      z = ATgetNext(z);
+    } 
+
+    return returnvalue;
+  }
+
+  return false;
+}
+
 // Returns a vector in which each element is a AtermsAppl (DataVarID)
 //
 inline atermpp::set< mcrl2::data::data_variable > lpsConstElm::getUsedFreeVars(aterm_appl input) {
@@ -411,7 +439,9 @@ inline bool lpsConstElm::cmpCurrToNext() {
           ATtablePut(safeguard,aterm(p_nextState.at(index)),aterm(p_nextState.at(index)));
           p_newCurrentState.at(index) = p_nextState.at(index) ;
           p_currentState.at(index) = p_nextState.at(index);
-          if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
+
+          if (DetectVariableProcessParamtersInDataAppl( (ATermAppl) p_nextState.at(index).rhs()))
+          {
             p_V.insert(p_lookupIndex[i->lhs()]);
  
             if (p_show)
@@ -734,7 +764,9 @@ inline bool lpsConstElm::output() {
             {
               if ( i->first == it_ca->first.lhs() ) 
               {
-                p_logstring.append("\t\""+ pp(it_ca->second.rhs()) + "\"" );
+                p_logstring.append( it_ca->first.rhs() == it_ca->second.rhs()  
+                    ? "\t\""+ pp(it_ca->second.rhs()) + "\"" 
+                    : "\t\"["+ pp(it_ca->first.rhs()) + " ? "+ pp(it_ca->second.rhs()) + "\"]" );
                 changed = printed = true;
               }            
             } 
@@ -758,20 +790,23 @@ inline bool lpsConstElm::output() {
    //
    // Write to file
    //
-
-   FILE * pFile;
-
-   pFile = fopen (p_logfile.c_str() ,"w");
   
-   if (pFile == NULL)
+   if (p_show)
    {
-     gsErrorMsg("lpsconstelm: Can not write to the CSV log-file: %s. Writing of the log-file is omitted.\n", p_logfile.c_str() ); 
-   } else {
-     fprintf (pFile, p_logstring.c_str() );
-     fclose (pFile);
-   }
+     FILE * pFile;
+  
+     pFile = fopen (p_logfile.c_str() ,"w");
+  
+     if (pFile == NULL)
+     {
+       gsVerboseMsg("lpsconstelm: Cannot write to the CSV log-file: %s. Writing of the log-file is omitted.\n", p_logfile.c_str() ); 
+     } else {
+       fprintf (pFile, p_logstring.c_str() );
+       fclose (pFile);
+     }
+    }
+ 
   }
-
   //Remove process parameters in in summand
   //
   lps::summand_list rebuild_summandlist_no_cp;
@@ -1336,6 +1371,8 @@ void lpsConstElm::parse_command_line(int argc, char** argv) {
     }
 
     p_logfile = csv_names[0] ;
+  } else {
+    setShow(false);
   }
 
   if (vm.count("file_names")){
