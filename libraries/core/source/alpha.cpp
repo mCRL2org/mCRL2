@@ -491,11 +491,12 @@ static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermLis
     ATermList ll=ATLgetFirst(l);
     for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o)){
       ATermList oo=ATLgetFirst(o);
-      if((!length || unsigned(ATgetLength(ll))+unsigned(ATgetLength(oo))<=length)&&
-         (ATisEqual(allowed,ATmakeList0()) || (sub_multiaction_list(untypeMA(ll),allowed) && sub_multiaction_list(untypeMA(oo),allowed)))){
-	ATermList ma=sync_mact(ll,oo);
+      if(!length || unsigned(ATgetLength(ll))+unsigned(ATgetLength(oo))<=length){
+        ATermList ma=sync_mact(ll,oo);
+        if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed)){
 	if(ATindexOf(n,(ATerm)ma,0)<0)
 	  n = ATinsert(n,(ATerm)ma);
+        }
       }
     }
   }
