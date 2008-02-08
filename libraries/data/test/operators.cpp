@@ -23,6 +23,10 @@ class D: public aterm_appl
 {
 };
 
+void f(data_expression d)
+{
+}
+
 // This program is for checking if some standard operators on aterms
 // are defined and don't lead to ambiguities.
 
@@ -38,6 +42,7 @@ int test_main(int argc, char** argv)
   ATermList L  = l;  
 
   data_variable v;
+  f(v);
   v = a;
 
   set<data_variable> variables;

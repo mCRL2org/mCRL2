@@ -17,11 +17,11 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/propositional_variable_replace.h"
+#include "mcrl2/pbes/replace.h"
 #include "pbes_rewrite.h"
 
 namespace mcrl2 {
@@ -237,14 +237,14 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec)
 
     // Replace all occurrences in the right hand side and rewrite the expression
     pbes_expression new_pbes_expression;
-    new_pbes_expression = data::replace_data_variable_sequence(current_pbes_expression, current_variable.parameters(), current_state.parameters());
+    new_pbes_expression = data::data_variable_sequence_replace(current_pbes_expression, current_variable.parameters(), current_state.parameters());
     new_pbes_expression = pbes_expression_rewrite(new_pbes_expression, data, rewriter);
 
     propositional_variable_instantiation_list oldpropvarinst_list;
     propositional_variable_instantiation_list newpropvarinst_list;
 
     // Get all propvarinst of the rhs
-    std::set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(new_pbes_expression);
+    std::set< propositional_variable_instantiation > propvarinst_set = find_all_propositional_variable_instantiations(new_pbes_expression);
 
     for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
     {
@@ -258,7 +258,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec)
     }
 
     // Replace the propvarinsts with the new ones
-    new_pbes_expression = replace_propositional_variable_sequence(new_pbes_expression,  oldpropvarinst_list, newpropvarinst_list);
+    new_pbes_expression = propositional_variable_sequence_replace(new_pbes_expression,  oldpropvarinst_list, newpropvarinst_list);
 
     // Create resulting pbes_equation and add it to equation system
     new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
@@ -385,14 +385,14 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec)
       pbes_expression current_expression; // Current expression
 
       // Substitute all instantiated variables and rewrite the rhs as far as possible.
-      current_expression = data::replace_data_variable_sequence(formula, inst_i->finite_var, inst_i->finite_exp);
+      current_expression = data::data_variable_sequence_replace(formula, inst_i->finite_var, inst_i->finite_exp);
       current_expression = pbes_expression_rewrite(current_expression, data, rewriter);
 
       propositional_variable_instantiation_list oldpropvarinst_list;
       propositional_variable_instantiation_list newpropvarinst_list;
 
       // Get all propvarinst of the rhs
-      std::set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(current_expression);
+      std::set< propositional_variable_instantiation > propvarinst_set = find_all_propositional_variable_instantiations(current_expression);
 
       for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
       {
@@ -401,7 +401,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec)
         newpropvarinst_list = push_front(newpropvarinst_list, newpropvarinst);
       }
 
-      current_expression = replace_propositional_variable_sequence(current_expression, oldpropvarinst_list, newpropvarinst_list);
+      current_expression = propositional_variable_sequence_replace(current_expression, oldpropvarinst_list, newpropvarinst_list);
       result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
 
       if (++nr_of_equations % 1000 == 0)

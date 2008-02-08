@@ -12,6 +12,7 @@
 
 #include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
@@ -295,48 +296,48 @@ namespace pbes_expr {
     inline
     pbes_expression not_(pbes_expression p)
     {
-      using namespace pbes_expr;
-      return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+      namespace pb = pbes_expr;
+	  return core::detail::optimized_not(p, pb::not_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
     }
     
     /// \brief Returns and applied to p and q, and simplifies the result.
     inline
     pbes_expression and_(pbes_expression p, pbes_expression q)
     {
-      using namespace pbes_expr;
-      return core::detail::optimized_and(p, q, and_, true_(), is_true, false_(), is_false);
+      namespace pb = pbes_expr;
+      return core::detail::optimized_and(p, q, pb::and_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
     }
     
     /// \brief Returns or applied to p and q, and simplifies the result.
     inline
     pbes_expression or_(pbes_expression p, pbes_expression q)
     {
-      using namespace pbes_expr;
-      return core::detail::optimized_or(p, q, or_, true_(), is_true, false_(), is_false);
+      namespace pb = pbes_expr;
+      return core::detail::optimized_or(p, q, pb::or_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
     }
     
     /// \brief Returns imp applied to p and q, and simplifies the result.
     inline
     pbes_expression imp(pbes_expression p, pbes_expression q)
     {
-      using namespace pbes_expr;
-      return core::detail::optimized_imp(p, q, imp, not_, true_(), is_true, false_(), is_false);
+      namespace pb = pbes_expr;
+      return core::detail::optimized_imp(p, q, pb::imp, pb::not_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
     }
 
     /// \brief Returns or applied to the sequence of pbes expressions [first, last[
     template <typename FwdIt>
     inline pbes_expression join_or(FwdIt first, FwdIt last)
     {
-      using namespace pbes_expr;
-      return core::detail::join(first, last, optimized::or_, false_());
+      namespace pb = pbes_expr;
+      return core::detail::join(first, last, optimized::or_, pb::false_());
     }
     
     /// \brief Returns and applied to the sequence of pbes expressions [first, last[
     template <typename FwdIt>
     inline pbes_expression join_and(FwdIt first, FwdIt last)
     {
-      using namespace pbes_expr;
-      return core::detail::join(first, last, optimized::and_, true_());
+      namespace pb = pbes_expr;
+      return core::detail::join(first, last, optimized::and_, pb::true_());
     }
 
     /// \brief Returns the universal quantification of the expression p over the variables in l.

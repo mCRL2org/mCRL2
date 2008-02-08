@@ -30,7 +30,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
@@ -173,8 +173,8 @@ void test_data_variable_replace()
   l.push_back(e3);
 
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data_expression t1 = replace_data_variable_sequence(t, variables, replacements);
-  data_expression t2 = replace_data_variable_sequence(t, v, l);
+  data_expression t1 = data_variable_sequence_replace(t, variables, replacements);
+  data_expression t2 = data_variable_sequence_replace(t, v, l);
   std::cerr << "t  == " << pp(t) << std::endl;
   std::cerr << "t1 == " << pp(t1) << std::endl;
   std::cerr << "t2 == " << pp(t2) << std::endl;

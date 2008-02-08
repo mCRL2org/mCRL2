@@ -44,7 +44,7 @@
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/lps/dataelm.h"
 

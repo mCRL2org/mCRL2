@@ -76,7 +76,7 @@ pbes_expression remove_double_variables_rec
   }
   else if (is_data(p)){
     // fill in the list of occuring variables
-    std::set<data_variable> setfv = find_variables(p);
+    std::set<data_variable> setfv = find_all_data_variables(p);
     for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
       *fv = push_back(*fv,*i);
     //    std::cout<<"RDV: end " <<pp(p).c_str()<<"\n";

@@ -10,7 +10,11 @@
 #ifndef MCRL2_MODAL_FREE_VARIABLES_H
 #define MCRL2_MODAL_FREE_VARIABLES_H
 
+#include <set>
+#include <vector>
 #include "mcrl2/modal_formula/state_formula_visitor.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -82,7 +86,7 @@ struct free_variable_visitor: public state_formula_visitor
 
   bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& l)
   {
-    std::set<data::data_variable> variables = find_variables(l);
+    std::set<data::data_variable> variables = find_all_data_variables(l);
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
@@ -95,7 +99,7 @@ struct free_variable_visitor: public state_formula_visitor
 
   bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
-    std::set<data::data_variable> variables = find_variables(d);
+    std::set<data::data_variable> variables = find_all_data_variables(d);
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))

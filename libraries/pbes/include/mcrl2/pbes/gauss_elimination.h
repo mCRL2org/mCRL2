@@ -10,7 +10,7 @@
 #ifndef MCRL2_PBES_GAUSS_ELIMINATION_H
 #define MCRL2_PBES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/pbes/propositional_variable_replace.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {

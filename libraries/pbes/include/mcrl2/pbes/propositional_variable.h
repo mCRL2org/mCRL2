@@ -7,8 +7,8 @@
 /// \file mcrl2/pbes/propositional_variable.h
 /// \brief The classes propositional_variable and propositional_variable_instantiation.
 
-#ifndef LPS_PROPOSITIONAL_VARIABLE
-#define LPS_PROPOSITIONAL_VARIABLE
+#ifndef MCRL2_PBES_PROPOSITIONAL_VARIABLE_H
+#define MCRL2_PBES_PROPOSITIONAL_VARIABLE_H
 
 #include <cassert>
 #include <string>
@@ -208,4 +208,4 @@ struct aterm_traits<propositional_variable_instantiation>
 } // namespace atermpp
 /// \endcond
 
-#endif // LPS_PROPOSITIONAL_VARIABLE
+#endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

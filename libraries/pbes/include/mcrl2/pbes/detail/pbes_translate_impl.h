@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/substitute.h"
+#include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"
@@ -474,13 +475,13 @@ namespace pbes_timed
       data::data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data::data_variable_list y = fresh_variables(x, data::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
+      data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     } else if (is_exists(b)) {
       data::data_variable_list x = quant_vars(b);
       assert(x.size() > 0);
       action_formula alpha = quant_form(b);
-      data::data_variable_list y = fresh_variables(x, data::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
+      data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
       result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
     } else {
       throw std::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
@@ -514,11 +515,11 @@ namespace pbes_timed
     } else if (s::is_imp(f)) {
 		  result = optimized::imp(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = data::find_variable_name_strings(s::quant_vars(f));
+      std::set<std::string> names = data::detail::find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       result = forall(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, T, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = data::find_variable_name_strings(s::quant_vars(f));
+      std::set<std::string> names = data::detail::find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       result = exists(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, T, context));
     } else if (s::is_must(f)) {
@@ -537,7 +538,7 @@ namespace pbes_timed
         data::data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, T, context);
-        std::set<std::string> rhs_context = data::find_variable_name_strings(rhs);
+        std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data::data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -571,7 +572,7 @@ namespace pbes_timed
         data::data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, T, context);
-        std::set<std::string> rhs_context = data::find_variable_name_strings(rhs);
+        std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data::data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -713,7 +714,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data::data_variable_list y = fresh_variables(x, data::find_variable_name_strings(make_list(a, b)));
+        data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a, b)));
         result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -723,7 +724,7 @@ namespace pbes_untimed
       action_formula alpha = quant_form(b);
       if (x.size() > 0)
       {
-        data::data_variable_list y = fresh_variables(x, data::find_variable_name_strings(make_list(a, b)));
+        data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a, b)));
         result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       }
       else
@@ -759,11 +760,11 @@ namespace pbes_untimed
     } else if (s::is_imp(f)) {
       result = imp(RHS(f0, s::lhs(f), lps, context), RHS(f0, s::rhs(f), lps, context));
     } else if (s::is_forall(f)) {
-      std::set<std::string> names = data::find_variable_name_strings(s::quant_vars(f));
+      std::set<std::string> names = data::detail::find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       result = forall(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, context));
     } else if (s::is_exists(f)) {
-      std::set<std::string> names = data::find_variable_name_strings(s::quant_vars(f));
+      std::set<std::string> names = data::detail::find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
       result = exists(s::quant_vars(f), RHS(f0, s::quant_form(f), lps, context));
     } else if (s::is_must(f)) {
@@ -781,7 +782,7 @@ namespace pbes_untimed
         data::data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, context);
-        std::set<std::string> rhs_context = data::find_variable_name_strings(rhs);
+        std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data::data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));
@@ -810,7 +811,7 @@ namespace pbes_untimed
         data::data_variable_list yi(i->summation_variables());
 
         pbes_expression rhs = RHS(f0, f1, lps, context);
-        std::set<std::string> rhs_context = data::find_variable_name_strings(rhs);
+        std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
         context.insert(rhs_context.begin(), rhs_context.end());
         data::data_variable_list y = fresh_variables(yi, context);
         ci = ci.substitute(make_list_substitution(yi, y));

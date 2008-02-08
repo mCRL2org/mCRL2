@@ -254,7 +254,7 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
       if (!stable) 
 	{
 	  std::set<propositional_variable_instantiation> setpred =
-	    find_propositional_variable_instantiations(approx_);
+	    find_all_propositional_variable_instantiations(approx_);
 	  stable = (setpred.empty());
 	}
       */

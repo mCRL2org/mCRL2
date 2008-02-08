@@ -34,15 +34,6 @@ using atermpp::aterm;
 using atermpp::aterm_traits;
 using namespace detail;
 
-/// \brief Returns the set of all identifier strings occurring in the term t
-template <typename Term>
-std::set<core::identifier_string> identifiers(Term t)
-{
-  std::set<core::identifier_string> result;
-  find_all_if(aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
-  return result;
-}
-
 /// Returns a copy of t, but with a common postfix added to each variable name,
 /// and such that the new names do not appear in context.
 inline
@@ -117,7 +108,7 @@ core::identifier_string fresh_identifier(const std::set<core::identifier_string>
 template <typename Term, class IdentifierCreator>
 core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
-  return fresh_identifier(identifiers(context), hint, id_creator);
+  return fresh_identifier(find_identifiers(context), hint, id_creator);
 }
 
 /// \brief Returns an identifier that doesn't appear in the term context
@@ -133,48 +124,6 @@ data_variable fresh_variable(Term context, sort_expression s, std::string hint)
 {
   core::identifier_string id = fresh_identifier(context, hint);
   return data_variable(id, s);
-}
-
-/// \brief Returns all data variables that occur in the term t
-template <typename Term>
-std::set<data_variable> find_variables(Term t)
-{
-  // find all data variables in t
-  std::set<data_variable> variables;
-  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
-  return variables;
-}
-
-/// \brief Returns all names of data variables that occur in the term t
-template <typename Term>
-std::set<core::identifier_string> find_variable_names(Term t)
-{
-  // find all data variables in t
-  std::set<data_variable> variables;
-  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
-
-  std::set<core::identifier_string> result;
-  for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
-  {
-    result.insert(j->name());
-  }
-  return result;
-}
-
-/// \brief Returns all names of data variables that occur in the term t
-template <typename Term>
-std::set<std::string> find_variable_name_strings(Term t)
-{
-  // find all data variables in t
-  std::set<data_variable> variables;
-  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
-
-  std::set<std::string> result;
-  for (std::set<data_variable>::iterator j = variables.begin(); j != variables.end(); ++j)
-  {
-    result.insert(j->name());
-  }
-  return result;
 }
 
 /// Fresh variable generator that generates data variables with
@@ -198,7 +147,7 @@ class fresh_variable_generator
     template <typename Term>
     fresh_variable_generator(Term context, sort_expression s = sort_expr::real(), std::string hint = "t")
     {
-      m_identifiers = identifiers(context);
+      m_identifiers = find_identifiers(context);
       m_hint = hint;
       m_sort = s;
     }
@@ -222,7 +171,7 @@ class fresh_variable_generator
     template <typename Term>
     void set_context(Term context)
     {
-      m_identifiers = identifiers(context);
+      m_identifiers = find_identifiers(context);
     }
 
     /// Set a new sort.
@@ -244,7 +193,7 @@ class fresh_variable_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<core::identifier_string> ids = identifiers(t);
+      std::set<core::identifier_string> ids = find_identifiers(t);
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 

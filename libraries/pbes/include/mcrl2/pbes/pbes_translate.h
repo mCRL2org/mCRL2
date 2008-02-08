@@ -14,7 +14,9 @@
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/free_variables.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
@@ -38,9 +40,9 @@ pbes<> pbes_translate(const modal::state_formula& formula, const lps::specificat
   using namespace modal::state_frm;
 
   modal::state_formula f = formula;
-  std::set<core::identifier_string> formula_variable_names = data::find_variable_names(formula);
-  std::set<core::identifier_string> spec_variable_names = data::find_variable_names(spec);
-  std::set<core::identifier_string> spec_names = data::identifiers(spec);
+  std::set<core::identifier_string> formula_variable_names = data::detail::find_variable_names(formula);
+  std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(spec);
+  std::set<core::identifier_string> spec_names = data::find_identifiers(spec);
 
   // rename data variables in f, to prevent name clashes with data variables in spec 
   data::set_identifier_generator generator;

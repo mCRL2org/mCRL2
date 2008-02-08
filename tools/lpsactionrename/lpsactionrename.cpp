@@ -31,6 +31,7 @@
 #include "mcrl2/utilities/version_info.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/sort_identifier.h"
 
@@ -393,7 +394,7 @@ void rename_renamerule_variables(mcrl2::data::data_expression& rcond, lps::actio
   for(mcrl2::data::data_expression_list::iterator rleft_argument_i = rleft.arguments().begin();
                                           rleft_argument_i != rleft.arguments().end();
                                         ++rleft_argument_i){
-    found_vars = find_variables(*rleft_argument_i);
+    found_vars = find_all_data_variables(*rleft_argument_i);
     new_vars.insert(found_vars.begin(), found_vars.end());
   }
 
@@ -596,7 +597,7 @@ ATermAppl rename(ATermAppl action_rename,lps::specification lps_old_spec,lps::sp
                                                     rule_old_argument_i != rule_old_action.arguments().end();
                                                   ++rule_old_argument_i){
               //add new variables to the summation list and to the condition
-              std::set<data_variable> new_vars = find_variables(*rule_old_argument_i);
+              std::set<data_variable> new_vars = find_all_data_variables(*rule_old_argument_i);
               for(std::set<data_variable>::iterator sdvi = new_vars.begin(); sdvi != new_vars.end(); sdvi++){
                 lps_new_sum_vars = push_front(lps_new_sum_vars, *sdvi);
                 lps_new_condition = and_(lps_new_condition, mcrl2::data::data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));

@@ -13,9 +13,10 @@
 #include <set>
 #include <vector>
 #include "boost/ptr_container/ptr_vector.hpp"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
 namespace mcrl2 {
@@ -39,7 +40,7 @@ struct enumerate_arguments_function
 
   void operator()()
   {
-    m_expressions.push_back(replace_data_variable_sequence(m_expr, m_src, m_dest));
+    m_expressions.push_back(data_variable_sequence_replace(m_expr, m_src, m_dest));
   }
 };
   
@@ -162,7 +163,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
     data::data_expression result = m_rewriter(d);
 
     // remove all data variables that are present in d from unused_quantifier_variables
-    std::set<data::data_variable> v = find_variables(d);
+    std::set<data::data_variable> v = find_all_data_variables(d);
     for (std::set<data::data_variable>::iterator i = v.begin(); i != v.end(); ++i)
     {
       unused_quantifier_variables.erase(*i);
@@ -289,7 +290,7 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
 
     push(variables);
     pbes_expression expr1 = visit(expr);
-    std::vector<data::data_variable> variables1 = pop(variables);
+    std::vector<data::data_variable> variables1 = pop(variables); // the sublist of variables that is actually used
     std::vector<data::data_variable> finite_variables = remove_finite_variables(variables1);
 
     if (variables1.size() == variables.size())

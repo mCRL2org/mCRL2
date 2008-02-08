@@ -419,40 +419,40 @@ namespace data_expr {
     inline
     data_expression not_(data_expression p)
     {
-      using namespace data_expr;
-      return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+      namespace d = data_expr;
+      return core::detail::optimized_not(p, d::not_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
     
     /// \brief Returns and applied to p and q, and simplifies the result.
     inline
     data_expression and_(data_expression p, data_expression q)
     {
-      using namespace data_expr;
-      return core::detail::optimized_and(p, q, and_, true_(), is_true, false_(), is_false);
+      namespace d = data_expr;
+      return core::detail::optimized_and(p, q, d::and_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
     
     /// \brief Returns or applied to p and q, and simplifies the result.
     inline
     data_expression or_(data_expression p, data_expression q)
     {
-      using namespace data_expr;
-      return core::detail::optimized_or(p, q, or_, true_(), is_true, false_(), is_false);
+      namespace d = data_expr;
+      return core::detail::optimized_or(p, q, d::or_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
     
     /// \brief Returns or applied to the sequence of data expressions [first, last[
     template <typename FwdIt>
     inline data_expression join_or(FwdIt first, FwdIt last)
     {
-      using namespace data_expr;
-      return core::detail::join(first, last, optimized::or_, false_());
+      namespace d = data_expr;
+      return core::detail::join(first, last, optimized::or_, d::false_());
     }
     
     /// \brief Returns and applied to the sequence of data expressions [first, last[
     template <typename FwdIt>
     inline data_expression join_and(FwdIt first, FwdIt last)
     {
-      using namespace data_expr;
-      return core::detail::join(first, last, optimized::and_, true_());
+      namespace d = data_expr;
+      return core::detail::join(first, last, optimized::and_, d::true_());
     }
   } // namespace optimized
 

@@ -15,7 +15,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
@@ -81,6 +82,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
 std::map<data::data_variable, data::data_expression> compute_constant_parameters_subst(const linear_process& p, data::data_expression_list init, data::rewriter& r)
 {
   using namespace data::data_expr;
+  namespace opt = data::data_expr::optimized;
   
   typedef std::map<data::data_variable, std::list<data::rewriter::substitution>::iterator> index_map;
 
@@ -120,7 +122,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
         {
           const data::data_variable&   d  = j->lhs();  // process parameter
           const data::data_expression& g  = j->rhs();  // assigned value
-          if (r(or_(not_(rc), not_equal_to(d, g)), substitutions.begin(), substitutions.end()) == true_())
+          if (r(opt::or_(opt::not_(rc), not_equal_to(d, g)), substitutions.begin(), substitutions.end()) == true_())
           {
             replacements.erase(d);
             substitutions.erase(index[d]);

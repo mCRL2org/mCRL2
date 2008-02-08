@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 #define MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
@@ -83,7 +84,7 @@ struct free_variable_visitor: public pbes_expression_visitor
 
   bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
   {
-    std::set<data::data_variable> variables = data::find_variables(v.parameters());
+    std::set<data::data_variable> variables = data::find_all_data_variables(v.parameters());
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
@@ -96,7 +97,7 @@ struct free_variable_visitor: public pbes_expression_visitor
 
   bool visit_data_expression(const pbes_expression& e, const data::data_expression& d)
   {
-    std::set<data::data_variable> variables = data::find_variables(d);
+    std::set<data::data_variable> variables = data::find_all_data_variables(d);
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))

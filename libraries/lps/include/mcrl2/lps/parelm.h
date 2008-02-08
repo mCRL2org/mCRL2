@@ -72,7 +72,7 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
         data::data_assignment_list::iterator j = std::find_if(i->assignments().begin(), i->assignments().end(), data::detail::has_left_hand_side(x));
         if (j != i->assignments().end())
         {
-          std::set<data::data_variable> new_variables = data::detail::set_difference(data::find_variables(j->rhs()), significant_variables);
+          std::set<data::data_variable> new_variables = data::detail::set_difference(data::find_all_data_variables(j->rhs()), significant_variables);
           todo.insert(new_variables.begin(), new_variables.end());
           significant_variables.insert(new_variables.begin(), new_variables.end());
         }

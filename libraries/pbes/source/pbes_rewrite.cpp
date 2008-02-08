@@ -102,7 +102,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_and(and_list.begin(), and_list.end());
 			}
-			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
+			else if (has_propvarinsts(find_all_propositional_variable_instantiations(expr), data_vars))
 			{
 				gsErrorMsg("Quantor expression contains a data variable of the quantor in a propositional variable instantiation\n");
 				gsErrorMsg("Cannot rewrite such an expression\n");
@@ -140,7 +140,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_or(or_list.begin(), or_list.end());
 			}
-			else if (has_propvarinsts(find_propositional_variable_instantiations(expr), data_vars))
+			else if (has_propvarinsts(find_all_propositional_variable_instantiations(expr), data_vars))
 			{
 				gsErrorMsg("Quantor expression contains a data variable of the quantor in a propositional variable instantiation\n");
 				gsErrorMsg("Cannot rewrite such an expression\n");

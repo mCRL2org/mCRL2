@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/filtered_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/utility.h"        // find_variables
+#include "mcrl2/data/find.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -161,7 +161,7 @@ class linear_process: public aterm_appl
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         std::set<data::data_variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
-        std::set<data::data_variable> used_variables = data::find_variables(make_list(i->condition(), i->actions(), i->time(), i->assignments()));
+        std::set<data::data_variable> used_variables = data::find_all_data_variables(make_list(i->condition(), i->actions(), i->time(), i->assignments()));
         std::set<data::data_variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
         std::set<data::data_variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());

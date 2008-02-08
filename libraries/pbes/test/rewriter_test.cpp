@@ -107,7 +107,9 @@ void test_rewriter()
   test_expression(and_(T, F), pbesr);
   test_expression(and_(F, F), pbesr);
   test_expression(imp(T, b), pbesr);
-  BOOST_CHECK(false);
+  
+  BOOST_CHECK(pbesr(and_(T, T)) == T);
+  //BOOST_CHECK(pbesr(forall(make_list(n), and_(T, T)) == T));
 }
 
 int test_main(int argc, char** argv)

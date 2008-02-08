@@ -4,15 +4,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/propositional_variable_replace.h
+/// \file mcrl2/pbes/replace.h
 /// \brief Contains a function for replacing data variables in a term.
 
-#ifndef MCRL2_PBES_PROPOSITIONAL_VARIABLE_REPLACE_H
-#define MCRL2_PBES_PROPOSITIONAL_VARIABLE_REPLACE_H
+#ifndef MCRL2_PBES_REPLACE_H
+#define MCRL2_PBES_REPLACE_H
 
-#include <map>
+#include <utility>
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
@@ -54,12 +54,12 @@ Term replace_propositional_variables(Term t, ReplaceFunction r)
 
 /// \cond INTERNAL_DOCS
 template <typename VariableContainer, typename ExpressionContainer>
-struct replace_propositional_variable_sequence_helper
+struct propositional_variable_sequence_replace_helper
 {
   const VariableContainer& variables_;
   const ExpressionContainer& replacements_;
   
-  replace_propositional_variable_sequence_helper(const VariableContainer& variables,
+  propositional_variable_sequence_replace_helper(const VariableContainer& variables,
                                         const ExpressionContainer& replacements
                                        )
     : variables_(variables), replacements_(replacements)
@@ -81,27 +81,55 @@ struct replace_propositional_variable_sequence_helper
     return t;
   }
 };
-
-template <typename V, typename E>
-replace_propositional_variable_sequence_helper<V, E>
-make_replace_propositional_variable_sequence_helper(const V& variables,
-                                           const E& replacements
-                                          )
-{
-  return replace_propositional_variable_sequence_helper<V, E>(variables, replacements);
-}
 /// \endcond
 
 /// Replaces all propositional_variables in the term t using the specified sequence of replacements.
 /// \param variables The sequence of variables that need to be replaced.
 /// \param replacements The corresponding replacements.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
-Term replace_propositional_variable_sequence(Term t,
+Term propositional_variable_sequence_replace(Term t,
                                     const VariableContainer& variables,
                                     const ExpressionContainer& replacements
                                    )
 {
-  return replace_propositional_variables(t, make_replace_propositional_variable_sequence_helper(variables, replacements));
+  return replace_propositional_variables(t, propositional_variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
+}
+
+/// \cond INTERNAL_DOCS
+template <typename MapContainer>
+struct propositional_variable_map_replace_helper
+{
+  const MapContainer& replacements_;
+  
+  /// Constructor.
+  ///
+  propositional_variable_map_replace_helper(const MapContainer& replacements)
+    : replacements_(replacements)
+  {}
+  
+  /// Returns s if a substitution of the form t := s is present in the replacement map,
+  /// otherwise t.
+  ///
+  pbes_expression operator()(const propositional_variable_instantiation& t) const
+  {
+    typename MapContainer::const_iterator i = replacements_.find(t);
+    if (i == replacements_.end())
+    {
+      return aterm_appl(t);
+    }
+    else
+    {
+      return i->second;
+    }
+  }
+};
+/// \endcond
+
+/// Replaces all propositional_variable_instantiations in the term t using the specified map of replacements.
+template <typename Term, typename MapContainer>
+Term propositional_variable_map_replace(Term t, const MapContainer& replacements)
+{
+  return replace_propositional_variable_instantiations(t, propositional_variable_map_replace_helper<MapContainer>(replacements));
 }
 
 /// \cond INTERNAL_DOCS
@@ -124,7 +152,7 @@ struct substitute_propositional_variable_helper
     }
     else
     {
-      return data::replace_data_variable_sequence(replacement_, variable_.parameters(), t.parameters());
+      return data::data_variable_sequence_replace(replacement_, variable_.parameters(), t.parameters());
     }
   }
 };
@@ -144,4 +172,4 @@ pbes_expression substitute_propositional_variable(pbes_expression t,
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_REPLACE_H
+#endif // MCRL2_PBES_REPLACE_H

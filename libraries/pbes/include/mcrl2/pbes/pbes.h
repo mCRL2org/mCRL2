@@ -27,7 +27,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/data_utility.h"
@@ -333,9 +333,9 @@ class pbes
       }
       for (typename Container::iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        *i = pbes_equation(i->symbol(), i->variable(), data::replace_data_variable_sequence(i->formula(), src, dest));
+        *i = pbes_equation(i->symbol(), i->variable(), data::data_variable_sequence_replace(i->formula(), src, dest));
       }
-      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::replace_data_variable_sequence(m_initial_state.parameters(), src, dest));
+      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::data_variable_sequence_replace(m_initial_state.parameters(), src, dest));
       m_free_variables.insert(fail.begin(), fail.end());
       return m_free_variables.empty();
     }

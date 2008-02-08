@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <iterator>
 #include <set>
+#include <vector>
 
 namespace mcrl2 {
 

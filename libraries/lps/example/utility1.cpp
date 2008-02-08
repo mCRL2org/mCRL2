@@ -14,6 +14,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 
 using namespace atermpp;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
   assert(v == data_variable("d03:D"));
 
   // find all identifiers appearing in e
-  std::set<identifier_string> ids = identifiers(e);
+  std::set<identifier_string> ids = find_identifiers(e);
   assert(ids.size() == 8);
   assert(ids.find(identifier_string("d"))    != ids.end());
   assert(ids.find(identifier_string("d00"))  != ids.end());

@@ -14,6 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -41,7 +42,7 @@ int test_main(int argc, char** argv)
   data_variable a = fresh_variable(e, sort_expression("D"), "d");
   BOOST_CHECK(a == data_variable("d01:D")); 
 
-  std::set<identifier_string> ids = identifiers(e);
+  std::set<identifier_string> ids = find_identifiers(e);
   BOOST_CHECK(ids.size() == 8);
   BOOST_CHECK(ids.find(identifier_string("d"))    != ids.end());
   BOOST_CHECK(ids.find(identifier_string("d0"))   != ids.end());

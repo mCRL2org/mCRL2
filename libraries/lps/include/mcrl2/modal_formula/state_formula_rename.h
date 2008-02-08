@@ -12,7 +12,8 @@
 
 #include <deque>
 #include "mcrl2/modal_formula/state_formula_builder.h"
-#include "mcrl2/data/data_variable_replace.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 
 namespace mcrl2 {
@@ -98,7 +99,7 @@ template <typename IdentifierGenerator>
 state_formula rename_data_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data::data_variable> src = data::find_variables(f);
+  std::set<data::data_variable> src = data::find_all_data_variables(f);
 
   // create a mapping of replacements
   std::map<data::data_variable, data::data_expression> replacements;
