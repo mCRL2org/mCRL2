@@ -117,7 +117,7 @@ if 10.4 in [ feature.values macosx-version ]
 for local sdk in $(.macosx-sdk)
 {
     flags darwin.compile OPTIONS <macosx-version>$(sdk) :
-        -isysroot $(.macosx-sdk.$(sdk))
+#        -isysroot $(.macosx-sdk.$(sdk))
         -mmacosx-version-min=$(sdk)
         ;
     flags darwin.link OPTIONS <macosx-version>$(sdk) :
@@ -138,6 +138,7 @@ local rule arch-addr-flags ( toolset variable
             : $(values) ;
     }
     flags $(toolset) $(variable)
+#        <architecture>/<address-model>$(address-model)
         <architecture>$(architecture)/<address-model>$(address-model)
         : $(values) ;
 }
@@ -174,8 +175,12 @@ _ = " " ;
 # set up the -F option to include the paths to any frameworks used.
 local rule prepare-framework-path ( target + )
 {
+    # The -framework option only takes basename of the framework.
+    # The -F option specifies the directories where a framework
+    # is searched for.  So, if we find <framework> feature
+    # with some path, we need to generate property -F option.
     local framework-path = [ on $(target) return $(FRAMEWORK:D) ] ;
-    
+
     if $(framework-path) {
       FRAMEWORK_PATH on $(target) += -F$(framework-path) ;
     }
