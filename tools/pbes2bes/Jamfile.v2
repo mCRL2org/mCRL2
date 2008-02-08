@@ -11,12 +11,6 @@ tool pbes2bes
        : <squadt-connectivity>implemented
        ;
 
-tool pbes2bes_new
-       : pbes2bes_new.cpp
-         /site-config//boost_program_options
-       : <squadt-connectivity>implemented
-       ;
-
 tool pbes2bool
        : pbes2bool.cpp
          /site-config//boost_program_options
@@ -24,10 +18,3 @@ tool pbes2bool
        ;
 
 install-tools pbes2bes pbes2bool ;
-
-install dist
-   :
-     pbes2bes
-     pbes2bes_new
-   :
-   ;

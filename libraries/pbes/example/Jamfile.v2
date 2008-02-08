@@ -11,10 +11,12 @@ project libraries/pbes/example
 
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
+exe bessolve     : bessolve.cpp : ;
 
 install dist
    :
      bisimulation
      lps2pbes
+     bessolve
    :
    ;

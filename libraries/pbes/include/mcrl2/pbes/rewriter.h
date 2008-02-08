@@ -67,6 +67,140 @@ void enumerate_arguments(Iter first, Iter last, std::vector<data::data_expressio
 }
 
 template <class DataRewriter>
+struct pbes_simplify_expression_builder: public pbes_expression_builder
+{
+  DataRewriter& m_rewriter;
+  const data::data_specification& m_data;
+
+  /// Constructor.
+  ///
+  pbes_simplify_expression_builder(DataRewriter& r, const data::data_specification& data)
+    : m_rewriter(r),
+      m_data(data)
+  { }
+
+  /// Returns if the sort s is finite.
+  /// For efficiency, the values of this function are cached.
+  bool is_finite_sort(data::sort_expression s)
+  {
+    std::map<data::sort_expression, bool>::const_iterator i = finite_sorts.find(s);
+    if (i != finite_sorts.end())
+    {
+      return i->second;
+    }
+    bool b = data::is_finite(m_data.constructors(), s);
+    finite_sorts[s] = b;
+    return finite_sorts[s];
+  }
+  
+  bool is_true(const pbes_expression& p) const
+  {
+    return pbes_expr::is_true(p) || data::data_expr::is_true(p);
+  }
+
+  bool is_false(const pbes_expression& p) const
+  {
+    return pbes_expr::is_false(p) || data::data_expr::is_false(p);
+  }
+
+  /// Visit data expression node.
+  ///
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
+  {
+    return m_rewriter(d);
+  }
+
+  /// Visit not node.
+  ///
+  pbes_expression visit_not(const pbes_expression& /* e */, const pbes_expression& arg)
+  {
+    using namespace pbes_expr;
+    if (is_true(arg))
+    {
+      return false_();
+    }
+    if (is_false(arg))
+    {
+      return true_();
+    }
+    return pbes_expression(); // continue recursion
+  }
+
+  /// Visit and node.
+  ///
+  pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
+  {
+    using namespace pbes_expr;
+    if (is_true(left))
+    {
+      return right;
+    }
+    if (is_true(right))
+    {
+      return left;
+    }
+    if (left == right)
+    {
+      return visit(left);
+    }
+    return pbes_expression(); // continue recursion
+  }
+
+  /// Visit or node.
+  ///
+  pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
+  {
+    using namespace pbes_expr;
+    if (is_true(left) || is_true(right))
+    {
+      return true_();
+    }
+    if (is_false(left))
+    {
+      return right;
+    }
+    if (is_false(right))
+    {
+      return left;
+    }
+    if (left == right)
+    {
+      return visit(left);
+    }
+    return pbes_expression(); // continue recursion
+  }    
+
+  /// Visit imp node.
+  ///
+  pbes_expression visit_imp(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
+  {
+    using namespace pbes_expr;
+
+    if (is_true(left))
+    {
+      return visit(right);
+    }
+    if (is_false(left))
+    {
+      return true_();
+    }
+    if (is_true(right))
+    {
+      return true_();
+    }
+    if (left == right)
+    {
+      return true_();
+    }
+    if (is_false(right))
+    {
+      return visit(not_(left));
+    }
+    return pbes_expression(); // continue recursion
+  }
+};
+
+template <class DataRewriter>
 struct pbes_rewrite_expression_builder: public pbes_expression_builder
 {
   DataRewriter& m_rewriter;
@@ -351,6 +485,30 @@ struct pbes_rewrite_expression_builder: public pbes_expression_builder
     using namespace pbes_expr;
     return propositional_variable_instantiation(v.name(), atermpp::apply(v.parameters(), m_rewriter));
   }
+};
+
+/// \brief A rewriter class for pbes expressions.
+///
+template <class DataRewriter>
+class simplify_rewriter
+{
+  private:
+    pbes_simplify_expression_builder<DataRewriter> m_builder;
+
+  public:
+    /// Constructor.
+    ///
+    simplify_rewriter(DataRewriter& r, const data::data_specification& data)
+      : m_builder(r, data)
+    { }
+
+		/// \brief Rewrites the pbes expression p.
+		///
+		pbes_expression operator()(const pbes_expression& p)
+		{
+		  pbes_expression result = m_builder.visit(p);
+		  return result;
+		}
 };
 
 /// \brief A rewriter class for pbes expressions.

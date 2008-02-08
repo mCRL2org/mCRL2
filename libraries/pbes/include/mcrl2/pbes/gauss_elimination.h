@@ -17,45 +17,53 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+namespace gauss {
+
+  /// Returns true if e.symbol() == nu(), else false.
+  inline
+  pbes_expression sigma(const pbes_equation& e)
+  {
+    using namespace pbes_expr;
+    return e.symbol().is_nu() ? true_() : false_();
+  }  
+
+  /// Applies the substitution X := phi to the pbes equation eq.
+  inline
+  pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi)
+  {
+    pbes_expression formula = substitute_propositional_variable(eq.formula(), X, phi);
+    return pbes_equation(eq.symbol(), eq.variable(), formula);
+  }
+  
+  /// Applies the substitution X := phi to the sequence of pbes equations [first, last[.
+  template <typename Iter>
+  void substitute(Iter first, Iter last, propositional_variable X, pbes_expression phi)
+  {
+    for (Iter i = first; i != last; ++i)
+    {
+      *i = substitute(*i, X, phi);
+    }
+  }
+
+} // namespace gauss
+
 /// Contains an implementation of the Gauss elimination algorithm for solving
 /// systems of pbes equations.
+template <typename PbesRewriter, typename EquationSolver>
 class gauss_elimination_algorithm
 {
+  protected:
+    PbesRewriter& m_rewriter;
+    EquationSolver& m_equation_solver;
+  
   public:
-    /// Returns true if e.symbol() == nu(), else false.
-    pbes_expression sigma(const pbes_equation& e) const
-    {
-      using namespace pbes_expr;
-      return e.symbol().is_nu() ? true_() : false_();
-    }
-    
-    /// Uses approximation to solve equation e.
-    /// \return The solved equation, in which the right hand side has been replaced.
-    pbes_equation approximate(pbes_equation e) const
-    {
-      return e;
-    }
-    
-    /// Applies the substitution X := phi to the pbes equation eq.
-    pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi) const
-    {
-      pbes_expression formula = substitute_propositional_variable(eq.formula(), X, phi);
-      return pbes_equation(eq.symbol(), eq.variable(), formula);
-    }
-    
-    /// Applies the substitution X := phi to the sequence of pbes equations [first, last[.
-    template <typename Iter>
-    void substitute(Iter first, Iter last, propositional_variable X, pbes_expression phi) const
-    {
-      for (Iter i = first; i != last; ++i)
-      {
-        *i = substitute(*i, X, phi);
-      }
-    }
-    
+    gauss_elimination_algorithm(PbesRewriter& rewriter, EquationSolver& equation_solver)
+      : m_rewriter(rewriter), m_equation_solver(equation_solver)
+    {}
+
     /// Applies Gauss elimination to the sequence of pbes equations [first, last[.
     template <typename Iter>
-    void run(Iter first, Iter last) const
+    void run(Iter first, Iter last)
     {
       if (first == last)
       {
@@ -65,19 +73,13 @@ class gauss_elimination_algorithm
       Iter i = last;
       while (i != first)
       {
-        *i = approximate(*i);
-        substitute(first, i, i->variable(), i->formula());
         --i;
+        *i = m_equation_solver(*i);
+        gauss::substitute(first, i, i->variable(), i->formula());
       }
+      *i = m_equation_solver(*i); // TODO: clean the logic of this algorithm up
     }
 };
-
-/// Applies Gauss elimination to the pbes p.
-template <typename Container>
-void apply_gauss_elimination(pbes<Container>& p)
-{
-  gauss_elimination_algorithm().run(p.equations().begin(), p.equations().end());
-}
 
 } // namespace pbes_system
 
