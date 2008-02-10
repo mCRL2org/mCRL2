@@ -116,55 +116,81 @@ struct pbes_expression_builder
   /// value is used for rebuilding the expression.
   pbes_expression visit(const pbes_expression& e)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
+    using namespace accessors;
+
+    pbes_expression result;
 
     if (is_data(e)) {
-      pbes_expression result = visit_data_expression(e, val(e));
-      return (result == pbes_expression()) ? e : result;
+      result = visit_data_expression(e, val(e));
+      if (result == pbes_expression()) {
+        result = e;
+      }
     } else if (is_true(e)) {
-      pbes_expression result = visit_true(e);
-      return (result == pbes_expression()) ? e : result;
+      result = visit_true(e);
+      if (result == pbes_expression()) {
+        result = e;
+      }
     } else if (is_false(e)) {
-      pbes_expression result = visit_false(e);
-      return (result == pbes_expression()) ? e : result;
+      result = visit_false(e);
+      if (result == pbes_expression()) {
+        result = e;
+      }
     } else if (is_not(e)) {
       const pbes_expression& arg = not_arg(e);
-      pbes_expression result = visit_not(e, arg);
-      return (result == pbes_expression()) ? not_(visit(arg)) : result;
+      result = visit_not(e, arg);
+      if (result == pbes_expression()) {
+        result = not_(visit(arg));
+      }
     } else if (is_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      pbes_expression result = visit_and(e, left, right);
-      return (result == pbes_expression()) ? and_(visit(left), visit(right)) : result;
+      result = visit_and(e, left, right);
+      if (result == pbes_expression()) {
+        result = and_(visit(left), visit(right));
+      }
     } else if (is_or(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      pbes_expression result = visit_or(e, left, right);
-      return (result == pbes_expression()) ? or_(visit(left), visit(right)) : result;
+      result = visit_or(e, left, right);
+      if (result == pbes_expression()) {
+        result = or_(visit(left), visit(right));
+      }
     } else if (is_imp(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      pbes_expression result = visit_imp(e, left, right);
-      return (result == pbes_expression()) ? imp(visit(left), visit(right)) : result;
+      result = visit_imp(e, left, right);
+      if (result == pbes_expression()) {
+        result = imp(visit(left), visit(right));
+      }
     } else if (is_forall(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
-      pbes_expression result = visit_forall(e, qvars, qexpr);
-      return (result == pbes_expression()) ? forall(qvars, visit(qexpr)) : result;
+      result = visit_forall(e, qvars, qexpr);
+      if (result == pbes_expression()) {
+        result = forall(qvars, visit(qexpr));
+      }
     } else if (is_exists(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
-      pbes_expression result = visit_exists(e, qvars, qexpr);
-      return (result == pbes_expression()) ? exists(qvars, visit(qexpr)) : result;
+      result = visit_exists(e, qvars, qexpr);
+      if (result == pbes_expression()) {
+        result = exists(qvars, visit(qexpr));
+      }
     }
     else if(is_propositional_variable_instantiation(e)) {
-      pbes_expression result = visit_propositional_variable(e, propositional_variable_instantiation(e));
-      return (result == pbes_expression()) ? e : result;
+      result = visit_propositional_variable(e, propositional_variable_instantiation(e));
+      if (result == pbes_expression()) {
+        result = e;
+      }
     }
     else {
-      pbes_expression result = visit_unknown(e);
-      return (result == pbes_expression()) ? e : result;
+      result = visit_unknown(e);
+      if (result == pbes_expression()) {
+        result = e;
+      }
     }
+    return result;
   }
 };
 

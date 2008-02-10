@@ -161,7 +161,8 @@ struct pbes_expression_visitor
   /// recursion in this node is stopped.
   void visit(const pbes_expression& e)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
+    using namespace accessors;
 
     if (is_data(e)) {
       visit_data_expression(e, val(e));

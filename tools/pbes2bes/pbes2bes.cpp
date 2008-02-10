@@ -26,9 +26,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
-
-//LPS-Framework
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/io.h"
 
 using namespace std;
@@ -50,7 +50,12 @@ struct t_tool_options {
 
 bool process(t_tool_options tool_options)
 {
+  typedef data::rewriter data_rewriter;
+  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
+
   pbes<> pbes_spec = load_pbes(tool_options.infilename);
+  data_rewriter datar(pbes_spec.data());
+  pbes_rewriter pbesr(datar, pbes_spec.data());
 
   if (!pbes_spec.is_well_typed())
   {
@@ -64,11 +69,11 @@ bool process(t_tool_options tool_options)
 
   if (tool_options.opt_strategy == "finite")
   {
-    pbes_spec = do_finite_algorithm(pbes_spec);
+    pbes_spec = do_finite_algorithm(pbes_spec, pbesr);
   }
   else if (tool_options.opt_strategy == "lazy")
   {
-    pbes_spec = do_lazy_algorithm(pbes_spec);
+    pbes_spec = do_lazy_algorithm(pbes_spec, pbesr);
   }
   save_pbes(pbes_spec, tool_options.outfilename, tool_options.opt_outputformat);
 

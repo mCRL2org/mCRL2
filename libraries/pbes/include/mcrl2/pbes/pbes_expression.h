@@ -83,6 +83,75 @@ class pbes_expression: public aterm_appl
 ///
 typedef term_list<pbes_expression> pbes_expression_list;
 
+namespace accessors {
+
+  /// Conversion of a pbes expression to a data expression.
+  /// \pre The pbes expression must be of the form val(d) for
+  /// some data variable d.
+  inline
+  data::data_expression val_arg(pbes_expression t)
+  {
+    assert(core::gsIsDataExpr(t));
+    return aterm_appl(t);
+  }
+
+  /// \brief Returns the argument of an expression of type not
+  inline
+  pbes_expression not_arg(pbes_expression t)
+  {
+    assert(core::detail::gsIsPBESNot(t));
+    return arg1(t);
+  }
+
+  /// \brief Returns the left hand side of an expression of type and/or
+  inline
+  pbes_expression lhs(pbes_expression t)
+  {
+    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the right hand side of an expression of type and/or
+  inline
+  pbes_expression rhs(pbes_expression t)
+  {
+    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the variables of a quantification expression
+  inline
+  data::data_variable_list quant_vars(pbes_expression t)
+  {
+    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
+    return list_arg1(t);
+  }
+  
+  /// \brief Returns the formula of a quantification expression
+  inline
+  pbes_expression quant_expr(pbes_expression t)
+  {
+    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the name of a propositional variable expression
+  inline
+  core::identifier_string var_name(pbes_expression t)
+  {
+    assert(core::detail::gsIsPropVarInst(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the value of a propositional variable expression
+  inline
+  data::data_expression_list var_val(pbes_expression t)
+  {
+    assert(core::detail::gsIsPropVarInst(t));
+    return list_arg2(t);
+  }
+} // accessors
+
 /// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
 
@@ -115,16 +184,6 @@ namespace pbes_expr {
 
   /// \brief Returns true if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t) { return core::detail::gsIsPropVarInst(t); }
-
-  /// Conversion of a pbes expression to a data expression.
-  /// \pre The pbes expression must be of the form val(d) for
-  /// some data variable d.
-  inline
-  data::data_expression val_arg(pbes_expression t)
-  {
-    assert(is_data(t));
-    return aterm_appl(t);
-  }
 
   /// Conversion of a data expression to a pbes expression.
   inline
@@ -213,68 +272,13 @@ namespace pbes_expr {
     return core::detail::join(first, last, and_, true_());
   }
 
-  /// \brief Returns the argument of an expression of type not
-  inline
-  pbes_expression not_arg(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESNot(t));
-    return arg1(t);
-  }
-  
-  /// \brief Returns the left hand side of an expression of type and/or
-  inline
-  pbes_expression lhs(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
-    return arg1(t);
-  }
-  
-  /// \brief Returns the right hand side of an expression of type and/or
-  inline
-  pbes_expression rhs(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
-    return arg2(t);
-  }
-  
-  /// \brief Returns the variables of a quantification expression
-  inline
-  data::data_variable_list quant_vars(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
-    return list_arg1(t);
-  }
-  
-  /// \brief Returns the formula of a quantification expression
-  inline
-  pbes_expression quant_expr(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
-    return arg2(t);
-  }
-  
-  /// \brief Returns the name of a propositional variable expression
-  inline
-  core::identifier_string var_name(pbes_expression t)
-  {
-    assert(core::detail::gsIsPropVarInst(t));
-    return arg1(t);
-  }
-  
-  /// \brief Returns the value of a propositional variable expression
-  inline
-  data::data_expression_list var_val(pbes_expression t)
-  {
-    assert(core::detail::gsIsPropVarInst(t));
-    return list_arg2(t);
-  }
-
   /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a 
   /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main 
   /// function symbol.
   inline
   atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
   {
+    using namespace accessors;
     atermpp::set<pbes_expression> result;
     core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, lhs, rhs);
     return result;
@@ -286,93 +290,104 @@ namespace pbes_expr {
   inline
   atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
   {
+    using namespace accessors;
     atermpp::set<pbes_expression> result;
     core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, lhs, rhs);
     return result;
   }
-
-  namespace optimized {
-    /// \brief Returns not applied to p, and simplifies the result.
-    inline
-    pbes_expression not_(pbes_expression p)
-    {
-      namespace pb = pbes_expr;
-	  return core::detail::optimized_not(p, pb::not_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
-    }
-    
-    /// \brief Returns and applied to p and q, and simplifies the result.
-    inline
-    pbes_expression and_(pbes_expression p, pbes_expression q)
-    {
-      namespace pb = pbes_expr;
-      return core::detail::optimized_and(p, q, pb::and_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
-    }
-    
-    /// \brief Returns or applied to p and q, and simplifies the result.
-    inline
-    pbes_expression or_(pbes_expression p, pbes_expression q)
-    {
-      namespace pb = pbes_expr;
-      return core::detail::optimized_or(p, q, pb::or_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
-    }
-    
-    /// \brief Returns imp applied to p and q, and simplifies the result.
-    inline
-    pbes_expression imp(pbes_expression p, pbes_expression q)
-    {
-      namespace pb = pbes_expr;
-      return core::detail::optimized_imp(p, q, pb::imp, pb::not_, pb::true_(), pb::is_true, pb::false_(), pb::is_false);
-    }
-
-    /// \brief Returns or applied to the sequence of pbes expressions [first, last[
-    template <typename FwdIt>
-    inline pbes_expression join_or(FwdIt first, FwdIt last)
-    {
-      namespace pb = pbes_expr;
-      return core::detail::join(first, last, optimized::or_, pb::false_());
-    }
-    
-    /// \brief Returns and applied to the sequence of pbes expressions [first, last[
-    template <typename FwdIt>
-    inline pbes_expression join_and(FwdIt first, FwdIt last)
-    {
-      namespace pb = pbes_expr;
-      return core::detail::join(first, last, optimized::and_, pb::true_());
-    }
-
-    /// \brief Returns the universal quantification of the expression p over the variables in l.
-    /// If l is empty, p is returned.
-    inline
-    pbes_expression forall(data::data_variable_list l, pbes_expression p)
-    {
-      if (l.empty())
-      {
-        return p;
-      }
-      return pbes_expr::forall(l, p);
-    }
-    
-    /// \brief Returns the existential quantification of the expression p over the variables in l.
-    /// If l is empty, p is returned.
-    inline
-    pbes_expression exists(data::data_variable_list l, pbes_expression p)
-    {
-      if (l.empty())
-      {
-        return p;
-      }
-      return pbes_expr::exists(l, p);
-    }
-
-  } // namespace optimized
-
 } // namespace pbes_expr
+
+namespace pbes_expr_optimized {
+  using pbes_expr::is_data;
+  using pbes_expr::is_true;
+  using pbes_expr::is_false;
+  using pbes_expr::is_not;
+  using pbes_expr::is_and;
+  using pbes_expr::is_or;
+  using pbes_expr::is_imp;
+  using pbes_expr::is_forall;
+  using pbes_expr::is_exists;
+  using pbes_expr::is_propositional_variable_instantiation;
+  using pbes_expr::val;
+  using pbes_expr::true_;
+  using pbes_expr::false_;
+  using pbes_expr::split_and;
+  using pbes_expr::split_or;
+
+  /// \brief Returns not applied to p, and simplifies the result.
+  inline
+  pbes_expression not_(pbes_expression p)
+  {
+    return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+  }
+  
+  /// \brief Returns and applied to p and q, and simplifies the result.
+  inline
+  pbes_expression and_(pbes_expression p, pbes_expression q)
+  {
+    return core::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
+  }
+  
+  /// \brief Returns or applied to p and q, and simplifies the result.
+  inline
+  pbes_expression or_(pbes_expression p, pbes_expression q)
+  {
+    return core::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
+  }
+  
+  /// \brief Returns imp applied to p and q, and simplifies the result.
+  inline
+  pbes_expression imp(pbes_expression p, pbes_expression q)
+  {
+    return core::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
+  }
+
+  /// \brief Returns or applied to the sequence of pbes expressions [first, last[
+  template <typename FwdIt>
+  inline pbes_expression join_or(FwdIt first, FwdIt last)
+  {
+    return core::detail::join(first, last, or_, false_());
+  }
+  
+  /// \brief Returns and applied to the sequence of pbes expressions [first, last[
+  template <typename FwdIt>
+  inline pbes_expression join_and(FwdIt first, FwdIt last)
+  {
+    return core::detail::join(first, last, and_, true_());
+  }
+
+  /// \brief Returns the universal quantification of the expression p over the variables in l.
+  /// If l is empty, p is returned.
+  inline
+  pbes_expression forall(data::data_variable_list l, pbes_expression p)
+  {
+    if (l.empty())
+    {
+      return p;
+    }
+    return pbes_expr::forall(l, p);
+  }
+  
+  /// \brief Returns the existential quantification of the expression p over the variables in l.
+  /// If l is empty, p is returned.
+  inline
+  pbes_expression exists(data::data_variable_list l, pbes_expression p)
+  {
+    if (l.empty())
+    {
+      return p;
+    }
+    return pbes_expr::exists(l, p);
+  }
+
+} // namespace pbes_expr_optimized
 
 /// \brief Returns true if the pbes expression t is a boolean expression
 inline
 bool is_bes(aterm_appl t)
 {
   using namespace pbes_expr;
+  using namespace accessors;
 
   if(is_and(t)) {
     return is_bes(lhs(t)) && is_bes(rhs(t));

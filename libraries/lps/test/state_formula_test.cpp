@@ -369,6 +369,7 @@ void test_normalize()
   std::cout << "f2 = " << pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
+/* this takes too much time with mcrl22lps...
   specification model = mcrl22lps(MODEL);
   state_formula req1_1 = mcf2statefrm(REQ1_1, model);
   state_formula req1_2 = mcf2statefrm(REQ1_2, model);
@@ -376,6 +377,7 @@ void test_normalize()
   state_formula q2 = normalize(req1_2);
   state_formula r1 = normalize(req1_1);
   state_formula r2 = normalize(req1_2); 
+*/
 }
 
 int test_main(int argc, char* argv[])

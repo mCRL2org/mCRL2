@@ -32,14 +32,17 @@ struct bes_equation_solver
   pbes_equation operator()(pbes_equation e)
   {
     pbes_equation result = gauss::substitute(e, e.variable(), gauss::sigma(e));
-    return pbes_equation(result.symbol(), result.variable(), m_rewriter(result.formula()));
+    pbes_expression t = m_rewriter(result.formula());
+    result = pbes_equation(result.symbol(), result.variable(), t);
+    return result;
   }
 };
 
 /// Solves a boolean equation system using Gauss elimination.
 /// \precondition The pbes p is a bes.
+/// \return 0 if false, 1 if true, 2 if unknown
 template <typename Container>
-bool bes_gauss_elimination(pbes<Container>& p)
+int bes_gauss_elimination(pbes<Container>& p)
 {
   typedef data::rewriter data_rewriter;
   typedef simplify_rewriter<data_rewriter> pbes_rewriter;
@@ -47,9 +50,23 @@ bool bes_gauss_elimination(pbes<Container>& p)
     
   data_rewriter datar(p.data());
   pbes_rewriter pbesr(datar, p.data());
+  bes_solver solver(pbesr);
 
-  gauss_elimination_algorithm<pbes_rewriter, bes_solver>(pbesr, bes_solver(pbesr)).run(p.equations().begin(), p.equations().end());
-  return p.equations().front().formula() == pbes_expr::true_();
+  gauss_elimination_algorithm<pbes_rewriter, bes_solver> algorithm(pbesr, solver);
+  algorithm.run(p.equations().begin(), p.equations().end());
+
+  if (p.equations().front().formula() == pbes_expr::false_())
+  {
+    return 0;
+  }
+  else if (p.equations().front().formula() == pbes_expr::true_())
+  {
+    return 1;
+  }
+  else
+  {
+    return 2;
+  } 
 }
 
 } // namespace pbes_system

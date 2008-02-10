@@ -2,11 +2,14 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/pbes/rewriter.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
@@ -26,6 +29,9 @@ std::string print_type(int type)
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
+  typedef data::rewriter data_rewriter;
+  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
 
   std::string infile;
   int type;
@@ -80,13 +86,26 @@ int main(int argc, char* argv[])
 
     p.load(infile);
     pbes<> q;
+    data_rewriter datar(p.data());
+    pbes_rewriter pbesr(datar, p.data());
     switch (type)
     {
-      case 0: q = do_lazy_algorithm(p); break;
-      case 1: q = do_finite_algorithm(p); break;
+      case 0: q = do_lazy_algorithm(p, pbesr); break;
+      case 1: q = do_finite_algorithm(p, pbesr); break;
     }
-    bool result = bes_gauss_elimination(q);
-    std::cout << (result ? "TRUE" : "FALSE") << std::endl;
+    int result = bes_gauss_elimination(q);
+    if (result == 0)
+    {
+      std::cout << "FALSE" << std::endl;
+    }
+    else if (result == 1)
+    {
+      std::cout << "TRUE" << std::endl;
+    }
+    else
+    {
+      std::cout << "UNKNOWN" << std::endl;
+    }   
   }
   catch(std::runtime_error e)
   {

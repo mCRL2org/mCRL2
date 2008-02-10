@@ -56,42 +56,48 @@ struct complement_builder: public pbes_expression_builder
   ///
   pbes_expression visit_true(const pbes_expression& /* e */)
   {
-    return pbes_expr::false_();;
+    using namespace pbes_expr_optimized;
+    return false_();;
   }
 
   /// \overload
   ///
   pbes_expression visit_false(const pbes_expression& /* e */)
   {
-    return pbes_expr::true_();;
+    using namespace pbes_expr_optimized;
+    return true_();;
   }
 
   /// \overload
   ///
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    return pbes_expr::optimized::or_(visit(left), visit(right));
+    using namespace pbes_expr_optimized;
+    return or_(visit(left), visit(right));
   }
 
   /// \overload
   ///
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    return pbes_expr::optimized::and_(visit(left), visit(right));
+    using namespace pbes_expr_optimized;
+    return and_(visit(left), visit(right));
   }    
 
   /// \overload
   ///
   pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
-    return pbes_expr::exists(variables, visit(expression));
+    using namespace pbes_expr_optimized;
+    return exists(variables, visit(expression));
   }
 
   /// \overload
   ///
   pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
-    return pbes_expr::forall(variables, visit(expression));
+    using namespace pbes_expr_optimized;
+    return forall(variables, visit(expression));
   }
 
   /// \overload

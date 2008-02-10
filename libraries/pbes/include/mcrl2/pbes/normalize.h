@@ -48,6 +48,7 @@ inline
 pbes_expression normalize(pbes_expression f)
 {
   using namespace pbes_expr;
+  using namespace accessors;
 
   if (is_not(f))
   {

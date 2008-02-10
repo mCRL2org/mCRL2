@@ -270,8 +270,8 @@ struct equal_data_parameters_builder
   /// Adds the expression 'a == b' to result.
   void operator()()
   {
+    using namespace pbes_expr_optimized;
     namespace d = data::data_expr;
-    namespace p = pbes_expr;
 
     atermpp::vector<pbes_expression> v;
     std::vector<lps::action>::const_iterator i, j;
@@ -283,17 +283,17 @@ struct equal_data_parameters_builder
       data::data_expression_list::iterator i1, i2;
       for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(p::val(d::equal_to(*i1, *i2)));
+        v.push_back(val(d::equal_to(*i1, *i2)));
       }
     }
-    result.push_back(p::optimized::join_and(v.begin(), v.end()));
+    result.push_back(join_and(v.begin(), v.end()));
   }
 };
 
 inline
 pbes_expression equal_data_parameters(lps::action_list a, lps::action_list b)
 {
-  namespace p = pbes_expr;
+  using namespace pbes_expr_optimized;
 
   // make copies of a and b and sort them
   std::vector<lps::action> va(a.begin(), a.end()); // protection not needed
@@ -302,7 +302,9 @@ pbes_expression equal_data_parameters(lps::action_list a, lps::action_list b)
   std::sort(vb.begin(), vb.end(), compare_action_name());
 
   if (!equal_action_signatures(va, vb))
-    return p::false_();
+  {
+    return false_();
+  }
 
   // compute the intervals of a with equal names
   typedef std::vector<lps::action>::iterator action_iterator;
@@ -317,7 +319,7 @@ pbes_expression equal_data_parameters(lps::action_list a, lps::action_list b)
   atermpp::vector<pbes_expression> z;
   equal_data_parameters_builder f(va, vb, z);
   forall_permutations(intervals.begin(), intervals.end(), f);
-  pbes_expression result = p::optimized::join_or(z.begin(), z.end());
+  pbes_expression result = join_or(z.begin(), z.end());
   return result;
 }
 
@@ -340,8 +342,8 @@ struct not_equal_data_parameters_builder
   /// Adds the expression 'a == b' to result.
   void operator()()
   {
+    using namespace pbes_expr_optimized;
     namespace d = data::data_expr;
-    namespace p = pbes_expr;
 
     atermpp::vector<pbes_expression> v;
     std::vector<lps::action>::const_iterator i, j;
@@ -353,17 +355,17 @@ struct not_equal_data_parameters_builder
       data::data_expression_list::iterator i1, i2;
       for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
       {
-        v.push_back(p::val(d::not_equal_to(*i1, *i2)));
+        v.push_back(val(d::not_equal_to(*i1, *i2)));
       }
     }
-    result.push_back(p::optimized::join_or(v.begin(), v.end()));
+    result.push_back(join_or(v.begin(), v.end()));
   }
 };
 
 inline
 pbes_expression not_equal_data_parameters(lps::action_list a, lps::action_list b)
 {
-  namespace p = pbes_expr;
+  using namespace pbes_expr_optimized;
 
   // make copies of a and b and sort them
   std::vector<lps::action> va(a.begin(), a.end());
@@ -372,7 +374,7 @@ pbes_expression not_equal_data_parameters(lps::action_list a, lps::action_list b
   std::sort(vb.begin(), vb.end(), compare_action_name());
 
   if (!equal_action_signatures(va, vb))
-    return p::true_();
+    return true_();
 
   // compute the intervals of a with equal names
   typedef std::vector<lps::action>::iterator action_iterator;
@@ -387,7 +389,7 @@ pbes_expression not_equal_data_parameters(lps::action_list a, lps::action_list b
   atermpp::vector<pbes_expression> z;
   not_equal_data_parameters_builder f(va, vb, z);
   forall_permutations(intervals.begin(), intervals.end(), f);
-  pbes_expression result = p::optimized::join_and(z.begin(), z.end());
+  pbes_expression result = join_and(z.begin(), z.end());
   return result;
 }
 
@@ -449,7 +451,7 @@ namespace pbes_timed
   {
     using namespace modal::act_frm;
     namespace d = data::data_expr;
-    namespace p = pbes_expr;
+    namespace p = pbes_expr_optimized;
 
     pbes_expression result;
 
@@ -493,7 +495,8 @@ namespace pbes_timed
   inline
   pbes_expression RHS(state_formula f0, state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
+    using namespace pbes_system::accessors;
     using lps::summand_list;
     namespace s = modal::state_frm;
     namespace d = data::data_expr;
@@ -507,13 +510,13 @@ namespace pbes_timed
     } else if (s::is_false(f)) {
       result = false_();
     } else if (s::is_not(f)) {
-		  result = optimized::not_(RHS(f0, s::not_arg(f), lps, T, context));
+		  result = not_(RHS(f0, s::not_arg(f), lps, T, context));
     } else if (s::is_and(f)) {
-		  result = optimized::and_(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
+		  result = and_(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_or(f)) {
       result = or_(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_imp(f)) {
-		  result = optimized::imp(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
+		  result = imp(RHS(f0, s::lhs(f), lps, T, context), RHS(f0, s::rhs(f), lps, T, context));
     } else if (s::is_forall(f)) {
       std::set<std::string> names = data::detail::find_variable_name_strings(s::quant_vars(f));
       context.insert(names.begin(), names.end());
@@ -555,7 +558,7 @@ namespace pbes_timed
         pbes_expression p = forall(y, imp(and_(and_(p1, p2), p3), rhs));
         v.push_back(p);
       }
-      result = optimized::join_and(v.begin(), v.end());
+      result = join_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha = s::mod_act(f);
@@ -589,7 +592,7 @@ namespace pbes_timed
         pbes_expression p = exists(y, and_(and_(and_(p1, p2), p3), rhs));
         v.push_back(p);
       }
-      result = optimized::join_or(v.begin(), v.end());
+      result = join_or(v.begin(), v.end());
     } else if (s::is_delay_timed(f)) {
       data::data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
@@ -601,7 +604,7 @@ namespace pbes_timed
         pbes_expression p = exists(yk, and_(val(ck), val(d::less_equal(t, tk))));
         v.push_back(p);
       }
-      result = optimized::or_(optimized::join_or(v.begin(), v.end()), val(d::less_equal(t, T)));
+      result = or_(join_or(v.begin(), v.end()), val(d::less_equal(t, T)));
     } else if (s::is_yaled_timed(f)) {
       data::data_expression t = s::time(f);
       atermpp::vector<pbes_expression> v;
@@ -613,7 +616,7 @@ namespace pbes_timed
         pbes_expression p = exists(yk, and_(val(d::not_(ck)), val(d::greater(t, tk))));
         v.push_back(p);
       }
-      result = optimized::and_(optimized::join_or(v.begin(), v.end()), val(d::greater(t, T)));
+      result = and_(join_or(v.begin(), v.end()), val(d::greater(t, T)));
     } else if (s::is_var(f)) {
       core::identifier_string X = s::var_name(f);
       data::data_expression_list d = s::var_val(f);
@@ -692,7 +695,7 @@ namespace pbes_untimed
   pbes_expression sat_top(lps::action_list a, action_formula b)
   {
     using namespace modal::act_frm;
-    namespace p = pbes_expr;
+    namespace p = pbes_expr_optimized;
 
     pbes_expression result;
 
@@ -739,7 +742,8 @@ namespace pbes_untimed
   inline
   pbes_expression RHS(state_formula f0, state_formula f, lps::linear_process lps, std::set<std::string>& context)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
+    using namespace accessors;
     using lps::summand_list;
     namespace s = modal::state_frm;
 
@@ -795,7 +799,7 @@ namespace pbes_untimed
         pbes_expression p = forall(y, imp(and_(p1, p2), rhs));
         v.push_back(p);
       }
-      result = optimized::join_and(v.begin(), v.end());
+      result = join_and(v.begin(), v.end());
     } else if (s::is_may(f)) {
       atermpp::vector<pbes_expression> v;
       action_formula alpha(s::mod_act(f));
@@ -824,7 +828,7 @@ namespace pbes_untimed
         pbes_expression p = exists(y, and_(and_(p1, p2), rhs));
         v.push_back(p);
       }
-      result = optimized::join_or(v.begin(), v.end());
+      result = join_or(v.begin(), v.end());
     } else if (s::is_var(f)) {
       core::identifier_string X = s::var_name(f);
       data::data_expression_list d = s::var_val(f);

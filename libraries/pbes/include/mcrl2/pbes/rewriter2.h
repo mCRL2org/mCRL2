@@ -45,6 +45,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
                    Rewriter *rewriter)
 {
   using namespace pbes_system::pbes_expr;
+  using namespace pbes_system::accessors;
   pbes_expression result;
   
   if (is_true(p))
@@ -193,6 +194,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 { 
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
+  using namespace pbes_system::accessors;
   pbes_expression result;
 
   

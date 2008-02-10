@@ -97,6 +97,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
                    const bool yield_internal_rewriter_format=false)
 {
   using namespace pbes_system::pbes_expr;
+  using namespace pbes_system::accessors;
   pbes_expression result;
   
   if (is_true(p))
@@ -351,8 +352,8 @@ inline pbes_expression give_the_instantiated_rhs(
 static void distribute_and(const pbes_expression &expr,atermpp::set < pbes_expression> &conjunction_set)
 { /* distribute the conjuncts of expr over the conjunction_set */
   if (pbes_expr::is_and(expr))
-  { distribute_and(pbes_expr::lhs(expr),conjunction_set);
-    distribute_and(pbes_expr::rhs(expr),conjunction_set);
+  { distribute_and(accessors::lhs(expr),conjunction_set);
+    distribute_and(accessors::rhs(expr),conjunction_set);
   }
   else
   { conjunction_set.insert(expr);
@@ -382,8 +383,8 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
 static void distribute_or(const pbes_expression &expr,atermpp::set < pbes_expression> &disjunction_set)
 { /* distribute the conjuncts of expr over the conjunction_set */
   if (pbes_expr::is_or(expr))
-  { distribute_or(pbes_expr::lhs(expr),disjunction_set);
-    distribute_or(pbes_expr::rhs(expr),disjunction_set);
+  { distribute_or(accessors::lhs(expr),disjunction_set);
+    distribute_or(accessors::rhs(expr),disjunction_set);
   }
   else
   { disjunction_set.insert(expr);
@@ -440,8 +441,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 { 
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
+  using namespace pbes_system::accessors;
   pbes_expression result;
-
   
   if (is_and(p))
   { // p = and(left, right)

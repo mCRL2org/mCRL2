@@ -21,6 +21,7 @@
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "pbes_rewrite.h"
 
@@ -173,8 +174,8 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 //function do_lazy_algorithm
 //--------------------------
 /// \brief Create a BES, using the lazy approach
-inline
-pbes<> do_lazy_algorithm(pbes<> pbes_spec)
+template <typename PbesRewriter>
+pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
   if (!pbes_spec.instantiate_free_variables())
@@ -197,8 +198,6 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec)
   int nr_of_equations = 0;
   data::data_variable_list empty_data_variable_list;
   data::data_expression_list empty_data_expression_list;
-
-  Rewriter *rewriter = createRewriter(data);
 
   atermpp::table pbes_equations(2*eqsys.size(), 50);  // (propvarname, pbes_equation)
   atermpp::indexed_set states_done(10000, 50);    // (propvarinst)
@@ -238,7 +237,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec)
     // Replace all occurrences in the right hand side and rewrite the expression
     pbes_expression new_pbes_expression;
     new_pbes_expression = data::data_variable_sequence_replace(current_pbes_expression, current_variable.parameters(), current_state.parameters());
-    new_pbes_expression = pbes_expression_rewrite(new_pbes_expression, data, rewriter);
+    new_pbes_expression = rewrite(new_pbes_expression);
 
     propositional_variable_instantiation_list oldpropvarinst_list;
     propositional_variable_instantiation_list newpropvarinst_list;
@@ -280,9 +279,9 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec)
 
 //function do_finite_algorithm
 //---------------------------
-/// \brief Create a PBES without finite data sorts, using the finite approach
-inline
-pbes<> do_finite_algorithm(pbes<> pbes_spec)
+// \brief Create a PBES without finite data sorts, using the finite approach
+template <typename PbesRewriter>
+pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
   if (!pbes_spec.instantiate_free_variables())
@@ -298,7 +297,6 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec)
 
   atermpp::vector<pbes_equation> result_eqsys;        // resulting equation system
   int nr_of_equations = 0;          // Nr of equations computed
-  Rewriter *rewriter = createRewriter(data);  // Data rewriter
 
   // Empty data::data_variable_list and data::data_expression_list
   data::data_variable_list empty_data_variable_list;
@@ -386,7 +384,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec)
 
       // Substitute all instantiated variables and rewrite the rhs as far as possible.
       current_expression = data::data_variable_sequence_replace(formula, inst_i->finite_var, inst_i->finite_exp);
-      current_expression = pbes_expression_rewrite(current_expression, data, rewriter);
+      current_expression = rewrite(current_expression);
 
       propositional_variable_instantiation_list oldpropvarinst_list;
       propositional_variable_instantiation_list newpropvarinst_list;
@@ -416,8 +414,6 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec)
   propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, &sort_enumerations);
 
   pbes<> result = pbes<>(data, result_eqsys, new_initial_state);
-
-  delete rewriter;
 
   return result;
 }

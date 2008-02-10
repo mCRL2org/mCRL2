@@ -44,15 +44,15 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   else if (pbes_expr::is_and(p))
   {
     //PBESAnd(a,b) => (a & b)
-    std::string left = convert_rhs_to_cwi(pbes_expr::lhs(p), variables);
-    std::string right = convert_rhs_to_cwi(pbes_expr::rhs(p), variables);
+    std::string left = convert_rhs_to_cwi(accessors::lhs(p), variables);
+    std::string right = convert_rhs_to_cwi(accessors::rhs(p), variables);
     result = "(" + left + "&" + right + ")";
   }
   else if (pbes_expr::is_or(p))
   {
     //PBESOr(a,b) => (a | b)
-    std::string left = convert_rhs_to_cwi(pbes_expr::lhs(p), variables);
-    std::string right = convert_rhs_to_cwi(pbes_expr::rhs(p), variables);
+    std::string left = convert_rhs_to_cwi(accessors::lhs(p), variables);
+    std::string right = convert_rhs_to_cwi(accessors::rhs(p), variables);
     result = "(" + left + "|" + right + ")";
   }
   else if (pbes_expr::is_propositional_variable_instantiation(p))

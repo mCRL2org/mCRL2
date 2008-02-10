@@ -13,16 +13,13 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/pbes/detail/quantifier_rename_builder.h"
-#include "mcrl2/pbes/rename.h"
-#include "mcrl2/pbes/complement.h"
-#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
+#include "mcrl2/pbes/bes_algorithms.h"
 
 using namespace std;
 using namespace atermpp;
@@ -78,11 +75,29 @@ const std::string FORMULA  = "[true*]<true*>true";
 
 void test_gauss_elimination()
 {
+  typedef data::rewriter data_rewriter;
+  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
+
   bool timed = false;
   specification spec    = mcrl22lps(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA, spec);
+  data_rewriter datar(spec.data());
+  pbes_rewriter pbesr(datar, spec.data());
+
   pbes<> p = lps2pbes(spec, formula, timed);
-  apply_gauss_elimination(p);
+  int result = bes_gauss_elimination(p);
+  if (result == 0)
+  {
+    std::cout << "FALSE" << std::endl;
+  }
+  else if (result == 1)
+  {
+    std::cout << "TRUE" << std::endl;
+  }
+  else
+  {
+    std::cout << "UNKNOWN" << std::endl;
+  }
 }
 
 int test_main(int argc, char** argv)
