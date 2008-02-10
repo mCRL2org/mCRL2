@@ -6,6 +6,8 @@
 /// \file ./free_bounded_vars.h
 
 #include "mcrl2/atermpp/substitute.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/detail/find.h"
 #include "util.h"
 
 using namespace mcrl2::data;
@@ -104,7 +106,7 @@ pbes_expression remove_double_variables(pbes_expression p)
 {
   data_variable_list fv;
   data_variable_list bv;
-  context = find_variable_name_strings(p);
+  context = detail::find_variable_name_strings(p);
   return (remove_double_variables_rec(p,&fv,&bv));
 }
 

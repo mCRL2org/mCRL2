@@ -90,22 +90,22 @@ namespace pbes_expr {
   inline bool is_data(pbes_expression t) { return core::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(pbes_expression t) { return core::detail::gsIsPBESTrue(t); }
+  inline bool is_true(pbes_expression t) { return core::detail::gsIsPBESTrue(t) || data::data_expr::is_true(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(pbes_expression t) { return core::detail::gsIsPBESFalse(t); }
+  inline bool is_false(pbes_expression t) { return core::detail::gsIsPBESFalse(t) || data::data_expr::is_false(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(pbes_expression t) { return core::detail::gsIsPBESNot(t); }
+  inline bool is_not(pbes_expression t) { return core::detail::gsIsPBESNot(t) || data::data_expr::is_not(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(pbes_expression t) { return core::detail::gsIsPBESAnd(t); }
+  inline bool is_and(pbes_expression t) { return core::detail::gsIsPBESAnd(t) || data::data_expr::is_and(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(pbes_expression t) { return core::detail::gsIsPBESOr(t); }
+  inline bool is_or(pbes_expression t) { return core::detail::gsIsPBESOr(t) || data::data_expr::is_or(t); }
 
   /// \brief Returns true if the term t is an imp expression
-  inline bool is_imp(pbes_expression t) { return core::detail::gsIsPBESImp(t); }
+  inline bool is_imp(pbes_expression t) { return core::detail::gsIsPBESImp(t) || data::data_expr::is_imp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
   inline bool is_forall(pbes_expression t) { return core::detail::gsIsPBESForall(t); }

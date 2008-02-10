@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description bessolve_options(
       "Usage: bessolve [OPTION]... INFILE\n"
       "\n"
-      "Read the pbes from INFILE, applies pbes2bes to it, and solves the\n"
+      "Reads a pbes from INFILE, applies pbes2bes to it, and solves the\n"
       "resulting bes using Gauss elimination\n"
       "\n"
       "Two variants of pbes2bes are supported:\n"

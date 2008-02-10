@@ -136,10 +136,10 @@ namespace data_expr {
   /// \brief Returns true if the term t is an or expression
   inline bool is_or(aterm_appl t) { return core::gsIsDataExprOr(t); }
 
-  /// \brief Returns true if the term t is a  expression
-  inline bool is_implies(aterm_appl t) { return core::gsIsDataExprImp(t); }
+  /// \brief Returns true if the term t is an implication
+  inline bool is_imp(aterm_appl t) { return core::gsIsDataExprImp(t); }
 
-  /// \brief Returns true if the term t is a binder
+  /// \brief Returns true if the term t is a 'binder'
   inline bool is_binder(aterm_appl t) { return core::detail::gsIsBinder(t); }
 
   /// \brief Returns true if the term t is a where expression
