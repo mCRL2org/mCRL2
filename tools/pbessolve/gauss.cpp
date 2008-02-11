@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/atermpp/substitute.h"
@@ -974,7 +975,7 @@ data_expression data_expression_simplify
 #endif
   
   // fill in the list of occuring variables
-  std::set<data_variable> setfv = find_variables(d);
+  std::set<data_variable> setfv = data::find_all_data_variables(d);
   for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
     *fv = push_back(*fv,*i);
   return f;

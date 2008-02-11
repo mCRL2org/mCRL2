@@ -15,6 +15,7 @@
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
+using namespace mcrl2::pbes_system::accessors;
 
 
 //auxiliary function that composes two prenex forms into a new prenex form

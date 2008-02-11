@@ -10,7 +10,9 @@
 #include "mcrl2/data/detail/find.h"
 #include "util.h"
 
+using namespace mcrl2;
 using namespace mcrl2::data;
+using namespace mcrl2::pbes_system::accessors;
 
 std::set<std::string> context;
 
@@ -106,7 +108,7 @@ pbes_expression remove_double_variables(pbes_expression p)
 {
   data_variable_list fv;
   data_variable_list bv;
-  context = detail::find_variable_name_strings(p);
+  context = data::detail::find_variable_name_strings(p);
   return (remove_double_variables_rec(p,&fv,&bv));
 }
 
