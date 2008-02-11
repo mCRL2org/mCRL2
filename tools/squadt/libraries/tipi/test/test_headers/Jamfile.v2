@@ -24,6 +24,8 @@ project test :
        <include>../../../../../../libraries/lps/include
        <include>../../../../../../libraries/pbes/include
        <include>../../include
+       <os>CYGWIN:<define>__USE_W32_SOCKETS
+       <os>CYGWIN:<define>_WIN32_WINNT=0x0501
 ;
 
 rule setup ( ) {
