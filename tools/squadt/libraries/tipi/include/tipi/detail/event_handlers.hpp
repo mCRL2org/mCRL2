@@ -7,6 +7,7 @@
 #ifndef TIPI_EVENT_HANDLERS_H
 #define TIPI_EVENT_HANDLERS_H
 
+#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
 namespace tipi {

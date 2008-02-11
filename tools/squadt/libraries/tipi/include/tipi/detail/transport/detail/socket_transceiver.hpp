@@ -24,8 +24,11 @@
 #include <tipi/detail/transport/detail/socket_scheduler.hpp>
 
 namespace transport {
-  namespace transceiver {
+  namespace listener {
+    class socket_listener;
+  }
 
+  namespace transceiver {
     /**
      * \brief Transport component
      *

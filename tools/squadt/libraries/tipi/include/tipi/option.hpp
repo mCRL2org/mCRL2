@@ -13,6 +13,7 @@
 #include <boost/any.hpp>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include "tipi/basic_datatype.hpp"
 #include "tipi/parameter.hpp"

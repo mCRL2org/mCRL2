@@ -7,6 +7,8 @@
 #ifndef TIPI_URI_H__
 #define TIPI_URI_H__
 
+#include <string>
+
 namespace tipi {
   /** \brief Type alias for a URI until something more appropriate is available **/
   typedef std::string uri;

@@ -7,10 +7,10 @@
 #ifndef SOCKET_SCHEDULER_H
 #define SOCKET_SCHEDULER_H
 
+#include <boost/asio/io_service.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
-
-#include <tipi/detail/transport/detail/socket_transceiver.hpp>
+#include <boost/bind.hpp>
 
 namespace transport {
   namespace listener {
@@ -18,6 +18,7 @@ namespace transport {
   }
 
   namespace transceiver {
+    class socket_transceiver;
 
     /**
      * \brief Basic wrapper around an asio io_service
@@ -67,12 +68,10 @@ namespace transport {
     }
 
     inline void socket_scheduler::run() {
-      using namespace boost;
-
       if (!active) {
         active = true;
 
-        thread.reset(new boost::thread(bind(&socket_scheduler::task, this)));
+        thread.reset(new boost::thread(boost::bind(&socket_scheduler::task, this)));
       }
     }
 

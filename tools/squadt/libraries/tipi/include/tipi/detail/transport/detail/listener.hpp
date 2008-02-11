@@ -7,10 +7,12 @@
 #ifndef TRANSPORT_LISTENER_H_
 #define TRANSPORT_LISTENER_H_
 
+#include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace transport {
   class transporter;
+  class transporter_impl;
 
   namespace transceiver {
     class basic_transceiver;
@@ -34,12 +36,12 @@ namespace transport {
         boost::weak_ptr < transport::transporter_impl > owner;
 
         /** \brief Associates the owner with the connection */
-        inline void associate(transceiver::basic_transceiver::ptr);
+        inline void associate(boost::shared_ptr< transceiver::basic_transceiver >);
 
       public:
 
         /** \brief Constructor */
-        inline basic_listener(boost::shared_ptr < transport::transporter_impl > const& m);
+        inline basic_listener(boost::shared_ptr< transport::transporter_impl > const& m);
 
         /** \brief Shutdown the listener */
         virtual void shutdown() = 0;
