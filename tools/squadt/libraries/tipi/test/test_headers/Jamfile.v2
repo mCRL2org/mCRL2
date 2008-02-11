@@ -1,0 +1,45 @@
+# Jamfile.v2
+#
+# Copyright (c) 2007
+# Steven Watanabe
+#
+# Distributed under the Boost Software License, Version 1.0. (See
+# accomanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt
+#
+# Modified for the mCRL2 tool set by Wieger Wesselink.
+
+import testing ;
+import path ;
+import regex ;
+
+project test :
+    requirements
+       <use>/boost//headers
+       <include>../../../../../../3rd-party/aterm/include/aterm
+       <include>../../../../../../libraries/atermpp/include
+       <include>../../../../../../libraries/utilities/include
+       <include>../../../../../../libraries/core/include
+       <include>../../../../../../libraries/data/include
+       <include>../../../../../../libraries/lps/include
+       <include>../../../../../../libraries/pbes/include
+       <include>../../include
+;
+
+rule setup ( ) {
+
+  for local file in [ path.glob-tree ../../include : *.hpp ] {
+
+    result += [ compile test.cpp : <define>BOOST_UNITS_HEADER_NAME=$(file) : [ regex.replace [ path.relative-to .. $(file) ] "/" "_" ] ] ;
+
+  }
+
+  return $(result) ;
+
+}
+
+import testing ;
+
+test-suite units_headers :
+  [ setup ]
+  ;

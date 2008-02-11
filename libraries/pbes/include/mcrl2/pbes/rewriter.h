@@ -208,6 +208,8 @@ struct pbes_simplify_expression_builder: public pbes_expression_builder
 template <class DataRewriter>
 struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<DataRewriter>
 {
+  typedef pbes_simplify_expression_builder<DataRewriter> super;
+  
   data::enumerator m_enumerator;
 
   /// Stores the quantifiers variables that are active in the current scope,
@@ -220,7 +222,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   /// Constructor.
   ///
   pbes_rewrite_expression_builder(DataRewriter& r, const data::data_specification& data)
-    : pbes_simplify_expression_builder<DataRewriter>(r, data),
+    : super(r, data),
       m_enumerator(data)
   { }
 
@@ -269,8 +271,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   ///
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    // g++ 3.4 wants to have the fully qualified name ...
-    data::data_expression result = pbes_simplify_expression_builder<DataRewriter>::m_rewriter(d);
+    data::data_expression result = super::m_rewriter(d);
 
     // remove all data variables that are present in d from unused_quantifier_variables
     std::set<data::data_variable> v = find_all_data_variables(d);
@@ -290,7 +291,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
     std::vector<data::data_variable> finite;
     for (std::vector<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
-      if (pbes_simplify_expression_builder<DataRewriter>::is_finite_sort(i->sort()))
+      if (super::is_finite_sort(i->sort()))
       {
         finite.push_back(*i);
       }
@@ -310,7 +311,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
     using namespace pbes_expr;
 
     push(variables);
-    pbes_expression expr1 = pbes_simplify_expression_builder<DataRewriter>::visit(expr);
+    pbes_expression expr1 = super::visit(expr);
     std::vector<data::data_variable> variables1 = pop(variables); // the sublist of variables that is actually used
     std::vector<data::data_variable> finite_variables = remove_finite_variables(variables1);
 
@@ -341,7 +342,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
     using namespace pbes_expr;
 
     push(variables);
-    pbes_expression expr1 = pbes_simplify_expression_builder<DataRewriter>::visit(expr);
+    pbes_expression expr1 = super::visit(expr);
     std::vector<data::data_variable> variables1 = pop(variables);
     std::vector<data::data_variable> finite_variables = remove_finite_variables(variables1);
 
@@ -370,7 +371,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
     using namespace pbes_expr;
-    return propositional_variable_instantiation(v.name(), atermpp::apply(v.parameters(), pbes_simplify_expression_builder<DataRewriter>::m_rewriter));
+    return propositional_variable_instantiation(v.name(), atermpp::apply(v.parameters(), super::m_rewriter));
   }
 };
 
