@@ -290,7 +290,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
     std::vector<data::data_variable> finite;
     for (std::vector<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
-      if (is_finite_sort(i->sort()))
+      if (pbes_simplify_expression_builder<DataRewriter>::is_finite_sort(i->sort()))
       {
         finite.push_back(*i);
       }
