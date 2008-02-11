@@ -541,6 +541,17 @@ void test_normalize()
   std::cout << "z = " << z << std::endl;
 }
 
+void test_normalize2()
+{
+  // test case from Aad Mathijssen, 2/11/2008
+  specification spec     = mcrl22lps("init tau + tau;");
+  state_formula formula  = mcf2statefrm("nu X. [true]X", spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  p.normalize();
+  std::cout << "HIEROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << std::endl;
+}
+
 // void test_xyz_generator()
 // {
 //   XYZ_identifier_generator generator(propositional_variable("X1(d:D)"));
@@ -649,7 +660,7 @@ void test_pbes_expression()
 
   data_variable x1("x1:X");
   pbes_expression e = p::val(x1);
-  data_expression x2 = p::val_arg(e);
+  data_expression x2 = accessors::val_arg(e);
   BOOST_CHECK(x1 == x2);
   
   pbes_expression v_expr = propositional_variable_instantiation("v:V");
@@ -726,6 +737,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   test_normalize(); 
+  test_normalize2();
   test_lps2pbes();
   test_trivial();
   test_pbes();

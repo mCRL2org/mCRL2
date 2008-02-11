@@ -83,75 +83,6 @@ class pbes_expression: public aterm_appl
 ///
 typedef term_list<pbes_expression> pbes_expression_list;
 
-namespace accessors {
-
-  /// Conversion of a pbes expression to a data expression.
-  /// \pre The pbes expression must be of the form val(d) for
-  /// some data variable d.
-  inline
-  data::data_expression val_arg(pbes_expression t)
-  {
-    assert(core::gsIsDataExpr(t));
-    return aterm_appl(t);
-  }
-
-  /// \brief Returns the argument of an expression of type not
-  inline
-  pbes_expression not_arg(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESNot(t));
-    return arg1(t);
-  }
-
-  /// \brief Returns the left hand side of an expression of type and/or
-  inline
-  pbes_expression lhs(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
-    return arg1(t);
-  }
-  
-  /// \brief Returns the right hand side of an expression of type and/or
-  inline
-  pbes_expression rhs(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESAnd(t) || core::detail::gsIsPBESOr(t) || core::detail::gsIsPBESImp(t));
-    return arg2(t);
-  }
-  
-  /// \brief Returns the variables of a quantification expression
-  inline
-  data::data_variable_list quant_vars(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
-    return list_arg1(t);
-  }
-  
-  /// \brief Returns the formula of a quantification expression
-  inline
-  pbes_expression quant_expr(pbes_expression t)
-  {
-    assert(core::detail::gsIsPBESExists(t) || core::detail::gsIsPBESForall(t));
-    return arg2(t);
-  }
-  
-  /// \brief Returns the name of a propositional variable expression
-  inline
-  core::identifier_string var_name(pbes_expression t)
-  {
-    assert(core::detail::gsIsPropVarInst(t));
-    return arg1(t);
-  }
-  
-  /// \brief Returns the value of a propositional variable expression
-  inline
-  data::data_expression_list var_val(pbes_expression t)
-  {
-    assert(core::detail::gsIsPropVarInst(t));
-    return list_arg2(t);
-  }
-} // accessors
-
 /// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
 
@@ -184,6 +115,80 @@ namespace pbes_expr {
 
   /// \brief Returns true if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t) { return core::detail::gsIsPropVarInst(t); }
+
+} // namespace pbes_expr
+
+namespace accessors {
+
+  /// Conversion of a pbes expression to a data expression.
+  /// \pre The pbes expression must be of the form val(d) for
+  /// some data variable d.
+  inline
+  data::data_expression val_arg(pbes_expression t)
+  {
+    assert(core::gsIsDataExpr(t));
+    return aterm_appl(t);
+  }
+
+  /// \brief Returns the argument of an expression of type not
+  inline
+  pbes_expression not_arg(pbes_expression t)
+  {
+    assert(pbes_expr::is_not(t));
+    return arg1(t);
+  }
+
+  /// \brief Returns the left hand side of an expression of type and/or
+  inline
+  pbes_expression lhs(pbes_expression t)
+  {
+    assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the right hand side of an expression of type and/or
+  inline
+  pbes_expression rhs(pbes_expression t)
+  {
+    assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the variables of a quantification expression
+  inline
+  data::data_variable_list quant_vars(pbes_expression t)
+  {
+    assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
+    return list_arg1(t);
+  }
+  
+  /// \brief Returns the formula of a quantification expression
+  inline
+  pbes_expression quant_expr(pbes_expression t)
+  {
+    assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
+    return arg2(t);
+  }
+  
+  /// \brief Returns the name of a propositional variable expression
+  inline
+  core::identifier_string var_name(pbes_expression t)
+  {
+    assert(pbes_expr::is_propositional_variable_instantiation(t));
+    return arg1(t);
+  }
+  
+  /// \brief Returns the value of a propositional variable expression
+  inline
+  data::data_expression_list var_val(pbes_expression t)
+  {
+    assert(pbes_expr::is_propositional_variable_instantiation(t));
+    return list_arg2(t);
+  }
+} // accessors
+
+/// Accessor functions and predicates for pbes expressions.
+namespace pbes_expr {
 
   /// Conversion of a data expression to a pbes expression.
   inline
