@@ -305,7 +305,10 @@ private:
     wxButton*         buttonOKClust;
 
     // -- about frame -----------------------------------------------
-    wxFrame*          frameAbout;
+    wxFrame*	frameAbout;
+    
+    // -- menus -----------------------------------------------------
+    wxMenu	*addAttributeMenu;
     
     // -- ID's ------------------------------------------------------
     enum
@@ -372,6 +375,7 @@ private:
         ID_CANVAS_COL_DOF,
         ID_CANVAS_OP_DOF,
         ID_MENU_ITEM_DOF_UNLINK,
+        ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
         ID_FRAME_PLOT,
         ID_PANEL_PLOT,
         ID_CANVAS_PLOT,

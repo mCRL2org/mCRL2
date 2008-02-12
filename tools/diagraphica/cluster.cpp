@@ -11,6 +11,8 @@
 
 #include "cluster.h"
 
+#include <iostream>
+using namespace std;
 	
 // -- constructors and destructors ----------------------------------
 
@@ -42,7 +44,7 @@ Cluster::Cluster( const vector< int > &crd )
 Cluster::Cluster( const Cluster &clst )
 // ------------------------------------
 {
-    coord      = clst.coord;
+    coord 	   = clst.coord;
     index      = clst.index;
     parent     = clst.parent;
     children   = clst.children;

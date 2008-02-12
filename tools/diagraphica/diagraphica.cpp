@@ -1894,7 +1894,6 @@ void DiaGraph::handleEditDOFShape()
     if ( mode == MODE_EDIT && editor != NULL )
     {
         editor->handleEditDOF();
-
     }
 }
 

@@ -11,6 +11,9 @@
 
 #include "examiner.h"
 
+#include <iostream>
+using namespace std;
+
 
 // -- static variables ----------------------------------------------
 
@@ -183,10 +186,9 @@ void Examiner::setFrame(
     if ( frame != NULL )
         delete frame;
     attributes.clear();
-
     frame = new Cluster( *frme );
+    
     attributes = attrs;
-
     colFrm = col;
 }
 
@@ -696,13 +698,21 @@ void Examiner::handleHits( const vector< int > &ids )
                 }
             }
             else if ( ids[ids.size()-1] == ID_ICON_CLR )
+            {
                 mediator->handleClearExnr( this );
+            }
             else if ( ids[ids.size()-1] == ID_ICON_RWND )
+            {
                 handleIconRwnd();
+            }
             else if ( ids[ids.size()-1] == ID_ICON_LFT )
+           	{
                 handleIconLft();
+            }
             else if ( ids[ids.size()-1] == ID_ICON_RGT )
+            {
                 handleIconRgt();
+            }
             
         }
         else if ( mouseButton == MSE_BUTTON_DOWN &&
@@ -796,7 +806,7 @@ void Examiner::handleIconLft()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 )
+        if ( focusFrameIdx >= 0  && focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx != 0 )
                 focusFrameIdx -= 1;
@@ -844,24 +854,24 @@ void Examiner::handleIconRgt()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 )
+        if ( focusFrameIdx >= 0 && focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx < framesHist.size()-1 )
                 focusFrameIdx += 1;
-
+                
             dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
             dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
             if ( dRgt > 0 )
                 offset -= dRgt/pix;
             else if ( dLft > 0 )
                 offset += dLft/pix;
-
+			
             ColorRGB col;
             VisUtils::mapColorCoolRed( col );
             setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
             
             geomChanged = true;
-
+			
             mediator->handleMarkFrameClust( this );
         }
         else

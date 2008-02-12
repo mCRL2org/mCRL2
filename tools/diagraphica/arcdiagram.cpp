@@ -2200,7 +2200,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         	canvas->clearToolTip();
     	}
     	else
-    	{
+    	{    		
         	// interact with bundles
         	if ( ids[1] == ID_BUNDLES )
         	{
@@ -2321,7 +2321,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                         	handlePlayDiagram( ids[2] );
                     	else if ( ids[3] == ID_DIAGRAM_NEXT )
                         	handleNextDiagram( ids[2] );
-                	}
+                	}                	
             	}
             	else if ( 	mouseSide   == MSE_SIDE_RGT &&
                       	mouseButton == MSE_BUTTON_DOWN /*&&
@@ -2345,7 +2345,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
             	else
             	{
                 	canvas->clearToolTip();
-
+					
                 	currIdxDgrm = ids[2];
                 	updateMarkBundles();
 
@@ -2354,7 +2354,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                 	mediator->handleShowFrame(
                     	framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
                     	attrsDgrm[currIdxDgrm],
-                	    col );
+                	    col );                	
             	}
         	}
     	}

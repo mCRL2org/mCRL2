@@ -284,9 +284,9 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
     VisUtils::setColorBlack();
     
     // y-axis labels
-    xLft = -0.5*w+3*pix;
-    xRgt = -0.5*w+12*pix;
-    yTop =  0.5*h-10*pix;
+    xLft = -0.51*w+3*pix;
+    xRgt = -0.50*w+12*pix;
+    yTop =  0.50*h-10*pix;
     if ( numAttr > 0 )
         yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
     else
@@ -348,7 +348,7 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
     {
         // y-axis labels
         
-        xLft = -0.5*w+3*pix;
+        xLft = -0.51*w+3*pix;
         xRgt = -0.5*w+12*pix;
            
         for ( size_t i = 0; i < attributeLabels.size(); ++i )

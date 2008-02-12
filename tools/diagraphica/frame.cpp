@@ -12,6 +12,9 @@
 #include "figures.xpm"
 #include "mcrl2/utilities/version_info.h"
 
+#include <iostream>
+using namespace std;
+
 #define NAME "Diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 
@@ -21,6 +24,7 @@
 # define wxFD_SAVE wxSAVE
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
+
 
 // -- constructors and destructor -----------------------------------
 
@@ -321,12 +325,12 @@ void Frame::displDOFInfo(
         // column 1
         listCtrlDOF->SetItem( 
             i, 
-            1, 
+            0, 
             wxString( Utils::intToStr( i ).c_str(), wxConvUTF8 ) );
         // column 2
-        listCtrlDOF->SetItem( i, 2, wxString( degsOfFrdm[i].c_str(), wxConvUTF8 ) );
+        listCtrlDOF->SetItem( i, 1, wxString( degsOfFrdm[i].c_str(), wxConvUTF8 ) );
         // column 3
-        listCtrlDOF->SetItem( i, 3, wxString( attrNames[i].c_str(), wxConvUTF8 ) );
+        listCtrlDOF->SetItem( i, 2, wxString( attrNames[i].c_str(), wxConvUTF8 ) );
     }
 
     // select
@@ -2108,24 +2112,24 @@ void Frame::initListCtrlDOF()
     wxListItem colItem;
     
     // dummy column
-    colItem.SetText( wxT( "" ) );
+    /*colItem.SetText( wxT( "" ) );
     listCtrlDOF->InsertColumn( 0, colItem );
-    listCtrlDOF->SetColumnWidth( 0, 0 );
+    listCtrlDOF->SetColumnWidth( 0, 0 );*/
     // column 1
     colItem.SetText( wxT( "" ) );
     colItem.SetAlign( wxLIST_FORMAT_RIGHT );
-    listCtrlDOF->InsertColumn( 1, colItem );
-    listCtrlDOF->SetColumnWidth( 1, 30 );
+    listCtrlDOF->InsertColumn( 0, colItem );
+    listCtrlDOF->SetColumnWidth( 0, 30 );
     // column 2
     colItem.SetText( wxT( "Degree of freedom" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
-    listCtrlDOF->InsertColumn( 2, colItem );
-    listCtrlDOF->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlDOF->InsertColumn( 1, colItem );
+    listCtrlDOF->SetColumnWidth( 1, wxLIST_AUTOSIZE_USEHEADER );
     // column 3
     colItem.SetText( wxT( "Associated attribute" ) );
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
-    listCtrlDOF->InsertColumn( 3, colItem );
-    listCtrlDOF->SetColumnWidth( 3, wxLIST_AUTOSIZE_USEHEADER );
+    listCtrlDOF->InsertColumn( 2, colItem );
+    listCtrlDOF->SetColumnWidth( 2, wxLIST_AUTOSIZE_USEHEADER );
 
 }
 
@@ -2249,6 +2253,7 @@ void Frame::initFramePlot()
         wxSize( 
             (int)(0.33*this->GetSize().GetWidth()),
             (int)(0.33*this->GetSize().GetHeight()) ) );
+    framePlot->SetMinSize(wxSize(200,200));
     framePlot->SetSizer( sizerFramePlot );
 
     // init children
@@ -3316,6 +3321,38 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 ID_MENU_ITEM_DOF_UNLINK,
                 wxT( "Remove attribute" ),
                 wxT( "Remove attribute" ) );
+                
+            addAttributeMenu = new wxMenu();
+            int i;
+            int id = wxID_LOWEST; // Event id's for Attributes
+
+            // List All the Attributes in a Menu         
+            for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
+            {
+            	wxListItem rowInfo;
+            	wxString   celInfo;            	
+            	              
+                // set row
+                rowInfo.m_itemId = i;
+                 // set column
+            	rowInfo.m_col    = 2;
+            	// set text mask
+            	rowInfo.m_mask   = wxLIST_MASK_TEXT;
+            	listCtrlAttr->GetItem( rowInfo );
+            	celInfo = rowInfo.m_text;
+            	wxString helpString;
+            	helpString << i; // Convert int to wxString
+            	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_NORMAL);
+                addAttributeMenu->Append(
+            	 	item);            	
+            	Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
+            	id--;         	
+            }
+            	 
+           	menu.Append(ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
+           				wxT( "Add attribute" ),
+           				addAttributeMenu,
+           				wxT( "Add attribute" ) );
         
             // determine of an attribute has been linked
             // code thanks to 'www.wxwidgets.org/wiki'
@@ -3325,7 +3362,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             // set row
             rowInfo.m_itemId = idxDOF;
             // set column
-            rowInfo.m_col    = 3;
+            rowInfo.m_col    = 2;
             // set text mask
             rowInfo.m_mask   = wxLIST_MASK_TEXT;
 
@@ -3715,7 +3752,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         long item   = -1;
         int  idDOF  = -1;
-        
+
         item = listCtrlDOF->GetNextItem(
             item,
             wxLIST_NEXT_ALL,
@@ -3828,6 +3865,35 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_EXNR_CLEAR )
     {
         mediator->handleClearExnrCur( this );
+    }
+    else
+    {
+    	long item   = -1;
+        int  idDOF  = -1;
+        int idxAttr = -1; 
+
+        if(addAttributeMenu != NULL)
+        {
+        	wxMenuItem* x = addAttributeMenu->FindItem(e.GetId());
+        	if( x != NULL)
+        	{    
+        		wxString name = x->GetHelp(); // Get the index of the selected attribute
+        		name.ToLong((long *)&idxAttr); // Converting String to int
+     
+        		item = listCtrlDOF->GetNextItem(
+            			item,
+            			wxLIST_NEXT_ALL,
+            			wxLIST_STATE_SELECTED );
+        		if ( item >= 0 )
+        		{
+            		idDOF = listCtrlDOF->GetItemData( item );
+            		item = listCtrlAttr->FindItem(-1, name);
+            		mediator->handleLinkDOFAttr( idDOF, idxAttr );
+        		}
+        	}
+        	x = NULL;
+        }    
+        addAttributeMenu = NULL;	
     }
 }
 
@@ -4168,6 +4234,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_LIST_ITEM_RIGHT_CLICK( ID_LIST_CTRL_DOF, Frame::onListCtrlRgtClick )
     //EVT_RADIOBOX( ID_RADIO_BOX_TEXT_DOF, Frame::onRadioBox )
     EVT_MENU( ID_MENU_ITEM_DOF_UNLINK, Frame::onPopupMenu )
+    EVT_MENU( ID_MENU_ITEM_DOF_ATTRIBUTE_LIST, Frame::onPopupMenu )
     // interaction with clusters
     EVT_MENU( ID_MENU_ITEM_CLUST_DISTR_PLOT, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_CLUST_CORRL_PLOT, Frame::onPopupMenu )
