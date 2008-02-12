@@ -11,9 +11,6 @@
 
 #include "cluster.h"
 
-#include <iostream>
-using namespace std;
-	
 // -- constructors and destructors ----------------------------------
 
 
