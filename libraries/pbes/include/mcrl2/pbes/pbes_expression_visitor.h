@@ -167,20 +167,20 @@ struct pbes_expression_visitor
     if (is_data(e)) {
       visit_data_expression(e, val(e));
       leave_data_expression();
-    } else if (is_true(e)) {
+    } else if (is_pbes_true(e)) {
       visit_true(e);
       leave_true();
-    } else if (is_false(e)) {
+    } else if (is_pbes_false(e)) {
       visit_false(e);
       leave_false();
-    } else if (is_not(e)) {
+    } else if (is_pbes_not(e)) {
       const pbes_expression& arg = not_arg(e);
       bool result = visit_not(e, arg);
       if (result) {
         visit(arg);
       }
       leave_not();
-    } else if (is_and(e)) {
+    } else if (is_pbes_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       bool result = visit_and(e, left, right);
@@ -189,7 +189,7 @@ struct pbes_expression_visitor
         visit(right);
       }
       leave_and();
-    } else if (is_or(e)) {
+    } else if (is_pbes_or(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       bool result = visit_or(e, left, right);
@@ -198,7 +198,7 @@ struct pbes_expression_visitor
         visit(right);
       }
       leave_or();
-    } else if (is_imp(e)) {
+    } else if (is_pbes_imp(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       bool result = visit_imp(e, left, right);
@@ -207,7 +207,7 @@ struct pbes_expression_visitor
         visit(right);
       }
       leave_imp();
-    } else if (is_forall(e)) {
+    } else if (is_pbes_forall(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       bool result = visit_forall(e, qvars, qexpr);
@@ -215,7 +215,7 @@ struct pbes_expression_visitor
         visit(qexpr);
       }
       leave_forall();
-    } else if (is_exists(e)) {
+    } else if (is_pbes_exists(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       bool result = visit_exists(e, qvars, qexpr);

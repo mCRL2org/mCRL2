@@ -35,20 +35,20 @@ inline
 std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variables)
 {
   std::string result;
-  if (pbes_expr::is_true(p))
+  if (pbes_expr::is_pbes_true(p))
     // PBESTrue => T
     result = "T";
-  else if (pbes_expr::is_false(p))
+  else if (pbes_expr::is_pbes_false(p))
     // PBESFalse => F
     result = "F";
-  else if (pbes_expr::is_and(p))
+  else if (pbes_expr::is_pbes_and(p))
   {
     //PBESAnd(a,b) => (a & b)
     std::string left = convert_rhs_to_cwi(accessors::lhs(p), variables);
     std::string right = convert_rhs_to_cwi(accessors::rhs(p), variables);
     result = "(" + left + "&" + right + ")";
   }
-  else if (pbes_expr::is_or(p))
+  else if (pbes_expr::is_pbes_or(p))
   {
     //PBESOr(a,b) => (a | b)
     std::string left = convert_rhs_to_cwi(accessors::lhs(p), variables);

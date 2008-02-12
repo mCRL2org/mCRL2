@@ -126,51 +126,51 @@ struct pbes_expression_builder
       if (result == pbes_expression()) {
         result = e;
       }
-    } else if (is_true(e)) {
+    } else if (is_pbes_true(e)) {
       result = visit_true(e);
       if (result == pbes_expression()) {
         result = e;
       }
-    } else if (is_false(e)) {
+    } else if (is_pbes_false(e)) {
       result = visit_false(e);
       if (result == pbes_expression()) {
         result = e;
       }
-    } else if (is_not(e)) {
+    } else if (is_pbes_not(e)) {
       const pbes_expression& arg = not_arg(e);
       result = visit_not(e, arg);
       if (result == pbes_expression()) {
         result = not_(visit(arg));
       }
-    } else if (is_and(e)) {
+    } else if (is_pbes_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       result = visit_and(e, left, right);
       if (result == pbes_expression()) {
         result = and_(visit(left), visit(right));
       }
-    } else if (is_or(e)) {
+    } else if (is_pbes_or(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       result = visit_or(e, left, right);
       if (result == pbes_expression()) {
         result = or_(visit(left), visit(right));
       }
-    } else if (is_imp(e)) {
+    } else if (is_pbes_imp(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
       result = visit_imp(e, left, right);
       if (result == pbes_expression()) {
         result = imp(visit(left), visit(right));
       }
-    } else if (is_forall(e)) {
+    } else if (is_pbes_forall(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       result = visit_forall(e, qvars, qexpr);
       if (result == pbes_expression()) {
         result = forall(qvars, visit(qexpr));
       }
-    } else if (is_exists(e)) {
+    } else if (is_pbes_exists(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
       result = visit_exists(e, qvars, qexpr);

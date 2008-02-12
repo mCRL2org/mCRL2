@@ -426,25 +426,25 @@ bool is_bes(aterm_appl t)
   using namespace pbes_expr;
   using namespace accessors;
 
-  if(is_and(t)) {
+  if(is_pbes_and(t)) {
     return is_bes(lhs(t)) && is_bes(rhs(t));
   }
-  else if(is_or(t)) {
+  else if(is_pbes_or(t)) {
     return is_bes(lhs(t)) && is_bes(rhs(t));
   }
-  else if(is_forall(t)) {
+  else if(is_pbes_forall(t)) {
     return false;
   }
-  else if(is_exists(t)) {
+  else if(is_pbes_exists(t)) {
     return false;
   }
   else if(is_propositional_variable_instantiation(t)) {
     return propositional_variable_instantiation(t).parameters().empty();
   }
-  else if(is_true(t)) {
+  else if(is_pbes_true(t)) {
     return true;
   }
-  else if(is_false(t)) {
+  else if(is_pbes_false(t)) {
     return true;
   }
 
