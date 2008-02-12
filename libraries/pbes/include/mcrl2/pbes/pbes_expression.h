@@ -86,32 +86,56 @@ typedef term_list<pbes_expression> pbes_expression_list;
 /// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
 
-  /// \brief Returns true if the term t is a data expression
-  inline bool is_data(pbes_expression t) { return core::gsIsDataExpr(t); }
-
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(pbes_expression t) { return core::detail::gsIsPBESTrue(t) || data::data_expr::is_true(t); }
+  inline bool is_pbes_true(pbes_expression t) { return core::detail::gsIsPBESTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(pbes_expression t) { return core::detail::gsIsPBESFalse(t) || data::data_expr::is_false(t); }
+  inline bool is_pbes_false(pbes_expression t) { return core::detail::gsIsPBESFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(pbes_expression t) { return core::detail::gsIsPBESNot(t) || data::data_expr::is_not(t); }
+  inline bool is_pbes_not(pbes_expression t) { return core::detail::gsIsPBESNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(pbes_expression t) { return core::detail::gsIsPBESAnd(t) || data::data_expr::is_and(t); }
+  inline bool is_pbes_and(pbes_expression t) { return core::detail::gsIsPBESAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(pbes_expression t) { return core::detail::gsIsPBESOr(t) || data::data_expr::is_or(t); }
+  inline bool is_pbes_or(pbes_expression t) { return core::detail::gsIsPBESOr(t); }
 
   /// \brief Returns true if the term t is an imp expression
-  inline bool is_imp(pbes_expression t) { return core::detail::gsIsPBESImp(t) || data::data_expr::is_imp(t); }
+  inline bool is_pbes_imp(pbes_expression t) { return core::detail::gsIsPBESImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(pbes_expression t) { return core::detail::gsIsPBESForall(t); }
+  inline bool is_pbes_forall(pbes_expression t) { return core::detail::gsIsPBESForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(pbes_expression t) { return core::detail::gsIsPBESExists(t); }
+  inline bool is_pbes_exists(pbes_expression t) { return core::detail::gsIsPBESExists(t); }
+
+  /// \brief Returns true if the term t is equal to true
+  inline bool is_true(pbes_expression t) { return is_pbes_true(t) || data::data_expr::is_true(t); }
+
+  /// \brief Returns true if the term t is equal to false
+  inline bool is_false(pbes_expression t) { return is_pbes_false(t) || data::data_expr::is_false(t); }
+
+  /// \brief Returns true if the term t is a not expression
+  inline bool is_not(pbes_expression t) { return is_pbes_not(t) || data::data_expr::is_not(t); }
+
+  /// \brief Returns true if the term t is an and expression
+  inline bool is_and(pbes_expression t) { return is_pbes_and(t) || data::data_expr::is_and(t); }
+
+  /// \brief Returns true if the term t is an or expression
+  inline bool is_or(pbes_expression t) { return is_pbes_or(t) || data::data_expr::is_or(t); }
+
+  /// \brief Returns true if the term t is an imp expression
+  inline bool is_imp(pbes_expression t) { return is_pbes_imp(t) || data::data_expr::is_imp(t); }
+
+  /// \brief Returns true if the term t is a universal quantification
+  inline bool is_forall(pbes_expression t) { return is_pbes_forall(t); }
+
+  /// \brief Returns true if the term t is an existential quantification
+  inline bool is_exists(pbes_expression t) { return is_pbes_exists(t); }
+
+  /// \brief Returns true if the term t is a data expression
+  inline bool is_data(pbes_expression t) { return core::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t) { return core::detail::gsIsPropVarInst(t); }
@@ -135,7 +159,7 @@ namespace accessors {
   pbes_expression not_arg(pbes_expression t)
   {
     assert(pbes_expr::is_not(t));
-    return arg1(t);
+    return data::data_expr::is_not(t) ? arg2(t) : arg1(t);
   }
 
   /// \brief Returns the left hand side of an expression of type and/or
@@ -303,7 +327,14 @@ namespace pbes_expr {
 } // namespace pbes_expr
 
 namespace pbes_expr_optimized {
-  using pbes_expr::is_data;
+  using pbes_expr::is_pbes_true;
+  using pbes_expr::is_pbes_false;
+  using pbes_expr::is_pbes_not;
+  using pbes_expr::is_pbes_and;
+  using pbes_expr::is_pbes_or;
+  using pbes_expr::is_pbes_imp;
+  using pbes_expr::is_pbes_forall;
+  using pbes_expr::is_pbes_exists;
   using pbes_expr::is_true;
   using pbes_expr::is_false;
   using pbes_expr::is_not;
@@ -312,6 +343,7 @@ namespace pbes_expr_optimized {
   using pbes_expr::is_imp;
   using pbes_expr::is_forall;
   using pbes_expr::is_exists;
+  using pbes_expr::is_data;
   using pbes_expr::is_propositional_variable_instantiation;
   using pbes_expr::val;
   using pbes_expr::true_;
