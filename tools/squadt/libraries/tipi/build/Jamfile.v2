@@ -19,7 +19,6 @@ alias transport
     : $(transport_sources)
     : <library>/site-config//boost_thread
       <library>/site-config//boost_system
-      <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
       <threading>multi
       <os>NT:<use>/site-config//winsock
       <os>CYGWIN:<use>/site-config//winsock

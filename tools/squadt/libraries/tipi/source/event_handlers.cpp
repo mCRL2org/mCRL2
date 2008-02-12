@@ -4,6 +4,12 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
+
+// Workaround for building with Cygwin 
+#if defined(__CYGWIN__)
+#include <boost/asio.hpp>
+#endif
+
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>

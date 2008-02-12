@@ -869,10 +869,17 @@ namespace mcrl2 {
          
           char output[64];
 
+          int status;
+
           // check return value
           if (0 < ::read(pipe_stdout[0], output, 8)) {
             if (strncmp(output, "sat", 3) == 0) {
               gsVerboseMsg("The formula is satisfiable\n");
+
+              ::close(pipe_stdout[0]);
+              ::close(pipe_stderr[0]);
+
+              ::wait(&status);
 
               return true;
             }
@@ -881,8 +888,6 @@ namespace mcrl2 {
             }
             else if (strncmp(output, "unknown", 7) == 0) {
               gsVerboseMsg("%s cannot determine whether this formula is satisfiable or not.\n", T::name());
-            }
-            else {
             }
           }
           else {
@@ -897,6 +902,8 @@ namespace mcrl2 {
 
           ::close(pipe_stdout[0]);
           ::close(pipe_stderr[0]);
+
+          ::wait(&status);
         }
      
         return false;

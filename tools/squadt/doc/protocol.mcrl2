@@ -4,108 +4,123 @@
 %    that was started is trying to communicate via a socket connection, this
 %    model ignores this detail
 
-sort
+sort Configuration = struct configuration(non_empty : Bool);
 
   % Type used for identifying messages sent by the controller
-  cmessage_type = struct request_tool_capabilities      % request the tools capabilities (e.g. supported protocol version)
-                     | controller_capabilities          % controller capabilities
-                     | offer_configuration              % tool configuration specification
-                     | signal_start                     % signal that a tool may commence the configured operation
-                     | interaction_data                 % communicates data resulting from user interaction
-                     | request_termination              % request the tool to terminate
-                     ;
+sort MessageType = struct identification |
+                           capabilities |           % request/respond for capabilities (e.g. supported protocol version) (empty for request)
+                           task_configuration |     % tool configuration specification
+                           task_start |             % signal that a tool may start task execution
+                           task_stop |              % signal that a tool has stopped task execution
+                           display_layout |         % communicates a display layout
+                           display_data |           % communicates state changes of the display
+                           termination |            % request/response for tool the termination
+                           report;                  % report
 
-sort
+sort MessageData = struct empty | result(Bool) | other;
 
-  % Type used for identifying messages sent by a tool instance
-  tmessage_type = struct instance_id                    % instance identifier to recognise a new tool instance
-                     | request_controller_capabilities  % request the controllers capabilities (e.g. supported protocol version)
-                     | tool_capabilities                % tool capabilities
-                     | configuration                    % signals to the controller that the current configuration is acceptable
-                     | signal_done                      % signal that the tool has finished the configured operation
-                     | display_layout                   % sends a display layout specification to the controller
-                     | display_data                     % communicates changes to layout (or what is displayed)
-                     | report                           % sends a report (warning, error or other message) to the controller
-                     | signal_termination               % signal the controller that the tool is terminating
-                     ;
-
-% Messages travel between a controller and a tool instance 
-sort
-
-  message = struct tmsg(t_address: Nat, type: tmessage_type) | cmsg(s_address: Nat, type: cmessage_type);
+% Messages travel between a controller (address 0) and a tool instance (address 0 <)
+sort Message = struct message(address : Nat, type : MessageType, data : MessageData);
 
 act
 
-  send,receive:                 message; % send or receive a message
-  tool_start,start_tool,start:  Nat;     % create a new tool instance
-  deliver:                      message; % communication between send and receive actions
-  perform;                               % perform the configured operation
-  error;                                 % an error has occurred
+  send,receive,communicate:                    Message;        % send or receive a message
+  start_tool, tool_start, tool_terminate:      Nat;            % create a new tool instance
+  execute_task:                                Configuration;  % perform the configured operation
+  error, update_display;                        % actions denoting operations
 
-proc
+% a: the tool id
+proc unidentified_tool(a : Nat) =
+      send(message(a, identification, other)).tool(a, configuration(false), false, false);
 
-  % n: the tool id
-  % c: whether or not the last received configuration was accepted
-  % l: whether a display layout was communicated
-  T(a:Nat,c:Bool,l:Bool) =
-    receive(cmsg(a, request_termination)).
-      send(tmsg(a, signal_termination)) +
-    receive(cmsg(a, request_tool_capabilities)).
-      send(tmsg(a, tool_capabilities)).T(a,c,l) + 
-    receive(cmsg(a, signal_start)).
-      ((c == true) ->
-        (perform.send(tmsg(a, signal_done)).T(a,c,l)) <>
-        error.send(tmsg(a, report)).T(a,c,l)) +                                % perform configured operation
-    receive(cmsg(a, interaction_data)).                                        % receive interaction data
-      ((l == true) ->
-        T(a,c,l) <> error.send(tmsg(a, report)).T(a,c,l)) +
-    receive(cmsg(a, offer_configuration)).                                     % received a configuration description
-      (send(tmsg(a, configuration)).T(a,false,l) +                             % accept it configuration description
-        send(tmsg(a, display_layout)).T(a,true, l) +                           % send display layout
-        (l == true)->
-          send(tmsg(a, display_data)).T(a, false,l) +                          % send display data
-        send(tmsg(a, report)).T(a,false,l)) +                                  % send a report
-    send(tmsg(a, report)).T(a,c,l) +
-    send(tmsg(a, request_controller_capabilities)).T(a,c,l) +
-    send(tmsg(a, display_layout)).T(a,c,true) +
-    (l == true)->
-      (send(tmsg(a, display_data)).T(a,c,l));
+% a: the tool id
+% c: configuration object
+proc tool(a : Nat, c : Configuration, in_configuration : Bool, in_task : Bool) =
+      receive(message(a, termination, empty)).                                             % received termination request
+        send(message(a, termination, empty)) +                                             % sends termination signal
+      (receive(message(a, capabilities, empty)).                                           % received request for capabilities
+         send(message(a, capabilities, other)) +                                           % responded with description of capabilities
+       send(message(a, capabilities, empty))+                                              % requested controller capabilities
+       receive(message(a, capabilities, other))+                                           % received controller capabilities
+       send(message(a, display_layout, other)) +                                           % sent display layout
+       send(message(a, display_data, other)) +                                             % sent display data
+       receive(message(a, display_data, other)) +                                          % sent display data
+       send(message(a, report, other))).
+      tool(a, c, in_configuration, in_task) +
+      (!in_configuration) ->
+        ((!in_task) ->
+          receive(message(a, task_configuration, empty)).
+            tool(a, c, true, false)) <>                                                    % received a configuration request
+        send(message(a, task_configuration, other)).
+          tool(a, configuration(true), false, false) +                                     % accepted configuration description
+      (!in_task) ->
+        (receive(message(a, task_start, empty)).
+          ((non_empty(c) && !in_configuration) ->
+              tool(a, c, false, true) <>
+              error.tool(a, c, in_configuration, false))) <>
+        (error.send(message(a, task_stop, result(false))).tool(a, c, false, true) +        % error occurred, stop task execution
+         send(message(a, task_stop, result(true))).tool(a, c, false, true));
 
-  % n: the number of tool instances
-  % r: the set of active tool instances
-  % c: for whether or not the last configuration for a tool in r was accepted
-  % l: for whether or not a layout was delivered previously for a tool in r
-  % s: for whether or not a tool has been sent the start signal for an operation
-  C(n:Nat,r:Set(Nat),c:Set(Nat),l:Set(Nat),s:Set(Nat)) =
-    (tool_start(n).C(n + 1,r + {n},c,l,s)) +                                    % starts a new tool instance
-    (sum a:Nat.(a < n) -> (
-      receive(tmsg(a, instance_id)).C(n,r,c,l,s) +                              % received instance identifier
-      receive(tmsg(a, request_controller_capabilities)).                        % request for capabilities
-        send(cmsg(a, controller_capabilities)).C(n,r,c,l,s) +
-      receive(tmsg(a, configuration)).
-        ((a in c) -> C(n,r,c + {a},l,s) <> error.C(n,r,c,l,s)) +                % last configuration was accepted
-      receive(tmsg(a, report)).C(n,r,c,l,s) +                                   % report delivered
-      receive(tmsg(a, display_layout)).C(n,r,c,l + {a},s) +                     % display layout delivered
-      receive(tmsg(a, display_data)).
-        ((a in l) -> C(n,r,c,l,s) <> error.C(n,r,c,l,s)) +                      % display data delivered
-      receive(tmsg(a, signal_done)).
-        ((a in s) -> C(n,r,c - {a},l,s - {a}) <> error.C(n,r,c,l,s)) +          % last operation completed
-      receive(tmsg(a, signal_termination)).
-        C(n,r - {a},c - {a},l - {a},s - {a}) +
-      send(cmsg(a, request_tool_capabilities)).
-        (receive(tmsg(a,tool_capabilities)).C(n,r,c,l,s)) +
-      send(cmsg(a, offer_configuration)).C(n,r,c,l,s) +
-      (a in l) ->
-        send(cmsg(a, interaction_data)).C(n,r,c,l,s) +
-      (a in c) ->
-        send(cmsg(a, signal_start)).C(n,r,c,l,s + {a}) +
-      send(cmsg(a, request_termination))).C(n,r,c,l,s));
+% Workaround until proper support for finite sets (unique representation) is implemented in (lps2lts)
+map in_set : Nat # List(Nat) -> Bool ;
+    as_set : List(Nat) -> Set(Nat) ;
+    add    : Nat # List(Nat) -> List(Nat);
+    remove : Nat # List(Nat) -> List(Nat);
+
+var m,x : Nat;
+    xs : List(Nat);
+
+eqn in_set(m, []) = false;
+    in_set(m, x|>xs) = x == m || in_set(m, xs);
+    as_set([]) = {};
+    as_set(x|>xs) = {x} + as_set(xs);
+    add(m,[]) = [m];
+    add(m,x|>xs) = if(m < x, x|>add(m, xs), if(m == x, x|>xs, m|> xs));
+    remove(m,[]) = [];
+    remove(m,x|>xs) = if(x != m,x|>res,res) whr res = remove(m,xs) end;
+
+% m: the maximum address of a running tool
+% r: the set of active tools
+% c: the set of active tools that are configured
+% l: the set of active tools that have communicated a display layout
+% s: the set of active tools that are executing a task
+proc controller(m : Nat, r : List(Nat), c : List(Nat), l : List(Nat), s : List(Nat)) =
+    (sum a : Nat. (a <= m) -> (
+      start_tool(a).controller(m,add(a,r),c,l,s) +                                               % starts a new tool instance
+      (a in r) -> (
+        tool_terminate(a).controller(m,remove(a,r), remove(a,c), remove(a,l), remove(a,s)) +
+        receive(message(a, identification, other)).controller(max(m,a),r,c,l,s) +            % received instance identifier
+        (receive(message(a, capabilities, empty)).                                           % received request for capabilities
+           send(message(a, capabilities, other)) +
+         send(message(a, capabilities, empty)).                                              % sent request for capabilities of tool <a>
+           receive(message(a, capabilities, other)) +
+         receive(message(a, report, other)) +                                                % report delivered
+         send(message(a, task_configuration, empty)) +
+         receive(message(a, display_data, other)).                                           % received display data (used for manipulation of display)
+           ((a in l) -> update_display <> error) +                                   % display data delivered
+         (a in l) ->
+           send(message(a, display_data, other)) +                                           % data from interaction only available when a layout is available
+         send(message(a, termination, empty))).                                              % sent termination request to tool <a>
+        controller(m,r,c,l,s) +
+        receive(message(a, display_layout, other)).controller(m,r,c,add(a,l),s) +            % display layout delivered for tool <a>
+        receive(message(a, task_configuration, other)).controller(m,r,add(a,c),l,s) +        % last configuration was accepted for tool <a>
+        (sum b : Bool. receive(message(a, task_stop, result(b)))).
+          ((a in s && a in c) ->
+             controller(m,r,c,l,remove(a,s)) <>
+             error.controller(m,r,c,l,s)) +                                                  % last task of tool <a> completed
+        (a in c) ->
+          send(message(a, task_start, empty)).controller(m,r,c,l,add(a,s)) +                     % sent task start signal to tool <a>
+        receive(message(a, termination, empty)).                                             % termination signal received for tool <a>
+          controller(m,remove(a,r),remove(a,c),remove(a,l),remove(a,s)))));
 
   % Execution component (starts tools)
-  E = (sum n:Nat. start_tool(n).(E || T(n,false,false)));
+%  E(n : Nat) = start_tool(n).(E(n + 1) || unidentified_tool(n));
+   E(n : Nat, m : Nat) = (n < m) -> start_tool(n).E(n + 1, m);
 
 init
 
-  allow({send,receive,deliver,tool_start,start_tool,start,perform,error},
-     comm({send|receive -> deliver,tool_start|start_tool -> start},C(0,{},{},{},{})));
+  hide({error},
+    allow({communicate, tool_start, tool_terminate, error, execute_task, update_display},
+      comm({send|receive -> communicate,start_tool|start_tool -> tool_start},
+        controller(0,[],[],[],[]) || unidentified_tool(0) || E(0, 1))));
 
