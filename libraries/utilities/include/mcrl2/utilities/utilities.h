@@ -35,12 +35,20 @@ inline int number_of_digits(const int a_integer) {
   return static_cast < int > (std::ceil(std::log10(static_cast < double > (a_integer))));
 }
 
+inline 
+ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
+{
+  ATprotectAppl(&f);
+  return v;
+}
+
+
 // Eventually, these two functions should probably be moved into core
 /**
  * \brief Creates an identifier for the for the ctau action
  **/
 inline ATermAppl make_ctau_act_id() {
-  static ATermAppl ctau_act_id(gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
+  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
 
   assert(ctau_act_id);
 
@@ -51,7 +59,7 @@ inline ATermAppl make_ctau_act_id() {
  * \brief Creates the ctau action
  **/
 inline ATermAppl make_ctau_action() {
-  static ATermAppl ctau_action(gsMakeAction(make_ctau_act_id(), ATmakeList0()));
+  static ATermAppl ctau_action = initAtermAppl(ctau_action, gsMakeAction(make_ctau_act_id(), ATmakeList0()));
 
   assert(ctau_action);
 

@@ -196,20 +196,13 @@ namespace squadt {
     assert(bf::exists(l) && bf::is_directory(l));
 
     bf::directory_iterator end;
-    bf::directory_iterator i(l);
 
-    while (i != end) {
-      if (is_directory(*i) && !symbolic_link_exists(*i)) {
-        /* Recursively import */
-        import_directory(*i);
-      }
-      else {
+    for (bf::directory_iterator i(l); i != end; ++i) {
+      if (!is_directory(*i) && !symbolic_link_exists(*i)) {
         if ((*i).leaf() != settings_manager::project_definition_base_name) {
           import_file(*i);
         }
       }
-
-      ++i;
     }
   }
 
