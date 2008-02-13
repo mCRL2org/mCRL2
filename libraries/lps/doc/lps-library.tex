@@ -1,136 +1,83 @@
 
 \documentclass{article}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fullpage}
 \usepackage{amsfonts}
 
 %TCIDATA{OutputFilter=Latex.dll}
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Friday, November 23, 2007 17:11:58}
+%TCIDATA{LastRevised=Wednesday, February 13, 2008 17:48:09}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
 
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
 \input{tcilatex}
+
 \begin{document}
 
 
-\section{\protect\bigskip The LPS-library}
+\section{The LPS-library}
 
-This document describes the algorithms in the LPS-library.
+This document describes data types and algorithms of the LPS-library.
 
-\subsection{\protect\bigskip Terms}
+\subsection{Terms}
 
 For an arbitrary term $t$ we define $\mathcal{V}ar(t)$ as the set of data
 variables that occur in $t$. The result of substituting $d^{\prime }$ for $d$
 in a term $t$ is denoted as $t[d:=d^{\prime }]$. With $d\in Sub(t)$ we
-denote that $d$ is a subterm of $t$.
+denote that data variable $d$ is a subterm of data expression $t$.
 
-\subsection{Linear processes}
+\subsection{Timed Linear processes}
 
-A linear process is a tuple $(X,\mathcal{A},\mathcal{D},\simeq )$, where $%
-\mathcal{A}$ is a set of action labels, $\mathcal{D}$ is a set of data
-expressions, $\simeq $ is an equivalence relation on $\mathcal{D}$, and $X$
-is a process of the following shape:%
+Let $\mathcal{D}$ be the set of all data expressions, with $\simeq $ an
+equivalence relation on $\mathcal{D}$. All data expressions have implicitly
+defined an associated sort. Let $\mathcal{V\subset D}$ be the set of all
+data variables. Furthermore, let $\mathcal{A}$ be the set of action labels.
+A timed linear process $X$ is a process equation of the following form:%
 \begin{equation}
 \begin{array}{l}
-X(d:D)=\sum\limits_{i\in
-I}\sum\limits_{e:E_{i}}s_{i}(d,e)X(g_{i}(d,e))+\sum\limits_{i\in
-J}\sum\limits_{e:E_{i}}\delta \circ t_{i}(d,e), \\
-\\
-\text{where }s_{i}(d,e)=c_{i}(d,e)\rightarrow a_{i}(f_{i}(d,e))\circ
-t_{i}(d,e),%
+X(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(f_{i}(d,e)) \mbox{\aap ,} t_{i}(d,e)X(g_{i}(d,e))+\sum\limits_{i\in
+J}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow \delta \mbox{\aap ,} t_{i}(d,e),%
 \end{array}
 \label{eq:lps_timed}
 \end{equation}%
-and $I$ and $J$ are disjoint and finite index sets, $D\subset \mathcal{D}$,
-and for $i\in I\cup J$:
+and $I$ and $J$ are disjoint and finite index sets, and for $i\in I\cup J$:
 
 \begin{itemize}
-\item $c_{i}:D\times E_{i}\rightarrow \mathbb{B}$ is a condition,
+\item $c_{i}:D\times E_{i}\rightarrow \mathbb{B}$ is the condition function,
 
 \item $a_{i}(d,e)$ is a multi-action $a_{i}^{1}(f_{i}^{1}(d,e))|\cdots
-|a_{i}^{n_{i}}(f_{i}^{n_{i}}(d,e))$, where $f_{i}^{k}(d,e)$ (for $1\leq
-k\leq n_{i}$) gives the parameters of action name $a_{i}^{k}\in A$,
+|a_{i}^{n_{i}}(f_{i}^{n_{i}}(d,e))$, where $f_{i}:D\times E_{i}\rightarrow 
+\mathcal{D}$ is the action parameter function,
 
-\item $t_{i}:D\times E_{i}\rightarrow \mathbb{R}$ is the time stamp of the
-multi-action $a_{i}(d,e)$ or $\delta $,
+\item $t_{i}:D\times E_{i}\rightarrow \mathbb{R}$ is the time stamp function,
 
-\item $c_{i}:D\times E_{i}\rightarrow D$ is the next state.
+\item $g_{i}:D\times E_{i}\rightarrow D$ is the next state function.
 \end{itemize}
 
-The components of $d$ are called the \emph{process parameters} of $X$.
+The components $d_{i}$ $\in \mathcal{V}$ of vector $d=[d_{1},\cdots ,d_{m}]$
+are called the \emph{process parameters} of $X$.
 
-\subsection{\protect\bigskip Free variables}
+\subsection{Untimed Linear processes}
 
-\bigskip In the mCRL2 tool set a linear process is parameterized with so
-called free variables\footnote{%
-The name free variables is confusing, a more descriptive name should be
-chosen.}. A linear process thus becomes a tuple $(X,\mathcal{A},\mathcal{D}%
-,\simeq ,V)$, where $V$ is a finite set of \emph{free variables} and $X$ is
-a process definition of the following shape:%
+Similarly, an untimed linear process $X$ is a process equation of the
+following form:%
 \begin{equation}
 \begin{array}{l}
-X(d:D)=\sum\limits_{i\in
-I}\sum\limits_{e:E_{i}}s_{i}(d,v,e)X(g_{i}(d,v,e))+\sum\limits_{i\in
-J}\sum\limits_{e:E_{i}}\delta \circ t_{i}(d,v,e), \\
-\\
-\text{where }s_{i}(d,v,e)=c_{i}(d,v,e)\rightarrow a_{i}(f_{i}(d,v,e))\circ
-t_{i}(d,v,e)\text{.}%
-\end{array}
-\label{eq:lps_freevar}
+X(d:D)=\sum\limits_{i\in I}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow
+a_{i}(f_{i}(d,e))X(g_{i}(d,e))+\sum\limits_{i\in
+J}\sum\limits_{e:E_{i}}c_{i}(d,e)\rightarrow \delta%
+\end{array}%
+,  \label{eq:lps_untimed}
 \end{equation}%
-Free variables have the property that they can attain arbitrary values
-"without influencing the process behavior". A linear process with free
-variables can be trivially transformed into a linear process without free
-variables, by adding the free variables $v$ to the process parameters $d$,
-or by giving them an arbitrary value. The reason they exist is that certain
-algorithms can substitute clever values for the free variables, in order to
-simplify the resulting process.
+with $c_{i}$, $a_{i}$ and $g_{i}$ defined as above.
 
-We will restrict most algorithms to the case without free variables. In many
-cases an algorithm for the case with free variables can be derived from it
-by allowing the algorithm to substitute values for free variables at
-arbitrary moments.
-
-\subsection{Untimed linear processes}
-
-\bigskip An untimed linear process is a tuple $(X,A,\mathcal{D},\simeq )$,
-where $X$ is a process of the following shape:%
-\begin{equation}
-\begin{array}{l}
-X(d:D)=\sum\limits_{i\in
-I}\sum\limits_{e:E_{i}}s_{i}(d,e)X(g_{i}(d,e))+\sum\limits_{i\in
-J}\sum\limits_{e:E_{i}}\delta ,\QQfnmark{%
-This summation over deltas looks weird.} \\
-\\
-\text{where }s_{i}(d,e)=c_{i}(d,e)\rightarrow a_{i}(f_{i}(d,e)),%
-\end{array}%
-\QQfntext{0}{
-This summation over deltas looks weird.}  \label{eq:lps_untimed}
-\end{equation}
-
-The timed linear process defined by \ref{eq:lps_timed} is equivalent to the
-following untimed linear process:%
-\[
-\begin{array}{l}
-X(d^{\prime }:D^{\prime })=\sum\limits_{i\in
-I}\sum\limits_{e:E_{i}}s_{i}^{\prime }(d^{\prime },e)X(g_{i}(d^{\prime
-},e))+\sum\limits_{i\in J}\sum\limits_{e:E_{i}}\delta , \\
-\\
-\text{where }s_{i}^{\prime }(d^{\prime },e)=c_{i}^{\prime }(d^{\prime
-},e)\rightarrow a_{i}(f_{i}^{\prime }(d^{\prime },e))\circ t_{i}^{\prime
-}(d^{\prime },e),%
-\end{array}%
-\]%
-and $d^{\prime }=(d,t)$, $t_{i}^{\prime }(d^{\prime },e)=t_{i}(d,e)$, $%
-f_{i}^{\prime }(d^{\prime },e)=f_{i}(d,e)$, $g_{i}^{\prime }(d^{\prime
-},e)=g_{i}(d,e)$, and $c_{i}^{\prime }(d^{\prime },e_{i})=c_{i}(d,e)\wedge
-(t_{i}(d,e)>t)$.
-
-We will restrict most algorithms to the untimed case. The corresponding
-algorithm for the timed case can often be easily derived from it.
-
-\subsection{State space}
+\subsubsection{State Space}
 
 An untimed linear process \ref{eq:lps_untimed} with initial value $\overline{%
 d}\in D$ defines a labeled transition system $M=(S,\Sigma ,\rightarrow
@@ -139,18 +86,28 @@ d}\in D$ defines a labeled transition system $M=(S,\Sigma ,\rightarrow
 \begin{itemize}
 \item $S=D$ is the (possibly infinite) set of states
 
-\item $\Sigma =\{a(d)|a\in A\wedge d\in D\}$ is the (possibly infinite) set
-of labels
+\item $\Sigma =\{a_{i}(f_{i}(d,e))|i\in I\wedge e:E_{i}\}$ is the (possibly
+infinite) set of labels
 
-\item $\rightarrow =\{(d,a(d^{\prime }),d^{\prime \prime })|a\in A\wedge
-\exists e\in E_{i}.c_{i}(d,e)\wedge d^{\prime }=f_{i}(d,e)\wedge d^{\prime
-\prime }=g_{i}(d,e)\}$
+\item $\rightarrow $ $=\{(d,a_{i}(f_{i}(d,e)),g_{i}(d,e))|i\in I\wedge
+e:E_{i}\wedge c_{i}(d,e)\}$
 
 \item $s${}$_{0}=\overline{d}$ is the initial state
 \end{itemize}
 
 For $R\subset S$ we define $next\_states(R)$ as $\{s\in S|\exists r\in
 R:r\rightarrow s\}$.
+
+\subsection{Don't care variables}
+
+\bigskip In the mCRL2 tool set a linear process is parameterized with a
+finite set $DC$ of so called \emph{don't care} variables (also called free
+variables). This means that the expressions $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, and $t_{i}(d,e)$ may contain unbound variables from the set $DC$%
+. Don't care variables have the special property that any two processes
+obtained by assigning values to them are strongly bisimulation equivalent.
+In many algorithms we will simply ignore don't care variables. In some
+cases, algorithms may assign values to some of the don't care variables.
 
 \subsection{Notations}
 
@@ -159,112 +116,141 @@ Let $p$ be an untimed linear process as defined in \ref{eq:lps_untimed}.
 \begin{itemize}
 \item A \emph{constant parameter} of $p$ is a parameter $d_{i}$ that has a
 constant value for all reachable states of the corresponding state space,
-given an initial value $\overline{d}\in D$.
+given an initial state $\overline{d}:D$.
 
 \item An \emph{insignificant parameter} of $p$ is a process parameter $d_{i}$
-that has no influence on the state space of the process for a given initial
-state $\overline{d}\in D$.\footnote{%
-This definition needs to be clarified.}
+such that for any two initial states that differ only at the value of $d_{i}$%
+, the corresponding state spaces are isomorphic.
 
-\item If $p$ is a linear process, then $p[t:=t^{\prime }]$ is the linear
-process obtained from $p$ by applying the substitution $t:=t^{\prime }$ to
-all terms that appear in the definition of $p$.
-
-\item If $d_{i}$ is an insignificant variable of $p$, then $p\backslash
-\{d_{i}\}$ is a linear process $p^{\prime }$ obtained from $p$ by replacing
-each term $t$ that appears in the definition of $p$ by a term $t^{\prime }$,
-such that $d_{i}\notin Sub(t^{\prime })$ and $t\simeq t^{\prime }$ and by
-removing $d_{i}$ from the process parameters of $p$.
+\item Let $p$ be a linear process, $x$ a data variable and $y$ a data
+expression. Then $p[x:=y]$ is the linear process obtained from $p$ by
+applying the substitution $x:=y$ to all terms $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.
 \end{itemize}
 
-\section{\protect\bigskip Parelm}
+\subsection{Operations on linear processes}
 
-Let $p$ be an untimed linear process as defined in \ref{eq:lps_untimed}, and
-$\overline{d}\in D$ an initial state. A \emph{parelm} algorithm is an
-algorithm that returns $p\backslash \{d_{j_{1}},\cdots ,d_{j_{m}}\}$ for
-some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of
+\bigskip We now define two operations on linear processes: removing
+(insignificant) parameters and removing constant parameters.
+
+Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
+insignificant parameters of $X$. Then we define \textsc{RemoveParameters(}$%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{) as a linear process obtained
+from }$X(d:D)$ by removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the
+process parameters of $X$, and by replacing each term $c_{i}(d,e)$, $%
+f_{i}(d,e)$, $g_{i}(d,e)$, or $t_{i}(d,e)$ that appears in the definition of 
+$X$, and that has one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a
+subterm by a term $c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $%
+g_{i}^{\prime }(d,e)$, or $t_{i}^{\prime }(d,e)$ that does not have one of
+the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm, and such that the
+remaining process is strongly bisimulation equivalent to $X(d:D)$\footnote{%
+A more formal definition of this is welcome.}.
+
+Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
+constant parameters of $X$, given the state $\overline{d}:D$. Then we define 
+\textsc{RemoveConstantParameters}($p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},%
+\overline{d}$) as a linear process obtained from $X(d:D)$ by removing $%
+\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process parameters of $X$, and by
+replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $g_{i}(d,e)$, or $t_{i}(d,e)$
+that appears in the definition of $X$ by a term $c_{i}^{\prime }(d,e)$, $%
+f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$, or $t_{i}^{\prime }(d,e)$
+that does not have one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a
+subterm, and such that the remaining process is strongly bisimulation
+equivalent to $X(d:D)$\footnote{%
+Or should this be restricted to the result of substituting all the constant
+values, and possibly applying the rewriter to it?}.
+
+\section{Parelm}
+
+Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns 
+\textsc{RemoveParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} for
+some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of 
 $p$.
 
-\subsection{\protect\bigskip Parelm implementations}
+\subsection{Parelm implementations}
 
 We define the following implementation of parelm:
 
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Parelm1(}$p$\textsc{)} \\
+\textsc{Parelm1(}$p,\overline{d}$\textsc{)} \\ 
 $G^{0}:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V%
-}ar(s_{i}(d,e))\}$ \\
-$m:=0$ \\
-$\text{\textbf{do}}$ \\
-$\qquad m:=m+1$ \\
+}ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}%
+ar(t_{i}(d,e))\} $ \\ 
+$m:=0$ \\ 
+$\text{\textbf{do}}$ \\ 
 $\qquad G^{m+1}:=G^{m}\cup \{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in
-G^{m}}\exists _{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\
-$\text{\textbf{while }}(G^{m+1}\neq G^{m})$ \\
-$\text{\textbf{return} }p\backslash \{d_{j_{1}},\cdots ,d_{j_{p}}\},$ \\
-\hline
+G^{m}}\exists _{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
+$\qquad m:=m+1$ \\ 
+$\text{\textbf{while }}(G^{m+1}\neq G^{m})$ \\ 
+$\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
+,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $G^{m}=\{j_{1},\cdots ,j_{p}\}$.\bigskip
+where $\{j_{1},\cdots ,j_{p}\}=G^{m}$.\bigskip\ Note that $g_{i}(d,e)_{l}$
+is the $l$-th component of the vector of terms $g_{i}(d,e)$.
 
 \section{Constelm}
 
-Let $p$ be an untimed linear process as defined in \ref{eq:lps_untimed}. A
-\emph{constelm} algorithm is an algorithm that returns $p[d_{j_{1}}:=%
-\overline{d}_{j_{1}}][d_{j_{2}}:=\overline{d}_{j_{2}}]\cdots \lbrack
-d_{j_{m}}:=\overline{d}_{j_{m}}]$ for some subset $\{d_{j_{1}},\cdots
-,d_{j_{m}}\}$ of constant parameters of $p$.
+Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
+{eq:lps_timed}, and let $\overline{d}:D$ be its initial value. A \emph{%
+constelm} algorithm is an algorithm that returns \textsc{%
+RemoveConstantParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}$%
+\textsc{)} for some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of constant
+parameters of $p$.
 
 \subsection{Constelm implementations}
 
 We assume that $R:\mathcal{D\rightarrow D}$ is a (rewriter) function on data
 expressions with the following properties:%
-\begin{eqnarray}
-R(t) &=&false\Rightarrow t\simeq false  \nonumber \\
-R(t) &=&R(t^{\prime })\Rightarrow t\simeq t^{\prime }\text{.}
-\end{eqnarray}%
+\begin{eqnarray*}
+R(false) &=&false \\
+(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{.}
+\end{eqnarray*}%
 Then we define the following implementations of constelm:
 
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Constelm1(}$p,\overline{d},R$\textsc{)} \\
-$x:=\overline{d}$ \\
-$J:=\{1,\ldots ,n\}$ \\
-$\text{\textbf{do}}$ \\
-$\qquad J_{prev}:=J$ \\
-$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in
-J}.R(c_{i}(d))\neq false\wedge R(g_{i}(d)_{j})\neq R(\overline{d}_{j}):$ \\
-$\qquad \qquad x_{j}:=d_{j}$ \\
-$\qquad \qquad J:=J\backslash \{j\}$ \\
-$\qquad \text{\textbf{fi}}$ \\
-$\text{\textbf{while }}(J\neq J_{prev})$ \\
-$\text{\textbf{return} }p[d_{j_{1}}:=\overline{d}_{j_{1}}][d_{j_{2}}:=%
-\overline{d}_{j_{2}}]\cdots \lbrack d_{j_{m}}:=\overline{d}_{j_{m}}],$ \\
-\hline
+\textsc{Constelm1(}$p,\overline{d},R$\textsc{)} \\ 
+$x:=\overline{d}$ \\ 
+$G:=\{1,\ldots ,n\}$ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta G:=\{j\in G|\exists _{i\in I}.R(c_{i}(x))\neq false\wedge
+R(g_{i}(x)_{j})\neq R(\overline{d}_{j})\}$ \\ 
+$\qquad G:=G\backslash \Delta G$ \\ 
+$\qquad \text{\textbf{for }}(j\in \Delta G):$ \\ 
+$\qquad \qquad x_{j}:=d_{j}$ \\ 
+$\qquad $\textbf{rof} \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $J=\{j_{1},\cdots ,j_{m}\}$.
+where $\{j_{1},\cdots ,j_{m}\}=G$.
 
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\
-$R:=\overline{\{d\}}$ \\
-$J:=\{1,\ldots ,n\}$ \\
-$\text{\textbf{do}}$ \\
-$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\
-$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in J}.\exists
-_{r\in R}.r_{j}\neq \overline{d}_{j}$ \\
-$\qquad \qquad J:=J\backslash \{j\}$ \\
-$\qquad \text{\textbf{fi}}$ \\
-$\qquad R:=R\cup \Delta R$ \\
-$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\
-$\text{\textbf{return} }p[d_{j_{1}}:=\overline{d}_{j_{1}}][d_{j_{2}}:=%
-\overline{d}_{j_{2}}]\cdots \lbrack d_{j_{m}}:=\overline{d}_{j_{m}}],$ \\
-\hline
+\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\ 
+$R:=\overline{\{d\}}$ \\ 
+$G:=\{1,\ldots ,n\}$ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\ 
+$\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in G}.\exists
+_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\ 
+$\qquad \qquad G:=G\backslash \{j\}$ \\ 
+$\qquad \text{\textbf{fi}}$ \\ 
+$\qquad R:=R\cup \Delta R$ \\ 
+$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\ 
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $J=\{j_{1},\cdots ,j_{m}\}$.
+where $\{j_{1},\cdots ,j_{m}\}=G$.
 
 \end{document}
