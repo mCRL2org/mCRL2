@@ -31,7 +31,7 @@ class VisObject
   private:
     float* matrix;
     RGB_Color color;
-    GLubyte** texture;
+    GLuint texName;
     int numColours;
     int primitive;
     vector<int> identifiers;
@@ -43,20 +43,14 @@ VisObject::VisObject() {
 	color.g = 150;
 	color.b = 150;
         numColours = 0;
+
+        // Generate texture alias for this object.
+        glGenTextures(1, &texName);
 }
 
 VisObject::~VisObject() {
+  glDeleteTextures(1, &texName);
   free(matrix);
-  
-  if(numColours > 0)
-  {
-    for(int i = 0; i < numColours; ++i)
-    {
-      free((void*) texture[i]);
-    }
-
-    free(texture);
-  }
 }
 
 float* VisObject::getMatrixP() const {
@@ -82,25 +76,42 @@ void VisObject::setColor(RGB_Color c) {
 
 void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
 {
-  if(colours.size() > 0)
+
+  if (colours.size() > 0)
   {
-    numColours = colours.size();
+    numColours = 1;
 
-    texture = (GLubyte**) malloc(colours.size() * sizeof(GLubyte*));
-
-    for(size_t i = 0; i < colours.size(); ++i)
+    // numColours := smallest power of 2 s.t. colours.size <= numColours,
+    // since taking an NP2 greatly reduces performance greatly.
+    while ( static_cast<unsigned int>(numColours) < colours.size())
     {
-      texture[i] = (GLubyte*) malloc(4* sizeof(GLubyte));
-      texture[i][0] = (GLubyte)colours[i].r;
-      texture[i][1] = (GLubyte)colours[i].g;
-      texture[i][2] = (GLubyte)colours[i].b;
-      texture[i][3] = (GLubyte) 255; //TODO 
+      numColours = numColours << 1;
     }
+    
+    GLubyte texture[numColours][4];
+
+    for(int i = 0; i < numColours; ++i)
+    {
+      int j = i % colours.size();
+      texture[i][0] = colours[j].r;
+      texture[i][1] = colours[j].g;
+      texture[i][2] = colours[j].b;
+      texture[i][3] = 255; // alpha value
+    }
+
+    glBindTexture(GL_TEXTURE_1D, texName); 
+    // GL_TEXTURE_1D is now an alias for texName
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, numColours, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, texture);
   }
-
-
-
-  
+  else
+  {
+    numColours = 0;
+  }
 }
 
 void VisObject::setPrimitive(int p) {
@@ -125,39 +136,15 @@ void VisObject::drawWithTexture(PrimitiveFactory *pf, unsigned char alpha)
 {
   if (numColours > 0)
   {
-    GLubyte tex[3][4] = {{255, 0, 0, 255},
-                         {0, 255, 0, 255},
-                         {0, 0, 255, 255}};
-    //TODO Necessary?
-    for(int i = 0; i < numColours; ++i)
-    {
-      texture[i][4] = alpha;
-    }
-    // TODO: Taken from the Red Book, might be improved by culling/rewrite code
-    GLuint texName;
-  
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
- 
-    glGenTextures(1, &texName);
-    glBindTexture(GL_TEXTURE_1D, texName);
-
-
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, numColours, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, tex);
-
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-
-    glBindTexture(GL_TEXTURE_1D, texName);
+    
+    // Recall all settings stored in texName
+    glBindTexture(GL_TEXTURE_1D, texName); 
 
     glEnable(GL_TEXTURE_1D);
   }
   
   draw(pf, alpha);
-  
+
   if (numColours > 0)
   {
     glDisable(GL_TEXTURE_1D);
@@ -197,10 +184,27 @@ void VisObjectFactory::sortObjects(Point3D viewpoint) {
 	stable_sort(objects_sorted.begin(),objects_sorted.end(),Distance(viewpoint));
 }
 
-void VisObjectFactory::drawObjects(PrimitiveFactory *pf,unsigned char alpha) {
-	for (unsigned int i = 0; i < objects_sorted.size(); ++i) {
-		objects_sorted[i]->drawWithTexture(pf,alpha);
-	}
+void VisObjectFactory::drawObjects(PrimitiveFactory *pf,unsigned char alpha,
+                                   bool texture) {
+  if (texture)
+  {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    
+    //glEnable(GL_TEXTURE_1D);
+    for (unsigned int i = 0; i < objects_sorted.size(); ++i) 
+    {
+      objects_sorted[i]->drawWithTexture(pf,alpha);
+    }
+    //glDisable(GL_TEXTURE_1D);
+  }
+  else
+  {
+    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
+    {
+      objects_sorted[i]->drawWithTexture(pf, alpha);
+    }
+  }
 }
 
 void VisObjectFactory::clear() {
@@ -231,4 +235,9 @@ void VisObjectFactory::updateObjectMatrix(int obj) {
 
 void VisObjectFactory::updateObjectColor(int obj,RGB_Color color) {
 	objects[obj]->setColor(color);
+}
+
+void VisObjectFactory::updateObjectTexture(int obj, vector<RGB_Color> &colours)
+{
+  objects[obj]->setTextureColours(colours);
 }

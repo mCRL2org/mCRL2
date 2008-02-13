@@ -716,11 +716,11 @@ void Cluster::removeMatchedRule(int mr) {
   matchedRules.erase(mr);
 }
 
-/*
+
 void Cluster::getMatchedRules(std::vector< int > &mrs) {
   mrs.assign(matchedRules.begin(),matchedRules.end());
 }
-*/
+
 int Cluster::setActionMark(int l,bool b) {
   map<int,int>::iterator li = actionLabelCounts.find(l);
   if (li != actionLabelCounts.end()) {

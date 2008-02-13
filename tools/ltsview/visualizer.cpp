@@ -168,7 +168,8 @@ void Visualizer::drawStructure() {
     updateColors();
     update_colors = false;
   }
-  visObjectFactory->drawObjects(primitiveFactory,settings->getUByte(Alpha));
+  visObjectFactory->drawObjects(primitiveFactory,settings->getUByte(Alpha),
+                                mediator->getMatchStyle() == MATCH_MULTI);
 }
 
 void Visualizer::traverseTree(bool co) {
@@ -476,19 +477,49 @@ void Visualizer::updateColors() {
   } else {
     for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
       cl = *ci;
+      vector<RGB_Color> rule_colours;
+
       // set color of cluster cl
-      if (mediator->isMarked(cl)) {
-        c = settings->getRGB(MarkedColor);
-      } else {
-        c = RGB_WHITE; 
+      if (mediator->isMarked(cl)) 
+      {
+        if (mediator->getMatchStyle() != MATCH_MULTI)
+        {
+          c = settings->getRGB(MarkedColor);
+        }
+        else
+        {
+          c = settings->getRGB(StateColor);
+
+          vector<int> cluster_rules;
+
+          cl->getMatchedRules(cluster_rules);
+
+          for(size_t i = 0; i <  cluster_rules.size(); ++i)
+          {
+            rule_colours.push_back(
+                    mediator->getMarkRuleColor(cluster_rules[i]));
+
+          }
+        }
+
+      } 
+      else {
+        c = RGB_WHITE;
       }
+      
       if (cl->isSelected()) {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
       }
+
       visObjectFactory->updateObjectColor(cl->getVisObject(),c);
+      visObjectFactory->updateObjectTexture(cl->getVisObject(), 
+                                           rule_colours);
+
       for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
         if (cl->getBranchVisObject(i) != -1) {
           visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
+          visObjectFactory->updateObjectTexture(cl->getBranchVisObject(i), 
+                                                rule_colours);
         }
       }
     }
@@ -781,7 +812,6 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
       if(!(simulating && s->isSimulated())) 
       {
         RGB_Color c;
-        //GLubyte texture[5][4];
         GLuint texName;
 
         if (!mediator->isMarked(s))

@@ -46,7 +46,7 @@ class Mediator {
     virtual Utils::MatchStyle getMatchStyle() = 0;
     virtual Utils::MarkStyle getMarkStyle() = 0;
     virtual bool isMarked(State *s) = 0;
-    virtual bool isMarked(Cluster *s) = 0;
+    virtual bool isMarked(Cluster *c) = 0;
     virtual bool isMarked(Transition *t) = 0;
 
     // Reports an error to the user through a message box.

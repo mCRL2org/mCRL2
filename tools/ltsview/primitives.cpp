@@ -35,7 +35,6 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   vertices[0] = 0;
   vertices[1] = 0;
   vertices[2] = -1;
-
   texCoords[0] = 0;
 
   k = 3;
@@ -55,13 +54,19 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   vertices[k+1] = 0;
   vertices[k+2] = 1;
   texCoords[l] = 0;
+
   int M = N+2;
 
   GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
+  
+
   is_bot[0] = 0;
   is_bot[1] = 1;
+
+
   for (i=N; i>=1; --i) {
     is_bot[M-i] = i;
+    
   }
   
   GLuint* is_mid = (GLuint*)malloc((N-2)*(2*N+2)*sizeof(GLuint));
@@ -83,6 +88,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   i = 1;
   for (k=j+1; k<=j+N; ++k) {
     is_top[i] = k;
+
     ++i;
   }
   is_top[i] = j + 1;
@@ -196,20 +202,26 @@ void P_Hemisphere::draw() {
 
 void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   int Ndiv2 = N / 2;
-  int i,j,k;
+  int i,j,k,l;
   GLfloat* vertices = (GLfloat*)malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((N*Ndiv2 + 2) * sizeof(GLfloat));
+
   k = 0;
+  l = 0;
   for (j = 0; j < Ndiv2; ++j) {
     for (i = 0; i < 2*N; i += 2) {
       vertices[k]   = coss[j] * coss[i];
       vertices[k+1] = coss[j] * sins[i];
       vertices[k+2] = sins[j];
+      texCoords[l] = coss[j] * coss[i];
       k += 3;
+      ++l;
     }
   }
   vertices[k]   = 0;
   vertices[k+1] = 0;
   vertices[k+2] = 1;
+  texCoords[l] = 0;
 
   GLuint* is_mid = (GLuint*)malloc((N*N+N)*sizeof(GLuint));
   i = 0;
@@ -238,9 +250,11 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
     disp_list = glGenLists(1);
   }
   glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glVertexPointer(3,GL_FLOAT,0,vertices);
   glNormalPointer(GL_FLOAT,0,vertices);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
   int M = 2*N + 2;
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is_top);
@@ -251,6 +265,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
   free(vertices);
   free(is_mid);
   free(is_top);
+  free(texCoords);
 }
 
 /* -------- P_Disc ------------------------------------------------------ */
@@ -269,26 +284,36 @@ void P_Disc::draw() {
 
 void P_Disc::reshape(int N,float *coss,float *sins) {
   GLfloat* vertices = (GLfloat*)malloc(3*N*sizeof(GLfloat));
-  int i,j;
+  GLfloat* texCoords = (GLfloat*)malloc(N*sizeof(GLfloat));
+  int i,j, k;
   j = 0;
+  k = 0;
   for (i=0; i<2*N; i+=2) {
     vertices[j] = coss[i];
     vertices[j+1] = sins[i];
     vertices[j+2] = 0;
+    texCoords[k] = coss[i];
     j += 3;
+    ++k;
   }
   
   if (disp_list == 0) {
     disp_list = glGenLists(1);
   }
+
   glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glVertexPointer(3,GL_FLOAT,0,vertices);
+  glTexCoordPointer(1,GL_FLOAT,0,texCoords);
+
   glNewList(disp_list,GL_COMPILE);
     glNormal3f(0.0f,0.0f,1.0f);
     glDrawArrays(GL_POLYGON,0,N);
   glEndList();
+
   free(vertices);
+  free(texCoords);
 }
 
 /* -------- P_Ring ------------------------------------------------------ */
@@ -308,19 +333,30 @@ void P_Ring::draw() {
 
 void P_Ring::reshape(int N,float *coss,float *sins) {
   int N3 = 3*N;
-  int i,j,k;
+  int i,j,k,l,m;
   GLfloat* vertices = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((2*N+2)*sizeof(GLfloat));
+
   k = 0;
+  l = 0;
   j = N3;
+  m = N;
+
   for (i=0; i<2*N; i+=2) {
     vertices[k] = coss[i];
     vertices[k+1] = sins[i];
     vertices[k+2] = -0.5f;
+    texCoords[l] = coss[i];
+
     k += 3;
+    ++l;
+
     vertices[j] = r_top*coss[i];
     vertices[j+1] = r_top*sins[i];
     vertices[j+2] = 0.5f;
+    texCoords[m] = r_top * coss[i];
     j += 3;
+    ++m;
   }
 
   GLfloat* normals = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
@@ -344,6 +380,7 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
     ++k;
     is[k] = i;
     ++k;
+
   }
   is[k] = N;
   is[k+1] = 0;
@@ -354,14 +391,18 @@ void P_Ring::reshape(int N,float *coss,float *sins) {
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
   glVertexPointer(3,GL_FLOAT,0,vertices);
   glNormalPointer(GL_FLOAT,0,normals);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_QUAD_STRIP,2*N+2,GL_UNSIGNED_INT,is);
   glEndList();
   free(vertices);
   free(normals);
   free(is);
+  free(texCoords);
 }
 
 float P_Ring::getTopRadius() {
@@ -425,17 +466,24 @@ void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
   float a = 0.5f*PI - alpha - sign*obt;
   float sin_a = -sign*sin(a);
   float cos_a = cos(a);
-  int i,j;
+  int i,j,k;
   GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((N + 1) * sizeof(GLfloat));
+
   vertices[0] = 0.0f;
   vertices[1] = 0.0f;
   vertices[2] = 0.0f;
+  texCoords[0] = 0.0f;
+
   j = 3;
+  k = 1;
   for (i = 0; i < 2*N; i += 2) {
     vertices[j]   = radius * coss[i] * cos_a;
     vertices[j+1] = radius * sins[i];
     vertices[j+2] = 1.0f - radius * coss[i] * sin_a;
+    texCoords[k] = coss[i];
     j += 3;
+    ++k;
   }
 
   GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
@@ -466,13 +514,16 @@ void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
   }
 
   glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glVertexPointer(3,GL_FLOAT,0,vertices);
   glNormalPointer(GL_FLOAT,0,normals);
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
   glNewList(disp_list,GL_COMPILE);
     glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is);
   glEndList();
   free(vertices);
+  free(texCoords);
   free(normals);
   free(is);
 }

@@ -67,7 +67,7 @@ class Cluster {
 
     void addMatchedRule(int mr);
     void removeMatchedRule(int mr);
-    //void getMatchedRules(std::vector< int > &mrs);
+    void getMatchedRules(std::vector< int > &mrs);
     int getNumMarkedStatesAll();
     int getNumMarkedStatesAny();
     void setNumMarkedStatesAll(int n);
