@@ -66,6 +66,7 @@ void Simulation::stop()
     posTrans[i]->getEndState()->setSimulated(false);
   }
 
+  chosenTrans = -1;
   // Clear history
   stateHis.clear();
   transHis.clear();
