@@ -342,7 +342,13 @@ void LTS::addCluster(Cluster* c)
 
   for (int i = 0; i < c->getNumStates(); ++i) {
     State* s = c->getState(i);
-    states.push_back(s);
+    unsigned int sid = s->getID();
+    if (states.size() <= sid)
+    {
+      states.resize(sid + 1);
+    }  
+    
+    states[sid] = s;
     s->setZoomLevel(zoomLevel);
   }
 }
@@ -915,7 +921,10 @@ LTS* LTS::zoomOut() {
     }
     vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li) {
-      (*li)->setZoomLevel(zoomLevel - 1);
+      if (*li)
+      {
+        (*li)->setZoomLevel(zoomLevel - 1);
+      }
     }
     return previousLevel;
   } else {
