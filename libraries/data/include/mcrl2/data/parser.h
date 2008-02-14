@@ -82,9 +82,7 @@ namespace detail {
     // make a fake linear process
     std::stringstream lps_stream;
     lps_stream << text;
-    lps_stream << "act a;\n";
-    lps_stream << "proc X = a.X;\n";
-    lps_stream << "init X;\n";
+    lps_stream << "init delta;\n";
 
     ATermAppl result = data::detail::parse_specification(lps_stream);
     result           = data::detail::type_check_specification(result);

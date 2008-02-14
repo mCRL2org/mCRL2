@@ -45,14 +45,18 @@ bool find_data_variable(Term t, const data_variable& d)
 template <typename Term>
 std::set<data_variable> find_all_data_variables(Term t)
 {
-  // find all data variables in t
   std::set<data_variable> variables;
-  atermpp::partial_find_all_if(t,
-                               is_data_variable,
-                               boost::bind(std::logical_or<bool>(), boost::bind(is_data_variable, _1), boost::bind(is_data_operation, _1)),
-                               std::inserter(variables, variables.end())
-                              );
+  atermpp::find_all_if(t, is_data_variable, std::inserter(variables, variables.end()));
   return variables;
+
+  // find all data variables in t
+  // std::set<data_variable> variables;
+  // atermpp::partial_find_all_if(t,
+  //                              is_data_variable,
+  //                              boost::bind(std::logical_or<bool>(), boost::bind(is_data_variable, _1), boost::bind(is_data_operation, _1)),
+  //                              std::inserter(variables, variables.end())
+  //                             );
+  // return variables;
 }
 
 } // namespace data

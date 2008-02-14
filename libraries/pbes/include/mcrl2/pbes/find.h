@@ -30,15 +30,10 @@ using atermpp::aterm_traits;
 template <typename Term>
 bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
 {
-  std::set<propositional_variable> variables;
-  atermpp::find_all_if(t, is_propositional_variable, std::inserter(variables, variables.end()));
-  return variables;
-/*  
   return atermpp::partial_find_if(t,
                                   detail::compare_propositional_variable_instantiation(v),
                                   is_propositional_variable_instantiation
                                  ) != atermpp::aterm();
-*/                                  
 }
 
 /// \brief Returns all propositional variable instantiations that occur in the term t
