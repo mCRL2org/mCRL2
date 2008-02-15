@@ -36,6 +36,7 @@ tool ltsview
         /site-config//wx_gl
       : <squadt-connectivity>implemented
         <wx>yes
+        <opengl>yes
       ;
 
 install-tools ltsview ;

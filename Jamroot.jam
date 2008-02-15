@@ -448,8 +448,11 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
   }
   if [ property.select opengl : $(requirements) ] {
     if [ feature.get-values opengl : $(requirements) ] = yes {
-      if $(OPENGL_NAME) {
+      if ! $(OPENGL_NAME) {
         make_alias = true ;
+      }
+      else {
+        requirements += <library>/site-config//opengl ;
       }
     }
   }
@@ -497,8 +500,11 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
   }
   if [ property.select opengl : $(requirements) ] {
     if [ feature.get-values opengl : $(requirements) ] = yes {
-      if $(OPENGL_NAME) {
+      if ! $(OPENGL_NAME) {
         make_alias = true ;
+      }
+      else {
+        requirements += <library>/site-config//opengl ;
       }
     }
   }

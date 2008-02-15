@@ -116,19 +116,16 @@ if $(WX_CPPFLAGS) {
           <toolset>msvc:<user-interface>gui
         ;
 
-  if $(OPENGL_NAME) {
-    libraries_from_string wx_gl
-	: $(WX_GL_LDFLAGS)
-        : <threading>multi
-        :
-        : <cxxflags>$(WX_CPPFLAGS)
-          <define>USING_WX
-          <wx>yes
-          <opengl>yes
-          <toolset>msvc:<user-interface>gui
-          <library>opengl
-        ;
-  }
+  libraries_from_string wx_gl
+      : $(WX_GL_LDFLAGS)
+      : <threading>multi
+      :
+      : <cxxflags>$(WX_CPPFLAGS)
+        <define>USING_WX
+        <wx>yes
+        <opengl>yes
+        <toolset>msvc:<user-interface>gui
+      ;
 }
 else {
   print-notice "Not building tools that depend on wxWidgets!" ;
