@@ -320,10 +320,11 @@ class pbes
 
       for (typename std::set<data::data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
       {
-        data::data_expression d = m_data.default_expression(*i);
+        data::data_expression d = m_data.default_expression(i->sort());
         if (d == data::data_expression())
         {
-          fail.push_back(d);
+          fail.push_back(*i);
+          // std::cerr << "Sort " << pp(i->sort()) << " Var " << pp(*i) << "\n";
         }
         else
         {
