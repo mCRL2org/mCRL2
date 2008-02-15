@@ -309,22 +309,23 @@ class pbes
     }
 
     /// Attempts to eliminate the free variables of the pbes, by substituting a default
-    /// value for them. The sequence of free variables is updated according to this.
+    /// value for them. Variables for which no default value can be found are untouched.
+    /// So, upon return the sequence of free variables of the pbes contains exactly those
+    /// variables for which no default value could be found. 
     /// Returns true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
       std::set<data::data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
       atermpp::vector<data::data_variable> src;    // the variables that will be replaced
       atermpp::vector<data::data_expression> dest; // the corresponding replacements
-      atermpp::vector<data::data_variable> fail;   // the variables that could not be replaced
+      atermpp::set<data::data_variable> fail;   // the variables that could not be replaced
 
       for (typename std::set<data::data_variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
       {
         data::data_expression d = m_data.default_expression(i->sort());
         if (d == data::data_expression())
         {
-          fail.push_back(*i);
-          // std::cerr << "Sort " << pp(i->sort()) << " Var " << pp(*i) << "\n";
+          fail.insert(*i);
         }
         else
         {
@@ -337,7 +338,7 @@ class pbes
         *i = pbes_equation(i->symbol(), i->variable(), data::data_variable_sequence_replace(i->formula(), src, dest));
       }
       m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::data_variable_sequence_replace(m_initial_state.parameters(), src, dest));
-      m_free_variables.insert(fail.begin(), fail.end());
+      m_free_variables.swap(fail);
       return m_free_variables.empty();
     }
 
