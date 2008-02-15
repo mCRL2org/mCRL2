@@ -18,7 +18,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/modal_formula/detail/read_text.h"
+#include "mcrl2/core/text_utility.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -103,7 +103,7 @@ int test_main(int argc, char** argv)
       {       
         std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + "expected_timed_result";
         std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + "expected_untimed_result";
-        std::string formula = read_text(filename);
+        std::string formula = core::read_text(filename);
         if (fs::exists(timed_result_file))
         {
           try {

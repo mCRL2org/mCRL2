@@ -241,25 +241,23 @@ namespace detail {
         value_type v(a);
         *destBegin++ = a;
       }
+      if (stop(aterm_appl(t)))
+      {
+        return;
+      }
     }
     if (t.type() == AT_LIST)
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        if (!stop(aterm_appl(*i)))
-        {
-          partial_find_all_if_impl(*i, match, stop, destBegin);
-        }
+        partial_find_all_if_impl(*i, match, stop, destBegin);
       }
     } 
     else if (t.type() == AT_APPL)
     {
       for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
       {
-        if (!stop(aterm_appl(*i)))
-        {
-          partial_find_all_if_impl(*i, match, stop, destBegin);
-        }
+        partial_find_all_if_impl(*i, match, stop, destBegin);
       }
     }
     else

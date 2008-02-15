@@ -9,14 +9,16 @@ project libraries/pbes/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe bisimulation : bisimulation.cpp : ;
-exe lps2pbes     : lps2pbes.cpp : ;
-exe bessolve     : bessolve.cpp : ;
+#exe bisimulation : bisimulation.cpp : ;
+#exe lps2pbes     : lps2pbes.cpp : ;
+#exe bessolve     : bessolve.cpp : ;
+exe pbes_rewrite : pbes_rewrite.cpp : ;
 
 install dist
    :
-     bisimulation
-     lps2pbes
-     bessolve
+     #bisimulation
+     #lps2pbes
+     #bessolve
+     pbes_rewrite
    :
    ;

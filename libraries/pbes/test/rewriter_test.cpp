@@ -80,6 +80,8 @@ void test_rewriter()
   specification spec    = mcrl22lps(SPECIFICATION);
   data::rewriter datar(spec.data());
   pbes_system::rewriter<data::rewriter> pbesr(datar, spec.data());
+  pbes_system::rewrite_and_simplify_rewriter simp_rewr(spec.data());
+  pbes_system::substitute_and_rewrite_rewriter subst_rewr(spec.data());
 
   //state_formula formula = mcf2statefrm(FORMULA, spec);
   //bool timed = false;
@@ -112,7 +114,14 @@ void test_rewriter()
   test_expression(and_(T, F), pbesr);
   test_expression(and_(F, F), pbesr);
   test_expression(imp(T, b), pbesr);
-  
+
+  pbes_expression x = and_(b, T);
+  test_expression(x, pbesr);
+  test_expression(x, simp_rewr);
+  test_expression(x, subst_rewr);
+
+  BOOST_CHECK(false);
+
   BOOST_CHECK(pbesr(and_(T, T)) == T);
   //BOOST_CHECK(pbesr(forall(make_list(n), and_(T, T)) == T));
 }
@@ -138,7 +147,10 @@ void test_simplify_rewriter()
   data_expression T = data_expr::true_();
   data_expression F = data_expr::false_();
 
-  propositional_variable_instantiation X = prop_var("X", make_list(n));
+  propositional_variable_instantiation X  = prop_var("X", make_list(n));
+  propositional_variable_instantiation X1 = prop_var("X1", make_list(n));
+  propositional_variable_instantiation X2 = prop_var("X2", make_list(n));
+  propositional_variable_instantiation X3 = prop_var("X3", make_list(n));
 
   test_expression(T, pbesr);
   test_expression(F, pbesr);
@@ -163,7 +175,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   test_rewriter();
-  test_simplify_rewriter();
+  //test_simplify_rewriter();
 
   return 0;
 }

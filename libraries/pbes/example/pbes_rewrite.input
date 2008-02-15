@@ -1,0 +1,14 @@
+
+variables
+
+b1: Bool = false, b2: Bool = true
+
+expressions
+
+val(b1 && b2)
+
+val(b1 => b2)
+
+val(b1 && true)
+
+forall b:Bool. (val(b) && true && val(b1))

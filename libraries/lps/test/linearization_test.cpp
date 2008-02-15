@@ -73,11 +73,22 @@ void test_multiple_linearization_calls()
   spec = mcrl22lps(case_7);
 }
 
+void test_struct()
+{
+  std::string text =
+  "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
+  "                                                   \n"
+  "init true->delta;                                  \n"
+  ;
+  specification spec = mcrl22lps(text); 
+}
+
 int test_main(int argc, char** argv )
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  void test_multiple_linearization_calls();
+  test_struct();
+  // test_multiple_linearization_calls();
 
   return 0;
 }

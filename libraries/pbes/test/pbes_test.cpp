@@ -549,7 +549,6 @@ void test_normalize2()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   p.normalize();
-  std::cout << "HIEROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << std::endl;
 }
 
 // void test_xyz_generator()

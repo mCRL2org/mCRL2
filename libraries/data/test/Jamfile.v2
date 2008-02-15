@@ -12,6 +12,7 @@ project libraries/lps/test
 
 test-suite lps
     :
+      [ run rewriter_test.cpp ]
       [ run apply_test.cpp ]
       [ run data_expression.cpp ]
       [ run data_expression_replace_test.cpp ]

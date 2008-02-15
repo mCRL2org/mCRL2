@@ -12,7 +12,6 @@
 
 #include <set>
 #include <vector>
-#include "boost/ptr_container/ptr_vector.hpp"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
@@ -107,7 +106,7 @@ struct pbes_simplify_expression_builder: public pbes_expression_builder
   ///
   pbes_expression visit_not(const pbes_expression& /* e */, const pbes_expression& arg)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
     if (is_true(arg))
     {
       return false_();
@@ -123,7 +122,7 @@ struct pbes_simplify_expression_builder: public pbes_expression_builder
   ///
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
     if (is_true(left))
     {
       return visit(right);
@@ -151,7 +150,7 @@ struct pbes_simplify_expression_builder: public pbes_expression_builder
   ///
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
     if (is_true(left))
     {
       return true_();
@@ -179,7 +178,7 @@ struct pbes_simplify_expression_builder: public pbes_expression_builder
   ///
   pbes_expression visit_imp(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
 
     if (is_true(left))
     {
@@ -308,7 +307,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   ///
   pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expr)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
 
     push(variables);
     pbes_expression expr1 = super::visit(expr);
@@ -320,10 +319,10 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
       return forall(variables, expr1);
     }
 
-    boost::ptr_vector<std::vector<data::data_expression> > finite_value_sequences;
+    std::vector<std::vector<data::data_expression> > finite_value_sequences;
     for (std::vector<data::data_variable>::iterator i = finite_variables.begin(); i != finite_variables.end(); ++i)
     {
-      finite_value_sequences.push_back(&(enumerate_values(i->sort())));
+      finite_value_sequences.push_back(enumerate_values(i->sort()));
     }
     std::vector<data::data_expression> finite_variables_replacements(finite_variables.size());
     std::vector<pbes_expression> v;
@@ -339,7 +338,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   ///
   pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expr)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
 
     push(variables);
     pbes_expression expr1 = super::visit(expr);
@@ -351,10 +350,10 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
       return exists(variables, expr1);
     }
 
-    boost::ptr_vector<std::vector<data::data_expression> > finite_value_sequences;
+    std::vector<std::vector<data::data_expression> > finite_value_sequences;
     for (std::vector<data::data_variable>::iterator i = finite_variables.begin(); i != finite_variables.end(); ++i)
     {
-      finite_value_sequences.push_back(&(enumerate_values(i->sort())));
+      finite_value_sequences.push_back(enumerate_values(i->sort()));
     }
     std::vector<data::data_expression> finite_variables_replacements(finite_variables.size());
     std::vector<pbes_expression> v;
@@ -370,7 +369,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   ///
   pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
-    using namespace pbes_expr;
+    using namespace pbes_expr_optimized;
     return propositional_variable_instantiation(v.name(), atermpp::apply(v.parameters(), super::m_rewriter));
   }
 };

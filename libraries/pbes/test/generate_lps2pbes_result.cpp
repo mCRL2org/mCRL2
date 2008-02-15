@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/modal_formula/detail/read_text.h"
+#include "mcrl2/core/text_utility.h"
 
 using namespace atermpp;
 using namespace mcrl2::lps;
@@ -35,10 +35,10 @@ int main(int argc, char** argv)
   }
 
   std::string specification_file = argv[1];
-  std::string spec = read_text(specification_file, true);
+  std::string spec = core::read_text(specification_file, true);
 
   std::string formula_file = argv[2];
-  std::string formula = read_text(formula_file, true);
+  std::string formula = core::read_text(formula_file, true);
 
   bool timed = (std::string(argv[3]) == "timed");
 
