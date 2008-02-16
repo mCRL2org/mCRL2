@@ -355,7 +355,7 @@ namespace pbes_expr_optimized {
   inline
   pbes_expression not_(pbes_expression p)
   {
-    return core::detail::optimized_not(p, not_, true_(), is_true, false_(), is_false);
+    return core::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
   }
   
   /// \brief Returns and applied to p and q, and simplifies the result.
