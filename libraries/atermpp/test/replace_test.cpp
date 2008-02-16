@@ -35,19 +35,18 @@ using namespace atermpp;
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(aterm t) const
+  bool operator()(aterm_appl t) const
   {
-    return (t.type() == AT_APPL) && aterm_appl(t).function().name() == "f";
+    return t.function().name() == "f";
   }
 };
 
 // function object to test if it is an aterm_appl with function symbol "a" or "b"
 struct is_a_or_b
 {
-  bool operator()(aterm t) const
+  bool operator()(aterm_appl t) const
   {
-    return (t.type() == AT_APPL) &&
-    (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
+    t.function().name() == "a" || t.function().name() == "b";
   }
 };
 
@@ -83,10 +82,10 @@ void test_find()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
-  aterm t = find_if(a, is_f());
+  aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == make_term("f(y)"));
   
-  vector<aterm> v;
+  vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));
@@ -96,7 +95,7 @@ void test_replace()
 {
   BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(a)")) == make_term("f(a)"));
   BOOST_CHECK(replace(make_term("x"), make_term("x"), make_term("f(x)")) == make_term("f(x)"));
-  //BOOST_CHECK(replace(make_term("[x]"), make_term("x"), make_term("f(x)")) == make_term("[f(x)]"));
+  BOOST_CHECK(replace(make_term("[x]"), make_term("x"), make_term("f(x)")) == make_term("[f(x)]"));
 
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
@@ -104,10 +103,6 @@ void test_replace()
   b = bottom_up_replace(a, make_term("f(x)"), make_term("x"));
   BOOST_CHECK(b == make_term("x"));
 
-//  aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
-//  aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
-//  BOOST_CHECK(e == make_term("h(g(u),f(u),p(u,q(u)))"));
-  
   aterm f = make_term("[]");
   aterm_appl g = replace(f, a, b);
   BOOST_CHECK(f == make_term("[]"));

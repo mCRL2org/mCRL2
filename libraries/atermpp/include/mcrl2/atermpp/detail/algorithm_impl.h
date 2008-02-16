@@ -115,9 +115,9 @@ namespace detail {
   // used to abort the recursive find
   struct found_term_exception
   {
-    aterm t;
+    aterm_appl t;
 
-    found_term_exception(aterm t_)
+    found_term_exception(aterm_appl t_)
       : t(t_)
     {}
   };
@@ -143,31 +143,31 @@ namespace detail {
     return op;
   }
   
-  template <typename UnaryPredicate>
-  void find_if_impl(aterm t, UnaryPredicate op)
+  template <typename MatchPredicate>
+  void find_if_impl(aterm t, MatchPredicate match)
   {
-    if (op(t))
-      throw found_term_exception(t);
+    if (t.type() == AT_APPL)
+    {
+      if (match(aterm_appl(t)))
+      {
+        throw found_term_exception(aterm_appl(t)); // report the match
+      }
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        find_if_impl(*i, match);
+      }
+    }
 
     if (t.type() == AT_LIST) {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        find_if_impl(*i, op);
+        find_if_impl(*i, match);
       }
-    }
-    else if (t.type() == AT_APPL) {
-      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
-      {
-        find_if_impl(*i, op);
-      }
-    }
-    else {
-      return;
     }
   }
 
-  template <typename UnaryPredicate, typename OutputIterator>
-  void find_all_if_impl(aterm t, UnaryPredicate op, OutputIterator& destBegin)
+  template <typename MatchPredicate, typename OutputIterator>
+  void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
   {
     typedef typename iterator_value<OutputIterator>::type value_type;
     
@@ -208,7 +208,12 @@ namespace detail {
       {
         return; // nothing was found
       }
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        partial_find_if_impl(*i, match, stop);
+      }
     }
+
     if (t.type() == AT_LIST)
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
@@ -216,36 +221,27 @@ namespace detail {
         partial_find_if_impl(*i, match, stop);
       }
     }
-    else if (t.type() == AT_APPL)
-    {
-      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
-      {
-        partial_find_if_impl(*i, match, stop);
-      }
-    }
-    else {
-      return;
-    }
   }
 
   template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
   void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
   {
-    typedef typename iterator_value<OutputIterator>::type value_type;
-
     if (t.type() == AT_APPL)
     {
       if (match(aterm_appl(t)))
       {
-        aterm_appl a(t);
-        value_type v(a);
-        *destBegin++ = a;
+        *destBegin++ = aterm_appl(t);
       }
       if (stop(aterm_appl(t)))
       {
         return;
       }
+      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
+      {
+        partial_find_all_if_impl(*i, match, stop, destBegin);
+      }
     }
+
     if (t.type() == AT_LIST)
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
@@ -253,17 +249,6 @@ namespace detail {
         partial_find_all_if_impl(*i, match, stop, destBegin);
       }
     } 
-    else if (t.type() == AT_APPL)
-    {
-      for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
-      {
-        partial_find_all_if_impl(*i, match, stop, destBegin);
-      }
-    }
-    else
-    {
-      return;
-    }
   }
 
 //--- replace -------------------------------------------------------------//

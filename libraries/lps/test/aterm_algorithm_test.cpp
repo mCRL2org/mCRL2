@@ -80,7 +80,7 @@ struct compare_variable
 
 bool occurs_in(data_expression d, data_variable v)
 {
-  return find_if(aterm_appl(d), compare_variable(v)) != aterm();
+  return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
 inline
@@ -94,9 +94,9 @@ bool is_variable(aterm t)
 template <typename Term>
 data_variable find_variable(Term t)
 {
-  aterm result = atermpp::find_if(t, is_variable);
+  aterm_appl result = atermpp::find_if(t, is_variable);
   assert((result)); // check if a variable has been found
-  return aterm_appl(result);
+  return result;
 }
 
 void test_find_variable()

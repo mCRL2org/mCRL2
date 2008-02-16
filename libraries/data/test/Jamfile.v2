@@ -1,9 +1,8 @@
 import testing ;
 
-project libraries/lps/test
+project libraries/data/test
    : requirements
        <use>/boost//headers
-#       <source>/libraries//rewrite
        <source>/libraries//core
        <source>/libraries//data
        <source>/site-config//boost_program_options
@@ -15,7 +14,6 @@ test-suite lps
       [ run rewriter_test.cpp ]
       [ run apply_test.cpp ]
       [ run data_expression.cpp ]
-      [ run data_expression_replace_test.cpp ]
       [ run data_test.cpp ]
       [ run data_utility_test.cpp ]
       [ run operators.cpp ]

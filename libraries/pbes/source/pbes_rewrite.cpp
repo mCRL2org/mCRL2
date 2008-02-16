@@ -212,7 +212,7 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 ///\ret variable v occurs in l.
 bool occurs_inL(aterm_appl l, data_variable v)
 {
-  return find_if(l, data::detail::compare_data_variable(v)) != aterm();
+  return find_if(l, data::detail::compare_data_variable(v)) != aterm_appl();
 }
 
 pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)

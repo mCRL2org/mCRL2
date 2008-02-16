@@ -9,7 +9,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/data_expression_replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -117,7 +117,7 @@ namespace lps {
   static inline
   bool occurs_in_expression(const data_type d, const data_variable v)
   {
-    return partial_find_if(aterm_appl(d), data::detail::compare_data_variable(v), is_sort_expression) != aterm();
+    return partial_find_if(aterm_appl(d), data::detail::compare_data_variable(v), is_sort_expression) != aterm_appl();
   }
 
   ///pre: is_and(t) || is_equal_to(t)

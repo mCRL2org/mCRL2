@@ -12,7 +12,6 @@ project libraries/lps/test
 
 test-suite lps
     :
-      [ run specification_test.cpp ]
       [ run data_specification_test.cpp ]
       [ run linearization_test.cpp ]
       [ run rewriter_test.cpp ]

@@ -39,17 +39,12 @@
 using namespace std;
 using namespace atermpp;
 
-bool is_appl(aterm t)
-{
-  return t.type() == AT_APPL;
-}
-
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(aterm t) const
+  bool operator()(aterm_appl t) const
   {
-    return is_appl(t) && aterm_appl(t).function().name() == "f";
+    return t.function().name() == "f";
   }
 };
 
@@ -57,11 +52,11 @@ void test_algorithm()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
-  aterm t = find_if(aterm(a), is_f());
+  aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == make_term("f(y)"));
   
-  atermpp::vector<aterm> v;
-  find_all_if(aterm(a), is_f(), back_inserter(v));
+  atermpp::vector<aterm_appl> v;
+  find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));
 }

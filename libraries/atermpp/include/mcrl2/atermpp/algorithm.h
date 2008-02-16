@@ -24,30 +24,30 @@ namespace atermpp
   template <typename UnaryFunction, typename Term>
   UnaryFunction for_each(Term t, UnaryFunction op)
   {
-    return detail::for_each_impl(t, op);
+    return detail::for_each_impl(aterm_traits<Term>::term(t), op);
   }
 
-  /// Finds a subterm of t that matches the predicate op. If no matching subterm is found,
-  /// aterm() is returned.
-  template <typename Term, typename UnaryPredicate>
-  aterm find_if(Term t, UnaryPredicate op)
+  /// Finds a subterm of t that matches a given predicate. If no matching subterm is found,
+  /// aterm_appl() is returned.
+  template <typename Term, typename MatchPredicate>
+  aterm_appl find_if(Term t, MatchPredicate match)
   {
     try {
-      detail::find_if_impl(aterm_traits<Term>::term(t), op);
+      detail::find_if_impl(aterm_traits<Term>::term(t), match);
     }
     catch (detail::found_term_exception e) {
       return e.t;
     }
-    return aterm();
+    return aterm_appl();
   }
 
-  /// Finds a subterm of t that matches the predicate op. If no matching subterm is found,
-  /// aterm() is returned. The term is only partially traversed. If the stop predicate
-  /// returns false in a subterm, the recursion is not continued.
+  /// Finds a subterm of t that matches a given predicate. If no matching subterm is found,
+  /// aterm_appl() is returned. The term is only partially traversed. If the stop predicate
+  /// returns true in a subterm, the recursion is not continued.
   /// \param match The predicate that determines if a subterm is a match
   /// \param stop The predicate that determines if the recursion should not be continued in a subterm
   template <typename Term, typename MatchPredicate, typename StopPredicate>
-  aterm partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
+  aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
   {
     try {
       detail::partial_find_if_impl(aterm_traits<Term>::term(t), match, stop);
@@ -55,22 +55,22 @@ namespace atermpp
     catch (detail::found_term_exception e) {
       return e.t;
     }
-    return aterm();
+    return aterm_appl();
   }
 
-  /// Finds all subterms of t that match the predicate op, and writes the found terms
+  /// Finds all subterms of t that match a given predicate, and writes the found terms
   /// to the destination range starting with destBegin.
-  template <typename Term, typename UnaryPredicate, typename OutputIterator>
-  void find_all_if(Term t, UnaryPredicate op, OutputIterator destBegin)
+  template <typename Term, typename MatchPredicate, typename OutputIterator>
+  void find_all_if(Term t, MatchPredicate match, OutputIterator destBegin)
   {
     OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-    detail::find_all_if_impl(aterm_traits<Term>::term(t), op, i);
+    detail::find_all_if_impl(aterm_traits<Term>::term(t), match, i);
   }
 
-  /// Finds all subterms of t that match the predicate op, and writes the found terms
+  /// Finds all subterms of t that match a given predicate, and writes the found terms
   /// to the destination range starting with destBegin.
   /// The term is only partially traversed. If the stop predicate
-  /// returns false in a subterm, the recursion is not continued.
+  /// returns true in a subterm, the recursion is not continued.
   /// \param match The predicate that determines if a subterm is a match
   /// \param stop The predicate that determines if the recursion should not be continued in a subterm
   template <typename Term, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
@@ -79,7 +79,6 @@ namespace atermpp
     OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
     detail::partial_find_all_if_impl(aterm_traits<Term>::term(t), match, stop, i);
   }
-
 
   /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
@@ -146,6 +145,7 @@ namespace atermpp
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
 
+/*
   /// \cond INTERNAL_DOCS
   template <typename ReplaceFunction, typename CheckFunction>
   struct checked_replace_helper
@@ -185,6 +185,7 @@ namespace atermpp
     ATerm x = detail::partial_replace_impl(aterm_traits<Term>::term(t), checked_replace_helper<ReplaceFunction, CheckFunction>(f, r));
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
+*/
 
 } // namespace atermpp
 

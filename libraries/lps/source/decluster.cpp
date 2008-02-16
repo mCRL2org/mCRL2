@@ -42,7 +42,7 @@ namespace lps {
 template <typename data_type>
 bool occurs_in(data_type l, data_variable v)
 {
-  return find_if(l, data::detail::compare_data_variable(v)) != aterm();
+  return find_if(l, data::detail::compare_data_variable(v)) != aterm_appl();
 }
 
 

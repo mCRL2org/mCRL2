@@ -56,7 +56,7 @@ void test_find()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
-  aterm t = find_if(a, is_f());
+  aterm_appl t = find_if(a, is_f());
   assert(t == make_term("f(y)"));
   
   vector<aterm> v;
