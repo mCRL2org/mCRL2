@@ -220,72 +220,6 @@ static void print_counter_example(bes::equations &bes_equations,
   }
 }
 
-// static data_expression dummyterm(sort_expression s)
-//           //         ATermAppl targetsort,
-//           //         specificationbasictype *spec,
-//           //         int max_nesting_depth)
-//{ /* This procedure yields a term of the requested sort.
-//     First, it tries to find a constant constructor. If it cannot
-//     be found, a constant mapping is sought. If this cannot be
-//     found a new dummy constant mapping of the requested sort is made. */
-//
-//  /* First search for a constant constructor */
-//
-//  for (int i=0 ; (i<maxobject) ; i++ )
-//  {
-//    if ((objectdata[i].object==func)&&
-//        (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
-//    { return objectdata[i].objectname;
-//    }
-//  }
-//
-//  /* Second search for a constant mapping */
-//
-//  for (int i=0 ; (i<maxobject) ; i++ )
-//  { if ((objectdata[i].object==map)&&
-//        (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
-//    { return objectdata[i].objectname;
-//    }
-//  }
-//
-//  /* Third search for a function or constructor applied to
-// *      dummyterms of the appropriate sort, with a smaller nesting
-// *           depth */
-//
-//  if (max_nesting_depth>0)
-//  { for (int i=0 ; (i<maxobject) ; i++ )
-//    { if (((objectdata[i].object==func)||(objectdata[i].object==map))&&
-//           (objectdata[i].targetsort==targetsort))
-//      { /* The function found cannot be a constant */
-//        ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
-//        unsigned int arity=ATgetLength(argumentsorts);
-//        ATermList arguments=ATempty;
-//        for(unsigned int j=0; j<arity; j++)
-//        { ATerm t=(ATerm)dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1);
-//          if (t==NULL)
-//          { goto FAIL;
-//          }
-//          arguments=ATinsert(arguments,t);
-//          argumentsorts=ATgetNext(argumentsorts);
-//        }
-//        arguments=ATreverse(arguments);
-//        return gsMakeDataApplList(objectdata[i].objectname,arguments);
-//      }
-//    }
-//  }
-//
-//  FAIL:
-//
-//  /* Third construct a new constant, and yield it. */
-//
-//  snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
-//  ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
-//  insertmapping(dummymapping,spec);
-//  return dummymapping;
-//
-//}
-
-
 template <typename Container>
 static void do_lazy_algorithm(pbes<Container> pbes_spec, 
                               t_tool_options tool_options,
@@ -309,12 +243,18 @@ bool process(t_tool_options const& tool_options)
     exit(1);
   }
   if (!pbes_spec.is_closed())
-  { gsErrorMsg("The pbes contains free pbes variables\n");
+  { gsErrorMsg("The pbes contains free pbes variables \n");
     exit(1);
   }
 
   if (!pbes_spec.instantiate_free_variables())
-  { gsErrorMsg("Fail to instantiate all free variables in the pbes.\n");
+  { std::cerr << "Fail to instantiate all free variables in the pbes.\n";
+    std::cerr << "Remaining free variables are: ";
+    for(atermpp::set <data_variable>::iterator i=pbes_spec.free_variables().begin() ;
+        i!=pbes_spec.free_variables().end() ; i++ )
+    { std::cerr << pp(*i) << " ";
+    }
+    std::cerr << "\n";
     exit(1);
   }
 
@@ -610,6 +550,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
     
   cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
+  ATfprintf(stderr,"AAA %t\n",(ATermAppl)p);
   exit(1);
   return bes::false_();
 }
@@ -690,41 +631,15 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
   unsigned long rank=1;
 
-  // Remove free variables by replacing them by arbitrary variables
-  // First construct using the set of free_variables a map where 
-  // each free_variable has an associated default_term.
-
-  // atermpp::set< data_variable > free_variables=pbes_spec.free_variables();
-  // std::map< data_variable, data_expression > default_assignment;
-
-  // for(atermpp::set< data_variable >::iterator v=free_variables.begin() ;
-  //     v!=free_variables.end() ; v++)
-  // { default_assignment[*v]=data.default_expression(v->sort());
-  //   if (default_assignment[*v]==data_expression()) // no term could be constructed 
-  //   { gsErrorMsg("Cannot construct default expression for a free variable of sort %P\n",
-  //                  (ATermAppl)(v->sort()));
-   //    exit(1);
-  //   }
-  // }
-
-  // pbes_spec=data_variable_map_replace(pbes_spec,default_assignment);
-
   for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
-  { // cerr << "PUT EQUATION: " << eqi->variable().name() << "===" << pbes_expression_rewrite_and_simplify(
-  //                    data_variable_map_replace(
-  //                            eqi->formula(),
-  //                         default_assignment),
-  //              rewriter,
-  //              tool_options.opt_precompile_pbes) << "\n";
+  { 
     pbes_equations.put(
             eqi->variable().name(), 
             pbes_equation(
                 eqi->symbol(),
                 eqi->variable(),
                 pbes_expression_rewrite_and_simplify(
-      //                data_variable_map_replace(
                               eqi->formula(),
-      //                      default_assignment),
                 rewriter,
                 tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
@@ -804,7 +719,6 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           }
           else
           { 
-            // std::cerr << "SUBSTITUTION " << pp(*vlist) << ":=" << pp(*elist) << "\n";
             rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
           }
           elist++;
@@ -812,10 +726,8 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
         assert(elist==current_variable_instantiation.parameters().end());
       }
       
-      // std::cerr << "--------------------------------------\n";
       pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
-      
       bes::bes_expression new_bes_expression=
            add_propositional_variable_instantiations_to_indexed_set_and_translate(
                         new_pbes_expression,
