@@ -1535,6 +1535,7 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         ATermList args = ATLgetArgument(data_eqn_lhs, 1);
         ATermAppl arg0 = ATAgetFirst(args);
         while (gsIsDataAppl(arg0)) {
+          args = ATLgetArgument(arg0, 1);
           arg0 = ATAgetArgument(arg0, 0);
         }
         assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
