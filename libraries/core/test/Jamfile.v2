@@ -14,6 +14,6 @@ use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 test-suite core
     : [ run test_lib.cpp ]
       [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps : : . : mcrl2 ]
-      [ run aterm_test.cpp ]
       [ run beta_reduce_test.cpp ]
+      [ run data_reconstruct_test.cpp ]
     ;
