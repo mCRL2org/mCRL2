@@ -309,7 +309,7 @@ namespace pbes_expr {
   {
     using namespace accessors;
     atermpp::set<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, lhs, rhs);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, lhs, rhs);
     return result;
   }
   
@@ -321,7 +321,7 @@ namespace pbes_expr {
   {
     using namespace accessors;
     atermpp::set<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, lhs, rhs);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, lhs, rhs);
     return result;
   }
 } // namespace pbes_expr

@@ -61,11 +61,15 @@ namespace pbes_system {
     data::data_specification data_spec = data::parse_data_specification(data_text);
 
     boost::trim(variables_text);
+    if (variables_text.size() > 0)
+    {
+      variables_text = "(" + variables_text + ")";
+    }
 
     std::vector<std::string> paragraphs = core::split_paragraphs(expressions_text);
     for (std::vector<std::string>::iterator i = paragraphs.begin(); i != paragraphs.end(); ++i)
     {
-      std::string formula_text = "nu X(" + variables_text + ")." + *i;
+      std::string formula_text = "nu X" + variables_text + "." + *i;
       pbes<> p = lps2pbes(spec_text, formula_text, false);
       pbes_expression e = p.equations().front().formula();
       result.push_back(e);
