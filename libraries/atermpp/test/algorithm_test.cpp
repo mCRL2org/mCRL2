@@ -51,9 +51,12 @@ struct is_f
 void test_algorithm()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl b = make_term("h(g(x),p(a(x,y),q(g(z))))");
 
   aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == make_term("f(y)"));
+  aterm_appl t1 = find_if(b, is_f());
+  BOOST_CHECK(t1 == aterm_appl());
   
   atermpp::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
