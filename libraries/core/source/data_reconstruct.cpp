@@ -304,7 +304,7 @@ static bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx);
 // ----------------------------------------------
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
-assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
+assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
 if (Spec == NULL) {
   gsDebugMsg("No specification given, "
                "therefore not all components can be reconstructed\n");
@@ -325,10 +325,10 @@ if (ATgetType(Part) == AT_APPL) {
 
 ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
   bool recursive = true;
 
-  if((gsIsSpecV1(Part) || gsIsPBES(Part)) && (Spec != NULL)) {
+  if((gsIsSpecV1(Part) || gsIsPBES(Part) || gsIsDataSpec(Part)) && (Spec != NULL)) {
     gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
   }
@@ -373,7 +373,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
 
 ATermList reconstruct_exprs_list(ATermList Parts, ATermList* p_substs, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
 
   ATermList result = ATmakeList0();
   while (!ATisEmpty(Parts))
@@ -387,7 +387,7 @@ ATermList reconstruct_exprs_list(ATermList Parts, ATermList* p_substs, const ATe
 
 ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATermAppl Spec, bool* recursive)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec));
+  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
   assert(gsIsDataExpr(Part));
 
   if (gsIsDataExprBagComp(Part)) {
@@ -772,8 +772,16 @@ bool is_lambda_binder_application(ATermAppl data_expr)
 ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_substs)
 {
   gsDebugMsg("Removing headers from specification\n");
-  assert(gsIsSpecV1(Spec) || gsIsPBES(Spec));
-  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+  assert(gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  ATermAppl DataSpec = NULL;
+  if (gsIsSpecV1(Spec) || gsIsPBES(Spec))
+  {
+    DataSpec = ATAgetArgument(Spec, 0);
+  }
+  else
+  { //gsIsDataSpec(Spec)
+    DataSpec = Spec;
+  }
 
   gsDebugMsg("Dissecting data specification\n");
   // Dissect Data specification
@@ -790,9 +798,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   data_decls.ops       = ATLgetArgument(MapSpec, 0);
   data_decls.data_eqns = ATLgetArgument(DataEqnSpec, 0);
 
-  atermpp::table sorts_table(15, 75);
-  atermpp::table ops_table(100, 75);
-  atermpp::table data_eqns_table(100, 75);
+  atermpp::table sorts_table(15, 75); // Collect sorts for efficient lookup
 
   atermpp::table superfluous_sorts(10, 75);
   atermpp::table superfluous_cons_ops(100, 75);
@@ -801,12 +807,6 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
 
   for (ATermList l = data_decls.sorts; !ATisEmpty(l); l = ATgetNext(l)) {
     sorts_table.put(ATgetFirst(l), (ATerm) ATtrue);
-  }
-  for (ATermList l = data_decls.ops; !ATisEmpty(l); l = ATgetNext(l)) {
-    ops_table.put(ATgetFirst(l), (ATerm) ATtrue);
-  }
-  for (ATermList l = data_decls.data_eqns; !ATisEmpty(l); l = ATgetNext(l)) {
-    data_eqns_table.put(ATgetFirst(l), (ATerm) ATtrue);
   }
 
   // Construct lists of data declarations for system defined sorts
@@ -859,7 +859,6 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
     data_decls_impl.data_eqns = ATgetNext(data_decls_impl.data_eqns);
   }
 
-  //subtract_data_decls(&data_decls, &data_decls_impl);
   data_decls.sorts = filter_table_elements_from_list(data_decls.sorts, superfluous_sorts);
   data_decls.cons_ops = filter_table_elements_from_list(data_decls.cons_ops, superfluous_cons_ops);
   data_decls.ops = filter_table_elements_from_list(data_decls.ops, superfluous_ops);
@@ -882,10 +881,14 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
                                ATAgetArgument(Spec, 1),
                                ATAgetArgument(Spec, 2),
                                ATAgetArgument(Spec, 3));
-  } else { //gsIsPBES(Spec)
+  } 
+  else if (gsIsPBES(Spec)) {
     Spec = gsMakePBES(DataSpec,
                       ATAgetArgument(Spec, 1),
                       ATAgetArgument(Spec, 2));
+  }
+  else {
+    Spec = DataSpec;
   }
   return Spec;
 }

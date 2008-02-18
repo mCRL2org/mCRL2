@@ -29,7 +29,7 @@ ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 /// \brief Reconstruct spec (in the internal format after data implementation)
 ///         to the mcrl2 format.
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
-  assert(gsIsSpecV1(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
     }
