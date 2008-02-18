@@ -34,8 +34,9 @@ namespace pbes_system {
   /// <li><tt>"expressions"</tt>, followed by a sequence of modal formulas separated by newlines</li>
   /// </ul>
   inline
-  std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(const std::string& text)
+  std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text)
   {
+    text = core::remove_comments(text);
     std::vector<pbes_expression> result;
     const std::string separator1 = "variables";
     const std::string separator2 = "expressions";

@@ -72,6 +72,19 @@ namespace core {
     return s;
   }
 
+  /// Remove comments from a text (everything from '%' until end of line)
+  inline
+  std::string remove_comments(const std::string& text)
+  {
+    using namespace boost::xpressive;
+
+    // matches everything from '%' until end of line
+    sregex src = sregex::compile( "%[^\\n]*\\n" );
+
+    std::string dest( "\n" );
+    return regex_replace(text, src, dest);
+  }
+
 } // namespace core
 
 } // namespace mcrl2
