@@ -1,6 +1,6 @@
-#line 2 "fsmlexer.cpp"
+#line 2 "ltsview_fsmlexer.cpp"
 
-#line 4 "fsmlexer.cpp"
+#line 4 "ltsview_fsmlexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -415,11 +415,11 @@ static yyconst flex_int16_t yy_chk[40] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "fsmlexer.ll"
-#line 2 "fsmlexer.ll"
+#line 1 "ltsview_fsmlexer.ll"
+#line 2 "ltsview_fsmlexer.ll"
 #include <string>
-#include "fsmlexer.h"
-#include "fsmparser.hpp"
+#include "ltsview_fsmlexer.h"
+#include "ltsview_fsmparser.hpp"
 /* import the parser's token type into a local typedef */
 typedef ltsview::LTSViewFSMParser::token token;
 typedef ltsview::LTSViewFSMParser::token_type token_type;
@@ -446,9 +446,9 @@ typedef ltsview::LTSViewFSMParser::token_type token_type;
 /* enables the use of start condition stacks */
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
-#line 45 "fsmlexer.ll"
+#line 45 "ltsview_fsmlexer.ll"
 #define YY_USER_ACTION  yylloc->columns(yyleng);
-#line 452 "fsmlexer.cpp"
+#line 452 "ltsview_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -548,7 +548,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 48 "fsmlexer.ll"
+#line 48 "ltsview_fsmlexer.ll"
 
  
  /* code to place at the beginning of yylex() */
@@ -561,7 +561,7 @@ YY_DECL
 
 
  /* white space */
-#line 565 "fsmlexer.cpp"
+#line 565 "ltsview_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -642,7 +642,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 60 "fsmlexer.ll"
+#line 60 "ltsview_fsmlexer.ll"
 {
   yylloc->step();
 }
@@ -651,7 +651,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 65 "fsmlexer.ll"
+#line 65 "ltsview_fsmlexer.ll"
 {
   yylloc->lines(yyleng);
   yylloc->step();
@@ -661,7 +661,7 @@ YY_RULE_SETUP
 /* section separator */
 case 3:
 YY_RULE_SETUP
-#line 72 "fsmlexer.ll"
+#line 72 "ltsview_fsmlexer.ll"
 {
   return token::SECSEP;
 }
@@ -669,7 +669,7 @@ YY_RULE_SETUP
 /* parenthesis left */
 case 4:
 YY_RULE_SETUP
-#line 77 "fsmlexer.ll"
+#line 77 "ltsview_fsmlexer.ll"
 { 
   return token::LPAR;
 }
@@ -677,7 +677,7 @@ YY_RULE_SETUP
 /* parenthesis right */
 case 5:
 YY_RULE_SETUP
-#line 82 "fsmlexer.ll"
+#line 82 "ltsview_fsmlexer.ll"
 { 
   return token::RPAR;
 }
@@ -685,7 +685,7 @@ YY_RULE_SETUP
 /* arrow symbol */
 case 6:
 YY_RULE_SETUP
-#line 87 "fsmlexer.ll"
+#line 87 "ltsview_fsmlexer.ll"
 {
   return token::ARROW;
 }
@@ -693,7 +693,7 @@ YY_RULE_SETUP
 /* ID */
 case 7:
 YY_RULE_SETUP
-#line 92 "fsmlexer.ll"
+#line 92 "ltsview_fsmlexer.ll"
 {
   yylval->stringVal = new std::string(yytext,yyleng);
   return token::ID;
@@ -703,7 +703,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 98 "fsmlexer.ll"
+#line 98 "ltsview_fsmlexer.ll"
 {
   quotedstring = std::string(yytext,yyleng);
   yylval->stringVal = new std::string(quotedstring.substr(1,
@@ -714,7 +714,7 @@ YY_RULE_SETUP
 /* Number */
 case 9:
 YY_RULE_SETUP
-#line 106 "fsmlexer.ll"
+#line 106 "ltsview_fsmlexer.ll"
 {
   yylval->integerVal = atoi(yytext);
   return token::NUMBER;
@@ -723,17 +723,17 @@ YY_RULE_SETUP
 /* pass all other characters up to bison */
 case 10:
 YY_RULE_SETUP
-#line 112 "fsmlexer.ll"
+#line 112 "ltsview_fsmlexer.ll"
 { 
   return static_cast<token_type>(*yytext);
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 116 "fsmlexer.ll"
+#line 116 "ltsview_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 737 "fsmlexer.cpp"
+#line 737 "ltsview_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -895,6 +895,13 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 
 }
 
+yyFlexLexer::~yyFlexLexer()
+{
+	delete [] yy_state_buf;
+	LTSViewFSMfree(yy_start_stack  );
+	yy_delete_buffer( YY_CURRENT_BUFFER );
+}
+
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1040,7 +1047,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1561,29 +1568,6 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-yyFlexLexer::~yyFlexLexer()
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_delete_buffer( YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yypop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	LTSViewFSMfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-    /* Destroy the start condition stack. */
-        LTSViewFSMfree((yy_start_stack)  );
-        (yy_start_stack) = NULL;
-
-	delete [] (yy_state_buf);
-	LTSViewFSMfree((yy_start_stack)  );
-
-}
-
 /*
  * Internal utility routines.
  */
@@ -1632,7 +1616,7 @@ void LTSViewFSMfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 116 "fsmlexer.ll"
+#line 116 "ltsview_fsmlexer.ll"
 
 
 

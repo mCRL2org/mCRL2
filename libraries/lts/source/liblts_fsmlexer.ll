@@ -12,8 +12,8 @@
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/liblts.h"
-#include "fsmlexer.h"
-#include "mcrl2/fsmparser.hpp"
+#include "liblts_fsmlexer.h"
+#include "mcrl2/liblts_fsmparser.hpp"
 
 #ifdef __cplusplus
 using namespace mcrl2::core;

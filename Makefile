@@ -5,7 +5,7 @@ ifeq (${MAKECMDGOALS},)
 include build/Makefile
 endif
 
-.PHONY: tags clean distclean parsers mcrl2parser ltsview-fsmparser liblts-fsmparser doxy
+.PHONY: tags clean distclean parsers mcrl2parser ltsview_fsmparser liblts_fsmparser doxy
 
 build/Makefile:
 	$(error Please run configure first)
@@ -18,19 +18,19 @@ distclean: clean
 	@$(RM) -rf build/Makefile config.log config.status build/config.jam libraries/utilities/include/mcrl2/setup.h
 	$(RM) -rf build/bin
 
-parsers: mcrl2parser chiparser ltsview-fsmparser liblts-fsmparser
+parsers: mcrl2parser chiparser ltsview_fsmparser liblts_fsmparser
 	cp /usr/include/FlexLexer.h build/workarounds/all
 
-liblts-fsmparser:
+liblts_fsmparser:
 	cd libraries/lts/source; \
-	flex -Pfsm -ofsmlexer.cpp fsmlexer.ll; \
-	bison -p fsm -d -o fsmparser.cpp fsmparser.yy; \
-	mv fsmparser.hpp ../include/mcrl2
+	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
+	bison -p fsm -d -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
+	mv liblts_fsmparser.hpp ../include/mcrl2
 
-ltsview-fsmparser:
+ltsview_fsmparser:
 	cd tools/ltsview; \
-	flex -+ -ofsmlexer.cpp fsmlexer.ll; \
-	bison -d -o fsmparser.cpp fsmparser.yy
+	flex -+ -oltsview_fsmlexer.cpp ltsview_fsmlexer.ll; \
+	bison -d -o ltsview_fsmparser.cpp ltsview_fsmparser.yy
 
 mcrl2parser:
 	cd libraries/core/source; \

@@ -6,12 +6,12 @@ tool ltsview
       : cluster.cpp
         conedb.cpp
         fileloader.cpp
-        fsmlexer.cpp
-        fsmparser.cpp
         glcanvas.cpp
         infodialog.cpp
         lts.cpp
         ltsview.cpp
+        ltsview_fsmlexer.cpp
+        ltsview_fsmparser.cpp
         mainframe.cpp
         markmanager.cpp
         markdialog.cpp

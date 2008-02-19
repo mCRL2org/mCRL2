@@ -9,8 +9,8 @@
 %{
 #include <vector>
 #include "mcrl2/lts/liblts.h"
-#include "fsmparser.h"
-#include "fsmlexer.h"
+#include "liblts_fsmparser.h"
+#include "liblts_fsmlexer.h"
 
 // Local variables
 std::vector<bool> ignore_par; /* Records which parameters will be ignored */

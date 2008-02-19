@@ -1,7 +1,7 @@
 %{
 #include <string>
-#include "fsmlexer.h"
-#include "fsmparser.hpp"
+#include "ltsview_fsmlexer.h"
+#include "ltsview_fsmparser.hpp"
 /* import the parser's token type into a local typedef */
 typedef ltsview::LTSViewFSMParser::token token;
 typedef ltsview::LTSViewFSMParser::token_type token_type;

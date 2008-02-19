@@ -20,7 +20,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
-#include "fsmparser.h"
+#include "liblts_fsmparser.h"
 
 #ifdef __cplusplus
 using namespace mcrl2::utilities;

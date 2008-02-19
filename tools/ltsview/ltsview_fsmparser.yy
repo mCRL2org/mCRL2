@@ -55,7 +55,7 @@
 
 %{
 #include "fileloader.h"
-#include "fsmlexer.h"
+#include "ltsview_fsmlexer.h"
 
 /* this "connects" the bison parser in the fileloader to the flex
  * scanner class object. it defines the yylex() function call to pull

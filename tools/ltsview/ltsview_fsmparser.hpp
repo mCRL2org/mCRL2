@@ -48,7 +48,7 @@ namespace ltsview
 }
 
 /* First part of user declarations.  */
-#line 1 "fsmparser.yy"
+#line 1 "ltsview_fsmparser.yy"
 
 #include <stdio.h>
 #include <string>
@@ -56,7 +56,7 @@ namespace ltsview
 
 
 /* Line 35 of lalr1.cc.  */
-#line 60 "fsmparser.hpp"
+#line 60 "ltsview_fsmparser.hpp"
 
 #include "location.hh"
 
@@ -107,13 +107,13 @@ namespace ltsview
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
-#line 36 "fsmparser.yy"
+#line 36 "ltsview_fsmparser.yy"
 {
   std::string* stringVal;
   int integerVal;
 }
 /* Line 35 of lalr1.cc.  */
-#line 117 "fsmparser.hpp"
+#line 117 "ltsview_fsmparser.hpp"
 	;
 #else
     typedef YYSTYPE semantic_type;

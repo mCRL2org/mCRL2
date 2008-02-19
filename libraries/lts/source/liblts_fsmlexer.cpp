@@ -1,6 +1,6 @@
-#line 2 "fsmlexer.cpp"
+#line 2 "liblts_fsmlexer.cpp"
 
-#line 4 "fsmlexer.cpp"
+#line 4 "liblts_fsmlexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -416,8 +416,8 @@ static yyconst flex_int16_t yy_chk[41] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "fsmlexer.ll"
-#line 2 "fsmlexer.ll"
+#line 1 "liblts_fsmlexer.ll"
+#line 2 "liblts_fsmlexer.ll"
 // Author(s): Muck van Weerdenburg
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -431,8 +431,8 @@ static yyconst flex_int16_t yy_chk[41] =
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/liblts.h"
-#include "fsmlexer.h"
-#include "mcrl2/fsmparser.hpp"
+#include "liblts_fsmlexer.h"
+#include "mcrl2/liblts_fsmparser.hpp"
 
 #ifdef __cplusplus
 using namespace mcrl2::core;
@@ -495,7 +495,7 @@ extern void fsmyyerror(const char* s);
 void processId();
 void processQuoted();
 void processNumber();
-#line 499 "fsmlexer.cpp"
+#line 499 "liblts_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -595,10 +595,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 87 "fsmlexer.ll"
+#line 87 "liblts_fsmlexer.ll"
 
 
-#line 602 "fsmlexer.cpp"
+#line 602 "liblts_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -683,62 +683,62 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 89 "fsmlexer.ll"
+#line 89 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 90 "fsmlexer.ll"
+#line 90 "liblts_fsmlexer.ll"
 { lineNo++; posNo=1; return EOLN; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 91 "fsmlexer.ll"
+#line 91 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); return SECSEP; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 92 "fsmlexer.ll"
+#line 92 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); return LPAR; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 93 "fsmlexer.ll"
+#line 93 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); return RPAR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 94 "fsmlexer.ll"
+#line 94 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); return ARROW; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 95 "fsmlexer.ll"
+#line 95 "liblts_fsmlexer.ll"
 { processId(); return ID; }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 96 "fsmlexer.ll"
+#line 96 "liblts_fsmlexer.ll"
 { processQuoted(); return QUOTED; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 97 "fsmlexer.ll"
+#line 97 "liblts_fsmlexer.ll"
 { processNumber(); return NUMBER; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 98 "fsmlexer.ll"
+#line 98 "liblts_fsmlexer.ll"
 { posNo += YYLeng(); fsmyyerror("unknown character"); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 100 "fsmlexer.ll"
+#line 100 "liblts_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 742 "fsmlexer.cpp"
+#line 742 "liblts_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -899,6 +899,13 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 
 }
 
+yyFlexLexer::~yyFlexLexer()
+{
+	delete [] yy_state_buf;
+	fsmyyfree(yy_start_stack  );
+	yy_delete_buffer( YY_CURRENT_BUFFER );
+}
+
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1044,7 +1051,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1565,25 +1572,6 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-yyFlexLexer::~yyFlexLexer()
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_delete_buffer( YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yypop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	fsmyyfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-	delete [] (yy_state_buf);
-	fsmyyfree((yy_start_stack)  );
-
-}
-
 /*
  * Internal utility routines.
  */
@@ -1632,7 +1620,7 @@ void fsmyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 100 "fsmlexer.ll"
+#line 100 "liblts_fsmlexer.ll"
 
 
 

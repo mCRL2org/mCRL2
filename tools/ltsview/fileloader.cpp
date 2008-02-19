@@ -10,8 +10,8 @@
 #include <fstream>
 #include <sstream>
 #include "fileloader.h"
-#include "fsmparser.hpp"
-#include "fsmlexer.h"
+#include "ltsview_fsmparser.hpp"
+#include "ltsview_fsmlexer.h"
 
 namespace ltsview {
 

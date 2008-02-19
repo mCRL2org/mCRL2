@@ -64,13 +64,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 31 "fsmparser.yy"
+#line 31 "liblts_fsmparser.yy"
 {
   ATermAppl aterm;
   int number;
 }
 /* Line 1489 of yacc.c.  */
-#line 74 "fsmparser.hpp"
+#line 74 "liblts_fsmparser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

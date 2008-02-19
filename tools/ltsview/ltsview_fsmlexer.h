@@ -20,7 +20,7 @@
 #undef yyFlexLexer
 #endif
 
-#include "fsmparser.hpp"
+#include "ltsview_fsmparser.hpp"
 
 namespace ltsview {
 
