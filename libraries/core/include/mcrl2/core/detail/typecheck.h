@@ -21,25 +21,16 @@ namespace mcrl2 {
 //Global preconditions:
 //- the ATerm library has been initialised
 
-/** \pre  spec represents an mCRL2 specification that adheres to the initial
- *      internal ATerm structure.
+/** \pre  spec represents an mCRL2 process specification that adheres to the
+ *      initial internal ATerm structure.
  * \post spec is type checked.
  * \return  if type checking went well, an equivalent version of spec is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_spec(ATermAppl spec);
+ATermAppl type_check_proc_spec(ATermAppl spec);
 
-/** \pre  spec represents a (partial) mCRL2 specification that adheres to the initial
- *      internal ATerm structure (without init).
- * \post spec is type checked.
- * \return  if type checking went well, an equivalent version of spec is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
- **/
-ATermAppl type_check_spec_part(ATermAppl spec);
 
 /** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
  *      initial internal ATerm structure.
@@ -52,6 +43,7 @@ ATermAppl type_check_spec_part(ATermAppl spec);
  **/
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec);
 
+
 /** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
  *      initial internal ATerm structure.
  *      spec represents a (partial) mCRL2 specification that adheres to the initial
@@ -63,6 +55,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
  *      NULL is returned.
  **/
 ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
+
 
 /** \pre  data_expr represents an mCRL2 data expression that adheres to the
  *      initial internal ATerm structure.
@@ -80,6 +73,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  **/
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, bool use_vars_from_lps=false, ATermTable Vars=NULL);
 
+
 /** \pre  data_expr represents an mCRL2 data expression that adheres to the
  *      initial internal ATerm structure.
  *      sort_expr represents an mCRL2 sort expression that adheres to the
@@ -95,6 +89,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
  **/
 ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec=NULL, ATermTable Vars=NULL);
 
+
 /** \pre  mult_act represents an mCRL2 multi-action that adheres to the initial
  *      internal ATerm structure.
  *      lps_spec represents an LPS specification
@@ -107,6 +102,7 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
  **/
 ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, bool use_vars_from_lps=false);
 
+
 /** \pre  proc_expr represents an mCRL2 proc expression that adheres to the
  *      initial internal ATerm structure.
  *      lps_spec represents an LPS specification
@@ -118,6 +114,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
  *      NULL is returned.
  **/
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec, bool use_vars_from_lps=false);
+
 
 /** \pre  state_formula represents an mCRL2 state formula that adheres to the
  *      initial internal ATerm structure.
@@ -132,6 +129,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
  *      NULL is returned.
  **/
 ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec, bool use_vars_from_lps=false);
+
 
 /** \pre  ar_spec represents an action rename specification that adheres to the
  *      initial internal ATerm structure.

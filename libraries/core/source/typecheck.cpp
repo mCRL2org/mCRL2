@@ -165,7 +165,7 @@ static ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec);
 //type checking functions
 //-----------------------
 
-ATermAppl type_check_spec(ATermAppl input)
+ATermAppl type_check_proc_spec(ATermAppl input)
 {
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
@@ -211,11 +211,6 @@ ATermAppl type_check_spec(ATermAppl input)
   }
   gstcDataDestroy();
   return Result;
-}
-
-ATermAppl type_check_spec_part(ATermAppl spec){
-  if(!ATAgetArgument(spec,3)) spec=ATsetArgument(spec,(ATerm)gsMakeDelta(),3);
-  return type_check_spec(spec);
 }
 
 ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){

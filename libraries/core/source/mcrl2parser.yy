@@ -62,6 +62,14 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and action rename rules in that order.
 
+ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
+//Pre: SpecElts contains one parameterised boolean initialisation and zero or
+//     more occurrences of sort, constructor, operation, data equation, action
+//     and parameterised boolean equation specifications.
+//Ret: BPES specification containing one sort, constructor, operation,
+//     data equation, action and parameterised boolean equation specification,
+//     and one parameterised boolean initialisation, in that order.
+
 #define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(parser_protect_table, (ATerm) lhs, &b); }
 %}
 
@@ -142,6 +150,11 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //action rename
 %type <appl> action_rename_spec action_rename_spec_elt action_rename_rule_spec
 %type <appl> action_rename_rule action_rename_rule_rhs
+//parameterised boolean expressions
+%type <appl> pb_expr pb_expr_quant pb_expr_imp pb_expr_imp_rhs pb_expr_and
+%type <appl> pb_expr_and_rhs pb_expr_not pb_expr_quant_not pb_expr_primary
+//PBES's
+%type <appl> pbes_spec pbes_spec_elt pb_eqn_spec pb_eqn_decl fixpoint pb_init
 
 //sort expressions
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
@@ -164,6 +177,9 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //action rename
 %type <list> action_rename_spec_elts action_rename_rules_scs
 %type <list> action_rename_rule_sect
+//PBES's
+%type <list> pbes_spec_elts pb_eqn_decls_scs
+
 
 %%
 
@@ -204,6 +220,11 @@ start:
       spec_tree = $$;
     }
   | TAG_ACTION_RENAME action_rename_spec
+    {
+      safe_assign($$, $2);
+      spec_tree = $$;
+    }
+  | TAG_PBES_SPEC pbes_spec
     {
       safe_assign($$, $2);
       spec_tree = $$;
@@ -492,8 +513,8 @@ data_expr_imp:
     }
   | data_expr_and IMP data_expr_imp_rhs
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed implication\n  %T\n", $$);
     }
   ;
@@ -524,14 +545,14 @@ data_expr_and:
     }
   | data_expr_eq AND data_expr_and_rhs
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed conjunction\n  %T\n", $$);
     }
   | data_expr_eq BARS data_expr_and_rhs
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$, 
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed disjunction\n  %T\n", $$);
     }
   ;
@@ -562,14 +583,14 @@ data_expr_eq:
     }
   | data_expr_rel EQ data_expr_eq_rhs
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
   | data_expr_rel NEQ data_expr_eq_rhs
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
   ;
@@ -600,32 +621,32 @@ data_expr_rel:
     }
   | data_expr_cons GTE data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LTE data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons RANG data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LANG data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons IN data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   ;
@@ -638,8 +659,8 @@ data_expr_cons:
     }
   | data_expr_add CONS data_expr_cons
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed list cons expression\n  %T\n", $$);
     }
   ;
@@ -652,8 +673,8 @@ data_expr_snoc:
     }
   | data_expr_snoc SNOC data_expr_add
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed list snoc expression\n  %T\n", $$);
     }
   ; 
@@ -666,8 +687,8 @@ data_expr_concat:
     }
   | data_expr_concat CONCAT data_expr_add
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed list concat expression\n  %T\n", $$);
     }
   ;
@@ -680,14 +701,14 @@ data_expr_add:
     }
   | data_expr_add PLUS data_expr_div
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed addition or set union\n  %T\n", $$);
     }
   | data_expr_add MINUS data_expr_div
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed subtraction or set difference\n  %T\n", $$);
     }
   ;
@@ -700,14 +721,14 @@ data_expr_div:
     }
   | data_expr_div DIV data_expr_mult
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed div expression\n  %T\n", $$);
     }
   | data_expr_div MOD data_expr_mult
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed mod expression\n  %T\n", $$);
     }
   ;
@@ -720,14 +741,14 @@ data_expr_mult:
     }
   | data_expr_mult STAR data_expr_prefix
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed multiplication or set intersection\n  %T\n", $$);
     }
   | data_expr_mult DOT data_expr_prefix
     {
-      $$ = gsMakeDataAppl(gsMakeId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed list at expression\n  %T\n", $$);
     }
   ;
@@ -1649,8 +1670,9 @@ data_eqn_sect:
       int n = ATgetLength($4);
       for (int i = 0; i < n; i++) {
         ATermAppl DataEqn = ATAelementAt($4, i);
-        $$ = ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
-          ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3)));
+        safe_assign($$,
+          ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
+            ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3))));
       }
       gsDebugMsg("parsed data equation section\n  %T\n", $$);
     }
@@ -1742,8 +1764,8 @@ acts_decl:
       safe_assign($$, ATmakeList0());
       int n = ATgetLength($1);
       for (int i = 0; i < n; i++) {
-        $$ = ATinsert($$,
-          (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0()));
+        safe_assign($$,
+          ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0())));
       }
       gsDebugMsg("parsed action declarations\n  %T\n", $$);
     }
@@ -1785,9 +1807,9 @@ proc_eqn_decls_scs:
 proc_eqn_decl:
   ID EQUALS proc_expr
     {
-      $$ = gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3);
-      gsDebugMsg("parsed process declaration\n  %T\n", $$);
+      safe_assign($$, gsMakeProcEqn(
+        ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
+      gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
@@ -1796,9 +1818,9 @@ proc_eqn_decl:
       for (int i = 0; i < n; i++) {
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
       }      
-      $$ = gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6);
-      gsDebugMsg("parsed process declaration\n  %T\n", $$);
+      safe_assign($$, gsMakeProcEqn(
+        ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
+      gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   ;
 
@@ -2057,7 +2079,7 @@ state_frm_primary:
   VAL LPAR data_expr RPAR
     {
       safe_assign($$, $3);
-      gsDebugMsg("parsed postfix state formula\n  %T\n", $$);
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
     }
   | param_id
     {
@@ -2471,8 +2493,11 @@ action_rename_rule_sect:
       int n = ATgetLength($4);
       for (int i = 0; i < n; i++) {
         ATermAppl ActionRenameRule = ATAelementAt($4, i);
-	$$ = ATinsert($$, (ATerm) gsMakeActionRenameRule($2, ATAgetArgument(ActionRenameRule, 1),
-          ATAgetArgument(ActionRenameRule, 2), ATAgetArgument(ActionRenameRule, 3)));
+	safe_assign($$, ATinsert($$,
+          (ATerm) gsMakeActionRenameRule($2,
+            ATAgetArgument(ActionRenameRule, 1),
+            ATAgetArgument(ActionRenameRule, 2),
+            ATAgetArgument(ActionRenameRule, 3))));
       }
       gsDebugMsg("parsed action rename rule section\n  %T\n", $$);
     }
@@ -2517,6 +2542,286 @@ action_rename_rule_rhs:
     {
       safe_assign($$, $1);
       gsDebugMsg("parsed right-hand-side of an action rename rule\n %T\n", $$);
+    }
+  ;
+
+//Parameterised boolean expressions
+//---------------------------------
+
+//parameterised boolean expression
+pb_expr:
+  pb_expr_quant
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed parameterised boolean expression\n  %T\n", $$);
+    }
+  ;
+
+//quantification
+pb_expr_quant:
+  pb_expr_imp
+    {
+      safe_assign($$, $1);
+    }
+  | FORALL data_vars_decls_cs DOT pb_expr_quant
+    {
+      safe_assign($$, gsMakePBESForall($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT pb_expr_quant
+    {
+      safe_assign($$, gsMakePBESExists($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//implication (right associative)
+pb_expr_imp:
+  pb_expr_and
+    {
+      safe_assign($$, $1);
+    }
+  | pb_expr_and IMP pb_expr_imp_rhs
+    {
+      safe_assign($$, gsMakePBESImp($1, $3));
+      gsDebugMsg("parsed implication\n  %T\n", $$);
+    }
+  ;
+
+//right argument of implication
+pb_expr_imp_rhs:
+  pb_expr_imp
+    {
+      safe_assign($$, $1);
+    }
+  | FORALL data_vars_decls_cs DOT pb_expr_imp_rhs
+    {
+      safe_assign($$, gsMakePBESForall($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT pb_expr_imp_rhs
+    {
+      safe_assign($$, gsMakePBESExists($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//conjunction and disjunction (right associative)
+pb_expr_and:
+  pb_expr_not
+    {
+      safe_assign($$, $1);
+    }
+  | pb_expr_not AND pb_expr_and_rhs
+    {
+      safe_assign($$, gsMakePBESAnd($1, $3));
+      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+    }
+  | pb_expr_not BARS pb_expr_and_rhs
+    {
+      safe_assign($$, gsMakePBESOr($1, $3));
+      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+    }
+  ;
+
+//right argument of conjunction and disjunction
+pb_expr_and_rhs:
+  pb_expr_and
+    {
+      safe_assign($$, $1);
+    }
+  | FORALL data_vars_decls_cs DOT pb_expr_and_rhs
+    {
+      safe_assign($$, gsMakePBESForall($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT pb_expr_and_rhs
+    {
+      safe_assign($$, gsMakePBESExists($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//negation
+pb_expr_not:
+  pb_expr_primary
+    {
+      safe_assign($$, $1);
+    }
+  | EXCLAM pb_expr_quant_not
+    {
+      safe_assign($$, gsMakePBESNot($2));
+      gsDebugMsg("parsed negation\n  %T\n", $$);
+    }
+  ;
+
+//quantifier or not
+pb_expr_quant_not:
+  pb_expr_not
+    {
+      safe_assign($$, $1);
+    }
+  | FORALL data_vars_decls_cs DOT pb_expr_quant_not
+    {
+      safe_assign($$, gsMakePBESForall($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT pb_expr_quant_not
+    {
+      safe_assign($$, gsMakePBESExists($2, $4));
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//primary expression
+pb_expr_primary:
+  VAL LPAR data_expr RPAR
+    {
+      safe_assign($$, $3);
+      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+    }
+  | param_id
+    {
+      safe_assign($$, gsMakePropVarInst(ATAgetArgument($1, 0), ATLgetArgument($1, 1)));
+      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+    }
+  | CTRUE
+    {
+      safe_assign($$, gsMakePBESTrue());
+      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+    }
+  | CFALSE
+    {
+      safe_assign($$, gsMakePBESFalse());
+      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+    }
+  | LPAR pb_expr RPAR
+    {
+      safe_assign($$, $2);
+    }
+  ;
+
+
+//PBES's
+//------
+
+//PBES specification
+pbes_spec:
+  pbes_spec_elts
+    {
+      safe_assign($$, gsPBESSpecEltsToSpec(ATreverse($1)));
+      gsDebugMsg("parsed PBES specification\n  %T\n", $$);
+    }
+  ;
+
+//PBES specification elements
+pbes_spec_elts:
+  pbes_spec_elt
+    {
+      safe_assign($$, ATmakeList1((ATerm) $1));
+      gsDebugMsg("parsed PBES specification elements\n  %T\n", $$);
+    }
+   | pbes_spec_elts pbes_spec_elt
+    {
+      safe_assign($$, ATinsert($1, (ATerm) $2));
+      gsDebugMsg("parsed PBES specification elements\n  %T\n", $$);
+    }
+   ;
+
+//PBES specification element
+pbes_spec_elt:
+  sort_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    } 
+  | cons_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
+  | map_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
+  | data_eqn_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
+  | pb_eqn_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
+  | pb_init
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
+  ;
+
+//parameterised boolean equation specification
+pb_eqn_spec:
+  KWPBES pb_eqn_decls_scs
+    {
+      safe_assign($$, gsMakePBEqnSpec(ATmakeList0(), ATreverse($2)));
+      gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
+    }
+  ;
+
+//one or more parameterised boolean equation declarations, separated by semicolons
+pb_eqn_decls_scs:
+  pb_eqn_decl SEMICOLON
+    {
+      safe_assign($$, ATmakeList1((ATerm) $1));
+      gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", $$);
+    }
+  | pb_eqn_decls_scs pb_eqn_decl SEMICOLON
+    {
+      safe_assign($$, ATinsert($1, (ATerm) $2));
+      gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", $$);
+    }
+  ;
+
+//parameterised boolean equation declaration
+pb_eqn_decl:
+  fixpoint ID EQUALS pb_expr
+    {
+      safe_assign($$,
+        gsMakePBEqn($1, gsMakePropVarDecl($2, ATmakeList0()), $4));
+      gsDebugMsg("parsed parameterised boolean equation declaration\n  %T\n", $$);
+    }
+  | fixpoint ID LPAR data_vars_decls_cs RPAR EQUALS pb_expr
+    {
+      safe_assign($$,
+        gsMakePBEqn($1, gsMakePropVarDecl($2, $4), $7));
+      gsDebugMsg("parsed parameterised boolean equation declaration\n  %T\n", $$);
+    }
+  ;
+
+//fixpoint
+fixpoint:
+  MU
+    {
+      safe_assign($$, gsMakeMu());
+      gsDebugMsg("parsed fixpoint\n  %T\n", $$);
+    }
+  | NU
+    {
+      safe_assign($$, gsMakeNu());
+      gsDebugMsg("parsed fixpoint\n  %T\n", $$);
+    }
+  ;
+
+//parameterised boolean initialisation
+pb_init:
+  KWINIT param_id SEMICOLON
+    {
+      safe_assign($$, gsMakePBInit(ATmakeList0(),
+        gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
+      gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
 
@@ -2618,6 +2923,70 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList ActionRenameElts)
     ),
     gsMakeActSpec(ActDecls),
     gsMakeActionRenameRules(ActionRenameRules)
+  );
+  return Result;
+}
+
+ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
+{
+  ATermAppl Result = NULL;
+  ATermList SortDecls = ATmakeList0();
+  ATermList ConsDecls = ATmakeList0();
+  ATermList MapDecls = ATmakeList0();
+  ATermList DataEqnDecls = ATmakeList0();
+  ATermAppl PBEqnSpec = NULL;
+  ATermAppl PBInit = NULL;
+  int n = ATgetLength(SpecElts);
+  for (int i = 0; i < n; i++) {
+    ATermAppl SpecElt = ATAelementAt(SpecElts, i);
+    if (gsIsPBEqnSpec(SpecElt)) {
+      if (PBEqnSpec == NULL) {
+        PBEqnSpec = SpecElt;
+      } else {
+        //PBEqnSpec != NULL
+        gsErrorMsg("parse error: multiple parameterised boolean equation specifications\n");
+        return NULL;
+      }
+    } else if (gsIsPBInit(SpecElt)) {
+      if (PBInit == NULL) {
+        PBInit = SpecElt;
+      } else {
+        //PBInit != NULL
+        gsErrorMsg("parse error: multiple initialisations\n");
+        return NULL;
+      }
+    } else {
+      ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
+      if (gsIsSortSpec(SpecElt)) {
+        SortDecls = ATconcat(SortDecls, SpecEltArg0);
+      } else if (gsIsConsSpec(SpecElt)) {
+        ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
+      } else if (gsIsMapSpec(SpecElt)) {
+        MapDecls = ATconcat(MapDecls, SpecEltArg0);
+      } else if (gsIsDataEqnSpec(SpecElt)) {
+        DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
+      }
+    }
+  }
+  //check whether a parameterised boolean equation specification is present
+  if (PBEqnSpec == NULL) {
+    gsErrorMsg("parse error: missing parameterised boolean equation specification\n");
+    return NULL;
+  }
+  //check whether an initialisation is present
+  if (PBInit == NULL) {
+    gsErrorMsg("parse error: missing initialisation\n");
+    return NULL;
+  }
+  Result = gsMakePBES(
+    gsMakeDataSpec(
+      gsMakeSortSpec(SortDecls),
+      gsMakeConsSpec(ConsDecls),
+      gsMakeMapSpec(MapDecls),
+      gsMakeDataEqnSpec(DataEqnDecls)
+    ),
+    PBEqnSpec,
+    PBInit
   );
   return Result;
 }

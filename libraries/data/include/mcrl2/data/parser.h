@@ -37,7 +37,7 @@ namespace detail {
   inline
   ATermAppl parse_specification(std::istream& from)
   {
-    ATermAppl result = core::detail::parse_spec(from);
+    ATermAppl result = core::detail::parse_proc_spec(from);
     if (result == NULL)
       throw std::runtime_error("parse error");
     return result;
@@ -46,7 +46,7 @@ namespace detail {
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
-    ATermAppl result = core::detail::type_check_spec(spec);
+    ATermAppl result = core::detail::type_check_proc_spec(spec);
     if (result == NULL)
       throw std::runtime_error("type check error");
     return result;
@@ -64,7 +64,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::detail::implement_data_spec(spec);
+    ATermAppl result = core::detail::implement_data_proc_spec(spec);
     if (result == NULL)
       throw std::runtime_error("data implementation error");
     return result;

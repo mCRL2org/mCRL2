@@ -363,8 +363,8 @@ static yyconst flex_int16_t yy_accept[264] =
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    6,    0,    0,    0,    0,
-        0,    0,    5,    9,    7,    8,    4,   10,    0,    0,
-        0,   11,    0
+        0,    0,    5,   11,    7,    8,    4,    9,    0,    0,
+        0,   10,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -867,17 +867,17 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 93 "mcrl2lexer.ll"
-{ process_string(); return TAG_PBES_SPEC; }
+{ process_string(); return TAG_STATE_FRM; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 94 "mcrl2lexer.ll"
-{ process_string(); return TAG_STATE_FRM; }
+{ process_string(); return TAG_ACTION_RENAME; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 95 "mcrl2lexer.ll"
-{ process_string(); return TAG_ACTION_RENAME; }
+{ process_string(); return TAG_PBES_SPEC; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP

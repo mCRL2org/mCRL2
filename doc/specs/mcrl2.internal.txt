@@ -297,7 +297,7 @@
 //PBES's
 //------
 
-//PBES equation system
+//PBES specification
 <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 
 //parameterized boolean equation specification

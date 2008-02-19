@@ -175,7 +175,7 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //--------------
 
 
-ATermAppl implement_data_spec(ATermAppl spec)
+ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
   int occ =

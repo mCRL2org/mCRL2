@@ -865,9 +865,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	  colored=ATtrue;
 	  std::string s(prelude);
           std::istringstream iss(s+"init delta;");
-	  ATermAppl Prelude=parse_spec(iss);
+	  ATermAppl Prelude=parse_proc_spec(iss);
           if(!Prelude) {gsErrorMsg("Parsing of the mCRL2 prelude failed\n"); return NULL;}
-          Prelude=type_check_spec_part(Prelude);
+          Prelude=type_check_proc_spec(Prelude);
           if(!Prelude) {gsErrorMsg("Type-checking of the mCRL2 prelude failed\n"); return NULL;}
           Net_prelude=Prelude;
 	}
@@ -2421,7 +2421,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     
     gsDebugMsg("The result of conversion is: %T\n",Spec);
    
-    Spec = type_check_spec(Spec);
+    Spec = type_check_proc_spec(Spec);
    
     if(Spec){
       PrintPart_C(OutStream, (ATerm) Spec, ppDefault);

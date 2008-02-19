@@ -24,8 +24,8 @@ namespace mcrl2 {
     namespace detail {
 
 
-/// \pre spec represents a specification that adheres to the internal ATerm
-///     structure after the type checking phase.
+/// \pre spec represents an mCRL2 process specification that adheres to the
+///     internal ATerm structure after the type checking phase.
 /// \post The datatypes of spec are implemented as higher-order abstract data
 ///     types.
 /// \return if the data implementation went well, an equivalent version of spec is
@@ -33,7 +33,7 @@ namespace mcrl2 {
 ///     implementation.
 ///     If something went wrong, an appropriate error message is printed and
 ///     NULL is returned.
-ATermAppl implement_data_spec(ATermAppl spec);
+ATermAppl implement_data_proc_spec(ATermAppl spec);
 
 /** \pre sort_expr represents a sort expression that adheres to the internal
  *     ATerm structure after the type checking phase.

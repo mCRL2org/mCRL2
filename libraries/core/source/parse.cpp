@@ -42,8 +42,8 @@ ATermAppl parse_proc_expr(istream &pe_stream) {
   return parse_tagged_stream("proc_expr", pe_stream);
 }
 
-ATermAppl parse_spec(istream &spec_stream) {
-  return parse_tagged_stream("proc_spec", spec_stream);
+ATermAppl parse_proc_spec(istream &ps_stream) {
+  return parse_tagged_stream("proc_spec", ps_stream);
 }
 
 ATermAppl parse_state_frm(istream &pe_stream) {
@@ -52,6 +52,10 @@ ATermAppl parse_state_frm(istream &pe_stream) {
 
 ATermAppl parse_action_rename_spec(istream &pe_stream) {
   return parse_tagged_stream("action_rename", pe_stream);
+}
+
+ATermAppl parse_pbes_spec(istream &pbes_spec_stream) {
+  return parse_tagged_stream("pbes_spec", pbes_spec_stream);
 }
 
 ATermAppl parse_tagged_stream(const string &tag, istream &stream) {

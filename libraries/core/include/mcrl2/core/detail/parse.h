@@ -28,12 +28,14 @@ namespace mcrl2 {
 **/ 
 ATermAppl parse_sort_expr(std::istream &se_stream);
 
+
 /** \pre    de_stream is an input stream from which can be read       
   * \post   the content of de_stream is parsed as an mCRL2 data expression
   * \return the parsed data expression, if everything went well
   *         NULL, otherwise
 **/ 
 ATermAppl parse_data_expr(std::istream &de_stream);
+
 
 /** \pre    ma_stream is an input stream from which can be read       
   * \post   the content of ma_stream is parsed as an mCRL2 multi-action
@@ -42,19 +44,23 @@ ATermAppl parse_data_expr(std::istream &de_stream);
 **/ 
 ATermAppl parse_mult_act(std::istream &ma_stream);
 
+
 /** \pre    pe_stream is an input stream from which can be read       
   * \post   the content of pe_stream is parsed as an mCRL2 process expression
-  * \return the parsed proc expression, if everything went well
+  * \return the parsed process expression, if everything went well
   *         NULL, otherwise
 **/ 
 ATermAppl parse_proc_expr(std::istream &pe_stream);
 
-/** \pre    spec_stream is an input stream from which can be read       
-  * \post   the content of spec_stream is parsed as an mCRL2 specification
-  * \return the parsed mCRL2 specification, if everything went well
+
+/** \pre    ps_stream is an input stream from which can be read       
+  * \post   the content of ps_stream is parsed as an mCRL2 process
+  *         specification
+  * \return the parsed process specification, if everything went well
   *         NULL, otherwise
 **/ 
-ATermAppl parse_spec(std::istream &spec_stream);
+ATermAppl parse_proc_spec(std::istream &ps_stream);
+
 
 /** \pre    sf_stream is an input stream from which can be read       
   * \post   the content of sf_stream is parsed as an mCRL2 state formula
@@ -63,12 +69,22 @@ ATermAppl parse_spec(std::istream &spec_stream);
 **/ 
 ATermAppl parse_state_frm(std::istream &sf_stream);
 
+
 /** \pre    sf_stream is an input stream from which can be read       
   * \post   the content of sf_stream is parsed as an action rename specification
   * \return the parsed rename rule file, if everything went well
   *         NULL, otherwise
 **/ 
 ATermAppl parse_action_rename_spec(std::istream &sf_stream);
+
+
+/** \pre    pbes_spec_stream is an input stream from which can be read       
+  * \post   the content of pbes_spec_stream is parsed as an mCRL2
+  *         parameterised boolean equation system specification
+  * \return the parsed PBES specification, if everything went well
+  *         NULL, otherwise
+**/ 
+ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
 
     }
   }

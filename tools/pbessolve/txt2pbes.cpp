@@ -389,15 +389,15 @@ data_specification get_minimal_data_spec()
   std::stringstream ss;
   //  ss << "map i:Nat; b:Bool; init delta;";
   ss << "init delta@0;";
-  ATermAppl r = parse_spec(ss);
+  ATermAppl r = parse_proc_spec(ss);
 #ifdef debug
   cerr<<"typecheck\n";
 #endif
-  r = type_check_spec(r);
+  r = type_check_proc_spec(r);
 #ifdef debug
   cerr<<"implement data spec\n";
 #endif
-  r = implement_data_spec(r);
+  r = implement_data_proc_spec(r);
 #ifdef debug
   cerr<<"linearise spec\n";
 #endif

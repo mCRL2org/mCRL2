@@ -180,18 +180,26 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and action rename rules in that order.
 
+ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
+//Pre: SpecElts contains one parameterised boolean initialisation and zero or
+//     more occurrences of sort, constructor, operation, data equation, action
+//     and parameterised boolean equation specifications.
+//Ret: BPES specification containing one sort, constructor, operation,
+//     data equation, action and parameterised boolean equation specification,
+//     and one parameterised boolean initialisation, in that order.
+
 #define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(parser_protect_table, (ATerm) lhs, &b); }
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 68 "mcrl2parser.yy"
+#line 76 "mcrl2parser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 195 "mcrl2parser.hpp"
+#line 203 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
