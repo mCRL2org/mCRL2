@@ -34,7 +34,7 @@ typedef ltsview::LTSViewFSMParser::token_type token_type;
 %option batch
 
 /* no support for include files is planned */
-%option noyywrap nounput 
+%option nounput 
 
 /* enables the use of start condition stacks */
 %option stack

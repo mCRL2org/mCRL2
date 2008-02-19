@@ -75,7 +75,7 @@ Number     "0"|([1-9][0-9]*)
 
 %option c++
 %option prefix="mcrl2yy"
-%option nounput noyywrap
+%option nounput
 
 %%
 
@@ -90,6 +90,7 @@ Number     "0"|([1-9][0-9]*)
 "mult_act"      { process_string(); return TAG_MULT_ACT; }
 "proc_expr"     { process_string(); return TAG_PROC_EXPR; }
 "proc_spec"     { process_string(); return TAG_PROC_SPEC; }
+"pbes_spec"     { process_string(); return TAG_PBES_SPEC; }
 "state_frm"     { process_string(); return TAG_STATE_FRM; }
 "action_rename" { process_string(); return TAG_ACTION_RENAME; }
 
@@ -138,6 +139,7 @@ var        { process_string(); return KWVAR; }
 eqn        { process_string(); return KWEQN; }
 act        { process_string(); return KWACT; }
 proc       { process_string(); return KWPROC; }
+pbes       { process_string(); return KWPBES; }
 init       { process_string(); return KWINIT; }
 
 struct     { process_string(); return KWSTRUCT; }

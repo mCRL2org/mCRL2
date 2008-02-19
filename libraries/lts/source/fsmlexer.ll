@@ -79,7 +79,7 @@ void processNumber();
 %}
 %option c++
 %option prefix="fsmyy"
-%option nounput noyywrap
+%option nounput
 Quoted	   \"[^\"]*\"
 Id	   [a-zA-Z_][a-zA-Z0-9_'@]*
 Number     [0]|([1-9][0-9]*) 
