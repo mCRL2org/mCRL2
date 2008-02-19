@@ -21,6 +21,8 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/data/rewrite.h"
 
+#include "mcrl2/pbes/utility.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -40,7 +42,7 @@ namespace pbes_system {
 /// to internal format the next time the rewriter is applied to it. This is for instance useful
 /// in the tool pbes2bool (or pbes2bes) where pbes expressions must iteratively be rewritten.
 
-inline pbes_expression pbes_expression_rewrite_and_simplify(
+inline pbes_expression pbes_expression_rewrite_and_simplify1(
                    pbes_expression p, 
                    Rewriter *rewriter)
 {
@@ -59,12 +61,12 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_pbes_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
+    pbes_expression left = pbes_expression_rewrite_and_simplify1(lhs(p),rewriter);
     if (is_pbes_false(left))
     { result = false_();
     }
     else
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
+    { pbes_expression right = pbes_expression_rewrite_and_simplify1(rhs(p),rewriter);
       //Options for left and right
       if (is_pbes_false(right))
       { result = false_();
@@ -81,12 +83,12 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_pbes_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_rewrite_and_simplify(lhs(p),rewriter);
+    pbes_expression left = pbes_expression_rewrite_and_simplify1(lhs(p),rewriter);
     if (is_pbes_true(left))
     { result = true_();
     }
     else 
-    { pbes_expression right = pbes_expression_rewrite_and_simplify(rhs(p),rewriter);
+    { pbes_expression right = pbes_expression_rewrite_and_simplify1(rhs(p),rewriter);
       if (is_pbes_true(right))
       { result = true_();
       }
@@ -102,7 +104,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_forall(p))
   { // p = forall(data::data_expression_list, pbes_expression)
     data::data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify1(quant_expr(p),rewriter);
     //Remove data_vars which do not occur in expr
     data::data_variable_list occurred_data_vars;
     for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -123,7 +125,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_exists(p))
   { // p = exists(data::data_expression_list, pbes_expression)
     data::data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(quant_expr(p),rewriter);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify1(quant_expr(p),rewriter);
     //Remove data_vars which does not occur in expr
     data::data_variable_list occurred_data_vars;
     for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -175,7 +177,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
 /// will be generated. And if the expressions are not constant, expressions such as
 /// p(f1(x1..xn)) are simplified, which can lead to the situation that certain 
 /// variables x1..xn do not occur anymore. In that case the quantors can be removed
-/// also. The function pbes_expression_substitute_and_rewrite will continue substituting
+/// also. The function pbes_expression_substitute_and_rewrite1 will continue substituting
 /// constructors for quantified variables until there are no variables left, or
 /// until there are only quantifications over non constructor sorts. In the last case,
 /// the function will halt with an exit(1). For every 100 new variables being used
@@ -187,7 +189,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
 /// in the result are also in internal format. The use of internal format saves
 /// a lot of internal compilation time.
 
-inline pbes_expression pbes_expression_substitute_and_rewrite(
+inline pbes_expression pbes_expression_substitute_and_rewrite1(
                    const pbes_expression &p, 
                    const data::data_specification &data, 
                    Rewriter *rewriter)
@@ -201,13 +203,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   if (is_pbes_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
+    pbes_expression left = pbes_expression_substitute_and_rewrite1(lhs(p), 
                                data, rewriter);
     if (is_pbes_false(left))
     { result = false_();
     }
     else
-    { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
+    { pbes_expression right = pbes_expression_substitute_and_rewrite1(rhs(p), 
                  data, rewriter);
       //Options for left and right
       if (is_pbes_false(right))
@@ -227,14 +229,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     //Rewrite left and right as far as possible
     
     // std::cerr << "SUB&REWR OR: " << pp(p) << "\n";
-    pbes_expression left = pbes_expression_substitute_and_rewrite(lhs(p), 
+    pbes_expression left = pbes_expression_substitute_and_rewrite1(lhs(p), 
                  data, rewriter);
     // std::cerr << "SUB&REWR OR LEFT: " << pp(left) << "\n";
     if (is_pbes_true(left))
     { result = true_();
     }
     else 
-    { pbes_expression right = pbes_expression_substitute_and_rewrite(rhs(p), 
+    { pbes_expression right = pbes_expression_substitute_and_rewrite1(rhs(p), 
                  data, rewriter);
       // std::cerr << "SUB&REWR OR RIGHT: " << pp(right) << "\n";
       if (is_pbes_true(right))
@@ -262,7 +264,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   { 
 
     data::data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite1(quant_expr(p), data, rewriter);
 
     // If no data_vars
     if (data_vars.empty())
@@ -322,7 +324,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   }
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  pbes_expression r(pbes_expression_substitute_and_rewrite1(*t,data,rewriter));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_false(r)) /* the resulting expression is false, so we can terminate */
                   { 
@@ -354,7 +356,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   { 
     // std::cerr << "EXISTS_: " << pp(p) << "\n";
     data::data_variable_list data_vars = quant_vars(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(quant_expr(p), data, rewriter);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite1(quant_expr(p), data, rewriter);
     // std::cerr << "REWRITTEN EXPR " << pp(expr) << "\n";
     // If no data_vars
     if (data_vars.empty())
@@ -416,7 +418,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter));
+                  pbes_expression r(pbes_expression_substitute_and_rewrite1(*t,data,rewriter));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_true(r)) /* the resulting expression is true, so we can terminate */
                   { // std::cerr << "Return true\n";
@@ -481,7 +483,7 @@ class simplify_rewriter1
     
     pbes_expression operator()(pbes_expression p)
     {
-      return pbes_expression_rewrite_and_simplify(p, datar.get_rewriter());
+      return pbes_expression_rewrite_and_simplify1(p, datar.get_rewriter());
     }   
 };
 
@@ -497,7 +499,23 @@ class substitute_rewriter
     
     pbes_expression operator()(pbes_expression p)
     {
-      return pbes_expression_substitute_and_rewrite(p, data_spec, datar.get_rewriter());
+      return pbes_expression_substitute_and_rewrite1(p, data_spec, datar.get_rewriter());
+    }   
+};
+
+class substitute_rewriter_jfg
+{
+  data::rewriter datar;
+  const data::data_specification& data_spec;
+ 
+  public:
+    substitute_rewriter_jfg(const data::data_specification& data)
+      : datar(data), data_spec(data)
+    { }
+    
+    pbes_expression operator()(pbes_expression p)
+    {
+      return pbes_expression_substitute_and_rewrite(p, data_spec, datar.get_rewriter(), false);
     }   
 };
 

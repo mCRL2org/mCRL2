@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
       "The following choices of the pbes rewriter are available:\n"
       "  0 : default rewriter                 \n"
       "  1 : substituting rewriter (Jan Friso)\n"
+      "  2 : substituting rewriter (Jan Friso, current version)\n"
       "\n"
       "The following choices of the data rewriter are available:\n"
       "  0 : innermost\n"
@@ -109,6 +110,11 @@ int main(int argc, char* argv[])
     else if (pbes_rewriter == 1)
     {
       substitute_rewriter pbesr(data_spec);
+      run(expressions, pbesr);
+    }
+    else if (pbes_rewriter == 2)
+    {
+      substitute_rewriter_jfg pbesr(data_spec);
       run(expressions, pbesr);
     }
   }
