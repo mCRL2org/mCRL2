@@ -5,20 +5,8 @@ project toolset/pbessolve
           <library>/libraries//pbes
        ;
 
-obj gauss.o
-       : gauss.cpp
-         /site-config//boost_program_options
-       ;
-
-obj sort_instantiator.o
-       : sort_instantiator.h sort_instantiator.cpp
-         /site-config//boost_program_options
-       ;
-
 tool pbessolve
        : pbessolve.cpp
-	 sort_instantiator.o
-	 gauss.o
          /site-config//boost_program_options
        : <status>experimental
        ;

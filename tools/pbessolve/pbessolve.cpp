@@ -45,7 +45,7 @@
 #include "gc.h" 
  
 //Tool-specific 
-#include "gauss.h" 
+#include "mcrl2/pbes/gauss.h" 
  
 using namespace std; 
 using namespace mcrl2::utilities;

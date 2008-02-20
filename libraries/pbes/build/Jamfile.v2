@@ -14,6 +14,8 @@ project pbes
 mcrl2-library pbes
        : source/pbes_rewrite.cpp
          source/pbes2bool.cpp
+         source/gauss.cpp
+         source/sort_instantiator.cpp
        : <use>/libraries/data//headers
        : <threading>single
        : <library>/libraries//data

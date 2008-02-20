@@ -109,12 +109,12 @@ int main(int argc, char* argv[])
     }
     else if (pbes_rewriter == 1)
     {
-      substitute_rewriter pbesr(data_spec);
+      substitute_rewriter pbesr(datar, data_spec);
       run(expressions, pbesr);
     }
     else if (pbes_rewriter == 2)
     {
-      substitute_rewriter_jfg pbesr(data_spec);
+      substitute_rewriter_jfg pbesr(datar, data_spec);
       run(expressions, pbesr);
     }
   }
