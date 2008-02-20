@@ -26,6 +26,10 @@ inline bool is_constructorsort(const sort_expression &s,const data_specification
 { // This function is added by Jan Friso Groote on 8/7/2007.
   // cl contains all constructors with target sort s. 
 
+  if (s.is_arrow())
+  { return false;
+  }
+
   assert(occurs_in(data.sorts(),s));
   return (!data.constructors(s).empty());
 }
