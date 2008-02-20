@@ -11,6 +11,7 @@ project libraries/data/test
 
 test-suite lps
     :
+      [ run data_reconstruct_test.cpp ]
       [ run rewriter_test.cpp ]
       [ run apply_test.cpp ]
       [ run data_expression.cpp ]
