@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
   std::string infile;
   int pbes_rewriter;
   int data_rewriter;
+  int smt_solver_type;
   bool use_prover;
   pbes<> p;
 
@@ -42,13 +43,19 @@ int main(int argc, char* argv[])
       "Reads a file containing pbes expressions, and applies the rewriter to it.\n"
       "\n"
       "The following choices of the pbes rewriter are available:\n"
-      "  0 : default rewriter                 \n"
-      "  1 : substituting rewriter (Jan Friso)\n"
-      "  2 : substituting rewriter (Jan Friso, current version)\n"
+      "  0 : enumerating rewriter (Wieger)\n"
+      "  1 : enumerating rewriter (Jan Friso)\n"
+      "  2 : enumerating rewriter (Jan Friso, current version)\n"
+      "  3 : simplifying rewriter, uses a prover (Simona)\n"
       "\n"
       "The following choices of the data rewriter are available:\n"
       "  0 : innermost\n"
       "  1 : jitty    \n"
+      "\n"
+      "The following choices of the SMT solver are available:\n"
+      "  0 : ario\n"
+      "  1 : cvc\n"
+      "  2 : cvc fast\n"
       "\n"
       "Options"
     );
@@ -56,6 +63,7 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("pbes-rewriter,p", po::value<int> (&pbes_rewriter)->default_value(0), "pbes rewriter type")
       ("data-rewriter,d", po::value<int> (&data_rewriter)->default_value(0), "data rewriter type")
+      ("smt-solver,s", po::value<int> (&smt_solver_type)->default_value(0), "SMT solver type")
       ("use-prover,u", po::value<bool>   (&use_prover)->default_value(false), "use the eq-bdd prover")
       ;
 
@@ -115,6 +123,28 @@ int main(int argc, char* argv[])
     else if (pbes_rewriter == 2)
     {
       substitute_rewriter_jfg pbesr(datar, data_spec);
+      run(expressions, pbesr);
+    }
+    else if (pbes_rewriter == 3)
+    {
+      SMT_Solver_Type solver;
+      switch (smt_solver_type)
+      {
+        case 0:  solver = solver_type_ario; break;
+        case 1:  solver = solver_type_cvc; break;
+        case 2:  solver = solver_type_cvc_fast; break;
+        default: solver = solver_type_ario; break;
+      }
+      RewriteStrategy rewrite_strategy;
+      if (data_rewriter == 0)
+      {
+        rewrite_strategy = use_prover ? GS_REWR_INNER_P : GS_REWR_INNER;
+      }
+      else
+      {
+        rewrite_strategy = use_prover ? GS_REWR_JITTY_P : GS_REWR_JITTY;
+      }
+      pbessolve_rewriter pbesr(datar, data_spec, rewrite_strategy, solver);
       run(expressions, pbesr);
     }
   }

@@ -20,8 +20,8 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/data/rewrite.h"
-
 #include "mcrl2/pbes/utility.h"
+#include "mcrl2/pbes/gauss.h"
 
 namespace mcrl2 {
 
@@ -489,33 +489,61 @@ class simplify_rewriter1
 
 class substitute_rewriter
 {
-  data::rewriter datar;
+  data::rewriter& datar_;
   const data::data_specification& data_spec;
  
   public:
-    substitute_rewriter(const data::data_specification& data)
-      : datar(data), data_spec(data)
+    substitute_rewriter(data::rewriter& datar, const data::data_specification& data)
+      : datar_(datar), data_spec(data)
     { }
     
     pbes_expression operator()(pbes_expression p)
     {
-      return pbes_expression_substitute_and_rewrite1(p, data_spec, datar.get_rewriter());
+      return pbes_expression_substitute_and_rewrite1(p, data_spec, datar_.get_rewriter());
     }   
 };
 
 class substitute_rewriter_jfg
 {
-  data::rewriter datar;
+  data::rewriter& datar_;
   const data::data_specification& data_spec;
  
   public:
-    substitute_rewriter_jfg(const data::data_specification& data)
-      : datar(data), data_spec(data)
+    substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
+      : datar_(datar), data_spec(data)
     { }
     
     pbes_expression operator()(pbes_expression p)
     {
-      return pbes_expression_substitute_and_rewrite(p, data_spec, datar.get_rewriter(), false);
+std::cout << "<rewrite>" << pp(p) << std::endl;
+std::cout << "<result>" << pp(pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false)) << std::endl; 
+      return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
+    }   
+};
+
+class pbessolve_rewriter
+{
+  data::rewriter& datar_;
+  const data::data_specification& data_spec;
+  int n;
+  data_variable_list fv;
+  BDD_Prover* prover;
+ 
+  public:
+    pbessolve_rewriter(data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
+      : datar_(datar), data_spec(data), n(0)
+    {
+      prover = new BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false);
+    }
+
+    ~pbessolve_rewriter()
+    {
+      delete prover;
+    }
+
+    pbes_expression operator()(pbes_expression p)
+    {
+      return pbes_expression_simplify(p, &n, &fv, prover);
     }   
 };
 
