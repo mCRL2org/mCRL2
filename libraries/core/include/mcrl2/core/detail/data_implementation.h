@@ -35,6 +35,19 @@ namespace mcrl2 {
 ///     NULL is returned.
 ATermAppl implement_data_proc_spec(ATermAppl spec);
 
+
+/// \pre spec represents a PBES specification that adheres to the
+///     internal ATerm structure after the type checking phase.
+/// \post The datatypes of spec are implemented as higher-order abstract data
+///     types.
+/// \return if the data implementation went well, an equivalent version of spec is
+///     returned that adheres to the internal ATerm structure after data
+///     implementation.
+///     If something went wrong, an appropriate error message is printed and
+///     NULL is returned.
+ATermAppl implement_data_pbes_spec(ATermAppl spec);
+
+
 /** \pre sort_expr represents a sort expression that adheres to the internal
  *     ATerm structure after the type checking phase.
  *     lps_spec represents an LPS specification
@@ -48,6 +61,7 @@ ATermAppl implement_data_proc_spec(ATermAppl spec);
  **/
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
   lps::specification &lps_spec);
+
 
 /** \pre data_expr represents a data expression that adheres to the internal
  *     ATerm structure after the type checking phase.
@@ -63,6 +77,7 @@ ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
 ATermAppl implement_data_data_expr(ATermAppl data_expr,
   lps::specification &lps_spec);
 
+
 /** \pre mult_act represents a multiaction that adheres to the internal ATerm
  *     structure after the type checking phase.
  *     lps_spec represents an LPS specification
@@ -77,6 +92,7 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr,
 ATermAppl implement_data_mult_act(ATermAppl mult_act,
   lps::specification &lps_spec);
 
+
 /** \pre proc_expr represents a process expression that adheres to the internal
  *     ATerm structure after the type checking phase.
  *     lps_spec represents an LPS specification
@@ -90,6 +106,7 @@ ATermAppl implement_data_mult_act(ATermAppl mult_act,
  **/
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
   lps::specification &lps_spec);
+
 
 /** \pre state_frm represents a state formula that adheres to the internal ATerm
  *     structure after the type checking phase.
@@ -106,6 +123,7 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
 ATermAppl implement_data_state_frm(ATermAppl state_frm,
   ATermAppl& spec);
 
+
 /** \pre ar_spec represents an action rename specification that
  *     adheres to the internal ATerm structure after the type checking fase.
  *     lps_spec represents an LPS specification
@@ -121,6 +139,8 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm,
  **/
 ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
   lps::specification &lps_spec);
+
+
 
 /* ============================================================================
  * Detailed data implementation, this is used by data reconstruction only!

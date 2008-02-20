@@ -156,7 +156,7 @@ bool is_list_enum_impl(ATermAppl data_expr)
 
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
-  assert(gsIsSpecV1(spec) || gsIsActionRenameSpec(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
   assert(data_decls_is_initialised(data_decls));
   ATermAppl data_spec = ATAgetArgument(spec, 0);
   //add sort declarations
