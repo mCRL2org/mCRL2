@@ -663,6 +663,7 @@ host_vendor
 host_os
 BJAM
 BJAM_CXX
+TOOLSET_FLAGS
 HOST_OS
 CC
 CFLAGS
@@ -1930,11 +1931,17 @@ case $host in
     R_LDFLAGS="-bundle -undefined dynamic_lookup"
     R_SLDFLAGS=""
     BJAM_CXX="darwin"
+    TOOLSET_FLAGS="<linker-type>darwin"
+    ;;
+  *-sun-*)
+    HOST_OS="SUNOS"
+    TOOLSET_FLAGS="<linker-type>sun"
     ;;
   *)
     HOST_OS="UNKNOWN"
     ;;
 esac
+
 
 
 
@@ -7170,6 +7177,7 @@ host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
 BJAM!$BJAM$ac_delim
 BJAM_CXX!$BJAM_CXX$ac_delim
+TOOLSET_FLAGS!$TOOLSET_FLAGS$ac_delim
 HOST_OS!$HOST_OS$ac_delim
 CC!$CC$ac_delim
 CFLAGS!$CFLAGS$ac_delim
@@ -7217,7 +7225,7 @@ USE_BCG!$USE_BCG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 92; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 93; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -54,11 +54,13 @@ namespace mcrl2 {
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
-  ATinit(3, debug_args, reinterpret_cast<ATerm*>(&argv));
+  ATinit(3, debug_args, reinterpret_cast<ATerm*>(&argv)); \
+  ATsetChecking(ATtrue);
 #else
 #define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
-  ATinit(3, debug_args, reinterpret_cast<ATerm*>(argv));
+  ATinit(3, debug_args, reinterpret_cast<ATerm*>(argv)); \
+  ATsetChecking(ATtrue);
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 

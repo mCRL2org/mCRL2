@@ -165,7 +165,7 @@ namespace transport {
       socket_transceiver::ptr s = w.lock();
 
       if (!w.expired()) {
-        mutex::scoped_lock l(s->operation_lock);
+        boost::mutex::scoped_lock l(s->operation_lock);
 
         if (!e) {
           basic_transceiver::deliver(std::string(buffer.get()));
@@ -266,13 +266,13 @@ namespace transport {
       socket_transceiver::sptr l(w.lock());
 
       if (l.get() != 0) {
-        mutex::scoped_lock k(send_lock);
+        boost::mutex::scoped_lock k(send_lock);
 
         ++send_count;
 
         std::ostringstream s;
 
-        mutex::scoped_lock l(operation_lock);
+        boost::mutex::scoped_lock l(operation_lock);
 
         s << d.rdbuf();
 

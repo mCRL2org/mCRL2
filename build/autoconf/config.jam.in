@@ -3,7 +3,7 @@ rule import_user_config {
   import toolset ;
 
   # For C/C++ programs
-  toolset.using @BJAM_CXX@ ;
+  toolset.using @BJAM_CXX@ : : : @TOOLSET_FLAGS@ ;
 }
 
 # Build specific settings (Boost Build v2 default command line arguments)

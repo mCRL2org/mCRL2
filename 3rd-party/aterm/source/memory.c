@@ -982,6 +982,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
   va_start(args, sym);
   for (i=0; i<arity; i++) {
   	arg = va_arg(args, ATerm);
+    CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
     buffer[i] = arg;
   }

@@ -36,14 +36,12 @@ mcrl2parser:
 	cd libraries/core/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
-	sed -i~ -e 's/#ifdef YYDEBUG/#if YYDEBUG/g' mcrl2parser.cpp; \
 	mv mcrl2parser.hpp ../include/mcrl2/core/detail
 
 chiparser:
 	cd tools/chi2mcrl2; \
 	flex -Pchi -ochilexer.cpp chilexer.ll; \
-	bison -p chi -d -o chiparser.cpp chiparser.yy; \
-	sed -i~ -e 's/#ifdef YYDEBUG/#if YYDEBUG/g' chiparser.cpp
+	bison -p chi -d -o chiparser.cpp chiparser.yy;
 
 configure: build/autoconf/configure.ac
 	autoconf -o $@ -W all $<

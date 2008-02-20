@@ -5,8 +5,7 @@
 //-------------------
 //
 //Re-implementation of strdup (because it is not part of the C99 standard)
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__ || defined __FreeBSD__)
-#warning hello
+#if !(defined __sun__ || defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__ || defined __FreeBSD__)
 inline char *strdup(const char *s) {
     char *p;
 

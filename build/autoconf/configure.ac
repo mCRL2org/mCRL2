@@ -46,6 +46,11 @@ case $host in
     R_LDFLAGS="-bundle -undefined dynamic_lookup"
     R_SLDFLAGS=""
     BJAM_CXX="darwin"
+    TOOLSET_FLAGS="<linker-type>darwin"
+    ;;
+  *-sun-*)
+    HOST_OS="SUNOS"
+    TOOLSET_FLAGS="<linker-type>sun"
     ;;
   *)
     HOST_OS="UNKNOWN"
@@ -53,6 +58,7 @@ case $host in
 esac
 AC_SUBST([BJAM])
 AC_SUBST([BJAM_CXX])
+AC_SUBST([TOOLSET_FLAGS])
 AC_SUBST([HOST_OS])
 
 # Default is 32 bits, test is probably very incomplete

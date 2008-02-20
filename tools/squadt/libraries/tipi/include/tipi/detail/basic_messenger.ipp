@@ -714,13 +714,11 @@ namespace tipi {
      **/
     template < class M >
     void basic_messenger_impl< M >::waiter_data::wait(boost::function< void () > h, long const& ts) {
-      using namespace boost;
+      boost::mutex::scoped_lock l(mutex);
 
-      mutex::scoped_lock l(mutex);
+      boost::xtime time;
 
-      xtime time;
-
-      xtime_get(&time, boost::TIME_UTC);
+      boost::xtime_get(&time, boost::TIME_UTC);
 
       time.sec += ts;
 

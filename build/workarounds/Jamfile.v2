@@ -39,6 +39,11 @@ alias configuration : : <toolset>darwin :
          <linkflags>-mmacosx_version_min=10.3
        ;
 
+# Sun, Solaris
+alias configuration : : <toolset>sun :
+       : <include>$(TOP)/build/workarounds
+       ;
+
 # Default gcc (known to work on Linux)
 alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds

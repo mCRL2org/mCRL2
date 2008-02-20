@@ -25,6 +25,7 @@ alias transport
     :
     : <library>/site-config//boost_thread
       <library>/site-config//boost_system
+      <os>SOLARIS:<library>/site-config//socket
       <os>NT:<library>/site-config//winsock
       <os>CYGWIN:<library>/site-config//winsock
     ;
