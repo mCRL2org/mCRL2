@@ -2769,6 +2769,11 @@ pb_eqn_spec:
       safe_assign($$, gsMakePBEqnSpec(ATmakeList0(), ATreverse($2)));
       gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
     }
+  | KWVAR data_vars_decls_scs KWPBES pb_eqn_decls_scs
+    {
+      safe_assign($$, gsMakePBEqnSpec($2, ATreverse($4)));
+      gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
+    }
   ;
 
 //one or more parameterised boolean equation declarations, separated by semicolons
@@ -2821,6 +2826,12 @@ pb_init:
     {
       safe_assign($$, gsMakePBInit(ATmakeList0(),
         gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
+      gsDebugMsg("parsed initialisation\n  %T\n", $$);
+    }
+  | KWVAR data_vars_decls_scs KWINIT param_id SEMICOLON
+    {
+      safe_assign($$, gsMakePBInit($2,
+        gsMakePropVarInst(ATAgetArgument($4, 0), ATLgetArgument($4, 1))));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
