@@ -503,12 +503,16 @@ ATermAppl merge_declarations(ATermAppl action_rename, lps::specification lps_spe
   used_names.insert(boost::make_transform_iterator(rule_vars.begin(), mcrl2::data::detail::data_variable_name()),
                     boost::make_transform_iterator(rule_vars.end()  , mcrl2::data::detail::data_variable_name())
                    );
-
   mcrl2::data::postfix_identifier_generator generator("_S");
   generator.add_identifiers(used_names);
-
   result_lp = rename_free_variables(result_lp, generator);
+
+  generator.clear_context();
+  generator.add_identifiers(used_names);
   result_lp = rename_summation_variables(result_lp, generator);
+
+  generator.clear_context();
+  generator.add_identifiers(used_names);
   result = lps::specification(new_data, lps_actions, result_lp, lps_spec.initial_process());
   result = rename_process_parameters(result, generator);
 
