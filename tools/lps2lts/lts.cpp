@@ -9,6 +9,7 @@
 #include <cstring>
 #include <fstream>
 #include <aterm2.h>
+#include <mcrl2/lps/specification.h>
 #include "svc/svc.h" //XXX
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
@@ -208,14 +209,35 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
     case lts_none:
       break;
     default:
-      if ( !generic_lts->write_to(lts_filename,lts_opts.outformat) )
       {
-        gsErrorMsg("failed to write state space to file\n");
+        mcrl2::lps::specification s;
+        lts_extra ext;
+        lts_dot_options extdot;
+        string fn;
+        if ( !lts_opts.outinfo )
+        {
+          generic_lts->remove_state_values();
+        }
+        if ( lts_opts.outformat == lts_fsm )
+        {
+          s = mcrl2::lps::specification(lts_opts.spec);
+          ext = lts_extra(&s);
+        } else if ( lts_opts.outformat == lts_dot )
+        {
+          fn = lts_filename;
+          extdot.name = &fn;
+          extdot.print_states = lts_opts.outinfo;
+          ext = lts_extra(extdot);
+        }
+        if ( !generic_lts->write_to(lts_filename,lts_opts.outformat,ext) )
+        {
+          gsErrorMsg("failed to write state space to file\n");
+        }
+        ATtableDestroy(aterm2label);
+        ATtableDestroy(aterm2state);
+        delete generic_lts;
+        break;
       }
-      ATtableDestroy(aterm2label);
-      ATtableDestroy(aterm2state);
-      delete generic_lts;
-      break;
   }
 }
 

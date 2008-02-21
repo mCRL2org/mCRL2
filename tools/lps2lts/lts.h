@@ -17,6 +17,7 @@ typedef struct {
   mcrl2::lts::lts_type outformat;
   bool outinfo;
   NextState *nstate;
+  ATermAppl spec;
 } lts_options;
 
 void open_lts(const char *filename, lts_options &opts);
