@@ -165,7 +165,7 @@ static ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec);
 //type checking functions
 //-----------------------
 
-ATermAppl type_check_proc_spec(ATermAppl input)
+ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
@@ -173,7 +173,7 @@ ATermAppl type_check_proc_spec(ATermAppl input)
 
   gsDebugMsg ("type checking read-in phase started\n");
   
-  ATermAppl data_spec = ATAgetArgument(input, 0);
+  ATermAppl data_spec = ATAgetArgument(proc_spec, 0);
   if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
@@ -181,9 +181,9 @@ ATermAppl type_check_proc_spec(ATermAppl input)
   if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
 			       ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
-  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(input,1),0))) {
-  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,2),0),
-			     ATAgetArgument(ATAgetArgument(input,3),1))) {
+  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(proc_spec,1),0))) {
+  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(proc_spec,2),0),
+			     ATAgetArgument(ATAgetArgument(proc_spec,3),1))) {
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
@@ -191,10 +191,10 @@ ATermAppl type_check_proc_spec(ATermAppl input)
   if(gstcTransformActProcVarConst()){
   gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
 
-  data_spec=ATAgetArgument(input,0);
+  data_spec=ATAgetArgument(proc_spec,0);
   data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
-  Result=ATsetArgument(input,(ATerm)data_spec,0);
-  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,2),0))),2);
+  Result=ATsetArgument(proc_spec,(ATerm)data_spec,0);
+  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(proc_spec,2),0))),2);
   Result=ATsetArgument(Result,(ATerm)gsMakeProcessInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),3);
 
@@ -683,6 +683,13 @@ finally:
   ATtableDestroy(actions_from_lps);
   gstcDataDestroy();
   return Result;
+}
+
+ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
+{
+  //check correctness of the PBES specification in pbes_spec 
+  gsWarningMsg("type checking of PBES specifications is not yet implemented\n");
+  return pbes_spec;
 }
 
 //local functions

@@ -21,25 +21,25 @@ namespace mcrl2 {
 //Global preconditions:
 //- the ATerm library has been initialised
 
-/** \pre  spec represents an mCRL2 process specification that adheres to the
- *      initial internal ATerm structure.
- * \post spec is type checked.
- * \return  if type checking went well, an equivalent version of spec is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \pre  proc_spec represents an mCRL2 process specification that adheres to
+ *      the initial internal ATerm structure.
+ * \post proc_spec is type checked.
+ * \return  if type checking went well, an equivalent version of proc_spec is
+ *      returned that adheres to the internal ATerm structure after type
+ *      checking. if something went wrong, an appropriate error message is
+ *      printed and NULL is returned.
  **/
-ATermAppl type_check_proc_spec(ATermAppl spec);
+ATermAppl type_check_proc_spec(ATermAppl proc_spec);
 
 
 /** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
  *      initial internal ATerm structure.
  *      lps_spec represents an LPS specification
  * \post sort_expr is type checked using the declaration from lps_spec
- * \return  if type checking went well, an equivalent version of sort_expr is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+ * \return  if type checking went well, an equivalent version of sort_expr is
+ *      returned that adheres to the internal ATerm structure after type
+ *      checking. if something went wrong, an appropriate error message is
+ *      printed and NULL is returned.
  **/
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec);
 
@@ -142,6 +142,17 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec, bool use
  *      NULL is returned.
  **/
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec);
+
+
+/** \pre  pbes_spec represents a PBES specification that adheres to the
+ *      initial internal ATerm structure.
+ * \post pbes_spec is type checked.
+ * \return  if type checking went well, an equivalent version of pbes_spec is
+ *      returned that adheres to the internal ATerm structure after type
+ *      checking. if something went wrong, an appropriate error message is
+ *      printed and NULL is returned.
+ **/
+ATermAppl type_check_pbes_spec(ATermAppl pbes_spec);
 
     } 
   }
