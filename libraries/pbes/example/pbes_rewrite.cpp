@@ -1,7 +1,13 @@
 #include <iostream>
+#include <map>
 #include <string>
+#include <utility>
+#include <vector>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
+#include <boost/variant/variant.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/parser.h"
@@ -15,12 +21,142 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
-template <typename PbesRewriter>
-void run(const std::vector<pbes_expression>& expressions, PbesRewriter& r)
+// Use boost::variant to create a heterogenous container of rewriters.
+typedef boost::variant<pbes_system::rewriter<data::rewriter>,
+                       pbes_system::substitute_rewriter,
+                       pbes_system::substitute_rewriter_jfg,
+                       pbes_system::pbessolve_rewriter
+                      > rewriter_variant;
+
+// This class specifies how to call the rewriter that is stored in a rewriter_variant.
+class rewriter_visitor: public boost::static_visitor<pbes_expression>
 {
-  for (std::vector<pbes_expression>::const_iterator i = expressions.begin(); i != expressions.end(); ++i)
+  public:
+    pbes_expression t_;
+
+    rewriter_visitor(pbes_expression t)
+      : t_(t)
+    {}
+
+    template <typename Rewriter>
+    pbes_expression operator()(Rewriter& r) const
+    {
+      return r(t_);
+    }
+};
+
+RewriteStrategy data_RewriteStrategy(int i)
+{
+  switch (i)
   {
-    std::cout << pp(*i) << " -> " << pp(r(*i)) << std::endl;
+    case 0: return GS_REWR_INNER;
+    case 1: return GS_REWR_INNER_P;
+    case 2: return GS_REWR_JITTY;
+    case 3: return GS_REWR_JITTY_P;
+  }
+  return GS_REWR_INNER;
+}
+
+data::rewriter::strategy data_rewriter_strategy(int i)
+{
+  switch (i)
+  {
+    case 0: return data::rewriter::innermost       ;
+    case 1: return data::rewriter::innermost_prover;
+    case 2: return data::rewriter::jitty           ;
+    case 3: return data::rewriter::jitty_prover    ;
+  }
+  return data::rewriter::jitty_prover;
+}
+
+SMT_Solver_Type smt_solver_type(int i)
+{
+  switch (i)
+  {
+    case 0: return solver_type_ario;
+    case 1: return solver_type_cvc;
+    case 2: return solver_type_cvc_fast;
+  }
+  return solver_type_ario;
+}
+
+std::string data_rewriter_name(int i)
+{
+  switch (i)
+  {
+    case 0: return "[datarewr inner  ]";
+    case 1: return "[datarewr inner_p]";
+    case 2: return "[datarewr comp   ]";
+    case 3: return "[datarewr comp_p ]";
+  }
+  return "";
+}
+
+std::string pbes_rewriter_name(int i)
+{
+  switch (i)
+  {
+    case 0: return "[pbesrewr 0]";
+    case 1: return "[pbesrewr 1]";
+    case 2: return "[pbesrewr 2]";
+    case 3: return "[pbesrewr 3]";
+  }
+  return "";
+}
+
+std::string smt_solver_name(int i)
+{
+  switch (i)
+  {
+    case 0: return "[ario]";
+    case 1: return "[cvc ]";
+    case 2: return "[cvcf]";
+  }
+  return "";
+}
+
+std::string rewriter_name(int data_rewriter_string, int pbes_rewriter_string, int smt_solver)
+{
+  return pbes_rewriter_name(pbes_rewriter_string) + data_rewriter_name(data_rewriter_string) + smt_solver_name(smt_solver);
+}
+
+/// Extracts the values of a comma-separated list of integers.
+std::vector<int> parse_integers(std::string text)
+{
+  using namespace boost;
+  using namespace boost::xpressive;
+   
+  std::vector<int> result;
+  sregex splitter = sregex::compile(",");
+  
+  // the -1 below directs the token iterator to display the parts of
+  // the string that did NOT match the regular expression.
+  sregex_token_iterator cur( text.begin(), text.end(), splitter, -1 );
+  sregex_token_iterator end;
+
+  for( ; cur != end; ++cur )
+  {
+    try
+    {
+      result.push_back(lexical_cast<int>(*cur));
+    }
+    catch(bad_lexical_cast &)
+    {
+      std::cerr << "Error: could not parse integer value " << *cur << std::endl;
+    }
+  }
+  return result; 
+}
+
+void run(std::map<std::string, rewriter_variant>& rewriters, const std::vector<pbes_expression>& expressions)
+{
+  for (std::map<std::string, rewriter_variant>::iterator i = rewriters.begin(); i != rewriters.end(); ++i)
+  {
+    for (std::vector<pbes_expression>::const_iterator j = expressions.begin(); j != expressions.end(); ++j)
+    {
+      pbes_expression result = boost::apply_visitor(rewriter_visitor(*j), i->second);
+      std::cout << i->first << " " << pp(*j) << " -> " << pp(result) << std::endl;
+    }
   }
 }
 
@@ -28,11 +164,16 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
+  // a map of rewriters that should be applied to the sequence of terms
+  std::map<std::string, rewriter_variant> rewriters;
+  std::vector<int> pbes_rewriter_indices;
+  std::vector<int> data_rewriter_indices;
+  std::vector<int> smt_solver_indices;
+
   std::string infile;
-  int pbes_rewriter;
-  int data_rewriter;
-  int smt_solver_type;
-  bool use_prover;
+  std::string pbes_rewriter_string;
+  std::string data_rewriter_string;
+  std::string smt_solver_string;
   pbes<> p;
 
   try {
@@ -50,7 +191,9 @@ int main(int argc, char* argv[])
       "\n"
       "The following choices of the data rewriter are available:\n"
       "  0 : innermost\n"
-      "  1 : jitty    \n"
+      "  1 : innermost with prover\n"
+      "  2 : jitty\n"
+      "  3 : jitty with prover\n"
       "\n"
       "The following choices of the SMT solver are available:\n"
       "  0 : ario\n"
@@ -61,10 +204,9 @@ int main(int argc, char* argv[])
     );
     pbes_rewrite_options.add_options()
       ("help,h", "display this help")
-      ("pbes-rewriter,p", po::value<int> (&pbes_rewriter)->default_value(0), "pbes rewriter type")
-      ("data-rewriter,d", po::value<int> (&data_rewriter)->default_value(0), "data rewriter type")
-      ("smt-solver,s", po::value<int> (&smt_solver_type)->default_value(0), "SMT solver type")
-      ("use-prover,u", po::value<bool>   (&use_prover)->default_value(false), "use the eq-bdd prover")
+      ("pbes-rewriter,p", po::value<std::string> (&pbes_rewriter_string)->default_value("0"), "pbes rewriter types, comma-separated list")
+      ("data-rewriter,d", po::value<std::string> (&data_rewriter_string)->default_value("0"), "data rewriter types, comma-separated list")
+      ("smt-solver,s",    po::value<std::string> (&smt_solver_string)   ->default_value("0"), "SMT solver types, comma-separated list")
       ;
 
     //--- hidden options ---------
@@ -91,62 +233,65 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    // read the input file
+    // parse the input file
     std::string text = core::read_text(infile);
-
-    // parse the file
     std::pair<std::vector<pbes_expression>, data_specification> parse_result = parse_pbes_expressions(text);
     const std::vector<pbes_expression>& expressions = parse_result.first;
     const data_specification& data_spec = parse_result.second;
 
-    data::rewriter::strategy s;
-    if (data_rewriter == 0)
+    // parse the program options
+    pbes_rewriter_indices = parse_integers(pbes_rewriter_string);
+    data_rewriter_indices = parse_integers(data_rewriter_string);
+    smt_solver_indices    = parse_integers(smt_solver_string);
+    if (pbes_rewriter_indices.empty() || data_rewriter_indices.empty() || smt_solver_indices.empty())
     {
-      s = use_prover ? data::rewriter::innermost_prover : data::rewriter::innermost;
+      std::cerr << "Warning: no pbes rewriters specified!" << std::endl;
+      return 0;
     }
-    else
-    {
-      s = use_prover ? data::rewriter::jitty_prover : data::rewriter::jitty;
-    }
-    data::rewriter datar(data_spec, s);
 
-    if (pbes_rewriter == 0)    
+    // store the data rewriters
+    std::vector<data::rewriter> data_rewriters;
+
+    // create a mapping of rewriters   
+    for (std::vector<int>::iterator i = data_rewriter_indices.begin(); i != data_rewriter_indices.end(); ++i)
     {
-      pbes_system::rewriter<data::rewriter> pbesr(datar, data_spec);
-      run(expressions, pbesr);
-    }
-    else if (pbes_rewriter == 1)
-    {
-      substitute_rewriter pbesr(datar, data_spec);
-      run(expressions, pbesr);
-    }
-    else if (pbes_rewriter == 2)
-    {
-      substitute_rewriter_jfg pbesr(datar, data_spec);
-      run(expressions, pbesr);
-    }
-    else if (pbes_rewriter == 3)
-    {
-      SMT_Solver_Type solver;
-      switch (smt_solver_type)
+      // Make sure the references to data rewriters stay valid after exiting the loop.
+      data_rewriters.push_back(data::rewriter(data_spec, data_rewriter_strategy(*i)));
+      data::rewriter& datar = data_rewriters.back();
+
+      for (std::vector<int>::iterator j = pbes_rewriter_indices.begin(); j != pbes_rewriter_indices.end(); ++j)
       {
-        case 0:  solver = solver_type_ario; break;
-        case 1:  solver = solver_type_cvc; break;
-        case 2:  solver = solver_type_cvc_fast; break;
-        default: solver = solver_type_ario; break;
+        switch (*j)
+        {
+          case 0: {
+            pbes_system::rewriter<data::rewriter> pbesr(datar, data_spec);     
+            rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
+            break;
+          }
+          case 1: {
+            substitute_rewriter pbesr(datar, data_spec);            
+            rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
+            break;
+          }
+          case 2: {
+            substitute_rewriter_jfg pbesr(datar, data_spec);
+            rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
+            break;
+          }
+          case 3: {
+            for (std::vector<int>::iterator k = smt_solver_indices.begin(); k != smt_solver_indices.end(); ++k)
+            {
+              pbessolve_rewriter pbesr(datar, data_spec, data_RewriteStrategy(*i), smt_solver_type(*k));
+              rewriters.insert(std::make_pair(rewriter_name(*i, *j, *k), pbesr));
+            }
+            break;
+          }
+        }
       }
-      RewriteStrategy rewrite_strategy;
-      if (data_rewriter == 0)
-      {
-        rewrite_strategy = use_prover ? GS_REWR_INNER_P : GS_REWR_INNER;
-      }
-      else
-      {
-        rewrite_strategy = use_prover ? GS_REWR_JITTY_P : GS_REWR_JITTY;
-      }
-      pbessolve_rewriter pbesr(datar, data_spec, rewrite_strategy, solver);
-      run(expressions, pbesr);
     }
+    
+    // apply the rewriters to the sequence of expressions
+    run(rewriters, expressions);
   }
   catch(std::runtime_error e)
   {

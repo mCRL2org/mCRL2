@@ -80,7 +80,7 @@ namespace detail {
 class enumerator
 {
   protected:
-    rewriter m_rewriter;
+    rewriter& m_rewriter;
     boost::shared_ptr<Enumerator> m_enumerator;
 
     typedef std::map<data_variable, atermpp::vector<rewriter::substitution> > substition_map;
@@ -109,8 +109,8 @@ class enumerator
     }
 
   public:
-    enumerator(const data_specification& data_spec)
-      : m_rewriter(data_spec),
+    enumerator(rewriter& rewr, const data_specification& data_spec)
+      : m_rewriter(rewr),
         m_enumerator(createEnumerator(data_spec, m_rewriter.m_rewriter.get()))
     {
     }

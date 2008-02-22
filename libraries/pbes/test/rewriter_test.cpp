@@ -79,15 +79,44 @@ void test_result(PbesRewriter& r, pbes_expression x, pbes_expression y)
   BOOST_CHECK(r(x) == y);
 }
 
+void test_builder()
+{
+  using namespace pbes_expr;
+
+  data_variable b  = bool_("b");
+  data_expression T = data_expr::true_();
+  pbes_expression x = and_(b, T);
+  pbes_expression y;
+  data_expression z;
+  specification spec = mcrl22lps(SPECIFICATION);
+  data::rewriter datar(spec.data()); 
+
+  pbes_rewrite_expression_builder<data::rewriter> builder1(datar, spec.data());   
+  y = builder1.visit(x);
+
+  pbes_rewrite_expression_builder<data::rewriter> builder2 = builder1;
+  y = builder2.visit(x);
+
+  pbes_simplify_expression_builder<data::rewriter> sbuilder1(datar, spec.data());   
+  y = sbuilder1.visit(x);
+
+  pbes_simplify_expression_builder<data::rewriter> sbuilder2 = sbuilder1;
+  y = sbuilder2.visit(x);
+
+  //z = sbuilder3.m_rewriter(T);
+  //std::cerr << z << std::endl;
+  //y = sbuilder3.visit(x);
+}
+
 void test_rewriter()
 {
   using namespace pbes_expr;
 
-  specification spec    = mcrl22lps(SPECIFICATION);
+  specification spec = mcrl22lps(SPECIFICATION);
   data::rewriter datar(spec.data());
   pbes_system::rewriter<data::rewriter> pbesr(datar, spec.data());
   pbes_system::simplify_rewriter1 simp_rewr(spec.data());
-  pbes_system::substitute_rewriter subst_rewr(spec.data());
+  pbes_system::substitute_rewriter subst_rewr(datar, spec.data());
 
   //state_formula formula = mcf2statefrm(FORMULA, spec);
   //bool timed = false;
@@ -128,6 +157,10 @@ void test_rewriter()
 
   //BOOST_CHECK(pbesr(and_(T, T)) == T);
   //BOOST_CHECK(pbesr(forall(make_list(n), and_(T, T)) == T));
+  
+  // copy a rewriter
+  pbes_system::rewriter<data::rewriter> pbesr1 = pbesr;
+  test_expression(x, pbesr1);
 }
 
 void test_simplify_rewriter()
@@ -174,7 +207,8 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  test_rewriter();
+  test_builder();
+  //test_rewriter();
   //test_simplify_rewriter();
 
   return 0;

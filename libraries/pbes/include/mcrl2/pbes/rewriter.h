@@ -222,7 +222,7 @@ struct pbes_rewrite_expression_builder: public pbes_simplify_expression_builder<
   ///
   pbes_rewrite_expression_builder(DataRewriter& r, const data::data_specification& data)
     : super(r, data),
-      m_enumerator(data)
+      m_enumerator(r, data)
   { }
 
   /// Returns all possible values of the finite sort s.

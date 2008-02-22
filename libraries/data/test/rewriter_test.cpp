@@ -28,6 +28,27 @@ data_variable nat(std::string name)
   return data_variable(core::identifier_string(name) , sort_expr::nat());
 }
 
+data::rewriter make_data_rewriter(const data_specification& data_spec)
+{
+  data::rewriter datar(data_spec); 
+  return datar;
+}
+
+struct A
+{
+  data::rewriter& r_;
+  
+  A(data::rewriter& r)
+    : r_(r)
+  { }
+};
+
+A make_A(data::rewriter& d)
+{
+  A result(d);
+  return result;
+}
+
 void test_rewriter()
 {
   using namespace data_expr;
@@ -41,6 +62,23 @@ void test_rewriter()
   data_variable y = nat("y");
   data_variable z = nat("z"); 
   data_expression t = datar(greater(min_(x,y), z));
+  
+  // copy a rewriter
+  data::rewriter datar1 = datar;
+  t = datar1(greater(min_(x,y), z));
+
+  // rewriter as return value
+  data::rewriter datar2 = make_data_rewriter(data);
+  t = datar2(greater(min_(x,y), z));
+  
+  A a(datar);
+  data_expression qa = a.r_(t);
+
+  A b = a;
+  data_expression qb = b.r_(t);
+  
+  A c = make_A(datar);
+  data_expression qc = c.r_(t);
 }
 
 int test_main(int argc, char** argv)

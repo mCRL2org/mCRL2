@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_REWRITER2_H
 #define MCRL2_PBES_REWRITER2_H
 
+#include <boost/shared_ptr.hpp>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/lps/specification.h"
@@ -527,23 +528,19 @@ class pbessolve_rewriter
   const data::data_specification& data_spec;
   int n;
   data_variable_list fv;
-  BDD_Prover* prover;
+  boost::shared_ptr<BDD_Prover> prover;
  
   public:
     pbessolve_rewriter(data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
-      : datar_(datar), data_spec(data), n(0)
-    {
-      prover = new BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false);
-    }
-
-    ~pbessolve_rewriter()
-    {
-      delete prover;
-    }
+      : datar_(datar),
+        data_spec(data),
+        n(0),
+        prover(new BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
+    { }
 
     pbes_expression operator()(pbes_expression p)
     {
-      return pbes_expression_simplify(p, &n, &fv, prover);
+      return pbes_expression_simplify(p, &n, &fv, prover.get());
     }   
 };
 
