@@ -8,9 +8,35 @@ Default options
 Every tool should provide the following options:
   -h, --help            display help information
       --version         display version information
+
+Additionally, every non-GUI tool should provide the following options:
   -q, --quiet           do not display warning messages
   -v, --verbose         turn on the display of short intermediate messages
   -d, --debug           turn on the display of detailed intermediate messages
+
+
+GUI features
+------------
+
+Every GUI tool should be able to display an about box containing version
+information.
+
+
+Help information
+----------------
+
+Help information should contain the following elements (in that order):
+- Synopsis
+- Short description
+- Options
+- Bug reporting information referring to <http://www.mcrl2.org/issuetracker>
+
+
+Version information
+-------------------
+
+Version information should be displayed using the routines defined in
+libraries/utilities/include/mcrl2/utilities/version_info.h
 
 
 Input and output files
@@ -50,24 +76,6 @@ extensions should be used only for corresponding purpose:
   .mcrl                 mCRL specification
   .tbf                  mCRL LPS
   .pnml                 PNML specification
-
-
-Version information
--------------------
-
-Version information should be displayed as follows:
-
-tool VERSION (revision REV)
-
-Here VERSION is the version of the toolset and REV the latest revision number
-of the whole toolset.
-
-
-Feedback
---------
-
-To provide users with a consistent way of giving feedback, the address
-bug@mcrl2.org should be used.
 
 
 Referring to mCRL
