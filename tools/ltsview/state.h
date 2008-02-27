@@ -50,6 +50,8 @@ class State {
     Utils::Point3D getPositionAbs() const;
     Utils::Point3D getOutgoingControl() const;
     Utils::Point3D getIncomingControl() const;
+    Utils::Point3D getLoopControl1() const;
+    Utils::Point3D getLoopControl2() const;
     int getRank() const;
     bool isSimulated() const;
     int getParameterValue(int parindex);
@@ -80,6 +82,8 @@ class State {
     void setPositionAbs(Utils::Point3D &p);
     void setOutgoingControl(Utils::Point3D &p);
     void setIncomingControl(Utils::Point3D &p);
+    void setLoopControl1(Utils::Point3D &p);
+    void setLoopControl2(Utils::Point3D &p);
     void setID(int id);
     void setRank(int r);
     void setSimulated(bool simulated);
@@ -112,6 +116,8 @@ class State {
     Utils::Point3D positionAbs;
     Utils::Point3D outgoingControl;
     Utils::Point3D incomingControl;
+    Utils::Point3D loopControl1;
+    Utils::Point3D loopControl2;
     int rank;
     bool simulated;
     std::vector< int > stateVector;

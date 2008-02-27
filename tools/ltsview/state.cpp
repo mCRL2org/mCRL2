@@ -122,6 +122,16 @@ Point3D State::getIncomingControl() const {
   return incomingControl;
 }
 
+Point3D State::getLoopControl1() const
+{
+  return loopControl1;
+}
+
+Point3D State::getLoopControl2() const
+{
+  return loopControl2;
+}
+
 void State::setPositionRadius(float r) {
   positionRadius = r;
 }
@@ -143,6 +153,17 @@ void State::setOutgoingControl(Point3D &p) {
 void State::setIncomingControl(Point3D &p) {
   incomingControl = p;
 }
+
+void State::setLoopControl1(Point3D &p)
+{
+  loopControl1 = p;
+}
+
+void State::setLoopControl2(Point3D &p)
+{
+  loopControl2 = p;
+}
+
 
 Cluster* State::getCluster() const {
   return cluster;

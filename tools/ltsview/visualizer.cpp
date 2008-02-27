@@ -735,13 +735,13 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         glTranslatef(0.0f, 0.0f, -2 * settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Point3D p2 = { M[12], M[13], M[14]};
-        s->setOutgoingControl(p2);
-        
+        s->setIncomingControl(p2);
+       
         // The incoming vector of the state lies settings->getFloat(ClusterHeight) beneath the state.
         glTranslatef(0.0f, 0.0f, 4 * settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Point3D p3 = { M[12], M[13], M[14]};
-        s->setIncomingControl(p3);
+        s->setOutgoingControl(p3);
 
         glPopMatrix();
       }
@@ -762,14 +762,37 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Point3D p2 = { M[12], M[13], M[14]};
-        s->setOutgoingControl(p2);
+        s->setIncomingControl(p2);
 
         glTranslatef(0.0f, 0.0f, 2 * settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Point3D p3 = { M[12], M[13], M[14]};
-        s->setIncomingControl(p3);
+        s->setOutgoingControl(p3);
         glPopMatrix();
       }
+
+      float M[16];
+      glPushMatrix();
+      glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
+      glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
+
+      glTranslatef(settings->getFloat(StateSize) * 5.0f, 
+                   settings->getFloat(StateSize) * 5.0f, 
+                   0.0f);
+      glGetFloatv(GL_MODELVIEW_MATRIX, M);
+      Point3D p = { M[12], M[13], M[14]};
+      s->setLoopControl1(p);
+
+      glTranslatef(0.0f, 
+                   -settings->getFloat(StateSize) * 10.0f, 
+                   0.0f);
+      glGetFloatv(GL_MODELVIEW_MATRIX, M);
+      p.x = M[12];
+      p.y = M[13];
+      p.z = M[14];
+      s->setLoopControl2(p);
+
+      glPopMatrix();
     }
 
     // recurse into the descendants
@@ -1216,7 +1239,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
 {
   computeAbsPos();
 
-  // Draw the historical transitions, in orange for the moment.
+  // Draw the historical transitions.
   for (size_t i = 0; i < transHis.size(); ++i) {
     Transition* currTrans = transHis[i];
     State* beginState = currTrans->getBeginState();
@@ -1358,11 +1381,12 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
 
 void Visualizer::drawLoop(State* state) {
   Point3D statePoint = state->getPositionAbs();
-  Point3D startControl = state->getOutgoingControl();
-  Point3D endControl = state->getIncomingControl();
+  Point3D startControl = state->getLoopControl1();
+  Point3D endControl = state->getLoopControl2();
 
-  float t,it,b0,b1,b2,b3,x,y,z;       
+  float t,it,b0,b1,b2,b3,x,y,z, statesize;       
   int N = settings->getInt(Quality);
+  statesize = settings->getFloat(StateSize);
   glBegin(GL_LINE_STRIP);
     for (int k = 0; k < N; ++k) {
       t  = (float)k / (N-1);
@@ -1372,7 +1396,7 @@ void Visualizer::drawLoop(State* state) {
       b2 = 3 *  t * it * it;
       b3 =     it * it * it;
 
-      x = b0 * statePoint.x +
+      x = b0 * statePoint.x  +
           b1 * startControl.x + 
           b2 * endControl.x +
           b3 * statePoint.x;
