@@ -547,7 +547,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec, bool use_var
        }
     }
     else {
-      gsErrorMsg("Reading structure constructors from LPS failed.\n");
+      gsErrorMsg("reading structure constructors from LPS failed.\n");
     }
   }  
   else {
@@ -1610,7 +1610,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 
     ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,PosType); //gstcExpandNumTypesDown(PosType));
 
-    if(!NewPosType) {gsErrorMsg("Cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
+    if(!NewPosType) {gsErrorMsg("cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
     NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
   }
@@ -1631,7 +1631,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 
       ATermAppl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,&Par);
       if(!CastedNewPosType)
-	{gsErrorMsg("Cannot cast %P to %P (while typechecking %P in %P)\n",NewPosType,PosType,Par,ProcTerm);return NULL;}
+	{gsErrorMsg("cannot cast %P to %P (while typechecking %P in %P)\n",NewPosType,PosType,Par,ProcTerm);return NULL;}
       
       NewPars=ATinsert(NewPars,(ATerm)Par);
       CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)CastedNewPosType);
@@ -1834,7 +1834,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       //upcasting
       ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
       if(!CastedNewType)
-	{gsErrorMsg("Cannot (up)cast time value %P to type Real\n",Time);return NULL;}
+	{gsErrorMsg("cannot (up)cast time value %P to type Real\n",Time);return NULL;}
     }
     
     return gsMakeAtTime(NewProc,Time);
@@ -1896,7 +1896,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   if(gsIsBinder(*DataTerm)){
     //The variable declaration of a binder should have at least 1 declaration
     if(ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
-      {gsErrorMsg("Binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
+      {gsErrorMsg("binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
 
     ATermAppl BindingOperator = ATAgetArgument(*DataTerm, 0);
     ATermTable CopyAllowedVars=ATtableCreate(63,50);
@@ -1913,7 +1913,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
       if(ATAgetFirst(VarDecls) != NULL)
-        {gsErrorMsg("Set/Bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
+        {gsErrorMsg("set/bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
 
       ATermAppl NewType=ATAgetArgument(VarDecl,1);
       ATermList VarList=ATmakeList1((ATerm)VarDecl);
@@ -2229,7 +2229,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       //upcasting
       ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm);
       if(!CastedNewType)
-        {gsErrorMsg("Cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
+        {gsErrorMsg("cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
       return CastedNewType;
     }
 
@@ -2239,7 +2239,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       *DataTerm=gsMakeDataVarId(Name,Type);
 
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
-	gsWarningMsg("Variable %P freely occurs in the right-hand-side or in the condition of an equation, but not its left-hand-side\n",Name);
+        gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
+        return NULL;
       }
 
       ATermAppl NewType=gstcTypeMatchA(Type,PosType);
@@ -2248,7 +2249,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	//upcasting
 	ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm);
 	if(!CastedNewType)
-	  {gsErrorMsg("Cannot (up)cast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
+	  {gsErrorMsg("cannot (up)cast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
       
 	Type=CastedNewType;
       }
@@ -2327,8 +2328,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     if(Type){
       variable=true;
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
-        gsWarningMsg("Variable %P freely occurs in the right-hand-side or in the condition of an equation, but not its left-hand-side\n",Name);
-	//gsWarningMsg("The variable %P is not allowed in %P (in the context of an equation)\n",Name,*DataTerm);
+        gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
+        return NULL;
       }
 
       //Add to free variables list
@@ -2340,7 +2341,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     if(nFactPars==0){
       if((Type=ATAtableGet(DeclaredVars,(ATerm)Name))) {
         if(!gstcTypeMatchA(Type,PosType)){
-          gsErrorMsg("The type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          gsErrorMsg("the type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
           return NULL;
         }
         *DataTerm=gsMakeDataVarId(Name,Type);
@@ -2348,7 +2349,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       }
       else if((Type=ATAtableGet(context.constants,(ATerm)Name))) {
         if(!gstcTypeMatchA(Type,PosType)){
-          gsErrorMsg("The type %P of constant %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          gsErrorMsg("the type %P of constant %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
           return NULL;
         }
         *DataTerm=gsMakeOpId(Name,Type);
@@ -3613,7 +3614,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
      //upcasting
      ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
      if(!CastedNewType)
-       {gsErrorMsg("Cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
+       {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
    }
    return ATsetArgument(StateFrm,(ATerm)Time,0);
   }
@@ -3622,13 +3623,13 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATermAppl StateVarName=ATAgetArgument(StateFrm,0);
     ATermList TypeList=ATLtableGet(StateVars,(ATerm)StateVarName);
     if(!TypeList){
-      gsErrorMsg("Undefined state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      gsErrorMsg("undefined state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
       return NULL;
     }
 
     ATermList Pars=ATLgetArgument(StateFrm,1);
     if(ATgetLength(TypeList)!=ATgetLength(Pars)){
-      gsErrorMsg("Incorrect number of parameters for state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      gsErrorMsg("incorrect number of parameters for state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
       return NULL;
     }
 
@@ -3648,7 +3649,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         //upcasting
         NewParType=gstcUpCastNumericType(ParType,NewParType,&Par);
         if(!NewParType){
-          gsErrorMsg("Cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
+          gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
           success=ATfalse;
           break;
         }
@@ -3677,14 +3678,14 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       
       ATermAppl VarName=ATAgetArgument(ATAgetArgument(o,0),0);
       if(ATAtableGet(FormPars,(ATerm)VarName)){
-        gsErrorMsg("Non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
+        gsErrorMsg("non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
         success=ATfalse;
         break;
       }
       
       ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1); 
       if(!gstcIsSortExprDeclared(VarType)){
-        gsErrorMsg("The previous type error occurred while typechecking %P\n",StateFrm);
+        gsErrorMsg("the previous type error occurred while typechecking %P\n",StateFrm);
         success=ATfalse;
         break;
       }	
@@ -3703,7 +3704,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         //upcasting
         VarInitType=gstcUpCastNumericType(VarType,VarInitType,&VarInit);
         if(!VarInitType){
-          gsErrorMsg("Cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
+          gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
           success=ATfalse;
           break;
         }
@@ -3819,7 +3820,7 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
      //upcasting
      ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
      if(!CastedNewType)
-       {gsErrorMsg("Cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
+       {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
    }
    return ATsetArgument(ATsetArgument(ActFrm,(ATerm)NewArg1,0),(ATerm)Time,1);
   }
