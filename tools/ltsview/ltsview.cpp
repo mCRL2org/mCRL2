@@ -625,7 +625,22 @@ void LTSView::selectCluster(const int rank, const int pos)
 {
   if (lts != NULL) 
   {
-    lts->selectCluster(rank, pos);
+    Cluster* c = lts->selectCluster(rank, pos);
+    mainFrame->setClusterStateNr(c->getNumStates());
+    for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
+    {
+      std::vector<int> vs; 
+      std::vector<std::string> val;
+
+      c->getParameterValues(i, vs);
+
+      for(size_t j = 0; j < vs.size(); ++j)
+      {
+        val.push_back(lts->getParameterValue(i, vs[j]));
+      }
+      mainFrame->setParameterValues(i, val);
+    }
+
   }
 }
 
@@ -633,6 +648,8 @@ void LTSView::deselect() {
   if (lts != NULL)
   {
     lts->deselect();
+
+    mainFrame->resetParameterValues();
   }
 }
 

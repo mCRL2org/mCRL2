@@ -12,6 +12,7 @@
 #include <string>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <vector>
 
 class InfoDialog: public wxDialog {
   public:
@@ -21,10 +22,14 @@ class InfoDialog: public wxDialog {
     void setNumMarkedTransitions(int n);
     void setParameterName(int i,std::string p);
     void setParameterValue(int i,std::string v);
+    void setParameterValues(int i, std::vector<std::string> vs);
+    void setClusterStateNr(int i);
     void resetParameterNames();
     void resetParameterValues();
   private:
     wxListCtrl* lts_info;
+    wxListCtrl* cluster_info;
+
     wxListCtrl* state_info;
     void setStateInfoColWidth(int col);
 };

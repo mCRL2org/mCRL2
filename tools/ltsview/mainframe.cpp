@@ -482,6 +482,16 @@ void MainFrame::setParameterValue(int i,std::string value) {
   infoDialog->setParameterValue(i,value);
 }
 
+void MainFrame::setParameterValues(int i, std::vector<std::string> values)
+{
+  infoDialog->setParameterValues(i, values);
+}
+
+void MainFrame::setClusterStateNr(int n)
+{
+  infoDialog->setClusterStateNr(n);
+}
+
 void MainFrame::reportError(std::string const& error)
 {
   wxString err(error.c_str(), wxConvLocal);

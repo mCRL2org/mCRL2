@@ -75,6 +75,8 @@ class MainFrame : public wxFrame {
 
     void addParameter(int i,std::string par);
     void setParameterValue(int i,std::string value);
+    void setParameterValues(int i, std::vector<std::string> values);
+    void setClusterStateNr(int n);
     void resetParameters();
     void resetParameterValues();
     

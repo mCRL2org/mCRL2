@@ -274,13 +274,14 @@ State* LTS::selectStateByID(int id) {
   return selectedState;
 }
 
-void LTS::selectCluster(const int rank, const int pos)
+Cluster* LTS::selectCluster(const int rank, const int pos)
 {
   clustersInRank[rank][pos]->select();
 
   // For fast deselection.
   selectedState = NULL;
   selectedCluster = clustersInRank[rank][pos];
+  return selectedCluster;
 }
 
 void LTS::deselect() {

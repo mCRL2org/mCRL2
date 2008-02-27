@@ -86,7 +86,7 @@ class LTS {
     std::string getParameterType(int parindex) ;
     std::string getParameterValue(int parindex,int valindex);
     State* selectStateByID(int id);
-    void selectCluster(const int rank, const int pos);
+    Cluster* selectCluster(const int rank, const int pos);
     void deselect();
     void positionClusters(bool fsmstyle);
     void positionStates();

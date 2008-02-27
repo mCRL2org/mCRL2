@@ -73,6 +73,8 @@ class Cluster {
     void setNumMarkedStatesAll(int n);
     void setNumMarkedStatesAny(int n);
     int getNumMarkedTransitions();
+
+    void getParameterValues(int i, std::vector<int> &vs);
     /*
     bool getMarking() const;
     void setMarking(bool b);
