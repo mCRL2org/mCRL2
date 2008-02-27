@@ -337,9 +337,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   send_clear_display();
 
-  bool result = process(tool_options);
+  process(tool_options);
  
-  return (result);
+  return true;
 }
 #endif
 
@@ -356,7 +356,8 @@ int main(int argc, char** argv)
   }
 #endif
 
-  return process(parse_command_line(argc, argv));
+  process(parse_command_line(argc, argv));
+  return 0;
 }
 
 //function parse_command_line

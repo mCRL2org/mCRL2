@@ -233,7 +233,7 @@ static bool solve_bes(const t_tool_options &,
 
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
-bool process(t_tool_options const& tool_options) 
+void process(t_tool_options const& tool_options) 
 {
   //Load PBES
   pbes<> pbes_spec = load_pbes(tool_options);
@@ -305,8 +305,6 @@ bool process(t_tool_options const& tool_options)
                             tool_options.opt_counter_example_file);
     }
   }
-
-  return true;
 }
 
 //function calculate_bes

@@ -57,7 +57,7 @@ struct t_tool_options
 };
 
 /// Solve a pbes
-bool process(t_tool_options const& tool_options);
+void process(t_tool_options const& tool_options);
 
 /// Solve a pbes.
 // TODO: currently the pbes2bool algorithm expects input from a file, and
@@ -69,7 +69,8 @@ bool pbes2bool(const mcrl2::pbes_system::pbes<>& p, t_tool_options options = t_t
   options.infilename = "pbes2bool.in";
   options.outfilename = "pbes2bool.out";
   q.save(options.infilename);
-  return process(options); 
+  process(options); 
+  return true;
 }
 
 #endif // MCRL2_PBES2BOOL_H
