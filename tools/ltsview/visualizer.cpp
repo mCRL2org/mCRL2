@@ -1269,7 +1269,14 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
           RGB_Color transColor = settings->getRGB(SimPrevColor);
           glColor4ub(transColor.r, transColor.g, transColor.b, 255);
         }
-        drawForwardPointer(beginState, endState);
+        if (!currTrans->isSelfLoop())
+        {
+          drawForwardPointer(beginState, endState);
+        }
+        else
+        {
+          drawLoop(beginState);
+        }
       }
     }
   }
@@ -1317,7 +1324,16 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
-        drawForwardPointer(beginState, endState);
+        
+        if (currTrans->isSelfLoop())
+        {
+          drawLoop(beginState);
+        }
+        else
+        {
+          drawForwardPointer(beginState, endState);
+        }
+
         glLineWidth(1.0);
       }
     }

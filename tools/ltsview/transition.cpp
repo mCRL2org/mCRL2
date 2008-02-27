@@ -39,6 +39,11 @@ bool Transition::isBackpointer() const
   return (beginState->getRank() > endState->getRank());
 }
 
+bool Transition::isSelfLoop() const
+{
+  return (beginState == endState);
+}
+
 bool Transition::isMarked() const
 {
   return *marked;

@@ -24,6 +24,7 @@ class Transition
     State*	getEndState() const;
     int			getLabel() const;
     bool		isBackpointer() const;
+    bool                isSelfLoop() const;
     bool		isMarked() const;
     void		setMarkedPointer(bool* bp);
 
