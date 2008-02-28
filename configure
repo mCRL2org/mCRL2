@@ -3763,10 +3763,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-# Add standard compatibility check flags for runtime compilation
-R_CFLAGS="$R_CFLAGS $CFLAGS"
-R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
-
 # Check whether optimization must be suppressed
 # Check whether --enable-optimisation was given.
 if test "${enable_optimisation+set}" = set; then
@@ -6452,9 +6448,11 @@ fi
 
 
 # Runtime compilation flags
+R_CFLAGS="$R_CFLAGS $CFLAGS"
 
 R_SCFLAGS="$R_SCFLAGS"
 
+R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
 
 R_SCXXFLAGS="$R_SCXXFLAGS"
 

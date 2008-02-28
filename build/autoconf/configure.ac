@@ -171,10 +171,6 @@ AC_RUN_IFELSE(
 )
 AC_LANG_POP(C++)
 
-# Add standard compatibility check flags for runtime compilation
-R_CFLAGS="$R_CFLAGS $CFLAGS"
-R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
-
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [optimisation],
@@ -584,9 +580,9 @@ fi
 AC_SUBST([BUILD_OPTIONS])
 
 # Runtime compilation flags
-AC_SUBST([R_CFLAGS],[])
+AC_SUBST([R_CFLAGS],["$R_CFLAGS $CFLAGS"])
 AC_SUBST([R_SCFLAGS],["$R_SCFLAGS"])
-AC_SUBST([R_CXXFLAGS],[])
+AC_SUBST([R_CXXFLAGS],["$R_CXXFLAGS $CXXFLAGS"])
 AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS"])
 AC_SUBST([R_CPPFLAGS],["$CPPFLAGS"])
 AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
