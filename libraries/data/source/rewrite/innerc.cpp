@@ -1558,7 +1558,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
   {
     if ( !isValidRewriteRule(ATAgetFirst(l)) )
     {
-      gsErrorMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+      gsWarningMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
       continue;
     }
 
