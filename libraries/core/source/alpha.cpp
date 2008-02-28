@@ -1429,12 +1429,15 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
 	  }
       }
       if ( !(ATisEmpty(Cp) && ATisEmpty(Cq)) ){
-	if ( !ATisEmpty(Cp) ){
+	//gsWarningMsg("Cp: %T, Cq:%T, C:%T \n",Cp,Cq,C);
+        if ( !ATisEmpty(Cp) ){
 	  p = PushComm(Cp,p);
 	}
+        else p = gsApplyAlpha(p);
 	if ( !ATisEmpty(Cq) ){
 	  q = PushComm(Cq,q);
 	}
+        else q = gsApplyAlpha(q);
 	{
 	  l=ATLtableGet(alphas,(ATerm) p);
 	  ATermList l2=ATLtableGet(alphas,(ATerm) q);
@@ -1461,7 +1464,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
 	l = filter_comm_list(l,Ca);
 	ATtablePut(alphas,(ATerm) a,(ATerm) l);
  	//gsWarningMsg("tick2 l: %d\n\n",ATgetLength(l));
-     }
+      }
       return a;
     } 
     else {
