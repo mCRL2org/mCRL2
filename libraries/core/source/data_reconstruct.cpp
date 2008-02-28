@@ -328,7 +328,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
   assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
   bool recursive = true;
 
-  if((gsIsSpecV1(Part) || gsIsPBES(Part) || gsIsDataSpec(Part)) && (Spec != NULL)) {
+  if (gsIsDataSpec(Part) && Spec != NULL) {
     gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
   }

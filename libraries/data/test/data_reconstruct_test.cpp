@@ -69,18 +69,23 @@ void test_data_reconstruct_struct()
 
   identifier_string d1_name("d1");
   identifier_string d2_name("d2");
+  identifier_string D_name("D");
 
   aterm_appl d1 = gsMakeStructCons(d1_name, aterm_list(), gsMakeNil());
   aterm_appl d2 = gsMakeStructCons(d2_name, aterm_list(), gsMakeNil());
   aterm_appl s = gsMakeSortStruct(make_list(d1, d2));
-  aterm_appl d = gsMakeSortRef(sort_identifier("D"), s);
+  aterm_appl d = gsMakeSortRef(D_name, s);
 
   BOOST_CHECK(find_term(rec_data(0), d1_name));
   BOOST_CHECK(find_term(rec_data(0), d2_name));
+  BOOST_CHECK(find_term(rec_data(0), D_name));
   BOOST_CHECK(find_term(rec_data(0), d1));
   BOOST_CHECK(find_term(rec_data(0), d2));
   BOOST_CHECK(find_term(rec_data(0), s));
   BOOST_CHECK(find_term(rec_data(0), d));
+  std::cerr << d << std::endl;
+  std::cerr << rec_data(0) << std::endl;
+  std::cerr << data(0) << std::endl;
 }
 
 void test_data_reconstruct_struct_complex()
@@ -101,12 +106,13 @@ void test_data_reconstruct_struct_complex()
   identifier_string arg3_name("arg3");
   identifier_string is_d3_name("is_d3");
   identifier_string arg3_proj = gsMakeStructProj(arg3_name, sort_expr::bool_());
+  identifier_string D_name("D");
 
   aterm_appl d1 = gsMakeStructCons(d1_name, aterm_list(), gsMakeNil());
   aterm_appl d2 = gsMakeStructCons(d2_name, aterm_list(), is_d2_name);
   aterm_appl d3 = gsMakeStructCons(d3_name, make_list(arg3_proj), is_d3_name);
   aterm_appl s = gsMakeSortStruct(make_list(d1, d2, d3));
-  aterm_appl d = gsMakeSortRef(sort_identifier("D"), s);
+  aterm_appl d = gsMakeSortRef(D_name, s);
 
   // Incrementally check that all elements occur in the sort declarations,
   // such that we can pinpoint any failures.
@@ -117,6 +123,7 @@ void test_data_reconstruct_struct_complex()
   BOOST_CHECK(find_term(rec_data(0), arg3_name));
   BOOST_CHECK(find_term(rec_data(0), is_d3_name));
   BOOST_CHECK(find_term(rec_data(0), arg3_proj));
+  BOOST_CHECK(find_term(rec_data(0), D_name));
   BOOST_CHECK(find_term(rec_data(0), d1));
   BOOST_CHECK(find_term(rec_data(0), d2));
   BOOST_CHECK(find_term(rec_data(0), d3));
@@ -142,8 +149,10 @@ void test_data_reconstruct_struct_nest()
   identifier_string is_cd_name("is_cd");
   identifier_string p_name("p");
   identifier_string is_cpos_name("is_cpos");
-  sort_identifier D_id("D");
-  sort_identifier DPos_id("DPos");
+  identifier_string D_name("D");
+  identifier_string DPos_name("DPos");
+  sort_identifier D_id(D_name);
+  sort_identifier DPos_id(DPos_name);
 
   aterm_appl d1_proj = gsMakeStructProj(d1_name, D_id);
   aterm_appl p_proj = gsMakeStructProj(p_name, sort_expr::pos());
@@ -154,8 +163,8 @@ void test_data_reconstruct_struct_nest()
 
   aterm_appl s1 = gsMakeSortStruct(make_list(d));
   aterm_appl s2 = gsMakeSortStruct(make_list(cd, cpos));
-  aterm_appl D = gsMakeSortRef(D_id, s1);
-  aterm_appl DPos = gsMakeSortRef(DPos_id, s2);
+  aterm_appl D = gsMakeSortRef(D_name, s1);
+  aterm_appl DPos = gsMakeSortRef(DPos_name, s2);
 
   BOOST_CHECK(find_term(rec_data(0), d_name));
   BOOST_CHECK(find_term(rec_data(0), cd_name));
@@ -165,8 +174,9 @@ void test_data_reconstruct_struct_nest()
   BOOST_CHECK(find_term(rec_data(0), is_cd_name));
   BOOST_CHECK(find_term(rec_data(0), p_name));
   BOOST_CHECK(find_term(rec_data(0), is_cpos_name));
+  BOOST_CHECK(find_term(rec_data(0), D_name));
   BOOST_CHECK(find_term(rec_data(0), D_id));
-  BOOST_CHECK(find_term(rec_data(0), DPos_id));
+  BOOST_CHECK(find_term(rec_data(0), DPos_name));
   BOOST_CHECK(find_term(rec_data(0), d1_proj));
   BOOST_CHECK(find_term(rec_data(0), p_proj));
   BOOST_CHECK(find_term(rec_data(0), d));
