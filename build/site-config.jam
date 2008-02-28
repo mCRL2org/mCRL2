@@ -80,19 +80,21 @@ rule libraries_from_string ( name : ldflags + : requirements * : default * : usa
 if $(OPENGL_NAME) {
   lib GLU : : <os>NT <name>glu32 ;
   lib GLU : : <os>CYGWIN <name>glu32 ;
+  lib GLU : : <os>SOLARIS <name>GLU ;
+  alias GLU ;
   
   if $(OPENGL_LPATH) {
-    lib opengl : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
+    lib opengl : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <library>GLU ;
   }
   else if $(OPENGL_IPATH) {
-    lib opengl : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <os>NT:<library>GLU ;
+    lib opengl : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <library>GLU ;
   }
   else {
     if [ modules.peek : OS ] = MACOSX {
       alias opengl : : <toolset>darwin : : <framework>OpenGL ;
     }
     else {
-      lib opengl : : <name>$(OPENGL_NAME) : : <os>NT:<library>GLU <os>CYGWIN:<library>GLU ;
+      lib opengl : : <name>$(OPENGL_NAME) : : <library>GLU <os>CYGWIN:<library>GLU ;
     }
   }
 
@@ -178,7 +180,8 @@ lib m  : : <name>"m" ;
 lib dl : : <name>"dl" ;
 
 # Socket library on SunOS/Solaris system
-lib socket : : <name>socket ;
+lib nsl    : : <name>nsl ;
+lib socket : : <name>socket : : <library>nsl ;
 
 alias winsock
     : winsock32 ws2_32
