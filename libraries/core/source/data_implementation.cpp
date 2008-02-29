@@ -1584,7 +1584,7 @@ void impl_sort_bool(t_data_decls *p_data_decls)
   ATermAppl f = gsMakeDataExprFalse();
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), se_bool);
   ATermList bl = ATmakeList1((ATerm) b);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(17,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(19,
       //logical negation (Bool -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(f), t),
@@ -1607,8 +1607,10 @@ void impl_sort_bool(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(t, b), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(f, b), t),
       //equality (Bool -> Bool -> Bool)
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(t, f), f),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, t), f)
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(t, b), b),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(f, b), gsMakeDataExprNot(b)),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, t), b),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, f), gsMakeDataExprNot(b))
     ), p_data_decls->data_eqns);
 }
 
