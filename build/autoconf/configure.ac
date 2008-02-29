@@ -507,6 +507,13 @@ if test $with_wx; then
 else 
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
 fi
+if test -z $WX_CONFIG; then
+  if test $with_wx; then
+    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[$with_wx/wx-config-2.8],[],[$with_wx])
+  else 
+    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
+  fi
+fi
 if test $WX_CONFIG; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
