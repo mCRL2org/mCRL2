@@ -28,12 +28,13 @@ public:
         Mediator* m,      const int &idx,
         const double &xC, const double &yC,
         const double &xD, const double &yD,
-        const double &aC, const int    &typ );
+        const double &aC, const int    &typ);
     Shape( const Shape &shape );
     virtual ~Shape();
 
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
+    void setVariable( const string &msg );
 
     void setCenter( const double &xC, const double &yC );
     void setDFC( const double &xD, const double &yD );
@@ -181,6 +182,8 @@ public:
     static double hdlSzeHnt;
     static double minSzeHnt;
     static int    segNumHnt;
+    static int	szeTxt;
+    static ColorRGB colTxt;
 
 protected:
     // -- private utility functions ---------------------------------
@@ -231,6 +234,7 @@ protected:
         GLCanvas* canvas );
     
     // -- data members ----------------------------------------------
+    
     int index;
     
     // geometry
@@ -245,6 +249,7 @@ protected:
     ColorRGB colLin;    // line color
     ColorRGB colFil;    // fill color
     double   hdlSze;    // handle size,     pix
+    string	 variable;  //variable shown on the shape
 
     // degrees of freedom
     DOF* xCtrDOF; // composition

@@ -42,6 +42,7 @@ Frame::Frame(
 {
 	SetAutoLayout(true);
     initFrame();
+    dofMenu = false;
 }
 
 
@@ -375,7 +376,40 @@ void Frame::displShapeMenu(
 // ---------------------------
 {
     wxMenu menu;
+    dofMenu = false;
+    		
+    addAttributeMenu = new wxMenu();
+    int i;
+    int id = wxID_LOWEST; // Event id's for Attributes
 
+    // List All the Attributes in a Menu         
+    for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
+    {
+    	wxListItem rowInfo;
+    	wxString   celInfo;            	
+            	              
+    	// set row
+    	rowInfo.m_itemId = i;
+    	// set column
+      	rowInfo.m_col    = 2;
+      	// set text mask
+      	rowInfo.m_mask   = wxLIST_MASK_TEXT;
+      	listCtrlAttr->GetItem( rowInfo );
+       	celInfo = rowInfo.m_text;
+       	wxString helpString;
+       	helpString << i; // Convert int to wxString
+       	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_NORMAL);
+        addAttributeMenu->Append( item );            	
+        Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
+        id--;         	
+    }
+            	 
+    menu.Append(ID_MENU_ITEM_SHOW_VARIABLES,
+    			wxT( "Show Variable" ),
+    			addAttributeMenu,
+    			wxT( "Show variables values on this shape" ) );
+    
+	menu.AppendSeparator();
     menu.Append( 
         ID_MENU_ITEM_SHAPE_CUT,
         wxT( "Cut" ),
@@ -419,7 +453,10 @@ void Frame::displShapeMenu(
         wxT( "Edit this shape's degrees of freedom" ) );
 
     if ( cut != true )
+    {
         menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );
+		menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
+    }
     if ( copy != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_COPY, false );
     if ( paste != true )
@@ -1766,7 +1803,7 @@ void Frame::initToolbarEdit()
         wxDefaultSize,
         wxTB_VERTICAL |
         wxTB_FLAT );
-
+      
     // add tools, figures defined in 'figures.xpm'
     // selection
     wxBitmap selectBmp( select_icon );
@@ -3312,6 +3349,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
         int  flag   = wxLIST_HITTEST_ONITEM;
         int  idxDOF = -1;
         idxDOF = listCtrlDOF->HitTest( e.GetPoint(), flag );
+        dofMenu = true;
         
         if ( 0 <= idxDOF && idxDOF < listCtrlDOF->GetItemCount() )
         {
@@ -3876,20 +3914,37 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         {
         	wxMenuItem* x = addAttributeMenu->FindItem(e.GetId());
         	if( x != NULL)
-        	{    
+        	{
         		wxString name = x->GetHelp(); // Get the index of the selected attribute
-        		name.ToLong((long *)&idxAttr); // Converting String to int
-     
-        		item = listCtrlDOF->GetNextItem(
-            			item,
-            			wxLIST_NEXT_ALL,
-            			wxLIST_STATE_SELECTED );
-        		if ( item >= 0 )
-        		{
-            		idDOF = listCtrlDOF->GetItemData( item );
-            		item = listCtrlAttr->FindItem(-1, name);
-            		mediator->handleLinkDOFAttr( idDOF, idxAttr );
-        		}
+		    	name.ToLong((long *)&idxAttr); // Converting String to int    
+		    	
+		    	name = x->GetName();
+		    	
+        		if(dofMenu == true)
+        		{		 
+		    		item = listCtrlDOF->GetNextItem(
+		        			item,
+		        			wxLIST_NEXT_ALL,
+		        			wxLIST_STATE_SELECTED );
+		    		if ( item >= 0 )
+		    		{
+		        		idDOF = listCtrlDOF->GetItemData( item );
+		        		item = listCtrlAttr->FindItem(-1, name);
+		        		mediator->handleLinkDOFAttr( idDOF, idxAttr );
+		    		}
+		    	}
+		    	else
+		    	{
+		    		Graph* g = (Graph*) (mediator->getGraph()); // Obtain graph from the mediator for retrieving attribute properties
+		    		Attribute* attribute = g->getAttribute(idxAttr); // Get selected attribute
+		    		string name = attribute->getName(); // Get the name of the selected attribute
+		    		string type = attribute->getType(); // Get the type of the selected attribute
+		    		string value = attribute->getCurValue(0)->getValue(); // Get the top current value of the selected attribute		    		
+		    		name.append(": ");
+		    		name.append(value); // Generate the text will be displayed on the shape		    		
+		    		
+		    		mediator->handleShowVariable( name ); 		    		
+		    	}
         	}
         	x = NULL;
         }    
@@ -4220,6 +4275,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_TOOL( ID_TOOL_SHOW_GRID, Frame::onTool )
     EVT_TOOL( ID_TOOL_SNAP_GRID, Frame::onTool )
     // edit shapes
+	EVT_MENU( ID_MENU_ITEM_SHOW_VARIABLES, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_CUT, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_COPY, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_PASTE, Frame::onPopupMenu )

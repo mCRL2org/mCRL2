@@ -143,6 +143,8 @@ public:
     int getView();
 
     // -- diagram editor --------------------------------------------
+    
+    void* getGraph();
     void handleEditModeSelect();
     void handleEditModeDOF( Colleague* c );
     void handleEditModeRect();
@@ -165,6 +167,7 @@ public:
         const bool &bringForward, 
         const bool &sendBackward,
         const bool &editDOF );
+    void handleShowVariable( const string &variable );
     void handleCutShape();
     void handleCopyShape();
     void handlePasteShape();

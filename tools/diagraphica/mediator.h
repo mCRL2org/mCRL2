@@ -139,6 +139,7 @@ public:
     virtual int getView() = 0;
 
     // -- diagram editor --------------------------------------------
+    virtual void* getGraph() = 0;
     virtual void handleEditModeSelect() = 0;
     virtual void handleEditModeDOF( Colleague* c ) = 0;
     virtual void handleEditModeRect() = 0;
@@ -161,6 +162,7 @@ public:
         const bool &bringForward,
         const bool &sendBackward,
         const bool &editDOF ) = 0;
+    virtual void handleShowVariable( const string &variable ) = 0;
     virtual void handleCutShape() = 0;
     virtual void handleCopyShape() = 0;
     virtual void handlePasteShape() = 0;

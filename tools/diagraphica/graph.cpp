@@ -10,6 +10,8 @@
 
 
 #include "graph.h"
+#include <iostream>
+using namespace std;
 
 
 // -- init constants ------------------------------------------------
@@ -458,8 +460,8 @@ Attribute* Graph::getAttribute( const size_t &idx )
 {
     if ( 0 <= idx && idx < attributes.size() )
         return attributes[idx];
-    else 
-        throw new string( "Error retrieving attribute." );
+    else    
+        throw new string( "Error retrieving attribute." );   
 }
 
 

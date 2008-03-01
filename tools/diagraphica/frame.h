@@ -26,6 +26,7 @@ using namespace std;
 #include "dof.h"
 #include "droptarget.h"
 #include "glcanvas.h"
+#include "graph.h"
 #include "partitionframe.h"
 #include "popupframe.h"
 #include "settingsframe.h"
@@ -288,6 +289,7 @@ private:
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
     GLCanvas*         canvasOpaDOF;
+    bool			  dofMenu;
     
     // -- Plot frame ------------------------------------------------
     PopupFrame*       framePlot;
@@ -309,6 +311,7 @@ private:
     
     // -- menus -----------------------------------------------------
     wxMenu	*addAttributeMenu;
+    wxMenu	*showVariableMenu;
     
     // -- ID's ------------------------------------------------------
     enum
@@ -398,6 +401,7 @@ private:
         ID_PANEL_CLUST,
         ID_LIST_CTRL_CLUST,
         ID_BUTTON_OK_CLUST,
+        ID_MENU_ITEM_SHOW_VARIABLES,
         ID_MENU_ITEM_SHAPE_CUT,
         ID_MENU_ITEM_SHAPE_COPY,
         ID_MENU_ITEM_SHAPE_PASTE,

@@ -1670,6 +1670,14 @@ int DiaGraph::getView()
 
 
 // ----------------------------------
+void* DiaGraph::getGraph()
+// ----------------------------------
+{
+    return graph;
+}
+
+
+// ----------------------------------
 void DiaGraph::handleEditModeSelect()
 // ----------------------------------
 {
@@ -1812,6 +1820,16 @@ void DiaGraph::handleEditShape(
         bringForward, 
         sendBackward,
         editDOF );
+}
+
+
+// ----------------------------
+void DiaGraph::handleShowVariable(
+    			const string &variable)
+// ----------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        editor->handleShowVariable( variable );
 }
 
 

@@ -8,8 +8,18 @@
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
 
+#ifdef __APPLE__
+    #include <GLUT/glut.h>
+#else
+	#ifdef WIN32
+		#include <windows.h>
+	#endif
+    #include <GL/glu.h>
+#endif
 
 #include "shape.h"
+#include <iostream>
+using namespace std;
 
 
 // -- static variables ----------------------------------------------
@@ -18,6 +28,8 @@
 double Shape::hdlSzeHnt =  5.0;
 double Shape::minSzeHnt =  5.0;
 int Shape::segNumHnt = 24;
+int Shape::szeTxt = 12;
+ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 
 
 // -- constructors and destructor -----------------------------------
@@ -28,7 +40,7 @@ Shape::Shape(
     Mediator* m,      const int &idx,
     const double &xC, const double &yC,
     const double &xD, const double &yD,
-    const double &aC, const int &typ )
+    const double &aC, const int &typ)
     : Colleague( m )
 // -------------------------------------
 {
@@ -113,6 +125,15 @@ void Shape::setIndex( const int &idx )
 // -----------------------------------
 {
     index = idx;
+}
+
+
+// ------------------------------------------
+void Shape::setVariable( const string &msg )
+// ------------------------------------------
+{
+    variable = "";
+    variable.append( msg );
 }
 
 
@@ -871,6 +892,7 @@ void Shape::visualize(
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
     
+    
     if ( type == TYPE_RECT )
     {
         //VisUtils::setColor( colFil );
@@ -1374,6 +1396,32 @@ void Shape::drawNormal(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
+        }
+        
+        if( variable != "")
+        {
+        	double pix = canvas->getPixelSize();
+        	
+        	// have textures been generated
+        	GLuint  texCharId[CHARSETSIZE];
+        	GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
+        	VisUtils::genCharTextures(
+        		texCharId,
+        		texChar );
+        	
+        	VisUtils::setColor( colTxt );
+            VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, variable );
+            VisUtils::setColorBlack();
+            //VisUtils::drawLine( -xDFC, xDFC, yDFC / 2, yDFC );
+        	
+        	/*VisUtils::setColorWhite();
+            VisUtils::fillRect(
+                -xDFC,  xDFC, 
+                 yDFC * 1.5, yDFC);
+            VisUtils::setColor( colLin );
+            VisUtils::drawRect(
+                -xDFC,  xDFC, 
+                 yDFC * 1.5, yDFC);*/
         }
         
         VisUtils::disableLineAntiAlias();

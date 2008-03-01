@@ -11,7 +11,12 @@
 
 #include "diagrameditor.h"
 #include <iostream>
+#include <sstream>
 using namespace std;
+
+
+// -- init static variables -----------------------------------------
+int DiagramEditor::szeTxt = 12;
 
 
 // -- constructors and destructor -----------------------------------
@@ -897,9 +902,13 @@ void DiagramEditor::handleMouseLftUpEvent(
     Visualizer::handleMouseLftUpEvent( x, y );
 
     if ( editMode == EDIT_MODE_SELECT )
+    {
         visualize( true );
+    }
     else if ( editMode == EDIT_MODE_DOF )
+    {
         visualize( true );
+    }
     else
     {
         double w, h;
@@ -1374,6 +1383,30 @@ void DiagramEditor::handleDrag()
         canvas->Refresh();
         s = NULL;
     }
+}
+
+
+// ----------------------------
+void DiagramEditor::handleShowVariable( const string &variable )
+// ----------------------------
+{
+	Shape* selectedShape = NULL;
+	double pix;	
+	pix = canvas->getPixelSize();
+	
+	//find the selected shape
+	for ( int i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
+    {
+        if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
+        {
+            selectedShape = diagram->getShape( i );
+            /*stringstream out;
+			out << attrIdx;			
+            string var = out.str();*/
+            selectedShape->setVariable(variable);
+        }
+    }
+
 }
 
 

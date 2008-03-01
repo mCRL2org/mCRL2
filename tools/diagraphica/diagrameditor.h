@@ -118,6 +118,7 @@ public:
         const int &y,
         const vector< int > &data );
     */
+    void handleShowVariable( const string &variable );
     void handleCut();
     void handleCopy();
     void handlePaste();
@@ -188,6 +189,9 @@ protected:
     
     Shape* clipBoardShape; // composition
     double xPaste, yPaste;
+    
+    // -- static variables ------------------------------------------
+    static int szeTxt;
 };
 
 #endif

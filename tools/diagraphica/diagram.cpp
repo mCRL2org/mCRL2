@@ -479,15 +479,17 @@ void Diagram::drawShapes(
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
         {
-            glPushName( i );
-            shapes[i]->visualize( inSelectMode, canvas );
+            glPushName( i );			
+            shapes[i]->visualize( inSelectMode, canvas );                      
             glPopName();
         }
     }
     else
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
-            shapes[i]->visualize( inSelectMode, canvas );
+        {        	
+            shapes[i]->visualize( inSelectMode, canvas );       
+        }
     }
 }
 
