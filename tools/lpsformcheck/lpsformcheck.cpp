@@ -333,7 +333,7 @@ using namespace mcrl2;
         throw std::runtime_error("cannot parse formula from '" + std::string(f_formula_file_name) + "'");
       }
       //typecheck the formula
-      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), lps_specification, true);
+      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), lps_specification);
       if(!f_formula){
         throw std::runtime_error("type checking formula from '" + std::string(f_formula_file_name) + "' failed");
       }
