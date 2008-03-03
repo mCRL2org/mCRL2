@@ -261,7 +261,7 @@ void print_help(FILE *f, char *Name)
     "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
     "                           'inner' for the innermost rewriter,\n"
     "                           'innerc' for the compiled innermost rewriter,\n"
-    "                           'jitty' for the jitty rewriter (default), and\n"
+    "                           'jitty' for the jitty rewriter (default), or\n"
     "                           'jittyc' for the compiled jitty rewriter\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"

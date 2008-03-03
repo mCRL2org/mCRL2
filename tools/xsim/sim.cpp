@@ -55,17 +55,17 @@ static void PrintState(ATerm state, NextState *ns)
 }
 
 char help_gsMessage[] = "During the simulation the following commands are accepted (short/long):\n"
-		      "   N                - take transition N to the corresponding state\n"
-		      "                      (where N is a number)\n"
-		      "   u/undo           - go to previous state in trace\n"
-		      "   r/redo           - go to next state in trace\n"
-		      "   i/initial        - go to initial state (preserving trace)\n"
-		      "   g/goto N         - go to position N in trace\n"
-		      "   t/trace          - print trace (current state is indicated with '>')\n"
-		      "   l/load FILENAME  - load trace from file FILENAME\n"
-		      "   s/save FILENAME  - save trace to file FILENAME\n"
-		      "   h/help           - print this help gsMessage\n"
-		      "   q/quit           - quit\n";
+		      "   N                take transition N to the corresponding state\n"
+		      "                    (where N is a number)\n"
+		      "   u/undo           go to previous state in trace\n"
+		      "   r/redo           go to next state in trace\n"
+		      "   i/initial        go to initial state (preserving trace)\n"
+		      "   g/goto N         go to position N in trace\n"
+		      "   t/trace          print trace (current state is indicated with '>')\n"
+		      "   l/load FILENAME  load trace from file FILENAME\n"
+		      "   s/save FILENAME  save trace to file FILENAME\n"
+		      "   h/help           print this help gsMessage\n"
+		      "   q/quit           quit\n";
 
 void print_help(FILE *f, char *Name)
 {
@@ -80,7 +80,7 @@ void print_help(FILE *f, char *Name)
     "  -RNAME, --rewriter=NAME  use rewrite strategy NAME\n"
     "                           'inner' for the innermost rewriter,\n"
     "                           'innerc' for the compiled innermost rewriter,\n"
-    "                           'jitty' for the jitty rewriter (default), and\n"
+    "                           'jitty' for the jitty rewriter (default), or\n"
     "                           'jittyc' for the compiled jitty rewriter\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"

@@ -229,7 +229,7 @@ static void print_help(char *Name)
     "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
     "                           'inner' for the innermost rewriter,\n"
     "                           'innerc' for the compiled innermost rewriter,\n"
-    "                           'jitty' for the jitty rewriter (default), and\n"
+    "                           'jitty' for the jitty rewriter (default), or\n"
     "                           'jittyc' for the compiled jitty rewriter\n"
     "\n"
     "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"

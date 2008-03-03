@@ -383,35 +383,35 @@ t_tool_options parse_command_line(int argc, char** argv)
     desc.add_options()
         ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
          "The following strategies are available:\n"
-         "0) Compute all boolean equations which can be reached from the initial state, without"
+         "0) Compute all boolean equations which can be reached from the initial state, without "
          "any optimization (default). This is is the most data efficient option per generated equation.\n"
-         "1) Optimize by immediately substituting the the right hand sides for already investigated"
+         "1) Optimize by immediately substituting the the right hand sides for already investigated "
          "variables that are true or false when generating a expression. This is as memory efficient as 0.\n"
-         "2) In addition to 1, also substitute variables that are true or false into an already generated"
-         "right hand sides. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1,"
-         "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables"
-         "have become unreachable as these do not have to be investigated. Depending on the PBES, this can"
+         "2) In addition to 1, also substitute variables that are true or false into an already generated "
+         "right hand side. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1, "
+         "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables "
+         "have become unreachable as these do not have to be investigated. Depending on the PBES, this can "
          "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
-         "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
-         "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
+         "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that "
+         "they can be set to true or false, depending on the fixed point symbol. This can increase the time "
          "needed to generate an equation substantially")
         ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "use rewrite strategy arg:\n"
          "'inner' for the innermost rewriter,\n"
          "'innerc' for the compiled innermost rewriter,\n"
-         "'jitty' for the jitty rewriter (default), and\n"
+         "'jitty' for the jitty rewriter (default), or\n"
          "'jittyc' for the compiled jitty rewriter")
         ("counter,c", "print at the end a tree labelled with instantiations of the left hand side of"
          "equations; this tree is an indication of how pbes2bool came to the validity/invalidity of the PBES")
         ("precompile,P", "precompile the pbes for faster rewriting; does not work when the toolset is compiled in debug mode")
         ("hashtables,H", "use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties)")
-        ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
-                 "available outputformats are none, vasy and cwi")
+        ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use output format arg:\n"
+                 "'none' (default), 'vasy' or 'cwi'")
         ("tree,r", "store state in a tree (for memory efficiency)")
         ("unused-data,u","do not remove unused parts of the data specification")
-        ("verbose,v",  "turn on the display of short intermediate gsMessages")
-        ("debug,d",    "turn on the display of detailed intermediate gsMessages")
-        ("version",    "display version information")
-        ("help,h",    "display this help")
+        ("verbose,v",  "turn on the display of short intermediate messages")
+        ("debug,d",    "turn on the display of detailed intermediate messages")
+        ("version",    "display version information and terminate")
+        ("help,h",    "display this help and terminate")
         ;
   
     po::options_description hidden("Hidden options");

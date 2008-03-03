@@ -189,7 +189,7 @@ t_tool_options parse_command_line(int argc, char** argv)
      "use rewrite strategy arg:\n"
      "'inner' for the innermost rewriter,\n"
      "'innerc' for the compiled innermost rewriter,\n"
-     "'jitty' for the jitty rewriter (default), and\n"
+     "'jitty' for the jitty rewriter (default), or\n"
      "'jittyc' for the compiled jitty rewriter")
     ("pnf,p","use the prenex normal form for the approximation") 
     ("verbose,v",	"turn on the display of short intermediate messages") 

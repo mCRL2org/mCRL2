@@ -257,15 +257,14 @@ t_tool_options parse_command_line(int argc, char** argv)
 
 	desc.add_options()
 			("strategy,s",	po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
-							"The following strategies are available:\n"
-							"finite  Compute all possible boolean equations\n"
-							"lazy    Compute only boolean equations which can be reached from the initial state\n")
+							"'finite' for computing all possible boolean equations, or\n"
+							"'lazy' for computing only boolean equations which can be reached from the initial state")
 			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
 			 				"available output formats are binary, internal and cwi")
 			("verbose,v",	"turn on the display of short intermediate messages")
 			("debug,d",		"turn on the display of detailed intermediate messages")
-			("version",		"display version information")
-			("help,h",		"display this help")
+			("version",		"display version information and terminate")
+			("help,h",		"display this help and terminate")
 			;
 
 	po::options_description hidden("Hidden options");

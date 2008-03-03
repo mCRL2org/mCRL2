@@ -63,7 +63,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "use rewrite strategy arg:\n"
        "'inner' for the innermost rewriter,\n"
        "'innerc' for the compiled innermost rewriter,\n"
-       "'jitty' for the jitty rewriter (default), and\n"
+       "'jitty' for the jitty rewriter (default), or\n"
        "'jittyc' for the compiled jitty rewriter")
       ("help,h",    "display this help")
       ("verbose,v",  "turn on the display of short intermediate messages")

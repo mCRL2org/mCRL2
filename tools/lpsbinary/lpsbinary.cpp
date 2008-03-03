@@ -246,7 +246,7 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
                        "use rewrite strategy arg:\n"
                        "'inner' for the innermost rewriter,\n"
                        "'innerc' for the compiled innermost rewriter,\n"
-                       "'jitty' for the jitty rewriter (default), and\n"
+                       "'jitty' for the jitty rewriter (default), or\n"
                        "'jittyc' for the compiled jitty rewriter")
   ;
   po::options_description hidden("Hidden options");
