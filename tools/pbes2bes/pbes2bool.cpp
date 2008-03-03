@@ -395,15 +395,15 @@ t_tool_options parse_command_line(int argc, char** argv)
          "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that"
          "they can be set to true or false, depending on the fixed point symbol. This can increase the time"
          "needed to generate an equation substantially")
-        ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
-         "inner   interpreting innermost rewriter,\n"
-         "jitty   interpreting just in time rewriter (default),\n"
-         "innerc  compiling innermost rewriter (not for Windows),\n"
-         "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
-        ("counter,c", "Print at the end a tree labelled with instantiations of the left hand side of"
-         "equations. This tree is an indication of how pbes2bool came to the validity/invalidity of the PBES.")
-        ("precompile,P", "Precompile the pbes for faster rewriting. Does not work when the toolset is compiled in debug mode")
-        ("hashtables,H", "Use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties).")
+        ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "use rewrite strategy arg:\n"
+         "'inner' for the innermost rewriter,\n"
+         "'innerc' for the compiled innermost rewriter,\n"
+         "'jitty' for the jitty rewriter (default), and\n"
+         "'jittyc' for the compiled jitty rewriter")
+        ("counter,c", "print at the end a tree labelled with instantiations of the left hand side of"
+         "equations; this tree is an indication of how pbes2bool came to the validity/invalidity of the PBES")
+        ("precompile,P", "precompile the pbes for faster rewriting; does not work when the toolset is compiled in debug mode")
+        ("hashtables,H", "use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties)")
         ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use outputformat arg (default 'none');\n"
                  "available outputformats are none, vasy and cwi")
         ("tree,r", "store state in a tree (for memory efficiency)")

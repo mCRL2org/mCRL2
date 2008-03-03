@@ -246,8 +246,12 @@ void parse_command_line(int ac, char** av, tool_options& t_options) {
       ("version",     "display version information")
       ("verbose,v",   "turn on the display of short intermediate messages")
       ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"), "use rewriter arg (default 'jitty');"
-                      "available rewriters are inner, jitty, innerc and jittyc")
+      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"),
+                       "use rewrite strategy arg:\n"
+                       "'inner' for the innermost rewriter,\n"
+                       "'innerc' for the compiled innermost rewriter,\n"
+                       "'jitty' for the jitty rewriter (default), and\n"
+                       "'jittyc' for the compiled jitty rewriter")
   ;
   po::options_description hidden("Hidden options");
   hidden.add_options()

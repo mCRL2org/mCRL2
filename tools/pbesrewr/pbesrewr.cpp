@@ -60,11 +60,11 @@ t_tool_options parse_command_line(int argc, char** argv)
   string opt_rewriter;
 
   desc.add_options()
-      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "indicate the rewriter to be used. Options are:\n"
-       "inner   interpreting innermost rewriter,\n"
-       "jitty   interpreting just in time rewriter (default),\n"
-       "innerc  compiling innermost rewriter (not for Windows),\n"
-       "jittyc  compiling just in time rewriter (fastest, not for Windows).\n")
+      ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "use rewrite strategy arg:\n"
+       "'inner' for the innermost rewriter,\n"
+       "'innerc' for the compiled innermost rewriter,\n"
+       "'jitty' for the jitty rewriter (default), and\n"
+       "'jittyc' for the compiled jitty rewriter")
       ("help,h",    "display this help")
       ("verbose,v",  "turn on the display of short intermediate messages")
       ("debug,d",    "turn on the display of detailed intermediate messages")

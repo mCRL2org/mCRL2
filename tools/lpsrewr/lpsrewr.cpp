@@ -226,7 +226,11 @@ static void print_help(char *Name)
     "  -q, --quiet              do not display warning messages\n"
     "  -v, --verbose            display concise intermediate messages\n"
     "  -bNUM, --benchmark=NUM   rewrite specification NUM times; do not save output\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
+    "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
+    "                           'inner' for the innermost rewriter,\n"
+    "                           'innerc' for the compiled innermost rewriter,\n"
+    "                           'jitty' for the jitty rewriter (default), and\n"
+    "                           'jittyc' for the compiled jitty rewriter\n"
     "\n"
     "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
     , Name

@@ -125,7 +125,13 @@ using namespace mcrl2::core;
   wxCmdLineParser cmdln(argc,argv);
 
   cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
-  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'jitty')"));
+  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT(
+    "use rewrite strategy arg:\n"
+    "'inner' for the innermost rewriter,\n"
+    "'innerc' for the compiled innermost rewriter,\n"
+    "'jitty' for the jitty rewriter (default), and\n"
+    "'jittyc' for the compiled jitty rewriter"
+  ));
   cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
   cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
   cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display warning messages"));
@@ -146,7 +152,11 @@ using namespace mcrl2::core;
     "\n"
     "Options:\n"
     "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-    "  -RNAME, --rewriter=NAME  use rewriter NAME (default 'jitty')\n"
+    "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
+    "                           'inner' for the innermost rewriter,\n"
+    "                           'innerc' for the compiled innermost rewriter,\n"
+    "                           'jitty' for the jitty rewriter (default), and\n"
+    "                           'jittyc' for the compiled jitty rewriter\n"
     "  -h, --help               display this help and terminate\n"
     "      --version            display version information and terminate\n"
     "  -q, --quiet              do not display warning messages\n"

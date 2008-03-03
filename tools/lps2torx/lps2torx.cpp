@@ -155,7 +155,11 @@ static void print_help(FILE *f, char *Name)
     "  -u, --unused-data       do not remove unused parts of the data specification\n"
     "  -c, --vector            store state in a vector (fastest, default)\n"
     "  -r, --tree              store state in a tree (for memory efficiency)\n"
-    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'jitty')\n"
+    "  -RNAME, --rewriter=NAME use rewrite strategy NAME:\n"
+    "                          'inner' for the innermost rewriter,\n"
+    "                          'innerc' for the compiled innermost rewriter,\n"
+    "                          'jitty' for the jitty rewriter (default), and\n"
+    "                          'jittyc' for the compiled jitty rewriter\n"
     "\n"
     "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
     , Name);
