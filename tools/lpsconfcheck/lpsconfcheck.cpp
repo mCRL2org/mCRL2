@@ -688,22 +688,29 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       
       lps_specification.load(f_input_file_name);
 
-      if (lps_specification.is_well_typed()) {
-        // temporary measure, until the invariant and confluence checkers use the lps framework
-        f_lps = (ATermAppl) lps_specification;
-
-        //typecheck the invariant formula
-        if (!(f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true))) {
-          throw std::runtime_error("Typechecking of the invariant formula failed.\n");
-        }
-       
-        //data implement the invariant formula
-        if (!(f_invariant = implement_data_data_expr(f_invariant, lps_specification))) {
-          throw std::runtime_error("Invalid mCRL2 LPS read from " + f_input_file_name);
-        }
-      }
-      else {
+      if (!lps_specification.is_well_typed()) {
         throw std::runtime_error("Invalid mCRL2 LPS read from " + f_input_file_name);
+      }
+      // temporary measure, until the invariant and confluence checkers use the lps framework
+      f_lps = (ATermAppl) lps_specification;
+
+      //typecheck the invariant formula
+      ATermList vars = lps_specification.process().process_parameters();
+      ATermTable var_table = ATtableCreate(63,50);
+      for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
+        ATermAppl var = ATAgetFirst(vars);
+        ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
+      }
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, var_table);
+      ATtableDestroy(var_table);
+      if (!f_invariant) {
+        throw std::runtime_error("Typechecking of the invariant formula failed.\n");
+      }
+     
+      //data implement the invariant formula
+      f_invariant = implement_data_data_expr(f_invariant, lps_specification);
+      if (!f_invariant) {
+        throw std::runtime_error("Data implementation of the invariant formula failed.\n");
       }
     }
 

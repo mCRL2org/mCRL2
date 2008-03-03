@@ -339,7 +339,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
   return Result;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, bool use_vars_from_lps, ATermTable Vars)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, ATermTable Vars)
 {
   //check correctness of the data expression in data_expr using
   //the LPS specification in lps_spec
@@ -347,7 +347,6 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   //check preconditions
   assert(gsIsDataExpr(data_expr));
   assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
-  //gsWarningMsg("type checking of data expressions is partially implemented\n");
 
   ATermAppl Result=NULL;
 
@@ -360,8 +359,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   //XXX read-in from LPS (not finished)
   if (gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) &&
       gstcReadInConstructors() &&
-      gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false) &&
-      gstcReadInActs((ATermList) lps_spec.action_labels()))
+      gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false))
   {
     gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
@@ -370,19 +368,6 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
       bool destroy_vars=(Vars == NULL);
       if(destroy_vars) Vars=ATtableCreate(63,50);
-      if(use_vars_from_lps) {
-        ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
-	if(!NewVars){
-	  if(destroy_vars) ATtableDestroy(Vars);
-          gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
-          goto finally;
-        }
-	else
-        {
-          Vars=NewVars;
-        }
-      }
-
       ATermAppl data=data_expr;
       ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?gsMakeSortUnknown():sort_expr);
       if(destroy_vars) ATtableDestroy(Vars);
@@ -392,13 +377,11 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
   } else {
     gsErrorMsg("reading from LPS failed\n");
   }
-
-finally:
   gstcDataDestroy();
   return Result;
 }
 
-ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, bool use_vars_from_lps)
+ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
 {
   //check correctness of the multi-action in mult_act using
   //the LPS specification in lps_spec
@@ -420,18 +403,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
 
     if(gsIsMultAct(mult_act)){
       ATermTable Vars=ATtableCreate(63,50);
-      if(use_vars_from_lps) {
-        ATermTable NewVars=gstcAddVars2Table(Vars,lps_spec.process().process_parameters());
-        if(!NewVars){
-          ATtableDestroy(Vars);
-          gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
-          goto finally;
-        }
-        else Vars=NewVars;
-      }
-
       ATermList r=ATmakeList0();
-
       for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l)){
         ATermAppl o=ATAgetFirst(l);
         assert(gsIsParamId(o));
@@ -451,13 +423,11 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, 
   else {
       gsErrorMsg("reading from LPS failed\n");
   }
-    
-finally:
   gstcDataDestroy();
   return Result;
 }
 
-ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec, bool use_vars_from_lps)
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec)
 {
   //check correctness of the process expression in proc_expr using
   //the LPS specification in lps_spec
@@ -465,7 +435,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
   return proc_expr;
 }
 
-ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec, bool use_vars_from_lps)
+ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 {
   assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   //check correctness of the state formula in state_formula using
@@ -523,24 +493,8 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec, bool use_var
          gsDebugMsg ("type checking of state formulas read-in phase finished\n");
 
          ATermTable Vars=ATtableCreate(63,50);
-         if(use_vars_from_lps && process_parameters != NULL) {
-           ATermTable NewVars=gstcAddVars2Table(Vars,process_parameters);
-           if(!NewVars){
-             ATtableDestroy(Vars);
-             gsErrorMsg("the parameters of the LPS cannot be used as variables\n");
-             goto finally;
-           }
-           else Vars=NewVars;
-         }
-
-         ATermTable StateVars=ATtableCreate(63,50);
-
-         //add LPS params as data vars??
-
-         Result=gstcTraverseStateFrm(Vars,StateVars,state_frm);
-
+         Result=gstcTraverseStateFrm(Vars,Vars,state_frm);
          ATtableDestroy(Vars);
-         ATtableDestroy(StateVars);
        }
        else {
          gsErrorMsg("reading functions from LPS failed\n");
@@ -553,8 +507,6 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec, bool use_var
   else {
     gsErrorMsg("reading sorts from LPS failed\n");
   }
-	
-finally:
   gstcDataDestroy();
   return Result;
 }

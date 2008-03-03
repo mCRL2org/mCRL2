@@ -62,7 +62,6 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *      sort_expr represents an mCRL2 sort expression that adheres to the
  *      internal ATerm structure after type checking or is NULL.
  *      lps_spec represents an LPS specification
- *      use_vars_from_lps says if the parameters of the LPS can be used in the data expression
  *      Vars contains any extra variables that can be used in the data expression
  * \post data_expr is type checked using the declaration from lps_spec and, if
  *      sort_expr is not NULL, it is type checked as being of type sort_expr
@@ -71,7 +70,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, bool use_vars_from_lps=false, ATermTable Vars=NULL);
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, ATermTable Vars=NULL);
 
 
 /** \pre  data_expr represents an mCRL2 data expression that adheres to the
@@ -93,34 +92,31 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
 /** \pre  mult_act represents an mCRL2 multi-action that adheres to the initial
  *      internal ATerm structure.
  *      lps_spec represents an LPS specification
- *      use_vars_from_lps says if the parameters of the LPS can be used in the data expression
  * \post mult_act is type checked using the declarations from lps_spec
  * \return  if type checking went well, an equivalent version of mult_act is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec, bool use_vars_from_lps=false);
+ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec);
 
 
 /** \pre  proc_expr represents an mCRL2 proc expression that adheres to the
  *      initial internal ATerm structure.
  *      lps_spec represents an LPS specification
- *      use_vars_from_lps says if the parameters of the LPS can be used in the data expression
  * \post proc_expr is type checked using the declaration from lps_spec
  * \return  if type checking went well, an equivalent version of proc_expr is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec, bool use_vars_from_lps=false);
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec);
 
 
 /** \pre  state_formula represents an mCRL2 state formula that adheres to the
  *      initial internal ATerm structure.
  *      spec represents either an LPS specification, or a PBES or a data
  *      specification, all before data implementation
- *      use_vars_from_lps says if the parameters of the LPS can be used in the data expression
  * \post state_formula is type checked using the declarations from lps_spec
  * \return  if type checking went well, an equivalent version of state_formula is
  *      returned that adheres to the internal ATerm structure after type
@@ -128,7 +124,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec, bool use_vars_from_lps=false);
+ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec);
 
 
 /** \pre  ar_spec represents an action rename specification that adheres to the

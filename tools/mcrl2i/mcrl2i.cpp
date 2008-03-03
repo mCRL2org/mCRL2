@@ -206,7 +206,7 @@ ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = 
       ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
     }
   }
-  term = type_check_data_expr(term,NULL,spec,false,variables);
+  term = type_check_data_expr(term,NULL,spec,variables);
   if ( vars != NULL )
   {
     for (ATermList l=vars; !ATisEmpty(l); l=ATgetNext(l))

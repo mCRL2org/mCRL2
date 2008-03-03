@@ -437,7 +437,14 @@ using namespace mcrl2;
       }
       
       //typecheck the invariant formula
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, true);
+      ATermList vars = lps_specification.process().process_parameters();
+      ATermTable var_table = ATtableCreate(63,50);
+      for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
+        ATermAppl var = ATAgetFirst(vars);
+        ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
+      } 
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, var_table);
+      ATtableDestroy(var_table);
       if(!f_invariant){
         gsErrorMsg("Typechecking of the invariant formula failed.\n");
         exit(1);
