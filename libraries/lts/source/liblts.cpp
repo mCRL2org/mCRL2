@@ -1308,15 +1308,17 @@ bool lts::reachability_check(bool remove_unreachable)
     }
   }
 
-  if ( remove_unreachable )
+  if ( !r && remove_unreachable )
   {
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
-    DECL_A(state_map,unsigned int,nstates);
-    DECL_A(label_map,unsigned int,nlabels);
+    unsigned int *state_map = (unsigned int *) malloc(nstates*sizeof(unsigned int));
+    unsigned int *label_map = (unsigned int *) malloc(nlabels*sizeof(unsigned int));
     if ( (state_map == NULL) || (label_map == NULL) )
     {
       gsErrorMsg("not enough memory to remove unreachable states\n");
+      free(state_map);
+      free(label_map);
       exit(1);
     }
 
@@ -1378,8 +1380,8 @@ bool lts::reachability_check(bool remove_unreachable)
 
     // XXX realloc tables?
 
-    FREE_A(label_map);
-    FREE_A(state_map);
+    free(label_map);
+    free(state_map);
   }
 
   free(visited);

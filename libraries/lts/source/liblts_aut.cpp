@@ -143,14 +143,23 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   while ( *s == ' ' )
     s++;
 
+  char *end_label;
   if ( *s == '"' )
+  {
     s++;
-  *label = s;
-  while ( (*s != '"') && ( *s != '\0') )
+    *label = s;
+    while ( (*s != '"') && ( *s != '\0') )
+      s++;
+    end_label = s;
+    if ( *s != '"' )
+      return false;
     s++;
-  char *end_label = s;
-  if ( *s == '"' )
-    s++;
+  } else {
+    *label = s;
+    while ( (*s != ',') && ( *s != '\0') )
+      s++;
+    end_label = s;
+  }
 
   while ( *s == ' ' )
     s++;
