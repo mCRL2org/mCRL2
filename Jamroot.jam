@@ -201,6 +201,10 @@ else {
   plugindir = [ path.make $(prefix)/plugins ] ;
 }
 
+if [ modules.peek : NT ] && [ feature.get-values link : $(build-options) ] != static {
+  libdir = $(bindir) ;
+}
+
 # Top project
 project toolset
        : build-dir $(BUILD_TOP)
@@ -399,12 +403,7 @@ rule install-libraries ( libraries * : requirements * ) {
   if [ feature.defaults <install> ] = <install>yes {
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
-      if [ modules.peek : NT ] && [ feature.get-values link : $(build-options) ] != static {
-        requirements += <location>$(bindir) ;
-      }
-      else {
-        requirements += <location>$(libdir) ;
-      }
+      requirements += <location>$(libdir) ;
     }
 
     install install-library : $(libraries) : <install-dependencies>on <install-type>LIB $(requirements) ;
@@ -489,7 +488,7 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
   local make_alias = false ;
   local additional-requirements = <define>PREFIX=\"\\\"$(prefix)\\\"\"
-                                  <define>PLUGINDIR=\"\\\"$(libdir)/plugins\\\"\"
+                                  <define>PLUGINDIR=\"\\\"$(plugindir)\\\"\"
                                   <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\" ;
 
   if [ property.select status : $(requirements) ] {
