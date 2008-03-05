@@ -690,7 +690,7 @@ inline char const* lin_method_to_string(t_lin_method lin_method)
 
 void PrintMoreInfo(char *Name)
 {
-  fprintf(stderr, "Use %s --help for options\n", Name);
+  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
 }
 
 void PrintHelp(char *Name)

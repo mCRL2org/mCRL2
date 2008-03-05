@@ -484,7 +484,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     // --------------------------------------------------------------------------------------------
 
     void LPS_Conf_Check::print_more_info() {
-      fprintf(stderr, "Try \'%s --help\' for more information.\n", f_tool_command);
+      fprintf(stderr, "Try `%s --help' for more information.\n", f_tool_command);
     }
 
     // --------------------------------------------------------------------------------------------

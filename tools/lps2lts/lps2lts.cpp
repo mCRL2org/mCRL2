@@ -91,7 +91,7 @@ static void print_formats(FILE *f)
 
 static void print_help_suggestion(FILE *f, const char *Name)
 {
-  fprintf(f,"Try '%s --help' for more information.\n",Name);
+  fprintf(f,"Try `%s --help' for more information.\n",Name);
 }
 
 static void print_help(FILE *f, const char *Name)

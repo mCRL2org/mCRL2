@@ -262,7 +262,7 @@ void PrintUsage(char *Name) {
 }
 
 void PrintMoreInfo(char *Name) {
-  fprintf(stderr, "Try \'%s --help\' for more information.\n", Name);
+  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
 }
 
 void PrintPPFormat(FILE *stream, t_pp_format pp_format)

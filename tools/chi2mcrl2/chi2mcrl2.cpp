@@ -297,7 +297,7 @@ ATermAppl translate_file(t_options &options)
 
 void PrintMoreInfo(char *Name)
 {
-  fprintf(stderr, "Use %s --help for options\n", Name);
+  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
 }
 
 void PrintHelp(char *Name)

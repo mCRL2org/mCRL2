@@ -487,7 +487,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       opt_outputformat = vm["output"].as< string >();
       if (!((opt_outputformat == "none") || (opt_outputformat == "vasy") || (opt_outputformat == "cwi")))
       {
-        gsErrorMsg("Unknown outputformat specified. Available outputformats are none, vasy and cwi\n");
+        gsErrorMsg("unknown output format specified; available output formats are 'none', 'vasy' and 'cwi'\n");
         exit(1);
       }
     }
@@ -497,7 +497,7 @@ t_tool_options parse_command_line(int argc, char** argv)
       opt_strategy = vm["strategy"].as< string >();
       if (!(opt_strategy == "0" || opt_strategy == "1" || opt_strategy == "2" || opt_strategy == "3" ))
       {
-        gsErrorMsg("Unknown strategy specified. The available strategies are 0, 1, 2, and 3\n");
+        gsErrorMsg("unknown strategy specified; available strategies are '0', '1', '2', and '3'\n");
         exit(1);
       }
     }
@@ -510,7 +510,7 @@ t_tool_options parse_command_line(int argc, char** argv)
           !(opt_rewriter == "innerc") &&
           !(opt_rewriter == "jittyc"))
       { 
-        gsErrorMsg("Unknown rewriter specified. Available rewriters are inner, jitty, innerc and jittyc\n");
+        gsErrorMsg("unknown rewrite strategy specified; available strategies are 'inner', 'jitty', 'innerc' and 'jittyc'\n");
         exit(1);
       }
   
@@ -532,7 +532,7 @@ t_tool_options parse_command_line(int argc, char** argv)
     }
     else if ( 2 < file_names.size())
     {
-      cerr << NAME << ": Too many arguments" << endl;
+      cerr << NAME << ": too many arguments" << endl;
       exit(1);
     }
     else
@@ -589,7 +589,7 @@ t_tool_options parse_command_line(int argc, char** argv)
   }
   catch (std::exception& e) {
     gsErrorMsg("%s\n", e.what());
-
+    cerr << "Try `" NAME " --help' for more information." << endl;
     exit(1);
   }
     

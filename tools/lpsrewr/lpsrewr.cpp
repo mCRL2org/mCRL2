@@ -239,7 +239,7 @@ static void print_help(char *Name)
 
 void print_more_info(char *Name)
 {
-  fprintf(stderr, "Use %s --help for options\n", Name);
+  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
 }
 
 bool is_valid_lps(ATermAppl spec)

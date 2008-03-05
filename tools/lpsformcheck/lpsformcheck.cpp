@@ -154,7 +154,7 @@ using namespace mcrl2;
     // --------------------------------------------------------------------------------------------
 
     void LPS_Form_Check::print_more_info() {
-      fprintf(stderr, "Try \'%s --help\' for more information.\n", f_tool_command);
+      fprintf(stderr, "Try `%s --help' for more information.\n", f_tool_command);
     }
 
     // --------------------------------------------------------------------------------------------

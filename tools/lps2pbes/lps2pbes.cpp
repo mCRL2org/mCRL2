@@ -559,5 +559,5 @@ static void print_help(char *name)
 
 void print_more_info(char *name)
 {
-  fprintf(stderr, "Use %s --help for options\n", name);
+  fprintf(stderr, "Try `%s --help' for more information.\n", name);
 }

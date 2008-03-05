@@ -130,7 +130,7 @@ class torx_data
 
 static void print_help_suggestion(FILE *f, char *Name)
 {
-  fprintf(f,"Try '%s --help' for more information.\n",Name);
+  fprintf(f,"Try `%s --help' for more information.\n",Name);
 }
 
 static void print_help(FILE *f, char *Name)
