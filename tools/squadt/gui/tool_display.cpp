@@ -813,45 +813,41 @@ namespace squadt {
      * \param[in] w weak pointer to this object
      * \param[in] l the layout elements that have changed
      **/
-    void tool_display::update_log(boost::weak_ptr < tipi::layout::tool_display > w, tipi::report::sptr l) {
-      boost::shared_ptr < tipi::layout::tool_display > g(w.lock());
+    void tool_display::update_log(boost::shared_ptr< tipi::report > l) {
+      wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
 
-      if (g.get() != 0) {
-        wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
+      if (m_log == 0) {
+        wxSizer* sizer = GetSizer();
 
-        if (m_log == 0) {
-          wxSizer* sizer = GetSizer();
+        m_log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+        m_log->SetSize(-1, 40);
 
-          m_log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
-          m_log->SetSize(-1, 40);
+        sizer->Add(m_log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
 
-          sizer->Add(m_log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
+        GetParent()->Layout();
 
-          GetParent()->Layout();
+        /* Toggle scrollbar availability on demand */
+        wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
 
-          /* Toggle scrollbar availability on demand */
-          wxSizeEvent size_event(GetParent()->GetSize(), GetParent()->GetId());
+        size_event.SetEventObject(GetParent());
 
-          size_event.SetEventObject(GetParent());
+        GetParent()->GetParent()->ProcessEvent(size_event);
 
-          GetParent()->GetParent()->ProcessEvent(size_event);
+        /* Show the log */
+        m_log->Show(true);
+      }
+      else {
+        m_log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
 
-          /* Show the log */
-          m_log->Show(true);
-        }
-        else {
-          m_log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
-
-          m_log->ShowPosition(m_log->GetLastPosition());
-        }
+        m_log->ShowPosition(m_log->GetLastPosition());
       }
     }
 
     /**
      * \param[in] l the layout specification
      **/
-    void tool_display::schedule_log_update(tipi::report::sptr l) {
-      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
+    void tool_display::schedule_log_update(boost::shared_ptr< tipi::report > l) {
+      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, l));
     }
 
     /**

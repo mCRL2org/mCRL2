@@ -111,10 +111,13 @@ namespace squadt {
      * \note the queue with commands for to be started processes is also cleared by this function.
      **/
     inline void executor_impl::terminate_all() {
+      std::list < boost::shared_ptr < process > > aprocesses;
+
+      aprocesses.swap(processes);
     
       delayed_commands.clear();
 
-      BOOST_FOREACH(boost::shared_ptr < process > p, processes) {
+      BOOST_FOREACH(boost::shared_ptr < process > p, aprocesses) {
         p->terminate();
       }
     }

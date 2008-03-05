@@ -37,25 +37,25 @@ namespace squadt {
       private:
 
         /** \brief The GUI project view to which this display `belongs' */
-        GUI::project*                            m_project;
+        GUI::project*                                     m_project;
 
         /** \brief Abstract description of the current layout of this panel */
-        tipi::layout::tool_display::sptr         m_layout;
+        boost::shared_ptr < tipi::layout::tool_display >  m_layout;
 
         /** \brief Sizer that contains the content part */
-        wxSizer*                                 m_content;
+        wxSizer*                                          m_content;
 
         /** \brief Sizer of the tool display control buttons */
-        wxSizer*                                 m_control_bar;
+        wxSizer*                                          m_control_bar;
 
         /** \brief Connected monitor */
-        boost::shared_ptr < processor::monitor > m_monitor;
+        boost::shared_ptr < processor::monitor >          m_monitor;
 
         /** \brief Sizer of the tool display control buttons */
-        wxTextCtrl*                              m_log;
+        wxTextCtrl*                                       m_log;
 
         /** \brief Sizer of the tool display control buttons */
-        tipi::layout::basic_event_handler        m_event_handler;
+        tipi::layout::basic_event_handler                 m_event_handler;
 
       private:
 
@@ -69,16 +69,16 @@ namespace squadt {
         void update(boost::weak_ptr < tipi::layout::tool_display >, std::vector < tipi::layout::element const* >);
 
         /** \brief Update the log with incoming status messages */
-        void update_log(boost::weak_ptr < tipi::layout::tool_display >, tipi::report::sptr l);
+        void update_log(boost::shared_ptr< tipi::report > l);
 
         /** \brief Set a new layout description */
-        void schedule_layout_change(tipi::layout::tool_display::sptr);
+        void schedule_layout_change(boost::shared_ptr< tipi::layout::tool_display >);
 
         /** \brief Set a new layout description */
         void schedule_layout_update(std::vector < tipi::layout::element const* > const&);
 
         /** \brief Set a new layout description */
-        void schedule_log_update(tipi::report::sptr);
+        void schedule_log_update(boost::shared_ptr< tipi::report >);
 
         /** \brief Handler for panel control button events */
         void on_panel_button_clicked(wxCommandEvent&);
