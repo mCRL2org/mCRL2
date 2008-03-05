@@ -589,7 +589,6 @@ t_tool_options parse_command_line(int argc, char** argv)
   }
   catch (std::exception& e) {
     gsErrorMsg("%s\n", e.what());
-    cerr << "Try `" NAME " --help' for more information." << endl;
     exit(1);
   }
     
