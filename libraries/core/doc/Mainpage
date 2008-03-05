@@ -1,4 +1,4 @@
-/** \mainpage Core Reference Manual
+/** \mainpage Core reference manual
  *
  * The Core library provides functionality for handling the internal data structures 
  * for the mCRL2 tools. 
@@ -6,5 +6,5 @@
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a
- * href="http://www.mcrl2.org/wiki/index.php/Core_Library">Core User Manual</a>.
+ * href="http://www.mcrl2.org/wiki/index.php/Core_library">Core user manual</a>.
  */

@@ -1,4 +1,4 @@
-/** \mainpage TIPi Reference Manual
+/** \mainpage TIPi reference manual
  *
  * The TIPi library is an implementation of a communication system, built around
  * a communication protocol, that is used to remotely control software tools.
@@ -8,5 +8,5 @@
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a
- * href="http://www.mcrl2.org/wiki/index.php/TIPi_Library">TIPi User Manual</a>.
+ * href="http://www.mcrl2.org/wiki/index.php/TIPi_library">TIPi user manual</a>.
  */

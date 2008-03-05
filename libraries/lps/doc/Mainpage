@@ -1,4 +1,4 @@
-/** \mainpage LPS Reference Manual
+/** \mainpage LPS reference manual
  *
  * The LPS library contains classes and algorithms for handling <i>linear
  * process specifications</i> (LPS).
@@ -6,5 +6,5 @@
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a
- * href="http://www.mcrl2.org/devel/lps">LPS User Manual</a>.
+ * href="http://www.mcrl2.org/devel/lps">LPS user manual</a>.
  */

@@ -1,4 +1,4 @@
-/** \mainpage ATerm++ Reference Manual
+/** \mainpage ATerm++ reference manual
  *
  * The ATerm++ library is a C++ wrapper around the ATerm Library, which is a C
  * library for manipulating tree-like data structures. Important features of the
@@ -10,5 +10,5 @@
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a
- * href="http://www.mcrl2.org/devel/atermpp">ATerm++ User Manual</a>.
+ * href="http://www.mcrl2.org/devel/atermpp">ATerm++ user manual</a>.
  */

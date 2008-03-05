@@ -1,4 +1,4 @@
-/** \mainpage PBES Reference Manual
+/** \mainpage PBES reference manual
  *
  * The PBES library provides the facilities to handle <i>Parameterised Boolean
  * Equation Systems</i> (PBES). Using the library, a PBES can be read from/written
@@ -7,5 +7,5 @@
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a
- * href="http://www.mcrl2.org/wiki/index.php/PBES_Library">PBES User Manual</a>.
+ * href="http://www.mcrl2.org/wiki/index.php/PBES_library">PBES user manual</a>.
  */
