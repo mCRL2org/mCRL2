@@ -91,10 +91,11 @@ DOXYFOOTER=doxyfooter.html
 
 # The text on the main page of the website (OUTPUT_DIR/index.html) in HTML
 # syntax.
-MAIN_TEXT="<h1>mCRL2 Library Reference Manual</h1>
+MAIN_TEXT="<h1>mCRL2 library reference manual</h1>
 <p>
-The mCRL2 Library Reference Manual contains the reference manuals of every mCRL2 library.
-These pages list and document the available data structures, methods and interfaces.
+This website contains the reference manuals of every mCRL2 library.
+These pages list and document the available data structures, methods and
+interfaces.
 </p>
 <p>
 The pages can be browsed using the navigation bar at the top.
@@ -105,8 +106,8 @@ repository</a> every night.
 </p>
 <p>
 This reference manual is part of the <a
-href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">mCRL2 Library
-Documentation</a> which also includes <i>user manuals</i> for developers
+href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">mCRL2 library
+documentation</a> which also includes <i>user manuals</i> for developers
 who want to start using any of the libraries.
 It is therefore recommended to read those pages first.
 </p>"
