@@ -602,7 +602,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
             } else if (strcmp(optarg, "innerc") == 0) {
               f_strategy = GS_REWR_INNERC;
             } else {
-              gsErrorMsg("option -s has illegal argument '%s'\n", optarg);
+              gsErrorMsg("option -r has illegal argument '%s'\n", optarg);
               exit(1);
             }
             break;

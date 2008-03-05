@@ -254,7 +254,7 @@ using namespace mcrl2;
             } else if (strcmp(optarg, "innerc") == 0) {
               f_strategy = GS_REWR_INNERC;
             } else {
-              throw std::runtime_error("option -s has illegal argument '" + std::string(optarg) + "'");
+              throw std::runtime_error("option -r has illegal argument '" + std::string(optarg) + "'");
             }
             break;
           case 't':
