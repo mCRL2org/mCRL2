@@ -286,7 +286,7 @@ void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
   if (strat == GS_REWR_INNER) {
     fprintf(stream, "inner");
   } else if (strat == GS_REWR_INNERC) {
-    fprintf(stream, "innerC");
+    fprintf(stream, "innerc");
   } else if (strat == GS_REWR_JITTY) {
     fprintf(stream, "jitty");
   } else if (strat == GS_REWR_JITTYC) {
