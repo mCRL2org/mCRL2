@@ -50,32 +50,33 @@ ATermAppl implement_data_pbes_spec(ATermAppl spec);
 
 /** \pre sort_expr represents a sort expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lps_spec represents an LPS specification
+ *     spec represents an LPS specification, a PBES or a data specification in
+ *     the internal format before data implementation.
  * \post The datatypes of sort_expr are implemented as higher-order abstract data
- *     types in lps_spec
+ *     types in spec
+ *     spec is updated to be the equivalent of spec in the internal format after
+ *     data implementation.
  * \return if the data implementation went well, an equivalent version of sort_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_sort_expr(ATermAppl sort_expr,
-  lps::specification &lps_spec);
+ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec);
 
 
 /** \pre data_expr represents a data expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lps_spec represents an LPS specification
- * \post The datatypes of data_expr are implemented as higher-order abstract data
- *     types in lps_spec
+ *     spec represents an LPS specification before data implementation
+ * \post The datatypes of spec are implemented as higher-order abstract data
+ *     types.
  * \return if the data implementation went well, an equivalent version of data_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_data_expr(ATermAppl data_expr,
-  lps::specification &lps_spec);
+ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec);
 
 
 /** \pre mult_act represents a multiaction that adheres to the internal ATerm
@@ -120,8 +121,7 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_state_frm(ATermAppl state_frm,
-  ATermAppl& spec);
+ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
 
 
 /** \pre ar_spec represents an action rename specification that

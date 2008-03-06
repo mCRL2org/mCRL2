@@ -305,11 +305,12 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
   return Result;
 }
 
-ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec)
+ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 {
   //check correctness of the sort expression in sort_expr using
   //the LPS specification in lps_spec
   assert(gsIsSortExpr(sort_expr));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   //gsWarningMsg("type checking of sort expressions is partially implemented\n");
   
   ATermAppl Result=NULL;
@@ -320,8 +321,19 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
 
   gsDebugMsg ("type checking of sort expressions read-in phase started\n");
 
+  ATermAppl data_spec = NULL;
+  if (gsIsSpecV1(spec) || gsIsPBES(spec))
+  {
+    data_spec = ATAgetArgument(spec, 0);
+  }
+  else
+  {
+    data_spec = spec;
+  }
+  ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
+  if(gstcReadInSorts(sorts,false)){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
     if(!gsIsNotInferred(sort_expr)){
@@ -339,12 +351,13 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec
   return Result;
 }
 
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, ATermTable Vars)
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars)
 {
   //check correctness of the data expression in data_expr using
-  //the LPS specification in lps_spec
+  //the LPS specification in spec
   
   //check preconditions
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   assert(gsIsDataExpr(data_expr));
   assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
 
@@ -356,10 +369,23 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
 
   gsDebugMsg ("type checking of data expression read-in phase started\n");
 
+  ATermAppl data_spec = NULL;
+  if (gsIsSpecV1(spec) || gsIsPBES(spec))
+  {
+    data_spec = ATAgetArgument(spec, 0);
+  }
+  else
+  {
+    data_spec = spec;
+  }
+  ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+  ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
+  ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
+
   //XXX read-in from LPS (not finished)
-  if (gstcReadInSorts((ATermList) lps_spec.data().sorts(),false) &&
+  if (gstcReadInSorts(sorts,false) &&
       gstcReadInConstructors() &&
-      gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false))
+      gstcReadInFuncs(ATconcat(constructors,mappings),false))
   {
     gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
@@ -378,6 +404,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::sp
     gsErrorMsg("reading from LPS failed\n");
   }
   gstcDataDestroy();
+
   return Result;
 }
 

@@ -34,14 +34,15 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec);
 
 /** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
  *      initial internal ATerm structure.
- *      lps_spec represents an LPS specification
+ *      spec represents an LPS specification, a PBES or a data specification
+ *      in the internal format before data implementation.
  * \post sort_expr is type checked using the declaration from lps_spec
  * \return  if type checking went well, an equivalent version of sort_expr is
  *      returned that adheres to the internal ATerm structure after type
  *      checking. if something went wrong, an appropriate error message is
  *      printed and NULL is returned.
  **/
-ATermAppl type_check_sort_expr(ATermAppl sort_expr, lps::specification &lps_spec);
+ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
 
 
 /** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
@@ -61,7 +62,8 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *      initial internal ATerm structure.
  *      sort_expr represents an mCRL2 sort expression that adheres to the
  *      internal ATerm structure after type checking or is NULL.
- *      lps_spec represents an LPS specification
+ *      spec represents an LPS specification, a PBES or a data specification in
+ *      the format before data implementation.
  *      Vars contains any extra variables that can be used in the data expression
  * \post data_expr is type checked using the declaration from lps_spec and, if
  *      sort_expr is not NULL, it is type checked as being of type sort_expr
@@ -70,7 +72,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, lps::specification &lps_spec, ATermTable Vars=NULL);
+ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars=NULL);
 
 
 /** \pre  data_expr represents an mCRL2 data expression that adheres to the

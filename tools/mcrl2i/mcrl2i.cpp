@@ -30,6 +30,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include <mcrl2/core/detail/data_implementation.h>
+#include <mcrl2/core/detail/data_reconstruct.h>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
@@ -116,15 +117,18 @@ bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
 
     gsDebugMsg("parsed: %T\n",sort);
 
-    sort = type_check_sort_expr(sort,spec);
+    ATermAppl reconstructed_spec = reconstruct_spec(spec);
+    sort = type_check_sort_expr(sort,reconstructed_spec);
     if ( sort == NULL )
       return false;
 
     gsDebugMsg("type checked: %T\n",sort);
 
-    sort = implement_data_sort_expr(sort,spec);
+    sort = implement_data_sort_expr(sort,reconstructed_spec);
     if ( sort == NULL )
       return false;
+
+    spec = specification(reconstructed_spec);
 
     gsDebugMsg("data implemented: %T\n",sort);
 
@@ -206,7 +210,11 @@ ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = 
       ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
     }
   }
-  term = type_check_data_expr(term,NULL,spec,variables);
+
+  // type checking and data implementation of a data expression use a
+  // specification before data implementation.
+  ATermAppl reconstructed_spec = reconstruct_spec(spec);
+  term = type_check_data_expr(term,NULL,reconstructed_spec,variables);
   if ( vars != NULL )
   {
     for (ATermList l=vars; !ATisEmpty(l); l=ATgetNext(l))
@@ -226,7 +234,8 @@ ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = 
 
   gsDebugMsg("type checked: %T\n",term);
 
-  term = implement_data_data_expr(term,spec);
+  term = implement_data_data_expr(term,reconstructed_spec);
+  spec = specification(reconstructed_spec);
   if ( term == NULL )
     return NULL;
 

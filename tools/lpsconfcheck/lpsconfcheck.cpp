@@ -16,6 +16,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -696,25 +697,31 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       }
       // temporary measure, until the invariant and confluence checkers use the lps framework
       f_lps = (ATermAppl) lps_specification;
+        // type checking and data implementation of data expressions use an lps
+        // before data implementation
+      ATermAppl f_reconstructed_lps = reconstruct_spec(f_lps);
 
       //typecheck the invariant formula
-      ATermList vars = lps_specification.process().process_parameters();
+      ATermList vars =  ATLgetArgument(ATAgetArgument(ATAgetArgument(f_reconstructed_lps, 2), 0), 0);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       }
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, var_table);
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), f_reconstructed_lps, var_table);
       ATtableDestroy(var_table);
       if (!f_invariant) {
         throw std::runtime_error("Typechecking of the invariant formula failed.\n");
       }
      
       //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant, lps_specification);
+      f_invariant = implement_data_data_expr(f_invariant, f_reconstructed_lps);
       if (!f_invariant) {
         throw std::runtime_error("Data implementation of the invariant formula failed.\n");
       }
+
+      f_lps = specification(f_reconstructed_lps);
+
     }
 
     // --------------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
@@ -423,8 +424,9 @@ using namespace mcrl2;
         exit(1);
       }
 
-      // temporary measure until the invariant and confluence checkers use the lps framework
-      f_lps = (ATermAppl) lps_specification;
+      // type checking and data implementation of data expressions use an lps
+      // before data implementation
+      ATermAppl f_reconstructed_spec = reconstruct_spec(lps_specification);      
 
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name);
@@ -440,13 +442,13 @@ using namespace mcrl2;
       }
       
       //typecheck the invariant formula
-      ATermList vars = lps_specification.process().process_parameters();
+      ATermList vars = ATLgetArgument(ATAgetArgument(ATAgetArgument(f_reconstructed_spec, 2), 0), 0);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       } 
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), lps_specification, var_table);
+      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), f_reconstructed_spec, var_table);
       ATtableDestroy(var_table);
       if(!f_invariant){
         gsErrorMsg("Typechecking of the invariant formula failed.\n");
@@ -454,11 +456,13 @@ using namespace mcrl2;
       }
      
       //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant,lps_specification);
+      f_invariant = implement_data_data_expr(f_invariant,f_reconstructed_spec);
       if(!f_invariant){
         gsErrorMsg("Data implementation of the invariant formula failed.\n");
         exit(1);
       }
+
+      f_lps = lps::specification(f_reconstructed_spec);
     }
 
     // --------------------------------------------------------------------------------------------

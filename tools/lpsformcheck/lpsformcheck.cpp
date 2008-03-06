@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>
@@ -320,8 +321,10 @@ using namespace mcrl2;
       if (!lps_specification.is_well_typed()) {
         throw std::runtime_error("invalid mCRL2 LPS read from " + std::string((f_lps_file_name == 0)?"stdin":f_lps_file_name));
       }
-      // temporary measure, until the invariant and confluence checkers use the lps framework
-      ATermAppl v_lps = (ATermAppl) lps_specification;
+
+      // typechecking and data implementation use a specification before data
+      // implementation.
+      ATermAppl v_reconstructed_lps = reconstruct_spec(lps_specification);
 
       gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name);
       //open the formula from f_formula_file_name
@@ -336,19 +339,19 @@ using namespace mcrl2;
         throw std::runtime_error("cannot parse formula from '" + std::string(f_formula_file_name) + "'");
       }
       //typecheck the formula
-      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), lps_specification);
+      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_lps);
       if(!f_formula){
         throw std::runtime_error("type checking formula from '" + std::string(f_formula_file_name) + "' failed");
       }
       //implement data in the formula
-      f_formula = implement_data_data_expr(f_formula,lps_specification);
+      f_formula = implement_data_data_expr(f_formula,v_reconstructed_lps);
       if(!f_formula){
         throw std::runtime_error("implementation of data types in the formula from '" + std::string(f_formula_file_name) + "' failed");
       }
 
       //check formula
       Formula_Checker v_formula_checker(
-        ATAgetArgument(v_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
+        ATAgetArgument(v_reconstructed_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
       v_formula_checker.check_formulas(ATmakeList1((ATerm) f_formula));
     }
 
