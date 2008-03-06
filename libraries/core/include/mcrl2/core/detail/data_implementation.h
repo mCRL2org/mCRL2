@@ -96,17 +96,17 @@ ATermAppl implement_data_mult_act(ATermAppl mult_act,
 
 /** \pre proc_expr represents a process expression that adheres to the internal
  *     ATerm structure after the type checking phase.
- *     lps_spec represents an LPS specification
+ *     spec represents an LPS specification, a PBES or a data specification in
+ *     the internal format before data implementation.
  * \post The datatypes of proc_expr are implemented as higher-order abstract data
- *     types in lps_spec
+ *     types in spec
  * \return if the data implementation went well, an equivalent version of proc_expr
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_proc_expr(ATermAppl proc_expr,
-  lps::specification &lps_spec);
+ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec);
 
 
 /** \pre state_frm represents a state formula that adheres to the internal ATerm

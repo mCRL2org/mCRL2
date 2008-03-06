@@ -105,14 +105,15 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec);
 
 /** \pre  proc_expr represents an mCRL2 proc expression that adheres to the
  *      initial internal ATerm structure.
- *      lps_spec represents an LPS specification
+ *      spec represents an LPS specification, a PBES or a data specification in
+ *      the internal format before data implementation.
  * \post proc_expr is type checked using the declaration from lps_spec
  * \return  if type checking went well, an equivalent version of proc_expr is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec);
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec);
 
 
 /** \pre  state_formula represents an mCRL2 state formula that adheres to the

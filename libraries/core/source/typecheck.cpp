@@ -454,10 +454,11 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
   return Result;
 }
 
-ATermAppl type_check_proc_expr(ATermAppl proc_expr, lps::specification &lps_spec)
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 {
   //check correctness of the process expression in proc_expr using
   //the LPS specification in lps_spec
+  assert (gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   gsWarningMsg("type checking of process expressions is not yet implemented\n");
   return proc_expr;
 }
