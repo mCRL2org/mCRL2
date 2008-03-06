@@ -3918,7 +3918,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         		wxString name = x->GetHelp(); // Get the index of the selected attribute
 		    	name.ToLong((long *)&idxAttr); // Converting String to int    
 		    	
-		    	name = x->GetLabelText(x->GetItemLabel());
+		    	name = x->GetLabelFromText(x->GetText());
 		    	
         		if(dofMenu == true)
         		{		 
