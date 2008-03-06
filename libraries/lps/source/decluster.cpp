@@ -148,8 +148,6 @@ void decluster_summand(const lps::specification& specification, const lps::summa
     variables = summand_.summation_variables();
   }
 
-  gsVerboseMsg("variables: %s\n", variables.to_string().c_str());
-
   if (aterm_get_length(variables) == 0)
   {
     // Nothing to be done, return original summand
