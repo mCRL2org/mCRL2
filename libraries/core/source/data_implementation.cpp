@@ -233,10 +233,9 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
   return impl_exprs_with_spec(data_expr, spec);
 }
 
-ATermAppl implement_data_mult_act(ATermAppl mult_act,
-  lps::specification &lps_spec)
+ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 {
-  return impl_exprs(mult_act, lps_spec);
+  return impl_exprs_with_spec(mult_act, spec);
 }
 
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)

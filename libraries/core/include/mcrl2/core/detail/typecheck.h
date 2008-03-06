@@ -36,7 +36,7 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec);
  *      initial internal ATerm structure.
  *      spec represents an LPS specification, a PBES or a data specification
  *      in the internal format before data implementation.
- * \post sort_expr is type checked using the declaration from lps_spec
+ * \post sort_expr is type checked using the declaration from spec
  * \return  if type checking went well, an equivalent version of sort_expr is
  *      returned that adheres to the internal ATerm structure after type
  *      checking. if something went wrong, an appropriate error message is
@@ -65,7 +65,7 @@ ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
  *      spec represents an LPS specification, a PBES or a data specification in
  *      the format before data implementation.
  *      Vars contains any extra variables that can be used in the data expression
- * \post data_expr is type checked using the declaration from lps_spec and, if
+ * \post data_expr is type checked using the declaration from spec and, if
  *      sort_expr is not NULL, it is type checked as being of type sort_expr
  * \return  if type checking went well, an equivalent version of data_expr is returned
  *      that adheres to the internal ATerm structure after type checking.
@@ -93,21 +93,22 @@ ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, AT
 
 /** \pre  mult_act represents an mCRL2 multi-action that adheres to the initial
  *      internal ATerm structure.
- *      lps_spec represents an LPS specification
- * \post mult_act is type checked using the declarations from lps_spec
+ *      spec represents an LPS specification in
+ *      the internal format before data implementation.
+ * \post mult_act is type checked using the declarations from spec
  * \return  if type checking went well, an equivalent version of mult_act is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec);
+ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
 
 
 /** \pre  proc_expr represents an mCRL2 proc expression that adheres to the
  *      initial internal ATerm structure.
  *      spec represents an LPS specification, a PBES or a data specification in
  *      the internal format before data implementation.
- * \post proc_expr is type checked using the declaration from lps_spec
+ * \post proc_expr is type checked using the declaration from spec
  * \return  if type checking went well, an equivalent version of proc_expr is returned
  *      that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and

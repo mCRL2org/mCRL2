@@ -408,11 +408,12 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
   return Result;
 }
 
-ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
+ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
 {
   //check correctness of the multi-action in mult_act using
   //the LPS specification in lps_spec
   //gsWarningMsg("type checking of multiactions is partially implemented\n");
+  assert (gsIsSpecV1(spec));
   ATermAppl Result=NULL;
 
   gsDebugMsg ("type checking phase started\n");
@@ -420,11 +421,17 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lps::specification &lps_spec)
 
   gsDebugMsg ("type checking of multiactions read-in phase started\n");
 
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+  ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
+  ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
+  ATermList action_labels = ATLgetArgument(ATAgetArgument(ATAgetArgument(spec, 1), 0), 0);
+
   //XXX read-in from LPS (not finished)
-    if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)
+    if(gstcReadInSorts(sorts,false)
        && gstcReadInConstructors()
-       && gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)
-       && gstcReadInActs((ATermList) lps_spec.action_labels())
+       && gstcReadInFuncs(ATconcat(constructors,mappings),false)
+       && gstcReadInActs(action_labels)
       ){
     gsDebugMsg ("type checking of multiactions read-in phase finished\n");
 

@@ -47,17 +47,19 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification &spec)
   {
     gsVerboseMsg("cannot parse action as mCRL2\n");
   } else {
-    t = type_check_mult_act(t,spec);
+    ATermAppl reconstructed_spec = reconstruct_spec(spec);
+    t = type_check_mult_act(t,reconstructed_spec);
     if ( t == NULL )
     {
       gsVerboseMsg("error type checking action\n");
     } else {
-      t = implement_data_mult_act(t,spec);
+      t = implement_data_mult_act(t,reconstructed_spec);
       if ( t == NULL )
       {
         gsVerboseMsg("error implementing data of action\n");
       }
     }
+    spec = lps::specification(reconstructed_spec);
   }
 
   return (ATerm) t;

@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
@@ -218,12 +219,13 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
-            t = type_check_mult_act(t,*spec);
+            ATermAppl reconstructed_spec = reconstruct_spec(*spec);
+            t = type_check_mult_act(t,reconstructed_spec);
             if ( t == NULL )
             {
               gsVerboseMsg("error type checking action\n");
             } else {
-              t = implement_data_mult_act(t,*spec);
+              t = implement_data_mult_act(t,reconstructed_spec);
               if ( t == NULL )
               {
                 gsVerboseMsg("error implementing data of action\n");
@@ -233,6 +235,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
                 applied_conversion = true;
               }
             }
+            *spec = lps::specification(reconstructed_spec);
           }
         }
         if ( no_convert )

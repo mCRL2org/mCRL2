@@ -81,17 +81,17 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec);
 
 /** \pre mult_act represents a multiaction that adheres to the internal ATerm
  *     structure after the type checking phase.
- *     lps_spec represents an LPS specification
+ *     spec represents an LPS specification in the internal format before data
+ *     implementation.
  * \post The datatypes of spec are implemented as higher-order abstract data
- *     types in lps_spec
+ *     types in spec
  * \return if the data implementation went well, an equivalent version of mult_act
  *     is returned that adheres to the internal ATerm structure after data
  *     implementation.
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_mult_act(ATermAppl mult_act,
-  lps::specification &lps_spec);
+ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec);
 
 
 /** \pre proc_expr represents a process expression that adheres to the internal
