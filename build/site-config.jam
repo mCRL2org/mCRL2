@@ -177,7 +177,7 @@ boost_library md5 : local ;
 
 lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;
-lib dl : : <name>"dl" ;
+lib dl : : <name>"dl" <link>shared ;
 
 # Socket library on SunOS/Solaris system
 lib nsl    : : <name>nsl ;
