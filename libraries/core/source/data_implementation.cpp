@@ -25,13 +25,6 @@ namespace mcrl2 {
 //------------------
 
 
-static ATermAppl impl_exprs(ATermAppl expr, ATermAppl& lps_spec);
-//Pre: expr represents a part of the internal syntax after type checking
-//     in which sort references are maximally folded
-//     lps_spec represents an LPS specification
-//Post:the datatypes of expr are implemented as in lps_spec
-//Ret: expr in which all expressions are implemented
-
 static ATermAppl impl_sort_refs(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation, with the exception that sort references may occur
@@ -77,13 +70,6 @@ static ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr,
 //     top_level indicates if data_expr contains the top-level operation
 //Ret: data_expr in which numerical patterns can be matched if they do not occur
 //     at top level
-
-static void impl_standard_functions_term(ATerm term, ATermAppl& lps_spec);
-//Pre: term represents a part of the internal syntax after data
-//     implementation
-//     lps_spec represents an LPS specification
-//Post:an implementation for equality, inequality and if
-//     is added to lps_spec for each sort occurring in term.
 
 static ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
 //Pre: part is an expression that adheres to the internal syntax after type
@@ -292,53 +278,6 @@ ATermAppl implement_data_pbes_spec(ATermAppl spec)
   return spec;
 }
 
-static ATermAppl impl_exprs(ATermAppl expr, ATermAppl& lps_spec)
-{
-  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) expr);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //implement system sort and data expressions occurring in expr
-  ATermList substs     = ATmakeList0();
-  t_data_decls old_data_decls = get_data_decls(lps_spec);
-  t_data_decls data_decls = old_data_decls;
-  expr = impl_exprs_appl(expr, &substs, &data_decls);
-  //perform substitutions on data declarations
-  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
-  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
-  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
-  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //update data declarations in lps_spec
-  set_data_decls(lps_spec, data_decls);
-  //store new declarations in new_decls
-  ATermList new_decls = ATmakeList0();
-  ATermList sorts = data_decls.sorts;
-  while (!ATisEqual(sorts, old_data_decls.sorts)) {
-    new_decls = ATinsert(new_decls, ATgetFirst(sorts));
-    sorts = ATgetNext(sorts);
-  }
-  ATermList cons_ops = data_decls.cons_ops;
-  while (!ATisEqual(cons_ops, old_data_decls.cons_ops)) {
-    new_decls = ATinsert(new_decls, ATgetFirst(cons_ops));
-    cons_ops = ATgetNext(cons_ops);
-  }
-  ATermList ops = data_decls.ops;
-  while (!ATisEqual(ops, old_data_decls.ops)) {
-    new_decls = ATinsert(new_decls, ATgetFirst(ops));
-    ops = ATgetNext(ops);
-  }
-  ATermList data_eqns = data_decls.data_eqns;
-  while (!ATisEqual(data_eqns, old_data_decls.data_eqns)) {
-    new_decls = ATinsert(new_decls, ATgetFirst(data_eqns));
-    data_eqns = ATgetNext(data_eqns);
-  }
-  new_decls = ATreverse(new_decls);
-  //implement standard functions in expr and the new declarations
-  impl_standard_functions_term((ATerm) ATinsert(new_decls, (ATerm) expr), lps_spec);
-  return expr;
-}
-
 ATermAppl impl_sort_refs(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
@@ -399,22 +338,6 @@ ATermAppl impl_standard_functions_spec(ATermAppl spec)
   //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
   return spec;
-}
-
-void impl_standard_functions_term(ATerm term, ATermAppl& lps_spec)
-{
-  //get data declarations from lps_spec
-  t_data_decls data_decls = get_data_decls(lps_spec);
-  //get sorts occurring in term
-  ATermList sorts = get_sorts(term);
-  //implement each sort in sorts
-  while (!ATisEmpty(sorts))
-  {
-    impl_standard_functions_sort(ATAgetFirst(sorts), &data_decls);
-    sorts = ATgetNext(sorts);
-  }
-  //update data declarations in lps_spec
-  set_data_decls(lps_spec, data_decls);
 }
 
 ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
