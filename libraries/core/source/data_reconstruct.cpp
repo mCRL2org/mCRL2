@@ -55,7 +55,10 @@ namespace mcrl2 {
 //             the (constructor, argument) pair for which f is the projection
 //             fuction.
 typedef struct {
-  atermpp::table sorts_table;
+  atermpp::table                                     sorts_table;
+  atermpp::table                                     system_defined_sorts;
+  atermpp::table                                     composite_sorts;
+  atermpp::table                                     non_composite_sorts;
   atermpp::map<ATermAppl, atermpp::indexed_set>      sort_constructors;
   atermpp::map<ATermAppl, int>                       num_sort_constructors;
   atermpp::map<ATermAppl, atermpp::indexed_set>      sort_mappings;
@@ -292,7 +295,7 @@ static void remove_data_equations(t_data_decls* p_data_decls,
 //!\brief Based on the information in p_ctx, compute the reconstructed
 //declarations for the structured sorts. Note that this also introduces sort
 //references, and adds substitutions to p_substs.
-static void compute_structured_sort_decls(t_data_decls* p_data_decls,
+static void compute_sort_decls(t_data_decls* p_data_decls,
                              t_reconstruct_context* p_ctx,
                              ATermList* p_substs);
 
@@ -930,7 +933,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
   remove_mappings(p_data_decls, &struct_mappings);
   remove_data_equations(p_data_decls, &struct_equations, &lambda_substs);
 
-  compute_structured_sort_decls(p_data_decls, &ctx, p_substs);
+  compute_sort_decls(p_data_decls, &ctx, p_substs);
 }
 
 bool is_and_of_data_var_equalities(const ATermAppl data_expr)
@@ -1591,15 +1594,20 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
 
   gsDebugMsg("Checking completeness\n");
   // Check for completeness and remove structured sort from data declarations
-  ATermList non_struct_sorts = ATmakeList0();
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
     ATermAppl sort = ATAgetFirst(l);
     if (!is_set_bag_list_sort(sort, p_ctx)) {
-      if ((p_ctx->num_sort_cons_equations[sort] != (p_ctx->num_sort_constructors[sort] * p_ctx->num_sort_constructors[sort]))) {
+      // The sort type depends on the number of constructors
+      if (p_ctx->num_sort_cons_equations[sort] != (p_ctx->num_sort_constructors[sort] * p_ctx->num_sort_constructors[sort])) {
+        // The sort is not composite...
         if (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1) {
-          non_struct_sorts = ATinsert(non_struct_sorts, (ATerm) sort);
+          // ... but it is in the original specification, leave it in.
+          p_ctx->non_composite_sorts.put(sort, sort);
         } else {
+          // ... but it is not in the original specification, hence it is system
+          // defined.
+          p_ctx->system_defined_sorts.put(sort, sort);
           p_ctx->sorts_table.remove(sort);
           p_ctx->sort_constructors.erase(sort);
           p_ctx->num_sort_constructors.erase(sort);
@@ -1608,13 +1616,24 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
           p_ctx->sort_cons_equations.erase(sort);
           p_ctx->num_sort_cons_equations.erase(sort);
         }
-      } else if (p_ctx->num_sort_cons_equations[sort] == 0 &&
-                (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1)) {
-        non_struct_sorts = ATinsert(non_struct_sorts, (ATerm) sort);
+      } else if (ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) != -1) {
+        // Sort is in the original specification, leave it in
+        if (p_ctx->num_sort_cons_equations[sort] == 0) {
+          // Sort has not got any constructors, hence it is not a structured sort
+          p_ctx->non_composite_sorts.put(sort, sort);
+        } else {
+          // sort is a structured sort
+          p_ctx->composite_sorts.put(sort, sort);
+        }
+      } else {
+        // Sort is not in the original specification
+        p_ctx->system_defined_sorts.put(sort, sort);
       }
+    } else {
+      // List, set and bag sorts are always treated as composite
+      p_ctx->composite_sorts.put(sort, sort);
     }
   }
-  p_data_decls->sorts = ATreverse(non_struct_sorts);
 }
 
 void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
@@ -1703,7 +1722,7 @@ void remove_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ct
   while (!ATisEmpty(p_data_decls->cons_ops)) {
     ATermAppl cons_op = ATAgetFirst(p_data_decls->cons_ops);
     ATermAppl sort = gsGetSortExprResult(gsGetSort(cons_op));
-    if (p_ctx->sorts_table.get(sort) == NULL) {
+    if (p_ctx->composite_sorts.get(sort) == NULL) {
       // Sort is not a structured sort
       constructors = ATinsert(constructors, (ATerm) cons_op);
     }
@@ -1758,15 +1777,18 @@ void remove_data_equations(t_data_decls* p_data_decls, atermpp::table* p_data_eq
   p_data_decls->data_eqns = ATreverse(data_eqns);
 }
 
-void compute_structured_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
+void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx, ATermList* p_substs)
 {
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
   assert(p_substs != NULL);
 
+  // Insert non-composite sorts
+  p_data_decls->sorts = ATreverse(p_ctx->non_composite_sorts.table_keys());
+
   gsDebugMsg("Building structured sort declarations\n");
   // Insert struct sort declarations
-  for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
+  for (ATermList l = ATreverse(p_ctx->composite_sorts.table_keys()); !ATisEmpty(l); l = ATgetNext(l))
   {
     // Build up struct
     ATermList struct_constructors = ATmakeList0();
