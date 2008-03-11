@@ -16,8 +16,6 @@
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linear_process.h"
 
 using namespace ::mcrl2::utilities;
 namespace mcrl2 {
@@ -27,7 +25,7 @@ namespace mcrl2 {
 //------------------
 
 
-static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec);
+static ATermAppl impl_exprs(ATermAppl expr, ATermAppl& lps_spec);
 //Pre: expr represents a part of the internal syntax after type checking
 //     in which sort references are maximally folded
 //     lps_spec represents an LPS specification
@@ -80,7 +78,7 @@ static ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr,
 //Ret: data_expr in which numerical patterns can be matched if they do not occur
 //     at top level
 
-static void impl_standard_functions_term(ATerm term, lps::specification &lps_spec);
+static void impl_standard_functions_term(ATerm term, ATermAppl& lps_spec);
 //Pre: term represents a part of the internal syntax after data
 //     implementation
 //     lps_spec represents an LPS specification
@@ -225,57 +223,39 @@ ATermAppl implement_data_proc_spec(ATermAppl spec)
 
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
 {
+  assert(gsIsSortExpr(sort_expr));
   return impl_exprs_with_spec(sort_expr, spec);
 }
 
 ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
 {
+  assert(gsIsDataExpr(data_expr));
   return impl_exprs_with_spec(data_expr, spec);
 }
 
 ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 {
+  assert(gsIsMultAct(mult_act));
   return impl_exprs_with_spec(mult_act, spec);
 }
 
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
 {
+  assert(gsIsProcExpr(proc_expr));
   return impl_exprs_with_spec(proc_expr, spec);
 }
 
 ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 {
+  assert(gsIsStateFrm(state_frm));
   return impl_exprs_with_spec(state_frm, spec);
 }
 
-ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
-  lps::specification &lps_spec)
+ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
-  //assert(0);
-  //return NULL;/*impl_exprs(action_rename, lps_spec);*/
   assert(gsIsActionRenameSpec(ar_spec));
-  int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) ar_spec);
-  if (occ > 0) {
-    gsErrorMsg("action rename specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //implement system sort and data expressions occurring in ar_spec based on
-  //the data declarations in lps_spec
-  ATermList substs     = ATmakeList0();
-  t_data_decls data_decls = get_data_decls(lps_spec);
-  ar_spec = impl_exprs_appl(ar_spec, &substs, &data_decls);
-  //perform substitutions on data declarations
-  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
-  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
-  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
-  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add new data declarations to ar_spec
-  ar_spec = add_data_decls(ar_spec, data_decls);
-  //implement sort references
-  ar_spec = impl_sort_refs(ar_spec);
-  //implement standard functions
-  ar_spec = impl_standard_functions_spec(ar_spec);
-  return ar_spec;
+  assert(gsIsSpecV1(lps_spec));
+  return impl_exprs_with_spec(ar_spec, lps_spec);
 }
 
 ATermAppl implement_data_pbes_spec(ATermAppl spec)
@@ -312,7 +292,7 @@ ATermAppl implement_data_pbes_spec(ATermAppl spec)
   return spec;
 }
 
-static ATermAppl impl_exprs(ATermAppl expr, lps::specification &lps_spec)
+static ATermAppl impl_exprs(ATermAppl expr, ATermAppl& lps_spec)
 {
   int occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) expr);
   if (occ > 0) {
@@ -421,7 +401,7 @@ ATermAppl impl_standard_functions_spec(ATermAppl spec)
   return spec;
 }
 
-void impl_standard_functions_term(ATerm term, lps::specification &lps_spec)
+void impl_standard_functions_term(ATerm term, ATermAppl& lps_spec)
 {
   //get data declarations from lps_spec
   t_data_decls data_decls = get_data_decls(lps_spec);

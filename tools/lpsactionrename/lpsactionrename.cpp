@@ -24,6 +24,7 @@
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/detail/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
@@ -742,8 +743,10 @@ ATermAppl rename_actions(t_tool_options tool_options)
   }
 
   //type check formula
+  ATermAppl reconstructed_lps_old_spec = reconstruct_spec(lps_old_spec);
+
   gsVerboseMsg("type checking...\n");
-  action_rename_spec = type_check_action_rename_spec(action_rename_spec, lps_old_spec);
+  action_rename_spec = type_check_action_rename_spec(action_rename_spec, reconstructed_lps_old_spec);
   if (action_rename_spec == NULL) {
     gsErrorMsg("type checking failed\n");
     return NULL;
@@ -754,7 +757,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  action_rename_spec = implement_data_action_rename_spec(action_rename_spec, lps_old_spec);
+  action_rename_spec = implement_data_action_rename_spec(action_rename_spec, reconstructed_lps_old_spec);
   if (action_rename_spec == NULL) {
     gsErrorMsg("data implementation failed\n");
     return NULL;
@@ -762,6 +765,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
   if (end_phase == PH_DATA_IMPL) {
     return action_rename_spec;
   }
+  lps_old_spec = specification(reconstructed_lps_old_spec);
   
   //merge declarations from lps_newspec and action_rename
   gsVerboseMsg("merging declarations...\n");

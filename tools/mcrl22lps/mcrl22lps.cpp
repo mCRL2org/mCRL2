@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <fstream>
 #include "aterm2.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/messaging.h"

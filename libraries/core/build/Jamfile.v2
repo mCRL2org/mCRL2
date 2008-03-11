@@ -3,13 +3,9 @@ project core
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <include>../../lps/include  # circular dependency
-          <include>../../data/include # circular dependency
           <os>NT:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
-          <include>../../lps/include  # circular dependency
-          <include>../../data/include # circular dependency
           <os>NT:<define>NO_DYNLOAD
        ;
 

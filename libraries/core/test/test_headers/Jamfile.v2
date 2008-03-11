@@ -20,9 +20,6 @@ project test :
        <include>../../../atermpp/include
        <include>../../../utilities/include
        <include>../../../core/include
-       <include>../../../data/include          # should not be needed
-       <include>../../../lps/include           # should not be needed
-       <include>../../../pbes/include          # should not be needed
 ;
 
 rule setup ( ) {

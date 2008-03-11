@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/struct.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>

@@ -10,7 +10,6 @@
 #define MCRL2_DATA_COMMON_H
 
 #include <aterm2.h>
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/struct.h"
 
@@ -199,17 +198,6 @@ inline bool data_decls_equal(t_data_decls data_decls1,
     ATisEqual(data_decls1.data_eqns, data_decls2.data_eqns);
 }
 
-/// \ret data declarations of lps_spec
-inline t_data_decls get_data_decls(lps::specification &lps_spec)
-{
-  t_data_decls data_decls;
-  data_decls.sorts     = (ATermList) lps_spec.data().sorts();
-  data_decls.cons_ops  = (ATermList) lps_spec.data().constructors();
-  data_decls.ops       = (ATermList) lps_spec.data().mappings();
-  data_decls.data_eqns = (ATermList) lps_spec.data().equations();
-  return data_decls;
-}
-
 /// \ret data declarations of spec
 inline t_data_decls get_data_decls(ATermAppl spec)
 {
@@ -220,16 +208,6 @@ inline t_data_decls get_data_decls(ATermAppl spec)
   data_decls.ops =       ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
   data_decls.data_eqns = ATLgetArgument(ATAgetArgument(data_spec, 3), 0);
   return data_decls;
-}
-
-/// \ret lps_spec in which the data declarations are replaced by data_decls
-inline void set_data_decls(lps::specification &lps_spec, t_data_decls data_decls)
-{
-  assert(data_decls_is_initialised(data_decls));
-  if (!data_decls_equal(data_decls, get_data_decls(lps_spec))) {
-    data::data_specification data(data_decls.sorts, data_decls.cons_ops, data_decls.ops, data_decls.data_eqns);
-    lps_spec = lps::set_data_specification(lps_spec, data);
-  }
 }
 
 /// \ret spec in which the data declarations are replaced by data_decls

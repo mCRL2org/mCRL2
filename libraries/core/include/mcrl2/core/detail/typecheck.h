@@ -12,7 +12,6 @@
 #define PARSER_TYPECHECK_H
 
 #include <aterm2.h>
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
   namespace core {
@@ -133,15 +132,16 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec);
 
 /** \pre  ar_spec represents an action rename specification that adheres to the
  *      initial internal ATerm structure.
- *      lps_spec represents an LPS specification
- * \post ar_spec is type checked using the declarations from lps_spec and its
+ *      spec represents an LPS specification in the internal format before data
+ *      implementation.
+ * \post ar_spec is type checked using the declarations from spec and its
  *      own declarations
  * \return  if type checking went well, an equivalent version of ar_spec is returned
  *     that adheres to the internal ATerm structure after type checking.
  *      if something went wrong, an appropriate error message is printed and
  *      NULL is returned.
  **/
-ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec);
+ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl spec);
 
 
 /** \pre  pbes_spec represents a PBES specification that adheres to the

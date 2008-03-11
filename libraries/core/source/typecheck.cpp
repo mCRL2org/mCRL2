@@ -546,7 +546,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
   return Result;
 }
 
-ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &lps_spec){
+ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
 
   //check precondition
   assert(gsIsActionRenameSpec(ar_spec));
@@ -559,11 +559,17 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, lps::specification &l
 
   ATermTable actions_from_lps=ATtableCreate(63,50);
 
+  ATermAppl lps_data_spec = ATAgetArgument(lps_spec, 0);
+  ATermList lps_sorts = ATLgetArgument(ATAgetArgument(lps_data_spec, 0), 0);
+  ATermList lps_constructors = ATLgetArgument(ATAgetArgument(lps_data_spec, 1), 0);
+  ATermList lps_mappings = ATLgetArgument(ATAgetArgument(lps_data_spec, 2), 0);
+  ATermList lps_action_labels = ATLgetArgument(ATAgetArgument(lps_spec, 1), 0);
+
   //XXX read-in from LPS (not finished)
-  if(gstcReadInSorts((ATermList) lps_spec.data().sorts(),false)){
+  if(gstcReadInSorts((ATermList) lps_sorts,false)){
     if(gstcReadInConstructors()){
-       if(gstcReadInFuncs(ATconcat((ATermList) lps_spec.data().constructors(),(ATermList) lps_spec.data().mappings()),false)){
-         if(!gstcReadInActs((ATermList) lps_spec.action_labels()))
+       if(gstcReadInFuncs(ATconcat(lps_constructors, lps_mappings),false)){
+         if(!gstcReadInActs(lps_action_labels))
            gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
          gsDebugMsg ("type checking of action rename specification read-in phase of LPS finished\n");
 

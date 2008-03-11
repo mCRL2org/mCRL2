@@ -17,7 +17,6 @@
 
 #include <aterm2.h>
 #include "mcrl2/core/detail/data_common.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
   namespace core {
@@ -126,10 +125,13 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
 
 /** \pre ar_spec represents an action rename specification that
  *     adheres to the internal ATerm structure after the type checking fase.
- *     lps_spec represents an LPS specification
+ *     lps_spec represents an LPS specification in the internal format before
+ *     data implementation.
  * \post The datatypes in action_rename_spec are implemented as higher-order
  *     abstract data types types and the data types of lps_spec are added
  *     to the data types of ar_spec.
+ *     The datatypes of lps_spec are implemented as higher-order abstract data
+ *     types in lps_spec
  * \return if the data implementation went well, an equivalent version of
  *     ar_spec is returned that adheres to the internal ATerm
  *     structure after data implementation, also containing the data
@@ -137,8 +139,7 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
  *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  **/
-ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec,
-  lps::specification &lps_spec);
+ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec);
 
 
 

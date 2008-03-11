@@ -1,7 +1,6 @@
 project libraries/core/test
    : source-location .
    : requirements
-      <use>/libraries/lps//headers
       <use>/libraries/utilities//headers
       <use>/libraries/atermpp//headers
       <use>/libraries/core//headers
