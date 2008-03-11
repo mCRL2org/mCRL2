@@ -188,12 +188,46 @@ void test_data_reconstruct_struct_nest()
   BOOST_CHECK(find_term(rec_data(0), DPos));
 }
 
+void test_data_reconstruct_simple_constructor()
+{
+  std::string text =
+  "sort S;\n"
+  "cons c: S;\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  // data reconstruction should not modify data
+  BOOST_CHECK(data == rec_data);
+
+  // some more specific checks:
+  identifier_string S_name("S");
+  identifier_string c_name("c");
+  sort_identifier S_id(S_name);
+  data_operation c(c_name, S_id);
+
+  BOOST_CHECK(find_term(rec_data(0), S_name));
+  BOOST_CHECK(find_term(rec_data(0), c_name));
+  BOOST_CHECK(find_term(rec_data(0), S_id));
+  BOOST_CHECK(find_term(rec_data(1), c));
+
+  // check that no structured sort has been added
+  // This test case is showing the presence of bug #335
+  aterm_appl c_struct = gsMakeStructCons(c_name, aterm_list(), gsMakeNil());
+  aterm_appl S_struct = gsMakeSortStruct(make_list(c_struct));
+  BOOST_CHECK(!find_term(rec_data(0), c_struct));
+  BOOST_CHECK(!find_term(rec_data(0), S_struct));
+
+}
+
 void test_multiple_reconstruct_calls()
 {
   test_find_term();
   test_data_reconstruct_struct();
   test_data_reconstruct_struct_complex();
   test_data_reconstruct_struct_nest();
+  test_data_reconstruct_simple_constructor();
 }
 
 int test_main(int argc, char** argv)
