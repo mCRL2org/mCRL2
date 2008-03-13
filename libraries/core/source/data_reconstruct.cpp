@@ -308,12 +308,14 @@ static bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx);
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
 assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+/*
 if (Spec == NULL) {
   gsDebugMsg("No specification given, "
                "therefore not all components can be reconstructed\n");
 } else {
   gsDebugMsg("Specification provided, performing full reconstruction\n");
 }
+*/
 
 ATerm Result;
 ATermList substs = ATmakeList0();
@@ -322,7 +324,7 @@ if (ATgetType(Part) == AT_APPL) {
   } else { //(ATgetType(Part) == AT_LIST) {
     Result = (ATerm) reconstruct_exprs_list((ATermList) Part, &substs, Spec);
   }
-  gsDebugMsg("Finished data reconstruction\n");
+//  gsDebugMsg("Finished data reconstruction\n");
   return Result;
 }
 
@@ -332,7 +334,7 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
   bool recursive = true;
 
   if (gsIsDataSpec(Part) && Spec != NULL) {
-    gsDebugMsg("Removing headers from specification\n");
+//    gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
   }
 
@@ -394,7 +396,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
   assert(gsIsDataExpr(Part));
 
   if (gsIsDataExprBagComp(Part)) {
-    gsDebugMsg("Reconstructing implementation of bag comprehension\n", Part);
+//    gsDebugMsg("Reconstructing implementation of bag comprehension\n", Part);
     //part is an implementation of a bag comprehension;
     //replace by a bag comprehension.
     ATermList Args = ATLgetArgument(Part, 1);
@@ -414,7 +416,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Body = gsMakeDataAppl(Body, Vars);
     Part = gsMakeBinder(gsMakeBagComp(),Vars, Body);
   } else if (gsIsDataExprSetComp(Part)) {
-    gsDebugMsg("Reconstructing implementation of set comprehension\n");
+//    gsDebugMsg("Reconstructing implementation of set comprehension\n");
     //part is an implementation of a set comprehension;
     //replace by a set comprehension.
     ATermList Args = ATLgetArgument(Part, 1);
@@ -434,7 +436,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Body = gsMakeDataAppl(Body, Vars);
     Part = gsMakeBinder(gsMakeSetComp(), Vars, Body);
   } else if (gsIsDataExprForall(Part)) {
-    gsDebugMsg("Reconstructing implementation of universal quantification\n");
+//    gsDebugMsg("Reconstructing implementation of universal quantification\n");
     //part is an implementation of a universal quantification;
     //replace by a universal quantification.
     ATermList Args = ATLgetArgument(Part, 1);
@@ -455,7 +457,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Body = gsMakeDataAppl(Body, Vars);
     Part = gsMakeBinder(gsMakeForall(), Vars, Body);
   } else if (gsIsDataExprExists(Part)) {
-    gsDebugMsg("Reconstructing implementation of existential quantification\n");
+//    gsDebugMsg("Reconstructing implementation of existential quantification\n");
     //part is an implementation of an existential quantification;
     //replace by an existential quantification.
     ATermList Args = ATLgetArgument(Part, 1);
@@ -476,7 +478,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Body = gsMakeDataAppl(Body, Vars);
     Part = gsMakeBinder(gsMakeExists(), Vars, Body);
   } else if (is_lambda_expr(Part)) {
-    gsDebugMsg("Reconstructing implementation of a lambda expression\n");
+//    gsDebugMsg("Reconstructing implementation of a lambda expression\n");
     Part = gsSubstValues_Appl(*p_substs, Part, true);
     // If the specification was not provided, substitution will not change Part,
     // hence beta reduction will not change the term, and the recursive call
@@ -488,20 +490,20 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       Part = reconstruct_exprs_appl(Part, p_substs, Spec);
     }
   } else if (is_lambda_op_id(Part)) {
-    gsDebugMsg("Reconstructing implementation of a lambda op id\n");
+//    gsDebugMsg("Reconstructing implementation of a lambda op id\n");
     Part = gsSubstValues_Appl(*p_substs, Part, true);
   } else if (gsIsDataExprC1(Part) || gsIsDataExprCDub(Part)) {
-    gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
     if (gsIsPosConstant(Part)) {
       Part = gsMakeOpId(gsString2ATermAppl(gsPosValue(Part)), gsMakeSortExprPos());
     } else {
       Part = reconstruct_pos_mult(Part, "1");
     }
   } else if (gsIsDataExprC0(Part)) {
-    gsDebugMsg("Reconstructing implementation of %T\n", Part);
+//    gsDebugMsg("Reconstructing implementation of %T\n", Part);
     Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
   } else if (gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part)) {
-    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
     Part = gsMakeDataExprPos2Nat(value);
@@ -512,12 +514,12 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       }
     }
   } else if (gsIsDataExprCPair(Part)) {
-    gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
+//    gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
   } else if (gsIsDataExprCNeg(Part)) {
-    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
     Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
   } else if (gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part)) {
-    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
     Part = gsMakeDataExprNat2Int(value);
@@ -528,7 +530,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       }
     }
   } else if (gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part)) {
-    gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
     Part = gsMakeDataExprInt2Real(value);
@@ -539,7 +541,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       }
     }
   } else if (gsIsDataExprDub(Part)) {
-    gsDebugMsg("Reconstructing implementation of Dub (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of Dub (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl PosArg = ATAelementAt(Args, 1);
@@ -553,7 +555,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       Part = gsMakeDataExprAdd(Mult, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     }
   } else if (gsIsDataExprAddC(Part)) {
-    gsDebugMsg("Reconstructing implementation of AddC (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of AddC (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl LHS = ATAelementAt(Args, 1);
@@ -568,7 +570,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       Part = gsMakeDataExprAdd(Sum, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     }
   } else if (gsIsDataExprGTESubt(Part)) {
-    gsDebugMsg("Reconstructing implementation of GTESubt (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of GTESubt (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl LHS = ATAelementAt(Args, 0);
     ATermAppl RHS = ATAelementAt(Args, 1);
@@ -580,7 +582,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       Part = gsMakeDataExprReal2Nat(gsMakeDataExprSubt(LHS, RHS));
     }
   } else if (gsIsDataExprGTESubtB(Part)) {
-    gsDebugMsg("Reconstructing implementation of GTESubtB (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of GTESubtB (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl LHS = ATAelementAt(Args, 1);
@@ -595,7 +597,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     }
     Part = gsMakeDataExprInt2Nat(Part);
   } else if (gsIsDataExprMultIR(Part)) {
-    gsDebugMsg("Reconstructing implementation of MultIR (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of MultIR (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl Bit = ATAelementAt(Args, 0);
     ATermAppl IR = ATAelementAt(Args, 1);
@@ -621,7 +623,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     gsDebugMsg("Currently not reconstructing implementation of GGDivMod (%T)\n", Part);
     // TODO
   } else if (gsIsDataExprEven(Part)) {
-    gsDebugMsg("Reconstructing implementation of even (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of even (%T)\n", Part);
     ATermAppl Arg = ATAgetFirst(ATLgetArgument(Part, 1));
     Part = gsMakeDataExprEq(gsMakeDataExprMod(Arg,
                gsMakeOpId(gsString2ATermAppl("2"),gsMakeSortExprPos())),
@@ -774,7 +776,7 @@ bool is_lambda_binder_application(ATermAppl data_expr)
 
 ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_substs)
 {
-  gsDebugMsg("Removing headers from specification\n");
+//  gsDebugMsg("Removing headers from specification\n");
   assert(gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
   ATermAppl DataSpec = NULL;
   if (gsIsSpecV1(Spec) || gsIsPBES(Spec))
@@ -786,7 +788,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
     DataSpec = Spec;
   }
 
-  gsDebugMsg("Dissecting data specification\n");
+//  gsDebugMsg("Dissecting data specification\n");
   // Dissect Data specification
   ATermAppl SortSpec    = ATAgetArgument(DataSpec, 0);
   ATermAppl ConsSpec    = ATAgetArgument(DataSpec, 1);
@@ -794,7 +796,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   ATermAppl DataEqnSpec = ATAgetArgument(DataSpec, 3);
 
   // Get the lists for data declarations
-  gsDebugMsg("Retrieving data declarations\n");
+//  gsDebugMsg("Retrieving data declarations\n");
   t_data_decls data_decls;
   data_decls.sorts     = ATLgetArgument(SortSpec, 0);
   data_decls.cons_ops  = ATLgetArgument(ConsSpec, 0);
@@ -816,7 +818,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   t_data_decls data_decls_impl;
   initialize_data_decls(&data_decls_impl);
 
-  gsDebugMsg("Removing system defined sorts from data declarations\n");
+//  gsDebugMsg("Removing system defined sorts from data declarations\n");
   if (sorts_table.get(gsMakeSortExprBool()) != NULL) {
     impl_sort_bool    (&data_decls_impl);
   }
@@ -900,7 +902,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
 {
   assert(p_substs != NULL);
 
-  gsDebugMsg("Reconstructing structured sorts\n");
+//  gsDebugMsg("Reconstructing structured sorts\n");
 
   t_reconstruct_context ctx; 
 
@@ -913,13 +915,13 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
   initialise_sort_constructors(p_data_decls, &ctx);
   initialise_mappings(p_data_decls, &ctx, p_substs);
 
-  gsDebugMsg("Inititialization done, traverse equations\n");
+//  gsDebugMsg("Inititialization done, traverse equations\n");
 
   collect_data_equations(p_data_decls, &ctx, &lambda_substs);
-  gsDebugMsg("Determined equations\n");
+//  gsDebugMsg("Determined equations\n");
 
   check_completeness(p_data_decls, &ctx);
-  gsDebugMsg("Determining recognisers\n");
+//  gsDebugMsg("Determining recognisers\n");
 
   calculate_recognisers_and_projections(&ctx);
 
@@ -1345,7 +1347,7 @@ void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Initialising table with sorts\n");
+//  gsDebugMsg("Initialising table with sorts\n");
 // Retrieve all sorts from the data declarations
   ATermList sorts = ATconcat(get_sorts((ATerm) p_data_decls->sorts),
                     ATconcat(get_sorts((ATerm) p_data_decls->cons_ops),
@@ -1373,7 +1375,7 @@ void initialise_sort_constructors(const t_data_decls* p_data_decls, t_reconstruc
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Initialising constructors\n");
+//  gsDebugMsg("Initialising constructors\n");
   // Initialise sort_constructors, such that for each sort s in
   // sorts sort_constructors(s) contains exactly the
   // constructors of s.
@@ -1397,7 +1399,7 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
   assert(p_ctx != NULL);
   assert(p_substs != NULL);
 
-  gsDebugMsg("Initialising mappings\n");
+//  gsDebugMsg("Initialising mappings\n");
   std::pair<long, bool> put_result;
   // Traverse mappings to find relevant functions, and mark possible recogniser
   // and projection functions as such.
@@ -1472,7 +1474,7 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
   assert(p_ctx != NULL);
   assert(p_substs != NULL);
 
-  gsDebugMsg("Collecting data equations\n");
+//  gsDebugMsg("Collecting data equations\n");
  // for matching against list, set, bag equations
   ATermAppl elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt"));
   ATermAppl list_sort = gsMakeSortId(gsString2ATermAppl("sort_list"));
@@ -1592,7 +1594,7 @@ void check_completeness(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Checking completeness\n");
+//  gsDebugMsg("Checking completeness\n");
   // Check for completeness and remove structured sort from data declarations
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
@@ -1640,7 +1642,7 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
 {
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Calculating recogniser and projection functions\n");
+//  gsDebugMsg("Calculating recogniser and projection functions\n");
   ATermList struct_sorts = p_ctx->sorts_table.table_keys();
 
   // Check for equations that have sufficient equations to be a recogniser
@@ -1683,7 +1685,7 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
   assert(equations != NULL);
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Flatten mappings and equations\n");
+//  gsDebugMsg("Flatten mappings and equations\n");
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
     // Mappings
@@ -1716,7 +1718,7 @@ void remove_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ct
   assert(p_data_decls != NULL);
   assert(p_ctx != NULL);
 
-  gsDebugMsg("Remove constructors\n");
+//  gsDebugMsg("Remove constructors\n");
   // Remove constructors for structured sorts from declarations
   ATermList constructors = ATmakeList0();
   while (!ATisEmpty(p_data_decls->cons_ops)) {
@@ -1736,7 +1738,7 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
   assert(p_data_decls != NULL);
   assert(p_mappings != NULL);
 
-  gsDebugMsg("Remove mappings\n");
+//  gsDebugMsg("Remove mappings\n");
 
   // Remove mappings from declarations
   ATermList mappings = ATmakeList0();
@@ -1757,7 +1759,7 @@ void remove_data_equations(t_data_decls* p_data_decls, atermpp::table* p_data_eq
   assert(p_data_eqns != NULL);
   assert(p_substs != NULL);
 
-  gsDebugMsg("Remove equations\n");
+//  gsDebugMsg("Remove equations\n");
 
   // Remove equations for structured sorts
   ATermList data_eqns = ATmakeList0();
@@ -1786,7 +1788,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
   // Insert non-composite sorts
   p_data_decls->sorts = ATreverse(p_ctx->non_composite_sorts.table_keys());
 
-  gsDebugMsg("Building structured sort declarations\n");
+//  gsDebugMsg("Building structured sort declarations\n");
   // Insert struct sort declarations
   for (ATermList l = ATreverse(p_ctx->composite_sorts.table_keys()); !ATisEmpty(l); l = ATgetNext(l))
   {
@@ -1860,7 +1862,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
       }
     }
   }
-  gsDebugMsg("Done reconstructing structured sorts\n");
+//  gsDebugMsg("Done reconstructing structured sorts\n");
 }
 
 // This is a workaround to determine whether a sort might also be a list sort.
