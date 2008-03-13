@@ -71,7 +71,7 @@ mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
-Number     "0"|("-"?[1-9][0-9]*) 
+Number     "0"|([1-9][0-9]*) 
 
 %option c++
 %option prefix="mcrl2yy"

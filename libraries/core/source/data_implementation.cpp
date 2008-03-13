@@ -375,17 +375,21 @@ ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr, bool top_lev
   if (!top_level) {
     //implement numerical patterns
     if (gsIsDataExprPos2Nat(data_expr)) {
-      return gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+      data_expr = gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)));
     } else if (gsIsDataExprPos2Int(data_expr)) {
-      return gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1))));
+      data_expr = gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1))));
     } else if (gsIsDataExprPos2Real(data_expr)) {
-      return gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)))));
+      data_expr = gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(ATAgetFirst(ATLgetArgument(data_expr, 1)))));
     } else if (gsIsDataExprNat2Int(data_expr)) {
-      return gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+      data_expr = gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1)));
     } else if (gsIsDataExprNat2Real(data_expr)) {
-      return gsMakeDataExprCReal(gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1))));
+      data_expr = gsMakeDataExprCReal(gsMakeDataExprCInt(ATAgetFirst(ATLgetArgument(data_expr, 1))));
     } else if (gsIsDataExprInt2Real(data_expr)) {
-      return gsMakeDataExprCReal(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+      data_expr = gsMakeDataExprCReal(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+    } else if (gsIsDataExprNeg(data_expr)) {
+      if (ATisEqual(gsMakeOpIdNeg(gsMakeSortExprPos()),ATAgetArgument(data_expr,0))) {
+        data_expr = gsMakeDataExprCNeg(ATAgetFirst(ATLgetArgument(data_expr, 1)));
+      }
     }
   }
   //implement pattern matching in the head of data_expr
