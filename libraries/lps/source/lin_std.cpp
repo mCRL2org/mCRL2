@@ -33,6 +33,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/alpha.h"
+#include "mcrl2/atermpp/set.h"
 
 // For Aterm library extension functions
 using namespace ::mcrl2::utilities;
@@ -101,6 +102,14 @@ static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec,int max_nesting_depth=3);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
+static void filter_vars_by_term(
+                    const ATermAppl t,
+                    const atermpp::set < ATermAppl > &vars_set,
+                    atermpp::set < ATermAppl > &vars_result_set);
+static void filter_vars_by_termlist(
+                    const ATermList l,
+                    const atermpp::set < ATermAppl > &vars_set,
+                    atermpp::set < ATermAppl > &vars_result_set);
 static ATermAppl getfreshvariable(char const* s,ATermAppl sort, const int reusable=-1);
 static ATermList construct_renaming(ATermList pars1, ATermList pars2,
                 ATermList *pars3, ATermList *pars4,const bool unique=true);
@@ -1628,6 +1637,29 @@ static int occursinterm(ATermAppl var, ATermAppl t)
          occursintermlist(var,ATLgetArgument(t,1));
 }
 
+static void filter_vars_by_term(
+                    const ATermAppl t,
+                    const atermpp::set < ATermAppl > &vars_set,
+                    atermpp::set < ATermAppl > &vars_result_set)
+{
+  if (gsIsDataVarId(t))
+  {
+    if (vars_set.find(t)!=vars_set.end())
+    { vars_result_set.insert(t);
+    }
+    return;
+  }
+
+  if (gsIsOpId(t))
+  { return; 
+  }
+
+  assert(gsIsDataAppl(t));
+
+  filter_vars_by_term(ATAgetArgument(t,0),vars_set,vars_result_set);
+  filter_vars_by_termlist(ATLgetArgument(t,1),vars_set,vars_result_set);
+}
+
 
 static int occursintermlist(ATermAppl var, ATermList l)
 { 
@@ -1636,6 +1668,34 @@ static int occursintermlist(ATermAppl var, ATermList l)
     return 1;
   }
   return 0;
+}
+
+static void filter_vars_by_termlist(
+                    const ATermList l,
+                    const atermpp::set < ATermAppl > &vars_set,
+                    atermpp::set < ATermAppl > &vars_result_set)
+{ ATermList aux_l=l;
+  for( ; aux_l!=ATempty ; aux_l=ATgetNext(aux_l))
+  { filter_vars_by_term(ATAgetFirst(aux_l),vars_set,vars_result_set);
+  }
+}
+
+
+
+static void filter_vars_by_multiaction(
+                    const ATermAppl multiaction,
+                    const atermpp::set < ATermAppl > &vars_set,
+                    atermpp::set < ATermAppl > &vars_result_set)
+{
+  if (gsIsDelta(multiaction))
+  { return;
+  }
+
+  ATermList ma=ATLgetArgument(multiaction,0);
+  for( ; ma!=ATempty ; ma=ATgetNext(ma) )
+  { filter_vars_by_termlist(ATLgetArgument(ATAgetFirst(ma),1),vars_set,vars_result_set);
+  }
+  return;
 }
 
 static int occursinmultiaction(ATermAppl var, ATermAppl a)
@@ -1651,6 +1711,22 @@ static int occursinmultiaction(ATermAppl var, ATermAppl a)
   }
   return 0;
 }
+
+static void filter_vars_by_assignmentlist(
+                 const ATermList assignments,
+                 const ATermList parameters,
+                 const atermpp::set < ATermAppl > &vars_set,
+                 atermpp::set < ATermAppl > &vars_result_set)
+{
+  filter_vars_by_termlist(parameters,vars_set,vars_result_set);
+  ATermList as=assignments;
+  for( ; as!=ATempty ; as=ATgetNext(as))
+  { ATermAppl rhs=ATAgetArgument(ATAgetFirst(as),1);
+    filter_vars_by_term(rhs,vars_set,vars_result_set); 
+  }
+}
+
+
 
 static int occursinassignmentlist(
                 ATermAppl var, 
@@ -8902,30 +8978,41 @@ static ATermList SieveProcDataVarsSummands(
                         ATermList vars,
                         ATermList summands,
                         ATermList parameters)
-{
-  ATermList result=ATempty;
+{ /* In this routine it is checked which free variables
+     in vars occur in the summands. Those variables
+     that occur in the summands are returned. The
+     parameters are needed to check occurrences of vars
+     in the assignment list */
+
+  atermpp::set < ATermAppl > vars_set;
+  atermpp::set < ATermAppl > vars_result_set;
 
   for( ; vars!=ATempty ; vars=ATgetNext(vars))
-  { ATermAppl var=ATAgetFirst(vars);
-    for(ATermList smds=summands ;
+  { vars_set.insert(ATAgetFirst(vars));
+  }
+
+  for(ATermList smds=summands ;
         smds!=ATempty ;
         smds=ATgetNext(smds))
-    { ATermAppl smd=ATAgetFirst(smds);
-      ATermAppl multiaction=linGetMultiAction(smd);
-      ATermAppl actiontime=linGetActionTime(smd);
-      ATermAppl condition=linGetCondition(smd);
-      ATermList nextstate=linGetNextState(smd);
+  { ATermAppl smd=ATAgetFirst(smds);
+    ATermAppl multiaction=linGetMultiAction(smd);
+    ATermAppl actiontime=linGetActionTime(smd);
+    ATermAppl condition=linGetCondition(smd);
+    ATermList nextstate=linGetNextState(smd);
 
-      if (((!gsIsDelta(multiaction)) &&
-              (occursinmultiaction(var,multiaction)))||
-          (((!gsIsNil(actiontime)) && (occursinterm(var,actiontime))))||
-          (occursinterm(var,condition))||
-          ((!gsIsDelta(multiaction)) &&
-              (occursinassignmentlist(var,nextstate,parameters))))
-      { result=ATinsertA(result,var);
-        break;
-      }
+    if (!gsIsDelta(multiaction))
+    { filter_vars_by_multiaction(multiaction,vars_set,vars_result_set);
+      filter_vars_by_assignmentlist(nextstate,parameters,vars_set,vars_result_set);
     }
+    if (!gsIsNil(actiontime)) 
+    { filter_vars_by_term(actiontime,vars_set,vars_result_set);
+    }
+    filter_vars_by_term(condition,vars_set,vars_result_set);
+  } 
+  ATermList result=ATempty;
+  for(atermpp::set < ATermAppl >::reverse_iterator i=vars_result_set.rbegin();
+           i!=vars_result_set.rend() ; i++)
+  { result=ATinsertA(result,*i);
   }
   
   return result;
@@ -8936,17 +9023,22 @@ static ATermList SieveProcDataVarsAssignments(
                         ATermList assignments,
                         ATermList parameters)
 {
-  ATermList result=ATempty;
+  atermpp::set < ATermAppl > vars_set;
+  atermpp::set < ATermAppl > vars_result_set;
 
   for( ; vars!=ATempty ; vars=ATgetNext(vars))
-  { ATermAppl var=ATAgetFirst(vars);
-    if (occursinassignmentlist(var,assignments,parameters))
-    { result=ATinsertA(result,var);
-    }
+  { vars_set.insert(ATAgetFirst(vars));
   }
-  
-  return result;
 
+  filter_vars_by_assignmentlist(assignments,parameters,vars_set,vars_result_set);
+
+  ATermList result=ATempty;
+  for(atermpp::set < ATermAppl >::reverse_iterator i=vars_result_set.rbegin();
+           i!=vars_result_set.rend() ; i++)
+  { result=ATinsertA(result,*i);
+  }
+
+  return result;
 }
 
 /**************** transform **************************************/
