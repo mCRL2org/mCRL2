@@ -16,6 +16,7 @@
 
 #include <mcrl2/data/parser.h>
 #include <mcrl2/data/data_specification.h>
+#include <mcrl2/data/sort_identifier.h>
 #include <mcrl2/core/detail/data_reconstruct.h>
 
 using namespace atermpp;
