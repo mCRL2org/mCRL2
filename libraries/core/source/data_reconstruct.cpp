@@ -196,6 +196,9 @@ static bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs
 //      lambda expressions in p_data_decls->data_eqns
 static void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p_substs);
 
+//ret: true if sort is Bool, Pos, Nat, Int or Real.
+static bool is_system_defined_sort(const ATermAppl sort);
+
 //ret: true if data_eqn is a system defined equation
 static bool is_system_defined_equation(const ATermAppl data_eqn);
 
@@ -848,7 +851,10 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   }
 
   while(!ATisEmpty(data_decls_impl.sorts)) {
-    superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), (ATerm) ATtrue);
+    ATermAppl sort = ATAgetFirst(data_decls_impl.sorts);
+    if (!is_system_defined_sort(sort)) {
+      superfluous_sorts.put(sort, (ATerm) ATtrue);
+    }
     data_decls_impl.sorts = ATgetNext(data_decls_impl.sorts);
   }
   while(!ATisEmpty(data_decls_impl.cons_ops)) {
@@ -1284,6 +1290,16 @@ void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p
       }
     }
   }
+}
+
+bool is_system_defined_sort(const ATermAppl sort)
+{
+  assert(gsIsSortExpr(sort));
+  return (ATisEqual(sort, gsMakeSortExprBool()) ||
+          ATisEqual(sort, gsMakeSortExprPos())  ||
+          ATisEqual(sort, gsMakeSortExprNat())  ||
+          ATisEqual(sort, gsMakeSortExprInt())  ||
+          ATisEqual(sort, gsMakeSortExprReal()));
 }
 
 bool is_system_defined_equation(const ATermAppl data_eqn)

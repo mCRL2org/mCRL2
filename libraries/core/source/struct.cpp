@@ -26,39 +26,39 @@ namespace mcrl2 {
 //Local declarations
 //------------------
 
-bool IsPNSort(ATermAppl SortExpr);
+static bool IsPNSort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos or Nat
 
-bool IsPNISort(ATermAppl SortExpr);
+static bool IsPNISort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat or Int
 
-bool IsNISort(ATermAppl SortExpr);
+static bool IsNISort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Nat or Int
 
-bool IsPNIRSort(ATermAppl SortExpr);
+static bool IsPNIRSort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat, Int or Real
 
-ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNSort(SortExpr1) and IsPNSort(SortExpr2)
 //Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
 
-ATermAppl IntersectPNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl IntersectPNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNISort(SortExpr1) and IsPNISort(SortExpr2)
 //Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
 
-ATermAppl IntersectPNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl IntersectPNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNIRSort(SortExpr1) and IsPNIRSort(SortExpr2)
 //Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
 
-ATermAppl UnitePNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl UnitePNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNSort(SortExpr1) and IsPNSort(SortExpr2)
 //Ret: the sort resulting from uniting SortExpr1 and SortExpr2
 
-ATermAppl UnitePNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl UnitePNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNISort(SortExpr1) and IsPNISort(SortExpr2)
 //Ret: the sort resulting from uniting SortExpr1 and SortExpr2
 
-ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+static ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNIRSort(SortExpr1) and IsPNIRSort(SortExpr2)
 //Ret: the sort resulting from uniting SortExpr1 and SortExpr2
 
@@ -820,7 +820,6 @@ ATermAppl gsMakeSortIdReal()
 {
   return gsMakeSortId(gsMakeSortIdNameReal());
 }
-
 
 //Creation of sort expressions for system defined sorts.
 
