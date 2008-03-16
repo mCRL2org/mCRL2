@@ -241,7 +241,47 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_sp
 {
   assert(gsIsActionRenameSpec(ar_spec));
   assert(gsIsSpecV1(lps_spec));
-  return impl_exprs_with_spec(ar_spec, lps_spec);
+
+  int occ =
+    gsCount((ATerm) gsMakeSortUnknown(), (ATerm) lps_spec) +
+    gsCountAFun(gsAFunSortsPossible(), (ATerm) lps_spec);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  occ = gsCount((ATerm) gsMakeSortUnknown(), (ATerm) ar_spec);
+  if (occ > 0) {
+    gsErrorMsg("action rename specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+
+  //implement system sorts and data expressions occurring in spec
+  ATermList substs     = ATmakeList0();
+  t_data_decls data_decls;
+  initialize_data_decls(&data_decls);
+  lps_spec = impl_exprs_appl(lps_spec, &substs, &data_decls);
+  ar_spec = impl_exprs_appl(ar_spec, &substs, &data_decls);
+  //perform substitutions on data declarations
+  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
+  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
+  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
+  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
+  //add implementation of sort Pos and Bool
+  impl_sort_pos(&data_decls);
+  impl_sort_bool(&data_decls);
+  //add new data declarations to spec
+  lps_spec = add_data_decls(lps_spec, data_decls);
+  ar_spec = add_data_decls(ar_spec, data_decls);
+  //implement numerical pattern matching
+  lps_spec = impl_numerical_pattern_matching(lps_spec);
+  ar_spec = impl_numerical_pattern_matching(ar_spec);
+  //implement sort references
+  lps_spec = impl_sort_refs(lps_spec);
+  ar_spec = impl_sort_refs(ar_spec);
+  //implement standard functions
+  lps_spec = impl_standard_functions_spec(lps_spec);
+  ar_spec = impl_standard_functions_spec(ar_spec);
+  return ar_spec;
 }
 
 ATermAppl implement_data_pbes_spec(ATermAppl spec)
@@ -342,7 +382,7 @@ ATermAppl impl_standard_functions_spec(ATermAppl spec)
 
 ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
   //get data equations
   ATermAppl data_spec = ATAgetArgument(spec, 0);
   ATermAppl data_eqn_spec = ATAgetArgument(data_spec, 3);

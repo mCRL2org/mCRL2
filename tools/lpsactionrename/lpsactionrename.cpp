@@ -850,7 +850,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
   }
   lps_old_spec = specification(reconstructed_lps_old_spec);
   
-  //merge declarations from lps_newspec and action_rename
+  //merge declarations from lps_old_spec and action_rename_spec
   gsVerboseMsg("merging declarations...\n");
   lps_old_spec = merge_declarations(action_rename_spec, lps_old_spec);
   if (lps_old_spec == NULL) 
