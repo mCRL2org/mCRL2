@@ -89,6 +89,10 @@ INPUT_LIST="include source doc/Mainpage"
 DOXYHEADER=doxyheader.php
 DOXYFOOTER=doxyfooter.php
 
+# The names of the index and portlet PHP files
+INDEX=index.php
+PORTLET=portlet.php
+
 # The text on the main page of the website (OUTPUT_DIR/index.php) in HTML
 # syntax.
 MAIN_TEXT="<h1>mCRL2 library reference manual</h1>
@@ -98,7 +102,7 @@ These pages list and document the available data structures, methods and
 interfaces.
 </p>
 <p>
-The pages can be browsed using the navigation bar at the top.
+The pages can be browsed using the navigation menu on the left.
 They are generated automatically using <a
 href=\"http://www.doxygen.org\">Doxygen</a> and are updated to the latest
 revision of the <a href=\"https://svn.win.tue.nl/viewcvs/MCRL2\">mCRL2 SVN
@@ -106,7 +110,7 @@ repository</a> every night.
 </p>
 <p>
 This reference manual is part of the <a
-href=\"http://www.mcrl2.org/wiki/index.php/Library_documentation\">mCRL2 library
+href=\"/wiki/index.php/Library_documentation\">mCRL2 library
 documentation</a> which also includes <i>user manuals</i> for developers
 who want to start using any of the libraries.
 It is therefore recommended to read those pages first.
@@ -115,8 +119,7 @@ It is therefore recommended to read those pages first.
 # The text at the bottom of every generated HTML page.
 # We use some of the predefined placeholders (starting with a '$') that Doxygen
 # will replace by approriate text.
-FOOTER_TEXT="
-<ul>
+FOOTER_TEXT="<ul>
   <li>This page was generated on \$datetime by 
       <a href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion.
   </li>
@@ -139,49 +142,60 @@ function determine_input {
   done
 } # End of function determine_input
 
-function write_index {
-  echo "
-<?php
-  require('../common/mcrl2.php');
-  mcrl2_html_begin();
-  mcrl2_head_begin();
-?>
-  <title>mCRL2 Library Reference</title>
-  <link href="doxystyle.css" rel="stylesheet" type="text/css">
-
-<?php
-  mcrl2_head_end();
-  mcrl2_body_begin(2);
-?>
-  <div id=\"libbar\">
-    <div id=\"libmenu\">
-    <ul>" > $OUTPUT_DIR/index.php
+function write_portlet {
+  echo "<?php function mcrl2_libref_portlet(\$current) { ?>
+  <div class=\"portlet\">
+    <h5>Libraries</h5>
+    <ul>" > $OUTPUT_DIR/$PORTLET
 
   OLDIFS1=$IFS
   IFS=$'\n'
   for L in $LIBRARY_LIST ; do
     IFS=$':'
     set -- $L
-    echo "<li><a href=\"$2/\">$1</a></li>" >> $OUTPUT_DIR/index.php
+    echo "      <li <?php if (\$current == \"$2\") { ?> class=\"current\"<?php } ?>><a href=\"/libref/$2/\">$1</a></li>" >> $OUTPUT_DIR/$PORTLET
   done
   IFS=$OLDIFS1
 
-  echo "
-      </ul>
-    </div> <!-- libmenu -->
-  </div> <!-- libbar -->
+  echo "    </ul>
+  </div> <!-- portlet -->
+<?php } ?>" >> $OUTPUT_DIR/$PORTLET
+} # End of function write_portlet
 
-<?php mcrl2_main_begin(); ?>
+function write_index {
+  echo "<?php
+  require('../common/mcrl2.php');
+  require('$PORTLET');
+  mcrl2_html_begin();
+  mcrl2_head_begin();
+?>
+  <title>mCRL2 Library Reference</title>
+  <link href=\"doxystyle.css\" rel=\"stylesheet\" type=\"text/css\">
 
+<?php
+  mcrl2_head_end();
+  mcrl2_body_begin();
+?>
+<div id=\"main\">
+
+<div id=\"portal\">
+<?php mcrl2_libref_portlet(\"\") ?>
+
+<?php mcrl2_search_portlet(2) ?>
+</div> <!-- portal -->
+
+<div id=\"contents-column\">
 <div class=\"contents\">
   $MAIN_TEXT
 </div> <!-- contents -->
+</div> <!-- contents-column -->
+
+</div> <!-- main -->
 
 <?php 
-  mcrl2_main_end();
   mcrl2_body_end();
   mcrl2_html_end();
-?>" >> $OUTPUT_DIR/index.php
+?>" > $OUTPUT_DIR/$INDEX
 } # End of function write_index
 
 
@@ -189,9 +203,9 @@ function write_doxyheader {
   # The name of the directory that will contain the HTML files that use this
   # header, is passed as an argument
   CURRENT=$1
-  echo "
-<?php
+  echo "<?php
   require('../../common/mcrl2.php');
+  require('../$PORTLET');
   mcrl2_html_begin();
   mcrl2_head_begin();
 ?>
@@ -200,40 +214,28 @@ function write_doxyheader {
 
 <?php
   mcrl2_head_end();
-  mcrl2_body_begin(2);
+  mcrl2_body_begin();
 ?>
-  <div id=\"libbar\">
-    <div id=\"libmenu\">
-    <ul>" > $DOXYHEADER
+<div id=\"main\">
 
-  OLDIFS1=$IFS
-  IFS=$'\n'
-  for L in $LIBRARY_LIST ; do
-    IFS=$':'
-    set -- $L
-    if [ "$2" == "$CURRENT" ] ; then
-      echo "<li class=\"current\"><a href=\"../$2/\">$1</a></li>" >> $DOXYHEADER
-    else
-      echo "<li><a href=\"../$2/\">$1</a></li>" >> $DOXYHEADER
-    fi
-  done
-  IFS=$OLDIFS1
+<div id=\"portal\">
+<?php mcrl2_libref_portlet(\"$CURRENT\") ?>
 
-  echo "
-      </ul>
-    </div> <!-- libmenu -->
-  </div> <!-- libbar -->
+<?php mcrl2_search_portlet(2) ?>
+</div> <!-- portal -->
 
-<?php mcrl2_main_begin(); ?>" >> $DOXYHEADER
+<div id=\"contents-column\">" > $DOXYHEADER
 } # End of function write_doxyheader
 
 function write_doxyfooter {
-  echo "
-    <div id=\"pageinfo\">
-      $FOOTER_TEXT
-    </div>
+  echo "<div id=\"pageinfo\">
+    $FOOTER_TEXT
+  </div>
+</div> <!-- contents-column -->
+
+</div> <!-- main -->
+
 <?php 
-  mcrl2_main_end();
   mcrl2_body_end();
   mcrl2_html_end();
 ?>" > $DOXYFOOTER
@@ -421,8 +423,9 @@ for L in $LIBRARY_LIST ; do
   rm -f $OUTPUT_DIR/$2/{tab_[blr].gif,*.css,doxygen.png,installdox}
 done
 
-# Create the website's main page
+# Create the website's main page and portlet file
 write_index
+write_portlet
 
 # Copy the CSS style sheet to the output directory
 cp $STYLESHEET $OUTPUT_DIR
