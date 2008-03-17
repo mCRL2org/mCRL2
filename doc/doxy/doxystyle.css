@@ -390,24 +390,39 @@ hr { height: 0px;
 
 div.tabs {
    position: relative;
-   top: -3.7em;
-   left: -1em;
+   margin: 1em 0 0 0;
+   width: 100%;
+   padding: 0;
    border-bottom: 1px solid #aaa;
-   padding-top: 1em;
-   width: 103%;
+   white-space: nowrap;
+   line-height: 5.1em;
+   overflow: visible;
+   border-collapse: collapse;
 }
 
 div.tabs ul {
-   position: relative;
-   left: -1px;
-   padding: 0;
-   margin: 0 0 0.1em 0;
-   list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 div.tabs li {
    display: inline;
-   margin-right: 0.2em;
+   margin: 0 .3em 0 0;
+}
+
+div.tabs li span {
+   padding: 0.2em;
+   border: 1px solid #aaa;
+   border-bottom: none;
+   background-color: #eee;
+   overflow: visible;
+}
+
+div.tabs li.current span {
+	background-color: white;
+	font-weight: bold;
+  border-bottom: 1px solid white;
 }
 
 div.tabs table {
@@ -439,25 +454,12 @@ div.tabs a:hover {
 	color: #ba0000;
 }
 
-div.tabs li span {
-   border: 1px solid #aaa;
-   background-color: #eee;
-   padding          : 0.3em;
-}
-
 div.tabs input {
    border: 1px solid #aaa;
 }
 
 div.tabs td {
    text-decoration  : none;
-}
-
-div.tabs li.current span {
-	border-bottom: 0px;
-	padding-bottom: 0.4em;
-	background-color: white;
-	font-weight: bold;
 }
 
 /* Commented Backslash Hack hides rule from IE5-Mac \*/

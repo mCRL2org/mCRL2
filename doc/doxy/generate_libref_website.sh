@@ -248,13 +248,11 @@ function write_doxyheader {
       </ul>
     </div>
   </div>
-  <div id=\"main\">
-    <div class=\"contents\">" >> $DOXYHEADER
+  <div id=\"main\">" >> $DOXYHEADER
 } # End of function write_doxyheader
 
 function write_doxyfooter {
   echo "
-    </div>
     <div id=\"pageinfo\">
       $FOOTER_TEXT
     </div>
