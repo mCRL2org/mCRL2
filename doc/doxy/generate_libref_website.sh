@@ -178,11 +178,12 @@ function write_index {
 ?>
 <div id=\"main\">
 
-<div id=\"portal\">
-<?php mcrl2_libref_portlet(\"\") ?>
-
-<?php mcrl2_search_portlet(2) ?>
-</div> <!-- portal -->
+<?php 
+  mcrl2_portal_begin();
+  mcrl2_libref_portlet(\"\");
+  mcrl2_search_portlet(2);
+  mcrl2_portal_end();
+?>
 
 <div id=\"contents-column\">
 <div class=\"contents\">
@@ -218,19 +219,22 @@ function write_doxyheader {
 ?>
 <div id=\"main\">
 
-<div id=\"portal\">
-<?php mcrl2_libref_portlet(\"$CURRENT\") ?>
-
-<?php mcrl2_search_portlet(2) ?>
-</div> <!-- portal -->
+<?php 
+  mcrl2_portal_begin();
+  mcrl2_libref_portlet(\"$CURRENT\");
+  mcrl2_search_portlet(2)
+  mcrl2_portal_end();
+?>
 
 <div id=\"contents-column\">" > $DOXYHEADER
 } # End of function write_doxyheader
 
 function write_doxyfooter {
-  echo "<div id=\"pageinfo\">
+  echo "<!--sphider_noindex-->
+  <div id=\"pageinfo\">
     $FOOTER_TEXT
   </div>
+<!--/sphider_noindex-->
 </div> <!-- contents-column -->
 
 </div> <!-- main -->
