@@ -110,6 +110,8 @@ void test_sort()
 
 void test_sort_equality()
 {
+  using mcrl2::data::detail::find_constructor;
+
   data_specification data = parse_data_specification(DATA_SPEC1);
 
   data_operation s1 = find_constructor(data, "s1");
