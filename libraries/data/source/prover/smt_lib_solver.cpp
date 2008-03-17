@@ -1,6 +1,8 @@
 // Implementation of class SMT_LIB_Solver
 // file: smt_lib_solver.cpp
 
+#include <cstdlib>
+
 #include "mcrl2/data/prover/smt_lib_solver.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/utilities.h"

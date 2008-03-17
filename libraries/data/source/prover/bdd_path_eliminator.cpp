@@ -1,11 +1,13 @@
 // Implementation of class BDD_Path_Eliminator
 // file: bdd_path_eliminator.cpp
 
+#include <ctime>
+#include <cstdlib>
+
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "time.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

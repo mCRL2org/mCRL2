@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
 #include <cassert>
+#include <limits>
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_make_match.h"
