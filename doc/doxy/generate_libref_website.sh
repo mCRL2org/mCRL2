@@ -222,7 +222,7 @@ function write_doxyheader {
 <?php 
   mcrl2_portal_begin();
   mcrl2_libref_portlet(\"$CURRENT\");
-  mcrl2_search_portlet(2)
+  mcrl2_search_portlet(2);
   mcrl2_portal_end();
 ?>
 
