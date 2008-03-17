@@ -21,6 +21,15 @@ typedef struct {
 } gsSystem;
 static gsSystem gssystem;
 
+static ATermList list_minus(ATermList l, ATermList m);
+static ATermList list_minus(ATermList l, ATermList m){
+  ATermList n = ATmakeList0();
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+    if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
+      n = ATinsert(n,ATgetFirst(l));
+  return ATreverse(n);
+}
+
 // the static context of the spec will be checked and used, not transformed
 typedef struct { 
   ATermIndexedSet basic_sorts;	
@@ -47,7 +56,7 @@ static Body body;
 static void gstcDataInit(void);
 static void gstcDataDestroy(void);
 static ATbool gstcReadInSorts (ATermList, bool high_level=true);
-static ATbool gstcReadInConstructors();
+static ATbool gstcReadInConstructors(ATermList NewSorts=NULL);
 static ATbool gstcReadInFuncs(ATermList, bool high_level=true);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
@@ -572,20 +581,28 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
          if(!gstcReadInActs(lps_action_labels))
            gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
          gsDebugMsg ("type checking of action rename specification read-in phase of LPS finished\n");
+         gsDebugMsg ("type checking of action rename specification read-in phase of rename file started\n");
 
          ATermAppl data_spec = ATAgetArgument(ar_spec, 0);
+         ATermList LPSSorts=ATtableKeys(context.defined_sorts); // remember the sorts from the LPS.
          if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
 	   goto finally;
 	 }
+         gsDebugMsg ("type checking of action rename specification read-in phase of rename file sorts finished\n");
+
          // Check sorts for loops
          // Unwind sorts to enable equiv and subtype relations
-         if(!gstcReadInConstructors()) {
+         if(!gstcReadInConstructors(list_minus(ATtableKeys(context.defined_sorts),LPSSorts))) {
            goto finally;
          }
+         gsDebugMsg ("type checking of action rename specification read-in phase of rename file constructors finished\n");
+
          if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
                                      ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
            goto finally;
          }
+         gsDebugMsg ("type checking of action rename specification read-in phase of rename file functions finished\n");
+
          body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
 
 	 //Save the actions from LPS only for the latter use.
@@ -1037,8 +1054,10 @@ static ATbool gstcReadInSorts (ATermList Sorts, bool high_level){
   return Result;
 }  
 
-static ATbool gstcReadInConstructors(){
-  for(ATermList Sorts=ATtableKeys(context.defined_sorts);!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
+static ATbool gstcReadInConstructors(ATermList NewSorts){
+  ATermList Sorts=NewSorts;
+  if(!Sorts) Sorts=ATtableKeys(context.defined_sorts);
+  for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
     ATermAppl SortExpr=ATAtableGet(context.defined_sorts,ATgetFirst(Sorts));
     if(!gstcIsSortExprDeclared(SortExpr)) return ATfalse;
     if(!gstcReadInSortStruct(SortExpr)) return ATfalse;
