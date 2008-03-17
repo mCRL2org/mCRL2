@@ -78,34 +78,6 @@ INPUT.search { font-size: 75%;
                background-color: #e8eef2;
 }
 
-/* Content part */
-
-#main {
-  position: relative;
-  padding: 0;
-  margin-left: 20px;
-  margin-right: 20px;
-  text-align: left;
-}
-.contents {
-  background: white;
-  color: black;
-  border-left: 1px solid #aaa;
-  border-bottom: 1px solid #aaa;
-  border-right: 1px solid #aaa;
-  padding: 1em;
-}
-/* For index.html in the top directory only*/
-#notabs {
-  border-top: 1px solid #aaa;
-}
-
-#pageinfo {
-	font-size: x-small;
-	color: #555;
-	margin-bottom: 50px;
-}
-
 div.qindex {
 	width: 100%;
 	background-color: #e8eef2;
@@ -390,14 +362,17 @@ hr { height: 0px;
 
 div.tabs {
    position: relative;
-   margin: 1em 0 0 0;
-   width: 100%;
    padding: 0;
-   border-bottom: 1px solid #aaa;
+   /*border-bottom: 1px solid #aaa;*/
    white-space: nowrap;
    line-height: 5.1em;
    overflow: visible;
    border-collapse: collapse;
+   width: 750px;
+   margin-left: auto;
+   margin-right: auto;
+   margin-top: 1em;
+   text-align: left;
 }
 
 div.tabs ul {

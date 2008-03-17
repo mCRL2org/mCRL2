@@ -85,11 +85,11 @@ INPUT_LIST="include source doc/Mainpage"
 # check with the other mCRL2 library developers before overriding specific
 # variable values.
 
-# The names of the temporary HTML header and footer files.
-DOXYHEADER=doxyheader.html
-DOXYFOOTER=doxyfooter.html
+# The names of the temporary PHP header and footer files.
+DOXYHEADER=doxyheader.php
+DOXYFOOTER=doxyfooter.php
 
-# The text on the main page of the website (OUTPUT_DIR/index.html) in HTML
+# The text on the main page of the website (OUTPUT_DIR/index.php) in HTML
 # syntax.
 MAIN_TEXT="<h1>mCRL2 library reference manual</h1>
 <p>
@@ -115,8 +115,12 @@ It is therefore recommended to read those pages first.
 # The text at the bottom of every generated HTML page.
 # We use some of the predefined placeholders (starting with a '$') that Doxygen
 # will replace by approriate text.
-FOOTER_TEXT="This page was generated on \$datetime by <a
-href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion."
+FOOTER_TEXT="
+<ul>
+  <li>This page was generated on \$datetime by 
+      <a href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion.
+  </li>
+</ul>"
 
 ###################### END OF SETTINGS ########################################
 
@@ -137,60 +141,47 @@ function determine_input {
 
 function write_index {
   echo "
-<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
-<html>
-
-<head>
-  <meta http-equiv=\"Content-Type\" content=\"text/html;charset=iso-8859-1\">
+<?php
+  require('../common/mcrl2.php');
+  mcrl2_html_begin();
+  mcrl2_head_begin();
+?>
   <title>mCRL2 Library Reference</title>
-  <link href=\"http://www.mcrl2.org/common/mcrl2.css\" rel=\"stylesheet\" type=\"text/css\">
-  <link href=\"doxystyle.css\" rel=\"stylesheet\" type=\"text/css\">
-</head>
+  <link href="doxystyle.css" rel="stylesheet" type="text/css">
 
-<body>
-<div id=\"globalWrapper\">
-  <div id=\"header\">
-    <a href=\"http://www.mcrl2.org\"><img
-      src=\"http://www.mcrl2.org/common/mcrl2.png\"/></a>
-  </div>
-  <div id=\"navbar\">
-    <div id=\"p-menu\">
-      <ul>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Home\">Home</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/About\">About</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Download\">Download</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Documentation\">Documentation</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Showcases\">Showcases</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Development\">Development</a></li>
-      </ul>
-    </div>
-  </div>
+<?php
+  mcrl2_head_end();
+  mcrl2_body_begin(2);
+?>
   <div id=\"libbar\">
     <div id=\"libmenu\">
-    <ul>" > $OUTPUT_DIR/index.html
+    <ul>" > $OUTPUT_DIR/index.php
 
   OLDIFS1=$IFS
   IFS=$'\n'
   for L in $LIBRARY_LIST ; do
     IFS=$':'
     set -- $L
-    echo "<li><a href=\"$2/index.html\">$1</a></li>" >> $OUTPUT_DIR/index.html
+    echo "<li><a href=\"$2/\">$1</a></li>" >> $OUTPUT_DIR/index.php
   done
   IFS=$OLDIFS1
 
   echo "
       </ul>
-    </div>
-  </div>
-  <div id=\"main\">
-    <div class=\"contents\" id=\"notabs\">
-    $MAIN_TEXT
-    </div>
-  </div>
-</div>
-</body>
+    </div> <!-- libmenu -->
+  </div> <!-- libbar -->
 
-</html>" >> $OUTPUT_DIR/index.html
+<?php mcrl2_main_begin(); ?>
+
+<div class=\"contents\">
+  $MAIN_TEXT
+</div> <!-- contents -->
+
+<?php 
+  mcrl2_main_end();
+  mcrl2_body_end();
+  mcrl2_html_end();
+?>" >> $OUTPUT_DIR/index.php
 } # End of function write_index
 
 
@@ -199,34 +190,18 @@ function write_doxyheader {
   # header, is passed as an argument
   CURRENT=$1
   echo "
-<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
-<html>
-
-<head>
-  <meta http-equiv=\"Content-Type\" content=\"text/html;charset=iso-8859-1\">
+<?php
+  require('../../common/mcrl2.php');
+  mcrl2_html_begin();
+  mcrl2_head_begin();
+?>
   <title>\$title</title>
-  <link href=\"http://www.mcrl2.org/common/mcrl2.css\" rel=\"stylesheet\" type=\"text/css\">
   <link href=\"../doxystyle.css\" rel=\"stylesheet\" type=\"text/css\">
-</head>
 
-<body>
-<div id=\"globalWrapper\">
-  <div id=\"header\">
-    <a href=\"http://www.mcrl2.org\"><img
-      src=\"http://www.mcrl2.org/common/mcrl2.png\"/></a>
-  </div>
-  <div id=\"navbar\">
-    <div id=\"p-menu\">
-      <ul>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Home\">Home</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/About\">About</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Download\">Download</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Documentation\">Documentation</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Showcases\">Showcases</a></li>
-        <li><a href=\"http://www.mcrl2.org/wiki/index.php/Development\">Development</a></li>
-      </ul>
-    </div>
-  </div>
+<?php
+  mcrl2_head_end();
+  mcrl2_body_begin(2);
+?>
   <div id=\"libbar\">
     <div id=\"libmenu\">
     <ul>" > $DOXYHEADER
@@ -237,18 +212,19 @@ function write_doxyheader {
     IFS=$':'
     set -- $L
     if [ "$2" == "$CURRENT" ] ; then
-      echo "<li class=\"current\"><a href=\"../$2/index.html\">$1</a></li>" >> $DOXYHEADER
+      echo "<li class=\"current\"><a href=\"../$2/\">$1</a></li>" >> $DOXYHEADER
     else
-      echo "<li><a href=\"../$2/index.html\">$1</a></li>" >> $DOXYHEADER
+      echo "<li><a href=\"../$2/\">$1</a></li>" >> $DOXYHEADER
     fi
   done
   IFS=$OLDIFS1
 
   echo "
       </ul>
-    </div>
-  </div>
-  <div id=\"main\">" >> $DOXYHEADER
+    </div> <!-- libmenu -->
+  </div> <!-- libbar -->
+
+<?php mcrl2_main_begin(); ?>" >> $DOXYHEADER
 } # End of function write_doxyheader
 
 function write_doxyfooter {
@@ -256,11 +232,11 @@ function write_doxyfooter {
     <div id=\"pageinfo\">
       $FOOTER_TEXT
     </div>
-  </div>
-</div>
-</body>
-
-</html>" > $DOXYFOOTER
+<?php 
+  mcrl2_main_end();
+  mcrl2_body_end();
+  mcrl2_html_end();
+?>" > $DOXYFOOTER
 } # End of function write_doxyfooter
 
 function print_help {
@@ -445,7 +421,7 @@ for L in $LIBRARY_LIST ; do
   rm -f $OUTPUT_DIR/$2/{tab_[blr].gif,*.css,doxygen.png,installdox}
 done
 
-# Create the website's main page (index.html)
+# Create the website's main page
 write_index
 
 # Copy the CSS style sheet to the output directory
