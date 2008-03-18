@@ -43,6 +43,7 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
+#include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes2bool.h"
@@ -367,21 +368,22 @@ t_tool_options parse_command_line(int argc, char** argv)
   t_tool_options tool_options;
 
   try {
-    string opt_outputformat;
-    string opt_strategy;
+    string opt_outputformat="none";
+    string opt_strategy="0";
     bool opt_precompile_pbes=false;
     bool opt_use_hashtables=false;
     bool opt_construct_counter_example=false;
     bool opt_store_as_tree=false;
     bool opt_data_elm=true;
   
-    string opt_rewriter;
+    RewriteStrategy opt_rewriter=GS_REWR_JITTY;
     vector< string > file_names;
   
     po::options_description desc;
   
     desc.add_options()
-        ("strategy,s",  po::value<string>(&opt_strategy)->default_value("0"), "use strategy arg (default '0');\n"
+        ("strategy,s",  po::value<string>(),
+         "use strategy arg (default '0');\n"
          "The following strategies are available:\n"
          "0) Compute all boolean equations which can be reached from the initial state, without "
          "any optimization (default). This is is the most data efficient option per generated equation.\n"
@@ -394,18 +396,29 @@ t_tool_options parse_command_line(int argc, char** argv)
          "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
          "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that "
          "they can be set to true or false, depending on the fixed point symbol. This can increase the time "
-         "needed to generate an equation substantially")
-        ("rewriter,R", po::value<string>(&opt_rewriter)->default_value("jitty"), "use rewrite strategy arg:\n"
-         "'inner' for the innermost rewriter,\n"
-         "'innerc' for the compiled innermost rewriter,\n"
-         "'jitty' for the jitty rewriter (default), or\n"
-         "'jittyc' for the compiled jitty rewriter")
-        ("counter,c", "print at the end a tree labelled with instantiations of the left hand side of"
-         "equations; this tree is an indication of how pbes2bool came to the validity/invalidity of the PBES")
-        ("precompile,P", "precompile the pbes for faster rewriting; does not work when the toolset is compiled in debug mode")
-        ("hashtables,H", "use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties)")
-        ("output,o",  po::value<string>(&opt_outputformat)->default_value("none"), "use output format arg:\n"
-                 "'none' (default), 'vasy' or 'cwi'")
+         "needed to generate an equation substantially"
+        )
+        ("rewriter,R", po::value<string>(), "use rewrite strategy arg:\n"
+         "'jitty' for jitty rewriting (default),\n"
+         "'jittyp' for jitty rewriting with prover,\n"
+         "'jittyc' for the compiled jitty rewriting,\n"
+         "'inner' for the innermost rewriting,\n"
+         "'innerp' for innermost rewriting with prover, or\n"
+         "'innerc' for the compiled innermost rewriting,\n"
+        )
+        ("counter,c",
+         "print at the end a tree labelled with instantiations of the left hand side of equations; this tree is an indication of how pbes2bool came to the validity / invalidity of the PBES"
+        )
+        ("precompile,P",
+         "precompile the pbes for faster rewriting; does not work when the toolset is compiled in debug mode"
+        )
+        ("hashtables,H",
+         "use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties)"
+        )
+        ("output,o",  po::value<string>(),
+         "use output format arg:\n"
+         "'none' (default), 'vasy' or 'cwi'"
+        )
         ("tree,r", "store state in a tree (for memory efficiency)")
         ("unused-data,u","do not remove unused parts of the data specification")
         ("verbose,v",  "turn on the display of short intermediate messages")
@@ -503,18 +516,14 @@ t_tool_options parse_command_line(int argc, char** argv)
     }
   
     if (vm.count("rewriter")) // Select the rewiter to be used
-    { 
-      opt_rewriter = vm["rewriter"].as< string >();
-      if (!(opt_rewriter == "inner") &&
-          !(opt_rewriter == "jitty") &&
-          !(opt_rewriter == "innerc") &&
-          !(opt_rewriter == "jittyc"))
-      { 
-        gsErrorMsg("unknown rewrite strategy specified; available strategies are 'inner', 'jitty', 'innerc' and 'jittyc'\n");
+    {
+      string opt_rewriter_str = vm["rewriter"].as< string >();
+      opt_rewriter = RewriteStrategyFromString(opt_rewriter_str.c_str());
+      if (opt_rewriter == GS_REWR_INVALID )
+      {
+        gsErrorMsg("invalid rewrite strategy '%s'\n",opt_rewriter_str.c_str());
         exit(1);
       }
-  
-          
     }
     
     if (vm.count("file_names"))
@@ -567,20 +576,7 @@ t_tool_options parse_command_line(int argc, char** argv)
     }
     else assert(0); // Unknown strategy. Should not occur here, as there is a check for this above.
     
-    if (opt_rewriter=="inner")
-    { tool_options.rewrite_strategy=GS_REWR_INNER;
-    }
-    else if (opt_rewriter=="jitty")
-    { tool_options.rewrite_strategy=GS_REWR_JITTY;
-    }
-    else if (opt_rewriter=="innerc")
-    { tool_options.rewrite_strategy=GS_REWR_INNERC;
-    }
-    else if (opt_rewriter=="jittyc")
-    { tool_options.rewrite_strategy=GS_REWR_JITTYC;
-    }
-    else assert(0); // Unknown rewriter specified. Should have been caught above.
-  
+    tool_options.rewrite_strategy=opt_rewriter;
     tool_options.opt_precompile_pbes=opt_precompile_pbes;
     tool_options.opt_construct_counter_example=opt_construct_counter_example;
     tool_options.opt_store_as_tree=opt_store_as_tree;
