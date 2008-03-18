@@ -1360,8 +1360,8 @@ void DiagramEditor::handleDrag()
         {
             if ( drgBegIdx2 == Shape::ID_HDL_CTR )
                 handleDragCtr( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_TOP_LFT )
-                handleDragTopLft( s );
+            else if ( drgBegIdx2 == Shape::ID_HDL_TOP_LFT )            
+                handleDragTopLft( s );         
             else if ( drgBegIdx2 == Shape::ID_HDL_LFT )
                 handleDragLft( s );
             else if ( drgBegIdx2 == Shape::ID_HDL_BOT_LFT )
@@ -1897,21 +1897,27 @@ void DiagramEditor::handleDragCtr( Shape* s )
     xDrgDist += xCur-xPrv;
     yDrgDist += yCur-yPrv;
 
-    if ( diagram->getSnapGrid() == true )
+    /*if ( diagram->getSnapGrid() == true )
     {
         x = Utils::rndToNearestMult( x+xDrgDist, diagram->getGridInterval( canvas ) );
         y = Utils::rndToNearestMult( y+yDrgDist, diagram->getGridInterval( canvas ) );
-
         if ( x != xCtr )
+        {
             xDrgDist = xCur-x;
+        }
         if ( y != yCtr )
+        {
             yDrgDist = yCur-y;
+        }
     }
     else
     {
         x += xCur-xPrv;
         y += yCur-yPrv;
-    }
+    }*/
+    
+    x += xCur-xPrv;
+    y += yCur-yPrv;
 
     s->setCenter( x, y );
 }

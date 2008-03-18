@@ -1040,7 +1040,10 @@ void Shape::visualize(
              hdlSze*pix, 2*hdlSze*pix );
     }
     
-    //drawText( canvas ); // Draw the textual values of the shape
+    if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
+    {
+    	drawText( canvas ); // Draw the textual values of the shape
+    }
     
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -1253,7 +1256,10 @@ void Shape::visualize(
              hdlSze*pix, 2*hdlSze*pix );
     }
     
-    //drawText( canvas ); // Draw the textual values of the shape
+    if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
+    {
+    	drawText( canvas ); // Draw the textual values of the shape
+    }
     
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -1514,7 +1520,10 @@ void Shape::drawNormal(
                 hdlSze*pix, 2*hdlSze*pix );
         }   
         
-        drawText( canvas ); // Draw the textual values of the shape
+        if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
+    	{
+    		drawText( canvas ); // Draw the textual values of the shape
+    	}
               
         VisUtils::disableLineAntiAlias();
     }    	
@@ -1534,7 +1543,7 @@ void Shape::drawText( GLCanvas* canvas )
     	
     double pix = canvas->getPixelSize();
     	
-    // have textures been generated
+    // generate textures !!!! This slows down the program too much, need a better technique to draw text for performance
     GLuint  texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
     VisUtils::genCharTextures(
