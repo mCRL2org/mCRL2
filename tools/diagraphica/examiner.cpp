@@ -1012,7 +1012,7 @@ void Examiner::drawFrame( const bool &inSelectMode )
         }
         attr = NULL;
         node = NULL;
-                
+        
         diagram->visualize(
             false,
             canvas,

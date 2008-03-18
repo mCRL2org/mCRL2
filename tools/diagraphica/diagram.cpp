@@ -258,7 +258,9 @@ void Diagram::visualize(
 // ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
+    {
         drawBorderFlush( inSelectMode, canvas );
+    }
     else
     {
         drawBorderFlush( inSelectMode, canvas );
@@ -281,7 +283,9 @@ void Diagram::visualize(
 // ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
+    {
         drawBorderFlush( inSelectMode, canvas );
+    }
     else
     {
         drawBorderFlush( inSelectMode, canvas, opacity );

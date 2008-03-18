@@ -209,6 +209,7 @@ protected:
     void drawEdit( 
         const bool &inSelectMode,
         GLCanvas* canvas );
+    void drawText( GLCanvas* canvas );
     void drawEditDOF( 
         const bool &inSelectMode,
         GLCanvas* canvas );

@@ -1584,7 +1584,7 @@ void DiagramEditor::handlePaste()
     if ( clipBoardShape != NULL )
     {
         double xC, yC;
-
+        
         // update index of clipboard shape
         clipBoardShape->setIndex( diagram->getSizeShapes() );
 

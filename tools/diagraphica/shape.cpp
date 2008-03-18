@@ -95,6 +95,11 @@ Shape::Shape( const Shape &shape )
     colLin = shape.colLin;
     colFil = shape.colFil;
     hdlSze = shape.hdlSze;
+    
+    // textual properties
+    variable = shape.variable;
+    note = shape.note;
+    checkedVariableId = shape.checkedVariableId;
 
     // degrees of freedom, invoke copy constructors
     xCtrDOF = new DOF( *shape.xCtrDOF );
@@ -958,11 +963,11 @@ void Shape::visualize(
     
     if( type == TYPE_NOTE)
     {
-    	VisUtils::setColor( colRGB );
+    	VisUtils::setColorWhite(); // Draw the note on a white background
         VisUtils::fillRect(
             -xD,  xD,   // new
              yD, -yD ); // new
-        VisUtils::setColor( colLin );
+        VisUtils::setColorWhite();
         VisUtils::drawRect(
             -xD,  xD,   // new
              yD, -yD ); // new
@@ -1034,6 +1039,9 @@ void Shape::visualize(
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
+    
+    //drawText( canvas ); // Draw the textual values of the shape
+    
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
@@ -1244,6 +1252,9 @@ void Shape::visualize(
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
+    
+    //drawText( canvas ); // Draw the textual values of the shape
+    
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
@@ -1386,6 +1397,7 @@ void Shape::drawNormal(
     {
     	if ( type == TYPE_NOTE )
         {
+        	VisUtils::setColorWhite(); // Draw the note on a white background
             VisUtils::fillRect(
                 -xDFC,  xDFC,
                  yDFC, -yDFC );
@@ -1431,11 +1443,11 @@ void Shape::drawNormal(
         VisUtils::enableLineAntiAlias();
         if ( type == TYPE_NOTE )
         {
-            VisUtils::setColor( colFil );
+            VisUtils::setColorWhite(); // Draw the note on a white background
             VisUtils::fillRect(
                 -xDFC,  xDFC, 
                  yDFC, -yDFC );
-            VisUtils::setColor( colLin );
+            VisUtils::setColorWhite();
             VisUtils::drawRect(
                 -xDFC,  xDFC, 
                  yDFC, -yDFC );
@@ -1500,36 +1512,44 @@ void Shape::drawNormal(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
-        }  
+        }   
         
-    	string text = note;
-    	if( variable != "" && text != "" )
-    	{
-    		text.append(" -- ");    		
-    	}
-    	text.append(variable);
-    	
-    	double pix = canvas->getPixelSize();
-    	
-    	// have textures been generated
-    	GLuint  texCharId[CHARSETSIZE];
-    	GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
-    	VisUtils::genCharTextures(
-    		texCharId,
-    		texChar );
-    	
-    	VisUtils::setColor( colTxt );
-    	if( type == TYPE_NOTE )
-    	{
-    		VisUtils::drawLabelRight( texCharId, -xDFC, 0 , szeTxt*pix/CHARHEIGHT, text );
-    	}
-    	else
-    	{
-    		VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, text );
-    	}       
-        
+        drawText( canvas ); // Draw the textual values of the shape
+              
         VisUtils::disableLineAntiAlias();
+    }    	
+}
+
+
+// ---------------------------------------------
+void Shape::drawText( GLCanvas* canvas )
+// ---------------------------------------------
+{
+	string text = note;
+    if( variable != "" && text != "" )
+    {
+    	text.append(" -- ");    		
     }
+    text.append(variable);
+    	
+    double pix = canvas->getPixelSize();
+    	
+    // have textures been generated
+    GLuint  texCharId[CHARSETSIZE];
+    GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
+    VisUtils::genCharTextures(
+    	texCharId,
+    	texChar );
+    
+    VisUtils::setColor( colTxt );
+    if( type == TYPE_NOTE )
+    {
+    	VisUtils::drawLabelRight( texCharId, -xDFC, 0 , szeTxt*pix/CHARHEIGHT, text );
+    }
+    else
+    {
+    	VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, text );
+    }  
 }
 
 
