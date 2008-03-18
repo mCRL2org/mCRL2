@@ -1678,6 +1678,14 @@ void* DiaGraph::getGraph()
 
 
 // ----------------------------------
+void DiaGraph::handleNote( const int &shapeId, const string &msg )
+// ----------------------------------
+{
+    frame->handleNote( shapeId, msg );
+}
+
+
+// ----------------------------------
 void DiaGraph::handleEditModeSelect()
 // ----------------------------------
 {
@@ -1697,6 +1705,15 @@ void DiaGraph::handleEditModeSelect()
         opaChooser = NULL;
     }
     canvasOpaChooser = NULL;
+}
+
+
+// ----------------------------------
+void DiaGraph::handleEditModeNote()
+// ----------------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        editor->setEditModeNote();
 }
 
 
@@ -1807,7 +1824,8 @@ void DiaGraph::handleEditShape(
     const bool &sendToBack,
     const bool &bringForward, 
     const bool &sendBackward,
-    const bool &editDOF )
+    const bool &editDOF,
+    const int  &checkedItem )
 // ----------------------------
 {
     frame->displShapeMenu(
@@ -1819,17 +1837,38 @@ void DiaGraph::handleEditShape(
         sendToBack,
         bringForward, 
         sendBackward,
-        editDOF );
+        editDOF,
+        checkedItem );
 }
 
 
 // ----------------------------
 void DiaGraph::handleShowVariable(
-    			const string &variable)
+    			const string &variable,
+    			const int    &variableId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
-        editor->handleShowVariable( variable );
+        editor->handleShowVariable( variable, variableId );
+}
+
+
+// ----------------------------
+void DiaGraph::handleShowNote( const string &variable, const int &shapeId)
+// ----------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        editor->handleShowNote( variable, shapeId );
+}
+
+
+// ----------------------------
+void DiaGraph::handleAddText( string &variable, int &shapeId)
+// ----------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        return editor->handleAddText( variable, shapeId);
+   
 }
 
 

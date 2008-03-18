@@ -35,6 +35,8 @@ public:
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setVariable( const string &msg );
+    void setCheckedId( const int &id );
+    void setNote( const string &msg );
 
     void setCenter( const double &xC, const double &yC );
     void setDFC( const double &xD, const double &yD );
@@ -51,6 +53,7 @@ public:
     void clearDOFOpaYValues();
     
     void setType( const int &typ );
+    void setTypeNote();
     void setTypeLine();
     void setTypeRect();
     void setTypeEllipse();
@@ -68,6 +71,7 @@ public:
     void setModeEdtDOFAgl();
     void setModeEdtDOFCol();
     void setModeEdtDOFOpa();
+    void setModeEdtDOFVar();
     
     void setLineWidth( const double &w );
     void setLineColor( const ColorRGB &c );
@@ -88,6 +92,8 @@ public:
 
     // -- get functions ---------------------------------------------
     int getIndex();
+    int getCheckedId();
+    string getNote();
     
     void getCenter( double &x, double &y );
     double getXCtr();
@@ -117,9 +123,11 @@ public:
     DOF* getDOFHgt();
     DOF* getDOFAgl();
     DOF* getDOFCol();
+    DOF* getDOFVar();
     void getDOFColYValues( vector< double > &yVals );
     DOF* getDOFOpa();
     void getDOFOpaYValues( vector< double > &yVals );
+    string getVariable();
 
     void getDOFAttrs( vector< Attribute* > &attrs );
 
@@ -151,6 +159,7 @@ public:
         TYPE_ELLIPSE,
         TYPE_ARROW,
         TYPE_DARROW,
+        TYPE_NOTE,
         
         MODE_NORMAL,
         MODE_EDIT,
@@ -161,6 +170,7 @@ public:
         MODE_EDT_DOF_AGL,
         MODE_EDT_DOF_COL,
         MODE_EDT_DOF_OPA,
+        MODE_EDT_DOF_VAR,
 
         ID_HDL_CTR,
         ID_HDL_TOP_LFT,
@@ -249,7 +259,9 @@ protected:
     ColorRGB colLin;    // line color
     ColorRGB colFil;    // fill color
     double   hdlSze;    // handle size,     pix
+    int checkedVariableId; // Event id of the variable displayed on the shape;
     string	 variable;  //variable shown on the shape
+    string 	 note;		// note shown on the shape
 
     // degrees of freedom
     DOF* xCtrDOF; // composition
@@ -257,6 +269,7 @@ protected:
     DOF* wthDOF;  // composition
     DOF* hgtDOF;  // composition
     DOF* aglDOF;  // composition
+    DOF* varDOF;	  // composition
     double xHge,   yHge;   // hinge point, relative to center
 
     DOF* colDOF;  // composition

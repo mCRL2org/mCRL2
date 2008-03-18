@@ -43,6 +43,7 @@ Frame::Frame(
 	SetAutoLayout(true);
     initFrame();
     dofMenu = false;
+    currentShapeId = -1;
 }
 
 
@@ -119,6 +120,15 @@ void Frame::setEditModeSelect()
 }
 
 
+// ----------------------------
+void Frame::setEditModeNote()
+// ----------------------------
+{
+    if ( toolBarEdit != NULL )
+        toolBarEdit->ToggleTool( ID_TOOL_NOTE, true );
+}
+
+
 // -------------------------
 void Frame::setEditModeDOF()
 // -------------------------
@@ -126,6 +136,7 @@ void Frame::setEditModeDOF()
     if ( toolBarEdit != NULL )
         toolBarEdit->ToggleTool( ID_TOOL_DOF, true );
 }
+
 
 // -------------------------------------------
 void Frame::setDOFColorSelected( )
@@ -135,12 +146,23 @@ void Frame::setDOFColorSelected( )
 		listCtrlDOF->SetItemState(5, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
+
 // -------------------------------------------
 void Frame::setDOFOpacitySelected( )
 // -------------------------------------------
 {
 	if(listCtrlDOF != NULL)
 		listCtrlDOF->SetItemState(6, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+}
+
+
+// ----------------------------------------
+void Frame::handleNote( const int &shapeId, const string &msg )
+// ----------------------------------------
+{
+	currentShapeId = shapeId;
+	currentShapeNote = msg;
+    initFrameNote();
 }
 
 
@@ -372,7 +394,8 @@ void Frame::displShapeMenu(
     const bool &sendToBack,
     const bool &bringForward, 
     const bool &sendBackward,
-    const bool &editDOF )
+    const bool &editDOF,
+    const int  &checkedItemId )
 // ---------------------------
 {
     wxMenu menu;
@@ -398,8 +421,12 @@ void Frame::displShapeMenu(
        	celInfo = rowInfo.m_text;
        	wxString helpString;
        	helpString << i; // Convert int to wxString
-       	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_NORMAL);
-        addAttributeMenu->Append( item );            	
+       	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_CHECK);
+        addAttributeMenu->Append( item );   
+        if( id == checkedItemId)
+        {
+        	addAttributeMenu->Check( id, true );
+        }         	
         Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
         id--;         	
     }
@@ -408,6 +435,10 @@ void Frame::displShapeMenu(
     			wxT( "Show Variable" ),
     			addAttributeMenu,
     			wxT( "Show variables values on this shape" ) );
+    			
+    menu.Append(ID_MENU_ITEM_SHOW_NOTE,
+    			wxT( "Add Note" ),
+    			wxT( "Add note for this shape" ) );
     
 	menu.AppendSeparator();
     menu.Append( 
@@ -456,6 +487,7 @@ void Frame::displShapeMenu(
     {
         menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );
 		menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
+		menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false);
     }
     if ( copy != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_COPY, false );
@@ -873,6 +905,11 @@ void Frame::handleCloseFrame( PopupFrame* f )
     {
         // clean up ptr
         frameClust = NULL;
+    }
+    else if ( f == frameNote )
+    {
+    	frameNote = NULL;
+    	toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
     }
 }
 
@@ -1808,6 +1845,9 @@ void Frame::initToolbarEdit()
     // selection
     wxBitmap selectBmp( select_icon );
     toolBarEdit->AddRadioTool( ID_TOOL_SELECT, wxString( wxT( "Selection" ) ), selectBmp );
+    // note
+    wxBitmap noteBmp( note );
+    toolBarEdit->AddRadioTool( ID_TOOL_NOTE, wxString( wxT( "Add Note" ) ), noteBmp );
     // edit DOF
     wxBitmap dofBmp( dof );
     toolBarEdit->AddRadioTool( ID_TOOL_DOF, wxString( wxT( "Edit DOF" ) ), dofBmp );
@@ -2088,6 +2128,53 @@ void Frame::initFrameDOF()
 
 
 // -----------------------
+void Frame::initFrameNote()
+// -----------------------
+{
+	if ( frameNote == NULL )
+	{
+		// init frame
+		sizerFrameNote = new wxBoxSizer( wxVERTICAL );
+		frameNote = new PopupFrame(
+		    mediator,
+		    this,
+		    ID_FRAME_NOTE,
+		    wxString( wxT( "Add Note" ) ),
+		    wxPoint(350,250),
+		    wxSize( 
+		        (int)(0.27*this->GetSize().GetWidth()),
+		        (int)(0.50*this->GetSize().GetHeight()) ) );
+
+		frameNote->SetSizer( sizerFrameNote );
+
+		// create children
+		
+		// create textbox
+		noteText = new wxTextCtrl( frameNote, -1, wxT(""), wxPoint(-1, -1), wxSize(150, 100), wxTE_MULTILINE);
+		const char *msg = currentShapeNote.c_str();
+		wxString textValue;
+		textValue = textValue.FromAscii( msg );
+		noteText->SetValue( textValue ); // Initialize the text field with the current note of the shape
+		sizerFrameNote->Add ( noteText, 0, wxEXPAND | wxALL, 5 );
+		
+		initPanelNote();    
+		
+		frameNote->Layout();
+		frameNote->Fit();
+		
+		frameNote->SetMinSize(frameNote->GetSize());
+		frameNote->SetMaxSize(frameNote->GetSize());
+		toolBarEdit->EnableTool( ID_TOOL_NOTE, false );
+
+		// show
+		frameNote->Show();
+		frameNote->Raise();
+		noteText->SetFocus(); // Set focus to the textbox
+	}
+}
+
+
+// -----------------------
 void Frame::initPanelDOF()
 // -----------------------
 {
@@ -2106,7 +2193,7 @@ void Frame::initPanelDOF()
     sizerFrameDOF->Add(
         panelDOF,
         1,
-        wxEXPAND );  
+        wxEXPAND );   
 
     // init children
     initListCtrlDOF();
@@ -2115,6 +2202,40 @@ void Frame::initPanelDOF()
     initCanvasOpaDOF();
 
 }
+
+
+// -----------------------
+void Frame::initPanelNote()
+// -----------------------
+{
+    // init panel
+    sizerNote = new wxBoxSizer( wxHORIZONTAL );
+    panelNote = new wxScrolledWindow(
+        frameNote,
+        wxID_ANY,
+        wxDefaultPosition,
+        wxDefaultSize,
+        wxHSCROLL |
+        wxVSCROLL |
+        wxRAISED_BORDER );
+    panelNote->SetSizer( sizerNote );
+    panelNote->SetScrollRate( 10, 10 );
+    sizerFrameNote->Add( panelNote, 0, wxEXPAND );  
+        
+    // create buttons
+    wxButton* addButton = new wxButton( panelNote, ID_ADD_BUTTON_NOTE, wxT("Add"));  
+    wxButton* clearButton = new wxButton( panelNote, ID_CLEAR_BUTTON_NOTE, wxT("Clear"));
+    sizerNote->Add( addButton, 0, wxALL, 5);     
+    sizerNote->Add( clearButton, 0, wxALL, 5); 
+    sizerNote->Fit(panelNote);
+    
+    // handle event for buttons
+    Connect( ID_ADD_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));   
+    Connect( ID_CLEAR_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton)); 
+}
+
+
+
 
 // --------------------------
 void Frame::initListCtrlDOF()
@@ -2170,36 +2291,6 @@ void Frame::initListCtrlDOF()
 
 }
 
-/*
-// -----------------------------
-void Frame::initTextOptionsDOF()
-// -----------------------------
-{
-    wxString choices[4] = { 
-        wxT( "Hide text" ),
-        wxT( "Show attribute label and value"),
-        wxT( "Show attribute label only"),
-        wxT( "Show attribute value only" ) };
-    radioBoxTextDOF = new wxRadioBox(
-        panelDOF, 
-        ID_RADIO_BOX_TEXT_DOF, 
-        wxString( wxT( "Text" ) ),
-        wxDefaultPosition,
-        wxDefaultSize, 
-        4,
-        choices,
-        0,
-        wxRA_SPECIFY_ROWS );
-    sizerDOF->Add(
-        radioBoxTextDOF,
-        0,          // vert not stretch
-        wxEXPAND |  // hori stretch
-        wxLEFT |
-        wxRIGHT |
-        wxBOTTOM,
-        5 );
-}
-*/
 
 // ---------------------------
 void Frame::initCanvasColDOF()
@@ -3904,6 +3995,16 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         mediator->handleClearExnrCur( this );
     }
+    else if ( e.GetId() == ID_MENU_ITEM_SHOW_NOTE )
+    {
+    	int shapeId;
+    	string msg;
+    	mediator->handleAddText( msg, shapeId );
+    	if( shapeId > -1 )
+    	{
+    		handleNote( shapeId, msg );
+    	}
+    }
     else
     {
     	long item   = -1;
@@ -3935,15 +4036,24 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 		    	}
 		    	else
 		    	{
-		    		Graph* g = (Graph*) (mediator->getGraph()); // Obtain graph from the mediator for retrieving attribute properties
-		    		Attribute* attribute = g->getAttribute(idxAttr); // Get selected attribute
-		    		string name = attribute->getName(); // Get the name of the selected attribute
-		    		string type = attribute->getType(); // Get the type of the selected attribute
-		    		string value = attribute->getCurValue(0)->getValue(); // Get the top current value of the selected attribute		    		
-		    		name.append(": ");
-		    		name.append(value); // Generate the text will be displayed on the shape		    		
-		    		
-		    		mediator->handleShowVariable( name ); 		    		
+		    		int checkedItemId = -1;
+		    		string name = "";
+		    		if( !x->IsChecked())
+		    		{
+		    			x->Check( true );
+		    		}
+		    		else
+		    		{
+		    			checkedItemId = e.GetId();
+			    		Graph* g = (Graph*) (mediator->getGraph()); // Obtain graph from the mediator for retrieving attribute properties
+			    		Attribute* attribute = g->getAttribute(idxAttr); // Get selected attribute
+			    		name = attribute->getName(); // Get the name of the selected attribute
+			    		string type = attribute->getType(); // Get the type of the selected attribute
+			    		string value = attribute->getCurValue(0)->getValue(); // Get the top current value of the selected attribute		    		
+			    		name.append(": ");
+			    		name.append(value); // Generate the text will be displayed on the shape		    		
+				    }
+		    		mediator->handleShowVariable( name, checkedItemId ); 		    		
 		    	}
         	}
         	x = NULL;
@@ -3959,6 +4069,8 @@ void Frame::onTool( wxCommandEvent &e )
 {
     if ( e.GetId() == ID_TOOL_SELECT )
         mediator->handleEditModeSelect();
+    else if ( e.GetId() == ID_TOOL_NOTE )
+    	mediator->handleEditModeNote();
     else if ( e.GetId() == ID_TOOL_DOF )
         mediator->handleEditModeDOF( this );
     else if ( e.GetId() == ID_TOOL_RECT )
@@ -3968,7 +4080,7 @@ void Frame::onTool( wxCommandEvent &e )
     else if ( e.GetId() == ID_TOOL_LINE )
         mediator->handleEditModeLine();
     else if ( e.GetId() == ID_TOOL_ARROW )
-        mediator->handleEditModeArrow();
+        mediator->handleEditModeArrow();    
     else if ( e.GetId() == ID_TOOL_DARROW )
         mediator->handleEditModeDArrow();
     else if ( e.GetId() == ID_TOOL_FILL_COL )
@@ -4140,6 +4252,20 @@ void Frame::onButton( wxCommandEvent &e )
     {
         frameAbout->Destroy();
     }
+    else if ( e.GetId() == ID_ADD_BUTTON_NOTE )
+    {
+    	if ( frameNote->Destroy() )
+    	{
+    		string noteString = (const char*) (noteText->GetValue()).mb_str(wxConvUTF8);
+    		frameNote = NULL;
+    		toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
+    		mediator->handleShowNote( noteString, currentShapeId );
+    	}
+    }
+    else if ( e.GetId() == ID_CLEAR_BUTTON_NOTE )
+    {
+    	noteText->Clear();
+    }
 }
 
 /*
@@ -4177,6 +4303,7 @@ void Frame::onRadioBox( wxCommandEvent &e )
     }
 }
 */
+
 
 // --------------------------------------
 void Frame::onSplitterDoubleClick( wxSplitterEvent &e)
@@ -4264,6 +4391,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_DOM_RENAME, Frame::onPopupMenu )
     // diagram editor
     EVT_TOOL( ID_TOOL_SELECT, Frame::onTool )
+    EVT_TOOL( ID_TOOL_NOTE, Frame::onTool )
     EVT_TOOL( ID_TOOL_DOF, Frame::onTool )
     EVT_TOOL( ID_TOOL_RECT, Frame::onTool )
     EVT_TOOL( ID_TOOL_ELLIPSE, Frame::onTool )
@@ -4276,6 +4404,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_TOOL( ID_TOOL_SNAP_GRID, Frame::onTool )
     // edit shapes
 	EVT_MENU( ID_MENU_ITEM_SHOW_VARIABLES, Frame::onPopupMenu )
+	EVT_MENU( ID_MENU_ITEM_SHOW_NOTE, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_CUT, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_COPY, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_PASTE, Frame::onPopupMenu )

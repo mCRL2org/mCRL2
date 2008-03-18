@@ -140,7 +140,9 @@ public:
 
     // -- diagram editor --------------------------------------------
     virtual void* getGraph() = 0;
+    virtual void handleNote( const int &shapeId, const string &msg ) = 0;
     virtual void handleEditModeSelect() = 0;
+    virtual void handleEditModeNote() = 0;
     virtual void handleEditModeDOF( Colleague* c ) = 0;
     virtual void handleEditModeRect() = 0;
     virtual void handleEditModeEllipse() = 0;
@@ -161,8 +163,12 @@ public:
         const bool &sendToBack,
         const bool &bringForward,
         const bool &sendBackward,
-        const bool &editDOF ) = 0;
-    virtual void handleShowVariable( const string &variable ) = 0;
+        const bool &editDOF,
+        const int  &checkedItem ) = 0;
+    virtual void handleShowVariable( const string &variable, 
+    								 const int &variableId ) = 0;
+    virtual void handleShowNote( const string &variable, const int &shapeId ) = 0;
+    virtual void handleAddText( string &variable, int &shapeId ) = 0;
     virtual void handleCutShape() = 0;
     virtual void handleCopyShape() = 0;
     virtual void handlePasteShape() = 0;

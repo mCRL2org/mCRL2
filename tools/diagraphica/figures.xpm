@@ -1027,6 +1027,51 @@ static const char *logo[] = {
 ">X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X>X:X>X>X>X>X>X>X>X>X>X>X>X>X>X:X>X:X>X>X>X:X>X>X>X:X>X:X>X:X:X>X>X:X:X>X:X:X>X:X:X:X>X:X:X:X>X:X:X:X:X>X:X:X:X>X:X:X:X:X:X:X:X:X;X:X:X;X:X;X;X;X;X;X;X;X-X;X;X;X;X-X;X=X;X-X-X=X;X;X;X-X-X-X-X-X-X-X=X-X-X*X-X*X*X-X*X*X*X-X*X*X*X*X*X*X*X*X*X*X&X*X*X&X*X*X*X&X*X&X&X&X&X&X&X&X&X&X&X&X&X&X&X&X&X#X&X&X#X&X#X&X&X#X#X#X&X#X#X#X#X#X&X#X#X#X#X#X#X#X@X#X#X#X#X@X#X#X@X@X@X#X%X@X@X@X#X@X@X.X@X@X@X@X@X@X.X@X@X.X@X@X.X.X@X.X.X@X.X.X.X.X.X.X.X.X.X|..X.X.X.X.X{..X|.|.|..X|..X|.{..X{.{.|.|.{.|.{.|.{.{.{.|.{.{.{.{.[.[.{.{.{.{.{.{.[.{.{.{.[.{.[.[.{.[.{.[.[.[.[.[.[.[.[.[.[./.[./.[.]."
 };
 /* XPM */
+static const char *note[] = {
+/* columns rows colors chars-per-pixel */
+"18 22 2 1",
+" 	c #D6D3CE",
+".	c #000000",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+"    ..........    ",
+"    ..  ..  ..    ",
+"    .   ..   .    ",
+"        ..        ",
+"        ..        ",
+"        ..        ",
+"        ..        ",
+"        ..        ",
+"        ..        ",
+"       ....       ",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+"                  ",
+/* pixels */
+"AAAAAAA,       .",
+"AAAAAAAA1#2wtpm ",
+"AAAAAAAAA7;tpmM ",
+"AAAAAAAAAA53mMC ",
+"AAAAAAAAAko:eCZ#",
+"AAAAAAAAh. 8yuS%",
+"AAAAAAAf. 9AAva%",
+"AAAAAAs  qAAAAb&",
+"AAAAA0 .fAAAAAAn",
+"AAAA8 .gAAAAAAAA",
+"AAA6 ojAAAAAAAAA",
+"Ac4.olAAAAAAAAAA",
+"A< &zAAAAAAAAAAA",
+"<.=xAAAAAAAAAAAA",
+" -cAAAAAAAAAAAAA"
+};
+/* XPM */
 static const char *rectangle[] = {
 /* columns rows colors chars-per-pixel */
 "16 15 147 2",

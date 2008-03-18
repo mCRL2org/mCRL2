@@ -52,6 +52,8 @@ Shape::Shape(
     yDFC   = yD;
     xHge   = 0.0;
     yHge   = 0.0;
+    variable = "";
+    checkedVariableId = -1;
     aglCtr = aC;
 
     // properties
@@ -128,12 +130,29 @@ void Shape::setIndex( const int &idx )
 }
 
 
+// -----------------------------------
+void Shape::setCheckedId( const int &id )
+// -----------------------------------
+{
+    checkedVariableId = id;
+}
+
+
 // ------------------------------------------
 void Shape::setVariable( const string &msg )
 // ------------------------------------------
 {
     variable = "";
     variable.append( msg );
+}
+
+
+// ------------------------------------------
+void Shape::setNote( const string &msg )
+// ------------------------------------------
+{
+    note = "";
+    note.append( msg );   
 }
 
 
@@ -238,6 +257,16 @@ void Shape::setType( const int &typ )
         setTypeArrow();
     else if ( type == TYPE_DARROW )
         setTypeDArrow();
+    else if ( type == TYPE_NOTE)
+    	setTypeNote();
+}
+
+
+// ----------------------    
+void Shape::setTypeNote()
+// ----------------------
+{
+    type = TYPE_NOTE;
 }
 
 
@@ -303,6 +332,8 @@ void Shape::setMode( const int &mde )
         mode = MODE_EDT_DOF_COL;
     else if ( mde == MODE_EDT_DOF_OPA )
         mode = MODE_EDT_DOF_OPA;
+    else if ( mde == MODE_EDT_DOF_VAR )
+        mode = MODE_EDT_DOF_VAR;
 }
 
 
@@ -375,6 +406,14 @@ void Shape::setModeEdtDOFOpa()
 // ---------------------------
 {
     mode = MODE_EDT_DOF_OPA;
+}
+
+
+// ---------------------------
+void Shape::setModeEdtDOFVar()
+// ---------------------------
+{
+    mode = MODE_EDT_DOF_VAR;
 }
     
 
@@ -464,6 +503,22 @@ int Shape::getIndex()
 // ------------------
 {
     return index;
+}
+
+
+// ------------------
+int Shape::getCheckedId()
+// ------------------
+{
+    return checkedVariableId;
+}
+
+
+// ------------------
+string Shape::getNote()
+// ------------------
+{
+    return note;
 }
 
 
@@ -684,6 +739,14 @@ DOF* Shape::getDOFCol()
 }
 
 
+// --------------------
+DOF* Shape::getDOFVar()
+// --------------------
+{
+    return varDOF;
+}
+
+
 // ----------------------------------------------------
 void Shape::getDOFColYValues( vector< double > &yVals )
 // ----------------------------------------------------
@@ -893,7 +956,18 @@ void Shape::visualize(
     VisUtils::enableBlending();
     
     
-    if ( type == TYPE_RECT )
+    if( type == TYPE_NOTE)
+    {
+    	VisUtils::setColor( colRGB );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLin );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_RECT )
     {
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colRGB );
@@ -1103,6 +1177,18 @@ void Shape::visualize(
             -xD,  xD,   // new
              yD, -yD ); // new
     }
+    else if ( type == TYPE_RECT )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colFill );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLine );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
     else if ( type == TYPE_ELLIPSE )
     {
         //VisUtils::setColor( colFil );
@@ -1224,6 +1310,8 @@ void Shape::initDOF()
     opaDOF->setMax( 0.75 );
     opaYValues.push_back( 0.0 );
     opaYValues.push_back( 0.0 );
+    
+    varDOF = new DOF( 7, "Text");
 }
 
 
@@ -1296,7 +1384,13 @@ void Shape::drawNormal(
 {
     if ( inSelectMode == true )
     {
-        if ( type == TYPE_RECT )
+    	if ( type == TYPE_NOTE )
+        {
+            VisUtils::fillRect(
+                -xDFC,  xDFC,
+                 yDFC, -yDFC );
+        }
+        else if ( type == TYPE_RECT )
         {
             VisUtils::fillRect(
                 -xDFC,  xDFC,
@@ -1335,8 +1429,18 @@ void Shape::drawNormal(
     else
     {
         VisUtils::enableLineAntiAlias();
-        
-        if ( type == TYPE_RECT )
+        if ( type == TYPE_NOTE )
+        {
+            VisUtils::setColor( colFil );
+            VisUtils::fillRect(
+                -xDFC,  xDFC, 
+                 yDFC, -yDFC );
+            VisUtils::setColor( colLin );
+            VisUtils::drawRect(
+                -xDFC,  xDFC, 
+                 yDFC, -yDFC );
+        }
+        else if ( type == TYPE_RECT )
         {
             VisUtils::setColor( colFil );
             VisUtils::fillRect(
@@ -1396,33 +1500,33 @@ void Shape::drawNormal(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
-        }
+        }  
         
-        if( variable != "")
-        {
-        	double pix = canvas->getPixelSize();
-        	
-        	// have textures been generated
-        	GLuint  texCharId[CHARSETSIZE];
-        	GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
-        	VisUtils::genCharTextures(
-        		texCharId,
-        		texChar );
-        	
-        	VisUtils::setColor( colTxt );
-            VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, variable );
-            VisUtils::setColorBlack();
-            //VisUtils::drawLine( -xDFC, xDFC, yDFC / 2, yDFC );
-        	
-        	/*VisUtils::setColorWhite();
-            VisUtils::fillRect(
-                -xDFC,  xDFC, 
-                 yDFC * 1.5, yDFC);
-            VisUtils::setColor( colLin );
-            VisUtils::drawRect(
-                -xDFC,  xDFC, 
-                 yDFC * 1.5, yDFC);*/
-        }
+    	string text = note;
+    	if( variable != "" && text != "" )
+    	{
+    		text.append(" -- ");    		
+    	}
+    	text.append(variable);
+    	
+    	double pix = canvas->getPixelSize();
+    	
+    	// have textures been generated
+    	GLuint  texCharId[CHARSETSIZE];
+    	GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
+    	VisUtils::genCharTextures(
+    		texCharId,
+    		texChar );
+    	
+    	VisUtils::setColor( colTxt );
+    	if( type == TYPE_NOTE )
+    	{
+    		VisUtils::drawLabelRight( texCharId, -xDFC, 0 , szeTxt*pix/CHARHEIGHT, text );
+    	}
+    	else
+    	{
+    		VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, text );
+    	}       
         
         VisUtils::disableLineAntiAlias();
     }
@@ -1665,6 +1769,14 @@ void Shape::drawEditDOF(
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
         }
+        else if ( mode == MODE_EDT_DOF_VAR )
+        {
+            drawDOFXCtr( inSelectMode, canvas );
+            drawDOFYCtr( inSelectMode, canvas );
+            drawDOFWth( inSelectMode, canvas );
+            drawDOFHgt( inSelectMode, canvas );
+            drawDOFAgl( inSelectMode, canvas );
+        }
     }
     else
     {
@@ -1734,6 +1846,14 @@ void Shape::drawEditDOF(
             drawDOFAgl( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_OPA )
+        {
+            drawDOFXCtr( inSelectMode, canvas );
+            drawDOFYCtr( inSelectMode, canvas );
+            drawDOFWth( inSelectMode, canvas );
+            drawDOFHgt( inSelectMode, canvas );
+            drawDOFAgl( inSelectMode, canvas );
+        }
+        else if ( mode == MODE_EDT_DOF_VAR )
         {
             drawDOFXCtr( inSelectMode, canvas );
             drawDOFYCtr( inSelectMode, canvas );

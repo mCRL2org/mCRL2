@@ -145,7 +145,9 @@ public:
     // -- diagram editor --------------------------------------------
     
     void* getGraph();
+    void handleNote( const int &shapeId, const string &msg );
     void handleEditModeSelect();
+    void handleEditModeNote();
     void handleEditModeDOF( Colleague* c );
     void handleEditModeRect();
     void handleEditModeEllipse();
@@ -166,8 +168,11 @@ public:
         const bool &sendToBack,
         const bool &bringForward, 
         const bool &sendBackward,
-        const bool &editDOF );
-    void handleShowVariable( const string &variable );
+        const bool &editDOF,
+        const int  &checkedItem );
+    void handleShowVariable( const string &variable, const int &variableId );
+    void handleShowNote( const string &variable, const int &shapeId );
+    void handleAddText( string &variable, int &shapeId );
     void handleCutShape();
     void handleCopyShape();
     void handlePasteShape();

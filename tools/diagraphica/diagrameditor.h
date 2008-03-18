@@ -34,6 +34,7 @@ public:
     void setDiagram( Diagram* dgrm );
 
     void setEditModeSelect();
+    void setEditModeNote();
     void setEditModeDOF();
     void setEditModeRect();
     void setEditModeEllipse();
@@ -118,7 +119,9 @@ public:
         const int &y,
         const vector< int > &data );
     */
-    void handleShowVariable( const string &variable );
+    void handleShowVariable( const string &variable, const int &variableId );
+    void handleShowNote( const string &variable, const int &shapeId );
+    void handleAddText( string &variable, int &shapeId );
     void handleCut();
     void handleCopy();
     void handlePaste();
@@ -136,6 +139,7 @@ public:
     enum
     {
         EDIT_MODE_SELECT,
+        EDIT_MODE_NOTE,
         EDIT_MODE_DOF,
         EDIT_MODE_RECT,
         EDIT_MODE_ELLIPSE,

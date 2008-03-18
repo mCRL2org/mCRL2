@@ -50,12 +50,14 @@ public:
     
     void setFileOptionsActive();
     void setEditModeSelect();
+    void setEditModeNote();
     void setEditModeDOF();
     
     void setDOFColorSelected();
 	void setDOFOpacitySelected();
 
     // -- display functions -----------------------------------------
+    void handleNote( const int &shapeId, const string &msg );
     void displNumNodes( const int &val );
     void displNumEdges( const int &val );
     void displAttrInfo( 
@@ -87,7 +89,8 @@ public:
         const bool &sendToBack,
         const bool &bringForward, 
         const bool &sendBackward,
-        const bool &editDOF );
+        const bool &editDOF,
+        const int  &checkedItemId );
     void displDgrmMenu(
         const bool &sendSglToSiml,
         const bool &sendSglToTrace,
@@ -194,11 +197,14 @@ private:
         int curParts );
     
     void initFrameDOF();
+    void initFrameNote();
     void initPanelDOF();
+    void initPanelNote();
     void initListCtrlDOF();
     void initTextOptionsDOF();
     void initCanvasColDOF();
     void initCanvasOpaDOF();
+    void initNoteButtons();
     
     void initFramePlot();
     void initPanelPlot();
@@ -233,6 +239,10 @@ private:
     // -- frame -----------------------------------------------------
     wxBoxSizer*       sizerFrame;
     wxSplitterWindow* splitterFrame;
+    
+    // -- note -----------------------------------------------------
+    int			  	  currentShapeId;
+    string			  currentShapeNote;
 
     // -- left panel ------------------------------------------------
     wxSplitterWindow* splitterLft;
@@ -282,9 +292,14 @@ private:
     
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;
+    PopupFrame*		  frameNote;
     wxBoxSizer*       sizerFrameDOF;
+    wxBoxSizer*       sizerFrameNote;
     wxScrolledWindow* panelDOF;
+    wxScrolledWindow* panelNote;
     wxBoxSizer*       sizerDOF;
+    wxBoxSizer*       sizerNote;
+    wxTextCtrl*		  noteText;
     wxListCtrl*       listCtrlDOF;
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
@@ -352,11 +367,12 @@ private:
         ID_CANVAS_MAIN,
         ID_TOOL_BAR_EDIT,
         ID_TOOL_SELECT,
+        ID_TOOL_NOTE,
         ID_TOOL_DOF,
         ID_TOOL_RECT,
         ID_TOOL_ELLIPSE,             
         ID_TOOL_LINE,
-        ID_TOOL_ARROW,
+        ID_TOOL_ARROW,        
         ID_TOOL_DARROW,
         ID_TOOL_FILL_COL,
         ID_TOOL_LINE_COL,
@@ -372,7 +388,10 @@ private:
         ID_FRAME_SETTINGS,
         ID_FRAME_PARTITION,
         ID_FRAME_DOF,
+        ID_FRAME_NOTE,
         ID_PANEL_DOF,
+   		ID_ADD_BUTTON_NOTE,
+   		ID_CLEAR_BUTTON_NOTE,
         ID_LIST_CTRL_DOF,
         ID_RADIO_BOX_TEXT_DOF,
         ID_CANVAS_COL_DOF,
@@ -402,6 +421,7 @@ private:
         ID_LIST_CTRL_CLUST,
         ID_BUTTON_OK_CLUST,
         ID_MENU_ITEM_SHOW_VARIABLES,
+        ID_MENU_ITEM_SHOW_NOTE,
         ID_MENU_ITEM_SHAPE_CUT,
         ID_MENU_ITEM_SHAPE_COPY,
         ID_MENU_ITEM_SHAPE_PASTE,
