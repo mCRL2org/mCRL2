@@ -5,7 +5,6 @@ project lpssumelm
 tool lpssumelm
        : lpssumelm.cpp
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 

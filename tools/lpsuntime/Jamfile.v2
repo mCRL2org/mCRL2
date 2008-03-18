@@ -5,7 +5,6 @@ project lpsuntime
 tool lpsuntime
        : lpsuntime.cpp
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 

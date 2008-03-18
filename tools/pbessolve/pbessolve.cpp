@@ -17,14 +17,6 @@
  
 #include <sstream> 
  
-//Boost 
-#include <boost/program_options.hpp> 
- 
-//MCRL2-specific 
-#include "mcrl2/core/messaging.h" 
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h" 
-
 //LPS-Framework 
 #include "mcrl2/pbes/pbes.h" 
 #include "mcrl2/pbes/utility.h" 
@@ -47,6 +39,11 @@
 //Tool-specific 
 #include "mcrl2/pbes/gauss.h" 
  
+//MCRL2-specific 
+#include "mcrl2/core/messaging.h" 
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+
 using namespace std; 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core; 
@@ -57,8 +54,6 @@ using atermpp::make_substitution;
  
 using namespace ::mcrl2::utilities;
 
-namespace po = boost::program_options; 
- 
 //Type definitions ====================== 
  
 // the command line options 
@@ -77,7 +72,7 @@ typedef struct{
 //======================================== 
  
  
-string infilename; 
+string infilename = "-"; 
  
  
 //Local functions ======================== 
@@ -100,32 +95,39 @@ int main(int argc, char** argv)
 { 
   MCRL2_ATERM_INIT(argc, argv)
    
-  //Parse command line 
-  t_tool_options tool_options = parse_command_line(argc, argv); 
-   
-  //Load the pbes 
-  pbes<> pbes_spec = load_pbes(); 
-   
-  //Solve the pbes. 
-  //The solution will be returned as an equation system,  
-  //in order to allow partial solutions. 
-  //Every equation is the result of a  
-  //(possibly interactive and/or bounded)  
-  //approximation process 
-  pbes_solver* ps = new pbes_solver
-    (pbes_spec, tool_options.solver, tool_options.rewriter,
-     tool_options.bound, tool_options.pnf, tool_options.interactive);
-  
-  atermpp::vector<pbes_equation> es_solution = ps->solve(); 
-   
-  //Interpret the solution in the initial state
-  pbes_expression sol_initial_state = 
-    interpret_solution(pbes_spec, es_solution, 
-		       tool_options.solver, tool_options.rewriter); 
-   
-  cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
-  
-  return 0; 
+  try {
+    //Parse command line 
+    t_tool_options tool_options = parse_command_line(argc, argv); 
+     
+    //Load the pbes 
+    pbes<> pbes_spec = load_pbes(); 
+     
+    //Solve the pbes. 
+    //The solution will be returned as an equation system,  
+    //in order to allow partial solutions. 
+    //Every equation is the result of a  
+    //(possibly interactive and/or bounded)  
+    //approximation process 
+    pbes_solver* ps = new pbes_solver
+      (pbes_spec, tool_options.solver, tool_options.rewriter,
+       tool_options.bound, tool_options.pnf, tool_options.interactive);
+    
+    atermpp::vector<pbes_equation> es_solution = ps->solve(); 
+     
+    //Interpret the solution in the initial state
+    pbes_expression sol_initial_state = 
+      interpret_solution(pbes_spec, es_solution, 
+          	       tool_options.solver, tool_options.rewriter); 
+     
+    cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
+    
+    return EXIT_SUCCESS; 
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 } 
 //======================================== 
  
@@ -171,93 +173,41 @@ pbes<> load_pbes()
  
  
 //======================================== 
-t_tool_options parse_command_line(int argc, char** argv) 
+t_tool_options parse_command_line(int ac, char** av) 
 { 
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE]\n"
+                          "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not\n"
+                          "present, stdin is used.\n");
+
+  clinterface.add_option("interactive", "turn on the manual guidance of the approximation process", 'i')
+             .add_option("bound", "limit the number of approximation steps\nExample: -b 10\n", 'b')
+             .add_option("pnf", "use the prenex normal form for the approximation", 'p')
+             .add_option("solver", make_optional_argument("SOLVER", "cvc"), "specify the solver to be used by the prover\n  Options are: ario, cvc, fast", 's');
+
+  clinterface.add_rewriting_options();
+
+  command_line_parser parser(clinterface, ac, av);
+
   t_tool_options tool_options; 
-  int opt_bound = 0; 
-  string opt_solver;
-  string opt_rewriter;
-  tool_options.pnf = false; 
-  tool_options.interactive = false; 
-   
-  po::options_description desc; 
-  desc.add_options() 
-    ("interactive,i","turn on the manual guidance of the approximation process") 
-    ("bound,b",po::value<int>(&opt_bound)->default_value(0), "limit the number of approximation steps\nExample: -b 10\n")
-    ("solver,s",po::value<string>(&opt_solver)->default_value("cvc"), "specify the solver to be used by the prover\nOptions are: ario, cvc, fast")
-    ("rewriter,r",po::value<string>(&opt_rewriter)->default_value("jitty"),
-     "use rewrite strategy arg:\n"
-     "'inner' for the innermost rewriter,\n"
-     "'innerc' for the compiled innermost rewriter,\n"
-     "'jitty' for the jitty rewriter (default), or\n"
-     "'jittyc' for the compiled jitty rewriter")
-    ("pnf,p","use the prenex normal form for the approximation") 
-    ("verbose,v",	"turn on the display of short intermediate messages") 
-    ("debug,d",		"turn on the display of detailed intermediate messages") 
-    ("version",		"display version information") 
-    ("help,h",		"display this help") 
-    ; 
-   
-  po::options_description hidden("Hidden options"); 
-  hidden.add_options() 
-    ("INFILE",              po::value<string>(), "input file") 
-    ; 
-   
-  //  po::options_description visible("Allowed options"); 
-  //  visible.add(desc); 
-   
-  po::options_description cmdline_options; 
-  cmdline_options.add(desc).add(hidden);  
-   
-  po::positional_options_description p; 
-  p.add("INFILE", -1); 
-   
-  po::variables_map vm; 
-  po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm); 
-  po::notify(vm); 
-   
-  if (vm.count("help")) { 
-    cout << "Usage: " << argv[0] << " [OPTION]... [INFILE]" << endl; 
-    cout << "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not" << endl;
-    cout << "present, stdin is used." << endl; 
-    cout << endl; 
-    cout << "Options:" << endl;
-    cout << desc; 
-    cout << endl; 
-    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
-    exit(0); 
-  } 
-   
-  if (vm.count("version")) { 
-    print_version_information(NAME, AUTHOR);
-    exit(0); 
-  } 
-   
-  if (vm.count("debug")) 
-    gsSetDebugMsg(); 
-   
-  if (vm.count("verbose")) 
-    gsSetVerboseMsg(); 
 
-  if (vm.count("pnf")) 
-    tool_options.pnf = true;  
-   
-  if (vm.count("interactive")) 
-    tool_options.interactive = true;  
-   
-  if (vm.count("bound")) 
-    opt_bound = vm["bound"].as<int>(); 
-   
-  if (vm.count("solver")) 
-    opt_solver = vm["solver"].as<string>(); 
+  tool_options.bound       = 0; 
+  tool_options.solver      = "cvc";
+  tool_options.pnf         = (0 < parser.options.count("pnf"));  
+  tool_options.interactive = (0 < parser.options.count("interactive"));  
+  tool_options.rewriter    = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
 
-  if (vm.count("rewriter")) 
-    opt_rewriter = vm["rewriter"].as<string>(); 
-
-  infilename = (0 < vm.count("INFILE")) ? vm["INFILE"].as<string>() : "-"; 
-  tool_options.bound = opt_bound; 
-  tool_options.solver = opt_solver;
-  tool_options.rewriter = opt_rewriter;
+  if (parser.options.count("bound")) {
+    tool_options.bound = parser.option_argument_as< int >("bound"); 
+  }
+  if (parser.options.count("solver")) {
+    tool_options.solver = parser.option_argument("solver");
+  }
+  if (0 < parser.unmatched.size()) {
+    infilename = parser.unmatched[0];
+  }
+  if (1 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
+  }
 
   return tool_options; 
 } 
@@ -276,7 +226,6 @@ t_tool_options parse_command_line(int argc, char** argv)
 pbes_expression interpret_solution (pbes<> pbes_spec, 
 				    atermpp::vector<pbes_equation> es_solution, string solver, string rewriter) 
 { 
-
   propositional_variable_instantiation s = pbes_spec.initial_state();
   data_expression_list del = s.parameters();
   
@@ -295,8 +244,8 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
   data_variable_list dvl = e->variable().parameters();
   pbes_expression p = 
     e->formula().substitute(make_list_substitution(dvl,del));
-
-
+ 
+ 
   SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_fast:solver_type_cvc);
   RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
     ((rewriter == "innerc") ? GS_REWR_INNERC : 
@@ -305,12 +254,12 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
   int nq = 0;
   data_variable_list fv;
   result = pbes_expression_simplify(p, &nq, &fv, prover);
-
+ 
   // in the resulting expression, the predicate instances should
   // be further replaced with their solutions, etc.
   // How to do this with substitute functions, without decomposing 
   // the pbes_expression???
-
+ 
   return result;
 } 
 //======================================== 

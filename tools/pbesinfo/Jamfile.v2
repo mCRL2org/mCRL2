@@ -6,7 +6,6 @@ tool pbesinfo
        : pbesinfo.cpp
          /libraries//lps
          /libraries//pbes
-         /site-config//boost_program_options
        ;
 
 install-tools pbesinfo ;

@@ -32,14 +32,6 @@
 
 #include <sstream>
 
-//Boost
-#include <boost/program_options.hpp>
-
-//MCRL2-specific
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/version_info.h"
-#include "mcrl2/utilities/aterm_ext.h"
-
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
@@ -55,6 +47,11 @@
 #include "mcrl2/atermpp/table.h"
 #include "_aterm.h"
 
+//MCRL2-specific
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+
 //Tool-specific
 // #include "pbes_rewrite_jfg.h"
 // #include "sort_functions.h"
@@ -67,8 +64,6 @@ using namespace mcrl2::lps;
 using bes::bes_expression;
 
 using atermpp::make_substitution;
-
-namespace po = boost::program_options;
 
 //Function declarations used by main program
 //------------------------------------------
@@ -345,248 +340,153 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 #endif
 
 
+//function parse_command_line
+//---------------------------
+t_tool_options parse_command_line(int ac, char** av)
+{
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+      "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is\n"
+      "not present, stdin is used. If OUTFILE is not present, stdout is used.\n");
+
+  clinterface.add_rewriting_options();
+
+  clinterface.
+    add_option("strategy", make_mandatory_argument("STRAT"), 
+      "use strategy STRAT (default '0');\n"
+      " 0) Compute all boolean equations which can be reached\n"
+      "    from the initial state, without optimization\n"
+      "    (default). This is is the most data efficient\n"
+      "    option per generated equation.\n"
+      " 1) Optimize by immediately substituting the right\n"
+      "    hand sides for already investigated variables\n"
+      "    that are true or false when generating an\n"
+      "    expression. This is as memory efficient as 0.\n"
+      " 2) In addition to 1, also substitute variables that\n"
+      "    are true or false into an already generated right\n"
+      "    hand side. This can mean that certain variables\n"
+      "    become unreachable (e.g. X0 in X0 && X1, when X1\n"
+      "    becomes false, assuming X0 does not occur\n"
+      "    elsewhere. It will be maintained which variables\n"
+      "    have become unreachable as these do not have to be\n"
+      "    investigated. Depending on the PBES, this can\n"
+      "    reduce the size of the generated BES substantially\n"
+      "    but requires a larger memory footprint.\n"
+      " 3) In addition to 2, investigate for generated\n"
+      "    variables whether they occur on a loop, such that\n"
+      "    they can be set to true or false, depending on the\n"
+      "    fixed point symbol. This can increase the time\n"
+      "    needed to generate an equation substantially",
+      's').
+    add_option("counter",
+      "print at the end a tree labelled with instantiations\n"
+      "of the left hand side of equations; this tree is an\n"
+      "indication of how pbes2bool came to the validity or\n"
+      "invalidity of the PBES",
+      'c').
+    add_option("precompile",
+      "precompile the pbes for faster rewriting; does not\n"
+      "work when the toolset is compiled in debug mode",
+      'p').
+    add_option("hashtables",
+      "use hashtables when substituting in bes equations,\n"
+      "and translate internal expressions to binary decision\n"
+      "diagrams (discouraged, due to performance)",
+      'H').
+    add_option("output",
+      make_mandatory_argument("FORMAT"),
+      "use output format FORMAT:\n"
+      " 'none' (default),\n"
+      " 'vasy',\n"
+      " 'cwi'",
+      'o').
+    add_option("tree",
+      "store state in a tree (for memory efficiency)",
+      't').
+    add_option("unused_data",
+      "do not remove unused parts of the data specification",
+      'u');
+
+  command_line_parser parser(clinterface, ac, av);
+
+  t_tool_options tool_options;
+
+  tool_options.opt_precompile_pbes           = 0 < parser.options.count("precompile");
+  tool_options.opt_use_hashtables            = 0 < parser.options.count("hashtables");
+  tool_options.opt_construct_counter_example = 0 < parser.options.count("counter");
+  tool_options.opt_store_as_tree             = 0 < parser.options.count("tree");
+  tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
+  tool_options.opt_outputformat              = "none";
+  tool_options.opt_strategy                  = lazy;
+  tool_options.infilename                    = "-";
+  tool_options.outfilename                   = "-";
+  
+  if (parser.options.count("output")) { // Output format
+    std::string format = parser.option_argument("output");
+
+    if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
+      clinterface.throw_exception("unknown output format specified (got `" + format + "')");
+    }
+
+    tool_options.opt_outputformat = format;
+  }
+  
+  if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
+    int strategy = parser.option_argument_as< int >("strategy");
+
+    switch (strategy) {
+      case 0:
+       tool_options.opt_strategy = lazy;
+       break;
+      case 1:
+       tool_options.opt_strategy = optimize;
+       break;
+      case 2:
+       tool_options.opt_strategy = on_the_fly;
+       break;
+      case 3:
+       tool_options.opt_strategy = on_the_fly_with_fixed_points;
+       break;
+      default:
+        clinterface.throw_exception("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+    }
+  }
+  
+  if (0 < parser.unmatched.size()) {
+    tool_options.infilename = parser.unmatched[0];
+  }
+  if (1 < parser.unmatched.size()) {
+    tool_options.outfilename = parser.unmatched[1];
+  }
+  if (2 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
+  }
+  
+  tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+  
+  return tool_options;
+}
+
 //Main Program
 //------------
 int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return 0;
-  }
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
 
-  process(parse_command_line(argc, argv));
-  return 0;
-}
+    process(parse_command_line(argc, argv));
 
-//function parse_command_line
-//---------------------------
-t_tool_options parse_command_line(int argc, char** argv)
-{
-  t_tool_options tool_options;
-
-  try {
-    string opt_outputformat="none";
-    string opt_strategy="0";
-    bool opt_precompile_pbes=false;
-    bool opt_use_hashtables=false;
-    bool opt_construct_counter_example=false;
-    bool opt_store_as_tree=false;
-    bool opt_data_elm=true;
-  
-    RewriteStrategy opt_rewriter=GS_REWR_JITTY;
-    vector< string > file_names;
-  
-    po::options_description desc;
-  
-    desc.add_options()
-        ("strategy,s",  po::value<string>(),
-         "use strategy arg (default '0');\n"
-         "The following strategies are available:\n"
-         "0) Compute all boolean equations which can be reached from the initial state, without "
-         "any optimization (default). This is is the most data efficient option per generated equation.\n"
-         "1) Optimize by immediately substituting the the right hand sides for already investigated "
-         "variables that are true or false when generating a expression. This is as memory efficient as 0.\n"
-         "2) In addition to 1, also substitute variables that are true or false into an already generated "
-         "right hand side. This can mean that certain variables become unreachable (e.g. X0 in X0 && X1, "
-         "when X1 becomes false, assuming X0 does not occur elsewhere. It will be maintained which variables "
-         "have become unreachable as these do not have to be investigated. Depending on the PBES, this can "
-         "reduce the size of the generated BES substantially, but requires a larger memory footstamp.\n"
-         "3) In addition to 2, investigate for generated variables whether they occur on a loop, such that "
-         "they can be set to true or false, depending on the fixed point symbol. This can increase the time "
-         "needed to generate an equation substantially"
-        )
-        ("rewriter,R", po::value<string>(), "use rewrite strategy arg:\n"
-         "'jitty' for jitty rewriting (default),\n"
-         "'jittyp' for jitty rewriting with prover,\n"
-         "'jittyc' for the compiled jitty rewriting,\n"
-         "'inner' for the innermost rewriting,\n"
-         "'innerp' for innermost rewriting with prover, or\n"
-         "'innerc' for the compiled innermost rewriting,\n"
-        )
-        ("counter,c",
-         "print at the end a tree labelled with instantiations of the left hand side of equations; this tree is an indication of how pbes2bool came to the validity / invalidity of the PBES"
-        )
-        ("precompile,P",
-         "precompile the pbes for faster rewriting; does not work when the toolset is compiled in debug mode"
-        )
-        ("hashtables,H",
-         "use hashtables when substituting in bes equations, and translate internal expressions to binary decision diagrams (discouraged, due to heavy performance penalties)"
-        )
-        ("output,o",  po::value<string>(),
-         "use output format arg:\n"
-         "'none' (default), 'vasy' or 'cwi'"
-        )
-        ("tree,r", "store state in a tree (for memory efficiency)")
-        ("unused-data,u","do not remove unused parts of the data specification")
-        ("verbose,v",  "turn on the display of short intermediate messages")
-        ("debug,d",    "turn on the display of detailed intermediate messages")
-        ("version",    "display version information and terminate")
-        ("help,h",    "display this help and terminate")
-        ;
-  
-    po::options_description hidden("Hidden options");
-    hidden.add_options()
-        ("file_names",  po::value< vector< string > >(), "input/output files")
-        ;
-  
-    po::options_description cmdline_options;
-    cmdline_options.add(desc).add(hidden);
-  
-    po::options_description visible("Allowed options");
-    visible.add(desc);
-  
-    po::positional_options_description p;
-    p.add("file_names", -1);
-  
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
-    po::notify(vm);
-  
-    if (vm.count("help"))
-    {
-      cout << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-      cout << "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is" << endl;
-      cout << "not present, stdin is used. If OUTFILE is not present, stdout is used." << endl;
-      cout << endl;
-      cout << "Options:" << endl;
-      cout << desc;
-      cout << endl;
-      cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
-  
-      exit(0);
-    }
-   
-    if (vm.count("precompile"))
-    { opt_precompile_pbes=true;
-    }
-  
-    if (vm.count("hashtables"))
-    { opt_use_hashtables=true;
-    }
-  
-    if (vm.count("counter"))
-    { opt_construct_counter_example=true;
-    }
-   
-    if (vm.count("tree"))
-    { opt_store_as_tree=true;
-    }
-  
-    if (vm.count("unused-data"))
-    { opt_data_elm=false;
-    }
-  
-    if (vm.count("version"))
-    {
-      print_version_information(NAME, AUTHOR);
-      exit(0);
-    }
-  
-    if (vm.count("debug"))
-    {
-      gsSetDebugMsg();
-    }
-  
-    if (vm.count("verbose"))
-    {
-      gsSetVerboseMsg();
-    }
-  
-    if (vm.count("output")) // Output format
-    {
-      opt_outputformat = vm["output"].as< string >();
-      if (!((opt_outputformat == "none") || (opt_outputformat == "vasy") || (opt_outputformat == "cwi")))
-      {
-        gsErrorMsg("unknown output format specified; available output formats are 'none', 'vasy' and 'cwi'\n");
-        exit(1);
-      }
-    }
-  
-    if (vm.count("strategy")) // Bes solving strategy (currently only one available)
-    {
-      opt_strategy = vm["strategy"].as< string >();
-      if (!(opt_strategy == "0" || opt_strategy == "1" || opt_strategy == "2" || opt_strategy == "3" ))
-      {
-        gsErrorMsg("unknown strategy specified; available strategies are '0', '1', '2', and '3'\n");
-        exit(1);
-      }
-    }
-  
-    if (vm.count("rewriter")) // Select the rewiter to be used
-    {
-      string opt_rewriter_str = vm["rewriter"].as< string >();
-      opt_rewriter = RewriteStrategyFromString(opt_rewriter_str.c_str());
-      if (opt_rewriter == GS_REWR_INVALID )
-      {
-        gsErrorMsg("invalid rewrite strategy '%s'\n",opt_rewriter_str.c_str());
-        exit(1);
-      }
-    }
-    
-    if (vm.count("file_names"))
-    {
-      file_names = vm["file_names"].as< vector< string > >();
-    }
-  
-    string infilename;
-    string outfilename;
-    if (file_names.size() == 0)
-    {
-      // Read from and write to stdin
-      infilename = "-";
-      outfilename = "-";
-    }
-    else if ( 2 < file_names.size())
-    {
-      cerr << NAME << ": too many arguments" << endl;
-      exit(1);
-    }
-    else
-    {
-      infilename = file_names[0];
-      if (file_names.size() == 2)
-      {
-        outfilename = file_names[1];
-      }
-      else
-      {
-        outfilename = "-";
-      }
-    }
-    
-    tool_options.infilename = infilename;
-    tool_options.outfilename = outfilename;
-    
-    tool_options.opt_outputformat = opt_outputformat;
-  
-    if (opt_strategy=="0")
-    { tool_options.opt_strategy=lazy;
-    }
-    else if (opt_strategy=="1")
-    { tool_options.opt_strategy=optimize;
-    }
-    else if (opt_strategy=="2")
-    { tool_options.opt_strategy=on_the_fly;
-    }
-    else if (opt_strategy=="3")
-    { tool_options.opt_strategy=on_the_fly_with_fixed_points;
-    }
-    else assert(0); // Unknown strategy. Should not occur here, as there is a check for this above.
-    
-    tool_options.rewrite_strategy=opt_rewriter;
-    tool_options.opt_precompile_pbes=opt_precompile_pbes;
-    tool_options.opt_construct_counter_example=opt_construct_counter_example;
-    tool_options.opt_store_as_tree=opt_store_as_tree;
-    tool_options.opt_data_elm=opt_data_elm;
-    tool_options.opt_use_hashtables=opt_use_hashtables;
+    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
-    gsErrorMsg("%s\n", e.what());
-    exit(1);
+    std::cerr << e.what() << std::endl;
   }
-    
-  return tool_options;
+
+  return EXIT_FAILURE;
 }
+

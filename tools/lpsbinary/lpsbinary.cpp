@@ -29,35 +29,28 @@
 #include <cstdio>
 #include <exception>
 
-//Boost
-#include <boost/program_options.hpp>
 #include "mcrl2/lps/binary.h"
 
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 using namespace std;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-namespace po = boost::program_options;
-
-#define VERSION "July 2007"
-
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
 ///
-typedef struct
-{
+struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
   RewriteStrategy strategy; ///< Rewrite strategy to use
-}tool_options;
+};
 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -76,6 +69,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
     static const char*  option_rewrite_strategy;
 
   private:
+
     boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
 
   public:
@@ -233,93 +227,47 @@ int do_binary(const tool_options& options)
 }
 
 ///Parses command line and sets settings from command line switches
-void parse_command_line(int ac, char** av, tool_options& t_options) {
-  po::options_description desc;
-  std::string rewriter;
+tool_options parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+                            "Replace finite sort variables by vectors of boolean variables in the LPS in\n"
+                            "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used.\n"
+                            "If OUTFILE is not present, stdout is used\n");
 
-  desc.add_options()
-      ("help,h",      "display this help")
-      ("version",     "display version information")
-      ("verbose,v",   "turn on the display of short intermediate messages")
-      ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("rewriter,R",   po::value<std::string>(&rewriter)->default_value("jitty"),
-                       "use rewrite strategy arg:\n"
-                       "'inner' for the innermost rewriter,\n"
-                       "'innerc' for the compiled innermost rewriter,\n"
-                       "'jitty' for the jitty rewriter (default), or\n"
-                       "'jittyc' for the compiled jitty rewriter")
-  ;
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("INFILE", po::value< string >(), "input file")
-      ("OUTFILE", po::value< string >(), "output file")
-  ;
-  po::options_description cmdline_options;
-  cmdline_options.add(desc).add(hidden);
+  clinterface.add_rewriting_options();
 
-  po::options_description visible("Allowed options");
-  visible.add(desc);
+  command_line_parser parser(clinterface, ac, av);
 
-  po::positional_options_description p;
-  p.add("INFILE", 1);
-  p.add("OUTFILE", -1);
+  tool_options t_options = { "-", "-", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
 
-  po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("help")) {
-    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-    cout << "Replace finite sort variables by vectors of boolean variables in the LPS in" << endl;
-    cout << "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used." << endl;
-    cout << "If OUTFILE is not present, stdout is used" << endl;
-
-    cout << endl;
-    cout << "Options:" << endl;
-    cout << desc;
-    cout << endl;
-    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
-
-    exit (0);
+  if (0 < parser.unmatched.size()) {
+    t_options.input_file = parser.unmatched[0];
+  }
+  if (1 < parser.unmatched.size()) {
+    t_options.output_file = parser.unmatched[1];
+  }
+  if (2 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
   }
 
-  if (vm.count("version")) {
-    print_version_information(NAME, AUTHOR);
-    exit (0);
-  }
-
-  if (vm.count("debug")) {
-    gsSetDebugMsg();
-  }
-
-  if (vm.count("verbose")) {
-    gsSetVerboseMsg();
-  }
-
-  t_options.strategy = RewriteStrategyFromString(rewriter.c_str());
-  if (t_options.strategy == GS_REWR_INVALID)
-  {
-    cerr << rewriter << " is not a valid rewriter strategy" << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  t_options.input_file = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-  t_options.output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
+  return t_options;
 }
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  tool_options options;
-
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return 0;
-  }
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
 
-  parse_command_line(argc,argv, options);
-  return do_binary(options);
+    return do_binary(parse_command_line(argc,argv));
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

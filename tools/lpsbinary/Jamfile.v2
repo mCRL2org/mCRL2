@@ -5,7 +5,6 @@ project lpsbinary
 tool lpsbinary
        : lpsbinary.cpp
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 

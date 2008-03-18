@@ -5,7 +5,6 @@ project toolset/lpsinfo
 tool lpsinfo
        : lpsinfo.cpp
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 

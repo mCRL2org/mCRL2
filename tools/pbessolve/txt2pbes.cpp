@@ -19,14 +19,6 @@
  
 #include <sstream> 
  
-//Boost 
-#include <boost/program_options.hpp> 
- 
-//MCRL2-specific 
-#include "mcrl2/core/messaging.h" 
-#include "mcrl2/utilities/version_info.h" 
-#include "mcrl2/utilities/aterm_ext.h"
-
 //PBES-Framework 
 #include "mcrl2/pbes/pbes.h" 
 #include "mcrl2/pbes/pbes_expression.h" 
@@ -45,9 +37,6 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 
-// command-line options
-#include <getopt.h>
-
 //ATERM-specific 
 #include "mcrl2/atermpp/substitute.h" 
 #include "mcrl2/core/identifier_string.h" 
@@ -58,6 +47,10 @@
 #include "mcrl2/atermpp/set.h" 
 #include "gc.h" 
 
+//MCRL2-specific 
+#include "mcrl2/core/messaging.h" 
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 // only for debug
 //#include "mcrl2/core/libstruct_core.h"
@@ -81,13 +74,11 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system; 
 using namespace mcrl2::pbes_system::pbes_expr;
  
-namespace po = boost::program_options; 
- 
 //Type definitions ====================== 
  
 
-string infilename; 
-string outfilename; 
+string infilename  = "-"; 
+string outfilename = "-"; 
 
 //t_pbes_simple ps;
 
@@ -483,25 +474,6 @@ pbes<> make_pbes(const string fileName){
   return pbes_simple_to_pbes();
 }
 
-void print_help(const char *name)
-{
-  fprintf(stdout,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Parse the contents of INFILE as a PBES and write the result to OUTFILE. If\n"
-    "INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n"
-    "\n"
-    "Options:\n"
-    "  -s, --syntax          display the syntax (and examples) of the expected text input\n"    	  
-    "  -h, --help            display this help and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , name
-  );
-}
-
 void print_syntax(void)
 {
   cerr<<"\nSYNTAX of the simple pbes text language\n";
@@ -532,73 +504,26 @@ void print_syntax(void)
   cerr<<"nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n\n";
 }
 
-
-void print_more_info(char *name)
-{
-  fprintf(stderr, "Try `%s --help' for more information.\n", name);
-}
-
-
-
 //========================== 
-void parse_command_line(int argc, char **argv)
+void parse_command_line(int ac, char **av)
 //==========================
 {
-#define SHORT_OPTIONS "shqvd"
-#define VERSION_OPTION 0x1
-  struct option long_options[] = {
-    { "syntax",  no_argument, NULL,  's' },
-    { "help",    no_argument, NULL,  'h' },
-    { "version", no_argument, NULL, VERSION_OPTION },
-    { "quiet",   no_argument, NULL,  'q' },
-    { "verbose", no_argument, NULL,  'v' },
-    { "debug",   no_argument, NULL,  'd' },
-    { 0, 0, 0, 0 }
-  };
-  int option;
-  //parse options
-  while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
-    switch (option) {
-    case 's': /* syntax */
-      print_syntax();
-      exit(0);
-    case 'h': /* help */
-      print_help(argv[0]);
-      exit(0);
-    case VERSION_OPTION: /* version */
-      print_version_information(NAME, AUTHOR);
-      exit(0);
-    case 'q': /* quiet */
-      gsSetQuietMsg();
-      break;
-    case 'v': /* verbose */
-      gsSetVerboseMsg();
-      break;
-    case 'd': /* debug */
-      gsSetDebugMsg();
-      break;
-    default:
-      print_more_info(argv[0]);
-      exit(1);
-    }
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+    "Parse the contents of INFILE as a PBES and write the result to OUTFILE. If\n"
+    "INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
+
+  clinterface.add_option("syntax", "display the syntax (and examples) of the expected text input", 's');
+
+  command_line_parser parser(clinterface, ac, av);
+
+  if (0 < parser.unmatched.size()) {
+    infilename = parser.unmatched[0];
   }
- 
-  //check for wrong number of arguments
-  int noargc; //non-option argument count
-  noargc = argc - optind;
-  if (noargc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-    print_more_info(argv[0]);
-    exit(1);
-  } 
-  else {
-    //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
-      infilename = argv[optind];
-    }
-    if (noargc == 2) {
-      outfilename = argv[optind + 1];
-    }
+  if (1 < parser.unmatched.size()) {
+    outfilename = parser.unmatched[1];
+  }
+  if (2 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
   }
 }
 
@@ -612,27 +537,34 @@ int main(int argc, char** argv)
 { 
   MCRL2_ATERM_INIT(argc, argv)
    
-  parse_command_line(argc, argv);
+  try {
+    parse_command_line(argc, argv);
+ 
+    cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
+ 
+    //Create the pbes from the input text 
+    pbes<> p = make_pbes(infilename); 
+    ATermAppl ap = p;
+ 
+    if (outfilename == "") {
+      gsVerboseMsg("The resulting PBES is:\n");
+      PrintPart_CXX(cout, (ATerm) ap, ppDefault);
+      cout << endl;
+    } else 
+      if(!p.save(outfilename, false)){
+        gsErrorMsg("writing to %s failed\n",outfilename.c_str());
+        exit(1);
+      }
+    
+    cerr <<"done\n";  
 
-  cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
+    return EXIT_SUCCESS;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
-  //Create the pbes from the input text 
-  pbes<> p = make_pbes(infilename); 
-  ATermAppl ap = p;
-
-  if (outfilename == "") {
-    gsVerboseMsg("The resulting PBES is:\n");
-    PrintPart_CXX(cout, (ATerm) ap, ppDefault);
-    cout << endl;
-  } else 
-    if(!p.save(outfilename, false)){
-      gsErrorMsg("writing to %s failed\n",outfilename.c_str());
-      exit(1);
-    }
-  
-  cerr <<"done\n";  
-
-  return 0; 
+  return EXIT_FAILURE;
 } 
 //======================================== 
  

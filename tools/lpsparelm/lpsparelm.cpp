@@ -1,4 +1,4 @@
-//  Copyright 2007 J.van der Wulp. Distributed under the Boost
+//  Copyright 2007 J.van der Wulp, Wieger Wesselink. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -9,35 +9,28 @@
 
 #include <exception>
 
-//Boost
-#include <boost/program_options.hpp>
-
-#include <mcrl2/lps/specification.h>
-#include <mcrl2/lps/parelm.h>
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/parelm.h"
 
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 struct tool_configuration {
-  std::string input_file;  ///< Name of the file to read input from
-  std::string output_file; ///< Name of the file to write output to (or stdout)
+  std::string input;  ///< Name of the file to read input from
+  std::string output; ///< Name of the file to write output to (or stdout)
 
-  tool_configuration() {
-  }
-
-  tool_configuration(std::string in, std::string out) : input_file(in), output_file(out) {
+  tool_configuration(std::string const& in, std::string const& out) : input(in), output(out) {
   }
 
   bool execute() {
     mcrl2::lps::specification lps_specification;
     
     try {
-      lps_specification.load(input_file);
-     
+      lps_specification.load(input);
     }
     catch (std::exception& e) {
       // XXX problem: the exceptions have bad descriptions, resorting to manual handling
-      std::cerr << "Fatal: could not read from file `" << input_file << "'" << std::endl;
+      std::cerr << "Fatal: could not read from file `" << input << "'" << std::endl;
 
       return false;
     }
@@ -45,11 +38,11 @@ struct tool_configuration {
     try {
       mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
 
-      r.save(output_file);
+      r.save(output);
     }
     catch (std::exception& e) {
       // XXX problem: the exceptions have bad descriptions, resorting to manual handling
-      std::cerr << "Fatal: could not write to file `" << output_file << "'" << std::endl;
+      std::cerr << "Fatal: could not write to file `" << output << "'" << std::endl;
 
       return false;
     }
@@ -57,63 +50,23 @@ struct tool_configuration {
     return true;
   }
 
-  tool_configuration(int ac, char** av) {
-    namespace po = boost::program_options;
-  
-    po::options_description description;
+  tool_configuration(int ac, char** av) : input("-"), output("-") {
+    interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+                             "Remove unused parameters from the linear process specification (LPS) in INFILE\n"
+                             "and write the result to OUTFILE. If INFILE is not present, stdin is used. If\n"
+                             "OUTFILE is not present, stdout is used.\n");
 
-    description.add_options()
-      ("help,h",      "display this help")
-      ("verbose,v",   "turn on the display of short intermediate messages")
-      ("debug,d",     "turn on the display of detailed intermediate messages")
-      ("version",     "display version information")
-    ;
-    po::options_description hidden("Hidden options");
-    hidden.add_options()
-        ("INFILE", po::value< string >(), "input file")
-        ("OUTFILE", po::value< string >(), "output file");
-  
-    po::options_description cmdline_options;
-    cmdline_options.add(description).add(hidden);
-          
-    po::options_description visible("Allowed options");
-    visible.add(description);
-          
-    po::positional_options_description p;
-    p.add("INFILE", 1).add("OUTFILE", 1);
-  
-    po::variables_map vm;
-    po::store(po::command_line_parser(ac, av).
-      options(cmdline_options).positional(p).run(), vm);
-    po::notify(vm);
-  
-    if (vm.count("verbose"))
-    {
-      gsSetVerboseMsg();
+    command_line_parser parser(clinterface, ac, av);
+
+    if (0 < parser.unmatched.size()) {
+      input = parser.unmatched[0];
     }
-       
-    if (vm.count("help")) {
-      std::cout <<
-      "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
-      "Remove unused parameters from the LPS in INFILE and write the result to OUTFILE.\n"
-      "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n" 
-      "used.\n"
-      "\n"
-      "Options:\n"
-      << description <<
-      "\n"
-      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-      ;
-      exit (0);
+    if (1 < parser.unmatched.size()) {
+      output = parser.unmatched[1];
     }
-          
-    if (vm.count("version")) {
-      print_version_information(NAME, AUTHOR);
-      exit (0);
+    if (2 < parser.unmatched.size()) {
+      clinterface.throw_exception("too many file arguments");
     }
-  
-    input_file  = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
-    output_file = (0 < vm.count("OUTFILE")) ? vm["OUTFILE"].as< string >() : "-";
   }
 };
 
@@ -177,11 +130,18 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
   
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return 0;
-  }
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
 
-  return tool_configuration(argc, argv).execute();
+    return tool_configuration(argc, argv).execute();
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

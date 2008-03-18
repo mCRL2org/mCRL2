@@ -19,25 +19,21 @@
 #include <utility>
 #include <sstream>
 
-//Boost
-#include <boost/program_options.hpp>
-
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
-
-namespace po = boost::program_options;
+using namespace mcrl2::utilities;
 
 //Type definitions
 //----------------
@@ -246,133 +242,68 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 //function parse_command_line
 //---------------------------
 /// \brief Parse the command line options.
-t_tool_options parse_command_line(int argc, char** argv)
+t_tool_options parse_command_line(int ac, char** av)
 {
-	t_tool_options tool_options;
-	string opt_outputformat;
-	string opt_strategy;
-	vector< string > file_names;
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+      "Transform the PBES from INFILE into an equivalent BES and write it to OUTFILE.\n"
+      "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is\n");
 
-	po::options_description desc;
+  clinterface.add_rewriting_options();
 
-	desc.add_options()
-			("strategy,s",	po::value<string>(&opt_strategy)->default_value("lazy"), "use strategy arg (default 'lazy');\n"
-							"'finite' for computing all possible boolean equations, or\n"
-							"'lazy' for computing only boolean equations which can be reached from the initial state")
-			("output,o",	po::value<string>(&opt_outputformat)->default_value("binary"), "use outputformat arg (default 'binary');\n"
-			 				"available output formats are binary, internal and cwi")
-			("verbose,v",	"turn on the display of short intermediate messages")
-			("debug,d",		"turn on the display of detailed intermediate messages")
-			("version",		"display version information and terminate")
-			("help,h",		"display this help and terminate")
-			;
+  clinterface.
+    add_option("strategy",
+      make_mandatory_argument("STRAT"),
+      "use strategy STRAT (default 'lazy');\n"
+      " 'finite' for computing all possible boolean equations, or\n"
+      " 'lazy' for computing only boolean equations which can be reached from the\n"
+      "        initial state",
+      's').
+    add_option("output",
+      make_mandatory_argument("FORMAT"),
+      "use outputformat FORMAT (default 'binary');\n"
+      "available output formats are binary, internal and cwi",
+      'o');
 
-	po::options_description hidden("Hidden options");
-	hidden.add_options()
-			("file_names",	po::value< vector< string > >(), "input/output files")
-			;
+  command_line_parser parser(clinterface, ac, av);
 
-	po::options_description cmdline_options;
-	cmdline_options.add(desc).add(hidden);
+  t_tool_options tool_options;
 
-	po::options_description visible("Allowed options");
-	visible.add(desc);
+  tool_options.opt_outputformat = "lazy";
+  tool_options.opt_strategy     = "binary";
+  tool_options.infilename       = "-";
+  tool_options.outfilename      = "-";
 
-	po::positional_options_description p;
-	p.add("file_names", -1);
+  if (parser.options.count("output")) { // Output format
+    std::string format = parser.option_argument("output");
 
-	po::variables_map vm;
-	po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
-	po::notify(vm);
+    if (!((format == "binary") || (format == "internal") || (format == "cwi"))) {
+      clinterface.throw_exception("unknown output format specified (got `" + format + "')");
+    }
 
-	if (vm.count("help"))
-	{
-		cout << "Usage: " << argv[0] << " [OPTION]... [INFILE [OUTFILE]]" << endl;
-		cout << "Transform the PBES from INFILE into an equivalent BES and write it to OUTFILE." << endl;
-		cout << "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is" << endl;
-                cout << "used." << endl;
-		cout << endl;
-                cout << "Options:" << endl;
-		cout << desc;
-                cout << endl;
-                cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
+    tool_options.opt_outputformat = format;
+  }
 
-		exit(0);
-	}
+  if (parser.options.count("strategy")) { // Strategy
+    std::string strategy = parser.option_argument("strategy");
 
-	if (vm.count("version"))
-	{
-                print_version_information(NAME, AUTHOR);
-		exit(0);
-	}
+    if (!((strategy == "lazy") || (strategy == "internal") || (strategy == "cwi"))) {
+      clinterface.throw_exception("unknown output strategy specified (got `" + strategy + "')");
+    }
 
-	if (vm.count("debug"))
-	{
-		gsSetDebugMsg();
-	}
+    tool_options.opt_strategy = strategy;
+  }
 
-	if (vm.count("verbose"))
-	{
-		gsSetVerboseMsg();
-	}
+  if (0 < parser.unmatched.size()) {
+    tool_options.infilename = parser.unmatched[0];
+  }
+  if (1 < parser.unmatched.size()) {
+    tool_options.outfilename = parser.unmatched[1];
+  }
+  if (2 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
+  }
 
-	if (vm.count("output")) // Output format
-	{
-		opt_outputformat = vm["output"].as< string >();
-		if (!((opt_outputformat == "internal") || (opt_outputformat == "binary") || (opt_outputformat == "cwi")))
-		{
-			gsErrorMsg("Unknown outputformat specified. Available outputformats are binary, internal and cwi\n");
-			exit(1);
-		}
-	}
-
-	if (vm.count("strategy")) // Output format
-	{
-		opt_strategy = vm["strategy"].as< string >();
-		if (!((opt_strategy == "finite") || (opt_strategy == "lazy")))
-		{
-			gsErrorMsg("Unknown strategy specified. Available strategies are finite and lazy\n");
-			exit(1);
-		}
-	}
-	
-	if (vm.count("file_names"))
-	{
-		file_names = vm["file_names"].as< vector< string > >();
-	}
-
-	string infilename;
-	string outfilename;
-	if (file_names.size() == 0)
-	{
-		// Read from and write to stdin
-		infilename = "-";
-		outfilename = "-";
-	}
-	else if ( 2 < file_names.size())
-	{
-		cerr << NAME << ": Too many arguments" << endl;
-		exit(1);
-	}
-	else
-	{
-		infilename = file_names[0];
-		if (file_names.size() == 2)
-		{
-			outfilename = file_names[1];
-		}
-		else
-		{
-			outfilename = "-";
-		}
-	}
-	
-	tool_options.infilename = infilename;
-	tool_options.outfilename = outfilename;
-	
-	tool_options.opt_outputformat = opt_outputformat;
-	tool_options.opt_strategy = opt_strategy;
-	return tool_options;
+  return tool_options;
 }
 
 //Main Program
@@ -382,15 +313,20 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
 
-  process(parse_command_line(argc, argv));
+    process(parse_command_line(argc, argv));
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+    return EXIT_SUCCESS;
   }
-#endif
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
-  return 0;
+  return EXIT_FAILURE;
 }

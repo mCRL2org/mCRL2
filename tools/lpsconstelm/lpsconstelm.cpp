@@ -22,20 +22,17 @@
 #include <stdlib.h>
 #include <fstream>
 
-//Boost
-#include <boost/program_options.hpp>
-
-#include "mcrl2/core/struct.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
-
 //Rewriter
 #include "mcrl2/data/rewrite.h"
 
 //Aterm
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+
+#include "mcrl2/core/struct.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 using namespace atermpp;
 using namespace mcrl2::utilities;
@@ -994,8 +991,7 @@ inline bool lpsConstElm::loadFile(std::string const& filename) {
   }
   catch (std::runtime_error e)
   {
-    gsErrorMsg("could not read input file '%s'\n", filename.c_str());
-    return false;
+    throw std::runtime_error("could not read input file '" + filename + "'\n");
   }
   //LPS x = p_spec.process();
   //gsDebugMsg("%s\n", pp(x).c_str());
@@ -1010,12 +1006,10 @@ inline bool lpsConstElm::loadFile(std::string const& filename) {
 inline bool lpsConstElm::readStream() {
   ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
   if (z == NULL){
-    gsErrorMsg("lpsconstelm: Could not read LPS from stdin\n");
-    return false;
+    throw std::runtime_error("Could not read LPS from stdin");
   };
   if (!gsIsSpecV1(z)){
-    gsErrorMsg("lpsconstelm: Stdin does not contain an LPS\n");
-    return false;
+    throw std::runtime_error("Stdin does not contain an LPS");
   }
   p_spec = specification(z);
   //gsDebugMsg("%s\n", pp(p_spec.process()).c_str());
@@ -1286,117 +1280,53 @@ bool lpsConstElm::filter() {
   return true;
 }
 
-void lpsConstElm::parse_command_line(int argc, char** argv) {
-  namespace po = boost::program_options;
-
-  po::options_description description;
-
-  /* Name of the file to read input from (or standard input: "-") */
-  std::vector < std::string > file_names;
-  std::vector < std::string > csv_names;
-
-  description.add_options()
-    ("no-singleton", "do not remove sorts consisting of a single element")
-    ("no-condition", "all summand conditions are set true (faster)")
-    ("no-reachable", "does not remove summands which are not visited")
-    ("verbose,v",    "turn on the display of short intermediate messages")
-    ("csv,c",po::value< std::vector< std::string > >(), "stores the value changes of the process parameters in a CSV file separated by tabs")
-    ("debug,d",      "turn on the display of detailed intermediate messages")
-    ("version",      "display version information")
-    ("help,h",       "display this help")
-  ;
-
-  po::options_description hidden("Hidden options");
-
-  hidden.add_options()
-     ("file_names", po::value< std::vector< std::string > >(), "input/output files")
-  ;
-
-  po::options_description cmdline_options;
-  cmdline_options.add(description).add(hidden);
-
-  po::options_description visible("Allowed options");
-  visible.add(description);
-
-  po::positional_options_description p;
-  p.add("file_names", -1);
-
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("help")) {
-    std::cout <<
-    "Usage: "<< argv[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+void lpsConstElm::parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
     "Remove constant process parameters from the LPS in INFILE and write the result\n"
     "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
-    "stdin is used.\n"
-    "\n"
-    "Options:\n"
-    << description <<
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    ;
-    exit (EXIT_SUCCESS);
-  }
+    "stdin is used.\n");
 
-  if (vm.count("version")) {
-    print_version_information(NAME, AUTHOR);
-    exit (EXIT_SUCCESS);
-  }
+  clinterface.add_option("no-singleton", "do not remove sorts consisting of a single element");
+  clinterface.add_option("no-condition", "all summand conditions are set true (faster)");
+  clinterface.add_option("no-reachable", "does not remove summands which are not visited");
+  clinterface.add_option("csv", make_mandatory_argument("CSV"), "stores the value changes of the process parameters in a CSV file separated by tabs", 'c');
 
-  setVerbose(0 < vm.count("verbose"));
-  setDebug(0 < vm.count("debug"));
-  setNoSingleton(0 < vm.count("no-singleton"));
-  setAllTrue(0 < vm.count("no-condition"));
-  setReachable(0 == vm.count("no-reachable"));
+  command_line_parser parser(clinterface, ac, av);
 
-  if(vm.count("csv"))
+  setNoSingleton(0 < parser.options.count("no-singleton"));
+  setAllTrue(0 < parser.options.count("no-condition"));
+  setReachable(0 == parser.options.count("no-reachable"));
+
+  if(parser.options.count("csv"))
   {
-    setShow(0 < vm.count("csv")); 
-    csv_names = vm["csv"].as< std::vector< std::string > >();
+    setShow(true); 
+
+    p_logfile = parser.option_argument("csv");
   
-    gsDebugMsg( "Output file %s", csv_names[0].c_str() );
-
-    if (csv_names.size() == 0)
-    {
-      std::cerr << "csv option requires a single OUTPUT file (too few arguments)"<< std::endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (csv_names.size()>1)
-    {
-      std::cerr << "csv option requires a single OUTPUT file (too many arguments)"<< std::endl;
-      exit(EXIT_FAILURE);
-    }
-
-    p_logfile = csv_names[0] ;
+    gsDebugMsg( "Output file %s", p_logfile.c_str() );
   } else {
     setShow(false);
   }
 
-  if (vm.count("file_names")){
-    file_names = vm["file_names"].as< std::vector< std::string > >();
+  try {
+    if (0 < parser.unmatched.size()) {
+      loadFile(parser.unmatched[0]);
+    }
+    else {
+      /* Read from standard input */
+      readStream();
+    }
+    if (1 < parser.unmatched.size()) {
+      setSaveFile(parser.unmatched[1]);
+    }
+  }
+  catch (std::exception& e) {
+    // rethrow error messages for correct formatting
+    clinterface.throw_exception(e.what());
   }
 
-  if (file_names.size() == 0){
-    /* Read from standard input */
-    if (!readStream()) {
-      exit (EXIT_FAILURE);
-    }
-  }
-  else if (2 < file_names.size()) {
-    std::cerr << "lpsconstelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< std::endl;
-    exit(EXIT_FAILURE);
-  }
-  else {
-    if (!loadFile(file_names[0])) {
-      exit (EXIT_FAILURE);
-    }
-
-    if (file_names.size() == 2) {
-      setSaveFile(file_names[1]);
-    }
+  if (2 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
   }
 }
 
@@ -1410,10 +1340,17 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return 0;
-  }
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return 0;
+    }
 #endif
-  exit(lpsConstElm(argc, argv).execute() ? EXIT_SUCCESS : EXIT_FAILURE );
+    return lpsConstElm(argc, argv).execute();
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

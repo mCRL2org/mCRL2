@@ -31,7 +31,8 @@ obj squadt_interface
       ;
 
 mcrl2-library utilities
-      : source/aterm_ext.cpp
+      : source/command_line.cpp
+        source/aterm_ext.cpp
         source/numeric_string.cpp
         source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?

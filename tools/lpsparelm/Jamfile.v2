@@ -5,7 +5,6 @@ project lpsparelm
 tool lpsparelm
        : lpsparelm.cpp
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 

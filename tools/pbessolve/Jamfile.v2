@@ -7,14 +7,12 @@ project toolset/pbessolve
 
 tool pbessolve
        : pbessolve.cpp
-         /site-config//boost_program_options
        : <status>experimental
        ;
 
 tool txt2pbes
        : txt2pbes.cpp
-       : <toolset>msvc:<library>/libraries//getopt
-         <status>experimental
+       : <status>experimental
        ;
 
 install-tools pbessolve txt2pbes ;

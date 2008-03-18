@@ -19,15 +19,14 @@
 
 //Boost
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 
 //mCRL2
-#include <mcrl2/atermpp/aterm.h>
-#include <mcrl2/lps/linear_process.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
@@ -38,11 +37,6 @@ using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2;
-
-namespace po = boost::program_options;
-
-/* Verbosity switch */
-bool        verbose = false;
 
 /* Name of the file to read input from (or standard input: "-") */
 std::string file_name;
@@ -78,61 +72,17 @@ static inline int get_number_of_used_actions(lps::linear_process lps){
 }
 
 void parse_command_line(int ac, char** av) {
-  po::options_description desc;
+  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE]\n"
+                           "Print basic information on the linear process specification (LPS) in INFILE.");
+      
+  command_line_parser parser(clinterface, ac, av);
 
-  desc.add_options()
-      ("help,h",      "display this help")
-      ("verbose,v",   "turn on the display of short intermediate messages")
-      ("debug,d",    "turn on the display of detailed intermediate messages")
-      ("version",     "display version information")
-  ;
-      
-  po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("INFILE", po::value< string >(), "input file")
-  ;
-      
-  po::options_description cmdline_options;
-  cmdline_options.add(desc).add(hidden);
-      
-  po::options_description visible("Allowed options");
-  visible.add(desc);
-      
-  po::positional_options_description p;
-  p.add("INFILE", -1);
-      
-  po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
-  po::notify(vm);
-      
-  if (vm.count("help")) {
-    cout << "Usage: "<< av[0] << " [OPTION]... [INFILE]" << endl;
-    cout << "Print basic information on the LPS in INFILE." << endl;
-    cout << endl;
-    cout << "Options:" << endl;
-    cout << desc;
-    cout << endl;
-    cout << "Report bugs at <http://www.mcrl2.org/issuetracker>." << endl;
-
-    exit (0);
+  if (0 < parser.unmatched.size()) {
+    file_name = parser.unmatched[0];
   }
-      
-  if (vm.count("version")) {
-    print_version_information(NAME, AUTHOR);
-    exit (0);
+  if (1 < parser.unmatched.size()) {
+    clinterface.throw_exception("too many file arguments");
   }
-
-  if (vm.count("debug")) {
-    gsSetDebugMsg();
-  }
-
-  if (vm.count("verbose")) {
-    gsSetVerboseMsg();
-  }
-
-  verbose  = 0 < vm.count("verbose");
-  file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
 }
         
 // SQuADT protocol interface
@@ -224,15 +174,17 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
     parse_command_line(argc,argv);
 
     lps::specification lps_specification;
  
-    try
-    {
+    try {
       lps_specification.load(file_name);
       lps::linear_process lps = lps_specification.process();
 		 
@@ -247,13 +199,15 @@ int main(int argc, char** argv)
       //cout << "Number of used versus declared multi-actions: " << "" << endl;
       cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
     }
-    catch (std::runtime_error e)
-    {
+    catch (std::exception& e) {
       std::cerr << "Error: Unable to load LPS from `" + file_name + "'\n";
     }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-#endif
 
-  return 0;
+    return EXIT_SUCCESS;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

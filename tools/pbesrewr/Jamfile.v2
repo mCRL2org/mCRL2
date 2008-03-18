@@ -6,7 +6,6 @@ tool pbesrewr
        : pbesrewr.cpp
          /libraries//lps
          /libraries//pbes
-         /site-config//boost_program_options
        ;
 
 install-tools pbesrewr ;

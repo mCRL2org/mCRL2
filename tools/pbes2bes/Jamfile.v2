@@ -7,13 +7,11 @@ project toolset/pbes2bes
 
 tool pbes2bes
        : pbes2bes.cpp
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 
 tool pbes2bool
        : pbes2bool.cpp
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
        ;
 
