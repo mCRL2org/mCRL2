@@ -313,15 +313,23 @@ hr { height: 0px;
 .directory div { display: none; margin: 0px; }
 .directory img { vertical-align: -30%; }
 
+/* Workaround for Doxygen 1.5.5 */
+
+.navigation p {
+  display: none;
+}
+
 /* tabs styles */
 
 div.tabs {
    padding: 0;
    white-space: nowrap;
-   line-height: 5.1em;
+   line-height: 1.1em;
    overflow: visible;
    border-collapse: collapse;
    text-align: left;
+   margin: 0.3em 0 0 14.6em;
+   font-size: 95%;
 }
 
 div.tabs ul {
@@ -333,20 +341,17 @@ div.tabs ul {
 div.tabs li {
    display: inline;
    margin: 0 .3em 0 0;
-}
-
-div.tabs li span {
-   padding: 0.2em;
+   padding: .2em .2em .1em .2em;
    border: 1px solid #aaa;
    border-bottom: none;
-   background-color: #eee;
    overflow: visible;
+   background-color: #eee;
 }
 
-div.tabs li.current span {
+div.tabs li.current {
   background-color: white;
+  padding-bottom: .2em;
   font-weight: bold;
-  border-bottom: 1px solid white;
 }
 
 div.tabs table {
@@ -371,7 +376,7 @@ div.tabs a {
 
 div.tabs a:link, div.tabs a:visited,
 div.tabs a:active {
-       color: #002bb8;
+  color: #002bb8;
 }
 
 div.tabs a:hover {
@@ -379,7 +384,7 @@ div.tabs a:hover {
 }
 
 div.tabs input {
-   border: 1px solid #aaa;
+  border: 1px solid #aaa;
 }
 
 div.tabs td {
