@@ -32,12 +32,12 @@
  *  introduced.
  **/
 /**
- * \mainpage A set of reusable components for command line interfacing for the mCRL2 toolset
+ * \page introduction A set of reusable components for command line interfacing for the mCRL2 toolset
  *
  * The mCRL2 toolset is growing rapidly and at present contains at least 36
  * tools. All of these tools have similar command line interfaces and very
  * similar usage patterns. Over time a lot of small inconsistencies have
- * arissen beteen the command line interfaces of the different tools.
+ * arisen between the command line interfaces of the different tools.
  * Recently interface conventions have been formulated, collectively
  * reviewed and accepted, and only need to be applied. The cost of adapting
  * al tools is quite substantial and by itself does not negate the
@@ -286,7 +286,7 @@ namespace mcrl2 {
          * \endverbatim
          *
          * Where toolset version, revision and copyright year are constants
-         * supplied interally at compile time.
+         * supplied internally at compile time.
          **/
         inline void print_copy_message(std::ostream& out) const {
           out << m_name << " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl
@@ -344,7 +344,7 @@ namespace mcrl2 {
          * The following adds a mandatory and optional option:
          * \code
          *  add_option("timeout", make_mandatory_argument("SEC"), "timeout occurs after SEC number of seconds", 's');
-         *  add_option("recusive", make_optional_argument("DEPTH", "2"), "stop at recursion level DEPTH (default 2)", 'r');
+         *  add_option("recursive", make_optional_argument("DEPTH", "2"), "stop at recursion level DEPTH (default 2)", 'r');
          * \endcode
          * The result is a command line interface with parser behaviour:
          * \verbatim
@@ -418,7 +418,7 @@ namespace mcrl2 {
      *
      * Note the use of the option_argument method.  It simplifies argument
      * extraction in the case that the same option does not occur multiple
-     * times the auxilliary option_argument() and option_argument_as()
+     * times the auxiliary option_argument() and option_argument_as()
      * functions are provided.
      **/
     class command_line_parser {
@@ -497,7 +497,7 @@ namespace mcrl2 {
         }
 
         /**
-         * \brief Recognises options from an array that represens a preparsed command on the command line, and executes default procedures for default options.
+         * \brief Recognises options from an array that represents a pre-parsed command on the command line, and executes default procedures for default options.
          * \param[in] d the interface description
          * \param[in] count amount of arguments
          * \param[in] arguments C-style array with arguments

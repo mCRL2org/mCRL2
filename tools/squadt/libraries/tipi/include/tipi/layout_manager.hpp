@@ -694,7 +694,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e a pointer to a layout element
+     * \param[in] e a reference to a layout element
      * \param[in] a how the element should be aligned relative to the box
      * \param[in] m the margins of the element relative to other elements that occupy the box
      * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
@@ -709,7 +709,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e a pointer to a layout element
+     * \param[in] e a reference to a layout element
      * \param[in] a how the element should be aligned relative to the box
      * \param[in] m the margins of the element relative to other elements that occupy the box
      * \param[in] v whether the element is visible and has an effect on other elements that occupy the box
@@ -724,7 +724,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e a pointer to a layout element
+     * \param[in] e a reference to a layout element
      * \param[in] m the margins of the element relative to other elements that occupy the box
      * \return *this
      **/

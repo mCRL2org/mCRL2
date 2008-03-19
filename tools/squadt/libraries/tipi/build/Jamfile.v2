@@ -51,11 +51,11 @@ alias messenger
       tool_display.cpp
       layout_base.cpp
       layout_elements.cpp
-      event_handlers.cpp
       mime_type.cpp
       transport
       store_visitor.cpp
       restore_visitor.o
+      detail/event_handlers.cpp
     : <threading>multi
       <use>/libraries/utilities//headers
       <dependency>/site-config//boost_filesystem

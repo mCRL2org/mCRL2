@@ -104,7 +104,7 @@ namespace squadt {
       }
 
       for (std::deque < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
-        if ((*i)[0] == '\'' || (*i)[0] == '\"' && 2 < i->size()) {
+        if (((*i)[0] == '\'' || (*i)[0] == '\"') && 2 < i->size()) {
           *(d++) = (*i).substr(1, i->size() - 2).c_str();
         }
         else {
