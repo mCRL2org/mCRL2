@@ -255,6 +255,20 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_sp
     return NULL;
   }
 
+  //append data declarations and action declarations for the ar_spec to the lps_spec
+  t_data_decls lps_data = get_data_decls(lps_spec);
+  t_data_decls ar_data = get_data_decls(ar_spec);
+  concat_data_decls(&lps_data, &ar_data);
+  lps_spec = set_data_decls(lps_spec, lps_data);
+  ATermList lps_actions = ATLgetArgument(ATAgetArgument(lps_spec, 1), 0);
+  ATermList ar_actions = ATLgetArgument(ATAgetArgument(ar_spec, 1), 0);
+  ATermList new_actions = ATconcat(lps_actions, ar_actions);
+  lps_spec = ATsetArgument(lps_spec, (ATerm)gsMakeActSpec(new_actions), 1);
+  //remove decls from ar_spec
+  initialize_data_decls(&ar_data);
+  ar_spec = set_data_decls(ar_spec, ar_data);
+  ar_spec = ATsetArgument(ar_spec, (ATerm)gsMakeActSpec(ATmakeList0()), 1);
+
   //implement system sorts and data expressions occurring in spec
   ATermList substs     = ATmakeList0();
   t_data_decls data_decls;

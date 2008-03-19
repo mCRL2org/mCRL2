@@ -50,7 +50,7 @@ using namespace std;
 //----------------
 
 //t_phase represents the phases at which the program should be able to stop
-typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_MERGE} t_phase;
+typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL} t_phase;
 
 //t_tool_options represents the options of the tool 
 typedef struct {
@@ -314,8 +314,6 @@ static t_tool_options parse_command_line(int argc, char **argv)
           opt_end_phase = PH_TYPE_CHECK;
         } else if (strcmp(optarg, "di") == 0) {
           opt_end_phase = PH_DATA_IMPL;
-        } else if (strcmp(optarg, "me") == 0) {
-          opt_end_phase = PH_MERGE;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
           exit(1);
@@ -473,54 +471,6 @@ lps::specification rewrite_lps(lps::specification lps){
   }   
   new_summands = reverse(new_summands);
   return set_lps(lps, set_summands(lps.process(), new_summands));
-}
-
-lps::specification merge_declarations(ATermAppl action_rename, lps::specification lps_spec)
-{
-  // merges action declarations in action_rename with the sections in the lps
-  // specification lps_spec and resolves variable name conflicts
-  lps::specification result;
-  lps::linear_process result_lp = lps_spec.process();
-  //action rename already contains all data elements of lps_spec since typechecking
-  data_specification new_data = data_specification(ATAgetArgument(action_rename, 0));
-
-  gsVerboseMsg("  Merging action labels...\n");
-
-  //merge action labels
-  lps::action_label_list lps_actions = lps_spec.action_labels();
-  lps::action_label_list new_actions = lps::action_label_list(ATLgetArgument(ATAgetArgument(action_rename, 1),0));
-  lps_actions = reverse(lps_actions);
-  for(lps::action_label_list::iterator i=new_actions.begin(); i!=new_actions.end(); i++){
-    lps_actions = push_front(lps_actions, *i);
-  }
-  lps_actions = reverse(lps_actions);
-
-  gsVerboseMsg("  Resolving naming conflicts...\n");
-
-  // Resolve name clashes between the rename rule variables and lps_spec
-  aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
-  aterm_appl rename_rule = *rename_rules.begin();
-  aterm_appl::iterator j = rename_rule.begin();
-  data_variable_list rule_vars = data_variable_list(*j);
-
-  std::set<identifier_string> used_names;
-  used_names.insert(boost::make_transform_iterator(rule_vars.begin(), mcrl2::data::detail::data_variable_name()),
-                    boost::make_transform_iterator(rule_vars.end()  , mcrl2::data::detail::data_variable_name())
-                   );
-  postfix_identifier_generator generator("_S");
-  generator.add_identifiers(used_names);
-  result_lp = rename_free_variables(result_lp, generator);
-
-  generator.clear_context();
-  generator.add_identifiers(used_names);
-  result_lp = rename_summation_variables(result_lp, generator);
-
-  generator.clear_context();
-  generator.add_identifiers(used_names);
-  result = lps::specification(new_data, lps_actions, result_lp, lps_spec.initial_process());
-  result = rename_process_parameters(result, generator);
-
-  return result;
 }
 
 /****************  Main rename routine   ****************/
@@ -825,7 +775,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
     return action_rename_spec;
   }
 
-  //type check formula
+  //type check formula against a reconstructed lps specification
   ATermAppl reconstructed_lps_old_spec = reconstruct_spec(lps_old_spec);
 
   gsVerboseMsg("type checking...\n");
@@ -849,18 +799,6 @@ ATermAppl rename_actions(t_tool_options tool_options)
     return action_rename_spec;
   }
   lps_old_spec = specification(reconstructed_lps_old_spec);
-  
-  //merge declarations from lps_old_spec and action_rename_spec
-  gsVerboseMsg("merging declarations...\n");
-  lps_old_spec = merge_declarations(action_rename_spec, lps_old_spec);
-  if (lps_old_spec == NULL) 
-  {
-    return NULL;
-  }
-  if (end_phase == PH_MERGE) 
-  {
-    return lps_old_spec;
-  }
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
@@ -886,7 +824,7 @@ static void print_help(char *name)
     "  -pPHASE, --end-phase=PHASE\n"
     "                        stop conversion after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
-    "                        'di' (data implementation), 'me' (merge data types)\n"
+    "                        'di' (data implementation)\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
