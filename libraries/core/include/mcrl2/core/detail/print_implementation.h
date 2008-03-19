@@ -302,7 +302,7 @@ static ATermAppl SubstituteAssignments_appl(ATermAppl Var,
        left-hand side.
 */
 
-static ATermList gsGroupDeclsBySort(const ATermList Decls);
+static ATermList gsGroupDeclsBySort(ATermList Decls);
 /*Pre: Decls is an ATermList containing declarations of the form
        Decl(Name, Sort) from the internal format
   Ret: a list containing the declarations from Decls, where declarations of the
@@ -983,13 +983,13 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
 void PRINT_FUNC(PrintDecls)(PRINT_OUTTYPE OutStream, const ATermList Decls,
   t_pp_format pp_format, const char *Terminator, const char *Separator)
 {
-  int n = ATgetLength(Decls);
-  if (n > 0) {
-    for (int i = 0; i < n-1; i++) {
-      ATermAppl Decl = ATAelementAt(Decls, i);
-      //check if sorts of Decls(i) and Decls(i+1) are equal
+  if (!ATisEmpty(Decls)) {
+    ATermAppl Decl = ATAgetFirst(Decls);
+    ATermList NextDecls = ATgetNext(Decls);
+    while (!ATisEmpty(NextDecls))
+    {
       if (ATisEqual(ATgetArgument(Decl, 1),
-          ATgetArgument(ATelementAt(Decls, i+1), 1))) {
+          ATgetArgument(ATAgetFirst(NextDecls), 1))) {
         PRINT_FUNC(PrintDecl)(OutStream, Decl, pp_format, false);
         PRINT_FUNC(fprints)(OutStream, ",");
       } else {
@@ -997,9 +997,10 @@ void PRINT_FUNC(PrintDecls)(PRINT_OUTTYPE OutStream, const ATermList Decls,
         if (Terminator  != NULL) PRINT_FUNC(fprints)(OutStream, Terminator);
         if (Separator  != NULL) PRINT_FUNC(fprints)(OutStream, Separator);
       }
+      Decl = ATAgetFirst(NextDecls);
+      NextDecls = ATgetNext(NextDecls);
     }
-    PRINT_FUNC(PrintDecl)(OutStream, ATAelementAt(Decls, n-1),
-      pp_format, true);
+    PRINT_FUNC(PrintDecl)(OutStream, Decl, pp_format, true);
     if (Terminator  != NULL) PRINT_FUNC(fprints)(OutStream, Terminator);
   }
 }
@@ -1820,37 +1821,36 @@ ATermAppl SubstituteAssignments_appl(ATermAppl Var, ATermList Assignments)
   return Result;
 }
 
-ATermList gsGroupDeclsBySort(const ATermList Decls)
+ATermList gsGroupDeclsBySort(ATermList Decls)
 {
-  int DeclsLength = ATgetLength(Decls);
-  if (DeclsLength > 0) {
-    ATermTable SortDeclsTable = ATtableCreate(2*DeclsLength, 50);
+  if (!ATisEmpty(Decls)) {
+    ATermTable SortDeclsTable = ATtableCreate(2*ATgetLength(Decls), 50);
     //Add all variable declarations from Decls to hash table
     //SortDeclsTable
-    for (int i = 0; i < DeclsLength; i++) {
-      ATermAppl Decl = ATAelementAt(Decls, i);
+    while (!ATisEmpty(Decls))
+    {
+      ATermAppl Decl = ATAgetFirst(Decls);
       ATermAppl DeclSort = ATAgetArgument(Decl, 1);
-      ATermList CorDecls = ATLtableGet(SortDeclsTable,
-        (ATerm) DeclSort);
-      if (CorDecls == NULL) {
-        ATtablePut(SortDeclsTable, (ATerm) DeclSort,
-          (ATerm) ATmakeList1((ATerm) Decl));
-      } else {
-        ATtablePut(SortDeclsTable, (ATerm) DeclSort,
-          (ATerm) ATappend(CorDecls, (ATerm) Decl));
-      }
+      ATermList CorDecls = ATLtableGet(SortDeclsTable, (ATerm) DeclSort);
+      ATtablePut(SortDeclsTable, (ATerm) DeclSort,
+        (CorDecls == NULL)
+          ?(ATerm) ATmakeList1((ATerm) Decl)
+          :(ATerm) ATinsert(CorDecls, (ATerm) Decl)
+      );
+      Decls = ATgetNext(Decls);
     }
     //Return the hash table as a list of variable declarations
-    ATermList Result = ATmakeList0();
     ATermList DeclSorts = ATtableKeys(SortDeclsTable);
-    int DeclSortsLength = ATgetLength(DeclSorts);
-    for (int i = 0; i < DeclSortsLength; i++) {
+    ATermList Result = ATmakeList0();
+    while (!ATisEmpty(DeclSorts))
+    {
       Result = ATconcat(
-        Result,
-        ATLtableGet(SortDeclsTable, ATelementAt(DeclSorts, i)));
+        ATLtableGet(SortDeclsTable, ATgetFirst(DeclSorts)),
+        Result);
+      DeclSorts = ATgetNext(DeclSorts);
     }
     ATtableDestroy(SortDeclsTable);
-    return Result;
+    return ATreverse(Result);
   } else {
     //Decls is empty
     return Decls;
