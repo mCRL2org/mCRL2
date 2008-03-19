@@ -16,6 +16,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_application.h"
 
 namespace mcrl2 {
 
@@ -55,6 +56,20 @@ class data_operation: public data_expression
     core::identifier_string name() const
     {
       return arg1(*this);
+    }
+    
+    /// Apply the data_operation to a list of arguments.
+    ///
+    data_expression operator()(data_expression_list args) const
+    {
+      if (args.empty())
+      {
+        return ATermAppl(*this);
+      }
+      else
+      {
+        return data_application(ATermAppl(*this), args);
+      }
     }
   };
                                                             

@@ -113,6 +113,27 @@ class identifier_generator
     }
 };
 
+/// Identifier generator that generates names with a postfix consisting of a number,
+/// that is incremented after each call to operator().
+class number_postfix_generator
+{
+  protected:
+    std::string m_prefix;
+    unsigned int m_index;
+  
+  public:
+    number_postfix_generator(const std::string& prefix, unsigned int index = 0)
+     : m_prefix(prefix), m_index(index)
+    {}
+
+    core::identifier_string operator()()
+    {
+      std::ostringstream out;
+      out << m_prefix << m_index++;
+      return core::identifier_string(out.str());
+    }
+};
+
 } // namespace data
 
 } // namespace mcrl2

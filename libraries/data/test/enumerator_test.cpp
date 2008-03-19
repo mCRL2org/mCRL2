@@ -19,11 +19,11 @@
 #include "mcrl2/data/sort_arrow.h"
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/identifier_generator.h"
 
 using namespace atermpp;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-using namespace mcrl2::lps;
 
 const std::string DATA_SPEC1 =
   "sort A;                     \n"
@@ -78,10 +78,39 @@ void test_enumerator()
   w = e2.enumerate_expression_values(t, vars.begin(), vars.end());
 }
 
+void test_data_enumerator()
+{
+  using namespace data_expr;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+  rewriter rewr(data_spec);
+  number_postfix_generator generator("x_");
+  data_enumerator<rewriter, number_postfix_generator> e(data_spec, rewr, generator);
+
+  data_variable x(core::identifier_string("x"), sort_expr::pos());
+  atermpp::vector<enumerator_expression> values = e.enumerate(x);
+  for (atermpp::vector<enumerator_expression>::iterator i = values.begin(); i != values.end(); ++i)
+  {
+    std::cout << pp(i->expression()) << " " << pp(i->variables()) << std::endl;
+  }
+  
+  enumerator_expression expr(x, make_list(x));
+  atermpp::vector<enumerator_expression> y = e.enumerate(x);
+  for (atermpp::vector<enumerator_expression>::iterator i = y.begin(); i != y.end(); ++i)
+  {
+    atermpp::vector<enumerator_expression> z = e.enumerate(*i);   
+    for (atermpp::vector<enumerator_expression>::iterator j = z.begin(); j != z.end(); ++j)
+    {
+      std::cout << pp(j->expression()) << " " << pp(j->variables()) << std::endl;
+    }
+  }
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   test_enumerator();
+  test_data_enumerator();
 
   return 0;
 }

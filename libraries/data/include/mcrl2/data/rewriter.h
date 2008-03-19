@@ -44,7 +44,6 @@ class rewriter
     };
 
     /// Represents a substitution of the form data_variable := data_expression.
-    /// Substitutions are created using the member function make_substitution.
     /// Suppose that a user has a sequence [first, last[ of substitutions that
     /// must be applied to a large number of terms, before feeding them to the
     /// rewriter. Then it is efficient to do it as follows:
@@ -61,14 +60,17 @@ class rewriter
     ///
     struct substitution
     {
-      friend class rewriter;
-      
       ATermAppl m_variable;
       ATerm m_value;
 
       substitution()
         : m_variable(0), m_value(0)
       { }
+
+      substitution(rewriter& rewr, const data_variable& variable, const data_expression& value)
+        : m_variable(variable),
+          m_value(rewr.get_rewriter()->toRewriteFormat(value))
+      {}
         
       protected:
         substitution(ATermAppl variable, ATerm value)
@@ -94,9 +96,8 @@ class rewriter
 		}
 
 		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
-		/// in the sequence [first, last[.
+		/// in the sequence [first, last).
 		/// \return The normal form of d.
-		// Question: is this function guaranteed to terminate?
 		///
 		template <typename Iter>
 		data_expression operator()(const data_expression& d, Iter first, Iter last) const
@@ -111,12 +112,15 @@ class rewriter
 		  return result;
 		}
 
-    /// Creates the substitution variable := value.
-    ///
-    substitution make_substitution(const data_variable& variable, const data_expression& value)
-    {
-      return substitution(variable, m_rewriter.get()->toRewriteFormat(value));
-    }
+		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
+		/// in the sequence subst.
+		/// \return The normal form of d.
+		///
+		template <typename SubstitutionSequence>
+		data_expression operator()(const data_expression& d, const SubstitutionSequence& subst) const
+		{
+		  return (*this)(d, subst.begin(), subst.end());
+		}
 
     /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.
     ///
