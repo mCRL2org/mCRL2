@@ -82,12 +82,12 @@ namespace mcrl2 {
         "rewriter",
         make_mandatory_argument("NAME"),
         "use rewrite strategy NAME:\n"
-        " 'jitty' for jitty rewriting (default),\n"
-        " 'jittyp' for jitty rewriting with prover,\n"
-        " 'jittyc' for compiled jitty rewriting,\n"
-        " 'inner' for innermost rewriting,\n"
-        " 'innerp' for innermost rewriting with prover,\n"
-        " 'innerc' for compiled innermost rewriting",
+        "'jitty' for jitty rewriting (default),\n"
+        "'jittyp' for jitty rewriting with prover,\n"
+        "'jittyc' for compiled jitty rewriting,\n"
+        "'inner' for innermost rewriting,\n"
+        "'innerp' for innermost rewriting with prover, or\n"
+        "'innerc' for compiled innermost rewriting",
         'r'
       );
     }
@@ -158,7 +158,7 @@ namespace mcrl2 {
                 // Assume it is an option to the ATerm library, so discard
               }
               else {
-                d.throw_exception("Parse error: command line argument `--" + option + "' not recognised!");
+                d.throw_exception("command line argument `--" + option + "' not recognised");
               }
             }
             else {
@@ -168,7 +168,7 @@ namespace mcrl2 {
                 interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
 
                 if (descriptor.needs_argument()) {
-                  d.throw_exception("Parse error: expected argument to option `--" + option + "'!");
+                  d.throw_exception("expected argument to option `--" + option + "'!");
                 }
                 else if (descriptor.m_argument.get() == 0) {
                   m_options.insert(std::make_pair(long_option, ""));
@@ -183,30 +183,40 @@ namespace mcrl2 {
             }
           }
           else if (1 < argument.size()) {
-            std::string option(1, argument[1]);
+            for (std::string::size_type i = 1; i < argument.size(); ++i) {
+              std::string option(1, argument[i]);
 
-            // Assume that the argument is a short option
-            if (d.m_short_to_long.find(argument[1]) == d.m_short_to_long.end()) {
-              d.throw_exception("Parse error: command line argument `-" + option + "' not recognised!");
-            }
-            else {
-              std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[1]])->first;
-
-              if (argument.size() == 2) { // no argument
-                interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
-
-                if (descriptor.needs_argument()) {
-                  d.throw_exception("Parse error: expected argument to option `-" + option + "'!");
-                }
-                else if (descriptor.m_argument.get() == 0) {
-                  m_options.insert(std::make_pair(long_option, ""));
-                }
-                else {
-                  m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
-                }
+              // Assume that the argument is a short option
+              if (d.m_short_to_long.find(argument[i]) == d.m_short_to_long.end()) {
+                d.throw_exception("command line argument `-" + option + "' not recognised");
               }
               else {
-                m_options.insert(std::make_pair(long_option, std::string(argument, 2)));
+                std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
+             
+                if (argument.size() - i == 1) { // the last option without argument
+                  interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
+
+                  if (descriptor.needs_argument()) {
+                    d.throw_exception("expected argument to option `-" + option + "'");
+                  }
+                  else if (descriptor.m_argument.get() == 0) {
+                    m_options.insert(std::make_pair(long_option, ""));
+                  }
+                  else {
+                    m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
+                  }
+                }
+                else { // intermediate option or option with argument
+                  if (d.m_options.find(long_option)->second.accepts_argument()) {
+                    // must be the last option, so take the remainder as option argument
+                    m_options.insert(std::make_pair(long_option, std::string(argument, i + 1)));
+
+                    break;
+                  }
+                  else {
+                    m_options.insert(std::make_pair(long_option, ""));
+                  }
+                }
               }
             }
           }

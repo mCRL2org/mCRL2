@@ -30,6 +30,10 @@ obj squadt_interface
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
+obj mcrl2_command_line_interface
+      : source/command_line.cpp
+      ;
+
 mcrl2-library utilities
       : source/command_line.cpp
         source/aterm_ext.cpp

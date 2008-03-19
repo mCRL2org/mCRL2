@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file gui/squadt.cpp
+/// \file squadt.cpp
 /// \brief Add your file description here.
 
 #define NAME "squadt"
@@ -16,7 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
@@ -29,90 +29,65 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include <wx/cmdline.h>
 #include <wx/msgdlg.h>
 #include <wx/sysopt.h>
 
 using namespace squadt::GUI;
 
-bool parse_command_line(int argc, wxChar** argv, boost::function < void (squadt::GUI::main*) >& action) {
-  bool c = 0 < argc;
+void parse_command_line(int ac, char** av, boost::function < void (squadt::GUI::main*) >& action) {
+  using namespace mcrl2::utilities;
 
-  if (c) {
-    wxCmdLineParser parser(argc, argv); 
- 
-    parser.AddSwitch(wxT("c"),wxT("create"),wxT(""));
-    parser.AddSwitch(wxT("d"),wxT("debug"),wxT(""));
-    parser.AddSwitch(wxT("h"),wxT("help"),wxT(""));
-    parser.AddSwitch(wxT("q"),wxT("quiet"),wxT(""));
-    parser.AddSwitch(wxT("v"),wxT("verbose"),wxT(""));
-    parser.AddSwitch(wxT(""),wxT("version"),wxT(""));
-    parser.AddParam(wxEmptyString,wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
- 
-    c = parser.Parse(false) == 0;
- 
-    if (c) {
-      tipi::utility::logger::log_level default_log_level = 1;
-
-      if (0 < parser.GetParamCount()) {
-        boost::filesystem::path target(std::string(parser.GetParam(0).fn_str()));
-
-        if (!target.has_root_path()) {
-          target = boost::filesystem::initial_path() / target;
-        }
-
-        if (parser.Found(wxT("c"))) {
-          action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
-        }
-        else {
-          action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
-        }
-      }
-      if (parser.Found(wxT("c"))) {
-        std::cerr << "Fatal: found -c, or --create option so expected path argument\n" << std::string(parser.GetParam(0).fn_str());
-       
-        return (false);
-      }
-      if (parser.Found(wxT("d"))) {
-        default_log_level = 3;
-      }
-      if (parser.Found(wxT("v"))) {
-        default_log_level = 2;
-      }
-      if (parser.Found(wxT("h"))) {
-        std::cout <<
-        "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [PATH]\n"
+  if (0 < ac) {
+    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [PATH]\n"
         "Graphical environment that provides a uniform interface for using all kinds of\n"
         "other connected tools. If PATH is provided, it provides an existing project in\n"
-        "PATH.\n"
-        "\n"
-        "Options:\n"
-        "  -c, --create          create new project in PATH\n"
-        "  -h, --help            display this help message\n"
-        "      --version         display version information\n"
-        "  -q, --quiet           represses unnecessary output\n"
-        "  -v, --verbose         display additional information during operation\n"
-        "  -d, --debug           produce lots of debug output\n"
-        "\n"
-        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-        ;
- 
-        return (false);
-      }
-      if (parser.Found(wxT("q"))) {
-        default_log_level = 0;
-      }
-      if (parser.Found(wxT("version"))) {
-        print_version_information(NAME, AUTHOR);
-        return (false);
-      }
+        "PATH.\n");
 
-      tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
-      tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
+    clinterface.add_option("create", "create new project in PATH\n", 'c');
+
+    command_line_parser parser(clinterface, ac, av);
+
+    // default log level
+    tipi::utility::logger::log_level default_log_level = 1;
+
+    if (0 < parser.options.count("create")) {
+      if (parser.unmatched.size() != 1) {
+        clinterface.throw_exception("create option requires that a path is provided.");
+      }
     }
-  }
 
-  return (c);
+    if (parser.unmatched.size() == 1) {
+      boost::filesystem::path target(parser.unmatched[0]);
+
+      if (!target.has_root_path()) {
+        target = boost::filesystem::initial_path() / target;
+      }
+
+      if (0 < parser.options.count("create")) {
+        action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
+      }
+      else {
+        action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
+      }
+    }
+
+    if (1 < parser.unmatched.size()) {
+      clinterface.throw_exception("too many file aguments!");
+    }
+
+    if (parser.options.count("quiet")) {
+      default_log_level = 0;
+    }
+    if (parser.options.count("verbose")) {
+      default_log_level = 2;
+    }
+    if (parser.options.count("debug")) {
+      default_log_level = 3;
+    }
+
+    tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
+    tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
+  }
 }
 
 /* Squadt class declaration */
@@ -136,9 +111,9 @@ bool Squadt::OnInit() {
 
   boost::function < void (squadt::GUI::main*) > action;
 
-  bool c = parse_command_line(argc, argv, action);
+  try {
+    parse_command_line(argc, argv, action);
 
-  if (c) {
     wxInitAllImageHandlers();
 
     wxSystemOptions::SetOption(wxT("msw.remap"), 0);
@@ -242,9 +217,14 @@ bool Squadt::OnInit() {
 
       return (false);
     }
+
+    return true;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
   }
 
-  return (c);
+  return false;
 }
 
 int Squadt::OnExit() {

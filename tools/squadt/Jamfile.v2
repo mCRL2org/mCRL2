@@ -14,8 +14,8 @@ tool squadt
         /site-config//wx_base
         /site-config//boost_md5
         /libraries/tipi//controller_interface
-      : <use>/libraries/utilities//headers
-        <dependency>/libraries//ticpp
+        /libraries/utilities//mcrl2_command_line_interface
+      : <dependency>/libraries//ticpp
         <wx>yes
       ;
 

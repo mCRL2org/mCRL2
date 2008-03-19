@@ -585,7 +585,7 @@ namespace mcrl2 {
       protected:
 
         /// Prints the option specification to stream
-        void print(std::ostream& s, const size_t w = 26) const;
+        void print(std::ostream& s, const size_t w = 27) const;
 
       public:
 
@@ -646,6 +646,13 @@ namespace mcrl2 {
          **/
         inline bool needs_argument() const {
           return !(m_argument.get() == 0 || m_argument->is_optional());
+        }
+
+        /**
+         * \brief Whether the option takes a mandatory argument
+         **/
+        inline bool accepts_argument() const {
+          return m_argument.get() != 0;
         }
     };
 
@@ -814,7 +821,7 @@ namespace mcrl2 {
         std::string rewriter(m_options.find("rewriter")->second);
 #if defined(__LIBREWRITE_H)
         if (RewriteStrategyFromString(rewriter.c_str()) == GS_REWR_INVALID) {
-          d.throw_exception("Parse error: argument `" + rewriter + "' to -r or --rewriter option is invalid!");
+          d.throw_exception("argument `" + rewriter + "' to -r or --rewriter option is invalid");
         }
 #endif
       }
