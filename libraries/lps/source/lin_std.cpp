@@ -1728,7 +1728,7 @@ static void filter_vars_by_assignmentlist(
 
 
 
-static int occursinassignmentlist(
+/* static int occursinassignmentlist(
                 ATermAppl var, 
                 ATermList as, 
                 ATermList parameters)
@@ -1743,7 +1743,7 @@ static int occursinassignmentlist(
     }
   }
   return 0;
-}
+} */
 
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
 { 
@@ -7724,7 +7724,7 @@ static ATermAppl getUltimateDelayCondition(
 
 /******** make_unique_variables **********************/
 
-static ATermList make_unique_variables(ATermList variable_list,char * hint)
+static ATermList make_unique_variables(ATermList variable_list,char *hint)
 { /* This function generates a list of variables with the same sorts
      as in variable_list, where all names are unique */ 
 
@@ -7739,7 +7739,7 @@ static ATermList make_unique_variables(ATermList variable_list,char * hint)
 
   snprintf(scratch,STRINGLENGTH,"%s%s%s",
                       ATSgetArgument(variable,0),
-                      (hint==""?"":"_"),
+                      ((hint==(char *)"")?"":"_"),
                       hint);
 
   ATermAppl new_variable=getfreshvariable(scratch,sort);
