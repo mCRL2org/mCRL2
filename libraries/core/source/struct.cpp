@@ -2957,7 +2957,7 @@ bool gsIsIntConstant(const ATermAppl IntExpr)
 char *gsPosValue(const ATermAppl PosConstant)
 {
   assert(gsIsPosConstant(PosConstant));
-  char *Result = "";
+  char *Result = 0;
   if (gsIsOpId(PosConstant)) {
     //PosConstant is 1
     Result = (char *) malloc(2 * sizeof(char));
@@ -2985,7 +2985,7 @@ int gsPosValue_int(const ATermAppl PosConstant)
 char *gsNatValue(const ATermAppl NatConstant)
 {
   assert(gsIsNatConstant(NatConstant));
-  char *Result = "";
+  char *Result = 0;
   if (gsIsOpId(NatConstant)) {
     //NatConstant is 0
     Result = (char *) malloc(2 * sizeof(char));
@@ -3008,7 +3008,7 @@ int gsNatValue_int(const ATermAppl NatConstant)
 char *gsIntValue(const ATermAppl IntConstant)
 {
   assert(gsIsIntConstant(IntConstant));
-  char *Result = "";
+  char *Result = 0;
   if (ATisEqual(ATAgetArgument(IntConstant, 0), gsMakeOpIdCInt())) {
     //IntExpr is a natural number
     Result = gsNatValue(ATAgetArgument(IntConstant, 1));
