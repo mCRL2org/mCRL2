@@ -7724,7 +7724,7 @@ static ATermAppl getUltimateDelayCondition(
 
 /******** make_unique_variables **********************/
 
-static ATermList make_unique_variables(ATermList variable_list,char *hint)
+static ATermList make_unique_variables(ATermList variable_list,const char *hint)
 { /* This function generates a list of variables with the same sorts
      as in variable_list, where all names are unique */ 
 
@@ -7739,7 +7739,7 @@ static ATermList make_unique_variables(ATermList variable_list,char *hint)
 
   snprintf(scratch,STRINGLENGTH,"%s%s%s",
                       ATSgetArgument(variable,0),
-                      ((hint==(char *)"")?"":"_"),
+                      ((strlen(hint)==0)?"":"_"),
                       hint);
 
   ATermAppl new_variable=getfreshvariable(scratch,sort);
@@ -7751,7 +7751,9 @@ static ATermList make_unique_variables(ATermList variable_list,char *hint)
 
 /******** make_parameters_and_variables_unique **********************/
 
-static ATermAppl make_parameters_and_sum_variables_unique(ATermAppl t, char *hint="")
+static ATermAppl make_parameters_and_sum_variables_unique(
+                              ATermAppl t, 
+                              const char *hint="")
 {  
   ATermList init=linGetInit(t);
   ATermList pars=linGetParameters(t);
