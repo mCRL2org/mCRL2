@@ -20,22 +20,6 @@ namespace core {
 
 namespace detail {
 
-template <typename SequenceFunction, typename ValueType>
-struct foreach_sequence_helper
-{
-  const std::vector<ValueType>& v_;
-  SequenceFunction f_;
-    
-  foreach_sequence_helper(const std::vector<ValueType>& v, SequenceFunction f)
-    : v_(v), f_(f)
-  {}
-  
-  void operator()() const
-  {
-    f_(v_.begin(), v_.end());
-  }
-};
-
 template <typename Iter1, typename Iter2, typename SequenceFunction>
 void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f)
 {
@@ -59,16 +43,15 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f)
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
 /// the function f is called.
-template <typename SequenceContainer, typename SequenceFunction>
-void foreach_sequence(const SequenceContainer& X, SequenceFunction f)
+template <typename SequenceContainer, typename OutIter, typename SequenceFunction>
+void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f)
 {
   typedef typename SequenceContainer::value_type::value_type value_type;
-
-  std::vector<value_type> x(X.size()); /// contains one sequence
   detail::foreach_sequence_impl(X.begin(),
                                 X.end(),
-                                x.begin(),
-                                detail::foreach_sequence_helper<SequenceFunction, value_type>(x, f));
+                                i,
+                                f
+                               );
 }
 
 } // namespace core

@@ -7,21 +7,22 @@ using namespace mcrl2;
 
 struct f
 {
+  std::vector<int>& v_;
   int& sum_;
 
-  f(int& sum)
-    : sum_(sum)
+  f(std::vector<int>& v, int& sum)
+    : v_(v), sum_(sum)
   {}
 
-  template <typename Iter>
-  void operator()(Iter first, Iter last) const
+  // Adds the sum of the elements of v_ to sum_.
+  void operator()() const
   {
-    for (Iter i = first; i != last; ++i)
+    for (std::vector<int>::const_iterator i = v_.begin(); i != v_.end(); ++i)
     {
       std::cout << *i << " ";
     }
     std::cout << std::endl;
-    sum_ += std::accumulate(first, last, 0);
+    sum_ += std::accumulate(v_.begin(), v_.end(), 0);
   }
 };
 
@@ -43,7 +44,11 @@ void test_sequence()
   v.push_back(c);
   
   int sum = 0;
-  core::foreach_sequence(v, f(sum));
+  
+  // w will hold a sequence
+  std::vector<int> w(v.size());
+
+  core::foreach_sequence(v, w.begin(), f(w, sum));
   std::cout << "sum == " << sum << std::endl;
   BOOST_CHECK(sum == 32);
 }
