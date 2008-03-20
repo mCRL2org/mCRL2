@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <memory>
+#include <locale>
 
 // dummy necessary for compiling
 #define MCRL2_REVISION "0"
@@ -110,8 +111,6 @@ namespace mcrl2 {
      * \param[in] m the body of the exception message
      **/
     void interface_description::throw_exception(std::string const& m) const {
-      std::string actual_tool_name(path_to_toolname(m_name));
-
       throw std::runtime_error(m_name + ": " + m + "\nTry `" + m_name + " --help' for more information.");
     }
 
@@ -233,6 +232,7 @@ namespace mcrl2 {
      * \param[in] count the number of arguments
      * \param[in] arguments C-style array with arguments as C-style zero-terminated string
      **/
+    template < >
     std::vector< std::string > command_line_parser::convert(const int count, char const* const* const arguments) {
       std::vector< std::string > result;
 
@@ -247,6 +247,53 @@ namespace mcrl2 {
       }
 
       return result;
+    }
+
+    /**
+     * Converts an array of C-style strings and a count to an STL vector of STL strings.
+     *
+     * \param[in] count the number of arguments
+     * \param[in] arguments C-style array with arguments as C-style zero-terminated string
+     **/
+    template < >
+    std::vector< std::string > command_line_parser::convert(const int count, wchar_t const* const* const arguments) {
+      std::vector< std::string > result;
+
+      if (0 < count) {
+        std::ostringstream converter(std::ios_base::out | std::ios_base::binary);
+
+        converter.imbue(std::locale::classic());
+
+        result.resize(count);
+
+        std::vector< std::string >::reverse_iterator j = result.rbegin();
+
+        for (wchar_t const* const* i = &arguments[count - 1]; i != &arguments[0]; --i) {
+          converter << *i;
+
+          *(j++) = converter.str();
+        }
+      }
+
+      return result;
+    }
+
+    template <>
+    command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
+                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+
+      collect(d, convert(c, a));
+
+      process_default_options(d);
+    }
+
+    template <>
+    command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
+                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+
+      collect(d, convert(c, a));
+
+      process_default_options(d);
     }
 
     /**

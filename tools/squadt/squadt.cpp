@@ -34,11 +34,11 @@
 
 using namespace squadt::GUI;
 
-void parse_command_line(int ac, char** av, boost::function < void (squadt::GUI::main*) >& action) {
+void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI::main*) >& action) {
   using namespace mcrl2::utilities;
 
   if (0 < ac) {
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [PATH]\n"
+    interface_description clinterface(wxConvLocal.cWX2MB(av[0]).data(), NAME, AUTHOR, "[OPTION]... [PATH]\n"
         "Graphical environment that provides a uniform interface for using all kinds of\n"
         "other connected tools. If PATH is provided, it provides an existing project in\n"
         "PATH.\n");

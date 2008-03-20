@@ -128,18 +128,25 @@ namespace mcrl2 {
             /// name of the argument (for reference purposes in option description)
             std::string m_name;
 
+          protected:
+       
+            /// sets the name for the argument
+            void set_name(std::string const& n) {
+              m_name = n;
+            }
+
           public:
+
+            /// returns the name for the argument
+            std::string get_name() const {
+              return m_name;
+            }
 
             /// Gets default value for option argument
             virtual std::string const& get_default() const = 0;
 
             /// verifies that a string is a valid argument
             virtual bool validate(std::string const&) const = 0;
-
-            /// returns the name for the argument
-            virtual std::string get_name() const {
-              return m_name;
-            }
 
             /// whether the argument is optional or not
             virtual bool is_optional() const = 0;
@@ -150,9 +157,6 @@ namespace mcrl2 {
         };
 
         /// Argument to an option
-        template < bool b = false >
-        class argument;
-
         template < typename T >
         class typed_argument;
 
@@ -200,27 +204,6 @@ namespace mcrl2 {
         short_to_long_map m_short_to_long;
 
       private:
-
-        /**
-         * \brief Convenience method to strip a path to a filename without extension
-         * \param[in] s string representing a path to a file
-         **/
-        static std::string path_to_toolname(std::string const& s) {
-          std::string::size_type n = s.find_last_of("/\\");
-
-          if (n != std::string::npos) {
-            std::string::size_type e = s.find_last_of('.');
-
-            if (e != std::string::npos) {
-              return s.substr(0, e).substr(n + 1);
-            }
-            else {
-              return s.substr(n + 1);
-            }
-          }
-
-          return s;
-        }
 
         /**
          * \brief Convenience method to strip a path to a filename without extension
@@ -433,53 +416,36 @@ namespace mcrl2 {
 
       private:
 
-        /**
-         * \brief The list of options found on the command line
-         **/
+        /// \brief The list of options found on the command line
         option_map              m_options;
 
-        /**
-         * \brief The list of arguments that have not been matched with an option
-         **/
+        /// \brief The list of arguments that have not been matched with an option
         unmatched_list          m_unmatched;
 
-        /**
-         * \brief The command line interface specification
-         **/
+        /// \brief The command line interface specification
         interface_description&  m_interface;
 
       public:
 
-        /**
-         * \brief The list of options found on the command line
-         **/
+        /// \brief The list of options found on the command line
         option_map const&       options;
 
-        /**
-         * \brief The list of arguments that have not been matched with an option
-         **/
+        /// \brief The list of arguments that have not been matched with an option
         unmatched_list const&   unmatched;
 
       private:
 
-        /**
-         * \brief Parses string as if it is an unparsed command line
-         **/
+        /// \brief Parses string as if it is an unparsed command line
         static std::vector< std::string > parse_command_line(char const* const arguments);
 
-        /**
-         * \brief Converts C-style array with specified length to STL vector of strings
-         **/
-        static std::vector< std::string > convert(const int count, char const* const* const arguments);
+        /// \brief Converts C-style array with specified length to STL vector of strings
+        template < typename C >
+        static std::vector< std::string > convert(const int count, C const* const* const arguments);
 
-        /**
-         * \brief Identifies all options and option arguments
-         **/
+        /// \brief Identifies all options and option arguments
         void collect(interface_description& d, std::vector< std::string > const& arguments);
 
-        /**
-         * \brief Executes actions for default options
-         **/
+        /// \brief Executes actions for default options
         void process_default_options(interface_description& d);
 
       public:
@@ -499,16 +465,11 @@ namespace mcrl2 {
         /**
          * \brief Recognises options from an array that represents a pre-parsed command on the command line, and executes default procedures for default options.
          * \param[in] d the interface description
-         * \param[in] count amount of arguments
-         * \param[in] arguments C-style array with arguments
+         * \param[in] c amount of arguments
+         * \param[in] a C-style array with arguments
          **/
-        inline command_line_parser(interface_description& d, const int count, char const* const* const arguments) :
-                                                           m_interface(d), options(m_options), unmatched(m_unmatched) {
-
-          collect(d, convert(count, arguments));
-
-          process_default_options(d);
-        }
+        template < typename C >
+        command_line_parser(interface_description& d, const int c, C const* const* const a);
 
         /**
          * \brief Returns the argument (or the empty string) of the first option matching a name
@@ -657,75 +618,6 @@ namespace mcrl2 {
     };
 
     /**
-     * Template implements the differences between optional and non-optional arguments to options
-     *
-     * The boolean type parameter specifies whether the argument is optional.
-     **/
-    template < bool b >
-    class interface_description::argument : virtual public basic_argument {
-
-      public:
-
-        /**
-         * \brief Constructor
-         * \param[in] n the name of the argument
-         **/
-        inline argument(std::string const& n) {
-          m_name = n;
-        }
-
-        /**
-         * \brief Throws because mandatory arguments have no default
-         **/
-        inline std::string const& get_default() const {
-          throw std::runtime_error("Fatal error: default argument requested for mandatory option! (this is a bug)\n");
-        }
-
-        /// whether the argument is optional or not
-        inline bool is_optional() const {
-          return false;
-        }
-    };
-
-    /**
-     * Specialisation for optional arguments to options
-     **/
-    template < >
-    class interface_description::argument< true > : virtual public basic_argument {
-      friend class interface_description;
-      friend class interface_description::option_descriptor;
-      friend class command_line_parser;
-    
-      protected:
-      
-        /// default value
-        std::string m_default;
-
-      public:
-
-        /**
-         * \brief Constructor
-         * \param[in] n the name of the argument
-         * \param[in] d the default value for the argument
-         **/
-        inline argument(std::string const& n, std::string const& d) : m_default(d) {
-          m_name = n;
-        }
-
-        /**
-         * \brief Returns the default argument
-         **/
-        inline std::string const& get_default() const {
-          return m_default;
-        }
-
-        /// whether the argument is optional or not
-        inline bool is_optional() const {
-          return true;
-        }
-    };
-
-    /**
      * \brief Represents a typed argument
      *
      * A typed argument is more specific than an untyped argument. All
@@ -734,7 +626,7 @@ namespace mcrl2 {
      * (with >>) to the type specified by the type parameter T.
      **/
     template < typename T >
-    class interface_description::typed_argument : virtual public basic_argument {
+    class interface_description::typed_argument : public basic_argument {
 
       public:
 
@@ -764,23 +656,66 @@ namespace mcrl2 {
 
     /// Represents an optional argument to an option
     template < typename T >
-    class interface_description::optional_argument : public typed_argument< T >, public argument< true > {
+    class interface_description::optional_argument : public typed_argument< T > {
+      friend class interface_description;
+      friend class interface_description::option_descriptor;
+      friend class command_line_parser;
     
+      protected:
+      
+        /// default value
+        std::string m_default;
+
       public:
     
-      /// Constructor
-      inline optional_argument(std::string const& name, std::string const& d) : argument< true >(name, d) {
-      }
+        /**
+         * Constructor
+         * \param[in] n the name of the argument
+         * \param[in] d the default value for the argument
+         **/
+        inline optional_argument(std::string const& name, std::string const& d) {
+          basic_argument::set_name(name);
+
+          m_default = d;
+        }
+
+        /**
+         * \brief Returns the default argument
+         **/
+        inline std::string const& get_default() const {
+          return m_default;
+        }
+
+        /// whether the argument is optional or not
+        inline bool is_optional() const {
+          return true;
+        }
     };
 
     /// Represents a mandatory argument to an option
     template < typename T >
-    class interface_description::mandatory_argument : public typed_argument< T >, public argument< false > {
+    class interface_description::mandatory_argument : public typed_argument< T > {
     
       public:
     
-        /// Constructor
-        inline mandatory_argument(std::string const& name) : argument< false >(name) {
+        /**
+         * Constructor
+         * \param[in] n the name of the argument
+         **/
+        inline mandatory_argument(std::string const& name) {
+          basic_argument::set_name(name);
+        }
+
+        /**
+         * \brief Throws because mandatory arguments have no default
+         **/
+        inline std::string const& get_default() const {
+          throw std::runtime_error("Fatal error: default argument requested for mandatory option! (this is a bug)\n");
+        }
+
+        /// whether the argument is optional or not
+        inline bool is_optional() const {
+          return false;
         }
     };
     /// \endcond
