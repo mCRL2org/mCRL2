@@ -84,9 +84,6 @@ void test_data_reconstruct_struct()
   BOOST_CHECK(find_term(rec_data(0), d2));
   BOOST_CHECK(find_term(rec_data(0), s));
   BOOST_CHECK(find_term(rec_data(0), d));
-  std::cerr << d << std::endl;
-  std::cerr << rec_data(0) << std::endl;
-  std::cerr << data(0) << std::endl;
 }
 
 void test_data_reconstruct_struct_complex()
@@ -106,9 +103,9 @@ void test_data_reconstruct_struct_complex()
   identifier_string is_d2_name("is_d2");
   identifier_string arg3_name("arg3");
   identifier_string is_d3_name("is_d3");
-  identifier_string arg3_proj = gsMakeStructProj(arg3_name, sort_expr::bool_());
   identifier_string D_name("D");
 
+  aterm_appl arg3_proj = gsMakeStructProj(arg3_name, sort_expr::bool_());
   aterm_appl d1 = gsMakeStructCons(d1_name, aterm_list(), gsMakeNil());
   aterm_appl d2 = gsMakeStructCons(d2_name, aterm_list(), is_d2_name);
   aterm_appl d3 = gsMakeStructCons(d3_name, make_list(arg3_proj), is_d3_name);
