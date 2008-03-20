@@ -208,7 +208,7 @@ if $(CADP_HEADERS) {
 else {
   print-notice "BCG format support for LTS library disabled!" ;
 
-  alias BCG : : : : ;
+  alias BCG : : : : <define>NO_DYNLOAD ;
 }
 
 if $(USE_CVC) {
