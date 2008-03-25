@@ -444,6 +444,7 @@ void ArcDiagram::handleSendDgrmSetToExnr()
 
 
 // ---------------------------------------------------
+
 void ArcDiagram::visualize( const bool &inSelectMode )
 // ---------------------------------------------------
 {
@@ -456,7 +457,7 @@ void ArcDiagram::visualize( const bool &inSelectMode )
         calcSettingsGeomBased();
     if ( dataChanged == true )
         calcSettingsDataBased();
-
+        
     // selection mode
     if ( inSelectMode == true )
     {

@@ -19,6 +19,7 @@ using namespace std;
 #include "dof.h"
 #include "glcanvas.h"
 #include "visutils.h"
+#include "visualizer.h"
 
 class Shape : public Colleague
 {
@@ -263,7 +264,10 @@ protected:
     int checkedVariableId; // Event id of the variable displayed on the shape;
     string	 variable;  //variable shown on the shape
     string 	 note;		// note shown on the shape
+    GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
+    GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH]; // resources for drawing text
     bool texturesGenerated; // check whether textures for drawing text is generated or not
+    GLCanvas* lastCanvas; // Last Canvas the text drawn on
 
     // degrees of freedom
     DOF* xCtrDOF; // composition

@@ -54,7 +54,9 @@ Shape::Shape(
     yHge   = 0.0;
     variable = "";
     checkedVariableId = -1;
-    texturesGenerated = false;
+    texturesGenerated = false;   
+    lastCanvas = NULL; 
+    
     aglCtr = aC;
 
     // properties
@@ -1041,10 +1043,8 @@ void Shape::visualize(
              hdlSze*pix, 2*hdlSze*pix );
     }
     
-    if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
-    {
-    	drawText( canvas ); // Draw the textual values of the shape
-    }
+    drawText( canvas ); // Draw the textual values of the shape
+    
     
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -1257,10 +1257,8 @@ void Shape::visualize(
              hdlSze*pix, 2*hdlSze*pix );
     }
     
-    if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
-    {
-    	drawText( canvas ); // Draw the textual values of the shape
-    }
+    drawText( canvas ); // Draw the textual values of the shape
+    
     
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -1521,11 +1519,8 @@ void Shape::drawNormal(
                 hdlSze*pix, 2*hdlSze*pix );
         }   
         
-        if( checkedVariableId != -1 || variable != "" || note != "") // Draw textual values if there is any kind of textual value attached to the shape
-    	{
-    		drawText( canvas ); // Draw the textual values of the shape
-    	}
-              
+    	drawText( canvas ); // Draw the textual values of the shape    
+    	          
         VisUtils::disableLineAntiAlias();
     }    	
 }
@@ -1543,27 +1538,19 @@ void Shape::drawText( GLCanvas* canvas )
     text.append(variable);
     	
     double pix = canvas->getPixelSize();
-    	
-    // generate textures !!!! This slows down the program too much, need a better technique to draw text
-    GLuint  texCharId[CHARSETSIZE];
-    GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
-    if( !texturesGenerated)
+    
+    // generate textures for drawing text, if they aren't generated yet	
+    if( !texturesGenerated || lastCanvas != canvas)
     {
     	VisUtils::genCharTextures(
     		texCharId,
-    		texChar );
-    	texturesGenerated = true;
+       		texChar );
+        texturesGenerated = true;
+        lastCanvas = canvas;
     }
-    
+            
     VisUtils::setColor( colTxt );
-    if( type == TYPE_NOTE )
-    {
-    	VisUtils::drawLabelRight( texCharId, -xDFC, 0 , szeTxt*pix/CHARHEIGHT, text );
-    }
-    else
-    {
-    	VisUtils::drawLabelRight( texCharId, 0, 0 , szeTxt*pix/CHARHEIGHT, text );
-    }  
+    VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
 }
 
 

@@ -505,7 +505,6 @@ void Frame::displShapeMenu(
     {
         menu.Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
         menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
-		menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false);
     }
         
     PopupMenu( &menu );
