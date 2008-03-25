@@ -2261,6 +2261,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                       	mouseDrag == MSE_DRAG_FALSE &&
                       	mouseSide == MSE_SIDE_LFT )
             	{
+            		cerr << "DOUBLE" << endl;
             	}
             	else
             	{
