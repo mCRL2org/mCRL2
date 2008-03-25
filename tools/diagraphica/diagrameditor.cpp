@@ -1752,11 +1752,17 @@ void DiagramEditor::displShapeEdtOptions( Shape *s )
 {
     if ( s != NULL )
     {
+    	bool editDOF = true;
         bool pasteFlag = false;
         int checkedId = s->getCheckedId();
         if ( clipBoardShape != NULL )
         {
             pasteFlag = true;
+        }
+        
+        if(s->getType() == Shape::TYPE_NOTE) // If the shape is a note, don't display the text options
+        {
+        	editDOF = false;
         }
         
         mediator->handleEditShape(
@@ -1768,7 +1774,7 @@ void DiagramEditor::displShapeEdtOptions( Shape *s )
             true,      // send to back
             true,      // bring forward
             true,      // send backward
-            true,	   // edit DOF
+            editDOF,	   // edit DOF
             checkedId ); // id of the variable displayed on the shape
 	}
 }

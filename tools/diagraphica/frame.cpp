@@ -483,20 +483,15 @@ void Frame::displShapeMenu(
         wxT( "Edit DOF" ),
         wxT( "Edit this shape's degrees of freedom" ) );
 
-    if ( cut != true )
-    {
-        menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );
-		menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
-		menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false);
-    }
+    if ( cut != true )    
+        menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );    
     if ( copy != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_COPY, false );
     if ( paste != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_PASTE, false );
-    
+            
     if ( clear != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_DELETE, false );
-
     if ( bringToFront != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_BRING_TO_FRONT, false );
     if ( sendToBack != true )
@@ -507,7 +502,11 @@ void Frame::displShapeMenu(
         menu.Enable( ID_MENU_ITEM_SHAPE_SEND_BACKWARD, false );
 
     if ( editDOF != true )
+    {
         menu.Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
+        menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
+		menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false);
+    }
         
     PopupMenu( &menu );
         
