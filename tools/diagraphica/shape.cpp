@@ -1543,7 +1543,7 @@ void Shape::drawText( GLCanvas* canvas )
     	
     double pix = canvas->getPixelSize();
     	
-    // generate textures !!!! This slows down the program too much, need a better technique to draw text for performance
+    // generate textures !!!! This slows down the program too much, need a better technique to draw text
     GLuint  texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
     VisUtils::genCharTextures(

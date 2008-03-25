@@ -137,6 +137,7 @@ public:
     virtual void handleSetViewSim() = 0;
     virtual void handleSetViewTrace() = 0;
     virtual int getView() = 0;
+    virtual bool getClustered() = 0;
 
     // -- diagram editor --------------------------------------------
     virtual void* getGraph() = 0;

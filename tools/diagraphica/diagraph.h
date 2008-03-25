@@ -141,6 +141,7 @@ public:
     void handleSetViewSim();
     void handleSetViewTrace();
     int getView();
+    bool getClustered();
 
     // -- diagram editor --------------------------------------------
     
@@ -407,6 +408,7 @@ private:
     int               mode;
     int               view;
     bool              critSect;
+    bool			  clustered;
     
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association

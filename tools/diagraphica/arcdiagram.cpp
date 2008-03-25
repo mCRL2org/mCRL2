@@ -2257,11 +2257,14 @@ void ArcDiagram::handleHits( const vector< int > &ids )
                     	mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
                 	}
             	}
-            	else if ( mouseClick == MSE_CLICK_DOUBLE &&
+            	else if ( mouseClick == MSE_CLICK_DOUBLE && //Try to cluster w.r.t. first attribute, when user double click on the nodes
                       	mouseDrag == MSE_DRAG_FALSE &&
-                      	mouseSide == MSE_SIDE_LFT )
-            	{
-            		cerr << "DOUBLE" << endl;
+                      	mouseSide == MSE_SIDE_LFT &&
+                      	!mediator->getClustered() )
+            	{ 
+            		vector< int > indcs;
+            		indcs.push_back(0); 
+            		mediator->handleAttributeCluster( indcs );
             	}
             	else
             	{

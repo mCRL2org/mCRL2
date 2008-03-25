@@ -227,6 +227,7 @@ bool DiaGraph::OnInit()
     // init colleagues
     initColleagues();
 
+	clustered = false;
     critSect = false;
    
     if (!fsm_file_argument.empty()) {
@@ -934,6 +935,7 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
 // ----------------------------------------------------------------
 {
     bool zeroCard = false;
+    clustered = true;
 
     for ( size_t i = 0; i < indcs.size() && zeroCard == false; ++i )
     {
@@ -1664,6 +1666,15 @@ int DiaGraph::getView()
 {
     return view;
 }
+
+
+// --------------------
+bool DiaGraph::getClustered()
+// --------------------
+{
+    return clustered;
+}
+
 
 
 // -- diagram editor ------------------------------------------------
