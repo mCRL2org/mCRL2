@@ -54,6 +54,7 @@ Shape::Shape(
     yHge   = 0.0;
     variable = "";
     checkedVariableId = -1;
+    texturesGenerated = false;
     aglCtr = aC;
 
     // properties
@@ -1533,7 +1534,7 @@ void Shape::drawNormal(
 // ---------------------------------------------
 void Shape::drawText( GLCanvas* canvas )
 // ---------------------------------------------
-{
+{	
 	string text = note;
     if( variable != "" && text != "" )
     {
@@ -1546,9 +1547,13 @@ void Shape::drawText( GLCanvas* canvas )
     // generate textures !!!! This slows down the program too much, need a better technique to draw text
     GLuint  texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
-    VisUtils::genCharTextures(
-    	texCharId,
-    	texChar );
+    if( !texturesGenerated)
+    {
+    	VisUtils::genCharTextures(
+    		texCharId,
+    		texChar );
+    	texturesGenerated = true;
+    }
     
     VisUtils::setColor( colTxt );
     if( type == TYPE_NOTE )

@@ -263,6 +263,7 @@ protected:
     int checkedVariableId; // Event id of the variable displayed on the shape;
     string	 variable;  //variable shown on the shape
     string 	 note;		// note shown on the shape
+    bool texturesGenerated; // check whether textures for drawing text is generated or not
 
     // degrees of freedom
     DOF* xCtrDOF; // composition
