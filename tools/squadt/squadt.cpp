@@ -38,7 +38,7 @@ void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI
   using namespace mcrl2::utilities;
 
   if (0 < ac) {
-    interface_description clinterface(wxString(av[0], wxConvLocal).fn_str(), NAME, AUTHOR, "[OPTION]... [PATH]\n"
+    interface_description clinterface(std::string(wxString(av[0], wxConvLocal).fn_str()), NAME, AUTHOR, "[OPTION]... [PATH]\n"
         "Graphical environment that provides a uniform interface for using all kinds of\n"
         "other connected tools. If PATH is provided, it provides an existing project in\n"
         "PATH.\n");
