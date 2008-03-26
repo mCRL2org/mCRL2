@@ -179,7 +179,6 @@ if [ os.name ] = NT {
   alias dl : : <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
 }
 else {
-  alias dl : : <define>NO_DYNLOAD <link>static : : <define>NO_DYNLOAD ;
   lib   dl : : <name>"dl" <link>shared ;
 }
 
