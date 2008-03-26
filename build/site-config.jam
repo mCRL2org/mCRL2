@@ -175,9 +175,17 @@ boost_library test : : system ;
 boost_library system : local ;
 boost_library md5 : local ;
 
-lib z  : : <name>"z" ;
-lib m  : : <name>"m" ;
-lib dl : : <name>"dl" <link>shared ;
+if [ os.name ] = NT {
+  alias dl : : <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
+}
+else {
+  alias dl : : <define>NO_DYNLOAD <link>static : : <define>NO_DYNLOAD ;
+  lib   dl : : <name>"dl" <link>shared ;
+}
+
+lib   m  : : <name>"m" ;
+alias m  : : <os>NT ;
+lib   z  : : <name>"z" ;
 
 # Socket library on SunOS/Solaris system
 lib nsl    : : <name>nsl ;
@@ -208,7 +216,7 @@ if $(CADP_HEADERS) {
 else {
   print-notice "BCG format support for LTS library disabled!" ;
 
-  alias BCG : : : : <define>NO_DYNLOAD ;
+  alias BCG : : : : ;
 }
 
 if $(USE_CVC) {

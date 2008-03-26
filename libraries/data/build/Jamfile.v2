@@ -3,10 +3,8 @@ project data
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
-          <os>NT:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
-          <os>NT:<define>NO_DYNLOAD
        ;
 
 mcrl2-library data
@@ -23,9 +21,8 @@ mcrl2-library data
          <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc
-         <os>LINUX:<library>/site-config//m   # for rewrite
-         <os>LINUX:<library>/site-config//dl  # for rewrite
-         <os>CYGWIN:<library>/site-config//m  # for rewrite
+         <library>/site-config//m    # for rewrite
+         <library>/site-config//dl   # for rewrite
        : <threading>single
        : <library>/libraries/core
          <library>/site-config//cvc
