@@ -247,13 +247,13 @@ namespace mcrl2 {
         }
 
         /**
-         * \brief Prints copyright message
-         * \param[out] out the stream to which output is written
+         * \brief Composes a copyright message
+         * \return formatted string that represents the copyright message
          *
          * The following example shows the effect of this method for a tool named test and author John Doe.
          *
          * \code
-         *  print_copy_message(std::cerr);
+         *  copyright_message(std::cerr);
          * \endcode
          *
          * The output is:
@@ -271,37 +271,19 @@ namespace mcrl2 {
          * Where toolset version, revision and copyright year are constants
          * supplied internally at compile time.
          **/
-        inline void print_copy_message(std::ostream& out) const {
-          out << m_name << " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl
-              << "Copyright (C) " << MCRL2_COPYRIGHT_YEAR << " Eindhoven University of Technology." << std::endl
-              << "This is free software.  You may redistribute copies of it under the" << std::endl
-              << "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>." << std::endl
-              << "There is NO WARRANTY, to the extent permitted by law." << std::endl
-              << std::endl
-              << "Written by " << m_authors << "." << std::endl;
-        }
+        inline std::string copyright_message() const {
+          std::ostringstream s;
 
-        /**
-         * \brief Throws standard formatted std::runtime_error exception
-         *
-         * The following example shows the output of this method for a tool named test.
-         *
-         * \code
-         *  try {
-         *    throw_exception("ran out of time!");
-         *  }
-         *  catch (std::exception& e) {
-         *    std::cerr << e.what();
-         *  }
-         * \endcode
-         *
-         * The output is:
-         *
-         * \verbatim
-         * test: ran out of time
-         * Try `test --help' for more information. \endverbatim
-         **/
-        void throw_exception(std::string const& m) const;
+          s << m_name << " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl
+            << "Copyright (C) " << MCRL2_COPYRIGHT_YEAR << " Eindhoven University of Technology." << std::endl
+            << "This is free software.  You may redistribute copies of it under the" << std::endl
+            << "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>." << std::endl
+            << "There is NO WARRANTY, to the extent permitted by law." << std::endl
+            << std::endl
+            << "Written by " << m_authors << "." << std::endl;
+
+          return s.str();
+        }
 
         /**
          * \brief The long option acts as identifier
@@ -346,9 +328,8 @@ namespace mcrl2 {
 
         /**
          * \brief Prints a human readable interface description
-         * \param[out] s the stream to which output is written
          **/
-        void print(std::ostream& s) const;
+        std::string textual_description() const;
     };
 
     /**
@@ -382,7 +363,7 @@ namespace mcrl2 {
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period");
      *
      *  // parse command line
-     *  command_line_parser(cli, "test -v --verbose -r --time --timeout --tool=foo bar1 bar2");
+     *  command_line_parser parser(cli, "test -v --verbose -r --time --timeout --tool=foo bar1 bar2");
      *
      *  std::cerr << parser.options.count("recursive");        // prints: "1"
      *  std::cerr << parser.options.count("verbose");          // prints: "2"
@@ -472,6 +453,28 @@ namespace mcrl2 {
         command_line_parser(interface_description& d, const int c, C const* const* const a);
 
         /**
+         * \brief Throws standard formatted std::runtime_error exception
+         *
+         * The following example shows the output of this method for a tool named test.
+         *
+         * \code
+         *  try {
+         *    error("ran out of time!");
+         *  }
+         *  catch (std::exception& e) {
+         *    std::cerr << e.what();
+         *  }
+         * \endcode
+         *
+         * The output is:
+         *
+         * \verbatim
+         * test: ran out of time
+         * Try `test --help' for more information. \endverbatim
+         **/
+        void error(std::string const& m) const;
+
+        /**
          * \brief Returns the argument (or the empty string) of the first option matching a name
          * \param[in] n the long name for the option
          * \pre 0 < options.count(n)
@@ -499,7 +502,7 @@ namespace mcrl2 {
           if (in.fail()) {
             const char short_option(m_interface.long_to_short(n));
 
-            m_interface.throw_exception("argument `" + option_argument(n) + "' to option --" + n +
+            error("argument `" + option_argument(n) + "' to option --" + n +
                 ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid!");
           }
 
@@ -546,7 +549,7 @@ namespace mcrl2 {
       protected:
 
         /// Prints the option specification to stream
-        void print(std::ostream& s, const size_t w = 27) const;
+        std::string textual_description(const size_t w = 27) const;
 
       public:
 
@@ -734,12 +737,12 @@ namespace mcrl2 {
      **/
     inline void command_line_parser::process_default_options(interface_description& d) {
       if (m_options.count("help")) {
-        d.print(std::cout);
+        std::cout << d.textual_description();
 
         exit(0);
       }
       else if (m_options.count("version")) {
-        d.print_copy_message(std::cout);
+        std::cout << d.copyright_message();
 
         exit(0);
       }
@@ -756,7 +759,7 @@ namespace mcrl2 {
         std::string rewriter(m_options.find("rewriter")->second);
 #if defined(__LIBREWRITE_H)
         if (RewriteStrategyFromString(rewriter.c_str()) == GS_REWR_INVALID) {
-          d.throw_exception("argument `" + rewriter + "' to -r or --rewriter option is invalid");
+          error("argument `" + rewriter + "' to -r or --rewriter option is invalid");
         }
 #endif
       }

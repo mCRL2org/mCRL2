@@ -67,7 +67,7 @@ t_tool_options parse_command_line(int ac, char** av)
     tool_options.outfile_name = parser.unmatched[1];
   }
   if (2 < parser.unmatched.size()) {
-    clinterface.throw_exception("too many file arguments");
+    parser.error("too many file arguments");
   }
 
   return tool_options;

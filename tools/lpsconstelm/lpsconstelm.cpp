@@ -1322,11 +1322,11 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
   }
   catch (std::exception& e) {
     // rethrow error messages for correct formatting
-    clinterface.throw_exception(e.what());
+    parser.error(e.what());
   }
 
   if (2 < parser.unmatched.size()) {
-    clinterface.throw_exception("too many file arguments");
+    parser.error("too many file arguments");
   }
 }
 

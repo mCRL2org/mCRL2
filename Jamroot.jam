@@ -321,8 +321,7 @@ if [ path.exists ./tools ] {
               ;
 
       install install-remaining-boost
-              : /site-config//boost_program_options
-                /site-config//boost_signals
+              : /site-config//boost_signals
               : <location>$(libdir)
               ;
     }

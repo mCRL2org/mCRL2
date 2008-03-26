@@ -424,7 +424,7 @@ t_tool_options parse_command_line(int ac, char** av)
     std::string format = parser.option_argument("output");
 
     if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
-      clinterface.throw_exception("unknown output format specified (got `" + format + "')");
+      parser.error("unknown output format specified (got `" + format + "')");
     }
 
     tool_options.opt_outputformat = format;
@@ -447,7 +447,7 @@ t_tool_options parse_command_line(int ac, char** av)
        tool_options.opt_strategy = on_the_fly_with_fixed_points;
        break;
       default:
-        clinterface.throw_exception("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+        parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
     }
   }
   
@@ -458,7 +458,7 @@ t_tool_options parse_command_line(int ac, char** av)
     tool_options.outfilename = parser.unmatched[1];
   }
   if (2 < parser.unmatched.size()) {
-    clinterface.throw_exception("too many file arguments");
+    parser.error("too many file arguments");
   }
   
   tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());

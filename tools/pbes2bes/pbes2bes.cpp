@@ -277,7 +277,7 @@ t_tool_options parse_command_line(int ac, char** av)
     std::string format = parser.option_argument("output");
 
     if (!((format == "binary") || (format == "internal") || (format == "cwi"))) {
-      clinterface.throw_exception("unknown output format specified (got `" + format + "')");
+      parser.error("unknown output format specified (got `" + format + "')");
     }
 
     tool_options.opt_outputformat = format;
@@ -287,7 +287,7 @@ t_tool_options parse_command_line(int ac, char** av)
     std::string strategy = parser.option_argument("strategy");
 
     if (!((strategy == "lazy") || (strategy == "internal") || (strategy == "cwi"))) {
-      clinterface.throw_exception("unknown output strategy specified (got `" + strategy + "')");
+      parser.error("unknown output strategy specified (got `" + strategy + "')");
     }
 
     tool_options.opt_strategy = strategy;
@@ -300,7 +300,7 @@ t_tool_options parse_command_line(int ac, char** av)
     tool_options.outfilename = parser.unmatched[1];
   }
   if (2 < parser.unmatched.size()) {
-    clinterface.throw_exception("too many file arguments");
+    parser.error("too many file arguments");
   }
 
   return tool_options;

@@ -17,11 +17,12 @@ namespace mcrl2 {
 
     /// \cond INTERNAL
     /**
-     * \param[in,out] s the stream to use for output
      * \param[in] w the width of the first column
+     * \return formatted string that represents the option description
      **/
-    void interface_description::option_descriptor::print(std::ostream& s, const size_t w) const {
-      std::string options;
+    std::string interface_description::option_descriptor::textual_description(const size_t w) const {
+      std::ostringstream s;
+      std::string        options;
 
       if (m_short != '\0') {
         options = "  -" + std::string(1, m_short);
@@ -60,6 +61,8 @@ namespace mcrl2 {
            s << std::string(w, ' ');
         }
       }
+
+      return s.str();
     }
     /// \endcond
 
@@ -107,22 +110,19 @@ namespace mcrl2 {
       return *this;
     }
 
-    /**
-     * \param[in] m the body of the exception message
-     **/
-    void interface_description::throw_exception(std::string const& m) const {
-      throw std::runtime_error(m_name + ": " + m + "\nTry `" + m_name + " --help' for more information.");
-    }
+    std::string interface_description::textual_description() const {
+      std::ostringstream s;
 
-    void interface_description::print(std::ostream& s) const {
       s << "Usage: " << m_path << " " << m_usage << std::endl
         << "Options:" << std::endl;
 
       for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-        i->second.print(s);
+        s << i->second.textual_description();
       }
 
       s << std::endl << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
+
+      return s.str();
     }
 
     /**
@@ -157,7 +157,7 @@ namespace mcrl2 {
                 // Assume it is an option to the ATerm library, so discard
               }
               else {
-                d.throw_exception("command line argument `--" + option + "' not recognised");
+                error("command line argument `--" + option + "' not recognised");
               }
             }
             else {
@@ -167,7 +167,7 @@ namespace mcrl2 {
                 interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
 
                 if (descriptor.needs_argument()) {
-                  d.throw_exception("expected argument to option `--" + option + "'!");
+                  error("expected argument to option `--" + option + "'!");
                 }
                 else if (descriptor.m_argument.get() == 0) {
                   m_options.insert(std::make_pair(long_option, ""));
@@ -187,7 +187,7 @@ namespace mcrl2 {
 
               // Assume that the argument is a short option
               if (d.m_short_to_long.find(argument[i]) == d.m_short_to_long.end()) {
-                d.throw_exception("command line argument `-" + option + "' not recognised");
+                error("command line argument `-" + option + "' not recognised");
               }
               else {
                 std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
@@ -196,7 +196,7 @@ namespace mcrl2 {
                   interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
 
                   if (descriptor.needs_argument()) {
-                    d.throw_exception("expected argument to option `-" + option + "'");
+                    error("expected argument to option `-" + option + "'");
                   }
                   else if (descriptor.m_argument.get() == 0) {
                     m_options.insert(std::make_pair(long_option, ""));
@@ -278,6 +278,7 @@ namespace mcrl2 {
       return result;
     }
 
+    /// \cond INTERNAL
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
                                          m_interface(d), options(m_options), unmatched(m_unmatched) {
@@ -294,6 +295,14 @@ namespace mcrl2 {
       collect(d, convert(c, a));
 
       process_default_options(d);
+    }
+    /// \endcond
+
+    /**
+     * \param[in] m the body of the exception message
+     **/
+    void command_line_parser::error(std::string const& m) const {
+      throw std::runtime_error(m_interface.m_name + ": " + m + "\nTry `" + m_interface.m_name + " --help' for more information.");
     }
 
     /**

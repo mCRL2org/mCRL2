@@ -65,7 +65,7 @@ struct tool_configuration {
       output = parser.unmatched[1];
     }
     if (2 < parser.unmatched.size()) {
-      clinterface.throw_exception("too many file arguments");
+      parser.error("too many file arguments");
     }
   }
 };
