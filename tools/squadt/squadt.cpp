@@ -52,7 +52,7 @@ void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI
 
     if (0 < parser.options.count("create")) {
       if (parser.unmatched.size() != 1) {
-        clinterface.throw_exception("create option requires that a path is provided.");
+        parser.error("create option requires that a path is provided.");
       }
     }
 
@@ -72,7 +72,7 @@ void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI
     }
 
     if (1 < parser.unmatched.size()) {
-      clinterface.throw_exception("too many file aguments!");
+      parser.error("too many file aguments!");
     }
 
     if (parser.options.count("quiet")) {
