@@ -1,11 +1,11 @@
-// Author(s): Tom Haenen
+// Author(s): Tom Haenen, Jan Friso Groote
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsactionrename.cpp
-/// \brief Add your file description here.
+/// \brief The tool lpsactionrename renames actions in an LPS
 
 #define NAME "lpsactionrename"
 #define AUTHOR "Tom Haenen"
@@ -493,7 +493,7 @@ ATermAppl rename(
   lps::action rule_new_action;
   
   std::set<identifier_string> s;
-  postfix_identifier_generator generator("_R");
+  postfix_identifier_generator generator("");
   generator.add_identifiers(s);
 
   bool to_tau=false;
