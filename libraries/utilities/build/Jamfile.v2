@@ -30,17 +30,17 @@ obj squadt_interface
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;
 
-obj mcrl2_command_line_interface
+obj command_line_interfacing
       : source/command_line.cpp
       ;
 
 mcrl2-library utilities
-      : source/command_line.cpp
-        source/aterm_ext.cpp
+      : source/aterm_ext.cpp
         source/numeric_string.cpp
         source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
+        /libraries/utilities//command_line_interfacing
       : <use>/boost//headers
         <use>/libraries/atermpp//headers
       :

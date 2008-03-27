@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <memory>
 
-#include <mcrl2/utilities/version_info.h> // for constants?
+#include <mcrl2/utilities/version_info.h> // for constants
 
 /**
  * \page notes Notes on the use of this library
@@ -57,15 +57,14 @@
  * the mCRL2 wiki: http://www.mcrl2.org/wiki/index.php/Tool_interface_guidelines .
  * The syntax of a command line command is structured as follows:
  * \code
- *  command ::= program-name (options | plain-arguments) *
- *   options         ::= ( white-space+ option ) *
- *   plain-arguments ::= ( white-space+ [^- \t\n] [^ \t\n]+ ) *
+ *   command ::= program-name ( white-space ( option | argument ) ) *
  *    white-space  ::= [ \t\n] +
- *    option       ::= ("--" long-option [ "=" argument ] ) | ("-" short-option [ argument ])
- *     long-option  ::= "--" alpha-low | long-option +
- *     short-option ::= "-" ( alpha-low )
- *      long-option-character  ::= '-' | short-option-character
- *      short-option-character ::= digit | alpha-low
+ *    argument     ::= [^ \t\n] +
+ *    option       ::= ("--" long-option [ "=" argument ] ) | ("-" short-options [ argument ])
+ *     long-option   ::= ( alpha-low | long-option-character ) +
+ *     short-options ::= ( short-option-character ) +
+ *      long-option-character  ::= '-' | digit | alpha-low
+ *      short-option-character ::= digit | alpha-low | alpha-high
  *       alpha-low             ::= 'a' | 'b' | 'c' | ... | 'z'
  *       alpha-high            ::= 'A' | 'B' | 'C' | ... | 'Z'
  *       digit                 ::= '0' | '1' | '2' | ... | '9'
@@ -90,6 +89,20 @@
 
 namespace mcrl2 {
   namespace utilities {
+
+#if defined(__LIBREWRITE_H)
+    inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
+      char strategy[7];
+    
+      is >> strategy;
+
+      if (RewriteStrategyFromString(strategy) == GS_REWR_INVALID) {
+        is.setstate(std::ios_base::failbit);
+      }
+    
+      return is;
+    }
+#endif
 
     class command_line_parser;
 
@@ -177,37 +190,36 @@ namespace mcrl2 {
 
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
 
-      private:
-
         typedef std::map< std::string, option_descriptor > option_map;
 
         typedef std::map< const char,  std::string >       short_to_long_map;
 
       private:
 
-        // \brief Path to executable (as in the first command line argument)
+        /// \brief Path to executable (as in the first command line argument)
         std::string       m_path;
 
-        // \brief Usage and tool description
+        /// \brief Usage and tool description
         std::string       m_name;
 
-        // \brief Comma separated list of authors
+        /// \brief Comma separated list of authors
         std::string       m_authors;
 
-        // \brief Usage and tool description
+        /// \brief Usage and tool description
         std::string       m_usage;
 
-        // \brief Maps long option identifiers to option descriptor objects
+        /// \brief Maps long option identifiers to option descriptor objects
         option_map        m_options;
 
-        // \brief Maps a short option to its associated long option
+        /// \brief Maps a short option to its associated long option
         short_to_long_map m_short_to_long;
 
       private:
 
         /**
-         * \brief Convenience method to strip a path to a filename without extension
-         * \param[in] s string representing a long option
+         * \brief Searches a short option for a given long option
+         * \param[in] n string representing a long option
+         * \return the short option, or '\0' in case no short option was found
          **/
         char long_to_short(std::string const& n) const {
           char result = '\0';
@@ -230,7 +242,7 @@ namespace mcrl2 {
          * \param[in] path the path to the executable (as in the first command line argument)
          * \param[in] authors string describing the authors
          * \param[in] usage message that explains tool usage and description
-         * \param[in] messaging_options adds messaging options to interface
+         * \param[in] messaging_options adds messaging options (--quiet, --verbose and --debug) to interface
          **/
         inline interface_description(std::string const& path, std::string const& name, std::string const& authors,
                                      std::string const& usage, bool messaging_options = true) :
@@ -249,11 +261,22 @@ namespace mcrl2 {
         /**
          * \brief Composes a copyright message
          * \return formatted string that represents the copyright message
+         **/
+        inline std::string copyright_message() const {
+          return "Copyright (C) " + std::string(MCRL2_COPYRIGHT_YEAR) + " Eindhoven University of Technology.\n"
+            "This is free software.  You may redistribute copies of it under the\n"
+            "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
+            "There is NO WARRANTY, to the extent permitted by law.\n";
+        }
+
+        /**
+         * \brief Composes a version information message
+         * \return formatted string that represents version information
          *
          * The following example shows the effect of this method for a tool named test and author John Doe.
          *
          * \code
-         *  copyright_message(std::cerr);
+         *  version_information(std::cerr);
          * \endcode
          *
          * The output is:
@@ -271,44 +294,45 @@ namespace mcrl2 {
          * Where toolset version, revision and copyright year are constants
          * supplied internally at compile time.
          **/
-        inline std::string copyright_message() const {
-          std::ostringstream s;
-
-          s << m_name << " " << MCRL2_VERSION << " (revision " << MCRL2_REVISION << ")" << std::endl
-            << "Copyright (C) " << MCRL2_COPYRIGHT_YEAR << " Eindhoven University of Technology." << std::endl
-            << "This is free software.  You may redistribute copies of it under the" << std::endl
-            << "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>." << std::endl
-            << "There is NO WARRANTY, to the extent permitted by law." << std::endl
-            << std::endl
-            << "Written by " << m_authors << "." << std::endl;
-
-          return s.str();
+        inline std::string version_information() const {
+          return m_name + " " + std::string(MCRL2_VERSION) + " (revision " + std::string(MCRL2_REVISION) + ")\n" +
+                 copyright_message() +
+                 "Written by " + m_authors + ".\n";
         }
 
         /**
-         * \brief The long option acts as identifier
+         * \brief Adds an option identified by a long-style identifier with argument to the interface
+         *
+         * Adds an option identified by a long-style identifier with an
+         * argument to the interface. The argument to the option is either
+         * optional, or mandatory. In the former case a default value is
+         * assumed when the option is found on a command line command.
+         *
+         * The template parameter T is used to select between optional and
+         * mandatory option argument types. More specifically it specifies one
+         * of the two template types:
+         *  \li template < S > interface_description::optional_argument representing a typed optional option argument or,
+         *  \li template < S > interface_description::mandatory_argument representing a typed mandatory option argument.
+         * The special case in which template parameter S is equal to
+         * std::string represents the untyped argument. The current state of
+         * implementation is that typed arguments are unchecked. The parser
+         * does not check that an argument with type mandatory_argument< int >
+         * found in a command is convertible to type int. At the moment only
+         * the two friend functions make_mandatory_argument and
+         * make_optional_argument can be used to create the arguments (that are
+         * untyped).
+         *
          * \param[in] l the long option representation of the option
          * \param[in] a a mandatory or optional argument to the option
          * \param[in] d description of the option
          * \param[in] s an optional single-character short representation of the option
          * \pre l should be a non-empty string that only contain characters from [a-Z] or `-' '_'
-         * \pre l must not be a known long option and s must not be a known short option
+         * \pre l must not be a previously added long option or short option
          * \see add_option(std::string const&, std::string const&, char const)
-         **/
-        template < typename T >
-        interface_description& add_option(std::string const& l, T const& a, std::string const& d, char const s = '\0');
-
-        /**
-         * \brief The long option acts as identifier
-         * \param[in] l the long option representation of the option
-         * \param[in] d description of the option
-         * \param[in] s an optional single-character short representation of the option
-         * \pre l should be a non-empty string that only contain characters from [a-Z] or `-' '_'
-         * \pre l must not be a known long option and s must not be a known short option
          *
-         * The following adds a mandatory and optional option:
+         * The following example shows how to add mandatory and optional options:
          * \code
-         *  add_option("timeout", make_mandatory_argument("SEC"), "timeout occurs after SEC number of seconds", 's');
+         *  add_option("timeout", make_mandatory_argument("SEC"), "timeout occurs after SEC number of seconds", 't');
          *  add_option("recursive", make_optional_argument("DEPTH", "2"), "stop at recursion level DEPTH (default 2)", 'r');
          * \endcode
          * The result is a command line interface with parser behaviour:
@@ -318,6 +342,43 @@ namespace mcrl2 {
          *  test --timeout="bla" --recursive="bla"    (pass)
          *  test --timeout                            (failure)
          *  test -t                                   (failure) \endverbatim
+         *
+         * The human readable interface specification for these options is as follows:
+         *
+         * \verbatim
+         *   -t, --timeout=SEC        timeout occurs after SEC number of seconds
+         *   -r, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
+         **/
+        template < typename T >
+        interface_description& add_option(std::string const& l, T const& a, std::string const& d, char const s = '\0');
+
+        /**
+         * \brief Adds an option identified by a long-style identifier to the interface
+         * \param[in] l the long option representation of the option
+         * \param[in] d description of the option
+         * \param[in] s an optional single-character short representation of the option
+         * \pre l should be a non-empty string that only contain characters from [a-Z] or `-' '_'
+         * \pre l must not be a previously added long option or short option
+         *
+         * The following example shows how to add an option without arguments
+         * \code
+         *  add_option("recursive", "recursively scans a directory", 'r');
+         *  add_option("test", "tests\n a lot");
+         * \endcode
+         * The result is a command line interface with the following example parsing behaviour:
+         * \verbatim
+         *  test --test                               (pass)
+         *  test --test --test                        (pass)
+         *  test -r --recursive                       (pass)
+         *  test --r                                  (failure)
+         *  test -t                                   (failure) \endverbatim
+         *
+         * The human readable interface specification for these options is as follows:
+         *
+         * \verbatim
+         *   -r, --recursive          recursively scans a directory
+         *       --test               tests
+         *                             a lot \endverbatim
          **/
         interface_description& add_option(std::string const& l, std::string const& d, char const s = '\0');
 
@@ -387,7 +448,7 @@ namespace mcrl2 {
      **/
     class command_line_parser {
 
-      private:
+      public:
 
         /// Used to maps options to arguments
         typedef std::multimap< std::string, std::string >  option_map;
@@ -577,17 +638,8 @@ namespace mcrl2 {
          * \param[in] a an optional argument specifier object
          **/
         template < typename T >
-        void set_argument(optional_argument< T > const& a) {
-          m_argument.reset(new optional_argument< T >(a));
-        }
-
-        /**
-         * \brief Sets option argument
-         * \param[in] a an optional argument specifier object
-         **/
-        template < typename T >
-        void set_argument(mandatory_argument< T > const& a) {
-          m_argument.reset(new mandatory_argument< T >(a));
+        void set_argument(T* a) {
+          m_argument.reset(a);
         }
 
         /**
@@ -721,28 +773,43 @@ namespace mcrl2 {
           return false;
         }
     };
-    /// \endcond
 
-    template < typename T >
-    interface_description& interface_description::add_option(std::string const& l, T const& a, std::string const& d, char const s) {
-      add_option(l, d, s);
+    template < >
+    std::vector< std::string > command_line_parser::convert(const int, wchar_t const* const* const);
 
-      m_options.find(l)->second.set_argument(a);
+    template < >
+    std::vector< std::string > command_line_parser::convert(const int, char const* const* const);
 
-      return *this;
-    };
+#if !defined(__COMMAND_LINE_INTERFACE__)
+    template <>
+    command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
+                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+
+      collect(d, convert(c, a));
+
+      process_default_options(d);
+    }
+
+    template <>
+    command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
+                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+
+      collect(d, convert(c, a));
+
+      process_default_options(d);
+    }
 
     /**
      * \param[in] d the interface description
      **/
-    inline void command_line_parser::process_default_options(interface_description& d) {
+    void command_line_parser::process_default_options(interface_description& d) {
       if (m_options.count("help")) {
         std::cout << d.textual_description();
 
         exit(0);
       }
       else if (m_options.count("version")) {
-        std::cout << d.copyright_message();
+        std::cout << d.version_information();
 
         exit(0);
       }
@@ -755,12 +822,9 @@ namespace mcrl2 {
           m_options.insert(std::make_pair("rewriter", "jitty"));
         }
       }
-      else { // check validity of argument to rewriter option
-        std::string rewriter(m_options.find("rewriter")->second);
+      if (m_options.count("rewriter")) {
 #if defined(__LIBREWRITE_H)
-        if (RewriteStrategyFromString(rewriter.c_str()) == GS_REWR_INVALID) {
-          error("argument `" + rewriter + "' to -r or --rewriter option is invalid");
-        }
+        option_argument_as< RewriteStrategy >("rewriter");
 #endif
       }
 
@@ -776,5 +840,17 @@ namespace mcrl2 {
       }
 #endif
     }
+#endif
+    /// \endcond
+
+    template < typename T >
+    interface_description& interface_description::add_option(std::string const& l, T const& a, std::string const& d, char const s) {
+      add_option(l, d, s);
+
+      m_options.find(l)->second.set_argument(new T(a));
+
+      return *this;
+    };
+ 
   }
 }

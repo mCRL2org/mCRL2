@@ -20,5 +20,5 @@ build-project ../libraries/lts/test ;                # test-suite lts
 build-project ../libraries/pbes/test ;               # test-suite pbes
 build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
+build-project ../libraries/utilities/test ;
 build-project ../tools/mcrl22lps/test ;
-# build-project ../libraries/utilities/test ;   # test-suite utilities

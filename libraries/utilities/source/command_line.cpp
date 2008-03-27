@@ -9,6 +9,7 @@
 
 // dummy necessary for compiling
 #define MCRL2_REVISION "0"
+#define __COMMAND_LINE_INTERFACE__
 
 #include <mcrl2/utilities/command_line_interface.h>
 
@@ -97,10 +98,14 @@ namespace mcrl2 {
     }
 
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
-      assert(m_options.find(l) == m_options.end());
+      if (m_options.find(l) != m_options.end()) {
+        throw std::logic_error("Duplicate long option; this is a serious program error!");
+      }
 
       if (s != '\0') {
-        assert(m_short_to_long.find(s) == m_short_to_long.end());
+        if (m_options.find(l) != m_options.end()) {
+          throw std::logic_error("Duplicate short option; this is a serious program error!");
+        }
 
         m_short_to_long[s] = l;
       }
@@ -139,93 +144,98 @@ namespace mcrl2 {
      * \param[in] arguments vector (as ordered list) with command line arguments
      **/
     void command_line_parser::collect(interface_description& d, std::vector< std::string > const& arguments) {
-      for (std::vector< std::string >::const_iterator i = arguments.begin() + 1; i != arguments.end(); ++i) {
-        std::string const& argument(*i);
-        
-        if (argument[0] == '-') {
-          if (argument[1] == '-') {
-            // Assume that the argument is a long option
-            std::string option(argument, 2);
-
-            if (option.find_first_of('=') < option.size()) {
-              // remove argument to single out the long option
-              option.resize(option.find_first_of('='));
-            }
-
-            if (d.m_options.find(option) == d.m_options.end()) {
-              if (argument[2] == 'a' && argument[3] == 't' && argument[4] == '-') {
-                // Assume it is an option to the ATerm library, so discard
+      if (arguments.begin() != arguments.end()) {
+        for (std::vector< std::string >::const_iterator i = arguments.begin() + 1; i != arguments.end(); ++i) {
+          if (!i->empty()) {
+            std::string const& argument(*i);
+          
+            if (argument[0] == '-') {
+              if (argument[1] == '-') {
+                // Assume that the argument is a long option
+                std::string option(argument, 2);
+           
+                if (option.find_first_of('=') < option.size()) {
+                  // remove argument to single out the long option
+                  option.resize(option.find_first_of('='));
+                }
+           
+                if (d.m_options.find(option) == d.m_options.end()) {
+                  if (argument[2] == 'a' && argument[3] == 't' && argument[4] == '-') {
+                    // Assume it is an option to the ATerm library, so discard
+                  }
+                  else {
+                    error("command line argument `--" + option + "' not recognised");
+                  }
+                }
+                else {
+                  std::string const& long_option = (d.m_options.find(option))->first;
+                
+                  if (argument.size() == option.size() + 2) { // no argument
+                    interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
+           
+                    if (descriptor.needs_argument()) {
+                      error("expected argument to option `--" + option + "'!");
+                    }
+                    else if (descriptor.m_argument.get() == 0) {
+                      m_options.insert(std::make_pair(long_option, ""));
+                    }
+                    else {
+                      m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
+                    }
+                  }
+                  else {
+                    m_options.insert(std::make_pair(long_option, std::string(argument, option.size() + 3)));
+                  }
+                }
               }
-              else {
-                error("command line argument `--" + option + "' not recognised");
+              else if (1 < argument.size()) {
+                for (std::string::size_type i = 1; i < argument.size(); ++i) {
+                  std::string option(1, argument[i]);
+           
+                  // Assume that the argument is a short option
+                  if (d.m_short_to_long.find(argument[i]) == d.m_short_to_long.end()) {
+                    error("command line argument `-" + option + "' not recognised");
+                  }
+                  else {
+                    std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
+                 
+                    if (argument.size() - i == 1) { // the last option without argument
+                      interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
+           
+                      if (descriptor.needs_argument()) {
+                        error("expected argument to option `-" + option + "'");
+                      }
+                      else if (descriptor.m_argument.get() == 0) {
+                        m_options.insert(std::make_pair(long_option, ""));
+                      }
+                      else {
+                        m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
+                      }
+                    }
+                    else { // intermediate option or option with argument
+                      if (d.m_options.find(long_option)->second.accepts_argument()) {
+                        // must be the last option, so take the remainder as option argument
+                        m_options.insert(std::make_pair(long_option, std::string(argument, i + 1)));
+           
+                        break;
+                      }
+                      else {
+                        m_options.insert(std::make_pair(long_option, ""));
+                      }
+                    }
+                  }
+                }
               }
             }
             else {
-              std::string const& long_option = (d.m_options.find(option))->first;
-            
-              if (argument.size() == option.size() + 2) { // no argument
-                interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
-
-                if (descriptor.needs_argument()) {
-                  error("expected argument to option `--" + option + "'!");
-                }
-                else if (descriptor.m_argument.get() == 0) {
-                  m_options.insert(std::make_pair(long_option, ""));
-                }
-                else {
-                  m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
-                }
-              }
-              else {
-                m_options.insert(std::make_pair(long_option, std::string(argument, option.size() + 3)));
-              }
+              m_unmatched.push_back(argument);
             }
           }
-          else if (1 < argument.size()) {
-            for (std::string::size_type i = 1; i < argument.size(); ++i) {
-              std::string option(1, argument[i]);
-
-              // Assume that the argument is a short option
-              if (d.m_short_to_long.find(argument[i]) == d.m_short_to_long.end()) {
-                error("command line argument `-" + option + "' not recognised");
-              }
-              else {
-                std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
-             
-                if (argument.size() - i == 1) { // the last option without argument
-                  interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
-
-                  if (descriptor.needs_argument()) {
-                    error("expected argument to option `-" + option + "'");
-                  }
-                  else if (descriptor.m_argument.get() == 0) {
-                    m_options.insert(std::make_pair(long_option, ""));
-                  }
-                  else {
-                    m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
-                  }
-                }
-                else { // intermediate option or option with argument
-                  if (d.m_options.find(long_option)->second.accepts_argument()) {
-                    // must be the last option, so take the remainder as option argument
-                    m_options.insert(std::make_pair(long_option, std::string(argument, i + 1)));
-
-                    break;
-                  }
-                  else {
-                    m_options.insert(std::make_pair(long_option, ""));
-                  }
-                }
-              }
-            }
-          }
-        }
-        else {
-          m_unmatched.push_back(argument);
         }
       }
     }
 
+    /// \cond INTERNAL
     /**
      * Converts an array of C-style strings and a count to an STL vector of STL strings.
      *
@@ -276,25 +286,6 @@ namespace mcrl2 {
       }
 
       return result;
-    }
-
-    /// \cond INTERNAL
-    template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
-                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
-
-      collect(d, convert(c, a));
-
-      process_default_options(d);
-    }
-
-    template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
-                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
-
-      collect(d, convert(c, a));
-
-      process_default_options(d);
     }
     /// \endcond
 

@@ -1,0 +1,12 @@
+import testing ;
+
+project libraries/utilities/test
+   : requirements
+       <use>/boost//headers
+       <source>/libraries/utilities//command_line_interfacing
+       <source>/libraries//data
+   ;
+
+test-suite utilities
+    : [ run command_line_interface_test.cpp ]
+    ;
