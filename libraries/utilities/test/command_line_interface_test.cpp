@@ -180,10 +180,8 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
 
     BOOST_CHECK(parser.options.size() == 6);
     BOOST_CHECK(first_of(parser, "mandatory") != last_of(parser, "mandatory"));
-std::cerr << first_of(parser, "mandatory") << " " << last_of(parser, "mandatory") << std::endl;
     BOOST_CHECK((first_of(parser, "mandatory") == "BLA" && last_of(parser, "mandatory") == "ALB") ||
                 (first_of(parser, "mandatory") == "ALB" && last_of(parser, "mandatory") == "BLA"));
-std::cerr << first_of(parser, "optional") << " " << last_of(parser, "optional") << std::endl;
     BOOST_CHECK((first_of(parser, "optional") == "4321" && last_of(parser, "optional") == "1234") ||
                 (first_of(parser, "optional") == "1234" && last_of(parser, "optional") == "4321"));
     BOOST_CHECK(parser.option_argument_as< int >("optional") == 1234 ||
