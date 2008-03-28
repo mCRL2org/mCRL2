@@ -139,6 +139,8 @@ static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
 
+static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
+
 // Typechecking modal formulas
 static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm);
 static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm);
@@ -2130,7 +2132,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
     gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
-    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
+    if(!NewType) {
+      gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
+      gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
+      return NULL;
+    }
     
     //it is possible that:
     //1) a cast has happened
@@ -2178,7 +2184,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
     gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
-    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);return NULL;}
+    if(!NewType) {
+      gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
+      gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
+      return NULL;
+    }
 
     gsDebugMsg("Arguments once more: Arguments %T, ArgumentTypes: %T\n",Arguments,ArgumentTypes);
 
@@ -2405,6 +2415,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     gsDebugMsg("Possible types for Op/Var %T with %d argument%s are (ParList: %T; PosType: %T)\n",
       Name, nFactPars, (nFactPars != 1)?"s":"", ParList, PosType);
 
+    ATermList CandidateParList=ParList;
+
     { // filter ParList keeping only functions A_0#...#A_nFactPars->A
       ATermList NewParList;
       if(nFactPars>=0){
@@ -2417,6 +2429,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
         }
         ParList=ATreverse(NewParList);
       }
+
+      if(!ATisEmpty(ParList)) CandidateParList=ParList;
 
       // filter ParList keeping only functions of the right type
       ATermList BackupParList=ParList;
@@ -2475,6 +2489,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 	
     if(ATisEmpty(ParList)) {
+      //provide some information to the upper layer for a better error message
+      ATermAppl Sort;
+      if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=gsMakeSortsPossible(CandidateParList);
+      *DataTerm=gsMakeOpId(Name,Sort);
       gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
         Name, nFactPars, (nFactPars != 1)?"s":"", PosType);    
       return NULL;
@@ -3572,7 +3590,61 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
   return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)gsMakeSortExprBag(Arg)),gsMakeSortIdNat());
 }
 
+static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes){
+  //prints more information about impossible cast.
+  //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
+  assert (ATgetLength(Arguments)==ATgetLength(ArgumentTypes));
 
+  ATermList CandidateList;
+  if(gsIsSortsPossible(CandidateType)) CandidateList=ATLgetArgument(CandidateType,0); 
+  else CandidateList=ATmakeList1((ATerm)CandidateType);
+
+  ATermList NewCandidateList=ATmakeList0();
+  for(ATermList l=CandidateList;!ATisEmpty(l);l=ATgetNext(l)){
+    NewCandidateList=ATinsert(NewCandidateList,(ATerm)ATLgetArgument(ATAgetFirst(l),0));
+  }
+  CandidateList=ATreverse(NewCandidateList);
+
+  //CandidateList=gstcTraverseListList(CandidateList);
+  ATermList CurrentCandidateList=CandidateList;
+  CandidateList=ATmakeList0();
+  while(true){
+    ATermList NewCurrentCandidateList=ATmakeList0();
+    ATermList NewList=ATmakeList0();
+    for(ATermList l=CurrentCandidateList;!ATisEmpty(l);l=ATgetNext(l)){
+      ATermList List=ATLgetFirst(l);
+      if(!ATisEmpty(List)) {
+        NewList=ATinsert(NewList,(ATerm)ATAgetFirst(List));
+        NewCurrentCandidateList=ATinsertUnique(NewCurrentCandidateList,(ATerm)ATgetNext(List));
+      } 
+      else {
+        NewCurrentCandidateList=ATinsert(NewCurrentCandidateList,(ATerm)ATmakeList0());
+      }
+    }
+    if(ATisEmpty(NewList)) break;
+    CurrentCandidateList=ATreverse(NewCurrentCandidateList);
+    CandidateList=ATinsert(CandidateList,(ATerm)ATreverse(NewList));    
+  }
+  CandidateList=ATreverse(CandidateList);
+
+  for(ATermList l=Arguments, m=ArgumentTypes, n=CandidateList;!ATisEmpty(l);l=ATgetNext(l), m=ATgetNext(m), n=ATgetNext(n)){
+    ATermList PosTypes=ATLgetFirst(n);
+    ATermAppl NeededType=ATAgetFirst(m);
+    bool found=true;
+    for(ATermList k=PosTypes;!ATisEmpty(k);k=ATgetNext(k)){
+      if(gstcTypeMatchA(ATAgetFirst(k),NeededType)){
+        found=false;
+        break;
+      }
+    }
+    if(found) {
+      ATermAppl Sort;
+      if(ATgetLength(PosTypes)==1) Sort=ATAgetFirst(PosTypes); else Sort=gsMakeSortsPossible(PosTypes);  
+      gsErrorMsg("this is, for instance, because cannot cast %P to type %P\n",ATAgetFirst(l),Sort);
+      break;
+    }
+  }
+}
 
 //===================================
 // Type checking modal formulas
