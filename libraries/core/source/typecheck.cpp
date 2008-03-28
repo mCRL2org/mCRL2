@@ -2696,7 +2696,11 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList){
     }
   }
   
-  for(int i=nFormPars-1;i>=0;i--) Result=ATinsert(Result,(ATerm)gsMakeSortsPossible(ATreverse(Pars[i])));
+  for(int i=nFormPars-1;i>=0;i--){
+    ATermAppl Sort;
+    if(ATgetLength(Pars[i])==1) Sort=ATAgetFirst(Pars[i]); else Sort=gsMakeSortsPossible(ATreverse(Pars[i]));
+    Result=ATinsert(Result,(ATerm)Sort);
+  }
   free(Pars);
   return Result;
 }
@@ -2955,7 +2959,7 @@ static ATermAppl gstcUnSet(ATermAppl PosType){
 
   ATermList NewPosTypes=ATmakeList0();
   if(gsIsSortsPossible(PosType)){
-    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprSet(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
@@ -2976,7 +2980,7 @@ static ATermAppl gstcUnBag(ATermAppl PosType){
 
   ATermList NewPosTypes=ATmakeList0();
   if(gsIsSortsPossible(PosType)){
-    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprBag(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
@@ -2997,7 +3001,7 @@ static ATermAppl gstcUnList(ATermAppl PosType){
 
   ATermList NewPosTypes=ATmakeList0();
   if(gsIsSortsPossible(PosType)){
-    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortExprList(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
@@ -3029,7 +3033,7 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
 
   ATermList NewPosTypes=ATmakeList0();
   if(gsIsSortsPossible(PosType)){
-    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
       if(gsIsSortArrow(PosType)){
