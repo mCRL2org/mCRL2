@@ -1418,7 +1418,7 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
   ATermAppl Name = gsGetName(OpId);
   ATermAppl Sort = gsGetSort(OpId);
 
-  if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
+  if(ATAtableGet(context.constants, (ATerm)Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/){
     gsErrorMsg("double declaration of %s %P\n", msg, Name);
     return ATfalse;
   }
