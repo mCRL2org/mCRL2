@@ -1531,26 +1531,34 @@ void Shape::drawText( GLCanvas* canvas )
 // ---------------------------------------------
 {	
 	string text = note;
-    if( variable != "" && text != "" )
-    {
-    	text.append(" -- ");    		
-    }
-    text.append(variable);
+	if( variable != "" && text != "" )
+    	{
+    		text.append(" -- ");
+		int i = i = variable.find(":",0); // for removing variable's name
+		i++; // for removing space char
+		string variableValue = variable;
+		variableValue.erase(0,i);
+		text.append(variableValue);	
+	}
+	else
+	{
+		text.append(variable);
+	}    	
     	
-    double pix = canvas->getPixelSize();
+    	double pix = canvas->getPixelSize();
     
-    // generate textures for drawing text, if they aren't generated yet	
-    if( !texturesGenerated || lastCanvas != canvas)
-    {
-    	VisUtils::genCharTextures(
-    		texCharId,
-       		texChar );
-        texturesGenerated = true;
-        lastCanvas = canvas;
-    }
+    	// generate textures for drawing text, if they aren't generated yet	
+    	if( !texturesGenerated || lastCanvas != canvas)
+    	{
+    		VisUtils::genCharTextures(
+    			texCharId,
+       			texChar );
+        	texturesGenerated = true;
+        	lastCanvas = canvas;
+    	}
             
-    VisUtils::setColor( colTxt );
-    VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+    	VisUtils::setColor( colTxt );
+    	VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
 }
 
 

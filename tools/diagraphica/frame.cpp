@@ -4050,7 +4050,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 			    		string value = attribute->getCurValue(0)->getValue(); // Get the top current value of the selected attribute		    		
 			    		name.append(": ");
 			    		name.append(value); // Generate the text will be displayed on the shape		    		
-				    }
+				}
 		    		mediator->handleShowVariable( name, checkedItemId ); 		    		
 		    	}
         	}

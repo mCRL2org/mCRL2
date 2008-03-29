@@ -2255,17 +2255,8 @@ void ArcDiagram::handleHits( const vector< int > &ids )
             		handleShowDiagram( ids[2] );
                 	if ( mediator->getView() == Mediator::VIEW_TRACE )
                 	{
-                    	mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
+                    		mediator->markTimeSeries( this, graph->getLeaf( ids[2] ) );
                 	}
-            	}
-            	else if ( mouseClick == MSE_CLICK_DOUBLE && //Try to cluster w.r.t. first attribute, when user double click on the nodes
-                      	mouseDrag == MSE_DRAG_FALSE &&
-                      	mouseSide == MSE_SIDE_LFT &&
-                      	!mediator->getClustered() )
-            	{ 
-            		vector< int > indcs;
-            		indcs.push_back(0); 
-            		mediator->handleAttributeCluster( indcs );
             	}
             	else
             	{
@@ -2445,24 +2436,20 @@ void ArcDiagram::handleHoverBarTree(
 void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
 // -----------------------------------------------------
 {
-    if ( mapPosToClust.size() > 1 )
-    {
-        // diagram doesn't exist, add it
-        if ( showDgrm[dgrmIdx] != true )
-        {
-            showDiagram( dgrmIdx );
-            updateMarkBundles();
-        }
-        else
-        // diagram exists, remove it
-        {
-            hideDiagram( dgrmIdx );
-            currIdxDgrm = -1;
-            updateMarkBundles();
-
-            mediator->handleUnshowFrame();
-        }
-    }
+	// diagram doesn't exist, add it
+	if ( showDgrm[dgrmIdx] != true )
+	{
+        	showDiagram( dgrmIdx );
+        	updateMarkBundles();
+	}
+	else
+	// diagram exists, remove it
+	{
+        	hideDiagram( dgrmIdx );
+        	currIdxDgrm = -1;
+        	updateMarkBundles();
+        	mediator->handleUnshowFrame();
+	}
 }
 
 
