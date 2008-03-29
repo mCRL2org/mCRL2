@@ -1,6 +1,4 @@
-project lpsbinary
-       : build-dir $(BUILD_TOP)/lpsbinary
-       ;
+project lpsbinary ;
 
 tool lpsbinary
        : lpsbinary.cpp

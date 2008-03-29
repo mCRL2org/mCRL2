@@ -4,8 +4,6 @@ project libraries/tipi/test
        <include>../../
     ;
 
-import testing ;
-
 #unit-test basic_messenger_test :
 #        basic_messenger_test.cpp
 #        /libraries//transport
@@ -18,7 +16,6 @@ import testing ;
 #        /libraries/sip//sip_common
 #        /site-config//boost_test ;
 
-unit-test mime_type_test
-         : mime_type_test.cpp
-         : <library>/libraries/tipi//tool_interface
+test-suite tipi
+         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool_interface ]
          ;

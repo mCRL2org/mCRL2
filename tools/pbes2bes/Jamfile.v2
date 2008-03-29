@@ -1,5 +1,4 @@
 project toolset/pbes2bes
-   : build-dir $(BUILD_TOP)/pbes2bes
    : requirements
       <library>/libraries//lps
       <library>/libraries//pbes

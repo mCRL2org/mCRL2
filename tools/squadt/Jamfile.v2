@@ -1,7 +1,4 @@
-project toolset/squadt
-  : build-dir $(BUILD_TOP)/squadt
-  : requirements <include>.
-  ;
+project toolset/squadt ;
 
 import set ;
 import sequence ;
@@ -16,6 +13,7 @@ tool squadt
         /libraries/tipi//controller_interface
         /libraries/utilities//command_line_interfacing
       : <dependency>/libraries//ticpp
+        <include>.
         <wx>yes
       ;
 

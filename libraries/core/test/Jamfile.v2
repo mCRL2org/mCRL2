@@ -8,11 +8,21 @@ project libraries/core/test
       <library>/libraries//core
    ;
 
+import sequence ;
+
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
+
+for file in [ sequence.insertion-sort [ glob-tree *.mcrl2 ] ] {
+  tests-with-files += [
+        unit-test mcrl22lps-core-$(file:B)
+              : /tools/mcrl22lps//mcrl22lps
+              : <testing.arg>$(file)
+                <testing.arg>mcrl22lps-core-$(file:B) ] ;
+}
 
 test-suite core
     : [ run test_lib.cpp ]
-      [ run_tool_on_examples /tools/mcrl22lps//mcrl22lps : : . : mcrl2 ]
+      $(tests-with-files)
       [ run beta_reduce_test.cpp ]
       [ run text_utility_test.cpp ]
       [ run sequence_test.cpp ]

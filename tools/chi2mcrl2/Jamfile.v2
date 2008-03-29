@@ -1,6 +1,4 @@
-project toolset/chi2mcrl2
-       : build-dir $(BUILD_TOP)/chi2mcrl2
-       ;
+project toolset/chi2mcrl2 ;
 
 tool chi2mcrl2
        : chi2mcrl2.cpp

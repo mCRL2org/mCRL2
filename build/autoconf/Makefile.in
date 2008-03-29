@@ -30,7 +30,7 @@ install: $(BJAM) config.status
 	$(BOOST_BUILD) --install
 
 test: $(BJAM) config.status
-	$(BJAM) ./status --preserve-test-targets
+	$(BJAM) ./status -l300
 
 # Build boost build tool
 bjam: $(BJAM)

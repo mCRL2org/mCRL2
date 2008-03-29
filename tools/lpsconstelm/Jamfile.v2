@@ -1,6 +1,4 @@
-project lpsconstelm
-       : build-dir $(BUILD_TOP)/lpsconstelm
-       ;
+project lpsconstelm ;
 
 tool lpsconstelm
        : lpsconstelm.cpp

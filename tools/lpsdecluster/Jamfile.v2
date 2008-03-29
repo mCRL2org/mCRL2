@@ -1,6 +1,4 @@
-project lpsdecluster
-       : build-dir $(BUILD_TOP)/lpsdecluster
-       ;
+project lpsdecluster ;
 
 tool lpsdecluster
        : lpsdecluster.cpp

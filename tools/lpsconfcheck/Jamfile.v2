@@ -1,6 +1,4 @@
-project toolset/lpsconfcheck
-  : build-dir $(BUILD_TOP)/lpsconfcheck
-  ;
+project toolset/lpsconfcheck ;
 
 tool lpsconfcheck
        : lpsconfcheck.cpp

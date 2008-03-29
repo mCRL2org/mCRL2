@@ -1,6 +1,4 @@
-project toolset/pbesrewr
-       : build-dir $(BUILD_TOP)/pbesrewr
-       ;
+project toolset/pbesrewr ;
 
 tool pbesrewr
        : pbesrewr.cpp

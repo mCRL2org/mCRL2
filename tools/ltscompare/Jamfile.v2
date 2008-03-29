@@ -1,6 +1,4 @@
-project toolset/ltscompare
-       : build-dir $(BUILD_TOP)/ltscompare
-       ;
+project toolset/ltscompare ;
 
 tool ltscompare
        : ltscompare.cpp

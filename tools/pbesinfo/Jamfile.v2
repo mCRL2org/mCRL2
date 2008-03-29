@@ -1,6 +1,4 @@
-project toolset/pbesinfo
-       : build-dir $(BUILD_TOP)/pbesinfo
-       ;
+project toolset/pbesinfo ;
 
 tool pbesinfo
        : pbesinfo.cpp

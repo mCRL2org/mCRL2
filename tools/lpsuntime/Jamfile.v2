@@ -1,6 +1,4 @@
-project lpsuntime
-       : build-dir $(BUILD_TOP)/lpsuntime
-       ;
+project lpsuntime ;
 
 tool lpsuntime
        : lpsuntime.cpp

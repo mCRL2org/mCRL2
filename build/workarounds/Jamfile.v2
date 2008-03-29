@@ -27,6 +27,7 @@ alias configuration : : <os>NT <toolset>msvc :
          <define>_SECURE_SCL=0
          <include>$(TOP)/build/workarounds/msvc
          <include>$(TOP)/3rd-party/getopt
+         <pch>off
        ;
 
 # Mac OS X, darwin
@@ -36,7 +37,6 @@ alias configuration : : <toolset>darwin :
          <cxxflags>"-std=c++98 -ansi"
          <debug-symbols>on:<cxxflags>"-ggdb"
          <linkflags>"-undefined dynamic_lookup"
-         <linkflags>-mmacosx_version_min=10.3
        ;
 
 # Sun, Solaris
@@ -48,5 +48,6 @@ alias configuration : : <toolset>sun :
 alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds
          <cxxflags>"-std=c++98 -ansi"
+         <link>static:<linkflags>-export-dynamic
        ;
 

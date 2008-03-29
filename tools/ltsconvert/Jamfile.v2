@@ -1,6 +1,4 @@
-project ltsconvert
-       : build-dir $(BUILD_TOP)/ltsconvert
-       ;
+project ltsconvert ;
 
 tool ltsconvert
        : ltsconvert.cpp

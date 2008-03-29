@@ -1,6 +1,4 @@
-project toolset/lpsinfo
-       : build-dir $(BUILD_TOP)/lpsinfo
-       ;
+project toolset/lpsinfo ;
 
 tool lpsinfo
        : lpsinfo.cpp

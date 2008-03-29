@@ -1,6 +1,4 @@
-project toolset/ltsinfo
-       : build-dir $(BUILD_TOP)/ltsinfo
-       ;
+project toolset/ltsinfo ;
 
 tool ltsinfo
        : ltsinfo.cpp

@@ -1,6 +1,4 @@
-project toolset/lpsactionrename
-       : build-dir $(BUILD_TOP)/lpsactionrename
-       ;
+project toolset/lpsactionrename ;
 
 tool lpsactionrename
        : lpsactionrename.cpp

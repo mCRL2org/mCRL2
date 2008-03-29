@@ -1,6 +1,4 @@
-project toolset/mcrl2i
-       : build-dir $(BUILD_TOP)/mcrl2i
-       ;
+project toolset/mcrl2i ;
 
 tool mcrl2i
        : mcrl2i.cpp

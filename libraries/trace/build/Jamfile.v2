@@ -1,6 +1,5 @@
 project libraries/trace
        : source-location ..
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
        : usage-requirements

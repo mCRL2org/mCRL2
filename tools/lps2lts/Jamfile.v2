@@ -1,6 +1,4 @@
-project lps2lts
-       : build-dir $(BUILD_TOP)/lps2lts
-       ;
+project lps2lts ;
 
 tool lps2lts
        : lps2lts.cpp

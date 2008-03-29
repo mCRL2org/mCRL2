@@ -126,9 +126,6 @@ use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
 use-project /workarounds               : build/workarounds ;
 
-# Helper rules for regession testing
-include $(BUILD_TOOLS)/testing.jam ;
-
 # Extract build requirements from command line options
 for option in [ modules.peek : ARGV ] {
   local temporary = [ MATCH ([^=]+)= : $(option) ] ;
@@ -209,13 +206,10 @@ if [ modules.peek : NT ] && [ feature.get-values link : $(build-options) ] != st
 project toolset
        : build-dir $(BUILD_TOP)
        : requirements
-          <define>_FILE_OFFSET_BITS=64
-          <toolset>msvc:<pch>off
           <use>/workarounds//configuration
-          <link>static,<squadt-support>yes:<threading>multi
-          <toolset>gcc,<link>static:<linkflags>-export-dynamic
-          $(build-options)
+          <define>_FILE_OFFSET_BITS=64
           <dll-path>$(libdir)
+          $(build-options)
        : default-build
           <link>$(link-variant)
        ;

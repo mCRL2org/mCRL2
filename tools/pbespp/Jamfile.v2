@@ -1,6 +1,4 @@
-project toolset/pbespp
-       : build-dir $(BUILD_TOP)/pbespp
-       ;
+project toolset/pbespp ;
 
 tool pbespp
        : pbespp.cpp

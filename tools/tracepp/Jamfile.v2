@@ -1,6 +1,4 @@
-project toolset/tracepp
-       : build-dir $(BUILD_TOP)/tracepp
-       ;
+project toolset/tracepp ;
 
 tool tracepp
        : tracepp.cpp

@@ -1,5 +1,4 @@
 project toolset/xsim
-       : build-dir $(BUILD_TOP)/xsim
        : requirements
           <use>/libraries/lps//headers
           <use>/libraries/trace//headers

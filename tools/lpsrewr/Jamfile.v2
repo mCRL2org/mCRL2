@@ -1,6 +1,4 @@
-project toolset/lpsrewr
-       : build-dir $(BUILD_TOP)/lpsrewr
-       ;
+project toolset/lpsrewr ;
 
 tool lpsrewr
        : lpsrewr.cpp

@@ -1,6 +1,4 @@
-project toolset/lpsformcheck
-  : build-dir $(BUILD_TOP)/lpsformcheck
-  ;
+project toolset/lpsformcheck ;
 
 tool lpsformcheck
        : lpsformcheck.cpp

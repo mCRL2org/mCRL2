@@ -1,6 +1,4 @@
-project toolset/diagraphica
-  : build-dir $(BUILD_TOP)/diagraphica
-  ;
+project toolset/diagraphica ;
 
 tool diagraphica
       : [ glob *.cpp ]

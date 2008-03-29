@@ -7,8 +7,6 @@ project status
       <define>BOOST_ALL_NO_LIB
     ;
         
-import testing ;
-
 # Tests from Jamfiles in individual library test subdirectories
 # Please keep these in alphabetic order by test-suite name
 

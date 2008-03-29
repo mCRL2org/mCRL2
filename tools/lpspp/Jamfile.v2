@@ -1,7 +1,4 @@
-project toolset/lpspp
-       : source-location .
-       : build-dir $(BUILD_TOP)/lpspp
-       ;
+project toolset/lpspp ;
 
 tool lpspp
        : lpspp.cpp

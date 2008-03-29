@@ -1,6 +1,4 @@
-project lpssumelm
-       : build-dir $(BUILD_TOP)/lpssumelm
-       ;
+project lpssumelm ;
 
 tool lpssumelm
        : lpssumelm.cpp

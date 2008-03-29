@@ -1,6 +1,4 @@
-project toolset/ltsmin
-       : build-dir $(BUILD_TOP)/ltsmin
-       ;
+project toolset/ltsmin ;
 
 tool ltsmin
        : ltsmin.cpp

@@ -1,6 +1,5 @@
 project lps
        : source-location ..
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
           <dependency>/boost//headers

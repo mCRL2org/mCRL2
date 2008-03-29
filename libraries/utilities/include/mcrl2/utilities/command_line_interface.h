@@ -96,7 +96,9 @@ namespace mcrl2 {
     
       is >> strategy;
 
-      if (RewriteStrategyFromString(strategy) == GS_REWR_INVALID) {
+      s = RewriteStrategyFromString(strategy);
+
+      if (s == GS_REWR_INVALID) {
         is.setstate(std::ios_base::failbit);
       }
     
@@ -297,7 +299,7 @@ namespace mcrl2 {
         inline std::string version_information() const {
           return m_name + " " + std::string(MCRL2_VERSION) + " (revision " + std::string(MCRL2_REVISION) + ")\n" +
                  copyright_message() +
-                 "Written by " + m_authors + ".\n";
+                 "\nWritten by " + m_authors + ".\n";
         }
 
         /**
@@ -553,10 +555,10 @@ namespace mcrl2 {
          * \throw std::runtime_exception containing a message that the argument cannot be converted to the specified type
          **/
         template < typename T >
-        T option_argument_as(std::string const& n) {
-          T result;
-
+        inline T option_argument_as(std::string const& n) {
           std::istringstream in(option_argument(n));
+
+          T result;
            
           in >> result;
 

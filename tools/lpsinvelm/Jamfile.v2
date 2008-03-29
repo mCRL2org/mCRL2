@@ -1,6 +1,4 @@
-project lpsinvelm
-  : build-dir $(BUILD_TOP)/lpsinvelm
-  ;
+project lpsinvelm ;
 
 tool lpsinvelm
        : lpsinvelm.cpp

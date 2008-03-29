@@ -1,6 +1,5 @@
 project core
        : source-location ..
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
           <os>NT:<define>NO_DYNLOAD

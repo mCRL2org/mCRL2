@@ -1,5 +1,4 @@
 project toolset/pbessolve
-       : build-dir $(BUILD_TOP)/pbessolve
        : requirements
           <library>/libraries//lps
           <library>/libraries//pbes

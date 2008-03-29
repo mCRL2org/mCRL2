@@ -1,6 +1,5 @@
 project libraries/utilities
        : source-location ..
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
           <include>../../core/include      # Circular dependency

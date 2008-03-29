@@ -1,6 +1,4 @@
-project toolset/ltsgraph
-       : build-dir $(BUILD_TOP)/ltsgraph
-       ;
+project toolset/ltsgraph ;
 
 tool ltsgraph
        : [ glob *.cpp ]

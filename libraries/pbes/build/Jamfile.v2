@@ -1,6 +1,5 @@
 project pbes
        : source-location ..
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
           <include>../../lps/include #Cyclic dependency that should be removed

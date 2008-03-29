@@ -1,7 +1,6 @@
 project squadt/libraries/tipi
     : source-location
        ../source
-    : build-dir $(BUILD_TOP)
     : requirements
        <use>/boost//headers
        <use>/libraries/utilities//headers

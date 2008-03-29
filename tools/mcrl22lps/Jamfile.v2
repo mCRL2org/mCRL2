@@ -1,6 +1,4 @@
-project toolset/mcrl22lps
-       : build-dir $(BUILD_TOP)/mcrl22lps
-       ;
+project toolset/mcrl22lps ;
 
 tool mcrl22lps
        : mcrl22lps.cpp

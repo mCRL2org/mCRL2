@@ -1,6 +1,4 @@
-project lpsparelm
-       : build-dir $(BUILD_TOP)/lpsparelm
-       ;
+project lpsparelm ;
 
 tool lpsparelm
        : lpsparelm.cpp

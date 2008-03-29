@@ -1,6 +1,4 @@
-project toolset/lps2torx
-       : build-dir $(BUILD_TOP)/lps2torx
-       ;
+project toolset/lps2torx ;
 
 tool lps2torx
        : lps2torx.cpp
