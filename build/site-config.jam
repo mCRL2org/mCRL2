@@ -1,6 +1,4 @@
-project site-config
-       : build-dir $(BUILD_TOP)
-       ;
+project site-config ;
 
 include $(TOP)/build/config.jam ;
 
