@@ -8,16 +8,15 @@ project libraries/core/test
       <library>/libraries//core
    ;
 
-import sequence ;
-
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 
-for file in [ sequence.insertion-sort [ glob-tree *.mcrl2 ] ] {
+for file in [ glob-tree *.mcrl2 ] {
   tests-with-files += [
-        unit-test mcrl22lps-core-$(file:B)
-              : /tools/mcrl22lps//mcrl22lps
-              : <testing.arg>$(file)
-                <testing.arg>mcrl22lps-core-$(file:B) ] ;
+        run /tools/mcrl22lps//mcrl22lps
+              : # no arguments
+              : $(file)
+              : <testing.preserve>true
+              : mcrl22lps-core-$(file:B) ] ;
 }
 
 test-suite core

@@ -60,6 +60,7 @@ feature.feature testing.launcher   : : free optional ;
 feature.feature test-info          : : free incidental ;
 feature.feature testing.arg        : : free incidental ;
 feature.feature testing.input-file : : free dependency ;
+feature.feature testing.preserve   : : free optional ;
 
 
 # Register target types.
@@ -376,6 +377,7 @@ if --preserve-test-targets in $(argv)
 toolset.flags testing.capture-output ARGS <testing.arg> ;
 toolset.flags testing.capture-output INPUT_FILES <testing.input-file> ;
 toolset.flags testing.capture-output LAUNCHER <testing.launcher> ;
+toolset.flags testing.capture-output PRESERVE <testing.preserve> ;
 
 
 # Runs executable 'sources' and stores stdout in file 'target'. Unless
@@ -406,7 +408,7 @@ rule capture-output ( target : source : properties * : targets-to-remove * )
     {
         targets-to-remove = ;
     }
-    else if ! $(targets-to-remove)
+    else if ! $(targets-to-remove) && ! [ on $(target) return $(PRESERVE) ]
     {
         targets-to-remove = $(source) ;
     }

@@ -1,6 +1,5 @@
 project svc
        : source-location ../source
-       : build-dir $(BUILD_TOP)
        : requirements
           <toolset>darwin:<cflags>-std=c99
           <toolset>gcc:<cflags>-std=c99

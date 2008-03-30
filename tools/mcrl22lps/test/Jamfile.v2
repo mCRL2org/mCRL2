@@ -1,14 +1,14 @@
 project toolset/mcrl22lps/test ;
 
-import sequence ;
-
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 
-for file in [ sequence.insertion-sort [ path.glob-tree $(TOP)/examples : *.mcrl2 ] ] {
-  tests-with-files += [ unit-test mcrl22lps-$(file:B)
-                         : /tools/mcrl22lps//mcrl22lps
-                         : <testing.arg>$(file)
-                           <testing.arg>mcrl22lps-$(file:B) ] ;
+for file in [ path.glob-tree $(TOP)/examples : *.mcrl2 ] {
+  tests-with-files += [
+        run /tools/mcrl22lps//mcrl22lps
+              : # no arguments
+              : $(file)
+              : <testing.preserve>true
+              : mcrl22lps-$(file:B) ] ;
 }
 
 test-suite mcrl22lps

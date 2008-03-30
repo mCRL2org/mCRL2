@@ -1,6 +1,5 @@
 project aterm
        : source-location ..
-       : build-dir $(BUILD_TOP)/aterm
        : requirements
           <toolset>darwin:<cflags>-std=c99
           <toolset>gcc:<cflags>-std=c99
