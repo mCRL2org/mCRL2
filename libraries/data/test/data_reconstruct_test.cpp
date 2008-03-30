@@ -155,7 +155,7 @@ void test_data_reconstruct_struct_nest()
   aterm_appl d1_proj = gsMakeStructProj(d1_name, D_id);
   aterm_appl p_proj = gsMakeStructProj(p_name, sort_expr::pos());
 
-  aterm_appl d = gsMakeStructCons(d1_name, aterm_list(), is_d_name);
+  aterm_appl d = gsMakeStructCons(d_name, aterm_list(), is_d_name);
   aterm_appl cd = gsMakeStructCons(cd_name, make_list(d1_proj), is_cd_name);
   aterm_appl cpos = gsMakeStructCons(cpos_name, make_list(p_proj), is_cpos_name);
 
@@ -196,9 +196,6 @@ void test_data_reconstruct_simple_constructor()
   data_specification data = parse_data_specification(text);
   aterm_appl rec_data = reconstruct_spec(data);
 
-  // data reconstruction should not modify data
-  BOOST_CHECK(data == rec_data);
-
   // some more specific checks:
   identifier_string S_name("S");
   identifier_string c_name("c");
@@ -206,33 +203,64 @@ void test_data_reconstruct_simple_constructor()
   data_operation c(c_name, S_id);
 
   BOOST_CHECK(find_term(rec_data(0), S_name));
-  BOOST_CHECK(find_term(rec_data(0), c_name));
   BOOST_CHECK(find_term(rec_data(0), S_id));
+  BOOST_CHECK(find_term(rec_data(1), c_name));
   BOOST_CHECK(find_term(rec_data(1), c));
 
   // check that no structured sort has been added
   // This test case is showing the presence of bug #335
   aterm_appl c_struct = gsMakeStructCons(c_name, aterm_list(), gsMakeNil());
   aterm_appl S_struct = gsMakeSortStruct(make_list(c_struct));
+  BOOST_CHECK(!find_term(rec_data(0), c_name));
   BOOST_CHECK(!find_term(rec_data(0), c_struct));
   BOOST_CHECK(!find_term(rec_data(0), S_struct));
 
 }
 
-void test_multiple_reconstruct_calls()
+/// Test case for issue #344, reported by Yaroslav Usenko
+/// c: Bool -> Bool disappeared from the specification after
+/// data reconstruction
+void test_data_reconstruct_bool_function()
 {
-  test_find_term();
-  test_data_reconstruct_struct();
-  test_data_reconstruct_struct_complex();
-  test_data_reconstruct_struct_nest();
-  test_data_reconstruct_simple_constructor();
+  std::string text =
+  "map c: Bool;\n"
+  "    c: Bool -> Bool;\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  // some more specific checks:
+  identifier_string c_name("c");
+  sort_expression b = sort_expr::bool_();
+  sort_expression bb = arrow(make_list(b), b);
+  data_operation cb(c_name, b);
+  data_operation cbb(c_name, bb);
+
+  std::cerr << rec_data << std::endl;
+  std::cerr << c_name << std::endl;
+  std::cerr << b << std::endl;
+  std::cerr << bb << std::endl;
+  std::cerr << cb << std::endl;
+  std::cerr << cbb << std::endl;
+
+  BOOST_CHECK(find_term(rec_data(2), c_name));
+  BOOST_CHECK(find_term(rec_data(2), b));
+  BOOST_CHECK(find_term(rec_data(2), bb));
+  BOOST_CHECK(find_term(rec_data(2), cb));
+  BOOST_CHECK(find_term(rec_data(2), cbb));
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  test_multiple_reconstruct_calls();
+  test_find_term();
+  test_data_reconstruct_struct();
+  test_data_reconstruct_struct_complex();
+  test_data_reconstruct_struct_nest();
+  test_data_reconstruct_simple_constructor();
+  test_data_reconstruct_bool_function();
 
   return 0;
 }
