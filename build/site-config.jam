@@ -173,12 +173,9 @@ boost_library test : : system ;
 boost_library system : local ;
 boost_library md5 : local ;
 
-if [ os.name ] = NT {
-  alias dl : : <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
-}
-else {
-  lib   dl : : <name>"dl" <link>shared ;
-}
+alias dl : : <os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
+alias dl : : <os>FREEBSD : : ;
+lib   dl : : <name>"dl" <link>shared ;
 
 lib   m  : : <name>"m" ;
 alias m  : : <os>NT ;
