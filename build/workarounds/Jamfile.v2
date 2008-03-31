@@ -27,7 +27,6 @@ alias configuration : : <os>NT <toolset>msvc :
          <define>_SECURE_SCL=0
          <include>$(TOP)/build/workarounds/msvc
          <include>$(TOP)/3rd-party/getopt
-         <pch>off
        ;
 
 # Mac OS X, darwin

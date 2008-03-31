@@ -9,7 +9,7 @@ rule import_user_config {
 }
 
 # Build specific settings (default command line options to bjam)
-BUILD_OPTIONS  = "link=static" ;
+BUILD_OPTIONS  = "pch=off link=static" ;
 
 # Library specific variables
 #WX_PREFIX          = "C:/wxWidgets" ;
