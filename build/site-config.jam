@@ -176,6 +176,7 @@ boost_library md5 : local ;
 alias dl : : <os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
 alias dl : : <os>FREEBSD : : ;
 lib   dl : : <name>"dl" <link>shared ;
+lib   dl : : <os>CYGWIN <name>"dl" ;
 
 lib   m  : : <name>"m" ;
 alias m  : : <os>NT ;
