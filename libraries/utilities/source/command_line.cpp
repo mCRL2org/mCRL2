@@ -118,14 +118,26 @@ namespace mcrl2 {
     std::string interface_description::textual_description() const {
       std::ostringstream s;
 
-      s << "Usage: " << m_path << " " << m_usage << std::endl
-        << "Options:" << std::endl;
+      s << "Usage: " << m_path << " " << m_usage << std::endl;
 
-      for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-        s << i->second.textual_description();
+      if (!m_known_issues.empty()) {
+        s << "Known Issues:" << m_known_issues << std::endl;
       }
 
-      s << std::endl << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
+      if (0 < m_options.size()) {
+        s << "Options:" << std::endl;
+
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+          s << i->second.textual_description();
+        }
+
+        s << std::endl;
+      }
+
+      s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
+        << std::endl
+        << "The full documentation can be found at <http://www.mcrl2.org/wiki/index.php/"
+        << m_name << ">." << std::endl;
 
       return s.str();
     }

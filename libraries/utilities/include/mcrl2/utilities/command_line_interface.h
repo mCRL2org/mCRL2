@@ -201,7 +201,7 @@ namespace mcrl2 {
         /// \brief Path to executable (as in the first command line argument)
         std::string       m_path;
 
-        /// \brief Usage and tool description
+        /// \brief Name of the tool for usage and tool description
         std::string       m_name;
 
         /// \brief Comma separated list of authors
@@ -209,6 +209,9 @@ namespace mcrl2 {
 
         /// \brief Usage and tool description
         std::string       m_usage;
+
+        /// \brief Description of known issues
+        std::string       m_known_issues;
 
         /// \brief Maps long option identifiers to option descriptor objects
         option_map        m_options;
@@ -244,11 +247,12 @@ namespace mcrl2 {
          * \param[in] path the path to the executable (as in the first command line argument)
          * \param[in] authors string describing the authors
          * \param[in] usage message that explains tool usage and description
+         * \param[in] known_issues textual description of known issues with the tool
          * \param[in] messaging_options adds messaging options (--quiet, --verbose and --debug) to interface
          **/
         inline interface_description(std::string const& path, std::string const& name, std::string const& authors,
-                                     std::string const& usage, bool messaging_options = true) :
-                                        m_path(path), m_name(name), m_authors(authors), m_usage(usage) {
+                     std::string const& usage, std::string const& known_issues = "", bool messaging_options = true) :
+                                        m_path(path), m_name(name), m_authors(authors), m_usage(usage), m_known_issues(known_issues) {
           // Add mandatory options
           add_option("help", "display help information", 'h');
           add_option("version", "display version information");
