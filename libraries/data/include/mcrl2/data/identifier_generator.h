@@ -122,6 +122,10 @@ class number_postfix_generator
     unsigned int m_index;
   
   public:
+    number_postfix_generator()
+      : m_prefix("x"), m_index(0)
+    {}
+    
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
      : m_prefix(prefix), m_index(index)
     {}

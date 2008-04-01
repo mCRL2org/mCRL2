@@ -72,6 +72,11 @@ class rewriter
           m_value(rewr.get_rewriter()->toRewriteFormat(value))
       {}
         
+      data_variable variable() const
+      {
+        return data_variable(m_variable);
+      }
+
       protected:
         substitution(ATermAppl variable, ATerm value)
           : m_variable(variable),
@@ -110,16 +115,6 @@ class rewriter
 		  data_expression result = m_rewriter.get()->rewrite(d);
 		  m_rewriter.get()->clearSubstitutions();
 		  return result;
-		}
-
-		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
-		/// in the sequence subst.
-		/// \return The normal form of d.
-		///
-		template <typename SubstitutionSequence>
-		data_expression operator()(const data_expression& d, const SubstitutionSequence& subst) const
-		{
-		  return (*this)(d, subst.begin(), subst.end());
 		}
 
     /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.

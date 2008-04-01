@@ -264,9 +264,9 @@ class data_enumerator
   protected:
     typedef std::map<sort_expression, std::vector<data_operation> > constructor_map;
 
-    const data_specification& m_data;
-    DataRewriter& m_rewriter;
-    IdentifierGenerator& m_generator;
+    const data_specification* m_data;
+    DataRewriter* m_rewriter;
+    IdentifierGenerator* m_generator;
     constructor_map m_constructors;
 
     /// Returns the constructors with target s.
@@ -277,7 +277,7 @@ class data_enumerator
       {
         return i->second;
       }
-      data_operation_list d = m_data.constructors(s);
+      data_operation_list d = m_data->constructors(s);
       std::vector<data_operation> v(d.begin(), d.end());
       m_constructors[s] = v;
       return m_constructors[s];
@@ -288,7 +288,7 @@ class data_enumerator
     data_enumerator(const data_specification& data_spec,
                     DataRewriter& rewriter,
                     IdentifierGenerator& generator)
-     : m_data(data_spec), m_rewriter(rewriter), m_generator(generator)
+     : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
     {}
 
     /// Enumerates a data variable.
@@ -303,11 +303,11 @@ class data_enumerator
         std::vector<data_variable> variables;
         for (sort_expression_list::iterator j = dsorts.begin(); j != dsorts.end(); ++j)
         {
-          variables.push_back(data_variable(m_generator(), *j));
+          variables.push_back(data_variable((*m_generator)(), *j));
         }
         data_variable_list w(variables.begin(), variables.end());
         data_expression_list w1 = make_data_expression_list(w);
-        result.push_back(enumerator_expression(m_rewriter((*i)(w1)), w));
+        result.push_back(enumerator_expression((*m_rewriter)((*i)(w1)), w));
       }
 
       return result;
