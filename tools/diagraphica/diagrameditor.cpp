@@ -1009,7 +1009,7 @@ void DiagramEditor::handleMouseLftUpEvent(
         else if ( editMode == EDIT_MODE_NOTE )
         {
         	s->setTypeNote();
-        	mediator->handleNote( s->getIndex() , s->getNote() );        	
+        	mediator->handleNote( s->getIndex() , s->getNote() );
        	}
 
         diagram->addShape( s );
@@ -1104,7 +1104,7 @@ void DiagramEditor::handleHits( const vector< int > &ids )
     else if ( ids.size() == 3 )
     {
         handleHitShapeHandle( ids[1], ids[2] );
-	}
+    }
 }
 
 

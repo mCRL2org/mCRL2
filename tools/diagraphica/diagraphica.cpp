@@ -2403,6 +2403,12 @@ void DiaGraph::addToExaminer(
 }
 
 
+void DiaGraph::handleShowClusterMenu()
+{
+	frame->displClusterMenu();
+}
+
+
 // ----------------------------
 void DiaGraph::handleSendDgrm(
     Colleague* sender,

@@ -91,6 +91,7 @@ public:
         const bool &sendBackward,
         const bool &editDOF,
         const int  &checkedItemId );
+    void displClusterMenu();
     void displDgrmMenu(
         const bool &sendSglToSiml,
         const bool &sendSglToTrace,
@@ -221,10 +222,11 @@ private:
     void onListCtrlBeginDrag( wxListEvent &e );
     void onListCtrlRgtClick( wxListEvent &e );
     void onPopupMenu( wxCommandEvent &e );
+    void onClusterMenu( wxCommandEvent &e );
     void onTool( wxCommandEvent &e );
     void onButton( wxCommandEvent &e );
     void onRadioBox( wxCommandEvent &e );
-	void onSplitterDoubleClick( wxSplitterEvent &e);
+    void onSplitterDoubleClick( wxSplitterEvent &e);
     
     // -- menu bar --------------------------------------------------
     wxMenuBar* menuBar;
@@ -268,7 +270,7 @@ private:
     // -- right panel -----------------------------------------------
     wxSplitterWindow* splitterRgt;
     double            sashRatioRgt;
-	double			  sashRatioLft;
+    double	      sashRatioLft;
     
     wxBoxSizer*       sizerTopRgt;
     wxScrolledWindow* panelTopRgt;
@@ -304,7 +306,7 @@ private:
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
     GLCanvas*         canvasOpaDOF;
-    bool			  dofMenu;
+    bool	      dofMenu;
     
     // -- Plot frame ------------------------------------------------
     PopupFrame*       framePlot;
@@ -327,6 +329,7 @@ private:
     // -- menus -----------------------------------------------------
     wxMenu	*addAttributeMenu;
     wxMenu	*showVariableMenu;
+    wxMenu      *clustMenu;
     
     // -- ID's ------------------------------------------------------
     enum
@@ -390,8 +393,8 @@ private:
         ID_FRAME_DOF,
         ID_FRAME_NOTE,
         ID_PANEL_DOF,
-   		ID_ADD_BUTTON_NOTE,
-   		ID_CLEAR_BUTTON_NOTE,
+   	ID_ADD_BUTTON_NOTE,
+   	ID_CLEAR_BUTTON_NOTE,
         ID_LIST_CTRL_DOF,
         ID_RADIO_BOX_TEXT_DOF,
         ID_CANVAS_COL_DOF,
@@ -420,6 +423,7 @@ private:
         ID_PANEL_CLUST,
         ID_LIST_CTRL_CLUST,
         ID_BUTTON_OK_CLUST,
+	ID_MENU_ITEM_CLUSTER,
         ID_MENU_ITEM_SHOW_VARIABLES,
         ID_MENU_ITEM_SHOW_NOTE,
         ID_MENU_ITEM_SHAPE_CUT,

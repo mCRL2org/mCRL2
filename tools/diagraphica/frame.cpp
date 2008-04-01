@@ -41,9 +41,10 @@ Frame::Frame(
 // ------------------------
 {
 	SetAutoLayout(true);
-    initFrame();
-    dofMenu = false;
-    currentShapeId = -1;
+	initFrame();
+	dofMenu = false;
+	clustMenu = NULL;
+	currentShapeId = -1;
 }
 
 
@@ -421,14 +422,14 @@ void Frame::displShapeMenu(
        	celInfo = rowInfo.m_text;
        	wxString helpString;
        	helpString << i; // Convert int to wxString
-       	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_CHECK);
+       	wxMenuItem* item = new wxMenuItem( addAttributeMenu, id, celInfo, helpString, wxITEM_CHECK );
         addAttributeMenu->Append( item );   
         if( id == checkedItemId)
         {
         	addAttributeMenu->Check( id, true );
         }         	
         Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
-        id--;         	
+        id--;
     }
             	 
     menu.Append(ID_MENU_ITEM_SHOW_VARIABLES,
@@ -499,8 +500,10 @@ void Frame::displShapeMenu(
     if ( bringForward != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_BRING_FORWARD, false );
     if ( sendBackward != true )
+    {
         menu.Enable( ID_MENU_ITEM_SHAPE_SEND_BACKWARD, false );
-
+	menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false );
+    }
     if ( editDOF != true )
     {
         menu.Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
@@ -509,6 +512,46 @@ void Frame::displShapeMenu(
         
     PopupMenu( &menu );
         
+}
+
+
+void Frame::displClusterMenu()
+{	
+	if( clustMenu == NULL )
+	{
+		clustMenu = new wxMenu();
+		
+		int i;
+		int id = wxID_LOWEST; // Event id's for Attributes	
+		// List All the Attributes in a Menu         
+		for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
+		{
+			wxListItem rowInfo;
+			wxString   celInfo;            	
+					
+			// set row
+			rowInfo.m_itemId = i;
+			// set column
+			rowInfo.m_col    = 2;
+			// set text mask
+			rowInfo.m_mask   = wxLIST_MASK_TEXT;
+			listCtrlAttr->GetItem( rowInfo );
+			celInfo = rowInfo.m_text;
+			wxString helpString;
+			helpString << i; // Convert int to wxString
+			wxMenuItem* item = new wxMenuItem( clustMenu, id, celInfo, helpString, wxITEM_CHECK );
+			clustMenu->Append( item );
+			Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onClusterMenu));
+			id--;
+		}
+		clustMenu->AppendSeparator();
+		clustMenu->Append(
+			ID_MENU_ITEM_CLUSTER,
+			wxT( "Cluster nodes" ),
+			wxT( "Subcluster this cluster based on selected attributes" ) );
+		clustMenu->Enable( ID_MENU_ITEM_CLUSTER, false );
+	}	
+	PopupMenu( clustMenu );
 }
 
 
@@ -521,47 +564,47 @@ void Frame::displDgrmMenu(
     const bool &sentSetToExnr )
 // ----------------------------
 {
-    wxMenu menu;
-
-    menu.Append( 
-        ID_MENU_ITEM_DGRM_SGL_TO_SIML,
-        wxT( "Send this to simulator" ),
-        wxT( "Send this diagram to simulator" ) );
-    
-    menu.AppendSeparator();
-
-    menu.Append( 
-        ID_MENU_ITEM_DGRM_SGL_TO_TRACE,
-        wxT( "Mark this in trace" ),
-        wxT( "Mark this diagram in trace view" ) );
-    menu.Append( 
-        ID_MENU_ITEM_DGRM_SET_TO_TRACE,
-        wxT( "Mark all in trace" ),
-        wxT( "Mark set of diagrams in trace view" ) );
-
-    menu.AppendSeparator();
-
-    menu.Append( 
-        ID_MENU_ITEM_DGRM_SGL_TO_EXNR,
-        wxT( "Send this to examiner" ),
-        wxT( "Send this diagram to examiner" ) );
-    menu.Append( 
-        ID_MENU_ITEM_DGRM_SET_TO_EXNR,
-        wxT( "Send all to examiner" ),
-        wxT( "Send set of diagrams to examiner" ) );
-    
-    if ( sendSglToSiml != true )
-        menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_SIML, false );
-    if ( sendSglToTrace != true )
-            menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_TRACE, false );
-    if ( sendSetToTrace != true )
-            menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_TRACE, false );
-    if ( sendSglToExnr != true )
-        menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_EXNR, false );
-    if ( sentSetToExnr != true )
-        menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_EXNR, false );
-
-    PopupMenu( &menu );
+	wxMenu menu;
+	
+	menu.Append( 
+	ID_MENU_ITEM_DGRM_SGL_TO_SIML,
+	wxT( "Send this to simulator" ),
+	wxT( "Send this diagram to simulator" ) );
+	
+	menu.AppendSeparator();
+	
+	menu.Append( 
+		ID_MENU_ITEM_DGRM_SGL_TO_TRACE,
+		wxT( "Mark this in trace" ),
+		wxT( "Mark this diagram in trace view" ) );
+	menu.Append( 
+	ID_MENU_ITEM_DGRM_SET_TO_TRACE,
+	wxT( "Mark all in trace" ),
+	wxT( "Mark set of diagrams in trace view" ) );
+	
+	menu.AppendSeparator();
+	
+	menu.Append( 
+	ID_MENU_ITEM_DGRM_SGL_TO_EXNR,
+	wxT( "Send this to examiner" ),
+	wxT( "Send this diagram to examiner" ) );
+	menu.Append( 
+	ID_MENU_ITEM_DGRM_SET_TO_EXNR,
+	wxT( "Send all to examiner" ),
+	wxT( "Send set of diagrams to examiner" ) );
+	
+	if ( sendSglToSiml != true )
+		menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_SIML, false );
+	if ( sendSglToTrace != true )
+		menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_TRACE, false );
+	if ( sendSetToTrace != true )
+		menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_TRACE, false );
+	if ( sendSglToExnr != true )
+		menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_EXNR, false );
+	if ( sentSetToExnr != true )
+		menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_EXNR, false );
+	
+	PopupMenu( &menu );
 }
     
 
@@ -4061,12 +4104,63 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 }
 
 
+// -----------------------------------------
+void Frame::onClusterMenu( wxCommandEvent &e )
+// -----------------------------------------
+{
+	if( clustMenu != NULL )
+	{
+		int i;
+		int itemCount = clustMenu->GetMenuItemCount();
+		if ( e.GetId() == ID_MENU_ITEM_CLUSTER )
+		{
+			// get idcs of selected (multiple) items
+        		vector< int > indcs;
+			for( i = 0; i < itemCount; i++ )
+			{
+				wxMenuItem* item = clustMenu->FindItemByPosition( i );
+				if( item->IsChecked() )
+				{
+					indcs.push_back( i );
+				}
+			}		
+			// handle selections
+			mediator->handleAttributeCluster( indcs );
+			clustMenu = NULL;
+		}
+		else
+		{
+			if( !e.IsChecked() )
+			{
+				bool checked = false;
+				for( i = 0; i < itemCount && checked == false; i++ )
+				{
+					wxMenuItem* item = clustMenu->FindItemByPosition( i );
+					if( item->IsChecked() )
+					{				
+						checked = true;
+					}
+				}
+				if( !checked )
+				{
+					clustMenu->Enable( ID_MENU_ITEM_CLUSTER, false );
+				}
+			}
+			else
+			{
+				clustMenu->Enable( ID_MENU_ITEM_CLUSTER, true );
+			}
+		}
+	}
+}
+
+
 // ------------------------------------
 void Frame::onTool( wxCommandEvent &e )
 // ------------------------------------
 {
     if ( e.GetId() == ID_TOOL_SELECT )
-        mediator->handleEditModeSelect();
+		mediator->handleEditModeSelect();
     else if ( e.GetId() == ID_TOOL_NOTE )
     	mediator->handleEditModeNote();
     else if ( e.GetId() == ID_TOOL_DOF )
@@ -4359,11 +4453,11 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_EDITOR, Frame::onMenuBar )
     EVT_MENU( wxID_ABOUT, Frame::onMenuBar )
     EVT_MENU( wxID_CLOSE, Frame::onMenuBar )
-	// splitter windows
-	EVT_SPLITTER_DCLICK( ID_SPLITTER_FRAME, Frame::onSplitterDoubleClick )
-	EVT_SPLITTER_DCLICK( ID_SPLITTER_LFT, Frame::onSplitterDoubleClick )
-	EVT_SPLITTER_DCLICK( ID_SPLITTER_TOP_LFT, Frame::onSplitterDoubleClick )
-	EVT_SPLITTER_DCLICK( ID_SPLITTER_RGT, Frame::onSplitterDoubleClick )
+    // splitter windows
+    EVT_SPLITTER_DCLICK( ID_SPLITTER_FRAME, Frame::onSplitterDoubleClick )
+    EVT_SPLITTER_DCLICK( ID_SPLITTER_LFT, Frame::onSplitterDoubleClick )
+    EVT_SPLITTER_DCLICK( ID_SPLITTER_TOP_LFT, Frame::onSplitterDoubleClick )
+    EVT_SPLITTER_DCLICK( ID_SPLITTER_RGT, Frame::onSplitterDoubleClick )
     // attributes & domain
     EVT_LIST_ITEM_SELECTED( ID_LIST_CTRL_ATTR, Frame::onListCtrlSelect )
     EVT_LIST_ITEM_DESELECTED( ID_LIST_CTRL_ATTR, Frame::onListCtrlSelect )
@@ -4387,6 +4481,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_DOM_GROUP, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_DOM_UNGROUP, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_DOM_RENAME, Frame::onPopupMenu )
+    EVT_MENU( ID_MENU_ITEM_CLUSTER, Frame::onClusterMenu )
     // diagram editor
     EVT_TOOL( ID_TOOL_SELECT, Frame::onTool )
     EVT_TOOL( ID_TOOL_NOTE, Frame::onTool )
@@ -4401,8 +4496,8 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_TOOL( ID_TOOL_SHOW_GRID, Frame::onTool )
     EVT_TOOL( ID_TOOL_SNAP_GRID, Frame::onTool )
     // edit shapes
-	EVT_MENU( ID_MENU_ITEM_SHOW_VARIABLES, Frame::onPopupMenu )
-	EVT_MENU( ID_MENU_ITEM_SHOW_NOTE, Frame::onPopupMenu )
+    EVT_MENU( ID_MENU_ITEM_SHOW_VARIABLES, Frame::onPopupMenu )
+    EVT_MENU( ID_MENU_ITEM_SHOW_NOTE, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_CUT, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_COPY, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_PASTE, Frame::onPopupMenu )
