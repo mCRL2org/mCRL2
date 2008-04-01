@@ -99,7 +99,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
   index_map index;
   for (std::map<data::data_variable, data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
   {
-    substitutions.push_back(r.make_substitution(i->first, i->second));
+    substitutions.push_back(data::rewriter::substitution(r, i->first, i->second));
     index[i->first] = --substitutions.end();
   }
 

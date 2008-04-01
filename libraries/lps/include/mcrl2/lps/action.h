@@ -23,8 +23,6 @@ namespace lps {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
-using namespace mcrl2::core;
-
 /// \brief Represents an action.
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
@@ -83,7 +81,7 @@ class action: public aterm_appl
     }     
 };
 
-/// \brief singly linked list of actions
+/// singly linked list of actions
 typedef term_list<action> action_list;
 
 /// Returns true if the term t is an action

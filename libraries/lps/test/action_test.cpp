@@ -18,6 +18,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
+using namespace mcrl2::core;
 using namespace mcrl2::lps;
 
 int test_main(int argc, char** argv )
