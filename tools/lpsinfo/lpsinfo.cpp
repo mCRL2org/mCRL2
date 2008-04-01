@@ -39,7 +39,7 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2;
 
 /* Name of the file to read input from (or standard input: "-") */
-std::string file_name;
+std::string file_name("-");
 
 /* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
 static inline bool is_tau_summand(ATermAppl a_summand) {

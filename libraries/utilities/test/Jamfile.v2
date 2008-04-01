@@ -8,5 +8,5 @@ project libraries/utilities/test
    ;
 
 test-suite utilities
-    : [ run command_line_interface_test.cpp ]
+    : [ run command_line_interface_test.cpp : : : <dependency>/libraries//data ]
     ;

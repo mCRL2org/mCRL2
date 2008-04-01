@@ -173,14 +173,14 @@ boost_library test : : system ;
 boost_library system : local ;
 boost_library md5 : local ;
 
-alias dl : : <os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
-alias dl : : <os>FREEBSD : : ;
-lib   dl : : <name>"dl" <link>shared ;
-lib   dl : : <os>CYGWIN <name>"dl" ;
-
+lib   dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
 lib   m  : : <name>"m" ;
 alias m  : : <os>NT ;
 lib   z  : : <name>"z" ;
+
+alias dynamic_loading : : <os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
+alias dynamic_loading : : <os>FREEBSD ;
+alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
 lib nsl    : : <name>nsl ;

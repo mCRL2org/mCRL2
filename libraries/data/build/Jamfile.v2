@@ -20,8 +20,8 @@ mcrl2-library data
          <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc
-         <library>/site-config//m    # for rewrite
-         <library>/site-config//dl   # for rewrite
+         <library>/site-config//m               # for rewrite
+         <library>/site-config//dynamic_loading # for rewrite
        : <threading>single
        : <library>/libraries/core
          <library>/site-config//cvc

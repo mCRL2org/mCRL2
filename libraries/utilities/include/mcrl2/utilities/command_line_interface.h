@@ -92,9 +92,9 @@ namespace mcrl2 {
 
 #if defined(__LIBREWRITE_H)
     inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
-      char strategy[7];
+      char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     
-      is >> strategy;
+      is.readsome(strategy, 9);
 
       s = RewriteStrategyFromString(strategy);
 

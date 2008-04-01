@@ -53,7 +53,6 @@ inline std::string to_string (const T& t)
 class lpsConstElm {
   private:
     ATermTable                            safeguard;
-    std::string                           p_inputfile;
     std::string                           p_outputfile;
     atermpp::vector< mcrl2::data::data_assignment >   p_currentState;
     atermpp::vector< mcrl2::data::data_assignment >   p_newCurrentState;
@@ -68,7 +67,6 @@ class lpsConstElm {
     atermpp::set< mcrl2::data::data_expression >      p_variableList;
     atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > > p_changed_assignements_per_cycle;
     int                                   p_newVarCounter;
-    bool                                  p_verbose;
     bool                                  p_nosingleton;
     bool                                  p_alltrue;
     bool                                  p_reachable;
@@ -586,7 +584,7 @@ void lpsConstElm::findSingleton() {
   }
   //p_singletonSort = result;
 
-  if (p_verbose){
+  if (gsVerbose){
     gsVerboseMsg("lpsconstelm: Sorts which have singleton constructors:\n");
     for(atermpp::set<sort_expression>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
       gsVerboseMsg("lpsconstelm:   %s\n", pp(*i).c_str());
@@ -674,7 +672,7 @@ void lpsConstElm::removeSingleton(int n)
        )
     {
       p_V.insert(i);
-      if (p_verbose){
+      if (gsVerbose){
         gsVerboseMsg("lpsconstelm:   %s : %s\n", pp(p_initAssignments[i].lhs()).c_str(), pp(p_initAssignments[i].lhs().sort()).c_str());
         empty = false;
       }
@@ -941,15 +939,14 @@ inline bool lpsConstElm::output() {
 
   //gsDebugMsg("%s\n", pp(p_process).c_str());
   if (p_outputfile.empty()){
-    //if(!p_verbose){
-    //  assert(!p_verbose);
+    //if(!gsVerbose){
+    //  assert(!gsVerbose);
       writeStream(rebuild_spec);
     //};
   }
   else {
     if(!rebuild_spec.save(p_outputfile)) {
-       gsErrorMsg("lpsconstelm: Unsuccessfully written outputfile: %s\n", p_outputfile.c_str());
-       exit(EXIT_FAILURE);
+       throw std::runtime_error("lpsconstelm: Unsuccessfully written outputfile: " + p_outputfile);
     }
   }
   
@@ -1021,28 +1018,6 @@ inline bool lpsConstElm::readStream() {
 void lpsConstElm::writeStream(lps::specification newSpec) {
   assert(gsIsSpecV1((ATermAppl) newSpec));
   ATwriteToSAFFile(aterm(newSpec) , stdout);
-}
-
-// Sets verbose option
-// Note: Has to be set
-//
-inline void lpsConstElm::setVerbose(bool b) {
-  if (b)
-  {
-    gsSetVerboseMsg();
-  }
-  p_verbose = b;
-}
-
-// Sets debug option
-// Note: Has to be set
-//
-inline void lpsConstElm::setDebug(bool b) {
-  setVerbose(b);
-  if (b)
-  {
-    gsSetDebugMsg();
-  }
 }
 
 // Sets no singleton option
@@ -1234,7 +1209,7 @@ bool lpsConstElm::filter() {
       }
 
       p_currentState = p_newCurrentState;
-      if (p_verbose){
+      if (gsVerbose){
         gsVerboseMsg("lpsconstelm: Detected %d fake constant process parameters\n", p_V.size() - n);
         foundFake = ((p_V.size() - n) != 0);
       }
@@ -1272,7 +1247,7 @@ bool lpsConstElm::filter() {
   };
   set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
 
-  if (p_verbose){
+  if (gsVerbose){
     gsVerboseMsg("lpsconstelm: Number of removed process parameters: %d\n", p_S.size());
     printSetVar();
   }
@@ -1346,7 +1321,10 @@ int main(int argc, char** argv)
       return 0;
     }
 #endif
-    return lpsConstElm(argc, argv).execute();
+
+    lpsConstElm(argc, argv).execute();
+
+    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

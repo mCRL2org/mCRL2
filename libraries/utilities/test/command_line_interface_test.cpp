@@ -25,6 +25,8 @@ void string_to_strategy_test(std::string const& strategy) {
   RewriteStrategy    s;
 
   BOOST_CHECK((is >> s).fail() != b);
+
+  is.clear();
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid) {
@@ -93,7 +95,7 @@ BOOST_AUTO_TEST_CASE(conformance) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -d"));
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --debug"));
 
-  interface_description test_interface_no_messaging("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", false);
+  interface_description test_interface_no_messaging("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "", false);
 
   // Invalid options -v, --verbose
   BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test -v"), std::runtime_error);
@@ -112,6 +114,7 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
   // testing rewriter strategy extraction 
   string_to_strategy_test< true >("jitty");
   string_to_strategy_test< false >("ajitty");
+  string_to_strategy_test< false >("jitta");
   string_to_strategy_test< false >("jittya");
   string_to_strategy_test< true >("jittyp");
   string_to_strategy_test< true >("jittyc");

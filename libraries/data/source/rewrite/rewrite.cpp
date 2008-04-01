@@ -6,9 +6,9 @@
 //
 /// \file rewrite.cpp
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <cassert>
 #include <aterm2.h>
-#include <assert.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -20,11 +20,8 @@
 #include "mcrl2/data/rewrite/jittyc.h"
 #include "mcrl2/data/rewrite/with_prover.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
-
 using namespace mcrl2::data;
 
 Rewriter::Rewriter()
@@ -306,31 +303,33 @@ void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
 
 RewriteStrategy RewriteStrategyFromString(const char *s)
 {
-	if ( !strcmp(s,"inner") )
-	{
-		return GS_REWR_INNER;
-	} else if ( !strcmp(s,"innerc") )
-	{
-		return GS_REWR_INNERC;
-	} else if ( !strcmp(s,"jitty") )
-	{
-		return GS_REWR_JITTY;
-	} else if ( !strcmp(s,"jittyc") )
-	{
-		return GS_REWR_JITTYC;
-	} else if ( !strcmp(s,"innerp") )
-	{
-		return GS_REWR_INNER_P;
-	} else if ( !strcmp(s,"innercp") )
-	{
-		return GS_REWR_INNERC_P;
-	} else if ( !strcmp(s,"jittyp") )
-	{
-		return GS_REWR_JITTY_P;
-	} else if ( !strcmp(s,"jittycp") )
-	{
-		return GS_REWR_JITTYC_P;
-	} else {
-		return GS_REWR_INVALID;
-	}
+  static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
+          GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_INNER_P, GS_REWR_INNERC_P,
+          GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P };
+
+  size_t main_strategy = 0; // default invalid
+
+  if (std::strncmp(&s[0], "inner", 5) == 0) { // not jitty{,c,cp} inner{,c,cp}
+    main_strategy = 1;
+  }
+  else if (std::strncmp(&s[0], "jitty", 5) == 0) { // jitty{,c,cp}
+    main_strategy = 5;
+  }
+
+  if (s[5] == '\0') { // interpreting
+    return strategies[main_strategy];
+  }
+  else if (s[6] == '\0') {
+    if (s[5] == 'c') { // compiling
+      return strategies[main_strategy + 1];
+    }
+    else if (s[5] == 'p') { // with prover
+      return strategies[main_strategy + 2];
+    }
+  }
+  else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0') { // compiling with prover
+    return strategies[main_strategy + 3];
+  }
+
+  return GS_REWR_INVALID;
 }

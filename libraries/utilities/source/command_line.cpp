@@ -136,8 +136,7 @@ namespace mcrl2 {
 
       s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
         << std::endl
-        << "The full documentation can be found at <http://www.mcrl2.org/wiki/index.php/"
-        << m_name << ">." << std::endl;
+        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/" << m_name << ">.\n";
 
       return s.str();
     }
