@@ -516,8 +516,6 @@ class substitute_rewriter_jfg
     
     pbes_expression operator()(pbes_expression p)
     {
-std::cout << "<rewrite>" << pp(p) << std::endl;
-std::cout << "<result>" << pp(pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false)) << std::endl; 
       return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
     }   
 };

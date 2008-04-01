@@ -21,8 +21,11 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
+typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
+
 // Use boost::variant to create a heterogenous container of rewriters.
-typedef boost::variant<pbes_system::rewriter<data::rewriter>,
+typedef boost::variant<my_pbes_rewriter,
                        pbes_system::substitute_rewriter,
                        pbes_system::substitute_rewriter_jfg,
                        pbes_system::pbessolve_rewriter
@@ -249,8 +252,14 @@ int main(int argc, char* argv[])
       return 0;
     }
 
+    // identifier generator for data enumerator
+    number_postfix_generator name_generator;
+
     // store the data rewriters
     std::vector<data::rewriter> data_rewriters;
+
+    // store the corresponding data enumerators
+    std::vector<my_enumerator> data_enumerators;
 
     // create a mapping of rewriters   
     for (std::vector<int>::iterator i = data_rewriter_indices.begin(); i != data_rewriter_indices.end(); ++i)
@@ -258,13 +267,15 @@ int main(int argc, char* argv[])
       // Make sure the references to data rewriters stay valid after exiting the loop.
       data_rewriters.push_back(data::rewriter(data_spec, data_rewriter_strategy(*i)));
       data::rewriter& datar = data_rewriters.back();
+      data_enumerators.push_back(my_enumerator(data_spec, data_rewriters.back(), name_generator));
+      my_enumerator& datae = data_enumerators.back();
 
       for (std::vector<int>::iterator j = pbes_rewriter_indices.begin(); j != pbes_rewriter_indices.end(); ++j)
       {
         switch (*j)
         {
           case 0: {
-            pbes_system::rewriter<data::rewriter> pbesr(datar, data_spec);     
+            my_pbes_rewriter pbesr(datar, datae);    
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }

@@ -29,12 +29,6 @@ bool is_finished(const pbes_expression& x)
   return x != pbes_expression();
 }
 
-inline
-pbes_expression make_result(const pbes_expression& n, const pbes_expression& x)
-{
-  return x;
-}
-
 /// Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns pbes_expression(), the recursion is continued
@@ -42,9 +36,11 @@ pbes_expression make_result(const pbes_expression& n, const pbes_expression& x)
 // TODO: rebuilding expressions with ATerms is very expensive. So it is probably
 // more efficient to  check if the children of a node have actually changed,
 // before rebuilding it.
-template <typename Node, typename Result>
+template <typename Arg>
 struct pbes_builder
 {
+  typedef Arg argument_type;
+  
   /// Destructor.
   ///
   virtual ~pbes_builder()
@@ -52,175 +48,338 @@ struct pbes_builder
 
   /// Visit data expression node.
   ///
-  virtual Result visit_data_expression(const Node& n, const data::data_expression& /* d */)
+  virtual pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& /* d */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit true node.
   ///
-  virtual Result visit_true(const Node& n)
+  virtual pbes_expression visit_true(pbes_expression x, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit false node.
   ///
-  virtual Result visit_false(const Node& n)
+  virtual pbes_expression visit_false(pbes_expression x, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit not node.
   ///
-  virtual Result visit_not(const Node& n, const pbes_expression& /* arg */)
+  virtual pbes_expression visit_not(pbes_expression x, const pbes_expression& /* arg */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit and node.
   ///
-  virtual Result visit_and(const Node& n, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_and(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit or node.
   ///
-  virtual Result visit_or(const Node& n, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_or(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }    
 
   /// Visit imp node.
   ///
-  virtual Result visit_imp(const Node& n, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_imp(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit forall node.
   ///
-  virtual Result visit_forall(const Node& n, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual Result visit_exists(const Node& n, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
 
   /// Visit propositional variable node.
   ///
-  virtual Result visit_propositional_variable(const Node& n, const propositional_variable_instantiation& /* v */)
+  virtual pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& /* v */, Arg& /* arg */)
   {
-    return Result();
+    return pbes_expression();
   }
   
   /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
   /// By default a std::runtime_error exception will be generated.
   ///
-  virtual Result visit_unknown(const pbes_expression& e)
+  virtual pbes_expression visit_unknown(const pbes_expression& e, Arg& /* arg */)
   {
     throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
-    return Result();
+    return pbes_expression();
   }
 
   /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals pbes_expression(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  pbes_expression visit(const Node& n)
+  pbes_expression visit(pbes_expression e, Arg& arg)
   {
     using namespace pbes_expr_optimized;
     using namespace accessors;
 
-    Result result;
-    pbes_expression e = expr(n);
+    pbes_expression result = e;
 
     if (is_data(e)) {
-      result = visit_data_expression(n, val(e));
+      result = visit_data_expression(e, val(e), arg);
       if (!is_finished(result)) {
-        result = make_result(n, e);
       }
     } else if (is_pbes_true(e)) {
-      result = visit_true(n);
+      result = visit_true(e, arg);
       if (!is_finished(result)) {
-        result = make_result(n, e);
       }
     } else if (is_pbes_false(e)) {
-      result = visit_false(n);
+      result = visit_false(e, arg);
       if (!is_finished(result)) {
-        result = make_result(n, e);
       }
     } else if (is_pbes_not(e)) {
-      const pbes_expression& arg = not_arg(e);
-      result = visit_not(n, arg);
+      const pbes_expression& n = not_arg(e);
+      result = visit_not(e, n, arg);
       if (!is_finished(result)) {
-        e = not_(visit(arg));
-        result = make_result(n, e);
+        result = not_(visit(n, arg));
       }
     } else if (is_pbes_and(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      result = visit_and(n, left, right);
+      result = visit_and(e, left, right, arg);
       if (!is_finished(result)) {
-        e = and_(visit(left), visit(right));
-        result = make_result(n, e);
+        result = and_(visit(left, arg), visit(right, arg));
       }
     } else if (is_pbes_or(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      result = visit_or(n, left, right);
+      result = visit_or(e, left, right, arg);
       if (!is_finished(result)) {
-        e = or_(visit(left), visit(right));
-        result = make_result(n, e);
+        result = or_(visit(left, arg), visit(right, arg));
       }
     } else if (is_pbes_imp(e)) {
       const pbes_expression& left  = lhs(e);
       const pbes_expression& right = rhs(e);
-      result = visit_imp(n, left, right);
+      result = visit_imp(e, left, right, arg);
       if (!is_finished(result)) {
-        e = imp(visit(left), visit(right));
-        result = make_result(n, e);
+        result = imp(visit(left, arg), visit(right, arg));
       }
     } else if (is_pbes_forall(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
-      result = visit_forall(n, qvars, qexpr);
+      result = visit_forall(e, qvars, qexpr, arg);
       if (!is_finished(result)) {
-        e = forall(qvars, visit(qexpr));
-        result = make_result(n, e);
+        result = forall(qvars, visit(qexpr, arg));
       }
     } else if (is_pbes_exists(e)) {
       const data::data_variable_list& qvars = quant_vars(e);
       const pbes_expression& qexpr = quant_expr(e);
-      result = visit_exists(n, qvars, qexpr);
+      result = visit_exists(e, qvars, qexpr, arg);
       if (!is_finished(result)) {
-        e = exists(qvars, visit(qexpr));
-        result = make_result(n, e);
+        result = exists(qvars, visit(qexpr, arg));
       }
     }
     else if(is_propositional_variable_instantiation(e)) {
-      result = visit_propositional_variable(n, propositional_variable_instantiation(e));
+      result = visit_propositional_variable(e, propositional_variable_instantiation(e), arg);
       if (!is_finished(result)) {
-        result = make_result(n, e);
+        result = e;
       }
     }
     else {
-      result = visit_unknown(n);
+      result = visit_unknown(e, arg);
       if (!is_finished(result)) {
-        result = make_result(n, e);
+        result = e;
       }
     }
     return result;
   }
 };
 
-typedef pbes_builder<pbes_expression, pbes_expression> pbes_expression_builder;
+// for backwards compatibility
+struct pbes_expression_builder: public pbes_builder<int>
+{
+  typedef pbes_builder<int> super;
+  
+  int dummy;
+  
+  /// Visit data expression node.
+  ///
+  virtual pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& /* d */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit true node.
+  ///
+  virtual pbes_expression visit_true(pbes_expression x)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit false node.
+  ///
+  virtual pbes_expression visit_false(pbes_expression x)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit not node.
+  ///
+  virtual pbes_expression visit_not(pbes_expression x, const pbes_expression& /* arg */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit and node.
+  ///
+  virtual pbes_expression visit_and(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit or node.
+  ///
+  virtual pbes_expression visit_or(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  {
+    return pbes_expression();
+  }    
+
+  /// Visit imp node.
+  ///
+  virtual pbes_expression visit_imp(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit forall node.
+  ///
+  virtual pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit exists node.
+  ///
+  virtual pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  {
+    return pbes_expression();
+  }
+
+  /// Visit propositional variable node.
+  ///
+  virtual pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& /* v */)
+  {
+    return pbes_expression();
+  }
+  
+  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// By default a std::runtime_error exception will be generated.
+  ///
+  virtual pbes_expression visit_unknown(const pbes_expression& e)
+  {
+    throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
+    return pbes_expression();
+  }
+
+  /// Visit data expression node.
+  ///
+  pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& d, int&)
+  {
+    return visit_data_expression(x, d);
+  }
+
+  /// Visit true node.
+  ///
+  pbes_expression visit_true(pbes_expression x, int&)
+  {
+    return visit_true(x);
+  }
+
+  /// Visit false node.
+  ///
+  pbes_expression visit_false(pbes_expression x, int&)
+  {
+    return visit_false(x);
+  }
+
+  /// Visit not node.
+  ///
+  pbes_expression visit_not(pbes_expression x, const pbes_expression& n, int&)
+  {
+    return visit_not(x, n);
+  }
+
+  /// Visit and node.
+  ///
+  pbes_expression visit_and(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  {
+    return visit_and(x, left, right);
+  }
+
+  /// Visit or node.
+  ///
+  pbes_expression visit_or(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  {
+    return visit_or(x, left, right);
+  }    
+
+  /// Visit imp node.
+  ///
+  pbes_expression visit_imp(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  {
+    return visit_imp(x, left, right);
+  }
+
+  /// Visit forall node.
+  ///
+  pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  {
+    return visit_forall(x, variables, expression);
+  }
+
+  /// Visit exists node.
+  ///
+  pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  {
+    return visit_exists(x, variables, expression);
+  }
+
+  /// Visit propositional variable node.
+  ///
+  pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& v, int&)
+  {
+    return visit_propositional_variable(x, v);
+  }
+  
+  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// By default a std::runtime_error exception will be generated.
+  ///
+  pbes_expression visit_unknown(const pbes_expression& e, int&)
+  {
+    throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
+    return visit_unknown(e);
+  }
+
+  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// member functions. If the return value of a visit function equals pbes_expression(),
+  /// the recursion in this node is continued automatically, otherwise the returned
+  /// value is used for rebuilding the expression.
+  pbes_expression visit(pbes_expression e)
+  {
+    return super::visit(e, dummy);
+  }
+};
 
 } // namespace pbes_system
 
