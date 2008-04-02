@@ -17,76 +17,6 @@
 
 #include <mcrl2/utilities/version_info.h> // for constants
 
-/**
- * \page notes Notes on the use of this library
- *
- * The interface components contained in this file are *not* for use in
- * libraries. Typical use of this small library is in an mCRL2 tool and in only
- * one source file for every tool.  No inclusion protection is added such that
- * people are made aware of wrong use.
- *
- * Activation of gs*Mesage filtering for --verbose (-v), --quiet (-q),
- * --debug (-d) requires the mcrl2/core/messaging.h header to be included
- *  *before* this file. A similar thing holds for the rewriter options. The
- *  reason is that no unnecessary dependencies on the data and core library are
- *  introduced.
- **/
-/**
- * \page introduction A set of reusable components for command line interfacing for the mCRL2 toolset
- *
- * The mCRL2 toolset is growing rapidly and at present contains at least 36
- * tools. All of these tools have similar command line interfaces and very
- * similar usage patterns. Over time a lot of small inconsistencies have
- * arisen between the command line interfaces of the different tools.
- * Recently interface conventions have been formulated, collectively
- * reviewed and accepted, and only need to be applied. The cost of adapting
- * al tools is quite substantial and by itself does not negate the
- * possibility that new inconsistencies will arise in the future.
- *
- * This small library should fill the gap between the conventions and the
- * practice of command line interface programming for mCRL2 tools. It
- * serves two purposes.  Firstly, it standardises command line parsing
- * (using C++) for the mCRL2 toolset. Secondly, the library offers a
- * collection of patterns such as options -that need to be the same for all
- * tools- for configuring functionality imported from libraries (such as
- * the rewriter). Think of it as necessary infrastructure to cut down on
- * long-term maintenance cost for command line interface development and
- * enforcement of conventions.
- *
- * The conventions used for command line interfaces of mCRL2 tools can be found on 
- * the mCRL2 wiki: http://www.mcrl2.org/wiki/index.php/Tool_interface_guidelines .
- * The syntax of a command line command is structured as follows:
- * \code
- *   command ::= program-name ( white-space ( option | argument ) ) *
- *    white-space  ::= [ \t\n] +
- *    argument     ::= [^ \t\n] +
- *    option       ::= ("--" long-option [ "=" argument ] ) | ("-" short-options [ argument ])
- *     long-option   ::= ( alpha-low | long-option-character ) +
- *     short-options ::= ( short-option-character ) +
- *      long-option-character  ::= '-' | digit | alpha-low
- *      short-option-character ::= digit | alpha-low | alpha-high
- *       alpha-low             ::= 'a' | 'b' | 'c' | ... | 'z'
- *       alpha-high            ::= 'A' | 'B' | 'C' | ... | 'Z'
- *       digit                 ::= '0' | '1' | '2' | ... | '9'
- * \endcode
- * Some observations:
- *  \li the same options can occur multiple times on the command line
- *  \li options can have an optional default argument
- *  \li options have at most one argument
- *  \li options and plain-arguments can be mixed
- *
- * This library consists of two interface classes, one for interface
- * specification and the other for the actual parsing of a command line command
- * using an interface description. The first class called
- * mcrl2::utilities::interface_description acts as a detailed interface
- * specification containing all options and their possible arguments. In
- * addition it provides functionality for notifying a user about parse errors
- * and for execution of actions for default options.  The second class called
- * mcrl2::utilities::command_line_parser only harbours functionality for
- * parsing the command line using an interface specification, and ways to
- * access the results of parsing.
- */
-
 namespace mcrl2 {
   namespace utilities {
 
@@ -115,15 +45,11 @@ namespace mcrl2 {
      * tools in terms of options and arguments to options. The scope is command
      * line interfaces of mCRL2 tools.
      *
-     * Options that are mandatory for every tool are automatically present and
-     * processed by default. This relieves the creator of a tool from this burden.
-     * Options for functionality in toolset libraries that are shared amongst
-     * multiple tools can be predefined in this component and included on
-     * demand for individual tools.
-     *
-     * Options are identified by their long
-     *
-     * \attention See \ref notes for using default processing of options.
+     * Options that are mandatory for every tool are present by default as well
+     * as semantic actions for those option.  This relieves the creator of a
+     * tool from this burden.  Options for functionality in toolset libraries
+     * that are shared amongst multiple tools can be predefined in this
+     * component and included on demand for individual tools.
      **/
     class interface_description {
       friend class command_line_parser;
@@ -857,6 +783,5 @@ namespace mcrl2 {
 
       return *this;
     };
- 
   }
 }
