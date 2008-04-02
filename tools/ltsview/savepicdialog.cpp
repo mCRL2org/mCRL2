@@ -30,7 +30,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 : wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
   statusbar = sb;
   glcanvas = glc;
-  r_slider = new wxSlider(this,myID_R_SLIDER,0,0,0);
+  r_slider = new wxSlider(this,myID_R_SLIDER,0,0,1);
   r_text = new wxStaticText(this,-1,wxT("0x0"));
   updateSlider();
 
@@ -140,6 +140,7 @@ void SavePicDialog::updateSlider() {
     w_curr = w;
   }
   w_curr = min(w_curr,w_max);
+
   r_slider->SetRange(1,w_max);
   r_slider->SetValue(w_curr);
   r_text->SetLabel(wxString::Format(wxT("%dx%d"),w_curr,int(w_curr/ar)));
