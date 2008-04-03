@@ -1532,15 +1532,17 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         while (gsIsDataAppl(arg0)) {
           arg0 = ATAgetArgument(arg0, 0);
         }
-        assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
-        assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
-        assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
-        put_result = p_ctx->map_equations[head].put(data_eqn);
-        if (put_result.second) {
-          p_ctx->num_map_equations[head]++;
-        }
-        if (ATisEqual(data_eqn_rhs, gsMakeDataExprTrue())) {
-          p_ctx->recognises[head] = arg0;
+        if (p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0
+          && p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0)
+        {
+          assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
+          put_result = p_ctx->map_equations[head].put(data_eqn);
+          if (put_result.second) {
+            p_ctx->num_map_equations[head]++;
+          }
+          if (ATisEqual(data_eqn_rhs, gsMakeDataExprTrue())) {
+            p_ctx->recognises[head] = arg0;
+          }
         }
       } else if (is_projection_equation(data_eqn)) {
         ATermList args = ATLgetArgument(data_eqn_lhs, 1);
