@@ -223,8 +223,7 @@ void test_data_reconstruct_simple_constructor()
 void test_data_reconstruct_bool_function()
 {
   std::string text =
-  "map c: Bool;\n"
-  "    c: Bool -> Bool;\n"
+  "map c: Bool -> Bool;\n"
   ;
 
   data_specification data = parse_data_specification(text);
@@ -234,20 +233,16 @@ void test_data_reconstruct_bool_function()
   identifier_string c_name("c");
   sort_expression b = sort_expr::bool_();
   sort_expression bb = arrow(make_list(b), b);
-  data_operation cb(c_name, b);
   data_operation cbb(c_name, bb);
 
   std::cerr << rec_data << std::endl;
   std::cerr << c_name << std::endl;
-  std::cerr << b << std::endl;
   std::cerr << bb << std::endl;
-  std::cerr << cb << std::endl;
   std::cerr << cbb << std::endl;
 
   BOOST_CHECK(find_term(rec_data(2), c_name));
   BOOST_CHECK(find_term(rec_data(2), b));
   BOOST_CHECK(find_term(rec_data(2), bb));
-  BOOST_CHECK(find_term(rec_data(2), cb));
   BOOST_CHECK(find_term(rec_data(2), cbb));
 }
 

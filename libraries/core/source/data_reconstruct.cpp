@@ -1433,6 +1433,9 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
       // Note that we can only partly identify projection and recogniser
       // functions at this point, and we use that the length of sort_domain == 1
       // for these.
+      // We need to make sure that functions with |sort_domain| == 1, which are
+      // later identified as not being a constructor function, which are also
+      // not system defined, should be removed from sort_mappings.
       if (ATisEqual(gsMakeOpIdIf(linked_sort), op)
         || ATisEqual(gsMakeOpIdEq(linked_sort), op)
         || ATisEqual(gsMakeOpIdNeq(linked_sort), op)
@@ -1648,6 +1651,16 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
   // Check for equations that have sufficient equations to be a recogniser
   // or projection function
   // and schedule the equations and mappings for these for removal
+  // Note:
+  // * We do not remove if, ==, != functions from sort_mappings, these functions
+  //   should be removed.
+  // * If a mapping has sort A -> Bool, |constructors| ==  |equations|, where
+  //   |constructors| > 0 must hold, then it is concidered a recogniser function.
+  // * If a mapping has sort A -> Bool, and |constructors| != |equations|, or
+  // |constructors| == 0, then it is neither a recogniser, nor a projection
+  // function.
+  // * If a mapping has sort A -> B, with B != Bool, and |equations| != 1, then
+  // it cannot be a recogniser nor a projection function.
   for (ATermList l = struct_sorts; !ATisEmpty(l); l = ATgetNext(l))
   {
     ATermAppl sort = ATAgetFirst(l);
@@ -1662,7 +1675,7 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
         // map is possibly a recogniser
         if (gsIsSortArrow(gsGetSort(map))) {
           if(ATisEqual(gsGetSortExprResult(gsGetSort(map)), gsMakeSortExprBool())) {
-            if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]) {
+            if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort] || p_ctx->num_sort_constructors[sort] == 0) {
               remove_mapping_not_list(map, sort, p_ctx);
             } else {
               p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
@@ -1747,7 +1760,7 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
     if (!ATisEqual(p_mappings->get(op), ATtrue) &&
         !is_lambda_op_id(op)) {
       mappings = ATinsert(mappings, (ATerm) op);
-    }
+    } 
     p_data_decls->ops = ATgetNext(p_data_decls->ops);
   }
   p_data_decls->ops = ATreverse(mappings);
