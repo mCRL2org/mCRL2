@@ -703,7 +703,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       ATermAppl f_reconstructed_lps = reconstruct_spec(f_lps);
 
       //typecheck the invariant formula
-      ATermList vars =  ATLgetArgument(ATAgetArgument(ATAgetArgument(f_reconstructed_lps, 2), 0), 0);
+      ATermAppl process = ATAgetArgument(f_reconstructed_lps, 2);
+      assert(gsIsLinearProcess(process));
+      ATermList vars = ATLgetArgument(process, 1);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
