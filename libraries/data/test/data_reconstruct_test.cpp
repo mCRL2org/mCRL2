@@ -24,6 +24,7 @@ using namespace atermpp::detail;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 
 struct compare_term: public std::unary_function<aterm_appl, bool>
 {
@@ -246,6 +247,38 @@ void test_data_reconstruct_bool_function()
   BOOST_CHECK(find_term(rec_data(2), cbb));
 }
 
+/// Test case for issue #351
+void test_data_reconstruct_bool_function_one_eq()
+{
+  std::string text =
+  "map c: Bool -> Bool;\n"
+  "eqn c(true) = true;\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  // some more specific checks:
+  identifier_string c_name("c");
+  sort_expression b = sort_expr::bool_();
+  sort_expression bb = arrow(make_list(b), b);
+  data_operation cbb(c_name, bb);
+  data_expression t = true_();
+  data_application ct(cbb, make_list(t));
+
+  std::cerr << rec_data << std::endl;
+  std::cerr << c_name << std::endl;
+  std::cerr << bb << std::endl;
+  std::cerr << cbb << std::endl;
+
+  BOOST_CHECK(find_term(rec_data(2), c_name));
+  BOOST_CHECK(find_term(rec_data(2), b));
+  BOOST_CHECK(find_term(rec_data(2), bb));
+  BOOST_CHECK(find_term(rec_data(2), cbb));
+  BOOST_CHECK(find_term(rec_data(3), t));
+  BOOST_CHECK(find_term(rec_data(3), ct));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -256,6 +289,7 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_struct_nest();
   test_data_reconstruct_simple_constructor();
   test_data_reconstruct_bool_function();
+  test_data_reconstruct_bool_function_one_eq();
 
   return 0;
 }
