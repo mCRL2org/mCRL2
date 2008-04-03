@@ -285,7 +285,10 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_sp
   impl_sort_bool(&data_decls);
   //add new data declarations to spec
   lps_spec = add_data_decls(lps_spec, data_decls);
-  ar_spec = add_data_decls(ar_spec, data_decls);
+  // We need to copy the data declarations of the lps_spec to the ar_spec.
+  // Just adding data_decls does not suffice. This causes implementation of sort
+  // references (caused by structured sorts) to fail.
+  ar_spec = ATsetArgument(ar_spec, ATgetArgument(lps_spec, 0), 0);
   //implement numerical pattern matching
   lps_spec = impl_numerical_pattern_matching(lps_spec);
   ar_spec = impl_numerical_pattern_matching(ar_spec);
