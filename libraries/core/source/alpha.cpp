@@ -2103,24 +2103,79 @@ ATermAppl gsAlpha(ATermAppl Spec){
       ATermAppl Number1=gsString2ATermAppl("1");
       bool good=false;
       if(P){
+        //get the name of the first formal parameter on nP (should be Pos)
+        ATermList FormParsNP=ATLtableGet(form_pars,(ATerm)p);
+        if(ATisEmpty(FormParsNP)) goto nP_checked;
+        int nParsNP=ATgetLength(FormParsNP);
+        
+        ATermAppl FormPar1=ATAgetFirst(FormParsNP);
+	if(!ATisEqual(ATAgetArgument(FormPar1,1),gsMakeSortIdPos())) goto nP_checked;
+        ATermAppl Varp=ATAgetArgument(FormPar1,0);
+
 	ATermAppl Cond=ATAgetArgument(body,0);
 	if(!gsIsDataAppl(Cond)) goto nP_checked;
+
+        ATermList FormParsp=ATLtableGet(form_pars,(ATerm)P);
+        int nParsP=ATgetLength(FormParsp);
+        if(!(nParsP==nParsNP || nParsP+1==nParsNP)) goto nP_checked;
+
+        //condition expression 
+        //DataAppl(OpId(">",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("n",SortId("Pos")),OpId("1",SortId("Pos"))])
+        if(!ATisEqual(ATAgetArgument(body,0),gsMakeDataAppl(gsMakeOpIdGT(gsMakeSortIdPos()),ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),(ATerm)gsMakeOpId(Number1,gsMakeSortIdPos()))))) goto nP_checked;
+
+        //Else part of the condition  
 	ATermAppl Right=ATAgetArgument(body,2);
         if(!ATisEqual(P,ATAgetArgument(Right,0))) goto nP_checked;  
-        int m=ATgetLength(ATLgetArgument(Right,1)); //number of parameters of P
-        
+        ATermList ActParsP=ATLgetArgument(Right,1);
+        if(nParsP==nParsNP) { 
+           //check that the first parameter is 1
+          if(!ATisEqual(Number1,ATAgetArgument(ATAgetFirst(ActParsP),0))) goto nP_checked;
+          ActParsP=ATgetNext(ActParsP); 
+        }
+        //the (rest of) the parameters must match the rest of the parameters of Np
+        if(!ATisEqual(ATgetNext(FormParsNP),ActParsP)) goto nP_checked; 
+
+        //Then part of the condition
         ATermAppl parallel=ATAgetArgument(body,1);
 	if(!gsIsMerge(parallel)) goto nP_checked;
-        ATermAppl parallel_left=ATAgetArgument(parallel,0);    
+        ATermAppl parallel_left=ATAgetArgument(parallel,0);
         if(!gsIsProcess(parallel_left)) goto nP_checked;
         ATermAppl parallel_right=ATAgetArgument(parallel,1);
         if(!gsIsProcess(parallel_right)) goto nP_checked;
         if(!ATisEqual(P,ATAgetArgument(parallel_left,0))) goto nP_checked;
         if(!ATisEqual(p,ATAgetArgument(parallel_right,0))) goto nP_checked;	
-        int n=ATgetLength(ATLgetArgument(parallel_right,1));
-        if(!(n==m || n==m+1)) goto nP_checked;
-        if(n==m && !ATisEqual(Number1,ATAgetArgument(ATAgetFirst(ATLgetArgument(Right,1)),0))) goto nP_checked;	
-        //more checks
+
+        //parallel_left
+        if(nParsP==nParsNP){
+          if(!ATisEqual(ATLgetArgument(parallel_left,1),FormParsNP)) goto nP_checked;
+        }
+        else { 
+          if(!ATisEqual(ATLgetArgument(parallel_left,1),ATgetNext(FormParsNP))) goto nP_checked;
+        }
+
+        //parallel_right
+        ATermList ParsRight=ATLgetArgument(parallel_right,1);
+        if(!ATisEqual(ATgetNext(ParsRight),ATgetNext(FormParsNP))) goto nP_checked; 
+
+        ATermAppl Par1=ATAgetFirst(ParsRight);
+        gsWarningMsg("Par1: %T\n",Par1);
+
+        if(!ATisEqual(Par1,
+                      gsMakeDataAppl(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdPos()),
+                                     ATmakeList2((ATerm)gsMakeDataAppl(gsMakeOpIdSubt(gsMakeSortIdPos()),
+                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),
+                                                                                   (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos()))),
+                                                 (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos())))
+           )
+          && 
+           !ATisEqual(Par1,
+                      gsMakeDataAppl(gsMakeOpIdInt2Pos(),
+                                     ATmakeList1((ATerm)gsMakeDataAppl(gsMakeOpIdSubt(gsMakeSortIdPos()),
+                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),
+                                                                                   (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos())))))
+           )
+        ) goto nP_checked;
+
 	good=true;
       }
 
