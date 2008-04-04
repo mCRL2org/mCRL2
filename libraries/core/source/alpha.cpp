@@ -1368,27 +1368,29 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     return a;
   } else if ( gsIsAllow(a) ){
     a = gsApplyAlpha(a);
+    if(!gsIsAllow(a)) /* call ourselves recursively */ return PushComm(C,a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    ATermList V = ATLgetArgument(a,0); 
-    
-    ATermList V2=extend_allow_comm(V,C);
-    if(push_comm_through_allow && ATisEqual(V,V2)){
-      
-      ATermList lhs=comm_lhs(C); 
-      for (ATermList lt=l; !ATisEmpty(lt); lt=ATgetNext(lt) ){
-	ATermList mas=untypeMAL(apply_comms(ATLgetFirst(lt),C,lhs));
-	V2=merge_list(V2,gsaMakeMultActNameL(mas));
+
+    if(push_comm_through_allow){
+      ATermList V = ATLgetArgument(a,0);
+      ATermList V2=extend_allow_comm(V,C);
+      if(ATisEqual(V,V2)){
+        ATermList lhs=comm_lhs(C); 
+        for (ATermList lt=l; !ATisEmpty(lt); lt=ATgetNext(lt) ){
+	  ATermList mas=untypeMAL(apply_comms(ATLgetFirst(lt),C,lhs));
+	  V2=merge_list(V2,gsaMakeMultActNameL(mas));
+        }
+        ATermAppl p=ATAgetArgument(a,1);
+        p=PushComm(C,p);
+        ATermList l1=ATLtableGet(alphas,(ATerm) p);
+        a=gsMakeAllow(V2,p);
+        ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l1,V2));
+        return a;
       }
-      ATermAppl p=ATAgetArgument(a,1);
-      p=PushComm(C,p);
-      ATermList l1=ATLtableGet(alphas,(ATerm) p);
-      a=gsMakeAllow(V2,p);
-      ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l1,V2));
     }
-    else{
-      a = gsMakeComm(C,a);
-      ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-    }
+    
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   } 
   else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) ){
@@ -2158,7 +2160,6 @@ ATermAppl gsAlpha(ATermAppl Spec){
         if(!ATisEqual(ATgetNext(ParsRight),ATgetNext(FormParsNP))) goto nP_checked; 
 
         ATermAppl Par1=ATAgetFirst(ParsRight);
-        gsWarningMsg("Par1: %T\n",Par1);
 
         if(!ATisEqual(Par1,
                       gsMakeDataAppl(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdPos()),
