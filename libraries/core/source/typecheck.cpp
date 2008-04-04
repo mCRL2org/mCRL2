@@ -2133,7 +2133,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
     if(!NewType) {
-      gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
+      if(gsIsOpId(Data)||gsIsDataVarId(Data)) gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
       gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
       return NULL;
     }
