@@ -399,8 +399,8 @@ void rename_renamerule_variables(data_expression& rcond, lps::action& rleft, lps
     new_vars.insert(found_vars.begin(), found_vars.end());
   }
 
-  for (std::set<data_variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i){
-    identifier_string new_name = generator(i->name());
+  for (std::set<data_variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i)
+  { identifier_string new_name = generator(i->name());
     if (new_name != i->name())
     {
       src.push_back(*i);
@@ -485,13 +485,7 @@ ATermAppl rename(
   lps::summand_list lps_old_summands = lps_old_spec.process().summands();
   lps::summand_list lps_summands = lps::summand_list(); //for changes in lps_old_summands
   lps::action_list lps_new_actions = lps::action_list();;
-  // data_expression lps_new_condition = data_expression();
-  data_expression rule_condition;
 
-  // data_variable_list lps_new_sum_vars = data_variable_list();
-  lps::action rule_old_action;
-  lps::action rule_new_action;
-  
   std::set<identifier_string> s;
   postfix_identifier_generator generator("");
   generator.add_identifiers(s);
@@ -507,8 +501,9 @@ ATermAppl rename(
     aterm_appl rename_rule = *i;
     aterm_appl::iterator j =  rename_rule.begin();
     //skipping the data_variable_list j
-    rule_condition = data_expression(*++j);
-    rule_old_action =  lps::action(*++j);
+    data_expression rule_condition = data_expression(*++j);     
+    lps::action rule_old_action =  lps::action(*++j);      
+    lps::action rule_new_action;
     aterm_appl new_element = *++j;
 
     if(lps::is_action(new_element))
@@ -557,15 +552,18 @@ ATermAppl rename(
           gsVerboseMsg("renaming action %P\n",(ATermAppl)rule_old_action);
 
           //rename all previously used variables
-          rename_renamerule_variables(rule_condition, rule_old_action, rule_new_action, generator);
+          data_expression renamed_rule_condition=rule_condition;
+          lps::action renamed_rule_old_action=rule_old_action;
+          lps::action renamed_rule_new_action=rule_new_action;
+          rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
           //go through the arguments of the action
           data_expression_list::iterator 
                     lps_old_argument_i = lps_old_action.arguments().begin();
           data_expression new_equalities_condition=true_();
           for(data_expression_list::iterator 
-                       rule_old_argument_i = rule_old_action.arguments().begin();
-                       rule_old_argument_i != rule_old_action.arguments().end();
+                       rule_old_argument_i = renamed_rule_old_action.arguments().begin();
+                       rule_old_argument_i != renamed_rule_old_action.arguments().end();
                        rule_old_argument_i++)
           { new_equalities_condition=and_(new_equalities_condition,
                                data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
@@ -579,7 +577,7 @@ ATermAppl rename(
           }
 
           /* insert the new sum variables in all the newly generated summands */
-          std::set<data_variable> new_vars = find_all_data_variables(rule_old_action);
+          std::set<data_variable> new_vars = find_all_data_variables(renamed_rule_old_action);
           for(std::set<data_variable>::iterator sdvi = new_vars.begin(); 
                          sdvi != new_vars.end(); sdvi++)
           { 
@@ -589,11 +587,11 @@ ATermAppl rename(
             }
           }
 
-          if (is_nil(rule_condition))
-          { rule_condition=true_();
+          if (is_nil(renamed_rule_condition))
+          { renamed_rule_condition=true_();
           }
 
-          if (is_true(rule_condition))
+          if (is_true(renamed_rule_condition))
           { 
             if (to_delta)
             { for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator 
@@ -606,12 +604,12 @@ ATermAppl rename(
             { for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
               { if (!((*i).first)) // the action is not delta
-                { *i=std::make_pair(false,push_front((*i).second,rule_new_action));
+                { *i=std::make_pair(false,push_front((*i).second,renamed_rule_new_action));
                 }
               }
             }
           }
-          else if (is_false(rule_condition))
+          else if (is_false(renamed_rule_condition))
           {
             for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
@@ -635,7 +633,7 @@ ATermAppl rename(
                 { *i=std::make_pair(true,lps::action());
                 }
                 else 
-                { *i=std::make_pair(false,push_front(i->second,rule_new_action));
+                { *i=std::make_pair(false,push_front(i->second,renamed_rule_new_action));
                 }
               }
             }
@@ -661,12 +659,12 @@ ATermAppl rename(
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition.begin() ;
                          i!=lps_new_condition.end() ; i++ )
-            { *i=and_(*i,rule_condition);
+            { *i=and_(*i,renamed_rule_condition);
             }
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition_temp.begin() ;
                          i!=lps_new_condition_temp.end() ; i++ )
-            { *i=and_(*i,not_(rule_condition));
+            { *i=and_(*i,not_(renamed_rule_condition));
             }
 
             lps_new_condition.insert(lps_new_condition.end(),
