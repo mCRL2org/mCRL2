@@ -352,6 +352,17 @@ using namespace mcrl2::core;
       bool v_is_confluent = true;
       bool v_current_summands_are_confluent;
 
+      // Add here that the sum variables of a_summand must be empty otherwise
+      // the confluence of the summand must be checked with respect to itself,
+      // which requires quantification. Otherwise tau.a+tau.b will be designated
+      // tau-confluent, if linearised with summand clustering.
+      
+      ATermList a_summand_sum_variables=ATLgetArgument(a_summand,0);
+      if (!ATisEmpty(a_summand_sum_variables))
+      { v_is_confluent = false;
+        gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number);
+      }
+
       while (!ATisEmpty(v_summands) && (v_is_confluent || f_check_all)) {
         v_summand = ATAgetFirst(v_summands);
         v_summands = ATgetNext(v_summands);
