@@ -34,6 +34,7 @@ alias configuration : : <toolset>darwin :
        : <define>__darwin__
          <include>$(TOP)/build/workarounds
          <cxxflags>"-std=c++98 -ansi"
+         <cflags>"-std=c99"
          <debug-symbols>on:<cxxflags>"-ggdb"
          <linkflags>"-undefined dynamic_lookup"
        ;
@@ -47,6 +48,9 @@ alias configuration : : <toolset>sun :
 alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds
          <cxxflags>"-std=c++98 -ansi"
+         <cflags>"-std=c99"
+         <toolset-gcc:version>4.3.0:<cxxflags>"-std=c++98 -ansi -fno-strict-overflow"
+         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
          <link>static:<linkflags>-export-dynamic
        ;
 
