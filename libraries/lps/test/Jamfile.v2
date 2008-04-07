@@ -21,4 +21,5 @@ test-suite lps
       [ run time.cpp ]
       [ run aterm_algorithm_test.cpp ]
       [ run parelm_test.cpp ]
+      [ run lpsconfcheck_test.cpp ]
     ;

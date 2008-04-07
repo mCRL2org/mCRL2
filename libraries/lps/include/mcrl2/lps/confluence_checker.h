@@ -198,8 +198,8 @@ class Confluence_Checker {
 
     /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
-    /// precondition: the argument passed as parameter a_summand_number corresponds with a summands of the LPS passed as
-    /// parameter a_lps. It lies in the interval from and including 1 upto and including the highest summand number 
+    /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
+    /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
     ATermAppl check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number);
 };
 
