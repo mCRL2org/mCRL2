@@ -9,10 +9,6 @@ project data
 mcrl2-library data
        : source/enum.cpp
          source/enum_standard.cpp
-         source/confluence_checker.cpp
-         source/disjointness_checker.cpp
-         source/invariant_checker.cpp
-         source/invariant_eliminator.cpp
          source/formula_checker.cpp
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]

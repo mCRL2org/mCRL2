@@ -17,6 +17,10 @@ mcrl2-library lps
          source/untime.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp
+         source/confluence_checker.cpp
+         source/disjointness_checker.cpp
+         source/invariant_checker.cpp
+         source/invariant_eliminator.cpp
        : <use>/libraries/data//headers
          <use>/libraries/pbes//headers
          <use>/libraries/atermpp//headers

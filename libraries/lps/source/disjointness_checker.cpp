@@ -10,7 +10,7 @@
 // Implementation of class Disjointness_Checker
 // file: disjointness_checker.cpp
 
-#include "mcrl2/disjointness_checker.h"
+#include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

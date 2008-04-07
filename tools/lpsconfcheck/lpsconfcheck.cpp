@@ -10,8 +10,6 @@
 #define NAME "lpsconfcheck"
 #define AUTHOR "Luc Engelen"
 
-#include "mcrl2/confluence_checker.h"
-#include "mcrl2/invariant_checker.h"
 #include "getopt.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
@@ -20,6 +18,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/confluence_checker.h"
+#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>

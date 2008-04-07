@@ -10,8 +10,6 @@
 #define NAME "lpsinvelm"
 #define AUTHOR "Luc Engelen"
 
-#include "mcrl2/invariant_eliminator.h"
-#include "mcrl2/invariant_checker.h"
 #include "getopt.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/parse.h"
@@ -21,6 +19,8 @@
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/invariant_eliminator.h"
+#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
 #include <string>

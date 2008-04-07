@@ -16,8 +16,8 @@
 #include "aterm2.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/prover/bdd_prover.h"
-#include "mcrl2/disjointness_checker.h"
-#include "mcrl2/invariant_checker.h"
+#include "mcrl2/lps/disjointness_checker.h"
+#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/bdd2dot.h"
 
     /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.

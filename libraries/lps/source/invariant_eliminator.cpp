@@ -10,7 +10,7 @@
 // Implementation of class Invariant_Eliminator
 // file: invariant_eliminator.cpp
 
-#include "mcrl2/invariant_eliminator.h"
+#include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/struct.h"

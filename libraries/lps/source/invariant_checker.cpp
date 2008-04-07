@@ -10,7 +10,7 @@
 // Implementation of class Invariant_Checker
 // file: invariant_checker.cpp
 
-#include "mcrl2/invariant_checker.h"
+#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/struct.h"
