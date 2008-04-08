@@ -18,12 +18,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 inline
-pbes_expression expr(const pbes_expression& x)
-{
-  return x;
-}
-
-inline
 bool is_finished(const pbes_expression& x)
 {
   return x != pbes_expression();
@@ -48,70 +42,70 @@ struct pbes_builder
 
   /// Visit data expression node.
   ///
-  virtual pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& /* d */, Arg& /* arg */)
+  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit true node.
   ///
-  virtual pbes_expression visit_true(pbes_expression x, Arg& /* arg */)
+  virtual pbes_expression visit_true(const pbes_expression& x, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit false node.
   ///
-  virtual pbes_expression visit_false(pbes_expression x, Arg& /* arg */)
+  virtual pbes_expression visit_false(const pbes_expression& x, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit not node.
   ///
-  virtual pbes_expression visit_not(pbes_expression x, const pbes_expression& /* arg */, Arg& /* arg */)
+  virtual pbes_expression visit_not(const pbes_expression& x, const pbes_expression& /* arg */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit and node.
   ///
-  virtual pbes_expression visit_and(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
+  virtual pbes_expression visit_and(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit or node.
   ///
-  virtual pbes_expression visit_or(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
+  virtual pbes_expression visit_or(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
     return pbes_expression();
   }    
 
   /// Visit imp node.
   ///
-  virtual pbes_expression visit_imp(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
+  virtual pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit forall node.
   ///
-  virtual pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit propositional variable node.
   ///
-  virtual pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& /* v */, Arg& /* arg */)
+  virtual pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& /* v */, Arg& /* arg */)
   {
     return pbes_expression();
   }
@@ -134,19 +128,22 @@ struct pbes_builder
     using namespace pbes_expr_optimized;
     using namespace accessors;
 
-    pbes_expression result = e;
+    pbes_expression result;
 
     if (is_data(e)) {
       result = visit_data_expression(e, val(e), arg);
       if (!is_finished(result)) {
+        result = e;
       }
     } else if (is_pbes_true(e)) {
       result = visit_true(e, arg);
       if (!is_finished(result)) {
+        result = e;
       }
     } else if (is_pbes_false(e)) {
       result = visit_false(e, arg);
       if (!is_finished(result)) {
+        result = e;
       }
     } else if (is_pbes_not(e)) {
       const pbes_expression& n = not_arg(e);
@@ -215,70 +212,70 @@ struct pbes_expression_builder: public pbes_builder<int>
   
   /// Visit data expression node.
   ///
-  virtual pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& /* d */)
+  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */)
   {
     return pbes_expression();
   }
 
   /// Visit true node.
   ///
-  virtual pbes_expression visit_true(pbes_expression x)
+  virtual pbes_expression visit_true(const pbes_expression& x)
   {
     return pbes_expression();
   }
 
   /// Visit false node.
   ///
-  virtual pbes_expression visit_false(pbes_expression x)
+  virtual pbes_expression visit_false(const pbes_expression& x)
   {
     return pbes_expression();
   }
 
   /// Visit not node.
   ///
-  virtual pbes_expression visit_not(pbes_expression x, const pbes_expression& /* arg */)
+  virtual pbes_expression visit_not(const pbes_expression& x, const pbes_expression& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit and node.
   ///
-  virtual pbes_expression visit_and(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_and(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }
 
   /// Visit or node.
   ///
-  virtual pbes_expression visit_or(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_or(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }    
 
   /// Visit imp node.
   ///
-  virtual pbes_expression visit_imp(pbes_expression x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  virtual pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     return pbes_expression();
   }
 
   /// Visit forall node.
   ///
-  virtual pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
   /// Visit propositional variable node.
   ///
-  virtual pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& /* v */)
+  virtual pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& /* v */)
   {
     return pbes_expression();
   }
@@ -294,70 +291,70 @@ struct pbes_expression_builder: public pbes_builder<int>
 
   /// Visit data expression node.
   ///
-  pbes_expression visit_data_expression(pbes_expression x, const data::data_expression& d, int&)
+  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, int&)
   {
     return visit_data_expression(x, d);
   }
 
   /// Visit true node.
   ///
-  pbes_expression visit_true(pbes_expression x, int&)
+  pbes_expression visit_true(const pbes_expression& x, int&)
   {
     return visit_true(x);
   }
 
   /// Visit false node.
   ///
-  pbes_expression visit_false(pbes_expression x, int&)
+  pbes_expression visit_false(const pbes_expression& x, int&)
   {
     return visit_false(x);
   }
 
   /// Visit not node.
   ///
-  pbes_expression visit_not(pbes_expression x, const pbes_expression& n, int&)
+  pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, int&)
   {
     return visit_not(x, n);
   }
 
   /// Visit and node.
   ///
-  pbes_expression visit_and(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
   {
     return visit_and(x, left, right);
   }
 
   /// Visit or node.
   ///
-  pbes_expression visit_or(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
   {
     return visit_or(x, left, right);
   }    
 
   /// Visit imp node.
   ///
-  pbes_expression visit_imp(pbes_expression x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
   {
     return visit_imp(x, left, right);
   }
 
   /// Visit forall node.
   ///
-  pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
   {
     return visit_forall(x, variables, expression);
   }
 
   /// Visit exists node.
   ///
-  pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
   {
     return visit_exists(x, variables, expression);
   }
 
   /// Visit propositional variable node.
   ///
-  pbes_expression visit_propositional_variable(pbes_expression x, const propositional_variable_instantiation& v, int&)
+  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, int&)
   {
     return visit_propositional_variable(x, v);
   }

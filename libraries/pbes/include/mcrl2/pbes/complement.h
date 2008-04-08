@@ -57,7 +57,7 @@ struct complement_builder: public pbes_expression_builder
   pbes_expression visit_true(const pbes_expression& /* e */)
   {
     using namespace pbes_expr_optimized;
-    return false_();;
+    return false_();
   }
 
   /// \overload
@@ -65,7 +65,7 @@ struct complement_builder: public pbes_expression_builder
   pbes_expression visit_false(const pbes_expression& /* e */)
   {
     using namespace pbes_expr_optimized;
-    return true_();;
+    return true_();
   }
 
   /// \overload
