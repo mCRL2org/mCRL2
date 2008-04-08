@@ -119,11 +119,7 @@ It is therefore recommended to read those pages first.
 # The text at the bottom of every generated HTML page.
 # We use some of the predefined placeholders (starting with a '$') that Doxygen
 # will replace by approriate text.
-FOOTER_TEXT="<ul>
-  <li>This page was generated on \$datetime by 
-      <a href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion.
-  </li>
-</ul>"
+FOOTER_TEXT="This page was generated on \$datetime by <a href=\"http://www.doxygen.org\">doxygen</a> \$doxygenversion."
 
 ###################### END OF SETTINGS ########################################
 
@@ -175,25 +171,19 @@ function write_index {
 <?php
   mcrl2_head_end();
   mcrl2_body_begin();
-?>
-<div id=\"main\">
-
-<?php 
+  mcrl2_main_begin();
+   
   mcrl2_portal_begin();
   mcrl2_libref_portlet(\"\");
-  mcrl2_search_portlet(2);
+  mcrl2_search_portlet();
   mcrl2_portal_end();
+   
+  mcrl2_contents_begin();
 ?>
-
-<div id=\"contents-column\">
-<div class=\"contents\">
   $MAIN_TEXT
-</div> <!-- contents -->
-</div> <!-- contents-column -->
-
-</div> <!-- main -->
-
 <?php 
+  mcrl2_contents_end();
+  mcrl2_main_end();
   mcrl2_body_end();
   mcrl2_html_end();
 ?>" > $OUTPUT_DIR/$INDEX
@@ -216,30 +206,23 @@ function write_doxyheader {
 <?php
   mcrl2_head_end();
   mcrl2_body_begin();
-?>
-<div id=\"main\">
+  mcrl2_main_begin();
 
-<?php 
   mcrl2_portal_begin();
   mcrl2_libref_portlet(\"$CURRENT\");
-  mcrl2_search_portlet(2);
+  mcrl2_search_portlet();
   mcrl2_portal_end();
-?>
 
-<div id=\"contents-column\">" > $DOXYHEADER
+?>" > $DOXYHEADER
 } # End of function write_doxyheader
 
 function write_doxyfooter {
-  echo "<!--sphider_noindex-->
-  <div id=\"pageinfo\">
-    $FOOTER_TEXT
-  </div>
-<!--/sphider_noindex-->
-</div> <!-- contents-column -->
+  echo "<?php 
+   
+  mcrl2_pageinfo('$FOOTER_TEXT');
 
-</div> <!-- main -->
-
-<?php 
+  mcrl2_main_end();
+  
   mcrl2_body_end();
   mcrl2_html_end();
 ?>" > $DOXYFOOTER
