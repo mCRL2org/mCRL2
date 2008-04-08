@@ -163,9 +163,9 @@ Shape* Diagram::getShape( const size_t &idx )
 // ---------------------------------------
 {
     Shape* result = NULL;
-	if ( 0 <= idx && idx < shapes.size() )
-		result = shapes[idx];
-	return result;
+    if ( 0 <= idx && idx < shapes.size() )
+	result = shapes[idx];
+    return result;
 }
 
 

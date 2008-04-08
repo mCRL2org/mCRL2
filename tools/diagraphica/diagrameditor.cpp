@@ -37,6 +37,11 @@ DiagramEditor::DiagramEditor(
     editMode    = EDIT_MODE_SELECT;
     drgBegIdx1 = -1;
     drgBegIdx2 = -1;
+    selectedX1 = -1; 
+    selectedX2 = -1;
+    selectedY1 = -1;
+    selectedY2 = -1;
+    selection = false;
     
     initMouse();
 
@@ -241,6 +246,83 @@ void DiagramEditor::setLineCol()
 
 
 // --------------------------------------------------
+void DiagramEditor::handleIntersection( )
+// --------------------------------------------------
+{
+	int shapeCount = diagram->getSizeShapes();
+	int i;	
+	Shape* s = NULL;
+	for( i = 0; i < shapeCount; i++ )
+	{
+		s = diagram->getShape( i );
+		double sX1 = s->getXCtr() - s->getXDFC();
+		double sY1 = s->getYCtr() + s->getYDFC();
+		double sX2 = s->getXCtr() + s->getXDFC();
+		double sY2 = s->getYCtr() - s->getYDFC();
+		double x1 = selectedX1 - selectedX2;
+		double y1 = selectedY1 + selectedY2;
+		double x2 = selectedX1 + selectedX2;
+		double y2 = selectedY1 - selectedY2;
+		translatePoints( sX1, sY1, sX2, sY2, s->getXCtr(), s->getYCtr(), s->getXDFC(), s->getYDFC() );
+		translatePoints( x1, y1, x2, y2, selectedX1, selectedY1, selectedX2, selectedY2 );
+		if( !(x1 >= sX2 || x2 <= sX1 || y1 <= sY2 || y2 >= sY1) )
+		{
+			s->setMode( Shape::MODE_EDIT );
+		}
+		s = NULL;
+	}
+	selection = false;
+}
+
+
+// --------------------------------------------------
+void DiagramEditor::translatePoints( double &x1, double &y1, 
+				     double &x2, double &y2, 
+				     double givenX1, double givenY1, 
+				     double givenX2, double givenY2 )
+// --------------------------------------------------
+{
+	x1 = givenX1 - givenX2;
+	y1 = givenY1 + givenY2;
+	x2 = givenX1 + givenX2;
+	y2 = givenY1 - givenY2;
+	double temp;
+	if( x1 > x2 )
+	{
+		temp = x1;
+		x1 = x2;
+		x2 = temp;
+	}
+	if( y2 > y1 )
+	{
+		temp = y1;
+		y1 = y2;
+		y2 = temp;
+	}
+}
+
+
+// --------------------------------------------------
+bool DiagramEditor::isAnyShapeSelected()
+// --------------------------------------------------
+{
+	if(diagram != NULL)
+	{
+		int sizeShapes = diagram->getSizeShapes();
+		for ( int i = 0; i < sizeShapes; ++i )    
+		{
+			if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT )
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+}
+
+
+// --------------------------------------------------
 void DiagramEditor::handleDOFSel( const int &DOFIdx )
 // --------------------------------------------------
 {
@@ -308,7 +390,7 @@ void DiagramEditor::handleDOFSel( const int &DOFIdx )
         }
         else if ( DOFIdx == s->getDOFVar()->getIndex() )
         {
-        	s->setModeEdtDOFVar();
+            s->setModeEdtDOFVar();
             mediator->handleDOFColDeactivate();
             mediator->handleDOFOpaActivate();
         }
@@ -842,9 +924,8 @@ void DiagramEditor::visualize( const bool &inSelectMode )
     clear();
 
     if ( inSelectMode == true )
-    {    	
-        if ( editMode == EDIT_MODE_SELECT ||
-             editMode == EDIT_MODE_DOF || editMode == EDIT_MODE_NOTE )
+    {
+        if ( editMode == EDIT_MODE_SELECT || editMode == EDIT_MODE_DOF || editMode == EDIT_MODE_NOTE )
         {
             // set up picking
             GLint hits = 0;
@@ -902,18 +983,34 @@ void DiagramEditor::visualize( const bool &inSelectMode )
             yC = y1+0.5*dY;
     
             VisUtils::setColorDkGray();
-            if( editMode == EDIT_MODE_NOTE )
-            	;//VisUtils::drawRect( x1, x2, y1, y2 );            
-            else if ( editMode == EDIT_MODE_RECT )
-                VisUtils::drawRect( x1, x2, y1, y2 );
-            else if ( editMode == EDIT_MODE_ELLIPSE )
-                VisUtils::drawEllipse( xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt );
-            else if ( editMode == EDIT_MODE_LINE )
-                VisUtils::drawLine( x1, x2, y1, y2 );
-            else if ( editMode == EDIT_MODE_ARROW )
-                VisUtils::drawArrow( x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix );
-            else if ( editMode == EDIT_MODE_DARROW )
-                VisUtils::drawDArrow( x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix );
+	    if ( editMode == EDIT_MODE_SELECT )
+	    {
+		selectedX1 = xC;
+		selectedY1 = yC;
+	        selectedX2 = 0.5*dX;
+	        selectedY2 = -0.5*dY;	
+		if( !isAnyShapeSelected() )
+		{	
+			VisUtils::drawRect( x1, x2, y1, y2 );
+		}
+	    }
+	    else
+	    {
+		selectedX1 = -1;
+	        selectedX2 = -1;
+		selectedY1 = -1;
+	        selectedY2 = -1;
+		if ( editMode == EDIT_MODE_RECT )
+			VisUtils::drawRect( x1, x2, y1, y2 );
+		else if ( editMode == EDIT_MODE_ELLIPSE )
+			VisUtils::drawEllipse( xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt );
+		else if ( editMode == EDIT_MODE_LINE )
+			VisUtils::drawLine( x1, x2, y1, y2 );
+		else if ( editMode == EDIT_MODE_ARROW )
+			VisUtils::drawArrow( x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix );
+		else if ( editMode == EDIT_MODE_DARROW )
+			VisUtils::drawDArrow( x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix );
+	    }
         }
     }
 }
@@ -943,7 +1040,12 @@ void DiagramEditor::handleMouseLftUpEvent(
 {
     Visualizer::handleMouseLftUpEvent( x, y );
 
-    if ( editMode == EDIT_MODE_SELECT ||  editMode == EDIT_MODE_DOF )
+    if ( editMode == EDIT_MODE_SELECT )
+    {
+	visualize( true );
+	handleIntersection();	
+    }
+    else if ( editMode == EDIT_MODE_DOF )
     {
         visualize( true );
     }
@@ -994,26 +1096,26 @@ void DiagramEditor::handleMouseLftUpEvent(
             diagram->getSizeShapes(), 
             xC,     yC,
             0.5*dX, -0.5*dY,
-            0.0,    Shape::TYPE_RECT );
-    
-        if ( editMode == EDIT_MODE_RECT )
-            s->setTypeRect();
-        else if ( editMode == EDIT_MODE_ELLIPSE )
-            s->setTypeEllipse();
-        else if ( editMode == EDIT_MODE_LINE )
-            s->setTypeLine();
-        else if ( editMode == EDIT_MODE_ARROW )
-            s->setTypeArrow();
-        else if ( editMode == EDIT_MODE_DARROW )
-            s->setTypeDArrow();
-        else if ( editMode == EDIT_MODE_NOTE )
-        {
-        	s->setTypeNote();
-        	mediator->handleNote( s->getIndex() , s->getNote() );
-       	}
-
-        diagram->addShape( s );
-        s = NULL;
+            0.0,    Shape::TYPE_RECT );    
+        
+	if ( editMode == EDIT_MODE_RECT )
+		s->setTypeRect();
+	else if ( editMode == EDIT_MODE_ELLIPSE )
+		s->setTypeEllipse();
+	else if ( editMode == EDIT_MODE_LINE )
+		s->setTypeLine();
+	else if ( editMode == EDIT_MODE_ARROW )
+		s->setTypeArrow();
+	else if ( editMode == EDIT_MODE_DARROW )
+		s->setTypeDArrow();
+	else if ( editMode == EDIT_MODE_NOTE )
+	{
+		s->setTypeNote();
+		mediator->handleNote( s->getIndex() , s->getNote() );
+	}
+	
+	diagram->addShape( s );
+	s = NULL;
         
         // undo transl & scale here
     }
@@ -1059,6 +1161,7 @@ void DiagramEditor::handleMouseMotionEvent(
     {
         if ( drgBegIdx1 < 0 && drgBegIdx2 < 0 )
         {
+	    selection = true;
             visualize( true );    // select mode        
         }
         else
@@ -1084,6 +1187,10 @@ void DiagramEditor::handleKeyUpEvent( const int &keyCode )
         {
             handleDelete();
         }
+	/*else if ( keyCode == 65 )
+	{
+		handleSelectAll();
+	}*/
     }
 }
 
@@ -1097,7 +1204,7 @@ void DiagramEditor::handleHits( const vector< int > &ids )
     if ( ids.size() == 1 )
         handleHitDiagramOnly();  
     // shape was hit
-    else if ( ids.size() == 2 )
+    else if ( ids.size() == 2 && !selection )
     {
         handleHitShape( ids[1] );
     }
@@ -1359,7 +1466,24 @@ void DiagramEditor::handleDrag()
         if ( s->getMode() == Shape::MODE_EDIT )
         {
             if ( drgBegIdx2 == Shape::ID_HDL_CTR )
-                handleDragCtr( s );
+	    {
+		double xDrag, yDrag;
+		handleDragCtr( s, xDrag, yDrag );	
+		int i;
+		for( i = 0; i < sizeShapes; i++ )
+		{
+			Shape* otherSelectedShape = diagram->getShape(i);
+			if( drgBegIdx1 != i && otherSelectedShape->getMode() == Shape::MODE_EDIT )
+			{
+				double xCtr, yCtr;
+				otherSelectedShape->getCenter( xCtr, yCtr );
+				xCtr += xDrag;
+				yCtr += yDrag;
+				otherSelectedShape ->setCenter( xCtr, yCtr );
+			}
+			otherSelectedShape = NULL;
+		}	
+	    }
             else if ( drgBegIdx2 == Shape::ID_HDL_TOP_LFT )            
                 handleDragTopLft( s );         
             else if ( drgBegIdx2 == Shape::ID_HDL_LFT )
@@ -1614,21 +1738,32 @@ void DiagramEditor::handleDelete()
     vector< int > toDelete;
     // get indices to delete
     {
-    for ( int i = 0; i < diagram->getSizeShapes() ; ++i )
-    {
-        /*
-        if ( diagram->getShape(i)->getMode() == Shape::MODE_EDT_CTR_DFC ||
-             diagram->getShape(i)->getMode() == Shape::MODE_EDT_HGE_AGL )
-        */
-        if ( diagram->getShape(i)->getMode() == Shape::MODE_EDIT )
-            toDelete.push_back( i );
-    }
+	for ( int i = 0; i < diagram->getSizeShapes() ; ++i )
+	{
+		/*
+		if ( diagram->getShape(i)->getMode() == Shape::MODE_EDT_CTR_DFC ||
+		diagram->getShape(i)->getMode() == Shape::MODE_EDT_HGE_AGL )
+		*/
+		if ( diagram->getShape(i)->getMode() == Shape::MODE_EDIT )
+		toDelete.push_back( i );
+	}
     }
     
     // delete shapes
     {
     for ( size_t i = 0; i < toDelete.size(); ++i )
         diagram->deleteShape( toDelete[i]-i );
+    }
+}
+
+
+// -------------------------------
+void DiagramEditor::handleSelectAll()
+// -------------------------------
+{
+    for ( int i = 0; i < diagram->getSizeShapes() ; ++i )
+    {
+        diagram->getShape(i)->setMode( Shape::MODE_EDIT );
     }
 }
 
@@ -1885,7 +2020,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
 
 
 // ------------------------------------------
-void DiagramEditor::handleDragCtr( Shape* s ) 
+void DiagramEditor::handleDragCtr( Shape* s, double &xDrag, double &yDrag ) 
 // ------------------------------------------
 {
     double xPrv, yPrv;
@@ -1903,7 +2038,7 @@ void DiagramEditor::handleDragCtr( Shape* s )
     xDrgDist += xCur-xPrv;
     yDrgDist += yCur-yPrv;
 
-    /*if ( diagram->getSnapGrid() == true )
+    if ( diagram->getSnapGrid() == true )
     {
         x = Utils::rndToNearestMult( x+xDrgDist, diagram->getGridInterval( canvas ) );
         y = Utils::rndToNearestMult( y+yDrgDist, diagram->getGridInterval( canvas ) );
@@ -1920,10 +2055,13 @@ void DiagramEditor::handleDragCtr( Shape* s )
     {
         x += xCur-xPrv;
         y += yCur-yPrv;
-    }*/
+    }
     
     x += xCur-xPrv;
     y += yCur-yPrv;
+
+    xDrag = x - xCtr;
+    yDrag = y - yCtr;
 
     s->setCenter( x, y );
 }

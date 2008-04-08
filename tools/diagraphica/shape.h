@@ -30,6 +30,13 @@ public:
         const double &xC, const double &yC,
         const double &xD, const double &yD,
         const double &aC, const int    &typ);
+    Shape(
+        Mediator* m,      const int &idx,
+        const double &xC, const double &yC,
+        const double &xD, const double &yD,
+        const double &xBegin, const double &yBegin,
+        const double &xEnd, const double &yEnd,
+	const double &aC, const int    &typ);
     Shape( const Shape &shape );
     virtual ~Shape();
 

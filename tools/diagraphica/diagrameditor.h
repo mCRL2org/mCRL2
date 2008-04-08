@@ -48,6 +48,9 @@ public:
     void setFillCol();
     void setLineCol();
 
+    void handleIntersection();
+    void translatePoints( double &x1, double &y1, double &x2, double &y2, double givenX1, double givenY1, double givenX2, double givenY2 );
+    bool isAnyShapeSelected();
     void handleDOFSel( const int &DOFIdx );
     void handleDOFSetTextStatus(
         const int &DOFIdx,
@@ -126,6 +129,7 @@ public:
     void handleCopy();
     void handlePaste();
     void handleDelete();
+    void handleSelectAll();
     void handleBringToFront();
     void handleSendToBack();
     void handleBringForward();
@@ -153,7 +157,7 @@ protected:
     void displShapeEdtOptions( Shape *s );
     void displDOFInfo( Shape* s );
     
-    void handleDragCtr( Shape* s );
+    void handleDragCtr( Shape* s, double &xDrag, double &yDrag );
     void handleDragTopLft( Shape* s );
     void handleDragLft( Shape* s );
     void handleDragBotLft( Shape* s );
@@ -187,9 +191,11 @@ protected:
     int editMode;
     int drgBegIdx1;
     int drgBegIdx2;
+    bool selection;
 
     double xDrgDist;
     double yDrgDist;
+    double selectedX1, selectedX2, selectedY1, selectedY2;
     
     Shape* clipBoardShape; // composition
     double xPaste, yPaste;

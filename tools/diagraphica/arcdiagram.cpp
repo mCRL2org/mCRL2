@@ -495,7 +495,7 @@ void ArcDiagram::visualize( const bool &inSelectMode )
         
         finishSelectMode(
             hits,
-            selectBuf );        
+            selectBuf );
     }
     // rendering mode
     else
@@ -2158,7 +2158,7 @@ void ArcDiagram::onTimer( wxTimerEvent &e )
         timerAnim->Stop();
         timerAnim->Start( itvAnim );
     }
-    
+
     frameIdxDgrm[animIdxDgrm] += 1;
     if ( static_cast <size_t> (frameIdxDgrm[animIdxDgrm]) >= framesDgrm[animIdxDgrm].size() )
         frameIdxDgrm[animIdxDgrm] = 0;
@@ -2480,7 +2480,7 @@ void ArcDiagram::handleDragDiagram()
 void ArcDiagram::handleDragDiagram(const int &dgrmIdx)
 // ---------------------------------
 {
-	double x1, y1;
+    double x1, y1;
     double x2, y2;
     
     canvas->getWorldCoords( xMousePrev, yMousePrev, x1, y1 );

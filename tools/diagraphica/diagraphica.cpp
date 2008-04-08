@@ -11,6 +11,7 @@
 #include <string>
 #include <wx/wx.h>
 #include <wx/sysopt.h>
+#include <wx/clrpicker.h>
 #include "mcrl2/utilities/version_info.h"
 
 // windows debug libraries
@@ -722,7 +723,7 @@ void DiaGraph::getColor( ColorRGB &col )
     wxColourDialog dialog( frame, &data );
     wxColour       colTmp;
 
-	if ( dialog.ShowModal() == wxID_OK )
+    if ( dialog.ShowModal() == wxID_OK )
     {
         data   = dialog.GetColourData();
         colTmp = data.GetColour();
@@ -730,7 +731,7 @@ void DiaGraph::getColor( ColorRGB &col )
         col.r = colTmp.Red()/255.0;
         col.g = colTmp.Green()/255.0;
         col.b = colTmp.Blue()/255.0;
-    }    
+    }
 }
 
 
