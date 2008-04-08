@@ -55,6 +55,11 @@ lib pthread ;
 # Extra library needed by phtread on some platforms.
 lib rt ;
 
+# The pythonpath feature specifies additional elements for the PYTHONPATH
+# environment variable, set by run-pyd. For example, pythonpath can be used
+# to access Python modules that are part of the product being built, but
+# are not installed in the development system's default paths.
+feature.feature pythonpath : : free optional path ;
 
 # Initializes the Python toolset.  Note that all parameters are
 # optional.
@@ -883,6 +888,11 @@ local rule configure (
             usage-requirements += <define>Py_DEBUG ;
         }
     }
+    
+    # Global, but conditional, requirements to give access to the interpreter
+    # for general utilities, like other toolsets, that run Python scripts.
+    toolset.add-requirements
+        $(target-requirements:J=,):<python.interpreter>$(interpreter-cmd) ;
 
     # Register the right suffix for extensions.
     register-extension-suffix $(extension-suffix) : $(target-requirements) ;
@@ -1143,6 +1153,13 @@ local rule translate-os ( src-os )
     return $(x[1]) ;
 }
 
+# Extract the path to a single ".pyd" source. This is used to build the
+# PYTHONPATH for running bpl tests.
+local rule pyd-pythonpath ( source )
+{
+    return [ on $(source) return $(LOCATE) $(SEARCH) ] ;
+}
+
 # The flag settings on testing.capture-output do not
 # apply to python.capture output at the moment.
 # Redo this explicitly.
@@ -1156,8 +1173,9 @@ rule capture-output ( target : sources * : properties * )
     # over explicitly.
     RUN_PATH on $(sources[1]) = [ on $(sources[2-]) return $(RUN_PATH) ] ;
 
-    PYTHONPATH = [ on $(sources[2-]) return $(LOCATE) $(SEARCH) ] ;
-
+    PYTHONPATH  = [ sequence.transform pyd-pythonpath : $(sources[2-]) ] ;
+    PYTHONPATH += [ feature.get-values pythonpath : $(properties) ] ;
+    
     # After test is run, we remove the Python module, but not the Python
     # script.
     testing.capture-output $(target) : $(sources[1]) : $(properties)

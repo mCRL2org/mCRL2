@@ -131,10 +131,11 @@ for option in [ modules.peek : ARGV ] {
   local temporary = [ MATCH ([^=]+)= : $(option) ] ;
 
   if $(temporary) {
-    value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+    local value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+    local values = [ regex.split $(value) "," ] ;
 
     if ! [ MATCH ^(-).* : $(option) ] {
-      build-options += <$(temporary)>$(value) ;
+      build-options += <$(temporary)>$(values) ;
     }
   }
   else if $(option) in debug profile release {
@@ -148,7 +149,7 @@ for option in $(BUILD_OPTIONS) {
 
   if $(temporary) {
     if ! [ feature.get-values $(temporary) : $(build-options) ] {
-      value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+      local value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
      
       if ! [ MATCH ^(-).* : $(option) ] {
         build-options += $(value:G=<$(temporary)>) ;

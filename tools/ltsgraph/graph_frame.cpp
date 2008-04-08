@@ -19,6 +19,7 @@ static const wxColour &border_colour_selected = *wxBLUE;
 #if (wxMINOR_VERSION < 8)
 #define wxFD_SAVE wxSAVE 
 #define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
+#define wxBRUSHSTYLE_SOLID wxSOLID
 #endif
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
@@ -63,7 +64,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     background_brush.SetColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
-    background_brush.SetStyle(wxSOLID);
+    background_brush.SetStyle(wxBRUSHSTYLE_SOLID);
  
   StopOpti = true;
   StoppedOpti = true;
