@@ -51,13 +51,13 @@ void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI
     tipi::utility::logger::log_level default_log_level = 1;
 
     if (0 < parser.options.count("create")) {
-      if (parser.unmatched.size() != 1) {
+      if (parser.arguments.size() != 1) {
         parser.error("create option requires that a path is provided.");
       }
     }
 
-    if (parser.unmatched.size() == 1) {
-      boost::filesystem::path target(parser.unmatched[0]);
+    if (parser.arguments.size() == 1) {
+      boost::filesystem::path target(parser.arguments[0]);
 
       if (!target.has_root_path()) {
         target = boost::filesystem::initial_path() / target;
@@ -71,7 +71,7 @@ void parse_command_line(int ac, wxChar** av, boost::function < void (squadt::GUI
       }
     }
 
-    if (1 < parser.unmatched.size()) {
+    if (1 < parser.arguments.size()) {
       parser.error("too many file aguments!");
     }
 

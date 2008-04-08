@@ -202,10 +202,10 @@ t_tool_options parse_command_line(int ac, char** av)
   if (parser.options.count("solver")) {
     tool_options.solver = parser.option_argument("solver");
   }
-  if (0 < parser.unmatched.size()) {
-    infilename = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    infilename = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
+  if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 

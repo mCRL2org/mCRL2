@@ -18,6 +18,77 @@ namespace mcrl2 {
 
     /// \cond INTERNAL
     /**
+     * Inserts newline characters while reading the input from left to right.
+     * When a newline is inserted the next read newline is discarded.
+     *  - if a newline is read the previous line was wrapped the first 
+     *
+     * To force a new-line at some position add two successive newline characters.
+     *
+     * \param[in] input the input string
+     * \param[in] width the width of the column
+     * \pre 0 < width and no word can be longer than width
+     * \return string with newlines inserted such that the number of characters
+     * between any two consecutive newlines is smaller than width
+     **/
+    static std::string word_wrap(std::string const& input, const size_t width) {
+      std::ostringstream out;
+
+      std::string            indent     = input.substr(0, input.find_first_not_of(" \t"));
+      std::string::size_type space_left = width;
+
+      std::string::const_iterator i = input.begin();
+      std::string::const_iterator word_start = i;
+
+      while (i != input.end()) {
+        if (space_left - (i - word_start) < 1) { // line too long
+
+          out << std::endl << indent << std::string(word_start, ++i);
+
+          space_left = width - (i - word_start) - indent.size();
+          word_start = i;
+        }
+        else if (*i == ' ' || *i == '\t') {
+          out << std::string(word_start, ++i);
+
+          space_left -= i - word_start;
+          word_start  = i;
+        }
+        else if (*i == '\n') {
+          if (word_start != i) {
+            out << std::string(word_start, i);
+          }
+
+          ++i;
+
+          // store new indent
+          std::string::size_type start = i - input.begin();
+          std::string::size_type end   = input.find_first_not_of(" \t", start);
+
+          if (end != std::string::npos) {
+            i     += end - start;
+            indent = input.substr(start, end - start);
+          }
+          else {
+            indent.clear();
+          }
+
+          // copy word and newline
+          out << std::endl << indent;
+
+          space_left = width - indent.size();
+          word_start = i;
+        }
+        else {
+          ++i;
+        }
+      }
+
+      out << std::string(word_start, input.end());
+
+      return out.str();
+    }
+
+    /**
      * \param[in] w the width of the first column
      * \return formatted string that represents the option description
      **/
@@ -51,7 +122,7 @@ namespace mcrl2 {
         s << options << std::string(w - options.size(), ' ');
       }
 
-      std::istringstream description(m_description);
+      std::istringstream description(word_wrap(m_description, 80 - w));
 
       while (description.good()) {
         getline(description, options);
@@ -115,6 +186,14 @@ namespace mcrl2 {
       return *this;
     }
 
+    interface_description& interface_description::add_option(std::string const& l, basic_argument const& a, std::string const& d, char const s) {
+      add_option(l, d, s);
+
+      m_options.find(l)->second.set_argument(a.clone());
+
+      return *this;
+    };
+
     std::string interface_description::textual_description() const {
       std::ostringstream s;
 
@@ -145,9 +224,9 @@ namespace mcrl2 {
      * The interface description specifies the available options and their
      * possible arguments. This procedure traverses the command-line arguments
      * in a left-to-right fashion and assigns those arguments to options. The
-     * output is a pair of a map and a vector: the option map and the unmatched
+     * output is a pair of a map and a vector: the option map and the arguments
      * vector. The option map (a multimap) maps an options found as argument to
-     * its argument or an empty string (in case of no argument). The unmatched
+     * its argument or an empty string (in case of no argument). The arguments
      * vector contains command line arguments that were not recognised as
      * option or argument to option.
      *
@@ -180,9 +259,10 @@ namespace mcrl2 {
                 }
                 else {
                   std::string const& long_option = (d.m_options.find(option))->first;
-                
+
+                  interface_description::option_descriptor const& descriptor = (d.m_options.find(long_option))->second;
+
                   if (argument.size() == option.size() + 2) { // no argument
-                    interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
            
                     if (descriptor.needs_argument()) {
                       error("expected argument to option `--" + option + "'!");
@@ -195,7 +275,13 @@ namespace mcrl2 {
                     }
                   }
                   else {
-                    m_options.insert(std::make_pair(long_option, std::string(argument, option.size() + 3)));
+                    std::string option_argument(argument, option.size() + 3);
+
+                    if (!descriptor.m_argument->validate(option_argument)) {
+                      error("argument to option `--" + option + "' is invalid");
+                    }
+
+                    m_options.insert(std::make_pair(long_option, option_argument));
                   }
                 }
               }
@@ -209,10 +295,10 @@ namespace mcrl2 {
                   }
                   else {
                     std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
+
+                    interface_description::option_descriptor const& descriptor = (d.m_options.find(long_option))->second;
                  
                     if (argument.size() - i == 1) { // the last option without argument
-                      interface_description::option_descriptor& descriptor = (d.m_options.find(long_option))->second;
-           
                       if (descriptor.needs_argument()) {
                         error("expected argument to option `-" + option + "'");
                       }
@@ -225,8 +311,14 @@ namespace mcrl2 {
                     }
                     else { // intermediate option or option with argument
                       if (d.m_options.find(long_option)->second.accepts_argument()) {
+                        std::string option_argument(argument, i + 1);
+
+                        if (!descriptor.m_argument->validate(option_argument)) {
+                          error("argument to option `-" + option + "' is invalid");
+                        }
+
                         // must be the last option, so take the remainder as option argument
-                        m_options.insert(std::make_pair(long_option, std::string(argument, i + 1)));
+                        m_options.insert(std::make_pair(long_option, option_argument));
            
                         break;
                       }
@@ -239,7 +331,7 @@ namespace mcrl2 {
               }
             }
             else {
-              m_unmatched.push_back(argument);
+              m_arguments.push_back(argument);
             }
           }
         }
@@ -301,10 +393,10 @@ namespace mcrl2 {
     /// \endcond
 
     /**
-     * \param[in] m the body of the exception message
+     * \param[in] message the body of the exception message
      **/
-    void command_line_parser::error(std::string const& m) const {
-      throw std::runtime_error(m_interface.m_name + ": " + m + "\nTry `" + m_interface.m_name + " --help' for more information.");
+    void command_line_parser::error(std::string const& message) const {
+      throw std::runtime_error(m_interface.m_name + ": " + message + "\nTry `" + m_interface.m_name + " --help' for more information.");
     }
 
     /**

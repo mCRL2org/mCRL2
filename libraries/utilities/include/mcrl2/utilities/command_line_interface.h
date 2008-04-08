@@ -45,9 +45,8 @@ namespace mcrl2 {
      * tools in terms of options and arguments to options. The scope is command
      * line interfaces of mCRL2 tools.
      *
-     * Options that are mandatory for every tool are present by default as well
-     * as semantic actions for those option.  This relieves the creator of a
-     * tool from this burden.  Options for functionality in toolset libraries
+     * Options that are standard (prescribed by convention) are automatically
+     * added to the interface. Options for functionality in toolset libraries
      * that are shared amongst multiple tools can be predefined in this
      * component and included on demand for individual tools.
      **/
@@ -77,6 +76,9 @@ namespace mcrl2 {
             }
 
           public:
+
+            /// returns a copy of the object
+            virtual basic_argument* clone() const = 0;
 
             /// returns the name for the argument
             std::string get_name() const {
@@ -169,12 +171,12 @@ namespace mcrl2 {
         /**
          * \brief Constructor
          *
-         * \param[in] name tool name
-         * \param[in] path the path to the executable (as in the first command line argument)
-         * \param[in] authors string describing the authors
+         * \param[in] path path or name that identifies the executable
+         * \param[in] name the name of the tool
+         * \param[in] authors string with the names of the authors
          * \param[in] usage message that explains tool usage and description
          * \param[in] known_issues textual description of known issues with the tool
-         * \param[in] messaging_options adds messaging options (--quiet, --verbose and --debug) to interface
+         * \param[in] messaging_options adds messaging options (-q,--quiet, -v,--verbose and -d,--debug) to interface
          **/
         inline interface_description(std::string const& path, std::string const& name, std::string const& authors,
                      std::string const& usage, std::string const& known_issues = "", bool messaging_options = true) :
@@ -233,12 +235,12 @@ namespace mcrl2 {
         }
 
         /**
-         * \brief Adds an option identified by a long-style identifier with argument to the interface
+         * \brief Adds an option with argument identified by a long-identifier to the interface
          *
-         * Adds an option identified by a long-style identifier with an
-         * argument to the interface. The argument to the option is either
-         * optional, or mandatory. In the former case a default value is
-         * assumed when the option is found on a command line command.
+         * Adds an option identified by a long-identifier with an argument to
+         * the interface. The argument to the option is either optional, or
+         * mandatory. In the former case a default value is assumed when the
+         * option is found on a command line command.
          *
          * The template parameter T is used to select between optional and
          * mandatory option argument types. More specifically it specifies one
@@ -254,12 +256,14 @@ namespace mcrl2 {
          * make_optional_argument can be used to create the arguments (that are
          * untyped).
          *
-         * \param[in] l the long option representation of the option
-         * \param[in] a a mandatory or optional argument to the option
-         * \param[in] d description of the option
-         * \param[in] s an optional single-character short representation of the option
-         * \pre l should be a non-empty string that only contain characters from [a-Z] or `-' '_'
-         * \pre l must not be a previously added long option or short option
+         * \param[in] long_identifier the long option representation of the option
+         * \param[in] argument_specification a mandatory or optional argument to the option
+         * \param[in] description description of the option
+         * \param[in] short_identifier an optional single-character short representation of the option
+         * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
+         * \pre short_identifier must a single character [a-zA-Z0-9]
+         * \throw std::runtime_error when an option with long_identifier is already part of the interface
+         * \throw std::runtime_error when an option with short_identifier is already part of the interface
          * \see add_option(std::string const&, std::string const&, char const)
          *
          * The following example shows how to add mandatory and optional options:
@@ -269,28 +273,32 @@ namespace mcrl2 {
          * \endcode
          * The result is a command line interface with parser behaviour:
          * \verbatim
-         *  test --timeout=2 --recursive              (pass)
-         *  test -t2 -r3                              (pass)
-         *  test --timeout="bla" --recursive="bla"    (pass)
-         *  test --timeout                            (failure)
-         *  test -t                                   (failure) \endverbatim
+            tool --timeout=2 --recursive              (pass)
+            tool -t2 -r3                              (pass)
+            tool --timeout=bla --recursive=bla        (pass)
+            tool --timeout                            (failure)
+            tool -t                                   (failure) \endverbatim
          *
          * The human readable interface specification for these options is as follows:
          *
          * \verbatim
-         *   -t, --timeout=SEC        timeout occurs after SEC number of seconds
-         *   -r, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
+             -t, --timeout=SEC        timeout occurs after SEC number of seconds
+             -r, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
          **/
-        template < typename T >
-        interface_description& add_option(std::string const& l, T const& a, std::string const& d, char const s = '\0');
+        interface_description& add_option(std::string const& long_identifier,
+                                          basic_argument const& argument_specification,
+                                          std::string const& description,
+                                          char const short_identifier = '\0');
 
         /**
-         * \brief Adds an option identified by a long-style identifier to the interface
-         * \param[in] l the long option representation of the option
-         * \param[in] d description of the option
-         * \param[in] s an optional single-character short representation of the option
-         * \pre l should be a non-empty string that only contain characters from [a-Z] or `-' '_'
-         * \pre l must not be a previously added long option or short option
+         * \brief Adds an option identified by a long-identifier to the interface
+         * \param[in] long_identifier the long option representation of the option
+         * \param[in] description description of the option
+         * \param[in] short_identifier an optional single-character short representation of the option
+         * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
+         * \pre short_identifier must a single character [a-zA-Z0-9]
+         * \throw std::runtime_error when an option with long_identifier is already part of the interface
+         * \throw std::runtime_error when an option with short_identifier is already part of the interface
          *
          * The following example shows how to add an option without arguments
          * \code
@@ -299,20 +307,22 @@ namespace mcrl2 {
          * \endcode
          * The result is a command line interface with the following example parsing behaviour:
          * \verbatim
-         *  test --test                               (pass)
-         *  test --test --test                        (pass)
-         *  test -r --recursive                       (pass)
-         *  test --r                                  (failure)
-         *  test -t                                   (failure) \endverbatim
+            tool --test                               (pass)
+            tool --test --test                        (pass)
+            tool -r --recursive                       (pass)
+            tool --r                                  (failure)
+            tool -t                                   (failure) \endverbatim
          *
          * The human readable interface specification for these options is as follows:
          *
          * \verbatim
-         *   -r, --recursive          recursively scans a directory
-         *       --test               tests
-         *                             a lot \endverbatim
+             -r, --recursive          recursively scans a directory
+                 --test               tests
+                                       a lot \endverbatim
          **/
-        interface_description& add_option(std::string const& l, std::string const& d, char const s = '\0');
+        interface_description& add_option(std::string const& long_identifier,
+                                          std::string const& description,
+                                          char const short_identifier = '\0');
 
         /**
          * \brief Adds options for the rewriter
@@ -320,7 +330,7 @@ namespace mcrl2 {
         void add_rewriting_options();
 
         /**
-         * \brief Prints a human readable interface description
+         * \brief Returns a human readable interface description
          **/
         std::string textual_description() const;
     };
@@ -328,18 +338,16 @@ namespace mcrl2 {
     /**
      * \brief Main parsing component for command line strings as well as
      * interface to the results of parsing. The input is a specification of an
-     * interface, as well as functionality to communicate parse problems with
-     * the user (see interface_description).
+     * interface.
      *
      * This class represents one of the two main interface components
      * responsible for actual parsing of the command line and communicating the
      * results. The other component the interface_description class provides an
-     * interface description along with functionality to print and throw
-     * standard exceptions in a format that is prescribed by the interface
-     * conventions.
+     * interface description along with functionality to format messages to the
+     * user of the tool.
      *
      * Access to parse results is provided through the STL multimap options
-     * (type std::multimap) and the STL vector unmatched (type std::vector).
+     * (type std::multimap) and the STL vector arguments (type std::vector).
      * The former is mapping between an option (through long-option identifier)
      * found on the command line to the string that represents its argument.
      * The latter contains from left-to-right the command line arguments that
@@ -347,7 +355,7 @@ namespace mcrl2 {
      *
      * The following example illustrates the use of parsing results:
      * \code
-     *  interface_description cli("test", "John Doe", "[OPTIONS]... [PATHS]");
+     *  interface_description interface("tool", "tool-name", "John Doe", "[OPTIONS]... [PATHS]");
      *
      *  // Note default options: --help,(-h), --version, --verbose (-v), --debug (-d) and --quiet (-q)
      *  cli.
@@ -355,22 +363,27 @@ namespace mcrl2 {
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with", 't').
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period");
      *
-     *  // parse command line
-     *  command_line_parser parser(cli, "test -v --verbose -r --time --timeout --tool=foo bar1 bar2");
-     *
-     *  std::cerr << parser.options.count("recursive");        // prints: "1"
-     *  std::cerr << parser.options.count("verbose");          // prints: "2"
-     *  std::cerr << parser.options.count("tool");             // prints: "1"
-     *  std::cerr << parser.options.count("timeout");          // prints: "1"
-     *  std::cerr << parser.options.count("bar1");             // prints: "0"
-     *
-     *  std::cerr << parser.option_argument["tool"];           // prints: "foo"
-     *  std::cerr << parser.option_argument_as< int >["tool"]; // prints: "2"
-     *  std::cerr << parser.option_argument["recursive"];      // prints: ""
-     *
-     *  std::cerr << parser.unmatched.size();                  // prints: "2"
-     *  std::cerr << parser.unmatched[0];                      // prints: "bar1"
-     *  std::cerr << parser.unmatched[1];                      // prints: "bar2"
+     *  try {
+     *    // parse command line
+     *    command_line_parser parser(cli, "test -v --verbose -r --timeout --tool=foo bar1 bar2");
+     * 
+     *    std::cerr << parser.options.count("recursive");        // prints: "1"
+     *    std::cerr << parser.options.count("verbose");          // prints: "2"
+     *    std::cerr << parser.options.count("tool");             // prints: "1"
+     *    std::cerr << parser.options.count("timeout");          // prints: "1"
+     *    std::cerr << parser.options.count("bar1");             // prints: "0"
+     * 
+     *    std::cerr << parser.option_argument("tool");           // prints: "foo"
+     *    std::cerr << parser.option_argument_as< int >("tool"); // prints: "2"
+     *    std::cerr << parser.option_argument("recursive");      // prints: ""
+     * 
+     *    std::cerr << parser.arguments.size();                  // prints: "2"
+     *    std::cerr << parser.arguments[0];                      // prints: "bar1"
+     *    std::cerr << parser.arguments[1];                      // prints: "bar2"
+     *  }
+     *  catch (std::exception& e) {
+     *    std::cerr << e.what() << std::endl;
+     *  }
      * \endcode
      *
      * Note the use of the option_argument method.  It simplifies argument
@@ -386,7 +399,7 @@ namespace mcrl2 {
         typedef std::multimap< std::string, std::string >  option_map;
 
         /// Used to store command line arguments that were not recognised as option or arguments to options
-        typedef std::vector< std::string >                 unmatched_list;
+        typedef std::vector< std::string >                 argument_list;
 
       private:
 
@@ -394,7 +407,7 @@ namespace mcrl2 {
         option_map              m_options;
 
         /// \brief The list of arguments that have not been matched with an option
-        unmatched_list          m_unmatched;
+        argument_list           m_arguments;
 
         /// \brief The command line interface specification
         interface_description&  m_interface;
@@ -405,7 +418,7 @@ namespace mcrl2 {
         option_map const&       options;
 
         /// \brief The list of arguments that have not been matched with an option
-        unmatched_list const&   unmatched;
+        argument_list const&    arguments;
 
       private:
 
@@ -425,34 +438,39 @@ namespace mcrl2 {
       public:
 
         /**
-         * \brief Parses a string that represents a command on the command line, and executes default procedures for default options.
-         * \param[in] d the interface description
+         * \brief Parses a string that represents a command on the command
+         * line, and executes default procedures for default options.
+         * \param[in] interface_specification the interface description
          * \param[in] command_line the string that represents the unparsed command line
          **/
-        inline command_line_parser(interface_description& d, char const* const command_line) :
-                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
-          collect(d, parse_command_line(command_line));
+        inline command_line_parser(interface_description& interface_specification, char const* const command_line) :
+                                         m_interface(interface_specification), options(m_options), arguments(m_arguments) {
+          collect(interface_specification, parse_command_line(command_line));
 
-          process_default_options(d);
+          process_default_options(interface_specification);
         }
 
         /**
-         * \brief Recognises options from an array that represents a pre-parsed command on the command line, and executes default procedures for default options.
-         * \param[in] d the interface description
-         * \param[in] c amount of arguments
-         * \param[in] a C-style array with arguments
+         * \brief Recognises options from an array that represents a pre-parsed
+         * command on the command line, and executes default procedures for
+         * default options.
+         * \param[in] interface_specification the interface description
+         * \param[in] argument_count amount of arguments
+         * \param[in] arguments C-style array with arguments
          **/
-        template < typename C >
-        command_line_parser(interface_description& d, const int c, C const* const* const a);
+        template < typename CharacterType >
+        command_line_parser(interface_description& interface_specification,
+                                const int argument_count, CharacterType const* const* const arguments);
 
         /**
          * \brief Throws standard formatted std::runtime_error exception
+         * \param[in] message the exception message
          *
          * The following example shows the output of this method for a tool named test.
          *
          * \code
          *  try {
-         *    error("ran out of time!");
+         *    error("Parse error: option -b unknown");
          *  }
          *  catch (std::exception& e) {
          *    std::cerr << e.what();
@@ -462,41 +480,43 @@ namespace mcrl2 {
          * The output is:
          *
          * \verbatim
-         * test: ran out of time
-         * Try `test --help' for more information. \endverbatim
+         * tool: Parse error: option -b unknown
+         * Try `tool --help' for more information. \endverbatim
          **/
-        void error(std::string const& m) const;
+        void error(std::string const& message) const;
 
         /**
          * \brief Returns the argument (or the empty string) of the first option matching a name
-         * \param[in] n the long name for the option
-         * \pre 0 < options.count(n)
+         * \param[in] long_identifier the long identifier for the option
+         * \pre 0 < options.count(long_identifier)
          **/
-        std::string const& option_argument(std::string const& n) {
-          assert(0 < options.count(n));
+        std::string const& option_argument(std::string const& long_identifier) {
+          if (options.count(long_identifier) == 0) {
+            throw std::logic_error("Fatal error: argument requested of unspecified option! (this is a bug)\n");
+          }
 
-          return options.find(n)->second;
+          return options.find(long_identifier)->second;
         }
 
         /**
          * \brief Returns the converted argument of the first option matching a name
-         * \param[in] n the long name for the option
-         * \pre 0 < options.count(n) and !options.find(n)->second.empty()
+         * \param[in] long_identifier the long identifier for the option
+         * \pre 0 < options.count(long_identifier) and !options.find(long_identifier)->second.empty()
          * \throw std::runtime_exception containing a message that the argument cannot be converted to the specified type
          **/
         template < typename T >
-        inline T option_argument_as(std::string const& n) {
-          std::istringstream in(option_argument(n));
+        inline T option_argument_as(std::string const& long_identifier) {
+          std::istringstream in(option_argument(long_identifier));
 
           T result;
            
           in >> result;
 
           if (in.fail()) {
-            const char short_option(m_interface.long_to_short(n));
+            const char short_option(m_interface.long_to_short(long_identifier));
 
-            error("argument `" + option_argument(n) + "' to option --" + n +
-                ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid!");
+            error("argument `" + option_argument(long_identifier) + "' to option --" + long_identifier +
+                ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
           }
 
           return result;
@@ -655,6 +675,10 @@ namespace mcrl2 {
 
       public:
     
+        virtual basic_argument* clone() const {
+          return new optional_argument< T >(*this);
+        }
+
         /**
          * Constructor
          * \param[in] n the name of the argument
@@ -685,6 +709,10 @@ namespace mcrl2 {
     
       public:
     
+        virtual basic_argument* clone() const {
+          return new mandatory_argument< T >(*this);
+        }
+
         /**
          * Constructor
          * \param[in] n the name of the argument
@@ -697,7 +725,7 @@ namespace mcrl2 {
          * \brief Throws because mandatory arguments have no default
          **/
         inline std::string const& get_default() const {
-          throw std::runtime_error("Fatal error: default argument requested for mandatory option! (this is a bug)\n");
+          throw std::logic_error("Fatal error: default argument requested for mandatory option! (this is a bug)\n");
         }
 
         /// whether the argument is optional or not
@@ -715,7 +743,7 @@ namespace mcrl2 {
 #if !defined(__COMMAND_LINE_INTERFACE__)
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
-                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+                                         m_interface(d), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
 
@@ -724,7 +752,7 @@ namespace mcrl2 {
 
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
-                                         m_interface(d), options(m_options), unmatched(m_unmatched) {
+                                         m_interface(d), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
 
@@ -774,14 +802,5 @@ namespace mcrl2 {
     }
 #endif
     /// \endcond
-
-    template < typename T >
-    interface_description& interface_description::add_option(std::string const& l, T const& a, std::string const& d, char const s) {
-      add_option(l, d, s);
-
-      m_options.find(l)->second.set_argument(new T(a));
-
-      return *this;
-    };
   }
 }

@@ -516,13 +516,13 @@ void parse_command_line(int ac, char **av)
 
   command_line_parser parser(clinterface, ac, av);
 
-  if (0 < parser.unmatched.size()) {
-    infilename = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    infilename = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
-    outfilename = parser.unmatched[1];
+  if (1 < parser.arguments.size()) {
+    outfilename = parser.arguments[1];
   }
-  if (2 < parser.unmatched.size()) {
+  if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 }

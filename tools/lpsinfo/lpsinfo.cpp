@@ -77,10 +77,10 @@ void parse_command_line(int ac, char** av) {
       
   command_line_parser parser(clinterface, ac, av);
 
-  if (0 < parser.unmatched.size()) {
-    file_name = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    file_name = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
+  if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 }

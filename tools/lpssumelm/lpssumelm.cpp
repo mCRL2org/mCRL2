@@ -162,13 +162,13 @@ tool_options parse_command_line(int ac, char** av) {
 
   tool_options t_options = { "-", "-" };
 
-  if (0 < parser.unmatched.size()) {
-    t_options.input_file = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    t_options.input_file = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
-    t_options.output_file = parser.unmatched[1];
+  if (1 < parser.arguments.size()) {
+    t_options.output_file = parser.arguments[1];
   }
-  if (2 < parser.unmatched.size()) {
+  if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 

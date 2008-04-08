@@ -353,43 +353,43 @@ t_tool_options parse_command_line(int ac, char** av)
   clinterface.
     add_option("strategy", make_mandatory_argument("STRAT"), 
       "use strategy STRAT (default '0');\n"
-      " 0) Compute all boolean equations which can be reached\n"
-      "    from the initial state, without optimization\n"
-      "    (default). This is is the most data efficient\n"
-      "    option per generated equation.\n"
-      " 1) Optimize by immediately substituting the right\n"
-      "    hand sides for already investigated variables\n"
-      "    that are true or false when generating an\n"
-      "    expression. This is as memory efficient as 0.\n"
-      " 2) In addition to 1, also substitute variables that\n"
-      "    are true or false into an already generated right\n"
-      "    hand side. This can mean that certain variables\n"
-      "    become unreachable (e.g. X0 in X0 && X1, when X1\n"
-      "    becomes false, assuming X0 does not occur\n"
-      "    elsewhere. It will be maintained which variables\n"
-      "    have become unreachable as these do not have to be\n"
-      "    investigated. Depending on the PBES, this can\n"
-      "    reduce the size of the generated BES substantially\n"
-      "    but requires a larger memory footprint.\n"
-      " 3) In addition to 2, investigate for generated\n"
-      "    variables whether they occur on a loop, such that\n"
-      "    they can be set to true or false, depending on the\n"
-      "    fixed point symbol. This can increase the time\n"
-      "    needed to generate an equation substantially",
+      " 0) Compute all boolean equations which can be reached"
+      " from the initial state, without optimization"
+      " (default). This is is the most data efficient"
+      " option per generated equation.\n"
+      " 1) Optimize by immediately substituting the right"
+      " hand sides for already investigated variables"
+      " that are true or false when generating an"
+      " expression. This is as memory efficient as 0.\n"
+      " 2) In addition to 1, also substitute variables that"
+      " are true or false into an already generated right"
+      " hand side. This can mean that certain variables"
+      " become unreachable (e.g. X0 in X0 && X1, when X1"
+      " becomes false, assuming X0 does not occur"
+      " elsewhere. It will be maintained which variables"
+      " have become unreachable as these do not have to be"
+      " investigated. Depending on the PBES, this can"
+      " reduce the size of the generated BES substantially"
+      " but requires a larger memory footprint.\n"
+      " 3) In addition to 2, investigate for generated"
+      " variables whether they occur on a loop, such that"
+      " they can be set to true or false, depending on the"
+      " fixed point symbol. This can increase the time"
+      " needed to generate an equation substantially",
       's').
     add_option("counter",
-      "print at the end a tree labelled with instantiations\n"
-      "of the left hand side of equations; this tree is an\n"
+      "print at the end a tree labelled with instantiations "
+      "of the left hand side of equations; this tree is an "
       "indication of how pbes2bool came to the validity or\n"
       "invalidity of the PBES",
       'c').
     add_option("precompile",
-      "precompile the pbes for faster rewriting; does not\n"
+      "precompile the pbes for faster rewriting; does not"
       "work when the toolset is compiled in debug mode",
       'p').
     add_option("hashtables",
-      "use hashtables when substituting in bes equations,\n"
-      "and translate internal expressions to binary decision\n"
+      "use hashtables when substituting in bes equations, "
+      "and translate internal expressions to binary decision "
       "diagrams (discouraged, due to performance)",
       'H').
     add_option("output",
@@ -451,13 +451,13 @@ t_tool_options parse_command_line(int ac, char** av)
     }
   }
   
-  if (0 < parser.unmatched.size()) {
-    tool_options.infilename = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    tool_options.infilename = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
-    tool_options.outfilename = parser.unmatched[1];
+  if (1 < parser.arguments.size()) {
+    tool_options.outfilename = parser.arguments[1];
   }
-  if (2 < parser.unmatched.size()) {
+  if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
   

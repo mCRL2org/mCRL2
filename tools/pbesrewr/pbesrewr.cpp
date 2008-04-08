@@ -60,13 +60,13 @@ t_tool_options parse_command_line(int ac, char** av)
 
   t_tool_options tool_options = { "-", "-", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
 
-  if (0 < parser.unmatched.size()) {
-    tool_options.infile_name = parser.unmatched[0];
+  if (0 < parser.arguments.size()) {
+    tool_options.infile_name = parser.arguments[0];
   }
-  if (1 < parser.unmatched.size()) {
-    tool_options.outfile_name = parser.unmatched[1];
+  if (1 < parser.arguments.size()) {
+    tool_options.outfile_name = parser.arguments[1];
   }
-  if (2 < parser.unmatched.size()) {
+  if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 
