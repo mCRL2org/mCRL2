@@ -101,14 +101,14 @@ class rewriter
 		}
 
 		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
-		/// in the sequence [first, last).
+		/// in the given sequence.
 		/// \return The normal form of d.
 		///
-		template <typename Iter>
-		data_expression operator()(const data_expression& d, Iter first, Iter last) const
+		template <typename SubstitutionSequence>
+		data_expression operator()(const data_expression& d, const SubstitutionSequence& sigma) const
 		{
 		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
-		  for (Iter i = first; i != last; ++i)
+		  for (typename SubstitutionSequence::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
 		  {
 		    m_rewriter.get()->setSubstitution(i->m_variable, i->m_value);
 		  }
@@ -155,16 +155,16 @@ class single_term_rewriter
     }   
 
 		/// \brief Rewrites the data expression phi that has been passed through the constructor,
-		/// and on the fly applies the substitutions in the sequence [first, last[.
+		/// and on the fly applies the substitutions in the given sequence.
 		/// \return The normal form of phi.
 		///
-		template <typename Iter>
-		data_expression operator()(Iter first, Iter last) const
+		template <typename SubstitutionSequence>
+		data_expression operator()(const SubstitutionSequence& sigma) const
 		{
 		  Rewriter* r = m_rewriter.m_rewriter.get();
 
 		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
-		  for (Iter i = first; i != last; ++i)
+		  for (typename SubstitutionSequence::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
 		  {
 		    r->setSubstitution(i->m_variable, i->m_value);
 		  }

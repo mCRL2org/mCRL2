@@ -50,7 +50,7 @@ namespace detail {
     
     void operator()()
     {
-      m_result.insert(m_rewriter(m_substitutions.begin(), m_substitutions.end()));
+      m_result.insert(m_rewriter(m_substitutions));
     }
   };
   
@@ -199,6 +199,7 @@ class enumerator_expression
     }
 };
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
   template <typename VariableContainer, typename EnumeratorExpressionContainer>
@@ -256,6 +257,7 @@ namespace detail {
   };
 
 } // namespace detail
+/// \endcond
 
 /// A class that enumerates data expressions.
 template <typename DataRewriter, typename IdentifierGenerator>

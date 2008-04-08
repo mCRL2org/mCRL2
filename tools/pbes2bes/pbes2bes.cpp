@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
-#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/detail/old_rewriter.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
@@ -47,7 +47,7 @@ struct t_tool_options {
 bool process(t_tool_options tool_options)
 {
   typedef data::rewriter data_rewriter;
-  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
+  typedef pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
 
   pbes<> pbes_spec = load_pbes(tool_options.infilename);
   data_rewriter datar(pbes_spec.data());
