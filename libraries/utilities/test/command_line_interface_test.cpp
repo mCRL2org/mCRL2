@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
     BOOST_CHECK(first_of(parser, "debug").empty());
     BOOST_CHECK(parser.options.count("quiet") == 1);
     BOOST_CHECK(first_of(parser, "quiet").empty());
-    BOOST_CHECK(parser.unmatched.size() == 0);
+    BOOST_CHECK(parser.arguments.size() == 0);
   }
 
   {
@@ -170,9 +170,9 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
  
     BOOST_CHECK(parser.options.size() == 1);
     BOOST_CHECK(first_of(parser, "verbose").empty());
-    BOOST_CHECK(parser.unmatched.size() == 2);
-    BOOST_CHECK(parser.unmatched[0] == "/bin/ls");
-    BOOST_CHECK(parser.unmatched[1] == "\\or\\more:1234567890|,<>.:;[]}{+-_=~!@#$%^&*()");
+    BOOST_CHECK(parser.arguments.size() == 2);
+    BOOST_CHECK(parser.arguments[0] == "/bin/ls");
+    BOOST_CHECK(parser.arguments[1] == "\\or\\more:1234567890|,<>.:;[]}{+-_=~!@#$%^&*()");
   }
 
   test_interface.add_option("mandatory", make_mandatory_argument("STR"), "option with mandatory argument", 'm');
@@ -189,6 +189,6 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
                 (first_of(parser, "optional") == "1234" && last_of(parser, "optional") == "4321"));
     BOOST_CHECK(parser.option_argument_as< int >("optional") == 1234 ||
                 parser.option_argument_as< int >("optional") == 4321);
-    BOOST_CHECK(parser.unmatched.size() == 0);
+    BOOST_CHECK(parser.arguments.size() == 0);
   }
 }
