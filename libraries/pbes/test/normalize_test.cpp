@@ -22,7 +22,7 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
-void test_normalize()
+void test_normalize1()
 {
   using namespace pbes_expr;
 
@@ -111,12 +111,26 @@ void test_normalize2()
   p.normalize();
 }
 
+void test_normalize3()
+{
+  // test case from Aad Mathijssen, 1-4-2008
+  specification spec = mcrl22lps(
+    "proc P = tau.P;\n"
+    "init P;        \n"
+  );
+  state_formula formula  = modal::detail::mcf2statefrm("![true*]<true>true", spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  p.normalize();
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  test_normalize(); 
+  test_normalize1(); 
   test_normalize2();
+  test_normalize3();
 
   return 0;
 }

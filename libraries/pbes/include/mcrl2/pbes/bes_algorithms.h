@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_ALGORITHMS_H
 #define MCRL2_PBES_ALGORITHMS_H
 
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
@@ -44,15 +46,17 @@ struct bes_equation_solver
 template <typename Container>
 int bes_gauss_elimination(pbes<Container>& p)
 {
-  typedef data::rewriter data_rewriter;
-  typedef simplify_rewriter<data_rewriter> pbes_rewriter;
-  typedef bes_equation_solver<pbes_rewriter> bes_solver;
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  typedef bes_equation_solver<my_rewriter> bes_solver;
     
-  data_rewriter datar(p.data());
-  pbes_rewriter pbesr(datar, p.data());
+  data::rewriter datar(p.data());
+  number_postfix_generator name_generator;
+  my_enumerator datae(p.data(), datar, name_generator);
+  my_rewriter pbesr(datar, datae);    
   bes_solver solver(pbesr);
 
-  gauss_elimination_algorithm<pbes_rewriter, bes_solver> algorithm(pbesr, solver);
+  gauss_elimination_algorithm<my_rewriter, bes_solver> algorithm(pbesr, solver);
   algorithm.run(p.equations().begin(), p.equations().end());
 
   if (p.equations().front().formula() == pbes_expr::false_())

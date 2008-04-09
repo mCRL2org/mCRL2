@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/data/identifier_generator.h"
 
 using namespace std;
 using namespace atermpp;
@@ -81,6 +82,9 @@ void test_result(PbesRewriter& r, pbes_expression x, pbes_expression y)
 
 void test_builder()
 {
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
+
   using namespace pbes_expr;
 
   data_variable b  = bool_("b");
@@ -89,32 +93,42 @@ void test_builder()
   pbes_expression y;
   data_expression z;
   specification spec = mcrl22lps(SPECIFICATION);
+
   data::rewriter datar(spec.data()); 
+  number_postfix_generator name_generator;
+  my_enumerator datae(spec.data(), datar, name_generator);
+  my_pbes_rewriter builder1(datar, datae);    
 
-  pbes_rewrite_expression_builder<data::rewriter> builder1(datar, spec.data());   
-  y = builder1.visit(x);
+  my_pbes_rewriter::argument_type dummy;
 
-  pbes_rewrite_expression_builder<data::rewriter> builder2 = builder1;
-  y = builder2.visit(x);
+  y = builder1.visit(x, dummy);
 
-  pbes_simplify_expression_builder<data::rewriter> sbuilder1(datar, spec.data());   
-  y = sbuilder1.visit(x);
+  my_pbes_rewriter builder2 = builder1;
+  y = builder2.visit(x, dummy);
 
-  pbes_simplify_expression_builder<data::rewriter> sbuilder2 = sbuilder1;
-  y = sbuilder2.visit(x);
-
-  //z = sbuilder3.m_rewriter(T);
-  //std::cerr << z << std::endl;
-  //y = sbuilder3.visit(x);
+//  pbes_simplify_expression_builder<data::rewriter> sbuilder1(datar, spec.data());   
+//  y = sbuilder1.visit(x);
+//
+//  pbes_simplify_expression_builder<data::rewriter> sbuilder2 = sbuilder1;
+//  y = sbuilder2.visit(x);
+//
+//  z = sbuilder3.m_rewriter(T);
+//  std::cerr << z << std::endl;
+//  y = sbuilder3.visit(x);
 }
 
 void test_rewriter()
 {
   using namespace pbes_expr;
 
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<data::rewriter, my_enumerator> my_pbes_rewriter;
+
   specification spec = mcrl22lps(SPECIFICATION);
   data::rewriter datar(spec.data());
-  pbes_system::rewriter<data::rewriter> pbesr(datar, spec.data());
+  number_postfix_generator name_generator;
+  my_enumerator datae(spec.data(), datar, name_generator);
+  my_pbes_rewriter pbesr(datar, datae);    
   pbes_system::simplify_rewriter1 simp_rewr(spec.data());
   pbes_system::substitute_rewriter subst_rewr(datar, spec.data());
 
@@ -140,8 +154,10 @@ void test_rewriter()
   data_variable n2 = nat("n2");
   data_variable n3 = nat("n3");
 
-  data_expression T = data_expr::true_();
-  data_expression F = data_expr::false_();
+  data_expression dT = data_expr::true_();
+  data_expression dF = data_expr::false_();
+  pbes_expression T  = true_();
+  pbes_expression F  = false_();
 
   test_expression(T, pbesr);
   test_expression(F, pbesr);
@@ -154,37 +170,6 @@ void test_rewriter()
   test_expression(x, pbesr);
   test_expression(x, simp_rewr);
   test_expression(x, subst_rewr);
-
-  //BOOST_CHECK(pbesr(and_(T, T)) == T);
-  //BOOST_CHECK(pbesr(forall(make_list(n), and_(T, T)) == T));
-  
-  // copy a rewriter
-  pbes_system::rewriter<data::rewriter> pbesr1 = pbesr;
-  test_expression(x, pbesr1);
-}
-
-void test_simplify_rewriter()
-{
-  using namespace pbes_expr;
-
-  specification spec    = mcrl22lps(SPECIFICATION);
-  data::rewriter datar(spec.data());
-  pbes_system::simplify_rewriter<data::rewriter> pbesr(datar, spec.data());
-
-  data_variable b  = bool_("b");
-  data_variable b1 = bool_("b1");
-  data_variable b2 = bool_("b2");
-  data_variable b3 = bool_("b3");
-
-  data_variable n  = nat("n");
-  data_variable n1 = nat("n1");
-  data_variable n2 = nat("n2");
-  data_variable n3 = nat("n3");
-
-  data_expression dT = data_expr::true_();
-  data_expression dF = data_expr::false_();
-  pbes_expression T = true_();
-  pbes_expression F = false_();
 
   propositional_variable_instantiation X  = prop_var("X", make_list(n));
   propositional_variable_instantiation X1 = prop_var("X1", make_list(n));
@@ -201,6 +186,11 @@ void test_simplify_rewriter()
   BOOST_CHECK(pbesr(and_(X, F)) == F);
   BOOST_CHECK(pbesr(and_(F, X)) == F);
   BOOST_CHECK(pbesr(and_(X, and_(F, X))) == F);
+  //BOOST_CHECK(pbesr(forall(make_list(n), and_(T, T)) == T));
+  
+  // copy a rewriter
+  my_pbes_rewriter pbesr1 = pbesr;
+  test_expression(x, pbesr1);
 }
 
 int test_main(int argc, char** argv)
@@ -208,8 +198,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   test_builder();
-  //test_rewriter();
-  //test_simplify_rewriter();
+  test_rewriter();
 
   return 0;
 }

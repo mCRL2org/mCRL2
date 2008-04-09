@@ -75,14 +75,18 @@ const std::string FORMULA  = "[true*]<true*>true";
 
 void test_gauss_elimination()
 {
-  typedef data::rewriter data_rewriter;
-  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
-
   bool timed = false;
   specification spec    = mcrl22lps(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA, spec);
-  data_rewriter datar(spec.data());
-  pbes_rewriter pbesr(datar, spec.data());
+
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  typedef bes_equation_solver<my_rewriter> bes_solver;
+    
+  data::rewriter datar(spec.data());
+  number_postfix_generator name_generator;
+  my_enumerator datae(spec.data(), datar, name_generator);
+  my_rewriter pbesr(datar, datae);    
 
   pbes<> p = lps2pbes(spec, formula, timed);
   int result = bes_gauss_elimination(p);
