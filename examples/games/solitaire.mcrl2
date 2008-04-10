@@ -48,7 +48,7 @@
 %
 % mcrl22lps -n solitaire.mcrl2 temps.lps
 % lpsuntime temps.lps temps1.lps
-% lpsdecluster temps1.lps temps2.lps
+% lpssuminst temps1.lps temps2.lps
 % lpsrewr temps2.lps temps3.lps
 % lps2lts -vRjittyc -r -t -aready temps3.lps
 %

@@ -9,7 +9,7 @@
 %  The most effective way to do a state space search is using 
 %
 % mcrl22lps -n knights.mcrl2 | lpsuntime > temp.lps
-% lpsdecluster temp.lps temp1.lps
+% lpssuminst temp.lps temp1.lps
 % lpsstructelm -depth 10 temp1.lps temp2.lps [to replace the
 % list structure of the Board by explicit variables]
 % lps2lts -Rjittyc -t -v -aready temp2.lps | less

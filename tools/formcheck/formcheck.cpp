@@ -4,10 +4,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsformcheck.cpp
+/// \file formcheck.cpp
 /// \brief Add your file description here.
 
-#define NAME "lpsformcheck"
+#define NAME "formcheck"
 #define AUTHOR "Luc Engelen"
 
 #include "mcrl2/formula_checker.h"
@@ -29,7 +29,7 @@ using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-  /// \mainpage lpsformcheck
+  /// \mainpage formcheck
   /// \section section_introduction Introduction
   /// This document provides information on the internals of the tool.
   /// \section section_additional_info Additional information
@@ -42,7 +42,7 @@ using namespace mcrl2;
 
   class LPS_Form_Check {
     private:
-      /// \brief The command entered to invoke the tool lpsformcheck.
+      /// \brief The command entered to invoke the tool formcheck.
       char* f_tool_command;
 
       /// \brief The name of the file containing the formula that is checked.

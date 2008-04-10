@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsdecluster.cpp
+/// \file lpssuminst.cpp
 /// \brief Add your file description here.
 
 // ======================================================================
@@ -13,7 +13,7 @@
 //
 // ----------------------------------------------------------------------
 //
-// file          : lpsdecluster 
+// file          : lpssuminst 
 // date          : 22-12-2006
 // version       : 0.5
 //
@@ -21,7 +21,7 @@
 //
 // ======================================================================
 
-#define NAME "lpsdecluster"
+#define NAME "lpssuminst"
 #define AUTHOR "Jeroen Keiren"
 
 //C++
@@ -239,7 +239,7 @@ int do_decluster(const tool_options& options)
   }
   catch (std::exception& e)
   {
-    gsErrorMsg("lpsdecluster: Unable to load LPS from `%s'\n", options.input_file.c_str());
+    gsErrorMsg("lpssuminst: Unable to load LPS from `%s'\n", options.input_file.c_str());
     return (1);
   }
 

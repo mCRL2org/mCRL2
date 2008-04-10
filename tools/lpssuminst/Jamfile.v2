@@ -1,9 +1,9 @@
-project lpsdecluster ;
+project lpssuminst ;
 
-tool lpsdecluster
-       : lpsdecluster.cpp
+tool lpssuminst
+       : lpssuminst.cpp
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
 
-install-tools lpsdecluster ;
+install-tools lpssuminst ;

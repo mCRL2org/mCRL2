@@ -1,9 +1,9 @@
-project toolset/lpsformcheck ;
+project toolset/formcheck ;
 
-tool lpsformcheck
-       : lpsformcheck.cpp
+tool formcheck
+       : formcheck.cpp
          /libraries//lps
        : <toolset>msvc:<library>/libraries//getopt
        ;
 
-install-tools lpsformcheck ;
+install-tools formcheck ;

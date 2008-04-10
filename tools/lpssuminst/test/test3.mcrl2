@@ -1,5 +1,5 @@
 % mCRL2 specification, displaying a bug reported by Aad Mathijssen.
-% When lpsdecluster is run on this specification an error
+% When lpssuminst is run on this specification an error
 % "error: cannot enumerate elements of sort D; it does not have constructor
 % functions" is given (whereas this summand should just be ignored!)
 % Furthermore an incorrect LPS is generated.

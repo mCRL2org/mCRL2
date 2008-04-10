@@ -1,9 +1,9 @@
-% This file describes the original bakery protocol as described by
-% Lamport for two parties that want to gain mutual access.
-% The processes are called P(true) and P(false). 
-% The state space of this system is infinite, and as such it is
-% a good and simple example to apply symbolic methods in the
-% broadest sense.
+% This file describes the original bakery protocol as described by Lamport for
+% two parties that want to gain mutual access.  The processes are called
+% P(true) and P(false). 
+%
+% The state space of this system is infinite, and as such it is a good and
+% simple example to apply symbolic methods in the broadest sense.
 
 act
   send,get,c:          Bool # Nat;
