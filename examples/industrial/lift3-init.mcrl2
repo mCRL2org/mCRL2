@@ -25,7 +25,7 @@
 
 sort  State = struct STANDBY | STOP | STARTUP | UP | DOWN | SYNC;
 
-cons  N: Pos;
+map   N: Pos;
 eqn   N = 3;
 
 map   S: Nat -> Nat;
