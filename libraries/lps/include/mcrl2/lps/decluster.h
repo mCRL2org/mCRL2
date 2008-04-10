@@ -17,7 +17,20 @@ namespace mcrl2 {
 
 namespace lps {
 
-specification decluster(const specification& s, Rewriter& r, bool finite_only = true);
+struct t_decluster_options {
+  bool tau_only;
+  bool finite_only;
+  RewriteStrategy strategy;
+
+  t_decluster_options()
+    : tau_only(false),
+      finite_only(true),
+      strategy(GS_REWR_JITTY)
+
+  {}
+};
+
+specification decluster(const specification& s, Rewriter& r, const t_decluster_options& o);
 
 } // namespace lps
 

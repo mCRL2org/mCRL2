@@ -131,14 +131,14 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_expres
 ///\pre specification is the specification belonging to summand
 ///\post the declustered version of summand has been appended to result
 ///\ret none
-void decluster_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, EnumeratorStandard& enumerator, bool finite_only)
+void decluster_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, EnumeratorStandard& enumerator, const t_decluster_options& o)
 {
   int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
 
   gsVerboseMsg("initialization...");
 
   data_variable_list variables; // The variables we need to consider in declustering
-  if (finite_only)
+  if (o.finite_only)
   {
     // Only consider finite variables
     variables = get_variables(summand_.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
@@ -246,7 +246,7 @@ void decluster_summand(const lps::specification& specification, const lps::summa
 lps::summand_list decluster_summands(const lps::specification& specification,
                                      const lps::summand_list& sl,
                                      EnumeratorStandard& enumerator, 
-                                     bool finite_only)
+                                     const t_decluster_options& o)
 {
   lps::summand_list result;
 
@@ -256,8 +256,17 @@ lps::summand_list decluster_summands(const lps::specification& specification,
   for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i, ++j)
   {
     gsVerboseMsg("Summand %d\n", j);
-    lps::summand s = *i;
-    decluster_summand(specification, s, result, enumerator, finite_only);
+    // If tau_only is set, only decluster tau summand, else decluster all.
+    // Summands we do not need to decluster are simply added to the
+    // specification.
+    if ((o.tau_only && i->is_tau()) || !o.tau_only)
+    {
+      decluster_summand(specification, *i, result, enumerator, o);
+    }
+    else
+    {
+      result = push_front(result, *i);
+    }
   }
 
   return result;
@@ -265,7 +274,7 @@ lps::summand_list decluster_summands(const lps::specification& specification,
 
 ///Takes the specification in specification, declusters it,
 ///and returns the declustered specification.
-lps::specification decluster(const lps::specification& specification, Rewriter& r, bool finite_only)
+lps::specification decluster(const lps::specification& specification, Rewriter& r, const t_decluster_options& o)
 {
   gsVerboseMsg("Declustering...\n");
   lps::linear_process lps = specification.process();
@@ -275,7 +284,7 @@ lps::specification decluster(const lps::specification& specification, Rewriter& 
   // Some use of internal format because we need it for the rewriter
   EnumeratorStandard enumerator = EnumeratorStandard(specification.data(), &r);
 
-  lps::summand_list sl = decluster_summands(specification, lps.summands(), enumerator, finite_only);
+  lps::summand_list sl = decluster_summands(specification, lps.summands(), enumerator, o);
   lps = set_summands(lps, sl);
 
   gsVerboseMsg("Output: %d summands.\n", lps.summands().size());

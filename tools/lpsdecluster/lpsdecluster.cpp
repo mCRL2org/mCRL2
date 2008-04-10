@@ -49,8 +49,13 @@ using namespace mcrl2;
 struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
-  bool finite_only; ///< Only decluster finite sorts
-  RewriteStrategy strategy; ///< Rewrite strategy to use, default jitty
+  lps::t_decluster_options decl_opts; ///< Options of the algorithm
+  
+  tool_options()
+    : input_file("-"),
+      output_file("-")
+
+  {}
 };
 
 //Squadt connectivity
@@ -88,6 +93,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
 const char* squadt_interactor::lps_file_for_input  = "lps_in";
 const char* squadt_interactor::lps_file_for_output = "lps_out";
 
+const char* squadt_interactor::option_tau_only         = "tau_only";
 const char* squadt_interactor::option_finite_only      = "finite_only";
 const char* squadt_interactor::option_rewrite_strategy = "rewrite_strategy";
 
@@ -111,6 +117,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   if (!configuration.option_exists(option_rewrite_strategy)) {
     configuration.add_option(option_rewrite_strategy).append_argument(mcrl2::utilities::squadt::rewrite_strategy_enumeration, 0);
   }
+  if (!configuration.option_exists(option_tau_only)) {
+    configuration.add_option(option_tau_only).
+       set_argument_value< 0, tipi::datatype::boolean >(true, false);
+  }
   if (!configuration.option_exists(option_finite_only)) {
     configuration.add_option(option_finite_only).
        set_argument_value< 0, tipi::datatype::boolean >(true, false);
@@ -132,8 +142,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
                 append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
 
   /* Prepare user interaction */
+  checkbox& tau_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_tau_only));
+  m.append(d.create< label >().set_text(" ")).
+    append(tau_only.set_label("Only decluster tau summands"), layout::left);
+
   checkbox& finite_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_finite_only));
-  
   m.append(d.create< label >().set_text(" ")).
     append(finite_only.set_label("Only decluster variables of finite sorts"), layout::left);
 
@@ -152,6 +165,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   okay_button.await_change();
   
   /* Update configuration */
+  configuration.get_option(option_tau_only).
+     set_argument_value< 0, tipi::datatype::boolean >(tau_only.get_status());
   configuration.get_option(option_finite_only).
      set_argument_value< 0, tipi::datatype::boolean >(finite_only.get_status());
 
@@ -178,8 +193,9 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).get_location();
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
-  options.finite_only = configuration.option_exists(option_finite_only);
-  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
+  options.decl_opts.tau_only = configuration.option_exists(option_tau_only);
+  options.decl_opts.finite_only = configuration.option_exists(option_finite_only);
+  options.decl_opts.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
 
   /* Create display */
   tipi::layout::tool_display d;
@@ -208,9 +224,9 @@ int do_decluster(const tool_options& options)
   try
   {
     lps_specification.load(options.input_file);
-    Rewriter* r = createRewriter(lps_specification.data(), options.strategy);
+    Rewriter* r = createRewriter(lps_specification.data(), options.decl_opts.strategy);
 
-    lps::specification result = lps::decluster(lps_specification, *r, options.finite_only);
+    lps::specification result = lps::decluster(lps_specification, *r, options.decl_opts);
 
     // decluster lps_specification and save the output to a binary file
     if (!result.save(options.output_file, true)) 
@@ -236,13 +252,16 @@ tool_options parse_command_line(int ac, char** av) {
                               "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is\n"
                               "used. If OUTFILE is not present, stdout is used.\n");
 
-  clinterface.add_option("finite", "only instantiate variables whose sorts are finite", 'f');
+  clinterface.add_option("finite", "only instantiate variables whose sorts are finite", 'f').
+  add_option("tau", "only decluster tau summands", 't');
 
   clinterface.add_rewriting_options();
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options = { "-", "-", (0 < parser.options.count("finite")), GS_REWR_JITTY };
+  tool_options t_options;
+  t_options.decl_opts.tau_only = (0 < parser.options.count("tau"));
+  t_options.decl_opts.finite_only = (0 < parser.options.count("finite"));
 
   if (0 < parser.arguments.size()) {
     t_options.input_file = parser.arguments[0];
@@ -254,7 +273,7 @@ tool_options parse_command_line(int ac, char** av) {
     parser.error("too many file arguments");
   }
 
-  t_options.strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+  t_options.decl_opts.strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
 
   return t_options;
 }
