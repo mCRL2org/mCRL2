@@ -20,7 +20,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/data_implementation.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
 

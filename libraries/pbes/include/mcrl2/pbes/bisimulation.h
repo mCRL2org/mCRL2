@@ -26,6 +26,7 @@
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/multi_action_equality.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
@@ -187,7 +188,7 @@ public:
     ///
     pbes_expression equals(action_list a, action_list b) const
     {
-      return detail::equal_data_parameters(a, b);
+      return equal_multi_actions(a, b);
     }
 
     /// Returns mu.

@@ -1,5 +1,9 @@
-using namespace mcrl2::data;
+#ifndef MCRL2_PBES_UTIL_H
+#define MCRL2_PBES_UTIL_H
 
+#include "mcrl2/data/data.h"
+
+using namespace mcrl2::data;
 
 //  Copyright 2007 Simona Orzan. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
@@ -70,3 +74,4 @@ data_variable_list substract(data_variable_list x, data_variable_list y)
 }
 //======================================================================
 
+#endif // MCRL2_PBES_UTIL_H

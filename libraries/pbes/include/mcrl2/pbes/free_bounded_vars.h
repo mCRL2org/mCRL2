@@ -1,17 +1,24 @@
-
 //  Copyright 2007 Simona Orzan. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./free_bounded_vars.h
 
+#ifndef MCRL2_PBES_FREE_BOUNDED_VARS_H
+#define MCRL2_PBES_FREE_BOUNDED_VARS_H
+
+#include <set>
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/find.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/util.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
 
 std::set<std::string> context;
@@ -127,3 +134,5 @@ pbes_expression remove_double_variables_fast(pbes_expression p)
 
  return p;
 }
+
+#endif // MCRL2_PBES_FREE_BOUNDED_VARS_H
