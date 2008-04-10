@@ -803,99 +803,112 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   data_decls.ops       = ATLgetArgument(MapSpec, 0);
   data_decls.data_eqns = ATLgetArgument(DataEqnSpec, 0);
 
-  atermpp::table sorts_table(15, 75); // Collect sorts for efficient lookup
 
-  atermpp::table superfluous_sorts(10, 75);
-  atermpp::table superfluous_cons_ops(100, 75);
-  atermpp::table superfluous_ops(100,75);
-  atermpp::table superfluous_data_eqns(100,75);
+  // Pruning data declarations needs to be skipped when we are reconstructing a specification in the
+  // internal format before data implementation. For determining this, we use a
+  // heuristic that the constructors do not contain true:Bool
+  if (ATindexOf(data_decls.cons_ops, (ATerm) gsMakeDataExprTrue(), 0) == -1)
+  {
+    // true:Bool does not occur, assume this is a specification in the internal
+    // format before data implementation.
+    return Spec;
+  }
+  else
+  {
+    atermpp::table sorts_table(15, 75); // Collect sorts for efficient lookup
 
-  for (ATermList l = data_decls.sorts; !ATisEmpty(l); l = ATgetNext(l)) {
-    sorts_table.put(ATgetFirst(l), (ATerm) ATtrue);
-  }
+    atermpp::table superfluous_sorts(10, 75);
+    atermpp::table superfluous_cons_ops(100, 75);
+    atermpp::table superfluous_ops(100,75);
+    atermpp::table superfluous_data_eqns(100,75);
 
-  // Construct lists of data declarations for system defined sorts
-  t_data_decls data_decls_impl;
-  initialize_data_decls(&data_decls_impl);
+    for (ATermList l = data_decls.sorts; !ATisEmpty(l); l = ATgetNext(l)) {
+      sorts_table.put(ATgetFirst(l), (ATerm) ATtrue);
+    }
 
-//  gsDebugMsg("Removing system defined sorts from data declarations\n");
-  if (sorts_table.get(gsMakeSortExprBool()) != NULL) {
-    impl_sort_bool    (&data_decls_impl);
-  }
-  if (sorts_table.get(gsMakeSortExprPos()) != NULL) {
-    impl_sort_pos     (&data_decls_impl);
-  }
-  if (sorts_table.get(gsMakeSortExprNat()) != NULL) {
-    // Nat is included in the implementation of other sorts, as well as that it
-    // includes the implementation of natpair, so needs to be
-    // removed with the rest of these.
-    impl_sort_nat     (&data_decls_impl);
-  }
-  if (sorts_table.get(gsMakeSortExprNatPair()) != NULL) {
-    // NatPair includes implementation of Nat, so it needs to be included in a larger
-    // batch.
-    impl_sort_nat_pair(&data_decls_impl);
-  }
-  if (sorts_table.get(gsMakeSortExprInt()) != NULL) {
-    // Int includes implementation of Nat, so it needs to be included in a
-    // larger batch.
-    impl_sort_int     (&data_decls_impl);
-  }
-  if (sorts_table.get(gsMakeSortExprReal()) != NULL) {
-    // Real includes implementation of Int, so it needs to be included in a
-    // larger batch.
-    impl_sort_real    (&data_decls_impl);
-  }
+    // Construct lists of data declarations for system defined sorts
+    t_data_decls data_decls_impl;
+    initialize_data_decls(&data_decls_impl);
 
-  while(!ATisEmpty(data_decls_impl.sorts)) {
-    superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), (ATerm) ATtrue);
-    data_decls_impl.sorts = ATgetNext(data_decls_impl.sorts);
-  }
-  while(!ATisEmpty(data_decls_impl.cons_ops)) {
-    superfluous_cons_ops.put(ATAgetFirst(data_decls_impl.cons_ops), (ATerm) ATtrue);
-    data_decls_impl.cons_ops = ATgetNext(data_decls_impl.cons_ops);
-  }
-  while(!ATisEmpty(data_decls_impl.ops)) {
-    superfluous_ops.put(ATAgetFirst(data_decls_impl.ops), (ATerm) ATtrue);
-    data_decls_impl.ops = ATgetNext(data_decls_impl.ops);
-  }
-  while(!ATisEmpty(data_decls_impl.data_eqns)) {
-    superfluous_data_eqns.put(ATAgetFirst(data_decls_impl.data_eqns), (ATerm) ATtrue);
-    data_decls_impl.data_eqns = ATgetNext(data_decls_impl.data_eqns);
-  }
+  //  gsDebugMsg("Removing system defined sorts from data declarations\n");
+    if (sorts_table.get(gsMakeSortExprBool()) != NULL) {
+      impl_sort_bool    (&data_decls_impl);
+    }
+    if (sorts_table.get(gsMakeSortExprPos()) != NULL) {
+      impl_sort_pos     (&data_decls_impl);
+    }
+    if (sorts_table.get(gsMakeSortExprNat()) != NULL) {
+      // Nat is included in the implementation of other sorts, as well as that it
+      // includes the implementation of natpair, so needs to be
+      // removed with the rest of these.
+      impl_sort_nat     (&data_decls_impl);
+    }
+    if (sorts_table.get(gsMakeSortExprNatPair()) != NULL) {
+      // NatPair includes implementation of Nat, so it needs to be included in a larger
+      // batch.
+      impl_sort_nat_pair(&data_decls_impl);
+    }
+    if (sorts_table.get(gsMakeSortExprInt()) != NULL) {
+      // Int includes implementation of Nat, so it needs to be included in a
+      // larger batch.
+      impl_sort_int     (&data_decls_impl);
+    }
+    if (sorts_table.get(gsMakeSortExprReal()) != NULL) {
+      // Real includes implementation of Int, so it needs to be included in a
+      // larger batch.
+      impl_sort_real    (&data_decls_impl);
+    }
 
-  data_decls.sorts = filter_table_elements_from_list(data_decls.sorts, superfluous_sorts);
-  data_decls.cons_ops = filter_table_elements_from_list(data_decls.cons_ops, superfluous_cons_ops);
-  data_decls.ops = filter_table_elements_from_list(data_decls.ops, superfluous_ops);
-  data_decls.data_eqns = filter_table_elements_from_list(data_decls.data_eqns, superfluous_data_eqns);
+    while(!ATisEmpty(data_decls_impl.sorts)) {
+      superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), (ATerm) ATtrue);
+      data_decls_impl.sorts = ATgetNext(data_decls_impl.sorts);
+    }
+    while(!ATisEmpty(data_decls_impl.cons_ops)) {
+      superfluous_cons_ops.put(ATAgetFirst(data_decls_impl.cons_ops), (ATerm) ATtrue);
+      data_decls_impl.cons_ops = ATgetNext(data_decls_impl.cons_ops);
+    }
+    while(!ATisEmpty(data_decls_impl.ops)) {
+      superfluous_ops.put(ATAgetFirst(data_decls_impl.ops), (ATerm) ATtrue);
+      data_decls_impl.ops = ATgetNext(data_decls_impl.ops);
+    }
+    while(!ATisEmpty(data_decls_impl.data_eqns)) {
+      superfluous_data_eqns.put(ATAgetFirst(data_decls_impl.data_eqns), (ATerm) ATtrue);
+      data_decls_impl.data_eqns = ATgetNext(data_decls_impl.data_eqns);
+    }
 
-  // Additional processing of data declarations by manually recognising
-  // system defined sorts, operators and data equations
-  // these are removed from their respective parts of the data declarations
-  // on the fly.
-  reconstruct_data_decls(&data_decls, p_substs);
+    data_decls.sorts = filter_table_elements_from_list(data_decls.sorts, superfluous_sorts);
+    data_decls.cons_ops = filter_table_elements_from_list(data_decls.cons_ops, superfluous_cons_ops);
+    data_decls.ops = filter_table_elements_from_list(data_decls.ops, superfluous_ops);
+    data_decls.data_eqns = filter_table_elements_from_list(data_decls.data_eqns, superfluous_data_eqns);
 
-  // Construct new DataSpec and Specification
-  SortSpec    = gsMakeSortSpec   (data_decls.sorts);
-  ConsSpec    = gsMakeConsSpec   (data_decls.cons_ops);
-  MapSpec     = gsMakeMapSpec    (data_decls.ops);
-  DataEqnSpec = gsMakeDataEqnSpec(data_decls.data_eqns);
-  DataSpec    = gsMakeDataSpec   (SortSpec, ConsSpec, MapSpec, DataEqnSpec);
-  if (gsIsSpecV1(Spec)) {
-    Spec        = gsMakeSpecV1(DataSpec,
-                               ATAgetArgument(Spec, 1),
-                               ATAgetArgument(Spec, 2),
-                               ATAgetArgument(Spec, 3));
-  } 
-  else if (gsIsPBES(Spec)) {
-    Spec = gsMakePBES(DataSpec,
-                      ATAgetArgument(Spec, 1),
-                      ATAgetArgument(Spec, 2));
+    // Additional processing of data declarations by manually recognising
+    // system defined sorts, operators and data equations
+    // these are removed from their respective parts of the data declarations
+    // on the fly.
+    reconstruct_data_decls(&data_decls, p_substs);
+
+    // Construct new DataSpec and Specification
+    SortSpec    = gsMakeSortSpec   (data_decls.sorts);
+    ConsSpec    = gsMakeConsSpec   (data_decls.cons_ops);
+    MapSpec     = gsMakeMapSpec    (data_decls.ops);
+    DataEqnSpec = gsMakeDataEqnSpec(data_decls.data_eqns);
+    DataSpec    = gsMakeDataSpec   (SortSpec, ConsSpec, MapSpec, DataEqnSpec);
+    if (gsIsSpecV1(Spec)) {
+      Spec        = gsMakeSpecV1(DataSpec,
+                                 ATAgetArgument(Spec, 1),
+                                 ATAgetArgument(Spec, 2),
+                                 ATAgetArgument(Spec, 3));
+    } 
+    else if (gsIsPBES(Spec)) {
+      Spec = gsMakePBES(DataSpec,
+                        ATAgetArgument(Spec, 1),
+                        ATAgetArgument(Spec, 2));
+    }
+    else {
+      Spec = DataSpec;
+    }
+    return Spec;
   }
-  else {
-    Spec = DataSpec;
-  }
-  return Spec;
 }
 
 void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
