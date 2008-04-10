@@ -1,0 +1,8 @@
+sort S = struct s1 | s2 | s3;
+     T = struct t1 | t2 | t3;
+
+act a;
+proc P = sum s : S . tau . P
+       + sum t : T . a . P;
+
+init P;
