@@ -72,6 +72,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
     static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
     static const char*  lps_file_for_output; ///< file used to write the output to
 
+    static const char*  option_tau_only;
     static const char*  option_finite_only;
     static const char*  option_rewrite_strategy;
 
