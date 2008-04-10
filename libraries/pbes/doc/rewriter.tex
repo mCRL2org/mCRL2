@@ -1,0 +1,127 @@
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{fullpage}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
+%TCIDATA{LastRevised=Friday, February 08, 2008 15:13:00}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\begin{document}
+
+
+\section{PBES rewriter}
+
+\bigskip We define a PBES rewriter inductively using a function $\mathsf{%
+pbesr}$ denoting the PBES rewriter and $\mathsf{datar}$ denoting the data
+rewriter.%
+\begin{equation*}
+\begin{array}{ccl}
+\mathsf{pbesr}(b) & = & \mathsf{datar}(b) \\
+\mathsf{pbesr}(\top ) & = & \top  \\
+\mathsf{pbesr}(\bot ) & = & \bot  \\
+\mathsf{pbesr}(\lnot \varphi ) & = & \lnot \mathsf{pbesr}(\varphi ) \\
+&  &  \\
+\mathsf{pbesr}(\varphi \wedge \psi ) & = & \left\{
+\begin{array}{lcl}
+\bot  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot \vee \mathsf{pbesr}(\psi
+)=\bot  \\
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\top  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\top  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
+pbesr}(\psi ) \\
+\mathsf{pbesr}(\varphi )\wedge \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
+\end{array}%
+\right.  \\
+&  &  \\
+\mathsf{pbesr}(\varphi \vee \psi ) & = & \left\{
+\begin{array}{lcl}
+\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\top \vee \mathsf{pbesr}(\psi
+)=\top  \\
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\bot  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\bot  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
+pbesr}(\psi ) \\
+\mathsf{pbesr}(\varphi )\vee \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
+\end{array}%
+\right.  \\
+&  &  \\
+\mathsf{pbesr}(\varphi \rightarrow \psi ) & = & \left\{
+\begin{array}{lcl}
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\top  \\
+\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot  \\
+\top  &  & \text{if }\mathsf{pbesr}(\psi )=\top  \\
+\mathsf{pbesr}(\lnot \varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\bot  \\
+\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{pbesr}(\psi ) \\
+\mathsf{pbesr}(\varphi )\rightarrow \mathsf{pbesr}(\psi ) &  & \text{%
+otherwise}%
+\end{array}%
+\right.  \\
+&  &  \\
+\mathsf{pbesr}(\forall _{d_{1}:D_{1}}.\forall _{d_{2}:D_{2}}.\varphi ) & = &
+\mathsf{pbesr}(\forall _{d_{1}:D_{1},d_{2}:D_{2}}.\varphi ) \\
+\mathsf{pbesr}(\exists _{d_{1}:D_{1}}.\exists _{d_{2}:D_{2}}.\varphi ) & = &
+\mathsf{pbesr}(\exists _{d_{1}:D_{1},d_{2}:D_{2}}.\varphi ) \\
+&  &  \\
+\mathsf{pbesr}(\forall _{d:D}.\varphi ) & = & \left\{
+\begin{array}{lcl}
+\mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
+\\
+\bigwedge \{\varphi \lbrack d:=e]|e\in D\} &  & \text{if it is a finite set
+that can be enumerated} \\
+\forall _{d:D}.\mathsf{pbesr}(\varphi ) &  & \text{otherwise}%
+\end{array}%
+\right.  \\
+&  &  \\
+\mathsf{pbesr}(\exists _{d:D}.\varphi ) & = & \left\{
+\begin{array}{lcl}
+\mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
+\\
+\bigvee \{\varphi \lbrack d:=e]|e\in D\} &  & \text{if it is a finite set
+that can be enumerated} \\
+\exists _{d:D}.\mathsf{pbesr}(\varphi ) &  & \text{otherwise}%
+\end{array}%
+\right.  \\
+&  &  \\
+\mathsf{pbesr}(X(e)) & = & X(\mathsf{datar}(e))%
+\end{array}%
+\end{equation*}%
+where $b$ is a data term of data sort $\mathbb{B}$, $\top $ and $\bot $ are
+elements of data sort $\mathbb{B}$, $X$ is a predicate variable, $e$consists
+of zero or more data sorts and $d,d_{1},d_{2}$ are data variables of sort $D$%
+.
+
+\end{document}

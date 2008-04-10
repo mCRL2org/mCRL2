@@ -13,7 +13,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, January 22, 2008 14:43:51}
+%TCIDATA{LastRevised=Friday, February 08, 2008 15:05:02}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -87,7 +87,7 @@ Thus, $\psi \lbrack \varphi /X]^{k}$ represents the result of recursively
 substituting $\varphi $ for $X$ in $\psi $.
 
 \begin{lemma}
-(Approximants as Solutions) Let $\varphi $ be a predicate formula and $k\in 
+(Approximants as Solutions) Let $\varphi $ be a predicate formula and $k\in
 \mathbb{N}$ be a natural number. Then%
 \begin{eqnarray*}
 (\mu X(d &:&D)=\varphi \lbrack \bot /X]^{k})\Rrightarrow (\mu X(d:D)=\varphi
@@ -98,7 +98,7 @@ substituting $\varphi $ for $X$ in $\psi $.
 \end{lemma}
 
 \begin{lemma}
-(Stable Approximants as Solutions) Let $\varphi $ be a predicate formula and 
+(Stable Approximants as Solutions) Let $\varphi $ be a predicate formula and
 $k\in \mathbb{N}$ be a natural number. Then%
 \begin{eqnarray*}
 \text{if }\varphi \lbrack \bot /X]^{k} &\longleftrightarrow &\varphi \lbrack
@@ -110,44 +110,92 @@ $k\in \mathbb{N}$ be a natural number. Then%
 \end{eqnarray*}
 \end{lemma}
 
-\newpage
+\pagebreak
 
 \subsection{Gau\ss\ Elimination Algorithm}
 
 Let $\mathcal{E}$ be an equation system of the form%
 \begin{equation*}
 \mathcal{E=(}\sigma _{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots (\sigma
-_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n}),
 \end{equation*}%
+and let $r$ be a rewrite function that maps a pbes expression $\varphi $ to
+an equivalent expression $\varphi ^{\prime }$.
+
 Then we define%
 \begin{equation*}
 \begin{array}{l}
-\begin{array}{l}
-\text{\textsc{Approximate(}}\sigma ,X,\varphi \text{\textsc{)}} \\ 
-j:=0 \\ 
-\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=\top \text{ 
-\textbf{else} }\psi _{0}:=\bot  \\ 
-\text{\textbf{repeat}} \\ 
-\qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\ 
-\qquad j:=j+1 \\ 
-\text{\textbf{until }}(\psi _{j}=\psi _{j+1}) \\ 
-\text{\textbf{return }}\psi _{j}%
-\end{array}
-\\ 
-\\ 
-\begin{array}{l}
-\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E}\text{\textsc{)}} \\ 
-i:=n \\ 
-\text{\textbf{while} \textbf{not} }i=0 \\ 
-\text{\textbf{do}} \\ 
-\qquad \varphi _{i}:=\text{\textsc{Approximate(}}\sigma _{i},X_{i},\varphi
-_{i}\text{\textsc{)}} \\ 
+\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r\text{\textsc{)}}
+\\
+\mathcal{E}^{\prime }:=\varepsilon \\
+i:=n \\
+\text{\textbf{while} \textbf{not} }i=0 \\
+\text{\textbf{do}} \\
+\qquad (\sigma _{i}X_{i}=\psi _{i}):=\text{\textsc{SolveEquation(}}\sigma
+_{i}X_{i}=\varphi _{i}\text{\textsc{)}} \\
+\qquad \varphi _{i}:=\psi _{i} \\
+\qquad \mathcal{E}^{\prime }:=\mathcal{E}^{\prime }(\sigma _{i}X_{i}=\varphi
+_{i}) \\
 \qquad \text{\textbf{for }}k=1\text{ \textbf{to }}i-1\text{ \textbf{do }}%
-\varphi _{k}:=\varphi _{k}[\varphi _{i}/X_{i}]\text{ \textbf{od}} \\ 
-\qquad i:=i-1 \\ 
-\text{\textbf{od}} \\ 
-\text{\textbf{return }}\mathcal{E}%
+\varphi _{k}:=r(\varphi _{k}[\varphi _{i}/X_{i}])\text{ \textbf{od}} \\
+\qquad i:=i-1 \\
+\text{\textbf{od}} \\
+\text{\textbf{return }}\mathcal{E}^{^{\prime }}%
 \end{array}%
+\end{equation*}%
+Here \textsc{SolveEquation} is an algorithm that solves a pbes equation,
+such that the resulting equation has no reference to the predicate variable
+in its right hand side. An example of such a solve equation algorithm is
+\textsc{Approximate}.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate(}}\sigma X=\varphi \text{\textsc{)}} \\
+j:=0 \\
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=\top \text{
+\textbf{else} }\psi _{0}:=\bot \\
+\text{\textbf{repeat}} \\
+\qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\
+\qquad j:=j+1 \\
+\text{\textbf{until }}(\psi _{j}=\psi _{j+1}) \\
+\text{\textbf{return }}\sigma X=\psi _{j}%
+\end{array}%
+\end{equation*}
+
+Also pattern matching algorithms exist for this. The \textsc{Gau\textsc{\ss\
+}Elimination} algorithm solves the equation system $\mathcal{E}$ for the
+predicate variable $X_{1}$. To solve the system $\mathcal{E}$ for all
+variables, the algorithm has to be applied repeatedly.
+
+\subsubsection{Simplify}
+
+The pbes expression rewrite system \textsc{Simplify} [Luc Engelen, 2007]
+consists of the following rules\footnote{%
+Todo: reformulate this rewrite system.}:%
+\begin{eqnarray*}
+false\wedge x &\rightarrow &false \\
+x\wedge false &\rightarrow &false \\
+true\wedge x &\rightarrow &x \\
+x\wedge true &\rightarrow &x \\
+\lnot true &\rightarrow &false \\
+\lnot false &\rightarrow &true \\
+ITE(true,x,y) &\rightarrow &x \\
+ITE(false,x,y) &\rightarrow &y \\
+x &=&x\rightarrow true \\
+y &=&x\rightarrow x=y,\text{ provided }y\succ x
+\end{eqnarray*}
+
+\subsubsection{Solving a BES}
+
+If the equation system $\mathcal{E}$ is a BES (i.e. the predicate variables
+have no parameters), then the following simple approximate function can be
+used to solve it:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Approximate-BES(}}\sigma X=\varphi \text{\textsc{)}} \\
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=\top \text{
+\textbf{else} }\psi _{0}:=\bot \\
+\text{\textbf{return} \textsc{Simplify}(}\sigma X=\varphi \lbrack \psi
+_{0}/X]\text{)}%
 \end{array}%
 \end{equation*}
 

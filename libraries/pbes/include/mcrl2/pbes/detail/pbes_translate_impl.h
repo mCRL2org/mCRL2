@@ -43,11 +43,13 @@ using atermpp::make_list;
 using atermpp::make_substitution;
 using modal::state_formula;
 
+/*
 inline
 std::string pp(std::set<data::data_variable> s)
 {
   return ::pp(data::data_variable_list(s.begin(), s.end()));
 }
+*/
 
 inline
 std::set<data::data_variable> compute_free_pbes_expression_variables(const pbes_expression& e)
