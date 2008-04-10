@@ -1,5 +1,3 @@
-#define MCRL2_PBES_TRANSLATE_DEBUG
-
 // Author(s): Wieger Wesselink
 //
 // Distributed under the Boost Software License, Version 1.0.
