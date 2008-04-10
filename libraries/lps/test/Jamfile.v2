@@ -22,4 +22,5 @@ test-suite lps
       [ run aterm_algorithm_test.cpp ]
       [ run parelm_test.cpp ]
       [ run lpsconfcheck_test.cpp ]
+      [ run decluster_test.cpp ]
     ;
