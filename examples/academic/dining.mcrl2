@@ -5,7 +5,7 @@
 
 eqn K = 2;
 
-cons K: Pos;
+map K: Pos;
 
 act get,put,up,down,lock,free: Pos#Pos;
     eat: Pos;
