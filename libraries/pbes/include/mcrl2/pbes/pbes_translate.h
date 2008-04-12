@@ -989,12 +989,12 @@ pbes<> pbes_translate(const modal::state_formula& formula, const lps::specificat
 
   if (timed)
   {
-    pbes_translate_algorithm_untimed algorithm;
+    pbes_translate_algorithm_timed algorithm;
     return algorithm.run(formula, spec);
   }
   else
   {
-    pbes_translate_algorithm_timed algorithm;
+    pbes_translate_algorithm_untimed algorithm;
     return algorithm.run(formula, spec);
   }
 }
