@@ -14,6 +14,7 @@ exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
 test-suite pbes
     :
+      [ run lps2pbes_test.cpp ]
       [ run pbes_test.cpp ]
       [ run bisimulation_test.cpp ]
       [ run rewriter_test.cpp ]

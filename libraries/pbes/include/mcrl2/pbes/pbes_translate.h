@@ -1,3 +1,5 @@
+//#define MCRL2_PBES_TRANSLATE_DEBUG
+
 // Author(s): Wieger Wesselink
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -258,7 +260,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "<RHS>" << pp(f) << std::flush;
+std::cout << "\n<RHS>" << pp(f) << std::flush;
 #endif
       using namespace pbes_expr_optimized;
       using namespace pbes_system::accessors;
@@ -456,7 +458,7 @@ std::cout << "<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(result) << std::endl;
+std::cout << " -> " << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -465,7 +467,7 @@ std::cout << " -> " << pp(result) << std::endl;
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "<E>" << pp(f) << std::flush;
+std::cout << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal::state_frm;
       atermpp::vector<pbes_equation> result;
@@ -560,7 +562,7 @@ std::cout << "<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::endl;
+std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }
@@ -667,7 +669,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "<RHS>" << pp(f) << std::flush;
+std::cout << "\n<RHS>" << pp(f) << std::flush;
 #endif
       using namespace pbes_expr_optimized;
       using namespace accessors;
@@ -676,7 +678,7 @@ std::cout << "<RHS>" << pp(f) << std::flush;
 
       pbes_expression result;
 
-      if (!is_not(f))
+	  if (!s::is_not(f))
       {
         if (s::is_data(f)) {
           result = pbes_expression(f);
@@ -828,7 +830,7 @@ std::cout << "<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(result) << std::endl;
+std::cout << " -> " << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -837,7 +839,7 @@ std::cout << " -> " << pp(result) << std::endl;
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "<E>" << pp(f) << std::flush;
+std::cout << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal::state_frm;
       atermpp::vector<pbes_equation> result;
@@ -934,7 +936,7 @@ std::cout << "<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::endl;
+std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }
