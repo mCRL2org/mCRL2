@@ -1,11 +1,11 @@
-//  Copyright 2007 Simona Orzan. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
+//  Copyright 2007 Aad Mathijssen and Simona Orzan. Distributed under
+//  the Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./txt2pbes.cpp
 
 #define NAME "txt2pbes" 
-#define AUTHOR "Simona Orzan" 
+#define AUTHOR "Aad Mathijssen and Simona Orzan" 
 
 // #define debug
  
@@ -77,11 +77,20 @@ using namespace mcrl2::pbes_system::pbes_expr;
 //Type definitions ====================== 
  
 
-string infilename  = "-"; 
-string outfilename = "-"; 
+struct t_tool_options
+{
+  std::string infilename;
+  std::string outfilename;
+  bool print_syntax;
+  bool new_parser;
 
-//t_pbes_simple ps;
-
+  t_tool_options() :
+    infilename(""),
+    outfilename(""),
+    print_syntax(false),
+    new_parser(false)
+  {}
+};
 
 
 
@@ -476,36 +485,39 @@ pbes<> make_pbes(const string fileName){
 
 void print_syntax(void)
 {
-  cerr<<"\nSYNTAX of the simple pbes text language\n";
-  cerr<<"(This is an extreme simplification of the official PBES grammar.)\n\n";
-  cerr<<"pbes        ::= pbes-eq pbes-eq .... \n"<<
-"pbes-eq     ::= \"mu\" predvar \"=\" pbes-expr  | \"nu\" predvar \"=\" pbes-expr \n"
-"predvar     ::= \"X\" | \"Y\" | \"Z\" | \"X\" \"(\" params \")\"	\
-| \"Y\" \"(\" params \")\" | \"Z\" \"(\" params \")\"\n\n";
-  
-  cerr <<"pbes-expr   ::= \"T\" | \"F\" | boolvar | nat-expr \"<\" nat-expr \
-| nat-expr \"=\" nat-expr						\
-| predvar-inst \n"<<
-"  | pbes-expr \"&&\" pbes-expr | pbes-expr \"||\" pbes-expr \
-| \"!\" pbes-expr | \"(\" pbes-expr \")\"\n\n";
-  
-  cerr<<"boolvar     ::= \"a\" | \"b\" | \"c\"\n"<<
-"natvar      ::= \"i\" | \"j\" | \"k\"\n"<<				
-"nat-expr    ::= \"1\" | natvar | nat-expr \"+\" nat-expr | \"(\" nat-expr \")\"\n"<<
-"predvar-inst::= \"X\" \"(\" params-inst \")\" | \"Y\" \"(\" params-inst \")\" \
-| \"Z\" \"(\" params-inst \")\"\n"<<					
-    "params	    ::=  boolvar | natvar | params \",\" boolvar | params \",\" natvar\n"<<
-"params-inst ::= boolvar	| \"!\" boolvar	| nat-expr | boolvar \",\" params-inst \
-| \"!\" boolvar \",\" params-inst | nat-expr\",\" params-inst\n\n";
-  
-  cerr<<"\nEXAMPLES:\n\n";
-  cerr<<"mu X(i) = (i<1) && X(i+1)\n\n";
-  cerr<<"mu X(b,i)   = (Y(b, i, i+1+1) && b) || !b\n";
-  cerr<<"nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n\n";
+  cerr <<
+"SYNTAX of the simple PBES text language\n"
+"(This is an extreme simplification of the official PBES grammar.)\n"
+"\n"
+"pbes      ::= pbes-eq | pbes-eq pbes\n"
+"pbes-eq   ::= fixpoint pvar-decl '=' pbes-expr\n"
+"fixpoint  ::= 'mu' | 'nu'\n"
+"pvar-decl ::= pvar | pvar '(' pars ')'\n"
+"pvar      ::= 'X' | 'Y' | 'Z'\n"
+"\n"
+"pbes-expr ::= boolvar | nat-expr '<' nat-expr | nat-expr '=' nat-expr\n"
+"            | 'T' | 'F' | pvar-inst | '(' pbes-expr ')' | '!' pbes-expr\n"
+"            | pbes-expr '&&' pbes-expr | pbes-expr '||' pbes-expr\n"
+"\n"
+"boolvar   ::= 'a' | 'b' | 'c'\n"
+"natvar    ::= 'i' | 'j' | 'k'\n"				
+"datavar   ::= boolvar | natvar\n"
+"nat-expr  ::= '1' | natvar | nat-expr '+' nat-expr | '(' nat-expr ')'\n"
+"pvar-inst ::= pvar '(' pars-inst ')'\n"
+"pars      ::= datavar | pars ',' datavar\n"
+"pars-inst ::= datavar | '!' boolvar\n"
+"            | datavar ',' pars-inst | '!' boolvar ',' pars-inst\n"
+"\n"
+"EXAMPLES:\n"
+"\n"
+"  mu X(i) = (i<1) && X(i+1)\n"
+"\n"
+"  mu X(b,i)   = (Y(b, i, i+1+1) && b) || !b\n"
+"  nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n";
 }
 
 //========================== 
-void parse_command_line(int ac, char **av)
+t_tool_options parse_command_line(int ac, char **av)
 //==========================
 {
   interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
@@ -513,18 +525,26 @@ void parse_command_line(int ac, char **av)
     "INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
 
   clinterface.add_option("syntax", "display the syntax (and examples) of the expected text input", 's');
+  clinterface.add_option("new-parser", "use the new full PBES parser (experimental)", 'n');
 
   command_line_parser parser(clinterface, ac, av);
 
+  t_tool_options tool_options;
+
   if (0 < parser.arguments.size()) {
-    infilename = parser.arguments[0];
+    tool_options.infilename = parser.arguments[0];
   }
   if (1 < parser.arguments.size()) {
-    outfilename = parser.arguments[1];
+    tool_options.outfilename = parser.arguments[1];
   }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
+
+  tool_options.print_syntax = 0 < parser.options.count("syntax");
+  tool_options.new_parser   = 0 < parser.options.count("new-parser");
+
+  return tool_options;
 }
 
 
@@ -538,26 +558,87 @@ int main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
    
   try {
-    parse_command_line(argc, argv);
- 
-    cerr <<"Creating pbes ("<<outfilename<< ") from text (" << infilename <<") \n";
- 
-    //Create the pbes from the input text 
-    pbes<> p = make_pbes(infilename); 
-    ATermAppl ap = p;
- 
-    if (outfilename == "") {
-      gsVerboseMsg("The resulting PBES is:\n");
-      PrintPart_CXX(cout, (ATerm) ap, ppDefault);
-      cout << endl;
-    } else 
-      if(!p.save(outfilename, false)){
-        gsErrorMsg("writing to %s failed\n",outfilename.c_str());
-        exit(1);
-      }
-    
-    cerr <<"done\n";  
+    t_tool_options tool_options = parse_command_line(argc, argv);
 
+    if (tool_options.print_syntax) {
+      print_syntax();
+      return EXIT_SUCCESS;
+    }
+ 
+    if (tool_options.new_parser) {
+      ATermAppl result = NULL;
+      //parse specification
+      if (tool_options.infilename == "") {
+        //parse specification from stdin
+        gsVerboseMsg("parsing input from stdin using the new parser...\n");
+        result = parse_pbes_spec(cin);
+      } else {
+        //parse specification from infilename
+        ifstream instream(tool_options.infilename.c_str(), ifstream::in|ifstream::binary);
+        if (!instream.is_open()) {
+          gsErrorMsg("cannot open input file '%s'\n", tool_options.infilename.c_str());
+          return EXIT_FAILURE;
+        }
+        gsVerboseMsg("parsing input file '%s' using the new parser...\n", tool_options.infilename.c_str());
+        result = parse_pbes_spec(instream);
+        instream.close();
+      }
+      if (result == NULL) 
+      {
+        gsErrorMsg("parsing failed\n");
+        return EXIT_FAILURE;
+      }
+      //type check the result
+      gsVerboseMsg("type checking...\n");
+      result = type_check_pbes_spec(result);
+      if (result == NULL)
+      {
+        gsErrorMsg("type checking failed\n");
+        return EXIT_FAILURE;
+      }
+      //implement standard data types and type constructors on the result
+      gsVerboseMsg("implementing standard data types and type constructors...\n");
+      result = implement_data_pbes_spec(result);
+      if (result == NULL) 
+      {
+        gsErrorMsg("data implementation failed\n");
+        return EXIT_FAILURE;
+      }
+      //store the result
+      if (tool_options.outfilename == "") {
+        gsVerboseMsg("saving result to stdout...\n");
+        ATwriteToSAFFile((ATerm) result, stdout);
+      } else {
+        FILE *outstream = fopen(tool_options.outfilename.c_str(), "wb");
+        if (outstream == NULL) {
+          gsErrorMsg("cannot open output file '%s'\n", tool_options.outfilename.c_str());
+          return EXIT_FAILURE;
+        }
+        gsVerboseMsg("saving result to '%s'...\n", tool_options.outfilename.c_str());
+        ATwriteToSAFFile((ATerm) result, outstream);
+        fclose(outstream);
+      }
+    } else {
+      //!tool_options.new_parser
+  
+      cerr <<"Creating PBES ("<<tool_options.outfilename<< ") from text (" << tool_options.infilename <<") \n";
+   
+      //Create the pbes from the input text 
+      pbes<> p = make_pbes(tool_options.infilename); 
+      ATermAppl ap = p;
+   
+      if (tool_options.outfilename == "") {
+        gsVerboseMsg("The resulting PBES is:\n");
+        PrintPart_CXX(cout, (ATerm) ap, ppDefault);
+        cout << endl;
+      } else 
+        if(!p.save(tool_options.outfilename, false)){
+          gsErrorMsg("writing to %s failed\n",tool_options.outfilename.c_str());
+          exit(1);
+        }
+      
+      cerr <<"done\n";  
+    }
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {

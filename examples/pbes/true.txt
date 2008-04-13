@@ -1,0 +1,5 @@
+% The following is the simplest possible PBES: one that is vacuously true.
+
+pbes mu X = true;
+
+init X;

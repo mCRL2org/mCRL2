@@ -200,15 +200,15 @@ void pbeserror(const char *str) {
 
 
 void parsePBES( std::string fileName ) {
-  FILE* infile = fopen(fileName.c_str(),"r");
-  if (infile == NULL) {
-      	throw std::string("Cannot open file for reading:\n" + fileName);
-       }
-  else 	{
-
-    pbesin = infile;
-
-    pbesparse();
-
+  FILE* infile;
+  if (fileName == "") {
+    infile = stdin;
+  } else {
+    infile = fopen(fileName.c_str(),"r");
+    if (infile == NULL) {
+      throw std::string("Cannot open file for reading:\n" + fileName);
+    }
   }
+  pbesin = infile;
+  pbesparse();
 }

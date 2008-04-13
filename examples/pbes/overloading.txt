@@ -1,0 +1,8 @@
+% The following PBES shows how overloading of propositional variables
+% can be used in PBESs.
+
+pbes mu X            = X(true);
+     nu X(b: Bool)   = X(b,false);
+     mu X(b,c: Bool) = val(b) && val(c) && X(!b, !c);
+
+init X;
