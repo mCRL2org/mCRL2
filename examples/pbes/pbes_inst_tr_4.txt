@@ -2,7 +2,7 @@
 %
 % A. van Dam, B. Ploeger and T.A.C. Willemse. Instantiation for
 % Parameterised Boolean Equation Systems.  Computer Science Report
-% 08-??, Eindhoven University of Technology (TU/e), 2008.
+% 08-11, Eindhoven University of Technology (TU/e), 2008.
 
 pbes mu X(b: Bool, n: Nat) =
        (forall i: Nat. val(!b) || X(!b, i)) &&
