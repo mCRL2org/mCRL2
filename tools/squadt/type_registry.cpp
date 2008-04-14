@@ -143,27 +143,29 @@ namespace squadt {
     categories_for_format.clear();
 
     for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
-      capabilities::input_configuration_range inputs((*t)->get_capabilities()->get_input_configurations());
-
-      BOOST_FOREACH(capabilities::input_configuration_range::value_type j, inputs) {
-        capabilities::input_configuration::object_sequence input_range(j->object_range());
-
-        BOOST_FOREACH(capabilities::input_configuration::object_sequence::value_type input_descriptor, input_range) {
-          tipi::mime_type& format(input_descriptor.second);
-
-          if (categories_for_format.find(format) == categories_for_format.end()) {
-            /* Format unknown, create new map */
-            tools_for_category temporary;
-
-            categories_for_format.insert(std::make_pair(format, temporary));
-
-            /* Make sure the type is registered */
-            if (!has_registered_command(format, true)) {
-              register_command(format, command_none);
+      if ((*t)->get_capabilities()) {
+        capabilities::input_configuration_range inputs((*t)->get_capabilities()->get_input_configurations());
+       
+        BOOST_FOREACH(capabilities::input_configuration_range::value_type j, inputs) {
+          capabilities::input_configuration::object_sequence input_range(j->object_range());
+       
+          BOOST_FOREACH(capabilities::input_configuration::object_sequence::value_type input_descriptor, input_range) {
+            tipi::mime_type& format(input_descriptor.second);
+       
+            if (categories_for_format.find(format) == categories_for_format.end()) {
+              /* Format unknown, create new map */
+              tools_for_category temporary;
+       
+              categories_for_format.insert(std::make_pair(format, temporary));
+       
+              /* Make sure the type is registered */
+              if (!has_registered_command(format, true)) {
+                register_command(format, command_none);
+              }
             }
+       
+            categories_for_format[format].insert(std::make_pair(j->get_category(), *t));
           }
-
-          categories_for_format[format].insert(std::make_pair(j->get_category(), *t));
         }
       }
     }

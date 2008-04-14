@@ -572,6 +572,10 @@ class file-target : abstract-file-target
             # will be <ptest/bin/gcc/debug>test.o and the target we create below
             # will be <e>test.o
             DEPENDS $(target:G=e) : $(target) ;
+            # Allow bjam <path-to-file>/<file> to work.  This won't catch all
+            # possible ways to refer to the path (relative/absolute, extra ".",
+            # various "..", but should help in obvious cases.
+            DEPENDS $(target:G=e:R=$(path)) : $(target) ;
         }
         else
         {
@@ -901,8 +905,10 @@ rule register ( target )
                 {
                     local ps1 = [ $(a1).properties ] ;
                     local ps2 = [ $(a2).properties ] ;
-                    local p1 = [ $(ps1).base ] [ $(ps1).free ] [ $(ps1).dependency ] ;
-                    local p2 = [ $(ps2).base ] [ $(ps2).free ] [ $(ps2).dependency ] ;
+                    local p1 = [ $(ps1).base ] [ $(ps1).free ] 
+                      [ set.difference [ $(ps1).dependency ] : [ $(ps1).incidental ] ] ;
+                    local p2 = [ $(ps2).base ] [ $(ps2).free ] 
+                      [ set.difference [ $(ps2).dependency ] : [ $(ps2).incidental ] ] ;
                     if $(p1) = $(p2)
                     {
                         result = $(t) ;

@@ -145,10 +145,11 @@ class configurations
 # extend it with all the values.
 #
 # The return value from this rule is a condition to be used for flags settings.
-rule check-init-parameters ( toolset : * )
+rule check-init-parameters ( toolset requirement * : * )
 {
     local sig = $(toolset) ;
     local condition = <toolset>$(toolset) ;
+    local subcondition ;
     for local index in 2 3 4 5 6 7 8 9
     {
         local name = $($(index)[1]) ;
@@ -185,6 +186,7 @@ rule check-init-parameters ( toolset : * )
                 .had-value.$(toolset).$(name) = true ;
             }
             feature.extend-subfeature toolset $(t) : $(name) : $(value) ;
+            subcondition += <toolset-$(t):$(name)>$(value) ;
         }
         else
         {
@@ -219,11 +221,25 @@ rule check-init-parameters ( toolset : * )
     .all-signatures += $(sig) ;
     .init-loc.$(sig) = [ errors.nearest-user-location ] ;
 
+    # If we have a requirement, this version should only be applied under that
+    # condition. To accomplish this we add a toolset requirement that imposes
+    # the toolset subcondition, which encodes the version.
+    if $(requirement)
+    {
+        local r = <toolset>$(toolset) $(requirement) ;
+        r = $(r:J=,) ;
+        toolset.add-requirements $(r):$(subcondition) ;
+    }
+
+    # We add the requirements, if any, to the condition to scope the toolset
+    # variables and options to this specific version.
+    condition += $(requirement) ;
+
     if $(.show-configuration)
     {
         ECHO notice: $(condition) ;
     }
-    return $(condition) ;
+    return $(condition:J=/) ;
 }
 
 
@@ -628,7 +644,8 @@ actions hard-link
 #           value as the version number.
 #   <property:/property-name/>[joiner]
 #       ::  Direct lookup of the given property-name value in the
-#           build properties.
+#           build properties. /property-name/ is a regular expression.
+#           e.g. <property:toolset-.*:flavor> will match every toolset.
 #   /otherwise/
 #       ::  The literal value of the format argument.
 #
@@ -678,12 +695,15 @@ rule format-name ( format * : name : type ? : property-set )
 
                 case <property:*> :
                 local key = [ MATCH <property:(.*)> : $(f:G) ] ;
-                local p = [ $(property-set).get [ MATCH <property:(.*)> : $(f:G) ] ] ;
-                if $(p)
-                {
-                    result += [ join-tag $(f:G=) : $(p) ] ;
+                local p0 = [ MATCH <($(key))> : [ $(property-set).raw ] ] ;
+                if $(p0) {
+                    local p = [ $(property-set).get <$(p0)> ] ;
+                    if $(p)
+                    {
+                        result += [ join-tag $(f:G=) : $(p) ] ;
+                    }
                 }
-
+                
                 case * :
                 result += $(f:G=) ;
             }
@@ -798,7 +818,7 @@ local rule runtime-tag ( name : type ? : property-set )
     # toolset, the tag rules won't even see <runtime-debugging>. Similar
     # functionality in V2 is not implemented yet, so we just check for toolsets
     # which are known to care about runtime debug.
-    if <toolset>msvc in $(properties) 
+    if <toolset>msvc in $(properties)
       || <stdlib>stlport in $(properties)
       || <toolset-intel:platform>win in $(properties)
     {

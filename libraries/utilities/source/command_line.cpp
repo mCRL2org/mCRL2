@@ -197,10 +197,10 @@ namespace mcrl2 {
     std::string interface_description::textual_description() const {
       std::ostringstream s;
 
-      s << "Usage: " << m_path << " " << m_usage << std::endl;
+      s << "Usage: " << m_path << " " << m_usage << std::endl << std::endl;
 
       if (!m_known_issues.empty()) {
-        s << "Known Issues:" << m_known_issues << std::endl;
+        s << "Known Issues:" << m_known_issues << std::endl << std::endl;
       }
 
       if (0 < m_options.size()) {
