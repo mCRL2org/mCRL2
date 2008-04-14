@@ -81,7 +81,7 @@ rule init ( version ? : command * : options * : requirement * )
         local strip =
             [ common.get-invocation-command darwin
                 : strip : [ feature.get-values <striper> : $(options) ] : $(bin) : search-path ] ;
-        flags darwin.link .STRIP $(condition) : $(strip[1]) ;
+        flags darwin.link .STRIP $(condition) : $(strip[1]) -S ;
         if $(.debug-configuration)
         {
             ECHO notice: using strip :: $(condition) :: $(strip[1]) ;
@@ -153,7 +153,7 @@ local rule available-macosx-versions ( )
 # will be first in the list, and hence the default.
 feature macosx-version
     : [ available-macosx-versions ]
-    : propagated link-incompatible symmetric optional ;
+    : propagated link-incompatible symmetric ;
 if 10.4 in [ feature.values macosx-version ]
 {
     feature.set-default macosx-version : 10.4 ;
@@ -244,7 +244,7 @@ rule link
 actions link bind LIBRARIES
 {
    $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
-   $(NEED_STRIP)"$(.STRIP)"$(NEED_STRIP)-S$(NEED_STRIP)"$(<)"
+   $(NEED_STRIP)"$(.STRIP)" $(NEED_STRIP)"$(<)"
 }
 
 rule link.dll

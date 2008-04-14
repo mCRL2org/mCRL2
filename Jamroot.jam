@@ -46,14 +46,11 @@
 #                                   be above arguments (for binary packaging)
 #
 
-import set ;
+import feature ;
 import path ;
-import feature ;
 import property ;
-import package ;
-import feature ;
-import option ;
 import regex ;
+import set ;
 
 # Constants for commonly used paths
 path-constant TOP             : . ;
