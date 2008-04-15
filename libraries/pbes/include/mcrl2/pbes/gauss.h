@@ -65,8 +65,8 @@ class pbes_solver {
  public:
   
   pbes_solver(pbes<> p_pbes_spec,
-	      std::string solver, 
-	      std::string rew_strategy, 
+	      SMT_Solver_Type solver, 
+	      RewriteStrategy rew_strategy, 
 	      int p_bound, bool p_pnf, bool p_interactive);
   
   /// This function implements the Gauss elimination algorithm.

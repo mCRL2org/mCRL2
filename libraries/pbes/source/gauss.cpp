@@ -78,23 +78,16 @@ void dunion(data_variable_list *x, data_variable_list y);
 
 //=================================================
 pbes_solver::pbes_solver(pbes<> p_pbes_spec,
-			 std::string solver, 
-			 std::string rew_strategy, 
+			 SMT_Solver_Type solver, 
+			 RewriteStrategy rew_strategy, 
 			 int p_bound, bool p_pnf, bool p_interactive)
 //=================================================
 {
   pbes_spec = p_pbes_spec;
   
   data_specification ds = pbes_spec.data();
-  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: 
-    ((solver=="fast")?solver_type_cvc_fast:
-     solver_type_cvc);
-  RewriteStrategy rew = (rew_strategy == "inner") ? GS_REWR_INNER:
-    ((rew_strategy == "innerc") ? GS_REWR_INNERC : 
-     ((rew_strategy == "jitty") ? GS_REWR_JITTY : 
-      GS_REWR_JITTYC));
   
-  prover = new BDD_Prover(ds, rew, 0, false, sol, false);
+  prover = new BDD_Prover(ds, rew_strategy, 0, false, solver, false);
   
   bound = p_bound;
   pnf = p_pnf;

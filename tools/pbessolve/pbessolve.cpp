@@ -57,13 +57,24 @@ using namespace ::mcrl2::utilities;
 //Type definitions ====================== 
  
 // the command line options 
-typedef struct{ 
+struct t_tool_options { 
+  string infilename;
   bool interactive;
-  bool pnf; 
   int bound; 
-  string solver;
-  string rewriter;
-} t_tool_options; 
+  bool pnf; 
+  SMT_Solver_Type solver;
+  RewriteStrategy rewrite_strategy;
+
+  //t_tool_options constructor with default values
+  t_tool_options() :
+    infilename(""),
+    interactive(false),
+    bound(0),
+    pnf(false),
+    solver(solver_type_cvc),
+    rewrite_strategy(GS_REWR_JITTY)
+  {}
+};
  
  
 
@@ -72,16 +83,16 @@ typedef struct{
 //======================================== 
  
  
-string infilename = "-"; 
  
  
 //Local functions ======================== 
 static t_tool_options parse_command_line(int argc, char** argv); 
-pbes<> load_pbes();
+pbes<> load_pbes(string infilename);
 
 pbes_expression interpret_solution(pbes<> pbes_spec, 
 				   atermpp::vector<pbes_equation> es_solution, 
-				   string solver, string rewriter); 
+                                   SMT_Solver_Type solver,
+                                   RewriteStrategy rewrite_strategy);
 //======================================== 
  
  
@@ -100,7 +111,7 @@ int main(int argc, char** argv)
     t_tool_options tool_options = parse_command_line(argc, argv); 
      
     //Load the pbes 
-    pbes<> pbes_spec = load_pbes(); 
+    pbes<> pbes_spec = load_pbes(tool_options.infilename); 
      
     //Solve the pbes. 
     //The solution will be returned as an equation system,  
@@ -109,7 +120,7 @@ int main(int argc, char** argv)
     //(possibly interactive and/or bounded)  
     //approximation process 
     pbes_solver* ps = new pbes_solver
-      (pbes_spec, tool_options.solver, tool_options.rewriter,
+      (pbes_spec, tool_options.solver, tool_options.rewrite_strategy,
        tool_options.bound, tool_options.pnf, tool_options.interactive);
     
     atermpp::vector<pbes_equation> es_solution = ps->solve(); 
@@ -117,7 +128,7 @@ int main(int argc, char** argv)
     //Interpret the solution in the initial state
     pbes_expression sol_initial_state = 
       interpret_solution(pbes_spec, es_solution, 
-          	       tool_options.solver, tool_options.rewriter); 
+          	       tool_options.solver, tool_options.rewrite_strategy); 
      
     cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
     
@@ -137,10 +148,10 @@ int main(int argc, char** argv)
 //========================================= 
 // Loads a PBES from a file. 
 // (function copied from pbes2bes)
-pbes<> load_pbes() 
+pbes<> load_pbes(string infilename) 
 { 
   pbes<> pbes_spec; 
-  if (infilename == "-") 
+  if (infilename == "") 
   {
     try
     {
@@ -182,7 +193,11 @@ t_tool_options parse_command_line(int ac, char** av)
   clinterface.add_option("interactive", "turn on the manual guidance of the approximation process", 'i')
              .add_option("bound", "limit the number of approximation steps\nExample: -b 10\n", 'b')
              .add_option("pnf", "use the prenex normal form for the approximation", 'p')
-             .add_option("solver", make_optional_argument("SOLVER", "cvc"), "specify the solver to be used by the prover\n  Options are: ario, cvc, fast", 's');
+             .add_option("solver", make_optional_argument("SOLVER", "cvc"),
+               "specify the SOLVER to be used by the prover:\n"
+               "'cvc' for the SMT solver CVC3 (default),\n"
+               "'fast' for the SMT solver CVC3 (fast variant), or\n"
+               "'ario' for the SMT solver Ario", 's');
 
   clinterface.add_rewriting_options();
 
@@ -190,27 +205,43 @@ t_tool_options parse_command_line(int ac, char** av)
 
   t_tool_options tool_options; 
 
-  tool_options.bound       = 0; 
-  tool_options.solver      = "cvc";
-  tool_options.pnf         = (0 < parser.options.count("pnf"));  
-  tool_options.interactive = (0 < parser.options.count("interactive"));  
-  tool_options.rewriter    = parser.option_argument("rewriter").c_str();
+  if (parser.options.count("interactive")) {
+    tool_options.interactive = true;
+  }
 
   if (parser.options.count("bound")) {
     tool_options.bound = parser.option_argument_as< int >("bound"); 
   }
+
+  if (parser.options.count("pnf")) {
+    tool_options.pnf = true;
+  }
+
   if (parser.options.count("solver")) {
-    tool_options.solver = parser.option_argument("solver");
+    string s = parser.option_argument("solver");
+    if (s == "cvc") {
+      tool_options.solver = solver_type_cvc;
+    } else if (s == "fast") {
+      tool_options.solver = solver_type_cvc_fast;
+    } else if (s == "ario") {
+      tool_options.solver = solver_type_ario;
+    } else {
+      parser.error("argument '" + s + "' to option --solver or -s is invalid");
+    }
   }
+
+  tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+
   if (0 < parser.arguments.size()) {
-    infilename = parser.arguments[0];
+    tool_options.infilename = parser.arguments[0];
   }
+
   if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 
   return tool_options; 
-} 
+}
 //======================================== 
  
  
@@ -224,7 +255,7 @@ t_tool_options parse_command_line(int ac, char** av)
 //======================================== 
 // evaluate solution in the initial state
 pbes_expression interpret_solution (pbes<> pbes_spec, 
-				    atermpp::vector<pbes_equation> es_solution, string solver, string rewriter) 
+				    atermpp::vector<pbes_equation> es_solution, SMT_Solver_Type solver, RewriteStrategy rewrite_strategy)
 { 
   propositional_variable_instantiation s = pbes_spec.initial_state();
   data_expression_list del = s.parameters();
@@ -246,11 +277,7 @@ pbes_expression interpret_solution (pbes<> pbes_spec,
     e->formula().substitute(make_list_substitution(dvl,del));
  
  
-  SMT_Solver_Type sol = (solver == "ario") ? solver_type_ario: ((solver=="fast")?solver_type_cvc_fast:solver_type_cvc);
-  RewriteStrategy rew = (rewriter == "inner") ? GS_REWR_INNER:
-    ((rewriter == "innerc") ? GS_REWR_INNERC : 
-     ((rewriter == "jitty") ? GS_REWR_JITTY : GS_REWR_JITTYC));
-  BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), rew, 0, false, sol, false);
+  BDD_Prover* prover = new BDD_Prover(pbes_spec.data(), rewrite_strategy, 0, false, solver, false);
   int nq = 0;
   data_variable_list fv;
   result = pbes_expression_simplify(p, &nq, &fv, prover);
