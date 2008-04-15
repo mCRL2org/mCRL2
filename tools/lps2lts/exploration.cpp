@@ -75,13 +75,15 @@ static unsigned long long initial_state;
  
 static ATermTable backpointers;
 static unsigned long *bithashtable;
-static ATermTable representation = NULL;
  
 static unsigned long tracecnt;
  
 static char *basefilename = NULL;
 
 static bool lg_error = false;
+  
+static void initialise_representation(bool confluence_reduction);
+static void cleanup_representation();
 
 bool initialise_lts_generation(lts_generation_options *opts)
 {
@@ -154,7 +156,9 @@ bool initialise_lts_generation(lts_generation_options *opts)
   {
     gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
     nstate->prioritise(lgopts->priority_action.c_str());
-    representation = ATtableCreate(lgopts->initial_table_size,50);
+    initialise_representation(true);
+  } else {
+    initialise_representation(false);
   }
 
   num_states = 0;
@@ -179,6 +183,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   
 bool finalise_lts_generation()
 {
+  cleanup_representation();
   delete nstate;
   free(basefilename);
 
@@ -375,119 +380,129 @@ static void check_deadlocktrace(ATerm state)
 // Efficient State Space Generation, Technical Report SEN-R0123, CWI,
 // Amsterdam, 2001
 
+static bool apply_confluence_reduction;
+static ATermIndexedSet repr_visited;
+static ATermTable repr_number;
+static ATermTable repr_low;
+static ATermTable repr_next;
+static ATermTable repr_back;
+static NextStateGenerator *repr_nsgen;
+
+static void initialise_representation(bool confluence_reduction)
+{
+  apply_confluence_reduction = confluence_reduction;
+  if ( confluence_reduction )
+  {
+    repr_visited = ATindexedSetCreate(1000,50);
+    repr_number = ATtableCreate(1000,50);
+    repr_low = ATtableCreate(1000,50);
+    repr_next = ATtableCreate(1000,50);
+    repr_back = ATtableCreate(1000,50);
+    repr_nsgen = NULL;
+  }
+}
+
+static void cleanup_representation()
+{
+  if ( apply_confluence_reduction )
+  {
+    delete repr_nsgen;
+    ATtableDestroy(repr_back);
+    ATtableDestroy(repr_next);
+    ATtableDestroy(repr_low);
+    ATtableDestroy(repr_number);
+    ATindexedSetDestroy(repr_visited);
+  }
+}
+
 static ATerm get_repr(ATerm state)
 {
-  if ( representation == NULL )
+  if ( !apply_confluence_reduction )
   {
     return state;
   }
 
-  ATerm t = ATtableGet(representation,state);
-  if ( t != NULL )
-  {
-    return t;
-  }
-
   ATerm v = state;
-  ATermIndexedSet visited = ATindexedSetCreate(1000,50);
+  ATindexedSetReset(repr_visited);
   int num_visited = 0;
-  ATermTable number = ATtableCreate(1000,50);
-  ATermTable low = ATtableCreate(1000,50);
-  ATermTable next = ATtableCreate(1000,50);
-  ATermTable back = ATtableCreate(1000,50);
+  ATtableReset(repr_number);
+  ATtableReset(repr_low);
+  ATtableReset(repr_next);
+  ATtableReset(repr_back);
   int count;
-  NextStateGenerator *nsgen = NULL;
 
-  ATtablePut(number,v,(ATerm) ATmakeInt(0));
+  ATtablePut(repr_number,v,(ATerm) ATmakeInt(0));
   count = 0;
   bool notdone = true;
   while ( notdone )
   {
-    if ( ATgetInt((ATermInt) ATtableGet(number,v)) == 0 )
+    if ( ATgetInt((ATermInt) ATtableGet(repr_number,v)) == 0 )
     {
       count++;
-      ATtablePut(number,v,(ATerm) ATmakeInt(count));
-      ATtablePut(low,v,(ATerm) ATmakeInt(count));
+      ATtablePut(repr_number,v,(ATerm) ATmakeInt(count));
+      ATtablePut(repr_low,v,(ATerm) ATmakeInt(count));
       ATermList nextl = ATmakeList0();
-      nsgen = nstate->getNextStates(v,nsgen);
+      repr_nsgen = nstate->getNextStates(v,repr_nsgen);
       ATermAppl Transition;
       ATerm NewState;
       bool prioritised_action;
-      while ( nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
+      while ( repr_nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
       {
         ATbool b;
-        ATindexedSetPut(visited,NewState,&b);
+        ATindexedSetPut(repr_visited,NewState,&b);
         if ( b == ATtrue )
         {
           num_visited++;
         }
-        ATerm t = ATtableGet(representation,NewState);
-        if ( t != NULL )
-        {
-          v = t;
-          notdone = false;
-          break;
-        }
         nextl = ATinsert(nextl,NewState);
-        if ( ATtableGet(number,NewState) == NULL ) // This condition was missing in the report
+        if ( ATtableGet(repr_number,NewState) == NULL ) // This condition was missing in the report
         {
-          ATtablePut(number,NewState,(ATerm) ATmakeInt(0));
+          ATtablePut(repr_number,NewState,(ATerm) ATmakeInt(0));
         }
       }
       if ( !notdone )
       {
         break;
       }
-      ATtablePut(next,v,(ATerm) nextl);
+      ATtablePut(repr_next,v,(ATerm) nextl);
     }
-    ATermList nextl = (ATermList) ATtableGet(next,v);
+    ATermList nextl = (ATermList) ATtableGet(repr_next,v);
     if ( ATisEmpty(nextl) )
     {
-      if ( ATisEqual(ATtableGet(number,v),ATtableGet(low,v)) )
+      if ( ATisEqual(ATtableGet(repr_number,v),ATtableGet(repr_low,v)) )
       {
         break;
       }
-      ATerm backv = ATtableGet(back,v);
-      int a = ATgetInt((ATermInt) ATtableGet(low,backv));
-      int b = ATgetInt((ATermInt) ATtableGet(low,v));
+      ATerm backv = ATtableGet(repr_back,v);
+      int a = ATgetInt((ATermInt) ATtableGet(repr_low,backv));
+      int b = ATgetInt((ATermInt) ATtableGet(repr_low,v));
       if ( a < b )
       {
-        ATtablePut(low,backv,(ATerm) ATmakeInt(a));
+        ATtablePut(repr_low,backv,(ATerm) ATmakeInt(a));
       } else {
-        ATtablePut(low,backv,(ATerm) ATmakeInt(b));
+        ATtablePut(repr_low,backv,(ATerm) ATmakeInt(b));
       }
       v = backv;
     } else {
       ATerm u = ATgetFirst(nextl);
-      ATtablePut(next,v,(ATerm) ATgetNext(nextl));
-      int nu = ATgetInt((ATermInt) ATtableGet(number,u));
+      ATtablePut(repr_next,v,(ATerm) ATgetNext(nextl));
+      int nu = ATgetInt((ATermInt) ATtableGet(repr_number,u));
       if ( nu == 0 )
       {
-        ATtablePut(back,u,v);
+        ATtablePut(repr_back,u,v);
         v = u;
       } else {
-        if ( nu < ATgetInt((ATermInt) ATtableGet(number,v)) )
+        if ( nu < ATgetInt((ATermInt) ATtableGet(repr_number,v)) )
         {
-          int lv = ATgetInt((ATermInt) ATtableGet(low,v));
+          int lv = ATgetInt((ATermInt) ATtableGet(repr_low,v));
           if ( nu < lv )
           {
-            ATtablePut(low,v,(ATerm) ATmakeInt(nu));
+            ATtablePut(repr_low,v,(ATerm) ATmakeInt(nu));
           }
         }
       }
     }
   }
-  for (int i=0; i<num_visited; i++)
-  {
-    ATtablePut(representation,ATindexedSetGetElem(visited,i),v);
-  }
-
-  delete nsgen;
-  ATtableDestroy(back);
-  ATtableDestroy(next);
-  ATtableDestroy(low);
-  ATtableDestroy(number);
-  ATindexedSetDestroy(visited);
 
   return v;
 }
