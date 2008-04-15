@@ -53,8 +53,28 @@ using namespace mcrl2::core;
           exit(1);
           break;
         }
+        case (GS_REWR_INNER_P): {
+          gsErrorMsg("The innermost rewriter with prover is not supported by the prover.\n");
+          exit(1);
+          break;
+        }
+        case (GS_REWR_INNERC_P): {
+          gsErrorMsg("The compiled innermost rewriter with prover is not supported by the prover.\n");
+          exit(1);
+          break;
+        }
         case (GS_REWR_JITTYC): {
           gsErrorMsg("The compiled jitty rewriter is not supported by the prover.\n");
+          exit(1);
+          break;
+        }
+        case (GS_REWR_JITTY_P): {
+          gsErrorMsg("The jitty rewriter with prover is not supported by the prover.\n");
+          exit(1);
+          break;
+        }
+        case (GS_REWR_JITTYC_P): {
+          gsErrorMsg("The compiled jitty rewriter with prover is not supported by the prover.\n");
           exit(1);
           break;
         }
