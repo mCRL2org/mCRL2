@@ -175,9 +175,9 @@ pbes<> load_pbes()
 //======================================== 
 t_tool_options parse_command_line(int ac, char** av) 
 { 
-  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
                           "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not\n"
-                          "present, stdin is used.\n");
+                          "present, stdin is used.");
 
   clinterface.add_option("interactive", "turn on the manual guidance of the approximation process", 'i')
              .add_option("bound", "limit the number of approximation steps\nExample: -b 10\n", 'b')
@@ -194,7 +194,7 @@ t_tool_options parse_command_line(int ac, char** av)
   tool_options.solver      = "cvc";
   tool_options.pnf         = (0 < parser.options.count("pnf"));  
   tool_options.interactive = (0 < parser.options.count("interactive"));  
-  tool_options.rewriter    = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+  tool_options.rewriter    = parser.option_argument("rewriter").c_str();
 
   if (parser.options.count("bound")) {
     tool_options.bound = parser.option_argument_as< int >("bound"); 
