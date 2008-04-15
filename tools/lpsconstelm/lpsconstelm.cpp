@@ -928,13 +928,15 @@ inline bool lpsConstElm::output() {
 
   gsVerboseMsg("lpsconstelm: Number of process parameters in the old LPS: %d\n", p_process.process_parameters().size());
   gsVerboseMsg("lpsconstelm: Number of process parameters in the new LPS: %d\n", rebuild_process.process_parameters().size());
-  
-  gsVerboseMsg("lpsconstelm: ===== Replacements =====\n");
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
+ 
+  if (constantPP.begin() != constantPP.end()) 
   { 
-    gsVerboseMsg("lpsconstelm: constant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
-  } 
-
+    gsVerboseMsg("lpsconstelm: ===== Replacements =====\n");
+    for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
+    { 
+      gsVerboseMsg("lpsconstelm: constant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
+    } 
+  }
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
   //gsDebugMsg("%s\n", pp(p_process).c_str());
