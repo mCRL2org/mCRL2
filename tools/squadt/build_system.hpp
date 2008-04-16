@@ -77,6 +77,9 @@ namespace squadt {
       /** \brief Gets executor implementation object */
       executor_impl* get_executor_impl();
 
+      /** \brief Resets tool manager such that it uses the default tool collection */
+      void default_tool_collection(tool_manager&) const;
+
     public:
 
       /** \brief Follows the syntax defined in RFC 2045 */
@@ -107,37 +110,37 @@ namespace squadt {
 
 
       /** \brief Gets settings manager object */
-      settings_manager const* get_settings_manager() const;
+      settings_manager const& get_settings_manager() const;
 
       /** \brief Gets settings manager object */
-      settings_manager* get_settings_manager();
+      settings_manager& get_settings_manager();
 
       /** \brief Sets settings manager object */
       void set_settings_manager(std::auto_ptr < settings_manager >);
 
       /** \brief Gets tool manager object */
-      tool_manager const* get_tool_manager() const;
+      tool_manager const& get_tool_manager() const;
 
       /** \brief Gets tool manager object */
-      tool_manager* get_tool_manager();
+      tool_manager& get_tool_manager();
 
       /** \brief Sets tool manager object */
       void set_tool_manager(std::auto_ptr< tool_manager >);
 
       /** \brief Gets tool manager object */
-      executor const* get_executor() const;
+      executor const& get_executor() const;
 
       /** \brief Gets tool manager object */
-      executor* get_executor();
+      executor& get_executor();
 
       /** \brief Sets tool manager object */
       void set_executor(std::auto_ptr< executor >);
 
       /** \brief Gets type registry object */
-      type_registry const* get_type_registry() const;
+      type_registry const& get_type_registry() const;
 
       /** \brief Gets type registry object */
-      type_registry* get_type_registry();
+      type_registry& get_type_registry();
 
       /** \brief Sets type registry object */
       void set_type_registry(std::auto_ptr< type_registry >);

@@ -278,7 +278,7 @@ namespace utility {
     assert((h.tree->Type() == TiXmlNode::ELEMENT) && h.tree->Value() == "processor");
 
     try {
-      p.tool_descriptor            = global_build_system.get_tool_manager()->
+      p.tool_descriptor            = global_build_system.get_tool_manager().
                                        get_tool_by_name(h.tree->GetAttribute("tool-name"));
       p.selected_input_configuration = p.tool_descriptor->find_input_configuration(
                                        tipi::tool::category::fit(h.tree->GetAttribute("category")),

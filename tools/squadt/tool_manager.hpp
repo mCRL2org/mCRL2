@@ -15,6 +15,7 @@
 #include <string>
 
 #include <boost/range/iterator_range.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "tool.hpp"
 
@@ -66,7 +67,7 @@ namespace squadt {
       typedef std::list < boost::shared_ptr < tool > >                                   tool_list;
  
       /** \brief Constant tool sequence type */
-      typedef boost::iterator_range < tool_list::const_iterator >                        tool_const_sequence;
+      typedef boost::iterator_range < tool_list::const_iterator >                        const_tool_sequence;
 
     private:
 
@@ -76,19 +77,19 @@ namespace squadt {
     public:
  
       /** \brief Constructor */
-      tool_manager();
+      tool_manager(tipi::tcp_port port = 10949);
  
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      boost::shared_ptr < tool > find(std::string const&) const;
+      boost::shared_ptr < const tool > find(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      boost::shared_ptr < tool > get_tool_by_name(std::string const&) const;
+      boost::shared_ptr < const tool > get_tool_by_name(std::string const&) const;
 
       /** \brief Add a new tool to the catalog */
-      bool add_tool(std::string const&, std::string const&);
+      bool add_tool(std::string const&, boost::filesystem::path const&);
  
       /** \brief Add a new tool to the catalog */
       bool add_tool(tool const&);
@@ -96,17 +97,11 @@ namespace squadt {
       /** \brief Get the tool_capabilities object for all known tools */
       void query_tools();
 
-      /** \brief Get the tool_capabilities object for all known tools */
-      void query_tools(boost::function < void (const std::string&) >);
-
       /** \brief Get the tool_capabilities object for a tool */
       bool query_tool(boost::shared_ptr < tool > const&);
 
-      /** \brief Reverts to the default configuration */
-      void factory_configuration();
-
       /** \brief Get the list of known tools */
-      tool_const_sequence get_tools() const;
+      const_tool_sequence get_tools() const;
  
       /** \brief Get the number of known tools */
       unsigned int number_of_tools() const;

@@ -578,7 +578,7 @@ namespace squadt {
 
         current_monitor->start_tool_operation(t, c);
 
-        global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
+        global_build_system.get_tool_manager().impl->execute(*tool_descriptor, make_output_path(output_directory),
            boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
       }
       else {
@@ -631,7 +631,7 @@ namespace squadt {
 
         current_monitor->start_tool_operation(t, c);
 
-        global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(output_directory),
+        global_build_system.get_tool_manager().impl->execute(*tool_descriptor, make_output_path(output_directory),
            boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
       }
       else {
@@ -679,7 +679,7 @@ namespace squadt {
 
     current_monitor->once_on_completion(boost::bind(&processor_impl::edit_completed, this));
 
-    global_build_system.get_tool_manager()->impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
+    global_build_system.get_tool_manager().impl->execute(c, boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
   }
 
 

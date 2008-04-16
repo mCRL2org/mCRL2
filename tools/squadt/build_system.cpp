@@ -9,6 +9,7 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 #include "build_system.hpp"
 
@@ -25,6 +26,42 @@
  * The global namespace for all squadt components.
  **/
 namespace squadt {
+  void build_system::default_tool_collection(tool_manager& m) const {
+    static char const* default_tools[] = { "diagraphica.app", "lps2pbes",
+      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
+      "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
+      "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
+      "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
+
+    using boost::filesystem::basename;
+    using boost::filesystem::path;
+
+    const path default_path(m_settings_manager->path_to_default_binaries());
+
+    for (char const** t = default_tools; *t != 0; ++t) {
+#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
+      path path_to_binary(std::string(basename(path(*t))).append(".exe"));
+
+      path_to_binary = default_path / path_to_binary;
+#elif defined(__APPLE__)
+      path path_to_binary(*t);
+
+      if (extension(path_to_binary).empty()) {
+        path_to_binary = default_path / path_to_binary;
+      }
+      else {
+        path_to_binary = default_path.branch_path() / path_to_binary;
+      }
+#else
+      path path_to_binary(basename(*t));
+
+      path_to_binary = default_path / path_to_binary;
+#endif
+
+      m.add_tool(basename(*t), path_to_binary);
+    }
+  }
+
   build_system global_build_system;
 
   build_system::build_system() {
@@ -60,24 +97,24 @@ namespace squadt {
     return (new_build_system);
   }
 
-  settings_manager const* build_system::get_settings_manager() const {
-    return (m_settings_manager.get());
+  settings_manager const& build_system::get_settings_manager() const {
+    return *m_settings_manager;
   }
 
-  settings_manager* build_system::get_settings_manager() {
-    return (m_settings_manager.get());
+  settings_manager& build_system::get_settings_manager() {
+    return *m_settings_manager;
   }
 
   void build_system::set_settings_manager(std::auto_ptr < settings_manager > t) {
     m_settings_manager = t;
   }
 
-  tool_manager const* build_system::get_tool_manager() const {
-    return (m_tool_manager.get());
+  tool_manager const& build_system::get_tool_manager() const {
+    return *m_tool_manager;
   }
 
-  tool_manager* build_system::get_tool_manager() {
-    return (m_tool_manager.get());
+  tool_manager& build_system::get_tool_manager() {
+    return *m_tool_manager;
   }
 
   tool_manager_impl const* build_system::get_tool_manager_impl() const {
@@ -92,12 +129,12 @@ namespace squadt {
     m_tool_manager = t;
   }
 
-  executor const* build_system::get_executor() const {
-    return (m_executor.get());
+  executor const& build_system::get_executor() const {
+    return *m_executor;
   }
 
-  executor* build_system::get_executor() {
-    return (m_executor.get());
+  executor& build_system::get_executor() {
+    return *m_executor;
   }
 
   executor_impl const* build_system::get_executor_impl() const {
@@ -112,12 +149,12 @@ namespace squadt {
     m_executor = t;
   }
 
-  type_registry const* build_system::get_type_registry() const {
-    return (m_type_registry.get());
+  type_registry const& build_system::get_type_registry() const {
+    return *m_type_registry.get();
   }
 
-  type_registry* build_system::get_type_registry() {
-    return (m_type_registry.get());
+  type_registry& build_system::get_type_registry() {
+    return *m_type_registry.get();
   }
 
   void build_system::set_type_registry(std::auto_ptr< type_registry > t) {
@@ -132,17 +169,20 @@ namespace squadt {
 
   void build_system::restore() {
 
-    const boost::filesystem::path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
-    const boost::filesystem::path tool_manager_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+    const boost::filesystem::path miscellaneous_file_name(
+                m_settings_manager->path_to_user_settings("preferences"));
+    const boost::filesystem::path tool_manager_file_name(
+                m_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
 
-    if (!boost::filesystem::exists(tool_manager_file_name)) {
-      m_tool_manager->factory_configuration();
+    if (!boost::filesystem::exists(tool_manager_file_name)) { // set default tool collection
+      tool_manager dummy;
 
-      visitors::store(*m_tool_manager, tool_manager_file_name);
+      default_tool_collection(dummy);
+
+      visitors::store(dummy, tool_manager_file_name);
     }
-    else {
-      visitors::restore(*m_tool_manager, tool_manager_file_name);
-    }
+
+    visitors::restore(*m_tool_manager, tool_manager_file_name);
 
     if (boost::filesystem::exists(miscellaneous_file_name)) {
       restore_visitor preferences(miscellaneous_file_name);
@@ -154,8 +194,10 @@ namespace squadt {
 
   void build_system::store() {
 
-    const boost::filesystem::path miscellaneous_file_name(global_build_system.get_settings_manager()->path_to_user_settings("preferences"));
-    const boost::filesystem::path tool_manager_file_name(global_build_system.get_settings_manager()->path_to_user_settings(settings_manager::tool_catalog_base_name));
+    const boost::filesystem::path miscellaneous_file_name(
+                m_settings_manager->path_to_user_settings("preferences"));
+    const boost::filesystem::path tool_manager_file_name(
+                m_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
 
     visitors::store(*m_tool_manager, tool_manager_file_name);
 

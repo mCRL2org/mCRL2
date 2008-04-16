@@ -342,7 +342,7 @@ namespace squadt {
   inline void processor_impl::configure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     output_directory = w;
 
-    global_build_system.get_tool_manager()->impl->execute(*tool_descriptor, make_output_path(w),
+    global_build_system.get_tool_manager().impl->execute(*tool_descriptor, make_output_path(w),
          boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), true);
 
     current_monitor->start_tool_configuration(t, c);

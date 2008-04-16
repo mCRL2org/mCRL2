@@ -391,7 +391,7 @@ namespace squadt {
           boost::shared_ptr < processor > new_processor(manager->construct());
 
           new_processor->register_output("authentic",
-                global_build_system.get_type_registry()->mime_type_from_name(name),
+                global_build_system.get_type_registry().mime_type_from_name(name),
                 name.leaf(), processor::object_descriptor::original);
 
           // Try creating the file
@@ -456,14 +456,14 @@ namespace squadt {
 
       assert(n.get_processor().get() != 0);
 
-      type_registry* registry = global_build_system.get_type_registry();
+      type_registry& registry(global_build_system.get_type_registry());
 
       bool   generated              = (0 < n.get_processor()->number_of_inputs());
       bool   show_update_operations = !n.get_processor()->is_active();
 
       wxMenu  context_menu;
 
-      bool   editable               = registry->has_registered_command(n.get_object()->get_format(), true);
+      bool   editable               = registry.has_registered_command(n.get_object()->get_format(), true);
       size_t separator_position     = 3;
 
       context_menu.Append(cmID_EDIT, wxT("edit"))->Enable(show_update_operations && editable);
@@ -478,7 +478,7 @@ namespace squadt {
         separator_position += 3;
       }
 
-      type_registry::tool_sequence range = registry->tools_by_mime_type(n.get_object()->get_format());
+      type_registry::tool_sequence range = registry.tools_by_mime_type(n.get_object()->get_format());
 
       if (!range.empty()) {
         bool        enabled     = boost::filesystem::exists(n.get_object()->get_location());
@@ -525,11 +525,11 @@ namespace squadt {
       boost::shared_ptr< processor >                    p = node_data->get_processor();
       boost::shared_ptr< processor::object_descriptor > object = node_data->get_object();
 
-      type_registry* registry = global_build_system.get_type_registry();
+      type_registry& registry(global_build_system.get_type_registry());
 
       switch (e.GetId()) {
         case cmID_EDIT:
-          p->edit(registry->get_registered_command(object->get_format(), object->get_location().leaf()).get());
+          p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
           break;
         case cmID_REMOVE:
           if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
@@ -569,7 +569,7 @@ namespace squadt {
 
               if (p->has_input_configuration()) {
                 /* Add the main input (must exist) */
-                dialog.populate_tool_list(registry->tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
+                dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
                
                 if (selected_tool) {
                   dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());

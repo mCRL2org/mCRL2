@@ -464,7 +464,7 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->register_output("", global_build_system.get_type_registry()->mime_type_from_name(s.leaf()),
+    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(s.leaf()),
                                 destination_path.leaf(), processor::object_descriptor::original);
 
     processors.push_back(p);

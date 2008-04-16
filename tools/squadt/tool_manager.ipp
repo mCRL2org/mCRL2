@@ -39,15 +39,7 @@ namespace squadt {
       typedef tool_manager::tool_list                                         tool_list;
 
       /** \brief Convenient type alias from interface class */
-      typedef tool_manager::tool_const_sequence                               tool_const_sequence;
-
-    private:
- 
-      /** \brief The default TCP port for a tool manager */
-      static const long   default_port;
-
-      /** \brief Set of tool names that are assumed to be available */
-      static char const*  default_tools[];
+      typedef tool_manager::const_tool_sequence                               const_tool_sequence;
 
     private:
  
@@ -60,8 +52,8 @@ namespace squadt {
       /** \brief Maps an instance identifier to its associated processor */
       validated_instance_list     validated_instances;
 
-      /** \brief Used to obtain unused instance identifiers */
-      mutable instance_identifier free_identifier;
+      /** \brief TCP port on which to listen for incoming connections */
+      tipi::tcp_port              tcp_port_number;
 
     private:
 
@@ -74,37 +66,31 @@ namespace squadt {
     public:
 
       /** \brief Default constructor */
-      tool_manager_impl();
+      tool_manager_impl(tipi::tcp_port port);
 
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      boost::shared_ptr< tool > find(std::string const&) const;
+      boost::shared_ptr< const tool > find(std::string const&) const;
 
       /** \brief Returns a tool by its name */
-      boost::shared_ptr< tool > get_tool_by_name(std::string const&) const;
+      boost::shared_ptr< const tool > get_tool_by_name(std::string const&) const;
 
       /** \brief Add a new tool to the catalog */
-      bool add_tool(std::string const&, std::string const&);
+      bool add_tool(std::string const&, boost::filesystem::path const&);
  
       /** \brief Add a new tool to the catalog */
       bool add_tool(tool const&);
 
       /** \brief Get the list of known tools */
-      tool_const_sequence get_tools() const;
+      const_tool_sequence get_tools() const;
  
       /** \brief Get the tool_capabilities object for all known tools */
       void query_tools();
 
-      /** \brief Get the tool_capabilities object for all known tools */
-      void query_tools(boost::function < void (std::string const&) >);
-
       /** \brief Get the tool_capabilities object for a tool */
       bool query_tool(boost::shared_ptr < tool > const&);
-
-      /** \brief Reverts to the default configuration */
-      void factory_configuration();
 
       /** \brief Get the number of known tools */
       const unsigned int number_of_tools() const;

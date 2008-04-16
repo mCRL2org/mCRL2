@@ -117,13 +117,13 @@ namespace squadt {
     wxString edit_preferences::no_action = wxT("");
 
     void execution_preferences::maximum_changed(wxCommandEvent&) {
-      global_build_system.get_executor()->set_maximum_instance_count(maximum_concurrent->GetValue());
+      global_build_system.get_executor().set_maximum_instance_count(maximum_concurrent->GetValue());
     }
 
     execution_preferences::execution_preferences(wxWindow* w) : wxPanel(w, wxID_ANY) {
       wxSizer* current_sizer = new wxBoxSizer(wxVERTICAL);
 
-      maximum_concurrent = new wxSlider(this, wxID_ANY, global_build_system.get_executor()->get_maximum_instance_count(),
+      maximum_concurrent = new wxSlider(this, wxID_ANY, global_build_system.get_executor().get_maximum_instance_count(),
                                     1, 25, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS|wxSL_BOTTOM);
 
       current_sizer->AddStretchSpacer();
@@ -167,7 +167,7 @@ namespace squadt {
 
             get_wxlist_value(s, formats_and_actions, selected, 0);
 
-            global_build_system.get_type_registry()->register_command(
+            global_build_system.get_type_registry().register_command(
                             mime_type(std::string(formats_and_actions->GetItemText(selected).fn_str())), std::string(command_dialog.GetValue().fn_str()));
           }
         }
@@ -191,7 +191,7 @@ namespace squadt {
       
           formats_and_actions->SetItem(row, 0, wxString(mt.to_string().c_str(), wxConvLocal));
 
-          std::auto_ptr< command > c = global_build_system.get_type_registry()->get_registered_command(mt, "$");
+          std::auto_ptr< command > c = global_build_system.get_type_registry().get_registered_command(mt, "$");
 
           if (c.get()) {
             formats_and_actions->SetItem(row, 1, wxString(c->as_string().c_str(), wxConvLocal));
@@ -216,7 +216,7 @@ namespace squadt {
         
       get_wxlist_value(s, formats_and_actions, selected, 0);
 
-      global_build_system.get_type_registry()->register_command(
+      global_build_system.get_type_registry().register_command(
                 mime_type(std::string(s.GetText().fn_str())), type_registry::command_none);
 
       formats_and_actions->DeleteItem(selected);
@@ -256,12 +256,12 @@ namespace squadt {
 
       long row = 0;
 
-      type_registry* registry = global_build_system.get_type_registry();
+      type_registry& registry(global_build_system.get_type_registry());
 
-      std::set < tipi::mime_type > types(registry->get_mime_types());
+      std::set < tipi::mime_type > types(registry.get_mime_types());
 
       BOOST_FOREACH(tipi::mime_type f, types) {
-        std::auto_ptr < command > command_line = registry->get_registered_command(f, "$");
+        std::auto_ptr < command > command_line = registry.get_registered_command(f, "$");
 
         formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
         formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->as_string().c_str(), wxConvLocal) : no_action);

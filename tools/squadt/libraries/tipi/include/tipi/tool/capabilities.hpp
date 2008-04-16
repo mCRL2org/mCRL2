@@ -191,6 +191,7 @@ namespace tipi {
         boost::shared_ptr< const input_configuration > find_input_configuration(const mime_type&, const tool::category&) const;
     };
   
+    /// \cond INTERNAL
     /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
     inline bool operator< (const capabilities::input_configuration& p, const capabilities::input_configuration& q) {
       capabilities::input_configuration::object_map::const_iterator i = p.m_object_map.begin();
@@ -212,6 +213,7 @@ namespace tipi {
     inline bool operator< (const capabilities::output_configuration& a, const capabilities::output_configuration& b) {
       return (a.m_mime_type < b.m_mime_type || a.m_mime_type == b.m_mime_type);
     }
+    /// \endcond
   }
 }
 

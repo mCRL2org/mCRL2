@@ -367,24 +367,23 @@ namespace mcrl2 {
      *
      * \param[in] count the number of arguments
      * \param[in] arguments C-style array with arguments as C-style zero-terminated string
+     * \pre arguments uses UTF-8 encoding
      **/
     template < >
     std::vector< std::string > command_line_parser::convert(const int count, wchar_t const* const* const arguments) {
       std::vector< std::string > result;
 
       if (0 < count) {
-        std::ostringstream converter(std::ios_base::out | std::ios_base::binary);
-
-        converter.imbue(std::locale::classic());
+        std::ostringstream converter;
 
         result.resize(count);
 
         std::vector< std::string >::reverse_iterator j = result.rbegin();
 
         for (wchar_t const* const* i = &arguments[count - 1]; i != &arguments[0]; --i) {
-          converter << *i;
-
-          *(j++) = converter.str();
+          std::wstring argument(*i);
+          
+          *(j++) = std::string(argument.begin(), argument.end());
         }
       }
 

@@ -16,6 +16,7 @@
 
 namespace tipi {
   namespace tool {
+    /// \cond INTERNAL
     /**
      * \brief Operator for writing to stream
      *
@@ -27,6 +28,8 @@ namespace tipi {
  
       return (s);
     }
+
+    /// \endcond
 
     capabilities::capabilities(const version v) : m_protocol_version(v) {
     }

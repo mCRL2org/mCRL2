@@ -20,7 +20,7 @@
 #include "tipi/detail/utility/generic_visitor.hpp"
 #include "tipi/visitors.hpp"
 
-#include <tipi/detail/controller.ipp>
+#include "tipi/detail/controller.ipp"
 
 #include "settings_manager.hpp"
 #include "tool_manager.ipp"
@@ -34,28 +34,11 @@ namespace squadt {
 
   using execution::command;
 
-  namespace bf = boost::filesystem;
-
-  /** \brief Socket connection option scheme for easy command generation */
-  const char* socket_connect_pattern    = "--si-connect=tipi://%s:%s";
-
-  /** \brief Identifier option scheme for easy command generation */
-  const char* identifier_pattern        = "--si-identifier=%s";
-
-  /** \brief Identifier option scheme for easy command generation */
-  const char* log_filter_level_pattern  = "--si-log-filter-level=%s";
-
   const boost::shared_ptr < tipi::tool::capabilities > tool::no_capabilities(new tipi::tool::capabilities());
 
   /// \cond INTERNAL_DOCS
-  const long tool_manager_impl::default_port = 10949;
-
-  char const* tool_manager_impl::default_tools[] = {"diagraphica.app", "lps2pbes", "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst", "lpsinfo",
-                                                    "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm", "ltsconvert", "ltsinfo",
-                                                    "ltsgraph.app", "ltsview.app", "mcrl22lps", "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim.app", 0};
-
-
-  tool_manager_impl::tool_manager_impl() : tipi::controller::communicator(), free_identifier(0) {
+  tool_manager_impl::tool_manager_impl(tipi::tcp_port port)
+                            : tipi::controller::communicator(), tcp_port_number(port) {
     struct local {
       /**
        * \param[in] m the incoming message
@@ -87,7 +70,7 @@ namespace squadt {
     };
 
     /* Listen for incoming socket connections on the default interface with the default port */
-    add_listener("", default_port);
+    add_listener("", tcp_port_number);
 
     /* Set handler for incoming instance identification messages */
     add_handler(tipi::message_identification, boost::bind(&local::handle_relay_connection, boost::ref(*this), _1));
@@ -99,7 +82,7 @@ namespace squadt {
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    **/
   void tool_manager_impl::execute(execution::command const* c, execution::task_monitor::sptr p, bool b) {
-    global_build_system.get_executor()->execute(*c, p, b);
+    global_build_system.get_executor().execute(*c, p, b);
   }
 
   /**
@@ -109,12 +92,19 @@ namespace squadt {
    * \param[in] w the directory in which execution should take place
    **/
   void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, execution::task_monitor::sptr p, bool b) {
-    instance_identifier id = free_identifier++;
+    static const char* socket_connect_pattern("--si-connect=tipi://%s:%s");
+    static const char* identifier_pattern("--si-identifier=%s");
+    static const char* log_filter_level_pattern("--si-log-filter-level=%s");
+
+    // For generating unique identifiers
+    static instance_identifier id = 0;
+
+    ++id;
 
     execution::command c(t.get_location().string(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
-                            % boost::asio::ip::address_v4::loopback() % default_port));
+                            % boost::asio::ip::address_v4::loopback() % tcp_port_number));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
     c.append_argument(boost::str(boost::format(log_filter_level_pattern)
@@ -123,7 +113,7 @@ namespace squadt {
     // Security note, should remove again if it is not matched to a process within some reasonable amount of time
     instances[id] = p;
 
-    global_build_system.get_executor()->execute(c, p, b);
+    global_build_system.get_executor().execute(c, p, b);
   }
 
   /**
@@ -144,7 +134,7 @@ namespace squadt {
        
             if (guard) {
               t->m_capabilities.reset(new tipi::tool::capabilities);
-       
+
               tipi::visitors::restore(*t->m_capabilities, m->to_string());
             }
           }
@@ -177,24 +167,25 @@ namespace squadt {
    * \attention This function blocks.
    **/
   bool tool_manager_impl::query_tool(boost::shared_ptr < tool > const& t) {
-    /* Sanity check: establish tool existence */
-    if (t->get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t->get_location()))) {
-      return (false);
+    /* Sanity check: establish existence of program binary */
+    if (!t->get_location().empty() && boost::filesystem::exists(t->get_location())) {
+
+      /* Extractor object, for retrieving the data from the running tool process */
+      boost::shared_ptr < extractor > e(new extractor());
+ 
+      execute(*t, boost::filesystem::current_path().string(),
+                 boost::dynamic_pointer_cast < execution::task_monitor > (e), true);
+ 
+      /* Wait until the process has been identified */
+      boost::shared_ptr < execution::process > p(e->get_process(true));
+ 
+      if (p.get() != 0) {
+        /* Start extracting */
+        return (*e)(e, t);
+      }
     }
 
-    /* Create extractor object, that will retrieve the data from the running tool process */
-    boost::shared_ptr < extractor > e(new extractor());
-
-    execute(*t, boost::filesystem::current_path().string(),
-               boost::dynamic_pointer_cast < execution::task_monitor > (e), true);
-
-    /* Wait until the process has been identified */
-    boost::shared_ptr < execution::process > p(e->get_process(true));
-
-    if (p.get() != 0) {
-      /* Start extracting */
-      return (*e)(e, t);
-    }
+    get_logger().log(1, "Request for interface failed (tool `" + t->get_name()+ "')");
 
     return false;
   }
@@ -202,7 +193,7 @@ namespace squadt {
   void tool_manager_impl::terminate() {
     /* Request the local tool executor to terminate the running processes known to this tool manager */
     for (validated_instance_list::const_iterator i = validated_instances.begin(); i != validated_instances.end(); ++i) {
-      global_build_system.get_executor()->terminate((*i)->get_process());
+      global_build_system.get_executor().terminate((*i)->get_process());
     }
   }
 
@@ -214,45 +205,13 @@ namespace squadt {
     disconnect();
   }
   
-  void tool_manager_impl::factory_configuration() {
-    using boost::filesystem::basename;
-    using boost::filesystem::path;
-
-    const path default_path(global_build_system.get_settings_manager()->path_to_default_binaries());
-
-    tools.clear();
-
-    for (char const** t = tool_manager_impl::default_tools; *t != 0; ++t) {
-#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
-      path path_to_binary(std::string(basename(path(*t))).append(".exe"));
-
-      path_to_binary = default_path / path_to_binary;
-#elif defined(__APPLE__)
-      path path_to_binary(*t);
-
-      if (extension(path_to_binary).empty()) {
-        path_to_binary = default_path / path_to_binary;
-      }
-      else {
-        path_to_binary = default_path.branch_path() / path_to_binary;
-      }
-#else
-      path path_to_binary(basename(*t));
-
-      path_to_binary = default_path / path_to_binary;
-#endif
-
-      tools.push_back(boost::shared_ptr < tool > (new tool(basename(*t), path_to_binary)));
-    }
-  }
-
   /**
    * \param[in] n the name of the tool
    **/
-  boost::shared_ptr< tool > tool_manager_impl::find(const std::string& n) const {
+  boost::shared_ptr< const tool > tool_manager_impl::find(const std::string& n) const {
     using namespace boost;
 
-    boost::shared_ptr< tool > t;
+    boost::shared_ptr< const tool > t;
 
     for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
       if ((*i)->get_name() == n) {
@@ -280,7 +239,7 @@ namespace squadt {
    *
    * \return whether the tool was added or not
    **/
-  bool tool_manager_impl::add_tool(const std::string& n, const std::string& l) {
+  bool tool_manager_impl::add_tool(const std::string& n, const boost::filesystem::path& l) {
     bool b = exists(n);
 
     if (!b) {
@@ -304,15 +263,16 @@ namespace squadt {
   }
 
   /** \brief Get the list of known tools */
-  tool_manager::tool_const_sequence tool_manager_impl::get_tools() const {
-    return tool_manager::tool_const_sequence(tools);
+  tool_manager::const_tool_sequence tool_manager_impl::get_tools() const {
+    return tool_manager::const_tool_sequence(tools);
   }
   /// \endcond
 
   /**
    * Default constructor
    **/
-  tool_manager::tool_manager() : impl(new tool_manager_impl) {
+  tool_manager::tool_manager(tipi::tcp_port port) :
+                                        impl(new tool_manager_impl(port)) {
   }
 
   /**
@@ -325,8 +285,8 @@ namespace squadt {
   /**
    * \param[in] n the name of the tool
    **/
-  boost::shared_ptr< tool > tool_manager::find(const std::string& n) const {
-    return (impl->find(n));
+  boost::shared_ptr< const tool > tool_manager::find(const std::string& n) const {
+    return impl->find(n);
   }
 
   /**
@@ -334,8 +294,8 @@ namespace squadt {
    *
    * \pre a tool with this name must be among the known tools
    **/
-  boost::shared_ptr < tool > tool_manager::get_tool_by_name(std::string const& n) const {
-    boost::shared_ptr< tool > t = impl->find(n);
+  boost::shared_ptr < const tool > tool_manager::get_tool_by_name(std::string const& n) const {
+    boost::shared_ptr< const tool > t = impl->find(n);
 
     /* Check tool existence */
     if (!t) {
@@ -351,7 +311,7 @@ namespace squadt {
    *
    * \return whether the tool was added or not
    **/
-  bool tool_manager::add_tool(const std::string& n, const std::string& l) {
+  bool tool_manager::add_tool(const std::string& n, const boost::filesystem::path& l) {
     return (impl->add_tool(n, l));
   }
 
@@ -363,42 +323,19 @@ namespace squadt {
   }
  
   void tool_manager::query_tools() {
-    tool_manager::tool_const_sequence tools(get_tools());
-
-    BOOST_FOREACH(tool_list::value_type t, tools) {
-      impl->query_tool(t);
-    }
-  }
-
-  /**
-   * \param[in] h a function that is called with the name of a tool before it is queried
-   **/
-  void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
-    using namespace boost;
-
-    tool_manager::tool_const_sequence tools(get_tools());
+    tool_manager::const_tool_sequence tools(get_tools());
 
     tool_list retry_list;
 
     BOOST_FOREACH(tool_list::value_type t, tools) {
-      h(t->get_name());
-
       if (!impl->query_tool(t)) {
         retry_list.push_back(t);
       }
     }
 
-    if (4 < retry_list.size()) {
-      throw std::runtime_error("Initialisation failed for too many tools!");
-    }
-
     /* Retry initialisation of failed tools */
     BOOST_FOREACH(tool_list::value_type t, retry_list) {
-      h(t->get_name());
-
-      if (!impl->query_tool(t)) {
-        /* TODO log failure */
-      }
+      impl->query_tool(t);
     }
   }
 
@@ -408,21 +345,17 @@ namespace squadt {
    * \attention This function blocks.
    **/
   bool tool_manager::query_tool(boost::shared_ptr < tool > const& t) {
-    return (impl->query_tool(t));
-  }
-
-  void tool_manager::factory_configuration() {
-    impl->factory_configuration();
+    return impl->query_tool(t);
   }
 
   /** \brief Get the list of known tools */
-  tool_manager::tool_const_sequence tool_manager::get_tools() const {
-    return (boost::make_iterator_range(impl->tools));
+  tool_manager::const_tool_sequence tool_manager::get_tools() const {
+    return boost::make_iterator_range(impl->tools);
   }
  
   /** \brief Get the number of known tools */
   unsigned int tool_manager::number_of_tools() const {
-    return (impl->tools.size());
+    return impl->tools.size();
   }
 
   /** \brief Have the tool executor terminate all running tools */

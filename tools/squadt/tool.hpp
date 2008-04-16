@@ -61,13 +61,13 @@ namespace squadt {
       /** \brief Constructor */
       inline tool(std::string const&, boost::filesystem::path const&, boost::shared_ptr < tipi::tool::capabilities > = tool::no_capabilities);
 
-      /** \brief Copy constructor */
-      inline tool(tool const&);
-
       /** \brief Default constructor */
       inline tool();
 
     public:
+
+      /** \brief Copy constructor */
+      inline tool(tool const&);
 
       /** \brief Set capabilities object for this tool */
       inline void set_capabilities(boost::shared_ptr < tipi::tool::capabilities >);
@@ -78,8 +78,14 @@ namespace squadt {
       /** \brief Get the location to for this tool */
       inline boost::filesystem::path get_location() const;
 
+      /** \brief Get the location to for this tool */
+      inline void set_location(boost::filesystem::path const& p);
+
       /** \brief Get the name of this tool */
       inline std::string get_name() const;
+
+      /** \brief Whether or not the tool is usable */
+      inline bool is_usable() const;
 
       /** \brief Find a specific input combination of this tool, if it exists */
       inline boost::shared_ptr < const input_configuration > find_input_configuration(build_system::tool_category const&, build_system::storage_format const&) const;
@@ -109,15 +115,26 @@ namespace squadt {
   }
 
   inline boost::shared_ptr < tipi::tool::capabilities > tool::get_capabilities() const {
-    return (m_capabilities);
+    return m_capabilities;
   }
 
   inline boost::filesystem::path tool::get_location() const {
-    return (m_location);
+    return m_location;
+  }
+
+  /**
+   * \param[in] p a full path to the executable
+   **/
+  inline void tool::set_location(boost::filesystem::path const& p) {
+    m_location = p;
   }
 
   inline std::string tool::get_name() const {
-    return (m_name);
+    return m_name;
+  }
+
+  inline bool tool::is_usable() const {
+    return m_capabilities.get() != 0;
   }
 
   /**

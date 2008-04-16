@@ -137,13 +137,13 @@ namespace squadt {
   void type_registry::build_index() {
     using tipi::tool::capabilities;
 
-    tool_manager::tool_const_sequence tools = global_build_system.get_tool_manager()->get_tools();
+    tool_manager::const_tool_sequence tools = global_build_system.get_tool_manager().get_tools();
 
     /* Make sure the map is empty */
     categories_for_format.clear();
 
-    for (tool_manager::tool_const_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
-      if ((*t)->get_capabilities()) {
+    for (tool_manager::const_tool_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
+      if ((*t)->is_usable()) {
         capabilities::input_configuration_range inputs((*t)->get_capabilities()->get_input_configurations());
        
         BOOST_FOREACH(capabilities::input_configuration_range::value_type j, inputs) {
@@ -256,7 +256,9 @@ namespace squadt {
       }
     }
 
-    BOOST_FOREACH(boost::shared_ptr< tool > t, global_build_system.get_tool_manager()->get_tools()) {
+    tool_manager::const_tool_sequence tools = global_build_system.get_tool_manager().get_tools();
+
+    BOOST_FOREACH(boost::shared_ptr< tool > t, tools) {
       tipi::tool::capabilities::output_configuration_range outputs(t->get_capabilities()->get_output_configurations());
 
       BOOST_FOREACH(tipi::tool::capabilities::output_configuration_range::value_type i, outputs) {

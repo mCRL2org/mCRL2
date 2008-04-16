@@ -280,7 +280,7 @@ namespace squadt {
       catch (std::exception& e) {
         wxMessageDialog(0, wxT("Some settings could not be saved due to a write error.\n\n")
                            wxT("Please check the permissions of all files in ") +
-                           wxString(global_build_system.get_settings_manager()->path_to_user_settings().c_str(), wxConvLocal),
+                           wxString(global_build_system.get_settings_manager().path_to_user_settings().c_str(), wxConvLocal),
                            wxT("Fatal: save settings failed"), wxOK).ShowModal();
       }
 

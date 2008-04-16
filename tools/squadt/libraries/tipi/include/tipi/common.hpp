@@ -167,6 +167,9 @@ namespace tipi {
 
   /** \brief Protocol version {major,minor} */
   const version default_protocol_version = {1,0};
+
+  /** \brief Type for TCP port specification */
+  typedef unsigned short int tcp_port;
 }
 
 #endif
