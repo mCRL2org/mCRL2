@@ -421,7 +421,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 							        PrintPart_CXX(msg,ATgetArgument((ATermAppl) ATgetFirst(k),1),ppDefault);
 						        }
 						        msg << " that satisfy ";
-						        PrintPart_CXX(msg,(ATerm) info.rewr_obj->fromRewriteFormat(info.rewr_obj->rewriteInternal(enum_expr)),ppDefault);
+						        PrintPart_CXX(msg,(ATerm) info.rewr_obj->fromRewriteFormat(enum_expr),ppDefault);
 						        msg << endl;
 						        gsWarningMsg("%s",msg.str().c_str());
 						        *info.max_vars *= MAX_VARS_FACTOR;
@@ -477,7 +477,7 @@ bool EnumeratorSolutionsStandard::errorOccurred()
 void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_only)
 {
 	enum_vars = Vars;
-	enum_expr = Expr;
+	enum_expr = info.rewr_obj->rewriteInternal(Expr);
 	check_true = true_only;
 
 	fs_reset();
@@ -487,7 +487,7 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
 
 	used_vars = 0;
 
-	fs_push(enum_vars,ATmakeList0(),info.rewr_obj->rewriteInternal(enum_expr));
+	fs_push(enum_vars,ATmakeList0(),enum_expr);
 	if ( !ATisEmpty(enum_vars) )
 	{
 		EliminateVars(&fs_bottom());
@@ -498,15 +498,12 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
 		fs_pop();
 	} else if ( ATisEmpty(fs_bottom().vars) )
 	{
-		if ( !ATisEqual(fs_bottom().expr,info.rewr_false) )
+		if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
 		{
-			if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
-			{
-				gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
-				error = true;
-			} else {
-				ss_push(build_solution(enum_vars,fs_bottom().vals));
-			}
+			gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
+			error = true;
+		} else {
+			ss_push(build_solution(enum_vars,fs_bottom().vals));
 		}
 		fs_pop();
 	}
