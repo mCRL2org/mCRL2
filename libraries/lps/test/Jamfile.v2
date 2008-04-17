@@ -23,4 +23,5 @@ test-suite lps
       [ run parelm_test.cpp ]
       [ run lpsconfcheck_test.cpp ]
       [ run decluster_test.cpp ]
+      [ run sumelm_test.cpp ]
     ;

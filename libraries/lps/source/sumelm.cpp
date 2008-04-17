@@ -236,7 +236,7 @@ namespace lps {
       data_expression a,b;
       a = recursive_substitute_equalities(summand_, lhs(working_condition), substitutions);
       b = recursive_substitute_equalities(summand_, rhs(working_condition), substitutions);
-      result = and_(a,b);
+      result = optimized::and_(a,b);
     }
 
     else if (is_equal_to(working_condition))
