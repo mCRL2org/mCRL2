@@ -101,11 +101,12 @@ namespace lps {
   {
     // First apply already present substitutions to rhs
     data_expression new_rhs = sumelm_replace(rhs, replacements);
+    // Use 1pt-map lhs:=new_rhs to substitute in the righthandsides
+    std::map<data_expression, data_expression> tmp_subst;
+    tmp_subst[lhs] = new_rhs;
     for (std::map<data_expression, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
     {
-      if (i->second == lhs) {
-        i->second = new_rhs;
-      }
+      i->second = sumelm_replace(i->second, tmp_subst);
     }
     replacements[lhs] = new_rhs;
   }
