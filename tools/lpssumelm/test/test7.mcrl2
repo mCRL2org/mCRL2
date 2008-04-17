@@ -1,8 +1,0 @@
-% lpssumelm Test Case 7 -- used variable occurs in delta summand
-%
-% This is a regression test introduced after a bug report by
-% Bas Ploeger. In contrary to what was assumed before, used
-% sum variables should not be removed from delta summands.
-proc X = sum y:Bool . y -> delta . X;
-
-init X;
