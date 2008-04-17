@@ -86,6 +86,80 @@ void test_case_3(const t_decluster_options& opts)
   BOOST_CHECK(sum_occurs);
 }
 
+///This is a test in which tau summands occur.
+///We override opts such that only tau summands are declustered.
+///Note: Test case 5 tests the same specification, but uses the defaults.
+void test_case_4(const t_decluster_options& opts)
+{
+  const std::string text(
+    "sort S = struct s1 | s2 | s3;\n"
+    "     T = struct t1 | t2 | t3;\n"
+    "act a;\n"
+    "proc P = sum s : S . tau . P\n"
+    "       + sum t : T . a . P;\n"
+    "init P;\n"
+  );
+
+  t_decluster_options new_opts = opts;
+  new_opts.tau_only = true;
+
+  specification s0 = mcrl22lps(text);
+  Rewriter* r = createRewriter(s0.data(), new_opts.strategy);
+  specification s1 = decluster(s0, *r, new_opts);
+  summand_list summands1 = s1.process().summands();
+  bool tau_sum_occurs = false;
+  bool sum_occurs = false;
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    if(i->is_tau())
+    {
+      tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
+    }
+    else
+    {
+      sum_occurs = sum_occurs || !i->summation_variables().empty();
+    }
+  }
+  BOOST_CHECK(!tau_sum_occurs);
+  BOOST_CHECK(sum_occurs);
+}
+
+///This is a test in which tau summands occur.
+///Both sum variables should be expanded, hence no sum variable may occur in the
+///result.
+///Note: Test case 4 tests the same specification, but only expands the tau
+///summands.
+void test_case_5(const t_decluster_options& opts)
+{
+  const std::string text(
+    "sort S = struct s1 | s2 | s3;\n"
+    "     T = struct t1 | t2 | t3;\n"
+    "act a;\n"
+    "proc P = sum s : S . tau . P\n"
+    "       + sum t : T . a . P;\n"
+    "init P;\n"
+  );
+
+  specification s0 = mcrl22lps(text);
+  Rewriter* r = createRewriter(s0.data(), opts.strategy);
+  specification s1 = decluster(s0, *r, opts);
+  summand_list summands1 = s1.process().summands();
+  bool tau_sum_occurs = false;
+  bool sum_occurs = false;
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    if(i->is_tau())
+    {
+      tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
+    }
+    else
+    {
+      sum_occurs = sum_occurs || !i->summation_variables().empty();
+    }
+  }
+  BOOST_CHECK(!tau_sum_occurs);
+  BOOST_CHECK(!sum_occurs);
+}
 
 int test_main(int ac, char** av)
 {
@@ -96,6 +170,8 @@ int test_main(int ac, char** av)
   test_case_1(opts);
   test_case_2(opts);
   test_case_3(opts);
+  test_case_4(opts);
+  test_case_5(opts);
 
   return 0;
 }
