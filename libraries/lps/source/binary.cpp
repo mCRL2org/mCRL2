@@ -321,7 +321,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       {
         if (!elts.empty())
         {
-          r = or_(r, data::data_expr::equal_to(arg, elts.front()));
+          r = optimized::or_(r, data::data_expr::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }
