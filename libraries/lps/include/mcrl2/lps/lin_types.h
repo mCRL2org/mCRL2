@@ -36,9 +36,9 @@ struct t_lin_options {
   bool nosumelm;
   bool nodeltaelimination;
   bool add_delta;
-  bool opt_check_only;
-  t_phase opt_end_phase;
-  bool opt_noalpha;
+  bool check_only;
+  t_phase end_phase;
+  bool noalpha;
   string infilename;
   string outfilename;
   
@@ -54,10 +54,9 @@ struct t_lin_options {
       nosumelm(false),
       nodeltaelimination(false),
       add_delta(false),
-      opt_check_only(false),
-      opt_end_phase(phNone),
-      opt_noalpha(false)
-      
+      check_only(false),
+      end_phase(phNone),
+      noalpha(false)
   {}
 };
 

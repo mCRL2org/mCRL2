@@ -42,6 +42,7 @@ using namespace::mcrl2;
 #endif
 
 //Functions used by the main program
+static t_lin_options parse_command_line(int argc, char *argv[]);
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
 static void PrintMoreInfo(char *Name);
@@ -327,7 +328,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
 
   task_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
   task_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
-  task_options.opt_noalpha             = c.get_option_argument< bool >(option_no_alpha);
+  task_options.noalpha             = c.get_option_argument< bool >(option_no_alpha);
   task_options.newstate                = c.get_option_argument< bool >(option_newstate);
   task_options.binary                  = c.get_option_argument< bool >(option_binary);
   task_options.statenames              = c.get_option_argument< bool >(option_statenames);
@@ -337,9 +338,9 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   task_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
   task_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
   
-  task_options.opt_end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_argument(option_end_phase, 0)));
+  task_options.end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_argument(option_end_phase, 0)));
 
-  task_options.opt_check_only = (task_options.opt_end_phase != phNone);
+  task_options.check_only = (task_options.end_phase != phNone);
 
   return (result);
 }
@@ -376,7 +377,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     result = false;
   }
-  else if (task_options.opt_check_only) {
+  else if (task_options.check_only) {
     message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % task_options.infilename));
   }
   else {
@@ -408,24 +409,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 using namespace std;
 
-static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
+static t_lin_options parse_command_line(int argc, char *argv[])
 { 
   //declarations for getopt
+  t_lin_options lin_options;
   bool lm_chosen = false;
-  t_lin_method opt_lin_method = lmRegular;
-  bool opt_no_intermediate_cluster = false;
-  bool opt_final_cluster = false;
-  bool opt_newstate = false;
-  bool opt_binary = false;
-  bool opt_statenames = false;
-  bool opt_noalpha = false;
-  bool opt_norewrite = false;
-  bool opt_nofreevars = false;
-  bool opt_check_only = false;
-  bool opt_nosumelm = false;
-  bool opt_nodeltaelimination = false;
-  bool opt_add_delta = false;
-  t_phase opt_end_phase = phNone;
   #define ShortOptions   "0123cnrwbaofep:hqvdmgD"
   #define VersionOption  0x1
   struct option LongOptions[] = {
@@ -458,85 +446,86 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
   while (Option != -1) {
     switch (Option){
       case '0': /* stack */
-        if (lm_chosen && opt_lin_method != lmStack) {
+        if (lm_chosen && lin_options.lin_method != lmStack) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return false;
+          exit(EXIT_FAILURE);
         }
         lm_chosen = true;
-        opt_lin_method = lmStack;
+        lin_options.lin_method = lmStack;
         break;
       case '1': /* regular */
-        if (lm_chosen && opt_lin_method != lmRegular) {
+        if (lm_chosen && lin_options.lin_method != lmRegular) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return false;
+          exit(EXIT_FAILURE);
         }
         lm_chosen = true;
-        opt_lin_method = lmRegular;
+        lin_options.lin_method = lmRegular;
         break;
       case '2': /* regular2 */
-        if (lm_chosen && opt_lin_method != lmRegular2) {
+        if (lm_chosen && lin_options.lin_method != lmRegular2) {
           gsErrorMsg("only one method of linearisation is allowed\n");
-          return false;
+          exit(EXIT_FAILURE);
         }
         lm_chosen = true;
-        opt_lin_method = lmRegular2;
+        lin_options.lin_method = lmRegular2;
         break;
       case 'c': /* cluster */ 
-        opt_final_cluster = true;
+        lin_options.final_cluster = true;
         break;
       case 'n': /* no-cluster */
-        opt_no_intermediate_cluster = true;
+        lin_options.no_intermediate_cluster = true;
         break;
       case 'r': /* no-alpha */
-        opt_noalpha = true;
+        lin_options.noalpha = true;
         break;
       case 'w': /* newstate */ 
-        opt_newstate = true;
+        lin_options.newstate = true;
         break;
       case 'b': /* binary */ 
-        opt_binary = true;
+        lin_options.binary = true;
         break;
       case 'a': /* statenames */ 
-        opt_statenames = true;
+        lin_options.statenames = true;
         break;
       case 'o': /* no-rewrite */ 
-        opt_norewrite = true;
+        lin_options.norewrite = true;
         break;
       case 'f': /* nofreevars */
-        opt_nofreevars = true;
+        lin_options.nofreevars = true;
         break;
       case 'e': /* check-only */
-        opt_check_only = true;
+        lin_options.check_only = true;
+        lin_options.end_phase = phTypeCheck;
         break;
       case 'm': /* no-sumelm */
-        opt_nosumelm = true;
+        lin_options.nosumelm = true;
         break;
       case 'g': /* no-deltaelm */
-        opt_nodeltaelimination = true;
+        lin_options.nodeltaelimination = true;
         break;
       case 'D': /* delta */
-        opt_add_delta = true;
+        lin_options.add_delta = true;
         break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
-          opt_end_phase = phParse;
+          lin_options.end_phase = phParse;
         } else if (strcmp(optarg, "tc") == 0) {
-          opt_end_phase = phTypeCheck;
+          lin_options.end_phase = phTypeCheck;
         } else if (strcmp(optarg, "ar") == 0) {
-          opt_end_phase = phAlphaRed;
+          lin_options.end_phase = phAlphaRed;
         } else if (strcmp(optarg, "di") == 0) {
-          opt_end_phase = phDataImpl;
+          lin_options.end_phase = phDataImpl;
         } else {
           gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
-          return false;
+          exit(EXIT_FAILURE);
         }
         break;
       case 'h': /* help */
         PrintHelp(argv[0]);
-        return false;
+        exit(EXIT_SUCCESS);
       case VersionOption: /* version */
         print_version_information(NAME, AUTHOR);
-        return false;
+        exit(EXIT_SUCCESS);
       case 'q': /* quiet */
         gsSetQuietMsg();
         break;
@@ -549,67 +538,44 @@ static bool parse_command_line(int argc, char *argv[],t_lin_options &lin_options
       case '?':
       default:
         PrintMoreInfo(argv[0]); 
-        return false;
+        exit(EXIT_FAILURE);
     } 
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
   //check for dangerous and illegal option combinations
-  if (opt_newstate && opt_lin_method == lmStack) {
+  if (lin_options.newstate && lin_options.lin_method == lmStack) {
     gsErrorMsg("option -w can only be used with -1 or -2\n");
-    return false;
+    exit(EXIT_FAILURE);
   }
-  if (opt_check_only && (opt_end_phase != phNone)) {
+  if (lin_options.check_only && (lin_options.end_phase != phTypeCheck)) {
     gsErrorMsg("options -e and -p may not be used in conjunction\n");
-    return false;
+    exit(EXIT_FAILURE);
   }
-  if (opt_noalpha && (opt_end_phase == phAlphaRed)) {
+  if (lin_options.noalpha && (lin_options.end_phase == phAlphaRed)) {
     gsErrorMsg("options -r and -p ar may not be used in conjunction\n");
-    return false;
+    exit(EXIT_FAILURE);
   }
-  //check for wrong number of arguments
-  string infilename;
-  string outfilename;
   int noargc; //non-option argument count
   noargc = argc - optind;
   if (noargc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
     PrintMoreInfo(argv[0]);
-    return false;
+    exit(EXIT_FAILURE);
   } else {
     //noargc >= 0 && noargc <= 2
     if (noargc > 0) {
-      infilename = argv[optind];
+      lin_options.infilename = argv[optind];
     }
     if (noargc == 2) {
-      outfilename = argv[optind + 1];
+      lin_options.outfilename = argv[optind + 1];
     }
   }
-
-  //set linearisation parameters
-  lin_options.lin_method = opt_lin_method;
-  lin_options.final_cluster = opt_final_cluster;
-  lin_options.no_intermediate_cluster = opt_no_intermediate_cluster;
-  lin_options.newstate = opt_newstate;
-  lin_options.binary = opt_binary;
-  lin_options.statenames = opt_statenames;
-  lin_options.norewrite = opt_norewrite;
-  lin_options.nofreevars = opt_nofreevars;
-  lin_options.nosumelm = opt_nosumelm;
-  lin_options.nodeltaelimination = opt_nodeltaelimination;
-  lin_options.opt_check_only = opt_check_only;
-  lin_options.opt_end_phase = opt_end_phase;
-  lin_options.opt_noalpha = opt_noalpha;
-  lin_options.infilename = infilename;
-  lin_options.outfilename = outfilename;
-  lin_options.add_delta = opt_add_delta;
-
-  return true;  // main can continue
+  return lin_options;
 }
 
 ATermAppl linearise_file(t_lin_options &lin_options)
 {
   ATermAppl result = NULL;
-  t_phase end_phase = lin_options.opt_check_only?phTypeCheck:lin_options.opt_end_phase;
   //parse specification
   if (lin_options.infilename == "") {
     //parse specification from stdin
@@ -632,7 +598,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     return NULL;
   }
 
-  if (end_phase == phParse) {
+  if (lin_options.end_phase == phParse) {
     return result;
   }
   //type check the result
@@ -643,11 +609,11 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     gsErrorMsg("type checking failed\n");
     return NULL;
   }
-  if (end_phase == phTypeCheck) {
+  if (lin_options.end_phase == phTypeCheck) {
     return result;
   }
   //perform alphabet reductions 
-  if (!lin_options.opt_noalpha) {
+  if (!lin_options.noalpha) {
     gsVerboseMsg("performing alphabet reductions...\n");
     result = gsAlpha(result);
     if (result == NULL)
@@ -655,7 +621,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
       gsErrorMsg("alphabet reductions failed\n");
       return NULL;
     }
-    if (end_phase == phAlphaRed) {
+    if (lin_options.end_phase == phAlphaRed) {
       return result;
     }
   }
@@ -667,7 +633,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     gsErrorMsg("data implementation failed\n");
     return NULL;
   }
-  if (end_phase == phDataImpl) {
+  if (lin_options.end_phase == phDataImpl) {
     return result;
   }
   //linearise the result
@@ -752,54 +718,47 @@ int main(int argc, char *argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  t_lin_options lin_options;
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
 #endif
-    if (parse_command_line(argc,argv,lin_options)) {
-      //linearise infilename with options lin_options
-      ATermAppl result = linearise_file(lin_options);
-
-      if (result == NULL) {
-        return 1;
-      }
-
-      //initialise spec to check if it well-typed
-      if (lin_options.opt_end_phase == phNone) 
-      {
-        lps::specification spec(result);
-      }
-
-      if (lin_options.opt_check_only) {
-        if (lin_options.infilename == "") {
-          fprintf(stdout, "stdin");
-        } else {
-          fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
-        }
-        fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
-        return 0;
+    t_lin_options lin_options = parse_command_line(argc, argv);
+    //linearise infilename with options lin_options
+    ATermAppl result = linearise_file(lin_options);
+    if (result == NULL) {
+      return EXIT_FAILURE;
+    }
+    //initialise spec to check if it well-typed
+    if (lin_options.end_phase == phNone) {
+      lps::specification spec(result);
+    }
+    if (lin_options.check_only) {
+      if (lin_options.infilename == "") {
+        fprintf(stdout, "stdin");
       } else {
-        //store the result
-        if (lin_options.outfilename == "") {
-          gsVerboseMsg("saving result to stdout...\n");
-          ATwriteToSAFFile((ATerm) result, stdout);
-        } else { //outfilename != NULL
-          //open output filename
-          FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
-          if (outstream == NULL) {
-            gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
-            return 1;
-          }
-          gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-          ATwriteToSAFFile((ATerm) result, outstream);
-          fclose(outstream);
+        fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
+      }
+      fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+      return EXIT_SUCCESS;
+    } else {
+      //store the result
+      if (lin_options.outfilename == "") {
+        gsVerboseMsg("saving result to stdout...\n");
+        ATwriteToSAFFile((ATerm) result, stdout);
+      } else { //outfilename != NULL
+        //open output filename
+        FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
+        if (outstream == NULL) {
+          gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
+          return EXIT_FAILURE;
         }
+        gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+        ATwriteToSAFFile((ATerm) result, outstream);
+        fclose(outstream);
       }
     }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   }
 #endif
 
-  return 0;
+  return EXIT_SUCCESS;
 }
