@@ -1,12 +1,12 @@
-project toolset/pbes2bes
+project toolset/pbes2bool
    : requirements
       <library>/libraries//lps
       <library>/libraries//pbes
    ;
 
-tool pbes2bes
-       : pbes2bes.cpp
+tool pbes2bool
+       : pbes2bool.cpp
        : <squadt-connectivity>implemented
        ;
 
-install-tools pbes2bes ;
+install-tools pbes2bool ;
