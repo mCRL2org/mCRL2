@@ -73,7 +73,7 @@ int  doReduce(void);
 int  doBranchReduce(void);
 int  doCompare(void);
 int  doBranchCompare(void);
-void set_tau_actions(std::vector<std::string> *actions);
+void set_tau_actions(std::vector<std::string> const*actions);
 int ReadData(mcrl2::lts::lts &l);
 ATerm Term(Symbol s, int d);
 void ReadCompareData(mcrl2::lts::lts &l, int *init1, mcrl2::lts::lts &l2, int *init2);

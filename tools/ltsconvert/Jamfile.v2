@@ -3,8 +3,7 @@ project ltsconvert ;
 tool ltsconvert
        : ltsconvert.cpp
          /libraries//lts
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools ltsconvert ;

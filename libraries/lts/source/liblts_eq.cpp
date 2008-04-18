@@ -30,7 +30,7 @@ lts_eq_options::lts_eq_options()
 
 lts_eq_options lts_eq_no_options = lts_eq_options();
 
-void lts_reduce_add_tau_actions(lts_eq_options &opts, string act_names)
+void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_names)
 {
   string::size_type lastpos = 0, pos;
   while ( (pos = act_names.find(',',lastpos)) != string::npos )
@@ -41,7 +41,7 @@ void lts_reduce_add_tau_actions(lts_eq_options &opts, string act_names)
   opts.reduce.tau_actions.push_back(act_names.substr(lastpos));
 }
 
-bool lts::reduce(lts_equivalence eq, lts_eq_options &opts)
+bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
 {
   switch ( eq )
   {

@@ -562,7 +562,7 @@ namespace mcrl2 {
       protected:
 
         /// Prints the option specification to stream
-        std::string textual_description(const size_t w = 27) const;
+        std::string textual_description(const size_t left_width, const size_t right_width) const;
 
       public:
 
@@ -790,6 +790,13 @@ namespace mcrl2 {
 
 #if defined(__MCRL2_MESSAGING_H__)
       if (m_options.count("quiet")) {
+        if (m_options.count("debug")) {
+          error("options -q/--quiet and -d/--debug cannot be used together\n");
+        }
+        if (m_options.count("verbose")) {
+          error("options -q/--quiet and -v/--verbose cannot be used together\n");
+        }
+
         mcrl2::core::gsSetQuietMsg();
       }
       if (m_options.count("verbose")) {

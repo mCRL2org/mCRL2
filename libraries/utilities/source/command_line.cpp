@@ -25,16 +25,17 @@ namespace mcrl2 {
      * To force a new-line at some position add two successive newline characters.
      *
      * \param[in] input the input string
-     * \param[in] width the width of the column
+     * \param[in] indent used as fixed indentation after end of line
+     * \param[in] width the maximum width of the text
      * \pre 0 < width and no word can be longer than width
      * \return string with newlines inserted such that the number of characters
      * between any two consecutive newlines is smaller than width
      **/
-    static std::string word_wrap(std::string const& input, const size_t width) {
+    static std::string word_wrap(std::string const& input, const size_t width, std::string const& indent = "") {
       std::ostringstream out;
 
-      std::string            indent     = input.substr(0, input.find_first_not_of(" \t"));
-      std::string::size_type space_left = width;
+      std::string            variable_indent = input.substr(0, input.find_first_not_of(" \t"));
+      std::string::size_type space_left      = width;
 
       std::string::const_iterator i = input.begin();
       std::string::const_iterator word_start = i;
@@ -42,9 +43,9 @@ namespace mcrl2 {
       while (i != input.end()) {
         if (space_left - (i - word_start) < 1) { // line too long
 
-          out << std::endl << indent << std::string(word_start, ++i);
+          out << std::endl << indent << variable_indent << std::string(word_start, ++i);
 
-          space_left = width - (i - word_start) - indent.size();
+          space_left = width - (i - word_start) - variable_indent.size();
           word_start = i;
         }
         else if (*i == ' ' || *i == '\t') {
@@ -65,17 +66,17 @@ namespace mcrl2 {
           std::string::size_type end   = input.find_first_not_of(" \t", start);
 
           if (end != std::string::npos) {
-            i     += end - start;
-            indent = input.substr(start, end - start);
+            i              += end - start;
+            variable_indent = input.substr(start, end - start);
           }
           else {
-            indent.clear();
+            variable_indent.clear();
           }
 
           // copy word and newline
-          out << std::endl << indent;
+          out << std::endl << indent << variable_indent;
 
-          space_left = width - indent.size();
+          space_left = width - variable_indent.size();
           word_start = i;
         }
         else {
@@ -89,10 +90,12 @@ namespace mcrl2 {
     }
 
     /**
-     * \param[in] w the width of the first column
+     * \param[in] left_width the width of the left column
+     * \param[in] right_width the width of the right column
      * \return formatted string that represents the option description
      **/
-    std::string interface_description::option_descriptor::textual_description(const size_t w) const {
+    std::string interface_description::option_descriptor::textual_description(
+                        const size_t left_width, const size_t right_width) const {
       std::ostringstream s;
       std::string        options;
 
@@ -115,24 +118,14 @@ namespace mcrl2 {
         options += ((m_argument->is_optional()) ? "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
       }
 
-      if (w - 1 <= options.size()) {
-        s << options << std::endl << std::string(w, ' ');
+      if (options.size() < left_width) {
+        s << options << std::string(left_width - options.size(), ' ');
       }
       else {
-        s << options << std::string(w - options.size(), ' ');
+        s << options << std::endl << std::string(left_width, ' ');
       }
 
-      std::istringstream description(word_wrap(m_description, 80 - w));
-
-      while (description.good()) {
-        getline(description, options);
-
-        s << options << std::endl;
-
-        if (!description.eof()) {
-           s << std::string(w, ' ');
-        }
-      }
+      s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
 
       return s.str();
     }
@@ -197,17 +190,17 @@ namespace mcrl2 {
     std::string interface_description::textual_description() const {
       std::ostringstream s;
 
-      s << "Usage: " << m_path << " " << m_usage << std::endl << std::endl;
+      s << "Usage: " << m_path << " " << word_wrap(m_usage, 80) << std::endl << std::endl;
 
       if (!m_known_issues.empty()) {
-        s << "Known Issues:" << m_known_issues << std::endl << std::endl;
+        s << "Known Issues:" << word_wrap(m_known_issues, 80) << std::endl << std::endl;
       }
 
       if (0 < m_options.size()) {
         s << "Options:" << std::endl;
 
         for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          s << i->second.textual_description();
+          s << i->second.textual_description(27, 53);
         }
 
         s << std::endl;

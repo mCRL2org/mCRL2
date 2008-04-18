@@ -106,6 +106,12 @@ BOOST_AUTO_TEST_CASE(conformance) {
   // Invalid options -d, --debug
   BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test -d"), std::runtime_error);
   BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test --debug"), std::runtime_error);
+
+  // Check conversion with wide characters
+  wchar_t* arguments[] = { L"test", L"--debug" } ;
+
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 2, arguments));
+  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, 2, arguments), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(rewriting_options) {

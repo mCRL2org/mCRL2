@@ -142,7 +142,7 @@ namespace lts
    * \param[in] act_names A string containing a comma-separated list of
    * transition labels that will be added to the list of internal actions.
    */
-  void lts_reduce_add_tau_actions(lts_eq_options &opts, std::string act_names);
+  void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_names);
 
   /** Checks whether an action is a timed mCRL2 action.
    * \param[in] t The action for which the check has to be performed.
@@ -565,7 +565,7 @@ namespace lts
        * \param[in] opts The options that will be used for the reduction.
        * \retval true if the reduction succeeded;
        * \retval false otherwise. */
-      bool reduce(lts_equivalence eq, lts_eq_options &opts = lts_eq_no_options);
+      bool reduce(lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
       /** Checks whether this LTS is equivalent to another LTS.
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] eq The equivalence with respect to which the LTSs will be

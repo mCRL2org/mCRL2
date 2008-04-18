@@ -10,34 +10,381 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include <getopt.h>
 #include "aterm2.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace ::mcrl2::lts;
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-bool read_lts_from_file(lts&, std::string const&, lts_type, std::string const&, bool perform_reachability_check);
-bool write_lts_to_stdout(lts&, lts_type outtype, std::string const&, bool);
-bool write_lts_to_file(lts&, std::string const&, lts_type outtype, std::string const&, bool);
+static inline std::string get_base(std::string const& s) {
+  return s.substr(0, s.find_last_of('.'));
+}
+
+static ATermAppl get_lps(std::string const& filename)
+{
+  if (!filename.empty()) {
+    FILE* file = fopen(filename.c_str(),"rb");
+
+    if ( file ) {
+      ATerm t = ATreadFromFile(file);
+      fclose(file);
+      
+      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
+      {
+        gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
+      }
+      else {
+        return (ATermAppl) t;
+      }
+    }
+    else {
+      gsErrorMsg("unable to open LPS-file '%s'\n",filename.c_str());
+    }
+  }
+    
+  return 0;
+}
+
+class t_tool_options {
+  private:
+    std::string     infilename;
+    std::string     outfilename;
+
+  public:
+    std::string     lpsfile;
+    lts_type        intype;
+    lts_type        outtype;
+    lts_equivalence equivalence;
+    lts_eq_options  eq_opts;
+    bool            print_dot_state;
+    bool            determinise;
+    bool            check_reach;
+
+    inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
+                       print_dot_state(true), determinise(false), check_reach(true) {
+    }
+  
+    inline char const* source_string() const {
+      return (infilename.empty()) ? "standard input" : std::string("'" + infilename + "'").c_str();
+    }
+  
+    inline char const* target_string() const {
+      return (outfilename.empty()) ?  "standard output" : std::string("'" + outfilename + "'").c_str();
+    }
+  
+    inline lts_extra get_extra(lts_type type, std::string const &base_name = "") const {
+      if ( type == lts_dot )
+      {
+        lts_dot_options opts;
+        opts.name = new std::string(base_name); // XXX Ugh!
+        opts.print_states = print_dot_state;
+        return lts_extra(opts);
+      } else {
+        if ( !lpsfile.empty() )
+        {
+          ATermAppl spec = get_lps(lpsfile);
+    
+          if ( spec != NULL )
+          {
+            if ( gsIsSpecV1(spec) )
+            {
+              return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
+            } else {
+              return lts_extra((ATerm) spec);
+            }
+          }
+        }
+        return lts_extra();
+      }
+    }
+  
+    void read_lts(lts& l) const {
+      bool success = false;
+    
+      gsVerboseMsg("reading LTS from %s...\n", source_string());
+      
+      lts_extra extra = get_extra(intype);
+     
+      if (infilename.empty()) {
+        success = l.read_from(std::cin,intype,extra);
+      }
+      else {
+        success = l.read_from(infilename,intype,extra);
+  
+        if (!success) {
+          lts_type guessed_type(lts::guess_format(infilename));
+         
+          success = l.read_from(infilename,guessed_type, get_extra(guessed_type));
+         
+          if (!success) {
+            gsVerboseMsg("reading based on format extension failed as well\n");
+          }
+        }
+      }
+    
+      if (!success) {
+        throw std::runtime_error("cannot read LTS from file " + std::string(source_string()) +
+                                               "\nretry with -v/--verbose for more information");
+      }
+    
+      if ( check_reach ) {
+        gsVerboseMsg("checking reachability of input LTS...\n");
+    
+        if ( !l.reachability_check(true) ) {
+          gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
+        }
+      }
+    }
+  
+    void set_source(std::string const& filename) {
+      infilename = filename;
+  
+      if ( intype == lts_none ) { // XXX really do this?
+        gsVerboseMsg("reading failed; trying to force format by extension...\n");
+  
+        intype = lts::guess_format(infilename);
+  
+        if ( intype == lts_none ) {
+          gsVerboseMsg("unsupported input format extension\n");
+        }
+      }
+    }
+  
+    void set_target(std::string const& filename) {
+      outfilename = filename;
+  
+      if ( outtype == lts_none ) {
+        gsVerboseMsg("trying to detect output format by extension...\n");
+
+        outtype = lts::guess_format(outfilename);
+
+        if ( outtype == lts_none ) {
+          if ( !lpsfile.empty() ) {
+            gsWarningMsg("no output format set; using fsm because --lps was used\n");
+            outtype = lts_fsm;
+          } else {
+            gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+            outtype = lts_mcrl2;
+          }
+        } else if ( (outtype == lts_fsm) && lpsfile.empty() ) {
+          gsWarningMsg("parameter names are unknown (use -l/--lps option)\n");
+        }
+      }
+    }
+  
+    void write_lts(lts& l) const {
+      bool success = false;
+  
+      gsVerboseMsg("writing LTS to %s...\n", target_string());
+  
+      if (outfilename.empty()) {
+        success = l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
+      }
+      else {
+        success = l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
+      }
+    
+      if (!success) { 
+        throw std::runtime_error("cannot write LTS to " + std::string(target_string()) +
+                                               "\nretry with -v/--verbose for more information");
+      }
+    }
+};
+
+using namespace std;
+
+static void print_formats(FILE *f)
+{
+  fprintf(f,
+    "The following formats are accepted by " NAME ":\n"
+    "\n"
+    "  format  ext.  description                       remarks\n"
+    "  -----------------------------------------------------------\n"
+    "  aut     .aut  Aldebaran format (CADP)\n"
+#ifdef MCRL2_BCG
+    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
+#endif
+    "  dot     .dot  GraphViz format                   output only\n"
+    "  fsm     .fsm  Finite State Machine format\n"
+    "  mcrl    .svc  mCRL SVC format\n"
+    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
+    "\n"
+    );
+}
+
+void process(t_tool_options const& tool_options) {
+  lts l;
+
+  tool_options.read_lts(l);
+
+  if ( tool_options.equivalence != lts_eq_none )
+  {
+    gsVerboseMsg("reducing LTS...\n");
+    gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
+    l.reduce(tool_options.equivalence, tool_options.eq_opts);
+    gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+  }
+
+  if ( tool_options.determinise )
+  {
+    gsVerboseMsg("determinising LTS...\n");
+    gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+    l.determinise();
+    gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+  }
+
+  tool_options.write_lts(l);
+}
+
+t_tool_options parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+    "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
+    "requested format after applying the selected minimisation method (default is\n"
+    "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"
+    "stdin is used.\n"
+    "\n"
+    "The output format is determined by the extension of OUTFILE, whereas the input\n"
+    "format is determined by the content of INFILE. Options --in and --out can be\n"
+    "used to force the input and output formats.");
+
+  clinterface.add_option("no-reach",
+               "do not perform a reachability check on the input LTS").
+              add_option("no-state",
+               "leave out state information when saving in dot format", 'n').
+              add_option("determinise", "determinise LTS", 'D').
+              add_option("formats", "list accepted formats", 'f').
+              add_option("lps", make_mandatory_argument("FILE"),
+               "use FILE as the LPS from which the input LTS was generated; this is "
+               "needed to store the correct parameter names of states when saving "
+               "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
+              add_option("in", make_mandatory_argument("FORMAT"),
+               "use FORMAT as the input format").
+              add_option("out", make_mandatory_argument("FORMAT"),
+               "use FORMAT as the output format");
+  clinterface.add_option("none",
+               "do not minimise (default)").
+              add_option("strong",
+               "minimise using strong bisimulation", 's').
+              add_option("branching",
+               "minimise using branching bisimulation", 'b').
+              add_option("trace",
+               "determinise and then minimise using trace equivalence", 't').
+              add_option("weak-trace",
+               "determinise and then minimise using weak trace equivalence", 'u').
+              add_option("add",
+               "do not minimise but save a copy of the original LTS extended with a "
+               "state parameter indicating the bisimulation class a state belongs to "
+               "(only for mCRL2)", 'a').
+              add_option("tau", make_mandatory_argument("ACTNAMES"),
+               "consider actions with a name in the comma separated list ACTNAMES to "
+               "be internal (tau) actions in addition to those defined as such by "
+               "the input"
+              );
+
+  command_line_parser parser(clinterface, ac, av);
+
+  t_tool_options tool_options;
+
+  if (parser.options.count("lps")) {
+    if (1 < parser.options.count("lps")) {
+      std::cerr << "warning: LPS file has already been specified; extra option ignored\n";
+    }
+
+    tool_options.lpsfile = parser.option_argument("lps");
+  }
+  if (parser.options.count("in")) {
+    if (1 < parser.options.count("in")) {
+      std::cerr << "warning: input format has already been specified; extra option ignored\n";
+    }
+
+    tool_options.intype = lts::parse_format(parser.option_argument("in").c_str());
+
+    if (tool_options.intype) {
+      std::cerr << "warning: format '" << parser.option_argument("in") <<
+                   "' is not recognised; option ignored" << std::endl;
+    }
+  }
+  if (parser.options.count("out")) {
+    if (1 < parser.options.count("out")) {
+      std::cerr << "warning: output format has already been specified; extra option ignored\n";
+    }
+
+    tool_options.outtype = lts::parse_format(parser.option_argument("out").c_str());
+
+    if (tool_options.outtype) {
+      std::cerr << "warning: format '" << parser.option_argument("out") <<
+                   "' is not recognised; option ignored" << std::endl;
+    }
+  }
+  if (parser.options.count("formats")) {
+    print_formats(stderr);
+  }
+  if (parser.options.count("none")) {
+    tool_options.equivalence = lts_eq_none;
+  }
+  if (parser.options.count("strong")) {
+    tool_options.equivalence = lts_eq_strong;
+  }
+  if (parser.options.count("branching")) {
+    tool_options.equivalence = lts_eq_branch;
+  }
+  if (parser.options.count("trace")) {
+    tool_options.equivalence = lts_eq_trace;
+  }
+  if (parser.options.count("weak-trace")) {
+    tool_options.equivalence = lts_eq_weak_trace;
+  }
+  if (parser.options.count("tau")) {
+    lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+  }
+
+  tool_options.determinise                       = 0 < parser.options.count("determinise");
+  tool_options.check_reach                       = parser.options.count("no-reach") == 0;
+  tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
+  tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
+
+  if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
+    parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+  }
+
+  if (0 < parser.arguments.size()) {
+    tool_options.set_source(parser.arguments[0]);
+  }
+  if (1 < parser.arguments.size()) {
+    tool_options.set_target(parser.arguments[1]);
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return tool_options;
+}
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
+static const char* lts_file_for_input  = "lts_in";  ///< file containing an LTS that can be imported using the LTS library
+static const char* lts_file_for_output = "lts_out"; ///< file used to write the output to
+static const char* lps_file_auxiliary  = "lps_aux"; ///< LPS file needed for some conversion operations
+
+static const char* option_selected_transformation            = "selected_transformation";               ///< the selected transformation method
+static const char* option_selected_output_format             = "selected_output_format";                ///< the selected output format
+static const char* option_no_reachability_check              = "no_reachability_check";                 ///< do not check reachability of input LTS
+static const char* option_no_state_information               = "no_state_information";                  ///< dot format output specific option to not save state information
+static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
+static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
+
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   private:
-
-    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported using the LTS library
-    static const char*  lts_file_for_output; ///< file used to write the output to
-    static const char*  lps_file_auxiliary;  ///< LPS file needed for some conversion operations
 
     enum lts_output_format {
       aldebaran,   ///< Aldebaran format (AUT)
@@ -58,13 +405,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       minimisation_modulo_weak_trace_equivalence, ///< minimisation modulo weak trace equivalence
       determinisation                             ///< determinisation
     };
-
-    static const char* option_selected_transformation;               ///< the selected transformation method
-    static const char* option_selected_output_format;                ///< the selected output format
-    static const char* option_no_reachability_check;                 ///< do not check reachability of input LTS
-    static const char* option_no_state_information;                  ///< dot format output specific option to not save state information
-    static const char* option_tau_actions;                           ///< the actions that should be recognised as tau
-    static const char* option_add_bisimulation_equivalence_class;    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
 
   private:
 
@@ -88,17 +428,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration&);
 };
-
-const char* squadt_interactor::lts_file_for_input  = "lts_in";
-const char* squadt_interactor::lts_file_for_output = "lts_out";
-const char* squadt_interactor::lps_file_auxiliary  = "lps_aux";
-
-const char* squadt_interactor::option_selected_transformation            = "selected_transformation";
-const char* squadt_interactor::option_selected_output_format             = "selected_output_format";
-const char* squadt_interactor::option_no_reachability_check              = "no_reachability_check";
-const char* squadt_interactor::option_no_state_information               = "no_state_information";
-const char* squadt_interactor::option_tau_actions                        = "tau_actions";
-const char* squadt_interactor::option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";
 
 squadt_interactor::squadt_interactor() {
   transformation_method_enumeration.reset(new tipi::datatype::enumeration("none"));
@@ -323,575 +652,88 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
     lts_eq_options eq_opts;
 
     /* Need to detect whether the next operation completes successfully or not, exceptions anyone? */
-    lts_reduce_add_tau_actions(eq_opts,(boost::any_cast < std::string > (c.get_option_argument(option_tau_actions)).c_str()));
+    lts_reduce_add_tau_actions(eq_opts,(c.get_option_argument< std::string >(option_tau_actions)).c_str());
   }
 
   return (result);
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  lts l;
-
-  std::string lps_path;
+  t_tool_options tool_options;
 
   if (c.input_exists(lps_file_auxiliary)) {
-    lps_path = c.get_input(lps_file_auxiliary).get_location();
+    tool_options.lpsfile = c.get_input(lps_file_auxiliary).get_location();
+  }
+  if (c.option_exists(option_no_state_information)) {
+    tool_options.print_dot_state = !(c.get_option_argument< bool >(option_no_state_information));
+  }
+  if (c.option_exists(option_no_reachability_check)) {
+    tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  if ( !read_lts_from_file(l, c.get_input(lts_file_for_input).get_location(),lts_none,lps_path,!c.option_exists(option_no_reachability_check)) ) {
+  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str());
+  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str());
+  tool_options.set_source(c.get_input(lts_file_for_input).get_location());
+  tool_options.set_target(c.get_output(lts_file_for_output).get_location());
 
-    send_error("Fatal: error reading input from `" + c.get_input(lts_file_for_input).get_location() + "'!");
-
-    return (false);
-  }
- 
   transformation_options method = static_cast < transformation_options > (c.get_option_argument< size_t >(option_selected_transformation));
 
   if (method != no_transformation) {
-    lts_equivalence equivalence = lts_eq_none;
-    bool determinise = false;
-
-    lts_eq_options  eq_opts;
-
     switch (method) {
       case minimisation_modulo_strong_bisimulation:
-        equivalence = lts_eq_strong;
+        tool_options.equivalence = lts_eq_strong;
         break;
       case minimisation_modulo_branching_bisimulation:
-        equivalence = lts_eq_branch;
+        tool_options.equivalence = lts_eq_branch;
         break;
       case minimisation_modulo_trace_equivalence:
-        equivalence = lts_eq_trace;
+        tool_options.equivalence = lts_eq_trace;
         break;
       case minimisation_modulo_weak_trace_equivalence:
-        equivalence = lts_eq_weak_trace;
+        tool_options.equivalence = lts_eq_weak_trace;
         break;
       case determinisation:
-        determinise = true;
+        tool_options.determinise = true;
         break;
       default:
         break;
     }
 
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-      eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
+      tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }
-
     if (c.option_exists(option_tau_actions)) {
-      lts_reduce_add_tau_actions(eq_opts, c.get_option_argument< std::string >(option_tau_actions).c_str());
-    }
-
-    if ( determinise )
-    {
-      gsVerboseMsg("determinising LTS..\n");
-
-      gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-      l.determinise();
-      gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-    } else {
-      gsVerboseMsg("reducing LTS...\n");
-
-      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_labels(),l.num_transitions());
-      if (!l.reduce(equivalence,eq_opts)) {
-        return (false);
-      }
-      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_labels(),l.num_transitions());
+      lts_reduce_add_tau_actions(tool_options.eq_opts, c.get_option_argument< std::string >(option_tau_actions).c_str());
     }
   }
  
-  bool result = true;
-
-  result = write_lts_to_file(l, c.get_output(lts_file_for_output).get_location(),
-                 lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str()), lps_path, c.option_exists(option_no_state_information));
+  process(tool_options);
 
   send_clear_display();
 
-  return (result);
+  return true;
 }
 #endif
 
-using namespace std;
-
-static ATermAppl get_lps(string const& filename)
-{
-  if ( filename == "" )
-  {
-    return NULL;
-  }
-
-  FILE* file = fopen(filename.c_str(),"rb");
-  if ( file == NULL )
-  {
-    gsErrorMsg("unable to open LPS-file '%s'\n",filename.c_str());
-    return NULL;
-  }
-  
-  ATerm t = ATreadFromFile(file);
-  fclose(file);
-  
-  if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
-  {
-    gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
-    return NULL;
-  }
-
-  return (ATermAppl) t;
-}
-
-static lts_extra get_extra(lts_type type, string const &lps_file, bool print_dot_states, string const &base_name)
-{
-  if ( type == lts_dot )
-  {
-    lts_dot_options opts;
-    opts.name = new string(base_name); // XXX Ugh!
-    opts.print_states = print_dot_states;
-    return lts_extra(opts);
-  } else {
-    if ( !lps_file.empty() )
-    {
-      ATermAppl spec = get_lps(lps_file);
-
-      if ( spec != NULL )
-      {
-        if ( gsIsSpecV1(spec) )
-        {
-          return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
-        } else {
-          return lts_extra((ATerm) spec);
-        }
-      }
-    }
-    return lts_extra();
-  }
-}
-
-static string get_base(string const& s)
-{
-  string::size_type pos = s.find_last_of('.');
-  
-  if ( pos == string::npos )
-  {
-    return s;
-  } else {
-    return s.substr(0,pos);
-  }
-}
-
-static void print_formats(FILE *f)
-{
-  fprintf(f,
-    "The following formats are accepted by " NAME ":\n"
-    "\n"
-    "  format  ext.  description                       remarks\n"
-    "  -----------------------------------------------------------\n"
-    "  aut     .aut  Aldebaran format (CADP)\n"
-#ifdef MCRL2_BCG
-    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
-#endif
-    "  dot     .dot  GraphViz format                   output only\n"
-    "  fsm     .fsm  Finite State Machine format\n"
-    "  mcrl    .svc  mCRL SVC format\n"
-    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
-    "\n"
-    );
-}
-
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
-    "requested format after applying the selected minimisation method (default is\n"
-    "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"
-    "stdin is used.\n"
-    "\n"
-    "The output format is determined by the extension of OUTFILE, whereas the input\n"
-    "format is determined by the content of INFILE. Options --in and --out can be\n"
-    "used to force the input and output formats.\n"
-    "\n"
-    "Options:\n"
-    "      --no-reach         do not perform a reachability check on the input LTS\n"
-    "  -n, --no-state         leave out state information when saving in dot format\n"
-    "  -D, --determinise      determinise LTS\n"
-    "  -lFILE, --lps=FILE     use FILE as the LPS from which the input LTS was\n"
-    "                         generated; this is needed to store the correct\n"
-    "                         parameter names of states when saving in fsm format and\n"
-    "                         to convert non-mCRL2 LTSs to a mCRL2 LTS\n"
-    "  -f, --formats          list accepted formats\n"
-    "  -iFORMAT, --in=FORMAT  use FORMAT as the input format\n"
-    "  -oFORMAT, --out=FORMAT use FORMAT as the output format\n"
-    "  -h, --help             display this help message and terminate\n"
-    "      --version          display version information and terminate\n"
-    "  -q, --quiet            do not display any unrequested information\n"
-    "  -v, --verbose          display concise intermediate messages\n"
-    "  -d, --debug            display detailed intermediate messages\n"
-    "\n"
-    "Minimisation options:\n"
-    "      --none             do not minimise (default)\n"
-    "  -s, --strong           minimise using strong bisimulation\n"
-    "  -b, --branching        minimise using branching bisimulation\n"
-    "  -t, --trace            determinise and then minimise using trace equivalence\n"
-    "  -u, --weak-trace       determinise and then minimise using weak trace equivalence\n"
-    "  -a, --add              do not minimise but save a copy of the original LTS\n"
-    "                         extended with a state parameter indicating the\n"
-    "                         bisimulation class a state belongs to (only for mCRL2)\n"
-    "      --tau=ACTNAMES     consider actions with a name in the comma separated\n"
-    "                         list ACTNAMES to be internal (tau) actions in\n"
-    "                         addition to those defined as such by the input\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name);
-}
-
-void reachability_check(lts &l)
-{
-  gsVerboseMsg("checking reachability of input LTS...\n");
-  if ( !l.reachability_check(true) )
-  {
-    gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
-  }
-}
-
-bool read_lts_from_stdin(lts& l, lts_type intype, std::string const& lpsfile, bool perform_reachability_check) {
-  gsVerboseMsg("reading LTS from stdin...\n");
-  
-  lts_extra extra = get_extra(intype, lpsfile, false, "");
-  
-  if ( !l.read_from(cin,intype,extra) )
-  {
-    gsErrorMsg("cannot read LTS from stdin\n");
-    gsErrorMsg("use -v/--verbose for more information\n");
-    return (false);
-  }
-  
-  if ( perform_reachability_check )
-  {
-    reachability_check(l);
-  }
-
-  return (true);
-}
-
-bool read_lts_from_file(lts& l, std::string const& infile, lts_type intype, std::string const& lpsfile, bool perform_reachability_check) {
-  gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
-  
-  lts_extra extra = get_extra(intype, lpsfile, false, "");
- 
-  if ( !l.read_from(infile,intype,extra) )
-  {
-    bool b = true;
-    if ( intype == lts_none ) // XXX really do this?
-    {
-      gsVerboseMsg("reading failed; trying to force format by extension...\n");
-      intype = lts::guess_format(infile);
-      if ( intype == lts_none )
-      {
-        gsVerboseMsg("unsupported input format extension\n");
-      } else {
-        extra = get_extra(intype, lpsfile, false, "");
-        if ( l.read_from(infile,intype,extra) )
-        {
-          b = false;
-        } else {
-          gsVerboseMsg("reading based on format extension failed as well\n");
-        }
-      }
-    }
-    if ( b )
-    {
-      gsErrorMsg("cannot read LTS from file '%s'\n",infile.c_str());
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return (false);
-    }
-  }
-
-  if ( perform_reachability_check )
-  {
-    reachability_check(l);
-  }
-
-  return (true);
-}
-
-bool write_lts_to_stdout(lts& l, lts_type outtype, std::string const& lpsfile, bool print_dot_states) {
-  gsVerboseMsg("writing LTS to stdout...\n");
-
-  lts_extra extra = get_extra(outtype, lpsfile, print_dot_states, "stdout");
-
-  if ( !l.write_to(cout,outtype,extra) )
-  {
-    gsErrorMsg("cannot write LTS to stdout\n");
-    gsErrorMsg("use -v/--verbose for more information\n");
-    return false;
-  }
-
-  return true;
-}
-
-bool write_lts_to_file(lts& l, std::string const& outfile, lts_type outtype, std::string const& lpsfile, bool print_dot_states) {
-  gsVerboseMsg("writing LTS to '%s'...\n",outfile.c_str());
-  
-  lts_extra extra = get_extra(outtype, lpsfile, print_dot_states, get_base(outfile));
-  
-  if ( !l.write_to(outfile,outtype,extra) )
-  {
-    gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-    gsErrorMsg("use -v/--verbose for more information\n");
-    return false;
-  }
-
-  return true;
-}
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  #define ShortOptions      "hqvdi:o:fl:nsbtuaD"
-  #define VersionOption     0x1
-  #define NoneOption        0x2
-  #define TauOption         0x3
-  #define NoReachOption     0x4
-  struct option LongOptions[] = { 
-    {"help"        , no_argument,         NULL, 'h'},
-    {"version"     , no_argument,         NULL, VersionOption},
-    {"verbose"     , no_argument,         NULL, 'v'},
-    {"quiet"       , no_argument,         NULL, 'q'},
-    {"debug"       , no_argument,         NULL, 'd'},
-    {"in"          , required_argument,   NULL, 'i'},
-    {"out"         , required_argument,   NULL, 'o'},
-    {"formats"     , no_argument,         NULL, 'f'},
-    {"lps"         , required_argument,   NULL, 'l'},
-    {"no-state"    , no_argument,         NULL, 'n'},
-    {"strong"      , no_argument,         NULL, 's'},
-    {"none"        , no_argument,         NULL, NoneOption},
-    {"branching"   , no_argument,         NULL, 'b'},
-    {"trace"       , no_argument,         NULL, 't'},
-    {"weak-trace"  , no_argument,         NULL, 'u'},
-    {"tau"         , required_argument,   NULL, TauOption},
-    {"add"         , no_argument,         NULL, 'a'},
-    {"determinise" , no_argument,         NULL, 'D'},
-    {"no-reach"    , no_argument,         NULL, NoReachOption},
-    {0, 0, 0, 0}
-  };
-
-  bool verbose = false;
-  bool quiet = false;
-  bool debug = false;
-  lts_type intype = lts_none;
-  lts_type outtype = lts_none;
-  int opt;
-  string lpsfile;
-  bool print_dot_state = true;
-  lts_equivalence equivalence = lts_eq_none;
-  lts_eq_options eq_opts;
-  bool determinise = false;
-  bool check_reach = true;
-
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
-    while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
-    {
-      switch ( opt )
-      {
-        case 'h':
-          print_help(stdout,argv[0]);
-          return 0;
-        case VersionOption:
-          print_version_information(NAME, AUTHOR);
-          return 0;
-        case 'v':
-          verbose = true;
-          break;
-        case 'q':
-          quiet = true;
-          break;
-        case 'd':
-          debug = true;
-          break;
-        case 'i':
-          if ( intype != lts_none )
-          {
-            fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
-          } else {
-            intype = lts::parse_format(optarg);
-            if ( intype == lts_none )
-            {
-              fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-            }
-          }
-          break;
-        case 'o':
-          if ( outtype != lts_none )
-          {
-            fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
-          } else {
-            outtype = lts::parse_format(optarg);
-            if ( outtype == lts_none )
-            {
-              fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-            }
-          }
-          break;
-        case 'f':
-          print_formats(stderr);
-          return 0;
-        case 'l':
-          if ( lpsfile != "" )
-          {
-            fprintf(stderr,"warning: LPS file has already been specified; extra option ignored\n");
-          }
-          lpsfile = optarg;
-          break;
-        case 'n':
-          print_dot_state = false;
-          break;
-        case NoneOption:
-          equivalence = lts_eq_none;
-          break;
-        case 's':
-          equivalence = lts_eq_strong;
-          break;
-        case 'b':
-          equivalence = lts_eq_branch;
-          break;
-        case 't':
-          equivalence = lts_eq_trace;
-          break;
-        case 'u':
-          equivalence = lts_eq_weak_trace;
-          break;
-        case TauOption:
-          lts_reduce_add_tau_actions(eq_opts,optarg);
-          break;
-        case 'a':
-          eq_opts.reduce.add_class_to_state = true;
-          break;
-        case 'D':
-          determinise = true;
-          break;
-        case NoReachOption:
-          check_reach = false;
-          break;
-        default:
-          break;
-      }
-    }
- 
-    if ( quiet && verbose )
-    {
-      gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-      return 1;
-    }
-    if ( quiet && debug )
-    {
-      gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-      return 1;
-    }
-    if ( quiet )
-    {
-      gsSetQuietMsg();
-    }
-    if ( verbose )
-    {
-      gsSetVerboseMsg();
-    }
-    if ( debug )
-    {
-      gsSetDebugMsg();
-    }
 
-    if ( determinise && (equivalence != lts_eq_none) )
-    {
-      gsErrorMsg("cannot use option -D/--determinise together with LTS reduction options\n");
-      return 1;
-    }
+    process(parse_command_line(argc, argv));
 
-    bool use_stdin = (optind >= argc);
-    bool use_stdout = (optind+1 >= argc);
-  
-    string infile;
-    string outfile;
-
-    if ( !use_stdin )
-    {
-      infile = argv[optind];
-    }
-    if ( !use_stdout )
-    {
-      outfile = argv[optind+1];
-      if ( outtype == lts_none )
-      {
-          gsVerboseMsg("trying to detect output format by extension...\n");
-          outtype = lts::guess_format(outfile);
-          if ( outtype == lts_none )
-          {
-            if ( lpsfile != "" )
-            {
-              gsWarningMsg("no output format set; using fsm because --lps was used\n");
-              outtype = lts_fsm;
-            } else {
-              gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
-              outtype = lts_mcrl2;
-            }
-          } else if ( (outtype == lts_fsm) && (lpsfile == "") )
-          {
-            gsWarningMsg("parameter names are unknown (use -l/--lps option)\n");
-          }
-      }
-    } else {
-      if ( outtype == lts_none )
-      {
-        if ( lpsfile != "" )
-        {
-          gsWarningMsg("no output format set; using fsm because --lps was used\n");
-          outtype = lts_fsm;
-        } else {
-          gsWarningMsg("no output format set; using default (aut)\n");
-          outtype = lts_aut;
-        }
-      }
-    }
-
-    lts l;
- 
-    if (!(use_stdin ? read_lts_from_stdin(l, intype, lpsfile, check_reach) : read_lts_from_file(l, infile, intype, lpsfile, check_reach)))
-    {
-      return (1);
-    }
- 
-    if ( equivalence != lts_eq_none )
-    {
-      gsVerboseMsg("reducing LTS...\n");
-      gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
-      l.reduce(equivalence,eq_opts);
-      gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-    }
-
-    if ( determinise )
-    {
-      gsVerboseMsg("determinising LTS...\n");
-      gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-      l.determinise();
-      gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-    }
- 
-    if ( use_stdout )
-    {
-      if (!write_lts_to_stdout(l, outtype, lpsfile, print_dot_state))
-      {
-        return (1);
-      }
-    } else {
-      if (!write_lts_to_file(l, outfile, outtype, lpsfile, print_dot_state))
-      {
-        return (1);
-      }
-    }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+    return EXIT_SUCCESS;
   }
-#endif
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
-  return 0;
+  return EXIT_FAILURE;
 }

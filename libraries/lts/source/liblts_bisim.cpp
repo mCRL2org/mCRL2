@@ -23,7 +23,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector<string> *tau_actions)
+bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector<string> const*tau_actions)
 {
   if ( add_class_to_state )
   {
@@ -59,7 +59,7 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector
   return true;
 }
 
-bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> *tau_actions)
+bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> const*tau_actions)
 {
   int init1, init2;
   set_tau_actions(tau_actions);

@@ -248,8 +248,8 @@ static void UpdateLabArray(int state, int label) {
      lab[state] = newval;
 }
 
-static vector<string> *tau_actions = NULL;
-void set_tau_actions(vector<string> *actions)
+static vector<string> const*tau_actions = NULL;
+void set_tau_actions(vector<string> const*actions)
 {
 	tau_actions = actions;
 }
