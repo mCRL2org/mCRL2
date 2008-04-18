@@ -42,12 +42,12 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
 
-char help_gsMessage[] = "At the prompt any mCRL2 data expression can be given. This term will be\n"
+char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be\n"
                       "rewritten to normal form and printed. Also, one can assign values to declared\n"
                       "variables by writing x := v, for variable x and value v. These variables can\n"
                       "then be used in expressions. Besides this, the prompt accepts the following\n"
                       "commands:\n"
-                      "  :h[elp]                         print this help gsMessage\n"
+                      "  :h[elp]                         print this help message\n"
                       "  :q[uit]                         quit\n"
                       "  :t[ype] EXPRESSION              print type of EXPRESSION\n"
                       "  :v[ar] VARLIST                  declare variables in VARLIST\n"
@@ -280,7 +280,7 @@ void print_help(FILE *f, char *Name)
     "\n"
     "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
     , Name
-    , help_gsMessage
+    , help_message
   );
 }
 
@@ -431,7 +431,7 @@ int main(int argc, char **argv)
           break;
         } else if ( (s == "h") || (s == "help") )
         {
-          cout << help_gsMessage;
+          cout << help_message;
         } else if ( (s.substr(0,2) == "r ") || (s.substr(0,9) == "rewriter ") ) 
         {
           if ( s.substr(0,2) == "r " )
