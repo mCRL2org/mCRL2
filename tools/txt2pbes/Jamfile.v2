@@ -1,12 +1,12 @@
-project toolset/pbessolve
+project toolset/txt2pbes
        : requirements
           <library>/libraries//lps
           <library>/libraries//pbes
        ;
 
-tool pbessolve
-       : pbessolve.cpp
+tool txt2pbes
+       : txt2pbes.cpp
        : <status>experimental
        ;
 
-install-tools pbessolve ;
+install-tools txt2pbes ;
