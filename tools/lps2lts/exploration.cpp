@@ -65,7 +65,7 @@ static lts_generation_options *lgopts;
 
 static NextState *nstate;
 
-static ATermIndexedSet states;
+static ATermIndexedSet states = NULL;
 static unsigned long long num_states;
 static unsigned long long trans;
 static unsigned long level;
@@ -73,8 +73,8 @@ static unsigned long long num_found_same;
 static unsigned long long current_state;
 static unsigned long long initial_state;
  
-static ATermTable backpointers;
-static unsigned long *bithashtable;
+static atermpp::vector<ATerm> backpointers;
+static unsigned long *bithashtable = NULL;
  
 static unsigned long tracecnt;
  
@@ -90,6 +90,8 @@ bool initialise_lts_generation(lts_generation_options *opts)
   gsVerboseMsg("initialising...\n");
 
   lgopts = opts;
+
+  lg_error = false;
  
   FILE *SpecStream;
   if ( (SpecStream = fopen(lgopts->specification.c_str(), "rb")) == NULL )
@@ -143,11 +145,10 @@ bool initialise_lts_generation(lts_generation_options *opts)
     states = ATindexedSetCreate(lgopts->initial_table_size,50);
   }
   
+  assert( backpointers.empty() );
   if ( lgopts->trace )
   {
-    backpointers = ATtableCreate(lgopts->initial_table_size,50);
-  } else {
-    backpointers = NULL;
+    backpointers.push_back(NULL);
   }
  
   nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
@@ -183,10 +184,6 @@ bool initialise_lts_generation(lts_generation_options *opts)
   
 bool finalise_lts_generation()
 {
-  cleanup_representation();
-  delete nstate;
-  free(basefilename);
-
   if ( lg_error )
   {
     remove_lts();
@@ -228,6 +225,18 @@ bool finalise_lts_generation()
     }
   }
 
+  cleanup_representation();
+  delete nstate;
+  backpointers.clear();
+  if ( states != NULL )
+  {
+    ATindexedSetDestroy(states);
+    states = NULL;
+  }
+  free(bithashtable);
+  bithashtable = NULL;
+  free(basefilename);
+
   return true;
 }
 
@@ -247,21 +256,41 @@ static bool occurs_in(ATermAppl name, ATermList ma)
   return false;
 }
 
-static bool savetrace(string const &info, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
 {
   ATerm s = state;
   ATerm ns;
   ATermList tr = ATmakeList0();
+  NextStateGenerator *nsgen = NULL;
   
   if ( extra_state != NULL )
   {
     tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
   }
-  while ( (ns = ATtableGet(backpointers, s)) != NULL )
+  while ( (ns = backpointers[ATindexedSetGetIndex(states,s)]) != NULL )
   {
-    tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
-    s = ATgetFirst((ATermList) ns);
+    ATermAppl trans;
+    ATerm t;
+    bool priority;
+    nsgen = nstate->getNextStates(ns,nsgen);
+    while ( nsgen->next(&trans,&t,&priority) )
+    {
+      if ( !priority && ATisEqual(s,t) )
+      {
+        break;
+      }
+    }
+    if ( nsgen->errorOccurred() )
+    {
+      gsErrorMsg("error occurred while reconstructing trace\n");
+      delete nsgen;
+      return false;
+    }
+    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
+    s = ns;
   }
+
+  delete nsgen;
   
   Trace trace;
   trace.setState(nstate->makeStateVector(s));
@@ -303,7 +332,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         std::ostringstream ss;
         ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j]));
         string sss(ss.str());
-        bool saved_ok = savetrace(sss,OldState,backpointers,nstate,NewState,Transition);
+        bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
 
         if ( lgopts->detect_action || gsVerbose )
         {
@@ -328,7 +357,7 @@ static void save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
   {
-    bool saved_ok = savetrace("error",state,backpointers,nstate);
+    bool saved_ok = savetrace("error",state,nstate);
 
     if ( saved_ok )
     {
@@ -350,7 +379,7 @@ static void check_deadlocktrace(ATerm state)
       std::ostringstream ss;
       ss << "dlk_" << tracecnt;
       string sss(ss.str());
-      bool saved_ok = savetrace(sss,state,backpointers,nstate);
+      bool saved_ok = savetrace(sss,state,nstate);
 
       if ( lgopts->detect_deadlock || gsVerbose )
       {
@@ -802,7 +831,7 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
     num_states++;
     if ( lgopts->trace )
     {
-            ATtablePut(backpointers, to, (ATerm) ATmakeList2(from,(ATerm) action));
+      backpointers.push_back(from);
     }
   } else {
     num_found_same++;
