@@ -10,7 +10,9 @@
 #define NAME "lpsinvelm"
 #define AUTHOR "Luc Engelen"
 
-#include "getopt.h"
+#include <string>
+#include <fstream>
+
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
@@ -22,10 +24,8 @@
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/version_info.h"
-#include <string>
-#include <fstream>
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -45,23 +45,20 @@ using namespace mcrl2;
 
   class LPS_Inv_Elm {
     private:
-      /// \brief The command entered to invoke the tool lpsinvelm.
-      char* f_tool_command;
-
       /// \brief The name of the file containing the invariant.
-      char* f_invariant_file_name;
+      std::string f_invariant_file_name;
 
       /// \brief The name of the file containing the LPS.
       /// \brief If this string is 0, the input is read from stdin.
-      char* f_lps_file_name;
+      std::string f_lps_file_name;
 
       /// \brief The name of the file the LPS is written to.
       /// \brief If this string is 0, the output is written to stdout.
-      char* f_output_file_name;
+      std::string f_output_file_name;
 
       /// \brief The number of the summand that is eliminated or simplified. If this number is 0,
       /// \brief all summands will be simplified or eliminated.
-      int f_summand_number;
+      size_t f_summand_number;
 
       /// \brief The flag indicating whether or not the invariance of the formula as found in
       /// \brief LPS_Inv_Elm::f_invariant_file_name is checked.
@@ -88,7 +85,7 @@ using namespace mcrl2;
       /// \brief The prefix of the files in dot format that are written each time a summand is
       /// \brief encountered whose condition in conjunction with the invariant is not a tautology or a
       /// \brief contradiction.
-      char* f_dot_file_name;
+      std::string f_dot_file_name;
 
       /// \brief The flag indicating whether or not a path eliminator is used.
       bool f_path_eliminator;
@@ -104,7 +101,7 @@ using namespace mcrl2;
 
       /// \brief The maximal number of seconds spent on proving the conjunction of the invariant
       /// \brief and a summands' condition
-      int f_time_limit;
+      size_t f_time_limit;
 
       /// \brief The LPS provided as input.
       ATermAppl f_lps;
@@ -112,18 +109,9 @@ using namespace mcrl2;
       /// \brief The invariant provided as input.
       ATermAppl f_invariant;
 
-      /// \brief Prints the help message.
-      void print_help();
-
-      /// \brief Prints a message indicating how to display the help message.
-      void print_more_info();
-
     public:
       /// \brief Constructor setting all flags to their default values.
       LPS_Inv_Elm();
-
-      /// \brief Destructor with no particular functionality.
-      ~LPS_Inv_Elm();
 
       /// \brief Uses the library getopt to determine which command line options are used.
       void get_options(int argc, char* argv[]);
@@ -146,93 +134,18 @@ using namespace mcrl2;
 
   // Class LPS_Inv_Elm - Functions declared private --------------------------------------------
 
-    void LPS_Inv_Elm::print_help() {
-      fprintf(stdout,
-        "Usage: %s [OPTION]... -iINVFILE [INFILE [OUTFILE]]\n"
-        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
-        "INVFILE is an invariant of the linear process specification (LPS) in INFILE.\n"
-        "If this is the case, the tool eliminates all summands of the LPS whose condition\n"
-        "violates the invariant, and writes the result to OUTFILE.\n"
-        "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
-        "\n"
-        "The tool can also be used to simplify the conditions of the summands of the\n"
-        "given LPS.\n"
-        "\n"
-        "Options:\n"
-        "  -iINVFILE, --invariant=INVFILE  use the invariant in INVFILE as input\n"
-        "  -sNUM, --summand=NUM            eliminate or simplify the summand with number\n"
-        "                                  NUM only\n"
-        "  -n, --no-check                  do not check if the invariant holds before\n"
-        "                                  eliminating unreachable summands\n"
-        "  -e, --no-elimination            do not eliminate or simplify summands\n"
-        "  -l, --simplify-all              simplify the conditions of all summands,\n"
-        "                                  instead of just eliminating the summands\n"
-        "                                  whose conditions in conjunction with the\n"
-        "                                  invariant are contradictions\n"
-        "  -y, --all-violations            do not terminate as soon as a single\n"
-        "                                  violation of the invariant is found, but\n"
-        "                                  report all violations instead\n"
-        "  -c, --counter-example           display a valuation indicating why the\n"
-        "                                  invariant could possibly be violated if it is\n"
-        "                                  uncertain whether a summand violates the\n"
-        "                                  invariant\n"
-        "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD if it\n"
-        "                                  is impossible to determine whether a summand\n"
-        "                                  violates the invariant; PREFIX will be used\n"
-        "                                  as prefix of the output files\n"
-        "  -h, --help                      display this help and terminate\n"
-        "      --version                   display version information and terminate\n"
-        "  -q, --quiet                     do not display warning messages\n"
-        "  -v, --verbose                   display concise intermediate messages\n"
-        "  -d, --debug                     display detailed intermediate messages\n"
-        "  -rNAME, --rewriter=NAME         use rewrite strategy NAME:\n"
-        "                                  'inner' for the innermost rewriter,\n"
-        "                                  'innerc' for the compiled innermost rewriter,\n"
-        "                                  'jitty' for the jitty rewriter (default), or\n"
-        "                                  'jittyc' for the compiled jitty rewriter\n"
-        "  -tLIMIT, --time-limit=LIMIT     spend at most LIMIT seconds on proving a\n"
-        "                                  single formula\n"
-        "  -zSOLVER, --smt-solver=SOLVER   use SOLVER to remove inconsistent paths from\n"
-        "                                  the internally used BDDs:\n"
-#ifdef HAVE_CVC
-        "                                  'ario' for the SMT solver Ario,\n"
-        "                                  'cvc' for the SMT solver CVC3, or\n"
-        "                                  'cvc-fast' for the fast implementation of the\n"
-        "                                  SMT solver CVC3;\n"
-#else
-        "                                  'ario' for the SMT solver Ario, or\n"
-        "                                  'cvc' for the SMT solver CVC3;\n"
-#endif
-        "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n"
-        "\n"
-        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-        , f_tool_command
-      );
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    void LPS_Inv_Elm::print_more_info() {
-      fprintf(stderr, "Try `%s --help' for more information.\n", f_tool_command);
-    }
 
     // --------------------------------------------------------------------------------------------
 
   // Class LPS_Inv_Elm - Functions declared public ----------------------------------------------
 
     LPS_Inv_Elm::LPS_Inv_Elm() {
-      f_tool_command = 0;
-      f_invariant_file_name = 0;
-      f_lps_file_name = 0;
-      f_output_file_name = 0;
       f_summand_number = 0;
       f_no_check = false;
       f_no_elimination = false;
       f_simplify_all = false;
       f_all_violations = false;
       f_counter_example = false;
-      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
       f_path_eliminator = false;
@@ -242,162 +155,93 @@ using namespace mcrl2;
 
     // --------------------------------------------------------------------------------------------
 
-    LPS_Inv_Elm::~LPS_Inv_Elm() {
-      free(f_invariant_file_name);
-      f_invariant_file_name = 0;
-      free(f_lps_file_name);
-      f_lps_file_name = 0;
-      free(f_output_file_name);
-      f_output_file_name = 0;
-      free(f_dot_file_name);
-      f_dot_file_name = 0;
-    }
+    void LPS_Inv_Elm::get_options(int argc, char* argv[]) {
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -iINVFILE [INFILE [OUTFILE]]\n"
+        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
+        "INVFILE is an invariant of the linear process specification (LPS) in INFILE."
+        "If this is the case, the tool eliminates all summands of the LPS whose condition "
+        "violates the invariant, and writes the result to OUTFILE. "
+        "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
+        "\n"
+        "The tool can also be used to simplify the conditions of the summands of the given LPS.");
 
-    // --------------------------------------------------------------------------------------------
+      clinterface.add_rewriting_options();
+      clinterface.add_prover_options();
 
-    /// Sets the flags of the class according to the command line options passed.
-    /// \param a_argc is the number of arguments passed on the command line
-    /// \param a_argv is an array of all arguments passed on the command line
+      clinterface.
+        add_option("invariant", make_mandatory_argument("INVFILE"), 
+          "use the formula (a boolean expression in mCRL2 format) in INVFILE as invariant", 'i').
+        add_option("summand", make_mandatory_argument("NUM"), 
+          "eliminate or simplify the summand with number NUM only", 's').
+        add_option("no-check",
+          "do not check if the invariant holds before eliminating unreachable summands", 'n').
+        add_option("no-elimination",
+          "do not eliminate or simplify summands", 'e').
+        add_option("simplify-all",
+          "simplify the conditions of all summands, instead of just eliminating the summands "
+          "whose conditions in conjunction with the invariant are contradictions", 'l').
+        add_option("all-violations",
+          "do not terminate as soon as a single violation of the invariant is found, but "
+          "report all violations instead", 'y').
+        add_option("counter-example",
+          "display a valuation indicating why the invariant could possibly be violated "
+          "if it is uncertain whether a summand violates the invariant", 'c').
+        add_option("print-dot", make_mandatory_argument("PREFIX"),
+          "save a .dot file of the resulting BDD if it is impossible to determine "
+          "whether a summand violates the invariant; PREFIX will be used as prefix "
+          "of the output files", 'p').
+        add_option("time-limit", make_mandatory_argument("LIMIT"),
+          "spend at most LIMIT seconds on proving a single formula", 't').
+        add_option("induction", "apply induction on lists", 'o');
 
-    void LPS_Inv_Elm::get_options(int a_argc, char* a_argv[]) {
-      const char* v_short_options = "i:s:nelycp:hqvdr:t:z:o";
+      command_line_parser parser(clinterface, argc, argv);
 
-      f_tool_command = a_argv[0];
+      f_no_check        = 0 < parser.options.count("no-check");
+      f_no_elimination  = 0 < parser.options.count("no-elimination");
+      f_simplify_all    = 0 < parser.options.count("simplify-all");
+      f_all_violations  = 0 < parser.options.count("all-violations");
+      f_counter_example = 0 < parser.options.count("counter-example");
+      f_apply_induction = 0 < parser.options.count("induction");
 
-      struct option v_long_options[] = {
-        {"invariant",        required_argument, 0, 'i'},
-        {"summand",          required_argument, 0, 's'},
-        {"no-check",         no_argument,       0, 'n'},
-        {"no-elimination",   no_argument,       0, 'e'},
-        {"simplify-all",     no_argument,       0, 'l'},
-        {"all-violation",    no_argument,       0, 'y'},
-        {"counter-example",  no_argument,       0, 'c'},
-        {"print-dot",        required_argument, 0, 'p'},
-        {"help",             no_argument,       0, 'h'},
-        {"version",          no_argument,       0, 0x1},
-        {"quiet",            no_argument,       0, 'q'},
-        {"verbose",          no_argument,       0, 'v'},
-        {"debug",            no_argument,       0, 'd'},
-        {"rewriter",         required_argument, 0, 'r'},
-        {"time-limit",       required_argument, 0, 't'},
-        {"smt-solver",       required_argument, 0, 'z'},
-        {"induction",        no_argument,       0, 'o'},
-        {0, 0, 0, 0}
-      };
-
-      int v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
-      while (v_option != -1) {
-        switch (v_option) {
-          case 'i':
-            f_invariant_file_name = strdup(optarg);
-            break;
-          case 's':
-            sscanf(optarg, "%d", &f_summand_number);
-            if (f_summand_number < 1) {
-              gsErrorMsg("The summand number must be greater than or equal to 1.\n");
-              exit(1);
-            } else {
-              gsVerboseMsg("Eliminating or simplifying summand number %d.\n", f_summand_number);
-            }
-            break;
-          case 'n':
-            f_no_check = true;
-            break;
-          case 'e':
-            f_no_elimination = true;
-            break;
-          case 'l':
-            f_simplify_all = true;
-            break;
-          case 'y':
-            f_all_violations = true;
-            break;
-          case 'c':
-            f_counter_example = true;
-            break;
-          case 'p':
-            f_dot_file_name = strdup(optarg);
-            break;
-          case 'h':
-            print_help();
-            exit(0);
-          case 0x1:
-            print_version_information(NAME, AUTHOR);
-            exit(0);
-          case 'q':
-            gsSetQuietMsg();
-            break;
-          case 'v':
-            gsSetVerboseMsg();
-            break;
-          case 'd':
-            gsSetDebugMsg();
-            break;
-          case 'r':
-            if (strcmp(optarg, "jitty") == 0) {
-              f_strategy = GS_REWR_JITTY;
-            } else if (strcmp(optarg, "inner") == 0) {
-              f_strategy = GS_REWR_INNER;
-            } else if (strcmp(optarg, "jittyc") == 0) {
-              f_strategy = GS_REWR_JITTYC;
-            } else if (strcmp(optarg, "innerc") == 0) {
-              f_strategy = GS_REWR_INNERC;
-            } else {
-              gsErrorMsg("option -r has illegal argument '%s'\n", optarg);
-              exit(1);
-            }
-            break;
-          case 't':
-            sscanf(optarg, "%d", &f_time_limit);
-            if (f_time_limit <= 0) {
-              gsErrorMsg("The time-limit must be greater than or equal to one.\n");
-              exit(0);
-            }
-            break;
-          case 'z':
-            if (strcmp(optarg, "ario") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_ario;
-            } else if (strcmp(optarg, "cvc") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc;
-#ifdef CVC_LITE_LIB
-            } else if (strcmp(optarg, "cvc-fast") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc_fast;
-#endif
-            } else {
-              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
-              exit(1);
-            }
-            break;
-          case 'o':
-            f_apply_induction = true;
-            break;
-          default:
-            print_more_info();
-            exit(1);
-        }
-        v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
+      if (parser.options.count("invariant")) {
+        f_invariant_file_name = parser.option_argument_as< std::string >("invariant");
+      }
+      else {
+        parser.error("a file containing an invariant must be specified using the option --invariant=INVFILE");
       }
 
-      int v_number_of_remaining_arguments = a_argc - optind;
-      if (v_number_of_remaining_arguments > 2) {
-        gsErrorMsg("%s: too many arguments\n", NAME);
-        print_more_info();
-        exit(1);
-      } else {
-        if (v_number_of_remaining_arguments > 0) {
-          f_lps_file_name = strdup(a_argv[optind]);
+      if (parser.options.count("print-dot")) {
+        f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
+      }
+      if (parser.options.count("summand")) {
+        f_summand_number = parser.option_argument_as< size_t >("summand");
+
+        if (f_summand_number < 1) {
+          parser.error("The summand number must be greater than or equal to 1.\n");
         }
-        if (v_number_of_remaining_arguments == 2) {
-          f_output_file_name = strdup(a_argv[optind + 1]);
+        else {
+          gsVerboseMsg("Eliminating or simplifying summand number %u.\n", f_summand_number);
         }
       }
-      if (f_invariant_file_name == 0) {
-        gsErrorMsg("%s: a file containing an invariant must be specified using the option --invariant=INVFILE\n", NAME);
-        print_more_info();
-        exit(1);
+      if (parser.options.count("time-limit")) {
+        f_time_limit = parser.option_argument_as< size_t >("time-limit");
+      }
+
+      f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+      if (parser.options.count("smt-solver")) {
+        f_path_eliminator = true;
+        f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
+      }
+
+      if (0 < parser.arguments.size()) {
+        f_lps_file_name = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        f_output_file_name = parser.arguments[1];
+      }
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
       }
     }
 
@@ -413,14 +257,14 @@ using namespace mcrl2;
       //read the LPS
       lps::specification lps_specification;
       try {
-        lps_specification.load((f_lps_file_name == 0)?"-":f_lps_file_name);
+        lps_specification.load((f_lps_file_name.empty())?"-":f_lps_file_name);
       } catch (std::exception) {
-        gsErrorMsg("could not read LPS from '%s'\n", (f_lps_file_name == 0)?"stdin":f_lps_file_name);
+        gsErrorMsg("could not read LPS from '%s'\n", (f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str());
         exit(1);
       }
 
       if (!lps_specification.is_well_typed()) {
-        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", (f_lps_file_name == 0)?"stdin":f_lps_file_name);
+        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", (f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str());
         exit(1);
       }
 
@@ -429,12 +273,12 @@ using namespace mcrl2;
       ATermAppl f_reconstructed_spec = reconstruct_spec(lps_specification);      
 
       //parse the invariant formula from infilename
-      std::ifstream instream(f_invariant_file_name);
+      std::ifstream instream(f_invariant_file_name.c_str());
       if (!instream.is_open()) {
-        gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name);
+        gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name.c_str());
         exit(1);
       }
-      gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name);
+      gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
       f_invariant = parse_data_expr(instream);
       instream.close();
       if(!f_invariant){
@@ -475,7 +319,7 @@ using namespace mcrl2;
     bool LPS_Inv_Elm::check_invariant() {
       if (!f_no_check) {
         Invariant_Checker v_invariant_checker(
-          f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name
+          f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name.c_str()
         );
 
         return v_invariant_checker.check_invariant(f_invariant);
@@ -510,7 +354,7 @@ using namespace mcrl2;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        ATwriteToNamedSAFFile((ATerm) f_lps, (f_output_file_name == 0)?"-":f_output_file_name);
+        ATwriteToNamedSAFFile((ATerm) f_lps, (f_output_file_name.empty())?"-":f_output_file_name.c_str());
       }
     }
 
@@ -520,13 +364,21 @@ using namespace mcrl2;
   {
     MCRL2_ATERM_INIT(argc, argv)
 
-    LPS_Inv_Elm v_lps_inv_elm;
+    try {
+      LPS_Inv_Elm v_lps_inv_elm;
+     
+      v_lps_inv_elm.get_options(argc, argv);
+      v_lps_inv_elm.read_input();
+      if (v_lps_inv_elm.check_invariant()) {
+        v_lps_inv_elm.simplify();
+        v_lps_inv_elm.write_result();
+      }
 
-    v_lps_inv_elm.get_options(argc, argv);
-    v_lps_inv_elm.read_input();
-    if (v_lps_inv_elm.check_invariant()) {
-      v_lps_inv_elm.simplify();
-      v_lps_inv_elm.write_result();
+      return EXIT_SUCCESS;
     }
-    return 0;
+    catch (std::exception& e) {
+      std::cerr << e.what() << std::endl;
+    }
+
+    return EXIT_FAILURE;
   }

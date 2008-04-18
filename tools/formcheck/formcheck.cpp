@@ -10,8 +10,10 @@
 #define NAME "formcheck"
 #define AUTHOR "Luc Engelen"
 
+#include <string>
+#include <fstream>
+
 #include "mcrl2/formula_checker.h"
-#include "getopt.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
@@ -21,9 +23,7 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
-#include <string>
-#include <fstream>
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -42,15 +42,12 @@ using namespace mcrl2;
 
   class LPS_Form_Check {
     private:
-      /// \brief The command entered to invoke the tool formcheck.
-      char* f_tool_command;
-
       /// \brief The name of the file containing the formula that is checked.
-      char* f_formula_file_name;
+      std::string f_formula_file_name;
 
       /// \brief The name of the file containing the LPS.
       /// \brief If this string is 0, the input is read from stdin.
-      char* f_lps_file_name;
+      std::string f_lps_file_name;
 
       /// \brief The flag indicating whether or not counter examples are printed each time a formula is encountered
       /// \brief that is neither a contradiction nor a tautology.
@@ -62,13 +59,13 @@ using namespace mcrl2;
 
       /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
       /// \brief a contradiction nor a tautology. If the string is 0, no files are written.
-      char* f_dot_file_name;
+      std::string f_dot_file_name;
 
       /// \brief The rewrite strategy used by the rewriter.
       RewriteStrategy f_strategy;
 
       /// \brief The maximal number of seconds spent on proving a single confluence condition.
-      int f_time_limit;
+      size_t f_time_limit;
 
       /// \brief The flag indicating whether or not a path eliminator is used.
       bool f_path_eliminator;
@@ -79,18 +76,9 @@ using namespace mcrl2;
       /// \brief The flag indicating whether or not induction should be applied.
       bool f_apply_induction;
 
-      /// \brief Prints the help message.
-      void print_help();
-
-      /// \brief Prints a message indicating how to display the help message.
-      void print_more_info();
-
     public:
       /// \brief Constructor setting all flags to their default values.
       LPS_Form_Check();
-
-      /// \brief Destructor with no particular functionality.
-      ~LPS_Form_Check();
 
       /// \brief Uses the library getopt to determine which command line options are used.
       void get_options(int a_argc, char* a_argv[]);
@@ -102,73 +90,11 @@ using namespace mcrl2;
 
   // Class LPS_Form_Check - Functions declared private --------------------------------------------
 
-    void LPS_Form_Check::print_help() {
-      fprintf(stdout,
-        "Usage: %s [OPTION]... -fFORMFILE [INFILE]\n"
-        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in\n"
-        "FORMFILE holds for the data specification of the linear process specification\n"
-        "(LPS) in INFILE. If INFILE is not present, stdin is used.\n"
-        "\n"
-        "Options:\n"
-        "  -fFORMFILE, --formula=FORMFILE  use the formula in FORMFILE as input\n"
-        "  -c, --counter-example           display a valuation for which the formula does\n"
-        "                                  not hold, in case it is neither a\n"
-        "                                  contradiction nor a tautology\n"
-        "  -w, --witness                   display a valuation for which the formula\n"
-        "                                  holds, in case it is neither a contradiction\n"
-        "                                  nor a tautology\n"
-        "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD if it\n"
-        "                                  is impossible to determine whether the formula\n"
-        "                                  is a contradiction or a tautology; PREFIX\n"
-        "                                  will be used as prefix of the output files\n"
-        "  -h, --help                      display this help and terminate\n"
-        "      --version                   display version information and terminate\n"
-        "  -q, --quiet                     do not display warning messages\n"
-        "  -v, --verbose                   display concise intermediate messages\n"
-        "  -d, --debug                     display detailed intermediate messages\n"
-        "  -rNAME, --rewriter=NAME         use rewrite strategy NAME:\n"
-        "                                  'inner' for the innermost rewriter,\n"
-        "                                  'innerc' for the compiled innermost rewriter,\n"
-        "                                  'jitty' for the jitty rewriter (default), or\n"
-        "                                  'jittyc' for the compiled jitty rewriter\n"
-        "  -tLIMIT, --time-limit=LIMIT     spend at most LIMIT seconds on proving the\n"
-        "                                  formula\n"
-        "  -zSOLVER, --smt-solver=SOLVER   use SOLVER to remove inconsistent paths from\n"
-        "                                  the internally used BDDs:\n"
-#ifdef HAVE_CVC
-        "                                  'ario' for the SMT solver Ario,\n"
-        "                                  'cvc' for the SMT solver CVC3, or\n"
-        "                                  'cvc-fast' for the fast implementation of the\n"
-        "                                  SMT solver CVC3;\n"
-#else
-        "                                  'ario' for the SMT solver Ario, or\n"
-        "                                  'cvc' for the SMT solver CVC3;\n"
-#endif
-        "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n"
-        "\n"
-        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-        , f_tool_command
-      );
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    void LPS_Form_Check::print_more_info() {
-      fprintf(stderr, "Try `%s --help' for more information.\n", f_tool_command);
-    }
-
-    // --------------------------------------------------------------------------------------------
-
   // Class LPS_Form_Check - Functions declared public ---------------------------------------------
 
     LPS_Form_Check::LPS_Form_Check() {
-      f_tool_command = 0;
-      f_formula_file_name = 0;
-      f_lps_file_name = 0;
       f_counter_example = false;
       f_witness = false;
-      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
       f_path_eliminator = false;
@@ -178,132 +104,67 @@ using namespace mcrl2;
 
     // --------------------------------------------------------------------------------------------
 
-    LPS_Form_Check::~LPS_Form_Check() {
-      free(f_formula_file_name);
-      f_formula_file_name = 0;
-      free(f_lps_file_name);
-      f_lps_file_name = 0;
-      free(f_dot_file_name);
-      f_dot_file_name = 0;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     /// Sets the flags of the class according to the command line options passed.
-    /// \param a_argc is the number of arguments passed on the command line
-    /// \param a_argv is an array of all arguments passed on the command line
+    /// \param argc is the number of arguments passed on the command line
+    /// \param argv is an array of all arguments passed on the command line
 
-    void LPS_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      const char* v_short_options = "f:cwp:hqvdr:t:z:o";
+    void LPS_Form_Check::get_options(int argc, char* argv[]) {
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -fFORMFILE [INFILE]\n"
+        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
+        "FORMFILE holds for the data specification of the linear process specification "
+        "(LPS) in INFILE. If INFILE is not present, stdin is used.");
 
-      struct option v_long_options[] = {
-        {"formula",          required_argument, 0, 'f'},
-        {"counter-example",  no_argument,       0, 'c'},
-        {"witness",          no_argument,       0, 'w'},
-        {"print-dot",        required_argument, 0, 'p'},
-        {"help",             no_argument,       0, 'h'},
-        {"version",          no_argument,       0, 0x1},
-        {"quiet",            no_argument,       0, 'q'},
-        {"verbose",          no_argument,       0, 'v'},
-        {"debug",            no_argument,       0, 'd'},
-        {"rewriter",         required_argument, 0, 'r'},
-        {"time-limit",       required_argument, 0, 't'},
-        {"smt-solver",       required_argument, 0, 'z'},
-        {"induction",        no_argument,       0, 'o'},
-        {0, 0, 0, 0}
-      };
+      clinterface.add_rewriting_options();
+      clinterface.add_prover_options();
 
-      f_tool_command = a_argv[0];
+      clinterface.
+        add_option("formula", make_mandatory_argument("FORMFILE"), 
+          "use the formula in FORMFILE as input", 'f').
+        add_option("counter-example",
+          "display a valuation for which the formula does not hold, in case it is neither a "
+          "contradiction nor a tautology", 'c').
+        add_option("witness",
+          "display a valuation for which the formula holds, in case it is neither a "
+          "contradiction nor a tautology", 'w').
+        add_option("print-dot", make_mandatory_argument("PREFIX"),
+          "save a .dot file of the resulting BDD if it is impossible to determine whether "
+          "the formula is a contradiction or a tautology; PREFIX will be used as prefix of "
+          "the output files", 'p').
+        add_option("time-limit", make_mandatory_argument("LIMIT"),
+          "spend at most LIMIT seconds on proving a single formula", 't').
+        add_option("induction", "apply induction on lists", 'o');
 
-      int v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
-      while (v_option != -1) {
-        switch (v_option) {
-          case 'f':
-            f_formula_file_name = strdup(optarg);
-            break;
-          case 'c':
-            f_counter_example = true;
-            break;
-          case 'w':
-            f_witness = true;
-            break;
-          case 'p':
-            f_dot_file_name = strdup(optarg);
-            break;
-          case 'h':
-            print_help();
-            exit(0);
-          case 0x1:
-            print_version_information(NAME, AUTHOR);
-            exit(0);
-          case 'q':
-            gsSetQuietMsg();
-            break;
-          case 'v':
-            gsSetVerboseMsg();
-            break;
-          case 'd':
-            gsSetDebugMsg();
-            break;
-          case 'r':
-            if (strcmp(optarg, "jitty") == 0) {
-              f_strategy = GS_REWR_JITTY;
-            } else if (strcmp(optarg, "inner") == 0) {
-              f_strategy = GS_REWR_INNER;
-            } else if (strcmp(optarg, "jittyc") == 0) {
-              f_strategy = GS_REWR_JITTYC;
-            } else if (strcmp(optarg, "innerc") == 0) {
-              f_strategy = GS_REWR_INNERC;
-            } else {
-              throw std::runtime_error("option -r has illegal argument '" + std::string(optarg) + "'");
-            }
-            break;
-          case 't':
-            sscanf(optarg, "%d", &f_time_limit);
-            if (f_time_limit <= 0) {
-              throw std::runtime_error("the time-limit must be greater than or equal to one");
-            }
-            break;
-          case 'z':
-            if (strcmp(optarg, "ario") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_ario;
-            } else if (strcmp(optarg, "cvc") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc;
-#ifdef CVC_LITE_LIB
-            } else if (strcmp(optarg, "cvc-fast") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc_fast;
-#endif
-            } else {
-              throw std::runtime_error("option -z has illegal argument '" + std::string(optarg) + "'");
-            }
-            break;
-          case 'o':
-            f_apply_induction = true;
-            break;
-          default:
-            print_more_info();
-            exit(1);
-        }
-        v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
+      command_line_parser parser(clinterface, argc, argv);
+
+      f_counter_example = 0 < parser.options.count("counter-example");
+      f_apply_induction = 0 < parser.options.count("induction");
+      f_witness         = 0 < parser.options.count("witness");
+
+      if (parser.options.count("formula")) {
+        f_formula_file_name = parser.option_argument_as< std::string >("formula");
+      }
+      else {
+        parser.error("a formula file must be specified using the option --formula=FORMFILE.");
+      }
+      if (parser.options.count("print-dot")) {
+        f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
+      }
+      if (parser.options.count("time-limit")) {
+        f_time_limit = parser.option_argument_as< size_t >("time-limit");
       }
 
-      int v_number_of_remaining_arguments = a_argc - optind;
-      if (v_number_of_remaining_arguments > 1) {
-        fprintf(stderr, "%s: too many arguments\n", NAME);
-        print_more_info();
-        exit(1);
-      } else {
-        if (v_number_of_remaining_arguments == 1) {
-          f_lps_file_name = strdup(a_argv[optind]);
-        }
+      f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+      if (parser.options.count("smt-solver")) {
+        f_path_eliminator = true;
+        f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
       }
-      if (f_formula_file_name == 0) {
-        fprintf(stderr, "%s: a formula file must be specified using the option --formula=FORMFILE.\n", NAME);
-        print_more_info();
-        exit(1);
+
+      if (0 < parser.arguments.size()) {
+        f_lps_file_name = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        parser.error("too many file arguments");
       }
     }
 
@@ -317,41 +178,41 @@ using namespace mcrl2;
 
       //Load LPS
       lps::specification lps_specification;
-      lps_specification.load((f_lps_file_name == 0)?"-":f_lps_file_name);
+      lps_specification.load((f_lps_file_name.empty())?"-":f_lps_file_name.c_str());
       if (!lps_specification.is_well_typed()) {
-        throw std::runtime_error("invalid mCRL2 LPS read from " + std::string((f_lps_file_name == 0)?"stdin":f_lps_file_name));
+        throw std::runtime_error("invalid mCRL2 LPS read from " + std::string((f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str()));
       }
 
       // typechecking and data implementation use a specification before data
       // implementation.
       ATermAppl v_reconstructed_lps = reconstruct_spec(lps_specification);
 
-      gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name);
+      gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name.c_str());
       //open the formula from f_formula_file_name
-      std::ifstream instream(f_formula_file_name);
+      std::ifstream instream(f_formula_file_name.c_str());
       if (!instream.is_open()) {
-        throw std::runtime_error("cannot open formula file '" + std::string(f_formula_file_name) + "'");
+        throw std::runtime_error("cannot open formula file '" + f_formula_file_name + "'");
       }
       //parse the formula
       ATermAppl f_formula = parse_data_expr(instream);
       instream.close();
       if(!f_formula){
-        throw std::runtime_error("cannot parse formula from '" + std::string(f_formula_file_name) + "'");
+        throw std::runtime_error("cannot parse formula from '" + f_formula_file_name + "'");
       }
       //typecheck the formula
       f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_lps);
       if(!f_formula){
-        throw std::runtime_error("type checking formula from '" + std::string(f_formula_file_name) + "' failed");
+        throw std::runtime_error("type checking formula from '" + f_formula_file_name + "' failed");
       }
       //implement data in the formula
       f_formula = implement_data_data_expr(f_formula,v_reconstructed_lps);
       if(!f_formula){
-        throw std::runtime_error("implementation of data types in the formula from '" + std::string(f_formula_file_name) + "' failed");
+        throw std::runtime_error("implementation of data types in the formula from '" + f_formula_file_name + "' failed");
       }
 
       //check formula
       Formula_Checker v_formula_checker(
-        ATAgetArgument(v_reconstructed_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name);
+        ATAgetArgument(v_reconstructed_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name.c_str());
       v_formula_checker.check_formulas(ATmakeList1((ATerm) f_formula));
     }
 
@@ -366,11 +227,12 @@ using namespace mcrl2;
 
       v_lps_form_check.get_options(argc, argv);
       v_lps_form_check.check_formula();
+
+      return EXIT_SUCCESS;
     }
     catch (std::exception& e) {
-      gsErrorMsg("%s\n", e.what());
-      exit(1);
+      std::cerr << e.what() << std::endl;
     }
 
-    return 0;
+    return EXIT_FAILURE;
   }

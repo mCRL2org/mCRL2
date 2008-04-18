@@ -3,7 +3,6 @@ project lpsinvelm ;
 tool lpsinvelm
        : lpsinvelm.cpp
          /libraries//lps
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools lpsinvelm ;

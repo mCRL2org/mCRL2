@@ -10,7 +10,9 @@
 #define NAME "lpsconfcheck"
 #define AUTHOR "Luc Engelen"
 
-#include "getopt.h"
+#include <string>
+#include <fstream>
+
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
@@ -21,9 +23,7 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
-#include <string>
-#include <fstream>
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -43,9 +43,6 @@ using namespace mcrl2::lps;
 
   class LPS_Conf_Check {
     private:
-      /// \brief The command entered to invoke the tool lpsconfcheck.
-      char* f_tool_command;
-
       /// \brief The name of a file containing an invariant that is used to check confluence.
       /// \brief If this string is 0, the constant true is used as invariant.
       std::string f_invariant_file_name;
@@ -60,7 +57,7 @@ using namespace mcrl2::lps;
 
       /// \brief The number of the summand that is checked for confluence.
       /// \brief If this number is 0, all summands are checked.
-      int f_summand_number;
+      size_t f_summand_number;
 
       /// \brief The flag indicating if the invariance of resulting expressions should be checked in case a confluence
       /// \brief condition is neither a tautology nor a contradiction.
@@ -88,7 +85,7 @@ using namespace mcrl2::lps;
       RewriteStrategy f_strategy;
 
       /// \brief The maximal number of seconds spent on proving a single confluence condition.
-      int f_time_limit;
+      size_t f_time_limit;
 
       /// \brief The flag indicating whether or not a path eliminator is used.
       bool f_path_eliminator;
@@ -106,21 +103,12 @@ using namespace mcrl2::lps;
       /// \brief If no invariant was provided, the constant true is used as invariant.
       ATermAppl f_invariant;
 
-      /// \brief Prints the help message.
-      void print_help();
-
-      /// \brief Prints a message indicating how to display the help message.
-      void print_more_info();
-
     public:
       /// \brief Constructor setting all flags to their default values.
       LPS_Conf_Check();
 
-      /// \brief Destructor with no particular functionality.
-      ~LPS_Conf_Check();
-
       /// \brief Uses the library getopt to determine which command line options are used.
-      void get_options(int a_argc, char* a_argv[]);
+      void get_options(int argc, char* argv[]);
 
       /// \brief Reads an LPS and an invariant from the specified input sources.
       void read_input();
@@ -145,23 +133,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface,
 
   private:
 
-    static const char* lps_file_for_input; ///< file containing an LTS that can be imported using the LTS library
-    static const char* invariant_file_for_input; ///< file containing an LTS that can be imported using the LTS library
-    static const char* lps_file_for_output;  ///< file containing an LTS that can be imported using the LTS library
-
-    static const char* option_generate_invariants;
-    static const char* option_check_invariant;
-    static const char* option_mark_tau;
-    static const char* option_check_combinations;
-    static const char* option_counter_example;
-    static const char* option_induction_on_lists;
-    static const char* option_invariant;
-    static const char* option_time_limit;
-    static const char* option_rewrite_strategy;
-    static const char* option_smt_solver;
-
-  private:
-
     boost::shared_ptr < tipi::datatype::enumeration > smt_solver_enumeration;
 
   public:
@@ -182,20 +153,20 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface,
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input       = "lps_in";
-const char* squadt_interactor::invariant_file_for_input = "invariant_in";
-const char* squadt_interactor::lps_file_for_output      = "lps_out";
+const char* lps_file_for_input       = "lps_in";
+const char* invariant_file_for_input = "invariant_in";
+const char* lps_file_for_output      = "lps_out";
 
-const char* squadt_interactor::option_generate_invariants = "generate_invariants";
-const char* squadt_interactor::option_check_invariant     = "check_invariant";
-const char* squadt_interactor::option_mark_tau            = "mark_tau";
-const char* squadt_interactor::option_check_combinations  = "check_combinations";
-const char* squadt_interactor::option_counter_example     = "counter_example";
-const char* squadt_interactor::option_induction_on_lists  = "induction_on_lists";
-const char* squadt_interactor::option_invariant           = "invariant";
-const char* squadt_interactor::option_time_limit          = "time_limit";
-const char* squadt_interactor::option_rewrite_strategy    = "rewrite_strategy";
-const char* squadt_interactor::option_smt_solver          = "smt_solver";
+const char* option_generate_invariants = "generate_invariants";
+const char* option_check_invariant     = "check_invariant";
+const char* option_mark_tau            = "mark_tau";
+const char* option_check_combinations  = "check_combinations";
+const char* option_counter_example     = "counter_example";
+const char* option_induction_on_lists  = "induction_on_lists";
+const char* option_invariant           = "invariant";
+const char* option_time_limit          = "time_limit";
+const char* option_rewrite_strategy    = "rewrite_strategy";
+const char* option_smt_solver          = "smt_solver";
 
 squadt_interactor::squadt_interactor() {
   smt_solver_enumeration.reset(new tipi::datatype::enumeration("none"));
@@ -420,82 +391,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   // Class LPS_Conf_Check - Functions declared private --------------------------------------------
 
-    void LPS_Conf_Check::print_help() {
-      fprintf(stdout,
-        "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them\n"
-        "by renaming them to ctau, and write the result to OUTFILE. If INFILE is not\n"
-        "present stdin is used. If OUTFILE is not present, stdout is used.\n"
-        "\n"
-        "Options:\n"
-        "  -iINVFILE, --invariant=INVFILE  use the formula (a boolean expression in mCRL2\n"
-        "                                  format) in INVFILE as invariant\n"
-        "  -g. --generate-invariants       try to prove that the reduced confluence\n"
-        "                                  condition is an invariant of the LPS, in case\n"
-        "                                  the confluence condition is not a tautology\n"
-        "  -sNUM, --summand=NUM            check the summand with number NUM only\n"
-        "  -n, --no-check                  do not check if the invariant holds before\n"
-        "                                  checking for confluence\n"
-        "  -m, --no-marking                do not mark the confluent tau-summands; since\n"
-        "                                  there are no changes made to the LPS, nothing\n"
-        "                                  is written to OUTFILE\n"
-        "  -a, --check-all                 check the confluence of tau-summands regarding\n"
-        "                                  all other summands, instead of continuing with\n"
-        "                                  the next tau-summand as soon as a summand is\n"
-        "                                  encountered that is not confluent with the\n"
-        "                                  current tau-summand\n"
-        "  -c, --counter-example           display a valuation for which the confluence\n"
-        "                                  condition does not hold, in case the\n"
-        "                                  encountered condition is neither a\n"
-        "                                  contradiction nor a tautolgy\n"
-        "  -pPREFIX, --print-dot=PREFIX    save a .dot file of the resulting BDD in case\n"
-        "                                  two summands cannot be proven confluent;\n"
-        "                                  PREFIX will be used as prefix of the output\n"
-        "                                  files\n"
-        "  -h, --help                      display this help and terminate\n"
-        "      --version                   display version information and terminate\n"
-        "  -q, --quiet                     do not display warning messages\n"
-        "  -v, --verbose                   display concise intermediate messages\n"
-        "  -d, --debug                     display detailed intermediate messages\n"
-        "  -rNAME, --rewriter=NAME         use rewrite strategy NAME:\n"
-        "                                  'inner' for the innermost rewriter,\n"
-        "                                  'innerc' for the compiled innermost rewriter,\n"
-        "                                  'jitty' for the jitty rewriter (default), or\n"
-        "                                  'jittyc' for the compiled jitty rewriter\n"
-        "  -tLIMIT, --time-limit=LIMIT     spend at most LIMIT seconds on proving a\n"
-        "                                  single formula\n"
-        "  -zSOLVER --smt-solver=SOLVER    use SOLVER to remove inconsistent paths from\n"
-        "                                  the internally used BDDs:\n"
-#ifdef CVC_LITE_LIB
-        "                                  'ario' for the SMT solver Ario,\n"
-        "                                  'cvc' for the SMT solver CVC3, or\n"
-        "                                  'cvc-fast' for the fast implementation of the\n"
-        "                                  SMT solver CVC3;\n"
-#else
-        "                                  'ario' for the SMT solver Ario, or\n"
-        "                                  'cvc' for the SMT solver CVC3;\n"
-#endif
-        "                                  by default, no path elimination is applied\n"
-        "  -o, --induction                 apply induction on lists\n"
-        "\n"
-        "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-        , f_tool_command
-      );
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    void LPS_Conf_Check::print_more_info() {
-      fprintf(stderr, "Try `%s --help' for more information.\n", f_tool_command);
-    }
-
-    // --------------------------------------------------------------------------------------------
-
   // Class LPS_Conf_Check - Functions declared public ---------------------------------------------
 
     LPS_Conf_Check::LPS_Conf_Check() : f_input_file_name("-"), f_output_file_name("-") {
       f_dot_file_name = "";
-      f_tool_command = 0;
       f_summand_number = 0;
       f_generate_invariants = false;
       f_no_check = false;
@@ -511,149 +410,94 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     // --------------------------------------------------------------------------------------------
 
-    LPS_Conf_Check::~LPS_Conf_Check() {
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     /// Sets the flags of the class according to the command line options passed.
-    /// \param a_argc is the number of arguments passed on the command line
-    /// \param a_argv is an array of all arguments passed on the command line
+    /// \param argc is the number of arguments passed on the command line
+    /// \param argv is an array of all arguments passed on the command line
 
-    void LPS_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      const char* v_short_options = "i:gs:nmacp:hqvdr:t:z:o";
+    void LPS_Conf_Check::get_options(int argc, char* argv[]) {
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
+        "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
+        "stdin is used. If OUTFILE is not present, stdout is used.");
 
-      f_tool_command = a_argv[0];
+      clinterface.add_rewriting_options();
+      clinterface.add_prover_options();
 
-      struct option v_long_options[] = {
-        {"invariant",        required_argument, 0, 'i'},
-        {"negation",         no_argument,       0, 'g'},
-        {"summand",          required_argument, 0, 's'},
-        {"no-check",         no_argument,       0, 'n'},
-        {"no-marking",       no_argument,       0, 'm'},
-        {"check-all",        no_argument,       0, 'a'},
-        {"counter-example",  no_argument,       0, 'c'},
-        {"print-dot",        required_argument, 0, 'p'},
-        {"help",             no_argument,       0, 'h'},
-        {"version",          no_argument,       0, 0x1},
-        {"quiet",            no_argument,       0, 'q'},
-        {"verbose",          no_argument,       0, 'v'},
-        {"debug",            no_argument,       0, 'd'},
-        {"rewriter",         required_argument, 0, 'r'},
-        {"time-limit",       required_argument, 0, 't'},
-        {"smt-solver",       required_argument, 0, 'z'},
-        {"induction",        no_argument,       0, 'o'},
-        {0, 0, 0, 0}
-      };
+      clinterface.
+        add_option("invariant", make_mandatory_argument("INVFILE"), 
+          "use the formula (a boolean expression in mCRL2 format) in INVFILE as invariant", 'i').
+        add_option("summand", make_mandatory_argument("NUM"), 
+          "eliminate or simplify the summand with number NUM only", 's').
+        add_option("check-all",
+          "check the confluence of tau-summands regarding all other summands, instead of "
+          "continuing with the next tau-summand as soon as a summand is encountered that "
+          "is not confluent with the current tau-summand", 'a').
+        add_option("generate-invariants",
+          "try to prove that the reduced confluence condition is an invariant of the LPS, "
+          "in case the confluence condition is not a tautology", 'g').
+        add_option("no-check",
+          "do not check if the invariant holds before checking for for confluence", 'n').
+        add_option("no-marking",
+          "do not mark the confluent tau-summands; since there are no changes made to the LPS, "
+          "nothing is written to OUTFILE", 'm').
+        add_option("counter-example",
+          "display a valuation for which the confluence condition does not hold, in case the "
+          "encountered condition is neither a contradiction nor a tautolgy", 'c').
+        add_option("print-dot", make_mandatory_argument("PREFIX"),
+          "save a .dot file of the resulting BDD in case two summands cannot be proven "
+          "confluent; PREFIX will be used as prefix of the output files\n", 'p').
+        add_option("time-limit", make_mandatory_argument("LIMIT"),
+          "spend at most LIMIT seconds on proving a single formula", 't').
+        add_option("induction", "apply induction on lists", 'o');
 
-      int v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
-      while (v_option != -1) {
-        switch (v_option) {
-          case 'i':
-            f_invariant_file_name = std::string(optarg);
-            break;
-          case 'g':
-            f_generate_invariants = true;
-            break;
-          case 's':
-            sscanf(optarg, "%d", &f_summand_number);
-            if (f_summand_number < 1) {
-              gsErrorMsg("The summand number must be greater than or equal to 1.\n");
-              exit(1);
-            } else {
-              gsVerboseMsg("Checking confluence of summand number %d.\n", f_summand_number);
-            }
-            break;
-          case 'n':
-            f_no_check = true;
-            break;
-          case 'm':
-            f_no_marking = true;
-            break;
-          case 'a':
-            f_check_all = true;
-            break;
-          case 'c':
-            f_counter_example = true;
-            break;
-          case 'p':
-            f_dot_file_name = std::string(optarg);
-            break;
-          case 'h':
-            print_help();
-            exit(0);
-          case 0x1:
-            print_version_information(NAME, AUTHOR);
-            exit(0);
-          case 'q':
-            gsSetQuietMsg();
-            break;
-          case 'v':
-            gsSetVerboseMsg();
-            break;
-          case 'd':
-            gsSetDebugMsg();
-            break;
-          case 'r':
-            if (strcmp(optarg, "jitty") == 0) {
-              f_strategy = GS_REWR_JITTY;
-            } else if (strcmp(optarg, "inner") == 0) {
-              f_strategy = GS_REWR_INNER;
-            } else if (strcmp(optarg, "jittyc") == 0) {
-              f_strategy = GS_REWR_JITTYC;
-            } else if (strcmp(optarg, "innerc") == 0) {
-              f_strategy = GS_REWR_INNERC;
-            } else {
-              gsErrorMsg("option -r has illegal argument '%s'\n", optarg);
-              exit(1);
-            }
-            break;
-          case 't':
-            sscanf(optarg, "%d", &f_time_limit);
-            if (f_time_limit <= 0) {
-              gsErrorMsg("the time-limit must be greater than or equal to one.\n");
-              exit(1);
-            }
-            break;
-          case 'z':
-            if (strcmp(optarg, "ario") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_ario;
-            } else if (strcmp(optarg, "cvc") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc;
-#ifdef HAVE_CVC
-            } else if (strcmp(optarg, "cvc-fast") == 0) {
-              f_path_eliminator = true;
-              f_solver_type = solver_type_cvc_fast;
-#endif
-            } else {
-              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
-              exit(1);
-            }
-            break;
-          case 'o':
-            f_apply_induction = true;
-            break;
-          default:
-            print_more_info();
-            exit(1);
-        }
-        v_option = getopt_long(a_argc, a_argv, v_short_options, v_long_options, NULL);
+      command_line_parser parser(clinterface, argc, argv);
+
+      f_no_check            = 0 < parser.options.count("no-check");
+      f_no_marking          = 0 < parser.options.count("no-marking");
+      f_generate_invariants = 0 < parser.options.count("generate-invariants");
+      f_check_all           = 0 < parser.options.count("check-all");
+      f_counter_example     = 0 < parser.options.count("counter-example");
+      f_apply_induction     = 0 < parser.options.count("induction");
+
+      if (parser.options.count("invariant")) {
+        f_invariant_file_name = parser.option_argument_as< std::string >("invariant");
+      }
+      else {
+        parser.error("a file containing an invariant must be specified using the option --invariant=INVFILE\n");
       }
 
-      int v_number_of_remaining_arguments = a_argc - optind;
-      if (v_number_of_remaining_arguments > 2) {
-        gsErrorMsg("%s: too many arguments\n", NAME);
-        print_more_info();
-        exit(1);
-      } else {
-        if (v_number_of_remaining_arguments > 0) {
-          f_input_file_name = std::string(a_argv[optind]);
-          if (v_number_of_remaining_arguments == 2) {
-            f_output_file_name = std::string(a_argv[optind + 1]);
-          }
+      if (parser.options.count("print-dot")) {
+        f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
+      }
+      if (parser.options.count("summand")) {
+        f_summand_number = parser.option_argument_as< size_t >("summand");
+
+        if (f_summand_number < 1) {
+          parser.error("The summand number must be greater than or equal to 1.\n");
         }
+        else {
+          gsVerboseMsg("Checking confluence of summand number %u.\n", f_summand_number);
+        }
+      }
+      if (parser.options.count("time-limit")) {
+        f_time_limit = parser.option_argument_as< size_t >("time-limit");
+      }
+
+      f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+      if (parser.options.count("smt-solver")) {
+        f_path_eliminator = true;
+        f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
+      }
+
+      if (0 < parser.arguments.size()) {
+        f_input_file_name = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        f_output_file_name = parser.arguments[1];
+      }
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
       }
     }
 
@@ -793,12 +637,12 @@ int main(int argc, char* argv[]) {
       v_lps_conf_check.check_confluence_and_mark();
       v_lps_conf_check.write_result();
     }
+
+    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     gsErrorMsg("Fatal: %s\n", e.what());
-
-    return 1;
   }
 
-  return 0;
+  return EXIT_FAILURE;
 }

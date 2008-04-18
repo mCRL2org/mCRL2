@@ -82,7 +82,7 @@ using namespace mcrl2::core;
 
     Formula_Checker::Formula_Checker(
       ATermAppl a_data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_counter_example, bool a_witness, char* a_dot_file_name
+      bool a_apply_induction, bool a_counter_example, bool a_witness, char const* a_dot_file_name
     ):
       f_bdd_prover(mcrl2::data::data_specification(a_data_spec), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {

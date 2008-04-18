@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <getopt.h>
 #include <ticpp.h>
 #include <aterm2.h>
 #include "mcrl2/core/struct.h"
@@ -25,7 +24,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -110,18 +109,25 @@ static ATermList pn2gsMakeListOfLists(ATermList l);
 
 static char *pn2gsGetText(ticpp::Element* cur);
 
+struct tool_options_type {
+  std::string infilename;
+  std::string outfilename;
+};
 
 bool perform_task(char const* InFileName, FILE* OutStream);
 
-bool perform_task(char const* InFileName, char const* OutFileName) {
-  FILE* OutStream = fopen(OutFileName,"w");
+bool perform_task(tool_options_type const& tool_options) {
+  FILE* OutStream = stdout;
+
+  if (!tool_options.outfilename.empty()) {
+    OutStream = fopen(tool_options.outfilename.c_str(),"w");
   
-  if (OutStream == 0) {
-    gsErrorMsg("cannot open file '%s' for writing\n", OutFileName);
-    return false;
+    if (OutStream == 0) {
+      throw std::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
+    }
   }
   
-  bool result = perform_task(InFileName, OutStream);
+  bool result = perform_task(tool_options.infilename.c_str(), OutStream);
   
   fclose(OutStream);
   
@@ -132,17 +138,12 @@ bool perform_task(char const* InFileName, char const* OutFileName) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
+static const char* pnml_file_for_input   = "pnml_in";
+static const char* mcrl2_file_for_output = "mcrl2_out";
+
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
-  private:
-
-    static const char*  pnml_file_for_input;   ///< file containing an LTS that can be imported
-    static const char*  mcrl2_file_for_output; ///< file used to write the output to
-
   public:
-
-    /** \brief constructor */
-    squadt_interactor();
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -156,12 +157,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration&);
 };
-
-const char* squadt_interactor::pnml_file_for_input   = "pnml_in";
-const char* squadt_interactor::mcrl2_file_for_output = "mcrl2_out";
-
-squadt_interactor::squadt_interactor() {
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
@@ -189,20 +184,14 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  using namespace boost;
   using namespace tipi;
-  using namespace tipi::layout;
-  using namespace tipi::datatype;
-  using namespace tipi::layout::elements;
-
-  bool result = true;
 
   rec_par=ATfalse;
 
-  result = ::perform_task(c.get_input(pnml_file_for_input).get_location().c_str(),
-                          c.get_output(mcrl2_file_for_output).get_location().c_str());
+  tool_options_type tool_options = { c.get_input(pnml_file_for_input).get_location().c_str(),
+                                     c.get_output(mcrl2_file_for_output).get_location().c_str()};
 
-  return (result);
+  return ::perform_task(tool_options);
 }
 
 #endif
@@ -2252,39 +2241,6 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
 
   //==================================================
-  // PrintHelp prints and contains the Help-text.
-  //==================================================
-  void PrintHelp(char *Name){
-    fprintf(stdout,
-      "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
-      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,\n"
-      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
-      "\n"
-      "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
-      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
-      "not taken into account.\n"
-      "With the -p option turned on, more functionality is supported.\n"
-      "\n"
-      "Options:\n"    
-      "  -e[NUM], --error[=NUM] an __error action will happen if a place gets NUM or\n"
-      "                         more tokens (default is 2)\n"
-      "  -i, --hide             hide (rename to tau) all transition monitoring actions\n"
-      "                         to hide all but one action edit the generated file and\n"
-      "                         remove that action from the hide list\n" 
-      "  -p, --no_rec_par       generate places in which the result is non-recursive;\n"
-      "                         also translate inhibitor and reset arcs\n"
-      "  -h, --help             display this help and terminate\n"
-      "      --version          display version information and terminate\n"
-      "  -q, --quiet            do not display warning messages\n"
-      "  -v, --verbose          display concise intermediate messages\n"
-      "  -d, --debug            display detailed intermediate messages\n"
-      "\n"
-      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-      , Name);
-  }
-
-  //==================================================
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
   bool perform_task(char const* InFileName, FILE* OutStream) {
@@ -2430,6 +2386,55 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
+  tool_options_type parse_command_line(int ac, char** av) {
+    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to."
+      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,"
+      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
+      "\n"
+      "Only classical Petri nets are translated, i.e. places, transitions and arcs."
+      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are"
+      "not taken into account.\n"
+      "With the -p option turned on, more functionality is supported.");
+
+    clinterface.add_option("error", make_optional_argument("NUM", "2"),
+                    "an __error action will happen if a place gets NUM or more "
+                    "tokens (default is 2)", 'e').
+                add_option("hide", 
+                    "hide (rename to tau) all transition monitoring actions to "
+                    "hide all but one action edit the generated file and remove "
+                    "that action from the hide list", 'i').
+                add_option("no-rec-par",
+                    "generate places in which the result is non-recursive; also "
+                    "translate inhibitor and reset arcs", 'p');
+
+    command_line_parser parser(clinterface, ac, av);
+
+    tool_options_type tool_options = { "-", "-" };
+
+    if (parser.options.count("error")) {
+      error = parser.option_argument_as< unsigned long >("error");
+    }
+    if (parser.options.count("hide")) {
+      hide = ATtrue;
+    }
+    if (parser.options.count("no-rec-par")) {
+      rec_par = ATfalse;
+    }
+
+    if (0 < parser.arguments.size()) {
+      tool_options.infilename = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.outfilename = parser.arguments[1];
+    }
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+
+    return tool_options;
+  }
+
   //==================================================
   // main
   //==================================================
@@ -2437,87 +2442,19 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   {
     MCRL2_ATERM_INIT(argc, argv)
     
+    try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+        return EXIT_SUCCESS;
+      }
 #endif
-
-      #define sopts "eiadhpqv"
-      struct option lopts[] = {
-        {"error"       , optional_argument,NULL, 'e'},
-        {"hide"        , no_argument,      NULL, 'i'},
-        {"read-aterm"  , no_argument,      NULL, 'a'},
-        {"debug"       , no_argument,      NULL, 'd'},
-        {"help"        , no_argument,      NULL, 'h'},
-        {"no_rec_par"  , no_argument,      NULL, 'p'},
-        {"quiet"       , no_argument,      NULL, 'q'},
-        {"verbose"     , no_argument,      NULL, 'v'},
-        {"version"     , no_argument,      NULL, 0},
-        {0, 0, 0, 0}
-      };
-      int opt;
-      
-      while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
-        switch ( opt ){
-        case 'i': /* hide */
-          hide = ATtrue;
-          break;
-        case 'e': /* error */
-	  error = 2;
-	  if ( optarg != NULL )
-	    {
-	      if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
-		{
-		  error = strtoul(optarg,NULL,0);
-		} else {
-		gsErrorMsg("invalid argument to -e/--error\n",optarg);
-		return 1;
-	      }
-	    }
-          break;
-        case 'd': /* debug */
-          gsSetDebugMsg();
-          break;
-        case 'h': /* help */
-          PrintHelp(argv[0]);
-          return 0;
-        case 'p': /* no_rec_par */
-          rec_par=ATfalse;
-          break;
-        case 'q': /* quiet */
-          gsSetQuietMsg();
-          break;
-        case 'v': /* verbose */
-          gsSetVerboseMsg();
-          break;
-        case 0: /* version */
-          print_version_information(NAME, AUTHOR);
-          return 0;
-        default:
-          break;
-        }
-      }
-      
-      char const* InFileName;
-      if ( argc-optind < 1 ){
-        InFileName = "-";
-      } else {
-        if ( (InFileName = argv[optind]) == NULL ){ 
-          perror(NAME);
-          return 1;
-        }
-      }
-
-      if ( optind+1 < argc ) {
-        return (perform_task(InFileName, argv[optind+1]));
-      }
-      else {
-        return (perform_task(InFileName, stdout));
-      }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+      return perform_task(parse_command_line(argc, argv));
     }
-#endif
+    catch (std::exception& e) {
+      std::cerr << e.what() << std::endl;
+    }
 
-    return 0;
+    return EXIT_FAILURE;
   }
 
 // Added by Yarick: alternative generation of Places:

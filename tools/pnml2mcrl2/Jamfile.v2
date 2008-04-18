@@ -3,8 +3,7 @@ project toolset/pnml2mcrl2 ;
 tool pnml2mcrl2
        : pnml2mcrl2.cpp
          /libraries//core
-       : <toolset>msvc:<library>/libraries//getopt
-         <library>/libraries//ticpp
+       : <library>/libraries//ticpp
          <squadt-connectivity>implemented
        ;
 

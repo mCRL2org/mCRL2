@@ -3,7 +3,6 @@ project toolset/formcheck ;
 tool formcheck
        : formcheck.cpp
          /libraries//lps
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools formcheck ;

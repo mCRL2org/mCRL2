@@ -35,6 +35,33 @@ namespace mcrl2 {
       return is;
     }
 #endif
+#if defined(BDD_PATH_ELIMINATOR_H)
+    inline std::istream& operator>>(std::istream& is, SMT_Solver_Type& s) {
+      char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    
+      /// no standard conversion available function, so implement on-the-spot
+      is.readsome(solver_type, 10);
+
+      s = solver_type_cvc_fast;
+
+      if (std::strncmp(solver_type, "ario", 5) == 0) {
+        s = solver_type_ario;
+      }
+      else if (std::strncmp(solver_type, "cvc", 3) == 0) {
+        if (solver_type[3] == '\0') {
+          s = solver_type_cvc;
+        }
+        else if (std::strncmp(&solver_type[3], "-fast", 6) != 0) {
+          is.setstate(std::ios_base::failbit);
+        }
+      }
+      else {
+        is.setstate(std::ios_base::failbit);
+      }
+
+      return is;
+    }
+#endif
 
     class command_line_parser;
 
@@ -328,6 +355,11 @@ namespace mcrl2 {
          * \brief Adds options for the rewriter
          **/
         void add_rewriting_options();
+
+        /**
+         * \brief Adds options for the prover
+         **/
+        void add_prover_options();
 
         /**
          * \brief Returns a human readable interface description
@@ -782,11 +814,16 @@ namespace mcrl2 {
           m_options.insert(std::make_pair("rewriter", "jitty"));
         }
       }
-      if (m_options.count("rewriter")) {
 #if defined(__LIBREWRITE_H)
+      if (m_options.count("rewriter")) {
         option_argument_as< RewriteStrategy >("rewriter");
-#endif
       }
+#endif
+#if defined(BDD_PATH_ELIMINATOR_H)
+      if (m_options.count("smt-solver")) {
+        option_argument_as< SMT_Solver_Type >("smt-solver");
+      }
+#endif
 
 #if defined(__MCRL2_MESSAGING_H__)
       if (m_options.count("quiet")) {

@@ -72,7 +72,7 @@ class Formula_Checker {
     bool f_witness;
 
     /// \brief Prefix for the names of the files containing BDDs in dot format.
-    char* f_dot_file_name;
+    char const* f_dot_file_name;
 
     /// \brief Displays a witness.
     void print_witness();
@@ -97,7 +97,7 @@ class Formula_Checker {
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_witness = false,
-      char* a_dot_file_name = 0
+      char const* a_dot_file_name = 0
     );
 
     /// \brief Destructor without any specific functionality.

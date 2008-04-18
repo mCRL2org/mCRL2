@@ -148,8 +148,7 @@ namespace mcrl2 {
 
     void interface_description::add_rewriting_options() {
       add_option(
-        "rewriter",
-        make_mandatory_argument("NAME"),
+        "rewriter", make_mandatory_argument("NAME"),
         "use rewrite strategy NAME:\n"
         "'jitty' for jitty rewriting (default),\n"
         "'jittyp' for jitty rewriting with prover,\n"
@@ -161,14 +160,28 @@ namespace mcrl2 {
       );
     }
 
+    void interface_description::add_prover_options() {
+      add_option("smt-solver", make_mandatory_argument("SOLVER"),
+        "use SOLVER to remove inconsistent paths from the internally used BDDs:\n"
+#if defined(HAVE_CVC)
+        "'ario' for the SMT solver Ario, or\n"
+        "'cvc' for the SMT solver CVC3;\n"
+        "'cvc-fast' for the fast implementation of the\n"
+#else
+        "'ario' for the SMT solver Ario, or\n"
+        "'cvc' for the SMT solver CVC3;\n"
+#endif
+        "by default, no path elimination is applied", 'z');
+    }
+
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
       if (m_options.find(l) != m_options.end()) {
-        throw std::logic_error("Duplicate long option; this is a serious program error!");
+        throw std::logic_error("Duplicate long option (--" + l + "); this is a serious program error!");
       }
 
       if (s != '\0') {
         if (m_options.find(l) != m_options.end()) {
-          throw std::logic_error("Duplicate short option; this is a serious program error!");
+          throw std::logic_error("Duplicate short option (-" + std::string(s, 1) + "); this is a serious program error!");
         }
 
         m_short_to_long[s] = l;

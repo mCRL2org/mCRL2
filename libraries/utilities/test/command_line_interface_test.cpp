@@ -15,18 +15,27 @@
 
 #define MCRL2_REVISION "xXxXx"
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 using namespace ::mcrl2::utilities;
 
-template < bool b >
-void string_to_strategy_test(std::string const& strategy) {
-  std::istringstream is(strategy);
-  RewriteStrategy    s;
+template < typename TypeName, bool b >
+void string_to_type_test(std::string const& value) {
+  std::istringstream is(value);
+  TypeName           s;
 
   BOOST_CHECK((is >> s).fail() != b);
+}
 
-  is.clear();
+template < bool b >
+inline void string_to_strategy_test(std::string const& strategy) {
+  string_to_type_test< RewriteStrategy, b >(strategy);
+}
+
+template < bool b >
+inline void string_to_prover_type_test(std::string const& prover_type) {
+  string_to_type_test< SMT_Solver_Type, b >(prover_type);
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid) {
@@ -119,7 +128,7 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
 
   // testing rewriter strategy extraction 
   string_to_strategy_test< true >("jitty");
-  string_to_strategy_test< false >("ajitty");
+  string_to_strategy_test< false >("ijitty");
   string_to_strategy_test< false >("jitta");
   string_to_strategy_test< false >("jittya");
   string_to_strategy_test< true >("jittyp");
@@ -141,6 +150,32 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -rjittyc"));
   // Valid rewriter option with invalid argument
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(prover_options) {
+  interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]");
+
+  // testing smt prover type extraction 
+  string_to_prover_type_test< true >("ario");
+  string_to_prover_type_test< false >("arion");
+  string_to_prover_type_test< false >("aario");
+  string_to_prover_type_test< false >("ar");
+  string_to_prover_type_test< false >("cvc-");
+  string_to_prover_type_test< false >("cvca");
+  string_to_prover_type_test< true >("cvc");
+  string_to_prover_type_test< false >("acvc");
+
+  // Test rewriting options (-r and --rewrite with a mandatory argument)
+  test_interface.add_prover_options();
+
+  // Missing mandatory argument for option --rewriter
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), std::runtime_error);
+  // Valid rewriter option with valid argument
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --smt-solver=ario"));
+  // Valid rewriter option with valid argument
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -zcvc"));
+  // Valid rewriter option with invalid argument
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), std::runtime_error);
 }
 
 inline std::string const& first_of(command_line_parser const& p, std::string const& option) {

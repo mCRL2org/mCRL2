@@ -166,7 +166,7 @@ int main(int argc, char** argv)
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return 0;
+      return EXIT_SUCCESS;
     }
 #endif
 

@@ -88,7 +88,7 @@ class Invariant_Checker {
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
-      char* a_dot_file_name = 0
+      char const* a_dot_file_name = 0
     );
     ~Invariant_Checker();
 
