@@ -4,7 +4,6 @@ tool tracepp
        : tracepp.cpp
          /libraries//core
          /libraries//trace
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools tracepp ;

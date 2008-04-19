@@ -11,8 +11,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <getopt.h>
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
@@ -20,6 +19,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
 using namespace mcrl2::utilities;
@@ -112,214 +112,26 @@ static void trace2aut(ostream &os, Trace &trace)
   // SVC library does not accept ostreams
 }*/
 
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE\n"
-    "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
-    "\n"
-    "Options:\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "\n"
-    "Conversion options:\n"
-    "  -p, --plain           write trace in plain format (default)\n"
-    "  -m, --mcrl2           write trace in mCRL2 trace format\n"
-    "  -D, --dot             write trace in dot format\n"
-    "  -a, --aut             write trace in aut format\n"
-/*    "  -s, --svc             write trace in svc format\n"*/
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name
-  );
-}
+struct t_tool_options {
+  std::string     name_for_input;
+  std::string     name_for_output;
+  output_type     format_for_output;
+};
 
-int main(int argc, char **argv)
-{
-  MCRL2_ATERM_INIT(argc, argv)
-
-  #define sopts "hqvdpmDa"
-//  #define sopts "hqvpmdas"
-  struct option lopts[] = {
-    { "help",     no_argument,  NULL,  'h' },
-    { "version",  no_argument,  NULL,  0x1 },
-    { "quiet",    no_argument,  NULL,  'q' },
-    { "verbose",  no_argument,  NULL,  'v' },
-    { "debug",    no_argument,  NULL,  'd' },
-    { "plain",    no_argument,  NULL,  'p' },
-    { "mcrl2",    no_argument,  NULL,  'm' },
-    { "dot",      no_argument,  NULL,  'D' },
-    { "aut",      no_argument,  NULL,  'a' },
-//    { "svc",      no_argument,  NULL,  's' },
-    { 0, 0, 0, 0 }
-  };
-
-  bool quiet = false;
-  bool verbose = false;
-  bool debug = false;
-  output_type outtype = otNone;
-  int opt;
-  while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
-  {
-    switch ( opt )
-    {
-      case 'h':
-        print_help(stdout, argv[0]);
-        return 0;
-      case 0x1:
-        print_version_information(NAME, AUTHOR);
-        return 0;
-      case 'q':
-        quiet = true;
-        break;
-      case 'v':
-        verbose = true;
-        break;
-      case 'd':
-        debug = true;
-        break;
-      case 'p':
-        if ( outtype != otNone )
-        {
-          gsErrorMsg("cannot set multiple output formats\n");
-          return 1;
-        }
-        outtype = otPlain;
-        break;
-      case 'm':
-        if ( outtype != otNone )
-        {
-          gsErrorMsg("cannot set multiple output formats\n");
-          return 1;
-        }
-        outtype = otMcrl2;
-        break;
-      case 'D':
-        if ( outtype != otNone )
-        {
-          gsErrorMsg("cannot set multiple output formats\n");
-          return 1;
-        }
-        outtype = otDot;
-        break;
-      case 'a':
-        if ( outtype != otNone )
-        {
-          gsErrorMsg("cannot set multiple output formats\n");
-          return 1;
-        }
-        outtype = otAut;
-        break;
-/*      case 's':
-        if ( outtype != otNone )
-        {
-          gsErrorMsg("cannot set multiple output formats\n");
-          return 1;
-        }
-        outtype = otSvc;
-        break;*/
-      default:
-        break;
-    }
-  }
-  if ( quiet && verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
-  }
-  if ( quiet && debug )
-  {
-    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-    return 1;
-  }
-  if ( quiet )
-    gsSetQuietMsg();
-  if ( verbose )
-    gsSetVerboseMsg();
-  if ( debug )
-    gsSetDebugMsg();
-
-  if ( outtype == otNone )
-    outtype = otPlain;
-
-  istream *InStream = &cin;
-  char *InFileName = NULL;
-  if ( optind < argc )
-  {
-    InFileName = argv[optind];
-    InStream = new ifstream(InFileName,ifstream::binary|ifstream::in);
-    if ( !InStream->good() )
-    {
-      gsErrorMsg("could not open input file '%s' for reading\n", InFileName);
-      delete InStream;
-      return 1;
-    }
-  }
-
-  ostream *OutStream = &cout;
-  char *OutFileName = NULL;
-  if ( optind+1 < argc )
-  {
-    OutFileName = argv[optind+1];
-    OutStream = new ofstream(OutFileName,ofstream::binary|ofstream::out|ofstream::trunc);
-    if ( !OutStream->good() )
-    {
-      gsErrorMsg("could not open output file '%s' for writing\n", OutFileName);
-      delete OutStream;
-      return 1;
-    }
-  }
-
-
-  if ( InStream == &cin )
-    gsVerboseMsg("reading input from stdin...\n");
-  else
-    gsVerboseMsg("reading input from '%s'...\n", InFileName);
-
-  Trace trace(*InStream);
-
-  if ( InStream != &cin )
-  {
-    ((ifstream *) InStream)->close();
-    delete InStream;
-  }
-
-  if ( OutStream == &cout )
-    gsVerboseMsg("writing result to stdout...\n");
-  else
-    gsVerboseMsg("writing result to '%s'...\n", OutFileName);
-
+inline void save_trace(Trace& trace, output_type outtype, std::ostream& out) {
   switch ( outtype )
   {
     case otPlain:
       gsVerboseMsg("writing result in plain text...\n");
-      trace.save(*OutStream,tfPlain);
+      trace.save(out,tfPlain);
       break;
     case otMcrl2:
       gsVerboseMsg("writing result in mCRL2 trace format...\n");
-      trace.save(*OutStream,tfMcrl2);
-      break;
-    case otDot:
-      gsVerboseMsg("writing result in dot format...\n");
-      if ( InFileName == NULL )
-      {
-        trace2dot(*OutStream,trace,"stdin");
-      } else {
-        char *s = strrchr(InFileName,'.');
-        if ( s != NULL )
-        {
-          *s = 0;
-        }
-        trace2dot(*OutStream,trace,InFileName);
-      }
+      trace.save(out,tfMcrl2);
       break;
     case otAut:
       gsVerboseMsg("writing result in aut format...\n");
-      trace2aut(*OutStream,trace);
+      trace2aut(out,trace);
       break;
 /*      gsVerboseMsg("writing result in svc format...\n");
       case otSvc:
@@ -328,10 +140,129 @@ int main(int argc, char **argv)
     default:
       break;
   }
+}
 
-  if ( OutStream != &cout )
-  {
-    ((ofstream *) OutStream)->close();
-    delete OutStream;
+void process(t_tool_options const& tool_options) {
+  Trace trace;
+
+  if (tool_options.name_for_input.empty()) {
+    gsVerboseMsg("reading input from stdin...\n");
+
+    trace.load(std::cin);
   }
+  else {
+    gsVerboseMsg("reading input from '%s'...\n", tool_options.name_for_input.c_str());
+
+    std::ifstream in(tool_options.name_for_input.c_str(), std::ios_base::binary|std::ios_base::in);
+
+    if (in.good()) {
+      trace.load(in);
+    }
+    else {
+      throw std::runtime_error("could not open input file '" + 
+          tool_options.name_for_input + "' for reading");
+    }
+  }
+
+  if (tool_options.name_for_output.empty()) {
+    gsVerboseMsg("writing result to stdout...\n");
+
+    if (tool_options.format_for_output == otDot) {
+      gsVerboseMsg("writing result in dot format...\n");
+
+      trace2dot(std::cout,trace,"stdin");
+    }
+    else {
+      save_trace(trace, tool_options.format_for_output, std::cout);
+    }
+  }
+  else {
+    gsVerboseMsg("writing result to '%s'...\n", tool_options.name_for_output.c_str());
+
+    std::ofstream out(tool_options.name_for_output.c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::trunc);
+
+    if (out.good()) {
+      if (tool_options.format_for_output == otDot) {
+        gsVerboseMsg("writing result in dot format...\n");
+     
+        trace2dot(out,trace, 
+            tool_options.name_for_input.substr(tool_options.name_for_input.find_last_of('.')).c_str());
+      }
+      else {
+        save_trace(trace, tool_options.format_for_output, out);
+      }
+    }
+    else {
+      throw std::runtime_error("could not open output file '" +
+                  tool_options.name_for_output +  "' for writing");
+    }
+  }
+}
+
+t_tool_options parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [[INFILE] OUTFILE]\n"
+    "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
+    "is not present, stdout is used. If INFILE is not present, stdin is used.");
+
+  clinterface.
+    add_option("plain", "write trace in plain format (default)", 'p').
+    add_option("mcrl2", "write trace in mCRL2 format", 'm').
+    add_option("dot", "write trace in dot format", 'D').
+    add_option("aut", "write trace in aut format", 'a');
+
+  command_line_parser parser(clinterface, ac, av);
+
+  t_tool_options tool_options;
+
+  tool_options.format_for_output = otPlain;
+
+  size_t count_formats = 0;
+
+  if (0 < parser.options.count("plain")) {
+    ++count_formats;
+    tool_options.format_for_output = otPlain;
+  }
+  if (0 < parser.options.count("mcrl2")) {
+    ++count_formats;
+    tool_options.format_for_output = otMcrl2;
+  }
+  if (0 < parser.options.count("dot")) {
+    ++count_formats;
+    tool_options.format_for_output = otDot;
+  }
+  if (0 < parser.options.count("aut")) {
+    ++count_formats;
+    tool_options.format_for_output = otAut;
+  }
+  if (1 < count_formats) {
+    parser.error("cannot set multiple output formats");
+  }
+
+  if (0 < parser.arguments.size()) {
+    tool_options.name_for_input = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    tool_options.name_for_output = parser.arguments[1];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return tool_options;
+}
+
+int main(int argc, char **argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
+
+  try {
+    process(parse_command_line(argc, argv));
+
+    return EXIT_SUCCESS;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

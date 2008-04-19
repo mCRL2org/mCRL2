@@ -6,8 +6,7 @@ tool chi2mcrl2
          chilexer.cpp
          translate.cpp
          /libraries//core
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools chi2mcrl2 ;

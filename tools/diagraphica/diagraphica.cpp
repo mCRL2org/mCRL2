@@ -7,12 +7,14 @@
 // --- diagraph.cpp -------------------------------------------------
 // (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
 // ---------------------------  *  ----------------------------------
+#define NAME "diagraphica"
+#define AUTHOR "A. Johannes Pretorius"
 
 #include <string>
 #include <wx/wx.h>
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 // windows debug libraries
 #ifdef _MSC_VER
@@ -27,56 +29,42 @@ std::string fsm_file_argument;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 # define NO_MCRL2_TOOL_FACILITIES
 # include <mcrl2/utilities/squadt_interface.h>
+  using namespace mcrl2::utilities::squadt;
 
-    class squadt_interactor: public mcrl2::utilities::squadt::tool_interface 
-    {
-        private:
-            // Wrapper for wxEntry invocation
-            mcrl2::utilities::squadt::entry_wrapper& starter;
-    	    // Identifier for main input file that contains an LTS
-            static const char* fsm_file_for_input;
-     
-        public:
-            // Constructor
-            squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
-            // Configures tool capabilities.
-            void set_capabilities(tipi::tool::capabilities&) const;
-            // Queries the user via SQuADt if needed to obtain configuration information
-            void user_interactive_configuration(tipi::configuration&);
-            // Check an existing configuration object to see if it is usable
-            bool check_configuration(tipi::configuration const&) const;
-            // Performs the task specified by a configuration
-            bool perform_task(tipi::configuration&);
-    };
+  const char* fsm_file_for_input = "fsm_in";
 
-    const char* squadt_interactor::fsm_file_for_input = "fsm_in";
-    squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) 
-    {}
+  class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
 
-    void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const 
-    {
+    public:
+
+      // Configures tool capabilities.
+      void set_capabilities(tipi::tool::capabilities& c) const {
         /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-        c.add_input_configuration(fsm_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
-    }
-
-    void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
-    {}
-
-    bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
-    {
+        c.add_input_configuration(fsm_file_for_input,
+             tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+      }
+     
+      // Queries the user via SQuADt if needed to obtain configuration information
+      void user_interactive_configuration(tipi::configuration&) {}
+     
+      // Check an existing configuration object to see if it is usable
+      bool check_configuration(tipi::configuration const& c) const {
         bool valid = c.input_exists(fsm_file_for_input);
-        if (!valid) 
-        {
-            send_error("Invalid input combination!");
+     
+        if (!valid) {
+          send_error("Invalid input combination!");
         }
+     
         return valid;
-    }
-
-    bool squadt_interactor::perform_task(tipi::configuration& c)
-    {
+      }
+     
+      // Performs the task specified by a configuration
+      bool perform_task(tipi::configuration& c) {
         fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
-        return starter.perform_entry();
-    }
+    
+        return mcrl2_wx_tool_interface::perform_task(c);
+      }
+  };
 #endif
 
 #include "diagraph.h"
@@ -93,21 +81,20 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {                                                                     
 
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+    return EXIT_SUCCESS;
   }
 
-  return (0);
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 # else
 int main(int argc, char **argv) {
-  using namespace mcrl2::utilities::squadt;
 
-  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return wxEntry(argc, argv);
+  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return EXIT_SUCCESS;
   }
+
+  return wxEntry(argc, argv);
 }
 # endif
 #endif
@@ -116,84 +103,27 @@ int main(int argc, char **argv) {
 
 // -- command line --------------------------------------------------
 
-#define NAME "diagraphica"
-#define AUTHOR "A. Johannes Pretorius"
-
 // parse command line 
-bool parse_command_line(
-    int argc, wxChar** argv,
-    std::string& fsm_file_argument ) 
-{
-    wxCmdLineParser cmdln(argc,argv);
+bool parse_command_line(int argc, wxChar** argv) {
 
-    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
-    cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
-    cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display any warning messages"));
-    cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
-    cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
-    cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-    cmdln.SetLogo(wxT("Graphical interactive analyser for FSMs."));
+  using namespace ::mcrl2::utilities;
 
-    if (cmdln.Parse()) 
-    {
-    return false;
-    }
+  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
+      NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+      "Multivariate state visualization and simulation analysis techniques for labelled"
+      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be"
+      "loaded by the tool.");
 
-    if (cmdln.Found(wxT("version"))) {
-      print_version_information(NAME, AUTHOR);
-    return false;
-    }
+  command_line_parser parser(clinterface, argc, argv);
 
-    if (cmdln.Found(wxT("h"))) {
-      std::cout <<
-      "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [INFILE]\n"
-      "Multivariate state visualization and simulation analysis techniques for labelled\n"
-      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be\n"
-      "loaded by the tool.\n"
-      "\n"
-      "Options:\n"
-      "  -h, --help               display this help and terminate\n"
-      "      --version            display version information and terminate\n"
-      "  -q, --quiet              do not display warning messages\n"
-      "  -v, --verbose            display concise intermediate messages\n"
-      "  -d, --debug              display detailed intermediate messages\n"
-      "\n"
-      "Report bugs at <http://www.mcrl2.org/issuetracker>.\n";
-    return false;
-    }
+  if (0 < parser.arguments.size()) {
+    fsm_file_argument = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
 
-    if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("v"))) 
-    {
-        //gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-        return false;
-    }
-
-    if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("d"))) 
-    {
-        //gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-        return false;
-    }
-
-    if (cmdln.Found(wxT("q"))) 
-    {
-        //gsSetQuietMsg();
-    }
-
-    if (cmdln.Found(wxT("v"))) 
-    {
-        //gsSetVerboseMsg();
-    }
-
-    if (cmdln.Found(wxT("d"))) 
-    {
-        //gsSetDebugMsg();
-    }
-
-    if ( cmdln.GetParamCount() > 0 && !cmdln.GetParam(0).IsEmpty()) {
-      fsm_file_argument = std::string(cmdln.GetParam(0).fn_str());
-    }
-
-    return (true);
+  return (true);
 }
 // -- * -------------------------------------------------------------
 
@@ -220,7 +150,7 @@ bool DiaGraph::OnInit()
     view = VIEW_SIM;
 
     // command line
-    if (!parse_command_line(argc, argv, fsm_file_argument)) 
+    if (!parse_command_line(argc, argv)) 
     {
         return (false);
     };

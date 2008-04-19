@@ -6,8 +6,7 @@ tool ltsmin
          ltsminkernel.cpp
          /libraries//core
          /libraries//svc
-       : <toolset>msvc:<library>/libraries//getopt
-         <status>deprecated
+       : <status>deprecated
        ;
 
 install-tools ltsmin ;

@@ -180,8 +180,8 @@ namespace mcrl2 {
       }
 
       if (s != '\0') {
-        if (m_options.find(l) != m_options.end()) {
-          throw std::logic_error("Duplicate short option (-" + std::string(s, 1) + "); this is a serious program error!");
+        if (m_short_to_long.find(s) != m_short_to_long.end()) {
+          throw std::logic_error("Duplicate short option (-" + std::string(1, s) + "); this is a serious program error!");
         }
 
         m_short_to_long[s] = l;

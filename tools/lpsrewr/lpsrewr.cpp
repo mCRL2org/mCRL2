@@ -9,18 +9,17 @@
 #define NAME "lpsrewr"
 #define AUTHOR "Aad Mathijssen"
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
+#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <aterm2.h>
-#include <assert.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -28,13 +27,54 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2;
 
 //Functions used by the main program
-static void print_help(char *Name);
-static void print_more_info(char *Name);
 static bool is_valid_lps(ATermAppl spec);
 static ATermAppl rewrite_lps(ATermAppl Spec);
 
 //Globally used rewriter
 static Rewriter *rewr;
+
+struct tool_options_type {
+  bool            benchmark;
+  bool            bench_times;
+  std::string     infilename;
+  std::string     outfilename;
+  RewriteStrategy strategy;
+};
+
+tool_options_type parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+    "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
+    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is"
+    "used.");
+
+  clinterface.add_rewriting_options();
+
+  clinterface.add_option("benchmark", make_mandatory_argument("NUM"),
+    "rewrite specification NUM times; do not save output", 'b');
+
+  command_line_parser parser(clinterface, ac, av);
+
+  tool_options_type options;
+
+  options.benchmark = 0 < parser.options.count("benchmark");
+  options.strategy  = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+  if (options.benchmark) {
+    options.bench_times = parser.option_argument_as< unsigned long >("benchmark");
+  }
+
+  if (0 < parser.arguments.size()) {
+    options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    options.outfilename = parser.arguments[0];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return options;
+}
 
 //Main program
 
@@ -42,213 +82,99 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  //declarations for getopt
-  bool opt_benchmark = false;
-  unsigned long int  opt_bench_times = 0;
-  RewriteStrategy opt_strat = GS_REWR_JITTY;
-  #define SHORT_OPTIONS "hqvb:R:"
-  #define VERSION_OPTION 0x1
-  struct option long_options[] = {
-    { "help",      no_argument,        NULL,  'h' },
-    { "version",   no_argument,        NULL,  VERSION_OPTION },
-    { "quiet",     no_argument,        NULL,  'q' },
-    { "verbose",   no_argument,        NULL,  'v' },
-    { "benchmark", required_argument,  NULL,  'b' },
-    { "rewriter",  required_argument,  NULL,  'R' },
-    { 0, 0, 0, 0 }
-  };
-  int option;
-  //parse options
-  while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
-    switch (option) {
-      case 'h': /* help */
-        print_help(argv[0]);
-        return 0;
-      case VERSION_OPTION: /* version */
-        print_version_information(NAME, AUTHOR);
-        return 0;
-      case 'q': /* quite */
-        gsSetQuietMsg();
-        break;
-      case 'v': /* verbose */
-        gsSetVerboseMsg();
-        break;
-      case 'b': /* benchmark */
-        opt_benchmark = true;
-        opt_bench_times = strtoul(optarg,NULL,0);
-        break;
-      case 'R': /* rewriter */
-        opt_strat = RewriteStrategyFromString(optarg);
-        if ( opt_strat == GS_REWR_INVALID ) {
-          gsErrorMsg("invalid rewrite strategy '%s'\n", optarg);
-          return 1;
+  try {
+    tool_options_type options(parse_command_line(argc, argv));
+
+    if (options.benchmark && !options.outfilename.empty()) {
+      gsWarningMsg("output will not be saved to '%s'\n", options.outfilename.c_str());
+    }
+
+    ATermAppl result;
+
+    if (options.infilename.empty()) {
+      gsVerboseMsg("reading LPS from stdin\n");
+
+      result = (ATermAppl) ATreadFromFile(stdin);
+
+      if (result == 0) {
+        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
+      }
+      if (!is_valid_lps(result)) {
+        throw std::runtime_error("stdin does not contain an LPS");
+      }
+    }
+    else {
+      gsVerboseMsg("reading LPS from '%s'\n", options.infilename.c_str());
+
+      FILE *in_stream = fopen(options.infilename.c_str(), "rb");
+
+      if (in_stream == 0) {
+        throw std::runtime_error("could not open input file '" + options.infilename + "' for reading");
+      }
+
+      result = (ATermAppl) ATreadFromFile(in_stream);
+
+      fclose(in_stream);
+
+      if (result == 0) {
+        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
+      }
+      if (!is_valid_lps(result)) {
+        throw std::runtime_error("'" + options.infilename + "' does not contain an LPS");
+      }
+    }
+
+    assert(is_valid_lps(result));
+
+    //initialise rewriter
+    if (gsVerbose) {
+      fprintf(stderr, "initialising rewriter ");
+      PrintRewriteStrategy(stderr, options.strategy);  
+      fprintf(stderr, "...\n");
+    }
+    rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(result,0)), options.strategy);
+
+    //rewrite result
+    if (options.benchmark) {
+      //rewrite result options.bench_times
+      gsVerboseMsg("rewriting LPS %lu times...\n", options.bench_times);
+      for (unsigned long i = 0; i < options.bench_times; i++) {
+        rewrite_lps(result);
+      }
+    } else {
+      gsVerboseMsg("rewriting LPS...\n");
+      result = rewrite_lps(result);
+      //store the result
+      if (options.outfilename.empty()) {
+        gsVerboseMsg("saving result to stdout...\n");
+        ATwriteToSAFFile((ATerm) result, stdout);
+      } else { //outfilename != NULL
+        gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
+        //open output filename
+        FILE *outstream = fopen(options.outfilename.c_str(), "wb");
+        if (outstream == NULL) {
+          throw std::runtime_error("cannot open output file '" + options.outfilename + "'");
         }
-        break;
-      default:
-        print_more_info(argv[0]);
-        return 1;
-    }
-  }
-  //check for wrong number of arguments
-  char *infilename   = NULL;
-  char *outfilename = NULL;
-  int noargc; //non-option argument count
-  noargc = argc - optind;
-  if (noargc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-    print_more_info(argv[0]);
-    return 1;
-  } else {
-    //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
-      infilename = strdup(argv[optind]);
-    }
-    if (noargc == 2) {
-      outfilename = strdup(argv[optind + 1]);
-      //check if input and output files are the same; disabled since it is not
-      //problematic
-      /*
-      if (strcmp(infilename,outfilename) == 0) {
-        gsErrorMsg("input and output files are the same\n");
-        free(infilename);
-        free(outfilename);
-        return 1;
+        ATwriteToSAFFile((ATerm) result, outstream);
+        fclose(outstream);
       }
-      */      
-      if (opt_benchmark) {
-        gsWarningMsg("output will not be saved to '%s'\n",outfilename);
-      }      
     }
+    delete rewr;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
   }
 
-  //open infilename
-  FILE *instream;
-  if (infilename == NULL) {
-    instream = stdin;
-  } else {
-    instream = fopen(infilename, "rb");
-    if (instream == NULL) {
-      gsErrorMsg("cannot open input file '%s'\n", infilename);
-      return 1;
-    }
-  }
-  assert(instream != NULL);
-
-  //read LPS from instream
-  if ( instream == stdin )
-    gsVerboseMsg("reading input from stdin...\n");
-  else
-    gsVerboseMsg("reading input from '%s'...\n", infilename);
-  ATermAppl result = (ATermAppl) ATreadFromFile(instream);
-  ATprotectAppl(&result); // ATerms in main are not safe
-  if ( result == NULL )
-  {
-    if (instream == stdin) {
-      gsErrorMsg("could not read LPS from stdin\n");
-    } else {
-      gsErrorMsg("could not read LPS from '%s'\n", infilename);
-      fclose(instream);
-    }
-    free(infilename);
-    free(outfilename);
-    return 1;
-  }
-  assert(result != NULL);
-
-  //check if result is an LPS
-  if (!is_valid_lps(result)) {
-    if (instream == stdin) {
-      gsErrorMsg("stdin does not contain an LPS\n");
-    } else {
-      gsErrorMsg("'%s' does not contain an LPS\n", infilename);
-      fclose(instream);
-    }
-    free(infilename);
-    free(outfilename);
-    return 1;
-  }
-  assert(is_valid_lps(result));
-
-  //initialise rewriter
-  if (gsVerbose) {
-    fprintf(stderr, "initialising rewriter ");
-    PrintRewriteStrategy(stderr, opt_strat);  
-    fprintf(stderr, "...\n");
-  }
-  rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(result,0)), opt_strat);
-
-  //rewrite result
-  if (opt_benchmark) {
-    //rewrite result opt_bench_times
-    gsVerboseMsg("rewriting LPS %lu times...\n", opt_bench_times);
-    for (unsigned long i = 0; i < opt_bench_times; i++) {
-      rewrite_lps(result);
-    }
-  } else {
-    gsVerboseMsg("rewriting LPS...\n");
-    result = rewrite_lps(result);
-    //store the result
-    if (outfilename == NULL) {
-      gsVerboseMsg("saving result to stdout...\n");
-      ATwriteToSAFFile((ATerm) result, stdout);
-    } else { //outfilename != NULL
-      //open output filename
-      FILE *outstream = fopen(outfilename, "wb");
-      if (outstream == NULL) {
-        gsErrorMsg("cannot open output file '%s'\n", outfilename);
-        free(infilename);
-        free(outfilename);
-        return 1;
-      }
-      gsVerboseMsg("saving result to '%s'...\n", outfilename);
-      ATwriteToSAFFile((ATerm) result, outstream);
-      fclose(outstream);
-    }
-  }
-  delete rewr;
-  ATunprotectAppl(&result);
-  free(infilename);
-  free(outfilename);
-  return 0;
-}
-
-static void print_help(char *Name)
-{
-  fprintf(stdout,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE.\n"
-    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
-    "used.\n"
-    "\n"
-    "Options:\n"
-    "  -h, --help               display this help message and terminate\n"
-    "      --version            display version information and terminate\n"
-    "  -q, --quiet              do not display warning messages\n"
-    "  -v, --verbose            display concise intermediate messages\n"
-    "  -bNUM, --benchmark=NUM   rewrite specification NUM times; do not save output\n"
-    "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
-    "                           'inner' for the innermost rewriter,\n"
-    "                           'innerc' for the compiled innermost rewriter,\n"
-    "                           'jitty' for the jitty rewriter (default), or\n"
-    "                           'jittyc' for the compiled jitty rewriter\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name
-  );
-}
-
-void print_more_info(char *Name)
-{
-  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
+  return EXIT_FAILURE;
 }
 
 bool is_valid_lps(ATermAppl spec)
 {
   if (gsIsSpecV1(spec)) {
     return gsIsLinearProcess(ATAgetArgument(spec,2));
-  } else {
-    return false;
   }
+
+  return false;
 }
 
 static ATermAppl rewrite_lps(ATermAppl Spec)

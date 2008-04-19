@@ -3,7 +3,6 @@ project toolset/lpsrewr ;
 tool lpsrewr
        : lpsrewr.cpp
          /libraries//data
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools lpsrewr ;

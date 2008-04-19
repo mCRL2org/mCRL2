@@ -9,198 +9,139 @@
 #define NAME "tbf2lps"
 #define AUTHOR "Muck van Weerdenburg"
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
+#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <aterm2.h>
-#include <assert.h>
 #include "mcrl2/core/struct.h"
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to\n"
-    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
+struct tool_options_type {
+  bool            convert_funcs;
+  bool            convert_bools; 
+  std::string     infilename;
+  std::string     outfilename;
+};
+
+tool_options_type parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+    "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to"
+    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,"
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
-    "The following conversions on the data specification will be applied:\n"
-    "constructors T, F: -> Bool are replaced by true and false,\n"
-    "mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and\n"
-    "mapping eq: S # S -> Bool is replaced by == for each sort S\n"
-    "\n"
-    "Options:\n"
-    "  -n, --no-conv-map   do not apply the conversion of mappings and, or and eq\n"
-    "      --no-conv-cons  do not apply the conversion of constructors T and F\n"
-    "                      note that this conversion is really needed for the toolset\n"
-    "                      to know what true and false are (e.g. simulation and state\n"
-    "                      space generation will not be possible)\n"
-    "  -h, --help          display this help and terminate\n"
-    "      --version       display version information and terminate\n"
-    "  -q, --quiet         do not display warning messages\n"
-    "  -v, --verbose       display concise intermediate messages\n"
-    "  -d, --debug         display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name);
+    "The following conversions on the data specification will be applied:"
+    "constructors T, F: -> Bool are replaced by true and false,"
+    "mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and"
+    "mapping eq: S # S -> Bool is replaced by == for each sort S");
+
+  clinterface.
+    add_option("no-conv-map",
+      "do not apply the conversion of mappings and, or and eq", 'n').
+    add_option("no-conv-cons",
+      "do not apply the conversion of constructors T and F not that this conversion is "
+      "really needed for the toolset to know what true and false are (e.g. simulation "
+      "and state space generation will not be possible)");
+
+  command_line_parser parser(clinterface, ac, av);
+
+  tool_options_type options;
+
+  options.convert_funcs = parser.options.count("no-conv-map") == 0;
+  options.convert_bools = parser.options.count("no-conv-cons") == 0;
+
+  if (0 < parser.arguments.size()) {
+    options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    options.outfilename = parser.arguments[0];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return options;
 }
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  FILE *InStream, *OutStream;
-  #define sopts "hqvdn"
-  #define version_option 0x1
-  #define no_conv_cons_option 0x2
-  struct option lopts[] = {
-    { "help",          no_argument,  NULL,  'h' },
-    { "version",       no_argument,  NULL,  version_option },
-    { "quiet",         no_argument,  NULL,  'q' },
-    { "verbose",       no_argument,  NULL,  'v' },
-    { "debug",         no_argument,  NULL,  'd' },
-    { "no-conv-map",   no_argument,  NULL,  'n' },
-    { "no-conv-cons",  no_argument,  NULL,  no_conv_cons_option },
-     { 0, 0, 0, 0 }
-  };
+  try {
+    tool_options_type options(parse_command_line(argc, argv));
 
+    ATermAppl mcrl_spec;
 
-  bool opt_quiet = false;
-  bool opt_verbose = false;
-  bool opt_debug = false;
-  bool convert_funcs = true;
-  bool convert_bools = true;
-  int opt;
-  while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
-  {
-    switch ( opt )
-    {
-      case 'h':
-        print_help(stdout, argv[0]);
-        return 0;
-      case version_option:
-        print_version_information(NAME, AUTHOR);
-        return 0;
-      case 'q':
-        opt_quiet = true;
-        break;
-      case 'v':
-        opt_verbose = true;
-        break;
-      case 'd':
-        opt_debug = true;
-        break;
-      case 'n':
-        convert_funcs = false;
-        break;
-      case no_conv_cons_option:
-        convert_bools = false;
-        break;
-      default:
-        break;
+    if (options.infilename.empty()) {
+      gsVerboseMsg("reading mCRL LPS from stdin...\n");
+
+      mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
+
+      if (mcrl_spec == 0) {
+        throw std::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
+      }
+      if (!is_mCRL_spec(mcrl_spec)) {
+        throw std::runtime_error("stdin does not contain an mCRL LPS");
+      }
+    }
+    else {
+      gsVerboseMsg("reading mCRL LPS from '%s'...\n", options.infilename.c_str());
+
+      FILE *in_stream = fopen(options.infilename.c_str(), "rb");
+
+      if (in_stream == 0) {
+        throw std::runtime_error("could not open input file '" + options.infilename + "' for reading");
+      }
+
+      mcrl_spec = (ATermAppl) ATreadFromFile(in_stream);
+
+      fclose(in_stream);
+
+      if (mcrl_spec == 0) {
+        throw std::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
+      }
+      if (!is_mCRL_spec(mcrl_spec)) {
+        throw std::runtime_error("'" + options.infilename + "' does not contain an mCRL LPS");
+      }
+    }
+
+    ATprotectAppl(&mcrl_spec);
+    assert(is_mCRL_spec(mcrl_spec));
+
+    ATermAppl spec = translate(mcrl_spec,options.convert_bools,options.convert_funcs);
+    ATprotectAppl(&spec);
+
+    if (options.outfilename.empty()) {
+      gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
+
+      ATwriteToSAFFile((ATerm) mcrl_spec, stdout);
+    }
+    else {
+      gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", options.outfilename.c_str());
+
+      FILE *outstream = fopen(options.outfilename.c_str(), "wb");
+
+      if (outstream == NULL) {
+        throw std::runtime_error("cannot open output file '" + options.outfilename + "'");
+      }
+
+      ATwriteToSAFFile((ATerm) spec,outstream);
+
+      fclose(outstream);
     }
   }
-  if ( opt_quiet && opt_verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
-  }
-  if ( opt_quiet && opt_debug )
-  {
-    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-    return 1;
-  }
-  if ( opt_quiet )
-    gsSetQuietMsg();
-  if ( opt_verbose )
-    gsSetVerboseMsg();
-  if ( opt_debug )
-    gsSetDebugMsg();
-
-
-
-  InStream = stdin;
-  char *InFileName = NULL;
-  if ( optind < argc && strcmp(argv[optind],"-") )
-  {
-    InFileName = argv[optind];
-    gsVerboseMsg("reading mCRL LPS from '%s'...\n", InFileName);
-    if ( (InStream = fopen(InFileName, "rb")) == NULL )
-    {
-      gsErrorMsg("cannot open input file '%s' for reading: ",
-        InFileName);
-      perror(NULL);
-      return 1;
-    }
-  } else {
-    gsVerboseMsg("reading mCRL LPS from stdin...\n");
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
   }
 
-  ATermAppl mu_spec = (ATermAppl) ATreadFromFile(InStream);
-  ATprotectAppl(&mu_spec);
-
-  if (InStream != stdin) {
-    fclose(InStream);
-  }
-
-  if ( mu_spec == NULL )
-  {
-    if (InStream == stdin) {
-      gsErrorMsg("could not read mCRL LPS from stdin\n");
-    } else {
-      gsErrorMsg("could not read mCRL LPS from '%s'\n", InFileName);
-    }
-    return 1;
-  }
-  assert(mu_spec != NULL);
-
-  if (!is_mCRL_spec(mu_spec)) {
-    if (InStream == stdin) {
-      gsErrorMsg("stdin does not contain a mCRL LPS\n");
-    } else {
-      gsErrorMsg("'%s' does not contain a mCRL LPS\n", InFileName);
-    }
-    return false;
-  }
-  assert(is_mCRL_spec(mu_spec));
-
-
-  ATermAppl spec = translate(mu_spec,convert_bools,convert_funcs);
-  ATprotectAppl(&spec);
-
-
-  OutStream = stdout;
-  char *OutFileName = NULL;
-  if ( optind+1 < argc )
-  {
-    OutFileName = argv[optind+1];
-    gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", OutFileName);
-    if ( (OutStream = fopen(OutFileName, "wb")) == NULL )
-    {
-      gsErrorMsg("cannot open output file '%s' for writing: ",
-        OutFileName);
-      perror(NULL);
-      return 1;
-    }
-  } else {
-    gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
-  }
-
-  ATwriteToSAFFile((ATerm) spec,OutStream);
-
-  if (OutStream != stdout) {
-    fclose(OutStream);
-  }
-
-  return 0;
+  return EXIT_FAILURE;
 }

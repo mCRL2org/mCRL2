@@ -10,11 +10,9 @@
 // Graphical shell
 #include "graph_frame.h"
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 #include <mcrl2/lts/liblts.h>
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 std::string lts_file_argument;
 
@@ -22,89 +20,76 @@ std::string lts_file_argument;
 // SQuADT protocol interface
 # include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
+using namespace mcrl2::utilities::squadt;
+
+const char* lts_file_for_input  = "lts_in";
+
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
   
-  private:
-
-    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
- 
-    // Wrapper for wxEntry invocation
-    mcrl2::utilities::squadt::entry_wrapper& starter;
-
   public:
-    // Constructor
-    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
-
     // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::visualisation);
+#ifdef MCRL2_BCG
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
+#endif  
+    }
 
     // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&);
+    void user_interactive_configuration(tipi::configuration&) { }
 
     // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const&) const;
+    bool check_configuration(tipi::configuration const& c) const {
+      if (c.input_exists(lts_file_for_input)) {
+        /* The input object is present, verify whether the specified format is supported */
+        if (lts::parse_format(c.get_input(lts_file_for_input).get_mime_type().get_sub_type().c_str()) == lts_none) {
+          send_error("Invalid configuration: unsupported type `" +
+              c.get_input(lts_file_for_input).get_mime_type().get_sub_type() + "' for main input");
+        }
+        else {
+          return true;
+        }
+      }
 
-    // Performs the task specified by a configuration
-    bool perform_task(tipi::configuration&);
-};
-
-const char* squadt_interactor::lts_file_for_input  = "lts_in";
-
-squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
-}
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::visualisation);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::visualisation);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::visualisation);
-#ifdef MCRL2_BCG
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
-#endif  
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-  //skip
-}
-
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  if (c.input_exists(lts_file_for_input)) {
-    /* The input object is present, verify whether the specified format is supported */
-    tipi::configuration::object input_object(c.get_input(lts_file_for_input));
-
-    lts_file_argument = input_object.get_location();
-
-    if (lts::parse_format(input_object.get_mime_type().get_sub_type().c_str()) == lts_none) {
-      send_error(boost::str(boost::format("Invalid configuration: unsupported type `%s' for main input") % input_object.get_mime_type().get_sub_type().c_str()));
       return false;
     }
-  }
-  else {
-    return false;
-  }
-  
-  return true;
-}
 
-bool squadt_interactor::perform_task(tipi::configuration&) {
-  return starter.perform_entry();
-}
+    bool squadt_interactor::perform_task(tipi::configuration& c) {
+      lts_file_argument = c.get_input(lts_file_for_input).get_location();
+
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
+};
 #endif
 
-void print_help(std::string const &name) {
-  cout << "Usage: " << name << " [INFILE]"
-       << endl << "Draw graphs and optimize their layout in a graphical environment."
-       << endl << "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file"
-       << endl << "as input for drawing."
-       << endl
-       << endl << "Use left click to drag the nodes and right click to fix the nodes."
-       << endl
-       << endl << "Options:"
-       << endl << "  -h, --help            display this help message and terminate"
-       << endl << "      --version         displays version information and terminate"
-       << endl
-       << endl << "Report bugs at <http://www.mcrl2.org/issuetracker>."
-       << endl;
+void parse_command_line(int argc, wxChar** argv) {
+
+  using namespace ::mcrl2::utilities;
+
+  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
+        NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+    "Draw graphs and optimize their layout in a graphical environment."
+    "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file"
+    "as input for drawing.\n"
+    "\n"
+    "Use left click to drag the nodes and right click to fix the nodes.");
+   
+  command_line_parser parser(clinterface, argc, argv);
+
+  if (0 < parser.arguments.size()) {
+    lts_file_argument = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
 }
 
 class GraphApp : public wxApp
@@ -112,30 +97,7 @@ class GraphApp : public wxApp
   public:
     bool OnInit() {
 
-      wxCmdLineParser cmdln(argc,argv);
-         
-      cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
-      cmdln.AddSwitch(wxEmptyString,wxT("version"), wxT("displays version information and exits"));
-      cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-      cmdln.SetLogo(wxT("Graphical tool for visualizing graph."));
-
-      if ( cmdln.Parse()) {
-        return false;
-      }
-
-      if ( cmdln.Found(wxT("h")) ) {
-        print_help(std::string(wxString(argv[0]).fn_str()));
-        return false;
-      }
-
-      if (cmdln.Found(wxT("version")) ) {
-        print_version_information(NAME, AUTHOR);
-        return false;
-      }
-
-      if ( cmdln.GetParamCount() > 0 ) {
-        lts_file_argument = std::string(cmdln.GetParam(0).fn_str());
-      }
+      parse_command_line(argc, argv);
 
       init_frame(lts_file_argument);
       return true;
@@ -175,32 +137,24 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
   MCRL2_ATERM_INIT(local_var, lpCmdLine)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+    return EXIT_SUCCESS;
+  }
 #endif
-      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    }
 
-    return 0;
-#endif
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
-# endif
-    return wxEntry(argc, argv);
-# ifdef ENABLE_SQUADT_CONNECTIVITY
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return EXIT_SUCCESS;
   }
+#endif
 
-  return 0;
-# endif
+  return wxEntry(argc, argv);
 }
 #endif

@@ -7,79 +7,62 @@
 /// \file
 /// \brief Contains implementation of the LTSView application.
 
-#include <string>
-
 #define NAME "ltsview"
 #define AUTHOR "Bas Ploeger and Carst Tankink"
+
+#include <string>
+#include <wx/wx.h>
 
 std::string lts_file_argument;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <wx/wx.h>
 //SQuADT protocol interface
 #include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
-  private:
-    static const char*  fsm_file_for_input;  ///< file containing an LTS that can be imported
-    // Wrapper for wxEntry invocation
-    mcrl2::utilities::squadt::entry_wrapper& starter;
+using namespace mcrl2::utilities::squadt;
+
+const char* fsm_file_for_input = "fsm_in";
+
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
 
   public:
-    // Constructor
-    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
+
     // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration(fsm_file_for_input,tipi::mime_type("fsm",
+            tipi::mime_type::text),tipi::tool::category::visualisation);
+    }
+
     // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&);
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const&) const;
-    // Performs the task specified by a configuration
-    bool perform_task(tipi::configuration&);
+    void user_interactive_configuration(tipi::configuration&) {
+    }
+
+    bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+      bool valid = c.input_exists(fsm_file_for_input);
+    
+      if (!valid) {
+        send_error("Invalid input combination!");
+      }
+
+      return valid;
+    }
+
+    bool squadt_interactor::perform_task(tipi::configuration& c) {
+      lts_file_argument = c.get_input(fsm_file_for_input).get_location();
+
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
 };
-
-const char* squadt_interactor::fsm_file_for_input = "fsm_in";
-
-squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
-  // skip 
-}
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(fsm_file_for_input,tipi::mime_type("fsm",
-        tipi::mime_type::text),tipi::tool::category::visualisation);
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-  //skip
-}
-
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  if (c.input_exists(fsm_file_for_input)) {
-
-    tipi::configuration::object input_object(c.get_input(fsm_file_for_input));
-    lts_file_argument = input_object.get_location();
-
-    return true;
-  }
-
-  return false;
-}
-
-bool squadt_interactor::perform_task(tipi::configuration&) {
-  return starter.perform_entry();
-}
 #endif
 
-#include <wx/cmdline.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include <mcrl2/utilities/aterm_ext.h>
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "ltsview.h"
 #include "markstateruledialog.h"
 #include "fileloader.h"
 #include "settings.h"
-#include "aterm1.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 using namespace std;
 using namespace Utils;
@@ -88,50 +71,30 @@ IMPLEMENT_APP_NO_MAIN(LTSView)
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
-void LTSView::printHelp(std::string const &name) {
-  cout <<         "Usage: " << name << " [OPTION]... [INFILE]"
-       << endl << "Start the LTSView application and open INFILE. If INFILE is not"
-       << endl << "supplied then LTSView is started without opening an LTS."
-       << endl
-       << endl << "INFILE should be in the FSM format."
-       << endl
-       << endl << "Options:"
-       << endl << "  -h, --help     display this help message and terminate"
-       << endl << "      --version  display version information and terminate"
-       << endl
-       << endl << "Report bugs at <http://www.mcrl2.org/issuetracker>."
-       << endl;
-}
+void parse_command_line(int argc, wxChar** argv) {
 
-void LTSView::printVersion() {
-  cout << getVersionString();
+  using namespace ::mcrl2::utilities;
+
+  interface_description clinterface(
+        std::string(wxString(argv[0], wxConvLocal).fn_str()),
+        NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+    "Start the LTSView application and open INFILE. If INFILE is not"
+    "supplied then LTSView is started without opening an LTS.\n"
+    "\n"
+    "INFILE should be in the FSM format.");
+
+  command_line_parser parser(clinterface, argc, argv);
+
+  if (0 < parser.arguments.size()) {
+    lts_file_argument = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
 }
 
 bool LTSView::OnInit() {
-  wxCmdLineParser cmdParser(argc,argv);
-  cmdParser.AddSwitch(wxT("h"),wxT("help"),
-      wxT("display this help message and terminate"),wxCMD_LINE_OPTION_HELP);
-  cmdParser.AddSwitch(wxEmptyString,wxT("version"),
-      wxT("display version information and terminate"));
-  cmdParser.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-
-  if (cmdParser.Parse(false) > 0) {
-    return false;
-  }
-  if (cmdParser.Found(wxT("h"))) {
-    printHelp(std::string(wxString(argv[0]).fn_str()));
-    return false;
-  }
-  if (cmdParser.Found(wxT("version"))) {
-    printVersion();
-    return false;
-  }
-  if (cmdParser.GetParamCount() > 1) {
-    cerr << "Too many command line parameters specified" << endl;
-  }
-  if (cmdParser.GetParamCount() > 0) {
-    lts_file_argument = std::string(cmdParser.GetParam(0).fn_str());
-  }
+  parse_command_line(argc, argv);
 
   lts = NULL;
   rankStyle = ITERATIVE;
@@ -170,16 +133,12 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
   MCRL2_ATERM_INIT(local_var, lpCmdLine) 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-#endif
-    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+    return EXIT_SUCCESS;
   }
-
-  return (0);
 #endif
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv) {
@@ -187,16 +146,12 @@ int main(int argc, char **argv) {
   MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
-#endif
-    return wxEntry(argc, argv);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return EXIT_SUCCESS;
   }
-
-  return 0;
 #endif
+
+  return wxEntry(argc, argv);
 }
 #endif
 

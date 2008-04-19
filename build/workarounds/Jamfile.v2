@@ -26,7 +26,6 @@ alias configuration : : <os>NT <toolset>msvc :
          <define>_HAS_ITERATOR_DEBUGGING=0
          <define>_SECURE_SCL=0
          <include>$(TOP)/build/workarounds/msvc
-         <include>$(TOP)/3rd-party/getopt
        ;
 
 # Mac OS X, darwin

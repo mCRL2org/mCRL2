@@ -4,8 +4,7 @@ tool mcrl22lps
        : mcrl22lps.cpp
          /libraries//utilities
          /libraries//lps
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools mcrl22lps ;

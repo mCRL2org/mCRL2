@@ -88,7 +88,7 @@ namespace mcrl2 {
         protected:
   
           /** \brief initialisation after connection to SQuADt */
-          virtual void initialise();
+          virtual void initialise() {};
   
           /** \brief configures tool capabilities */
           virtual void set_capabilities(tipi::tool::capabilities&) const = 0;
@@ -103,7 +103,7 @@ namespace mcrl2 {
           virtual bool perform_task(tipi::configuration&) = 0;
   
           /** \brief finalisation after termination signal has been received */
-          virtual void finalise();
+          virtual void finalise() {};
   
           /** \brief virtual destructor */
           virtual ~tool_interface();
@@ -127,49 +127,6 @@ namespace mcrl2 {
           /**  \brief whether or not the communicator is active (connected to SQuADT) */
           bool is_active() const;
       };
-
-#ifdef __WXWINDOWS__
-      /** 
-       * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
-       **/
-      class entry_wrapper {
-#ifdef __WINDOWS__
-      private:
- 
-        HINSTANCE        hInstance;
-        HINSTANCE        hPrevInstance;
-        wxCmdLineArgType lpCmdLine;
-        int              nCmdShow;
- 
-      public:
- 
-        entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
-          hInstance     = hc;
-          hPrevInstance = hp;
-          lpCmdLine     = lp;
-          nCmdShow      = ns;
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
-        }
-#else
-      private:
- 
-        int&    argc;
-        char**& argv;
- 
-      public:
- 
-        entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(argc, argv) == 0);
-        }
-#endif
-      };
-#endif
 
       /**
        * \brief mCRL2 tool specific squadt interface
@@ -200,16 +157,87 @@ namespace mcrl2 {
         protected:
 
           /** \brief initialisation after connection to SQuADt */
-          void initialise();
+          virtual void initialise();
   
           /** \brief finalisation after termination signal has been received */
-          void finalise();
+          virtual void finalise();
       };
+
+#ifdef __WXWINDOWS__
+      /** 
+       * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
+       **/
+      class entry_wrapper {
+#ifdef __WINDOWS__
+        private:
+
+          HINSTANCE        hInstance;
+          HINSTANCE        hPrevInstance;
+          wxCmdLineArgType lpCmdLine;
+          int              nCmdShow;
+
+        public:
+
+          entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
+            hInstance     = hc;
+            hPrevInstance = hp;
+            lpCmdLine     = lp;
+            nCmdShow      = ns;
+          }
+
+          bool perform_entry() {
+            return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
+          }
+#else
+        private:
+
+          int&    argc;
+          char**& argv;
+
+        public:
+
+          entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
+          }
+   
+          bool perform_entry() {
+            return (wxEntry(argc, argv) == 0);
+          }
+#endif
+      };
+
+      /**
+       * \brief mCRL2 tools using wxWidgets specific squadt interface
+       *
+       * In addition to the interface above, the message system used by most
+       * tools in the mCRL2 toolset is initialised such that messages are
+       * relayed.
+       *
+       * \note only works for one object at a time
+       **/
+      class mcrl2_wx_tool_interface : public mcrl2_tool_interface {
+        template < typename T >
+        friend class interactor;
+
+        private:
+
+          // Wrapper for wxEntry invocation
+          std::auto_ptr< entry_wrapper > m_starter;
+
+        public:
+
+          mcrl2_wx_tool_interface() {
+          }
+
+          // Performs the task specified by a configuration
+          virtual bool perform_task(tipi::configuration&) {
+            return m_starter->perform_entry();
+          }
+      };
+#endif
   
 #ifndef NO_MCRL2_TOOL_FACILITIES
       using ::mcrl2::core::messageType;
-      
-  
+
       /** \brief Used to relay messages generated using core::print */
       template < >
       inline void relay_message(const messageType t, const char* data) {
@@ -253,13 +281,13 @@ namespace mcrl2 {
         /* Unregister message relay */
         mcrl2::core::gsSetCustomMessageHandler(0);
       }
+#else
+      inline void mcrl2_tool_interface::initialise() {
+      }
+      inline void mcrl2_tool_interface::finalise() {
+      }
 #endif
-
-      inline void tool_interface::initialise() {
-      }
-  
-      inline void tool_interface::finalise() {
-      }
+      
 
       /**
        * \brief Component that simplifies a connection attempt with squadt to a single call
@@ -272,33 +300,27 @@ namespace mcrl2 {
           /**
            * \brief builds a connection with SQuADT
            **/
-          inline static bool free_activation(int& ac, char** const av) {
+          inline static bool free_activation(int& ac, char**& av) {
+            T communicator;
+
 #ifdef __WXWINDOWS__
-            int    dummy_ac = 0;
-            char** dummy_av = 0;
-
-            entry_wrapper starter(dummy_ac, dummy_av);
-
-            T c(starter);
-#else
-            T c;
+            communicator.m_starter.reset(new entry_wrapper(ac, av));
 #endif
            
-            return (c.try_interaction(ac, av));
+            return (communicator.try_interaction(ac, av));
           }
 
 #ifdef __WINDOWS__
           inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
+            T communicator;
+
 # ifdef __WXWINDOWS__
             wxCmdLineArgType dummy_lpCmdLine = 0;
 
-            entry_wrapper starter(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow);
-
-            T c(starter);
-# else
-            T c;
+            communicator.m_starter.reset(new entry_wrapper(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow));
 # endif
-            return (c.try_interaction(lpCmdLine));
+
+            return (communicator.try_interaction(lpCmdLine));
           }
 #endif
       };

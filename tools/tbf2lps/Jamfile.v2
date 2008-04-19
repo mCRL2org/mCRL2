@@ -4,7 +4,6 @@ tool tbf2lps
        : tbf2lps.cpp
          lpstrans.cpp
          /libraries//core
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools tbf2lps ;

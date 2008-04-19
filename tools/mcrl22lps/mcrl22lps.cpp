@@ -11,8 +11,6 @@
 #define AUTHOR "Jan Friso Groote"
 
 #include <cassert>
-#include <stdbool.h>
-#include <getopt.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -29,7 +27,7 @@
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
@@ -45,33 +43,12 @@ using namespace::mcrl2;
 static t_lin_options parse_command_line(int argc, char *argv[]);
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
-static void PrintMoreInfo(char *Name);
-static void PrintHelp(char *Name);
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include "mcrl2/utilities/squadt_interface.h"
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
-  private:
-
-    static const char* mcrl2_file_for_input; ///< file containing an LTS that can be imported using the LTS library
-    static const char* lps_file_for_output;  ///< file containing an LTS that can be imported using the LTS library
-
-    static const char* option_linearisation_method;
-    static const char* option_final_cluster;
-    static const char* option_no_intermediate_cluster;
-    static const char* option_no_alpha;
-    static const char* option_newstate;
-    static const char* option_binary;
-    static const char* option_statenames;
-    static const char* option_no_rewrite;
-    static const char* option_no_freevars;
-    static const char* option_no_sumelm;
-    static const char* option_no_deltaelm;
-    static const char* option_end_phase;
-    static const char* option_add_delta;
 
   private:
 
@@ -102,22 +79,22 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::mcrl2_file_for_input = "mcrl2_in";
-const char* squadt_interactor::lps_file_for_output  = "lps_out";
+const char* mcrl2_file_for_input = "mcrl2_in";
+const char* lps_file_for_output  = "lps_out";
 
-const char* squadt_interactor::option_linearisation_method     = "linearisation_method";
-const char* squadt_interactor::option_final_cluster            = "final_cluster";
-const char* squadt_interactor::option_no_intermediate_cluster  = "no_intermediate_cluster";
-const char* squadt_interactor::option_no_alpha                 = "no_alpha";
-const char* squadt_interactor::option_newstate                 = "newstate";
-const char* squadt_interactor::option_binary                   = "binary";
-const char* squadt_interactor::option_statenames               = "statenames";
-const char* squadt_interactor::option_no_rewrite               = "no_rewrite";
-const char* squadt_interactor::option_no_freevars              = "no_freevars"; 
-const char* squadt_interactor::option_no_sumelm                = "no_sumelm";
-const char* squadt_interactor::option_no_deltaelm              = "no_dataelm";
-const char* squadt_interactor::option_end_phase                = "end_phase";
-const char* squadt_interactor::option_add_delta                = "add_delta";
+const char* option_linearisation_method     = "linearisation_method";
+const char* option_final_cluster            = "final_cluster";
+const char* option_no_intermediate_cluster  = "no_intermediate_cluster";
+const char* option_no_alpha                 = "no_alpha";
+const char* option_newstate                 = "newstate";
+const char* option_binary                   = "binary";
+const char* option_statenames               = "statenames";
+const char* option_no_rewrite               = "no_rewrite";
+const char* option_no_freevars              = "no_freevars"; 
+const char* option_no_sumelm                = "no_sumelm";
+const char* option_no_deltaelm              = "no_dataelm";
+const char* option_end_phase                = "end_phase";
+const char* option_add_delta                = "add_delta";
 
 squadt_interactor::squadt_interactor() {
   linearisation_method_enumeration.reset(new tipi::datatype::enumeration("stack"));
@@ -411,166 +388,140 @@ using namespace std;
 
 static t_lin_options parse_command_line(int argc, char *argv[])
 { 
-  //declarations for getopt
-  t_lin_options lin_options;
-  bool lm_chosen = false;
-  #define ShortOptions   "0123cnrwbaofep:hqvdmgD"
-  #define VersionOption  0x1
-  struct option LongOptions[] = {
-    { "stack",       no_argument,       NULL, '0' },
-    { "regular",     no_argument,       NULL, '1' },
-    { "regular2",    no_argument,       NULL, '2' },
-    { "cluster",     no_argument,       NULL, 'c' },
-    { "no-cluster",  no_argument,       NULL, 'n' },
-    { "no-alpha",    no_argument,       NULL, 'r' },
-    { "newstate",    no_argument,       NULL, 'w' },
-    { "binary",      no_argument,       NULL, 'b' },
-    { "statenames",  no_argument,       NULL, 'a' },
-    { "no-rewrite",  no_argument,       NULL, 'o' },
-    { "no-freevars", no_argument,       NULL, 'f' },
-    { "no-sumelm",   no_argument,       NULL, 'm' },
-    { "no-deltaelm", no_argument,       NULL, 'g' },
-    { "check-only",  no_argument,       NULL, 'e' },
-    { "end-phase",   required_argument, NULL, 'p' },
-    { "help",        no_argument,       NULL, 'h' },
-    { "version",     no_argument,       NULL, VersionOption },
-    { "quiet",       no_argument,       NULL, 'q' },
-    { "verbose",     no_argument,       NULL, 'v' },
-    { "debug",       no_argument,       NULL, 'd' },
-    { "delta",       no_argument,       NULL, 'D' },
-    { 0, 0, 0, 0 }
-  };
-  int Option;
-  //parse options
-  Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
-  while (Option != -1) {
-    switch (Option){
-      case '0': /* stack */
-        if (lm_chosen && lin_options.lin_method != lmStack) {
-          gsErrorMsg("only one method of linearisation is allowed\n");
-          exit(EXIT_FAILURE);
-        }
-        lm_chosen = true;
-        lin_options.lin_method = lmStack;
-        break;
-      case '1': /* regular */
-        if (lm_chosen && lin_options.lin_method != lmRegular) {
-          gsErrorMsg("only one method of linearisation is allowed\n");
-          exit(EXIT_FAILURE);
-        }
-        lm_chosen = true;
-        lin_options.lin_method = lmRegular;
-        break;
-      case '2': /* regular2 */
-        if (lm_chosen && lin_options.lin_method != lmRegular2) {
-          gsErrorMsg("only one method of linearisation is allowed\n");
-          exit(EXIT_FAILURE);
-        }
-        lm_chosen = true;
-        lin_options.lin_method = lmRegular2;
-        break;
-      case 'c': /* cluster */ 
-        lin_options.final_cluster = true;
-        break;
-      case 'n': /* no-cluster */
-        lin_options.no_intermediate_cluster = true;
-        break;
-      case 'r': /* no-alpha */
-        lin_options.noalpha = true;
-        break;
-      case 'w': /* newstate */ 
-        lin_options.newstate = true;
-        break;
-      case 'b': /* binary */ 
-        lin_options.binary = true;
-        break;
-      case 'a': /* statenames */ 
-        lin_options.statenames = true;
-        break;
-      case 'o': /* no-rewrite */ 
-        lin_options.norewrite = true;
-        break;
-      case 'f': /* nofreevars */
-        lin_options.nofreevars = true;
-        break;
-      case 'e': /* check-only */
-        lin_options.check_only = true;
-        lin_options.end_phase = phTypeCheck;
-        break;
-      case 'm': /* no-sumelm */
-        lin_options.nosumelm = true;
-        break;
-      case 'g': /* no-deltaelm */
-        lin_options.nodeltaelimination = true;
-        break;
-      case 'D': /* delta */
-        lin_options.add_delta = true;
-        break;
-      case 'p': /* end-phase */
-        if (strcmp(optarg, "pa") == 0) {
-          lin_options.end_phase = phParse;
-        } else if (strcmp(optarg, "tc") == 0) {
-          lin_options.end_phase = phTypeCheck;
-        } else if (strcmp(optarg, "ar") == 0) {
-          lin_options.end_phase = phAlphaRed;
-        } else if (strcmp(optarg, "di") == 0) {
-          lin_options.end_phase = phDataImpl;
-        } else {
-          gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
-          exit(EXIT_FAILURE);
-        }
-        break;
-      case 'h': /* help */
-        PrintHelp(argv[0]);
-        exit(EXIT_SUCCESS);
-      case VersionOption: /* version */
-        print_version_information(NAME, AUTHOR);
-        exit(EXIT_SUCCESS);
-      case 'q': /* quiet */
-        gsSetQuietMsg();
-        break;
-      case 'v': /* verbose */
-        gsSetVerboseMsg();
-        break;
-      case 'd': /* debug */
-        gsSetDebugMsg();
-        break;
-      case '?':
-      default:
-        PrintMoreInfo(argv[0]); 
-        exit(EXIT_FAILURE);
-    } 
-    Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+    "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to"
+    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,"
+    "stdin is used.");
+
+  clinterface.
+    add_option("stack",
+      "the LPS is generated using stack datatypes; useful when -1 and -2 "
+      " do not work", '0').
+    add_option("regular",
+      "if the specification is regular, the LPS is generated in regular "
+      "form (default)", '1').
+    add_option("regular2",
+      "a variant of regular that uses more data variables; "
+      "sometimes successful when -1 leads to non-termination", '2').
+    add_option("cluster",
+      "all actions in the final LPS are clustered", 'c').
+    add_option("no-cluster",
+      "the actions in intermediate LPSs are not clustered "
+      "(default behaviour is that intermediate LPSs are "
+      "clustered and the final LPS is not clustered)", 'n').
+    add_option("no-alpha",
+      "alphabet reductions are not applied", 'r').
+    add_option("newstate",
+      "state variables are encoded using enumerated types "
+      "(requires -1 or -2); without -w numbers are used", 'w').
+    add_option("binary",
+      "when clustering use binary case functions instead of "
+      "n-ary; in the presence of -w, state variables are "
+      "encoded by a vector of boolean variables", 'b').
+    add_option("statenames",
+      "the names of state variables are derived from the specification", 'a').
+    add_option("no-rewrite",
+      "do not rewrite data terms while linearising; useful when the rewrite "
+      "system does not terminate", 'o').
+    add_option("no-freevars",
+      "instantiate don't care values with arbitrary constants, "
+      "instead of modelling them by free variables", 'f').
+    add_option("no-sumelm",
+      "avoid applying sum elimination in parallel composition", 'm').
+    add_option("no-deltaelm",
+      "avoid removing spurious delta summands", 'g').
+    add_option("delta",
+      "add a true->delta summands to each state in each process; "
+      "these delta's subsume all other conditional timed delta's, "
+      "effectively reducing the number of delta summands drastically "
+      "in the resulting linear process; speeds up linearisation ", 'D').
+    add_option("check-only",
+      "check syntax and static semantics; do not linearise", 'e').
+    add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop linearisation after phase PHASE and output the result; PHASE "
+      "can be 'pa' (parse), 'tc' (type check), 'ar' (alphabet reduction) or "
+      "'di' (data implementation)", 'p');
+
+  command_line_parser parser(clinterface, argc, argv);
+
+  t_lin_options options;
+
+  options.final_cluster           = 0 < parser.options.count("cluster");
+  options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
+  options.noalpha                 = 0 < parser.options.count("no-alpha");
+  options.newstate                = 0 < parser.options.count("newstate");
+  options.binary                  = 0 < parser.options.count("binary");
+  options.statenames              = 0 < parser.options.count("statenames");
+  options.norewrite               = 0 < parser.options.count("no-rewrite");
+  options.nofreevars              = 0 < parser.options.count("no-freevars");
+  options.nosumelm                = 0 < parser.options.count("no-sumelm");
+  options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
+  options.add_delta               = 0 < parser.options.count("delta");
+  options.lin_method = lmRegular;
+
+  if (0 < parser.options.count("check-only")) {
+    options.check_only = true;
+    options.end_phase  = phTypeCheck;
   }
-  //check for dangerous and illegal option combinations
-  if (lin_options.newstate && lin_options.lin_method == lmStack) {
-    gsErrorMsg("option -w can only be used with -1 or -2\n");
-    exit(EXIT_FAILURE);
-  }
-  if (lin_options.check_only && (lin_options.end_phase != phTypeCheck)) {
-    gsErrorMsg("options -e and -p may not be used in conjunction\n");
-    exit(EXIT_FAILURE);
-  }
-  if (lin_options.noalpha && (lin_options.end_phase == phAlphaRed)) {
-    gsErrorMsg("options -r and -p ar may not be used in conjunction\n");
-    exit(EXIT_FAILURE);
-  }
-  int noargc; //non-option argument count
-  noargc = argc - optind;
-  if (noargc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-    PrintMoreInfo(argv[0]);
-    exit(EXIT_FAILURE);
-  } else {
-    //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
-      lin_options.infilename = argv[optind];
-    }
-    if (noargc == 2) {
-      lin_options.outfilename = argv[optind + 1];
+
+  size_t method_count = 0;
+
+  if (0 < parser.options.count("stack")) {
+    options.lin_method = lmStack;
+    ++method_count;
+
+    //check for dangerous and illegal option combinations
+    if (options.newstate) {
+      parser.error("option -w can only be used with -1 or -2");
     }
   }
-  return lin_options;
+  if (parser.options.count("regular")) {
+    options.lin_method = lmRegular;
+    ++method_count;
+  }
+  if (parser.options.count("regular2")) {
+    options.lin_method = lmRegular2;
+    ++method_count;
+  }
+  if (1 < method_count) {
+    parser.error("only one method of linearisation is allowed");
+  }
+
+  if (parser.options.count("end-phase")) {
+    std::string phase(parser.option_argument("end-phase"));
+
+    if (phase == "pa") {
+      options.end_phase = phParse;
+    } else if (phase == "tc") {
+      options.end_phase = phTypeCheck;
+
+      if (options.check_only) {
+        parser.error("options -e and -p may not be used in conjunction");
+      }
+    } else if (phase == "ar") {
+      options.end_phase = phAlphaRed;
+
+      if (options.noalpha) {
+        parser.error("options -r and -p ar may not be used in conjunction");
+      }
+    } else if (phase == "di") {
+      options.end_phase = phDataImpl;
+    } else {
+      parser.error("option -p has illegal argument '" + parser.option_argument("end-phase") + "'");
+    }
+  }
+
+  if (0 < parser.arguments.size()) {
+    options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    options.outfilename = parser.arguments[1];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return options;
 }
 
 ATermAppl linearise_file(t_lin_options &lin_options)
@@ -655,73 +606,21 @@ inline char const* lin_method_to_string(t_lin_method lin_method)
   return (method[lin_method]);
 }
 
-void PrintMoreInfo(char *Name)
-{
-  fprintf(stderr, "Try `%s --help' for more information.\n", Name);
-}
-
-void PrintHelp(char *Name)
-{
-  fprintf(stdout,
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to\n"
-    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
-    "stdin is used.\n"
-    "\n"
-    "Options:\n"
-    "  -0, --stack           the LPS is generated using stack datatypes;\n"
-    "                        useful when -1 and -2 do not work\n"
-    "  -1, --regular         if the specification is regular, the LPS is generated\n"
-    "                        in regular form (default)\n"
-    "  -2, --regular2        a variant of regular that uses more data variables;\n"
-    "                        sometimes successful when -1 leads to non-termination\n"
-    "  -c, --cluster         all actions in the final LPS are clustered\n"
-    "  -n, --no-cluster      the actions in intermediate LPSs are not clustered\n"
-    "                        (default behaviour is that intermediate LPSs are\n"
-    "                        clustered and the final LPS is not clustered)\n"
-    "  -r, --no-alpha        alphabet reductions are not applied\n"
-    "  -w, --newstate        state variables are encoded using enumerated types\n"
-    "                        (requires -1 or -2); without -w numbers are used\n"
-    "  -b, --binary          when clustering use binary case functions instead of\n"
-    "                        n-ary; in the presence of -w, state variables are\n"
-    "                        encoded by a vector of boolean variables\n"
-    "  -a, --statenames      the names of state variables are derived from the\n"
-    "                        specification\n"
-    "  -o, --no-rewrite      do not rewrite data terms while linearising;\n"
-    "                        useful when the rewrite system does not terminate\n"
-    "  -f, --no-freevars     instantiate don't care values with arbitrary constants,\n"
-    "                        instead of modelling them by free variables\n"
-    "  -m, --no-sumelm       avoid applying sum elimination in parallel composition\n"
-    "  -g, --no-deltaelm     avoid removing spurious delta summands\n"
-    "  -D, --delta           add a true->delta summands to each state in each process;\n"
-    "                        these delta's subsume all other conditional timed delta's,\n"
-    "                        effectively reducing the number of delta summands drastically\n"
-    "                        in the resulting linear process; speeds up linearisation\n"
-    "  -e, --check-only      check syntax and static semantics; do not linearise\n"
-    "  -pPHASE, --end-phase=PHASE\n"
-    "                        stop linearisation after phase PHASE and output the\n"
-    "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
-    "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
-    "  -h, --help            display this help and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name);
-}
-
 // Main 
 
 int main(int argc, char *argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
+
     t_lin_options lin_options = parse_command_line(argc, argv);
+
     //linearise infilename with options lin_options
     ATermAppl result = linearise_file(lin_options);
     if (result == NULL) {
@@ -756,9 +655,12 @@ int main(int argc, char *argv[])
         fclose(outstream);
       }
     }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-#endif
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

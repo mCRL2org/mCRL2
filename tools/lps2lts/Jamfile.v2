@@ -7,8 +7,7 @@ tool lps2lts
          /libraries//trace
          /libraries//lps
          /libraries//lts
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools lps2lts ;

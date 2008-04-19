@@ -21,7 +21,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <wx/cmdline.h>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
 #include <aterm2.h>
@@ -42,66 +41,46 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
-class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
-  
-  private:
-
-    // Wrapper for wxEntry invocation
-    mcrl2::utilities::squadt::entry_wrapper& starter;
-
-  public:
-
-    // Constructor
-    squadt_interactor(mcrl2::utilities::squadt::entry_wrapper&);
-
-    // Special initialisation
-    void initialise();
-
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities&) const;
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&);
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const&) const;
-
-    // Performs the task specified by a configuration
-    bool perform_task(tipi::configuration&);
-};
+using namespace mcrl2::utilities::squadt;
 
 const char* lps_file_for_input = "lps_in";
 
-void squadt_interactor::initialise() {
-  gsSetCustomMessageHandler(xsim_message_handler);
-}
+class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+  
+  public:
 
-squadt_interactor::squadt_interactor(mcrl2::utilities::squadt::entry_wrapper& w): starter(w) {
-}
+    // Special initialisation
+    void initialise() {
+      gsSetCustomMessageHandler(xsim_message_handler);
+    }
 
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
-}
+    // Configures tool capabilities.
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
+      c.add_input_configuration(lps_file_for_input,
+           tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
+    }
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-}
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(tipi::configuration&) { }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  bool valid = c.input_exists(lps_file_for_input);
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(tipi::configuration const& c) const {
+      bool valid = c.input_exists(lps_file_for_input);
+  
+      if (!valid) {
+        send_error("Invalid input combination!");
+      }
 
-  if (!valid) {
-    send_error("Invalid input combination!");
-  }
+     return valid;
+   }
 
-  return valid;
-}
+    bool perform_task(tipi::configuration& c) {
+      lps_file_argument = c.get_input(lps_file_for_input).get_location();
 
-bool squadt_interactor::perform_task(tipi::configuration& c) {
-  lps_file_argument = c.get_input(lps_file_for_input).get_location();
-
-  return starter.perform_entry();
-}
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
+};
 #endif
 
 //------------------------------------------------------------------------------
@@ -119,9 +98,8 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 
   using namespace ::mcrl2::utilities;
 
-  interface_description clinterface(
-        std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
-        NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
+      NAME, AUTHOR, "[OPTION]... [INFILE]\n"
     "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
     "loaded into the simulator.");
 
@@ -130,7 +108,7 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   clinterface.
     add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
 
-  command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
+  command_line_parser parser(clinterface, argc, argv);
 
   dummies = 0 < parser.options.count("dummy");
 
@@ -167,21 +145,18 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
     {
       case gs_warning:
         {
-        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION);
-        dlg.ShowModal();
+        wxMessageDialog(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION).ShowModal();
         }
         break;
       case gs_error:
         {
-        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR);
-        dlg.ShowModal();
+        wxMessageDialog(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR).ShowModal();
         }
         break;
       case gs_notice:
       default:
         {
-        wxMessageDialog dlg(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION);
-        dlg.ShowModal();
+        wxMessageDialog(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION).ShowModal();
         }
         break;
     }
@@ -233,18 +208,13 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
   int local_var;
   MCRL2_ATERM_INIT(local_var, lpCmdLine)
 
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-#endif
-    return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+    return EXIT_SUCCESS;
   }
-
-  return (0);
 #endif
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv)
@@ -252,15 +222,11 @@ int main(int argc, char **argv)
   MCRL2_ATERM_INIT(argc, argv)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
-#endif
-    return wxEntry(argc, argv);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
+    return EXIT_SUCCESS;
   }
-
-  return 0;
 #endif
+
+  return wxEntry(argc, argv);
 }
 #endif
