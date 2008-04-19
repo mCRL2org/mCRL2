@@ -67,7 +67,7 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
   }
 }
  
-bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options &opts)
+bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
 {
   switch ( eq )
   {

@@ -3,7 +3,6 @@ project toolset/ltscompare ;
 tool ltscompare
        : ltscompare.cpp
          /libraries//lts
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools ltscompare ;

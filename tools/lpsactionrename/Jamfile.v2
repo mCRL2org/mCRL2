@@ -3,8 +3,7 @@ project toolset/lpsactionrename ;
 tool lpsactionrename
        : lpsactionrename.cpp
          /libraries//lps
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools lpsactionrename ;

@@ -31,6 +31,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
@@ -45,9 +46,6 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
   
   private:
 
-    // Identifier for main input file that contains an LTS
-    static const char* lps_file_for_input;
- 
     // Wrapper for wxEntry invocation
     mcrl2::utilities::squadt::entry_wrapper& starter;
 
@@ -72,7 +70,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input = "lps_in";
+const char* lps_file_for_input = "lps_in";
 
 void squadt_interactor::initialise() {
   gsSetCustomMessageHandler(xsim_message_handler);
@@ -120,95 +118,29 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
                         bool& dummies, std::string& lps_file_argument) {
 
   using namespace ::mcrl2::utilities;
-using namespace mcrl2::core;
 
-  wxCmdLineParser cmdln(argc,argv);
+  interface_description clinterface(
+        std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
+        NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+    "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
+    "loaded into the simulator.");
 
-  cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPS with dummy values"));
-  cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT(
-    "use rewrite strategy arg:\n"
-    "'inner' for the innermost rewriter,\n"
-    "'innerc' for the compiled innermost rewriter,\n"
-    "'jitty' for the jitty rewriter (default), or\n"
-    "'jittyc' for the compiled jitty rewriter"
-  ));
-  cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("display this help and terminate"));
-  cmdln.AddSwitch(wxT(""),wxT("version"),wxT("display version information and terminate"));
-  cmdln.AddSwitch(wxT("q"),wxT("quiet"),wxT("do not display warning messages"));
-  cmdln.AddSwitch(wxT("v"),wxT("verbose"),wxT("display concise intermediate messages"));
-  cmdln.AddSwitch(wxT("d"),wxT("debug"),wxT("display detailed intermediate messages"));
-  cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
-  cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPSs."));
+  clinterface.add_rewriting_options();
 
-  if (cmdln.Parse()) {
-    return false;
+  clinterface.
+    add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
+
+  command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
+
+  dummies = 0 < parser.options.count("dummy");
+
+  rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+  if (0 < parser.arguments.size()) {
+    lps_file_argument = parser.arguments[0];
   }
-
-  if (cmdln.Found(wxT("h"))) {
-    std::cout <<
-    "Usage: " << std::string(wxString(argv[0]).fn_str()) << " [OPTION]... [INFILE]\n"
-    "Simulate LPSs in a graphical environment. If INFILE is supplied it will be\n"
-    "loaded into the simulator.\n"
-    "\n"
-    "Options:\n"
-    "  -y, --dummy              replace free variables in the LPS with dummy values\n"
-    "  -RNAME, --rewriter=NAME  use rewrite strategy NAME:\n"
-    "                           'inner' for the innermost rewriter,\n"
-    "                           'innerc' for the compiled innermost rewriter,\n"
-    "                           'jitty' for the jitty rewriter (default), or\n"
-    "                           'jittyc' for the compiled jitty rewriter\n"
-    "  -h, --help               display this help and terminate\n"
-    "      --version            display version information and terminate\n"
-    "  -q, --quiet              do not display warning messages\n"
-    "  -v, --verbose            display concise intermediate messages\n"
-    "  -d, --debug              display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    ;
-    return false;
-  }
-
-  if (cmdln.Found(wxT("version"))) {
-    print_version_information(NAME, AUTHOR);
-    return false;
-  }
-
-  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("v"))) {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return false;
-  }
-  if (cmdln.Found(wxT("q")) && cmdln.Found(wxT("d"))) {
-    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-    return false;
-  }
-  if (cmdln.Found(wxT("q"))) {
-    gsSetQuietMsg();
-  }
-  if (cmdln.Found(wxT("v"))) {
-    gsSetVerboseMsg();
-  }
-  if (cmdln.Found(wxT("d"))) {
-    gsSetDebugMsg();
-  }
-
-  if (cmdln.Found(wxT("y"))) {
-    dummies = true;
-  }
-
-  wxString strategy;
-
-  if ( cmdln.Found(wxT("R"), &strategy) ) {
-    rewrite_strategy = RewriteStrategyFromString(strategy.fn_str());
-
-    if ( rewrite_strategy == GS_REWR_INVALID ) {
-      std::cerr << "error: invalid rewrite strategy '" << std::string(strategy.fn_str()) << "'" << std::endl;;
-
-      return false;
-    }
-  }
-
-  if ( cmdln.GetParamCount() > 0 ) {
-    lps_file_argument = std::string(cmdln.GetParam(0).fn_str());
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
   }
 
   return (true);
@@ -218,7 +150,7 @@ static XSim *this_xsim = NULL;
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 {
   using namespace ::mcrl2::utilities;
-using namespace mcrl2::core;
+  using namespace mcrl2::core;
 
   if ( this_xsim == NULL )
   {

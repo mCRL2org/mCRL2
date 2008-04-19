@@ -10,13 +10,12 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include <getopt.h>
 #include "aterm2.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
 using namespace ::mcrl2::lts;
@@ -53,213 +52,160 @@ static void print_formats(FILE *f)
     );
 }
 
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE1] INFILE2\n"
-    "Compare the labelled transition systems (LTSs) INFILE1 to INFILE2 in the\n"
-    "requested format modulo a certain equivalence If INFILE1 is not supplied, stdin\n"
+struct t_tool_options {
+  std::string     name_for_first;
+  std::string     name_for_second;
+  lts_type        format_for_first;
+  lts_type        format_for_second;
+  lts_equivalence equivalence;
+  lts_eq_options  eq_opts;
+};
+
+t_tool_options parse_command_line(int ac, char** av) {
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE1] INFILE2\n"
+    "Compare the labelled transition systems (LTSs) INFILE1 to INFILE2 in the"
+    "requested format modulo a certain equivalence If INFILE1 is not supplied, stdin"
     "is used.\n"
     "\n"
-    "The input formats are determined by the contents of INFILE1 and INFILE2.\n"
-    "Options --in1 and --in2 can beused to force the input format of INFILE1 and\n"
-    "INFILE2, respectively.\n"
-    "\n"
-    "Options:\n"
-    "  -s, --strong            use strong bisimulation equivalence (default)\n"
-    "  -b, --branching         use branching bisimulation equivalence\n"
-    "      --tau=ACTNAMES      consider actions with a name in the comma separated\n"
-    "                          list ACTNAMES to be a internal (tau) actions in\n"
-    "                          addition to those defined as such by the input\n"
-    "  -f, --formats           list accepted formats\n"
-    "  -iFORMAT, --in1=FORMAT  use FORMAT as the format for INFILE1 (or stdin)\n"
-    "  -jFORMAT, --in2=FORMAT  use FORMAT as the format for INFILE2\n"
-    "  -h, --help              display this help gsMessage and terminate\n"
-    "      --version           display version information and terminate\n"
-    "  -q, --quiet             do not display warning gsMessages\n"
-    "  -v, --verbose           display concise intermediate gsMessages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name);
+    "The input formats are determined by the contents of INFILE1 and INFILE2. "
+    "Options --in1 and --in2 can beused to force the input format of INFILE1 and "
+    "INFILE2, respectively.");
+
+  clinterface.
+    add_option("formats", "list accepted formats", 'f').
+    add_option("lps", make_mandatory_argument("FILE"),
+      "use FILE as the LPS from which the input LTS was generated; this is "
+      "needed to store the correct parameter names of states when saving "
+      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
+    add_option("in1", make_mandatory_argument("FORMAT"),
+      "use FORMAT as the format for INFIL1 (or stdin)", 'i').
+    add_option("in2", make_mandatory_argument("FORMAT"),
+      "use FORMAT as the format for INFILE2", 'j').
+    add_option("strong",
+      "use strong bisimulation equivalence (default)", 's').
+    add_option("branching",
+      "use branching bisimulation equivalence", 'b').
+    add_option("tau", make_mandatory_argument("ACTNAMES"),
+      "consider actions with a name in the comma separated list ACTNAMES to "
+      "be internal (tau) actions in addition to those defined as such by "
+      "the input");
+
+  command_line_parser parser(clinterface, ac, av);
+
+  t_tool_options tool_options;
+
+  tool_options.equivalence = lts_eq_strong;
+
+  if (parser.options.count("formats")) {
+    print_formats(stderr);
+  }
+  if (parser.options.count("strong")) {
+    tool_options.equivalence = lts_eq_strong;
+  }
+  if (parser.options.count("branching")) {
+    tool_options.equivalence = lts_eq_branch;
+  }
+  if (parser.options.count("tau")) {
+    lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+  }
+
+  if (parser.arguments.size() == 0) {
+    parser.error("need at least one file argument");
+  }
+  if (parser.arguments.size() == 1) {
+    tool_options.format_for_first = lts_aut;
+    tool_options.name_for_second  = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    tool_options.name_for_first  = parser.arguments[0];
+    tool_options.name_for_second = parser.arguments[1];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  if (parser.options.count("in1")) {
+    if (1 < parser.options.count("in1")) {
+      std::cerr << "warning: first input format has already been specified; extra option ignored\n";
+    }
+
+    tool_options.format_for_first = lts::parse_format(parser.option_argument("in1").c_str());
+
+    if (tool_options.format_for_first == lts_none) {
+      std::cerr << "warning: format '" << parser.option_argument("in1") <<
+                   "' is not recognised; option ignored" << std::endl;
+    }
+  }
+  else if (!tool_options.name_for_first.empty()) {
+    tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
+  }
+  if (parser.options.count("in2")) {
+    if (1 < parser.options.count("in2")) {
+      std::cerr << "warning: second input format has already been specified; extra option ignored\n";
+    }
+
+    tool_options.format_for_second = lts::parse_format(parser.option_argument("in2").c_str());
+
+    if (tool_options.format_for_second == lts_none) {
+      std::cerr << "warning: format '" << parser.option_argument("in2") <<
+                   "' is not recognised; option ignored" << std::endl;
+    }
+  }
+  else {
+    tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
+  }
+
+  return tool_options;
 }
 
-int main(int argc, char **argv)
-{
-  MCRL2_ATERM_INIT(argc, argv)
-
-  #define ShortOptions      "hqvi:j:fsb"
-  #define VersionOption     0x1
-  #define TauOption         0x2
-  struct option LongOptions[] = { 
-    {"help"      , no_argument,         NULL, 'h'},
-    {"version"   , no_argument,         NULL, VersionOption},
-    {"quiet"     , no_argument,         NULL, 'q'},
-    {"verbose"   , no_argument,         NULL, 'v'},
-    {"in1"       , required_argument,   NULL, 'i'},
-    {"in2"       , required_argument,   NULL, 'j'},
-    {"formats"   , no_argument,         NULL, 'f'},
-    {"strong"    , no_argument,         NULL, 's'},
-    {"branching" , no_argument,         NULL, 'b'},
-    {"tau"       , required_argument,   NULL, TauOption},
-    {0, 0, 0, 0}
-  };
-
-  bool verbose = false;
-  bool quiet = false;
-  lts_type in1type = lts_none;
-  lts_type in2type = lts_none;
-  int opt;
-  lts_equivalence equivalence = lts_eq_strong;
-  lts_eq_options eq_opts;
-  while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
-  {
-    switch ( opt )
-    {
-      case 'h':
-        print_help(stdout,argv[0]);
-        return 0;
-      case VersionOption:
-        print_version_information(NAME, AUTHOR);
-        return 0;
-      case 'v':
-        verbose = true;
-        break;
-      case 'q':
-        quiet = true;
-        break;
-      case 'i':
-        if ( in1type != lts_none )
-        {
-          fprintf(stderr,"warning: first input format has already been specified; extra option ignored\n");
-        } else {
-          in1type = lts::parse_format(optarg);
-          if ( in1type == lts_none )
-          {
-            fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-          }
-        }
-        break;
-      case 'j':
-        if ( in2type != lts_none )
-        {
-          fprintf(stderr,"warning: sceond input format has already been specified; extra option ignored\n");
-        } else {
-          in2type = lts::parse_format(optarg);
-          if ( in2type == lts_none )
-          {
-            fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-          }
-        }
-        break;
-      case 'f':
-        print_formats(stderr);
-        return 0;
-      case 's':
-        equivalence = lts_eq_strong;
-        break;
-      case 'b':
-        equivalence = lts_eq_branch;
-        break;
-      case TauOption:
-	lts_reduce_add_tau_actions(eq_opts,optarg);
-        break;
-      default:
-        break;
-    }
-  }
-
-  if ( quiet && verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
-  }
-  if ( quiet )
-  {
-    gsSetQuietMsg();
-  }
-  if ( verbose )
-  {
-    gsSetVerboseMsg();
-  }
-
-  if ( optind >= argc )
-  {
-    gsErrorMsg("%s needs at least one file as argument; see --help\n",NAME);
-    return 1;
-  }
-  bool use_stdin = (optind+1 >= argc);
-
-  string in1file;
-  string in2file;
-  if ( !use_stdin )
-  {
-    in1file = argv[optind];
-    in2file = argv[optind+1];
-  } else {
-    in2file = argv[optind];
-  }
-
+int process(t_tool_options const & tool_options) {
   lts l1,l2;
 
-  if ( use_stdin )
-  {
+  if ( tool_options.name_for_first.empty() ) {
     gsVerboseMsg("reading first LTS from stdin...\n");
-    if ( !l1.read_from(cin,in1type) )
-    {
-      gsErrorMsg("cannot read LTS from stdin\n");
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return 1;
+
+    if ( !l1.read_from(std::cin, tool_options.format_for_first) ) {
+      throw std::runtime_error("cannot read LTS from stdin");
     }
   } else {
-    gsVerboseMsg("reading first LTS from '%s'...\n",in1file.c_str());
-    if ( !l1.read_from(in1file,in1type) )
-    {
-      bool b = true;
-      if ( in1type == lts_none ) // XXX really do this?
-      {
-        gsVerboseMsg("reading failed; trying to force format by extension...\n");
-        in1type = lts::guess_format(in1file);
-        if ( (in1type != lts_none) && l1.read_from(in1file,in1type) )
-        {
-          b = false;
-        }
-      }
-      if ( b )
-      {
-        gsErrorMsg("cannot read LTS from file '%s'\n",in1file.c_str());
-        gsErrorMsg("use -v/--verbose for more information\n");
-        return 1;
-      }
+    gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
+
+    if ( !l1.read_from(tool_options.name_for_first.c_str(), tool_options.format_for_first) ) {
+      throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'");
     }
   }
-  gsVerboseMsg("reading second LTS from '%s'...\n",in2file.c_str());
-  if ( !l2.read_from(in2file,in2type) )
-  {
-    bool b = true;
-    if ( in2type == lts_none ) // XXX really do this?
-    {
-      gsVerboseMsg("reading failed; trying to force format by extension...\n");
-      in2type = lts::guess_format(in2file);
-      if ( (in2type != lts_none) && l2.read_from(in2file,in2type) )
-      {
-        b = false;
-      }
-    }
-    if ( b )
-    {
-      gsErrorMsg("cannot read LTS from file '%s'\n",in2file.c_str());
-      gsErrorMsg("use -v/--verbose for more information\n");
-      return 1;
-    }
+
+  gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
+
+  if ( !l2.read_from(tool_options.name_for_second.c_str(), tool_options.format_for_second) ) {
+    throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'");
   }
 
   gsVerboseMsg("comparing LTSs...\n");
-  if ( l1.compare(l2,equivalence,eq_opts) )
-  {
-    gsMessage("LTSs are %s\n",equivalent_string(equivalence));
-    return 0;
-  } else {
-    gsMessage("LTSs are not %s\n",equivalent_string(equivalence));
-    return 2;
+
+  bool result = l1.compare(l2,tool_options.equivalence,tool_options.eq_opts);
+
+  gsMessage("LTSs are %s%s\n", ((result) ? "" : "not "),
+                         equivalent_string(tool_options.equivalence));
+
+  return (result) ? 0 : 2;
+}
+
+int main(int argc, char **argv) {
+  MCRL2_ATERM_INIT(argc, argv)
+
+  try {
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
+#endif
+
+    return process(parse_command_line(argc, argv));
   }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

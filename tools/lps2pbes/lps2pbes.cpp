@@ -17,7 +17,6 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <getopt.h>
 #include <aterm2.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
@@ -32,7 +31,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace std;
 using namespace mcrl2::lps;
@@ -77,12 +76,10 @@ static ATermAppl create_pbes(t_tool_options tool_options);
 //      if end_phase != PH_NONE, the state formula after phase end_phase
 //      NULL, if something went wrong
 
-static void print_help(char *name);
-static void print_more_info(char *name);
-
 bool process(t_tool_options const& tool_options) {
   //process state formula
   ATermAppl result = create_pbes(tool_options);
+
   if (result == 0) {
     return false;
   }
@@ -116,18 +113,10 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    static const char*  lps_file_for_input;      ///< file containing an LPS
-    static const char*  formula_file_for_input;  ///< file containing a formula
-    static const char*  pbes_file_for_output;    ///< file used to write the output to
-
     enum pbes_output_format {
       normal,
       readable
     };
-
-    static const char* option_selected_output_format;
-    static const char* option_end_phase;
-    static const char* option_timed;
 
   private:
 
@@ -151,13 +140,13 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input     = "lps_in";
-const char* squadt_interactor::formula_file_for_input = "formula_in";
-const char* squadt_interactor::pbes_file_for_output   = "pbes_out";
+const char* lps_file_for_input     = "lps_in";
+const char* formula_file_for_input = "formula_in";
+const char* pbes_file_for_output   = "pbes_out";
 
-const char* squadt_interactor::option_selected_output_format     = "selected_output_format";
-const char* squadt_interactor::option_end_phase                  = "stop_after_phase";
-const char* squadt_interactor::option_timed                      = "use_timed_algorithm";
+const char* option_selected_output_format     = "selected_output_format";
+const char* option_end_phase                  = "stop_after_phase";
+const char* option_timed                      = "use_timed_algorithm";
 
 squadt_interactor::squadt_interactor() {
   output_format_enumeration.reset(new tipi::datatype::enumeration("normal"));
@@ -295,6 +284,71 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
+static t_tool_options parse_command_line(int argc, char **argv) {
+  using namespace ::mcrl2::utilities;
+
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -fFILE [INFILE [OUTFILE]]\n"
+    "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
+    "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
+    "present, stdout is used. If INFILE is not present, stdin is used.");
+
+  clinterface.
+    add_option("formula", make_mandatory_argument("FILE"), 
+      "use the state formula from FILE", 'f').
+    add_option("external",
+      "return the result in the external format", 'e').
+    add_option("timed",
+      "use the timed version of the algorithm, even for untimed LPS's", 't').
+    add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop conversion and output the result after PHASE 'pa' (parsing), "
+      "'tc' (type checking), 'di' (data implementation) or 'rft' (regular "
+      "formula translation)", 'p');
+
+  command_line_parser parser(clinterface, argc, argv);
+
+  t_tool_options tool_options;
+
+  tool_options.pretty    = 0 < parser.options.count("external");
+  tool_options.timed     = 0 < parser.options.count("timed");
+  tool_options.end_phase = PH_NONE;
+
+  if (parser.options.count("end-phase")) {
+    std::string phase = parser.option_argument("end-phase");
+
+    if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
+      tool_options.end_phase = PH_PARSE;
+    } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
+      tool_options.end_phase = PH_TYPE_CHECK;
+    } else if (std::strncmp(phase.c_str(), "di", 3) == 0) {
+      tool_options.end_phase = PH_DATA_IMPL;
+    } else if (std::strncmp(phase.c_str(), "rft", 4) == 0) {
+      tool_options.end_phase = PH_REG_FRM_TRANS;
+    } else {
+      parser.error("option -p has illegal argument '" + phase + "'");
+    }
+  }
+
+  //check for presence of -f
+  if (parser.options.count("formula")) {
+    tool_options.formfilename = parser.option_argument("formula");
+  }
+  else {
+    parser.error("option -f is not specified");
+  }
+
+  if (0 < parser.arguments.size()) {
+    tool_options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    tool_options.outfilename = parser.arguments[1];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return tool_options;
+}
+
 //Main program
 //------------
 
@@ -302,130 +356,21 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
-    //parse command line
-    t_tool_options tool_options = parse_command_line(argc, argv);
+    if (process(parse_command_line(argc, argv))) {
+      return EXIT_SUCCESS;
+    }
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
-    if (!process(tool_options)) {
-      return 1;
-    }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-#endif
-
-  return 0;
-}
-
-static t_tool_options parse_command_line(int argc, char **argv)
-{
-  t_tool_options tool_options;
-  //declarations for getopt
-  t_phase opt_end_phase = PH_NONE;
-  bool opt_pretty = false;
-  bool opt_timed = false;
-  string formfilename = "";
-  #define SHORT_OPTIONS "f:p:ehqtvd"
-  #define VERSION_OPTION 0x1
-  struct option long_options[] = {
-    { "formula",   required_argument,  NULL,  'f' },
-    { "timed",     no_argument,        NULL,  't' },
-    { "end-phase", required_argument,  NULL,  'p' },
-    { "external",  no_argument,        NULL,  'e' },
-    { "help",      no_argument,        NULL,  'h' },
-    { "version",   no_argument,        NULL,  VERSION_OPTION },
-    { "quiet",     no_argument,        NULL,  'q' },
-    { "verbose",   no_argument,        NULL,  'v' },
-    { "debug",     no_argument,        NULL,  'd' },
-    { 0, 0, 0, 0 }
-  };
-  int option;
-  //parse options
-  while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
-    switch (option) {
-      case 'f': /* formula */
-        formfilename = optarg;
-        break;
-      case 't': /* timed */
-        opt_timed = true;
-        break;
-      case 'p': /* end-phase */
-        if (strcmp(optarg, "pa") == 0) {
-          opt_end_phase = PH_PARSE;
-        } else if (strcmp(optarg, "tc") == 0) {
-          opt_end_phase = PH_TYPE_CHECK;
-        } else if (strcmp(optarg, "di") == 0) {
-          opt_end_phase = PH_DATA_IMPL;
-        } else if (strcmp(optarg, "rft") == 0) {
-          opt_end_phase = PH_REG_FRM_TRANS;
-        } else {
-          gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
-          exit(1);
-        }
-        break;
-      case 'e': /* pretty */
-        opt_pretty = true;
-        break;
-      case 'h': /* help */
-        print_help(argv[0]);
-        exit(0);
-      case VERSION_OPTION: /* version */
-        print_version_information(NAME, AUTHOR);
-        exit(0);
-      case 'q': /* quiet */
-        gsSetQuietMsg();
-        break;
-      case 'v': /* verbose */
-        gsSetVerboseMsg();
-        break;
-      case 'd': /* debug */
-        gsSetDebugMsg();
-        break;
-      case '?':
-      default:
-        print_more_info(argv[0]);
-        exit(1);
-    }
-  }
-  //check for presence of -f
-  if (formfilename == "") {
-    gsErrorMsg("option -f is not specified\n");
-    exit(1);
-  }
-  //check for wrong number of arguments
-  string infilename;
-  string outfilename;
-  int noargc; //non-option argument count
-  noargc = argc - optind;
-  if (noargc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-    print_more_info(argv[0]);
-    exit(1);
-  } else {
-    //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
-      infilename = argv[optind];
-    }
-    if (noargc == 2) {
-      outfilename = argv[optind + 1];
-      //check if input and output files are the same; disabled since it is not
-      //problematic
-      /*
-      if (strcmp(infilename,outfilename) == 0) {
-        gsErrorMsg("input and output files are the same\n");
-        exit(1);
-      }
-      */
-    }
-  }
-  tool_options.formfilename = formfilename;
-  tool_options.infilename   = infilename;
-  tool_options.outfilename  = outfilename;
-  tool_options.timed        = opt_timed;
-  tool_options.end_phase    = opt_end_phase;
-  tool_options.pretty       = opt_pretty;
-  return tool_options;
+  return EXIT_FAILURE;
 }
 
 ATermAppl create_pbes(t_tool_options tool_options)
@@ -528,36 +473,3 @@ ATermAppl create_pbes(t_tool_options tool_options)
   return result;
 }
 
-
-static void print_help(char *name)
-{
-  fprintf(stdout,
-    "Usage: %s [OPTION]... -f FILE [INFILE [OUTFILE]]\n"
-    "Convert the state formula in FILE and the LPS in INFILE to a parameterised\n"
-    "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not\n"
-    "present, stdout is used. If INFILE is not present, stdin is used.\n"
-    "\n"
-    "Options:\n"
-    "  -fFILE, --formula=FILE      use the state formula from FILE\n"
-    "  -t, --timed                 use the timed version of the algorithm, even for\n"
-    "                              untimed LPS's\n"
-    "  -pPHASE, --end-phase=PHASE  stop conversion and output the result after PHASE\n"
-    "                              'pa' (parsing), 'tc' (type checking), 'di'\n"
-    "                              (data implementation) or 'rft' (regular formula\n"
-    "                              translation)\n"
-    "  -e, --external              return the result in the external format\n"
-    "  -h, --help                  display this help message and terminate\n"
-    "      --version               display version information and terminate\n"
-    "  -q, --quiet                 do not display warning messages\n"
-    "  -v, --verbose               display concise intermediate messages\n"
-    "  -d, --debug                 display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , name
-  );
-}
-
-void print_more_info(char *name)
-{
-  fprintf(stderr, "Try `%s --help' for more information.\n", name);
-}

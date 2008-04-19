@@ -107,7 +107,7 @@ using namespace mcrl2::lps;
       /// \brief Constructor setting all flags to their default values.
       LPS_Conf_Check();
 
-      /// \brief Uses the library getopt to determine which command line options are used.
+      /// \brief Parses command line options
       void get_options(int argc, char* argv[]);
 
       /// \brief Reads an LPS and an invariant from the specified input sources.

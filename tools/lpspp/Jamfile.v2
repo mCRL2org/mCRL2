@@ -3,8 +3,6 @@ project toolset/lpspp ;
 tool lpspp
        : lpspp.cpp
          /libraries//core
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools lpspp ;

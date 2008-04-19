@@ -82,24 +82,11 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    static const char*  pbes_file_for_input;             ///< file containing an LPS
-    static const char*  bes_file_for_output;             ///< file used to write the output to
-    static const char*  counter_example_file_for_output; ///< file used to write the output to
-
     enum bes_output_format {
       none,
       vasy,
       cwi
     };
-
-    static const char* option_transformation_strategy;
-    static const char* option_rewrite_strategy;
-    static const char* option_selected_output_format;
-    static const char* option_precompile;
-    static const char* option_counter;
-    static const char* option_hash_table;
-    static const char* option_tree;
-    static const char* option_unused_data;
 
   private:
 
@@ -124,18 +111,18 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::pbes_file_for_input             = "pbes_in";
-const char* squadt_interactor::bes_file_for_output             = "bes_out";
-const char* squadt_interactor::counter_example_file_for_output = "counter_example";
+const char* pbes_file_for_input             = "pbes_in";
+const char* bes_file_for_output             = "bes_out";
+const char* counter_example_file_for_output = "counter_example";
 
-const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
-const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
-const char* squadt_interactor::option_rewrite_strategy        = "rewrite_strategy";
-const char* squadt_interactor::option_precompile              = "precompile";
-const char* squadt_interactor::option_counter                 = "counter";
-const char* squadt_interactor::option_hash_table              = "hash_table";
-const char* squadt_interactor::option_tree                    = "tree";
-const char* squadt_interactor::option_unused_data             = "unused_data";
+const char* option_transformation_strategy = "transformation_strategy";
+const char* option_selected_output_format  = "selected_output_format";
+const char* option_rewrite_strategy        = "rewrite_strategy";
+const char* option_precompile              = "precompile";
+const char* option_counter                 = "counter";
+const char* option_hash_table              = "hash_table";
+const char* option_tree                    = "tree";
+const char* option_unused_data             = "unused_data";
 
 squadt_interactor::squadt_interactor() {
   transformation_strategy_enumeration.reset(new tipi::datatype::enumeration("lazy"));
@@ -461,7 +448,7 @@ t_tool_options parse_command_line(int ac, char** av)
     parser.error("too many file arguments");
   }
   
-  tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+  tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   
   return tool_options;
 }

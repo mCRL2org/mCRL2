@@ -18,7 +18,6 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <getopt.h>
 #include <aterm2.h>
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/print.h"
@@ -30,7 +29,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/data/find.h"
@@ -38,7 +36,7 @@
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
-
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace atermpp;
 using namespace mcrl2::utilities;
@@ -56,15 +54,19 @@ using namespace std;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL} t_phase;
 
 //t_tool_options represents the options of the tool 
-typedef struct {
-  bool pretty;
-  bool norewrite;
-  bool nosumelm;
-  t_phase end_phase;
-  string action_rename_filename;
-  string infilename;
-  string outfilename;
-} t_tool_options;
+struct t_tool_options {
+  bool            pretty;
+  bool            no_rewrite;
+  bool            no_sumelm;
+  t_phase         end_phase;
+  string          action_rename_filename;
+  string          infilename;
+  string          outfilename;
+  RewriteStrategy rewrite_strategy;
+
+  t_tool_options() : pretty(false), no_rewrite(false), no_sumelm(false), end_phase(PH_NONE) {
+  }
+};
 
 //Functions used by the main program
 //----------------------------------
@@ -85,9 +87,6 @@ static ATermAppl rename_actions(t_tool_options tool_options);
 //      file and the old LPS
 //      if end_phase != PH_NONE, the state formula after phase end_phase
 //      NULL, if something went wrong
-
-static void print_help(char *name);
-static void print_more_info(char *name);
 
 bool process(t_tool_options const& tool_options) {
   //process action rename specfication
@@ -123,14 +122,6 @@ bool process(t_tool_options const& tool_options) {
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
-  private:
-
-    static const char*  lps_file_for_input;     ///< file containing an LPS
-    static const char*  rename_file_for_input;  ///< file containing a rename specification
-    static const char*  lps_file_for_output;    ///< file used to write the output to
-    static const char*  option_no_rewrite;
-    static const char*  option_no_sumelm;
-
   public:
 
     /** \brief configures tool capabilities */
@@ -146,11 +137,11 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input    = "lps_in";
-const char* squadt_interactor::rename_file_for_input = "renamefile_in";
-const char* squadt_interactor::lps_file_for_output   = "lps_out";
-const char* squadt_interactor::option_no_rewrite     = "no_rewrites";
-const char* squadt_interactor::option_no_sumelm      = "no_sumelm";
+const char* lps_file_for_input    = "lps_in";
+const char* rename_file_for_input = "renamefile_in";
+const char* lps_file_for_output   = "lps_out";
+const char* option_no_rewrite     = "no_rewrites";
+const char* option_no_sumelm      = "no_sumelm";
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
@@ -230,13 +221,9 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
-  tool_options.pretty           = false;
-  tool_options.norewrite	= false;
-  tool_options.nosumelm		= false;
-  tool_options.end_phase        = PH_NONE;
   tool_options.action_rename_filename = c.get_input(rename_file_for_input).get_location();
-  tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
-  tool_options.outfilename      = c.get_output(lps_file_for_output).get_location();
+  tool_options.infilename             = c.get_input(lps_file_for_input).get_location();
+  tool_options.outfilename            = c.get_output(lps_file_for_output).get_location();
 
   bool result = process(tool_options);
 
@@ -248,6 +235,72 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
+static t_tool_options parse_command_line(int argc, char **argv)
+{
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -f FILE [INFILE [OUTFILE]]\n"
+    "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE."
+    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used.");
+
+  clinterface.add_rewriting_options();
+
+  clinterface.
+    add_option("file", make_mandatory_argument("RENAMEFILE"),
+     "use the rename rules from RENAMEFILE", 'o').
+    add_option("no-rewrite",
+     "do not rewrite data terms while renaming; useful when the rewrite system "
+     "does not terminate", 'o').
+    add_option("no-sumelm",
+     "do not apply sum elimination to the final result", 'm').
+    add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop conversion after phase PHASE and output the result; PHASE can be "
+      "'pa' (parse), 'tc' (type check) or 'di' (data implementation)", 'p').
+    add_option("external",
+      "return the result in the external format", 'e');
+
+  command_line_parser parser(clinterface, argc, argv);
+
+  t_tool_options tool_options;
+
+  tool_options.no_rewrite = 0 < parser.options.count("no-rewrite"); 
+  tool_options.no_sumelm  = 0 < parser.options.count("no-sumelm"); 
+  tool_options.pretty     = 0 < parser.options.count("pretty"); 
+
+  if (parser.options.count("end-phase")) {
+    std::string phase = parser.option_argument("end-phase");
+
+    if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
+      tool_options.end_phase = PH_PARSE;
+    } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
+      tool_options.end_phase = PH_TYPE_CHECK;
+    } else if (std::strncmp(phase.c_str(), "di", 3) == 0) {
+      tool_options.end_phase = PH_DATA_IMPL;
+    } else {
+      parser.error("option -p has illegal argument '" + phase + "'");
+    }
+  }
+
+  tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+  if (parser.options.count("file")) {
+    tool_options.action_rename_filename = parser.option_argument("file");
+  }
+  else {
+    parser.error("option -f is not specified");
+  }
+
+  if (0 < parser.arguments.size()) {
+    tool_options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    tool_options.outfilename = parser.arguments[1];
+  }
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  return tool_options;
+}
+
 //Main program
 //------------
 
@@ -255,136 +308,20 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor    >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 #endif
 
-  //parse command line
-  t_tool_options tool_options = parse_command_line(argc, argv);
+    return process(parse_command_line(argc, argv));
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
 
-  //process action rename specfication
-  if (!process(tool_options)) {
-    return 1;
-  }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-#endif
-
-  return 0;
-}
-
-static t_tool_options parse_command_line(int argc, char **argv)
-{
-  t_tool_options tool_options;
-  //declarations for getopt
-  t_phase opt_end_phase = PH_NONE;
-  bool opt_pretty = false;
-  bool opt_norewrite = false;
-  bool opt_nosumelm = false;
-  string action_rename_filename = "";
-  #define SHORT_OPTIONS "f:p:ehqvdom"
-  #define VERSION_OPTION 0x1
-  struct option long_options[] = {
-    { "file",      required_argument,  NULL,  'f' },
-    { "no-rewrite",no_argument,	       NULL,  'o' },
-    { "no-sumelm", no_argument,        NULL,  'm' },
-    { "end-phase", required_argument,  NULL,  'p' },
-    { "external",  no_argument,        NULL,  'e' },
-    { "help",      no_argument,        NULL,  'h' },
-    { "version",   no_argument,        NULL,  VERSION_OPTION },
-    { "quiet",     no_argument,        NULL,  'q' },
-    { "verbose",   no_argument,        NULL,  'v' },
-    { "debug",     no_argument,        NULL,  'd' },
-    { 0, 0, 0, 0 }
-  };
-  int option;
-  //parse options
-  while ((option = getopt_long(argc, argv, SHORT_OPTIONS, long_options, NULL)) != -1) {
-    switch (option) {
-      case 'f': /* rename file */
-        action_rename_filename = optarg;
-        break;
-      case 'o': /* no rewrites */
-        opt_norewrite = true;
-        break;
-      case 'm': /* no sumelm */
-        opt_nosumelm = true;
-        break;
-      case 'p': /* end-phase */
-        if (strcmp(optarg, "pa") == 0) {
-          opt_end_phase = PH_PARSE;
-        } else if (strcmp(optarg, "tc") == 0) {
-          opt_end_phase = PH_TYPE_CHECK;
-        } else if (strcmp(optarg, "di") == 0) {
-          opt_end_phase = PH_DATA_IMPL;
-        } else {
-          gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
-          exit(1);
-        }
-        break;
-      case 'e': /* pretty */
-        opt_pretty = true;
-        break;
-      case 'h': /* help */
-        print_help(argv[0]);
-        exit(0);
-      case VERSION_OPTION: /* version */
-        print_version_information(NAME, AUTHOR);
-        exit(0);
-      case 'q': /* quiet */
-        gsSetQuietMsg();
-        break;
-      case 'v': /* verbose */
-        gsSetVerboseMsg();
-        break;
-      case 'd': /* debug */
-        gsSetDebugMsg();
-        break;
-      case '?':
-      default:
-        print_more_info(argv[0]);
-        exit(1);
-    }
-  }
-  //check for presence of -f
-  if (action_rename_filename == "") {
-    gsErrorMsg("option -f is not specified\n");
-    exit(1);
-  }
-  //check for wrong number of arguments
-  string infilename;
-  string outfilename;
-  int noargc; //non-option argument count
-  noargc = argc - optind;
-  if (noargc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-    print_more_info(argv[0]);
-    exit(1);
-  } else {
-    //noargc >= 0 && noargc <= 2
-    if (noargc > 0) {
-      infilename = argv[optind];
-    }
-    if (noargc == 2) {
-      outfilename = argv[optind + 1];
-      //check if input and output files are the same; disabled since it is not
-      //problematic
-      /*
-      if (strcmp(infilename,outfilename) == 0) {
-        gsErrorMsg("input and output files are the same\n");
-        exit(1);
-      }
-      */      
-    }
-  }
-  tool_options.end_phase    = opt_end_phase;
-  tool_options.pretty       = opt_pretty;
-  tool_options.norewrite    = opt_norewrite;
-  tool_options.nosumelm     = opt_nosumelm;
-  tool_options.action_rename_filename = action_rename_filename;
-  tool_options.infilename   = infilename;
-  tool_options.outfilename  = outfilename;
-  return tool_options;
+  return EXIT_FAILURE;
 }
 
 template <typename IdentifierGenerator>
@@ -882,42 +819,5 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  return rename(action_rename_spec, lps_old_spec, tool_options.norewrite, tool_options.nosumelm);
-}
-
-
-static void print_help(char *name)
-{
-  fprintf(stdout, //TODO: change
-    "Usage: %s [OPTION]... -f FILE [INFILE [OUTFILE]]\n"
-    "Apply the action rename specification in FILE to the LPS in INFILE and save it\n"
-    "to OUTFILE.\n"
-    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
-    "used.\n"
-    "\n"
-    "Options:\n"
-    "  -fRENAMEFILE, --file=RENAMEFILE\n"
-    "                        use the rename rules from FILE\n"
-    "  -o, --no-rewrite      do not rewrite data terms while renaming;\n"
-    "                        useful when the rewrite system does not terminate\n"
-    "  -m, --no-sumelm       do not apply sum elimination to the final result\n"
-    "  -pPHASE, --end-phase=PHASE\n"
-    "                        stop conversion after phase PHASE and output the\n"
-    "                        result; PHASE can be 'pa' (parse), 'tc' (type check) or\n"
-    "                        'di' (data implementation)\n"
-    "  -e, --external        return the result in the external format\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , name
-  );
-}
-
-void print_more_info(char *name)
-{
-  fprintf(stderr, "Try `%s --help' for more information.\n", name);
+  return rename(action_rename_spec, lps_old_spec, tool_options.no_rewrite, tool_options.no_sumelm);
 }

@@ -573,7 +573,7 @@ namespace lts
        * \param[in] opts The options that will be used for the comparison.
        * \retval true if the LTSs are found to be equivalent.
        * \retval false otherwise. */
-      bool compare(lts &l, lts_equivalence eq, lts_eq_options &opts = lts_eq_no_options);
+      bool compare(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
       /** Determinises this LTS. */
       void determinise();
       /** Checks whether all states in this LTS are reachable from the initial

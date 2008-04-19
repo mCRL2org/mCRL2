@@ -4,8 +4,7 @@ tool lps2pbes
        : lps2pbes.cpp
          /libraries//lps
          /libraries//pbes
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools lps2pbes ;

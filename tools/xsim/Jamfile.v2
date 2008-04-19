@@ -31,8 +31,7 @@ tool xsim
          /libraries//trace
          /libraries//lps
          /site-config//wx_base
-       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
          <wx>yes
        ;
 
@@ -41,7 +40,6 @@ tool sim
          sim_shared
          /libraries//lps
          /libraries//trace
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools xsim sim : <source>/xsim-$(plugins) ;

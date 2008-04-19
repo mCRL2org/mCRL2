@@ -64,8 +64,9 @@ void SQuADt::parse_command_line() {
         "Graphical environment that provides a uniform interface for using all kinds of\n"
         "other connected tools. If PATH is provided, it provides an existing project in\n" "PATH."); 
 
-    clinterface.add_option("create", "create new project in PATH", 'c')
-               .add_option("port", make_mandatory_argument("PORT"), "listen on TCP port number PORT", 'p');
+    clinterface.
+      add_option("create", "create new project in PATH", 'c').
+      add_option("port", make_mandatory_argument("PORT"), "listen on TCP port number PORT", 'p');
 
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
 

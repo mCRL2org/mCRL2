@@ -10,24 +10,26 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include <getopt.h>
+
+#include <boost/lexical_cast.hpp>
+
 #include "aterm2.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
-
-#include <boost/lexical_cast.hpp>
+#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 //Temporary workaround for the passing of the determinism
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-typedef struct {
+struct tool_options {
+  std::string                 infilename;
+  mcrl2::lts::lts_type        intype;
   mcrl2::lts::lts_equivalence determinism_equivalence;
-} ltsinfo_options;
+};
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -37,14 +39,10 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    static const char*  lts_file_for_input;  ///< file containing an LTS that can be imported
-
-    static const char* option_determinism_equivalence;
-
     boost::shared_ptr < tipi::datatype::enumeration > determinism_equivalence_enumeration;
 
-    /** \brief compiles a ltsinfo_options instance from a configuration */
-    bool extract_task_options(tipi::configuration const& c, ltsinfo_options&) const;
+    /** \brief compiles a tool_options instance from a configuration */
+    bool extract_task_options(tipi::configuration const& c, tool_options&) const;
 
   public:
     /** \brief constructor */
@@ -63,8 +61,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lts_file_for_input  = "lts_in";
-const char* squadt_interactor::option_determinism_equivalence = "determinism_equivalence";
+const char* lts_file_for_input  = "lts_in";
+const char* option_determinism_equivalence = "determinism_equivalence";
 
 squadt_interactor::squadt_interactor() {
   determinism_equivalence_enumeration.reset(new tipi::datatype::enumeration("none"));
@@ -139,7 +137,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
   return (result);
 }
 
-bool squadt_interactor::extract_task_options(tipi::configuration const& c, ltsinfo_options& task_options) const {
+bool squadt_interactor::extract_task_options(tipi::configuration const& c, tool_options& task_options) const {
   bool result = true;
 
   task_options.determinism_equivalence = static_cast < mcrl2::lts::lts_equivalence > (boost::any_cast < size_t > (c.get_option_argument(option_determinism_equivalence, 0)));
@@ -148,7 +146,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, ltsin
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  using namespace mcrl2::lts;
+  using mcrl2::lts::lts;
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
@@ -156,9 +154,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::object& input_object = c.get_input(lts_file_for_input);
 
   lts l;
-  lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
+  mcrl2::lts::lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
 
-  ltsinfo_options task_options;
+  tool_options task_options;
 
   // Extract configuration
   extract_task_options(c, task_options);
@@ -246,228 +244,155 @@ static void print_formats(FILE *f)
     );
 }
 
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE]\n"
-    "Print information about the labelled transition system (LTS) in INFILE. If\n"
+tool_options parse_command_line(int argc, char** argv) {
+  using mcrl2::lts::lts;
+
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+    "Print information about the labelled transition system (LTS) in INFILE. If "
     "INFILE is not supplied, stdin is used.\n"
     "\n"
-    "The format of INFILE is determined by its contents. The option --in can be used\n"
-    "to force the format for INFILE.\n"
-    "\n"
-    "Options:\n"
-    "  -eEQ, --equiv=EQ      use equivalence EQ for deterministic check:\n"
-    "                        'isomorph' for isomorphism (default),\n"
-    "                        'strong' for strong bisimilarity,\n"
-    "                        'branch' for branching bisimilarity, or\n"
-    "                        'none' for not performing the check at all\n"
-    "  -f, --formats         list accepted formats\n"
-    "  -iFORMAT, --in=FORMAT use FORMAT as the input format\n"
-    "  -h, --help            display this help message and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display any unrequested information\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n"
-    "\n"
-    "Report bugs at <http://www.mcrl2.org/issuetracker>.\n"
-    , Name);
+    "The format of INFILE is determined by its contents. The option --in can be used "
+    "to force the format for INFILE.");
+
+  clinterface.
+    add_option("equiv", make_mandatory_argument("EQ"),
+      "use equivalence EQ for deterministic check:\n"
+      "'isomorph' for isomorphism (default),\n"
+      "'strong' for strong bisimilarity,\n"
+      "'branch' for branching bisimilarity, or\n"
+      "'none' for not performing the check at all",
+      'e').
+    add_option("in", make_mandatory_argument("FORMAT"),
+      "use FORMAT as the input format", 'i').
+    add_option("formats", "list accepted formats", 'f');
+
+  command_line_parser parser(clinterface, argc, argv);
+
+  tool_options opts = { "", mcrl2::lts::lts_none, mcrl2::lts::lts_eq_isomorph };
+
+  if (parser.options.count("formats")) {
+    print_formats(stderr);
+  }
+  if (parser.options.count("equiv")) {
+    opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equiv").c_str());
+  }
+
+  if (0 < parser.arguments.size()) {
+    opts.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  if (parser.options.count("in")) {
+    if (1 < parser.options.count("in")) {
+      std::cerr << "warning: input format has already been specified; extra option ignored\n";
+    }
+
+    opts.intype = lts::parse_format(parser.option_argument("in").c_str());
+
+    if (opts.intype) {
+      std::cerr << "warning: format '" << parser.option_argument("in") <<
+                   "' is not recognised; option ignored" << std::endl;
+    }
+  }
+  else if (!opts.infilename.empty()) {
+    opts.intype = lts::guess_format(opts.infilename.c_str());
+  }
+
+  return opts;
 }
 
-bool parse_command_line(int argc, char** argv, mcrl2::lts::lts& l, ltsinfo_options &opts) {
+void process(tool_options const& opts) {
   using namespace mcrl2::lts;
 
-  #define ShortOptions      "hqvdi:fe:"
-  #define VersionOption     0x1
-  struct option LongOptions[] = { 
-    {"help"      , no_argument,         NULL, 'h'},
-    {"version"   , no_argument,         NULL, VersionOption},
-    {"quiet"     , no_argument,         NULL, 'q'},
-    {"verbose"   , no_argument,         NULL, 'v'},
-    {"debug"     , no_argument,         NULL, 'd'},
-    {"in"        , required_argument,   NULL, 'i'},
-    {"formats"   , no_argument,         NULL, 'f'},
-    {"equiv"     , required_argument,   NULL, 'e'},
-    {0, 0, 0, 0}
-  };
+  mcrl2::lts::lts l;
 
-  bool verbose = false;
-  bool quiet = false;
-  bool debug = false;
-  lts_type intype = lts_none;
-  opts.determinism_equivalence = lts_eq_isomorph;
-  int opt;
-  while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
-  {
-    switch ( opt )
-    {
-      case 'h':
-        print_help(stdout,argv[0]);
-        return (false);
-      case VersionOption:
-        print_version_information(NAME, AUTHOR);
-        return (false);
-      case 'v':
-        verbose = true;
-        break;
-      case 'q':
-        quiet = true;
-        break;
-      case 'd':
-        debug = true;
-        break;
-      case 'i':
-        if ( intype != lts_none )
-        {
-          fprintf(stderr,"warning: input format has already been specified; extra option ignored\n");
-        } else {
-          intype = lts::parse_format(optarg);
-          if ( intype == lts_none )
-          {
-            fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
-          }
-        }
-        break;
-      case 'f':
-        print_formats(stderr);
-        return (false);
-      case 'e':
-        opts.determinism_equivalence = lts::parse_equivalence(optarg);
-        break;
-      default:
-        break;
-    }
-  }
-
-  if ( quiet && verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-
-    return (false);
-  }
-  if ( quiet && debug )
-  {
-    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-
-    return (false);
-  }
-  if ( quiet )
-  {
-    gsSetQuietMsg();
-  }
-  if ( verbose )
-  {
-    gsSetVerboseMsg();
-  }
-  if ( debug )
-  {
-    gsSetDebugMsg();
-  }
-
-  bool use_stdin = (optind >= argc);
-
-  std::string infile;
-
-  if ( !use_stdin )
-  {
-    infile = argv[optind];
-  }
-
-  if ( use_stdin )
-  {
+  if (opts.infilename.empty()) {
     gsVerboseMsg("reading LTS from stdin...\n");
-    if ( !l.read_from(std::cin,intype) )
-    {
-      gsErrorMsg("cannot read LTS from stdin\n");
 
-      return (false);
+    if ( !l.read_from(std::cin, opts.intype) ) {
+      throw std::runtime_error("cannot read LTS from stdin\n");
     }
-  } else {
-    gsVerboseMsg("reading LTS from '%s'...\n",infile.c_str());
-    if ( !l.read_from(infile,intype) )
-    {
-      bool b = true;
+  }
+  else {
+    gsVerboseMsg("reading LTS from '%s'...\n",opts.infilename.c_str());
 
-      if ( intype == lts_none ) // XXX really do this?
-      {
-        gsVerboseMsg("reading failed; trying to force format by extension...\n");
-        intype = lts::guess_format(infile);
-        if ( (intype != lts_none) && l.read_from(infile,intype) )
-        {
-          b = false;
-        }
+    bool success = l.read_from(opts.infilename,opts.intype);
+  
+    if (!success) {
+      success = l.read_from(opts.infilename, lts::guess_format(opts.infilename));
+     
+      if (!success) {
+        gsVerboseMsg("reading based on format extension failed as well\n");
       }
-      if ( b )
-      {
-        gsErrorMsg("cannot read LTS from file '%s'\n",infile.c_str());
-
-        return (false);
-      }
+    }
+    if (!success) {
+      throw std::runtime_error("cannot read LTS from file " + opts.infilename +
+                                             "\nretry with -v/--verbose for more information");
     }
   }
 
-  return (true);
+  std::cout << "LTS format: " << lts::string_for_type(l.get_type()) << std::endl
+       << "Number of states: " << l.num_states() << std::endl
+       << "Number of labels: " << l.num_labels() << std::endl
+       << "Number of transitions: " << l.num_transitions() << std::endl;
+ 
+  if ( l.has_state_info() )
+  {
+    std::cout << "Has state information." << std::endl;
+  } else {
+    std::cout << "Does not have state information." << std::endl;
+  }
+  if ( l.has_label_info() )
+  {
+    std::cout << "Has label information." << std::endl;
+  } else {
+    std::cout << "Does not have label information." << std::endl;
+  }
+  if ( l.has_creator() )
+  {
+    std::cout << "Created by: " << l.get_creator() << std::endl;
+  }
+  gsVerboseMsg("checking reachability...\n");
+  if ( !l.reachability_check() )
+  {
+    std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
+  }
+  if ( opts.determinism_equivalence != lts_eq_none )
+  {
+    gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence));
+    gsVerboseMsg("minimisation...\n");
+
+    l.reduce(opts.determinism_equivalence);
+    gsVerboseMsg("deterministic check...\n");
+    if ( l.is_deterministic() )
+    {
+      std::cout << "LTS is deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << std::endl;
+    } else {
+      std::cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << std::endl;
+    }
+  }
 }
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
+  try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (!mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-#endif
-    using namespace std;
-    using namespace mcrl2::lts;
-
-    lts l;
-    ltsinfo_options opts;
-
-    if (parse_command_line(argc, argv, l, opts)) {
-
-      cout << "LTS format: " << lts::string_for_type(l.get_type()) << endl
-           << "Number of states: " << l.num_states() << endl
-           << "Number of labels: " << l.num_labels() << endl
-           << "Number of transitions: " << l.num_transitions() << endl;
-     
-      if ( l.has_state_info() )
-      {
-        cout << "Has state information." << endl;
-      } else {
-        cout << "Does not have state information." << endl;
-      }
-      if ( l.has_label_info() )
-      {
-        cout << "Has label information." << endl;
-      } else {
-        cout << "Does not have label information." << endl;
-      }
-      if ( l.has_creator() )
-      {
-        cout << "Created by: " << l.get_creator() << endl;
-      }
-      gsVerboseMsg("checking reachability...\n");
-      if ( !l.reachability_check() )
-      {
-        cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << endl;
-      }
-      if ( opts.determinism_equivalence != lts_eq_none )
-      {
-        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence));
-        gsVerboseMsg("minimisation...\n");
-
-        l.reduce(opts.determinism_equivalence);
-        gsVerboseMsg("deterministic check...\n");
-        if ( l.is_deterministic() )
-        {
-          cout << "LTS is deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
-        } else {
-          cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(opts.determinism_equivalence) << ")" << endl;
-        }
-      }
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+      return EXIT_SUCCESS;
     }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
 #endif
 
-  return 0;
+    process(parse_command_line(argc, argv));
+
+    return EXIT_SUCCESS;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return EXIT_FAILURE;
 }

@@ -4,8 +4,7 @@ tool ltsinfo
        : ltsinfo.cpp
          /libraries//core
          /libraries//lts
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
 
 install-tools ltsinfo ;

@@ -80,7 +80,7 @@ using namespace mcrl2;
       /// \brief Constructor setting all flags to their default values.
       LPS_Form_Check();
 
-      /// \brief Uses the library getopt to determine which command line options are used.
+      /// \brief Parses command line options
       void get_options(int a_argc, char* a_argv[]);
 
       /// \brief Checks and indicates whether or not the formula specified by

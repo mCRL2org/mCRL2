@@ -3,7 +3,6 @@ project toolset/pbespp ;
 tool pbespp
        : pbespp.cpp
          /libraries//pbes
-       : <toolset>msvc:<library>/libraries//getopt
        ;
 
 install-tools pbespp ;

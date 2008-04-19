@@ -130,7 +130,7 @@ class t_tool_options {
       }
     
       if (!success) {
-        throw std::runtime_error("cannot read LTS from file " + std::string(source_string()) +
+        throw std::runtime_error("cannot read LTS from " + std::string(source_string()) +
                                                "\nretry with -v/--verbose for more information");
       }
     
@@ -254,39 +254,39 @@ t_tool_options parse_command_line(int ac, char** av) {
     "format is determined by the content of INFILE. Options --in and --out can be\n"
     "used to force the input and output formats.");
 
-  clinterface.add_option("no-reach",
-               "do not perform a reachability check on the input LTS").
-              add_option("no-state",
-               "leave out state information when saving in dot format", 'n').
-              add_option("determinise", "determinise LTS", 'D').
-              add_option("formats", "list accepted formats", 'f').
-              add_option("lps", make_mandatory_argument("FILE"),
-               "use FILE as the LPS from which the input LTS was generated; this is "
-               "needed to store the correct parameter names of states when saving "
-               "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
-              add_option("in", make_mandatory_argument("FORMAT"),
-               "use FORMAT as the input format").
-              add_option("out", make_mandatory_argument("FORMAT"),
-               "use FORMAT as the output format");
+  clinterface.
+    add_option("no-reach",
+      "do not perform a reachability check on the input LTS").
+    add_option("no-state",
+      "leave out state information when saving in dot format", 'n').
+    add_option("determinise", "determinise LTS", 'D').
+    add_option("formats", "list accepted formats", 'f').
+    add_option("lps", make_mandatory_argument("FILE"),
+      "use FILE as the LPS from which the input LTS was generated; this is "
+      "needed to store the correct parameter names of states when saving "
+      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
+    add_option("in", make_mandatory_argument("FORMAT"),
+      "use FORMAT as the input format", 'i').
+    add_option("out", make_mandatory_argument("FORMAT"),
+      "use FORMAT as the output format", 'o');
   clinterface.add_option("none",
-               "do not minimise (default)").
-              add_option("strong",
-               "minimise using strong bisimulation", 's').
-              add_option("branching",
-               "minimise using branching bisimulation", 'b').
-              add_option("trace",
-               "determinise and then minimise using trace equivalence", 't').
-              add_option("weak-trace",
-               "determinise and then minimise using weak trace equivalence", 'u').
-              add_option("add",
-               "do not minimise but save a copy of the original LTS extended with a "
-               "state parameter indicating the bisimulation class a state belongs to "
-               "(only for mCRL2)", 'a').
-              add_option("tau", make_mandatory_argument("ACTNAMES"),
-               "consider actions with a name in the comma separated list ACTNAMES to "
-               "be internal (tau) actions in addition to those defined as such by "
-               "the input"
-              );
+      "do not minimise (default)").
+    add_option("strong",
+      "minimise using strong bisimulation", 's').
+    add_option("branching",
+      "minimise using branching bisimulation", 'b').
+    add_option("trace",
+      "determinise and then minimise using trace equivalence", 't').
+    add_option("weak-trace",
+      "determinise and then minimise using weak trace equivalence", 'u').
+    add_option("add",
+      "do not minimise but save a copy of the original LTS extended with a "
+      "state parameter indicating the bisimulation class a state belongs to "
+      "(only for mCRL2)", 'a').
+    add_option("tau", make_mandatory_argument("ACTNAMES"),
+      "consider actions with a name in the comma separated list ACTNAMES to "
+      "be internal (tau) actions in addition to those defined as such by "
+      "the input");
 
   command_line_parser parser(clinterface, ac, av);
 
@@ -349,6 +349,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   tool_options.check_reach                       = parser.options.count("no-reach") == 0;
   tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
   tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
+  tool_options.outtype                           = lts_mcrl2;
 
   if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
     parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
@@ -356,6 +357,9 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (0 < parser.arguments.size()) {
     tool_options.set_source(parser.arguments[0]);
+  }
+  else {
+    tool_options.intype = lts_aut;
   }
   if (1 < parser.arguments.size()) {
     tool_options.set_target(parser.arguments[1]);

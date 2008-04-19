@@ -205,10 +205,6 @@ namespace mcrl2 {
 
       s << "Usage: " << m_path << " " << word_wrap(m_usage, 80) << std::endl << std::endl;
 
-      if (!m_known_issues.empty()) {
-        s << "Known Issues:" << word_wrap(m_known_issues, 80) << std::endl << std::endl;
-      }
-
       if (0 < m_options.size()) {
         s << "Options:" << std::endl;
 
@@ -217,6 +213,11 @@ namespace mcrl2 {
         }
 
         s << std::endl;
+      }
+
+      if (!m_known_issues.empty()) {
+        s << "Known Issues:" << std::endl
+          << word_wrap(m_known_issues, 80) << std::endl << std::endl;
       }
 
       s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl

@@ -113,7 +113,7 @@ using namespace mcrl2;
       /// \brief Constructor setting all flags to their default values.
       LPS_Inv_Elm();
 
-      /// \brief Uses the library getopt to determine which command line options are used.
+      /// \brief Parses command line options
       void get_options(int argc, char* argv[]);
 
       /// \brief Reads an LPS and an invariant from the specified input sources.
