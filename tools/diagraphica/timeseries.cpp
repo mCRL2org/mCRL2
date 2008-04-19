@@ -1134,7 +1134,6 @@ void TimeSeries::handleHits( const vector< int > &ids )
                 	if ( ids[3] == ID_DIAGRAM_CLSE )
                     {
                        	handleShowDiagram( ids[2] );
-                       	cerr << "Close" << endl;
                     }
                     else if ( ids[3] == ID_DIAGRAM_MORE )
                     {

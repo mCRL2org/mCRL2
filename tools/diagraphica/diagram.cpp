@@ -219,7 +219,6 @@ void Diagram::deleteShape( const size_t &idx )
         shapes.erase( shapes.begin()+idx );
         delete s;
         s = NULL;
-
         // update indices
         for ( size_t i = idx; i < shapes.size(); ++i )
             shapes[i]->setIndex( i );
@@ -479,22 +478,24 @@ void Diagram::drawShapes(
     GLCanvas* canvas )
 // --------------------------
 {
+    
     if ( inSelectMode == true )
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
         {
-            glPushName( i );			
-            shapes[i]->visualize( inSelectMode, canvas );                      
+            glPushName( i );	
+            shapes[i]->visualize( inSelectMode, canvas );
             glPopName();
         }
     }
     else
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
-        {        	
-            shapes[i]->visualize( inSelectMode, canvas );       
+        {	
+            shapes[i]->visualize( inSelectMode, canvas );
         }
     }
+   
 }
 
 

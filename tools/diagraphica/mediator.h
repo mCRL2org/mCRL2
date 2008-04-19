@@ -380,7 +380,8 @@ public:
 		const int &keyCode ) = 0;
 	virtual void handleKeyUpEvent(
 		GLCanvas* c,
-		const int &keyCode ) = 0;
+		const int &keyCode,
+		const int &specialKey ) = 0;
 	
 	// -- overloaded operators --------------------------------------
 	virtual void operator<<( const string &msg ) = 0;

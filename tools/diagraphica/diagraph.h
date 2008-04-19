@@ -384,7 +384,8 @@ public:
 	const int &keyCode );
 	void handleKeyUpEvent(
 	GLCanvas* c,
-	const int &keyCode );
+	const int &keyCode,
+	const int &specialKey );
 	
 	// -- overloaded operators --------------------------------------
 	void operator<<( const string &msg );

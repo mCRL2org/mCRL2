@@ -3427,13 +3427,14 @@ void DiaGraph::handleKeyDownEvent(
 // -------------------------------
 void DiaGraph::handleKeyUpEvent(
     GLCanvas* c,
-    const int &keyCode )
+    const int &keyCode,
+    const int &specialKey )
 // -------------------------------
 {
     if ( mode == MODE_EDIT )
     {
         if ( c == canvasEdit && editor != NULL )
-            editor->handleKeyUpEvent( keyCode );
+            editor->handleKeyUpEvent( keyCode, specialKey );
     }
     else if ( mode == MODE_ANALYSIS )
     {

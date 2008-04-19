@@ -1176,21 +1176,37 @@ void DiagramEditor::handleMouseMotionEvent(
 
 
 // -------------------------------------------------------
-void DiagramEditor::handleKeyUpEvent( const int &keyCode )
+void DiagramEditor::handleKeyUpEvent( const int &keyCode, const int &specialKey )
 // -------------------------------------------------------
 {
     Visualizer::handleKeyUpEvent( keyCode );
 
+	cerr << specialKey << endl;
+	cerr << WXK_CONTROL << endl;
     if ( editMode == EDIT_MODE_SELECT )
     {
-        if ( keyCode == WXK_DELETE )
-        {
-            handleDelete();
-        }
-	/*else if ( keyCode == 65 )
+	// Ctrl+A is pressed, select all the shapes in the diagram, 65 for A, 10 for CTRL, GetModifiers function of wxWidgets is not working properly
+	if ( keyCode == 65 && specialKey == 10 ) 
 	{
 		handleSelectAll();
-	}*/
+	}
+	else if ( keyCode == WXK_DELETE && specialKey == 12 ) // Cut Shortcut, shift + del
+	{
+		handleCut();
+	}
+	else if ( keyCode == 67 && specialKey == 10 ) // Copy Shortcut, ctrl + c
+	{
+		cerr << "copy" << endl;
+		handleCopy();
+	}
+	else if ( keyCode == 86 && specialKey == 10 ) // Paste Shortcut, ctrl + v
+	{
+		handlePaste();
+	}
+	else if ( keyCode == WXK_DELETE ) // Delete
+        {
+        	handleDelete();
+        }
     }
 }
 
@@ -1241,21 +1257,21 @@ void DiagramEditor::handleHitDiagramOnly()
         
         bool pasteFlag = false;
         int checkedItem = -1;
-        if ( clipBoardShape != NULL )
+        if ( clipBoardShape != NULL || clipBoardList.size() > 0 )
         {
             pasteFlag = true;
         }
         
         Shape* selectedShape = NULL;	
-		//find the selected shape
-		for ( int i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
-   		{
-        	if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
-       		{
-            	selectedShape = diagram->getShape( i );
-            	checkedItem = selectedShape->getCheckedId();
-        	}
-    	}
+	//find the selected shape
+	for ( int i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
+	{
+		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
+		{
+			selectedShape = diagram->getShape( i );
+			checkedItem = selectedShape->getCheckedId();
+		}
+	}
     	
         mediator->handleEditShape(
             false,     // cut
@@ -1339,9 +1355,9 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                         xMouseCur, yMouseCur, 
                         xPaste,    yPaste );
 
-                    for ( int i = 0; i < sizeShapes; ++i )
+                    /*for ( int i = 0; i < sizeShapes; ++i )
                         if ( i != s->getIndex() )
-                            diagram->getShape(i)->setModeNormal();
+                            diagram->getShape(i)->setModeNormal();*/
                 
                     s->setModeEdit();
                     
@@ -1401,9 +1417,9 @@ void DiagramEditor::handleHitShapeHandle(
                         xMouseCur, yMouseCur, 
                         xPaste,    yPaste );
 
-                    for ( int i = 0; i < sizeShapes; ++i )
+                    /*for ( int i = 0; i < sizeShapes; ++i )
                         if ( i != s->getIndex() )
-                            diagram->getShape(i)->setModeNormal();
+                            diagram->getShape(i)->setModeNormal();*/
                     
                     //Clear mouse input
                     handleMouseRgtUpEvent((int)xMouseCur, (int)yMouseCur);
@@ -1484,26 +1500,26 @@ void DiagramEditor::handleDrag()
 			otherSelectedShape = NULL;
 		}	
 	    }
-            else if ( drgBegIdx2 == Shape::ID_HDL_TOP_LFT )            
-                handleDragTopLft( s );         
-            else if ( drgBegIdx2 == Shape::ID_HDL_LFT )
-                handleDragLft( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_BOT_LFT )
-                handleDragBotLft( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_BOT )
-                handleDragBot( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_BOT_RGT )
-                handleDragBotRgt( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_RGT )
-                handleDragRgt( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_TOP_RGT )
-                handleDragTopRgt( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_TOP )
-                handleDragTop( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_ROT_RGT )
-                handleDragRotRgt( s );
-            else if ( drgBegIdx2 == Shape::ID_HDL_ROT_TOP )
-                handleDragRotTop( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_TOP_LFT )            
+	handleDragTopLft( s );         
+	else if ( drgBegIdx2 == Shape::ID_HDL_LFT )
+	handleDragLft( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_BOT_LFT )
+	handleDragBotLft( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_BOT )
+	handleDragBot( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_BOT_RGT )
+	handleDragBotRgt( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_RGT )
+	handleDragRgt( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_TOP_RGT )
+	handleDragTopRgt( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_TOP )
+	handleDragTop( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_ROT_RGT )
+	handleDragRotRgt( s );
+	else if ( drgBegIdx2 == Shape::ID_HDL_ROT_TOP )
+	handleDragRotTop( s );
         }
         else if ( s->getMode() == Shape::MODE_EDT_DOF_XCTR )
         {
@@ -1627,39 +1643,40 @@ void DiagramEditor::handleCut()
 {
     Shape* origShape = NULL;
     Shape* copyShape = NULL;
+    bool shapeSelected = false;
 
     // find & copy selected shape
-    for ( int i = 0; i < diagram->getSizeShapes() && copyShape == NULL; ++i )
+    for ( int i = 0; i < diagram->getSizeShapes(); ++i )
     {
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
         {
-            origShape = diagram->getShape( i );
-            
-            // invoke copy constructor
-            copyShape = new Shape( *origShape );
-        }
+		if( !shapeSelected )
+		{
+			shapeSelected = true;
+    			clearClipBoard();
+		}
+		origShape = diagram->getShape( i );
+		
+		// invoke copy constructor
+		copyShape = new Shape( *origShape );
+		// delete original shape
+		diagram->deleteShape( origShape->getIndex() );
+		i--; // decrement index; because deletion of the shape decrements the size of the diagram
+	
+		/*// delete previous clipBoardShape
+		if ( clipBoardShape != NULL )
+		{
+			delete clipBoardShape;
+			clipBoardShape = NULL;
+		}
+	
+		// update clipboard shape
+		clipBoardShape = copyShape;*/
+		clipBoardList.push_back( copyShape );
+		origShape = NULL;
+		copyShape = NULL;
+	}
     }
-
-    // instantiate clipboard shape
-    if ( copyShape != NULL )
-    {
-        // delete original shape
-        diagram->deleteShape( origShape->getIndex() );
-
-        // delete previous clipBoardShape
-        if ( clipBoardShape != NULL )
-        {
-            delete clipBoardShape;
-            clipBoardShape = NULL;
-        }
-
-        // update clipboard shape
-        clipBoardShape = copyShape;
-    }
-
-    origShape = NULL;
-    copyShape = NULL;
-
 }
 
 
@@ -1669,35 +1686,50 @@ void DiagramEditor::handleCopy()
 {
     Shape* origShape = NULL;
     Shape* copyShape = NULL;
+    bool shapeSelected = false;
 
     // find & copy selected shape
-    for ( int i = 0; i < diagram->getSizeShapes() && copyShape == NULL; ++i )
+    for ( int i = 0; i < diagram->getSizeShapes(); ++i )
     {
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
         {
-            origShape = diagram->getShape( i );
-            
-            // invoke copy constructor
-            copyShape = new Shape( *origShape );
-        }
+		if( !shapeSelected )
+		{
+			shapeSelected = true;			
+			clearClipBoard();
+		}
+		origShape = diagram->getShape( i );
+		
+		// invoke copy constructor
+		copyShape = new Shape( *origShape );
+	
+		/*// delete previous clipBoardShape
+		if ( clipBoardShape != NULL )
+		{
+			delete clipBoardShape;
+			clipBoardShape = NULL;
+		}
+	
+		// update clipboard shape
+		clipBoardShape = copyShape;*/
+		clipBoardList.push_back( copyShape );
+		origShape = NULL;
+		copyShape = NULL;
+	}
     }
+}
 
-    // instantiate clipboard shape
-    if ( copyShape != NULL )
-    {
-        // delete previous clipBoardShape
-        if ( clipBoardShape != NULL )
-        {
-            delete clipBoardShape;
-            clipBoardShape = NULL;
-        }
 
-        // update clipboard shape
-        clipBoardShape = copyShape;
-    }
-
-    origShape = NULL;
-    copyShape = NULL;
+// ------------------------------
+void DiagramEditor::clearClipBoard()
+// ------------------------------
+{
+	int size = clipBoardList.size();
+	for(int i = 0; i < size; i++)
+	{
+		clipBoardList[i] = NULL;
+	}
+	clipBoardList.clear();
 }
 
 
@@ -1705,28 +1737,57 @@ void DiagramEditor::handleCopy()
 void DiagramEditor::handlePaste()
 // ------------------------------
 {
-    if ( clipBoardShape != NULL )
+    if ( clipBoardList.size() > 0 )
     {
-        double xC, yC;
-        
-        // update index of clipboard shape
-        clipBoardShape->setIndex( diagram->getSizeShapes() );
+	// deselect all other shapes
+	for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
+			diagram->getShape(i)->setModeNormal();
+	
+	int size = clipBoardList.size();
+	double xC, yC, xCFirst, yCFirst;
+	clipBoardList[0]->getCenter( xCFirst, yCFirst );
+	for(int i = 0; i < size; i++)
+	{		
+		// update index of clipboard shape
+		clipBoardList[i]->setIndex( diagram->getSizeShapes() );
+	
+		// update clipboard shape
+		if(i == 0) // Paste the first selected shape to the clicked position
+		{
+			clipBoardList[i]->setCenter( xPaste, yPaste );
+		}
+		else // Paste other shapes relative to their position with respect to first shape
+		{			
+			double distanceX, distanceY, x1, x2, y1, y2;		
+			clipBoardList[0]->getCenter( x1, y1 );
+			clipBoardList[i]->getCenter( x2, y2 );
+			
+			// calculate the distance between the first selected shape and the current shape
+			distanceX = xCFirst - x2;
+			distanceY = yCFirst - y2;
+			if( x2 > xCFirst )
+			{
+				distanceX = x2 - xCFirst;
+			}
+			if( y2 > yCFirst )
+			{
+				distanceY = y2 - yCFirst;
+			}
 
-        // update clipboard shape
-        clipBoardShape->getCenter( xC, yC );
-        clipBoardShape->setCenter( xPaste, yPaste );
-        clipBoardShape->setModeEdit();
-       
-        // deselect all other shapes
-        for ( int i = 0; i < diagram->getSizeShapes(); ++i )
-            if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
-                diagram->getShape(i)->setModeNormal();
-        
-        // add clipboard shape to diagram
-        diagram->addShape( clipBoardShape );
+			xC = xPaste + distanceX; // Calculate new center of the selected shape according to the distance between the first shape
+			yC = yPaste + distanceY;
 
-        // make another copy of clipboard shape
-        clipBoardShape = new Shape( *clipBoardShape );
+			clipBoardList[i]->setCenter( xC, yC );
+		}
+		clipBoardList[i]->setModeEdit();		
+		
+		// add clipboard shape to diagram
+		diagram->addShape( clipBoardList[i] );
+	
+		// make another copy of clipboard shape
+		clipBoardList[i] = new Shape( *clipBoardList[i] );
+	}
     }
 }
 
@@ -1890,7 +1951,7 @@ void DiagramEditor::displShapeEdtOptions( Shape *s )
     	bool editDOF = true;
         bool pasteFlag = false;
         int checkedId = s->getCheckedId();
-        if ( clipBoardShape != NULL )
+        if ( clipBoardShape != NULL || clipBoardList.size() > 0 )
         {
             pasteFlag = true;
         }
@@ -2050,11 +2111,6 @@ void DiagramEditor::handleDragCtr( Shape* s, double &xDrag, double &yDrag )
         {
             yDrgDist = yCur-y;
         }
-    }
-    else
-    {
-        x += xCur-xPrv;
-        y += yCur-yPrv;
     }
     
     x += xCur-xPrv;

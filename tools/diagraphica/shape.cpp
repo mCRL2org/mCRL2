@@ -80,42 +80,43 @@ Shape::Shape( const Shape &shape )
 // Copy constructor.
 // ------------------------------------------------------------------
 {
-    index  = shape.index;
-    
-    // geometry
-    xCtr   = shape.xCtr;
-    yCtr   = shape.yCtr;
-    xDFC   = shape.xDFC;
-    yDFC   = shape.yDFC;
-    xHge   = shape.xHge;
-    yHge   = shape.yHge;
-    aglCtr = shape.aglCtr;
-    
-    // properties
-    type   = shape.type;
-    mode   = shape.mode;
-    linWth = shape.linWth;
-    colLin = shape.colLin;
-    colFil = shape.colFil;
-    hdlSze = shape.hdlSze;
-    
-    // textual properties
-    variable = shape.variable;
-    note = shape.note;
-    checkedVariableId = shape.checkedVariableId;
+	index  = shape.index;
+	
+	// geometry
+	xCtr   = shape.xCtr;
+	yCtr   = shape.yCtr;
+	xDFC   = shape.xDFC;
+	yDFC   = shape.yDFC;
+	xHge   = shape.xHge;
+	yHge   = shape.yHge;
+	aglCtr = shape.aglCtr;
+	
+	// properties
+	type   = shape.type;
+	mode   = shape.mode;
+	linWth = shape.linWth;
+	colLin = shape.colLin;
+	colFil = shape.colFil;
+	hdlSze = shape.hdlSze;
+	
+	// textual properties
+	variable = shape.variable;
+	note = shape.note;
+	checkedVariableId = shape.checkedVariableId;
+	
+	// degrees of freedom, invoke copy constructors
+	xCtrDOF = new DOF( *shape.xCtrDOF );
+	yCtrDOF = new DOF( *shape.yCtrDOF );
+	wthDOF  = new DOF( *shape.wthDOF );
+	hgtDOF  = new DOF( *shape.hgtDOF );
+	aglDOF  = new DOF( *shape.aglDOF );
+	
+	colDOF  = new DOF( *shape.colDOF );
+	colYValues = shape.colYValues;
+	
+	opaDOF  = new DOF( *shape.opaDOF );
+	opaYValues = shape.opaYValues;
 
-    // degrees of freedom, invoke copy constructors
-    xCtrDOF = new DOF( *shape.xCtrDOF );
-    yCtrDOF = new DOF( *shape.yCtrDOF );
-    wthDOF  = new DOF( *shape.wthDOF );
-    hgtDOF  = new DOF( *shape.hgtDOF );
-    aglDOF  = new DOF( *shape.aglDOF );
-    
-    colDOF  = new DOF( *shape.colDOF );
-    colYValues = shape.colYValues;
-    
-    opaDOF  = new DOF( *shape.opaDOF );
-    opaYValues = shape.opaYValues;
 }
 
 

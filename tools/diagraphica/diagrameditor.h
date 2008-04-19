@@ -106,7 +106,7 @@ public:
     void handleMouseMotionEvent( 
         const int &x, 
         const int &y );
-    void handleKeyUpEvent( const int &keyCode );
+    void handleKeyUpEvent( const int &keyCode, const int &specialKey );
     
     void handleHits( const vector< int > &ids );
     void handleHitDiagramOnly();
@@ -127,6 +127,7 @@ public:
     void handleAddText( string &variable, int &shapeId );
     void handleCut();
     void handleCopy();
+    void clearClipBoard();
     void handlePaste();
     void handleDelete();
     void handleSelectAll();
@@ -135,6 +136,8 @@ public:
     void handleBringForward();
     void handleSendBackward();
     void handleEditDOF();
+
+    
     
     // -- public utility functions ----------------------------------
     void deselectAll();
@@ -198,6 +201,7 @@ protected:
     double selectedX1, selectedX2, selectedY1, selectedY2;
     
     Shape* clipBoardShape; // composition
+    vector < Shape* > clipBoardList;
     double xPaste, yPaste;
     
     // -- static variables ------------------------------------------

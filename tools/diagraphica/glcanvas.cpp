@@ -687,7 +687,7 @@ void GLCanvas::onKeyUp( wxKeyEvent &event )
     // this is current context
     SetCurrent();
     
-	mediator->handleKeyUpEvent(this,event.GetKeyCode() );
+    mediator->handleKeyUpEvent(this,event.GetKeyCode(), event.GetModifiers() );
     event.Skip();
 
     Refresh();
