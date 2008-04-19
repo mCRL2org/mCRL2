@@ -521,11 +521,14 @@ t_tool_options parse_command_line(int ac, char **av)
 //==========================
 {
   interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
-    "Parse the contents of INFILE as a PBES and write the result to OUTFILE. If\n"
-    "INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
+    "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
+    "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
+    "A BNF syntax description of the current ad hoc parser can be displayed using the -s/--syntax option.",
+    "Currently the mCRL2 PBES parser that is accessible via the -n/--new-parser option does not generate a valid PBES, because type-checking is not yet implemented."
+  );
 
-  clinterface.add_option("syntax", "display the syntax (and examples) of the expected text input", 's');
-  clinterface.add_option("new-parser", "use the new full PBES parser (experimental)", 'n');
+  clinterface.add_option("syntax", "display the BNF syntax description of the current ad hoc parser", 's');
+  clinterface.add_option("new-parser", "use the mCRL2 PBES parser that adheres to the BNF syntax description at <http://mcrl2.org/wiki/index.php/PBES_syntax>", 'n');
 
   command_line_parser parser(clinterface, ac, av);
 
