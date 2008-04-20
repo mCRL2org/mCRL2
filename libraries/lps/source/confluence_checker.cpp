@@ -279,11 +279,10 @@ using namespace mcrl2::core;
 
         v_counter_example = f_bdd_prover.get_counter_example();
         if (v_counter_example == 0) {
-          gsErrorMsg(
+          throw std::runtime_error(
             "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
-            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
+            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set."
           );
-          exit(1);
         } else {
           gsMessage("  Counter example: %P\n", v_counter_example);
         }
@@ -423,8 +422,7 @@ using namespace mcrl2::core;
       f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lps)) {
-        gsErrorMsg("An action named \'ctau\' already exists.\n");
-        exit(1);
+        throw std::runtime_error("An action named \'ctau\' already exists.\n");
       }
 
       f_lps = a_lps;

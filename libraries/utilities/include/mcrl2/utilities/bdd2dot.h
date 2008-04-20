@@ -47,7 +47,7 @@ class BDD2Dot {
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of Bool as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    void output_bdd(ATermAppl a_bdd, char* a_file_name);
+    void output_bdd(ATermAppl a_bdd, char const* a_file_name);
 };
 
 #endif

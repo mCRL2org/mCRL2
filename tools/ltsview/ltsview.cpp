@@ -37,7 +37,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
     void user_interactive_configuration(tipi::configuration&) {
     }
 
-    bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+    bool check_configuration(tipi::configuration const& c) const {
       bool valid = c.input_exists(fsm_file_for_input);
     
       if (!valid) {
@@ -47,7 +47,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
       return valid;
     }
 
-    bool squadt_interactor::perform_task(tipi::configuration& c) {
+    bool perform_task(tipi::configuration& c) {
       lts_file_argument = c.get_input(fsm_file_for_input).get_location();
 
       return mcrl2_wx_tool_interface::perform_task(c);

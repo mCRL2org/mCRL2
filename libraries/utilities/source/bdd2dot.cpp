@@ -62,7 +62,7 @@ using namespace mcrl2::core;
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
 
-    void BDD2Dot::output_bdd(ATermAppl a_bdd, char* a_file_name) {
+    void BDD2Dot::output_bdd(ATermAppl a_bdd, char const* a_file_name) {
       f_visited = ATtableCreate(200, 75);
       f_node_number = 0;
       f_dot_file = fopen(a_file_name, "w");

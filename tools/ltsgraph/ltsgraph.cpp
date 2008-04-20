@@ -62,7 +62,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
       return false;
     }
 
-    bool squadt_interactor::perform_task(tipi::configuration& c) {
+    bool perform_task(tipi::configuration& c) {
       lts_file_argument = c.get_input(lts_file_for_input).get_location();
 
       return mcrl2_wx_tool_interface::perform_task(c);

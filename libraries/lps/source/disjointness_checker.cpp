@@ -10,6 +10,8 @@
 // Implementation of class Disjointness_Checker
 // file: disjointness_checker.cpp
 
+#include <stdexcept>
+
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
@@ -195,7 +197,6 @@ using namespace mcrl2::core::detail;
                                 );
         return v_used_1_changed_2 && v_used_2_changed_1 && v_changed_1_changed_2;
       } else {
-        gsErrorMsg("There is no summand with this number.\n");
-        exit(1);
+        throw std::runtime_error("There is no summand with this number.\n");
       }
     }

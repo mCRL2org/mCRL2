@@ -10,6 +10,7 @@
 #define _EXPLORATION_H
 
 #include <string>
+#include <limits>
 
 #include <boost/bind.hpp>
 
@@ -94,7 +95,7 @@ inline lts_generation_options::lts_generation_options() :
     expl_strat(es_breadth),
     bithashing(false),
     bithashsize(DEFAULT_BITHASHSIZE),
-    todo_max(ULONG_MAX),
+    todo_max(std::numeric_limits< unsigned long >::max()),
     initial_table_size(DEFAULT_INIT_TSIZE) {
 
   generate_filename_for_trace = boost::bind(

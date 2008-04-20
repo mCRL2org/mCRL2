@@ -2,9 +2,11 @@
 // file: smt_lib_solver.cpp
 
 #include <cstdlib>
+#include <stdexcept>
 
 #include "mcrl2/data/prover/smt_lib_solver.h"
 #include "mcrl2/core/struct.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -93,8 +95,8 @@ using namespace std;
             {
               v_sort_domain_elt = ATAgetFirst(l);
               if (f_sort_info.is_sort_arrow_prod(v_sort_domain_elt)) {
-                gsErrorMsg("Function %P cannot be translated to the SMT-LIB format.\n", v_operator);
-                exit(1);
+                throw std::runtime_error("Function " + pp(v_operator) +
+                        " cannot be translated to the SMT-LIB format.");
               }
               if (f_sort_info.is_sort_int(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
@@ -712,8 +714,8 @@ using namespace std;
       } else if (gsIsOpId(a_clause)) {
         translate_constant(a_clause);
       } else {
-        gsErrorMsg("Unable to handle the current clause (%T).\n", a_clause);
-        exit(1);
+        throw std::runtime_error("Unable to handle the current clause (" +
+                pp(a_clause) + ").");
       }
     }
 
@@ -813,7 +815,7 @@ using namespace std;
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #include <cerrno>       // for errno
 #include <cstddef>      // for size_t
-#include <cstdlib>      // for exit()
+#include <cstdlib>
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD

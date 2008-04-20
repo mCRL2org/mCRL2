@@ -462,9 +462,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       if (parser.options.count("invariant")) {
         f_invariant_file_name = parser.option_argument_as< std::string >("invariant");
       }
-      else {
-        parser.error("a file containing an invariant must be specified using the option --invariant=INVFILE\n");
-      }
 
       if (parser.options.count("print-dot")) {
         f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
@@ -641,7 +638,7 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
-    gsErrorMsg("Fatal: %s\n", e.what());
+    std::cerr << e.what() << std::endl;
   }
 
   return EXIT_FAILURE;

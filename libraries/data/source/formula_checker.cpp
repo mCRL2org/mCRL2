@@ -10,6 +10,9 @@
 // Implementation of class Formula_Checker
 // file: formula_checker.cpp
 
+#include <sstream>
+#include <exception>
+
 #include "mcrl2/formula_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -28,11 +31,10 @@ using namespace mcrl2::core;
 
         v_counter_example = f_bdd_prover.get_counter_example();
         if (v_counter_example == 0) {
-          gsErrorMsg(
+          throw std::runtime_error(
             "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
           );
-          exit(1);
         } else {
           gsMessage("  Counter-example: %P\n", v_counter_example);
         }
@@ -47,11 +49,10 @@ using namespace mcrl2::core;
 
         v_witness = f_bdd_prover.get_witness();
         if (v_witness == 0) {
-          gsErrorMsg(
+          throw std::runtime_error(
             "Cannot print witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
           );
-          exit(1);
         } else {
           gsMessage("  Witness: %P\n", v_witness);
         }
@@ -61,20 +62,12 @@ using namespace mcrl2::core;
     // ----------------------------------------------------------------------------------------------
 
     void Formula_Checker::save_dot_file(int a_formula_number) {
-      char* v_file_name;
-      char* v_file_name_suffix;
 
       if (f_dot_file_name != 0) {
-        v_file_name_suffix = (char*) malloc((number_of_digits(a_formula_number) + 6) * sizeof(char));
-        sprintf(v_file_name_suffix, "-%d.dot", a_formula_number);
-        v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
-        strcpy(v_file_name, f_dot_file_name);
-        strcat(v_file_name, v_file_name_suffix);
-        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
-        free(v_file_name);
-        v_file_name = 0;
-        free(v_file_name_suffix);
-        v_file_name_suffix = 0;
+        std::ostringstream  v_file_name(f_dot_file_name);
+
+        v_file_name << "-" << a_formula_number << ".dot";
+        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
       }
     }
 

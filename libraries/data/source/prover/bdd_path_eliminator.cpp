@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <cstdlib>
+#include <stdexcept>
 
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
@@ -149,16 +150,14 @@ using namespace mcrl2::core;
 #ifdef HAVE_CVC
         f_smt_solver = new SMT_Solver_CVC_Fast();
 #else
-        gsErrorMsg("The fast implementation of CVC Lite is not available.\n");
-        exit(1);
+        throw std::runtime_error("The fast implementation of CVC Lite is not available.");
 #endif
       } else {
-        gsErrorMsg("An unknown SMT solver type was passed as argument.\n");
+        throw std::runtime_error("An unknown SMT solver type was passed as argument.");
       }
 #else
-      gsErrorMsg("No SMT solvers available on this platform.\n");
+      throw std::runtime_error("No SMT solvers available on this platform.");
 #endif // _MSC_VER
-      exit(1);
     }
 
     // --------------------------------------------------------------------------------------------

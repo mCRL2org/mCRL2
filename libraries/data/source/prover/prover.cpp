@@ -49,38 +49,31 @@ using namespace mcrl2::core;
           break;
         }
         case (GS_REWR_INNERC): {
-          gsErrorMsg("The compiled innermost rewriter is not supported by the prover.\n");
-          exit(1);
+          throw std::runtime_error("The compiled innermost rewriter is not supported by the prover.");
           break;
         }
         case (GS_REWR_INNER_P): {
-          gsErrorMsg("The innermost rewriter with prover is not supported by the prover.\n");
-          exit(1);
+          throw std::runtime_error("The innermost rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_INNERC_P): {
-          gsErrorMsg("The compiled innermost rewriter with prover is not supported by the prover.\n");
-          exit(1);
+          std::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTYC): {
-          gsErrorMsg("The compiled jitty rewriter is not supported by the prover.\n");
-          exit(1);
+          throw std::runtime_error("The compiled jitty rewriter is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTY_P): {
-          gsErrorMsg("The jitty rewriter with prover is not supported by the prover.\n");
-          exit(1);
+          throw std::runtime_error("The jitty rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTYC_P): {
-          gsErrorMsg("The compiled jitty rewriter with prover is not supported by the prover.\n");
-          exit(1);
+          throw std::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
           break;
         }
         default: {
-          gsErrorMsg("Unknown type of rewriter.\n");
-          exit(1);
+          std::runtime_error("Unknown type of rewriter.");
           break;
         }
       }
