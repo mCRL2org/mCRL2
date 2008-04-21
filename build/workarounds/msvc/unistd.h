@@ -10,7 +10,7 @@
 #include <process.h>
 
 #define __UNISTD_GETOPT__
-#include <getopt.h>
+// #include <getopt.h>
 #undef __UNISTD_GETOPT__
 
 #endif 

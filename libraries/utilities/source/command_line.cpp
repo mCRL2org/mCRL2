@@ -369,6 +369,7 @@ namespace mcrl2 {
       return result;
     }
 
+#ifndef __CYGWIN__ // Cygwin has no wstrings
     /**
      * Converts an array of C-style strings and a count to an STL vector of STL strings.
      *
@@ -397,6 +398,7 @@ namespace mcrl2 {
       return result;
     }
     /// \endcond
+#endif // __CYGWIN__
 
     /**
      * \param[in] message the body of the exception message
