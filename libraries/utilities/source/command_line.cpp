@@ -7,6 +7,9 @@
 #include <memory>
 #include <locale>
 
+#include "boost/algorithm/string.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"
+
 // dummy necessary for compiling
 #define MCRL2_REVISION "0"
 #define __COMMAND_LINE_INTERFACE__
@@ -103,7 +106,8 @@ namespace mcrl2 {
         options = "  -" + std::string(1, m_short);
         
         if (m_argument.get() != 0) {
-          options += (m_argument->is_optional()) ? "[" + m_argument->get_name() + "]" : m_argument->get_name();
+          options += (m_argument->is_optional()) ?
+                "[" + m_argument->get_name() + "]" : m_argument->get_name();
         }
 
         options += ", ";
@@ -115,7 +119,8 @@ namespace mcrl2 {
       options += "--" + m_long;
 
       if (m_argument.get() != 0) {
-        options += ((m_argument->is_optional()) ? "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
+        options += ((m_argument->is_optional()) ?
+                "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
       }
 
       if (options.size() < left_width) {
@@ -129,21 +134,110 @@ namespace mcrl2 {
 
       return s.str();
     }
+
+    std::string interface_description::option_descriptor::man_page_description() const {
+      std::ostringstream s;
+      
+      s << ".TP" << std::endl;
+
+      if (m_short != '\0') {
+        s << "\\fB\\-" << std::string(1, m_short) << "\\fR";
+
+        if (m_argument.get() != 0) {
+          if (m_argument->is_optional()) {
+            s << "[\\fI" << m_argument->get_name() << "\\fR]";
+          }
+          else {
+            s << "\\fI" << m_argument->get_name() << "\\fR";
+          }
+        }
+
+        s << ", ";
+      }
+
+      s << "\\fB\\-\\-" << m_long << "\\fR";
+
+      if (m_argument.get() != 0) {
+        s << ((m_argument->is_optional()) ?
+              "[=\\fI" + m_argument->get_name() + "\\fR]" :
+              "=\\fI" + m_argument->get_name() + "\\fR");
+      }
+
+      s << std::endl
+        << boost::replace_all_copy(word_wrap(m_description, 80), "'", "\\&'") << std::endl;
+
+      return s.str();
+    }
     /// \endcond
 
     /**
      * \param[in] name the name used to reference the argument
      * \param[in] default_value the default value
      **/
-    interface_description::optional_argument< std::string > make_optional_argument(std::string const& name, std::string const& default_value) {
+    interface_description::optional_argument< std::string >
+       make_optional_argument(std::string const& name, std::string const& default_value) {
+
       return interface_description::optional_argument< std::string >(name, default_value);
     }
 
     /**
      * \param[in] name the name used to reference the argument
      **/
-    interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name) {
+    interface_description::mandatory_argument< std::string >
+                                make_mandatory_argument(std::string const& name) {
       return interface_description::mandatory_argument< std::string >(name);
+    }
+
+    interface_description::interface_description(std::string const& path,
+          std::string const& name, std::string const& authors, std::string const& usage,
+          std::string const& known_issues) :
+                                    m_path(path), m_name(name), m_authors(authors),
+                                    m_known_issues(known_issues) {
+
+      std::istringstream usage_and_description(usage);
+
+      getline(usage_and_description, m_usage);
+
+      std::ostringstream description_only;
+
+      description_only << usage_and_description.rdbuf();
+
+      m_description = description_only.str();
+
+      // Add mandatory options
+      add_hidden_option("help", "display help information", 'h');
+      add_hidden_option("version", "display version information");
+      add_hidden_option("quiet", "do not display warning messages", 'q');
+      add_hidden_option("verbose", "display short intermediate messages", 'v');
+      add_hidden_option("debug", "display detailed intermediate messages", 'd');
+    }
+
+    std::string interface_description::copyright_message() const {
+      return "Copyright (c) " + std::string(MCRL2_COPYRIGHT_YEAR) +
+                                        " Eindhoven University of Technology.\n"
+        "This is free software.  You may redistribute copies of it under the\n"
+        "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
+        "There is NO WARRANTY, to the extent permitted by law.\n";
+    }
+
+    inline void interface_description::add_hidden_option(
+                std::string const& long_identifier,
+                basic_argument const& argument_specification,
+                std::string const& description, char const short_identifier) {
+
+      add_option(long_identifier, argument_specification, description, short_identifier);
+
+      m_options.find(long_identifier)->second.m_show = false;
+    }
+
+    inline void interface_description::add_hidden_option(
+                std::string const& long_identifier,
+                std::string const& description,
+                char const short_identifier) {
+
+      add_option(long_identifier, description, short_identifier);
+
+      m_options.find(long_identifier)->second.m_show = false;
     }
 
     void interface_description::add_rewriting_options() {
@@ -203,17 +297,30 @@ namespace mcrl2 {
     std::string interface_description::textual_description() const {
       std::ostringstream s;
 
-      s << "Usage: " << m_path << " " << word_wrap(m_usage, 80) << std::endl << std::endl;
+      s << "Usage: " << m_path << " " << m_usage << std::endl
+        << word_wrap(m_description, 80) << std::endl << std::endl;
 
-      if (0 < m_options.size()) {
+      if (5 < m_options.size()) { // tool-specific options
         s << "Options:" << std::endl;
 
         for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          s << i->second.textual_description(27, 53);
+          option_descriptor const& option(i->second);
+
+          if (option.m_show) {
+            s << option.textual_description(27, 53);
+          }
         }
 
         s << std::endl;
       }
+
+      s << "Default options:" << std::endl
+        << m_options.find("help")->second.textual_description(27, 53)
+        << m_options.find("quiet")->second.textual_description(27, 53)
+        << m_options.find("verbose")->second.textual_description(27, 53)
+        << m_options.find("debug")->second.textual_description(27, 53)
+        << m_options.find("version")->second.textual_description(27, 53)
+        << std::endl;
 
       if (!m_known_issues.empty()) {
         s << "Known Issues:" << std::endl
@@ -222,6 +329,80 @@ namespace mcrl2 {
 
       s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
         << std::endl
+        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/" << m_name << ">.\n";
+
+      return s.str();
+    }
+
+    inline std::string mark_name_in_usage(std::string const& usage) {
+      std::string result;
+      bool        name_character = false;
+
+      result.reserve(2 * usage.size());
+
+      for (std::string::const_iterator i = usage.begin(); i != usage.end(); ++i) {
+        if (*i == '[') {
+          name_character = true;
+          result.append("[\\fI");
+        }
+        else if ((*i == ' ') || (*i == ']')) {
+          if (name_character) {
+            result.append("\\fR");
+
+            name_character = false;
+          }
+          result.append(1, *i);
+        }
+        else {
+          result.append(1, *i);
+        }
+      }
+
+      return result;
+    }
+
+    std::string interface_description::interface_description::man_page() const {
+      std::ostringstream s;
+
+      s.imbue(std::locale(s.getloc(),
+        new boost::gregorian::date_facet("%B %Y")));
+
+      s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
+                  << boost::gregorian::day_clock::local_day() << "\" \"" 
+                  << m_name << " " << std::string(MCRL2_VERSION)
+        << "\" \"User Commands\"" << std::endl;
+
+      s << ".SH NAME" << std::endl 
+        << m_name << " \\- manual page for " << m_name << " "
+                                         << std::string(MCRL2_VERSION) << std::endl;
+
+      s << ".SH SYNOPSIS" << std::endl 
+        << ".B " << m_name << std::endl
+        << mark_name_in_usage(m_usage) << std::endl;
+
+      s << ".SH DESCRIPTION" << std::endl
+        << word_wrap(m_description, 80) << std::endl;
+      
+      if (0 < m_options.size()) {
+        s << ".SH OPTIONS" << std::endl;
+
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+          s << i->second.man_page_description();
+        }
+      }
+
+      s << ".SH AUTHOR" << std::endl
+        << "Written by " << m_authors << "." << std::endl;
+      s << ".SH \"REPORTING BUGS\"" << std::endl 
+        << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
+      s << ".SH COPYRIGHT" << std::endl
+        << "Copyright \\(co " + std::string(MCRL2_COPYRIGHT_YEAR) +
+                                        " Eindhoven University of Technology.\n"
+        << ".br" << std::endl
+        << "This is free software.  You may redistribute copies of it under the\n"
+           "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
+           "There is NO WARRANTY, to the extent permitted by law.\n";
+      s << ".SH \"SEE ALSO\"" << std::endl
         << "See also the manual at <http://www.mcrl2.org/wiki/index.php/" << m_name << ">.\n";
 
       return s.str();
@@ -241,12 +422,12 @@ namespace mcrl2 {
      * \param[in] arguments vector (as ordered list) with command line arguments
      **/
     void command_line_parser::collect(interface_description& d, std::vector< std::string > const& arguments) {
-      if (arguments.begin() != arguments.end()) {
+      if (0 < arguments.size()) {
         for (std::vector< std::string >::const_iterator i = arguments.begin() + 1; i != arguments.end(); ++i) {
           if (!i->empty()) {
             std::string const& argument(*i);
           
-            if (argument[0] == '-') {
+            if (argument[0] == '-' && 1 < argument.size()) {
               if (argument[1] == '-') {
                 // Assume that the argument is a long option
                 std::string option(argument, 2);
@@ -257,8 +438,9 @@ namespace mcrl2 {
                 }
            
                 if (d.m_options.find(option) == d.m_options.end()) {
-                  if (argument[2] == 'a' && argument[3] == 't' && argument[4] == '-') {
-                    // Assume it is an option to the ATerm library, so discard
+                  if (argument == "--generate-man-page") {
+                    // Special option
+                    m_options.insert(std::make_pair(argument.substr(2), ""));
                   }
                   else {
                     error("command line argument `--" + option + "' not recognised");
@@ -267,7 +449,8 @@ namespace mcrl2 {
                 else {
                   std::string const& long_option = (d.m_options.find(option))->first;
 
-                  interface_description::option_descriptor const& descriptor = (d.m_options.find(long_option))->second;
+                  interface_description::option_descriptor const& descriptor =
+                                                (d.m_options.find(long_option))->second;
 
                   if (argument.size() == option.size() + 2) { // no argument
            
@@ -278,7 +461,8 @@ namespace mcrl2 {
                       m_options.insert(std::make_pair(long_option, ""));
                     }
                     else {
-                      m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
+                      m_options.insert(std::make_pair(long_option,
+                                        descriptor.m_argument->get_default()));
                     }
                   }
                   else {
@@ -292,7 +476,11 @@ namespace mcrl2 {
                   }
                 }
               }
-              else if (1 < argument.size()) {
+              else {
+                if (argument[1] == 'a' && argument[2] == 't' && argument[3] == '-') {
+                  // Assume it is an option to the ATerm library, so discard
+                }
+
                 for (std::string::size_type i = 1; i < argument.size(); ++i) {
                   std::string option(1, argument[i]);
            
@@ -301,9 +489,11 @@ namespace mcrl2 {
                     error("command line argument `-" + option + "' not recognised");
                   }
                   else {
-                    std::string const& long_option = d.m_options.find(d.m_short_to_long[argument[i]])->first;
+                    std::string const& long_option =
+                        d.m_options.find(d.m_short_to_long[argument[i]])->first;
 
-                    interface_description::option_descriptor const& descriptor = (d.m_options.find(long_option))->second;
+                    interface_description::option_descriptor const& descriptor =
+                                                (d.m_options.find(long_option))->second;
                  
                     if (argument.size() - i == 1) { // the last option without argument
                       if (descriptor.needs_argument()) {
@@ -352,7 +542,6 @@ namespace mcrl2 {
      * \param[in] count the number of arguments
      * \param[in] arguments C-style array with arguments as C-style zero-terminated string
      **/
-    template < >
     std::vector< std::string > command_line_parser::convert(const int count, char const* const* const arguments) {
       std::vector< std::string > result;
 
@@ -369,7 +558,6 @@ namespace mcrl2 {
       return result;
     }
 
-#ifndef __CYGWIN__ // Cygwin has no wstrings
     /**
      * Converts an array of C-style strings and a count to an STL vector of STL strings.
      *
@@ -377,7 +565,6 @@ namespace mcrl2 {
      * \param[in] arguments C-style array with arguments as C-style zero-terminated string
      * \pre arguments uses UTF-8 encoding
      **/
-    template < >
     std::vector< std::string > command_line_parser::convert(const int count, wchar_t const* const* const arguments) {
       std::vector< std::string > result;
 
@@ -398,13 +585,13 @@ namespace mcrl2 {
       return result;
     }
     /// \endcond
-#endif // __CYGWIN__
 
     /**
      * \param[in] message the body of the exception message
      **/
     void command_line_parser::error(std::string const& message) const {
-      throw std::runtime_error(m_interface.m_name + ": " + message + "\nTry `" + m_interface.m_name + " --help' for more information.");
+      throw std::runtime_error(m_interface.m_name + ": " + message
+                + "\nTry `" + m_interface.m_name + " --help' for more information.");
     }
 
     /**

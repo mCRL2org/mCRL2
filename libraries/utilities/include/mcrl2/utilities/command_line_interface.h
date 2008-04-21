@@ -162,8 +162,11 @@ namespace mcrl2 {
         /// \brief Comma separated list of authors
         std::string       m_authors;
 
-        /// \brief Usage and tool description
+        /// \brief Usage and description
         std::string       m_usage;
+
+        /// \brief Tool description
+        std::string       m_description;
 
         /// \brief Description of known issues
         std::string       m_known_issues;
@@ -193,6 +196,24 @@ namespace mcrl2 {
           return result;
         }
 
+        /**
+         * \brief adds a hidden option
+         * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
+         **/
+        void add_hidden_option(
+                        std::string const& long_identifier,
+                        basic_argument const& argument_specification,
+                        std::string const& description,
+                        char const short_identifier = '\0');
+
+        /**
+         * \brief adds a hidden option
+         * \see add_option(std::string const&, std::string const&, char const)
+         **/
+        void add_hidden_option(std::string const& long_identifier,
+                                                 std::string const& description,
+                                                 char const short_identifier = '\0');
+
       public:
 
         /**
@@ -205,30 +226,14 @@ namespace mcrl2 {
          * \param[in] known_issues textual description of known issues with the tool
          * \param[in] messaging_options adds messaging options (-q,--quiet, -v,--verbose and -d,--debug) to interface
          **/
-        inline interface_description(std::string const& path, std::string const& name, std::string const& authors,
-                     std::string const& usage, std::string const& known_issues = "", bool messaging_options = true) :
-                                        m_path(path), m_name(name), m_authors(authors), m_usage(usage), m_known_issues(known_issues) {
-          // Add mandatory options
-          add_option("help", "display help information", 'h');
-          add_option("version", "display version information");
-
-          if (messaging_options) {
-            add_option("quiet", "do not display warning messages", 'q');
-            add_option("verbose", "display short intermediate messages", 'v');
-            add_option("debug", "display detailed intermediate messages", 'd');
-          }
-        }
+        interface_description(std::string const& path, std::string const& name, std::string const& authors,
+                     std::string const& usage, std::string const& known_issues = "");
 
         /**
          * \brief Composes a copyright message
          * \return formatted string that represents the copyright message
          **/
-        inline std::string copyright_message() const {
-          return "Copyright (C) " + std::string(MCRL2_COPYRIGHT_YEAR) + " Eindhoven University of Technology.\n"
-            "This is free software.  You may redistribute copies of it under the\n"
-            "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
-            "There is NO WARRANTY, to the extent permitted by law.\n";
-        }
+        std::string copyright_message() const;
 
         /**
          * \brief Composes a version information message
@@ -365,6 +370,11 @@ namespace mcrl2 {
          * \brief Returns a human readable interface description
          **/
         std::string textual_description() const;
+
+        /**
+         * \brief Returns the text of a man page
+         **/
+        std::string man_page() const;
     };
 
     /**
@@ -458,8 +468,10 @@ namespace mcrl2 {
         static std::vector< std::string > parse_command_line(char const* const arguments);
 
         /// \brief Converts C-style array with specified length to STL vector of strings
-        template < typename C >
-        static std::vector< std::string > convert(const int count, C const* const* const arguments);
+        static std::vector< std::string > convert(const int count, char const* const* const arguments);
+
+        /// \brief Converts C-style array with specified length to STL vector of strings
+        static std::vector< std::string > convert(const int count, wchar_t const* const* const arguments);
 
         /// \brief Identifies all options and option arguments
         void collect(interface_description& d, std::vector< std::string > const& arguments);
@@ -582,19 +594,25 @@ namespace mcrl2 {
         /// Long representation for the option
         std::string                       m_long;
 
-        /// Short representation for the option or 0
-        const char                        m_short;
-
         /// Description for the option
         std::string                       m_description;
 
         /// Option argument
         std::auto_ptr < basic_argument >  m_argument;
 
+        /// Short representation for the option or 0
+        const char                        m_short;
+
+        /// whether the option is printed as part of the tool-specific interface
+        bool                              m_show;
+
       protected:
 
-        /// Prints the option specification to stream
+        /// Returns a textual description of the option
         std::string textual_description(const size_t left_width, const size_t right_width) const;
+
+        /// Returns a man page description for the option
+        std::string man_page_description() const;
 
       public:
 
@@ -606,14 +624,16 @@ namespace mcrl2 {
          * \pre l should be a non-empty string that only contain characters from [0-9a-Z] or `-'
          **/
         option_descriptor(std::string const& l, std::string const& d, const char s) :
-                    m_long(l), m_short(s), m_description(d) {
+                    m_long(l), m_description(d), m_short(s), m_show(true) {
 
           assert(!l.empty());
           assert(l.find_first_not_of("_-0123456789abcdefghijklmnopqrstuvwxyz") == std::string::npos);
         }
 
         /// copy constructor
-        option_descriptor(option_descriptor const& o) : m_long(o.m_long), m_short(o.m_short), m_description(o.m_description) {
+        option_descriptor(option_descriptor const& o) : m_long(o.m_long),
+                m_description(o.m_description), m_short(o.m_short), m_show(true) {
+
           m_argument.reset(const_cast< std::auto_ptr< basic_argument >& > (o.m_argument).release());
         }
 
@@ -766,12 +786,6 @@ namespace mcrl2 {
         }
     };
 
-    template < >
-    std::vector< std::string > command_line_parser::convert(const int, wchar_t const* const* const);
-
-    template < >
-    std::vector< std::string > command_line_parser::convert(const int, char const* const* const);
-
 #if !defined(__COMMAND_LINE_INTERFACE__)
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
@@ -805,6 +819,11 @@ namespace mcrl2 {
 
         exit(0);
       }
+      else if (m_options.count("generate-man-page")) {
+        std::cout << d.man_page();
+
+        exit(0);
+      }
       else if (!m_options.count("rewriter")) {
         // Add rewrite option for default strategy
         interface_description::option_map::const_iterator i = d.m_options.find("rewriter");
@@ -824,7 +843,6 @@ namespace mcrl2 {
         option_argument_as< SMT_Solver_Type >("smt-solver");
       }
 #endif
-
 #if defined(__MCRL2_MESSAGING_H__)
       if (m_options.count("quiet")) {
         if (m_options.count("debug")) {
