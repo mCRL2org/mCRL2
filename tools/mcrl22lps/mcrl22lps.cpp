@@ -469,11 +469,6 @@ static t_lin_options parse_command_line(int argc, char *argv[])
   if (0 < parser.options.count("stack")) {
     options.lin_method = lmStack;
     ++method_count;
-
-    //check for dangerous and illegal option combinations
-    if (options.newstate) {
-      parser.error("option -w can only be used with -1 or -2");
-    }
   }
   if (parser.options.count("regular")) {
     options.lin_method = lmRegular;
@@ -494,21 +489,24 @@ static t_lin_options parse_command_line(int argc, char *argv[])
       options.end_phase = phParse;
     } else if (phase == "tc") {
       options.end_phase = phTypeCheck;
-
-      if (options.check_only) {
-        parser.error("options -e and -p may not be used in conjunction");
-      }
     } else if (phase == "ar") {
       options.end_phase = phAlphaRed;
-
-      if (options.noalpha) {
-        parser.error("options -r and -p ar may not be used in conjunction");
-      }
     } else if (phase == "di") {
       options.end_phase = phDataImpl;
     } else {
       parser.error("option -p has illegal argument '" + parser.option_argument("end-phase") + "'");
     }
+  }
+
+  //check for dangerous and illegal option combinations
+  if (options.newstate && options.lin_method == lmStack) {
+    parser.error("option -w can only be used with -1 or -2");
+  }
+  if (options.check_only && options.end_phase != phTypeCheck) {
+    parser.error("options -e and -p may not be used in conjunction");
+  }
+  if (options.noalpha && options.end_phase == phAlphaRed) {
+    parser.error("options -r and -p ar may not be used in conjunction");
   }
 
   if (0 < parser.arguments.size()) {
