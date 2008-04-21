@@ -468,7 +468,10 @@ namespace mcrl2 {
                   else {
                     std::string option_argument(argument, option.size() + 3);
 
-                    if (!descriptor.m_argument->validate(option_argument)) {
+                    if (descriptor.m_argument.get() == 0) {
+                      error("did not expect argument to option `--" + option + "'");
+                    }
+                    else if (!descriptor.m_argument->validate(option_argument)) {
                       error("argument to option `--" + option + "' is invalid");
                     }
 
@@ -510,7 +513,10 @@ namespace mcrl2 {
                       if (d.m_options.find(long_option)->second.accepts_argument()) {
                         std::string option_argument(argument, i + 1);
 
-                        if (!descriptor.m_argument->validate(option_argument)) {
+                        if (descriptor.m_argument.get() == 0) {
+                          error("did not expect argument to option `-" + option + "'");
+                        }
+                        else if (!descriptor.m_argument->validate(option_argument)) {
                           error("argument to option `-" + option + "' is invalid");
                         }
 

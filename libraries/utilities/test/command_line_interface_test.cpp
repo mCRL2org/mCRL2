@@ -104,23 +104,11 @@ BOOST_AUTO_TEST_CASE(conformance) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -d"));
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --debug"));
 
-  interface_description test_interface_no_messaging("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "", false);
-
-  // Invalid options -v, --verbose
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test -v"), std::runtime_error);
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test --verbose"), std::runtime_error);
-  // Invalid options -q, --quiet
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test -q"), std::runtime_error);
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test --quiet"), std::runtime_error);
-  // Invalid options -d, --debug
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test -d"), std::runtime_error);
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, "test --debug"), std::runtime_error);
-
   // Check conversion with wide characters
-  wchar_t* arguments[] = { L"test", L"--debug" } ;
+  wchar_t* arguments[] = { L"test", L"--debug", L"--verbose=2" } ;
 
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 2, arguments));
-  BOOST_CHECK_THROW(command_line_parser(test_interface_no_messaging, 2, arguments), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(rewriting_options) {
