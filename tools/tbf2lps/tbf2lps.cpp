@@ -18,7 +18,6 @@
 #include "mcrl2/core/struct.h"
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 

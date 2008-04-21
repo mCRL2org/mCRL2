@@ -17,7 +17,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/version_info.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
