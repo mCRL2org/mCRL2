@@ -101,7 +101,7 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = i->summation_variables();
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = and_(i->condition(), data::data_expr::greater(i->time(),data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), data::data_expr::greater(i->time(),data_expression(last_action_time)));
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
@@ -115,7 +115,7 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
-	untime_condition = and_(i->condition(), mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)));
 
 
 	// Extend original assignments to include t.i(d,e.i)
