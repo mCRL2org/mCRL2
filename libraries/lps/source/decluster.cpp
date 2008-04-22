@@ -9,6 +9,7 @@
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/data/sort_utility.h>
+#include <mcrl2/data/find.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -37,14 +38,6 @@ namespace lps {
 /////////////////////////////////////////////////////////////////
 // Helper functions
 /////
-
-///\ret variable v occurs in l.
-template <typename data_type>
-bool occurs_in(data_type l, data_variable v)
-{
-  return find_if(l, data::detail::compare_data_variable(v)) != aterm_appl();
-}
-
 
 ///\ret a list of all data_variables of sort s in vl
 data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
@@ -83,7 +76,7 @@ data_variable_list filter(const data_variable_list& vl, const data_variable_list
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (!occurs_in(rl, *i))
+    if (!find_data_variable(rl, *i))
     {
       result = push_front(result, *i);
     }
@@ -114,7 +107,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_expres
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (occurs_in(sl, i->sort()))
+    if (find_data_variable(sl, i->sort()))
     {
       result = push_front(result, *i);
     }
