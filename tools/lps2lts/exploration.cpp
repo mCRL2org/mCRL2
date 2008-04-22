@@ -76,6 +76,7 @@ static unsigned long long initial_state;
 static atermpp::vector<ATerm> backpointers;
 static unsigned long *bithashtable = NULL;
  
+static bool trace_support = false;
 static unsigned long tracecnt;
  
 static char *basefilename = NULL;
@@ -146,9 +147,12 @@ bool initialise_lts_generation(lts_generation_options *opts)
   }
   
   assert( backpointers.empty() );
-  if ( lgopts->trace )
+  if ( lgopts->trace || lgopts->save_error_trace )
   {
+    trace_support = true;
     backpointers.push_back(NULL);
+  } else {
+    trace_support = false;
   }
  
   nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
@@ -628,12 +632,12 @@ static unsigned long long calc_hash(ATerm state)
 
 static bool get_bithash(unsigned long long i)
 {
-  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1) == 1;
+  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1UL) == 1UL;
 }
 
 static void set_bithash(unsigned long long i)
 {
-  bithashtable[i/(8*sizeof(unsigned long))] |=  1 << (i%(8*sizeof(unsigned long)));
+  bithashtable[i/(8*sizeof(unsigned long))] |= 1UL << (i%(8*sizeof(unsigned long)));
 }
 
 static void remove_state_from_bithash(ATerm state)
@@ -829,7 +833,7 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
   if ( new_state )
   {
     num_states++;
-    if ( lgopts->trace )
+    if ( trace_support )
     {
       backpointers.push_back(from);
     }

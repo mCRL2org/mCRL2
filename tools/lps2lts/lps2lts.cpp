@@ -155,7 +155,11 @@ lts_generation_options parse_command_line(int ac, char** av) {
   lts_generation_options options;
 
   options.usedummies      = parser.options.count("freevar") == 0;
-  options.usedummies      = 0 < parser.options.count("dummy");
+  if ( !options.usedummies && parser.options.count("dummy") )
+  {
+    parser.error("conflicting options -f/--freevar and -y/--dummy cannot be used together");
+  }
+
   options.removeunused    = parser.options.count("unused-data") == 0;
   options.detect_deadlock = parser.options.count("deadlock");
   options.outinfo         = parser.options.count("no-info") == 0;
@@ -180,7 +184,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
   }
   if (parser.options.count("trace")) {
     options.trace      = true;
-    options.max_states = parser.option_argument_as< unsigned long > ("trace");
+    options.max_traces = parser.option_argument_as< unsigned long > ("trace");
   }
   if (parser.options.count("confluence")) {
     options.priority_action = parser.option_argument("confluence");
@@ -210,7 +214,6 @@ lts_generation_options parse_command_line(int ac, char** av) {
     options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
   }
   if (parser.options.count("error-trace")) {
-    options.trace            = true;
     options.save_error_trace = true;
   }
 
