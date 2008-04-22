@@ -797,6 +797,7 @@ namespace mcrl2 {
       process_default_options(d);
     }
 
+#ifndef __CYGWIN__ // wstring is not available for cygwin
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
                                          m_interface(d), options(m_options), arguments(m_arguments) {
@@ -805,6 +806,7 @@ namespace mcrl2 {
 
       process_default_options(d);
     }
+#endif // __CYGWIN__
 
     /**
      * \param[in] d the interface description
