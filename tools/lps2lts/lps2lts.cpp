@@ -199,12 +199,6 @@ lts_generation_options parse_command_line(int ac, char** av) {
       parser.error("format '" + parser.option_argument("out") + "' is not recognised; option ignored");
     }
   }
-  if (parser.options.count("aut")) {
-    options.outformat = lts_aut;
-  }
-  if (parser.options.count("svc")) {
-    options.outformat = lts_mcrl2;
-  }
   if (parser.options.count("formats")) {
     print_formats(stderr);
     exit(EXIT_SUCCESS);
