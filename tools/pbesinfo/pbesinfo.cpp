@@ -45,7 +45,7 @@ struct t_tool_options {
 };
 
 t_tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
                            "Print basic information on the PBES in INFILE. If INFILE is not present, stdin\n"
                            "is used.");
 

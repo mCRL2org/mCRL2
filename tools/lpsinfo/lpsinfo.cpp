@@ -72,7 +72,7 @@ static inline int get_number_of_used_actions(lps::linear_process lps){
 }
 
 void parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
                            "Print basic information on the linear process specification (LPS) in INFILE.");
       
   command_line_parser parser(clinterface, ac, av);

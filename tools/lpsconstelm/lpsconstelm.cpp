@@ -1258,7 +1258,7 @@ bool lpsConstElm::filter() {
 }
 
 void lpsConstElm::parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
     "Remove constant process parameters from the LPS in INFILE and write the result\n"
     "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used.\n");

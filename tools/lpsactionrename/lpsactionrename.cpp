@@ -245,7 +245,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
 
   clinterface.
     add_option("file", make_mandatory_argument("RENAMEFILE"),
-     "use the rename rules from RENAMEFILE", 'o').
+     "use the rename rules from RENAMEFILE", 'f').
     add_option("no-rewrite",
      "do not rewrite data terms while renaming; useful when the rewrite system "
      "does not terminate", 'o').

@@ -248,7 +248,7 @@ int do_decluster(const tool_options& options)
 
 ///Parses command line and sets settings from command line switches
 tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, " [OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
                               "Instantiate the summation variables of the linear process specification (LPS)\n"
                               "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is\n"
                               "used. If OUTFILE is not present, stdout is used.\n");
