@@ -141,7 +141,7 @@ namespace mcrl2 {
       s << ".TP" << std::endl;
 
       if (m_short != '\0') {
-        s << "\\fB\\-" << std::string(1, m_short) << "\\fR";
+        s << "\\fB-" << std::string(1, m_short) << "\\fR";
 
         if (m_argument.get() != 0) {
           if (m_argument->is_optional()) {
@@ -155,7 +155,7 @@ namespace mcrl2 {
         s << ", ";
       }
 
-      s << "\\fB\\-\\-" << m_long << "\\fR";
+      s << "\\fB--" << m_long << "\\fR";
 
       if (m_argument.get() != 0) {
         s << ((m_argument->is_optional()) ?
@@ -244,12 +244,12 @@ namespace mcrl2 {
       add_option(
         "rewriter", make_mandatory_argument("NAME"),
         "use rewrite strategy NAME:\n"
-        "'jitty' for jitty rewriting (default),\n"
-        "'jittyp' for jitty rewriting with prover,\n"
-        "'jittyc' for compiled jitty rewriting,\n"
-        "'inner' for innermost rewriting,\n"
-        "'innerp' for innermost rewriting with prover, or\n"
-        "'innerc' for compiled innermost rewriting",
+        "  'jitty' for jitty rewriting (default),\n"
+        "  'jittyp' for jitty rewriting with prover,\n"
+        "  'jittyc' for compiled jitty rewriting,\n"
+        "  'inner' for innermost rewriting,\n"
+        "  'innerp' for innermost rewriting with prover, or\n"
+        "  'innerc' for compiled innermost rewriting",
         'r'
       );
     }
@@ -258,12 +258,12 @@ namespace mcrl2 {
       add_option("smt-solver", make_mandatory_argument("SOLVER"),
         "use SOLVER to remove inconsistent paths from the internally used BDDs:\n"
 #if defined(HAVE_CVC)
-        "'ario' for the SMT solver Ario, or\n"
-        "'cvc' for the SMT solver CVC3;\n"
-        "'cvc-fast' for the fast implementation of the\n"
+        "  'ario' for the SMT solver Ario, or\n"
+        "  'cvc' for the SMT solver CVC3;\n"
+        "  'cvc-fast' for the fast implementation of the\n"
 #else
-        "'ario' for the SMT solver Ario, or\n"
-        "'cvc' for the SMT solver CVC3;\n"
+        "  'ario' for the SMT solver Ario, or\n"
+        "  'cvc' for the SMT solver CVC3;\n"
 #endif
         "by default, no path elimination is applied", 'z');
     }
@@ -314,11 +314,11 @@ namespace mcrl2 {
         s << std::endl;
       }
 
-      s << "Default options:" << std::endl
-        << m_options.find("help")->second.textual_description(27, 53)
+      s << "Standard options:" << std::endl
         << m_options.find("quiet")->second.textual_description(27, 53)
         << m_options.find("verbose")->second.textual_description(27, 53)
         << m_options.find("debug")->second.textual_description(27, 53)
+        << m_options.find("help")->second.textual_description(27, 53)
         << m_options.find("version")->second.textual_description(27, 53)
         << std::endl;
 
@@ -366,15 +366,16 @@ namespace mcrl2 {
 
       s.imbue(std::locale(s.getloc(), new boost::gregorian::date_facet("%B %Y")));
 
-      s << ".\" " << "manual for " << m_name <<
-           " which part of the mCRL2 toolset revision " << revision << std::endl;
+      s << ".\" " << "Manual page for " << m_name << " revision " << revision << "." << std::endl
+        << ".\" " << "Generated from " << m_name << " --generate-man-page." << std::endl;
+
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
                   << boost::gregorian::day_clock::local_day() << "\" \"" 
                   << m_name << " " << std::string(MCRL2_VERSION)
         << "\" \"User Commands\"" << std::endl;
 
       s << ".SH NAME" << std::endl 
-        << m_name << " \\- manual page for " << m_name << " "
+        << m_name << " - manual page for " << m_name << " "
                                          << std::string(MCRL2_VERSION) << std::endl;
 
       s << ".SH SYNOPSIS" << std::endl 
@@ -396,11 +397,12 @@ namespace mcrl2 {
         }
       }
 
-      s << ".SS \"DEFAULT OPTIONS\"" << std::endl
-        << m_options.find("help")->second.man_page_description()
+      s << ".TP" << std::endl
+        << "\\fBStandard options:\\fR" << std::endl
         << m_options.find("quiet")->second.man_page_description()
         << m_options.find("verbose")->second.man_page_description()
         << m_options.find("debug")->second.man_page_description()
+        << m_options.find("help")->second.man_page_description()
         << m_options.find("version")->second.man_page_description()
         << std::endl;
 

@@ -91,10 +91,10 @@ static void print_formats(FILE *f)
 
 lts_generation_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-    "Generate state space of the LPS in INFILE and save the result to OUTFILE. If"
+    "Generate state space of the LPS in INFILE and save the result to OUTFILE. If "
     "OUTFILE is not supplied, the state space is not stored.\n"
     "\n"
-    "The format of OUTFILE is determined by its extension (unless it is specified"
+    "The format of OUTFILE is determined by its extension (unless it is specified "
     "by an option). If the extension is unknown, the svc format will be used.");
 
   clinterface.add_rewriting_options();
@@ -122,11 +122,11 @@ lts_generation_options parse_command_line(int ac, char** av) {
       "states per level, and for depth first, where NUM is the maximum depth").
     add_option("deadlock", make_mandatory_argument("NUM"),
       "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
-    add_option("action", make_mandatory_argument("NAME*"),
-      "detect actions from NAME*, a comma-separated list of action names; a message "
+    add_option("action", make_mandatory_argument("NAMES"),
+      "detect actions from NAMES, a comma-separated list of action names; a message "
       "is printed for every occurrence of one of these action names", 'a').
     add_option("trace", make_optional_argument("NUM", "10"),
-      "write at most NUM traces to states detected with the--deadlock or --action "
+      "write at most NUM traces to states detected with the --deadlock or --action "
       "options (NUM is 10 by default)", 't').
     add_option("error-trace",
       "if an error occurs during exploration, save a trace to the state that could "
@@ -140,14 +140,12 @@ lts_generation_options parse_command_line(int ac, char** av) {
     add_option("strategy", make_mandatory_argument("NAME"),
       "use strategy NAME to explore the state space with;\n"
       "the following strategies are available:\n"
-      "  b, breadth   breadth-first search (default)\n"
-      "  d, depth     depth-first search\n"
-      "  r, random    random simulation", 's').
+      "  'b', 'breadth'   breadth-first search (default)\n"
+      "  'd', 'depth'     depth-first search\n"
+      "  'r', 'random'    random simulation", 's').
     add_option("out", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the output format", 'o').
+      "use FORMAT as the output format; for accepted formats, see --formats", 'o').
     add_option("formats", "list accepted output formats").
-    add_option("aut", "alias for --out=aut").
-    add_option("svc", "alias for --out=mcrl2").
     add_option("no-info", "do not add state information to OUTFILE").
     add_option("init-tsize", make_mandatory_argument("NUM"),
       "set the initial size of the internally used hash tables (default is 10000)");
@@ -209,6 +207,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
   }
   if (parser.options.count("formats")) {
     print_formats(stderr);
+    exit(EXIT_SUCCESS);
   }
   if (parser.options.count("init-tsize")) {
     options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
@@ -222,7 +221,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
   }
 
   if ( options.bithashing && options.trace ) {
-    parser.error("options -b/--bit-hash and -t/--trace cannot be used together\n");
+    parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
   }
 
   if (0 < parser.arguments.size()) {
