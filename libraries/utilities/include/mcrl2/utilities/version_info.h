@@ -16,7 +16,7 @@
 /**
  * \brief toolset version string
  **/
-#define MCRL2_VERSION "January 2008"
+#define MCRL2_VERSION "July 2008 (development)"
 #define MCRL2_COPYRIGHT_YEAR "2008"
 
 /**
@@ -35,16 +35,6 @@ inline std::string get_version_information(const std::string &tool_name, const s
   text.append("\n");
   text.append("Written by " + tool_author + ".\n");
   return text;
-}
-
-/**
- * \brief Prints toolset version information
- * \param[in] tool_name the name of the tool
- * \param[in] tool_author the author of the tool
- **/
-inline void print_version_information(const std::string &tool_name, const std::string &tool_author)
-{
-  std::cout << get_version_information(tool_name, tool_author);
 }
 
 #endif //MCRL2_UTILITIES_VERSION_INFO_H

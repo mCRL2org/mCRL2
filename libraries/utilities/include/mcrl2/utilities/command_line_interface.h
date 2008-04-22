@@ -373,8 +373,9 @@ namespace mcrl2 {
 
         /**
          * \brief Returns the text of a man page
+         * \param[in] revision 
          **/
-        std::string man_page() const;
+        std::string man_page(std::string const& revision) const;
     };
 
     /**
@@ -820,7 +821,7 @@ namespace mcrl2 {
         exit(0);
       }
       else if (m_options.count("generate-man-page")) {
-        std::cout << d.man_page();
+        std::cout << d.man_page(MCRL2_REVISION);
 
         exit(0);
       }

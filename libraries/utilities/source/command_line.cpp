@@ -361,12 +361,13 @@ namespace mcrl2 {
       return result;
     }
 
-    std::string interface_description::interface_description::man_page() const {
+    std::string interface_description::man_page(std::string const& revision) const {
       std::ostringstream s;
 
-      s.imbue(std::locale(s.getloc(),
-        new boost::gregorian::date_facet("%B %Y")));
+      s.imbue(std::locale(s.getloc(), new boost::gregorian::date_facet("%B %Y")));
 
+      s << ".\" " << "manual for " << m_name <<
+           " which part of the mCRL2 toolset revision " << revision << std::endl;
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
                   << boost::gregorian::day_clock::local_day() << "\" \"" 
                   << m_name << " " << std::string(MCRL2_VERSION)
@@ -387,8 +388,25 @@ namespace mcrl2 {
         s << ".SH OPTIONS" << std::endl;
 
         for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          s << i->second.man_page_description();
+          option_descriptor const& option(i->second);
+
+          if (option.m_show) {
+            s << option.man_page_description();
+          }
         }
+      }
+
+      s << ".SS \"DEFAULT OPTIONS\"" << std::endl
+        << m_options.find("help")->second.man_page_description()
+        << m_options.find("quiet")->second.man_page_description()
+        << m_options.find("verbose")->second.man_page_description()
+        << m_options.find("debug")->second.man_page_description()
+        << m_options.find("version")->second.man_page_description()
+        << std::endl;
+
+      if (!m_known_issues.empty()) {
+        s << ".SH \"KNOWN ISSUES\"" << std::endl
+          << word_wrap(m_known_issues, 80) << std::endl;
       }
 
       s << ".SH AUTHOR" << std::endl
