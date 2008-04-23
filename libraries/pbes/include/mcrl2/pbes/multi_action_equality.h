@@ -106,7 +106,7 @@ namespace detail {
           data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(val(d::equal_to(*i1, *i2)));
+            v.push_back(d::equal_to(*i1, *i2));
           }
         }
         result.push_back(join_and(v.begin(), v.end()));
@@ -145,7 +145,7 @@ namespace detail {
           data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(val(d::not_equal_to(*i1, *i2)));
+            v.push_back(d::not_equal_to(*i1, *i2));
           }
         }
         result.push_back(join_or(v.begin(), v.end()));

@@ -129,8 +129,8 @@ void test_rewriter()
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_pbes_rewriter pbesr(datar, datae);    
-  pbes_system::simplify_rewriter1 simp_rewr(spec.data());
-  pbes_system::substitute_rewriter subst_rewr(datar, spec.data());
+  pbes_system::simplify_rewriter_jfg simp_rewr(spec.data());
+  pbes_system::substitute_rewriter_jfg subst_rewr(datar, spec.data());
 
   //state_formula formula = mcf2statefrm(FORMULA, spec);
   //bool timed = false;

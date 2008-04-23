@@ -90,13 +90,6 @@ using atermpp::list_arg2;
 using namespace mcrl2::data;
 using namespace mcrl2::core::detail;
 
-  /// \brief Returns the expression d
-  inline
-  action_formula data(data::data_expression d)
-  {
-    return action_formula(aterm_appl(d));
-  }
-  
   /// \brief Returns the expression true
   inline
   action_formula true_()
@@ -197,6 +190,10 @@ using namespace mcrl2::core::detail;
   /// \brief Returns true if the term t is an at expression
   inline bool is_at(aterm_appl t) { return core::detail::gsIsActAt(t); }
 
+} // namespace act_frm
+
+namespace accessors
+{
   /// \brief Returns the parameters of an action formula
   inline
   lps::action_list mult_params(action_formula t)
@@ -205,17 +202,22 @@ using namespace mcrl2::core::detail;
     return list_arg1(t);
   }
   
-  /// \brief Returns the argument of a not expression
+  /// \brief Returns the action formula argument of an expression of
+  /// type not, at, exists or forall.
   inline
-  action_formula not_arg(action_formula t)
+  action_formula arg(action_formula t)
   {
-    assert(core::detail::gsIsActNot(t));
-    return arg1(t);
+    if (core::detail::gsIsActNot(t) || core::detail::gsIsActAt(t))
+    {
+      return arg1(t);
+    }
+    assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
+    return arg2(t);
   }
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
   inline
-  action_formula lhs(action_formula t)
+  action_formula left(action_formula t)
   {
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return arg1(t);
@@ -223,7 +225,7 @@ using namespace mcrl2::core::detail;
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
   inline
-  action_formula rhs(action_formula t)
+  action_formula right(action_formula t)
   {
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return arg2(t);
@@ -231,37 +233,21 @@ using namespace mcrl2::core::detail;
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list quant_vars(action_formula t)
+  data::data_variable_list var(action_formula t)
   {
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return list_arg1(t);
   }
   
-  /// \brief Returns the formula of a quantification expression
-  inline
-  action_formula quant_form(action_formula t)
-  {
-    assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-    return arg2(t);
-  }
-  
-  /// \brief Returns the formula of an at expression
-  inline
-  action_formula at_form(action_formula t)
-  {
-    assert(core::detail::gsIsActAt(t));
-    return arg1(t);
-  }
-  
   /// \brief Returns the time of an at expression
   inline
-  data::data_expression at_time(action_formula t)
+  data::data_expression time(action_formula t)
   {
     assert(core::detail::gsIsActAt(t));
     return arg2(t);
   }
 
-} // namespace act_frm
+} // namespace accessors
 
 } // namespace modal
 

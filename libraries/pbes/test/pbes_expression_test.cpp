@@ -44,14 +44,14 @@ void print(atermpp::set<pbes_expression> q)
 
 void test_accessors()
 {
-  using namespace accessors;
+  using namespace pbes_system::accessors;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
   pbes_expression x = expressions[0];
   pbes_expression y = expressions[1];
   data_variable d(core::identifier_string("d"), sort_expr::nat());
   data_variable_list v = make_list(d);
-  pbes_expression z = pbes_expr::val(d); 
+  pbes_expression z = d; 
   propositional_variable_instantiation X(identifier_string("X"), make_list(d));
 
   atermpp::set<pbes_expression> q;
@@ -61,6 +61,7 @@ void test_accessors()
 
   {
     using namespace pbes_expr;
+    using namespace pbes_system::accessors;
 
     pbes_expression a, b, c;
     data_variable_list w;
@@ -68,46 +69,46 @@ void test_accessors()
     data_expression e;
     atermpp::set<pbes_expression> q1;
 
-    e = val_arg(z);
+    e = val(z);
     
     a = not_(x);
-    b = not_arg(a);
+    b = arg(a);
     BOOST_CHECK(x == b);
 
     a = and_(x, y);
-    b = lhs(a);
-    c = rhs(a);
+    b = left(a);
+    c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
     a = or_(x, y);
-    b = lhs(a);
-    c = rhs(a);
+    b = left(a);
+    c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
     a = imp(x, y);
-    b = lhs(a);
-    c = rhs(a);
+    b = left(a);
+    c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
     a = forall(v, x);
-    w = quant_vars(a);
-    b = quant_expr(a);
+    w = var(a);
+    b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
    
     a = exists(v, x);
-    w = quant_vars(a);
-    b = quant_expr(a);
+    w = var(a);
+    b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
-    s = var_name(X);
+    s = name(X);
     BOOST_CHECK(s == identifier_string("X"));
     
-    data_expression_list f = var_val(X);
+    data_expression_list f = param(X);
     data_expression_list g = make_list(d);
     BOOST_CHECK(f == g);
 
@@ -135,7 +136,7 @@ void test_accessors()
     data_expression e;
     atermpp::set<pbes_expression> q1;
 
-    e = val_arg(z);
+    e = val(z);
     
     a = not_(x);
     a = and_(x, y);
@@ -143,8 +144,8 @@ void test_accessors()
     a = imp(x, y);
     a = forall(v, x);
     a = exists(v, x);
-    s = var_name(X);
-    data_expression_list f = var_val(X);
+    s = name(X);
+    data_expression_list f = param(X);
     a = join_or(q.begin(), q.end());
     a = join_and(q.begin(), q.end());
     q1 = split_or(a);

@@ -94,12 +94,12 @@ std::set<core::identifier_string> propositional_variable_names(Term t)
   return result;
 }
 
-/// \brief Returns the variables corresponding to mu_params(f)
+/// \brief Returns the variables corresponding to ass(f)
 inline
 data::data_variable_list mu_variables(state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::data_assignment_list l = modal::state_frm::mu_params(f);
+  data::data_assignment_list l = modal::state_frm::ass(f);
   data::data_variable_list result;
   for(data::data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
@@ -108,12 +108,12 @@ data::data_variable_list mu_variables(state_formula f)
   return atermpp::reverse(result);
 }
 
-/// \brief Returns the data expressions corresponding to mu_params(f)
+/// \brief Returns the data expressions corresponding to ass(f)
 inline
 data::data_expression_list mu_expressions(state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::data_assignment_list l = modal::state_frm::mu_params(f);
+  data::data_assignment_list l = modal::state_frm::ass(f);
   data::data_expression_list result;
   for(data::data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {

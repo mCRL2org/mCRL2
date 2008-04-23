@@ -44,41 +44,41 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	else if (is_and(p))
 	{ // p = and(left, right)
 		//Rewrite left and right as far as possible
-		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
-		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
+		pbes_expression l = pbes_expression_rewrite(left(p), data, rewriter);
+		pbes_expression r = pbes_expression_rewrite(right(p), data, rewriter);
 		//Options for left and right
-		if (is_false(left) || is_false(right))
+		if (is_false(l) || is_false(r))
 			result = false_();
-		else if (is_true(left))
-			result = right;
-		else if (is_true(right))
-			result = left;
-		else if (left == right)
-			result = left;
+		else if (is_true(l))
+			result = r;
+		else if (is_true(r))
+			result = l;
+		else if (l == r)
+			result = l;
 		else 
-			result = and_(left,right);
+			result = and_(l,r);
 	}
 	else if (is_or(p))
 	{ // p = or(left, right)
 		//Rewrite left and right as far as possible
-		pbes_expression left = pbes_expression_rewrite(lhs(p), data, rewriter);
-		pbes_expression right = pbes_expression_rewrite(rhs(p), data, rewriter);
+		pbes_expression l = pbes_expression_rewrite(left(p), data, rewriter);
+		pbes_expression r = pbes_expression_rewrite(right(p), data, rewriter);
 		//Options for left and right
-		if (is_true(left) || is_true(right))
+		if (is_true(l) || is_true(r))
 			result = true_();
-		else if (is_false(left))
-			result = right;
-		else if (is_false(right))
-			result = left;
-		else if (left == right)
-			result = right;
+		else if (is_false(l))
+			result = r;
+		else if (is_false(r))
+			result = l;
+		else if (l == r)
+			result = r;
 		else 
-			result = or_(left,right);
+			result = or_(l,r);
 	}
 	else if (is_forall(p))
 	{ // p = forall(data_expression_list, pbes_expression)
-		data_variable_list data_vars = quant_vars(p);
-		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
+		data_variable_list data_vars = var(p);
+		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
 		
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;
@@ -116,8 +116,8 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	}
 	else if (is_exists(p))
 	{ // p = exists(data_expression_list, pbes_expression)
-		data_variable_list data_vars = quant_vars(p);
-		pbes_expression expr = pbes_expression_rewrite(quant_expr(p), data, rewriter);
+		data_variable_list data_vars = var(p);
+		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
 		
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;

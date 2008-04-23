@@ -288,8 +288,8 @@ void test_pbes_expression()
   namespace d = data_expr;
 
   data_variable x1("x1:X");
-  pbes_expression e = p::val(x1);
-  data_expression x2 = accessors::val_arg(e);
+  pbes_expression e = x1;
+  data_expression x2 = pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);
   
   pbes_expression v_expr = propositional_variable_instantiation("v:V");

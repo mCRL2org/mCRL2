@@ -108,20 +108,20 @@ static bool add_used(pbes_expression expr, ATermIndexedSet s)
 {
 	if ( is_data(expr) )
 	{
-		return add_used(val_arg(expr),s);
+		return add_used(val(expr),s);
 	} else if ( is_and(expr) || is_or(expr) )
 	{
-		bool b = add_used(lhs(expr),s);
-		bool c = add_used(rhs(expr),s);
+		bool b = add_used(left(expr),s);
+		bool c = add_used(right(expr),s);
 		return b || c;
 	} else if ( is_forall(expr) || is_exists(expr) )
 	{
-		bool b = add_used(make_data_expression_list(quant_vars(expr)),s);
-		bool c = add_used(quant_expr(expr),s);
+		bool b = add_used(make_data_expression_list(var(expr)),s);
+		bool c = add_used(arg(expr),s);
 		return b || c;
 	} else if ( is_propositional_variable_instantiation(expr) )
 	{
-		return add_used(var_val(expr),s);
+		return add_used(param(expr),s);
 	}
 
 	return false;

@@ -25,13 +25,13 @@ static pbes_expression join
   using namespace pbes_expr;
 
   if (is_forall(left))
-    return (pbes_expr::forall(quant_vars(left),join(quant_expr(left),right,op)));
+    return (pbes_expr::forall(var(left),join(arg(left),right,op)));
   if (is_exists(left))
-    return (exists(quant_vars(left),join(quant_expr(left),right,op)));
+    return (exists(var(left),join(arg(left),right,op)));
   if (is_forall(right))
-    return (pbes_expr::forall(quant_vars(right),join(left,quant_expr(right),op)));
+    return (pbes_expr::forall(var(right),join(left,arg(right),op)));
   if (is_exists(right))
-    return (pbes_expr::exists(quant_vars(right),join(left,quant_expr(right),op)));
+    return (pbes_expr::exists(var(right),join(left,arg(right),op)));
  
   return (op?pbes_expr::and_(left,right):pbes_expr::or_(left,right));
 }
@@ -51,7 +51,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_data_expression
   (const pbes_expression& f, const data_expression& d)
   {
-    return val(f);   // this shouldn't be needed!!
+    return f;
   }
 
   pbes_expression visit_true

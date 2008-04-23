@@ -148,31 +148,39 @@ namespace accessors {
   /// \pre The pbes expression must be of the form val(d) for
   /// some data variable d.
   inline
-  data::data_expression val_arg(pbes_expression t)
+  data::data_expression val(pbes_expression t)
   {
     assert(core::gsIsDataExpr(t));
     return aterm_appl(t);
   }
 
-  /// \brief Returns the argument of an expression of type not
+  /// \brief Returns the pbes expression argument of expressions of type not,
+  /// exists and forall.
   inline
-  pbes_expression not_arg(pbes_expression t)
+  pbes_expression arg(pbes_expression t)
   {
-    assert(pbes_expr::is_not(t));
-    return data::data_expr::is_not(t) ? arg2(t) : arg1(t);
+    if (pbes_expr::is_pbes_not(t))
+    {
+      return arg1(t);
+    }
+    assert(data::data_expr::is_not(t) ||
+           pbes_expr::is_forall(t)    ||
+           pbes_expr::is_exists(t)
+          );
+    return arg2(t); 
   }
 
-  /// \brief Returns the left hand side of an expression of type and/or
+  /// \brief Returns the left hand side of an expression of type and, or or imp.
   inline
-  pbes_expression lhs(pbes_expression t)
+  pbes_expression left(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
     return arg1(t);
   }
   
-  /// \brief Returns the right hand side of an expression of type and/or
+  /// \brief Returns the right hand side of an expression of type and, or or imp.
   inline
-  pbes_expression rhs(pbes_expression t)
+  pbes_expression right(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
     return arg2(t);
@@ -180,31 +188,23 @@ namespace accessors {
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list quant_vars(pbes_expression t)
+  data::data_variable_list var(pbes_expression t)
   {
     assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
     return list_arg1(t);
   }
   
-  /// \brief Returns the formula of a quantification expression
-  inline
-  pbes_expression quant_expr(pbes_expression t)
-  {
-    assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
-    return arg2(t);
-  }
-  
   /// \brief Returns the name of a propositional variable expression
   inline
-  core::identifier_string var_name(pbes_expression t)
+  core::identifier_string name(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
     return arg1(t);
   }
   
-  /// \brief Returns the value of a propositional variable expression
+  /// \brief Returns the parameters of a propositional variable instantiation.
   inline
-  data::data_expression_list var_val(pbes_expression t)
+  data::data_expression_list param(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
     return list_arg2(t);
@@ -213,13 +213,6 @@ namespace accessors {
 
 /// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
-
-  /// Conversion of a data expression to a pbes expression.
-  inline
-  pbes_expression val(data::data_expression d)
-  {
-    return pbes_expression(aterm_appl(d));
-  }
 
   /// \brief Returns the expression true
   inline
@@ -309,7 +302,7 @@ namespace pbes_expr {
   {
     using namespace accessors;
     atermpp::set<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, lhs, rhs);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
     return result;
   }
   
@@ -321,7 +314,7 @@ namespace pbes_expr {
   {
     using namespace accessors;
     atermpp::set<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, lhs, rhs);
+    core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
     return result;
   }
 } // namespace pbes_expr
@@ -345,7 +338,6 @@ namespace pbes_expr_optimized {
   using pbes_expr::is_exists;
   using pbes_expr::is_data;
   using pbes_expr::is_propositional_variable_instantiation;
-  using pbes_expr::val;
   using pbes_expr::true_;
   using pbes_expr::false_;
   using pbes_expr::split_and;
@@ -427,10 +419,10 @@ bool is_bes(aterm_appl t)
   using namespace accessors;
 
   if(is_pbes_and(t)) {
-    return is_bes(lhs(t)) && is_bes(rhs(t));
+    return is_bes(left(t)) && is_bes(right(t));
   }
   else if(is_pbes_or(t)) {
-    return is_bes(lhs(t)) && is_bes(rhs(t));
+    return is_bes(left(t)) && is_bes(right(t));
   }
   else if(is_pbes_forall(t)) {
     return false;

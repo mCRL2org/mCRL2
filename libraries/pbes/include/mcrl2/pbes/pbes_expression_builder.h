@@ -123,7 +123,7 @@ struct pbes_builder
   /// member functions. If the return value of a visit function equals pbes_expression(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  pbes_expression visit(pbes_expression e, Arg& arg)
+  pbes_expression visit(pbes_expression e, Arg& arg1)
   {
     using namespace pbes_expr_optimized;
     using namespace accessors;
@@ -131,70 +131,70 @@ struct pbes_builder
     pbes_expression result;
 
     if (is_data(e)) {
-      result = visit_data_expression(e, val(e), arg);
+      result = visit_data_expression(e, val(e), arg1);
       if (!is_finished(result)) {
         result = e;
       }
     } else if (is_pbes_true(e)) {
-      result = visit_true(e, arg);
+      result = visit_true(e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
     } else if (is_pbes_false(e)) {
-      result = visit_false(e, arg);
+      result = visit_false(e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
     } else if (is_pbes_not(e)) {
-      const pbes_expression& n = not_arg(e);
-      result = visit_not(e, n, arg);
+      pbes_expression n = arg(e);
+      result = visit_not(e, n, arg1);
       if (!is_finished(result)) {
-        result = not_(visit(n, arg));
+        result = not_(visit(n, arg1));
       }
     } else if (is_pbes_and(e)) {
-      const pbes_expression& left  = lhs(e);
-      const pbes_expression& right = rhs(e);
-      result = visit_and(e, left, right, arg);
+      pbes_expression l = left(e);
+      pbes_expression r = right(e);
+      result = visit_and(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = and_(visit(left, arg), visit(right, arg));
+        result = and_(visit(l, arg1), visit(r, arg1));
       }
     } else if (is_pbes_or(e)) {
-      const pbes_expression& left  = lhs(e);
-      const pbes_expression& right = rhs(e);
-      result = visit_or(e, left, right, arg);
+      pbes_expression l = left(e);
+      pbes_expression r = right(e);
+      result = visit_or(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = or_(visit(left, arg), visit(right, arg));
+        result = or_(visit(l, arg1), visit(r, arg1));
       }
     } else if (is_pbes_imp(e)) {
-      const pbes_expression& left  = lhs(e);
-      const pbes_expression& right = rhs(e);
-      result = visit_imp(e, left, right, arg);
+      pbes_expression l = left(e);
+      pbes_expression r = right(e);
+      result = visit_imp(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = imp(visit(left, arg), visit(right, arg));
+        result = imp(visit(l, arg1), visit(r, arg1));
       }
     } else if (is_pbes_forall(e)) {
-      const data::data_variable_list& qvars = quant_vars(e);
-      const pbes_expression& qexpr = quant_expr(e);
-      result = visit_forall(e, qvars, qexpr, arg);
+      data::data_variable_list qvars = var(e);
+      pbes_expression qexpr = arg(e);
+      result = visit_forall(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = forall(qvars, visit(qexpr, arg));
+        result = forall(qvars, visit(qexpr, arg1));
       }
     } else if (is_pbes_exists(e)) {
-      const data::data_variable_list& qvars = quant_vars(e);
-      const pbes_expression& qexpr = quant_expr(e);
-      result = visit_exists(e, qvars, qexpr, arg);
+      data::data_variable_list qvars = var(e);
+      pbes_expression qexpr = arg(e);
+      result = visit_exists(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = exists(qvars, visit(qexpr, arg));
+        result = exists(qvars, visit(qexpr, arg1));
       }
     }
     else if(is_propositional_variable_instantiation(e)) {
-      result = visit_propositional_variable(e, propositional_variable_instantiation(e), arg);
+      result = visit_propositional_variable(e, propositional_variable_instantiation(e), arg1);
       if (!is_finished(result)) {
         result = e;
       }
     }
     else {
-      result = visit_unknown(e, arg);
+      result = visit_unknown(e, arg1);
       if (!is_finished(result)) {
         result = e;
       }

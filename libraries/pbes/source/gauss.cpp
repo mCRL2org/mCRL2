@@ -317,16 +317,16 @@ pbes_expression substitute(pbes_expression expr,
 {
  if (is_and(expr))	 
 	//substitute in lhs and rhs
-	return(and_(substitute(lhs(expr),X,solX), substitute(rhs(expr),X,solX)));	
+	return(and_(substitute(left(expr),X,solX), substitute(right(expr),X,solX)));	
  else if (is_or(expr)) 
 	//substitute in lhs and rhs
-	return(or_(substitute(lhs(expr),X,solX), substitute(rhs(expr),X,solX)));
+	return(or_(substitute(left(expr),X,solX), substitute(right(expr),X,solX)));
  else if (is_forall(expr))
 	// substitute in expression under quantifier
-	return (forall(quant_vars(expr), substitute(quant_expr(expr),X,solX)));
+	return (forall(var(expr), substitute(arg(expr),X,solX)));
  else if (is_exists(expr))
 	// substitute in expression under quantifier
-	return (exists(quant_vars(expr), substitute(quant_expr(expr),X,solX)));
+	return (exists(var(expr), substitute(arg(expr),X,solX)));
  else if (is_propositional_variable_instantiation(expr))
 	// expr is a predicate variable.
 	// If it's X, instantiate solX with the right parameters,
@@ -414,14 +414,14 @@ data_expression pbes_to_data(pbes_expression e)
  else if (is_true(e)) return dname::true_();
  else if(is_false(e)) return dname::false_();
  else if (is_and(e))
-	return dname::and_(pbes_to_data(lhs(e)),pbes_to_data(rhs(e)));
+	return dname::and_(pbes_to_data(left(e)),pbes_to_data(right(e)));
  else if (is_or(e)) 
-	return dname::or_(pbes_to_data(lhs(e)),pbes_to_data(rhs(e)));
+	return dname::or_(pbes_to_data(left(e)),pbes_to_data(right(e)));
  /*
  else if (is_forall(e))
    {
      aterm_appl x = 
-       gsMakeBinder(gsMakeForall(),quant_vars(e),pbes_to_data(quant_expr(e)));
+       gsMakeBinder(gsMakeForall(),var(e),pbes_to_data(arg(e)));
      return (gsMakeDataExprExists(x));
      //implement_data_data_expr(x,spec); 
      // (if implement, then there is no way back anymore!)
@@ -429,19 +429,19 @@ data_expression pbes_to_data(pbes_expression e)
  else if (is_exists(e)) 
    {
      aterm_appl x = 
-       gsMakeBinder(gsMakeExists(),quant_vars(e),pbes_to_data(quant_expr(e)));
+       gsMakeBinder(gsMakeExists(),var(e),pbes_to_data(arg(e)));
      return (gsMakeDataExprExists(x));
    }
  */
  else if (is_not(e))
-   return dname::not_(pbes_to_data(not_arg(e)));
+   return dname::not_(pbes_to_data(arg(e)));
  else
    if (is_propositional_variable_instantiation(e)) 
      // transform it to a data variable with parameters
      {
-       std::string vname = var_name(e);
+       std::string vname = name(e);
        vname += PREDVAR_MARK;
-       data_expression_list parameters = var_val(e);
+       data_expression_list parameters = param(e);
 #ifdef debug2
        gsVerboseMsg("P2D: name %s, parameters %s",
 		    vname.c_str(), pp(parameters).c_str());
@@ -480,8 +480,8 @@ data_expression pbes_to_data(pbes_expression e)
  /* the code below ends in segmentation fault at the creation of a data variable
     if (is_propositional_variable_instantiation(e)) 
     {
-    identifier_string vname = var_name(e)+PREDVAR_MARK;
-    data_expression_list parameters = var_val(e);
+    identifier_string vname = name(e)+PREDVAR_MARK;
+    data_expression_list parameters = param(e);
     if (parameters.empty())
     {
     sort_expression vsort = gsMakeSortIdBool();
@@ -528,7 +528,7 @@ data_expression pbes_to_data(pbes_expression e)
  // if d doesn't contain any predicate variables, 
  // leave it as it is
  if ( d.to_string().find(PREDVAR_MARK) == std::string::npos )
-	return val(d);
+	return d;
  
  // else, predicate variables have to be reconstructed
 
@@ -552,7 +552,7 @@ data_expression pbes_to_data(pbes_expression e)
 	     (identifier_string(varname.substr(0,varname.size()-1)), DEPRECATED_FUNCTION_ARGUMENTS(d));
 
 	 else
-		return val(d);
+		return d;
 	}
  else if (is_data_variable(d))
    // d is either a predicate or a data variable without arguments (?)
@@ -564,7 +564,7 @@ data_expression pbes_to_data(pbes_expression e)
 	 propositional_variable_instantiation
 	 (identifier_string(varname.substr(0,varname.size()-1)));
      else
-       return val(d);
+       return d;
    }
  else if (gsIsDataExprIf(d))  // what's the right test here?
    // in this case, the reconstruction of the pbes_expression is limited 
@@ -591,7 +591,7 @@ data_expression pbes_to_data(pbes_expression e)
      // Below both dname and pname are used, 
      // because the translation is lazy and therefore 
      // the pbes_expression "true"
-     // will in fact be "val(true)".
+     // will in fact be "true".
      // pname::is_true( val(true) ) returns false... Suggest change?!
      /*
      if ((dname::is_true(ptest)) || (pname::is_true(ptest))) 
@@ -649,7 +649,7 @@ data_expression pbes_to_data(pbes_expression e)
 			propositional_variable_instantiation
 		 (identifier_string(varname.substr(0,varname.size()-1)), DEPRECATED_FUNCTION_ARGUMENTS(d));
 	 else
-		return val(d);
+		return d;
     }
  else if (dname::is_true(d)) return pname::true_();
  else if (dname::is_false(d)) return pname::false_();
@@ -662,7 +662,7 @@ data_expression pbes_to_data(pbes_expression e)
  
  // if none of the above, then it is a pure data expression
  
- return val(d);
+ return d;
 }
 //======================================================================
 
@@ -690,8 +690,8 @@ pbes_expression pbes_expression_prove_experiment(pbes_expression e, BDD_Prover* 
   using namespace pbes_expr;
   
   if ((is_and(e)) || (is_or(e)) || (is_imp(e))) {
-    pbes_expression pleft = pbes_expression_prove(lhs(e),prover);
-    pbes_expression pright = pbes_expression_prove(rhs(e),prover);
+    pbes_expression pleft = pbes_expression_prove(left(e),prover);
+    pbes_expression pright = pbes_expression_prove(right(e),prover);
     if (is_true(pleft))
       return (is_and(e)? pright : 
 	      (is_or(e)? true_() : pright));
@@ -800,8 +800,8 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
       // simplify left and right
       int nqlhs, nqrhs;
       data_variable_list fvlhs,fvrhs;
-      pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
-      pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
+      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,&fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,&fvrhs,prover);
       *nq = nqlhs + nqrhs;
       *fv = fvlhs+fvrhs;
       expr_simplified = and_(slhs,srhs); 
@@ -812,8 +812,8 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
       // simplify left and right
       int nqlhs, nqrhs;
       data_variable_list fvlhs,fvrhs;
-      pbes_expression slhs = pbes_expression_simplify(lhs(expr),&nqlhs,&fvlhs,prover);
-      pbes_expression srhs = pbes_expression_simplify(rhs(expr),&nqrhs,&fvrhs,prover);
+      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,&fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,&fvrhs,prover);
       *nq = nqlhs + nqrhs;
       *fv = dunion(fvlhs,fvrhs);     
       expr_simplified = or_(slhs,srhs);	
@@ -824,14 +824,14 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
       int nq_under;
       data_variable_list fv_under;
       pbes_expression s_under = 
-	pbes_expression_simplify(quant_expr(expr),&nq_under,&fv_under, prover);
+	pbes_expression_simplify(arg(expr),&nq_under,&fv_under, prover);
       // dit heeft waarschijnlijk geen zin:
       //      if (nq_under==0)
       //s_under = pbes_expression_prove(s_under,prover);
       
       // compute the list of actually bounded variables 
-      // (i.e., eliminate from the quant_vars those vars that do not occur free in s_under)
-      data_variable_list new_quant_vars = intersect(quant_vars(expr),fv_under);
+      // (i.e., eliminate from the var those vars that do not occur free in s_under)
+      data_variable_list new_quant_vars = intersect(var(expr),fv_under);
       *fv = substract(fv_under, new_quant_vars); // !! too inefficient?
 
       // if any quantified vars left, try to eliminate them by enumeration   
@@ -880,7 +880,7 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 #endif
       data_expression rdata = rewrite_data_expression (dexpr,prover);
       //      std::cerr<<" \nAAA ";
-      expr_simplified = val(rdata);
+      expr_simplified = rdata;
       //std::cerr<<" \nBBB ";
 #ifdef debug
       gsVerboseMsg("\nPBES_EXPRESSION_SIMPLIFY: back from prover: %s, counting free vars",
@@ -890,7 +890,7 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
       */
       data_expression data_simplified = 
 	data_expression_simplify(expr, fv, prover);
-      expr_simplified = val(data_simplified);
+      expr_simplified = data_simplified;
     }
   //  else // expr is true, false or a propositional variable
   else
@@ -1068,18 +1068,18 @@ pbes_expression enumerate_rec(bool forall,
 
 //======================================================================
 pbes_expression enumerate_finite_domains
-(bool forall, data_variable_list *quant_vars, pbes_expression p, BDD_Prover *prover)
+(bool forall, data_variable_list *var, pbes_expression p, BDD_Prover *prover)
 //======================================================================
 
-// - instantiate all finite domain variables from quant_vars
+// - instantiate all finite domain variables from var
 // with their domain's elements
 // - return the \/ composition of the resulting p's
-// - in the end, quant_vars will only contain the infinite-domain variables
+// - in the end, var will only contain the infinite-domain variables
 {
   // make a separate list of finite domain variables
   data_variable_list finite_domain_vars;
-  data_variable_list::iterator v = quant_vars->begin();
-  for ( ; v != quant_vars->end(); v++)
+  data_variable_list::iterator v = var->begin();
+  for ( ; v != var->end(); v++)
     {
       sort_expression vsort = v->sort();
       
@@ -1089,12 +1089,12 @@ pbes_expression enumerate_finite_domains
 	finite_domain_vars = push_back(finite_domain_vars, (*v));
     } 
   
-  // eliminate the finite vars from the quant_vars list
-  *quant_vars = substract((*quant_vars), finite_domain_vars);
+  // eliminate the finite vars from the var list
+  *var = substract((*var), finite_domain_vars);
 
 #ifdef debug  
   gsVerboseMsg("ENUMERATE_FINITE_DOMAINS: finite vars %s, infinte vars %s\n", 
-	       pp(finite_domain_vars).c_str(), pp(*quant_vars).c_str());
+	       pp(finite_domain_vars).c_str(), pp(*var).c_str());
 #endif  
 
   // instantiate the finite vars

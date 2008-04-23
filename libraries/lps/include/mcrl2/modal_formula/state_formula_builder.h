@@ -142,7 +142,7 @@ struct state_formula_builder
     using namespace state_frm;
 
     if (is_data(e)) {
-      state_formula result = visit_data_expression(e, data_arg(e));
+      state_formula result = visit_data_expression(e, val(e));
       return (result == state_formula()) ? e : result;
     } else if (is_true(e)) {
       state_formula result = visit_true(e);
@@ -151,42 +151,42 @@ struct state_formula_builder
       state_formula result = visit_false(e);
       return (result == state_formula()) ? e : result;
     } else if (is_not(e)) {
-      const state_formula& arg = not_arg(e);
-      state_formula result = visit_not(e, arg);
-      return (result == state_formula()) ? not_(visit(arg)) : result;
+      state_formula n = arg(e);
+      state_formula result = visit_not(e, n);
+      return (result == state_formula()) ? not_(visit(n)) : result;
     } else if (is_and(e)) {
-      const state_formula& left  = lhs(e);
-      const state_formula& right = rhs(e);
-      state_formula result = visit_and(e, left, right);
-      return (result == state_formula()) ? and_(visit(left), visit(right)) : result;
+      state_formula l = left(e);
+      state_formula r = right(e);
+      state_formula result = visit_and(e, l, r);
+      return (result == state_formula()) ? and_(visit(l), visit(r)) : result;
     } else if (is_or(e)) {
-      const state_formula& left  = lhs(e);
-      const state_formula& right = rhs(e);
-      state_formula result = visit_or(e, left, right);
-      return (result == state_formula()) ? or_(visit(left), visit(right)) : result;
+      state_formula l = left(e);
+      state_formula r = right(e);
+      state_formula result = visit_or(e, l, r);
+      return (result == state_formula()) ? or_(visit(l), visit(r)) : result;
     } else if (is_imp(e)) {
-      const state_formula& left  = lhs(e);
-      const state_formula& right = rhs(e);
-      state_formula result = visit_imp(e, left, right);
-      return (result == state_formula()) ? imp(visit(left), visit(right)) : result;
+      state_formula l = left(e);
+      state_formula r = right(e);
+      state_formula result = visit_imp(e, l, r);
+      return (result == state_formula()) ? imp(visit(l), visit(r)) : result;
     } else if (is_forall(e)) {
-      const data::data_variable_list& qvars = quant_vars(e);
-      const state_formula& qexpr = quant_form(e);
+      data::data_variable_list qvars = var(e);
+      state_formula qexpr = arg(e);
       state_formula result = visit_forall(e, qvars, qexpr);
       return (result == state_formula()) ? forall(qvars, visit(qexpr)) : result;
     } else if (is_exists(e)) {
-      const data::data_variable_list& qvars = quant_vars(e);
-      const state_formula& qexpr = quant_form(e);
+      data::data_variable_list qvars = var(e);
+      state_formula qexpr = arg(e);
       state_formula result = visit_exists(e, qvars, qexpr);
       return (result == state_formula()) ? exists(qvars, visit(qexpr)) : result;
     } else if(is_must(e)) {
-      const regular_formula& r = mod_act(e);
-      const state_formula& s = mod_form(e);
+      const regular_formula& r = act(e);
+      state_formula s = arg(e);
       state_formula result = visit_must(e, r, s);
       return (result == state_formula()) ? must(r, visit(s)) : result;
     } else if(is_may(e)) {
-      const regular_formula& r = mod_act(e);
-      const state_formula& s = mod_form(e);
+      const regular_formula& r = act(e);
+      state_formula s = arg(e);
       state_formula result = visit_may(e, r, s);
       return (result == state_formula()) ? may(r, visit(s)) : result;
     } else if (is_yaled(e)) {
@@ -204,20 +204,20 @@ struct state_formula_builder
       state_formula result = visit_delay_timed(e, t);
       return (result == state_formula()) ? e : result;
     } else if(is_var(e)) {
-      const core::identifier_string& n = var_name(e);
-      const data::data_expression_list& l = var_val(e);
+      const core::identifier_string& n = name(e);
+      const data::data_expression_list& l = param(e);
       state_formula result = visit_var(e, n, l);
       return (result == state_formula()) ? e : result;
     } else if(is_mu(e)) {
-      const core::identifier_string& n = mu_name(e);
-      const data::data_assignment_list& a = mu_params(e);
-      const state_formula& f = mu_form(e);
+      const core::identifier_string& n = name(e);
+      const data::data_assignment_list& a = ass(e);
+      state_formula f = arg(e);
       state_formula result = visit_mu(e, n, a, f);
       return (result == state_formula()) ? mu(n, a, visit(f)) : result;
     } else if(is_nu(e)) {
-      const core::identifier_string& n = mu_name(e);
-      const data::data_assignment_list& a = mu_params(e);
-      const state_formula& f = mu_form(e);
+      const core::identifier_string& n = name(e);
+      const data::data_assignment_list& a = ass(e);
+      state_formula f = arg(e);
       state_formula result = visit_nu(e, n, a, f);
       return (result == state_formula()) ? nu(n, a, visit(f)) : result;
     } else {

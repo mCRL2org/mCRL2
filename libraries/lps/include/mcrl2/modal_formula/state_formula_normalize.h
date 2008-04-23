@@ -30,7 +30,7 @@ struct state_variable_negation
   {
     using namespace modal::state_frm;
 
-    if (is_var(t) && (var_name(t) == X))
+    if (is_var(t) && (name(t) == X))
     {
       return not_(t);
     }
@@ -51,7 +51,7 @@ state_formula normalize(state_formula f)
 
   if (is_not(f))
   {
-    f = not_arg(f); // remove the not
+    f = arg(f); // remove the not
     if (is_data(f)) {
       return data::data_expr::not_(f);
     } else if (is_true(f)) {
@@ -59,21 +59,21 @@ state_formula normalize(state_formula f)
     } else if (is_false(f)) {
       return true_();
     } else if (is_not(f)) {
-      return normalize(not_arg(f));
+      return normalize(arg(f));
     } else if (is_and(f)) {
-      return or_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+      return or_(normalize(not_(left(f))), normalize(not_(right(f))));
     } else if (is_or(f)) {
-      return and_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+      return and_(normalize(not_(left(f))), normalize(not_(right(f))));
     } else if (is_imp(f)) {
-      return and_(normalize(lhs(f)), normalize(not_(rhs(f))));
+      return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return exists(quant_vars(f), normalize(not_(quant_form(f))));
+      return exists(var(f), normalize(not_(arg(f))));
     } else if (is_exists(f)) {
-      return forall(quant_vars(f), normalize(not_(quant_form(f))));
+      return forall(var(f), normalize(not_(arg(f))));
     } else if (is_must(f)) {
-      return may(mod_act(f), normalize(not_(mod_form(f))));
+      return may(act(f), normalize(not_(arg(f))));
     } else if (is_may(f)) {
-      return must(mod_act(f), normalize(not_(mod_form(f))));
+      return must(act(f), normalize(not_(arg(f))));
     } else if (is_yaled_timed(f)) {
       return delay_timed(time(f));
     } else if (is_yaled(f)) {
@@ -85,9 +85,9 @@ state_formula normalize(state_formula f)
     } else if (is_var(f)) {
       throw std::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     } else if (is_mu(f)) {
-      return nu(mu_name(f), mu_params(f), mu_form(normalize(not_(f.substitute(state_variable_negation(mu_name(f)))))));
+      return nu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
     } else if (is_nu(f)) {
-      return mu(mu_name(f), mu_params(f), mu_form(normalize(not_(f.substitute(state_variable_negation(mu_name(f)))))));
+      return mu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
     }
   }
   else // !is_not(f)
@@ -101,19 +101,19 @@ state_formula normalize(state_formula f)
     //} else if (is_not(f)) {
     // ;
     } else if (is_and(f)) {
-      return and_(normalize(lhs(f)), normalize(rhs(f)));
+      return and_(normalize(left(f)), normalize(right(f)));
     } else if (is_or(f)) {
-      return or_(normalize(lhs(f)), normalize(rhs(f)));
+      return or_(normalize(left(f)), normalize(right(f)));
     } else if (is_imp(f)) {
-      return or_(normalize(lhs(f)), normalize(not_(rhs(f))));
+      return or_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return forall(quant_vars(f), normalize(quant_form(f)));
+      return forall(var(f), normalize(arg(f)));
     } else if (is_exists(f)) {
-      return exists(quant_vars(f), normalize(quant_form(f)));
+      return exists(var(f), normalize(arg(f)));
     } else if (is_must(f)) {
-      return must(mod_act(f), normalize(mod_form(f)));
+      return must(act(f), normalize(arg(f)));
     } else if (is_may(f)) {
-      return may(mod_act(f), normalize(mod_form(f)));
+      return may(act(f), normalize(arg(f)));
     } else if (is_yaled_timed(f)) {
       return f;
     } else if (is_yaled(f)) {
@@ -125,9 +125,9 @@ state_formula normalize(state_formula f)
     } else if (is_var(f)) {
       return f;
     } else if (is_mu(f)) {
-      return mu(mu_name(f), mu_params(f), normalize(mu_form(f)));
+      return mu(name(f), ass(f), normalize(arg(f)));
     } else if (is_nu(f)) {
-      return nu(mu_name(f), mu_params(f), normalize(mu_form(f)));
+      return nu(name(f), ass(f), normalize(arg(f)));
     }
   }
   throw std::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());

@@ -280,23 +280,36 @@ using atermpp::list_arg2;
 
   /// \brief Returns the argument of a data expression
   inline
-  data::data_expression data_arg(state_formula t)
+  data::data_expression val(state_formula t)
   {
     assert(core::gsIsDataExpr(t));
     return t;
   }
   
-  /// \brief Returns the argument of a not expression
+  /// \brief Returns the state formula argument of an expression of type
+  /// not, mu, nu, exists, forall, must or may.
   inline
-  state_formula not_arg(state_formula t)
+  state_formula arg(state_formula t)
   {
-    assert(core::detail::gsIsStateNot(t));
-    return arg1(t);
+    if (core::detail::gsIsStateNot(t))
+    {
+      return arg1(t);
+    }
+    if (core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t))
+    {
+      return arg3(t);
+    }
+    assert(core::detail::gsIsStateExists(t) ||
+           core::detail::gsIsStateForall(t) ||
+           core::detail::gsIsStateMust(t)   ||
+           core::detail::gsIsStateMay(t)
+          );
+    return arg2(t);   
   }
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
   inline
-  state_formula lhs(state_formula t)
+  state_formula left(state_formula t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return arg1(t);
@@ -304,7 +317,7 @@ using atermpp::list_arg2;
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
   inline
-  state_formula rhs(state_formula t)
+  state_formula right(state_formula t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return arg2(t);
@@ -312,18 +325,10 @@ using atermpp::list_arg2;
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list quant_vars(state_formula t)
+  data::data_variable_list var(state_formula t)
   {
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
     return list_arg1(t);
-  }
-  
-  /// \brief Returns the formula of a quantification expression
-  inline
-  state_formula quant_form(state_formula t)
-  {
-    assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
-    return arg2(t);
   }
   
   /// \brief Returns the time of delay or yaled expression
@@ -336,60 +341,39 @@ using atermpp::list_arg2;
   
   /// \brief Returns the name of a variable expression
   inline
-  core::identifier_string var_name(state_formula t)
+  core::identifier_string name(state_formula t)
   {
-    assert(core::detail::gsIsStateVar(t));
+    assert(core::detail::gsIsStateVar(t) ||
+           core::detail::gsIsStateMu(t)  ||
+           core::detail::gsIsStateNu(t)
+          );
     return arg1(t);
   }
   
-  /// \brief Returns the value of a variable expression
+  /// \brief Returns the parameters of a variable expression
   inline
-  data::data_expression_list var_val(state_formula t)
+  data::data_expression_list param(state_formula t)
   {
     assert(core::detail::gsIsStateVar(t));
     return list_arg2(t);
-  }
-  
-  /// \brief Returns the name of a mu or nu expression
-  inline
-  core::identifier_string mu_name(state_formula t)
-  {
-    assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-    return arg1(t);
   }
   
   /// \brief Returns the parameters of a mu or nu expression
   inline
-  data::data_assignment_list mu_params(state_formula t)
+  data::data_assignment_list ass(state_formula t)
   {
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
     return list_arg2(t);
   }
   
-  /// \brief Returns the formula of a mu or nu expression
-  inline
-  state_formula mu_form(state_formula t)
-  {
-    assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-    return arg3(t);
-  }
-  
   /// \brief Returns the regular formula of a must or may expression
   inline
-  regular_formula mod_act(state_formula t)
+  regular_formula act(state_formula t)
   {
     assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
     return arg1(t);
   }
   
-  /// \brief Returns the state formula of a must or may expression
-  inline
-  state_formula mod_form(state_formula t)
-  {
-    assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
-    return arg2(t);
-  }
-
   /// \internal
   struct is_timed_subterm
   {

@@ -52,7 +52,7 @@ pbes_expression normalize(pbes_expression f)
 
   if (is_pbes_not(f))
   {
-    f = not_arg(f); // remove the not
+    f = arg(f); // remove the not
     if (is_data(f)) {
       return data::data_expr::not_(f);
     } else if (is_pbes_true(f)) {
@@ -60,17 +60,17 @@ pbes_expression normalize(pbes_expression f)
     } else if (is_pbes_false(f)) {
       return true_();
     } else if (is_pbes_not(f)) {
-      return normalize(not_arg(f));
+      return normalize(arg(f));
     } else if (is_pbes_and(f)) {
-      return or_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+      return or_(normalize(not_(left(f))), normalize(not_(right(f))));
     } else if (is_pbes_or(f)) {
-      return and_(normalize(not_(lhs(f))), normalize(not_(rhs(f))));
+      return and_(normalize(not_(left(f))), normalize(not_(right(f))));
     } else if (is_pbes_imp(f)) {
-      return and_(normalize(lhs(f)), normalize(not_(rhs(f))));
+      return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_pbes_forall(f)) {
-      return exists(quant_vars(f), normalize(not_(quant_expr(f))));
+      return exists(var(f), normalize(not_(arg(f))));
     } else if (is_pbes_exists(f)) {
-      return forall(quant_vars(f), normalize(not_(quant_expr(f))));
+      return forall(var(f), normalize(not_(arg(f))));
     } else if (is_propositional_variable_instantiation(f)) {
       throw std::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     }
@@ -86,15 +86,15 @@ pbes_expression normalize(pbes_expression f)
     //} else if (is_not(f)) {
     // ;
     } else if (is_pbes_and(f)) {
-      return and_(normalize(lhs(f)), normalize(rhs(f)));
+      return and_(normalize(left(f)), normalize(right(f)));
     } else if (is_pbes_or(f)) {
-      return or_(normalize(lhs(f)), normalize(rhs(f)));
+      return or_(normalize(left(f)), normalize(right(f)));
     } else if (is_pbes_imp(f)) {
-      return or_(normalize(not_(lhs(f))), normalize(rhs(f)));
+      return or_(normalize(not_(left(f))), normalize(right(f)));
     } else if (is_pbes_forall(f)) {
-      return forall(quant_vars(f), normalize(quant_expr(f)));
+      return forall(var(f), normalize(arg(f)));
     } else if (is_pbes_exists(f)) {
-      return exists(quant_vars(f), normalize(quant_expr(f)));
+      return exists(var(f), normalize(arg(f)));
     } else if (is_propositional_variable_instantiation(f)) {
       return f;
     }

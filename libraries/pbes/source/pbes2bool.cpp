@@ -481,13 +481,13 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            accessors::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            accessors::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (is_false(b2))
     { return b2;
@@ -508,14 +508,14 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_or(p))
   { 
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            accessors::lhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
-                            accessors::rhs(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
+                            accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
     if (bes::is_true(b2))
     { return b2;

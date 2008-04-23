@@ -55,8 +55,8 @@ pbes_expression remove_double_variables_rec
 
   if ((is_and(p)) || (is_or(p)) || (is_imp(p))) {
     data_variable_list fvl,fvr,bvl,bvr;
-    pbes_expression pleft = remove_double_variables_rec(lhs(p),&fvl,&bvl);
-    pbes_expression pright = remove_double_variables_rec(rhs(p),&fvr,&bvr);
+    pbes_expression pleft = remove_double_variables_rec(left(p),&fvl,&bvl);
+    pbes_expression pright = remove_double_variables_rec(right(p),&fvr,&bvr);
     data_variable_list toreplace = intersect(bvl,fvr);
     dunion(toreplace,intersect(bvl,bvr));
     pbes_expression pleft_ok = newnames(pleft,toreplace);
@@ -72,8 +72,8 @@ pbes_expression remove_double_variables_rec
     else return imp(pleft_ok,pright_ok);
   }
   else if ((is_forall(p))||(is_exists(p))) {
-    pbes_expression punder = remove_double_variables_rec(quant_expr(p),fv,bv);
-    data_variable_list qv = quant_vars(p);
+    pbes_expression punder = remove_double_variables_rec(arg(p),fv,bv);
+    data_variable_list qv = var(p);
     // if the quantifier is useless, dump it
     if (intersect(qv,*fv).empty()) return punder;
     if (!intersect(qv,*bv).empty()) return punder;
@@ -83,7 +83,7 @@ pbes_expression remove_double_variables_rec
     return (is_forall(p)? forall(qv,punder):exists(qv,punder));
   }
   else if (is_not(p)){
-    return not_(remove_double_variables_rec(not_arg(p),fv,bv));
+    return not_(remove_double_variables_rec(arg(p),fv,bv));
   }
   else if (is_data(p)){
     // fill in the list of occuring variables
