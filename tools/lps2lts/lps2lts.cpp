@@ -24,7 +24,8 @@
 
 #include "squadt_interactor.ipp"
 
-#define STRINGIFY(x) #x
+#define __STRINGIFY(x) #x
+#define STRINGIFY(x) __STRINGIFY(x)
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -134,9 +135,6 @@ lts_generation_options parse_command_line(int ac, char** av) {
     add_option("confluence", make_optional_argument("NAME", "ctau"),
       "apply on-the-fly confluence reduction with NAME the confluent tau action "
       "(when no NAME is supplied, 'ctau' is used)", 'C').
-/*  add_option("priority", make_mandatory_argument("NAME"),
-      "give priority to action NAME (i.e. if it is possible to execute an action "
-      "NAME in some state, than make it the only executable action from that state)", 'p'). */
     add_option("strategy", make_mandatory_argument("NAME"),
       "explore the state space using strategy NAME:\n"
       "  'b', 'breadth'   breadth-first search (default)\n"
@@ -248,32 +246,6 @@ lts_generation_options parse_command_line(int ac, char** av) {
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
-
-/*  ATerm bot;
-  // handle the aterm options
-  {
-    short a_argc=1;
-    char *a_argv[11];
-    a_argv[0]=argv[0];
-
-    for(int i=1; (i<argc) && (a_argc<11); i++)
-    {
-      if(strncmp(argv[i],"--at-",5)!=0) continue;
-
-      //fprintf(stderr, "at argument %s\n",argv[i]);
-      a_argv[a_argc++]=argv[i]+1;
-
-      if(strcmp(argv[i],"--at-afuntable")==0 || strcmp(argv[i],"--at-termtable")==0){
-        i++;
-        if(i==argc) break;
-        else a_argv[a_argc++]=argv[i];
-      }
-    } 
-  
-    ATinit(a_argc,a_argv,&bot);
-  } */
-  // end handle aterm lib options 
-
 
   try {
   // Start 
