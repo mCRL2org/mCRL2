@@ -97,6 +97,8 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (parser.options.count("formats")) {
     print_formats(stderr);
+
+    exit(1);
   }
   if (parser.options.count("strong")) {
     tool_options.equivalence = lts_eq_strong;

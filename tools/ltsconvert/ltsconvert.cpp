@@ -158,7 +158,7 @@ class t_tool_options {
   
     void set_target(std::string const& filename) {
       outfilename = filename;
-  
+
       if ( outtype == lts_none ) {
         gsVerboseMsg("trying to detect output format by extension...\n");
 
@@ -305,7 +305,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
     tool_options.intype = lts::parse_format(parser.option_argument("in").c_str());
 
-    if (tool_options.intype) {
+    if (tool_options.intype == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("in") <<
                    "' is not recognised; option ignored" << std::endl;
     }
@@ -317,13 +317,16 @@ t_tool_options parse_command_line(int ac, char** av) {
 
     tool_options.outtype = lts::parse_format(parser.option_argument("out").c_str());
 
-    if (tool_options.outtype) {
+    if (tool_options.outtype == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("out") <<
                    "' is not recognised; option ignored" << std::endl;
     }
   }
+
   if (parser.options.count("formats")) {
     print_formats(stderr);
+
+    exit(0);
   }
   if (parser.options.count("none")) {
     tool_options.equivalence = lts_eq_none;
@@ -348,7 +351,6 @@ t_tool_options parse_command_line(int ac, char** av) {
   tool_options.check_reach                       = parser.options.count("no-reach") == 0;
   tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
   tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
-  tool_options.outtype                           = lts_mcrl2;
 
   if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
     parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
@@ -357,7 +359,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   if (0 < parser.arguments.size()) {
     tool_options.set_source(parser.arguments[0]);
   }
-  else {
+  else if (tool_options.intype == lts_none) {
     tool_options.intype = lts_aut;
   }
   if (1 < parser.arguments.size()) {
