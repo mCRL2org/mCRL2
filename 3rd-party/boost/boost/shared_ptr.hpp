@@ -20,13 +20,22 @@
 #include <boost/detail/shared_ptr_nmt.hpp>
 #else
 
-#include <memory>               // for std::auto_ptr
+// In order to avoid circular dependencies with Boost.TR1
+// we make sure that our include of <memory> doesn't try to
+// pull in the TR1 headers: that's why we use this header 
+// rather than including <memory> directly:
+#include <boost/config/no_tr1/memory.hpp>  // std::auto_ptr
 
 #include <boost/assert.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/detail/shared_count.hpp>
 #include <boost/detail/workaround.hpp>
+
+#if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
+#include <boost/detail/spinlock_pool.hpp>
+#include <boost/memory_order.hpp>
+#endif
 
 #include <algorithm>            // for std::swap
 #include <functional>           // for std::less
@@ -219,6 +228,11 @@ public:
     {
     }
 
+    template<class Y>
+    shared_ptr(detail::shared_count const & c, Y * p): px(p), pn(c) // never throws
+    {
+    }
+
     // aliasing
     template< class Y >
     shared_ptr( shared_ptr<Y> const & r, T * p ): px( p ), pn( r.pn ) // never throws
@@ -330,6 +344,11 @@ public:
     {
         pn.swap( r.pn );
         r.px = 0;
+    }
+
+    template<class Y>
+    shared_ptr(detail::shared_count && c, Y * p): px(p), pn( static_cast< detail::shared_count && >( c ) ) // never throws
+    {
     }
 
     shared_ptr & operator=( shared_ptr && r ) // never throws
@@ -458,6 +477,11 @@ public:
         pn.swap(other.pn);
     }
 
+    detail::shared_count const & get_shared_count() const // never throws
+    {
+        return pn;
+    }
+
     template<class Y> bool _internal_less(shared_ptr<Y> const & rhs) const
     {
         return pn < rhs.pn;
@@ -467,6 +491,65 @@ public:
     {
         return pn.get_deleter( ti );
     }
+
+    // atomic access
+
+#if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
+
+    shared_ptr<T> atomic_load( memory_order /*mo*/ = memory_order_seq_cst ) const
+    {
+        boost::detail::spinlock_pool<2>::scoped_lock lock( this );
+        return *this;
+    }
+
+    void atomic_store( shared_ptr<T> r, memory_order /*mo*/ = memory_order_seq_cst )
+    {
+        boost::detail::spinlock_pool<2>::scoped_lock lock( this );
+        swap( r );
+    }
+
+    shared_ptr<T> atomic_swap( shared_ptr<T> r, memory_order /*mo*/ = memory_order_seq_cst )
+    {
+        boost::detail::spinlock & sp = boost::detail::spinlock_pool<2>::spinlock_for( this );
+
+        sp.lock();
+        swap( r );
+        sp.unlock();
+
+        return r; // return std::move(r)
+    }
+
+    bool atomic_compare_swap( shared_ptr<T> & v, shared_ptr<T> w )
+    {
+        boost::detail::spinlock & sp = boost::detail::spinlock_pool<2>::spinlock_for( this );
+
+        sp.lock();
+
+        if( px == v.px && pn == v.pn )
+        {
+            swap( w );
+
+            sp.unlock();
+
+            return true;
+        }
+        else
+        {
+            shared_ptr tmp( *this );
+
+            sp.unlock();
+
+            tmp.swap( v );
+            return false;
+        }
+    }
+
+    inline bool atomic_compare_swap( shared_ptr<T> & v, shared_ptr<T> w, memory_order /*success*/, memory_order /*failure*/ )
+    {
+        return atomic_compare_swap( v, w ); // std::move( w )
+    }
+
+#endif
 
 // Tasteless as this may seem, making all members public allows member templates
 // to work in the absence of member template friends. (Matthew Langston)
@@ -566,7 +649,7 @@ template<class T> inline T * get_pointer(shared_ptr<T> const & p)
 
 #if !defined(BOOST_NO_IOSTREAM)
 
-#if defined(__GNUC__) &&  (__GNUC__ < 3)
+#if defined(BOOST_NO_TEMPLATED_IOSTREAMS) || ( defined(__GNUC__) &&  (__GNUC__ < 3) )
 
 template<class Y> std::ostream & operator<< (std::ostream & os, shared_ptr<Y> const & p)
 {

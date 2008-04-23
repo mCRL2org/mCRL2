@@ -256,16 +256,17 @@ namespace mcrl2 {
 
     void interface_description::add_prover_options() {
       add_option("smt-solver", make_mandatory_argument("SOLVER"),
-        "use SOLVER to remove inconsistent paths from the internally used BDDs:\n"
+        "use SOLVER to remove inconsistent paths from the internally used "
+        "BDDs (by default, no path elimination is applied):\n"
 #if defined(HAVE_CVC)
         "  'ario' for the SMT solver Ario, or\n"
         "  'cvc' for the SMT solver CVC3;\n"
-        "  'cvc-fast' for the fast implementation of the\n"
+        "  'cvc-fast' for the fast implementation of the SMT solver CVC3\n",
 #else
         "  'ario' for the SMT solver Ario, or\n"
-        "  'cvc' for the SMT solver CVC3;\n"
+        "  'cvc' for the SMT solver CVC3;\n",
 #endif
-        "by default, no path elimination is applied", 'z');
+        'z');
     }
 
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
@@ -386,7 +387,9 @@ namespace mcrl2 {
         << word_wrap(m_description, 80) << std::endl;
       
       if (0 < m_options.size()) {
-        s << ".SH OPTIONS" << std::endl;
+        s << ".SH OPTIONS" << std::endl
+          << ".TP" << std::endl
+          << "\\fIOPTION\\fR can be any of the following:" << std::endl;
 
         for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
           option_descriptor const& option(i->second);
@@ -397,9 +400,15 @@ namespace mcrl2 {
         }
       }
 
-      s << ".TP" << std::endl
-        << "\\fBStandard options:\\fR" << std::endl
-        << m_options.find("quiet")->second.man_page_description()
+      s << ".TP" << std::endl;
+
+      if (0 < m_options.size()) {
+        s << "Standard options:" << std::endl;
+      }
+      else {
+        s << "\\fIOPTION\\fR can be any of the following standard options:\n";
+      }
+      s << m_options.find("quiet")->second.man_page_description()
         << m_options.find("verbose")->second.man_page_description()
         << m_options.find("debug")->second.man_page_description()
         << m_options.find("help")->second.man_page_description()

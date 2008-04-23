@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<expected-failures>
+ <toolset name="gcc-4.0.3">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="gcc-4.1.2">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="gcc-4.2.3">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="gcc-4.3.0">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="darwin">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="gcc-mingw-4.2.1">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+ <toolset name="msvc-9.0express">
+  <library name="tools">
+   <test-result test-name="mcrl22lps-commprot" result="fail"/>
+  </library>
+ </toolset>
+</expected-failures>
