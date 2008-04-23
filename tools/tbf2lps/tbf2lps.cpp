@@ -39,9 +39,9 @@ tool_options_type parse_command_line(int ac, char** av) {
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
     "The following conversions on the data specification will be applied:\n"
-    "- constructors T, F: -> Bool are replaced by true and false,\n"
-    "- mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and\n"
-    "- mapping eq: S # S -> Bool is replaced by == for each sort S");
+    "  constructors T, F: -> Bool are replaced by true and false,\n"
+    "  mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and\n"
+    "  mapping eq: S # S -> Bool is replaced by == for each sort S");
 
   clinterface.
     add_option("no-conv-map",
