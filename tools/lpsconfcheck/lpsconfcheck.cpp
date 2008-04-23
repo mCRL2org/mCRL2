@@ -425,7 +425,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
       clinterface.
         add_option("invariant", make_mandatory_argument("INVFILE"), 
-          "use the formula (a boolean expression in mCRL2 format) in INVFILE as invariant", 'i').
+          "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
         add_option("summand", make_mandatory_argument("NUM"), 
           "eliminate or simplify the summand with number NUM only", 's').
         add_option("check-all",

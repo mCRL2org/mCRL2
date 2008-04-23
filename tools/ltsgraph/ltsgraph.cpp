@@ -76,11 +76,8 @@ void parse_command_line(int argc, wxChar** argv) {
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
         NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-    "Draw graphs and optimize their layout in a graphical environment."
-    "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file"
-    "as input for drawing.\n"
-    "\n"
-    "Use left click to drag the nodes and right click to fix the nodes.");
+    "Draw graphs and optimize their layout in a graphical environment. "
+    "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file as input for drawing.");
    
   command_line_parser parser(clinterface, argc, argv);
 

@@ -34,20 +34,20 @@ struct tool_options_type {
 
 tool_options_type parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-    "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to"
-    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,"
+    "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to "
+    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
-    "The following conversions on the data specification will be applied:"
-    "constructors T, F: -> Bool are replaced by true and false,"
-    "mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and"
-    "mapping eq: S # S -> Bool is replaced by == for each sort S");
+    "The following conversions on the data specification will be applied:\n"
+    "- constructors T, F: -> Bool are replaced by true and false,\n"
+    "- mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and\n"
+    "- mapping eq: S # S -> Bool is replaced by == for each sort S");
 
   clinterface.
     add_option("no-conv-map",
       "do not apply the conversion of mappings and, or and eq", 'n').
     add_option("no-conv-cons",
-      "do not apply the conversion of constructors T and F not that this conversion is "
+      "do not apply the conversion of constructors T and F; note that this conversion is "
       "really needed for the toolset to know what true and false are (e.g. simulation "
       "and state space generation will not be possible)");
 

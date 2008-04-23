@@ -245,23 +245,24 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 t_tool_options parse_command_line(int ac, char** av)
 {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-      "Transform the PBES from INFILE into an equivalent BES and write it to OUTFILE.\n"
-      "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is\n");
+      "Transform the PBES from INFILE into an equivalent BES and write it to OUTFILE. "
+      "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
 
   clinterface.add_rewriting_options();
 
   clinterface.
     add_option("strategy",
-      make_mandatory_argument("STRAT"),
-      "use strategy STRAT (default 'lazy');\n"
-      " 'finite' for computing all possible boolean equations, or\n"
-      " 'lazy' for computing only boolean equations which can be reached from the\n"
-      "        initial state",
+      make_mandatory_argument("NAME"),
+      "compute the BES using strategy NAME:\n"
+      "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
+      "  'finite' for computing all possible boolean equations.",
       's').
     add_option("output",
-      make_mandatory_argument("FORMAT"),
-      "use outputformat FORMAT (default 'binary');\n"
-      "available output formats are binary, internal and cwi",
+      make_mandatory_argument("NAME"),
+      "store the BES in output format NAME:\n"
+      "  'binary' for the internal binary format (default),\n"
+      "  'internal' for the internal textual format, or\n"
+      "  'cwi' for the format used by the CWI to solve a BES.",
       'o');
 
   command_line_parser parser(clinterface, ac, av);

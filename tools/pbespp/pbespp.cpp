@@ -61,17 +61,15 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 
 t_tool_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-    "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE"
+    "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
     "is not present, stdout is used. If INFILE is not present, stdin is used.");
 
   clinterface.
     add_option("format", make_mandatory_argument("FORMAT"),
       "print the PBES in the specified FORMAT:\n"
-      "'internal' for a textual ATerm representation of the internal format,\n"
-      "'default' for an PBES specification (default), or\n"
-      "'debug' for 'default' with the exceptions that data expressions are "
-      "printed in prefix notation using identifiers from the internale format, "
-      "each data equation is put in a separate data equation section", 'f');
+      "  'internal' for a textual ATerm representation of the internal format,\n"
+      "  'default' for an PBES specification (default), or\n"
+      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section", 'f');
 
   command_line_parser parser(clinterface, ac, av);
 

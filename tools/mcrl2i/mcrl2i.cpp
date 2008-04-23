@@ -41,19 +41,18 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
 
-char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be\n"
-                      "rewritten to normal form and printed. Also, one can assign values to declared\n"
-                      "variables by writing x := v, for variable x and value v. These variables can\n"
-                      "then be used in expressions. Besides this, the prompt accepts the following\n"
-                      "commands:\n"
+char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "
+                      "rewritten to normal form and printed. Also, one can assign values to declared "
+                      "variables by writing x := v, for variable x and value v. These variables can "
+                      "then be used in expressions. Besides this, the prompt accepts the following "
+                      "commands (where VARLISt is of the form x,y,...: S; v,w,...: T):\n"
                       "  :h[elp]                         print this help message\n"
                       "  :q[uit]                         quit\n"
                       "  :t[ype] EXPRESSION              print type of EXPRESSION\n"
                       "  :v[ar] VARLIST                  declare variables in VARLIST\n"
                       "  :r[ewriter] STRATEGY            use STRATEGY for rewriting\n"
                       "  :s[solve] <VARLIST> EXPRESSION  give all valuations of the variables in\n"
-                      "                                  VARLIST that satisfy EXPRESSION\n"
-                      "  where VARLIST is of the form x,y,...: S; v,w,...: T\n";
+                      "                                  VARLIST that satisfy EXPRESSION\n";
 
 static Rewriter *rewr;
 static Enumerator *e;

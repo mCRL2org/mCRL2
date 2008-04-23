@@ -49,7 +49,7 @@ t_tool_options parse_command_line(int ac, char** av) {
                            "Print basic information on the PBES in INFILE. If INFILE is not present, stdin\n"
                            "is used.");
 
-  clinterface.add_option("full", "display full information on the PBES", 'f');
+  clinterface.add_option("full", "display the predicate variables and their signature", 'f');
 
   command_line_parser parser(clinterface, ac, av);
 

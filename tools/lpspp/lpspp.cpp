@@ -52,17 +52,17 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 t_tool_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
     "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
-    "is not present, stdout is used. If INFILE is not present, stdin is used.");
+    "is not present, stdout is used. If INFILE is not present, stdin is used.",
+    "The LPS printed in the default format might not be a well-formed mCRL2 specification,"
+    "because the proc and init sections could be preceded by declarations of free variables"
+    "denoted by var");
 
   clinterface.
     add_option("format", make_mandatory_argument("FORMAT"),
       "print the LPS in the specified FORMAT:\n"
-      "'internal' for a textual ATerm representation of the internal format,\n"
-      "'default' for an mCRL2 specification (default), or\n"
-      "'debug' for 'default' with the exceptions that data expressions are "
-      "printed in prefix notation using identifiers from the internale format, "
-      "each data equation is put in a separate data equation section, and next "
-      "states of process references are printed in assignment notation", 'f');
+      "  'internal' for a textual ATerm representation of the internal format,\n"
+      "  'default' for an mCRL2 specification (default), or\n"
+      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, each data equation is put in a separate data equation section, and next states of process references are printed in assignment notation", 'f');
 
   command_line_parser parser(clinterface, ac, av);
 

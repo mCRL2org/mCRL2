@@ -191,7 +191,7 @@ t_tool_options parse_command_line(int ac, char** av)
                           "present, stdin is used.");
 
   clinterface.add_option("interactive", "turn on the manual guidance of the approximation process", 'i')
-             .add_option("bound", "limit the number of approximation steps\nExample: -b 10\n", 'b')
+             .add_option("bound", make_mandatory_argument("NUM"), "limit the number of approximation steps to NUM", 'b')
              .add_option("pnf", "use the prenex normal form for the approximation", 'p')
              .add_option("solver", make_optional_argument("SOLVER", "cvc"),
                "specify the SOLVER to be used by the prover:\n"
@@ -210,7 +210,7 @@ t_tool_options parse_command_line(int ac, char** av)
   }
 
   if (parser.options.count("bound")) {
-    tool_options.bound = parser.option_argument_as< int >("bound"); 
+    tool_options.bound = parser.option_argument_as< unsigned int >("bound"); 
   }
 
   if (parser.options.count("pnf")) {

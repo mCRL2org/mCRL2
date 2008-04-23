@@ -109,7 +109,7 @@ using namespace mcrl2;
     /// \param argv is an array of all arguments passed on the command line
 
     void LPS_Form_Check::get_options(int argc, char* argv[]) {
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -fFORMFILE [INFILE]\n"
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --formula=FORMFILE [INFILE]\n"
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
         "FORMFILE holds for the data specification of the linear process specification "
         "(LPS) in INFILE. If INFILE is not present, stdin is used.");

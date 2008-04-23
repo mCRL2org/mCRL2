@@ -1259,14 +1259,14 @@ bool lpsConstElm::filter() {
 
 void lpsConstElm::parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-    "Remove constant process parameters from the LPS in INFILE and write the result\n"
-    "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
-    "stdin is used.\n");
+    "Remove constant process parameters from the LPS in INFILE and write the result "
+    "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
+    "stdin is used.");
 
   clinterface.add_option("no-singleton", "do not remove sorts consisting of a single element");
   clinterface.add_option("no-condition", "all summand conditions are set true (faster)");
   clinterface.add_option("no-reachable", "does not remove summands which are not visited");
-  clinterface.add_option("csv", make_mandatory_argument("CSV"), "stores the value changes of the process parameters in a CSV file separated by tabs", 'c');
+  clinterface.add_option("csv", make_mandatory_argument("NAME"), "stores the value changes of the process parameters in the CSV file NAME", 'c');
 
   command_line_parser parser(clinterface, ac, av);
 

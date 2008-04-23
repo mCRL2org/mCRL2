@@ -248,19 +248,21 @@ tool_options parse_command_line(int argc, char** argv) {
   using mcrl2::lts::lts;
 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-    "Print information about the labelled transition system (LTS) in INFILE. If "
-    "INFILE is not supplied, stdin is used.\n"
+    "Print information about the labelled transition system (LTS) in INFILE. "
+    "If INFILE is not supplied, stdin is used.\n"
     "\n"
-    "The format of INFILE is determined by its contents. The option --in can be used "
-    "to force the format for INFILE.");
+    "The format of INFILE is determined by its contents. "
+    "The option --in can be used to force the format for INFILE. "
+    "A list of supported formats can be requested by using the option --formats" 
+    );
 
   clinterface.
     add_option("equiv", make_mandatory_argument("EQ"),
       "use equivalence EQ for deterministic check:\n"
-      "'isomorph' for isomorphism (default),\n"
-      "'strong' for strong bisimilarity,\n"
-      "'branch' for branching bisimilarity, or\n"
-      "'none' for not performing the check at all",
+      "  'isomorph' for isomorphism (default),\n"
+      "  'strong' for strong bisimilarity,\n"
+      "  'branch' for branching bisimilarity, or\n"
+      "  'none' for not performing the check at all",
       'e').
     add_option("in", make_mandatory_argument("FORMAT"),
       "use FORMAT as the input format", 'i').

@@ -290,7 +290,9 @@ static t_tool_options parse_command_line(int argc, char **argv) {
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -fFILE [INFILE [OUTFILE]]\n"
     "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
     "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
-    "present, stdout is used. If INFILE is not present, stdin is used.");
+    "present, stdout is used. If INFILE is not present, stdin is used.\n"
+    "\n"
+    "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>.");
 
   clinterface.
     add_option("formula", make_mandatory_argument("FILE"), 

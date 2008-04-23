@@ -63,13 +63,12 @@ struct t_tool_options {
 
 t_tool_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE1] INFILE2\n"
-    "Compare the labelled transition systems (LTSs) INFILE1 to INFILE2 in the"
-    "requested format modulo a certain equivalence If INFILE1 is not supplied, stdin"
-    "is used.\n"
+    "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are the same modulo some equivalence. "
+    "If INFILE1 is not supplied, stdin is used.\n"
     "\n"
     "The input formats are determined by the contents of INFILE1 and INFILE2. "
-    "Options --in1 and --in2 can beused to force the input format of INFILE1 and "
-    "INFILE2, respectively.");
+    "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
+    "A list of supported formats can be requested using the option --formats.");
 
   clinterface.
     add_option("formats", "list accepted formats", 'f').
