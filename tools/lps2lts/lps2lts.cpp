@@ -91,11 +91,11 @@ static void print_formats(FILE *f)
 
 lts_generation_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-    "Generate state space of the LPS in INFILE and save the result to OUTFILE. If "
-    "OUTFILE is not supplied, the state space is not stored.\n"
+    "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. If "
+    "OUTFILE is not supplied, the LTS is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified "
-    "by an option). If the extension is unknown, the svc format will be used.");
+    "by an option). If the extension is unknown, the SVC format will be used.");
 
   clinterface.add_rewriting_options();
 
@@ -138,8 +138,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
       "give priority to action NAME (i.e. if it is possible to execute an action "
       "NAME in some state, than make it the only executable action from that state)", 'p'). */
     add_option("strategy", make_mandatory_argument("NAME"),
-      "use strategy NAME to explore the state space with;\n"
-      "the following strategies are available:\n"
+      "explore the state space using strategy NAME:\n"
       "  'b', 'breadth'   breadth-first search (default)\n"
       "  'd', 'depth'     depth-first search\n"
       "  'r', 'random'    random simulation", 's').
