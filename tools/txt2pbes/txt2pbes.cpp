@@ -4,31 +4,31 @@
 //
 /// \file ./txt2pbes.cpp
 
-#define NAME "txt2pbes" 
-#define AUTHOR "Aad Mathijssen and Simona Orzan" 
+#define NAME "txt2pbes"
+#define AUTHOR "Aad Mathijssen and Simona Orzan"
 
 // #define debug
- 
-//C++ 
-#include <cstdio> 
-#include <exception> 
-#include <iostream> 
-#include <fstream> 
-#include <string> 
-#include <utility> 
- 
-#include <sstream> 
- 
-//PBES-Framework 
-#include "mcrl2/pbes/pbes.h" 
-#include "mcrl2/pbes/pbes_expression.h" 
-//#include "mcrl2/pbes/propositional_variable.h" 
-#include "mcrl2/pbes/fixpoint_symbol.h" 
-#include "mcrl2/pbes/utility.h" 
-#include "mcrl2/data/data_expression.h" 
-#include "mcrl2/data/data_operators.h" 
-#include "mcrl2/data/sort_expression.h" 
- 
+
+//C++
+#include <cstdio>
+#include <exception>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <utility>
+
+#include <sstream>
+
+//PBES-Framework
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_expression.h"
+//#include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/fixpoint_symbol.h"
+#include "mcrl2/pbes/utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_operators.h"
+#include "mcrl2/data/sort_expression.h"
+
 #include "mcrl2/lps/detail/algorithms.h"
 
 
@@ -37,24 +37,24 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 
-//ATERM-specific 
-#include "mcrl2/atermpp/substitute.h" 
-#include "mcrl2/core/identifier_string.h" 
-#include "mcrl2/atermpp/utility.h" 
-#include "mcrl2/atermpp/indexed_set.h" 
-#include "mcrl2/atermpp/table.h" 
-#include "mcrl2/atermpp/vector.h" 
-#include "mcrl2/atermpp/set.h" 
-#include "gc.h" 
+//ATERM-specific
+#include "mcrl2/atermpp/substitute.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/set.h"
+#include "gc.h"
 
-//MCRL2-specific 
-#include "mcrl2/core/messaging.h" 
+//MCRL2-specific
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 // only for debug
 //#include "mcrl2/core/libstruct_core.h"
- 
+
 //#include "pbes_simple.h"
 #include "pbesparser.cpp"
 
@@ -66,16 +66,16 @@
 
 
 
-using namespace std; 
+using namespace std;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core; 
-using namespace mcrl2::data; 
-using namespace mcrl2::lps; 
-using namespace mcrl2::pbes_system; 
+using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::lps;
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
- 
-//Type definitions ====================== 
- 
+
+//Type definitions ======================
+
 
 struct t_tool_options
 {
@@ -96,16 +96,16 @@ struct t_tool_options
 
 //=======================================
 data_expression to_nat_expression(int n)
-// constructs expressions 
+// constructs expressions
 // N ::= 0 | 1 | i | j | k | N + N
 //=======================================
 {
-  
+
   switch (ps->op[n])
-    {  
-    case '0': 
+    {
+    case '0':
       return (data_expr::nat(0));
-    case '1': 
+    case '1':
       return (data_expr::nat(1));
     case 'i': case 'j': case 'k':
       {
@@ -131,10 +131,10 @@ data_expression to_bool_expression(int n)
 { // parse an expression of boolean type, without quantifiers.
   // B = T | F | a | b | c | (N=N) | (N<N) | !B | B && B | B || B
  switch (ps->op[n])
-    {  
-    case 'T': 
+    {
+    case 'T':
       return (data_expr::true_());
-    case 'F': 
+    case 'F':
       return (data_expr::false_());
     case 'a': case 'b': case 'c':
       {
@@ -143,10 +143,10 @@ data_expression to_bool_expression(int n)
 	data_expression dv = data_expression(v);
 	return (dv);
       };
-    case '<': 
+    case '<':
       return (data_expr::less(to_nat_expression(ps->arg1[n]),
-				   to_nat_expression(ps->arg2[n])));     
-    case '=': 
+				   to_nat_expression(ps->arg2[n])));
+    case '=':
       return(data_expr::equal_to(to_nat_expression(ps->arg1[n]),
 				      to_nat_expression(ps->arg2[n])));
     case '!':
@@ -159,16 +159,16 @@ data_expression to_bool_expression(int n)
 				   to_bool_expression(ps->arg2[n])));
       // default should be unreachable
     default: return (data_expr::true_());
-    }    
+    }
   }
 
 
 data_expression get_data_expr(int n)
 {
-  if ((ps->op[n] == 'i') || (ps->op[n] == 'j') || (ps->op[n] == 'k') 
+  if ((ps->op[n] == 'i') || (ps->op[n] == 'j') || (ps->op[n] == 'k')
       || (ps->op[n] == '+') || (ps->op[n] == '0') || (ps->op[n] == '1'))
     return(to_nat_expression(n));
-  else 
+  else
     return (to_bool_expression(n));
 }
 
@@ -179,11 +179,11 @@ data_expression_list get_expr_list(int n)
 {
   data_expression_list d;
   int en;
-  while (n>0)    
+  while (n>0)
     {
       if (ps->op[n] == ',')
 	{en = ps->arg1[n]; n = ps->arg2[n];}
-      else 
+      else
 	{en = n; n = 0;}
       data_expression e = get_data_expr(en);
       d = push_back(d,e);
@@ -191,7 +191,7 @@ data_expression_list get_expr_list(int n)
 #ifdef debug
   cerr<<"Expr_list: "<< pp(d).c_str() <<"\n";
 #endif
-  
+
   return d;
 }
 
@@ -211,26 +211,26 @@ pbes_expression to_pbes_expression(int n){
   switch (ps->op[n])
     {
       // TRUE, FALSE
-    case 'T':  
+    case 'T':
       res = pbes_expr::true_(); break;
-    case 'F':  
+    case 'F':
       res = pbes_expr::false_(); break;
       // IDPROP
-    case 'a': case 'b': case 'c': 
+    case 'a': case 'b': case 'c':
       {
 	string s("");s = s + ps->op[n] + ":Bool";
 	data_variable v = data_variable(s);
-	res = val(data_expression(v));
+	res = data_expression(v);
 	break;
-      }        
+      }
       // IDPRED [ expr_list ]
-    case 'X': case 'Y': case 'Z': 
+    case 'X': case 'Y': case 'Z':
       {
 	string s(""); s = s + ps->op[n];
 	//	cerr<<"\n1\n";
 	propositional_variable_instantiation propinst;
 	//	cerr<<"\n2\n";
-	
+
 	if (ps->arg1[n]==0) // no parameters
 	  {	  propinst = propositional_variable_instantiation(s);
 	    //	    cerr<<"\n3\n";
@@ -238,7 +238,7 @@ pbes_expression to_pbes_expression(int n){
 	else
 	  {
 	  propinst = propositional_variable_instantiation
-	    (s, get_expr_list(ps->arg1[n]));	  
+	    (s, get_expr_list(ps->arg1[n]));
 	  if (!is_propositional_variable_instantiation(propinst))
 	    gsVerboseMsg(" \n\n\nNEEEE\n\n\n");
 	  //	cerr<<"\n4\n";
@@ -248,15 +248,15 @@ pbes_expression to_pbes_expression(int n){
 
 	res = pbes_expression(propinst);
 	break;
-      }      
+      }
       // nat_expr LESS,IS nat_expr
-    case '<': 
-      res = val(data_expr::less(to_nat_expression(ps->arg1[n]),
-				     to_nat_expression(ps->arg2[n])));
+    case '<':
+      res = data_expr::less(to_nat_expression(ps->arg1[n]),
+				     to_nat_expression(ps->arg2[n]));
       break;
-    case '=': 
-      res = val(data_expr::equal_to(to_nat_expression(ps->arg1[n]),
-					 to_nat_expression(ps->arg2[n])));
+    case '=':
+      res = data_expr::equal_to(to_nat_expression(ps->arg1[n]),
+					 to_nat_expression(ps->arg2[n]));
       break;
       // pbes_expression EN,OF pbes_expression
     case '&':
@@ -267,14 +267,14 @@ pbes_expression to_pbes_expression(int n){
       res = pbes_expr::or_(to_pbes_expression(ps->arg1[n]),
 				to_pbes_expression(ps->arg2[n]));
       break;
-      // NEG pbes_expression 
-      // in fact it only works for data_expressions under negation, 
+      // NEG pbes_expression
+      // in fact it only works for data_expressions under negation,
       // since there is no pbes_expression constructor
       // for negation
     case '!':
-      res = val(data_expr::not_(to_bool_expression(ps->arg1[n])));      
+      res = data_expr::not_(to_bool_expression(ps->arg1[n]));
       break;
-    default: 
+    default:
       gsErrorMsg("cannot parse pbes_expression"); exit(0);
     }
 #ifdef debug
@@ -291,15 +291,15 @@ data_variable_list get_var_list(int n)
 {
   data_variable_list d;
   int vn;
-  while (n>0)    
+  while (n>0)
     {
       if (ps->op[n] == ',')
 	{vn = ps->arg1[n]; n = ps->arg2[n];}
-      else 
+      else
 	{vn = n; n = 0;}
       string s("");
       switch (ps->op[vn])
-	{  
+	{
 	case 'i': case 'j': case 'k':
 	  {s = s +  ps->op[vn] + ":Nat";break;}
 	case 'a': case 'b': case 'c':
@@ -314,7 +314,7 @@ data_variable_list get_var_list(int n)
 #ifdef debug
   cerr<<"Var_list: "<< pp(d).c_str() <<"\n";
 #endif
-  
+
   return d;
 }
 
@@ -328,7 +328,7 @@ data_variable_list get_var_list(int n)
 pbes_equation to_pbes_eq(int n){
 //==============================
 
-  fixpoint_symbol f;  
+  fixpoint_symbol f;
   propositional_variable prop;
   if (ps->op[ps->arg1[n]] == 'm')
     f = fixpoint_symbol(gsMakeMu()); // mu()
@@ -336,9 +336,9 @@ pbes_equation to_pbes_eq(int n){
     f = fixpoint_symbol(gsMakeNu()); //nu();
   else {
     gsErrorMsg("fixpoint expected\n");
-    exit(0);     
+    exit(0);
   }
- 
+
   string sop(""); sop=sop+ps->op[ps->arg1[ps->arg1[n]]]; // name
   data_variable_list dvl; // variable list
   dvl = get_var_list(ps->arg1[ps->arg1[ps->arg1[n]]]);
@@ -360,7 +360,7 @@ pbes_equation to_pbes_eq(int n){
 data_expression_list standard_instance(data_variable_list dv){
 //============================================================
   data_expression_list del;
-  
+
   data_variable_list::iterator i = dv.begin();
   for ( ; i != dv.end(); i++){
     data_expression de;
@@ -422,10 +422,10 @@ pbes<> pbes_simple_to_pbes(){
   cerr <<"\nps:\n";
   for (i=0;i<ps->nops;i++)
     cerr<<i<<" : "<<ps->op[i]<<" "<<ps->arg1[i]<<" "<<ps->arg2[i]<<"\n";
-  cerr << "\nStarting parsing at position " << pos <<"\n";  
+  cerr << "\nStarting parsing at position " << pos <<"\n";
 #endif
-  
-  atermpp::vector<pbes_equation> eqs; 
+
+  atermpp::vector<pbes_equation> eqs;
   for(i=0; i<ps->nops; i++)
     if (ps->op[i] == 'Q') // new equation
       {
@@ -438,18 +438,18 @@ pbes<> pbes_simple_to_pbes(){
 
 
   data_specification data = get_minimal_data_spec();
-  
+
   // create a standard instantiation for the variable
   // of the first equation
   propositional_variable pv = eqs.begin()->variable();
-  propositional_variable_instantiation ppv = 
+  propositional_variable_instantiation ppv =
     propositional_variable_instantiation
     (pv.name(),standard_instance(pv.parameters()));
-  
+
   pbes<> pb(data,eqs,ppv);
   return pb;
 }
- 
+
 
 //====================================
 pbes<> make_pbes(const string fileName){
@@ -464,7 +464,7 @@ pbes<> make_pbes(const string fileName){
     {
     ext_lc[i] = tolower(ext_lc[i]);
   }
-  
+
   if ( ext_lc != "txt" )
     {
     throw string( "Unknown file extension: " + ext );
@@ -477,7 +477,7 @@ pbes<> make_pbes(const string fileName){
   parsePBES(fileName);
 
        //    }
-#ifdef debug  
+#ifdef debug
   cerr << "txt parsed. Now making a pbes.\n";
 #endif
   return pbes_simple_to_pbes();
@@ -500,7 +500,7 @@ void print_syntax(void)
 "            | pbes-expr '&&' pbes-expr | pbes-expr '||' pbes-expr\n"
 "\n"
 "boolvar   ::= 'a' | 'b' | 'c'\n"
-"natvar    ::= 'i' | 'j' | 'k'\n"				
+"natvar    ::= 'i' | 'j' | 'k'\n"
 "datavar   ::= boolvar | natvar\n"
 "nat-expr  ::= '1' | natvar | nat-expr '+' nat-expr | '(' nat-expr ')'\n"
 "pvar-inst ::= pvar '(' pars-inst ')'\n"
@@ -516,7 +516,7 @@ void print_syntax(void)
 "  nu Y(b,i,j) = X(!b,i) && Y(b,i+1,j) && ((i+1) < j)\n";
 }
 
-//========================== 
+//==========================
 t_tool_options parse_command_line(int ac, char **av)
 //==========================
 {
@@ -552,14 +552,14 @@ t_tool_options parse_command_line(int ac, char **av)
 
 
 
- 
- 
- 
-//MAIN =================================== 
-int main(int argc, char** argv) 
-{ 
+
+
+
+//MAIN ===================================
+int main(int argc, char** argv)
+{
   MCRL2_ATERM_INIT(argc, argv)
-   
+
   try {
     t_tool_options tool_options = parse_command_line(argc, argv);
 
@@ -567,7 +567,7 @@ int main(int argc, char** argv)
       print_syntax();
       return EXIT_SUCCESS;
     }
- 
+
     if (tool_options.new_parser) {
       ATermAppl result = NULL;
       //parse specification
@@ -586,7 +586,7 @@ int main(int argc, char** argv)
         result = parse_pbes_spec(instream);
         instream.close();
       }
-      if (result == NULL) 
+      if (result == NULL)
       {
         gsErrorMsg("parsing failed\n");
         return EXIT_FAILURE;
@@ -602,7 +602,7 @@ int main(int argc, char** argv)
       //implement standard data types and type constructors on the result
       gsVerboseMsg("implementing standard data types and type constructors...\n");
       result = implement_data_pbes_spec(result);
-      if (result == NULL) 
+      if (result == NULL)
       {
         gsErrorMsg("data implementation failed\n");
         return EXIT_FAILURE;
@@ -623,24 +623,24 @@ int main(int argc, char** argv)
       }
     } else {
       //!tool_options.new_parser
-  
+
       cerr <<"Creating PBES ("<<tool_options.outfilename<< ") from text (" << tool_options.infilename <<") \n";
-   
-      //Create the pbes from the input text 
-      pbes<> p = make_pbes(tool_options.infilename); 
+
+      //Create the pbes from the input text
+      pbes<> p = make_pbes(tool_options.infilename);
       ATermAppl ap = p;
-   
+
       if (tool_options.outfilename == "") {
         gsVerboseMsg("The resulting PBES is:\n");
         PrintPart_CXX(cout, (ATerm) ap, ppDefault);
         cout << endl;
-      } else 
+      } else
         if(!p.save(tool_options.outfilename, false)){
           gsErrorMsg("writing to %s failed\n",tool_options.outfilename.c_str());
           exit(1);
         }
-      
-      cerr <<"done\n";  
+
+      cerr <<"done\n";
     }
     return EXIT_SUCCESS;
   }
@@ -649,9 +649,9 @@ int main(int argc, char** argv)
   }
 
   return EXIT_FAILURE;
-} 
-//======================================== 
- 
- 
- 
- 
+}
+//========================================
+
+
+
+
