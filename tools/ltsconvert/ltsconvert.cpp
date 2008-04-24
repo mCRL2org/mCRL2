@@ -352,12 +352,14 @@ t_tool_options parse_command_line(int ac, char** av) {
     parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
   }
 
-  if (0 < parser.arguments.size()) {
-    tool_options.set_source(parser.arguments[0]);
-  }
   if (1 < parser.arguments.size()) {
+    tool_options.set_source(parser.arguments[0]);
     tool_options.set_target(parser.arguments[1]);
-  } else {
+  }
+  else if (0 < parser.arguments.size()) {
+    tool_options.set_target(parser.arguments[0]);
+  }
+  else {
     if ( tool_options.outtype == lts_none ) {
       if ( !tool_options.lpsfile.empty() ) {
         gsWarningMsg("no output format set; using fsm because --lps was used\n");

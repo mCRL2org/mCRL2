@@ -487,11 +487,12 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
       }
 
-      if (0 < parser.arguments.size()) {
-        f_input_file_name = parser.arguments[0];
-      }
       if (1 < parser.arguments.size()) {
+        f_input_file_name = parser.arguments[0];
         f_output_file_name = parser.arguments[1];
+      }
+      else if (0 < parser.arguments.size()) {
+        f_output_file_name = parser.arguments[0];
       }
       if (2 < parser.arguments.size()) {
         parser.error("too many file arguments");

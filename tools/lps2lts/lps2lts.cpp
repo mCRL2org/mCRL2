@@ -218,15 +218,22 @@ lts_generation_options parse_command_line(int ac, char** av) {
     parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
   }
 
-  if (0 < parser.arguments.size()) {
+  if (1 < parser.arguments.size()) {
     options.specification = parser.arguments[0];
+    options.lts           = parser.arguments[1];
+  }
+  else if (0 < parser.arguments.size()) {
+    options.lts = parser.arguments[0];
   }
   else {
     parser.error("no LPS file specified");
   }
-  if (1 < parser.arguments.size()) {
-    options.lts = parser.arguments[1];
 
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+
+  if (!options.lts.empty()) {
     if ( options.outformat == lts_none ) {
       options.outformat = lts::guess_format(options.lts);
 
@@ -235,9 +242,6 @@ lts_generation_options parse_command_line(int ac, char** av) {
         options.outformat = lts_mcrl2;
       }
     }
-  }
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
   }
 
   return options;

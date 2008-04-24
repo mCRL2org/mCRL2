@@ -1286,24 +1286,33 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
   }
 
   try {
-    if (0 < parser.arguments.size()) {
-      loadFile(parser.arguments[0]);
+    std::string name_for_input;
+    std::string name_for_output;
+
+    if (1 < parser.arguments.size()) {
+      name_for_input = parser.arguments[0];
+      name_for_output = parser.arguments[1];
     }
-    else {
+    else if (0 < parser.arguments.size()) {
+      name_for_output = parser.arguments[0];
+    }
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+
+    if (name_for_input.empty()) {
       /* Read from standard input */
       readStream();
     }
-    if (1 < parser.arguments.size()) {
-      setSaveFile(parser.arguments[1]);
+    else {
+      loadFile(name_for_input);
     }
+
+    setSaveFile(parser.arguments[0]);
   }
   catch (std::exception& e) {
     // rethrow error messages for correct formatting
     parser.error(e.what());
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
   }
 }
 

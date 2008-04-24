@@ -187,11 +187,12 @@ t_options parse_command_line(int argc, char *argv[])
 
   options.no_statepar = false;
 
-  if (0 < parser.arguments.size()) {
-    options.infilename = parser.arguments[0];
-  }
   if (1 < parser.arguments.size()) {
+    options.infilename = parser.arguments[0];
     options.outfilename = parser.arguments[1];
+  }
+  else if (0 < parser.arguments.size()) {
+    options.outfilename = parser.arguments[0];
   }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

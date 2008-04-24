@@ -112,12 +112,12 @@ t_tool_options parse_command_line(int ac, char** av) {
   if (parser.arguments.size() == 0) {
     parser.error("need at least one file argument");
   }
-  if (parser.arguments.size() == 1) {
-    tool_options.name_for_second  = parser.arguments[0];
-  }
   if (1 < parser.arguments.size()) {
     tool_options.name_for_first  = parser.arguments[0];
     tool_options.name_for_second = parser.arguments[1];
+  }
+  else if (0 < parser.arguments.size()) {
+    tool_options.name_for_second  = parser.arguments[0];
   }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

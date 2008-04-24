@@ -288,11 +288,13 @@ static t_tool_options parse_command_line(int argc, char **argv)
     parser.error("option -f is not specified");
   }
 
-  if (0 < parser.arguments.size()) {
-    tool_options.infilename = parser.arguments[0];
-  }
+
   if (1 < parser.arguments.size()) {
+    tool_options.infilename = parser.arguments[0];
     tool_options.outfilename = parser.arguments[1];
+  }
+  else if (0 < parser.arguments.size()) {
+    tool_options.outfilename = parser.arguments[0];
   }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
@@ -353,7 +355,7 @@ void rename_renamerule_variables(data_expression& rcond, lps::action& rleft, lps
   rright = atermpp::partial_replace(rright, lps::detail::make_data_variable_replacer(src, dest));
 }
 
-lps::specification rewrite_lps(lps::specification lps)
+lps::specification rewrite_lps(lps::specification lps, RewriteStrategy rewrite_strategy)
 {
   lps::summand_list lps_summands = lps.process().summands();
   lps::summand_list new_summands;
@@ -368,7 +370,7 @@ lps::specification rewrite_lps(lps::specification lps)
   data_assignment_list new_assignments;
   data_assignment new_assignment;
 
-  Rewriter *rewr = createRewriter(lps.data());
+  Rewriter *rewr = createRewriter(lps.data(), rewrite_strategy);
 
   new_summands = lps::summand_list();
   for(lps::summand_list::iterator si = lps_summands.begin(); si != lps_summands.end(); ++si)
@@ -421,6 +423,7 @@ lps::specification rewrite_lps(lps::specification lps)
 ATermAppl rename(
             ATermAppl action_rename,
             lps::specification lps_old_spec,
+            RewriteStrategy rewrite_strategy,
             bool norewrite, 
             bool nosumelm)
 {
@@ -731,9 +734,9 @@ ATermAppl rename(
                                                       lps_old_summands), // These are the renamed sumands.
                                           lps_old_spec.initial_process());
 
-  if(!norewrite) lps_new_spec = rewrite_lps(lps_new_spec);
+  if(!norewrite) lps_new_spec = rewrite_lps(lps_new_spec, rewrite_strategy);
   if(!nosumelm)  lps_new_spec = lps::sumelm(lps_new_spec);
-  if(!nosumelm && !norewrite) lps_new_spec = rewrite_lps(lps_new_spec);
+  if(!nosumelm && !norewrite) lps_new_spec = rewrite_lps(lps_new_spec, rewrite_strategy);
 
   gsVerboseMsg("new lps complete\n");
   return lps_new_spec;
@@ -819,5 +822,5 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //rename all assigned actions
   gsVerboseMsg("renaming actions...\n");
-  return rename(action_rename_spec, lps_old_spec, tool_options.no_rewrite, tool_options.no_sumelm);
+  return rename(action_rename_spec, lps_old_spec, tool_options.rewrite_strategy, tool_options.no_rewrite, tool_options.no_sumelm);
 }
