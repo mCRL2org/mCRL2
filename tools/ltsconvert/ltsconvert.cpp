@@ -116,14 +116,21 @@ class t_tool_options {
       }
       else {
         success = l.read_from(infilename,intype,extra);
-  
-        if (!success) {
+        
+        if (!success && (intype == lts_none)) {
+          gsVerboseMsg("reading failed; trying to force format by extension...\n");
+
           lts_type guessed_type(lts::guess_format(infilename));
+        
+          if ( guessed_type == lts_none ) {
+            gsVerboseMsg("unsupported input format extension\n");
+          }
+          else {
+            success = l.read_from(infilename,guessed_type, get_extra(guessed_type));
          
-          success = l.read_from(infilename,guessed_type, get_extra(guessed_type));
-         
-          if (!success) {
-            gsVerboseMsg("reading based on format extension failed as well\n");
+            if (!success) {
+              gsVerboseMsg("reading based on format extension failed as well\n");
+            }
           }
         }
       }
@@ -144,16 +151,6 @@ class t_tool_options {
   
     void set_source(std::string const& filename) {
       infilename = filename;
-  
-      if ( intype == lts_none ) { // XXX really do this?
-        gsVerboseMsg("reading failed; trying to force format by extension...\n");
-  
-        intype = lts::guess_format(infilename);
-  
-        if ( intype == lts_none ) {
-          gsVerboseMsg("unsupported input format extension\n");
-        }
-      }
     }
   
     void set_target(std::string const& filename) {
@@ -293,14 +290,14 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (parser.options.count("lps")) {
     if (1 < parser.options.count("lps")) {
-      std::cerr << "warning: LPS file has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple LPS files specified; can only use one\n";
     }
 
     tool_options.lpsfile = parser.option_argument("lps");
   }
   if (parser.options.count("in")) {
     if (1 < parser.options.count("in")) {
-      std::cerr << "warning: input format has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple input formats specified; can only use one\n";
     }
 
     tool_options.intype = lts::parse_format(parser.option_argument("in").c_str());
@@ -312,7 +309,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   }
   if (parser.options.count("out")) {
     if (1 < parser.options.count("out")) {
-      std::cerr << "warning: output format has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple output formats specified; can only use one\n";
     }
 
     tool_options.outtype = lts::parse_format(parser.option_argument("out").c_str());
@@ -325,8 +322,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (parser.options.count("formats")) {
     print_formats(stderr);
-
-    exit(0);
+    exit(EXIT_SUCCESS);
   }
   if (parser.options.count("none")) {
     tool_options.equivalence = lts_eq_none;
@@ -359,11 +355,18 @@ t_tool_options parse_command_line(int ac, char** av) {
   if (0 < parser.arguments.size()) {
     tool_options.set_source(parser.arguments[0]);
   }
-  else if (tool_options.intype == lts_none) {
-    tool_options.intype = lts_aut;
-  }
   if (1 < parser.arguments.size()) {
     tool_options.set_target(parser.arguments[1]);
+  } else {
+    if ( tool_options.outtype == lts_none ) {
+      if ( !tool_options.lpsfile.empty() ) {
+        gsWarningMsg("no output format set; using fsm because --lps was used\n");
+        tool_options.outtype = lts_fsm;
+      } else {
+        gsWarningMsg("no output format set or detected; using default (aut)\n");
+        tool_options.outtype = lts_aut;
+      }
+    }
   }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

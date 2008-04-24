@@ -274,6 +274,7 @@ tool_options parse_command_line(int argc, char** argv) {
 
   if (parser.options.count("formats")) {
     print_formats(stderr);
+    exit(EXIT_SUCCESS);
   }
   if (parser.options.count("equiv")) {
     opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equiv").c_str());
@@ -288,7 +289,7 @@ tool_options parse_command_line(int argc, char** argv) {
 
   if (parser.options.count("in")) {
     if (1 < parser.options.count("in")) {
-      std::cerr << "warning: input format has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple input formats specified; can only use one\n";
     }
 
     opts.intype = lts::parse_format(parser.option_argument("in").c_str());
@@ -297,9 +298,6 @@ tool_options parse_command_line(int argc, char** argv) {
       std::cerr << "warning: format '" << parser.option_argument("in") <<
                    "' is not recognised; option ignored" << std::endl;
     }
-  }
-  else if (!opts.infilename.empty()) {
-    opts.intype = lts::guess_format(opts.infilename.c_str());
   }
 
   return opts;
@@ -314,7 +312,7 @@ void process(tool_options const& opts) {
     gsVerboseMsg("reading LTS from stdin...\n");
 
     if ( !l.read_from(std::cin, opts.intype) ) {
-      throw std::runtime_error("cannot read LTS from stdin\n");
+      throw std::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
     }
   }
   else {
@@ -322,16 +320,17 @@ void process(tool_options const& opts) {
 
     bool success = l.read_from(opts.infilename,opts.intype);
   
-    if (!success) {
-      success = l.read_from(opts.infilename, lts::guess_format(opts.infilename));
-     
-      if (!success) {
-        gsVerboseMsg("reading based on format extension failed as well\n");
+    if (!success && (opts.intype == lts_none)) { // XXX really do this?
+      gsVerboseMsg("reading failed; trying to force format by extension...\n");
+
+      lts_type guessedtype = lts::guess_format(opts.infilename);
+      if ( guessedtype != lts_none ) {
+        success = l.read_from(opts.infilename, guessedtype);
       }
     }
     if (!success) {
-      throw std::runtime_error("cannot read LTS from file " + opts.infilename +
-                                             "\nretry with -v/--verbose for more information");
+      throw std::runtime_error("cannot read LTS from file '" + opts.infilename +
+                                             "'\nretry with -v/--verbose for more information");
     }
   }
 

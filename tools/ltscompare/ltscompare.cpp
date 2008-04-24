@@ -77,7 +77,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       "needed to store the correct parameter names of states when saving "
       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
     add_option("in1", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the format for INFIL1 (or stdin)", 'i').
+      "use FORMAT as the format for INFILE1 (or stdin)", 'i').
     add_option("in2", make_mandatory_argument("FORMAT"),
       "use FORMAT as the format for INFILE2", 'j').
     add_option("strong",
@@ -97,8 +97,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (parser.options.count("formats")) {
     print_formats(stderr);
-
-    exit(1);
+    exit(EXIT_SUCCESS);
   }
   if (parser.options.count("strong")) {
     tool_options.equivalence = lts_eq_strong;
@@ -114,7 +113,6 @@ t_tool_options parse_command_line(int ac, char** av) {
     parser.error("need at least one file argument");
   }
   if (parser.arguments.size() == 1) {
-    tool_options.format_for_first = lts_aut;
     tool_options.name_for_second  = parser.arguments[0];
   }
   if (1 < parser.arguments.size()) {
@@ -127,7 +125,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   if (parser.options.count("in1")) {
     if (1 < parser.options.count("in1")) {
-      std::cerr << "warning: first input format has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
     }
 
     tool_options.format_for_first = lts::parse_format(parser.option_argument("in1").c_str());
@@ -142,7 +140,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   }
   if (parser.options.count("in2")) {
     if (1 < parser.options.count("in2")) {
-      std::cerr << "warning: second input format has already been specified; extra option ignored\n";
+      std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
     }
 
     tool_options.format_for_second = lts::parse_format(parser.option_argument("in2").c_str());
@@ -166,20 +164,42 @@ int process(t_tool_options const & tool_options) {
     gsVerboseMsg("reading first LTS from stdin...\n");
 
     if ( !l1.read_from(std::cin, tool_options.format_for_first) ) {
-      throw std::runtime_error("cannot read LTS from stdin");
+      throw std::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
     }
   } else {
     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
     if ( !l1.read_from(tool_options.name_for_first.c_str(), tool_options.format_for_first) ) {
-      throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'");
+      bool failed = true; 
+      if ( tool_options.format_for_first == lts_none ) { // XXX really do this? 
+        gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
+        lts_type guessedtype = lts::guess_format(tool_options.name_for_first); 
+        if ( (guessedtype != lts_none) && l1.read_from(tool_options.name_for_first.c_str(),guessedtype) ) 
+        { 
+          failed = false; 
+        } 
+      } 
+      if ( failed ) {
+        throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
+      }
     }
   }
 
   gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
   if ( !l2.read_from(tool_options.name_for_second.c_str(), tool_options.format_for_second) ) {
-    throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'");
+    bool failed = true; 
+    if ( tool_options.format_for_second == lts_none ) { // XXX really do this? 
+      gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
+      lts_type guessedtype = lts::guess_format(tool_options.name_for_second); 
+      if ( (guessedtype != lts_none) && l2.read_from(tool_options.name_for_second.c_str(),guessedtype) ) 
+      { 
+        failed = false; 
+      } 
+    } 
+    if ( failed ) {
+      throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
+    }
   }
 
   gsVerboseMsg("comparing LTSs...\n");
