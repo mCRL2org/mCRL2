@@ -73,15 +73,14 @@ t_tool_options parse_command_line(int ac, char** av) {
     add_tau_action(strdup(parser.option_argument("tau").c_str()));
   }
 
-  if (1 < parser.arguments.size()) {
-    options.inputname = parser.arguments[0].c_str();
-    options.outputname = parser.arguments[1];
-  }
-  else if (0 < parser.arguments.size()) {
-    options.outputname = parser.arguments[0];
-  }
   if (parser.arguments.size() != 2) {
     parser.error("incorrect number of arguments");
+  }
+  else if (1 < parser.arguments.size()) {
+    options.inputname = parser.arguments[0].c_str();
+  }
+  else if (0 < parser.arguments.size()) {
+    options.outputname = parser.arguments[1];
   }
   if (options.inputname == options.outputname) {
     parser.error("input file and output file are not allowed to be the same");

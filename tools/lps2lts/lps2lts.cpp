@@ -218,19 +218,19 @@ lts_generation_options parse_command_line(int ac, char** av) {
     parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
   }
 
-  if (1 < parser.arguments.size()) {
-    options.specification = parser.arguments[0];
-    options.lts           = parser.arguments[1];
-  }
-  else if (0 < parser.arguments.size()) {
-    options.lts = parser.arguments[0];
-  }
-  else {
-    parser.error("no LPS file specified");
-  }
-
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
+  }
+  else if (parser.arguments.size() == 0) {
+    parser.error("no LPS file specified");
+  }
+  else {
+    if (0 < parser.arguments.size()) {
+      options.specification = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      options.lts = parser.arguments[1];
+    }
   }
 
   if (!options.lts.empty()) {

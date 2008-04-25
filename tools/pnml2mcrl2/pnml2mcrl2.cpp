@@ -2422,15 +2422,16 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       rec_par = ATfalse;
     }
 
-    if (1 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-      tool_options.outfilename = parser.arguments[1];
-    }
-    else if (0 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[0];
-    }
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.outfilename = parser.arguments[1];
+      }
     }
 
     return tool_options;

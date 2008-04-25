@@ -58,15 +58,16 @@ tool_options_type parse_command_line(int ac, char** av) {
   options.convert_funcs = parser.options.count("no-conv-map") == 0;
   options.convert_bools = parser.options.count("no-conv-cons") == 0;
 
-  if (1 < parser.arguments.size()) {
-    options.infilename = parser.arguments[0];
-    options.outfilename = parser.arguments[1];
-  }
-  else if (0 < parser.arguments.size()) {
-    options.outfilename = parser.arguments[0];
-  }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
+  }
+  else {
+    if (0 < parser.arguments.size()) {
+      options.infilename = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      options.outfilename = parser.arguments[1];
+    }
   }
 
   return options;

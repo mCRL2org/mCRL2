@@ -338,15 +338,16 @@ static t_tool_options parse_command_line(int argc, char **argv) {
     parser.error("option -f is not specified");
   }
 
-  if (1 < parser.arguments.size()) {
-    tool_options.infilename = parser.arguments[0];
-    tool_options.outfilename = parser.arguments[1];
-  }
-  else if (0 < parser.arguments.size()) {
-    tool_options.outfilename = parser.arguments[0];
-  }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
+  }
+  else {
+    if (0 < parser.arguments.size()) {
+      tool_options.infilename = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.outfilename = parser.arguments[1];
+    }
   }
 
   return tool_options;

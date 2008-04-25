@@ -352,26 +352,32 @@ t_tool_options parse_command_line(int ac, char** av) {
     parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
   }
 
-  if (1 < parser.arguments.size()) {
-    tool_options.set_source(parser.arguments[0]);
-    tool_options.set_target(parser.arguments[1]);
-  }
-  else if (0 < parser.arguments.size()) {
-    tool_options.set_target(parser.arguments[0]);
-  }
-  else {
-    if ( tool_options.outtype == lts_none ) {
-      if ( !tool_options.lpsfile.empty() ) {
-        gsWarningMsg("no output format set; using fsm because --lps was used\n");
-        tool_options.outtype = lts_fsm;
-      } else {
-        gsWarningMsg("no output format set or detected; using default (aut)\n");
-        tool_options.outtype = lts_aut;
-      }
-    }
-  }
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
+  }
+  else {
+    if (0 < parser.arguments.size()) {
+      tool_options.set_source(parser.arguments[0]);
+    }
+    else {
+      if ( tool_options.intype == lts_none ) {
+        tool_options.intype = lts_aut;
+      }
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.set_target(parser.arguments[1]);
+    }
+    else {
+      if ( tool_options.outtype == lts_none ) {
+        if ( !tool_options.lpsfile.empty() ) {
+          gsWarningMsg("no output format set; using fsm because --lps was used\n");
+          tool_options.outtype = lts_fsm;
+        } else {
+          gsWarningMsg("no output format set or detected; using default (aut)\n");
+          tool_options.outtype = lts_aut;
+        }
+      }
+    }
   }
 
   return tool_options;

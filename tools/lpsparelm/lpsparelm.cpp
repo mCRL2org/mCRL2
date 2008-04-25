@@ -58,15 +58,16 @@ struct tool_configuration {
 
     command_line_parser parser(clinterface, ac, av);
 
-    if (0 < parser.arguments.size()) {
-      input  = parser.arguments[0];
-      output = parser.arguments[1];
-    }
-    else if (1 < parser.arguments.size()) {
-      output = parser.arguments[0];
-    }
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        input  = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        output = parser.arguments[1];
+      }
     }
   }
 };
