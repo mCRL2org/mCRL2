@@ -1309,7 +1309,7 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
       loadFile(name_for_input);
     }
 
-    setSaveFile(parser.arguments[0]);
+    setSaveFile(name_for_output);
   }
   catch (std::exception& e) {
     // rethrow error messages for correct formatting
