@@ -45,5 +45,9 @@ int test_main(int argc, char** argv )
   BOOST_CHECK(equal_signatures(a1, a2));
   BOOST_CHECK(!equal_signatures(a1, a3));
 
+  action empty = action();
+  std::cerr << pp(empty) << std::endl;
+  std::cerr << pp(action()) << std::endl;
+
   return 0;
 }
