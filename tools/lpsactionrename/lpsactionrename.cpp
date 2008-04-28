@@ -427,7 +427,9 @@ ATermAppl rename(
             bool norewrite, 
             bool nosumelm)
 {
-  aterm_list rename_rules = ATLgetArgument(ATAgetArgument(action_rename, 2), 0);
+  // In the line below the reverse is necessary, because the parser puts the
+  // rename rules in the reversed order compared to the order they appear in the text.
+  aterm_list rename_rules = ATreverse(ATLgetArgument(ATAgetArgument(action_rename, 2), 0));
   lps::summand_list lps_old_summands = lps_old_spec.process().summands();
   lps::summand_list lps_summands = lps::summand_list(); //for changes in lps_old_summands
   lps::action_list lps_new_actions = lps::action_list();;
@@ -445,6 +447,7 @@ ATermAppl rename(
   {
     lps::summand_list lps_new_summands;
     aterm_appl rename_rule = *i;
+    
     aterm_appl::iterator j =  rename_rule.begin();
     //skipping the data_variable_list j
     data_expression rule_condition = data_expression(*++j);     
@@ -645,7 +648,7 @@ ATermAppl rename(
                         i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
               { if (to_delta) 
-                { *i=std::make_pair(true,lps::action());
+                { *i=std::make_pair(true,lps::action_list());
                 }
                 else 
                 { *i=std::make_pair(false,push_front(i->second,renamed_rule_new_action));
@@ -786,6 +789,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
   }
   ATermAppl action_rename_spec = parse_action_rename_spec(formstream);
   formstream.close();
+  
   if (action_rename_spec == NULL) {
     gsErrorMsg("parsing failed\n");
     return NULL;
