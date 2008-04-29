@@ -243,7 +243,8 @@ namespace lps {
     {
       //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
       //is always the same.
-      if (!is_data_variable(lhs(working_condition)) && is_data_variable(rhs(working_condition)))
+      if (!is_data_variable(lhs(working_condition)) && is_data_variable(rhs(working_condition)) && 
+          find_data_variable(summand_.summation_variables(), rhs(working_condition)))
       {
         working_condition = swap_equality(working_condition);
       }
@@ -262,14 +263,16 @@ namespace lps {
             // apply all previously added substitutions to the rhs.
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();
-          } else if (is_data_variable(rhs(working_condition))) {
+          } else if (is_data_variable(rhs(working_condition)) && 
+                     occurs_in_expression(summand_.summation_variables(), data_variable(rhs(working_condition)))) {
             // check whether the converse is possible
             if (substitutions.count(rhs(working_condition)) == 0) {
               sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
               result = true_();
             }
           } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 &&
-                     is_data_variable(substitutions[lhs(working_condition)])) {
+                       is_data_variable(substitutions[lhs(working_condition)]) &&
+                       occurs_in_expression(summand_.summation_variables(), data_variable(substitutions[lhs(working_condition)]))) {
             sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();

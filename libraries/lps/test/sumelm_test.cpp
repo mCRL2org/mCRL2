@@ -269,6 +269,30 @@ void test_case_9()
   BOOST_CHECK(sumvar_count == 1);
 }
 
+///Test case for issue #380
+void test_case_10()
+{
+  const std::string text(
+  "act a:Nat;\n"
+  "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
+  "init P(0);\n"
+  );
+
+  specification s0 = mcrl22lps(text);
+  specification s1 = sumelm(s0);
+  summand_list summands1 = s1.process().summands();
+  int sumvar_count = 0;
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    BOOST_CHECK(i->condition() != data_expr::true_());
+    if (!i->summation_variables().empty())
+    {
+      ++sumvar_count;
+    }
+  }
+  BOOST_CHECK(sumvar_count == 0);
+}
+
 int test_main(int ac, char** av)
 {
   MCRL2_ATERM_INIT(ac, av)
@@ -282,6 +306,7 @@ int test_main(int ac, char** av)
   test_case_7();
   test_case_8();
   test_case_9();
+  test_case_10();
 
   return 0;
 }
