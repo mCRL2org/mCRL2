@@ -2193,10 +2193,9 @@ void ArcDiagram::handleHits( const vector< int > &ids )
     	{    	
         	if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
         	{
-            	currIdxDgrm = -1;
-            	updateMarkBundles();
-
-            	mediator->handleUnshowFrame();
+			currIdxDgrm = -1;
+            		updateMarkBundles();
+            		mediator->handleUnshowFrame();
         	}
         	canvas->clearToolTip();
     	}
@@ -2586,7 +2585,7 @@ void ArcDiagram::handleNextDiagram( const size_t &dgrmIdx )
         framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
         attrsDgrm[currIdxDgrm],
         col );
-    
+
     updateMarkBundles();
 }
 
@@ -2605,8 +2604,7 @@ void ArcDiagram::showDiagram( const int &dgrmIdx )
         // show diagram
         showDgrm[dgrmIdx] = true;
         
-        // find attributes linked to DOF's in diagram
-        {
+        // find attributes linked to DOF's in diagram        
         for ( int i = 0; i < diagram->getSizeShapes(); ++i )
         {
             // get result
@@ -2637,8 +2635,12 @@ void ArcDiagram::showDiagram( const int &dgrmIdx )
             attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
             if ( attr != NULL )
                 attrs.insert( attr );
+		
+	    attr = diagram->getShape(i)->getDOFText()->getAttribute();
+	    if( attr != NULL )
+		attrs.insert( attr );
         }
-        }
+        
 
         // find attributes corresponding to path to root in clustering tree
         while ( clust != graph->getRoot() )
@@ -2647,7 +2649,7 @@ void ArcDiagram::showDiagram( const int &dgrmIdx )
             clust = clust->getParent();
         }
 
-        // update attrsDaigram
+        // update attrsDiagram
         attrsDgrm[dgrmIdx].clear();
         set< Attribute* >::iterator it;
         for ( it = attrs.begin(); it != attrs.end(); ++it )

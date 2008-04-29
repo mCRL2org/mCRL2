@@ -43,8 +43,10 @@ public:
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setVariable( const string &msg );
+    void setVariableName( const string &msg );
     void setCheckedId( const int &id );
     void setNote( const string &msg );
+    void setTextSize( const int &size );
 
     void setCenter( const double &xC, const double &yC );
     void setDFC( const double &xD, const double &yD );
@@ -79,7 +81,7 @@ public:
     void setModeEdtDOFAgl();
     void setModeEdtDOFCol();
     void setModeEdtDOFOpa();
-    void setModeEdtDOFVar();
+    void setModeEdtDOFText();
     
     void setLineWidth( const double &w );
     void setLineColor( const ColorRGB &c );
@@ -102,6 +104,9 @@ public:
     int getIndex();
     int getCheckedId();
     string getNote();
+    string getVariable();
+    string getVariableName();
+    int getTextSize();
     
     void getCenter( double &x, double &y );
     double getXCtr();
@@ -113,7 +118,7 @@ public:
     void getHinge( double &x, double &y );
     double getXHinge();
     double getYHinge();
-    
+
     int getType();
     int getMode();
     double getLineWidth();
@@ -131,11 +136,10 @@ public:
     DOF* getDOFHgt();
     DOF* getDOFAgl();
     DOF* getDOFCol();
-    DOF* getDOFVar();
+    DOF* getDOFText();
     void getDOFColYValues( vector< double > &yVals );
     DOF* getDOFOpa();
     void getDOFOpaYValues( vector< double > &yVals );
-    string getVariable();
 
     void getDOFAttrs( vector< Attribute* > &attrs );
 
@@ -178,7 +182,7 @@ public:
         MODE_EDT_DOF_AGL,
         MODE_EDT_DOF_COL,
         MODE_EDT_DOF_OPA,
-        MODE_EDT_DOF_VAR,
+        MODE_EDT_DOF_TEXT,
 
         ID_HDL_CTR,
         ID_HDL_TOP_LFT,
@@ -199,8 +203,7 @@ public:
     };
     static double hdlSzeHnt;
     static double minSzeHnt;
-    static int    segNumHnt;
-    static int	szeTxt;
+    static int    segNumHnt;    
     static ColorRGB colTxt;
 
 protected:
@@ -264,13 +267,15 @@ protected:
     // properties
     int      type;      // type of shape
     int      mode;      // drawing mode
+    int	     szeTxt;	// font size
     double   linWth;    // line width,      pix
     ColorRGB colLin;    // line color
     ColorRGB colFil;    // fill color
     double   hdlSze;    // handle size,     pix
     int checkedVariableId; // Event id of the variable displayed on the shape;
     string	 variable;  //variable shown on the shape
-    string 	 note;		// note shown on the shape
+    string	 variableName; // name of the variable
+    string	 note;	// note shown on the shape
     GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH]; // resources for drawing text
     bool texturesGenerated; // check whether textures for drawing text is generated or not
@@ -282,7 +287,7 @@ protected:
     DOF* wthDOF;  // composition
     DOF* hgtDOF;  // composition
     DOF* aglDOF;  // composition
-    DOF* varDOF;	  // composition
+    DOF* textDOF;	  // composition
     double xHge,   yHge;   // hinge point, relative to center
 
     DOF* colDOF;  // composition

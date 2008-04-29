@@ -270,7 +270,7 @@ double GLCanvas::getPixelSize()
     // get pixel (device) sizes
     int widthPixels;
     int heightPixels;
-    GetClientSize( 
+    GetClientSize(
         &widthPixels,
         &heightPixels );
     
@@ -668,7 +668,8 @@ void GLCanvas::onKeyDown( wxKeyEvent &event )
 	SetCurrent();
 	mediator->handleKeyDownEvent(
         this,
-        event.GetKeyCode() );
+        event.GetKeyCode(),
+	event.GetModifiers() );
 	event.Skip();
 	
 	Refresh();

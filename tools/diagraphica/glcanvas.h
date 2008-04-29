@@ -102,7 +102,7 @@ private:
 
     bool handleMouseMotion;
 
-	wxString tooltip;
+    wxString tooltip;
     
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()

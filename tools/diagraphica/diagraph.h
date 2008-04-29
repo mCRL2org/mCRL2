@@ -174,6 +174,8 @@ public:
 	void handleShowVariable( const string &variable, const int &variableId );
 	void handleShowNote( const string &variable, const int &shapeId );
 	void handleAddText( string &variable, int &shapeId );
+	void handleTextSize( int &textSize, int &shapeId );
+	void handleSetTextSize( int &textSize, int &shapeId );
 	void handleCutShape();
 	void handleCopyShape();
 	void handlePasteShape();
@@ -183,6 +185,8 @@ public:
 	void handleBringForwardShape();
 	void handleSendBackwardShape();
 	void handleEditDOFShape();
+	void handleSetDOF( const int &attrIdx );
+	void handleCheckedVariable( const int &idDOF, const int &variableId );
 	
 	void handleEditDOF( 
 	const vector< int > &degsOfFrdmIds,
@@ -381,7 +385,8 @@ public:
 	void handleMouseLeaveEvent( GLCanvas* c );
 	void handleKeyDownEvent(
 	GLCanvas* c,
-	const int &keyCode );
+	const int &keyCode,
+	const int &specialKey );
 	void handleKeyUpEvent(
 	GLCanvas* c,
 	const int &keyCode,

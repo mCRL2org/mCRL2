@@ -1810,7 +1810,24 @@ void DiaGraph::handleAddText( string &variable, int &shapeId)
 {
     if ( mode == MODE_EDIT && editor != NULL )
         return editor->handleAddText( variable, shapeId);
-   
+}
+
+
+// ----------------------------
+void DiaGraph::handleTextSize( int &textSize, int &shapeId )
+// ----------------------------
+{
+    if ( mode == MODE_EDIT && editor != NULL )
+        return editor->handleTextSize( textSize, shapeId);
+}
+
+
+// ----------------------------
+void DiaGraph::handleSetTextSize( int &textSize, int &shapeId )
+// ----------------------------
+{
+	if ( mode == MODE_EDIT && editor != NULL )
+        	editor->handleSetTextSize( textSize, shapeId );
 }
 
 
@@ -1896,6 +1913,27 @@ void DiaGraph::handleEditDOFShape()
     }
 }
 
+
+// --------------------------------
+void DiaGraph::handleSetDOF( const int &attrIdx )
+// --------------------------------
+{
+	if ( mode == MODE_EDIT && editor != NULL )
+	{
+        	editor->handleSetDOF( attrIdx );
+	}
+}
+
+
+// --------------------------------
+void DiaGraph::handleCheckedVariable( const int &idDOF, const int &variableId )
+// --------------------------------
+{
+	if ( mode == MODE_EDIT && editor != NULL )
+	{
+        	editor->handleCheckedVariable( idDOF, variableId );
+	}
+}
 
 // ------------------------------------
 void DiaGraph::handleEditDOF(
@@ -3323,13 +3361,14 @@ void DiaGraph::handleMouseLeaveEvent( GLCanvas* c )
 // -------------------------------
 void DiaGraph::handleKeyDownEvent(
     GLCanvas* c,
-    const int &keyCode )
+    const int &keyCode,
+    const int &specialKey )
 // -------------------------------
 {
     if ( mode == MODE_EDIT )
     {
         if ( c == canvasEdit && editor != NULL )
-            editor->handleKeyDownEvent( keyCode );
+            editor->handleKeyDownEvent( keyCode, specialKey );
     }
     else if ( mode == MODE_ANALYSIS )
     {

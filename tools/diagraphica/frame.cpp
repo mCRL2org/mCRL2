@@ -163,7 +163,17 @@ void Frame::handleNote( const int &shapeId, const string &msg )
 {
 	currentShapeId = shapeId;
 	currentShapeNote = msg;
-    initFrameNote();
+        initFrameNote();
+}
+
+
+// ----------------------------------------
+void Frame::handleTextSize( const int &shapeId, const int &textSize )
+// ----------------------------------------
+{
+	currentShapeId = shapeId;
+	currentTextSize = textSize;
+        initFrameTextSize();
 }
 
 
@@ -431,17 +441,20 @@ void Frame::displShapeMenu(
         Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
         id--;
     }
-            	 
+
     menu.Append(ID_MENU_ITEM_SHOW_VARIABLES,
     			wxT( "Show Variable" ),
     			addAttributeMenu,
     			wxT( "Show variables values on this shape" ) );
     			
     menu.Append(ID_MENU_ITEM_SHOW_NOTE,
-    			wxT( "Add Note" ),
-    			wxT( "Add note for this shape" ) );
+    			wxT( "Edit Note" ),
+    			wxT( "Edit or add note to this shape" ) );
+    menu.Append(ID_MENU_ITEM_TEXT_SIZE,
+    			wxT( "Text Size" ),
+    			wxT( "Change the size of the text displayed on the shape" ) );
     
-	menu.AppendSeparator();
+    menu.AppendSeparator();
     menu.Append( 
         ID_MENU_ITEM_SHAPE_CUT,
         wxT( "Cut" ),
@@ -952,6 +965,10 @@ void Frame::handleCloseFrame( PopupFrame* f )
     	frameNote = NULL;
     	toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
     }
+    else if( f == frameTextSize )
+    {
+	frameTextSize = NULL;
+    }
 }
 
 
@@ -1402,7 +1419,7 @@ void Frame::initSplitterLft()
         splitterFrame,
         ID_SPLITTER_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterLft->SetSashGravity( 1.0 );
-    splitterLft->SetMinimumPaneSize( 100 );
+    splitterLft->SetMinimumPaneSize( 200 );
 	
     // init children
     initSplitterTopLft();
@@ -1811,7 +1828,7 @@ void Frame::initSplitterRgt()
         splitterFrame,
         ID_SPLITTER_RGT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterRgt->SetSashGravity( 1.0 );
-    splitterRgt->SetMinimumPaneSize( 100 );
+    splitterRgt->SetMinimumPaneSize( 200 );
 
     // init children
     initPanelTopRgt();
@@ -1859,7 +1876,7 @@ void Frame::initCanvasOne()
         mediator,
         panelTopRgt,
         ID_CANVAS_MAIN );
-    canvasOne->SetMinSize( panelTopRgt->GetSize() );
+    //canvasOne->SetMinSize( panelTopRgt->GetSize() );
     
     sizerTopRgt->Add(
         canvasOne,
@@ -1952,9 +1969,9 @@ void Frame::initPanelBotRgt()
         wxVSCROLL |
         wxRAISED_BORDER );
     panelBotRgt->SetSizer( sizerBotRgt );
-	sizerBotRgt->Fit(panelBotRgt);
+    sizerBotRgt->Fit(panelBotRgt);
     panelBotRgt->SetScrollRate( 10, 10 );
-    
+
     // children
     initCanvasTwo();
 }
@@ -1968,12 +1985,14 @@ void Frame::initCanvasTwo()
         mediator,
         panelBotRgt,
         ID_CANVAS_LFT );
-    //canvasTwo->SetMinSize( wxSize( 0, 0 ) );
+    canvasTwo->SetMinSize( panelBotRgt->GetSize() );
     
     sizerBotRgt->Add(
         canvasTwo,
-        1,
-        wxEXPAND | wxALL, 10  );
+        1,         // vert stretch
+        wxEXPAND | // hori stretch
+        wxALL,     // border
+	10  );
 }
 
 // -----------------------
@@ -2181,7 +2200,7 @@ void Frame::initFrameNote()
 		    this,
 		    ID_FRAME_NOTE,
 		    wxString( wxT( "Add Note" ) ),
-		    wxPoint(350,250),
+		    wxPoint(350,300),
 		    wxSize( 
 		        (int)(0.27*this->GetSize().GetWidth()),
 		        (int)(0.50*this->GetSize().GetHeight()) ) );
@@ -2211,6 +2230,58 @@ void Frame::initFrameNote()
 		frameNote->Show();
 		frameNote->Raise();
 		noteText->SetFocus(); // Set focus to the textbox
+	}
+}
+
+
+// -----------------------
+void Frame::initFrameTextSize()
+// -----------------------
+{
+	if( frameTextSize == NULL )
+	{
+		// init frame
+		sizerTextSize = new wxBoxSizer( wxVERTICAL );
+		frameTextSize = new PopupFrame(
+		    mediator,
+		    this,
+		    ID_FRAME_TEXT_SIZE,
+		    wxString( wxT( "Change Text Size" ) ),
+		    wxPoint(350,250),
+		    wxSize( 
+		        (int)(0.27*this->GetSize().GetWidth()),
+		        (int)(0.50*this->GetSize().GetHeight()) ) );
+
+		frameTextSize->SetSizer( sizerTextSize );
+
+		// create children
+		
+		
+		wxString initials[7];
+		for( int i = 0; i < 7; i++ )
+		{
+			initials[i] = wxString::Format(_T("%d"), (8 + 2*i));
+		}
+		// create textbox
+		wxString currentSize = wxString::Format(_T("%d"), currentTextSize );
+		textSizeBox = new wxComboBox( frameTextSize, -1, currentSize, wxPoint(-1, -1), wxSize(40, 40), 7, initials );
+		sizerTextSize->Add ( textSizeBox, 0, wxEXPAND | wxALL, 5 );
+		wxButton* okButton = new wxButton( frameTextSize, ID_OK_BUTTON_TEXT_SIZE, wxT("Ok"));
+		sizerTextSize->Add ( okButton, 0, wxEXPAND | wxALL, 5 );
+
+    		// handle event for buttons
+    		Connect( ID_OK_BUTTON_TEXT_SIZE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));  		
+		
+		frameTextSize->Layout();
+		frameTextSize->Fit();
+		
+		frameTextSize->SetMinSize(frameTextSize->GetSize());
+		frameTextSize->SetMaxSize(frameTextSize->GetSize());
+
+		// show
+		frameTextSize->Show();
+		frameTextSize->Raise();
+		textSizeBox->SetFocus(); // Set focus to the textbox
 	}
 }
 
@@ -2276,13 +2347,11 @@ void Frame::initPanelNote()
 }
 
 
-
-
 // --------------------------
 void Frame::initListCtrlDOF()
 // --------------------------
 {
-	wxSize* size = new wxSize(180,180);
+    wxSize* size = new wxSize(180,200);
     // init list
     listCtrlDOF = new wxListCtrl(
         panelDOF,
@@ -3519,10 +3588,10 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             	id--;         	
             }
             	 
-           	menu.Append(ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
-           				wxT( "Add attribute" ),
-           				addAttributeMenu,
-           				wxT( "Add attribute" ) );
+           menu.Append(ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
+           			wxT( "Add attribute" ),
+           			addAttributeMenu,
+           			wxT( "Add attribute" ) );
         
             // determine of an attribute has been linked
             // code thanks to 'www.wxwidgets.org/wiki'
@@ -3932,6 +4001,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         {
             idDOF = listCtrlDOF->GetItemData( item );
             mediator->handleUnlinkDOFAttr( idDOF );
+	    mediator->handleCheckedVariable( idDOF, -1 ); // Uncheck the variable in the right menu which is displayed when right clicked on a shape
         }
     }
     else if ( e.GetId() == ID_MENU_ITEM_CLUST_DISTR_PLOT )
@@ -4046,6 +4116,16 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     		handleNote( shapeId, msg );
     	}
     }
+    else if ( e.GetId() == ID_MENU_ITEM_TEXT_SIZE )
+    {
+    	int shapeId;
+    	int textSize;
+    	mediator->handleTextSize( textSize, shapeId );
+    	if( shapeId > -1 )
+    	{
+    		handleTextSize( shapeId, textSize );
+    	}
+    }
     else
     {
     	long item   = -1;
@@ -4061,7 +4141,8 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 		    	name.ToLong((long *)&idxAttr); // Converting String to int    
 		    	
 		    	name = x->GetLabelFromText(x->GetText());
-		    	
+		    	int checkedItemId = -1;
+
         		if(dofMenu == true)
         		{		 
 		    		item = listCtrlDOF->GetNextItem(
@@ -4070,36 +4151,46 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 		        			wxLIST_STATE_SELECTED );
 		    		if ( item >= 0 )
 		    		{
+					checkedItemId = e.GetId();
 		        		idDOF = listCtrlDOF->GetItemData( item );
 		        		item = listCtrlAttr->FindItem(-1, name);
 		        		mediator->handleLinkDOFAttr( idDOF, idxAttr );
+					mediator->handleCheckedVariable( idDOF, checkedItemId );
 		    		}
 		    	}
 		    	else
 		    	{
-		    		int checkedItemId = -1;
+				bool hasDomain = true;		
 		    		string name = "";
 		    		if( !x->IsChecked())
 		    		{
-		    			x->Check( true );
+		    			x->Check( false );
+					mediator->handleSetDOF( -1 ); //UnLink the variable from DOFText, -1 indicates Unlink Operation
 		    		}
 		    		else
 		    		{
-		    			checkedItemId = e.GetId();
+					checkedItemId = e.GetId();
 			    		Graph* g = (Graph*) (mediator->getGraph()); // Obtain graph from the mediator for retrieving attribute properties
 			    		Attribute* attribute = g->getAttribute(idxAttr); // Get selected attribute
 			    		name = attribute->getName(); // Get the name of the selected attribute
-			    		string type = attribute->getType(); // Get the type of the selected attribute
-			    		string value = attribute->getCurValue(0)->getValue(); // Get the top current value of the selected attribute		    		
-			    		name.append(": ");
-			    		name.append(value); // Generate the text will be displayed on the shape		    		
+					if( attribute->getSizeCurValues() == 0)
+					{
+						hasDomain = false;
+					}
+					else
+					{
+						string value = attribute->getCurValue(0)->getValue(); // Get current value of the selected attribute
+						name.append(": ");
+						name.append(value); // Generate the text will be displayed on the shape
+					}
+					mediator->handleSetDOF( idxAttr ); //Link the variable to the DOFText
 				}
-		    		mediator->handleShowVariable( name, checkedItemId ); 		    		
-		    	}
+				mediator->handleShowVariable( name, checkedItemId );
+			}
         	}
         	x = NULL;
-        }    
-        addAttributeMenu = NULL;	
+        }
+        addAttributeMenu = NULL;
     }
 }
 
@@ -4358,6 +4449,28 @@ void Frame::onButton( wxCommandEvent &e )
     {
     	noteText->Clear();
     }
+    else if ( e.GetId() == ID_OK_BUTTON_TEXT_SIZE )
+    {
+	if( textSizeBox->GetValue().IsNumber() ) // Check whether user entered a number or not
+	{
+		if ( frameTextSize->Destroy() )
+		{
+			double size;		
+			textSizeBox->GetValue().ToDouble( &size );		
+			int textSize = (int) size;
+			if( textSize < 8 ) // Font size can be between 8 and 40
+				textSize = 8;
+			else if( textSize > 40 )
+				textSize = 40;
+			frameTextSize = NULL;
+			mediator->handleSetTextSize( textSize, currentShapeId);
+		}
+	}
+	else
+	{
+		wxMessageBox(wxT("Please enter an integer"),wxT("Wrong Input"), wxOK | wxICON_INFORMATION, this);
+	}
+    }
 }
 
 /*
@@ -4498,6 +4611,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     // edit shapes
     EVT_MENU( ID_MENU_ITEM_SHOW_VARIABLES, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHOW_NOTE, Frame::onPopupMenu )
+    EVT_MENU( ID_MENU_ITEM_TEXT_SIZE, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_CUT, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_COPY, Frame::onPopupMenu )
     EVT_MENU( ID_MENU_ITEM_SHAPE_PASTE, Frame::onPopupMenu )

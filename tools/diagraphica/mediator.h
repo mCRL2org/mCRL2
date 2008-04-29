@@ -166,10 +166,11 @@ public:
 		const bool &sendBackward,
 		const bool &editDOF,
 		const int  &checkedItem ) = 0;
-	virtual void handleShowVariable( const string &variable, 
-									const int &variableId ) = 0;
+	virtual void handleShowVariable( const string &variable, const int &variableId ) = 0;
 	virtual void handleShowNote( const string &variable, const int &shapeId ) = 0;
 	virtual void handleAddText( string &variable, int &shapeId ) = 0;
+	virtual void handleTextSize( int &textSize, int &shapeId ) = 0;
+	virtual void handleSetTextSize( int &textSize, int &shapeId ) = 0;
 	virtual void handleCutShape() = 0;
 	virtual void handleCopyShape() = 0;
 	virtual void handlePasteShape() = 0;
@@ -179,6 +180,8 @@ public:
 	virtual void handleBringForwardShape() = 0;
 	virtual void handleSendBackwardShape() = 0;
 	virtual void handleEditDOFShape() = 0;
+	virtual void handleSetDOF( const int &attrIdx ) = 0;
+	virtual void handleCheckedVariable( const int &idDOF, const int &variableId ) = 0;
 	
 	virtual void handleEditDOF( 
 		const vector< int > &degsOfFrdmIds,
@@ -377,7 +380,8 @@ public:
 	virtual void handleMouseLeaveEvent( GLCanvas* c ) = 0;
 	virtual void handleKeyDownEvent(
 		GLCanvas* c,
-		const int &keyCode ) = 0;
+		const int &keyCode,
+		const int &specialKey ) = 0;
 	virtual void handleKeyUpEvent(
 		GLCanvas* c,
 		const int &keyCode,

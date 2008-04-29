@@ -58,6 +58,7 @@ public:
 
     // -- display functions -----------------------------------------
     void handleNote( const int &shapeId, const string &msg );
+    void handleTextSize( const int &shapeId, const int &textSize );
     void displNumNodes( const int &val );
     void displNumEdges( const int &val );
     void displAttrInfo( 
@@ -199,6 +200,7 @@ private:
     
     void initFrameDOF();
     void initFrameNote();
+    void initFrameTextSize();
     void initPanelDOF();
     void initPanelNote();
     void initListCtrlDOF();
@@ -245,6 +247,7 @@ private:
     // -- note -----------------------------------------------------
     int			  	  currentShapeId;
     string			  currentShapeNote;
+    int				  currentTextSize;
 
     // -- left panel ------------------------------------------------
     wxSplitterWindow* splitterLft;
@@ -294,14 +297,17 @@ private:
     
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;
-    PopupFrame*		  frameNote;
+    PopupFrame*	      frameNote;
+    PopupFrame*	      frameTextSize;
     wxBoxSizer*       sizerFrameDOF;
     wxBoxSizer*       sizerFrameNote;
     wxScrolledWindow* panelDOF;
     wxScrolledWindow* panelNote;
     wxBoxSizer*       sizerDOF;
     wxBoxSizer*       sizerNote;
-    wxTextCtrl*		  noteText;
+    wxBoxSizer*       sizerTextSize;
+    wxTextCtrl*	      noteText;
+    wxComboBox*	      textSizeBox;	
     wxListCtrl*       listCtrlDOF;
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
@@ -392,9 +398,11 @@ private:
         ID_FRAME_PARTITION,
         ID_FRAME_DOF,
         ID_FRAME_NOTE,
+	ID_FRAME_TEXT_SIZE,
         ID_PANEL_DOF,
    	ID_ADD_BUTTON_NOTE,
    	ID_CLEAR_BUTTON_NOTE,
+	ID_OK_BUTTON_TEXT_SIZE,
         ID_LIST_CTRL_DOF,
         ID_RADIO_BOX_TEXT_DOF,
         ID_CANVAS_COL_DOF,
@@ -426,6 +434,7 @@ private:
 	ID_MENU_ITEM_CLUSTER,
         ID_MENU_ITEM_SHOW_VARIABLES,
         ID_MENU_ITEM_SHOW_NOTE,
+	ID_MENU_ITEM_TEXT_SIZE,
         ID_MENU_ITEM_SHAPE_CUT,
         ID_MENU_ITEM_SHAPE_COPY,
         ID_MENU_ITEM_SHAPE_PASTE,

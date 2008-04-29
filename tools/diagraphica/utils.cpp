@@ -10,6 +10,9 @@
 
 
 #include "utils.h"
+#include <iostream>
+#include <sstream>
+using namespace std;
 
 
 // -- string conversion functions -----------------------------------
@@ -177,10 +180,10 @@ double Utils::rndToNearestMult(
         result = intPtVal*factor;
     else
     {
-        if ( dblPtVal < 0 )
+        if ( dblPtVal < 0 )		
             result = (intPtVal-1)*factor;
         else
-            result = (intPtVal+1)*factor;
+            result = (intPtVal+1)*factor;	
     }
 
     return result;

@@ -107,6 +107,7 @@ public:
         const int &x, 
         const int &y );
     void handleKeyUpEvent( const int &keyCode, const int &specialKey );
+    void handleKeyDownEvent( const int &keyCode, const int &specialKey );
     
     void handleHits( const vector< int > &ids );
     void handleHitDiagramOnly();
@@ -125,6 +126,8 @@ public:
     void handleShowVariable( const string &variable, const int &variableId );
     void handleShowNote( const string &variable, const int &shapeId );
     void handleAddText( string &variable, int &shapeId );
+    void handleTextSize( int &textSize, int &shapeId );
+    void handleSetTextSize( int &textSize, int &shapeId );
     void handleCut();
     void handleCopy();
     void clearClipBoard();
@@ -136,9 +139,9 @@ public:
     void handleBringForward();
     void handleSendBackward();
     void handleEditDOF();
+    void handleSetDOF( const int &attrIdx );
+    void handleCheckedVariable( const int &idDOF, const int &variableId );
 
-    
-    
     // -- public utility functions ----------------------------------
     void deselectAll();
     

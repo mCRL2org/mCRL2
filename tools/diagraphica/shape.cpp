@@ -28,7 +28,6 @@ using namespace std;
 double Shape::hdlSzeHnt =  5.0;
 double Shape::minSzeHnt =  5.0;
 int Shape::segNumHnt = 24;
-int Shape::szeTxt = 12;
 ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 
 
@@ -52,6 +51,7 @@ Shape::Shape(
     yDFC   = yD;
     xHge   = 0.0;
     yHge   = 0.0;
+    szeTxt = 12;
     variable = "";
     checkedVariableId = -1;
     texturesGenerated = false;   
@@ -101,8 +101,10 @@ Shape::Shape( const Shape &shape )
 	
 	// textual properties
 	variable = shape.variable;
+	variableName = shape.variableName;
 	note = shape.note;
 	checkedVariableId = shape.checkedVariableId;
+	szeTxt = shape.szeTxt;
 	
 	// degrees of freedom, invoke copy constructors
 	xCtrDOF = new DOF( *shape.xCtrDOF );
@@ -110,13 +112,13 @@ Shape::Shape( const Shape &shape )
 	wthDOF  = new DOF( *shape.wthDOF );
 	hgtDOF  = new DOF( *shape.hgtDOF );
 	aglDOF  = new DOF( *shape.aglDOF );
+	textDOF = new DOF( *shape.textDOF ); 
 	
 	colDOF  = new DOF( *shape.colDOF );
 	colYValues = shape.colYValues;
 	
 	opaDOF  = new DOF( *shape.opaDOF );
 	opaYValues = shape.opaYValues;
-
 }
 
 
@@ -157,11 +159,28 @@ void Shape::setVariable( const string &msg )
 
 
 // ------------------------------------------
+void Shape::setVariableName( const string &msg )
+// ------------------------------------------
+{
+    variableName = "";
+    variableName.append( msg );
+}
+
+
+// ------------------------------------------
 void Shape::setNote( const string &msg )
 // ------------------------------------------
 {
     note = "";
     note.append( msg );   
+}
+
+
+// ------------------------------------------
+void Shape::setTextSize( const int &size )
+// ------------------------------------------
+{
+    szeTxt = size;
 }
 
 
@@ -341,8 +360,8 @@ void Shape::setMode( const int &mde )
         mode = MODE_EDT_DOF_COL;
     else if ( mde == MODE_EDT_DOF_OPA )
         mode = MODE_EDT_DOF_OPA;
-    else if ( mde == MODE_EDT_DOF_VAR )
-        mode = MODE_EDT_DOF_VAR;
+    else if ( mde == MODE_EDT_DOF_TEXT )
+        mode = MODE_EDT_DOF_TEXT;
 }
 
 
@@ -419,10 +438,10 @@ void Shape::setModeEdtDOFOpa()
 
 
 // ---------------------------
-void Shape::setModeEdtDOFVar()
+void Shape::setModeEdtDOFText()
 // ---------------------------
 {
-    mode = MODE_EDT_DOF_VAR;
+    mode = MODE_EDT_DOF_TEXT;
 }
     
 
@@ -528,6 +547,30 @@ string Shape::getNote()
 // ------------------
 {
     return note;
+}
+
+
+// ------------------
+string Shape::getVariable()
+// ------------------
+{
+    return variable;
+}
+
+
+// ------------------
+string Shape::getVariableName()
+// ------------------
+{
+    return variableName;
+}
+
+
+// ------------------
+int Shape::getTextSize()
+// ------------------
+{
+    return szeTxt;
 }
 
 
@@ -749,10 +792,10 @@ DOF* Shape::getDOFCol()
 
 
 // --------------------
-DOF* Shape::getDOFVar()
+DOF* Shape::getDOFText()
 // --------------------
 {
-    return varDOF;
+    return textDOF;
 }
 
 
@@ -947,6 +990,13 @@ void Shape::visualize(
             else
                 colRGB.a = opaDOF->getValue( (int)intPtVal );
         }
+	
+	if( attrs[i] == textDOF->getAttribute() && attrs[i]->getSizeCurValues() > 0 )
+	{
+		variable = attrs[i]->getName();
+		variable.append( ": " );
+		variable.append( attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue() );
+	}
     }
     
     // set up transf
@@ -1043,10 +1093,7 @@ void Shape::visualize(
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
-    
     drawText( canvas ); // Draw the textual values of the shape
-    
-    
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
@@ -1257,10 +1304,7 @@ void Shape::visualize(
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
-    
     drawText( canvas ); // Draw the textual values of the shape
-    
-    
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
@@ -1328,7 +1372,7 @@ void Shape::initDOF()
     opaYValues.push_back( 0.0 );
     opaYValues.push_back( 0.0 );
     
-    varDOF = new DOF( 7, "Text");
+    textDOF = new DOF( 7, "Text");
 }
 
 
@@ -1404,7 +1448,7 @@ void Shape::drawNormal(
     	if ( type == TYPE_NOTE )
         {
         	VisUtils::setColorWhite(); // Draw the note on a white background
-            VisUtils::fillRect(
+            	VisUtils::fillRect(
                 -xDFC,  xDFC,
                  yDFC, -yDFC );
         }
@@ -1518,36 +1562,23 @@ void Shape::drawNormal(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
-        }   
-        
-    	drawText( canvas ); // Draw the textual values of the shape    
-    	          
-        VisUtils::disableLineAntiAlias();
-    }    	
+        }
+	drawText( canvas ); // Draw the textual values of the shape
+	VisUtils::disableLineAntiAlias();
+    }
 }
 
 
 // ---------------------------------------------
 void Shape::drawText( GLCanvas* canvas )
 // ---------------------------------------------
-{	
+{
 	string text = note;
-	if( variable != "" && text != "" )
-	{
-		text.append(" -- ");
-		int i = variable.find(":",0); // for removing variable's name
-		i++; // for removing space char
-		string variableValue = variable;
-		variableValue.erase(0,i);
-		text.append(variableValue);	
-	}
-	else
-	{
-		text.append(variable);
-	}
-    	
+	text.append(" ");
+	text.append( variable );
+
 	double pix = canvas->getPixelSize();
-    
+
 	// generate textures for drawing text, if they aren't generated yet	
 	if( !texturesGenerated || lastCanvas != canvas)
 	{
@@ -1557,7 +1588,7 @@ void Shape::drawText( GLCanvas* canvas )
         	texturesGenerated = true;
         	lastCanvas = canvas;
 	}
-            
+
 	VisUtils::setColor( colTxt );
 	VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
 }
@@ -1575,7 +1606,7 @@ void Shape::drawEdit(
     if ( inSelectMode == true )
     {
         // draw shape
-        drawNormal( inSelectMode, canvas ); 
+        drawNormal( inSelectMode, canvas );
 
         glPushName( ID_HDL_CTR );
         VisUtils::fillRect( -xDFC, xDFC, yDFC, -yDFC );
@@ -1627,8 +1658,8 @@ void Shape::drawEdit(
              yDFC, -yDFC );
         VisUtils::disableLineAntiAlias();
         
-        // draw shape       
-        drawNormal( inSelectMode, canvas );        
+        // draw shape
+        drawNormal( inSelectMode, canvas );
         
         // enable antialiasing
         VisUtils::enableLineAntiAlias();
@@ -1799,7 +1830,7 @@ void Shape::drawEditDOF(
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
         }
-        else if ( mode == MODE_EDT_DOF_VAR )
+        else if ( mode == MODE_EDT_DOF_TEXT )
         {
             drawDOFXCtr( inSelectMode, canvas );
             drawDOFYCtr( inSelectMode, canvas );
@@ -1818,7 +1849,7 @@ void Shape::drawEditDOF(
              yDFC, -yDFC );
         VisUtils::disableLineAntiAlias();
         
-        // draw shape       
+        // draw shape
         drawNormal( inSelectMode, canvas );
 
         VisUtils::enableLineAntiAlias();
@@ -1883,7 +1914,7 @@ void Shape::drawEditDOF(
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
         }
-        else if ( mode == MODE_EDT_DOF_VAR )
+        else if ( mode == MODE_EDT_DOF_TEXT )
         {
             drawDOFXCtr( inSelectMode, canvas );
             drawDOFYCtr( inSelectMode, canvas );
