@@ -8,6 +8,7 @@ project libraries/pbes/test
        <source>/libraries//pbes
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
+       <source>/site-config//boost_system
    ;
 
 exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
