@@ -2,10 +2,8 @@ project core
        : source-location ..
        : requirements
           <include>../include
-          <os>NT:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
-          <os>NT:<define>NO_DYNLOAD
        ;
 
 obj mcrl2parser.o
