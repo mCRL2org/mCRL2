@@ -228,8 +228,7 @@ public:
     {
     }
 
-    template<class Y>
-    shared_ptr(detail::shared_count const & c, Y * p): px(p), pn(c) // never throws
+    shared_ptr(detail::shared_count const & c, T * p): px(p), pn(c) // never throws
     {
     }
 
@@ -346,8 +345,7 @@ public:
         r.px = 0;
     }
 
-    template<class Y>
-    shared_ptr(detail::shared_count && c, Y * p): px(p), pn( static_cast< detail::shared_count && >( c ) ) // never throws
+    shared_ptr(detail::shared_count && c, T * p): px(p), pn( static_cast< detail::shared_count && >( c ) ) // never throws
     {
     }
 
@@ -391,6 +389,18 @@ public:
     {
         this_type( r, p ).swap( *this );
     }
+
+    void reset( detail::shared_count const & c, T * p )
+    {
+        this_type( c, p ).swap( *this );
+    }
+
+#if defined( BOOST_HAS_RVALUE_REFS )
+    void reset( detail::shared_count && c, T * p )
+    {
+        this_type( static_cast< detail::shared_count && >( c ), p ).swap( *this );
+    }
+#endif
 
     reference operator* () const // never throws
     {
@@ -485,11 +495,6 @@ public:
     template<class Y> bool _internal_less(shared_ptr<Y> const & rhs) const
     {
         return pn < rhs.pn;
-    }
-
-    void * _internal_get_deleter( detail::sp_typeinfo const & ti ) const
-    {
-        return pn.get_deleter( ti );
     }
 
     // atomic access
@@ -691,35 +696,35 @@ namespace detail
 // g++ 2.9x doesn't allow static_cast<X const *>(void *)
 // apparently EDG 2.38 and HP aCC A.03.35 also don't accept it
 
-template<class D, class T> D * basic_get_deleter(shared_ptr<T> const & p)
+template<class D> D * basic_get_deleter(shared_count const & c)
 {
-    void const * q = p._internal_get_deleter(BOOST_SP_TYPEID(D));
+    void const * q = c.get_deleter(BOOST_SP_TYPEID(D));
     return const_cast<D *>(static_cast<D const *>(q));
 }
 
 #else
 
-template<class D, class T> D * basic_get_deleter(shared_ptr<T> const & p)
+template<class D> D * basic_get_deleter(shared_count const & c)
 {
-    return static_cast<D *>(p._internal_get_deleter(BOOST_SP_TYPEID(D)));
+    return static_cast<D *>(c.get_deleter(BOOST_SP_TYPEID(D)));
 }
 
 #endif
 
 class sp_deleter_wrapper
 {
-    shared_ptr<const void> _deleter;
+    detail::shared_count _deleter;
 public:
     sp_deleter_wrapper()
     {}
-    void set_deleter(const shared_ptr<const void> &deleter)
+    void set_deleter(shared_count const &deleter)
     {
         _deleter = deleter;
     }
     void operator()(const void *)
     {
         BOOST_ASSERT(_deleter.use_count() <= 1);
-        _deleter.reset();
+        detail::shared_count().swap( _deleter );
     }
     template<typename D>
     D* get_deleter() const
@@ -732,10 +737,10 @@ public:
 
 template<class D, class T> D * get_deleter(shared_ptr<T> const & p)
 {
-    D *del = detail::basic_get_deleter<D>(p);
+    D *del = detail::basic_get_deleter<D>(p.get_shared_count());
     if(del == 0)
     {
-        detail::sp_deleter_wrapper *del_wrapper = detail::basic_get_deleter<detail::sp_deleter_wrapper>(p);
+        detail::sp_deleter_wrapper *del_wrapper = detail::basic_get_deleter<detail::sp_deleter_wrapper>(p.get_shared_count());
 // The following get_deleter method call is fully qualified because
 // older versions of gcc (2.95, 3.2.3) fail to compile it when written del_wrapper->get_deleter<D>()
         if(del_wrapper) del = del_wrapper->::boost::detail::sp_deleter_wrapper::get_deleter<D>();

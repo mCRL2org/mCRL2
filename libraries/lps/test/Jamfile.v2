@@ -8,6 +8,7 @@ project libraries/lps/test
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
+       <source>/site-config//boost_system
    ;
 
 test-suite lps
