@@ -121,7 +121,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
       "keep at most NUM states in todo lists; this option is only relevant for "
       "breadth-first search with bithashing, where NUM is the maximum number of "
       "states per level, and for depth first, where NUM is the maximum depth").
-    add_option("deadlock", make_mandatory_argument("NUM"),
+    add_option("deadlock",
       "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
     add_option("action", make_mandatory_argument("NAMES"),
       "detect actions from NAMES, a comma-separated list of action names; a message "

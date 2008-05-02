@@ -290,7 +290,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
       delete nsgen;
       return false;
     }
-    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
+    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,ns));
     s = ns;
   }
 
