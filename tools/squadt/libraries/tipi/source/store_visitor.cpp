@@ -367,7 +367,7 @@ namespace utility {
   void visitor< tipi::store_visitor_impl >::visit(tipi::tool::capabilities::input_configuration const& c) {
     using tipi::tool::capabilities;
 
-    out << "<input-configuration category=\"" << c.get_category() << "\" identifier=\"" << c.m_primary_identifier << "\">";
+    out << "<input-configuration category=\"" << c.get_category() << "\">";
 
     for (capabilities::input_configuration::object_map::const_iterator j = c.m_object_map.begin(); j != c.m_object_map.end(); ++j) {
       out << "<object id=\"" << j->first << "\" format=\"" << j->second << "\"/>";

@@ -387,8 +387,6 @@ namespace utility {
 
     cp.reset(new capabilities::input_configuration(tipi::tool::category::fit(tree->GetAttribute("category"))));
 
-    cp->m_primary_identifier = tree->GetAttribute("identifier");
-
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       cp->m_object_map.insert(std::make_pair(e->GetAttribute("id"), e->GetAttribute("format")));
     }

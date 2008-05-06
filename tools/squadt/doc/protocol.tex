@@ -28,6 +28,9 @@
   {\normalfont\normalsize\textbf}}
 \makeatother
 
+%\setlength{\parindent}{0cm}
+%\setlength{\parskip}{\baselineskip}
+
 \bibliographystyle{alpha}
 
 \begin{document}
@@ -198,14 +201,16 @@
    A tool integration framework offers a simplified way of using combinations
    of tools.
  
-   By definition a tool integration framework sits between a user and the tools
-   that are to be used. It's purpose is to assist a user in the typical usage
-   patterns of the connected tools. So functionality that crosses the boundaries
-   of individual tools means added value. An important example of this is
-   automation functionality. Automating aspects of tool application use
-   sometimes require the means to circumvent user interaction that would be
-   part of normal tool behaviour.  For this the integration framework requires
-   a certain degree of control over tools: it must function as an orchestrator.
+   The purpose of a tool integration framework is to assist a user in the
+   typical usage patterns of the connected tools. Simply making tools
+   accessible from a unified user interface already serves this goal. More
+   interesting is adding functionality that crosses the boundaries of
+   individual tools to obtain added value (when comparing use of the
+   integration system with the use of the individual tools). Examples of such
+   added value are consistency checking and automating aspects of tool
+   application are an important example of such integration level
+   functionality. The role of the integration framework is that of
+   orchestrator.
 
    This section functions as introduction to the important concepts around
    which a communication protocol will be built in later sections.
@@ -240,16 +245,19 @@
 
    A \textit{task} for a tool is the use of a specific combination of functions
    of that tool. This combination determines the requirements on input and
-   output. The input of a tool needed for a task is called the \textit{task
-   input}.  Output of a tool for a task is called \textit{task output} and must
-   be disjoint with task input. Notice that this precludes manipulation of
-   input as part as output. 
+   output. The input of a tool needed for a task, called \textit{task input},
+   is a non-empty set of resource identifiers (discussed shortly). Similarly
+   output of a tool for a task, called \textit{task output}, is a non-empty set
+   of resource identifiers that is disjoint with task input. Notice that this
+   precludes manipulation of input as part as output. 
 
-   The principle method of specifying input/output files or streams is the
-   Uniform Resource Identifier (or URI, see \cite{rfc3305}). A URI that is
-   specified as part of input must identify an existing resource before a tool
-   can be applied. Similarly, a URI is specified as output must identify an
-   existing resource after the tool completes its task.
+   A resource identifier is a name of a file or stream associated with a type
+   that describes the data format (or file type).  The principle method of
+   specifying input/output files or streams is the Uniform Resource Identifier
+   (or URI, see \cite{rfc3305}). A URI that is specified as part of input must
+   identify an existing resource before a tool can be applied. Similarly, a URI
+   is specified as output must identify an existing resource after the tool
+   completes its task.
 
    Every input as well as output is associated with a type that is specified
    using the MIME format (Multipurpose Internet Mail Extensions, \cite{rfc2822}).
@@ -261,29 +269,31 @@
 %Whether the use actually satisfies the purpose depends on the
 %   functionality the tool provides and how the tool is used.
    
-   A \textit{task configuration} for a tool is a concrete specification that
-   uniquely defines a task (up to user-interaction) for that tool. The process
-   of bringing a tool in the state that it can perform a task is called
-   configuration. Using a task configuration, it is possible to configure a
-   tool to perform the specified task.
+   The process of bringing a tool in the state that it can perform a specified
+   task is called \textit{task configuration}. The state of a tool after task
+   configuration is complete can be made explicit by capturing it as a task
+   specification.  A \textit{task specification} for a tool is a concrete
+   specification that uniquely defines a task for that tool (up to
+   user-interaction).
 
-   \begin{figure}[H]
-    \begin{center}
-     \includegraphics{task_configuration.eps}
-    \end{center}
-    \caption{Graphic overview of the contents of a task configuration}
-   \end{figure}
-
-   % creation and manipulation (tool and system)
-   \noindent A task configuration consists of a description of task input and
+   \noindent A task specification consists of a description of task input and
    task output and it specifies the specific combination of functions that
    define the task. The task input is set of URI's that all identify an
    existing resource. The task output is a set of URI's that is disjoint from
    the task input. Every input as well as output is associated with a MIME
    type, if the actual resource identified by the URI does not match the type a
    tool may fail.
+
+   \begin{figure}[H]
+    \begin{center}
+     \includegraphics{task_configuration.eps}
+    \end{center}
+    \caption{Graphic overview of the contents of a task specification}
+   \end{figure}
+
+   % creation and manipulation (tool and system)
  
-   The tool creates its own task configuration and communicates it afterward
+   The tool creates its own task specification and communicates it afterward
    with the integration framework. The framework can read and modify the part
    that specifies the task input and output, e.g. it can rename input files.
    The remainder of the task specification is tool-specific, the framework can
@@ -291,15 +301,15 @@
    the configuration with the framework is to have a means to preserve it.
    
    Task execution is the process of using a tool to fulfil a configured task.
-   To configure a task the tool must create a task configuration in cooperation
+   To configure a task the tool must create a task specification in cooperation
    with the user and communicate it with the integration framework. To actually
-   start execution the framework communicates a task configuration with the
-   tool that must either accept or reject it. Once a task configuration is
+   start execution the framework communicates a task specification with the
+   tool that must either accept or reject it. Once a task specification is
    accepted actual task execution may commence.
 
    % note on user interaction
 %   Some tools always require interaction with the user. In such a case a task cannot
-%   be unambiguously specified. The task configuration only specifies a starting
+%   be unambiguously specified. The task specification only specifies a starting
 %   point from where the user interaction . The actions of the user may
 %   completely change the configuration in any way.
 
@@ -310,7 +320,7 @@
 
   \subsection{Display}
 
-   Since tools create task configuration themselves, with the user as ultimate
+   Since tools create task specifications themselves, with the user as ultimate
    beneficiary, the tool must have means of communicating with the user. The
    \textit{(interaction) display} is a tool-controlled graphical user interface
    that acts as a direct communication channel between a running tool and the
@@ -338,7 +348,7 @@
 %%   complete procedure is as follows. First the user selects a tool that has the
 %%   functionality to complete the task at hand.  The tool is started and must be
 %%   configured to actually complete that task.  The tool can gather the
-%%   information it needs to produce a task configuration from the user through
+%%   information it needs to produce a task specification from the user through
 %%   its interaction display. After the process of task configuration a task can
 %%   be started. The tool will commence task execution during which it can use
 %%   the display to inform the user about progress, or request further input.
@@ -414,62 +424,87 @@
   different messages (by type), the purpose and structure of data communicated
   by means of such a message, and it's interpretation.
 
-  \subsection{Notation}
+  \subsection{Notes on Presentation}
 
-   Messages have a name and are described by fixing a type and direction and
-   using a table to describe how the message content is structured. Some
-   messages have contents that has the same structure regardless of their
-   direction. In this case the direction is omitted. Some messages serve as
-   signal or notification and do not have contents.
+   Messages have a name and are described by giving type and direction and a
+   specification of the structure of its contents. For example table
+   \ref{table:example_message} describes a message called ``example message''
+   with type ``example'' it is sent by a controller and received by a tool and
+   carries some data (discussed shortly). A message without data has the data
+   field unspecified. If both communication partners can sent message the
+   direction field is unspecified.
    
-   The contents (or data) of a message is a string, how this string is actually
-   parsed is \emph{not} important in this section. The idea here is to convey
-   what a message of this type is about by sketching its structure. The goal of
-   this separate treatment is to focus on communication patterns and message
-   purpose before presenting all the details of implementation.  The next
-   section is about defining syntax and giving semantics.
+   The contents of a message is the combination of type, direction and data.
+   Message types are names that are introduced on demand. The direction
+   determines which of the communication partners can send or receive such
+   messages. Only the information carried by a message and not its precise
+   representation of message data is important in this section.
    
    The structure of a message is described in terms of named types that may be
    composed of other (nested) types. The type notation is a mix using
    mCRL2-data syntax for types to do BNF-style specification.  The names hint
-   at the purpose and form an intuitive conceptual structure.  Predefined types
-   are \texttt{Id} representing an identifier, \texttt{URI},
-   \texttt{MIME-type}, \texttt{Bool}, \texttt{Nat}, and \texttt{String}, with
-   the usual meaning.  Product types are specified using the $\times$ operator
-   as usual. Lastly there the \texttt{List} type constructor that can be used
-   to specify lists of arbitrary length with elements of a parametrised type.
+   at the purpose and data inter-dependency and help to form an intuition about
+   how this data is used to fulfill the purpose.  There is a small number of
+   predefined types which are discussed next. The first type is \texttt{Id}
+   representing a textual identifier (scope is determined at use). The other
+   types are \texttt{URI}, \texttt{MIME-type}, $\mathbb{B}$, $\mathbb{N}$,
+   and \texttt{String}, with the usual meaning.
+
+   Tuples are specified using the $\times$ operator as usual e.g. $\texttt{Id}
+   \times \mathbb{N}$ is an ordered pair of an identifier and a natural number.
+   Lastly there are the set and list types, with constructors $Set$ and $List$
+   that are parametrised by the type of the elements, e.g.  $Set(\mathbb{N})$
+   represents a set of natural numbers.
    
    The following table specifies a message sent by a tool with name `example
    message' of type \msg{example}.  The contents (or data) of the message is a
    list of finite length with pairs of Token $\times$ Number; where token is of
    type String and Number is a natural number.
 
-   \begin{figure}[H]
+   \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
-       \multicolumn{2}{|l|}{\textbf{example message}} \\
+       \multicolumn{2}{|l|}{\textbf{example request}} \\
       \hline
        message type:    & \msg{example} \\
       \hline
        direction:       & tool to controller \\
        data:            & List(Token $\times$ Number) \\
                         & \ Token  = String \\
-                        & \ Number = Number \\
+                        & \ Number = $\mathbb{N}$ \\
       \hline
      \end{tabular}
      \vspace{-0.3cm}
     \end{center}
-   \end{figure}
+    \label{table:example_message}
+   \end{table}
    \noindent Consequently the contents of this message is a sequence of pairs
    consisting of a string and a natural number.
 
-   \noindent Pictures of state machines (as regular automata) are used to
-   illustrate communication behaviour with regard to a specific type of
-   message. The incoming arrow at the top identifies the initial state, as
-   usual. A deadlock state just represents the end of \emph{relevant}
-   behaviour, it may be that other messaging behaviour is possible. As an
-   example of a state machine consider \label{fig::identification}.
+   \noindent Pictures of state machines (inspired by regular automata notation)
+   are used to specify the allowed communication behaviour with regard to a
+   message. When an action label on a transition is the name of a message then
+   this transition represents a communication action, otherwise it is a local
+   action by \emph{one} of the tool partners. The non-communication actions
+   illustrate local choice that influences communication behaviour. The
+   incoming arrow on the left identifies the initial state. Figure
+   \ref{fig:process_example} shows an example process.
+
+   \begin{figure}[H]
+    \begin{center}
+     \includegraphics{example.eps}
+    \end{center}
+    \vspace{-0.3cm}
+    \caption{Example of a process based around communication behaviour}
+    \label{fig:process_example}
+   \end{figure}
+
+   From the initial state an example request takes place, meaning a
+   communication action occurs between the partners. Subsequently an example
+   response must occur after which a state is reached from which a start
+   notification can occur. A start notification can only be followed by a stop
+   notification and vice versa. 
 
   \subsection{Instance identification} \label{s:instance_identification}
 
@@ -514,47 +549,48 @@
 
    \begin{figure}[H]
     \begin{center}
-     \includegraphics{t_identification.eps}
+     \includegraphics{connection_and_identification.eps}
     \end{center}
     \vspace{-0.3cm}
-    \caption{Combined behaviour pertaining to instance identification}
+    \caption{Process of instance identification}
     \label{fig::identification}
    \end{figure}
 
-   \noindent The automata in Figure \ref{fig::identification} depicts the
-   combined behaviour of a controller and a tool with respect to instance
-   identification. The controller chooses between breaking the connection and
-   accepting the identity of the tool on the other side. In reality the token
-   communicated as part of the instance identification message must direct this
+   \noindent Figure \ref{fig::identification} shows the combined behaviour of a
+   controller and a tool with regard to instance identification. A tool
+   initiates a connection, sends an identification notification and awaits a
+   response. The response is either the event that a connection is terminated
+   or an arbitrary message sent by the controller. The controller chooses
+   between breaking the connection and accepting the identity of the tool on
+   the other side. In reality this choice will of course depend on the token
+   communicated as part of the instance identification message will direct this
    choice.
 
   \subsection{Capabilities}
 
    Capabilities represent both an information facility for one communication
    partner to learn about the capabilities of the other, as well as a protocol
-   extension mechanism.  At minimum it can be used to communicate the supported
-   version of the protocol between both parties. This allows for complete
-   backward and forward compatibility between official protocol versions. In
-   addition it allows plug-in type extension that only works if both parties
-   support this.
+   extension mechanism. The extension mechanism currently consists only of a
+   means to check for the protocol version supported by a communication
+   partner. This provides some limited backward and forward compatibility
+   between protocol versions.  For example it allows a tool developer to check
+   controller side support for facilities that have been introduced in specific
+   protocol versions.
    
-   The exchange of capabilities follows the following pattern.
+   \noindent The exchange of capabilities follows a request response sequence
+   as illustrated by the following figure.
    
    \begin{figure}[H]
     \begin{center}
-     \includegraphics{t_capabilities.eps}
+     \includegraphics{exchange_of_capabilities.eps}
     \end{center}
     \vspace{-0.3cm}
-    \caption{exchange of capabilities: controller versus tool}
+    \caption{Process of exchange of capabilities}
    \end{figure}
 
-   \noindent This corresponds with a normal request-response sequence.  Notice
-   that the picture only displays the isolated communication of what is called
-   capabilities. Something that is missing for instance is that in all states
-   the communication partner must be able to respond to a request for
-   capabilities made by the other.
-
-   \noindent A request for capabilities looks as follows.
+   \noindent The process follows the basic request response pattern and is
+   symmetric for both communication parties. A request for capabilities looks
+   as follows.
    
    \begin{table}[H]
     \begin{center}
@@ -571,10 +607,10 @@
     \end{center}
    \end{table}
 
-   \noindent The absence of data signifies the fact that it is a request. The
-   partner that receives is the one that it is addressed to. The receiver
-   \emph{must} send a response. The controller must respond with a message that
-   looks as follows.
+   \noindent The type of the message identifies and otherwise empty content
+   signifies makes the message a request for capabilities. The partner that
+   receives \emph{must} send a response. For a controller the response only
+   contains the protocol version number and looks as follows.
 
    \begin{table}[H]
     \begin{center}
@@ -594,11 +630,13 @@
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent The data represents the version number of the protocol . The
-   response of a tool looks similar but in addition to a version must also
-   contains a non-empty set of input configurations. An \textit{input
-   configuration} is a pair of a unique name, called a \textit{category}, and a
-   non-empty list of names for inputs each of which associated with a type.
+   \noindent For a tool the response in addition contains an abstract
+   `advertisement' of the tools functionality. This advertisement is a
+   non-empty set of input configurations.  An \textit{input configuration} is a
+   pair of a \textit{category} (introduced next), and a non-empty list of names
+   for inputs each of which associated with a type (as MIME-type).  The
+   category is a descriptive name for the type of functionality that a tool
+   offers for that specific input configuration.
    
    \begin{table}[H]
     \begin{center}
@@ -622,17 +660,17 @@
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent The list of input configurations serves as an abstract
-   advertisement of the tool's functionality.  The category is a descriptive
-   name for the type of functionality that a tool offers for that specific
-   input configuration.  The set of input configurations partition the entirety
-   of tasks that a tool can perform into classes that have the same input
-   requirements and whose functionality falls in the same category.
+   The set of input configurations partition the entirety of tasks that a tool
+   can perform into classes that have the same input requirements and whose
+   functionality falls in the same category. Every task specification is based
+   on an input combination. The input combination expresses a set of basic
+   requirements for configuration of tools using some specific tool
+   functionality.
    
-   It is important to realise that the content of capabilities response
-   messages described here represent only a bare minimum. Protocol extension
-   requires extension to contents and therefore the structure of these
-   messages (see section \ref{ss:structure}).
+%   It is important to realise that the content of capabilities response
+%   messages described here represent only a bare minimum. Protocol extension
+%   requires extension to contents and therefore the structure of these
+%   messages (see section \ref{ss:structure}).
 
   \subsection{Task Configuration} \label{ss::task_configuration}
 
@@ -643,41 +681,48 @@
 %   \ref{ss::task_execution}.
 
    The task configuration process is considered to be an incremental activity.
-   When a task has been configured once, one may later want to make changes to
+   After a task has been configured once, one may later want to make changes to
    it.  Task configurations can be modified again and again until a user is
    satisfied and wants to proceed with execution. Perhaps surprisingly, the
-   task configuration process starts with sending a task configuration to a
-   tool. This may seem strange because now the output of the process is input
-   as well. This leaves one important question: how to obtain a task configuration
-   in the first place?  A task configuration can have come into being in two
-   ways.  First it can be derived from an input configuration received as part
-   of a tool's capabilities, or it is the result of a previous task
-   configuration process.
+   task configuration process starts with communicating a task specification 
+   with a tool. A task specification can be obtained in two ways either by
+   deriving it from from an input configuration or by receiving one as result
+   of a previous task configuration process.
    
-   Because task configuration is made explicit and brought outside of the tool
-   it becomes important to check task configurations for usability. A
-   consequence of making a task configuration explicit is that it opens up the
-   opportunity that a tool receives a task-configuration that is unusable. So
-   now a tool must validate a task configuration and in the event of rejection
-   it is responsible for resolving this conflict.
+   Since task specifications are now brought outside of the tool it becomes
+   necessary on the side of a tool to check whether such specifications can be
+   used for task configuration. A consequence of making a task specification 
+   explicit is that it opens up the opportunity that a tool receives a
+   task-configuration that is unusable. Consequently a tool developer must
+   think about validating a task specification and in the case the
+   configuration is unusable must resolve this problem through communication
+   with the user.
 
    The following figure depicts the basic (isolated) communication behaviour of
    the task configuration process.
    
    \begin{figure}[H]
     \begin{center}
-     \includegraphics{t_configuration.eps}
+     \includegraphics{configuration_execution.eps}
     \end{center}
     \vspace{-0.3cm}
-    \caption{task configuration process: controller versus tool}
+    \label{fig:configuration_execution}
+    \caption{Schematic overview of the process of task configuration and execution}
    \end{figure}
 
-   Let $sc$ be the sending context of a controller and $rc$ be the receiving
-   context (pertaining to one tool). If both controller and tool are still
-   running and every configuration message in $sc$ can be paired to a unique
-   configuration message in the receiving context then \emph{no} task
-   configuration is in progress. The following figure specifies the content of
-   the message that initiates the task configuration process.
+   The process of task configuration is a straight-forward application of the
+   request-response pattern. The state with label \texttt{C} represents the
+   configured state, i.e. the state from which task execution may commence. In
+   section \ref{ss::task_execution} the messages that deal with task execution.
+
+%   Let $sc$ be the sending context of a controller and $rc$ be the receiving
+%   context (pertaining to one tool). If both controller and tool are still
+%   running and every configuration message in $sc$ can be paired to a unique
+%   configuration message in the receiving context then \emph{no} task
+%   configuration is in progress.
+   
+   The following figure specifies the content of the message that initiates the
+   task configuration process.
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -687,8 +732,8 @@
        message type:   & \msg{configuration} \\
       \hline
        direction       & controller to tool \\
-       data:           & Fresh $\times$ Configuration \\
-                       & \ Fresh = Bool \\
+       data:           & Interactive $\times$ Configuration \\
+                       & \ Interactive = $\mathbb{B}$ \\
                        & \ Configuration = Category $\times$ List(ConfigurationItem) \\
                        & \ \ Category = String \\
                        & \ \ ConfigurationItem = Id $\times$ (Option $|$ Object) \\
@@ -703,24 +748,27 @@
     \end{center}
    \end{table}
 
-   \noindent The message \emph{may} only be sent when task configuration is not
-   in progress.  Furthermore it \emph{must} specify a freshness marking and a
-   basic configuration specification.  The marking is used to distinguish
-   between configurations generated from an input-configuration (fresh) from
-   those that are the result of a task-configuration process.  The basic
-   configuration specification consists of a category name, a list of options
-   and a list of inputs and outputs. The category gives an indication of what
-   functionality of the tool is used to perform the task.  The list of options
-   can be used to encode the task specification. A single option is a
-   parametrised entity that represents optional configurable behaviour. The
-   list of options contains the specific combination of behaviour needed to
-   execute the task.
+   \noindent The message \emph{must} specify an interactivity flag, specifying
+   whether or not further user configuration is desired. The tool may initiate
+   interaction with the user regardless of this flag. The intended meaning
+   however is that the tool only verifies usability of the task specification
+   (Configuration) and only initiates communication when this fails.
+
+   The task specification specified as the Configuration type requires a bit
+   more explanation. A minimal task specification must have a non-empty list of
+   objects, a category name, a list of options and a possibly empty list of
+   outputs. The category gives an indication of what functionality of the tool
+   is used to perform the task. The options represent the language for task
+   specification. A single option is a parametrised entity that represents the
+   smallest part of optional configurable behaviour. The list of options
+   identifies a combination of functions that make up the task. 
 
    Before sending a response the tool may initiate arbitrary interaction with
    the user(see subsection \ref{ss:user_interaction}). The user should direct
    the process of task-configuration, unless the purpose of configuration is to
-   repeat a task that has been executed before. Using the specification of
-   \textit{Configure} in the figure above, a response looks as follows:
+   non-interactively execute a task that has been configured in the past. Using
+   the specification of \textit{Configuration} in the figure above, a response
+   looks as follows:
 
    \begin{table}[H]
     \begin{center}
@@ -732,7 +780,7 @@
       \hline
        direction       & tool to controller \\
        data:           & Valid $\times$ Configuration \\
-                       & \ Valid = Bool \\
+                       & \ Valid = $\mathbb{B}$ \\
       \hline
      \end{tabular}
     \end{center}
@@ -759,34 +807,25 @@
 %   validation purposes a data type can be specified against which the values
 %   for the option are matched. An object is a file associated with a format and
 %   a location.
-  \pagebreak
 
   \subsection{Task Execution} \label{ss::task_execution}
 
    \noindent Tool configuration is complete when the controller receives a
    configuration response message with an accepted configuration and it has not
    sent a new configuration request.  When configuration is complete the
-   controller may start task execution by sending a task start signal. A task
+   controller may start task execution by sending a task start command. A task
    is called \textit{in progress} (from a controller perspective) as soon as a
    task start signal is sent, and as long as no task stop signal has been
-   received. The following figure depicts this behaviour.
+   received. See figure \ref{fig:configuration_execution} for a schematic
+   overview of the process of task execution.
 
-   \begin{figure}[H]
-    \begin{center}
-     \includegraphics{t_task.eps}
-    \end{center}
-    \vspace{-0.3cm}
-    \caption{task execution: controller versus tool}
-   \end{figure}
-
-   \noindent Once again we note that this is isolated communication behaviour.
-   Especially user interaction can take place regardless of the state that the
-   controller or tool is in. A task start notification message has no data and
-   looks as follows:
+   A task start command message has no data and looks as follows:
 
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
+      \hline
+       \multicolumn{2}{|l|}{\textbf{task start command}} \\
       \hline
        message type:   & \msg{task\_start} \\
       \hline
@@ -797,36 +836,42 @@
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent On receipt, a tool \emph{must} start executing a task based on the
-   last accepted configuration. After a task start signal has been received,
-   execution has started and was completed, a task done signal \emph{must} be
-   sent. Such a message looks as follows.
+   \noindent On receipt, a tool starts executing the configured task. When
+   subsequently task execution completes a task stop notification, shown in
+   table \ref{table:task_stop}, \emph{must} be sent.
 
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
+       \multicolumn{2}{|l|}{\textbf{task stop notification}} \\
+      \hline
        message type:   & \msg{task\_done} \\
       \hline
        direction       & tool to controller \\
        data            & Result \\
-                       & Result = Bool \\
+                       &  Result = $\mathbb{B}$ \\
       \hline
      \end{tabular}
+     \label{table:task_stop}
     \end{center}
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent The result represents success or failure during task execution. In
-   case of failure the user should be notified. A side remark on task
-   execution: the controller has the responsibility to ensure that the inputs
-   in a configuration exist prior to starting a task that depends on them. Also
-   it must ensure that they remain unchanged (by the environment) during task
-   execution. Likewise, the outputs must not exist or be modifiable by the tool
-   prior to starting a task, and it must ensure that the environment leaves the
-   outputs unchanged during task execution.
+   \noindent The data in the stop notification represents success or failure
+   during task execution. In case of failure the user should probably be
+   notified of the details of the failure using the display or the reporting
+   facility both of which will be discussed shortly.
+   
+%%   A side remark on task
+%%   execution: the controller has the responsibility to ensure that the inputs
+%%   in a configuration exist prior to starting a task that depends on them. Also
+%%   it must ensure that they remain unchanged (by the environment) during task
+%%   execution. Likewise, the outputs must not exist or be modifiable by the tool
+%%   prior to starting a task, and it must ensure that the environment leaves the
+%%   outputs unchanged during task execution.
 
-  \subsection{Tool Report}
+  \subsection{Reporting}
 
    From any context a tool can send a report that signifies a warning, error or
    just some information. The purpose is to inform the user through controller
@@ -838,6 +883,8 @@
    \begin{figure}[H]
     \begin{center}
      \begin{tabular}{|ll|}
+      \hline
+       \multicolumn{2}{|l|}{\textbf{report notification}} \\
       \hline
        message type:   & \msg{report} \\
       \hline
@@ -881,6 +928,8 @@
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
+       \multicolumn{2}{|l|}{\textbf{termination command}} \\
+      \hline
        message type:    & \msg{termination} \\
       \hline
        direction:       & controller to tool \\
@@ -891,16 +940,16 @@
    \end{figure}
    \vspace{-0.4cm}
 
-   \noindent The response \emph{must} be a termination signal, which signifies
-   that the tool is shutting down and will terminate soon.  In principle a tool
-   should not just terminate without request. However if termination is somehow
-   unavoidable a signal of this event is better than no signal at all.  So from
-   any context a tool may send a termination signal, which is a message that
-   looks as follows:
+   \noindent The response be a termination notification, which signifies that
+   the tool is shutting down and will terminate soon.  So from any context a
+   tool may send a termination notification, which is a message that looks as
+   follows:
 
    \begin{figure}[H]
     \begin{center}
      \begin{tabular}{|ll|}
+      \hline
+       \multicolumn{2}{|l|}{\textbf{termination notification}} \\
       \hline
        message type:   & \msg{termination} \\
       \hline
@@ -912,9 +961,12 @@
    \end{figure}
    \vspace{-0.4cm}
 
-   \noindent In the case that a tool fails to respond to a termination request
-   within a reasonable time span, the controller may and is assumed to be able
-   to forcibly terminate the tool by other means.
+   \noindent The message represents a general notification of termination and
+   may also be sent by a tool in case of emergency when it must terminate
+   before completing a task. When a tool fails to respond to a termination
+   request, the controller is assumed to force a tool to terminate by other
+   means.
+
   \subsection{Display} \label{ss:user_interaction}
 
    The display is a facility provided by the controller that represents the
@@ -968,6 +1020,8 @@
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
+       \multicolumn{2}{|l|}{\textbf{display change command}} \\
+      \hline
        message type:   & \msg{display\_layout} \\
       \hline
        direction:      & tool to controller \\
@@ -989,7 +1043,7 @@
                        & \ \ \ LayoutElement = LayoutManager $|$ Control \\
                        & \ \ \ \ Control = ProgressBar $|$ RadioButton $|$ Button $|$ Label $|$ TextField $|$ CheckBox \\
                        & \ \ \ \ \ ProgressBar = Nat $\times$ Nat $\times$ Nat \\
-                       & \ \ \ \ \ RadioButton = Bool \\
+                       & \ \ \ \ \ RadioButton = $\mathbb{B}$ \\
                        & \ \ \ \ \ Button      = String \\
                        & \ \ \ \ \ Label       = String \\
                        & \ \ \ \ \ TextField   = String \\
@@ -998,14 +1052,15 @@
     \end{center}
    \end{table}
    \vspace{-0.4cm}
-   \noindent Notice that every control is associated to an identifier ($id$),
-   that \emph{must} uniquely identifies the control in this layout. The
-   identifier is used to target a control in a display update.  The $box$
-   element and $properties$ represent a set of constraints on the relative
-   layout on what is contained in the box. A layout consists of set of nested
-   box elements that contain controls.  The horizontal or vertical direction of
-   a box determines the way it lays out the elements it contains above or
-   beside each other respectively.
+   \noindent Every control is with an identifier ($id$), that \emph{must}
+   uniquely identify this control within this layout. Communication of changes
+   to the state of a control rely on the identifier as control specifier.
+
+   \noindent The $box$ and $properties$ elements represent a set of constraints
+   on the relative layout on what is contained in the box. A layout consists of
+   set of nested box elements that contain controls.  The horizontal or
+   vertical direction of a box determines the way it lays out the elements it
+   contains above or beside each other respectively.
 
    The layout properties further affect layout of elements relative to each
    other or the containing box. Visibility determines whether a layout element
@@ -1018,16 +1073,18 @@
    used to control either the vertical or horizontal position of a control
    within the available space.
 
-   The following message is used to communicate changes to a control on the
-   display.
+   To communicate changes to a control on the display the following messages
+   are used.
 
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
+       \multicolumn{2}{|l|}{\textbf{display interaction notification}} \\
+      \hline
        message type:   & \msg{display\_data} \\
       \hline
-       direction:      & both \\
+       direction:      & controller to tool \\
        data:           & Id $\rightarrow$ State \\
                        & \ State = String \\
       \hline
@@ -1036,61 +1093,86 @@
    \vspace{-0.4cm}
    \end{table}
 
-   \noindent The interpretation of the message depends on the direction of the
-   message. When a tool receives the message it is interpreted as a change in
-   the state of a control on the display. When the controller receives such a
-   message it is interpreted as a request to change the state of a control on
-   the display. At the receiving side the message must be ignored if the $id$
-   does not identify a target control.
+   \noindent When a tool receives such a message it is interpreted as a state
+   change of a control that matches the identifier. When the identifier is not
+   known the message must be ignored. Similarly a tool can request a change to
+   a control on the display using the following message.
+
+   \begin{table}[H]
+    \begin{center}
+     \begin{tabular}{|ll|}
+      \hline
+       \multicolumn{2}{|l|}{\textbf{display manipulation request}} \\
+      \hline
+       message type:   & \msg{display\_data} \\
+      \hline
+       direction:      & tool to controller \\
+       data:           & Id $\rightarrow$ State \\
+                       & \ State = String \\
+      \hline
+     \end{tabular}
+    \end{center}
+   \vspace{-0.4cm}
+   \end{table}
+
+   \noindent When a controller receives such a message it is interpreted as a
+   state change of a control that matches the identifier. When the identifier
+   is not known the message must be ignored.
+
 %    A tool can change the state of controls on a display by means of their
 %    identifier. The following message must be used for this purpose.
 
 \pagebreak
- \section{Implementation} \label{s:protocol_implementation}
+ \section{Implementation details} \label{s:protocol_implementation}
 
    The previous section specified a high level view of the protocol. At this
    point it should be clear what concepts are involved and how those concepts
-   fit together. Our protocol is message based and all messages are typed.
-   Parameters of interpretation of messages are its type and its origin (or
-   travel direction). Not explicitly mentioned so far, but very important in
-   this section is that we rely on the property that the order in which
-   messages are sent is the same as the order in which those messages are
-   received (or actually delivered). Another such property is that
-   communication between partners uses a notion of connection.
+   fit together. Communication is based on typed messages. And message
+   interpretation depends on the type, and the partner that receives the
+   message. This section focusses on implementation details and visits
+   important design decisions.
    
-   Protocol security has not been a big issue in the design of the protocol so
-   far. The only place where security did play a small part is in tool
-   identification on incoming connections. The details about communicating a
-   token that identifies a tool are left unspecified for a reason. This step
-   poses the largest security risk and leaving this behaviour unspecified
-   allows to plug-in a more secure authentication scheme (which is often a
-   protocol in itself) later, without modification to our protocol.
+   An important design goal was to create a communication interface that can be
+   used from a wide variety of programming languages. Meaning that we looked
+   only at standardized inter-process communication mechanisms available as
+   operating system resource such as sockets and pipes. To further simplify
+   the use of the interface from other programming languages it was decided
+   to make the protocol text-based using XML \cite{XML-1_0-4}.
 
-   In terms of the seven layers of the OSI model \cite{Day1983}, our protocol
-   only covers the 6th (presentation) layer. All functionality below the
-   presentation layer will be provided through the use of standard protocols.
+%   Not explicitly mentioned so far, but very important in this section is that
+%   we rely on the property that the order in which messages are sent is the
+%   same as the order in which those messages are received (or actually
+%   delivered). Another such property is that communication between partners
+%   uses a notion of connection.
+   Another important general design decision was to not put focus on protocol
+   security aspects. We feel that security as well as performance are key
+   aspects in the design of any system. By this we mean that as with
+   performance it is often not possible to implement or to simply extend a
+   design to add security at a later stage. Putting a focus on security would
+   too much slow down the development process. The main goal has been on
+   getting a proof-of-concept implementation of a protocol-stack on which to
+   built the \squadt application.
+
+   The OSI model \cite{Day1983} is a popular way of analysing and describing
+   communication protocols. Our use of this model only serves to provide a
+   frame of reference. The OSI model divides the communication into subproblems
+   (using seven layers) that can be solved independently. Layers 1 through 5
+   represent basic functionality covered by widely available standard
+   communication protocols. The \squadt application covers the 7th
+   (application) layer and our communication protocol covers the 6th
+   (presentation) layer.
    
   \subsection{Transport} \label{ss:transport}
 
-   For the actual transport of data the TCP/IP protocol suite is the best
-   contender. It satisfies all requirements discussed previously. More
-   specifically, it provides: a state-full connection and preserves the order
-   of messages.  Furthermore TCP/IP widely is available on many platforms and
-   usable from a wide variety of programming languages.
+   For transport of data layers 1 through 5 of the OSI model the internet (or
+   TCP/IP) protocol suite is used (see \cite{rfc793} and \cite{rfc791} for
+   TCP(-v4) respectively IP). The TCP/IP protocol provides (bi-directional)
+   reliable order preserving delivery of a byte stream (layers 1 through 4 of
+   OSI). In addition it creates session functionality, or a stateful connection
+   between communication peers which allows one-time identification for tools
+   (section \ref{s:instance_identification}).  The use of TCP/IP is ubiquitous
+   and usable from a wide variety of programming languages.
 
-   Other straight-forward alternatives are XMPP core (Extensible Messaging and
-   Presence Protocol, \cite{rfc3920}) and the use of pipes. The use of pipes, a
-   ubiquitous operating system level construct for interprocess communication,
-   has already been discussed in the introduction. The XMPP core protocol is a
-   relative newcomer that is gaining popularity in all kinds of Internet
-   oriented applications. The protocol is built on top of UDP/TCP and therefore
-   also at the presentation layer of the OSI model.
-   
-   The reason for mentioning XMPP core here is that the protocol offers basic
-   messaging and a request-response mechanism. Both are needed for our protocol
-   so there is an opportunity for reuse of existing work. More about this in
-   the next subsection.
-   
 %   An alternative is to use
 %   standard input/output streams (or piping).  But the main disadvantage of
 %   this facility is that there is not built-in support in many programming
@@ -1109,37 +1191,12 @@
 
   \subsection{Messaging}
 
-   In the case of TCP/IP, the bottom layers of the OSI model to up to the
-   transport layer offer reliability that data that is offered at the side of
-   the sender is delivered without data loss in the same order at the side of
-   the receiver. At the presentation level, our level, the data are messages.
-   The notion of a message transcends the transport layer, so a messaging
-   mechanism must break down or merge data that is delivered to messages in
-   such a way that the messages that are offered at the side of the sender are
-   the messages that are delivered by the side of the receiver.
+   The presentation layer of the OSI model is about mapping between application
+   level concepts (with their own syntax and semantics) and data representation
+   in communication (data in messages). The topic of this subsection is the
+   representation of messages (see section \ref{s:message_definitions}) and
+   their interpretation in the domain of the application.
    
-   The first thing that is needed is the representation of a message. We have
-   chosen the text-based XML format for this purpose. The use of XML is
-   widespread, with an enormous variety of tools and libraries for many
-   existing programming languages. This should make it easy to add the
-   tool-side functionality of the protocol to tools written any popular
-   programming language. So we have been searching specifically for XML-based
-   protocols. 
-   
-   An existing XML-based protocol, also mentioned above is XMPP core.  A big
-   advantage of using this protocol is that it features basic messaging and
-   request response mechanism and little more than that. It is a relatively
-   compact open communication protocol that that relies on TCP/IP to transport
-   two XML streams (one for each direction), see \cite{Sperberg-McQueen:06:EML}
-   for more information.
-
-   The only notable disadvantage of XMPP core at the time of writing is that no
-   suitable standalone implementation seems to be available that suits all of
-   our needs.  Developing a full platform independent implementation ourselves
-   would take too much time. We are more interested in the results obtained
-   from using this protocol in the context of \squadt. So instead we use XMPP as
-   an example and shall develop a messaging mechanism that stays very close to it.
-
 %   XMPP has the notion of a message that can be sent from client to client, on
 %   top of it our protocol can be implemented.   Unfortunately no single
 %   client/server side implementations exist at the time that are usable on all
@@ -1162,34 +1219,31 @@
 
     \noindent Messages are wrapped in the \textit{message} element. A mandatory
     attribute is \textit{type} that specifies the type of the message. The type
-    attribute can occur only once. For example:
+    attribute can occur only once and its value must be among those introduced
+    in the previous section: \textit{identification}, \textit{capabilities},
+    \textit{configuration}, \textit{display\_layout}, \textit{display\_data},
+    \textit{termination}, \textit{task\_start}, \textit{task\_done},
+    \textit{report}. As an example consider the following message with type
+    `termination'.
  
     \begin{verbatim}
      <message type="termination"><![CDATA[message content]]></message>\end{verbatim}
 
-    The content of a message is wrapped as so-called CDATA section. This is an
-    XML construct that is used to indicate that it's contents should not be
-    interpreted as XML when parsing the document. As a consequence it is
-    possible to embed non-XML(-like) documents into XML documents. This is crucial
-    to allow arbitrary data to be put in messages. To make it work properly
-    every instance of \verb']]>' in the message body \textit{must} be replaced by
-    \verb']]]><![CDATA[]>'.
+    \noindent The content of a message is wrapped in a so-called CDATA section. The
+    contents of a CDATA section is treated as character-only data and not
+    parsed as markup. This allows embedding arbitrary character data into XML
+    documents. To deal between data that contains fragments that match the
+    end-marker \verb']]>', any instance of \verb']]>' in the message content
+    \textit{must} be replaced by \verb']]]><![CDATA[]>'.
     
-    Al of this means that the data inside a message is not interpreted when
-    parsing a message.  The valid message types are those introduced in the
-    previous section. A short summary: \textit{identification},
-    \textit{capabilities}, \textit{configuration}, \textit{display\_layout},
-    \textit{display\_data}, \textit{termination}, \textit{task\_start},
-    \textit{task\_done}, \textit{report}.
-    \\[5pt]
-    \noindent In subsequent sections the structure of messages is specified for
-    all the message types and for some of interesting variations. Normally the
-    structure of an XML document is (formally) specified using XML Document
-    Type Declaration (\cite{Sperberg-McQueen:06:EML}) or the XML Schema
-    standard \cite{Malhotra:06:XSP}. Many people find both difficult to read
-    and understand. So instead of using any of these standards the translation
-    of the functional specification of messages the previous section to XML is
-    sketched by means of examples.
+    \noindent Message structure will be specified subsequently for all the
+    message types and for some of interesting variations. Usually the structure
+    of an XML document is (formally) specified using XML Document Type
+    Declaration (\cite{Sperberg-McQueen:06:EML}) or the XML Schema standard
+    \cite{Malhotra:06:XSP}. An XML Schema specification is available for the
+    complete set of messages. Many people find both of them difficult to read
+    and understand. The treatment in this section consists of presenting a set
+    of XML fragments and text to illustrate translation.
 
 %  \subsubsection{Authentication}
 
@@ -1212,56 +1266,45 @@
 
    \small \begin{verbatim}
   <capabilities>
-   <protocol-version major="1" minor="0"/>
+   <protocol-version major="1" minor="0" />
   </capabilities>\end{verbatim}
   \normalsize
 
-   \noindent A capabilities message sent in reply to a request for capabilities by the
-   controller in addition must contain the tools input-configurations. Recall
-   that an input-configuration describes the main input for a relevant subset
-   of functionality of the tool. So in addition the \textit{protocol-version}
-   element may contain any number of \textit{input-configuration} elements as
-   follows:
+   \noindent A capabilities response message sent in reply to a request for
+   capabilities by the controller in addition must contain the set of
+   input-configurations. An input-configuration is represented by means of the
+   \textit{input-configuration} element. The non-empty set is modelled as an
+   non-empty ordered list without duplicates, meaning that elements with the
+   same values for the category and format attributes are ignored. For example:
 
    \small \begin{verbatim}
-  <input-configuration category="editing" format="text/mcrl2" id="x"/>
-  <input-configuration category="visualisation" format="text/mcrl2" id="x"/>
-  <input-configuration category="editing" format="application/lps" id="x"/>\end{verbatim}
+  <capabilities>
+   <protocol-version major="1" minor="0" />
+   <input-configuration category="editing">
+    <object id="mcrl2_in" format="text/mcrl2" />
+   </input-configuration>
+   <input-configuration category="visualisation" />
+    <object id="mcrl2_in" format="text/mcrl2" />
+   </input-configuration>
+   <input-configuration category="editing" />
+    <object id="lps_in" format="application/lps" />
+   </input-configuration>
+  </capabilities>\end{verbatim}
   \normalsize
 
-   \noindent All attributes: \textit{category}, \textit{format} and \textit{id} are
-   mandatory. In the context of the pair of \textit{category} and
-   \textit{format} the \textit{id} should must uniquely identify the main
-   input. The \textit{category} attribute is a string which represents a name
-   that characterises functionality targeted by the input configuration. The
-   \textit{id} is a string that represents a unique identifier for an input
-   object in a future configuration. The \textit{format} attribute specifies
-   the format of this object as a MIME type (Multipurpose Internet Mail
-   Extensions, \cite{rfc2822}).
+   \noindent The attribute \textit{category} is mandatory and represents the
+   category of functionality associated with this input configuration. The
+   \textit{input-configuration} section contains an arbitrary amount of
+   \textit{object} sections each representing a source of input. An
+   \textit{object} element has two mandatory attributes: \textit{id} a unique
+   identifier within the scope of an input-configuration section and
+   \textit{format} a MIME-type (see Multipurpose Internet Mail Extensions,
+   \cite{rfc2822}) that specifies the type of the input.
 
-   The input configuration are interpreted as follows. As input tool can take a
-   file that uses the text based format called mcrl2 as input, and behave
-   either as an editor or as a visualiser. Alternatively it can take a file
-   that stores data using the (presumably) binary lps format, and behave as an
-   editor. Notice that the input identifier has value \verb'x' in all three
-   cases.  The identifier only plays a role when generating a fresh
-   configuration from an input configuration.
-
-   A valid (initial) configuration can be obtained from an input configuration
-   as follows.  Create a \textit{configuration} element, add a Boolean
-   attribute \textit{fresh} set to true and a as child element add a single
-   object (see section \ref{ss:implementation_configuration}) of type input
-   with the same values for the \textit{id} and \textit{format} attributes as
-   the \textit{input-configuration} element. For the first input-configuration
-   above such a configuration would look as follows.
-   \small \begin{verbatim}
-  <configuration fresh="true" category="editing">
-   <object type="input" format="text/mcrl2" id="x">
-  </configuration>\end{verbatim}
-  \normalsize
-  
-   This is an example of an initial configuration, the starting point in the
-   process of task configuration.
+   For the example above the interpretation is as follows. As input the tool
+   takes a file that either uses the text based format called mcrl2, then
+   behaves either as an editor or as a visualiser, or it uses the binary lps
+   format and behave as an editor.
 
   \subsubsection{Configuration} \label{ss:implementation_configuration}
 
@@ -1299,52 +1342,62 @@
    looks as follows.
 
    \small \begin{verbatim}
-  <configuration fresh="true" category="debugging">
+  <configuration interactive="true" category="debugging">
    <option id="-v">
     <argument type="integer">1</argument>
    </option>
-   <object id="in" type="input" location="" format=""/>
-   <object id="out" type="output" location="" format=""/>
+   <object id="in" type="input" location="/dev/random" format="application/octet-stream"/>
+   <object id="out" type="output" location="/tmp/out" format="application/octet-stream"/>
   </configuration>\end{verbatim}
   \normalsize
 
-   \noindent The \textit{fresh} and \textit{category} attributes are mandatory.
-   A \textit{configuration} element may contain an arbitrary number of
-   \textit{object} and \textit{option} elements in any order, they represent
-   data sources and options respectively.  The \textit{id} attributes of
-   \textit{option} and \textit{object} elements represent the identifiers and
-   all must be unique within the context of a task configuration (the
-   containing \textit{configuration} element).
-
-   An \textit{object} element must contain the \textit{type} attribute, which
+   \noindent The \textit{category} attribute is mandatory, the interactive
+   attribute must be true when it is part of a message that serves as a request
+   for interactive configuration.  A \textit{configuration} element may contain
+   an arbitrary number of \textit{object} and \textit{option} elements in any
+   order, they represent data sources and options respectively.
+   
+   The \textit{id} attributes of \textit{option} and \textit{object} elements
+   represent the identifiers and all must be unique within the context of a
+   task specification (the containing \textit{configuration} element).  An
+   \textit{object} element must contain the \textit{type} attribute, which
    specifies whether the tool takes it as input or produces it as output. The
-   \textit{location} attribute must specify a URI (see \cite{rfc3305}),
-   and the \textit{format} attribute contains a data format specifier
-   using the MIME standard.
-
-   An \textit{option} element may contain an arbitrary number of
+   \textit{location} attribute must specify a URI (see \cite{rfc3305}), and the
+   \textit{format} attribute contains a data format specifier using the MIME
+   standard.  An \textit{option} element may contain an arbitrary number of
    \textit{argument} elements that each represent a single typed-argument to
    the option. A number of predefined types is available for arguments to
-   options: string, enumeration, integer, natural, positive, real.
+   options: string, integer, natural, positive, real.
+
+   A valid (initial) configuration can be obtained from an input configuration
+   as follows.  Create an empty \textit{configuration} section and add an
+   attribute \textit{interactive} set to true and add the contents of an
+   input-configuration section (section \ref{ss:implementation_configuration}).
 
   \subsubsection{Display}
-   
-   Display manipulation is limited to replacing the entire content of the
-   display at once or modifying the state of controls on the display.  In
-   particular it is not possible to manipulate the layout itself. Design of a
-   good user interface may require more flexibility such as separate
-   manipulation of layout properties.  A good example is the combination of
-   HTML, CSS, and JavaScript because it essentially offers this flexibility by
-   means of open standards. The complexity of these standards make them
-   unsuitable to directly rely on at this time.
 
-   We have chosen a limited subset of controls that can be used by tools in
-   display layouts. Layout construction itself is left very simple on purpose.
-   The downside of this choice is that a tool developer has less control over
-   the exact way a layout looks on the display. Within this context it has
-   always been the intention of making it easy to add new controls to the
-   repertoire. A detailed treatment of layout structure and the available
-   controls follows.
+   Design of a good user interface may require more flexibility such as
+   separate manipulation of layout properties. In the previous section display
+   manipulation was restricted to replacing the entire content of the display
+   at once or modifying the state of individual controls on the display.  In
+   particular it is not possible to manipulate the layout itself. More complete
+   manipulation capabilities rapidly increase complexity. A conservative
+   approach was chosen to save on implementation time. 
+
+%%   A good example is the combination of HTML,
+%%   CSS, and JavaScript because it essentially offers this flexibility by means
+%%   of open standards. The complexity of these standards and lack of easy-to-use
+%%   standard portable implementations make them unsuitable to directly rely on
+%%   at this time.
+
+   We have preselected a limited set of controls that are available to tools to
+   construct display layouts. Again the reason is to limit complexity although
+   the display layout construction and manipulation by itself are by far the
+   most complex functionality the protocol has to offer.  The downside of this
+   limitation of choice is that a tool developer has less control over the
+   exact layout of controls on the display. Instead we have aimed to make it
+   easy to implement new controls and hope to extend the protocol when there is
+   a specific demand.
    
 %   The available elements are: \textit{box-layout-manager}, \textit{progress-bar},
 %   \textit{radio-button}, \textit{button}, \textit{label}, \textit{checkbox},
@@ -1354,12 +1407,13 @@
 
    \paragraph{Controls}
 
-    It is assumed that the reader is familiar with each of the controls their
-    basic function and purpose. The name and function of controls and the way a
-    layout is built are based on concepts and terminology used in Java Swing.
-    Every control has a mandatory \textit{id} attribute is mandatory it must be
-    unique within the scope of the containing \textit{display-layout} element
-    (introduced later).
+    Because the use of graphical user interfaces today is so ubiquitous it is
+    assumed that the reader is familiar with the purpose and basic functions of
+    each of the controls presented earlier. The name and function of controls
+    and the way a layout is built are based on concepts and terminology used in
+    Java Swing.  Every control has a mandatory \textit{id} attribute that must
+    be unique within the scope of the containing \textit{display-layout} section
+    (introduced shortly).
    
     The following example shows a specification for a label, a button and a
     checkbox with text Cancel.
@@ -1367,7 +1421,7 @@
     \small \begin{verbatim}
   <label id="x"><![CDATA[Cancel]]></label>
   <button id="y"><![CDATA[Cancel]]></button>
-  <checkbox id="y" checked="true"><![CDATA[Cancel]]></checkbox>\end{verbatim}
+  <checkbox id="z" checked="true"><![CDATA[Cancel]]></checkbox>\end{verbatim}
   \normalsize
 
     \noindent When the button is pressed or the checkbox is toggled this fact is
@@ -1547,6 +1601,55 @@
    versions is available and/or to signal compatibility mode. The capabilities
    request-response mechanism can be used check finer degrees of compatibility.
    
+  \section{Comparison}
+  
+   How does our approach measure up to other approaches to tool integration?  In
+   Eucalyptus, the graphical front-end to CADP, detailed knowledge about the
+   capabilities of individual tools as well as file formats seems to be
+   integrated. Such coupling is very tight and limits its applicability. We set
+   our target somewhat higher. We have chosen to avoid building in knowledge
+   about particular file formats or tools.
+   
+   Other approaches we know of are the electronic tool integration platform
+   (ETI) \cite{RICVT} and repository (\cite{SFAV}). The former is a platform
+   that uses web-services (using SOAP \cite{SOAP} and WSDL \cite{2001-WSDL})
+   in order to loosely connect tools in a way very similar to ours. A tool can
+   be connected by means of filling in a web-form that generates an XML file
+   that represents the tools' interface.  This is very similar to the XML
+   formatted message on tools capabilities. Connected tools are aware of the
+   integration context and ETI offers facilities that are usable to tools via
+   Java specific remote procedure calls.
+   
+   Repository also uses web-services but in contrast to ETI, the connection
+   between tool and framework is ad-hoc by means of scripts. This puts it
+   somewhere in between Eucalyptus and ETI. The tools are not aware of the
+   integration context so a script is needed to make a tool behave properly in
+   the integration context.
+ 
+   For all of the above approaches it seems that tools communicate through
+   files.  A serious consideration on our side was that files could grow very
+   big and that you do not want to copy those unnecessarily across a network.
+   For this reason the use of web-services as interface between tool was not
+   really considered until a protocol implementation was already available.
+
+  \section{Afterthoughts}
+
+   After implementation work had started on a implementation of a protocol
+   stack, an existing XML-based protocol called XMPP core came into the view.
+   This protocol offers basic messaging functionality including a request
+   response mechanism and little more than that.  Quickly summarised: is a
+   relatively compact open communication protocol that that relies on TCP/IP to
+   transport two XML streams (one for each direction), also see
+   \cite{Sperberg-McQueen:06:EML}.  At some point XMPP core (Extensible
+   Messaging and Presence Protocol, \cite{rfc3920}) even became an official
+   standard. In hind-sight we would have liked to consider the use of XMPP
+   core.
+
+   Our messaging functionality is very similar in approach to XMPP. We would
+   like to conclude with the message that with a little effort a future
+   possible reimplementation of the protocol stack can be based on an XMPP-core
+   implementation.
+
   \enlargethispage*{4pt}
   \bibliography{references}
 
@@ -1558,56 +1661,19 @@
   only communications actions are visible. The model features a single
   controller and a single tool.
 
-  \addtolength{\oddsidemargin}{-2cm}
-  \addtolength{\evensidemargin}{-2cm}
   \small \verbatiminput{protocol.mcrl2} \normalsize
 %  \rotatebox{90}{\verbatiminput{protocol.mcrl2}}
-
-  \pagebreak
-  \addtolength{\oddsidemargin}{2cm}
-  \addtolength{\evensidemargin}{2cm}
 
   \begin{figure}[H]
    \includegraphics[width=\textheight,angle=90]{protocol.eps}
    \caption{Graphical representation of the state-space}
   \end{figure}
 
- \section{Comparison}
- 
-  How does our approach measure up to other approaches to tool integration?  In
-  Eucalyptus, the graphical front-end to CADP, detailed knowledge about the
-  capabilities of individual tools as well as file formats seems to be
-  integrated. Such coupling is very tight and limits its applicability. We set
-  our target somewhat higher. We have chosen to avoid building in knowledge
-  about particular file formats or tools.
-  
-  Other approaches we know of are the electronic tool integration platform
-  (ETI) \cite{RICVT} and repository (\cite{SFAV}). The former is a platform
-  that uses web-services (using SOAP \cite{SOAP} and WSDL \cite{2001-WSDL})
-  in order to loosely connect tools in a way very similar to ours. A tool can
-  be connected by means of filling in a web-form that generates an XML file
-  that represents the tools' interface.  This is very similar to the XML
-  formatted message on tools capabilities. Connected tools are aware of the
-  integration context and ETI offers facilities that are usable to tools via
-  Java specific remote procedure calls.
-  
-  Repository also uses web-services but in contrast to ETI, the connection
-  between tool and framework is ad-hoc by means of scripts. This puts it
-  somewhere in between Eucalyptus and ETI. The tools are not aware of the
-  integration context so a script is needed to make a tool behave properly in
-  the integration context.
-
-  For all of the above approaches it seems that tools communicate through
-  files.  A serious consideration on our side was that files could grow very
-  big and that you do not want to copy those unnecessarily across a network.
-  For this reason the use of web-services as interface between tool was not
-  really considered until a protocol implementation was already available.
-
 %   The purpose of the protocol is make it possible for a user to control of a
 %   tool through facilities offered by a separate system that acts as
 %   intermediary. The protocol describes how a tool can be configured to perform
 %   a task, how it can be made to perform this task and report the results.  A
-%   task configuration comes into being by interaction with the user through the
+%   task specification comes into being by interaction with the user through the
 %   system. The protocol describes this process.  The most important
 %   functionality offered by the protocol is repeatability of the configuration
 %   process based on a previous configuration.

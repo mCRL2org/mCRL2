@@ -66,7 +66,6 @@ namespace tipi {
  
             tipi::tool::category const&               m_category;           ///< tool category
             object_map                                m_object_map;         ///< storage format
-            tipi::configuration::parameter_identifier m_primary_identifier; ///< identifier of primary input
  
           private:
 
@@ -77,7 +76,7 @@ namespace tipi {
  
             /** \brief Constructor */
             inline input_configuration(tool::category const& c,
-                        mime_type const& m, tipi::configuration::parameter_identifier const& id) : m_category(c), m_primary_identifier(id) {
+                        mime_type const& m, tipi::configuration::parameter_identifier const& id) : m_category(c) {
 
               m_object_map.insert(std::make_pair(id, m));
             }
@@ -89,7 +88,7 @@ namespace tipi {
 
             /** \brief Gets the primary input object descriptor */
             inline object_map::value_type get_primary_object_descriptor() const {
-              return *m_object_map.find(m_primary_identifier);
+              return *m_object_map.begin();
             }
 
             /** \brief Gets the sequence of objects descriptors */

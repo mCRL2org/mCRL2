@@ -21,7 +21,6 @@ obj squadt_interface
       : source/squadt_interface.cpp
       : <threading>multi
         <use>/libraries/tipi//tool_interface
-        <use>/libraries/core//headers
         <define>ENABLE_SQUADT_CONNECTIVITY
       :
       : <library>/libraries/tipi//tool_interface
