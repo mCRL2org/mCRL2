@@ -44,6 +44,8 @@ Frame::Frame(
 	initFrame();
 	dofMenu = false;
 	clustMenu = NULL;
+	frameNote = NULL;
+	frameTextSize = NULL;
 	currentShapeId = -1;
 }
 
@@ -163,7 +165,7 @@ void Frame::handleNote( const int &shapeId, const string &msg )
 {
 	currentShapeId = shapeId;
 	currentShapeNote = msg;
-        initFrameNote();
+	initFrameNote();
 }
 
 
@@ -173,7 +175,7 @@ void Frame::handleTextSize( const int &shapeId, const int &textSize )
 {
 	currentShapeId = shapeId;
 	currentTextSize = textSize;
-        initFrameTextSize();
+	initFrameTextSize();
 }
 
 
@@ -1902,28 +1904,28 @@ void Frame::initToolbarEdit()
     // add tools, figures defined in 'figures.xpm'
     // selection
     wxBitmap selectBmp( select_icon );
-    toolBarEdit->AddRadioTool( ID_TOOL_SELECT, wxString( wxT( "Selection" ) ), selectBmp );
+    toolBarEdit->AddTool( ID_TOOL_SELECT, wxString( wxT( "Selection" ) ), selectBmp );
     // note
     wxBitmap noteBmp( note );
-    toolBarEdit->AddRadioTool( ID_TOOL_NOTE, wxString( wxT( "Add Note" ) ), noteBmp );
+    toolBarEdit->AddTool( ID_TOOL_NOTE, wxString( wxT( "Add Note" ) ), noteBmp );
     // edit DOF
     wxBitmap dofBmp( dof );
-    toolBarEdit->AddRadioTool( ID_TOOL_DOF, wxString( wxT( "Edit DOF" ) ), dofBmp );
+    toolBarEdit->AddTool( ID_TOOL_DOF, wxString( wxT( "Edit DOF" ) ), dofBmp );
     // rectangle
     wxBitmap rectBmp( rectangle );
-    toolBarEdit->AddRadioTool( ID_TOOL_RECT, wxString( wxT( "Rectangle" ) ), rectBmp );
+    toolBarEdit->AddTool( ID_TOOL_RECT, wxString( wxT( "Rectangle" ) ), rectBmp );
     // ellipse
     wxBitmap ellipseBmp( ellipse );
-    toolBarEdit->AddRadioTool( ID_TOOL_ELLIPSE, wxString( wxT( "Ellipse" ) ), ellipseBmp );
+    toolBarEdit->AddTool( ID_TOOL_ELLIPSE, wxString( wxT( "Ellipse" ) ), ellipseBmp );
     // line
     wxBitmap lineBmp( line );
-    toolBarEdit->AddRadioTool( ID_TOOL_LINE, wxString( wxT( "Line" ) ), lineBmp );
+    toolBarEdit->AddTool( ID_TOOL_LINE, wxString( wxT( "Line" ) ), lineBmp );
     // arrow
     wxBitmap arrowBmp( arrow );
-    toolBarEdit->AddRadioTool( ID_TOOL_ARROW, wxString( wxT( "Arrow" ) ), arrowBmp );
+    toolBarEdit->AddTool( ID_TOOL_ARROW, wxString( wxT( "Arrow" ) ), arrowBmp );
     // double arrow
     wxBitmap darrowBmp( darrow );
-    toolBarEdit->AddRadioTool( ID_TOOL_DARROW, wxString( wxT( "Double arrow" ) ), darrowBmp );
+    toolBarEdit->AddTool( ID_TOOL_DARROW, wxString( wxT( "Double arrow" ) ), darrowBmp );
     
     toolBarEdit->AddSeparator();
     // fill color
@@ -2224,7 +2226,7 @@ void Frame::initFrameNote()
 		
 		frameNote->SetMinSize(frameNote->GetSize());
 		frameNote->SetMaxSize(frameNote->GetSize());
-		toolBarEdit->EnableTool( ID_TOOL_NOTE, false );
+		toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
 
 		// show
 		frameNote->Show();
@@ -4441,7 +4443,6 @@ void Frame::onButton( wxCommandEvent &e )
     	{
     		string noteString = (const char*) (noteText->GetValue()).mb_str(wxConvUTF8);
     		frameNote = NULL;
-    		toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
     		mediator->handleShowNote( noteString, currentShapeId );
     	}
     }
