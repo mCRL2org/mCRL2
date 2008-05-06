@@ -993,9 +993,7 @@ void Shape::visualize(
 	
 	if( attrs[i] == textDOF->getAttribute() && attrs[i]->getSizeCurValues() > 0 )
 	{
-		variable = attrs[i]->getName();
-		variable.append( ": " );
-		variable.append( attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue() );
+		variable = attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue();
 	}
     }
     

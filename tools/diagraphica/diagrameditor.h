@@ -197,6 +197,7 @@ protected:
     int editMode;
     int drgBegIdx1;
     int drgBegIdx2;
+    int lastSelectedShapeId;
     bool selection;
 
     double xDrgDist;
