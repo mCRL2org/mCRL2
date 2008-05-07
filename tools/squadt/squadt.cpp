@@ -81,6 +81,9 @@ void SQuADt::parse_command_line() {
     if (0 < parser.options.count("port")) {
       tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
     }
+    else {
+      tcp_port_number = 10949;
+    }
 
     if (parser.arguments.size() == 1) {
       boost::filesystem::path target(parser.arguments[0]);

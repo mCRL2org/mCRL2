@@ -363,7 +363,12 @@ namespace transport {
       }
     }
     catch (...) {
-      impl->add_listener(impl, a, p);
+      if (a.empty()) {
+        impl->add_listener(impl, boost::asio::ip::address_v4::loopback(), p);
+      }
+      else {
+        impl->add_listener(impl, a, p);
+      }
     }
   }
 
