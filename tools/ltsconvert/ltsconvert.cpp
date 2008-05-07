@@ -70,12 +70,14 @@ class t_tool_options {
                        print_dot_state(true), determinise(false), check_reach(true) {
     }
   
-    inline char const* source_string() const {
-      return (infilename.empty()) ? "standard input" : std::string("'" + infilename + "'").c_str();
+    inline std::string source_string() const {
+      return (infilename.empty()) ? std::string("standard input") :
+                                    std::string("'" + infilename + "'");
     }
   
-    inline char const* target_string() const {
-      return (outfilename.empty()) ?  "standard output" : std::string("'" + outfilename + "'").c_str();
+    inline std::string target_string() const {
+      return (outfilename.empty()) ? std::string("standard output") :
+                                     std::string("'" + outfilename + "'");
     }
   
     inline lts_extra get_extra(lts_type type, std::string const &base_name = "") const {
@@ -107,7 +109,7 @@ class t_tool_options {
     void read_lts(lts& l) const {
       bool success = false;
     
-      gsVerboseMsg("reading LTS from %s...\n", source_string());
+      gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
       
       lts_extra extra = get_extra(intype);
      
@@ -136,7 +138,7 @@ class t_tool_options {
       }
     
       if (!success) {
-        throw std::runtime_error("cannot read LTS from " + std::string(source_string()) +
+        throw std::runtime_error("cannot read LTS from " + source_string() +
                                                "\nretry with -v/--verbose for more information");
       }
     
@@ -178,7 +180,7 @@ class t_tool_options {
     void write_lts(lts& l) const {
       bool success = false;
   
-      gsVerboseMsg("writing LTS to %s...\n", target_string());
+      gsVerboseMsg("writing LTS to %s...\n", target_string().c_str());
   
       if (outfilename.empty()) {
         success = l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
@@ -188,7 +190,7 @@ class t_tool_options {
       }
     
       if (!success) { 
-        throw std::runtime_error("cannot write LTS to " + std::string(target_string()) +
+        throw std::runtime_error("cannot write LTS to " + target_string() +
                                                "\nretry with -v/--verbose for more information");
       }
     }
@@ -687,7 +689,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str());
+  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).get_mime_type().get_sub_type().c_str());
   tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str());
   tool_options.set_source(c.get_input(lts_file_for_input).get_location());
   tool_options.set_target(c.get_output(lts_file_for_output).get_location());
