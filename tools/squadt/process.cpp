@@ -308,7 +308,7 @@ namespace squadt {
       };
 
       static bool termination_handling = local::install_termination_handler();
-      
+
       // Start application bundle
       if (is_directory(c.executable) && extension(c.executable).compare(".app") == 0) {
         CFURLRef bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,

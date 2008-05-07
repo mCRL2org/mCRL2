@@ -8,7 +8,6 @@
 #define SOCKET_LISTENER_H
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <tipi/detail/transport/detail/socket_transceiver.hpp>

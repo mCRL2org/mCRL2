@@ -13,6 +13,7 @@ tool squadt
         /libraries/tipi//controller_interface
         /libraries/utilities//command_line_interfacing
       : <dependency>/libraries//ticpp
+        <define>USING_WX
         <include>.
         <wx>yes
       ;

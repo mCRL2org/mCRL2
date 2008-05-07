@@ -53,14 +53,12 @@ namespace squadt {
     std::string extension = boost::filesystem::extension(name);
 
     if (!extension.empty()) {
-      wxFileType* wtype(m.GetFileTypeFromExtension(wxString(extension.substr(1).c_str(), wxConvLocal)));
+      std::auto_ptr < wxFileType > wtype(m.GetFileTypeFromExtension(wxString(extension.substr(1).c_str(), wxConvLocal)));
      
-      if (wtype) {
+      if (wtype.get()) {
         wxString mime_type;
      
         wtype->GetMimeType(&mime_type);
-     
-        delete wtype;
      
         return tipi::mime_type(std::string(mime_type.fn_str()));
       }
@@ -72,42 +70,28 @@ namespace squadt {
   std::string system_mime_type_manager::get_command(tipi::mime_type const& type) const {
     static wxMimeTypesManager m;
 
-    wxFileType* wtype = m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal));
+    std::auto_ptr< wxFileType > wtype(m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal)));
 
-    if (wtype) {
-      std::string command(wtype->GetOpenCommand(wxT("$")).fn_str());
+    if (wtype.get()) {
+      return std::string(wtype->GetOpenCommand(wxT("$")).fn_str());
+    }
+    else if (type.is_type(tipi::mime_type::text)) {
+#if defined(__APPLE__)
+      return "open -t $"; // .GetFileTypeFromMimeType("text/plain") does not work on OS X
+#else
+      wtype.reset(m.GetFileTypeFromMimeType(wxT("text/plain")));
 
-      delete wtype;
-
-      return command;
+      if (wtype.get()) {
+        return std::string(wtype->GetOpenCommand(wxT("$")).fn_str());
+      }
+#endif
     }
 
     return std::string();
   }
 
   bool system_mime_type_manager::is_known_type(tipi::mime_type const& type) const {
-    static wxMimeTypesManager m;
-
-    wxFileType* wtype = m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal));
-
-    if (wtype != 0) {
-      delete wtype;
-
-      return true;
-    }
-    else {
-      if (type.is_type(tipi::mime_type::text)) {
-        wtype = m.GetFileTypeFromMimeType(wxT("text/plain"));
-      }
-
-      if (wtype != 0) {
-        delete wtype;
-
-        return true;
-      }
-    }
-
-    return false;
+    return !get_command(type).empty();
   }
 #else
   inline tipi::mime_type system_mime_type_manager::guess_mime_type(boost::filesystem::path const&) const {

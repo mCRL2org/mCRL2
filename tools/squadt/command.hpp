@@ -82,7 +82,7 @@ namespace squadt {
         /** \brief Adds an argument */
         void append_argument(std::string const&);
 
-        /** \brief Get arguments as a traditional C string */
+        /** \brief Get arguments as a string */
         std::string as_string(bool = true) const;
 
         /** \brief Get arguments as an array of constant C strings */
