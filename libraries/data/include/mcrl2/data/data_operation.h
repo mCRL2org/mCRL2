@@ -58,6 +58,13 @@ class data_operation: public data_expression
       return arg1(*this);
     }
     
+    /// Returns the sort of the data_operation.
+    ///
+    sort_expression sort() const
+    {
+      return arg2(*this);
+    }
+
     /// Apply the data_operation to a list of arguments.
     ///
     data_expression operator()(data_expression_list args) const

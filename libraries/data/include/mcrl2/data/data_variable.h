@@ -79,6 +79,13 @@ class data_variable: public data_expression
     {
       return arg1(*this);
     }
+
+    /// Returns the sort of the data_variable.
+    ///
+    data::sort_expression sort() const
+    {
+      return arg2(*this);
+    }
   };
                                                             
 /// \brief singly linked list of data variables

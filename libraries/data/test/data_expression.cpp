@@ -33,11 +33,16 @@ int test_main(int argc, char** argv)
   
   data_variable v("d:D");
   data_expression e(v);
+  BOOST_CHECK(v.sort() == e.sort());
 
   data_variable x("x:X");
   data_variable y("y:Y");
   data_variable_list l = make_list(x, y);
   data_expression_list m = make_data_expression_list(l);
+
+  data_operation f(identifier_string("f"), sort_identifier("T"));
+  data_expression ef(f);
+  BOOST_CHECK(f.sort() == ef.sort());
 
   return 0;
 }
