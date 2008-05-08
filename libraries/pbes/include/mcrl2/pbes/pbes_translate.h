@@ -201,7 +201,14 @@ class pbes_translate_algorithm
     }
 
   public:
+    /// Constructor.
+    ///
     pbes_translate_algorithm()
+    {}
+
+    /// Destructor.
+    ///
+    virtual ~pbes_translate_algorithm()
     {}
 
     virtual pbes<> run(const modal::state_formula& formula, const lps::specification& spec) = 0;
@@ -571,6 +578,7 @@ std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << s
 
   public:
     /// Constructor.
+    ///
     pbes_translate_algorithm_timed()
     {}
 
@@ -947,6 +955,7 @@ std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << s
 
   public:
     /// Constructor.
+    ///
     pbes_translate_algorithm_untimed()
     {}
 
