@@ -48,5 +48,6 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(x3.name() == x_name);
   BOOST_CHECK(x3.sort() == T);
 
+  return 0;
 }
 

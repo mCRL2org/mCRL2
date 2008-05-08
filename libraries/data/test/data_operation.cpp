@@ -36,5 +36,6 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(f1.name() == f_name);
   BOOST_CHECK(f1.sort() == T);
 
+  return 0;
 }
 

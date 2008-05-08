@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <string>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/aterm_ext.h"
