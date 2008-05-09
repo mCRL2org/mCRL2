@@ -88,32 +88,48 @@ static ATermAppl rename_actions(t_tool_options tool_options);
 //      if end_phase != PH_NONE, the state formula after phase end_phase
 //      NULL, if something went wrong
 
-bool process(t_tool_options const& tool_options) {
+int process(t_tool_options const& tool_options) 
+{
   //process action rename specfication
   ATermAppl result = rename_actions(tool_options);
   if (result == NULL) {
-    return false;
+    return EXIT_FAILURE;
   }
 
   //store the result
   string outfilename = tool_options.outfilename;
-  bool opt_pretty = tool_options.pretty;
-  if (outfilename == "") {
-    gsVerboseMsg("saving result to stdout...\n");
-    PrintPart_CXX(cout, (ATerm) result, opt_pretty?ppDefault:ppInternal);
-    cout << endl;
-  } else {
-    gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
-    ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
-    if (!outstream.is_open()) {
-      gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-      return false;
+  if (outfilename == "") 
+  { gsVerboseMsg("saving result to stdout...\n");
+    if ((tool_options.end_phase==PH_NONE) && (!tool_options.pretty))
+    { ATwriteToSAFFile((ATerm)result,stdout);
     }
-    PrintPart_CXX(outstream, (ATerm) result, opt_pretty?ppDefault:ppInternal);
-    outstream.close();
+    else 
+    { PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
+      cout << endl;
+    }
+  } 
+  else 
+  { gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
+    if ((tool_options.end_phase==PH_NONE) && (!tool_options.pretty))
+    { FILE *outstream = fopen(outfilename.c_str(), "wb");
+      if (outstream == NULL) 
+      { gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
+        return EXIT_FAILURE;
+      }
+      ATwriteToSAFFile((ATerm)result,outstream);
+      fclose(outstream);
+    }
+    else 
+    { ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
+      if (!outstream.is_open()) 
+      { gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
+        return EXIT_FAILURE;
+      }
+      PrintPart_CXX(outstream, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
+      outstream.close();
+    }
   }
-
-  return true;
+  return EXIT_SUCCESS;
 }
 
 // SQuADT protocol interface
@@ -255,7 +271,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
       "stop conversion after phase PHASE and output the result; PHASE can be "
       "'pa' (parse), 'tc' (type check) or 'di' (data implementation)", 'p').
     add_option("external",
-      "return the result in the external format", 'e');
+      "return the result in human readable format", 'e');
 
   command_line_parser parser(clinterface, argc, argv);
 
@@ -263,7 +279,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
 
   tool_options.no_rewrite = 0 < parser.options.count("no-rewrite"); 
   tool_options.no_sumelm  = 0 < parser.options.count("no-sumelm"); 
-  tool_options.pretty     = 0 < parser.options.count("pretty"); 
+  tool_options.pretty     = 0 < parser.options.count("external"); 
 
   if (parser.options.count("end-phase")) {
     std::string phase = parser.option_argument("end-phase");
@@ -310,17 +326,18 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  try {
+  try 
+  {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) 
+    { return EXIT_SUCCESS;
     }
 #endif
 
     return process(parse_command_line(argc, argv));
   }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+  catch (std::exception& e) 
+  { std::cerr << e.what() << std::endl;
   }
 
   return EXIT_FAILURE;
