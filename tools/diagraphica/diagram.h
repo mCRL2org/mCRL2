@@ -60,6 +60,12 @@ public:
     void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas,
+        const vector< Attribute* > attrs,
+        const vector< double > attrValIdcs,
+	const double &pix );
+    void visualize(
+        const bool &inSelectMode,
+        GLCanvas* canvas,
         const double &opacity,
         const vector< Attribute* > attrs,
         const vector< double > attrValIdcs );

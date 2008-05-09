@@ -153,6 +153,11 @@ public:
         const vector< double > attrValIdcs );
     void visualize(
         GLCanvas* canvas,
+        const vector< Attribute* > attrs,
+        const vector< double > attrValIdcs,
+	const double &pix );
+    void visualize(
+        GLCanvas* canvas,
         const double &opacity,
         const vector< Attribute* > attrs,
         const vector< double > attrValIdcs );
@@ -221,6 +226,7 @@ protected:
         const bool &inSelectMode,
         GLCanvas* canvas );
     void drawText( GLCanvas* canvas );
+    void drawText( GLCanvas* canvas, double pix );
     void drawEditDOF( 
         const bool &inSelectMode,
         GLCanvas* canvas );
@@ -276,6 +282,7 @@ protected:
     string	 variable;  //variable shown on the shape
     string	 variableName; // name of the variable
     string	 note;	// note shown on the shape
+    double	 currentPix; // used in Simulator for drawing text more readable
     GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH]; // resources for drawing text
     bool texturesGenerated; // check whether textures for drawing text is generated or not

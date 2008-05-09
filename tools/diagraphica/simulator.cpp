@@ -1836,7 +1836,8 @@ void Simulator::drawFrameCurr( const bool &inSelectMode )
                 inSelectMode,
                 canvas,
                 attributes,
-                valsFrame );
+                valsFrame,
+		pix );
 
             if ( focusDepthIdx == ID_FRAME_CURR )
             {
@@ -1949,7 +1950,8 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
                         inSelectMode,
                         canvas,
                         attributes,
-                        valsFrame );
+                        valsFrame,
+			pix );
                 }
                 else
                 {
@@ -2116,7 +2118,8 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
                         inSelectMode,
                         canvas,
                         attributes,
-                        valsFrame );
+                        valsFrame,
+			pix );
                 }
                 else
                 {
@@ -2175,7 +2178,8 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
                     inSelectMode,
                     canvas,
                     attributes,
-                    valsFrame );
+                    valsFrame,
+		    pix );
 
                 VisUtils::enableLineAntiAlias();
                 VisUtils::setColorCoolGreen();

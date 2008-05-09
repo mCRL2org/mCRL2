@@ -273,6 +273,31 @@ void Diagram::visualize(
 void Diagram::visualize(
     const bool &inSelectMode,
     GLCanvas* canvas,
+    const vector< Attribute* > attrs,
+    const vector< double > attrValIdcs,
+    const double &pix )
+// ----------------------------------
+// ------------------------------------------------------------------
+// Used by visualizers.
+// ------------------------------------------------------------------
+{
+    if ( inSelectMode == true )
+    {
+        drawBorderFlush( inSelectMode, canvas );
+    }
+    else
+    {
+        drawBorderFlush( inSelectMode, canvas );
+        for ( size_t i = 0; i < shapes.size(); ++i )
+            shapes[i]->visualize( canvas, attrs, attrValIdcs, pix );
+    }
+}
+
+
+// ----------------------------------
+void Diagram::visualize(
+    const bool &inSelectMode,
+    GLCanvas* canvas,
     const double &opacity,
     const vector< Attribute* > attrs,
     const vector< double > attrValIdcs )

@@ -1099,14 +1099,214 @@ void Shape::visualize(
     glPopMatrix();
 
 }
+
+
+// ----------------------------------
+void Shape::visualize(
+    GLCanvas* canvas,
+    const vector< Attribute* > attrs,
+    const vector< double > attrValIdcs,
+    const double &pixel )
+// ----------------------------------
+{
+    double xC, yC; // center, [-1,1]
+    double xD, yD; // bound dist from ctr,norm
+    double aglH;   // rotation about hinge, degrees
+    ColorHLS colHLS;
+    ColorRGB colRGB;
+
+    double alpha;
     
+    xC         = xCtr;
+    yC         = yCtr;
+    xD         = xDFC;
+    yD         = yDFC;
+    aglH       = 0.0;
+    colRGB     = colFil;
+    colHLS.l   = 0.5;
+    colHLS.s   = 1.0;
+    
+    for ( size_t i = 0; i < attrs.size(); ++i )
+    {
+        /*
+        if ( attrs[i]->getSizeCurValues() == 1 )
+            alpha = 0.0;
+        else
+            alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        */
+        if ( attrs[i]->getSizeCurValues() == 0 && attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+            alpha = ( attrValIdcs[i] - attrs[i]->getLowerBound() )/( attrs[i]->getUpperBound() - attrs[i]->getLowerBound() );
+        else if ( attrs[i]->getSizeCurValues() == 1 )
+            alpha = 0.0;
+        else
+            alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+
+        if ( attrs[i] == xCtrDOF->getAttribute() )
+            xC = xCtr + (1-alpha)*xCtrDOF->getMin() + alpha*xCtrDOF->getMax();
+            
+        if ( attrs[i] == yCtrDOF->getAttribute() )
+            yC = yCtr + (1-alpha)*yCtrDOF->getMin() + alpha*yCtrDOF->getMax();
+
+        if ( attrs[i] == wthDOF->getAttribute() )
+            xD = xDFC + (1-alpha)*wthDOF->getMin() + alpha*wthDOF->getMax();
+
+        if ( attrs[i] == hgtDOF->getAttribute() )
+            yD = yDFC + (1-alpha)*hgtDOF->getMin() + alpha*hgtDOF->getMax();
+
+        if ( attrs[i] == aglDOF->getAttribute() )
+        {
+            if ( aglDOF->getDir() > 0 )
+                aglH = 0.0 + (1-alpha)*aglDOF->getMin() + alpha*aglDOF->getMax();
+            else
+                aglH = 360.0 - (1-alpha)*aglDOF->getMin() + alpha*aglDOF->getMax();
+        }
+
+        if ( attrs[i] == colDOF->getAttribute() )
+        {
+            double intPtVal;
+            double dblPtVal;
+
+            dblPtVal = modf( alpha*(colDOF->getSizeValues()-1), &intPtVal );
+                
+            if ( intPtVal < colDOF->getSizeValues()-1 )
+                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal ) 
+                        + dblPtVal*colDOF->getValue( (int)intPtVal+1 ) )*360.0;
+            else
+                colHLS.h = colDOF->getValue( (int)intPtVal )*360.0;
+
+            VisUtils::hlsToRgb( colHLS, colRGB );
+        }
+
+        if ( attrs[i] == opaDOF->getAttribute() )
+        {
+            double intPtVal;
+            double dblPtVal;
+
+            dblPtVal = modf( alpha*(opaDOF->getSizeValues()-1), &intPtVal );
+                
+            if ( intPtVal < opaDOF->getSizeValues()-1 )
+                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal ) 
+                        + dblPtVal*opaDOF->getValue( (int)intPtVal+1 ) );
+            else
+                colRGB.a = opaDOF->getValue( (int)intPtVal );
+        }
+	
+	if( attrs[i] == textDOF->getAttribute() && attrs[i]->getSizeCurValues() > 0 )
+	{
+		variable = attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue();
+	}
+    }
+    
+    // set up transf
+    glPushMatrix();
+
+    // move to center pos & rotate
+    glTranslatef( xC, yC, 0.0 );
+    glRotatef( aglCtr, 0.0, 0.0, 1.0 );
+
+    // move to hinge pos & rotate
+    glTranslatef( xHge, yHge, 0.0 );
+    glRotatef( aglH, 0.0, 0.0, 1.0 );
+    glTranslatef( -xHge, -yHge, 0.0 );
+    
+    VisUtils::enableLineAntiAlias();
+    VisUtils::enableBlending();
+    
+    
+    if( type == TYPE_NOTE)
+    {
+    	VisUtils::setColorWhite(); // Draw the note on a white background
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColorWhite();
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_RECT )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLin );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_ELLIPSE )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillEllipse( 
+            0.0, 0.0,
+            xD,  yD,
+            segNumHnt );
+        VisUtils::setColor( colLin );
+        VisUtils::drawEllipse( 
+            0.0, 0.0,
+            xD,  yD,
+            segNumHnt );
+    }
+    else if ( type == TYPE_LINE )
+    {
+        //VisUtils::setColor( colLin );
+        VisUtils::setColor( colRGB );
+        VisUtils::drawLine( 
+            -xD,  xD,
+             yD, -yD );
+    }
+    else if ( type == TYPE_ARROW )
+    {
+        double pix = canvas->getPixelSize();
+
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillArrow( 
+            -xD,         xD,
+             yD,        -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+        
+        VisUtils::setColor( colLin );
+        VisUtils::drawArrow( 
+            -xD,       xD,
+             yD,      -yD, 
+             hdlSze*pix, 2*hdlSze*pix );
+    }
+    else if ( type == TYPE_DARROW )
+    {
+        double pix = canvas->getPixelSize();
+
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillDArrow( 
+            -xD,         xD,
+             yD,        -yD, 
+             hdlSze*pix, 2*hdlSze*pix );
+        VisUtils::setColor( colLin );
+        VisUtils::drawDArrow( 
+            -xD,         xD,
+             yD,        -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+    }
+    drawText( canvas, pixel ); // Draw the textual values of the shape
+    VisUtils::disableBlending();
+    VisUtils::disableLineAntiAlias();
+
+    // clear transf
+    glPopMatrix();
+}
+
 
 // ----------------------------------
 void Shape::visualize(
     GLCanvas* canvas,
     const double &opacity,
     const vector< Attribute* > attrs,
-    const vector< double > attrValIdcs )
+    const vector< double > attrValIdcs
+    )
 // ----------------------------------
 {
     double xC, yC; // center, [-1,1]
@@ -1577,6 +1777,32 @@ void Shape::drawText( GLCanvas* canvas )
 
 	double pix = canvas->getPixelSize();
 
+	// generate textures for drawing text, if they aren't generated yet	
+	if( !texturesGenerated || lastCanvas != canvas)
+	{
+		VisUtils::genCharTextures(
+			texCharId,
+			texChar );
+        	texturesGenerated = true;
+        	lastCanvas = canvas;
+	}
+
+	VisUtils::setColor( colTxt );
+	VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+}
+
+
+// ---------------------------------------------
+void Shape::drawText( GLCanvas* canvas, double pix )
+// ---------------------------------------------
+{
+	string text = note;
+	text.append(" ");
+	text.append( variable );
+	if( pix < 0.01 )
+		pix = 0.01;
+	else if( pix > 0.015)
+		pix = 0.01;
 	// generate textures for drawing text, if they aren't generated yet	
 	if( !texturesGenerated || lastCanvas != canvas)
 	{
