@@ -2060,15 +2060,31 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(Name == gsMakeOpIdNameListEnum()) {
         ATermAppl Type=gstcUnList(PosType);
         if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "list", PosType,Arguments);  return NULL;}
+
+	ATermList OldArguments=Arguments;
+        
+        //First time to determine the common type only!
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
+          if(!Type0) return NULL;
+          NewArguments=ATinsert(NewArguments,(ATerm)Argument);
+          Type=Type0;
+        }
+        Arguments=OldArguments;
+
+        //Second time to do the real work.
+        NewArguments=ATmakeList0();
+        for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+          ATermAppl Argument=ATAgetFirst(Arguments);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
           if(!Type0) return NULL;
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
         }
         Arguments=ATreverse(NewArguments);
+
         Type=gsMakeSortExprList(Type);
         *DataTerm=gsMakeDataExprListEnum(Arguments,Type);
         return Type;
@@ -2076,10 +2092,25 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(Name == gsMakeOpIdNameSetEnum()) {
         ATermAppl Type=gstcUnSet(PosType);
         if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "set", PosType,Arguments);  return NULL;}
+
+        ATermList OldArguments=Arguments;
+
+        //First time to determine the common type only!
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
+          NewArguments=ATinsert(NewArguments,(ATerm)Argument);
+          Type=Type0;
+        }
+        Arguments=OldArguments;
+        
+        //Second time to do the real work.
+        NewArguments=ATmakeList0();
+        for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+          ATermAppl Argument=ATAgetFirst(Arguments);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2092,6 +2123,10 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       if(Name == gsMakeOpIdNameBagEnum()) {
         ATermAppl Type=gstcUnBag(PosType);
         if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
+        
+        ATermList OldArguments=Arguments;
+
+        //First time to determine the common type only!
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument0=ATAgetFirst(Arguments);
@@ -2099,7 +2134,23 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
+          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+          NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
+          NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
+          Type=Type0;
+        }
+        Arguments=OldArguments;
+        
+        //Second time to do the real work.
+        NewArguments=ATmakeList0();
+        for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+          ATermAppl Argument0=ATAgetFirst(Arguments);
+          Arguments=ATgetNext(Arguments);
+          ATermAppl Argument1=ATAgetFirst(Arguments);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous);
+          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
           if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
