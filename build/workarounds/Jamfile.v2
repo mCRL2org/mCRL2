@@ -43,6 +43,14 @@ alias configuration : : <toolset>sun :
        : <include>$(TOP)/build/workarounds
        ;
 
+# FreeBSD
+alias configuration : : <os>FREEBSD <toolset>gcc :
+       : <include>$(TOP)/build/workarounds
+         <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
+         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
+         <link>static:<linkflags>-export-dynamic
+       ;
+
 # Default gcc (known to work on Linux)
 alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds

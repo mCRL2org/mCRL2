@@ -297,6 +297,7 @@ namespace mcrl2 {
 
         public:
   
+#if !(defined(__WINDOWS__) && defined(__WXWINDOWS__))
           /**
            * \brief builds a connection with SQuADT
            **/
@@ -309,6 +310,7 @@ namespace mcrl2 {
            
             return (communicator.try_interaction(ac, av));
           }
+#endif
 
 #ifdef __WINDOWS__
           inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
