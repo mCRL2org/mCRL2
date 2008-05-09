@@ -34,23 +34,28 @@ namespace data {
 
 namespace detail {
 
-using atermpp::aterm;
-using atermpp::aterm_traits;
-
-/// \brief Function object that determines if a term is equal to a given data variable.
-struct compare_data_variable: public std::unary_function<atermpp::aterm, bool>
+template <typename Term>
+struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
 {
-  const data_variable& v_;
+  const Term& term;
   
-  compare_data_variable(const data_variable& v)
-   : v_(v)
+  compare_term(const Term& t)
+   : term(t)
   {}
   
-  template <typename Term>
-  bool operator()(Term t) const
+  template <typename Term2>
+  bool operator()(Term2 t) const
   {
-    return v_ == t;
+    return term == t;
   }
+};
+
+/// \brief Function object that determines if a term is equal to a given data variable.
+struct compare_data_variable: public compare_term<data_variable>
+{
+  compare_data_variable(const data_variable& v)
+   : compare_term<data_variable>(v)
+  {}
 };
 
 /// Function object that returns true if the expressions x and y have the same sort.
