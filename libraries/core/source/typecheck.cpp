@@ -436,7 +436,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
   ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
   ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
-  ATermList action_labels = ATLgetArgument(ATAgetArgument(ATAgetArgument(spec, 1), 0), 0);
+  ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
   //XXX read-in from LPS (not finished)
     if(gstcReadInSorts(sorts,false)
