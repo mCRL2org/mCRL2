@@ -8,6 +8,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/core/messaging.h"
@@ -109,16 +110,6 @@ namespace lps {
       i->second = sumelm_replace(i->second, tmp_subst);
     }
     replacements[lhs] = new_rhs;
-  }
-
-  
-  ///pre: true
-  ///ret: data_variable v occurs in d.
-  template <typename data_type>
-  static inline
-  bool occurs_in_expression(const data_type d, const data_variable v)
-  {
-    return partial_find_if(aterm_appl(d), data::detail::compare_data_variable(v), is_sort_expression) != aterm_appl();
   }
 
   ///pre: is_and(t) || is_equal_to(t)
@@ -255,8 +246,8 @@ namespace lps {
       //substitution in summation_variables is done in calling function.
       if (is_data_variable(lhs(working_condition)))
       {
-        if (occurs_in_expression(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
-            !occurs_in_expression(rhs(working_condition), lhs(working_condition)))
+        if (find_data_variable(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
+            !find_data_expression(rhs(working_condition), lhs(working_condition)))
         {
           if (substitutions.count(lhs(working_condition)) == 0)
           {
@@ -264,7 +255,7 @@ namespace lps {
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();
           } else if (is_data_variable(rhs(working_condition)) && 
-                     occurs_in_expression(summand_.summation_variables(), data_variable(rhs(working_condition)))) {
+                     find_data_variable(summand_.summation_variables(), data_variable(rhs(working_condition)))) {
             // check whether the converse is possible
             if (substitutions.count(rhs(working_condition)) == 0) {
               sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
@@ -272,7 +263,7 @@ namespace lps {
             }
           } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 &&
                        is_data_variable(substitutions[lhs(working_condition)]) &&
-                       occurs_in_expression(summand_.summation_variables(), data_variable(substitutions[lhs(working_condition)]))) {
+                       find_data_variable(summand_.summation_variables(), data_variable(substitutions[lhs(working_condition)]))) {
             sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = true_();
