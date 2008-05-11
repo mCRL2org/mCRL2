@@ -57,7 +57,6 @@ data_variable_list get_occurrences(const data_variable_list& vl, const sort_expr
 ///\ret the list of all data_variables in vl, which are unequal to v
 data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 {
-  gsDebugMsg("filter:vl = %s, v = %s\n", vl.to_string().c_str(), v.to_string().c_str());
   data_variable_list result;
   for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
@@ -66,7 +65,6 @@ data_variable_list filter(const data_variable_list& vl, const data_variable& v)
       result = push_front(result, *i);
     }
   }
-  gsDebugMsg("filter:result = %s\n", result.to_string().c_str());
   return result;
 }
 
@@ -99,27 +97,6 @@ sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_
   }
   reverse(result);
   return result;
-}
-
-/// \brief Function object that determines if a term is equal to a given sort expression.
-struct compare_sort_expression: public std::unary_function<atermpp::aterm, bool>
-{
-  const sort_expression& s_;
-  
-  compare_sort_expression(const sort_expression& s)
-   : s_(s)
-  {}
-  
-  template <typename Term>
-  bool operator()(Term t) const
-  {
-    return s_ == t;
-  }
-};
-
-bool find_sort_expression(const sort_expression_list& l, const sort_expression s)
-{
-  return atermpp::partial_find_if(l, compare_sort_expression(s), gsIsSortExpr) != atermpp::aterm();
 }
 
 ///\ret a list of all variables of a sort that occurs in sl
