@@ -377,7 +377,7 @@ int main(int argc, char **argv)
             options.strategy = RewriteStrategyFromString(s.c_str());
             if ( options.strategy == GS_REWR_INVALID )
             {
-              gsErrorMsg("invalid rewrite strategy '%s'i, ignoring command\n",s.c_str());
+              gsErrorMsg("invalid rewrite strategy '%s', ignoring command\n",s.c_str());
             } else {
               delete e;
               delete rewr;
