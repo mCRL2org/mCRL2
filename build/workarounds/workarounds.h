@@ -15,6 +15,12 @@ inline char *strdup(const char *s) {
 } 
 #endif
 
+// Part of C99 but not C++98
+#if !defined(LLONG_MIN)
+# define LLONG_MIN -9223372036854775807LL
+# define LLONG_MAX +9223372036854775807LL
+#endif
+
 //Declare a local array NAME of type TYPE and SIZE elements (where SIZE
 //is not a constant value)
 #ifndef DECL_A
