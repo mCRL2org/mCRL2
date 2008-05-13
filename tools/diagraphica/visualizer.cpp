@@ -244,11 +244,11 @@ void Visualizer::handleMouseMotionEvent(
     	 mouseDrag  = MSE_DRAG_TRUE;
          mouseClick = MSE_CLICK_SINGLE; 
     }
-	else 
-	{
-		mouseDrag  = MSE_DRAG_FALSE;
-		mouseClick = -1;
-    }    
+    else 
+    {
+	mouseDrag  = MSE_DRAG_FALSE;
+	mouseClick = -1;
+    }
 
     xMouseCur = x;
     yMouseCur = y;

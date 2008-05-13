@@ -2172,7 +2172,7 @@ void ArcDiagram::onTimer( wxTimerEvent &e )
 // ----------------------------------------------------
 void ArcDiagram::handleHits( const vector< int > &ids )
 // ----------------------------------------------------
-{	
+{
     if ( mouseButton == MSE_BUTTON_DOWN )
     {
         if ( mouseDrag == MSE_DRAG_TRUE )
@@ -2188,9 +2188,8 @@ void ArcDiagram::handleHits( const vector< int > &ids )
     }
     else // mouse button up
     {
-       
     	if ( ids.size() == 1 )  // leaves
-    	{    	
+    	{
         	if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
         	{
 			currIdxDgrm = -1;
@@ -2200,7 +2199,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         	canvas->clearToolTip();
     	}
     	else
-    	{    		
+    	{
         	// interact with bundles
         	if ( ids[1] == ID_BUNDLES )
         	{
@@ -2261,7 +2260,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 				 mouseDrag == MSE_DRAG_FALSE && 
 				 mouseSide == MSE_SIDE_RGT )
 			{
-				mediator->handleShowClusterMenu();
+				/*mediator->handleShowClusterMenu();*/ // Select attributes from the popup menu for clustering. 
 			}
             		else
             		{
@@ -2275,16 +2274,15 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         	// interact with bar tree
         	else if ( ids[1] == ID_BAR_TREE )
         	{
-            	currIdxDgrm = -1;
-            	updateMarkBundles();
-            	mediator->handleUnshowFrame();
-            
-            	handleHoverBarTree( ids[2], ids[3] );
+			currIdxDgrm = -1;
+			updateMarkBundles();
+			mediator->handleUnshowFrame();
+		
+			handleHoverBarTree( ids[2], ids[3] );
         	}
         	// interact with diagrams
         	else if ( ids[1] == ID_DIAGRAM )
         	{
-			canvas->clearToolTip();			
 			if ( mouseClick == MSE_CLICK_SINGLE &&
 				mouseSide   == MSE_SIDE_LFT &&
 				mouseDrag   == MSE_DRAG_FALSE )
@@ -2346,7 +2344,6 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 			else
 			{
 				canvas->clearToolTip();
-						
 				currIdxDgrm = ids[2];
 				updateMarkBundles();
 	
@@ -2355,7 +2352,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 				mediator->handleShowFrame(
 				framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]],
 				attrsDgrm[currIdxDgrm],
-				col );                	
+				col );
 			}
         	}
     	}
@@ -2394,7 +2391,6 @@ void ArcDiagram::handleHoverCluster(
             val = NULL;
             */
         }
-
         canvas->showToolTip( msg );
     }
 }
@@ -2427,11 +2423,11 @@ void ArcDiagram::handleHoverBarTree(
     {
         string   msg;
         Cluster* clust;
-        
+
         clust = mapPosToClust[i][j];
         msg = Utils::intToStr( clust->getSizeDescNodes() );
         canvas->showToolTip( msg );
-        
+
         clust = NULL;
     }
 }
