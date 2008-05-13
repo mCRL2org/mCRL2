@@ -377,8 +377,7 @@ int main(int argc, char **argv)
             options.strategy = RewriteStrategyFromString(s.c_str());
             if ( options.strategy == GS_REWR_INVALID )
             {
-              gsErrorMsg("invalid rewrite strategy '%s'\n",s.c_str());
-              return 1;
+              gsErrorMsg("invalid rewrite strategy '%s'i, ignoring command\n",s.c_str());
             } else {
               delete e;
               delete rewr;
@@ -483,7 +482,8 @@ int main(int argc, char **argv)
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
