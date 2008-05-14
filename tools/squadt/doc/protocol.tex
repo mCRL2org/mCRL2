@@ -119,24 +119,24 @@
   Inconsistency can result from legitimate tool application within the scope of
   a project, but also from unexpected tool behaviour or system/hardware
   failure.  The integration framework as well as the individual connected tools
-  must cooperate in order to maximise the effectiveness of inconsistency
-  detection. Firstly, creation and modification of files by tools must be
+  must cooperate in order to maximise the effectiveness of any inconsistency
+  detection mechanism. Firstly, creation and modification of files by tools must be
   restricted, i.e. directed pro-actively by the integration framework.  This is
   in line with the assumption that a file in a project must be reproducible in
   a unique way. A direct consequence is that input files cannot also be output
-  files.  Secondly, tools must communicate a complete specification of input
-  and output files.  When tools behave accordingly the set of dependencies
-  among files in a project is complete and the dependencies together form a
-  directed acyclic graph.
+  files for the same tool application.  Secondly, tools must communicate a
+  complete specification of input and output files.  When tools behave
+  accordingly the set of dependencies among files in a project is complete and
+  the dependencies together form a directed acyclic graph.
  
   Better integration is possible when a tool is `aware' of the integration
-  context. Other user interfaces to the same functionality may have different
+  context. Different user interfaces to the same functionality may have different
   requirements. For example in the context of a graphical user interface it is
   convenient and accepted practise to show progress indication. For the purpose
   of integration it may be desirable to adapt a tool such that it shows
   progress when it is operating within the context of the integration
   framework. To conveniently use any functionality provided by the integration
-  framework there must be direct access to use such functionality directly from
+  framework there must be access to use such functionality directly from
   within a tool.  The purpose of this text is to describe the communication
   protocol used by the integration framework that supports \squadt.
 
@@ -186,7 +186,7 @@
   should get a picture of the structure of communication: what is communicated,
   in what way and why. This is followed by a more detailed description of the
   protocol. It consists of a description of the contents of messages, their
-  syntax and effects (rough semantics) and finally some of the important design
+  syntax and effects (rough semantics) and some of the important design
   choices.  At the end is a quick comparison with interfaces used by other
   integration frameworks.
 % IDE comparison
@@ -195,23 +195,21 @@
  \section{Concepts}
 
    There are lots of examples of software tools that all have different
-   functionality and interfaces. Considering integration between tools is only
-   useful when there is a meaningful way in which the tools can be used
-   together in order to obtain a result that any of the individual tools can't.
-   A tool integration framework offers a simplified way of using combinations
-   of tools.
+   functionality and interfaces. It is only useful to consider integration
+   between tools when there is a meaningful way in which the tools can be used
+   together in order to obtain a result that any of the individual tools
+   cannot.  To create value, a tool integration framework must simplify the use
+   of connected tools or offer functionality transcends the functionality
+   provided by individual connected tools.
  
-   The purpose of a tool integration framework is to assist a user in the
-   typical usage patterns of the connected tools. Simply making tools
-   accessible from a unified user interface already serves this goal. More
-   interesting is adding functionality that crosses the boundaries of
-   individual tools to obtain added value (when comparing use of the
-   integration system with the use of the individual tools). Examples of such
-   added value are consistency checking and automating aspects of tool
-   application are an important example of such integration level
-   functionality. The role of the integration framework is that of
-   orchestrator.
-
+   The main purpose of solving the tool integration problem is assisting a user
+   in utilising the connected tools. Making tools accessible from a unified
+   user interface already serves this goal. More interesting however, is adding
+   functionality that crosses the boundaries of the individual tools. The prime
+   example of such functionality in our framework is that of consistency
+   monitoring.  The consistency monitoring functionality has profoundly
+   influenced protocol design at several points.
+   
    This section functions as introduction to the important concepts around
    which a communication protocol will be built in later sections.
 
@@ -558,13 +556,12 @@
 
    \noindent Figure \ref{fig::identification} shows the combined behaviour of a
    controller and a tool with regard to instance identification. A tool
-   initiates a connection, sends an identification notification and awaits a
-   response. The response is either the event that a connection is terminated
-   or an arbitrary message sent by the controller. The controller chooses
-   between breaking the connection and accepting the identity of the tool on
-   the other side. In reality this choice will of course depend on the token
-   communicated as part of the instance identification message will direct this
-   choice.
+   initiates a connection, sends an identification notification and awaits any
+   incoming message. At the side of controller the value of the token is
+   somehow used to choose between breaking the connection and accepting the
+   identity of the tool on the other side. If the connection persists and the
+   tool receives an arbitrary other message from the controller its identify
+   was accepted.
 
   \subsection{Capabilities}
 
@@ -622,8 +619,8 @@
       \hline
        direction:      & controller to tool \\
        data:           & Version = Major $\times$ Minor \\
-                       & \ Major = Nat \\
-                       & \ Minor = Nat \\
+                       & \ Major = $\mathbb{N}$ \\
+                       & \ Minor = $\mathbb{N}$ \\
       \hline
      \end{tabular}
     \end{center}
@@ -649,8 +646,8 @@
        direction:      & tool to controller \\
        data:           & Version $\times$ Set(InputConfiguration) \\
                        & \ Version = Major $\times$ Minor \\
-                       & \ \ Major = Nat \\
-                       & \ \ Minor = Nat \\
+                       & \ \ Major = $\mathbb{N}$ \\
+                       & \ \ Minor = $\mathbb{N}$ \\
                        & \ InputConfiguration = Category $\times$ List(Id $\times$ Format) \\
                        & \ \ Category = String \\
                        & \ \ Format = MIME-type \\
@@ -680,23 +677,24 @@
 %   task execution are separated, the latter is discussed in section
 %   \ref{ss::task_execution}.
 
-   The task configuration process is considered to be an incremental activity.
-   After a task has been configured once, one may later want to make changes to
-   it.  Task configurations can be modified again and again until a user is
-   satisfied and wants to proceed with execution. Perhaps surprisingly, the
-   task configuration process starts with communicating a task specification 
-   with a tool. A task specification can be obtained in two ways either by
-   deriving it from from an input configuration or by receiving one as result
-   of a previous task configuration process.
+   A task specification can be obtained in two ways, either by deriving it from
+   from an input configuration or by receiving one as result of a previous task
+   configuration process. Task configuration is considered to be an incremental
+   activity, the result of which is a configuration that is uniquely
+   represented by a task configuration. A tool's configuration can always be
+   recreated from a task specification so it is always possible to modify or
+   refine the configuration. In fact the task configuration process always
+   starts with communicating an existing task specification with a tool.
    
-   Since task specifications are now brought outside of the tool it becomes
-   necessary on the side of a tool to check whether such specifications can be
-   used for task configuration. A consequence of making a task specification 
-   explicit is that it opens up the opportunity that a tool receives a
-   task-configuration that is unusable. Consequently a tool developer must
-   think about validating a task specification and in the case the
-   configuration is unusable must resolve this problem through communication
-   with the user.
+   Configuration details, as part of task specifications, can now exist outside
+   the tool.  A consequence of making a task specification explicit is that it
+   opens up the opportunity that a tool receives a task specification that does
+   not uniquely specify a configuration. Simple causes are tools that change
+   over time or task specifications get corrupted.  It is necessary for tools
+   to check whether a task specifications are usable.  As a consequence tool
+   developer must think about validating a task specification and in the case
+   the configuration is unusable must resolve this problem through
+   communication with the user.
 
    The following figure depicts the basic (isolated) communication behaviour of
    the task configuration process.
@@ -748,27 +746,27 @@
     \end{center}
    \end{table}
 
-   \noindent The message \emph{must} specify an interactivity flag, specifying
-   whether or not further user configuration is desired. The tool may initiate
-   interaction with the user regardless of this flag. The intended meaning
-   however is that the tool only verifies usability of the task specification
-   (Configuration) and only initiates communication when this fails.
+   \noindent The message \emph{must} specify contain the interactivity flag; it
+   specifies whether or not further user configuration is desired. The tool may
+   initiate interaction with the user regardless of the value for the
+   interactivity flag. The intended meaning however is that the tool only
+   verifies usability of the task specification (Configuration) and only
+   initiates communication when this fails.
 
-   The task specification specified as the Configuration type requires a bit
-   more explanation. A minimal task specification must have a non-empty list of
-   objects, a category name, a list of options and a possibly empty list of
-   outputs. The category gives an indication of what functionality of the tool
-   is used to perform the task. The options represent the language for task
-   specification. A single option is a parametrised entity that represents the
-   smallest part of optional configurable behaviour. The list of options
-   identifies a combination of functions that make up the task. 
+   The Configuration type represents a task specification. A minimal task
+   specification must have a non-empty list of objects, a category name, a list
+   of options and a possibly empty list of outputs. The category gives an
+   indication of what functionality of the tool is used to perform the task.
+   The options represent the language for task specification. A single option
+   is a parametrised entity that represents the smallest part of optional
+   configurable behaviour. The list of options identifies a combination of
+   functions that make up the task. 
 
    Before sending a response the tool may initiate arbitrary interaction with
-   the user(see subsection \ref{ss:user_interaction}). The user should direct
-   the process of task-configuration, unless the purpose of configuration is to
-   non-interactively execute a task that has been configured in the past. Using
-   the specification of \textit{Configuration} in the figure above, a response
-   looks as follows:
+   the user (see subsection \ref{ss:user_interaction}). The user as beneficiary
+   is supposed to direct the process of task-configuration if interactive
+   communication is the purpose. A response message looks as follows:
+   (\textit{Configuration} is reused)
 
    \begin{table}[H]
     \begin{center}
@@ -779,21 +777,20 @@
        message type:   & \msg{configuration} \\
       \hline
        direction       & tool to controller \\
-       data:           & Valid $\times$ Configuration \\
-                       & \ Valid = $\mathbb{B}$ \\
+       data:           & Validity $\times$ Configuration \\
+                       & \ Validity = $\mathbb{B}$ \\
       \hline
      \end{tabular}
     \end{center}
     \vspace{-0.4cm}
    \end{table}
 
-   \noindent The only difference between the request and the response is
-   the validity marking. The message indicates by means of the validity marking
-   whether the embedded configuration is valid. A configuration is called
-   accepted if a response marks it as valid. Of course, the task-configuration
-   specification in the response need not be the same as that in the initiation
-   message. It represents the final configuration obtained after user
-   interaction, or indeed the unchanged specification in case of an error.
+   \noindent The response carries a judgement and the final configuration.
+   Depending on the Validity flag the embedded configuration was judged usable
+   and is accepted. Notice that the configuration sent in the request is not
+   necessarily the same as the configuration in the response. The tool may have
+   made changes to the configuration hopefully after having consulting the
+   user.
 
 %   It is assumed that the task-configuration that is returned in a response has
 %   a strong resemblance to the task-configuration sent in the request. At the
@@ -810,16 +807,15 @@
 
   \subsection{Task Execution} \label{ss::task_execution}
 
-   \noindent Tool configuration is complete when the controller receives a
-   configuration response message with an accepted configuration and it has not
-   sent a new configuration request.  When configuration is complete the
-   controller may start task execution by sending a task start command. A task
-   is called \textit{in progress} (from a controller perspective) as soon as a
-   task start signal is sent, and as long as no task stop signal has been
-   received. See figure \ref{fig:configuration_execution} for a schematic
-   overview of the process of task execution.
+   When configuration is complete the controller may start task execution by
+   sending a task start command. Configuration is complete when the controller
+   receives a configuration response message with an accepted configuration and
+   it has not sent a new configuration request.  A task is called \textit{in
+   progress} as soon as a task start signal is sent, and as long as no task
+   stop signal has been received. See figure \ref{fig:configuration_execution}
+   for a schematic overview of the process of task execution.
 
-   A task start command message has no data and looks as follows:
+   A task start command message looks as follows:
 
    \begin{table}[H]
     \begin{center}
@@ -836,9 +832,9 @@
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent On receipt, a tool starts executing the configured task. When
-   subsequently task execution completes a task stop notification, shown in
-   table \ref{table:task_stop}, \emph{must} be sent.
+   \noindent When a tool receives a task start command it must start executing
+   the configured task. As task execution completes the tool must send a task stop
+   notification as shown in table \ref{table:task_stop}.
 
    \begin{table}[H]
     \begin{center}
@@ -858,10 +854,10 @@
     \vspace{-0.3cm}
    \end{table}
 
-   \noindent The data in the stop notification represents success or failure
-   during task execution. In case of failure the user should probably be
-   notified of the details of the failure using the display or the reporting
-   facility both of which will be discussed shortly.
+   \noindent The data in the stop notification signifies success or failure
+   of task execution. In case of failure the user should probably be notified
+   of the details of the failure using the display or the reporting facility
+   both of which will be discussed shortly.
    
 %%   A side remark on task
 %%   execution: the controller has the responsibility to ensure that the inputs
@@ -873,12 +869,12 @@
 
   \subsection{Reporting}
 
-   From any context a tool can send a report that signifies a warning, error or
-   just some information. The purpose is to inform the user through controller
-   of individual task activities and their progress. These are detailed
-   messages that are copied to a log. If for some reason a user may want more
-   information about a task that is being (or has been) executed than this
-   additional information can be consulted. A report message looks as follows.
+   The purpose of the reporting facility is to inform the user (through the
+   controller) of individual task activities and their progress. A report may
+   be send from any context and signifies either a warning, error or just
+   notification of some event. The facility is intended as secondary source of
+   information (next to the display) that a user may consult to get more
+   feedback on configuration or task execution. A report message looks as follows:
    
    \begin{figure}[H]
     \begin{center}
@@ -899,19 +895,20 @@
    \vspace{-0.3cm}
 
    \noindent This facility is meant as an indirect method of communication with
-   the user.  For direct communication the display facility should be used.
-   Especially in the case of critical errors that force a task abort the
-   display must be used rather than the reporting facility. Eventually it is up
-   to the tool developer, but for the sake of user-friendliness the display
-   facility is recommended.
+   the user. The information from the reporting facility ends up in a log that
+   is only visible when the user happens to want it that way. So the reporting
+   facility must not be relied on as a part of the user regular user interface.
+   The reporting facility is intended as additional source of information for
+   the user and \emph{not} an exception handling facility for the tool
+   developer.
 
   \subsection{Termination}
 
-   The controller can request a tool to terminate. This facility is present to
-   allow tools to free resources and remove outputs, and otherwise leave them
-   in an internally consistent state. On the other side, in case of failure, a
-   tool can signal that it is going to terminate, without having received a
-   termination request. The following figure depicts the termination
+   The termination facility allows the controller to terminate a tool in a
+   controlled fashion.  In this way a tool is allowed time to free resources
+   and remove outputs. On the other hand a tool can use it to signal the
+   controller that it is going to terminate, probably as a result of a fatal
+   error. The following figure depicts the termination
    request-response/signalling behaviour.
 
    \begin{figure}[H]
@@ -940,10 +937,10 @@
    \end{figure}
    \vspace{-0.4cm}
 
-   \noindent The response be a termination notification, which signifies that
-   the tool is shutting down and will terminate soon.  So from any context a
-   tool may send a termination notification, which is a message that looks as
-   follows:
+   \noindent The response message is a termination notification, which
+   signifies that the tool is shutting down and will terminate soon.  So from
+   any context a tool may send a termination notification, which is a message
+   that looks as follows:
 
    \begin{figure}[H]
     \begin{center}
@@ -984,8 +981,7 @@
    on the space provided by the display. A widget arrangement, also called a
    layout, cannot be manipulated. The only manipulation allowed is the complete
    replacement of a layout by another layout. The state of individual widgets,
-   also called controls, can manipulated; both by the user as by the tool that
-   owns the display.
+   can manipulated; both by the user as by the tool that owns the display.
 
    To use the display a tool must communicate the details of a set of widgets
    and the layout of those widgets. A \textit{layout specification} is a
@@ -1010,8 +1006,8 @@
 
    \noindent Notice that at the side of the controller display data can even be
    received when no display layout was communicated. This is explained as
-   follows: updates to the display are modular and target a single control. If
-   the target control of an update is not available then the update will be
+   follows: updates to the display are modular and target a single widget. If
+   the target widget of an update is not available then the update will be
    ignored. Because by default the display is empty, which corresponds to the
    empty layout specification, any update is ignored. A layout specification is
    communicated with a message that looks as follows.
@@ -1033,16 +1029,16 @@
                        & \ \ \ \ Visibility = 'visible' $|$ 'hidden' \\
                        & \ \ \ \ Status = 'enabled' $|$ 'disabled' \\
                        & \ \ \ \ Margin = Left $\times$ Top $\times$ Right $\times$ Bottom \\
-                       & \ \ \ \ \ Left   = Nat \\
-                       & \ \ \ \ \ Top    = Nat \\
-                       & \ \ \ \ \ Right  = Nat \\
-                       & \ \ \ \ \ Bottom = Nat \\
+                       & \ \ \ \ \ Left   = $\mathbb{N}$ \\
+                       & \ \ \ \ \ Top    = $\mathbb{N}$ \\
+                       & \ \ \ \ \ Right  = $\mathbb{N}$ \\
+                       & \ \ \ \ \ Bottom = $\mathbb{N}$ \\
                        & \ \ \ \ Alignment = HorizontalAlignment $\times$ VerticalAlignment \\
                        & \ \ \ \ \ HorizontalAlignment = 'left' $|$ 'center' $|$ 'right' \\
                        & \ \ \ \ \ VerticalAlignment = 'bottom' $|$ 'middle' $|$ 'top' \\
                        & \ \ \ LayoutElement = LayoutManager $|$ Control \\
-                       & \ \ \ \ Control = ProgressBar $|$ RadioButton $|$ Button $|$ Label $|$ TextField $|$ CheckBox \\
-                       & \ \ \ \ \ ProgressBar = Nat $\times$ Nat $\times$ Nat \\
+                       & \ \ \ \ Widget = ProgressBar $|$ RadioButton $|$ Button $|$ Label $|$ TextField $|$ CheckBox \\
+                       & \ \ \ \ \ ProgressBar = $\mathbb{N} \times \mathbb{N} \times \mathbb{N}$ \\
                        & \ \ \ \ \ RadioButton = $\mathbb{B}$ \\
                        & \ \ \ \ \ Button      = String \\
                        & \ \ \ \ \ Label       = String \\
@@ -1052,28 +1048,28 @@
     \end{center}
    \end{table}
    \vspace{-0.4cm}
-   \noindent Every control is with an identifier ($id$), that \emph{must}
-   uniquely identify this control within this layout. Communication of changes
-   to the state of a control rely on the identifier as control specifier.
+   \noindent Every widget is associated with an identifier ($id$), that
+   \emph{must} uniquely identify it the layout. Communication of changes to the
+   state of a widget rely on the identifier as widget specifier.
 
    \noindent The $box$ and $properties$ elements represent a set of constraints
    on the relative layout on what is contained in the box. A layout consists of
-   set of nested box elements that contain controls.  The horizontal or
+   set of nested box elements that contain widgets.  The horizontal or
    vertical direction of a box determines the way it lays out the elements it
    contains above or beside each other respectively.
 
    The layout properties further affect layout of elements relative to each
    other or the containing box. Visibility determines whether a layout element
-   is visible or not. Input determines whether a control is active, i.e.
+   is visible or not. Input determines whether a widget is active, i.e.
    whether it responds to user interaction. Margins control the distance
    between the directly adjacent elements. For first and last elements this
    means the distance to the borders of the containing box. A box equally
-   divides the amount of available space over the available controls. When
+   divides the amount of available space over the available widgets. When
    there is plenty of space after deduction of margins the alignment can be
-   used to control either the vertical or horizontal position of a control
+   used to control either the vertical or horizontal position of a widget 
    within the available space.
 
-   To communicate changes to a control on the display the following messages
+   To communicate changes to a widget on the display the following messages
    are used.
 
    \begin{table}[H]
@@ -1094,9 +1090,9 @@
    \end{table}
 
    \noindent When a tool receives such a message it is interpreted as a state
-   change of a control that matches the identifier. When the identifier is not
+   change of a widget that matches the identifier. When the identifier is not
    known the message must be ignored. Similarly a tool can request a change to
-   a control on the display using the following message.
+   a widget on the display using the following message.
 
    \begin{table}[H]
     \begin{center}
@@ -1116,10 +1112,13 @@
    \end{table}
 
    \noindent When a controller receives such a message it is interpreted as a
-   state change of a control that matches the identifier. When the identifier
-   is not known the message must be ignored.
+   state change of a widget that matches the identifier. When the identifier is
+   not known the message must be ignored. The state actually depends on the
+   type of the widget identified by the identifier, e.g. for a progress bar the
+   state is $ProgressBar$ or $\mathbb{N} \times \mathbb{N} \times \mathbb{N}$
+   (which can also be represented as String of course).
 
-%    A tool can change the state of controls on a display by means of their
+%    A tool can change the state of widgets on a display by means of their
 %    identifier. The following message must be used for this purpose.
 
 \pagebreak
@@ -1150,7 +1149,7 @@
    performance it is often not possible to implement or to simply extend a
    design to add security at a later stage. Putting a focus on security would
    too much slow down the development process. The main goal has been on
-   getting a proof-of-concept implementation of a protocol-stack on which to
+   getting a proof-of-concept implementation of a protocol stack on which to
    built the \squadt application.
 
    The OSI model \cite{Day1983} is a popular way of analysing and describing
@@ -1309,22 +1308,22 @@
   \subsubsection{Configuration} \label{ss:implementation_configuration}
 
    The purpose of a configuration specification is to differentiate between
-   behaviours of a tool in order to able to make a selection of the desired
-   behaviour. Of course it depends on the developer of a tool, whether
-   different behaviour can be observed from the outside. It also depends on the
-   developer to what extend this behaviour can be selected before task
-   execution is started.
+   behaviours of a tool in order to allow for selection of behaviour. Depending
+   on the developer of a tool different behaviour can be observed from the
+   outside. It also depends on the developer to what extend this behaviour can
+   be selected before task execution is started.
 
    Traditionally most programs with a command line interface take arguments
    that are used to (re)produce this state non-interactively by means of a
-   single string: the command line. The model behind this method of expressing
-   a task-configuration is based on the idea that tasks consist of a sequence
-   of operations or sub tasks each of which can be parametrised.  A
-   configuration is a selection between available operations and values for the
-   parameters for operations or the combinations thereof. On the command line such a
-   configuration is represented as a string that consists of so-called options
-   followed by values for the arguments of this option. We chose to reuse this
-   model but will not use the same implementation.
+   command which is a single specially formatted string. The model behind this
+   method of expressing a task-specification is based on the idea that tasks
+   consist of a sequence of operations or sub tasks each of which can be
+   parametrised.  A configuration is a selection between available operations
+   and values for the parameters for operations or the combinations thereof. On
+   the command line such a configuration is represented as a string that
+   consists of so-called options followed by values for the arguments of this
+   option. We chose to reuse this model but will not use the same
+   implementation.
 
    The controller is assumed to be oblivious to any data that is produced by
    tools other than the fact that there is a name associated to this data and
@@ -1379,7 +1378,7 @@
    Design of a good user interface may require more flexibility such as
    separate manipulation of layout properties. In the previous section display
    manipulation was restricted to replacing the entire content of the display
-   at once or modifying the state of individual controls on the display.  In
+   at once or modifying the state of individual widgets on the display.  In
    particular it is not possible to manipulate the layout itself. More complete
    manipulation capabilities rapidly increase complexity. A conservative
    approach was chosen to save on implementation time. 
@@ -1390,28 +1389,28 @@
 %%   standard portable implementations make them unsuitable to directly rely on
 %%   at this time.
 
-   We have preselected a limited set of controls that are available to tools to
+   We have preselected a limited set of widgets that are available to tools to
    construct display layouts. Again the reason is to limit complexity although
    the display layout construction and manipulation by itself are by far the
    most complex functionality the protocol has to offer.  The downside of this
    limitation of choice is that a tool developer has less control over the
-   exact layout of controls on the display. Instead we have aimed to make it
-   easy to implement new controls and hope to extend the protocol when there is
+   exact layout of widgets on the display. Instead we have aimed to make it
+   easy to implement new widgets and hope to extend the protocol when there is
    a specific demand.
    
 %   The available elements are: \textit{box-layout-manager}, \textit{progress-bar},
 %   \textit{radio-button}, \textit{button}, \textit{label}, \textit{checkbox},
-%   \textit{text\_field}.  A detailed introduction of the individual controls
-%   comes next followed by a description on how the controls are positioned by
+%   \textit{text\_field}.  A detailed introduction of the individual widgets 
+%   comes next followed by a description on how the widgets are positioned by
 %   means of a layout specification.
 
    \paragraph{Controls}
 
     Because the use of graphical user interfaces today is so ubiquitous it is
     assumed that the reader is familiar with the purpose and basic functions of
-    each of the controls presented earlier. The name and function of controls
+    each of the widgets presented earlier. The name and function of widgets 
     and the way a layout is built are based on concepts and terminology used in
-    Java Swing.  Every control has a mandatory \textit{id} attribute that must
+    Java Swing.  Every widget has a mandatory \textit{id} attribute that must
     be unique within the scope of the containing \textit{display-layout} section
     (introduced shortly).
    
@@ -1428,7 +1427,7 @@
     communicated by sending a \msg{display\_data} message with the complete
     respective button or checkbox specification. The checkbox has a description
     and is always in one of two states: checked or not. A more complex example
-    is the radio-button control, because it is not a stand-alone control.
+    is the radio-button widget, because it is not a stand-alone widget.
 
     \small \begin{verbatim}
   <radio-button id="x" connected="y"><![CDATA[first]]></radio-button>
@@ -1447,9 +1446,9 @@
    must be sent by means of a \msg{display\_data} message to inform the other
    side of this event.
 
-   The text field displays an input control for the user to input text. It is
-   like the button control, but it contains an element \textit{text} that
-   holds the content of the control. The following fragment shows example of
+   The text field displays an input widget for the user to input text. It is
+   like the button widget, but it contains an element \textit{text} that
+   holds the content of the widget. The following fragment shows example of
    the specification of a text field.
    
    \small \begin{verbatim}
@@ -1472,9 +1471,9 @@
   <progress-bar id="x" minimum="10" maximum="20" current="15"/>\end{verbatim}
   \normalsize
 
-   \noindent Updates to the state of a control are specified in the same way as
+   \noindent Updates to the state of a widget are specified in the same way as
    in the layout specification. The \textit{id} attribute identifies the
-   control of which the state is to be updated. The attributes then specify the
+   widget of which the state is to be updated. The attributes then specify the
    new value for the attribute with the same name and child elements specify
    other aspects of the state. When attributes are missing, their value remains
    unchanged.
@@ -1502,7 +1501,7 @@
    Child elements are laid out on the screen horizontally, or vertically and
    are expanded to fill space. The top layout manager completely fills the
    available space of the display. The following figure shows an example of how
-   controls can be laid out using nested layout managers.
+   widgets can be laid out using nested layout managers.
 
    \begin{figure}[H]
     \begin{center}
@@ -1524,11 +1523,11 @@
    bottom, left), vertical alignment (top, middle, bottom),
    horizontal-alignment (left, center, right), element visibility and element
    activity.
-   More attention is in order for element activity. Every control can be
-   enabled or disabled for user interaction. A control is \textit{active} when
+   More attention is in order for element activity. Every widget can be
+   enabled or disabled for user interaction. A widget is \textit{active} when
    the user can interact with it. This notion is extended to layout managers
    and thereby arbitrary elements as follows. If a layout manager is inactive
-   all elements it controls are inactive.
+   all elements it widgets are inactive.
    
    Every element that is a child of a layout manager is associated with a value
    for each of the available layout properties. An implicit set of default
@@ -1551,7 +1550,7 @@
    \noindent The layout properties for both buttons are the same, top and bottom margins
    are one pixel, vertical alignment is middle and horizontal alignment is right
    and both elements are visible and enabled. The \textit{properties} element
-   directly preceding a control defines the properties for that control. If
+   directly preceding a widget specify the layout properties for that widget. If
    there is no properties element then the previous \textit{properties} element
    within the same layout manager defines the layout properties for that
    element.

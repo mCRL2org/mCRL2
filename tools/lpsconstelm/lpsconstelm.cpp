@@ -1,6 +1,8 @@
-///  Copyright 2007 F.P.M. (Frank) Stappers. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+///  Author(s): F.P.M. (Frank) Stappers
+//
+//  Distributed under the Boost Software License, Version 1.0.
+//  (See accompanying file LICENSE_1_0.txt or copy at
+//  LICENSE_1_0.txt)
 //
 /// \file ./lpsconstelm.cpp
 

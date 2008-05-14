@@ -1,6 +1,6 @@
-//  Copyright 2007 Aad Mathijssen and Simona Orzan. Distributed under
-//  the Boost Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//  Author(s): Aad Mathijssen and Simona Orzan. Distributed under
+//  the Boost (See accompanying file LICENSE_1_0.txt or copy at
+//  LICENSE_1_0.txt)
 //
 /// \file ./txt2pbes.cpp
 
