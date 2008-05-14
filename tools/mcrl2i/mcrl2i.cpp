@@ -45,7 +45,7 @@ char help_message[] = "At the prompt any mCRL2 data expression can be given. Thi
                       "rewritten to normal form and printed. Also, one can assign values to declared "
                       "variables by writing x := v, for variable x and value v. These variables can "
                       "then be used in expressions. Besides this, the prompt accepts the following "
-                      "commands (where VARLISt is of the form x,y,...: S; v,w,...: T):\n"
+                      "commands (where VARLIST is of the form x,y,...: S; v,w,...: T):\n"
                       "  :h[elp]                         print this help message\n"
                       "  :q[uit]                         quit\n"
                       "  :t[ype] EXPRESSION              print type of EXPRESSION\n"
