@@ -28,10 +28,6 @@ eqn  inv(e0)       = e1;
      I_ind(e0, e0) = I_inc;
      I_ind(e1, e0) = I_fst;
 
-% Dirty hack to make it work
-var  p,q: Pos;
-eqn  succ(p) < q  =  p < pred(q);
-
 act  r1: List(D);
      s1,s4: Ind;
      s4: D # Ind;

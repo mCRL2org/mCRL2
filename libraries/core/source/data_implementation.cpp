@@ -1638,7 +1638,7 @@ void impl_sort_pos(t_data_decls *p_data_decls)
   ATermList bpql = ATmakeList3((ATerm) b, (ATerm) p, (ATerm) q);
   ATermList bcpql = ATmakeList4((ATerm) b, (ATerm) c, (ATerm) p, (ATerm) q);
   ATermList bpqrl = ATmakeList4((ATerm) b, (ATerm) p, (ATerm) q, (ATerm) r);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(39,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(41,
       //equality (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(bpl, nil, 
          gsMakeDataExprEq(one, gsMakeDataExprCDub(b, p)), f),
@@ -1669,6 +1669,10 @@ void impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprLTE(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
          gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(bcpql,nil,
+         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
+         gsMakeDataExprIf(gsMakeDataExprImp(b, c),
+           gsMakeDataExprLTE(p, q), gsMakeDataExprLT(p, q))),
       //less than (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprLT(p, one), f),
       (ATerm) gsMakeDataEqn(bpl, nil, 
@@ -1682,6 +1686,10 @@ void impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprLT(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
          gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(bcpql,nil,
+         gsMakeDataExprLT(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
+         gsMakeDataExprIf(gsMakeDataExprImp(c, b),
+           gsMakeDataExprLT(p, q), gsMakeDataExprLTE(p, q))),
       //greater than or equal (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprGTE(p, q), gsMakeDataExprLTE(q, p)),
