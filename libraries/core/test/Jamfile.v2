@@ -1,3 +1,5 @@
+import testing ;
+
 project libraries/core/test
    : source-location .
    : requirements
