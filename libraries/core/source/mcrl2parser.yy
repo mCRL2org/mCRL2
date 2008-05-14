@@ -87,6 +87,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //start token
 %start start
 
+//enable debug output
+%debug
+
 //terminals
 //---------
 
@@ -2838,6 +2841,13 @@ pb_init:
 
 %%
 
+//Uncomment the lines below to enable the use of SIZE_MAX
+//#define __STDC_LIMIT_MACROS 1
+//#include <stdint.h>
+
+//Uncomment the line below to enable the use of std::cerr, std::cout and std::endl;
+//#include <iostream>
+
 ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
 {
   ATermAppl Result = NULL;
@@ -2892,6 +2902,11 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
     gsMakeProcEqnSpec(ProcEqnDecls),
     ProcInit
   );
+  //Uncomment the lines below to check if the parser stack size isn't too big
+  //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
+  //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
+  //std::cerr << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
+  //std::cerr << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
   return Result;
 }
 

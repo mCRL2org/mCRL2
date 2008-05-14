@@ -37,6 +37,7 @@ using namespace mcrl2::core;
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
 extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
+extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
 
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
@@ -257,6 +258,8 @@ void mcrl2_lexer::process_string(void) {
 }
 
 ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+  //uncomment the line below to let bison generate debug information 
+  //mcrl2yydebug = 1;
   ATermAppl result = NULL;
   if (streams.size() == 0) {
     return result;
