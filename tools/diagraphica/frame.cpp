@@ -6,10 +6,6 @@
 //
 /// \file ./frame.cpp
 
-// --- frame.cpp ----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 #include "frame.h"
 #include "figures.xpm"
 #include "mcrl2/utilities/version_info.h"

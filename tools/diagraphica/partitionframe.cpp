@@ -6,10 +6,6 @@
 //
 /// \file ./partitionframe.cpp
 
-// --- partitionframe.cpp -------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "partitionframe.h"
 

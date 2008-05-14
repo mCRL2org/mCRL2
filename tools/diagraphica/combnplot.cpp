@@ -6,10 +6,6 @@
 //
 /// \file ./combnplot.cpp
 
-// --- combnplot.cpp ------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "combnplot.h"
 

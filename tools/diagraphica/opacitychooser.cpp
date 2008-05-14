@@ -6,10 +6,6 @@
 //
 /// \file ./opacitychooser.cpp
 
-// --- opacitychooser.cpp -------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "opacitychooser.h"
 

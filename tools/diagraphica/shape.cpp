@@ -6,10 +6,6 @@
 //
 /// \file ./shape.cpp
 
-// --- shape.cpp ----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 #ifdef __APPLE__
     #include <GLUT/glut.h>
 #else

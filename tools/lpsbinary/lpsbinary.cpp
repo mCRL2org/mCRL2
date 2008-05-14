@@ -7,21 +7,6 @@
 /// \file lpsbinary.cpp
 /// \brief The binary tool, this runs the binary algorithm. 
 
-// ======================================================================
-//
-// Copyright (c) 2006 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpsbinary
-// date          : 22-12-2006
-// version       : 0.25
-//
-// author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
-//
-// ======================================================================
-//
-
 #define NAME "lpsbinary"
 #define AUTHOR "Jeroen Keiren"
 

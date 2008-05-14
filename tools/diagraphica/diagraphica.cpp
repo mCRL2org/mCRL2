@@ -5,10 +5,6 @@
 //  LICENSE_1_0.txt)
 //
 /// \file ./diagraph.cpp
-
-// --- diagraph.cpp -------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 

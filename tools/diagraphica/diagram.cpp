@@ -6,10 +6,6 @@
 //
 /// \file ./diagram.cpp
 
-// --- diagram.cpp --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "diagram.h"
 

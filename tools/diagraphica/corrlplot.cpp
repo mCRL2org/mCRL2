@@ -6,10 +6,6 @@
 //
 /// \file ./corrlplot.cpp
 
-// --- corrlplot.cpp ------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "corrlplot.h"
 

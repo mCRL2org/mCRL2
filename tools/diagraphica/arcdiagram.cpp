@@ -6,10 +6,6 @@
 //
 /// \file ./arcdiagram.cpp
 
-// --- arcdiagram.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 #include <limits>
 #include "arcdiagram.h"
 #include <iostream>

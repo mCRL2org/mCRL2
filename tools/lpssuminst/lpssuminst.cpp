@@ -5,21 +5,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpssuminst.cpp
-/// \brief Add your file description here.
-
-// ======================================================================
-//
-// Copyright (c) 2006 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpssuminst 
-// date          : 22-12-2006
-// version       : 0.5
-//
-// author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
-//
-// ======================================================================
 
 #define NAME "lpssuminst"
 #define AUTHOR "Jeroen Keiren"

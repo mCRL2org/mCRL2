@@ -5,22 +5,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsuntime.cpp
-/// \brief Add your file description here.
-
-// ======================================================================
-//
-// Copyright (c) 2006 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpsuntime 
-// date          : 07-11-2006
-// version       : 0.31
-//
-// author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
-//
-// ======================================================================
-//
 
 #define NAME "lpsuntime"
 #define AUTHOR "Jeroen Keiren"

@@ -6,10 +6,6 @@
 //
 /// \file ./popupframe.cpp
 
-// --- popupframe.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "popupframe.h"
 

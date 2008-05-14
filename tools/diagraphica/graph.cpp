@@ -6,10 +6,6 @@
 //
 /// \file ./graph.cpp
 
-// --- graph.cpp ----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "graph.h"
 #include <iostream>

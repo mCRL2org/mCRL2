@@ -6,10 +6,6 @@
 //
 /// \file ./parser.cpp
 
-// --- parser.cpp ---------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "parser.h"
 

@@ -6,10 +6,6 @@
 //
 /// \file ./visualizer.cpp
 
-// --- visualizer.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 #include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"

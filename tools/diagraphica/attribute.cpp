@@ -6,10 +6,6 @@
 //
 /// \file ./attribute.cpp
 
-// --- attribute.cpp ------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "attribute.h"
 

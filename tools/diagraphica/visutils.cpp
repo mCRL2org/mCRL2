@@ -6,10 +6,6 @@
 //
 /// \file ./visutils.cpp
 
-// --- visutils.cpp -------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "visutils.h"
 #include "character_set.xpm"

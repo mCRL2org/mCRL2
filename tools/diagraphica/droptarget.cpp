@@ -6,10 +6,6 @@
 //
 /// \file ./droptarget.cpp
 
-// --- droptarget.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 
 #include "droptarget.h"
 

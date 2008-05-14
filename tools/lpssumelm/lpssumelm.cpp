@@ -5,22 +5,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpssumelm.cpp
-/// \brief Add your file description here.
-
-// ======================================================================
-//
-// Copyright (c) 2006 TU/e
-//
-// ----------------------------------------------------------------------
-//
-// file          : lpssumelm 
-// date          : 22-12-2006
-// version       : 0.4
-//
-// author(s)     : Jeroen Keiren <j.j.a.keiren@student.tue.nl>
-//
-// ======================================================================
-//
 
 #define NAME "lpssumelm"
 #define AUTHOR "Jeroen Keiren"
