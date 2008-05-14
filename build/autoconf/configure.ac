@@ -444,13 +444,9 @@ AC_SUBST([BOOST_INCLUDE_PATH],[])
 AC_SUBST([BOOST_LIBRARY_PATH],[])
 
 # Check for OpenGL
-AC_ARG_WITH([OpenGL],
+AC_ARG_WITH([opengl],
             AS_HELP_STRING([--with-opengl=DIR], [OpenGL/Mesa installation directory]))
 AC_MSG_CHECKING([for OpenGL])
-if test $with_opengl; then
-  CFLAGS="-I$with_opengl/include"
-  LDFLAGS="-L$with_opengl/lib"
-fi
 
 case $host in
   *-*-mingw32*)
@@ -471,26 +467,34 @@ esac
 if test "$USE_OPENGL"; then
   AC_MSG_RESULT([yes])
 else
-  LIBS=$OPENGL_NAME
-  USE_OPENGL=$with_opengl
-  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-                   #include <GL/gl.h>
-                   #include <GL/glu.h>],
-                  [glPointSize(1.0f);]),
-                  USE_OPENGL="yes")
+  LIBS=-l$OPENGL_NAME
+  AC_LINK_IFELSE(
+    AC_LANG_PROGRAM([
+      #include <GL/gl.h>
+      #include <GL/glu.h>],
+      [ glPointSize(1.0f); ]),
+    USE_OPENGL="yes",
+    if test $with_opengl; then
+      CFLAGS="-I$with_opengl/include"
+      LDFLAGS="-L$with_opengl/lib"
+    fi
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([
+        #include <GL/gl.h>
+        #include <GL/glu.h>],
+        [ glPointSize(1.0f); ]),
+        USE_OPENGL="yes ($with_opengl)"
+        AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
+        AC_SUBST([OPENGL_LPATH],[$with_opengl/lib]),
+        AC_MSG_ERROR(["Problem with finding OpenGL header files or libraries in path: `$with_opengl'"])
+        ))
 
   if test $USE_OPENGL; then
     AC_MSG_RESULT([yes])
-
-    if test $with_opengl; then
-      USE_OPENGL="yes ($with_opengl)"
-      AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
-      AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
-    fi
   else
+    AC_MSG_RESULT([no])
     USE_OPENGL="no"
     OPENGL_NAME=""
-    AC_MSG_RESULT([no])
   fi
   LIBS=""
 fi
