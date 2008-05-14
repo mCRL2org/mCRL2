@@ -58,8 +58,30 @@ static Rewriter *rewr;
 static Enumerator *e;
 static ATermTable variables;
 static ATermTable assignments;
-            
-void clear_rewr_substs(ATermList vars)
+
+static void updated_specification(specification spec)
+{
+  gsVerboseMsg("reinitialising rewriter and enumerator...\n");
+  RewriteStrategy strat = rewr->getStrategy();
+  delete e;
+  delete rewr;
+  rewr = createRewriter(spec.data(), strat);
+  e = createEnumerator(spec.data(),rewr);
+}
+
+static bool refresh_specification(specification old_spec, specification new_spec)
+{
+  if ( old_spec == new_spec )
+  {
+    return false;
+  }
+
+  updated_specification(new_spec);
+
+  return true;
+}
+
+static void clear_rewr_substs(ATermList vars)
 {
   if ( vars == NULL )
   {
@@ -71,7 +93,7 @@ void clear_rewr_substs(ATermList vars)
   }
 }
 
-void reset_rewr_substs()
+static void reset_rewr_substs()
 {
   ATermList vars = ATtableKeys(assignments);
   for (; !ATisEmpty(vars); vars=ATgetNext(vars))
@@ -81,7 +103,7 @@ void reset_rewr_substs()
   }
 }
 
-string trim_spaces(const string &str)
+static string trim_spaces(const string &str)
 {
   // function from http://www.codeproject.com/vcpp/stl/stdstringtrim.asp
   string s(str);
@@ -98,7 +120,7 @@ string trim_spaces(const string &str)
   return s;
 }
 
-bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
+static bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
 {
     string::size_type semi_pos = decl.find(':');
     if ( semi_pos == string::npos )
@@ -126,7 +148,10 @@ bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
     if ( sort == NULL )
       return false;
 
-    spec = specification(reconstructed_spec);
+    if ( refresh_specification(spec,specification(reconstructed_spec)) )
+    {
+      spec = specification(reconstructed_spec);
+    }
 
     gsDebugMsg("data implemented: %T\n",sort);
 
@@ -141,7 +166,7 @@ bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
     return true;
 }
 
-bool parse_var_decl_list(string decl_list, ATermList *varlist, specification &spec)
+static bool parse_var_decl_list(string decl_list, ATermList *varlist, specification &spec)
 {
   decl_list += ';';
   string::size_type pos;
@@ -157,7 +182,7 @@ bool parse_var_decl_list(string decl_list, ATermList *varlist, specification &sp
   return true;
 }
 
-ATermList parse_varlist_from_string(string &s, specification &spec)
+static ATermList parse_varlist_from_string(string &s, specification &spec)
 {
   string::size_type start = s.find('<');
   if ( start == string::npos )
@@ -183,7 +208,7 @@ ATermList parse_varlist_from_string(string &s, specification &spec)
   return result;
 }
 
-ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = NULL)
+static ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = NULL)
 {
   stringstream ss(term_string);
 
@@ -233,7 +258,10 @@ ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = 
   gsDebugMsg("type checked: %T\n",term);
 
   term = implement_data_data_expr(term,reconstructed_spec);
-  spec = specification(reconstructed_spec);
+  if ( refresh_specification(spec,specification(reconstructed_spec)) )
+  {
+    spec = specification(reconstructed_spec);
+  }
   if ( term == NULL )
     return NULL;
 
@@ -242,7 +270,7 @@ ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = 
   return term;
 }
 
-void declare_variables(string &vars, specification &spec)
+static void declare_variables(string &vars, specification &spec)
 {
   ATermList varlist = ATmakeList0();
   if ( ! parse_var_decl_list(vars,&varlist,spec) )
@@ -260,7 +288,7 @@ struct tool_options_type {
   RewriteStrategy strategy;
 };
 
-tool_options_type parse_command_line(int ac, char** av) {
+static tool_options_type parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
     "Evaluate expressions using the data specification of the LPS in INFILE via a\n"
     "text-based interface.\n"
@@ -379,10 +407,7 @@ int main(int argc, char **argv)
             {
               gsErrorMsg("invalid rewrite strategy '%s', ignoring command\n",s.c_str());
             } else {
-              delete e;
-              delete rewr;
-              rewr = createRewriter(spec.data(), options.strategy);
-              e = createEnumerator(spec.data(),rewr);
+              updated_specification(spec);
             }
           } else if ( (s.substr(0,2) == "t ") || (s.substr(0,5) == "type ") )
           {
