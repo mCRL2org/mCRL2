@@ -132,11 +132,10 @@ if test -n $BISON; then
 fi
 
 # Set flags
-CPPFLAGS=""
+R_CFLAGS="${R_CFLAGS} -std=c99"
+R_CXXFLAGS="${R_CXXFLAGS} -std=c++98"
 CFLAGS="-std=c99"
 CXXFLAGS="-std=c++98"
-LDFLAGS=""
-BFLAGS=""
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])
@@ -587,9 +586,9 @@ fi
 AC_SUBST([BUILD_OPTIONS])
 
 # Runtime compilation flags
-AC_SUBST([R_CFLAGS],["$R_CFLAGS $CFLAGS"])
+AC_SUBST([R_CFLAGS],["$R_CFLAGS"])
 AC_SUBST([R_SCFLAGS],["$R_SCFLAGS"])
-AC_SUBST([R_CXXFLAGS],["$R_CXXFLAGS $CXXFLAGS"])
+AC_SUBST([R_CXXFLAGS],["$R_CXXFLAGS"])
 AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS"])
 AC_SUBST([R_CPPFLAGS],["$CPPFLAGS"])
 AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
