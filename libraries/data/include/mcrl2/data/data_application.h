@@ -14,6 +14,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/sort_arrow.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
@@ -62,6 +63,14 @@ class data_application: public data_expression
     {
       return core::gsGetDataExprArgs(*this);
     }
+
+    sort_expression sort() const
+    {
+      sort_expression s = this->head().sort();
+      assert(is_sort_arrow(s));
+      return static_cast<const sort_arrow&>(s).result_sort();
+    }
+
   };
 
 /// \brief singly linked list of data applications
