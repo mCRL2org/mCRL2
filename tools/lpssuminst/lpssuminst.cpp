@@ -16,7 +16,7 @@
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 
-#include <mcrl2/lps/decluster.h>
+#include <mcrl2/lps/suminst.h>
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/rewriter.h"
@@ -34,7 +34,7 @@ using namespace mcrl2;
 struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
-  lps::t_decluster_options decl_opts; ///< Options of the algorithm
+  lps::t_suminst_options suminst_opts; ///< Options of the algorithm
   
   tool_options()
     : input_file("-"),
@@ -47,8 +47,8 @@ struct tool_options {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/squadt_interface.h>
 
-//Forward declaration because do_decluster() is called within squadt_interactor class
-int do_decluster(const tool_options& options);
+//Forward declaration because do_suminst() is called within squadt_interactor class
+int do_suminst(const tool_options& options);
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
 {
@@ -130,11 +130,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   /* Prepare user interaction */
   checkbox& tau_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_tau_only));
   m.append(d.create< label >().set_text(" ")).
-    append(tau_only.set_label("Only decluster tau summands"), layout::left);
+    append(tau_only.set_label("Only instantiate tau summands"), layout::left);
 
   checkbox& finite_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_finite_only));
   m.append(d.create< label >().set_text(" ")).
-    append(finite_only.set_label("Only decluster variables of finite sorts"), layout::left);
+    append(finite_only.set_label("Only instantiate variables of finite sorts"), layout::left);
 
   button& okay_button = d.create< button >().set_label("OK");
 
@@ -179,9 +179,9 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).get_location();
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
-  options.decl_opts.tau_only = configuration.option_exists(option_tau_only);
-  options.decl_opts.finite_only = configuration.option_exists(option_finite_only);
-  options.decl_opts.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
+  options.suminst_opts.tau_only = configuration.option_exists(option_tau_only);
+  options.suminst_opts.finite_only = configuration.option_exists(option_finite_only);
+  options.suminst_opts.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
 
   /* Create display */
   tipi::layout::tool_display d;
@@ -189,8 +189,8 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   send_display_layout(d.set_manager(d.create< vertical_box >().
                 append(d.create< label >().set_text("Declustering in progress"), layout::left)));
 
-  //Perform declustering
-  bool result = do_decluster(options) == 0;
+  //Perform instantiation
+  bool result = do_suminst(options) == 0;
 
   send_display_layout(d.set_manager(d.create< vertical_box >().
                 append(d.create< label >().set_text(std::string("Declustering ") + ((result) ? "succeeded" : "failed")), layout::left)));
@@ -202,19 +202,19 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 
 
 ///Reads a specification from input_file, 
-///applies declustering to it and writes the result to output_file.
-int do_decluster(const tool_options& options)
+///applies instantiation of sums to it and writes the result to output_file.
+int do_suminst(const tool_options& options)
 {
   lps::specification lps_specification;
 
   try
   {
     lps_specification.load(options.input_file);
-    Rewriter* r = createRewriter(lps_specification.data(), options.decl_opts.strategy);
+    Rewriter* r = createRewriter(lps_specification.data(), options.suminst_opts.strategy);
 
-    lps::specification result = lps::decluster(lps_specification, *r, options.decl_opts);
+    lps::specification result = lps::instantiate_sums(lps_specification, *r, options.suminst_opts);
 
-    // decluster lps_specification and save the output to a binary file
+    // instantiate lps_specification and save the output to a binary file
     if (!result.save(options.output_file, true)) 
     {
       // An error occurred when saving
@@ -246,8 +246,8 @@ tool_options parse_command_line(int ac, char** av) {
   command_line_parser parser(clinterface, ac, av);
 
   tool_options t_options;
-  t_options.decl_opts.tau_only = (0 < parser.options.count("tau"));
-  t_options.decl_opts.finite_only = (0 < parser.options.count("finite"));
+  t_options.suminst_opts.tau_only = (0 < parser.options.count("tau"));
+  t_options.suminst_opts.finite_only = (0 < parser.options.count("finite"));
 
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
@@ -261,7 +261,7 @@ tool_options parse_command_line(int ac, char** av) {
     }
   }
 
-  t_options.decl_opts.strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
+  t_options.suminst_opts.strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
 
   return t_options;
 }
@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    return do_decluster(parse_command_line(argc,argv));
+    return do_suminst(parse_command_line(argc,argv));
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

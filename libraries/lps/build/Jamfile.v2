@@ -12,8 +12,8 @@ mcrl2-library lps
        : source/lin_std.cpp
          source/binary.cpp
          source/dataelm.cpp
-         source/decluster.cpp
          source/sumelm.cpp
+         source/suminst.cpp
          source/untime.cpp
          source/nextstate.cpp
          source/nextstate_standard.cpp
