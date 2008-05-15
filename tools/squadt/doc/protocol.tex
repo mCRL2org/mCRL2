@@ -223,7 +223,7 @@
    references to sources of binary data. Considered so far are: data from files
    in a local filesystem or potentially unbounded streams of data sent or received
    over a network. Alternate sources of input or output namely data associated
-   with user interaction through connected human interface devices is treated
+   with user interaction through connected human interface devices are treated
    specially.
    
    Any tool is always used with a particular purpose in mind. Let's assume that
@@ -280,7 +280,7 @@
    existing resource. The task output is a set of URI's that is disjoint from
    the task input. Every input as well as output is associated with a MIME
    type, if the actual resource identified by the URI does not match the type a
-   tool may fail.
+   tool is expected to fail in completing the task.
 
    \begin{figure}[H]
     \begin{center}
@@ -291,7 +291,7 @@
 
    % creation and manipulation (tool and system)
  
-   The tool creates its own task specification and communicates it afterward
+   A tool creates its own task specification and communicates it afterward
    with the integration framework. The framework can read and modify the part
    that specifies the task input and output, e.g. it can rename input files.
    The remainder of the task specification is tool-specific, the framework can
@@ -318,7 +318,7 @@
 
   \subsection{Display}
 
-   Since tools create task specifications themselves, with the user as ultimate
+   Since tools create task specifications themselves, with the user as
    beneficiary, the tool must have means of communicating with the user. The
    \textit{(interaction) display} is a tool-controlled graphical user interface
    that acts as a direct communication channel between a running tool and the
@@ -383,10 +383,9 @@
   framework built in C++. At the heart of this framework is the communication
   protocol we are going to sketch in this section. The protocol represents the
   interface between two different parties, the framework or controlling-side
-  (also called \textit{controller}), and the side of a software program
-  representing a tool (also called \textit{tool}). The role of a tool is that a
-  configurable service, that of a controller is to orchestrate on behalf of of
-  a user.
+  (called \textit{controller}), and the side of a software program representing
+  a tool (called \textit{tool}). The role of a tool is that a configurable
+  service, that of a controller is to orchestrate on behalf of a user.
 
   The smallest unit of communication is a message. Messages are sent and
   received in a particular order and the protocol specifies how each message
@@ -396,19 +395,20 @@
   a message is based on both it's type and the role of the party that receives
   it.
 
-  Besides the type and the role of the receiving party, message interpretation
-  is also affected by the messaging context. A message context is a chronologically
-  ordered list of messages that were either sent or received by a communication
-  partner.  More formal: let $p$ and $q$ be communication partners. The
-  \textit{receiving context} of $p$ (pertaining to $q$) is the sequence of
-  \emph{all} messages $m_{1}, m_{2}, m_{3}, \ldots$ that were sent by $q$ and
-  received by $p$ in this particular order.  The \textit{sending context} of
-  $p$ (pertaining to $q$) is the sequence of \emph{all} messages $m_{1}, m_{2},
-  m_{3}, \ldots$ that were sent by $p$ and received by $q$ in this particular
-  order. From hereon we will assume that every message that is sent will also
-  be received and that message order is preserved. More precise the receiving
-  context of $p$ pertaining to $q$ is a prefix of the sending context of $q$
-  pertaining to $p$.
+  Message interpretation, besides type and role of the receiving party, is also
+  affected by the messaging context.  A \textit{message context} is a
+  chronologically ordered list of messages that were all either sent or
+  received by the same communication partner in that particular order.  More
+  formal: let $p$ and $q$ be communication partners. The \textit{receiving
+  context} of $p$ (pertaining to $q$) is the sequence of \emph{all} messages
+  $m_{1}, m_{2}, m_{3}, \ldots$ that were sent by $q$ and received by $p$ in
+  this particular order.  The \textit{sending context} of $p$ (pertaining to
+  $q$) is the sequence of \emph{all} messages $m_{1}, m_{2}, m_{3}, \ldots$
+  that were sent by $p$ and received by $q$ in this particular order. From
+  hereon we will assume that every message that is sent will also be received
+  and that message order is preserved. More precise the receiving context of
+  $p$ pertaining to $q$ is a prefix of the sending context of $q$ pertaining to
+  $p$.
 
   A basic pattern used in the protocol is a request-response sequence. The
   tool, as well as the controller, can issue a request that the other party
@@ -419,8 +419,8 @@
 
   This section provides a high level overview of the protocol in terms of: what
   is communicated when and for what purpose. The next section zooms in on the
-  different messages (by type), the purpose and structure of data communicated
-  by means of such a message, and it's interpretation.
+  different messages (by type) and the purpose and structure of data
+  communicated by means of such a message.
 
   \subsection{Notes on Presentation}
 
@@ -429,14 +429,16 @@
    \ref{table:example_message} describes a message called ``example message''
    with type ``example'' it is sent by a controller and received by a tool and
    carries some data (discussed shortly). A message without data has the data
-   field unspecified. If both communication partners can sent message the
-   direction field is unspecified.
+   field unspecified. If both communication partners can send the same message
+   (message with the same name) the direction field is unspecified.
    
    The contents of a message is the combination of type, direction and data.
    Message types are names that are introduced on demand. The direction
    determines which of the communication partners can send or receive such
-   messages. Only the information carried by a message and not its precise
-   representation of message data is important in this section.
+   messages. Message names are not communicated; every message can be
+   identified by the combination of type data and direction. In this section
+   the focus lies on the information carried by a message and its purpose; not
+   on the representation and details of interpretation.
    
    The structure of a message is described in terms of named types that may be
    composed of other (nested) types. The type notation is a mix using
@@ -507,16 +509,16 @@
   \subsection{Instance identification} \label{s:instance_identification}
 
    The purpose of instance identification is to identify a tool that starts
-   communicating with the controller and match it with the purpose to which it
-   was started.  The integration framework, that encompasses the controller,
-   starts tools on demand, e.g. to allow a user to configure a task. When a
-   tool is started it gets a unique token that identifies the tool instance
-   (and purpose for which the tool was started).  The tool will subsequently
-   initiate communication with the controller and pass back the token. The
-   controller will pass on the token to it's environment (the integration
-   framework) that can use it to identify the combination of purpose and
-   communication parter (or tool) that was started to serve that purpose.
-   
+   communicating with the controller and match it with the purpose to which
+   this tool was started. The integration framework that plays the part of
+   controller starts tools on demand, e.g. to allow a user to configure a task,
+   and waits for each tool to start communicating. When started the integration
+   framework must pass it a unique token that identifies the purpose to which
+   the tool was started.  The tool will subsequently initiate communication
+   with the controller and communicate the token. After a token is received the
+   integration framework must decide on its validity and thereby the identity
+   of the communication partner.   
+
    When a tool is started it will initiate communication with a controller.  In
    practise this means that a new messaging context (connection) is established
    at the side of controller and tool.  After the connection is established the
@@ -556,18 +558,18 @@
 
    \noindent Figure \ref{fig::identification} shows the combined behaviour of a
    controller and a tool with regard to instance identification. A tool
-   initiates a connection, sends an identification notification and awaits any
-   incoming message. At the side of controller the value of the token is
-   somehow used to choose between breaking the connection and accepting the
-   identity of the tool on the other side. If the connection persists and the
-   tool receives an arbitrary other message from the controller its identify
-   was accepted.
+   initiates a connection, sends an identification notification and starts
+   waiting for incoming messages (controller has initiative).  At the side of
+   controller the value of the token is somehow used to choose between breaking
+   the connection and accepting the identity of the tool on the other side. If
+   the connection persists and the tool receives an arbitrary other message
+   from the controller its identify was accepted.
 
   \subsection{Capabilities}
 
    Capabilities represent both an information facility for one communication
    partner to learn about the capabilities of the other, as well as a protocol
-   extension mechanism. The extension mechanism currently consists only of a
+   extension mechanism. The extension mechanism currently only consists of a
    means to check for the protocol version supported by a communication
    partner. This provides some limited backward and forward compatibility
    between protocol versions.  For example it allows a tool developer to check
@@ -586,8 +588,8 @@
    \end{figure}
 
    \noindent The process follows the basic request response pattern and is
-   symmetric for both communication parties. A request for capabilities looks
-   as follows.
+   symmetric for both communication parties. A request for capabilities
+   message looks as follows.
    
    \begin{table}[H]
     \begin{center}
@@ -604,10 +606,9 @@
     \end{center}
    \end{table}
 
-   \noindent The type of the message identifies and otherwise empty content
-   signifies makes the message a request for capabilities. The partner that
-   receives \emph{must} send a response. For a controller the response only
-   contains the protocol version number and looks as follows.
+   \noindent The partner that receives \emph{must} send a response. For a
+   controller the response only contains the protocol version number and looks
+   as follows.
 
    \begin{table}[H]
     \begin{center}
@@ -710,8 +711,10 @@
 
    The process of task configuration is a straight-forward application of the
    request-response pattern. The state with label \texttt{C} represents the
-   configured state, i.e. the state from which task execution may commence. In
-   section \ref{ss::task_execution} the messages that deal with task execution.
+   configured state, i.e. the state from which task execution may commence.
+   Similarly the state with label \texttt{E} represents the state in which the
+   tool is executing a task. Section \ref{ss::task_execution} introduces the
+   messages that deal with task execution.
 
 %   Let $sc$ be the sending context of a controller and $rc$ be the receiving
 %   context (pertaining to one tool). If both controller and tool are still
@@ -842,11 +845,11 @@
       \hline
        \multicolumn{2}{|l|}{\textbf{task stop notification}} \\
       \hline
-       message type:   & \msg{task\_done} \\
+       message type:   & \msg{task\_stop} \\
       \hline
        direction       & tool to controller \\
        data            & Result \\
-                       &  Result = $\mathbb{B}$ \\
+                       & \ Result = $\mathbb{B}$ \\
       \hline
      \end{tabular}
      \label{table:task_stop}
@@ -913,7 +916,7 @@
 
    \begin{figure}[H]
     \begin{center}
-     \includegraphics{t_termination.eps}
+     \includegraphics{termination.eps}
     \end{center}
     \vspace{-0.3cm}
     \caption{termination: controller versus tool}
@@ -930,7 +933,6 @@
        message type:    & \msg{termination} \\
       \hline
        direction:       & controller to tool \\
-       data:            & \\
       \hline
      \end{tabular}
     \end{center}
@@ -951,7 +953,6 @@
        message type:   & \msg{termination} \\
       \hline
        direction:      & tool to controller \\
-       data:           & \\
       \hline
      \end{tabular}
     \end{center}
@@ -966,52 +967,32 @@
 
   \subsection{Display} \label{ss:user_interaction}
 
-   The display is a facility provided by the controller that represents the
-   primary means of a tool to communicate with the user.  Think of it as an
-   interactive bulletin board controlled by the tool. The bulletin board
-   notifies the tool after any change a user makes. Of course to user is not
-   allowed to make arbitrary changes to content, he/she can only add or change
-   data where it is the intention of the developer of the tool that owns the
-   display.
+   The display facility represents the primary means of a tool to communicate
+   with the user.  Think of it as an interactive bulletin board controlled by
+   the tool. The bulletin board notifies the tool after any change a user
+   makes. Of course to user is not allowed to make arbitrary changes to
+   content, he/she can only add or change data where it is the intention of the
+   developer of the tool that owns the display.
 
    The display facility shows an arrangement of widgets (user interface
-   primitives, e.g. a button), with which the user can interact. To keep it 
+   primitives, e.g. a button), with which the user can interact. To keep it
    simple, widgets are chosen from a preselected set of the set of very basic
    widgets. A simple relative positioning scheme is used for widget arrangement
    on the space provided by the display. A widget arrangement, also called a
-   layout, cannot be manipulated. The only manipulation allowed is the complete
-   replacement of a layout by another layout. The state of individual widgets,
-   can manipulated; both by the user as by the tool that owns the display.
+   layout, cannot be manipulated. From a tool perspective, the only
+   manipulation possible is the complete replacement of a layout or a change of
+   the state of an individual widget the existing layout (the one on display).
 
-   To use the display a tool must communicate the details of a set of widgets
-   and the layout of those widgets. A \textit{layout specification} is a
-   description of a set of widgets and how they are positioned relative to each
-   other on the space made available by the display. All user interaction with
-   widgets on the display is relayed to the associated tool immediately after
-   the fact. On the other hand a tool can change the internal state of widgets,
-   e.g. change the label of a button from "okay" to "cancel". In both cases
-   information from individual widgets, called \textit{display data}, is
-   exchanged between the communication partners.
+   To make use of the display a tool must communicate a set of widgets and a
+   layout.  A \textit{layout specification} is a description of a set of
+   widgets and how they are positioned relative to each other on the space made
+   available by the display. User interaction with widgets on the display
+   is relayed to the associated tool immediately after the fact. On the other
+   hand a tool can change the internal state of widgets, e.g. change the label
+   of a button from "okay" to "cancel". In both cases information from
+   individual widgets, called \textit{display data}, is exchanged between the
+   communication partners.
 
-   The following figure shows the communication behaviour with regard to the
-   use of the display.
-   
-   \begin{figure}[H]
-    \begin{center}
-     \includegraphics{t_display.eps}
-    \end{center}
-    \vspace{-0.4cm}
-    \caption{display interaction: controller versus tool}
-   \end{figure}
-
-   \noindent Notice that at the side of the controller display data can even be
-   received when no display layout was communicated. This is explained as
-   follows: updates to the display are modular and target a single widget. If
-   the target widget of an update is not available then the update will be
-   ignored. Because by default the display is empty, which corresponds to the
-   empty layout specification, any update is ignored. A layout specification is
-   communicated with a message that looks as follows.
-   
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -1114,14 +1095,35 @@
    \noindent When a controller receives such a message it is interpreted as a
    state change of a widget that matches the identifier. When the identifier is
    not known the message must be ignored. The state actually depends on the
-   type of the widget identified by the identifier, e.g. for a progress bar the
-   state is $ProgressBar$ or $\mathbb{N} \times \mathbb{N} \times \mathbb{N}$
-   (which can also be represented as String of course).
+   type of the widget identified by the identifier and is assumed to be
+   representable as a string.  For example the structure of the state of a
+   progress bar widget state is $ProgressBar$ or $\mathbb{N} \times \mathbb{N}
+   \times \mathbb{N}$ (which can also be represented as String of course).
 
 %    A tool can change the state of widgets on a display by means of their
 %    identifier. The following message must be used for this purpose.
 
-\pagebreak
+   The following figure shows the communication behaviour with regard to the
+   use of the display.
+   
+   \begin{figure}[H]
+    \begin{center}
+     \includegraphics{display.eps}
+    \end{center}
+    \vspace{-0.4cm}
+    \caption{Process of display manipulation}
+   \end{figure}
+
+   \noindent Initially the display shows the empty layout. Interaction with a
+   user is not possible so display interaction notification messages cannot be
+   sent by the controller; if they do the tool should ignore them. Similarly
+   display manipulation requests should not be sent by the tool because no
+   widgets are on the display. After a tool sent layout change command with a
+   valid non-empty layout specification then display manipulation requests and
+   display interaction notifications
+   \noindent A state change must be ignored if the state does not match that of
+   the widget identified, or if the identifier does not match with a widget on the display.
+   
  \section{Implementation details} \label{s:protocol_implementation}
 
    The previous section specified a high level view of the protocol. At this
@@ -1221,7 +1223,7 @@
     attribute can occur only once and its value must be among those introduced
     in the previous section: \textit{identification}, \textit{capabilities},
     \textit{configuration}, \textit{display\_layout}, \textit{display\_data},
-    \textit{termination}, \textit{task\_start}, \textit{task\_done},
+    \textit{termination}, \textit{task\_start}, \textit{task\_stop},
     \textit{report}. As an example consider the following message with type
     `termination'.
  

@@ -121,7 +121,7 @@ namespace tipi {
      message_identification,                   ///< \brief the unique identifier assigned to a tool instance
      message_report,                           ///< \brief send the controller a report of a tools operation
      message_task_start,                       ///< \brief signal to a tool for starting a task
-     message_task_done,                        ///< \brief signal to controller that task execution has finished
+     message_task_stop,                        ///< \brief signal to controller that task execution has finished
      message_termination,                      ///< \brief request/response of tool termination
      message_unknown                           ///< \brief unspecified or unknown (or should be derived from content)
   };

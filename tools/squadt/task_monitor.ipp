@@ -199,7 +199,7 @@ namespace squadt {
  
       boost::mutex::scoped_lock l(register_lock);
 
-      add_handler(tipi::message_task_done, boost::bind(&local::handle_task_completion, boost::ref(*this), _1, boost::ref(result)));
+      add_handler(tipi::message_task_stop, boost::bind(&local::handle_task_completion, boost::ref(*this), _1, boost::ref(result)));
 
       /* Other side has not connected and the process has not been registered as terminated */
       completion_condition.wait(l);
