@@ -294,6 +294,19 @@ ATermList get_sorts(ATerm term)
 
 void get_sorts_appl(ATermAppl part, ATermList *p_sorts)
 {
+  // Do not consider sorts specified in if, ==, != as these are
+  // system defined any way.
+  if (gsIsOpId(part))
+  {
+    ATermAppl Name = gsGetName(part);
+    if (ATisEqual(Name, gsMakeOpIdNameIf()) ||
+        ATisEqual(Name, gsMakeOpIdNameEq()) ||
+        ATisEqual(Name, gsMakeOpIdNameNeq()))
+    {
+      return;
+    }
+  }
+
   if (gsIsSortExpr(part)) {
     if (ATindexOf(*p_sorts, (ATerm) part, 0) == -1) {
       *p_sorts = ATinsert(*p_sorts, (ATerm) part);
