@@ -109,8 +109,8 @@ bool parse_command_line(int argc, wxChar** argv) {
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
       NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-      "Multivariate state visualization and simulation analysis techniques for labelled"
-      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be"
+      "Multivariate state visualization and simulation analysis techniques for labelled "
+      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be "
       "loaded by the tool.");
 
   command_line_parser parser(clinterface, argc, argv);

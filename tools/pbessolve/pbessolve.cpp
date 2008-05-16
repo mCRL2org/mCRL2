@@ -196,11 +196,11 @@ t_tool_options parse_command_line(int ac, char** av)
   clinterface.add_option("interactive", "turn on the manual guidance of the approximation process", 'i')
              .add_option("bound", make_mandatory_argument("NUM"), "limit the number of approximation steps to NUM", 'b')
              .add_option("pnf", "use the prenex normal form for the approximation", 'p')
-             .add_option("solver", make_optional_argument("SOLVER", "cvc"),
+             .add_option("solver", make_mandatory_argument("SOLVER"),
                "specify the SOLVER to be used by the prover:\n"
-               "'cvc' for the SMT solver CVC3 (default),\n"
-               "'fast' for the SMT solver CVC3 (fast variant), or\n"
-               "'ario' for the SMT solver Ario", 's');
+               "  'cvc' for the SMT solver CVC3 (default),\n"
+               "  'fast' for the SMT solver CVC3 (fast variant), or\n"
+               "  'ario' for the SMT solver Ario", 's');
 
   clinterface.add_rewriting_options();
 
