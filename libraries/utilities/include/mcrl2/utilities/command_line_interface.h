@@ -15,6 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <memory>
+#include <boost/algorithm/string/compare.hpp>
 
 #include <mcrl2/utilities/version_info.h> // for constants
 
@@ -142,15 +143,22 @@ namespace mcrl2 {
         /// Describes an individual option
         class option_descriptor;
 
+        struct option_identifier_less {
+          template < typename S >
+          bool operator()(S const& s1, S const& s2) const {
+            return boost::is_iless()(s1, s2) || (boost::is_iequal()(s1, s2) && s2 < s1);
+          }
+        };
+
         /// \endcond
 
       friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
 
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
 
-        typedef std::map< std::string, option_descriptor > option_map;
+        typedef std::map< std::string, option_descriptor, option_identifier_less > option_map;
 
-        typedef std::map< const char,  std::string >       short_to_long_map;
+        typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
 
       private:
 

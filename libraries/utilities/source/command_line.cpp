@@ -303,13 +303,44 @@ namespace mcrl2 {
         << word_wrap(m_description, 80) << std::endl << std::endl;
 
       if (5 < m_options.size()) { // tool-specific options
+        option_map::const_iterator        i = m_options.begin();
+        short_to_long_map::const_iterator j = m_short_to_long.begin();
+
         s << "Options:" << std::endl;
 
-        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          option_descriptor const& option(i->second);
+        while (i != m_options.end()) {
+          option_descriptor const* option;
 
-          if (option.m_show) {
-            s << option.textual_description(27, 53);
+          while (i->second.m_short != '\0') { // skip options without short identifier
+            ++i;
+          }
+
+          if (j != m_short_to_long.end()) {
+            if (i != m_options.end()) {
+              if (i->second.m_long[0] < j->first) {
+                option = &(i++)->second;
+              }
+              else {
+                if (i->first == j->second) {
+                  ++j;
+                }
+             
+                option = &m_options.find((j++)->second)->second;
+              }
+            }
+            else {
+              option = &m_options.find((j++)->second)->second;
+            }
+          }
+          else if (i != m_options.end()) {
+            option = &(i++)->second;
+          }
+          else {
+            break;
+          }
+           
+          if (option->m_show) {
+            s << option->textual_description(27, 53);
           }
         }
 
