@@ -8,7 +8,7 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Wednesday, February 13, 2008 17:48:09}
+%TCIDATA{LastRevised=Thursday, May 15, 2008 16:51:22}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -16,7 +16,6 @@
 \font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 \input{tcilatex}
-
 \begin{document}
 
 
@@ -136,15 +135,15 @@ g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.
 Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
 {eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
 insignificant parameters of $X$. Then we define \textsc{RemoveParameters(}$%
-p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{) as a linear process obtained
-from }$X(d:D)$ by removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the
-process parameters of $X$, and by replacing each term $c_{i}(d,e)$, $%
-f_{i}(d,e)$, $g_{i}(d,e)$, or $t_{i}(d,e)$ that appears in the definition of 
-$X$, and that has one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a
-subterm by a term $c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $%
-g_{i}^{\prime }(d,e)$, or $t_{i}^{\prime }(d,e)$ that does not have one of
-the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm, and such that the
-remaining process is strongly bisimulation equivalent to $X(d:D)$\footnote{%
+p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} as a linear process obtained
+from $X(d:D)$ by removing $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process
+parameters of $X$, and by replacing each term $c_{i}(d,e)$, $f_{i}(d,e)$, $%
+g_{i}(d,e)$, or $t_{i}(d,e)$ that appears in the definition of $X$, and that
+has one of the variables $d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm by a
+term $c_{i}^{\prime }(d,e)$, $f_{i}^{\prime }(d,e)$, $g_{i}^{\prime }(d,e)$,
+or $t_{i}^{\prime }(d,e)$ that does not have one of the variables $%
+d_{j_{1}},\cdots ,d_{j_{m}}$ as a subterm, and such that the remaining
+process is strongly bisimulation equivalent to $X(d:D)$\footnote{%
 A more formal definition of this is welcome.}.
 
 Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
@@ -172,27 +171,41 @@ $p$.
 
 \subsection{Parelm implementations}
 
-We define the following implementation of parelm:
+We define the following implementations of parelm:
 
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Parelm1(}$p,\overline{d}$\textsc{)} \\ 
-$G^{0}:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V%
-}ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}%
-ar(t_{i}(d,e))\} $ \\ 
-$m:=0$ \\ 
+\textsc{Parelm1(}$p$\textsc{)} \\ 
+$G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}%
+ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$
+\\ 
 $\text{\textbf{do}}$ \\ 
-$\qquad G^{m+1}:=G^{m}\cup \{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in
-G^{m}}\exists _{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
-$\qquad m:=m+1$ \\ 
-$\text{\textbf{while }}(G^{m+1}\neq G^{m})$ \\ 
+$\qquad \Delta G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in G}\ \exists
+_{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
+$\qquad G:=G\cup \Delta G$ \\ 
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
 $\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
 ,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $\{j_{1},\cdots ,j_{p}\}=G^{m}$.\bigskip\ Note that $g_{i}(d,e)_{l}$
-is the $l$-th component of the vector of terms $g_{i}(d,e)$.
+where $\{j_{1},\cdots ,j_{m}\}=G$.\bigskip\ Note that $g_{i}(d,e)_{l}$ is
+the $l$-th component of the vector of terms $g_{i}(d,e)$.%
+\[
+\begin{tabular}{|l|}
+\hline
+\textsc{Parelm2(}$p$\textsc{)} \\ 
+$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}ar(c_{i}(d,e))\cup 
+\mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$ \\ 
+$V:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$E:=\{(d_{j},d_{k})\ |\ \exists _{i\in I}:d_{j}\in \mathcal{V}%
+ar(g_{i}(d,e)_{k}\}$ \\ 
+$R:=\{d_{k}\ |\ $graph $G=(V,E)$ contains a directed path $w,\cdots ,d_{k}$
+for some $w\in W\}$ \\ 
+$\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\ 
+\hline
+\end{tabular}%
+\]
 
 \section{Constelm}
 

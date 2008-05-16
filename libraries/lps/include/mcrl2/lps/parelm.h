@@ -11,17 +11,20 @@
 #ifndef MCRL2_LPS_PARELM_H
 #define MCRL2_LPS_PARELM_H
 
+#include <iterator>
 #include <algorithm>
 #include <map>
 #include <set>
 #include <vector>
+#include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
 namespace mcrl2 {
@@ -89,6 +92,88 @@ specification parelm(const specification& spec)
 {
   std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
     
+  // logging statements
+  gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  {
+    gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
+  }
+  gsVerboseMsg("\n");
+    
+  specification result = detail::remove_parameters(spec, to_be_removed);
+  assert(result.is_well_typed());
+  return result;
+}
+
+namespace detail {
+
+  template <class Iter, class T>
+  void iota(Iter first, Iter last, T value)
+  {
+    while (first != last)
+    {
+      *first++ = value++;
+    }
+  }
+
+} // namespace detail
+
+/// Removes zero or more insignificant parameters from the specification spec.
+inline
+specification parelm2(const specification& spec)
+{
+  std::vector<data::data_variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
+  
+  // create a mapping m from process parameters to integers
+  std::map<data::data_variable, int> m;
+  int index = 0;
+  for (std::vector<data::data_variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  {
+    m[*i] = index++;
+  }
+
+  // compute the initial set v of significant variables
+  std::set<data::data_variable> tvars = transition_variables(spec.process().summands().begin(), spec.process().summands().end());
+  std::vector<int> v;
+  for (std::set<data::data_variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
+  {
+    v.push_back(m[*i]);
+  }
+
+  // compute the dependency graph G
+  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
+  typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+  graph G(process_parameters.size());
+  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  {
+    if (!i->is_delta())
+    {
+      for (data::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      {
+        int j0 = m[j->lhs()];
+        std::set<data::data_variable> vars = data::find_all_data_variables(j->rhs());
+        for (std::set<data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+        {
+          int k0 = m[*k];
+          boost::add_edge(j0, k0, G);
+        }
+      }
+    }
+  }
+
+  // compute the reachable nodes (i.e. the significant parameters)
+  std::vector<int> r = reachable_nodes(G, v.begin(), v.end());
+  std::sort(r.begin(), r.end());
+  std::vector<int> q(process_parameters.size());
+  detail::iota(q.begin(), q.end(), 0);
+  std::vector<int> s;
+  std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
+  std::set<data::data_variable> to_be_removed;
+  for (std::vector<int>::iterator i = s.begin(); i != s.end(); ++i)
+  {
+    to_be_removed.insert(process_parameters[*i]);
+  }
+
   // logging statements
   gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
