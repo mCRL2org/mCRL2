@@ -156,7 +156,7 @@ namespace mcrl2 {
 
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
 
-        typedef std::map< std::string, option_descriptor, option_identifier_less > option_map;
+        typedef std::map< std::string, option_descriptor > option_map;
 
         typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
 
