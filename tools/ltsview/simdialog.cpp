@@ -1,4 +1,5 @@
 #include "simdialog.h"
+// Copyright: see the accompanying file COPYING.
 #include <vector>
 
 using namespace IDs;

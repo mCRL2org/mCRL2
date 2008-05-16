@@ -1,4 +1,5 @@
 #include <map>
+// Copyright: see the accompanying file COPYING.
 #include <utility>
 
 #include <boost/bind.hpp>

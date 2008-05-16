@@ -1,4 +1,5 @@
 #define yy_create_buffer pbes_create_buffer
+// Copyright: see the accompanying file COPYING.
 #define yy_delete_buffer pbes_delete_buffer
 #define yy_scan_buffer pbes_scan_buffer
 #define yy_scan_string pbes_scan_string

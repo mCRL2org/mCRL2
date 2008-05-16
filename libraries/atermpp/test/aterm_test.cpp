@@ -1,4 +1,5 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING.
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,20 +7,6 @@
 //
 /// \file aterm_test.cpp
 /// \brief Add your file description here.
-
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/aterm_test.cpp
-// date          : 04/25/05
-// version       : 0.3
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
 
 #include <iostream>
 #include <string>

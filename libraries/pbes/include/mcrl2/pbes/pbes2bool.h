@@ -1,4 +1,5 @@
 #ifndef MCRL2_PBES2BOOL_H
+// Copyright: see the accompanying file COPYING.
 #define MCRL2_PBES2BOOL_H
 
 #include <string>

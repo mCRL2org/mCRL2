@@ -1,4 +1,5 @@
 #include <string.h>
+// Copyright: see the accompanying file COPYING.
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>

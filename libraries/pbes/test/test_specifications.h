@@ -1,4 +1,5 @@
 #ifndef LPS_TEST_SPECIFICATIONS_H
+// Copyright: see the accompanying file COPYING.
 #define LPS_TEST_SPECIFICATIONS_H
 
 #include <string>

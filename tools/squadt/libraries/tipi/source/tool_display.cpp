@@ -1,4 +1,5 @@
 #include <tipi/tool_display.hpp>
+// Copyright: see the accompanying file COPYING.
 #include <tipi/visitors.hpp>
 
 namespace tipi {

@@ -1,4 +1,5 @@
 
+// Copyright: see the accompanying file COPYING.
 #define BOOST_UNITS_STRINGIZE_IMPL(x) #x
 #define BOOST_UNITS_STRINGIZE(x) BOOST_UNITS_STRINGIZE_IMPL(x)
 

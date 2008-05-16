@@ -1,4 +1,5 @@
 #ifndef MCRL2_PBES_UTIL_H
+// Copyright: see the accompanying file COPYING.
 #define MCRL2_PBES_UTIL_H
 
 #include "mcrl2/data/data.h"

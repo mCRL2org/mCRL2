@@ -1,4 +1,5 @@
 #include "markdialog.h"
+// Copyright: see the accompanying file COPYING.
 #include "ids.h"
 #include "utils.h"
 #include <string>

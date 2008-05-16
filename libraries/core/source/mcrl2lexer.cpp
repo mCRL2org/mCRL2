@@ -1,4 +1,5 @@
 #line 2 "mcrl2lexer.cpp"
+// Copyright: see the accompanying file COPYING.
 
 #line 4 "mcrl2lexer.cpp"
 

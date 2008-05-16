@@ -1,4 +1,5 @@
 #include <boost/test/minimal.hpp>
+// Copyright: see the accompanying file COPYING.
 #include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/core/reachable_nodes.h"
 

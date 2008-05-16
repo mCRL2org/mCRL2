@@ -1,4 +1,5 @@
 /* A Bison parser, made by GNU Bison 2.3.  */
+// Copyright: see the accompanying file COPYING.
 
 /* Skeleton implementation for Bison LALR(1) parsers in C++
 

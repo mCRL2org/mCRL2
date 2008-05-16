@@ -1,8 +1,9 @@
-//  Author(s): J.van der Wulp, Wieger Wesselink
+// Author(s): J.van der Wulp, Wieger Wesselink
+// Copyright: see the accompanying file COPYING.
 //
-//  Distributed under the Boost Software License, Version 1.0.
-//  (See accompanying file LICENSE_1_0.txt or copy at
-//  LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// LICENSE_1_0.txt)
 //
 /// \file ./lpsparelm.cpp
 

@@ -1,4 +1,5 @@
 #include "infodialog.h"
+// Copyright: see the accompanying file COPYING.
 #include <wx/notebook.h>
 #include <algorithm>
 

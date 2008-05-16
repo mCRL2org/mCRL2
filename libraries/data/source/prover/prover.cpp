@@ -1,5 +1,11 @@
-// Implementation of class Prover
-// file: prover.cpp
+// Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING.
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file prover.cpp
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/prover.h"

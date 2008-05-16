@@ -1,4 +1,5 @@
 #include <iostream>
+// Copyright: see the accompanying file COPYING.
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>

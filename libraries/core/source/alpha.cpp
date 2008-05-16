@@ -1,4 +1,5 @@
 #define NAME "libalpha"
+// Copyright: see the accompanying file COPYING.
 
 #include <stdio.h>
 #include <stdlib.h>

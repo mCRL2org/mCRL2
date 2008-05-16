@@ -1,4 +1,5 @@
 #ifndef __FSMPARSER_H
+// Copyright: see the accompanying file COPYING.
 #define __FSMPARSER_H
 
 #include <iostream>

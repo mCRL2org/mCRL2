@@ -1,4 +1,5 @@
 #include <numeric>
+// Copyright: see the accompanying file COPYING.
 #include <vector>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/sequence.h"

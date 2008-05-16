@@ -1,4 +1,5 @@
 #line 2 "liblts_fsmlexer.cpp"
+// Copyright: see the accompanying file COPYING.
 
 #line 4 "liblts_fsmlexer.cpp"
 

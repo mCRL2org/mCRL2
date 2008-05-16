@@ -1,5 +1,11 @@
-// Interface to class BDD_Path_Eliminator
-// file: mcrl2/bdd_path_eliminator.h
+// Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING.
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/prover/bdd_path_eliminator.h
 
 #ifndef BDD_PATH_ELIMINATOR_H
 #define BDD_PATH_ELIMINATOR_H

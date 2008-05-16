@@ -1,4 +1,5 @@
 #ifndef TRANSLATE_H
+// Copyright: see the accompanying file COPYING.
 #define TRANSLATE_H
 
 #include <string.h>

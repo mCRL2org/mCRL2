@@ -1,4 +1,5 @@
 #include <iostream>
+// Copyright: see the accompanying file COPYING.
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>

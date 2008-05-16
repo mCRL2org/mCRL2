@@ -1,4 +1,5 @@
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+// Copyright: see the accompanying file COPYING.
 #include <string>
 #include <boost/bind.hpp>
 #include <boost/cstdint.hpp>

@@ -1,4 +1,5 @@
 #include <iostream>
+// Copyright: see the accompanying file COPYING.
 #include <map>
 #include <string>
 #include <utility>

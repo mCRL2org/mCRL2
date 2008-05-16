@@ -1,4 +1,5 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING.
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,20 +7,6 @@
 //
 /// \file mcrl2/atermpp/aterm_appl_constructor.h
 /// \brief Use the boost preprocessor library to generate constructors.
-
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : mcrl2/atermpp/aterm_appl_constructor.h
-// date          : 25-10-2005
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
 
 #ifndef BOOST_PP_IS_ITERATING
 

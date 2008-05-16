@@ -1,4 +1,5 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING.
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,20 +7,6 @@
 //
 /// \file mcrl2/atermpp/utility.h
 /// \brief Utility functions for terms.
-
-// ======================================================================
-//
-// Copyright (c) 2006 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : mcrl2/atermpp/utility.h
-// date          : 15-12-2006
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
 
 #ifndef ATERM_UTILITY_H
 #define ATERM_UTILITY_H

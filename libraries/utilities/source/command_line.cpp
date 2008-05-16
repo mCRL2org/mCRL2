@@ -1,4 +1,5 @@
 #include <algorithm>
+// Copyright: see the accompanying file COPYING.
 #include <vector>
 #include <map>
 #include <iosfwd>

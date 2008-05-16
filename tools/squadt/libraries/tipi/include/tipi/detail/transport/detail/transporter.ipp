@@ -1,4 +1,5 @@
 #ifndef TIPI_TRANSPORTER_TCC__
+// Copyright: see the accompanying file COPYING.
 #define TIPI_TRANSPORTER_TCC__
 
 #include <exception>

@@ -1,4 +1,5 @@
 #ifndef __STANDARD_UTILITY_HPP__
+// Copyright: see the accompanying file COPYING.
 #define __STANDARD_UTILITY_HPP__
 
 /**

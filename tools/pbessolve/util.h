@@ -1,7 +1,8 @@
 using namespace mcrl2::data;
+// Copyright: see the accompanying file COPYING.
 
 
-//  Author(s): Simona Orzan
+// Author(s): Simona Orzan
 //
 //  Distributed under the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at

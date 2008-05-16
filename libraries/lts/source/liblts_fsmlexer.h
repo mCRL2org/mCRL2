@@ -1,4 +1,5 @@
 #ifndef __FSMLEXER_H
+// Copyright: see the accompanying file COPYING.
 #define __FSMLEXER_H
 
 #include <aterm2.h>

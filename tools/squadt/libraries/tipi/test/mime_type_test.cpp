@@ -1,4 +1,5 @@
 #include <sstream>
+// Copyright: see the accompanying file COPYING.
 #include <iostream>
 #include <cstdio>
 

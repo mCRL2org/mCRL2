@@ -1,4 +1,5 @@
 #include <algorithm>
+// Copyright: see the accompanying file COPYING.
 #include <iostream>
 #include <cstdio>
 #include <string.h>

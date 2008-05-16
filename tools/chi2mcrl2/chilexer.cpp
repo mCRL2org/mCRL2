@@ -1,4 +1,5 @@
 #line 2 "chilexer.cpp"
+// Copyright: see the accompanying file COPYING.
 
 #line 4 "chilexer.cpp"
 

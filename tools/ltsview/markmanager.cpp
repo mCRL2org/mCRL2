@@ -1,4 +1,5 @@
 #include "markmanager.h"
+// Copyright: see the accompanying file COPYING.
 using namespace std;
 using namespace Utils;
 

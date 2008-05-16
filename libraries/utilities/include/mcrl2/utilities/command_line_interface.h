@@ -1,11 +1,12 @@
 // Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING.
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/utilities/command_line_interface.h
-//
+
 #include <algorithm>
 #include <vector>
 #include <map>

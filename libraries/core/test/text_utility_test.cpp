@@ -1,4 +1,5 @@
 #include <boost/test/minimal.hpp>
+// Copyright: see the accompanying file COPYING.
 #include "mcrl2/core/text_utility.h"
 
 using namespace mcrl2;
