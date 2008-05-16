@@ -2389,13 +2389,13 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
   tool_options_type parse_command_line(int ac, char** av) {
     interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to."
-      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,"
-      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
-      "\n"
-      "Only classical Petri nets are translated, i.e. places, transitions and arcs."
-      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are"
-      "not taken into account.\n"
+      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
+      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
+      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard."
+      "\n\n"
+      "Only classical Petri nets are translated, i.e. places, transitions and arcs. "
+      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are "
+      "not taken into account. "
       "With the -p option turned on, more functionality is supported.");
 
     clinterface.add_option("error", make_optional_argument("NUM", "2"),
@@ -2406,8 +2406,8 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
                     "hide all but one action edit the generated file and remove "
                     "that action from the hide list", 'i').
                 add_option("no-rec-par",
-                    "generate places in which the result is non-recursive; also "
-                    "translate inhibitor and reset arcs", 'p');
+                    "generate non-recursive mCRL2 process for the places, "
+                    "and enable the translation of inhibitor and reset arcs", 'p');
 
     command_line_parser parser(clinterface, ac, av);
 

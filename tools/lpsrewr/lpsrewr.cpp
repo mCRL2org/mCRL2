@@ -51,7 +51,7 @@ tool_options_type parse_command_line(int ac, char** av) {
   clinterface.add_rewriting_options();
 
   clinterface.add_option("benchmark", make_mandatory_argument("NUM"),
-    "rewrite specification NUM times; do not save output", 'b');
+    "rewrite data expressions NUM times; do not save output", 'b');
 
   command_line_parser parser(clinterface, ac, av);
 

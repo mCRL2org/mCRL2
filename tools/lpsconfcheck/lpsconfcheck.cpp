@@ -446,7 +446,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
           "encountered condition is neither a contradiction nor a tautolgy", 'c').
         add_option("print-dot", make_mandatory_argument("PREFIX"),
           "save a .dot file of the resulting BDD in case two summands cannot be proven "
-          "confluent; PREFIX will be used as prefix of the output files\n", 'p').
+          "confluent; PREFIX will be used as prefix of the output files", 'p').
         add_option("time-limit", make_mandatory_argument("LIMIT"),
           "spend at most LIMIT seconds on proving a single formula", 't').
         add_option("induction", "apply induction on lists", 'o');

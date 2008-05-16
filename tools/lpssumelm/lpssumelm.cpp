@@ -139,9 +139,9 @@ int do_sumelm(const tool_options& options)
 ///Parses command line and sets settings from command line switches
 tool_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
-                             "Remove superfluous summations from the linear process specification (LPS) in\n"
-                             "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used.\n"
-                             "If OUTFILE is not present, stdout is used.\n");
+                             "Remove superfluous summations from the linear process specification (LPS) in "
+                             "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
+                             "If OUTFILE is not present, stdout is used.");
 
   command_line_parser parser(clinterface, ac, av);
 

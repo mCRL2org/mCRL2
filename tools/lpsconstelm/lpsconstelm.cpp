@@ -1266,9 +1266,9 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
     "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used.");
 
-  clinterface.add_option("no-singleton", "do not remove sorts consisting of a single element");
-  clinterface.add_option("no-condition", "all summand conditions are set true (faster)");
-  clinterface.add_option("no-reachable", "does not remove summands which are not visited");
+  clinterface.add_option("no-singleton", "do not process parameters of which the sort contains a single element");
+  clinterface.add_option("no-condition", "treat all summand conditions as true (faster)");
+  clinterface.add_option("no-reachable", "do not remove summands that are not visited");
   clinterface.add_option("csv", make_mandatory_argument("NAME"), "stores the value changes of the process parameters in the CSV file NAME", 'c');
 
   command_line_parser parser(clinterface, ac, av);
