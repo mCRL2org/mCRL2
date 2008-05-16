@@ -18,6 +18,7 @@
 #include <mcrl2/data/parser.h>
 #include <mcrl2/data/data_specification.h>
 #include <mcrl2/data/sort_identifier.h>
+#include <mcrl2/data/sort_expression.h>
 #include <mcrl2/core/detail/data_reconstruct.h>
 
 using namespace atermpp;
@@ -280,6 +281,21 @@ void test_data_reconstruct_bool_function_one_eq()
   BOOST_CHECK(find_term(rec_data(3), ct));
 }
 
+void test_data_reconstruct_sort_expr()
+{
+  std::string text =
+  "map f: List(Nat) -> List(Nat);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+
+  sort_expression l("List@0");
+  std::cerr << l << std::endl;
+  BOOST_CHECK(find_term(data(2),l));
+
+  BOOST_CHECK(reconstruct_exprs(aterm(l), data) != l);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -291,6 +307,7 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_simple_constructor();
   test_data_reconstruct_bool_function();
   test_data_reconstruct_bool_function_one_eq();
+  test_data_reconstruct_sort_expr();
 
   return 0;
 }

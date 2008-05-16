@@ -334,9 +334,14 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
   assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
   bool recursive = true;
 
-  if (gsIsDataSpec(Part) && Spec != NULL) {
+  if (gsIsDataSpec(Part)) {
 //    gsDebugMsg("Removing headers from specification\n");
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
+  }
+  else if (Spec != NULL && ATisEmpty(*p_substs))
+  {
+    // Compute substitutions for sorts by determining reconstruction of Spec
+    remove_headers_without_binders_from_spec(Spec, p_substs);
   }
 
   // Perform substitutions
