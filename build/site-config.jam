@@ -137,7 +137,7 @@ if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
 }
 
-rule boost_library ( name : use-local-boost ? : use-system-boost ? ) {
+rule boost-library ( name : use-local-boost ? : use-system-boost ? ) {
   if $(use-local-boost) {
     alias boost_$(name) : /boost//$(name) : <threading>multi ;
   }
@@ -147,10 +147,11 @@ rule boost_library ( name : use-local-boost ? : use-system-boost ? ) {
              :
              : $(boost-library-path)
                <name>"boost_$(name)"
-               <include>$(BOOST_ROOT) # currently needed for ASIO
+               <include>$(BOOST_INCLUDE_PATH)
+               <search>$(BOOST_LIBRARY_PATH)
              :
              : <define>BOOST_ALL_NO_LIB=1
-               <include>$(BOOST_ROOT) # currently needed for ASIO and foreach
+               <include>$(BOOST_INCLUDE_PATH)
              ;
     }
     else {
@@ -164,14 +165,14 @@ rule boost_library ( name : use-local-boost ? : use-system-boost ? ) {
   explicit boost_$(name) ;
 }
 
-boost_library filesystem ;
-boost_library program_options ;
-boost_library regex ;
-boost_library thread ;
-boost_library signals : local ;
-boost_library test : : system ;
-boost_library system : local ;
-boost_library md5 : local ;
+boost-library filesystem ;
+boost-library program_options ;
+boost-library regex ;
+boost-library thread ;
+boost-library signals ;
+boost-library test ;
+boost-library system : ;
+boost-library md5 : local ;
 
 lib   dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
 lib   m  : : <name>"m" ;
