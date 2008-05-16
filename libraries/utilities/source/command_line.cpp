@@ -47,7 +47,7 @@ namespace mcrl2 {
       while (i != input.end()) {
         if (space_left - (i - word_start) < 1) { // line too long
 
-          out << std::endl << indent << variable_indent << std::string(word_start, ++i);
+          out << std::endl << indent << variable_indent << std::string(word_start, i);
 
           space_left = width - (i - word_start) - variable_indent.size();
           word_start = i;
