@@ -21,9 +21,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/lts/liblts.h"
 
-#ifndef ULLONG_MAX
-#define ULLONG_MAX      18446744073709551615ULL
-#endif
+#include "workarounds.h"
 
 #define DEFAULT_MAX_STATES ULLONG_MAX
 #define DEFAULT_MAX_TRACES 10UL

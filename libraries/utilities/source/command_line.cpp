@@ -308,10 +308,11 @@ namespace mcrl2 {
 
         s << "Options:" << std::endl;
 
-        while (i != m_options.end()) {
+        while (true) {
           option_descriptor const* option;
 
-          while (i->second.m_short != '\0') { // skip options without short identifier
+          // skip options without short identifier
+          while (i != m_options.end() && i->second.m_short != '\0') {
             ++i;
           }
 
@@ -322,7 +323,7 @@ namespace mcrl2 {
               }
               else {
                 if (i->first == j->second) {
-                  ++j;
+                  ++i;
                 }
              
                 option = &m_options.find((j++)->second)->second;

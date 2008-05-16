@@ -13,6 +13,8 @@
 
 #include "squadt_interactor.h"
 
+#include "workarounds.h" // for strdup
+
 const char*  ::squadt_interactor::option_as_aut               = "as_aut";
 const char*  ::squadt_interactor::option_out_info             = "out_info";
 

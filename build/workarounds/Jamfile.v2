@@ -15,6 +15,7 @@ alias configuration : : <os>CYGWIN <toolset>gcc :
 # MinGW
 alias configuration : : <os>NT <toolset>gcc :
        : <include>$(TOP)/build/workarounds/mingw
+         <cxxflags>"-std=c++98"
        ;
 
 # MSVC

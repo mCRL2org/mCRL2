@@ -19,6 +19,7 @@ inline char *strdup(const char *s) {
 #if !defined(LLONG_MIN)
 # define LLONG_MIN -9223372036854775807LL
 # define LLONG_MAX +9223372036854775807LL
+# define ULLONG_MAX 18446744073709551615ULL
 #endif
 
 //Declare a local array NAME of type TYPE and SIZE elements (where SIZE

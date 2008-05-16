@@ -291,26 +291,26 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     //         If the input-string is already of this format, it is returned unchanged.
     //         If a string is of a different format, all characters that do not follow the format are replaced with an _
     
-    char *String=ATgetName(id);
+    std::string name(ATgetName(id));
 
     // check if the first character is of format [a-zA-Z_]
-    if(!(isalpha(String[0])||String[0]=='_')) {
+    if(!(isalpha(name[0])||name[0]=='_')) {
       // first character does not follow the format
       // put 'c_' in front of the String
       id=ATprependAFun("c_",id);
     }
 
-    String=strdup(ATgetName(id));
+    name=strdup(ATgetName(id));
 
-    for(int i=0; i< (int)strlen(String); i++){
-      if(!(isalnum(String[i]))) {
+    for(size_t i=0; i< name.size(); ++i) {
+      if(!(isalnum(name[i]))) {
 	// if a character in the string is not [a-zA-Z0-9_], replace it by an '_'
-	String[i]='_';
+	name[i]='_';
       }
     }
 
-    id=ATmakeAFun(String,ATgetArity(id),ATisQuoted(id));
-    free(String);
+    id=ATmakeAFun(name.c_str(),ATgetArity(id),ATisQuoted(id));
+
     return id;
   }
 

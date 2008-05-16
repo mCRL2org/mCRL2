@@ -63,11 +63,10 @@ void open_lts(const char *filename, lts_options &opts)
       gsVerboseMsg("writing state space in mCRL2 format to '%s'.\n",filename);
       {
         SVCbool b;
-        char *t = strdup(filename);
 
         b = lts_opts.outinfo?SVCfalse:SVCtrue;
-        SVCopen(svc,t,SVCwrite,&b); // XXX check result
-        free(t);
+        SVCopen(svc,const_cast< char* > (filename),SVCwrite,&b); // XXX check result
+
         SVCsetCreator(svc,const_cast < char* > (NAME));
         if (lts_opts.outinfo)
           SVCsetType(svc, const_cast < char* > ("mCRL2+info"));

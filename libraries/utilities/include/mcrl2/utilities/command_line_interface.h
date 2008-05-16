@@ -140,15 +140,118 @@ namespace mcrl2 {
         template < typename T = std::string >
         class mandatory_argument;
 
-        /// Describes an individual option
-        class option_descriptor;
+        /**
+         * \brief Describes a single option
+         *
+         * Objects of this type represent option specifications. They consist of: a
+         * long description (the option identifier) an optional short description,
+         * a description of the option, and optionally an argument. The argument
+         * itself can be optional or mandatory. An optional argument has a default
+         * value that is taken instead of the argument when the option is found on
+         * the command line without an argument. A mandatory argument requires the
+         * user to specify an argument to the option.
+         **/
+        class option_descriptor {
+          friend class command_line_parser;
+          friend class interface_description;
 
-        struct option_identifier_less {
-          template < typename S >
-          bool operator()(S const& s1, S const& s2) const {
-            return boost::is_iless()(s1, s2) || (boost::is_iequal()(s1, s2) && s2 < s1);
-          }
-        };
+          private:
+
+            /// Long representation for the option
+            std::string                       m_long;
+
+            /// Description for the option
+            std::string                       m_description;
+
+            /// Option argument
+            std::auto_ptr < basic_argument >  m_argument;
+
+            /// Short representation for the option or 0
+            char                              m_short;
+
+            /// whether the option is printed as part of the tool-specific interface
+            bool                              m_show;
+
+          protected:
+
+            /// Returns a textual description of the option
+            std::string textual_description(const size_t left_width, const size_t right_width) const;
+
+            /// Returns a man page description for the option
+            std::string man_page_description() const;
+
+          public:
+
+            /**
+             * \brief Constructor
+             * \param[in] d description of the option
+             * \param[in] l the long option representation of the option
+             * \param[in] s an optional single-character short representation of the option
+             * \pre l should be a non-empty string that only contain characters from [0-9a-Z] or `-'
+             **/
+            option_descriptor(std::string const& l, std::string const& d, const char s) :
+                        m_long(l), m_description(d), m_short(s), m_show(true) {
+
+              assert(!l.empty());
+              assert(l.find_first_not_of("_-0123456789abcdefghijklmnopqrstuvwxyz") == std::string::npos);
+            }
+
+            /// copy constructor
+            option_descriptor(option_descriptor const& o) : m_long(o.m_long),
+                    m_description(o.m_description), m_short(o.m_short), m_show(true) {
+
+              m_argument.reset(const_cast< std::auto_ptr< basic_argument >& > (o.m_argument).release());
+            }
+
+            option_descriptor operator=(option_descriptor const& o) {
+              return option_descriptor(o);
+            }
+
+            /**
+             * \brief Sets option argument
+             * \param[in] a an optional argument specifier object
+             **/
+            template < typename T >
+            void set_argument(T* a) {
+              m_argument.reset(a);
+            }
+
+            /**
+             * \brief Gets default
+             * \pre m_argument->is_optional()
+             **/
+            inline std::string get_default() const {
+              return m_argument->get_default();
+            }
+
+            /**
+             * \brief Gets the option description
+             **/
+            inline std::string get_description() const {
+              return m_description;
+            }
+
+            /**
+             * \brief Whether the option takes a mandatory argument
+             **/
+            inline bool needs_argument() const {
+              return !(m_argument.get() == 0 || m_argument->is_optional());
+            }
+
+            /**
+             * \brief Whether the option takes a mandatory argument
+             **/
+            inline bool accepts_argument() const {
+              return m_argument.get() != 0;
+            }
+          };
+
+          struct option_identifier_less {
+            template < typename S >
+            bool operator()(S const& s1, S const& s2) const {
+              return boost::is_iless()(s1, s2) || (boost::is_iequal()(s1, s2) && s2 < s1);
+            }
+          };
 
         /// \endcond
 
@@ -584,107 +687,6 @@ namespace mcrl2 {
     interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name);
 
     /// \cond INTERNAL
-    /**
-     * \brief Describes a single option
-     *
-     * Objects of this type represent option specifications. They consist of: a
-     * long description (the option identifier) an optional short description,
-     * a description of the option, and optionally an argument. The argument
-     * itself can be optional or mandatory. An optional argument has a default
-     * value that is taken instead of the argument when the option is found on
-     * the command line without an argument. A mandatory argument requires the
-     * user to specify an argument to the option.
-     **/
-    class interface_description::option_descriptor {
-      friend class command_line_parser;
-      friend class interface_description;
-
-      private:
-
-        /// Long representation for the option
-        std::string                       m_long;
-
-        /// Description for the option
-        std::string                       m_description;
-
-        /// Option argument
-        std::auto_ptr < basic_argument >  m_argument;
-
-        /// Short representation for the option or 0
-        const char                        m_short;
-
-        /// whether the option is printed as part of the tool-specific interface
-        bool                              m_show;
-
-      protected:
-
-        /// Returns a textual description of the option
-        std::string textual_description(const size_t left_width, const size_t right_width) const;
-
-        /// Returns a man page description for the option
-        std::string man_page_description() const;
-
-      public:
-
-        /**
-         * \brief Constructor
-         * \param[in] d description of the option
-         * \param[in] l the long option representation of the option
-         * \param[in] s an optional single-character short representation of the option
-         * \pre l should be a non-empty string that only contain characters from [0-9a-Z] or `-'
-         **/
-        option_descriptor(std::string const& l, std::string const& d, const char s) :
-                    m_long(l), m_description(d), m_short(s), m_show(true) {
-
-          assert(!l.empty());
-          assert(l.find_first_not_of("_-0123456789abcdefghijklmnopqrstuvwxyz") == std::string::npos);
-        }
-
-        /// copy constructor
-        option_descriptor(option_descriptor const& o) : m_long(o.m_long),
-                m_description(o.m_description), m_short(o.m_short), m_show(true) {
-
-          m_argument.reset(const_cast< std::auto_ptr< basic_argument >& > (o.m_argument).release());
-        }
-
-        /**
-         * \brief Sets option argument
-         * \param[in] a an optional argument specifier object
-         **/
-        template < typename T >
-        void set_argument(T* a) {
-          m_argument.reset(a);
-        }
-
-        /**
-         * \brief Gets default
-         * \pre m_argument->is_optional()
-         **/
-        inline std::string get_default() const {
-          return m_argument->get_default();
-        }
-
-        /**
-         * \brief Gets the option description
-         **/
-        inline std::string get_description() const {
-          return m_description;
-        }
-
-        /**
-         * \brief Whether the option takes a mandatory argument
-         **/
-        inline bool needs_argument() const {
-          return !(m_argument.get() == 0 || m_argument->is_optional());
-        }
-
-        /**
-         * \brief Whether the option takes a mandatory argument
-         **/
-        inline bool accepts_argument() const {
-          return m_argument.get() != 0;
-        }
-    };
 
     /**
      * \brief Represents a typed argument
