@@ -168,7 +168,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(internal, "internal")).
                 append(format_selector.associate(cwi, "cwi")),
           margins(0,5,0,5)).
-    append(d.create< label >().set_text("Transformation stragey : ")).
+    append(d.create< label >().set_text("Transformation strategy : ")).
     append(strategy_selector.associate(lazy, "lazy: only boolean equations reachable from the initial state")).
     append(strategy_selector.associate(finite, "finite: all possible boolean equations"));
 
