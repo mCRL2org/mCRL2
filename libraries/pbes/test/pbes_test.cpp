@@ -307,6 +307,26 @@ void test_trivial()
   BOOST_CHECK(p.is_well_typed());
 }
 
+void test_instantiate_free_variables()
+{
+  std::string spec_text = 
+    "act a,b:Nat;             \n"
+    "    d;                   \n"
+    "proc P(n:Nat)=a(n).delta;\n"
+    "init d.P(1);             \n"
+  ;
+  std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
+  specification spec    = mcrl22lps(spec_text);
+  state_formula formula = mcf2statefrm(formula_text, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+std::cout << "<before>" << pp(p) << std::endl;  
+std::cout << "<lps>" << pp(spec) << std::endl;  
+  bool result = p.instantiate_free_variables();
+std::cout << "<result>" << result << std::endl;  
+std::cout << "<after>" << pp(p) << std::endl;  
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -319,6 +339,7 @@ int test_main(int argc, char** argv)
   test_quantifier_rename_builder();
   test_complement_method_builder();
   test_pbes_expression();
+  test_instantiate_free_variables();
 
   return 0;
 }

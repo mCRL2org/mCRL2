@@ -16,6 +16,7 @@
 #include <utility>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/identifier_string.h"
@@ -160,6 +161,19 @@ class propositional_variable_instantiation: public aterm_appl
     data::data_expression_list parameters() const
     {
       return m_parameters;
+    }
+    
+    /// Returns the unbound variables appearing in the parameters.
+    ///
+    std::set<data::data_variable> unbound_variables() const
+    {
+      std::set<data::data_variable> result;
+      for (data::data_expression_list::iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
+      {
+        std::set<data::data_variable> vars = data::find_all_data_variables(*i);
+        result.insert(vars.begin(), vars.end());
+      }
+      return result;
     }
 };
 

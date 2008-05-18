@@ -197,6 +197,15 @@ class pbes
       return false;
     }
 
+    /// Computes the unbound variables that occur in the pbes.
+    std::set<data::data_variable> compute_unbound_variables() const
+    {
+      std::set<data::data_variable> result = compute_free_variables(equations().begin(), equations().end());
+      std::set<data::data_variable> vars = initial_state().unbound_variables();
+      result.insert(vars.begin(), vars.end());
+      return result;
+    }
+
   public:
     /// Constructor.
     ///
@@ -213,7 +222,7 @@ class pbes
         m_equations(equations),
         m_initial_state(initial_state)
     {
-      m_free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
+      m_free_variables = compute_unbound_variables();
       assert(core::detail::check_rule_PBES(term()));
     }
 
@@ -316,7 +325,7 @@ class pbes
     /// Returns true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
-      std::set<data::data_variable> free_variables = compute_free_variables(m_equations.begin(), m_equations.end());
+      std::set<data::data_variable> free_variables = compute_unbound_variables();
       atermpp::vector<data::data_variable> src;    // the variables that will be replaced
       atermpp::vector<data::data_expression> dest; // the corresponding replacements
       atermpp::set<data::data_variable> fail;   // the variables that could not be replaced
@@ -512,7 +521,7 @@ class pbes
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
       const atermpp::set<data::data_variable>& declared_free_variables = free_variables();
-      std::set<data::data_variable> occurring_free_variables = compute_free_variables(equations().begin(), equations().end());
+      std::set<data::data_variable> occurring_free_variables = compute_unbound_variables();
       std::set<data::data_variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
@@ -644,7 +653,10 @@ class pbes
 template <typename Container>
 std::set<data::data_variable> compute_free_variables(const pbes<Container>& p)
 {
-  return compute_free_variables(p.equations().begin(), p.equations().end());
+  std::set<data::data_variable> result = compute_free_variables(p.equations().begin(), p.equations().end());
+  std::set<data::data_variable> vars = p.initial_state().unbound_variables();
+  result.insert(vars.begin(), vars.end());
+  return result;
 }
 
 } // namespace pbes_system
