@@ -543,7 +543,6 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
     
   cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
-  ATfprintf(stderr,"AAA %t\n",(ATermAppl)p);
   exit(1);
   return bes::false_();
 }
@@ -1013,7 +1012,9 @@ static bes_expression evaluate_bex(
                 const unsigned long rank,
                 bes::equations &bes_equations,
                 const bool use_hashtable,
-                atermpp::table &hashtable)
+                atermpp::table &hashtable,
+                const bool construct_counter_example,
+                const bes::variable_type current_variable)
 { /* substitute the approximation for variables in b, given
      by approximation, for all those variables that have a 
      rank higher or equal to the variable rank; */
@@ -1030,11 +1031,24 @@ static bes_expression evaluate_bex(
   }
 
   if (is_variable(b))
-  {
-    bes::variable_type v=bes::get_variable(b);
+  { const bes::variable_type v=bes::get_variable(b);
     if (bes_equations.get_rank(v)>=rank)
-    { 
+    {
       result=approximation[v];
+      if (construct_counter_example)
+      { if (bes::is_true(result))
+        { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION_TRUE));
+        }
+        else if (bes::is_false(result))
+        { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION_FALSE));
+        }
+        else
+        { bes_equations.counter_example_queue(current_variable).
+                   push_front(bes::counter_example(v,bes::APPROXIMATION));
+        }
+      }
     }
     else
     { /* the condition has lower rank than the variable rank,
@@ -1043,12 +1057,12 @@ static bes_expression evaluate_bex(
     }
   }
   else if (is_and(b))
-  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
     if (is_false(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       if (is_false(b2))
       { result=b2;
       }
@@ -1064,12 +1078,12 @@ static bes_expression evaluate_bex(
     }
   }
   else if (is_or(b))
-  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+  { bes_expression b1=evaluate_bex(lhs(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
     if (is_true(b1))
     { result=b1;
     }
     else
-    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+    { bes_expression b2=evaluate_bex(rhs(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       if (is_true(b2))
       { result=b2;
       }
@@ -1089,15 +1103,15 @@ static bes_expression evaluate_bex(
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
     { 
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       result=BDDif(approximation[v],b1,b2);
     }
     else
     { /* the condition has lower rank than the variable rank,
          leave it untouched */
-      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
-      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable);
+      bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
+      bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
@@ -1156,7 +1170,8 @@ bool solve_bes(const t_tool_options &tool_options,
     set <bes::variable_type> todo;
 
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
-    { if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
+    { 
+      if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       { 
         bes_expression t=evaluate_bex(
                              bes_equations.get_rhs(v),
@@ -1164,7 +1179,9 @@ bool solve_bes(const t_tool_options &tool_options,
                              current_rank,
                              bes_equations,
                              tool_options.opt_use_hashtables,
-                             bex_hashtable);
+                             bex_hashtable,
+                             false,
+                             v);
         
         if (toBDD(t)!=toBDD(approximation[v]))
         {
@@ -1172,7 +1189,24 @@ bool solve_bes(const t_tool_options &tool_options,
           { bex_hashtable.reset();  /* we change the approximation, so the 
                                        hashtable becomes invalid */
           }
-          approximation[v]=t;
+          if (tool_options.opt_construct_counter_example)
+          { if (tool_options.opt_use_hashtables)
+            { bex_hashtable.reset();  /* We want to construct a counter example, which is
+                                         not traceable when results in the hashtable are used */
+            }
+            approximation[v]=evaluate_bex(
+                             bes_equations.get_rhs(v),
+                             approximation,
+                             current_rank,
+                             bes_equations,
+                             tool_options.opt_use_hashtables,
+                             bex_hashtable,
+                             true,
+                             v);
+          }
+          else
+          { approximation[v]=t;
+          }
           todo.insert(v);
         }
       }
@@ -1195,7 +1229,9 @@ bool solve_bes(const t_tool_options &tool_options,
                               current_rank,
                               bes_equations,
                               tool_options.opt_use_hashtables,
-                              bex_hashtable);
+                              bex_hashtable,
+                              false,
+                              *u);
         
           if (toBDD(t)!=toBDD(approximation[*u]))
           { 
@@ -1203,7 +1239,24 @@ bool solve_bes(const t_tool_options &tool_options,
             { bex_hashtable.reset();  /* we change approximation, so the 
                                          hashtable becomes invalid */
             }
-            approximation[*u]=t;
+            if (tool_options.opt_construct_counter_example)
+            { if (tool_options.opt_use_hashtables)
+              { bex_hashtable.reset();  /* We want to construct a counter example, which is
+                                           not traceable when results in the hashtable are used */
+              }
+              approximation[*u]=evaluate_bex(
+                                   bes_equations.get_rhs(*u),
+                                   approximation,
+                                   current_rank,
+                                   bes_equations,
+                                   tool_options.opt_use_hashtables,
+                                   bex_hashtable,
+                                   true,
+                                   *u);
+            }
+            else
+            { approximation[*u]=t;
+            }
             todo.insert(*u);
           }
         }

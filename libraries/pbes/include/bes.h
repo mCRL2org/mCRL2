@@ -899,7 +899,7 @@ namespace bes
                         std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
         assert(v>0);     // variables are represented by numbers >0.
-        // std::cerr << "Add equation " << v << std::endl;
+        // std::cerr << "Add equation " << v << " with rank " << rank << std::endl;
 
         check_vector_sizes(v);
         // the vector at position v is now guaranteed to exist.
