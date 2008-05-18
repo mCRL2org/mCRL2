@@ -200,6 +200,14 @@ class pbes_translate_algorithm
       return f;
     }
 
+    atermpp::set<data::data_variable> free_variables(const lps::specification& spec) const
+    {
+      atermpp::set<data::data_variable> result;
+      result.insert(spec.process().free_variables().begin(), spec.process().free_variables().end());
+      result.insert(spec.initial_process().free_variables().begin(), spec.initial_process().free_variables().end());
+      return result;
+    }
+
   public:
     /// Constructor.
     ///
@@ -607,7 +615,6 @@ std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << s
       core::identifier_string Xf = name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state();
-      atermpp::set<data::data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
       propositional_variable_instantiation init(Xe, data::data_expr::real(0) + fi + pi + Par(Xf, data::data_variable_list(), f));
 
       // add sort real to data_spec (if needed)
@@ -617,7 +624,7 @@ std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << s
         data_spec = data::set_sorts(data_spec, push_front(data_spec.sorts(), data::sort_expr::real()));
       }
 
-      pbes<> result(data_spec, e, free_variables, init);
+      pbes<> result(data_spec, e, free_variables(spec), init);
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
@@ -978,10 +985,9 @@ std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << s
       core::identifier_string Xf = name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state();
-      atermpp::set<data::data_variable> free_variables(spec.process().free_variables().begin(), spec.process().free_variables().end());
       propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::data_variable_list(), f));
 
-      pbes<> result = pbes<>(spec.data(), e, free_variables, init);
+      pbes<> result = pbes<>(spec.data(), e, free_variables(spec), init);
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
