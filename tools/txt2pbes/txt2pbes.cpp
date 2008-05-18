@@ -1,7 +1,7 @@
 // Author(s): Aad Mathijssen and Simona Orzan. Distributed under
 // Copyright: see the accompanying file COPYING.
 // the Boost (See accompanying file LICENSE_1_0.txt or copy at
-// LICENSE_1_0.txt)
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./txt2pbes.cpp
 
