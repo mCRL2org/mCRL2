@@ -138,9 +138,9 @@ struct tool_options_type {
 
 tool_options_type parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-    "Provide a TorX explorer interface to the LPS in INFILE. If INFILE is not\n"
-    "supplied, stdin is used.\n"
-    "\n"
+    "Provide a TorX explorer interface to the LPS in INFILE. "
+    "If INFILE is not supplied, stdin is used."
+    "\n\n"
     "The LPS can be explored using TorX as described in torx_explorer(5).");
 
   clinterface.add_rewriting_options();
@@ -177,9 +177,6 @@ tool_options_type parse_command_line(int ac, char** av) {
   if (0 < parser.arguments.size()) {
     options.name_for_input = parser.arguments[0];
   }
-  else {
-    parser.error("no LPS file specified");
-  }
   if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
@@ -202,10 +199,10 @@ int main(int argc, char **argv)
       Spec = (ATermAppl) ATreadFromFile(stdin);
 
       if (Spec == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.name_for_input + "'");
+        throw std::runtime_error("error: could not read LPS from stdin");
       }
       if (!gsIsSpecV1(Spec)) {
-        throw std::runtime_error("stdin does not contain an LPS");
+        throw std::runtime_error("error: stdin does not contain an LPS");
       }
     }
     else {
@@ -214,7 +211,7 @@ int main(int argc, char **argv)
       FILE *in_stream = fopen(options.name_for_input.c_str(), "rb");
 
       if (in_stream == 0) {
-        throw std::runtime_error("could not open input file '" + options.name_for_input + "' for reading");
+        throw std::runtime_error("error: could not open input file '" + options.name_for_input + "' for reading");
       }
 
       Spec = (ATermAppl) ATreadFromFile(in_stream);
@@ -222,10 +219,10 @@ int main(int argc, char **argv)
       fclose(in_stream);
 
       if (Spec == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.name_for_input + "'");
+        throw std::runtime_error("error: could not read LPS from '" + options.name_for_input + "'");
       }
       if (!gsIsSpecV1(Spec)) {
-        throw std::runtime_error("'" + options.name_for_input + "' does not contain an LPS");
+        throw std::runtime_error("error: '" + options.name_for_input + "' does not contain an LPS");
       }
     }
  
