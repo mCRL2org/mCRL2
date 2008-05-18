@@ -39,21 +39,21 @@ void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format);
 
 ///Extensions of the printf function. The following new conversion formats are
 ///supported:
-///- '%P' for the pretty printing ATerm's using the advanced method
+///- '%P' for the pretty printing ATerm's
 ///- '%T' for the normal printing of ATerm's 
 ///- '%F' for the printing of AFun's
 int gsprintf(const char *format, ...);
 
 ///Extensions of the printf function. The following new conversion formats are
 ///supported:
-///- '%P' for the pretty printing ATerm's using the advanced method
+///- '%P' for the pretty printing ATerm's
 ///- '%T' for the normal printing of ATerm's 
 ///- '%F' for the printing of AFun's
 int gsfprintf(FILE *stream, const char *format, ...);
 
 ///Extensions of the vfprintf functions. The following new conversion formats are
 ///supported:
-///- '%P' for the pretty printing ATerm's using the advanced method
+///- '%P' for the pretty printing ATerm's
 ///- '%T' for the normal printing of ATerm's 
 ///- '%F' for the printing of AFun's
 int gsvfprintf(FILE *stream, const char *format, va_list args);
