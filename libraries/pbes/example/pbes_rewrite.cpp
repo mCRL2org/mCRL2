@@ -10,10 +10,10 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/core/text_utility.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/parser.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/rewriter2.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -27,8 +27,8 @@ typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
 typedef boost::variant<my_pbes_rewriter,
-                       pbes_system::substitute_rewriter,
                        pbes_system::substitute_rewriter_jfg,
+                       pbes_system::simplify_rewriter_jfg,
                        pbes_system::pbessolve_rewriter
                       > rewriter_variant;
 
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
       "The following choices of the pbes rewriter are available:\n"
       "  0 : enumerating rewriter (Wieger)\n"
       "  1 : enumerating rewriter (Jan Friso)\n"
-      "  2 : enumerating rewriter (Jan Friso, current version)\n"
+      "  2 : simplifying rewriter (Jan Friso)\n"
       "  3 : simplifying rewriter, uses a prover (Simona)\n"
       "\n"
       "The following choices of the data rewriter are available:\n"
@@ -281,12 +281,12 @@ int main(int argc, char* argv[])
             break;
           }
           case 1: {
-            substitute_rewriter pbesr(datar, data_spec);            
+            substitute_rewriter_jfg pbesr(datar, data_spec);            
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 2: {
-            substitute_rewriter_jfg pbesr(datar, data_spec);
+            simplify_rewriter_jfg pbesr(data_spec);
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }

@@ -7,6 +7,7 @@ project libraries/lps/example
        <source>/site-config//boost_filesystem
    ;
 
+exe lpsparelm       : lpsparelm.cpp : ;
 exe constelm        : constelm.cpp : ;
 exe parelm          : parelm.cpp : ;
 exe constructors    : constructors.cpp : ;
@@ -19,6 +20,7 @@ exe utility1        : utility1.cpp : ;
 
 install dist
    :
+     lpsparelm
      constelm
      parelm
      term_replace

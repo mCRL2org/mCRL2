@@ -3,6 +3,7 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbes2bes.h"
@@ -31,8 +32,9 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  typedef data::rewriter data_rewriter;
-  typedef pbes_system::rewriter<data_rewriter> pbes_rewriter;
+  typedef data::rewriter my_data_rewriter;
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;
   int type;
@@ -87,8 +89,19 @@ int main(int argc, char* argv[])
 
     p.load(infile);
     pbes<> q;
-    data_rewriter datar(p.data());
-    pbes_rewriter pbesr(datar, p.data());
+
+    // data rewriter
+    my_data_rewriter datar(p.data());
+
+    // identifier generator for data enumerator
+    number_postfix_generator name_generator;
+
+    // data enumerator
+    my_enumerator datae(p.data(), datar, name_generator);
+
+    // pbes rewriter
+    my_pbes_rewriter pbesr(datar, datae);    
+
     switch (type)
     {
       case 0: q = do_lazy_algorithm(p, pbesr); break;

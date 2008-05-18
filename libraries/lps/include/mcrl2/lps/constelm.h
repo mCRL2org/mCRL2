@@ -110,7 +110,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      data::data_expression rc = r(i->condition(), substitutions.begin(), substitutions.end());
+      data::data_expression rc = r(i->condition(), substitutions);
 
       if (rc == false_())
       {
@@ -121,9 +121,10 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
         index_map::iterator k = index.find(j->lhs());
         if (k != index.end())
         {
-          const data::data_variable&   d  = j->lhs();  // process parameter
-          const data::data_expression& g  = j->rhs();  // assigned value
-          if (r(opt::or_(opt::not_(rc), not_equal_to(d, g)), substitutions.begin(), substitutions.end()) == true_())
+          data::data_expression d  = j->lhs();  // process parameter
+          data::data_expression g  = j->rhs();  // assigned value
+          data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
+          if (r(x, substitutions) == true_())
           {
             replacements.erase(d);
             substitutions.erase(index[d]);

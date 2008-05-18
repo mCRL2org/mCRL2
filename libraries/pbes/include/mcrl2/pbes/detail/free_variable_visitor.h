@@ -26,12 +26,14 @@ struct free_variable_visitor: public pbes_expression_visitor
   data::data_variable_list bound_variables;
   std::vector<data::data_variable_list> quantifier_stack;
   std::set<data::data_variable> result;
+  bool search_propositional_variables;
 
-  free_variable_visitor()
+  free_variable_visitor(bool search_propositional_variables_ = true)
+    : search_propositional_variables(search_propositional_variables_)
   {}
 
-  free_variable_visitor(data::data_variable_list bound_variables_)
-    : bound_variables(bound_variables_)
+  free_variable_visitor(data::data_variable_list bound_variables_, bool search_propositional_variables_ = true)
+    : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
   {}
 
   // returns true if v is an element of bound_variables or quantifier_stack
@@ -85,12 +87,15 @@ struct free_variable_visitor: public pbes_expression_visitor
 
   bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
   {
-    std::set<data::data_variable> variables = data::find_all_data_variables(v.parameters());
-    for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+    if (search_propositional_variables)
     {
-      if (!is_bound(*i))
+      std::set<data::data_variable> variables = data::find_all_data_variables(v.parameters());
+      for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
       {
-        result.insert(*i);
+        if (!is_bound(*i))
+        {
+          result.insert(*i);
+        }
       }
     }
     return true;
