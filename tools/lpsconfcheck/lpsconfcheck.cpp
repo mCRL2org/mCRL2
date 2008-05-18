@@ -79,7 +79,7 @@ using namespace mcrl2::lps;
       bool f_counter_example;
 
       /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
-      /// \brief a contradiction nor a tautology. If the string is 0, no files are written.
+      /// \brief a contradiction nor a tautology. If the string is empty, no files are written.
       std::string f_dot_file_name;
 
       /// \brief The rewrite strategy used by the rewriter.
@@ -394,20 +394,25 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   // Class LPS_Conf_Check - Functions declared public ---------------------------------------------
 
-    LPS_Conf_Check::LPS_Conf_Check() : f_input_file_name("-"), f_output_file_name("-") {
-      f_dot_file_name = "";
-      f_summand_number = 0;
-      f_generate_invariants = false;
-      f_no_check = false;
-      f_no_marking = false;
-      f_check_all = false;
-      f_counter_example = false;
-      f_strategy = GS_REWR_JITTY;
-      f_time_limit = 0;
-      f_path_eliminator = false;
-      f_solver_type = solver_type_ario;
-      f_apply_induction = false;
-    }
+    LPS_Conf_Check::LPS_Conf_Check() :
+      f_invariant_file_name(""),
+      f_input_file_name(""),
+      f_output_file_name(""),
+      f_summand_number(0),
+      f_generate_invariants(false),
+      f_no_check(false),
+      f_no_marking(false),
+      f_check_all(false),
+      f_counter_example(false),
+      f_dot_file_name(""),
+      f_strategy(GS_REWR_JITTY),
+      f_time_limit(0),
+      f_path_eliminator(false),
+      f_solver_type(solver_type_ario),
+      f_apply_induction(false),
+      f_lps(NULL),
+      f_invariant(NULL)
+    { }
 
     // --------------------------------------------------------------------------------------------
 
@@ -518,13 +523,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         //instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
 
         if (!instream.is_open()) {
-          throw std::runtime_error("cannot open input file '" + f_invariant_file_name + "'");
+          throw std::runtime_error("error: cannot open input file '" + f_invariant_file_name + "'");
         }
 
         gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
 
         if (!(f_invariant = parse_data_expr(instream))) {
-          throw std::runtime_error("parsing failed!");
+          instream.close();
+          throw std::runtime_error("error: parsing failed!");
         }
 
         instream.close();
@@ -537,9 +543,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       
       lps_specification.load(f_input_file_name);
 
-      if (!lps_specification.is_well_typed()) {
-        throw std::runtime_error("Invalid mCRL2 LPS read from " + f_input_file_name);
-      }
       // temporary measure, until the invariant and confluence checkers use the lps framework
       f_lps = (ATermAppl) lps_specification;
         // type checking and data implementation of data expressions use an lps
@@ -583,7 +586,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       if (!f_invariant_file_name.empty()) {
         if (!f_no_check) {
           Invariant_Checker v_invariant_checker(
-            f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, (f_dot_file_name == "")?0:const_cast < char* > (f_dot_file_name.c_str()));
+            f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, false, (f_dot_file_name.empty())?0:const_cast < char* > (f_dot_file_name.c_str()));
 
           return v_invariant_checker.check_invariant(f_invariant);
         }
@@ -604,7 +607,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     void LPS_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
         f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_no_marking, f_check_all, f_counter_example,
-        f_generate_invariants, (f_dot_file_name == "")?0:const_cast < char* > (f_dot_file_name.c_str()));
+        f_generate_invariants, (f_dot_file_name.empty())?0:const_cast < char* > (f_dot_file_name.c_str()));
 
       f_lps = v_confluence_checker.check_confluence_and_mark(f_invariant, f_summand_number);
     }
@@ -617,7 +620,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
     void LPS_Conf_Check::write_result() {
       if (!f_no_marking) {
-        ATwriteToNamedSAFFile((ATerm) f_lps, const_cast < char* > (f_output_file_name.c_str()));
+        specification lps_specification(f_lps);
+        lps_specification.save(f_output_file_name);
       }
     }
 

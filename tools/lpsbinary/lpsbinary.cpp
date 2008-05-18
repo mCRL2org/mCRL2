@@ -186,28 +186,15 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 int do_binary(const tool_options& options)
 {
   lps::specification lps_specification;
-  try
-  {
-    lps_specification.load(options.input_file);
-    // apply binary on lps_specification and save the output to a binary file
+  lps_specification.load(options.input_file);
+  // apply binary on lps_specification and save the output to a binary file
 
-    Rewriter* r = createRewriter(lps_specification.data(), options.strategy);
+  Rewriter* r = createRewriter(lps_specification.data(), options.strategy);
 
-    lps::specification result;
-    result = lps::binary(lps_specification, *r);
+  lps::specification result;
+  result = lps::binary(lps_specification, *r);
 
-    if (!result.save(options.output_file, true))
-    {
-      // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
-      return (1);
-    }
-  }
-  catch (std::runtime_error e)
-  {
-    gsErrorMsg("lpsbinary: Unable to load LPS from `%s'\n", options.input_file.c_str());
-    return (1);
-  }
+  result.save(options.output_file);
 
   return 0;
 }
@@ -223,7 +210,7 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options = { "-", "-", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
+  tool_options t_options = { "", "", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
 
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

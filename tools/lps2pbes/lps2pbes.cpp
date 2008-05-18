@@ -393,37 +393,13 @@ int main(int argc, char **argv)
 
 ATermAppl create_pbes(t_tool_options tool_options)
 {
-  string infilename = tool_options.infilename;
   string outfilename = tool_options.outfilename;
   string formfilename = tool_options.formfilename;
   t_phase end_phase = tool_options.end_phase;
 
   //open infilename
   specification lps_spec;
-  if (infilename == "") {
-    try
-    {
-      lps_spec.load("-");
-    }
-    catch (std::runtime_error e)
-    {
-      gsErrorMsg("cannot open LPS from stdin\n");
-      return NULL;
-    }
-  } else {
-    try
-    {
-      lps_spec.load(infilename);
-    }
-    catch (std::runtime_error e)
-    {
-      gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
-      return NULL;
-    }
-  }
-
-  //check if lps_spec is an LPS
-  //XXX need soundness check
+  lps_spec.load(tool_options.infilename);
 
   //parse formula from formfilename
   gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());

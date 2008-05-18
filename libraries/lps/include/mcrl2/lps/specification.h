@@ -17,6 +17,8 @@
 #include <iterator>
 #include <algorithm>
 #include <stdexcept>
+#include <cerrno>
+#include <cstring>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
@@ -71,13 +73,13 @@ class specification: public aterm_appl
     }
 
   public:
-    /// Constructor.
+    /// \brief Constructor.
     ///
     specification()
       : aterm_appl(mcrl2::core::detail::constructProcSpec())
     { }
 
-    /// Constructor.
+    /// \brief Constructor.
     ///
     specification(aterm_appl t)
       : aterm_appl(t)
@@ -86,7 +88,7 @@ class specification: public aterm_appl
       init_term(t);
     }
 
-    /// Constructor.
+    /// \brief Constructor.
     ///
     specification(
         data::data_specification  data         ,
@@ -110,62 +112,122 @@ class specification: public aterm_appl
       );
     }
 
-    /// Reads the LPS from file. Returns true if the operation succeeded.
+    /// \brief Reads the specification from file.
+    /// \param[in] filename
+    /// If filename is nonempty, input is read from the file named filename.
+    /// If filename is empty, input is read from stdin.
     ///
     void load(const std::string& filename)
     {
-      aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::check_rule_ProcSpec(aterm_appl(t)))
-        throw std::runtime_error(std::string("Error in specification::load(): could not read from file " + filename));
-      init_term(aterm_appl(t));
-      if (!is_well_typed())
-        throw std::runtime_error("Error in specification::load(): term is not well typed");
+      try {
+        //open filename for reading as spec_stream
+        FILE *spec_stream = NULL;
+        if (filename.empty()) {
+          spec_stream = stdin;
+        } else {
+          spec_stream = fopen(filename.c_str(), "rb");
+        }
+        if (spec_stream == NULL) {
+          std::string err_msg(strerror(errno)); 
+          if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
+            err_msg.replace(err_msg.length()-1, 1, "");
+          }
+          throw std::runtime_error("could not open input file '" + filename + "' for reading (" + err_msg + ")");
+        }
+        //read specification from spec_stream
+        ATermAppl spec_term = (ATermAppl) ATreadFromFile(spec_stream);
+        if (spec_stream != stdin) {
+          fclose(spec_stream);
+        }
+        if (spec_term == NULL) {
+          throw std::runtime_error("could not read LPS from " + ((spec_stream == stdin)?"stdin":("'" + filename + "'")));
+        }
+        if (!core::detail::gsIsSpecV1(spec_term)) {
+          throw std::runtime_error(((spec_stream == stdin)?"stdin":("'" + filename + "'")) + " does not contain an LPS");
+        }
+        //store the term locally
+        init_term(aterm_appl(spec_term));
+        if (!is_well_typed())
+          throw std::runtime_error("specification is not well typed (specification::load())");
+      } catch (std::exception &e) {
+        throw std::runtime_error(std::string("error: ") + e.what());
+      }
     }
 
-    /// \brief Writes the linear process to file and returns true if the operation succeeded.
-    /// \param binary If binary is true the linear process is saved in compressed binary format.
+    /// \brief Writes the specification to file.
+    /// \param[in] filename
+    /// If filename is nonempty, output is written to the file named filename.
+    /// If filename is empty, output is written to stdout.
+    /// \param[in] binary
+    /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
+    /// \return true if the operation succeeded.
     ///
-    bool save(const std::string& filename, bool binary = true)
+    void save(const std::string& filename, bool binary = true)
     {
-      if (!is_well_typed())
-        throw std::runtime_error("Error in specification::save(): term is not well typed");
-      if (binary)
-      {
-        return atermpp::write_to_named_saf_file(m_term, filename);
-      }
-      else
-      {
-        return atermpp::write_to_named_text_file(m_term, filename);
+      try {
+        if (!is_well_typed())
+          throw std::runtime_error("specification is not well typed (specification::save())");
+        //open filename for writing as spec_stream
+        FILE *spec_stream = NULL;
+        if (filename.empty()) {
+          spec_stream = stdout;
+        } else {
+          spec_stream = fopen(filename.c_str(), binary?"wb":"w");
+        }
+        if (spec_stream == NULL) {
+          std::string err_msg(strerror(errno)); 
+          if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
+            err_msg.replace(err_msg.length()-1, 1, "");
+          }
+          throw std::runtime_error("could not open output file '" + filename + "' for writing (" + err_msg + ")");
+        }
+        //write specification to spec_stream
+        ATbool result;
+        if (binary) {
+          result = ATwriteToSAFFile(m_term, spec_stream);
+        } else {
+          result = ATwriteToTextFile(m_term, spec_stream);
+        }
+        if (spec_stream != stdout) {
+          fclose(spec_stream);
+        }
+        if (result == ATfalse) {
+          throw std::runtime_error("could not write LPS to " + ((spec_stream == stdout)?"stdout":("'" + filename + "'")));
+        }
+      } catch (std::exception &e) {
+        throw std::runtime_error(std::string("error: ") + e.what());
       }
     }
 
-    /// Returns the LPS of the specification.
+    /// \brief Returns the linear process of the specification.
     ///
     linear_process process() const
     {
       return m_process;
     }
 
-    /// Returns the data specification.
+    /// \brief Returns the data specification.
     ///
     data::data_specification data() const
     { return m_data; }
 
-    /// Returns a sequence of action labels. This sequence includes all
-    /// action labels occurring in this specification, but it can have more.
+    /// \brief Returns a sequence of action labels containing all action
+    /// labels occurring in the specification (but it can have more).
     ///
     action_label_list action_labels() const
     { return m_action_labels; }
 
-    /// Returns the initial process.
+    /// \brief Returns the initial process.
     ///
     process_initializer initial_process() const
     {
       return m_initial_process;
     }
 
+    /// \brief Indicates whether the specification is well typed.
+    ///
     /// Returns true if
     /// <ul>
     /// <li>the sorts occurring in the summation variables are declared in the data specification</li>

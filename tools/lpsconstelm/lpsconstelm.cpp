@@ -76,7 +76,6 @@ class lpsConstElm {
     bool                                  p_show;
     std::string                           p_logfile;
     std::string                           p_logstring;
-    std::string                           p_filenamein;
     lps::specification                    p_spec;
     atermpp::set< sort_expression >       p_singletonSort;
     Rewriter*                             rewr;
@@ -129,11 +128,9 @@ class lpsConstElm {
     bool execute();
     void removeSingleton(int n);
     bool output();
+    void loadFile(std::string const& x);
     void setSaveFile(std::string const& x);
     void printSet();
-    bool loadFile(std::string const& filename);
-    bool readStream();
-    void writeStream(lps::specification newSpec);
     void setVerbose(bool b);
     void setDebug(bool b);
     void setNoSingleton(bool b);
@@ -266,19 +263,13 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   send_hide_display();
 
-  if (constelm.loadFile(c.get_input(lps_file_for_input).get_location())) {
-    constelm.setSaveFile(c.get_output(lps_file_for_output).get_location());
+  constelm.loadFile(c.get_input(lps_file_for_input).get_location());
+  constelm.setSaveFile(c.get_output(lps_file_for_output).get_location());
 
-    constelm.filter();
-    constelm.output();
+  constelm.filter();
+  constelm.output();
 
-    return (true);
-  }
-  else {
-    send_error("Could not read `" + c.get_input(lps_file_for_input).get_location() + "', corrupt or incorrect format\n");
-  }
-
-  return (false);
+  return true;
 }
 #endif
 
@@ -942,20 +933,15 @@ inline bool lpsConstElm::output() {
   }
   assert(gsIsSpecV1((ATermAppl) rebuild_spec));
 
-  //gsDebugMsg("%s\n", pp(p_process).c_str());
-  if (p_outputfile.empty()){
-    //if(!gsVerbose){
-    //  assert(!gsVerbose);
-      writeStream(rebuild_spec);
-    //};
-  }
-  else {
-    if(!rebuild_spec.save(p_outputfile)) {
-       throw std::runtime_error("lpsconstelm: Unsuccessfully written outputfile: " + p_outputfile);
-    }
-  }
+  rebuild_spec.save(p_outputfile);
   
   return true;
+}
+
+// Load file
+//
+inline void lpsConstElm::loadFile(std::string const& x) {
+  p_spec.load(x);
 }
 
 // Set output file
@@ -980,49 +966,6 @@ inline void lpsConstElm::printSet() {
   }
   result << " }";
   gsVerboseMsg("%s\n", result.str().c_str());
-}
-
-// Loads an LPS from file
-// returns true if succeeds
-//
-inline bool lpsConstElm::loadFile(std::string const& filename) {
-  p_filenamein = filename;
-  try
-  {
-    p_spec.load(p_filenamein);
-  }
-  catch (std::runtime_error e)
-  {
-    throw std::runtime_error("could not read input file '" + filename + "'\n");
-  }
-  //LPS x = p_spec.process();
-  //gsDebugMsg("%s\n", pp(x).c_str());
-  //p_spec.save("/scratch/dump.lps");
-  //assert(false);
-  return true;
-}
-
-// Reads an LPS from stdin
-// returns true if succeeds
-//
-inline bool lpsConstElm::readStream() {
-  ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
-  if (z == NULL){
-    throw std::runtime_error("Could not read LPS from stdin");
-  };
-  if (!gsIsSpecV1(z)){
-    throw std::runtime_error("Stdin does not contain an LPS");
-  }
-  p_spec = specification(z);
-  //gsDebugMsg("%s\n", pp(p_spec.process()).c_str());
-  return true;
-}
-
-// Writes file to stdout
-//
-void lpsConstElm::writeStream(lps::specification newSpec) {
-  assert(gsIsSpecV1((ATermAppl) newSpec));
-  ATwriteToSAFFile(aterm(newSpec) , stdout);
 }
 
 // Sets no singleton option
@@ -1288,36 +1231,22 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
     setShow(false);
   }
 
-  try {
-    std::string name_for_input;
-    std::string name_for_output;
+  std::string name_for_input;
+  std::string name_for_output;
 
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        name_for_input = parser.arguments[0];
-      }
-      if (1 < parser.arguments.size()) {
-        name_for_output = parser.arguments[1];
-      }
-    }
-
-    if (name_for_input.empty()) {
-      /* Read from standard input */
-      readStream();
-    }
-    else {
-      loadFile(name_for_input);
-    }
-
-    setSaveFile(name_for_output);
+  if (2 < parser.arguments.size()) {
+    parser.error("too many file arguments");
   }
-  catch (std::exception& e) {
-    // rethrow error messages for correct formatting
-    parser.error(e.what());
+  else {
+    if (0 < parser.arguments.size()) {
+      name_for_input = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      name_for_output = parser.arguments[1];
+    }
   }
+  loadFile(name_for_input);
+  setSaveFile(name_for_output);
 }
 
 bool lpsConstElm::execute() {

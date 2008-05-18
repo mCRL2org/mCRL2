@@ -109,29 +109,14 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 int do_sumelm(const tool_options& options)
 {
   lps::specification lps_specification;
+    
+  lps_specification.load(options.input_file);
 
-  try
-  {
-    lps_specification.load(options.input_file);
+  // Untime lps_specification and save the output to a binary file
+  lps::specification new_spec = lps::sumelm(lps_specification);
 
-    // Untime lps_specification and save the output to a binary file
-    lps::specification new_spec = lps::sumelm(lps_specification);
-
-    gsDebugMsg("Sum elimination completed, saving to %s\n", options.output_file.c_str());
-    bool success = new_spec.save(options.output_file, true);
-
-    if (!success) 
-    {
-      // An error occurred when saving
-      gsErrorMsg("could not save to '%s'\n", options.output_file.c_str());
-      return (1);
-    }
-  }
-  catch (std::runtime_error e)
-  {
-    gsErrorMsg("unable to load LPS from `%s'\n", options.input_file.c_str());
-    return (1);
-  }
+  gsDebugMsg("Sum elimination completed, saving to %s\n", options.output_file.c_str());
+  new_spec.save(options.output_file);
 
   return 0;
 }
@@ -145,7 +130,7 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options = { "-", "-" };
+  tool_options t_options;
 
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

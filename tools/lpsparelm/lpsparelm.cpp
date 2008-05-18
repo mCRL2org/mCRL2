@@ -27,33 +27,13 @@ struct tool_configuration {
 
   bool execute() {
     mcrl2::lps::specification lps_specification;
-    
-    try {
-      lps_specification.load(input);
-    }
-    catch (std::exception& e) {
-      // XXX problem: the exceptions have bad descriptions, resorting to manual handling
-      std::cerr << "Fatal: could not read from file `" << input << "'" << std::endl;
-
-      return false;
-    }
-
-    try {
-      mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
-
-      r.save(output);
-    }
-    catch (std::exception& e) {
-      // XXX problem: the exceptions have bad descriptions, resorting to manual handling
-      std::cerr << "Fatal: could not write to file `" << output << "'" << std::endl;
-
-      return false;
-    }
-
+    lps_specification.load(input);
+    mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
+    r.save(output);
     return true;
   }
 
-  tool_configuration(int ac, char** av) : input("-"), output("-") {
+  tool_configuration(int ac, char** av) {
     interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
                              "Remove unused parameters from the linear process specification (LPS) in INFILE\n"
                              "and write the result to OUTFILE. If INFILE is not present, stdin is used. If\n"

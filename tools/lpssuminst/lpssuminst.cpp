@@ -37,11 +37,7 @@ struct tool_options {
   std::string output_file; ///< Name of the file to write output to (or stdout)
   lps::t_suminst_options suminst_opts; ///< Options of the algorithm
   
-  tool_options()
-    : input_file("-"),
-      output_file("-")
-
-  {}
+  tool_options() {}
 };
 
 //Squadt connectivity
@@ -208,26 +204,12 @@ int do_suminst(const tool_options& options)
 {
   lps::specification lps_specification;
 
-  try
-  {
-    lps_specification.load(options.input_file);
-    Rewriter* r = createRewriter(lps_specification.data(), options.suminst_opts.strategy);
+  lps_specification.load(options.input_file);
+  Rewriter* r = createRewriter(lps_specification.data(), options.suminst_opts.strategy);
 
-    lps::specification result = lps::instantiate_sums(lps_specification, *r, options.suminst_opts);
+  lps::specification result = lps::instantiate_sums(lps_specification, *r, options.suminst_opts);
 
-    // instantiate lps_specification and save the output to a binary file
-    if (!result.save(options.output_file, true)) 
-    {
-      // An error occurred when saving
-      gsErrorMsg("Could not save to '%s'\n", options.output_file.c_str());
-      return (1);
-    }
-  }
-  catch (std::exception& e)
-  {
-    gsErrorMsg("lpssuminst: Unable to load LPS from `%s'\n", options.input_file.c_str());
-    return (1);
-  }
+  result.save(options.output_file);
 
   return 0;
 }

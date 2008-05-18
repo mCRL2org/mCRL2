@@ -41,8 +41,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2;
 
-/* Name of the file to read input from (or standard input: "-") */
-std::string file_name("-");
+/* Name of the file to read input from (or standard input if empty) */
+std::string file_name;
 
 /* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
 static inline bool is_tau_summand(ATermAppl a_summand) {
@@ -187,30 +187,24 @@ int main(int argc, char** argv)
 
     lps::specification lps_specification;
  
-    try {
-      lps_specification.load(file_name);
-      lps::linear_process lps = lps_specification.process();
-		 
-      cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
-     
-      cout << "Number of summands                    : " << lps.summands().size() << endl;
-      cout << "Number of tau-summands                : " << get_number_of_tau_summands(lps) << endl; 
-      cout << "Number of free variables              : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
-      cout << "Number of process parameters          : " << lps.process_parameters().size() << endl; 
-      cout << "Number of action labels               : " << lps_specification.action_labels().size() << endl;
-      cout << "Number of used versus declared actions: " << get_number_of_used_actions(lps) << "/"<< lps_specification.action_labels().size() << endl;
-      //cout << "Number of used versus declared multi-actions: " << "" << endl;
-      cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
-    }
-    catch (std::exception& e) {
-      std::cerr << "Error: Unable to load LPS from `" + file_name + "'\n";
-    }
+    lps_specification.load(file_name);
+    lps::linear_process lps = lps_specification.process();
+      	 
+    cout << "Input read from " << (file_name.empty()?"stdin":("'" + file_name + "'")) << endl;
+    cout << endl;   
+    cout << "Number of summands                    : " << lps.summands().size() << endl;
+    cout << "Number of tau-summands                : " << get_number_of_tau_summands(lps) << endl; 
+    cout << "Number of free variables              : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
+    cout << "Number of process parameters          : " << lps.process_parameters().size() << endl; 
+    cout << "Number of action labels               : " << lps_specification.action_labels().size() << endl;
+    cout << "Number of used versus declared actions: " << get_number_of_used_actions(lps) << "/"<< lps_specification.action_labels().size() << endl;
+    //cout << "Number of used versus declared multi-actions: " << "" << endl;
+    cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
 
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
-
   return EXIT_FAILURE;
 }

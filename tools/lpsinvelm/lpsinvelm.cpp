@@ -259,17 +259,7 @@ using namespace mcrl2;
 
       //read the LPS
       lps::specification lps_specification;
-      try {
-        lps_specification.load((f_lps_file_name.empty())?"-":f_lps_file_name);
-      } catch (std::exception) {
-        gsErrorMsg("could not read LPS from '%s'\n", (f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str());
-        exit(1);
-      }
-
-      if (!lps_specification.is_well_typed()) {
-        gsErrorMsg("Invalid mCRL2 LPS read from %s.\n", (f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str());
-        exit(1);
-      }
+      lps_specification.load(f_lps_file_name);
 
       // type checking and data implementation of data expressions use an lps
       // before data implementation
@@ -278,8 +268,7 @@ using namespace mcrl2;
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name.c_str());
       if (!instream.is_open()) {
-        gsErrorMsg("cannot open input file '%s'\n", f_invariant_file_name.c_str());
-        exit(1);
+        throw std::runtime_error("error: cannot open input file '" + f_invariant_file_name +"'");
       }
       gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
       f_invariant = parse_data_expr(instream);
@@ -357,7 +346,8 @@ using namespace mcrl2;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        ATwriteToNamedSAFFile((ATerm) f_lps, (f_output_file_name.empty())?"-":f_output_file_name.c_str());
+        lps::specification lps_specification(f_lps);
+        lps_specification.save(f_output_file_name);
       }
     }
 

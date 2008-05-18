@@ -99,32 +99,22 @@ int process(t_tool_options const& tool_options)
 
   //store the result
   string outfilename = tool_options.outfilename;
-  if (outfilename == "") 
-  { gsVerboseMsg("saving result to stdout...\n");
-    if ((tool_options.end_phase==PH_NONE) && (!tool_options.pretty))
-    { ATwriteToSAFFile((ATerm)result,stdout);
-    }
-    else 
-    { PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
+  if (outfilename == "") {
+    gsVerboseMsg("saving result to stdout...\n");
+  } else {
+    gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
+  }
+  if (tool_options.end_phase == PH_NONE && !tool_options.pretty) {
+    lps::specification lps_spec(result);
+    lps_spec.save(outfilename);
+  } else {
+    if (outfilename == "") {
+      PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
       cout << endl;
-    }
-  } 
-  else 
-  { gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
-    if ((tool_options.end_phase==PH_NONE) && (!tool_options.pretty))
-    { FILE *outstream = fopen(outfilename.c_str(), "wb");
-      if (outstream == NULL) 
-      { gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-        return EXIT_FAILURE;
-      }
-      ATwriteToSAFFile((ATerm)result,outstream);
-      fclose(outstream);
-    }
-    else 
-    { ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
-      if (!outstream.is_open()) 
-      { gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-        return EXIT_FAILURE;
+    } else {
+      ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
+      if (!outstream.is_open()) { 
+        throw std::runtime_error("error: could not open output file '" + outfilename + "' for writing");
       }
       PrintPart_CXX(outstream, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
       outstream.close();
@@ -338,7 +328,8 @@ int main(int argc, char **argv)
     return process(parse_command_line(argc, argv));
   }
   catch (std::exception& e) 
-  { std::cerr << e.what() << std::endl;
+  { 
+    std::cerr << e.what() << std::endl;
   }
 
   return EXIT_FAILURE;
@@ -765,38 +756,14 @@ ATermAppl rename(
 
 ATermAppl rename_actions(t_tool_options tool_options)
 {
-  string infilename = tool_options.infilename;
   string outfilename = tool_options.outfilename;
   string action_rename_filename = tool_options.action_rename_filename;
   t_phase end_phase = tool_options.end_phase;
 
-  lps::specification lps_old_spec = lps::specification();
-  lps::specification lps_new_spec;
-  //ATermAppl rename_rules;
-
   //open infilename
   gsVerboseMsg("loading lps...\n");
-  if (infilename == "") {
-    try
-    {
-      lps_old_spec.load("-");
-    }
-    catch (std::runtime_error e)
-    {
-      gsErrorMsg("cannot open LPS from stdin\n");
-      return NULL;
-    }
-  } else {
-    try
-    {
-      lps_old_spec.load(infilename);
-    }
-    catch (std::runtime_error e)
-    {
-      gsErrorMsg("cannot open LPS from '%s'\n", infilename.c_str());
-      return NULL;
-    }
-  }
+  lps::specification lps_old_spec;
+  lps_old_spec.load(tool_options.infilename);
 
   //parse the action rename file
   gsVerboseMsg("parsing action rename from '%s'...\n", action_rename_filename.c_str());
