@@ -87,35 +87,28 @@ bool process(t_tool_options const& tool_options) {
 
   //store the result
   string outfilename = tool_options.outfilename;
-  if (outfilename == "") {
+  if (outfilename.empty()) {
     gsVerboseMsg("saving result to stdout...\n");
-    if ((tool_options.end_phase == PH_NONE) && (!tool_options.pretty)) {
-      ATwriteToSAFFile((ATerm) result, stdout);
-    } else {
-      PrintPart_CXX(cout, (ATerm) result, tool_options.pretty?ppDefault:ppInternal);
-      cout << endl;
-    }
   } else {
     gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
-    if ((tool_options.end_phase==PH_NONE) && (!tool_options.pretty)) {
-      FILE *outstream = fopen(outfilename.c_str(), "wb");
-      if (outstream == NULL) {
-        gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
-        return false;
-      }
-      ATwriteToSAFFile((ATerm)result,outstream);
-      fclose(outstream);
+  }
+  if ((tool_options.end_phase == PH_NONE) && (!tool_options.pretty)) {
+    mcrl2::pbes_system::pbes<> pbes_spec(result);
+    pbes_spec.save(outfilename.empty()?"-":outfilename);
+  } else {
+    if (outfilename.empty()) {
+      PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
+      cout << endl;
     } else {
       ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
       if (!outstream.is_open()) {
-        gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
+        throw std::runtime_error("error: could not open output file '" + outfilename + "' for writing");
         return false;
       }
       PrintPart_CXX(outstream, (ATerm) result, tool_options.pretty?ppDefault:ppInternal);
       outstream.close();
     }
   }
-
   return true;
 }
 

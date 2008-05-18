@@ -99,7 +99,7 @@ int process(t_tool_options const& tool_options)
 
   //store the result
   string outfilename = tool_options.outfilename;
-  if (outfilename == "") {
+  if (outfilename.empty()) {
     gsVerboseMsg("saving result to stdout...\n");
   } else {
     gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
@@ -108,7 +108,7 @@ int process(t_tool_options const& tool_options)
     lps::specification lps_spec(result);
     lps_spec.save(outfilename);
   } else {
-    if (outfilename == "") {
+    if (outfilename.empty()) {
       PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);
       cout << endl;
     } else {

@@ -214,6 +214,13 @@ class pbes
 
     /// Constructor.
     ///
+    pbes(aterm_appl t)
+    {
+      init_term(t);
+      assert(core::detail::check_rule_PBES(term()));
+    }
+    /// Constructor.
+    ///
     pbes(data::data_specification data,
          const Container& equations,
          propositional_variable_instantiation initial_state)
