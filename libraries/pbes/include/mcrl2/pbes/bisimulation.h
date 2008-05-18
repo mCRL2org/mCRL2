@@ -253,15 +253,12 @@ public:
     {
       const linear_process& m = M.process();
       const linear_process& s = S.process();
-      atermpp::set<data_variable> free_variables;
-      std::copy(m.free_variables().begin(), m.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
-      std::copy(s.free_variables().begin(), s.free_variables().end(), std::inserter(free_variables, free_variables.begin()));
 
       // TODO: the data of the two specification needs to be merged!
       data_specification data = M.data();
       propositional_variable_instantiation init(X(m, s), M.initial_process().state() + S.initial_process().state());
 
-      pbes<> result(data, equations, free_variables, init);
+      pbes<> result(data, equations, init);
       assert(result.is_closed());
       return result;
     }

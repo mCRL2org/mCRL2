@@ -5,6 +5,9 @@
 //
 /// \file ./gauss.h
 
+#ifndef MCRL2_PBES_GAUSS_H
+#define MCRL2_PBES_GAUSS_H
+
 #include <cstdio>
 #include <string>
 #include <iostream> 
@@ -154,4 +157,5 @@ pbes_expression enumerate_finite_domains
 bool pbes_expression_compare
 (pbes_expression p, pbes_expression q, BDD_Prover* prover);
 
+#endif // MCRL2_PBES_GAUSS_H
 

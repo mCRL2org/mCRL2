@@ -22,7 +22,6 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/rewriter2.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/normalize.h"
