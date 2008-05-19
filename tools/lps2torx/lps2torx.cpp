@@ -137,9 +137,8 @@ struct tool_options_type {
 };
 
 tool_options_type parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n"
     "Provide a TorX explorer interface to the LPS in INFILE. "
-    "If INFILE is not supplied, stdin is used."
     "\n\n"
     "The LPS can be explored using TorX as described in torx_explorer(5).");
 
@@ -174,10 +173,12 @@ tool_options_type parse_command_line(int ac, char** av) {
     options.stateformat = GS_STATE_TREE; 
   }
 
-  if (0 < parser.arguments.size()) {
+  if (parser.arguments.size() == 0) {
+    parser.error("no INFILE specified");
+  } else if (parser.arguments.size() == 1) {
     options.name_for_input = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
+  } else {
+    //parser.arguments.size() > 1
     parser.error("too many file arguments");
   }
 
