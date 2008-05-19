@@ -71,7 +71,25 @@ int bes_gauss_elimination(pbes<Container>& p)
   else
   {
     return 2;
-  } 
+  }
+}
+
+pbes<> pbes2bes(const pbes<>& pbes_spec, bool lazy = false)
+{
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  data::rewriter datar(pbes_spec.data());
+  number_postfix_generator name_generator;
+  my_enumerator datae(pbes_spec.data(), datar, name_generator);
+  my_rewriter pbesr(datar, datae);    
+  if (lazy)
+  {
+    return do_lazy_algorithm(pbes_spec, pbesr);
+  }
+  else
+  {
+    return do_finite_algorithm(pbes_spec, pbesr);
+  }
 }
 
 } // namespace pbes_system

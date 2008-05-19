@@ -12,7 +12,6 @@ exe constelm        : constelm.cpp : ;
 exe parelm          : parelm.cpp : ;
 exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp : ;
-exe filter_template : filter_template.cpp : ;
 exe find            : find.cpp : ;
 exe term_replace    : term_replace.cpp : ;
 exe mcrl22lps       : mcrl22lps.cpp : ;
@@ -26,7 +25,6 @@ install dist
      term_replace
      constructors
      spec
-     filter_template
      find
      mcrl22lps
      utility1

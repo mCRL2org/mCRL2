@@ -31,7 +31,16 @@ void solve_formula(std::string title, std::string spec_text, std::string formula
   BOOST_CHECK(result = expected_result);
   
   int result2 = bes_gauss_elimination(p);
+  std::cout << "<result2>" << result2 << std::endl;
   BOOST_CHECK((result2 == 2) || (expected_result == (result2 == 1)));
+  
+  pbes<> p3 = pbes2bes(p, false);
+  bool result3 = pbes2bool(p3);
+  BOOST_CHECK(result3 = expected_result);
+
+  pbes<> p4 = pbes2bes(p, true);
+  bool result4 = pbes2bool(p4);
+  BOOST_CHECK(result4 = expected_result);
 }
 
 /// hblc test case from Muhammed en Mohammad (18-5-2008)

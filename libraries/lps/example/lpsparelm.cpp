@@ -12,6 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <boost/program_options.hpp>
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parelm.h"
 
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
     );
     lpsparelm_options.add_options()
       ("help,h", "display this help")
+      ("verbose,v", "display short intermediate messages")
       ;
 
     //--- hidden options ---------
@@ -62,6 +64,9 @@ int main(int argc, char* argv[])
     if (var_map.count("help")) {
       std::cout << lpsparelm_options << "\n";
       return 1;
+    }
+    if (var_map.count("verbose")) {
+      mcrl2::core::gsSetVerboseMsg();
     }
 
     std::cout << "lpsparelm parameters:" << std::endl;
