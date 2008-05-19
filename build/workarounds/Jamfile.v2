@@ -10,12 +10,15 @@ project workarounds
 # Cygwin
 alias configuration : : <os>CYGWIN <toolset>gcc :
        : <include>$(TOP)/build/workarounds/cygwin
+         <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
+         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
        ;
 
 # MinGW
 alias configuration : : <os>NT <toolset>gcc :
        : <include>$(TOP)/build/workarounds/mingw
-         <cxxflags>"-std=c++98"
+         <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
+         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
        ;
 
 # MSVC
@@ -33,7 +36,7 @@ alias configuration : : <os>NT <toolset>msvc :
 alias configuration : : <toolset>darwin :
        : <define>__darwin__
          <include>$(TOP)/build/workarounds
-         <cxxflags>"-std=c++98 -ansi"
+         <cxxflags>"-std=c++98"
          <cflags>"-std=c99"
          <debug-symbols>on:<cxxflags>"-ggdb"
          <linkflags>"-undefined dynamic_lookup"
@@ -49,7 +52,7 @@ alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds
          <cxxflags>"-std=c++98"
          <cflags>"-std=c99"
-         <toolset-gcc:version>4.3.0:<cxxflags>"-std=c++98 -ansi -fno-strict-overflow"
+         <toolset-gcc:version>4.3.0:<cxxflags>"-std=c++98 -fno-strict-overflow"
          <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
          <link>static:<linkflags>-export-dynamic
        ;
