@@ -98,12 +98,18 @@ struct tool_options_type {
   RewriteStrategy rewrite_strategy;
   std::string     lps_file_argument;
   bool            use_dummies;
+
+  tool_options_type() :
+    rewrite_strategy(GS_REWR_JITTY),
+    lps_file_argument(""),
+    use_dummies(false)
+  {}
 };
 
 tool_options_type parse_command_line(int argc, char** argv) {
   using namespace ::mcrl2::utilities;
 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... INFILE\n"
     "Simulate the LPS in INFILE via a text-based interface.");
 
   clinterface.add_rewriting_options();
@@ -113,16 +119,18 @@ tool_options_type parse_command_line(int argc, char** argv) {
 
   command_line_parser parser(clinterface, argc, argv);
 
-  tool_options_type options = { GS_REWR_JITTY, "-", false };
+  tool_options_type options;
 
   options.use_dummies = 0 < parser.options.count("dummy");
 
   options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (0 < parser.arguments.size()) {
+  if (parser.arguments.size() == 0) {
+    parser.error("no INFILE specified");
+  } else if (parser.arguments.size() == 1) {
     options.lps_file_argument = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
+  } else {
+    //parser.arguments.size() > 1
     parser.error("too many file arguments");
   }
 
