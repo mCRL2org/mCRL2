@@ -339,9 +339,14 @@ ATermAppl implement_data_pbes_spec(ATermAppl spec)
 
 ATermAppl impl_sort_refs(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get sort declarations
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl data_spec;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
   ATermAppl sort_spec = ATAgetArgument(data_spec, 0);
   ATermList sort_decls = ATLgetArgument(sort_spec, 0);
   //split sort declarations in sort id's and sort references
@@ -352,7 +357,11 @@ ATermAppl impl_sort_refs(ATermAppl spec)
   //identifiers
   sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
   data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
-  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  if (gsIsDataSpec(spec)) {
+    spec = data_spec;
+  } else {
+    spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  }
   //make list of substitutions from sort_refs, the list of sort references
   ATermList substs = ATmakeList0();
   while (!ATisEmpty(sort_refs))
@@ -382,7 +391,7 @@ ATermAppl impl_sort_refs(ATermAppl spec)
 
 ATermAppl impl_standard_functions_spec(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //initalise data declarations
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
@@ -401,9 +410,14 @@ ATermAppl impl_standard_functions_spec(ATermAppl spec)
 
 ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get data equations
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl data_spec;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
   ATermAppl data_eqn_spec = ATAgetArgument(data_spec, 3);
   ATermList data_eqns = ATLgetArgument(data_eqn_spec, 0);
   //implement pattern matching for each equation
@@ -420,7 +434,11 @@ ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
   data_eqns = ATreverse(l);
   data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqns, 0);
   data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
-  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  if (gsIsDataSpec(spec)) {
+    spec = data_spec;
+  } else {
+    spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  }
   return spec;
 }
 

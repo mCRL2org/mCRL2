@@ -181,9 +181,6 @@ using namespace mcrl2;
       //Load LPS
       lps::specification lps_specification;
       lps_specification.load((f_lps_file_name.empty())?"-":f_lps_file_name.c_str());
-      if (!lps_specification.is_well_typed()) {
-        throw std::runtime_error("invalid mCRL2 LPS read from " + std::string((f_lps_file_name.empty())?"stdin":f_lps_file_name.c_str()));
-      }
 
       // typechecking and data implementation use a specification before data
       // implementation.

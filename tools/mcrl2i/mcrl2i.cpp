@@ -32,7 +32,7 @@
 #include "mcrl2/core/detail/typecheck.h"
 #include <mcrl2/core/detail/data_implementation.h>
 #include <mcrl2/core/detail/data_reconstruct.h>
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
@@ -41,7 +41,7 @@ using namespace std;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::lps;
+using namespace mcrl2::data;
 
 char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "
                       "rewritten to normal form and printed. Also, one can assign values to declared "
@@ -61,17 +61,17 @@ static Enumerator *e;
 static ATermTable variables;
 static ATermTable assignments;
 
-static void updated_specification(specification spec)
+static void updated_specification(data_specification spec)
 {
   gsVerboseMsg("reinitialising rewriter and enumerator...\n");
   RewriteStrategy strat = rewr->getStrategy();
   delete e;
   delete rewr;
-  rewr = createRewriter(spec.data(), strat);
-  e = createEnumerator(spec.data(),rewr);
+  rewr = createRewriter(spec, strat);
+  e = createEnumerator(spec,rewr);
 }
 
-static bool refresh_specification(specification old_spec, specification new_spec)
+static bool refresh_specification(data_specification old_spec, data_specification new_spec)
 {
   if ( old_spec == new_spec )
   {
@@ -122,7 +122,7 @@ static string trim_spaces(const string &str)
   return s;
 }
 
-static bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
+static bool parse_var_decl(string decl, ATermList *varlist, data_specification &spec)
 {
     string::size_type semi_pos = decl.find(':');
     if ( semi_pos == string::npos )
@@ -150,9 +150,9 @@ static bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
     if ( sort == NULL )
       return false;
 
-    if ( refresh_specification(spec,specification(reconstructed_spec)) )
+    if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
     {
-      spec = specification(reconstructed_spec);
+      spec = data_specification(reconstructed_spec);
     }
 
     gsDebugMsg("data implemented: %T\n",sort);
@@ -168,7 +168,7 @@ static bool parse_var_decl(string decl, ATermList *varlist, specification &spec)
     return true;
 }
 
-static bool parse_var_decl_list(string decl_list, ATermList *varlist, specification &spec)
+static bool parse_var_decl_list(string decl_list, ATermList *varlist, data_specification &spec)
 {
   decl_list += ';';
   string::size_type pos;
@@ -184,7 +184,7 @@ static bool parse_var_decl_list(string decl_list, ATermList *varlist, specificat
   return true;
 }
 
-static ATermList parse_varlist_from_string(string &s, specification &spec)
+static ATermList parse_varlist_from_string(string &s, data_specification &spec)
 {
   string::size_type start = s.find('<');
   if ( start == string::npos )
@@ -210,7 +210,7 @@ static ATermList parse_varlist_from_string(string &s, specification &spec)
   return result;
 }
 
-static ATermAppl parse_term(string &term_string, specification &spec, ATermList vars = NULL)
+static ATermAppl parse_term(string &term_string, data_specification &spec, ATermList vars = NULL)
 {
   stringstream ss(term_string);
 
@@ -260,9 +260,9 @@ static ATermAppl parse_term(string &term_string, specification &spec, ATermList 
   gsDebugMsg("type checked: %T\n",term);
 
   term = implement_data_data_expr(term,reconstructed_spec);
-  if ( refresh_specification(spec,specification(reconstructed_spec)) )
+  if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
   {
-    spec = specification(reconstructed_spec);
+    spec = data_specification(reconstructed_spec);
   }
   if ( term == NULL )
     return NULL;
@@ -272,7 +272,7 @@ static ATermAppl parse_term(string &term_string, specification &spec, ATermList 
   return term;
 }
 
-static void declare_variables(string &vars, specification &spec)
+static void declare_variables(string &vars, data_specification &spec)
 {
   ATermList varlist = ATmakeList0();
   if ( ! parse_var_decl_list(vars,&varlist,spec) )
@@ -291,10 +291,11 @@ struct tool_options_type {
 };
 
 static tool_options_type parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-    "Evaluate expressions using the data specification of the LPS in INFILE via a\n"
-    "text-based interface.\n"
-    "\n" + std::string(help_message));
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n"
+    "Evaluate expressions using the data specification of the LPS or PBES in INFILE "
+    "via a text-based interface."
+    "\n\n"
+    + std::string(help_message));
 
   clinterface.add_rewriting_options();
 
@@ -304,10 +305,11 @@ static tool_options_type parse_command_line(int ac, char** av) {
 
   options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (0 < parser.arguments.size()) {
+  if (parser.arguments.size() == 0) {
+    parser.error("no INFILE specified");
+  } else if (parser.arguments.size() == 1) {
     options.infilename = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
+  } else {
     parser.error("too many file arguments");
   }
 
@@ -321,47 +323,31 @@ int main(int argc, char **argv)
   try {
     tool_options_type options(parse_command_line(argc, argv));
 
-    ATermAppl raw_specification;
+    gsVerboseMsg("reading LPS from '%s'\n", options.infilename.c_str());
 
-    if (options.infilename.empty()) {
-      gsVerboseMsg("reading LPS from stdin\n");
+    FILE *in_stream = fopen(options.infilename.c_str(), "rb");
 
-      raw_specification = (ATermAppl) ATreadFromFile(stdin);
-
-      if (raw_specification == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
-      }
-      if (!gsIsSpecV1(raw_specification)) {
-        throw std::runtime_error("stdin does not contain an LPS");
-      }
-    }
-    else {
-      gsVerboseMsg("reading LPS from '%s'\n", options.infilename.c_str());
-
-      FILE *in_stream = fopen(options.infilename.c_str(), "rb");
-
-      if (in_stream == 0) {
-        throw std::runtime_error("could not open input file '" + options.infilename + "' for reading");
-      }
-
-      raw_specification = (ATermAppl) ATreadFromFile(in_stream);
-
-      fclose(in_stream);
-
-      if (raw_specification == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
-      }
-      if (!gsIsSpecV1(raw_specification)) {
-        throw std::runtime_error("'" + options.infilename + "' does not contain an LPS");
-      }
+    if (in_stream == 0) {
+      throw std::runtime_error("error: could not open input file '" + options.infilename + "' for reading");
     }
 
-    specification spec(raw_specification);
+    ATermAppl raw_specification = (ATermAppl) ATreadFromFile(in_stream);
+
+    fclose(in_stream);
+
+    if (raw_specification == 0) {
+      throw std::runtime_error("error: could not read LPS from '" + options.infilename + "'");
+    }
+    if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
+      throw std::runtime_error("error: '" + options.infilename + "' does not contain an LPS");
+    }
+
+    data_specification spec(ATgetArgument(raw_specification, 0));
 
     gsMessage("mCRL2 interpreter (type :h for help)\n");
  
-    rewr = createRewriter(spec.data(), options.strategy);
-    e = createEnumerator(spec.data(),rewr);
+    rewr = createRewriter(spec, options.strategy);
+    e = createEnumerator(spec,rewr);
     variables = ATtableCreate(50,50);
     assignments = ATtableCreate(50,50);
  

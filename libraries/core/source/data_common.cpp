@@ -158,9 +158,14 @@ bool is_list_enum_impl(ATermAppl data_expr)
 
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec));
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   assert(data_decls_is_initialised(data_decls));
-  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermAppl data_spec;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
   //add sort declarations
   ATermAppl sort_spec  = ATAgetArgument(data_spec, 0);
   ATermList sort_decls = ATLgetArgument(sort_spec, 0);
@@ -186,7 +191,11 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
   data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);  
   data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
   //return the new specification
-  spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  if (gsIsDataSpec(spec)) {
+    spec = data_spec;
+  } else {
+    spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  }
   return spec;
 }
 

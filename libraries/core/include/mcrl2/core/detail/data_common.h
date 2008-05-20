@@ -215,6 +215,7 @@ inline t_data_decls get_data_decls(ATermAppl spec)
 /// \ret spec in which the data declarations are replaced by data_decls
 inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   assert(data_decls_is_initialised(data_decls));
   if (!data_decls_equal(data_decls, get_data_decls(spec))) {
     ATermAppl sorts = gsMakeSortSpec(data_decls.sorts);
@@ -222,10 +223,11 @@ inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
     ATermAppl ops = gsMakeMapSpec(data_decls.ops);
     ATermAppl data_eqns = gsMakeDataEqnSpec(data_decls.data_eqns);
     ATermAppl data_spec = gsMakeDataSpec(sorts, cons_ops, ops, data_eqns);
-    spec = gsMakeSpecV1(data_spec,
-                        ATAgetArgument(spec, 1),
-                        ATAgetArgument(spec, 2),
-                        ATAgetArgument(spec, 3));
+    if (gsIsDataSpec(spec)) {
+      spec = data_spec;
+    } else {
+      spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+    }
   }
   return spec;
 }
