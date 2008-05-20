@@ -121,8 +121,7 @@ namespace tipi {
      message_display_data,                     ///< \brief the controller a data to be displayed using the current display layout
      message_identification,                   ///< \brief the unique identifier assigned to a tool instance
      message_report,                           ///< \brief send the controller a report of a tools operation
-     message_task_start,                       ///< \brief signal to a tool for starting a task
-     message_task_stop,                        ///< \brief signal to controller that task execution has finished
+     message_task,                             ///< \brief signal for task execution
      message_termination,                      ///< \brief request/response of tool termination
      message_unknown                           ///< \brief unspecified or unknown (or should be derived from content)
   };

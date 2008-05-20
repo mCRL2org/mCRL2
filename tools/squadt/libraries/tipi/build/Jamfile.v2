@@ -2,13 +2,13 @@ project squadt/libraries/tipi
     : source-location
        ../source
     : requirements
-       <use>/boost//headers
+       <use>/site-config//boost_headers
        <use>/libraries/utilities//headers
        <toolset>darwin:<cxxflags>-ftemplate-depth-512
        <toolset>gcc:<cxxflags>-ftemplate-depth-512
        <include>../include
     : usage-requirements
-       <use>/boost//headers
+       <use>/site-config//boost_headers
        <include>../include
     ;
 

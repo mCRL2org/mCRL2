@@ -1,14 +1,14 @@
-import testing ;
-
 project libraries/core/test
    : source-location .
    : requirements
       <use>/libraries/utilities//headers
       <use>/libraries/atermpp//headers
       <use>/libraries/core//headers
-      <use>/boost//headers 
+      <use>/site-config//boost_headers 
       <library>/libraries//core
    ;
+
+include $(TOP)/build/testing/header_test.jam ;
 
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 
@@ -28,4 +28,5 @@ test-suite core
       [ run text_utility_test.cpp ]
       [ run sequence_test.cpp ]
       [ run reachable_nodes_test.cpp ]
+      [ compile-headers ../include ]
     ;

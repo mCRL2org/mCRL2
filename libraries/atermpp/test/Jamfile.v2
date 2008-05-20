@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/aterm/test
    : requirements
-       <dependency>/boost//headers
+       <dependency>/site-config//boost_headers
        <dependency>/libraries//atermpp
        <source>/libraries//aterm
    ;

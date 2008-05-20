@@ -1,6 +1,6 @@
 project libraries/pbes/example
    : requirements
-       <use>/boost//headers
+       <use>/site-config//boost_headers
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes

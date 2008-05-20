@@ -2,10 +2,10 @@ project lps
        : source-location ..
        : requirements
           <include>../include
-          <dependency>/boost//headers
+          <dependency>/site-config//boost_headers
        : usage-requirements
           <include>../include
-          <dependency>/boost//headers
+          <dependency>/site-config//boost_headers
        ;
 
 mcrl2-library lps

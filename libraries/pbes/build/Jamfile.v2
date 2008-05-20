@@ -3,11 +3,11 @@ project pbes
        : requirements
           <include>../include
           <include>../../lps/include #Cyclic dependency that should be removed
-          <dependency>/boost//headers
+          <dependency>/site-config//boost_headers
           <dependency>/libraries//atermpp
        : usage-requirements
           <include>../include
-          <dependency>/boost//headers
+          <dependency>/site-config//boost_headers
           <dependency>/libraries//atermpp
        ;
 

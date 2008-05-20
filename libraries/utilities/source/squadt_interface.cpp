@@ -60,7 +60,7 @@ namespace mcrl2 {
                     m_communicator->send_configuration(configuration);
                   }
                   break;
-                case tipi::message_task_start:
+                case tipi::message_task: // task start signal
                   if (valid_configuration_present) {
                     tipi::configuration& configuration = m_communicator->get_configuration();
 

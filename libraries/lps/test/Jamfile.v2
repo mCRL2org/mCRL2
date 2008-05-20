@@ -1,15 +1,13 @@
-import testing ;
-
 project libraries/lps/test
    : requirements
-       <use>/boost//headers
-       <source>/libraries//core
-       <source>/libraries//data
+       <use>/site-config//boost_headers
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
    ;
+
+include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
@@ -27,4 +25,5 @@ test-suite lps
       [ run sumelm_test.cpp ]
       [ run suminst_test.cpp ]
       [ run untime_test.cpp ]
+      [ compile-headers ../include ]
     ;

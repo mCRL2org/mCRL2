@@ -1,15 +1,13 @@
-import testing ;
-
 project libraries/pbes/test
    : requirements
-       <use>/boost//headers
-       <source>/libraries//core
-       <source>/libraries//lps
+       <use>/site-config//boost_headers
        <source>/libraries//pbes
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
    ;
+
+include $(TOP)/build/testing/header_test.jam ;
 
 exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
@@ -24,6 +22,7 @@ test-suite pbes
       [ run gauss_elimination_test.cpp ]
       [ run pbes_expression_test.cpp ]
       [ run normalize_test.cpp ]
+      [ compile-headers ../include ]
     ;
 
 install dist

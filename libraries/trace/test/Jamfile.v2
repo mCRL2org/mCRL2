@@ -2,7 +2,7 @@ import testing ;
 
 project libraries/trace/test
    : requirements
-       <use>/boost//headers
+       <use>/site-config//boost_headers
        <source>/libraries//core
        <source>/libraries//trace
    ;

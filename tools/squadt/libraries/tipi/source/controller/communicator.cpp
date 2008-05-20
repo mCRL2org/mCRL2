@@ -70,7 +70,7 @@ namespace tipi {
     }
  
     void communicator::send_start_signal() {
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_task_start);
+      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_task);
     }
 
     /**

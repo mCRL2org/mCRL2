@@ -1,13 +1,12 @@
-import testing ;
-
 project libraries/data/test
    : requirements
-       <use>/boost//headers
-       <source>/libraries//core
+       <use>/site-config//boost_headers
        <source>/libraries//data
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
    ;
+
+include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
@@ -24,4 +23,5 @@ test-suite lps
       [ run replace_test.cpp ]
       [ run sort_test.cpp ]
       [ run find_test.cpp ]
+      [ compile-headers ../include ]
     ;

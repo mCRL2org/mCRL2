@@ -3,7 +3,7 @@
 project status
     : source-location ../test
     : requirements <hardcode-dll-paths>true  
-      <dependency>/boost//headers
+      <dependency>/site-config//boost_headers
       <define>BOOST_ALL_NO_LIB
     ;
         

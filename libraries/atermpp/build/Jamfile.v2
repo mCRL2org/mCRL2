@@ -8,9 +8,9 @@ project atermpp
 
 mcrl2-library atermpp
        :
-       : <use>/boost//headers
+       : <use>/site-config//boost_headers
          <use>/libraries/aterm//headers
        :
-       : <use>/boost//headers
+       : <use>/site-config//boost_headers
          <library>/libraries//aterm
        ;

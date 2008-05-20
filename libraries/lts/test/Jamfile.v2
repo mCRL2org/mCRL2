@@ -1,12 +1,13 @@
-import testing ;
-
 project libraries/lts/test
    : requirements
-       <dependency>/boost//headers
+       <dependency>/site-config//boost_headers
        <source>/libraries//lts
    ;
+
+include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lts
     :
       [ run test_lib.cpp ]
+      [ compile-headers ../include ]
     ;

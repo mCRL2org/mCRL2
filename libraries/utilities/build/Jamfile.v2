@@ -30,7 +30,7 @@ obj squadt_interface
 
 obj command_line_interfacing
       : source/command_line.cpp
-      : <use>/boost//headers
+      : <use>/site-config//boost_headers
       ;
 
 mcrl2-library utilities
@@ -40,7 +40,7 @@ mcrl2-library utilities
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
         /libraries/utilities//command_line_interfacing
-      : <use>/boost//headers
+      : <use>/site-config//boost_headers
         <use>/libraries/atermpp//headers
       :
       : <library>/libraries//aterm

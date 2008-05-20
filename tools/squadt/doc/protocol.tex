@@ -826,7 +826,7 @@
       \hline
        \multicolumn{2}{|l|}{\textbf{task start command}} \\
       \hline
-       message type:   & \msg{task\_start} \\
+       message type:   & \msg{task} \\
       \hline
        direction       & controller to tool \\
       \hline
@@ -845,7 +845,7 @@
       \hline
        \multicolumn{2}{|l|}{\textbf{task stop notification}} \\
       \hline
-       message type:   & \msg{task\_stop} \\
+       message type:   & \msg{task} \\
       \hline
        direction       & tool to controller \\
        data            & Result \\
@@ -909,19 +909,8 @@
 
    The termination facility allows the controller to terminate a tool in a
    controlled fashion.  In this way a tool is allowed time to free resources
-   and remove outputs. On the other hand a tool can use it to signal the
-   controller that it is going to terminate, probably as a result of a fatal
-   error. The following figure depicts the termination
-   request-response/signalling behaviour.
-
-   \begin{figure}[H]
-    \begin{center}
-     \includegraphics{termination.eps}
-    \end{center}
-    \vspace{-0.3cm}
-    \caption{termination: controller versus tool}
-   \end{figure}
-
+   and remove inconsistent outputs.
+   
    \noindent A termination request is a message that looks as follows.
 
    \begin{figure}[H]
@@ -937,7 +926,7 @@
      \end{tabular}
     \end{center}
    \end{figure}
-   \vspace{-0.4cm}
+   \vspace{-0.5cm}
 
    \noindent The response message is a termination notification, which
    signifies that the tool is shutting down and will terminate soon.  So from
@@ -957,13 +946,26 @@
      \end{tabular}
     \end{center}
    \end{figure}
-   \vspace{-0.4cm}
+   \vspace{-0.5cm}
+
+   \enlargethispage*{30pt}
 
    \noindent The message represents a general notification of termination and
    may also be sent by a tool in case of emergency when it must terminate
-   before completing a task. When a tool fails to respond to a termination
-   request, the controller is assumed to force a tool to terminate by other
-   means.
+   before completing a task.
+   The following figure shows the communication behaviour with regard to
+   termination command/notification behaviour.
+
+   \begin{figure}[H]
+    \begin{center}
+     \includegraphics{termination.eps}
+    \end{center}
+    \vspace{-0.5cm}
+    \caption{termination behaviour}
+   \end{figure} 
+   
+   \noindent When a tool fails to respond to a termination request, the
+   controller is assumed to force a tool to terminate by other means.
 
   \subsection{Display} \label{ss:user_interaction}
 
@@ -1031,13 +1033,12 @@
    \vspace{-0.4cm}
    \noindent Every widget is associated with an identifier ($id$), that
    \emph{must} uniquely identify it the layout. Communication of changes to the
-   state of a widget rely on the identifier as widget specifier.
-
-   \noindent The $box$ and $properties$ elements represent a set of constraints
-   on the relative layout on what is contained in the box. A layout consists of
-   set of nested box elements that contain widgets.  The horizontal or
-   vertical direction of a box determines the way it lays out the elements it
-   contains above or beside each other respectively.
+   state of a widget rely on the identifier as widget specifier.  The $box$ and
+   $properties$ elements represent a set of constraints on the relative layout
+   on what is contained in the box. A layout consists of set of nested box
+   elements that contain widgets.  The horizontal or vertical direction of a
+   box determines the way it lays out the elements it contains above or beside
+   each other respectively.
 
    The layout properties further affect layout of elements relative to each
    other or the containing box. Visibility determines whether a layout element
@@ -1079,7 +1080,7 @@
     \begin{center}
      \begin{tabular}{|ll|}
       \hline
-       \multicolumn{2}{|l|}{\textbf{display manipulation request}} \\
+       \multicolumn{2}{|l|}{\textbf{display manipulation command}} \\
       \hline
        message type:   & \msg{display\_data} \\
       \hline
@@ -1114,15 +1115,17 @@
     \caption{Process of display manipulation}
    \end{figure}
 
-   \noindent Initially the display shows the empty layout. Interaction with a
-   user is not possible so display interaction notification messages cannot be
-   sent by the controller; if they do the tool should ignore them. Similarly
-   display manipulation requests should not be sent by the tool because no
-   widgets are on the display. After a tool sent layout change command with a
-   valid non-empty layout specification then display manipulation requests and
-   display interaction notifications
-   \noindent A state change must be ignored if the state does not match that of
-   the widget identified, or if the identifier does not match with a widget on the display.
+   \noindent Initially the display shows the empty layout. User interaction
+   without widgets is not possible, so display interaction notification
+   messages will not be sent by the controller and similarly display
+   manipulation requests will not be sent by the tool. A display manipulation
+   command is ignored when the controller cannot identify the widget that was
+   targeted or when the state is not a valid state description for the targeted
+   widget. The display becomes non-empty when a layout change command with a
+   valid non-empty layout specification is communicated.  A display interaction
+   notification is ignored when the tool cannot identify the widget that was
+   targeted or when the state is not a valid state description for the targeted
+   widget. 
    
  \section{Implementation details} \label{s:protocol_implementation}
 
@@ -1223,7 +1226,7 @@
     attribute can occur only once and its value must be among those introduced
     in the previous section: \textit{identification}, \textit{capabilities},
     \textit{configuration}, \textit{display\_layout}, \textit{display\_data},
-    \textit{termination}, \textit{task\_start}, \textit{task\_stop},
+    \textit{termination}, \textit{task},
     \textit{report}. As an example consider the following message with type
     `termination'.
  
@@ -1284,10 +1287,10 @@
    <input-configuration category="editing">
     <object id="mcrl2_in" format="text/mcrl2" />
    </input-configuration>
-   <input-configuration category="visualisation" />
+   <input-configuration category="visualisation">
     <object id="mcrl2_in" format="text/mcrl2" />
    </input-configuration>
-   <input-configuration category="editing" />
+   <input-configuration category="editing">
     <object id="lps_in" format="application/lps" />
    </input-configuration>
   </capabilities>\end{verbatim}
@@ -1406,7 +1409,7 @@
 %   comes next followed by a description on how the widgets are positioned by
 %   means of a layout specification.
 
-   \paragraph{Controls}
+   \paragraph{Widgets}
 
     Because the use of graphical user interfaces today is so ubiquitous it is
     assumed that the reader is familiar with the purpose and basic functions of
@@ -1542,9 +1545,9 @@
 
    \small \begin{verbatim}
  <box-layout-manager variant="vertical" id="">
-  <properties margin-top="1" margin-bottom="1" horizontal-alignment="right">
+  <properties margin-top="1" margin-bottom="1" horizontal-alignment="right" />
   <button><![CDATA[Ok]]></button>
-  <properties>
+  <properties />
   <button><![CDATA[Cancel]]></button>
  </box-layout-manager>\end{verbatim}
  \normalsize
@@ -1561,33 +1564,33 @@
    to the overview picture presented earlier.
 
    \small \begin{verbatim}
-  <display-layout>
-   <layout-manager>
-    <box-layout-manager variant="horizontal" id="top">
-     <box-layout-manager variant="vertical" id="top_top">
-      <box-layout-manager variant="vertical" id="top_top_left">
-       <properties margin-left="5" margin-top="10">
-       <label id="alabel"><![CDATA[This is a label]]></label>
-      </box-layout-manager>
-      <box-layout-manager variant="vertical" id="top_top_right">
-       <properties margin-left="0" margin-top="0" horizontal-alignment="center">
-       <box-layout-manager variant="vertical" id="top_top_right_top">
-        <properties horizontal-alignment="center">
-        <button id="abutton"><![CDATA[B Button]]></button>
-       </box-layout-manager>
-       <box-layout-manager variant="vertical" id="top_top_right_bottom">
-        <properties horizontal-alignment="left">
-        <button id="abutton"><![CDATA[A Button]]></button>
-       </box-layout-manager>
-      </box-layout-manager>
+ <display-layout>
+  <layout-manager>
+   <box-layout-manager variant="horizontal" id="top">
+    <box-layout-manager variant="vertical" id="top_top">
+     <box-layout-manager variant="vertical" id="top_top_left">
+      <properties margin-left="5" margin-top="10">
+      <label id="alabel"><![CDATA[This is a label]]></label>
      </box-layout-manager>
-     <box-layout-manager variant="vertical" id="top_bottom">
-      <properties horizontal-alignment="center">
-      <progress-bar id="progress" minimum="0" maximum="1000" current="350" />
+     <box-layout-manager variant="vertical" id="top_top_right">
+      <properties margin-left="0" margin-top="0" horizontal-alignment="center">
+      <box-layout-manager variant="vertical" id="top_top_right_top">
+       <properties horizontal-alignment="center">
+       <button id="abutton"><![CDATA[B Button]]></button>
+      </box-layout-manager>
+      <box-layout-manager variant="vertical" id="top_top_right_bottom">
+       <properties horizontal-alignment="left">
+       <button id="abutton"><![CDATA[A Button]]></button>
+      </box-layout-manager>
      </box-layout-manager>
     </box-layout-manager>
-   </layout-manager>
-  </display-layout>\end{verbatim}
+    <box-layout-manager variant="vertical" id="top_bottom">
+     <properties horizontal-alignment="center">
+     <progress-bar id="progress" minimum="0" maximum="1000" current="350" />
+    </box-layout-manager>
+   </box-layout-manager>
+  </layout-manager>
+ </display-layout>\end{verbatim}
   \normalsize
 
   \noindent Pay careful attention to the use of properties to control margins and
