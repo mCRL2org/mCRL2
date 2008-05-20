@@ -468,16 +468,9 @@ if test "$USE_OPENGL"; then
   AC_MSG_RESULT([yes])
 else
   LIBS=-l$OPENGL_NAME
-  AC_LINK_IFELSE(
-    AC_LANG_PROGRAM([
-      #include <GL/gl.h>
-      #include <GL/glu.h>],
-      [ glPointSize(1.0f); ]),
-    USE_OPENGL="yes",
-    if test $with_opengl; then
-      CFLAGS="-I$with_opengl/include"
-      LDFLAGS="-L$with_opengl/lib"
-    fi
+  if test $with_opengl; then
+    CFLAGS="-I$with_opengl/include"
+    LDFLAGS="-L$with_opengl/lib"
     AC_LINK_IFELSE(
       AC_LANG_PROGRAM([
         #include <GL/gl.h>
@@ -487,9 +480,17 @@ else
         AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
         AC_SUBST([OPENGL_LPATH],[$with_opengl/lib]),
         AC_MSG_ERROR(["Problem with finding OpenGL header files or libraries in path: `$with_opengl'"])
-        ))
-
-  if test $USE_OPENGL; then
+     )
+  else
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([
+        #include <GL/gl.h>
+        #include <GL/glu.h>],
+        [ glPointSize(1.0f); ]),
+      USE_OPENGL="yes",
+    )
+  fi
+  if test "$USE_OPENGL"; then
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
