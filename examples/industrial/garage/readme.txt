@@ -27,9 +27,8 @@ References
 ----------
 
 [1] Aad Mathijssen and A. Johannes Pretorius. Verified Design of an Automated
-    Parking Garage. In Proc. 11th Int'l Workshop on Formal Methods for
-    Industrial Critical Systems (FMICS), LNCS (to appear), Springer-Verlag,
-    2006.
+    Parking Garage. In Proc. FMICS and PDMC 2006, LNCS 4346, pp 165-180,
+    Springer-Verlag, 2007.
 
 [2] Aad Mathijssen and A. Johannes Pretorius. Specification, Analysis and
     Verification of an Automated Parking Garage. Computer Science Report 05-25,
