@@ -518,6 +518,7 @@ void Frame::displShapeMenu(
     {
         menu.Enable( ID_MENU_ITEM_SHAPE_SEND_BACKWARD, false );
 	menu.Enable( ID_MENU_ITEM_SHOW_NOTE, false );
+	menu.Enable( ID_MENU_ITEM_TEXT_SIZE, false );
     }
     if ( editDOF != true )
     {
@@ -2128,10 +2129,10 @@ void Frame::initFrameSettings()
         ID_FRAME_SETTINGS,
         wxString( wxT( "Settings" ) ),
         wxDefaultPosition,
-        wxSize( 250, 300 ) );
-    
+	wxDefaultSize );
+
     // show
-    frameSettings->Show();    
+    frameSettings->Show();
 }
 
 
@@ -2709,7 +2710,13 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->saveFile( string(filePath.fn_str()) ) ;
+	    string s = string( filePath.fn_str() );
+	    int found = s.find(".fsm");
+	    if( found == string::npos)
+	    {
+		s.append(".fsm");
+	    }
+            mediator->saveFile( s );
         }
 
         delete fileDialog;
@@ -2734,7 +2741,13 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->saveFile( string(filePath.fn_str()) );
+	    string s = string( filePath.fn_str() );
+	    int found = s.find(".fsm");
+	    if( found == string::npos)
+	    {
+		s.append(".fsm");
+	    }
+            mediator->saveFile( s );
         }
 
         delete fileDialog;
@@ -2785,8 +2798,13 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->handleSaveAttrConfig( 
-                string( filePath.fn_str() ) );
+	    string s = string( filePath.fn_str() );
+	    int found = s.find(".dgc");
+	    if( found == string::npos)
+	    {
+		s.append(".dgc");
+	    }
+            mediator->handleSaveAttrConfig( s );
         }
 
         delete fileDialog;
@@ -2836,8 +2854,14 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
+	    string s = string( filePath.fn_str() );
+	    int found = s.find(".dgd");
+	    if( found == string::npos)
+	    {
+		s.append(".dgd");
+	    }
             mediator->handleSaveDiagram( 
-                string( filePath.fn_str() ) );
+                string( s ) );
         }
 
         delete fileDialog;
@@ -3591,9 +3615,9 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             }
             	 
            menu.Append(ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
-           			wxT( "Add attribute" ),
+           			wxT( "Select attribute" ),
            			addAttributeMenu,
-           			wxT( "Add attribute" ) );
+           			wxT( "Select attribute" ) );
         
             // determine of an attribute has been linked
             // code thanks to 'www.wxwidgets.org/wiki'
@@ -4252,8 +4276,19 @@ void Frame::onClusterMenu( wxCommandEvent &e )
 void Frame::onTool( wxCommandEvent &e )
 // ------------------------------------
 {
+    if ( e.GetId() != ID_TOOL_DOF &&
+         e.GetId() != ID_TOOL_FILL_COL &&
+         e.GetId() != ID_TOOL_LINE_COL )
+    {
+        if ( frameDOF != NULL )
+        {
+            frameDOF->Close();
+            frameDOF = NULL;
+        }
+    }
+
     if ( e.GetId() == ID_TOOL_SELECT )
-		mediator->handleEditModeSelect();
+	mediator->handleEditModeSelect();
     else if ( e.GetId() == ID_TOOL_NOTE )
     	mediator->handleEditModeNote();
     else if ( e.GetId() == ID_TOOL_DOF )
@@ -4277,16 +4312,7 @@ void Frame::onTool( wxCommandEvent &e )
     else if ( e.GetId() == ID_TOOL_SNAP_GRID )
         mediator->handleEditSnapGrid( toolBarEdit->GetToolState( ID_TOOL_SNAP_GRID ) );
 
-    if ( e.GetId() != ID_TOOL_DOF &&
-         e.GetId() != ID_TOOL_FILL_COL &&
-         e.GetId() != ID_TOOL_LINE_COL )
-    {
-        if ( frameDOF != NULL )
-        {
-            frameDOF->Close();
-            frameDOF = NULL;
-        }
-    }
+    
 }
 
 
@@ -4454,15 +4480,19 @@ void Frame::onButton( wxCommandEvent &e )
     {
 	if( textSizeBox->GetValue().IsNumber() ) // Check whether user entered a number or not
 	{
-		if ( frameTextSize->Destroy() )
+		double size;		
+		textSizeBox->GetValue().ToDouble( &size );		
+		int textSize = (int) size;
+		if( textSize < 8 ) // Font size can be between 8 and 40
 		{
-			double size;		
-			textSizeBox->GetValue().ToDouble( &size );		
-			int textSize = (int) size;
-			if( textSize < 8 ) // Font size can be between 8 and 40
-				textSize = 8;
-			else if( textSize > 40 )
-				textSize = 40;
+			wxMessageBox(wxT("Please enter an integer bigger than 8"),wxT("Font size is too small"), wxOK | wxICON_INFORMATION, this);
+		}
+		else if( textSize > 40 )
+		{
+			wxMessageBox(wxT("Please enter an integer smaller than 40"),wxT("Font size is too big"), wxOK | wxICON_INFORMATION, this);
+		}
+		else if ( frameTextSize->Destroy() )
+		{
 			frameTextSize = NULL;
 			mediator->handleSetTextSize( textSize, currentShapeId);
 		}

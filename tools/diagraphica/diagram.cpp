@@ -204,6 +204,16 @@ double Diagram::getAngleInterval()
     return sizeInterval;
 }
 
+// -------------------------------
+void Diagram::getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom)
+// -------------------------------
+{
+    xLeft = gridXLeft;
+    xRight = gridXRight;
+    yTop = gridYTop;
+    yBottom = gridYBottom;
+}
+
 
 // -- clear functions -----------------------------------------------
 
@@ -471,6 +481,11 @@ void Diagram::drawGrid(
         xRgt =  1.0 - pix*SIZE_BORDER;
         yTop =  1.0 - pix*SIZE_BORDER;
         yBot = -1.0 + pix*SIZE_BORDER;
+
+	gridXLeft = xLft;
+	gridXRight = xRgt;
+	gridYTop = yTop;
+	gridYBottom = yBot;
         
         sizeInterval = (2.0-(2.0*pix*SIZE_BORDER)-2.0*pix)/(double)numIntervals;
         

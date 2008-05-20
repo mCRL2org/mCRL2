@@ -146,6 +146,7 @@ void Shape::setCheckedId( const int &id )
 // -----------------------------------
 {
     checkedVariableId = id;
+    texturesGenerated = false;
 }
 
 
@@ -155,6 +156,7 @@ void Shape::setVariable( const string &msg )
 {
     variable = "";
     variable.append( msg );
+    texturesGenerated = false;
 }
 
 
@@ -164,6 +166,7 @@ void Shape::setVariableName( const string &msg )
 {
     variableName = "";
     variableName.append( msg );
+    texturesGenerated = false;
 }
 
 
@@ -172,7 +175,8 @@ void Shape::setNote( const string &msg )
 // ------------------------------------------
 {
     note = "";
-    note.append( msg );   
+    note.append( msg );
+    texturesGenerated = false;
 }
 
 
@@ -181,6 +185,7 @@ void Shape::setTextSize( const int &size )
 // ------------------------------------------
 {
     szeTxt = size;
+    texturesGenerated = false;
 }
 
 
@@ -188,8 +193,24 @@ void Shape::setTextSize( const int &size )
 void Shape::setCenter( const double &xC, const double &yC )
 // --------------------------------------------------------
 {
-    xCtr = xC;
-    yCtr = yC;
+    double xLeft, xRight, yTop, yBottom;
+    mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+    if(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC))
+    {
+    	xCtr = xC;
+    	yCtr = yC;
+    }
+    else
+    {
+	if(xLeft > (xC - xDFC))
+		xCtr = xLeft + xDFC;
+	else if(xRight < (xC + xDFC))
+		xCtr = xRight - xDFC;
+	if(yBottom > (yC - yDFC))
+		yCtr = yBottom + yDFC;
+	else if(yTop < (yC + yDFC))
+		yCtr = yTop - yDFC;
+    }
 }
 
 
@@ -520,6 +541,14 @@ void Shape::setHandleSize( const double &s )
 // -----------------------------------------
 {
     hdlSze = s;
+}
+
+
+// -----------------------------------------
+void Shape::setTextures( const bool &generated)
+// -----------------------------------------
+{
+    texturesGenerated = generated;
 }
 
 
@@ -1015,11 +1044,11 @@ void Shape::visualize(
     
     if( type == TYPE_NOTE)
     {
-    	VisUtils::setColorWhite(); // Draw the note on a white background
+    	VisUtils::setColor( colRGB );
         VisUtils::fillRect(
             -xD,  xD,   // new
              yD, -yD ); // new
-        VisUtils::setColorWhite();
+        VisUtils::setColor( colLin );
         VisUtils::drawRect(
             -xD,  xD,   // new
              yD, -yD ); // new
@@ -1215,11 +1244,11 @@ void Shape::visualize(
     
     if( type == TYPE_NOTE)
     {
-    	VisUtils::setColorWhite(); // Draw the note on a white background
+    	VisUtils::setColor( colRGB );
         VisUtils::fillRect(
             -xD,  xD,   // new
              yD, -yD ); // new
-        VisUtils::setColorWhite();
+        VisUtils::setColor( colLin );
         VisUtils::drawRect(
             -xD,  xD,   // new
              yD, -yD ); // new
@@ -1645,7 +1674,6 @@ void Shape::drawNormal(
     {
     	if ( type == TYPE_NOTE )
         {
-        	VisUtils::setColorWhite(); // Draw the note on a white background
             	VisUtils::fillRect(
                 -xDFC,  xDFC,
                  yDFC, -yDFC );
@@ -1691,11 +1719,11 @@ void Shape::drawNormal(
         VisUtils::enableLineAntiAlias();
         if ( type == TYPE_NOTE )
         {
-            VisUtils::setColorWhite(); // Draw the note on a white background
+            VisUtils::setColor( colFil );
             VisUtils::fillRect(
                 -xDFC,  xDFC, 
                  yDFC, -yDFC );
-            VisUtils::setColorWhite();
+            VisUtils::setColor( colLin );
             VisUtils::drawRect(
                 -xDFC,  xDFC, 
                  yDFC, -yDFC );
@@ -1772,23 +1800,26 @@ void Shape::drawText( GLCanvas* canvas )
 // ---------------------------------------------
 {
 	string text = note;
-	text.append(" ");
-	text.append( variable );
-
-	double pix = canvas->getPixelSize();
-
-	// generate textures for drawing text, if they aren't generated yet	
-	if( !texturesGenerated || lastCanvas != canvas)
+	if(text != "")
 	{
-		VisUtils::genCharTextures(
-			texCharId,
-			texChar );
-        	texturesGenerated = true;
-        	lastCanvas = canvas;
-	}
+		text.append(" ");
+		text.append( variable );
 
-	VisUtils::setColor( colTxt );
-	VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+		double pix = canvas->getPixelSize();
+
+		// generate textures for drawing text, if they aren't generated yet	
+		if( !texturesGenerated || lastCanvas != canvas )
+		{
+			VisUtils::genCharTextures(
+				texCharId,
+				texChar );
+			texturesGenerated = true;
+			lastCanvas = canvas;
+		}
+	
+		VisUtils::setColor( colTxt );
+		VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+	}
 }
 
 
@@ -1797,24 +1828,28 @@ void Shape::drawText( GLCanvas* canvas, double pix )
 // ---------------------------------------------
 {
 	string text = note;
-	text.append(" ");
-	text.append( variable );
-	if( pix < 0.01 )
-		pix = 0.01;
-	else if( pix > 0.015)
-		pix = 0.01;
-	// generate textures for drawing text, if they aren't generated yet	
-	if( !texturesGenerated || lastCanvas != canvas)
+	if( !text.empty() )
 	{
-		VisUtils::genCharTextures(
-			texCharId,
-			texChar );
-        	texturesGenerated = true;
-        	lastCanvas = canvas;
+		text.append(" ");
+		text.append( variable );
+		if( pix < 0.01 )
+			pix = 0.01;
+		else if( pix > 0.015)
+			pix = 0.01;
+	
+		// generate textures for drawing text, if they aren't generated yet	
+		if( texturesGenerated || lastCanvas != canvas )
+		{
+			VisUtils::genCharTextures(
+				texCharId,
+				texChar );
+			texturesGenerated = true;
+			lastCanvas = canvas;
+		}
+	
+		VisUtils::setColor( colTxt );
+		VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
 	}
-
-	VisUtils::setColor( colTxt );
-	VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
 }
 
 

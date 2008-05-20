@@ -48,6 +48,7 @@ public:
     bool getSnapGrid();
     double getGridInterval( GLCanvas* canvas );
     double getAngleInterval();
+    void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom);
 
     // -- clear functions -------------------------------------------
     void deleteShape( const size_t &idx );
@@ -73,6 +74,7 @@ public:
         const double &opacity,
         const vector< Attribute* > attrs,
         const vector< double > attrValIdcs );
+
 
 protected:
     // -- private utility functions ---------------------------------
@@ -103,6 +105,10 @@ protected:
 
     bool   showGrid;
     bool   snapGrid;
+    double gridXLeft;
+    double gridXRight;
+    double gridYTop;
+    double gridYBottom;	
     
     // constants
     int SIZE_BORDER;

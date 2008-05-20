@@ -1,12 +1,12 @@
-// Author(s): A.j. (Hannes) pretorius
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./diagraph.cpp
+
+// --- diagraph.cpp -------------------------------------------------
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
+// ---------------------------  *  ----------------------------------
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 
@@ -110,8 +110,8 @@ bool parse_command_line(int argc, wxChar** argv) {
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
       NAME, AUTHOR, "[OPTION]... [INFILE]\n"
-      "Multivariate state visualization and simulation analysis techniques for labelled "
-      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be "
+      "Multivariate state visualization and simulation analysis techniques for labelled"
+      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be"
       "loaded by the tool.");
 
   command_line_parser parser(clinterface, argc, argv);
@@ -1556,6 +1556,7 @@ void DiaGraph::handleSetModeEdit()
 // -------------------------------
 {
     mode = MODE_EDIT;
+    editor->reGenText();
     
     if ( canvasExnr != NULL )
         canvasExnr->Refresh();
@@ -2937,6 +2938,17 @@ void DiaGraph::getSettingsArcDiagram(
     colTmp = ArcDiagram::getColorBundles();
     colArcs.Set( (int)(255*colTmp.r), (int)(255*colTmp.g), (int)(255*colTmp.b) );
     trspArcs = 1.0-colTmp.a;
+}
+
+
+// -------------------------------
+void DiaGraph::getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom)
+// -------------------------------
+{
+    if( editor != NULL )
+    {
+    	editor->getDiagram()->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+    }
 }
 
 

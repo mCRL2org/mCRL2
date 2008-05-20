@@ -1,10 +1,6 @@
-// Author(s): A.J. (Hannes) Pretorius
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./shape.h
 
@@ -103,6 +99,7 @@ public:
         const double &a );
     void setFillTransp( const double &a );
     void setHandleSize( const double &s );
+    void setTextures( const bool &generated);
 
     // -- get functions ---------------------------------------------
     int getIndex();
@@ -285,7 +282,7 @@ protected:
     int checkedVariableId; // Event id of the variable displayed on the shape;
     string	 variable;  //variable shown on the shape
     string	 variableName; // name of the variable
-    string	 note;	// note shown on the shape
+    string	 note; // note shown on the shape
     double	 currentPix; // used in Simulator for drawing text more readable
     GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH]; // resources for drawing text

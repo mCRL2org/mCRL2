@@ -81,6 +81,7 @@ private:
     wxScrolledWindow* panelNotebook;
     wxBoxSizer*       sizerNotebook;
     wxNotebook*       notebook;
+    wxButton*	      submitButton;
     
     wxScrolledWindow* panelGeneral;
     wxColorButton*    buttonColorBG;
@@ -115,6 +116,7 @@ private:
     enum
     {
         ID_PANEL_GENERAL,
+	ID_BUTTON_SUBMIT,
         ID_BUTTON_COL_BG,
         ID_BUTTON_COL_TXT,
         ID_COMBO_BOX_SIZE_TXT,

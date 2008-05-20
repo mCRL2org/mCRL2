@@ -69,6 +69,9 @@ void SettingsFrame::initFrame()
         notebook,
         1,
         wxEXPAND );
+	
+    submitButton = new wxButton(panelNotebook, ID_BUTTON_SUBMIT, wxString( wxT( "Submit")), wxDefaultPosition, wxDefaultSize );
+    sizerNotebook->Add(submitButton, 0);
 
     initPanelGeneral();
     initPanelClustTree();
@@ -757,12 +760,23 @@ void SettingsFrame::setDgrmEditor()
 void SettingsFrame::onButton( wxCommandEvent &e )
 // ----------------------------------------------
 {
-    if ( e.GetId() == ID_BUTTON_COL_BG )
+    if( e.GetId() == ID_BUTTON_SUBMIT)
+    {
+	updateSettingsGeneral();
+	updateSettingsClustTree();
+	updateSettingsBarTree();
+	updateSettingsArcDiagram();
+	updateSettingsTrace();
+	updateSettingsSimulator();
+	updateSettingsDgrmEditor();
+	this->Close( false );
+    }
+    /*else if ( e.GetId() == ID_BUTTON_COL_BG )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_BUTTON_COL_TXT )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_BUTTON_COL_ARCS )
-        updateSettingsArcDiagram();
+        updateSettingsArcDiagram();*/
 }
 
 
@@ -770,7 +784,7 @@ void SettingsFrame::onButton( wxCommandEvent &e )
 void SettingsFrame::onCheckBox( wxCommandEvent &e )
 // ------------------------------------------------
 {
-    if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
+    /*if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
         updateSettingsClustTree();
     if ( e.GetId() == ID_CHECK_BOX_ANNOTATE_CT )
         updateSettingsClustTree();
@@ -781,7 +795,7 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
     else if ( e.GetId() == ID_CHECK_BOX_SHOW_NODES )
         updateSettingsArcDiagram();
     else if ( e.GetId() == ID_CHECK_BOX_USE_SHADING )
-        updateSettingsTrace();
+        updateSettingsTrace();*/
 }
 
 
@@ -789,12 +803,12 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
 void SettingsFrame::onComboBox( wxCommandEvent &e )
 // ------------------------------------------------
 {
-    if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
+    /*if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_COMBO_BOX_COL_MAP )
         updateSettingsClustTree();
     else if ( e.GetId() == ID_COMBO_BOX_BLEND_TYPE )
-        updateSettingsSimulator();
+        updateSettingsSimulator();*/
 }
 
 
@@ -802,12 +816,12 @@ void SettingsFrame::onComboBox( wxCommandEvent &e )
 void SettingsFrame::onSpinCtrl( wxSpinEvent &e )
 // ---------------------------------------------
 {
-    if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )
+    /*if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_SPIN_CTRL_MAGN_BT )
         updateSettingsBarTree();
     else if ( e.GetId() == ID_SPIN_CTRL_TRSP_ARCS )
-        updateSettingsArcDiagram();
+        updateSettingsArcDiagram();*/
 }
 
 
@@ -913,9 +927,9 @@ void SettingsFrame::updateSettingsSimulator()
 void SettingsFrame::updateSettingsTrace()
 // --------------------------------------
 {
-    bool useShading;
+    /*bool useShading;
     useShading = checkBoxUseShading->GetValue();
-    mediator->setSettingsTrace( useShading );
+    mediator->setSettingsTrace( useShading );*/
 }
 
 
@@ -929,7 +943,8 @@ void SettingsFrame::updateSettingsDgrmEditor()
 
 
 BEGIN_EVENT_TABLE( SettingsFrame, PopupFrame )
-EVT_BUTTON( ID_BUTTON_COL_BG, SettingsFrame::onButton )
+    EVT_BUTTON( ID_BUTTON_SUBMIT, SettingsFrame::onButton )
+    EVT_BUTTON( ID_BUTTON_COL_BG, SettingsFrame::onButton )
     EVT_BUTTON( ID_BUTTON_COL_TXT, SettingsFrame::onButton )
     EVT_COMBOBOX( ID_COMBO_BOX_SIZE_TXT, SettingsFrame::onComboBox )
     EVT_SPINCTRL( ID_SPIN_CTRL_ANIM_SPD, SettingsFrame::onSpinCtrl )

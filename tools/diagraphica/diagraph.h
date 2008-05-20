@@ -334,6 +334,7 @@ public:
 	bool &showArcs,
 	wxColour &colArcs,
 	double &trspArcs );
+	void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom);
 	
 	// -- visualization ---------------------------------------------
 	void handlePaintEvent( GLCanvas* c );

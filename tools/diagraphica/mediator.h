@@ -329,6 +329,7 @@ public:
 		bool &showArcs,
 		wxColour &colArcs,
 		double &trspArcs ) = 0;
+	virtual void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom) = 0;
 	
 	// -- visualization ---------------------------------------------
 	virtual void handlePaintEvent( GLCanvas* c ) = 0;

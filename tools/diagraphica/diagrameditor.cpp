@@ -1,12 +1,12 @@
-// Author(s): A.j. (Hannes) pretorius
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./diagrameditor.cpp
+
+// --- diagrameditor.cpp --------------------------------------------
+// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
+// ---------------------------  *  ----------------------------------
 
 
 #include "diagrameditor.h"
@@ -1038,6 +1038,18 @@ void DiagramEditor::visualize( const bool &inSelectMode )
     }
 }
 
+void DiagramEditor::reGenText()
+{
+	Shape* s        = NULL;
+
+	int sizeShapes = diagram->getSizeShapes();
+	for ( int i = 0; i < sizeShapes; ++i )    
+	{
+		s = diagram->getShape( i );
+		s->setTextures( false );
+	}
+}
+
 
 // -- event handlers --------------------------------------------
 
@@ -1110,9 +1122,25 @@ void DiagramEditor::handleMouseLftUpEvent(
             dY = Shape::minSzeHnt*pix;
         }
         
-        double xC, yC;
+        double xC, yC, xDFC, yDFC;
         xC = x1+0.5*dX;
         yC = y1+0.5*dY;
+	xDFC = 0.5*dX;
+	yDFC = -0.5*dY;
+
+	double xLeft, xRight, yTop, yBottom;
+    	mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+    	if(!(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC)))
+	{
+		if(xLeft > (xC - xDFC))
+			xC = xLeft + xDFC;
+		else if(xRight < (xC + xDFC))
+			xC = xRight - xDFC;
+		if(yBottom > (yC - yDFC))
+			yC = yBottom + yDFC;
+		else if(yTop < (yC + yDFC))
+			yC = yTop - yDFC;
+	}
 
         Shape* s = new Shape(
             mediator,
@@ -1492,10 +1520,12 @@ void DiagramEditor::handleHitShapeHandle(
                         drgBegIdx1 = -1;
                         drgBegIdx2 = -1;
                     }
-                    displDOFInfo( s );
-                    editMode = EDIT_MODE_DOF;
-                    mediator->handleEditModeDOF( this );
-                    
+		    if(s->getType() != Shape::TYPE_NOTE )
+		    {
+                    	displDOFInfo( s );
+                    	editMode = EDIT_MODE_DOF;
+                    	mediator->handleEditModeDOF( this );
+		    }
                     for ( int i = 0; i < sizeShapes; ++i )
                         if ( i != shapeIdx )
                             diagram->getShape(i)->setModeNormal();
@@ -1519,9 +1549,9 @@ void DiagramEditor::handleDrag()
     {
         // do transl & scale here
         Shape* s = diagram->getShape( drgBegIdx1 );
-
-        if ( s->getMode() == Shape::MODE_EDIT )
-        {
+	
+	if ( s->getMode() == Shape::MODE_EDIT )
+	{
 		if ( drgBegIdx2 == Shape::ID_HDL_CTR )
 		{
 			double xDrag, yDrag;
@@ -1561,59 +1591,58 @@ void DiagramEditor::handleDrag()
 		handleDragRotRgt( s );
 		else if ( drgBegIdx2 == Shape::ID_HDL_ROT_TOP )
 		handleDragRotTop( s );
-        }
-        else if ( s->getMode() == Shape::MODE_EDT_DOF_XCTR )
-        {
-            /*
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-                handleDragDOFXCtrBeg( s );
-            else
-            */ 
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
-                handleDragDOFXCtrEnd( s );
-        }
-        else if ( s->getMode() == Shape::MODE_EDT_DOF_YCTR )
-        {
-            /*
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-                handleDragDOFYCtrBeg( s );
-            else 
-            */
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
-                handleDragDOFYCtrEnd( s );
-        }
-        else if ( s->getMode() == Shape::MODE_EDT_DOF_WTH )
-        {
-            /*
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-                handleDragDOFWthBeg( s );
-            else
-            */
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
-                handleDragDOFWthEnd( s );
-        }
-        else if ( s->getMode() == Shape::MODE_EDT_DOF_HGT )
-        {
-            /*
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-                handleDragDOFHgtBeg( s );
-            else
-            */
-            if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
-                handleDragDOFHgtEnd( s );
-        }
-        else if ( s->getMode() == Shape::MODE_EDT_DOF_AGL )
-        {
-            if ( drgBegIdx2 == Shape::ID_HDL_HGE )            
-                handleDragHge( s );
-            /*
-            else if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
-                handleDragDOFAglBeg( s );
-            */
-            else if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
-                handleDragDOFAglEnd( s );
-        }
-        
+	}
+	else if ( s->getMode() == Shape::MODE_EDT_DOF_XCTR )
+	{
+	/*
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
+		handleDragDOFXCtrBeg( s );
+	else
+	*/ 
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
+		handleDragDOFXCtrEnd( s );
+	}
+	else if ( s->getMode() == Shape::MODE_EDT_DOF_YCTR )
+	{
+	/*
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
+		handleDragDOFYCtrBeg( s );
+	else 
+	*/
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
+		handleDragDOFYCtrEnd( s );
+	}
+	else if ( s->getMode() == Shape::MODE_EDT_DOF_WTH )
+	{
+	/*
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
+		handleDragDOFWthBeg( s );
+	else
+	*/
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
+		handleDragDOFWthEnd( s );
+	}
+	else if ( s->getMode() == Shape::MODE_EDT_DOF_HGT )
+	{
+	/*
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
+		handleDragDOFHgtBeg( s );
+	else
+	*/
+	if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
+		handleDragDOFHgtEnd( s );
+	}
+	else if ( s->getMode() == Shape::MODE_EDT_DOF_AGL )
+	{
+	if ( drgBegIdx2 == Shape::ID_HDL_HGE )            
+		handleDragHge( s );
+	/*
+	else if ( drgBegIdx2 == Shape::ID_HDL_DOF_BEG )
+		handleDragDOFAglBeg( s );
+	*/
+	else if ( drgBegIdx2 == Shape::ID_HDL_DOF_END )
+		handleDragDOFAglEnd( s );
+	}
         // undo transl & scale here
 
         canvas->Refresh();
@@ -1683,8 +1712,11 @@ void DiagramEditor::handleTextSize( int &textSize, int &shapeId )
 	Shape* selectedShape = NULL;	
 	shapeId = lastSelectedShapeId;	
 	selectedShape = diagram->getShape( shapeId );
-	textSize = selectedShape->getTextSize();
-	selectedShape = NULL;
+	if(selectedShape != NULL)
+	{
+		textSize = selectedShape->getTextSize();
+		selectedShape = NULL;
+	}
 }
 
 
@@ -2269,8 +2301,8 @@ void DiagramEditor::handleDragTopLft( Shape* s )
     adjY = hypY*cos( angl ); // y (+)
     oppY = hypY*sin( angl ); // x (-)
 
-    s->setCenter( xCtr-adjX-oppY, yCtr-oppX+adjY );
     s->setDFC(    xDFC+hypX,      yDFC+hypY );
+    s->setCenter( xCtr-adjX-oppY, yCtr-oppX+adjY );
 }
 
 
@@ -2313,8 +2345,9 @@ void DiagramEditor::handleDragLft( Shape* s )
     adj = hyp*cos( angl ); // x (-)
     opp = hyp*sin( angl ); // y (-)
 
+    s->setDFC(    xDFC+hyp, yDFC );    
     s->setCenter( xCtr-adj, yCtr-opp );
-    s->setDFC(    xDFC+hyp, yDFC );
+    
 }
 
 
@@ -2363,8 +2396,9 @@ void DiagramEditor::handleDragBotLft( Shape* s )
     adjY = hypY*cos( angl ); // y (-)
     oppY = hypY*sin( angl ); // x (+)
 
-    s->setCenter( xCtr-adjX+oppY, yCtr-oppX-adjY );
     s->setDFC(    xDFC+hypX,      yDFC+hypY );
+    s->setCenter( xCtr-adjX+oppY, yCtr-oppX-adjY );
+    
 }
 
 
@@ -2407,8 +2441,8 @@ void DiagramEditor::handleDragBot( Shape* s )
     adj = hyp*cos( angl ); // y (-)
     opp = hyp*sin( angl ); // x (+)
 
-    s->setCenter( xCtr+opp, yCtr-adj );
     s->setDFC(    xDFC,     yDFC+hyp );
+    s->setCenter( xCtr+opp, yCtr-adj );
 }
 
 
@@ -2457,8 +2491,8 @@ void DiagramEditor::handleDragBotRgt( Shape* s )
     adjY = hypY*cos( angl ); // y (-)
     oppY = hypY*sin( angl ); // x (+)
 
-    s->setCenter( xCtr+adjX+oppY, yCtr+oppX-adjY );
     s->setDFC(    xDFC+hypX,      yDFC+hypY );
+    s->setCenter( xCtr+adjX+oppY, yCtr+oppX-adjY );
 }
 
 
@@ -2502,8 +2536,8 @@ void DiagramEditor::handleDragRgt( Shape* s )
     adj = hyp*cos( angl ); // x (+)
     opp = hyp*sin( angl ); // y (+)
 
-    s->setCenter( xCtr+adj, yCtr+opp );
     s->setDFC(    xDFC+hyp, yDFC );
+    s->setCenter( xCtr+adj, yCtr+opp );
 }
 
 
@@ -2552,8 +2586,8 @@ void DiagramEditor::handleDragTopRgt( Shape* s )
     adjY = hypY*cos( angl ); // y (+)
     oppY = hypY*sin( angl ); // x (-)
 
-    s->setCenter( xCtr+adjX-oppY, yCtr+oppX+adjY );
     s->setDFC(    xDFC+hypX,      yDFC+hypY );
+    s->setCenter( xCtr+adjX-oppY, yCtr+oppX+adjY );
 }
 
 
@@ -2596,8 +2630,8 @@ void DiagramEditor::handleDragTop( Shape* s )
     adj = hyp*cos( angl ); // y (+)
     opp = hyp*sin( angl ); // x (-)
 
-    s->setCenter( xCtr-opp, yCtr+adj );
     s->setDFC(    xDFC,     yDFC+hyp );
+    s->setCenter( xCtr-opp, yCtr+adj );
 }
 
 
