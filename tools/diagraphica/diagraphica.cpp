@@ -52,7 +52,7 @@ std::string fsm_file_argument;
         bool valid = c.input_exists(fsm_file_for_input);
      
         if (!valid) {
-          send_error("Invalid input combination!");
+          send_error("Invalid input combination");
         }
      
         return valid;
