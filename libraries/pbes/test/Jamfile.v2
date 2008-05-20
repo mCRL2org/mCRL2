@@ -13,6 +13,7 @@ exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
 test-suite pbes
     :
+      [ run remove_parameters_test.cpp ]
       [ run pbes_solve_test.cpp ]
       [ run parelm_test.cpp ]
       [ run lps2pbes_test.cpp ]

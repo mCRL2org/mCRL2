@@ -15,6 +15,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <boost/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
@@ -28,6 +29,7 @@
 #include "mcrl2/lps/detail/remove_parameters.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
 
 namespace mcrl2 {
@@ -116,7 +118,7 @@ class pbes_parelm_algorithm
     template <typename Container>
     void run(pbes<Container>& p) const
     {
-std::cout << "<pbes>" << pp(p) << std::endl;
+//std::cout << "<pbes>" << pp(p) << std::endl;
 //print_pp_container(p.free_variables(), "<pbes free variables>");
       data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
       std::vector<data::data_variable> predicate_variables;
@@ -132,7 +134,7 @@ std::cout << "<pbes>" << pp(p) << std::endl;
       }
       int N = offset; // # variables
 
-print_pp_container(predicate_variables, "<predicate_variables>", true);
+//print_pp_container(predicate_variables, "<predicate_variables>", true);
 //print_map(propvar_offsets, "<variable offsets>");
 
       // compute the initial set v of significant variables
@@ -190,17 +192,51 @@ print_pp_container(predicate_variables, "<predicate_variables>", true);
         }
       }
 
-print_container(v, "<initial significant variables>");
+//print_container(v, "<initial significant variables>");
 
-      // compute the reachable nodes (i.e. the significant parameters)
+      // compute the indices s of the parameters that need to be removed
       std::vector<int> r = core::reachable_nodes(G, v.begin(), v.end());
-print_container(r, "<significant variables>");
+//print_container(r, "<significant variables>");
       std::sort(r.begin(), r.end());
       std::vector<int> q(N);
       iota(q.begin(), q.end(), 0);
       std::vector<int> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
-print_container(s, "<insignificant variables>");
+//print_container(s, "<insignificant variables>");
+
+      // create a map that specifies the parameters that need to be removed
+      std::map<core::identifier_string, std::vector<int> > removals;
+      int index = 0;
+      std::vector<int>::iterator sfirst = s.begin();
+      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      {
+        int maxindex = index + i->variable().parameters().size();
+        std::vector<int>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<int>(), _1, maxindex));
+        if (slast > sfirst)
+        {
+          removals[i->variable().name()] = std::vector<int>(sfirst, slast);
+        }
+        index = maxindex;
+        sfirst = slast;
+      }
+
+      // print verbose output
+      if (mcrl2::core::gsVerbose)
+      {
+        std::cout << "\nremoving the following parameters:" << std::endl;
+        for (std::map<core::identifier_string, std::vector<int> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
+        {
+          std::cout << "  predicate variable " << pp(i->first) << " -> ";
+          for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
+          {
+            std::cout << pp(predicate_variables[*j]) << " ";
+          }
+          std::cout << std::endl;
+        }
+      }
+
+      // remove the parameters
+      remove_parameters(p, removals);
     }
 };
 

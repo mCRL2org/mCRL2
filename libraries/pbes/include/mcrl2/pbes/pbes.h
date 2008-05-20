@@ -298,6 +298,13 @@ class pbes
       return m_initial_state;
     }
 
+    /// Returns the initial state.
+    ///
+    propositional_variable_instantiation& initial_state()
+    {
+      return m_initial_state;
+    }
+
     /// Reads the pbes from file. Returns true if the operation succeeded.
     ///
     void load(const std::string& filename)

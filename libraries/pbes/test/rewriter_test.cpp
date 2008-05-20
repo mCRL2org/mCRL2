@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
+#include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rename.h"
@@ -53,21 +54,6 @@ const std::string SPECIFICATION =
 "init P(0);                               \n";
 
 const std::string FORMULA = "forall m:Nat. [a(m)]false";
-
-data_variable nat(std::string name)
-{
-  return data_variable(core::identifier_string(name) , sort_expr::nat());
-}
-
-data_variable bool_(std::string name)
-{
-  return data_variable(core::identifier_string(name) , sort_expr::bool_());
-}
-
-propositional_variable_instantiation prop_var(std::string name, data::data_expression_list parameters)
-{
-  return propositional_variable_instantiation(core::identifier_string(name), parameters);
-}
 
 template <typename Rewriter>
 void test_expression(pbes_expression p, Rewriter r)
@@ -172,10 +158,10 @@ void test_rewriter()
   test_expression(x, simp_rewr);
   test_expression(x, subst_rewr);
 
-  propositional_variable_instantiation X  = prop_var("X", make_list(n));
-  propositional_variable_instantiation X1 = prop_var("X1", make_list(n));
-  propositional_variable_instantiation X2 = prop_var("X2", make_list(n));
-  propositional_variable_instantiation X3 = prop_var("X3", make_list(n));
+  propositional_variable_instantiation X  = propvarinst("X", make_list(n));
+  propositional_variable_instantiation X1 = propvarinst("X1", make_list(n));
+  propositional_variable_instantiation X2 = propvarinst("X2", make_list(n));
+  propositional_variable_instantiation X3 = propvarinst("X3", make_list(n));
 
   BOOST_CHECK(pbesr(and_(T, T)) == T);
   BOOST_CHECK(pbesr(and_(T, F)) == F);

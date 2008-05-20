@@ -12,6 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <boost/program_options.hpp>
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
 
@@ -22,12 +23,13 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  std::string pbesfile;            // location of pbes
+  std::string infile;            // location of pbes
+  std::string outfile;           // location of result
 
   try {
     //--- pbesparelm options ---------
     boost::program_options::options_description pbesparelm_options(
-      "Usage: pbesparelm [OPTION]... INFILE\n"
+      "Usage: pbesparelm [OPTION]... INFILE OUTFILE\n"
       "\n"
       "Reads a file containing a pbes, and applies parameter elimination to it.\n"
       "\n"
@@ -35,17 +37,20 @@ int main(int argc, char* argv[])
     );
     pbesparelm_options.add_options()
       ("help,h", "display this help")
+      ("verbose,v", "display short intermediate messages")
       ;
 
     //--- hidden options ---------
     po::options_description hidden_options;
     hidden_options.add_options()
-      ("input-file", po::value<std::string>(&pbesfile), "input file")
+      ("input-file", po::value<std::string>(&infile), "input file")
+      ("output-file", po::value<std::string>(&outfile), "output file")
     ;
 
     //--- positional options ---------
     po::positional_options_description positional_options;
     positional_options.add("input-file", 1);
+    positional_options.add("output-file", 1);
 
     //--- command line options ---------
     po::options_description cmdline_options;
@@ -60,14 +65,19 @@ int main(int argc, char* argv[])
       std::cout << pbesparelm_options << "\n";
       return 1;
     }
+    if (var_map.count("verbose")) {
+      mcrl2::core::gsSetVerboseMsg();
+    }
 
     std::cout << "pbesparelm parameters:" << std::endl;
-    std::cout << "  input file:         " << pbesfile << std::endl;
+    std::cout << "  input file:         " << infile << std::endl;
+    std::cout << "  output file:        " << outfile << std::endl;
 
     pbes<> p;
-    p.load(pbesfile);
+    p.load(infile);
     pbes_parelm_algorithm algorithm;
     algorithm.run(p);
+    p.save(outfile);
   }
   catch(std::runtime_error e)
   {
