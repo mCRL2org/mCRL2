@@ -1,5 +1,6 @@
 #ifndef MCRL2_PBES_UTIL_H
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 #define MCRL2_PBES_UTIL_H
 
 #include "mcrl2/data/data.h"

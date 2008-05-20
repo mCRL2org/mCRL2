@@ -1,5 +1,6 @@
 #ifndef FSMLEXER_H
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 #define FSMLEXER_H
 
 // Flex expects the signature of yylex to be defined in the macro YY_DECL, and

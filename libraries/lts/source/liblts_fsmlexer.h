@@ -1,5 +1,6 @@
 #ifndef __FSMLEXER_H
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 #define __FSMLEXER_H
 
 #include <aterm2.h>

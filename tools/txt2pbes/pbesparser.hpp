@@ -1,5 +1,6 @@
 /* A Bison parser, made by GNU Bison 1.875c.  */
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 
 /* Skeleton parser for Yacc-like parsing with Bison,
    Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.

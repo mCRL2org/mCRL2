@@ -1,5 +1,6 @@
 #line 2 "mcrl2lexer.cpp"
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 
 #line 4 "mcrl2lexer.cpp"
 

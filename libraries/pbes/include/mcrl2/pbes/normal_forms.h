@@ -1,5 +1,6 @@
 
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 
 // Author(s): Simona Orzan. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file

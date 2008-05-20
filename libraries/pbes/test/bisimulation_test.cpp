@@ -1,5 +1,6 @@
 #include <boost/test/minimal.hpp>
-// Copyright: see the accompanying file COPYING.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbes2bool.h"
