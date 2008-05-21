@@ -36,6 +36,10 @@ ATermAppl parse_data_expr(istream &de_stream) {
   return parse_tagged_stream("data_expr", de_stream);
 }
 
+ATermAppl parse_data_spec(istream &ps_stream) {
+  return parse_tagged_stream("data_spec", ps_stream);
+}
+
 ATermAppl parse_mult_act(istream &pe_stream) {
   return parse_tagged_stream("mult_act", pe_stream);
 }

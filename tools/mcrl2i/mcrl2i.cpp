@@ -285,15 +285,54 @@ static void declare_variables(string &vars, data_specification &spec)
   }
 }
 
+static data_specification load_specification(const string &infilename)
+{
+  ATermAppl raw_specification;
+  if (infilename.empty()) {
+    //use empty data specification
+    raw_specification = implement_data_data_spec(
+      gsMakeDataSpec(
+        gsMakeSortSpec(ATmakeList0()),
+        gsMakeConsSpec(ATmakeList0()),
+        gsMakeMapSpec(ATmakeList0()),
+        gsMakeDataEqnSpec(ATmakeList0())
+      )
+    );
+  } else {
+    //load data specification from file infilename
+    gsVerboseMsg("reading LPS from '%s'\n", infilename.c_str());
+
+    FILE *in_stream = fopen(infilename.c_str(), "rb");
+
+    if (in_stream == 0) {
+      throw std::runtime_error("error: could not open input file '" + infilename + "' for reading");
+    }
+
+    raw_specification = (ATermAppl) ATreadFromFile(in_stream);
+
+    fclose(in_stream);
+
+    if (raw_specification == 0) {
+      throw std::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
+    }
+    if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
+      throw std::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
+    }
+    raw_specification = ATAgetArgument(raw_specification, 0);
+  }
+  data_specification spec(raw_specification);
+  return spec;
+}
+
 struct tool_options_type {
   std::string     infilename;
   RewriteStrategy strategy;
 };
 
 static tool_options_type parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n"
-    "Evaluate expressions using the data specification of the LPS or PBES in INFILE "
-    "via a text-based interface."
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+    "Evaluate mCRL2 data expressions via a text-based interface. "
+    "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used."
     "\n\n"
     + std::string(help_message));
 
@@ -305,11 +344,10 @@ static tool_options_type parse_command_line(int ac, char** av) {
 
   options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (parser.arguments.size() == 0) {
-    parser.error("no INFILE specified");
-  } else if (parser.arguments.size() == 1) {
+  if (0 < parser.arguments.size()) {
     options.infilename = parser.arguments[0];
-  } else {
+  }
+  if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
 
@@ -323,26 +361,7 @@ int main(int argc, char **argv)
   try {
     tool_options_type options(parse_command_line(argc, argv));
 
-    gsVerboseMsg("reading LPS from '%s'\n", options.infilename.c_str());
-
-    FILE *in_stream = fopen(options.infilename.c_str(), "rb");
-
-    if (in_stream == 0) {
-      throw std::runtime_error("error: could not open input file '" + options.infilename + "' for reading");
-    }
-
-    ATermAppl raw_specification = (ATermAppl) ATreadFromFile(in_stream);
-
-    fclose(in_stream);
-
-    if (raw_specification == 0) {
-      throw std::runtime_error("error: could not read LPS from '" + options.infilename + "'");
-    }
-    if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
-      throw std::runtime_error("error: '" + options.infilename + "' does not contain an LPS");
-    }
-
-    data_specification spec(ATgetArgument(raw_specification, 0));
+    data_specification spec = load_specification(options.infilename);
 
     gsMessage("mCRL2 interpreter (type :h for help)\n");
  

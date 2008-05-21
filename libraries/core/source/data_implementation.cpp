@@ -27,6 +27,17 @@ namespace mcrl2 {
 //------------------
 
 
+static ATermAppl implement_data_spec(ATermAppl spec);
+//Pre: spec represents an mCRL2 data, process or PBES specification that
+//     adheres to the internal ATerm structure after the type checking phase.
+//Post:The datatypes of spec are implemented as higher-order abstract data
+//     types.
+//Ret: if the data implementation went well, an equivalent version of spec is
+//     returned that adheres to the internal ATerm structure after data
+//     implementation.
+//     If something went wrong, an appropriate error message is printed and
+//     NULL is returned.
+
 static ATermAppl impl_sort_refs(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation, with the exception that sort references may occur
@@ -175,38 +186,22 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //--------------
 
 
+ATermAppl implement_data_data_spec(ATermAppl spec)
+{
+  assert(gsIsDataSpec(spec));
+  return implement_data_spec(spec);
+}
+
 ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
-  int occ =
-    gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
-    gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //implement system sorts and data expressions occurring in spec
-  ATermList substs     = ATmakeList0();
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  spec = impl_exprs_appl(spec, &substs, &data_decls);
-  //perform substitutions on data declarations
-  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
-  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
-  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
-  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
-  impl_sort_bool(&data_decls);
-  //add new data declarations to spec
-  spec = add_data_decls(spec, data_decls);
-  //implement numerical pattern matching
-  spec = impl_numerical_pattern_matching(spec);
-  //implement sort references
-  spec = impl_sort_refs(spec);
-  //implement standard functions
-  spec = impl_standard_functions_spec(spec);
-  return spec;
+  return implement_data_spec(spec);
+}
+
+ATermAppl implement_data_pbes_spec(ATermAppl spec)
+{
+  assert(gsIsPBES(spec));
+  return implement_data_spec(spec);
 }
 
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
@@ -237,6 +232,40 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 {
   assert(gsIsStateFrm(state_frm));
   return impl_exprs_with_spec(state_frm, spec);
+}
+
+ATermAppl implement_data_spec(ATermAppl spec)
+{
+  assert(gsIsDataSpec(spec) || gsIsSpecV1(spec) || gsIsPBES(spec));
+  int occ =
+    gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
+    gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  //implement system sorts and data expressions occurring in spec
+  ATermList substs     = ATmakeList0();
+  t_data_decls data_decls;
+  initialize_data_decls(&data_decls);
+  spec = impl_exprs_appl(spec, &substs, &data_decls);
+  //perform substitutions on data declarations
+  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
+  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
+  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
+  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
+  //add implementation of sort Pos and Bool
+  impl_sort_pos(&data_decls);
+  impl_sort_bool(&data_decls);
+  //add new data declarations to spec
+  spec = add_data_decls(spec, data_decls);
+  //implement numerical pattern matching
+  spec = impl_numerical_pattern_matching(spec);
+  //implement sort references
+  spec = impl_sort_refs(spec);
+  //implement standard functions
+  spec = impl_standard_functions_spec(spec);
+  return spec;
 }
 
 ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
@@ -301,40 +330,6 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_sp
   lps_spec = impl_standard_functions_spec(lps_spec);
   ar_spec = impl_standard_functions_spec(ar_spec);
   return ar_spec;
-}
-
-ATermAppl implement_data_pbes_spec(ATermAppl spec)
-{
-  assert(gsIsPBES(spec));
-  int occ =
-    gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
-    gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unresolved type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //implement system sorts and data expressions occurring in spec
-  ATermList substs     = ATmakeList0();
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  spec = impl_exprs_appl(spec, &substs, &data_decls);
-  //perform substitutions on data declarations
-  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
-  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
-  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
-  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
-  impl_sort_bool(&data_decls);
-  //add new data declarations to spec
-  spec = add_data_decls(spec, data_decls);
-  //implement numerical pattern matching
-  spec = impl_numerical_pattern_matching(spec);
-  //implement sort references
-  spec = impl_sort_refs(spec);
-  //implement standard functions
-  spec = impl_standard_functions_spec(spec);
-  return spec;
 }
 
 ATermAppl impl_sort_refs(ATermAppl spec)

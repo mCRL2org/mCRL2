@@ -22,6 +22,16 @@ namespace mcrl2 {
 //Global preconditions:
 //- the ATerm library has been initialised
 
+/** \pre  data_spec represents an mCRL2 data specification that adheres to
+ *      the initial internal ATerm structure.
+ * \post data_spec is type checked.
+ * \return  if type checking went well, an equivalent version of data_spec is
+ *      returned that adheres to the internal ATerm structure after type
+ *      checking. if something went wrong, an appropriate error message is
+ *      printed and NULL is returned.
+ **/
+ATermAppl type_check_data_spec(ATermAppl data_spec);
+
 /** \pre  proc_spec represents an mCRL2 process specification that adheres to
  *      the initial internal ATerm structure.
  * \post proc_spec is type checked.

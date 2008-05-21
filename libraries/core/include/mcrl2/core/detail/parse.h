@@ -39,6 +39,15 @@ ATermAppl parse_sort_expr(std::istream &se_stream);
 ATermAppl parse_data_expr(std::istream &de_stream);
 
 
+/** \pre    ps_stream is an input stream from which can be read       
+  * \post   the content of ps_stream is parsed as an mCRL2 data 
+  *         specification
+  * \return the parsed data specification, if everything went well
+  *         NULL, otherwise
+**/ 
+ATermAppl parse_data_spec(std::istream &ps_stream);
+
+
 /** \pre    ma_stream is an input stream from which can be read       
   * \post   the content of ma_stream is parsed as an mCRL2 multi-action
   * \return the parsed multi-action, if everything went well

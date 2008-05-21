@@ -178,6 +178,44 @@ static ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec);
 //type checking functions
 //-----------------------
 
+ATermAppl type_check_data_spec(ATermAppl data_spec)
+{
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking read-in phase started\n");
+  
+  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+  // Check sorts for loops
+  // Unwind sorts to enable equiv and subtype relations
+  if(gstcReadInConstructors()) {
+  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+			       ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+  gsDebugMsg ("type checking read-in phase finished\n");
+  
+  gsDebugMsg ("type checking transform VarConst phase started\n");
+  if(gstcTransformVarConsTypeData()){
+  gsDebugMsg ("type checking transform VarConst phase finished\n");
+
+  Result = ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
+
+  Result = gstcFoldSortRefs(Result);
+
+  gsDebugMsg ("type checking phase finished\n");
+  }}}}
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  } 
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
   ATermAppl Result=NULL;
@@ -732,20 +770,29 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 
 ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 {
-  assert(gsIsSpecV1(Spec) || gsIsActionRenameSpec(Spec));
+  assert(gsIsDataSpec(Spec) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
   assert(gsIsSortSpec(SortSpec));
-  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
-  DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
-  Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
+  if (gsIsDataSpec(Spec)) {
+    Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
+  } else {
+    ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+    DataSpec = ATsetArgument(DataSpec, (ATerm) SortSpec, 0);
+    Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
+  }
   return Spec;
 }
 
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
-  assert(gsIsSpecV1(Spec) || gsIsActionRenameSpec(Spec));
+  assert(gsIsDataSpec(Spec) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
   gsDebugMsg("specification before folding:\n%T\n\n", Spec);
   //get sort declarations
-  ATermAppl DataSpec = ATAgetArgument(Spec, 0);
+  ATermAppl DataSpec;
+  if (gsIsDataSpec(Spec)) {
+    DataSpec = Spec;
+  } else {
+    DataSpec = ATAgetArgument(Spec, 0);
+  }
   ATermAppl SortSpec = ATAgetArgument(DataSpec, 0);
   ATermList SortDecls = ATLgetArgument(SortSpec, 0);
   //split sort declarations in sort id's and sort references

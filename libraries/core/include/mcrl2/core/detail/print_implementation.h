@@ -400,7 +400,7 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
     ATerm ReconstructedPart = Part;
     // Do not do data reconstruction in case of a debug print
     if (pp_format != ppDebug) {
-      if (gsIsSpecV1((ATermAppl) Part) || gsIsPBES((ATermAppl) Part)) {
+      if (gsIsDataSpec((ATermAppl) Part) || gsIsSpecV1((ATermAppl) Part) || gsIsPBES((ATermAppl) Part)) {
         ReconstructedPart = reconstruct_exprs(Part, (ATermAppl) Part);
       } else {
         ReconstructedPart = reconstruct_exprs(Part, NULL);
