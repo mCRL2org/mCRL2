@@ -4485,11 +4485,11 @@ void Frame::onButton( wxCommandEvent &e )
 		int textSize = (int) size;
 		if( textSize < 8 ) // Font size can be between 8 and 40
 		{
-			wxMessageBox(wxT("Please enter an integer bigger than 8"),wxT("Font size is too small"), wxOK | wxICON_INFORMATION, this);
+			wxMessageBox(wxT("Entered value should be an integer bigger than or equal to 8"),wxT("Font size is too small"), wxOK | wxICON_INFORMATION, this);
 		}
 		else if( textSize > 40 )
 		{
-			wxMessageBox(wxT("Please enter an integer smaller than 40"),wxT("Font size is too big"), wxOK | wxICON_INFORMATION, this);
+			wxMessageBox(wxT("Entered value should be an integer less than or equal to 40"),wxT("Font size is too big"), wxOK | wxICON_INFORMATION, this);
 		}
 		else if ( frameTextSize->Destroy() )
 		{
@@ -4499,7 +4499,7 @@ void Frame::onButton( wxCommandEvent &e )
 	}
 	else
 	{
-		wxMessageBox(wxT("Please enter an integer"),wxT("Wrong Input"), wxOK | wxICON_INFORMATION, this);
+		wxMessageBox(wxT("Please enter an integer between 8 and 40"),wxT("Wrong Input"), wxOK | wxICON_INFORMATION, this);
 	}
     }
 }
