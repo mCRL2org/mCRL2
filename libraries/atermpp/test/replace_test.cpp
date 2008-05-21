@@ -34,7 +34,7 @@ struct is_a_or_b
 {
   bool operator()(aterm_appl t) const
   {
-    t.function().name() == "a" || t.function().name() == "b";
+    return t.function().name() == "a" || t.function().name() == "b";
   }
 };
 

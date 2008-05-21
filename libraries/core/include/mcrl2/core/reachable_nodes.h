@@ -58,7 +58,7 @@ namespace detail {
 
     for (Iter i = first; i != last; ++i)
     {
-      boost::default_color_type c;
+      boost::default_color_type c = Color::white();
       boost::depth_first_visit(g, 
                                *i,
                                recorder,

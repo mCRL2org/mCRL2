@@ -39,8 +39,9 @@ namespace pbes_system {
 class pbes_parelm_algorithm
 {
   protected:
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
+    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
     typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
     
     template <class Iter, class T>
     void iota(Iter first, Iter last, T value) const
@@ -114,12 +115,26 @@ class pbes_parelm_algorithm
       std::cout << std::endl;
     }
 
+    template <typename Container>
+    core::identifier_string find_predicate_variable(const pbes<Container>& p, int index) const
+    {
+      int offset = 0;
+      for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      {
+        int size = i->variable().parameters().size();
+        if (offset + size > index)
+        {
+          return i->variable().name();
+        }
+        offset += i->variable().parameters().size();
+      }
+      return core::identifier_string("<not found>");
+    }
+
   public:
     template <typename Container>
     void run(pbes<Container>& p) const
     {
-//std::cout << "<pbes>" << pp(p) << std::endl;
-//print_pp_container(p.free_variables(), "<pbes free variables>");
       data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
       std::vector<data::data_variable> predicate_variables;
       
@@ -134,18 +149,12 @@ class pbes_parelm_algorithm
       }
       int N = offset; // # variables
 
-//print_pp_container(predicate_variables, "<predicate_variables>", true);
-//print_map(propvar_offsets, "<variable offsets>");
-
       // compute the initial set v of significant variables
       std::set<int> v;
       offset = 0;
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-//std::cout << "<equation>" << pp(*i) << std::endl;
         std::set<data::data_variable> uvars = unbound_variables(i->formula(), fvars);
-//print_pp_container(uvars, "<unbound variables>");
-
         for (std::set<data::data_variable>::iterator j = uvars.begin(); j != uvars.end(); ++j)
         {
           int k = variable_index(i->variable().parameters(), *j);
@@ -163,7 +172,6 @@ class pbes_parelm_algorithm
       graph G(N);
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-//std::cout << "<equation>" << pp(*i) << std::endl;
         core::identifier_string X = i->variable().name();
         data::data_variable_list params = i->variable().parameters();
         pbes_expression phi = i->formula();
@@ -171,7 +179,6 @@ class pbes_parelm_algorithm
         std::set<propositional_variable_instantiation> propvars = find_all_propositional_variable_instantiations(phi);
         for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
-//std::cout << "<inst>" << pp(*j) << std::endl;
           int k0 = 0;
           for (data::data_expression_list::iterator k = j->parameters().begin(); k != j->parameters().end(); ++k)
           {
@@ -184,25 +191,20 @@ class pbes_parelm_algorithm
                 continue;
               }
               int j0 = propvar_offsets[X] + vi;
-//std::cout << "<edge>" << j0 << "," << k0 << "  " << pp(*l) << " " << pp(X) << std::endl;
-              boost::add_edge(j0, k0, G);
+              boost::add_edge(j0, propvar_offsets[j->name()] + k0, G);
             }
             k0++;
           }
         }
       }
 
-//print_container(v, "<initial significant variables>");
-
       // compute the indices s of the parameters that need to be removed
       std::vector<int> r = core::reachable_nodes(G, v.begin(), v.end());
-//print_container(r, "<significant variables>");
       std::sort(r.begin(), r.end());
       std::vector<int> q(N);
       iota(q.begin(), q.end(), 0);
       std::vector<int> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
-//print_container(s, "<insignificant variables>");
 
       // create a map that specifies the parameters that need to be removed
       std::map<core::identifier_string, std::vector<int> > removals;
@@ -214,10 +216,42 @@ class pbes_parelm_algorithm
         std::vector<int>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<int>(), _1, maxindex));
         if (slast > sfirst)
         {
-          removals[i->variable().name()] = std::vector<int>(sfirst, slast);
+          std::vector<int> w(sfirst, slast);
+          std::transform(w.begin(), w.end(), w.begin(), boost::bind(std::minus<int>(), _1, index));
+          removals[i->variable().name()] = w;
         }
         index = maxindex;
         sfirst = slast;
+      }
+
+      // print debug output
+      if (mcrl2::core::gsDebug)
+      {
+        std::cout << "\ninfluential parameters:" << std::endl;
+        for(std::set<int>::iterator i = v.begin(); i != v.end(); ++i)
+        {
+          core::identifier_string X1 = find_predicate_variable(p, *i);
+          data::data_variable v1 = predicate_variables[*i];
+          std::cout << "(" + pp(X1) + ", " + pp(v1) + ")\n";
+        }
+        std::cout << "\ndependencies:" << std::endl;
+        typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
+        std::pair<edge_iterator, edge_iterator> e = edges(G);
+        edge_iterator first = e.first;
+        edge_iterator last  = e.second;       
+        for( ; first != last; ++first)
+        {
+          edge_descriptor e = *first;
+          int i1 = boost::source(e, G);
+          core::identifier_string X1 = find_predicate_variable(p, i1);
+          data::data_variable v1 = predicate_variables[i1];
+          int i2 = boost::target(e, G);
+          core::identifier_string X2 = find_predicate_variable(p, i2);
+          data::data_variable v2 = predicate_variables[i2];
+          std::string left  = "(" + pp(X1) + ", " + pp(v1) + ")";
+          std::string right = "(" + pp(X2) + ", " + pp(v2) + ")";
+          std::cout << left << " -> " << right << std::endl;
+        }
       }
 
       // print verbose output
@@ -226,12 +260,13 @@ class pbes_parelm_algorithm
         std::cout << "\nremoving the following parameters:" << std::endl;
         for (std::map<core::identifier_string, std::vector<int> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
-          std::cout << "  predicate variable " << pp(i->first) << " -> ";
+          core::identifier_string X1 = i->first;
+
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
-            std::cout << pp(predicate_variables[*j]) << " ";
+            data::data_variable v1 = predicate_variables[*j];
+            std::cout << "(" + pp(X1) + ", " + pp(v1) + ")\n";
           }
-          std::cout << std::endl;
         }
       }
 

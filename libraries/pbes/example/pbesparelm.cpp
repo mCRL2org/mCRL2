@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
     pbesparelm_options.add_options()
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
+      ("debug,d", "display detailed intermediate messages")
       ;
 
     //--- hidden options ---------
@@ -65,13 +66,19 @@ int main(int argc, char* argv[])
       std::cout << pbesparelm_options << "\n";
       return 1;
     }
+    if (var_map.count("debug")) {
+      mcrl2::core::gsSetDebugMsg();
+    }
     if (var_map.count("verbose")) {
       mcrl2::core::gsSetVerboseMsg();
     }
 
-    std::cout << "pbesparelm parameters:" << std::endl;
-    std::cout << "  input file:         " << infile << std::endl;
-    std::cout << "  output file:        " << outfile << std::endl;
+    if (mcrl2::core::gsVerbose)
+    {
+      std::cout << "pbesparelm parameters:" << std::endl;
+      std::cout << "  input file:         " << infile << std::endl;
+      std::cout << "  output file:        " << outfile << std::endl;
+    }
 
     pbes<> p;
     p.load(infile);
