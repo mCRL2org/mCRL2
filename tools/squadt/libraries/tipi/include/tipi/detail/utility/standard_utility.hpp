@@ -1,6 +1,6 @@
 #ifndef __STANDARD_UTILITY_HPP__
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define __STANDARD_UTILITY_HPP__
 
 /**

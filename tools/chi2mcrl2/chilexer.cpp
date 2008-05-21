@@ -1,6 +1,6 @@
 #line 2 "chilexer.cpp"
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 
 #line 4 "chilexer.cpp"
 

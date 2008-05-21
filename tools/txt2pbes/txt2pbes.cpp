@@ -1,6 +1,6 @@
 // Author(s): Aad Mathijssen and Simona Orzan. Distributed under
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 // the Boost (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //

@@ -53,16 +53,17 @@
   tools.
   
   The \squadt desktop application is a graphical user interface layer around a
-  new tool integration framework, of which a central part is played by the
-  protocol we are going to describe.  The name \squadt, stands for (Systems
-  Quality, Analysis and Design Toolset), which refers to the kind of tasks that
-  can be performed with the connected tools. The connected tools are those
-  found in the mCRL2 toolset. Most of these the tools can be used stand-alone
-  by means of a traditional command line interface and some with a graphical
-  user interface.  The only communication between the tools is uni-directional
-  by means of files or file streams (also known as piping). The design of the
-  \squadt graphical user interface as well as much of its functionality have,
-  so far been targeted at tools with this specific behaviour.
+  new tool integration framework, within which a central part is played by the
+  communication protocol described in this text.  The name \squadt, stands for
+  (Systems Quality, Analysis and Design Toolset), which refers to the kind of
+  tasks that can be performed with the connected tools. The connected tools are
+  those found in the mCRL2 toolset. Most of these the tools can be used
+  stand-alone by means of a traditional command line interface and some with a
+  graphical user interface.  The only communication between the tools is
+  uni-directional by means of files or file streams (also known as piping). The
+  design of the \squadt graphical user interface as well as much of its
+  functionality have, so far been targeted at tools with this specific
+  behaviour.
   
   The idea of using a graphical user interface to simplify the use of a toolset
   is is not new. The \squadt application is very much influenced by the
@@ -103,18 +104,19 @@
   a result the user analyses the wrong results. The idea is to help the user
   to become aware of such inconsistencies when they arise.
 
-  Consistency is a property of two disjoint sets of files established by tools.
-  Every file in a project is either added by the user, or it is produced by a
-  single tool with a single configuration from a single set of input files. So
-  every file in the project can be (re)produced in a unique way by applying
-  tools to files. A file in a project is \textit{consistent} if and only if
-  reapplication of the tool does not change the contents of the file, provided
-  that the set of input files is consistent.  A tool produces a set of output
-  files from a given set of input files, at which point the output files are
-  all consistent. Without inspecting the contents of files, the framework can
-  only detect when changes have occurred to files.  Using file dependencies
-  available from the project context it can then deduce which files may no
-  longer be consistent.
+  Consistency is a property between two disjoint sets of files that is
+  established by the application of a tool to the files of one of the sets and
+  the output of the tool being the files in the other set.  Every file in a
+  project is either added by the user, or it is produced by a single tool with
+  a single configuration from a single set of input files. So every file in the
+  project can be (re)produced in a unique way by applying tools to files. A
+  file in a project is \textit{consistent} if and only if reapplication of the
+  tool does not change the contents of the file, provided that the set of input
+  files is consistent.  A tool produces a set of output files from a given set
+  of input files, at which point the output files are all consistent. Without
+  inspecting the contents of files, the framework can only detect when changes
+  have occurred to files.  Using file dependencies available from the project
+  context it can then deduce which files may no longer be consistent.
   
   Inconsistency can result from legitimate tool application within the scope of
   a project, but also from unexpected tool behaviour or system/hardware
@@ -928,10 +930,9 @@
    \end{figure}
    \vspace{-0.5cm}
 
-   \noindent The response message is a termination notification, which
-   signifies that the tool is shutting down and will terminate soon.  So from
-   any context a tool may send a termination notification, which is a message
-   that looks as follows:
+   \noindent The response must be a termination notification, as shown in the
+   table below, which signifies that the tool is shutting down and will
+   terminate soon. A tool may send a termination notification from any context.
 
    \begin{figure}[H]
     \begin{center}
@@ -1008,16 +1009,16 @@
                        & \ LayoutManager = BoxLayoutManager \\
                        & \ \ BoxLayoutManager = Direction $\times$ List(Properties $\times$ id $\times$ LayoutElement)) \\
                        & \ \ \ Direction = 'horizontal' $|$ 'vertical' \\
-                       & \ \ \ Properties = Visibility $|$ Input $|$ Margin $|$ Alignment \\
+                       & \ \ \ Properties = Visibility $\times$ Input $\times$ Margins $\times$ Alignment \\
                        & \ \ \ \ Visibility = 'visible' $|$ 'hidden' \\
                        & \ \ \ \ Status = 'enabled' $|$ 'disabled' \\
-                       & \ \ \ \ Margin = Left $\times$ Top $\times$ Right $\times$ Bottom \\
+                       & \ \ \ \ Margins = Left $\times$ Top $\times$ Right $\times$ Bottom \\
                        & \ \ \ \ \ Left   = $\mathbb{N}$ \\
                        & \ \ \ \ \ Top    = $\mathbb{N}$ \\
                        & \ \ \ \ \ Right  = $\mathbb{N}$ \\
                        & \ \ \ \ \ Bottom = $\mathbb{N}$ \\
                        & \ \ \ \ Alignment = HorizontalAlignment $\times$ VerticalAlignment \\
-                       & \ \ \ \ \ HorizontalAlignment = 'left' $|$ 'center' $|$ 'right' \\
+                       & \ \ \ \ \ HorizontalAlignment = 'left' $|$ 'centre' $|$ 'right' \\
                        & \ \ \ \ \ VerticalAlignment = 'bottom' $|$ 'middle' $|$ 'top' \\
                        & \ \ \ LayoutElement = LayoutManager $|$ Control \\
                        & \ \ \ \ Widget = ProgressBar $|$ RadioButton $|$ Button $|$ Label $|$ TextField $|$ CheckBox \\
@@ -1660,6 +1661,7 @@
   \section{Appendix}
   \pagestyle{empty}
 
+  \subsection{Behavioural model}
   The following listing shows an mCRL2 model of the combined communication
   behaviour of the protocol. Besides communication tool start and termination
   only communications actions are visible. The model features a single
@@ -1668,11 +1670,28 @@
   \small \verbatiminput{protocol.mcrl2} \normalsize
 %  \rotatebox{90}{\verbatiminput{protocol.mcrl2}}
 
+  \pagebreak
+
+  The following figure is a graphical representation of the communication
+  behaviour using the mCRL2 model presented previously. The picture was created
+  automatically by first linearising and instantiating to create a labelled
+  transition system and minimising that modulo branching bisimulation. The
+  minimised labelled transition system then was visualised as a labelled graph
+  and the resulting picture is the result of some manual polishing.
+
   \begin{figure}[H]
-   \includegraphics[width=\textheight,angle=90]{protocol.eps}
+   \includegraphics[width=\textheight-3.5cm,angle=90]{protocol.eps}
    \caption{Graphical representation of the state-space}
   \end{figure}
 
+  \subsection{XML Schema for Messages}
+
+  A formal specification of the syntax of messages is given by the following
+  XML schema listing. The main element is a message with a mandatory attribute
+  type. The value of the message type attribute determines the contents of the
+  message.
+
+  \small \verbatiminput{protocol.xsd} \normalsize
 %   The purpose of the protocol is make it possible for a user to control of a
 %   tool through facilities offered by a separate system that acts as
 %   intermediary. The protocol describes how a tool can be configured to perform

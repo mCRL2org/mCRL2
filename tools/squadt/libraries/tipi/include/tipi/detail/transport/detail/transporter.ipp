@@ -1,6 +1,6 @@
 #ifndef TIPI_TRANSPORTER_TCC__
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define TIPI_TRANSPORTER_TCC__
 
 #include <exception>

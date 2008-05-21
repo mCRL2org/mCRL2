@@ -1,6 +1,6 @@
 #include "infodialog.h"
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <wx/notebook.h>
 #include <algorithm>
 

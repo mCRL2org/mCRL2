@@ -1,6 +1,6 @@
 #include <string.h>
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>

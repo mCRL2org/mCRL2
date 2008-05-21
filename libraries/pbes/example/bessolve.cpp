@@ -1,6 +1,6 @@
 #include <iostream>
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>

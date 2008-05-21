@@ -1,6 +1,6 @@
 #include <tipi/tool_display.hpp>
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <tipi/visitors.hpp>
 
 namespace tipi {

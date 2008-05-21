@@ -1,6 +1,6 @@
 /* A Bison parser, made by GNU Bison 2.3.  */
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
 

@@ -1,6 +1,6 @@
 #ifndef LPS_TEST_SPECIFICATIONS_H
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING).
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define LPS_TEST_SPECIFICATIONS_H
 
 #include <string>
