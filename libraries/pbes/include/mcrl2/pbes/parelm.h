@@ -172,28 +172,32 @@ class pbes_parelm_algorithm
       graph G(N);
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
+        // left hand side (X)
         core::identifier_string X = i->variable().name();
-        data::data_variable_list params = i->variable().parameters();
-        pbes_expression phi = i->formula();
+        data::data_variable_list Xparams = i->variable().parameters();
 
+        // right hand side (Y)
+        pbes_expression phi = i->formula();
         std::set<propositional_variable_instantiation> propvars = find_all_propositional_variable_instantiations(phi);
         for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
-          int k0 = 0;
-          for (data::data_expression_list::iterator k = j->parameters().begin(); k != j->parameters().end(); ++k)
+          core::identifier_string Y = j->name();
+          data::data_expression_list Yparams = j->parameters();
+          int Yindex = 0;
+          for (data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
           {
-            std::set<data::data_variable> vars = data::find_all_data_variables(*k);
-            for (std::set<data::data_variable>::iterator l = vars.begin(); l != vars.end(); ++l)
+            std::set<data::data_variable> vars = data::find_all_data_variables(*y);
+            for (std::set<data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
             {
-              int vi = variable_index(params, *l);
-              if (vi < 0)
+              int Xindex = variable_index(Xparams, *k);
+              if (Xindex < 0)
               {
                 continue;
               }
-              int j0 = propvar_offsets[X] + vi;
-              boost::add_edge(j0, propvar_offsets[j->name()] + k0, G);
+              // parameter (Y, Yindex) is influenced by (X, Xindex)
+              boost::add_edge(propvar_offsets[Y] + Yindex, propvar_offsets[X] + Xindex, G);
             }
-            k0++;
+            Yindex++;
           }
         }
       }
