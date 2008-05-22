@@ -449,7 +449,7 @@ namespace data_expr {
       {
         return data_expr::true_();
       }
-      return core::gsMakeDataExprEq(d, e);
+      return core::detail::gsMakeDataExprEq(d, e);
     }
     
     /// \brief Returns the expression d != e
@@ -460,7 +460,7 @@ namespace data_expr {
       {
         return data_expr::false_();
       }
-      return core::gsMakeDataExprNeq(d, e);
+      return core::detail::gsMakeDataExprNeq(d, e);
     }
     
     /// \brief Returns or applied to the sequence of data expressions [first, last[
