@@ -129,7 +129,7 @@ namespace lps {
   data_expression lhs(const data_expression t)
   {
     assert(is_and(t) || is_equal_to(t));
-    return data_expression(ATAelementAt(ATLgetArgument(t, 1), 0));
+    return *(static_cast<const data_application&>(t).arguments().begin());
   }
 
   ///pre: is_and(t) || is_equal_to(t)
@@ -138,7 +138,7 @@ namespace lps {
   data_expression rhs(const data_expression t)
   {
     assert(is_and(t) || is_equal_to(t));
-    return data_expression(ATAelementAt(ATLgetArgument(t, 1), 1));
+    return *(++static_cast<const data_application&>(t).arguments().begin());
   }
 
   ///pre: is_equal_to(t); t is of form a == b
