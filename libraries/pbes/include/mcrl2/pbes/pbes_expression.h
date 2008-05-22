@@ -137,7 +137,7 @@ namespace pbes_expr {
   inline bool is_exists(pbes_expression t) { return is_pbes_exists(t); }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(pbes_expression t) { return core::gsIsDataExpr(t); }
+  inline bool is_data(pbes_expression t) { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t) { return core::detail::gsIsPropVarInst(t); }
@@ -152,7 +152,7 @@ namespace accessors {
   inline
   data::data_expression val(pbes_expression t)
   {
-    assert(core::gsIsDataExpr(t));
+    assert(core::detail::gsIsDataExpr(t));
     return aterm_appl(t);
   }
 

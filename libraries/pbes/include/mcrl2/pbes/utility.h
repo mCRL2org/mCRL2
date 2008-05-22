@@ -570,7 +570,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     new_data_vars=push_front(new_data_vars,new_data_variable);
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
-                  pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
+                  pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
@@ -670,7 +670,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     new_data_vars=push_front(new_data_vars,new_data_variable);
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
-                  pbes_expression d(gsMakeDataApplList(*f,reverse(function_arguments)));
+                  pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
                   rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));

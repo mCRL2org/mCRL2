@@ -163,7 +163,7 @@ using namespace mcrl2::core::detail;
   inline bool is_mult_act(aterm_appl t) { return core::detail::gsIsMultAct(t); }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(aterm_appl t) { return core::gsIsDataExpr(t); }
+  inline bool is_data(aterm_appl t) { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
   inline bool is_true(aterm_appl t) { return core::detail::gsIsActTrue(t); }

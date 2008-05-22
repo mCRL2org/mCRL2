@@ -56,14 +56,14 @@ class data_application: public data_expression
     ///
     data_expression head() const
     {
-      return core::gsGetDataExprHead(*this);
+      return core::detail::gsGetDataExprHead(*this);
     }
 
     /// Returns the arguments of the data expression.
     ///
     data_expression_list arguments() const
     {
-      return core::gsGetDataExprArgs(*this);
+      return core::detail::gsGetDataExprArgs(*this);
     }
 
     sort_expression sort() const

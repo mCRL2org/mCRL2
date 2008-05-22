@@ -106,7 +106,7 @@ sort_expression arrow(sort_expression_list domain, sort_expression range)
 inline
 sort_expression_list domain_sorts(sort_expression s)
 {
-  return core::gsGetSortExprDomain(s);
+  return core::detail::gsGetSortExprDomain(s);
 }
 
 /// Returns the range sort of s.
@@ -114,7 +114,7 @@ sort_expression_list domain_sorts(sort_expression s)
 inline
 sort_expression result_sort(sort_expression s)
 {
-  return core::gsGetSortExprResult(s);
+  return core::detail::gsGetSortExprResult(s);
 }
 
 /// Returns the source of the sort.
@@ -154,35 +154,35 @@ namespace sort_expr {
   inline
   sort_expression real()
   {
-    return core::gsMakeSortExprReal();
+    return core::detail::gsMakeSortExprReal();
   }
   
   /// Returns the predefined sort_expression int.
   inline
   sort_expression int_()
   {
-    return core::gsMakeSortExprInt();
+    return core::detail::gsMakeSortExprInt();
   }
   
   /// Returns the predefined sort_expression pos.
   inline
   sort_expression pos()
   {
-    return core::gsMakeSortExprPos();
+    return core::detail::gsMakeSortExprPos();
   }
   
   /// Returns the predefined sort_expression nat.
   inline
   sort_expression nat()
   {
-    return core::gsMakeSortExprNat();
+    return core::detail::gsMakeSortExprNat();
   }
   
   /// Returns the predefined sort_expression bool.
   inline
   sort_expression bool_()
   {
-    return core::gsMakeSortExprBool();
+    return core::detail::gsMakeSortExprBool();
   }
 
   /// \brief Returns true if the term t equals the sort_expression real

@@ -24,6 +24,7 @@ using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
   namespace core {
+    namespace detail {
 
 //Local declarations
 //------------------
@@ -3833,6 +3834,7 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
   }
 }
 
+    }
   }
 }
 

@@ -227,7 +227,7 @@ using atermpp::list_arg2;
   }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(aterm_appl t) { return core::gsIsDataExpr(t); }
+  inline bool is_data(aterm_appl t) { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
   inline bool is_true(aterm_appl t) { return core::detail::gsIsStateTrue(t); }
@@ -284,7 +284,7 @@ using atermpp::list_arg2;
   inline
   data::data_expression val(state_formula t)
   {
-    assert(core::gsIsDataExpr(t));
+    assert(core::detail::gsIsDataExpr(t));
     return t;
   }
   

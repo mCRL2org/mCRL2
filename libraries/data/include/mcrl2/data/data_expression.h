@@ -68,7 +68,7 @@ class data_expression: public aterm_appl
     ///
     sort_expression sort() const
     {
-      ATermAppl result = core::gsGetSort(*this);
+      ATermAppl result = core::detail::gsGetSort(*this);
       assert(!core::detail::gsIsSortUnknown(result));
       return sort_expression(result);
     }
@@ -87,7 +87,7 @@ class data_expression: public aterm_appl
 inline
 bool is_data_expression(aterm_appl t)
 {
-  return core::gsIsDataExpr(t);
+  return core::detail::gsIsDataExpr(t);
 }
 
 /// Returns the head of the data expression t.
@@ -95,7 +95,7 @@ bool is_data_expression(aterm_appl t)
 inline
 data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 {
-  return core::gsGetDataExprHead(t);
+  return core::detail::gsGetDataExprHead(t);
 }
 
 /// Returns the arguments of the data expression t.
@@ -103,7 +103,7 @@ data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 inline
 data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
 {
-  return core::gsGetDataExprArgs(t);
+  return core::detail::gsGetDataExprArgs(t);
 }
 
 /// Accessor functions and predicates for data expressions.
@@ -124,22 +124,22 @@ namespace data_expr {
   inline bool is_nil(aterm_appl t) { return t == core::detail::gsMakeNil(); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(aterm_appl t) { return core::gsIsDataExprTrue(t); }
+  inline bool is_true(aterm_appl t) { return core::detail::gsIsDataExprTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(aterm_appl t) { return core::gsIsDataExprFalse(t); }
+  inline bool is_false(aterm_appl t) { return core::detail::gsIsDataExprFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(aterm_appl t) { return core::gsIsDataExprNot(t); }
+  inline bool is_not(aterm_appl t) { return core::detail::gsIsDataExprNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(aterm_appl t) { return core::gsIsDataExprAnd(t); }
+  inline bool is_and(aterm_appl t) { return core::detail::gsIsDataExprAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(aterm_appl t) { return core::gsIsDataExprOr(t); }
+  inline bool is_or(aterm_appl t) { return core::detail::gsIsDataExprOr(t); }
 
   /// \brief Returns true if the term t is an implication
-  inline bool is_imp(aterm_appl t) { return core::gsIsDataExprImp(t); }
+  inline bool is_imp(aterm_appl t) { return core::detail::gsIsDataExprImp(t); }
 
   /// \brief Returns true if the term t is a 'binder'
   inline bool is_binder(aterm_appl t) { return core::detail::gsIsBinder(t); }
@@ -181,7 +181,7 @@ namespace data_expr {
   inline
   data_expression real(int i)
   {
-    return core::gsMakeDataExprCReal(core::gsMakeDataExprInt_int(i));
+    return core::detail::gsMakeDataExprCReal(core::detail::gsMakeDataExprInt_int(i));
   }
 
   /// \brief Returns a pos with value i
@@ -190,35 +190,35 @@ namespace data_expr {
   data_expression pos(unsigned int i)
   {
     assert(i > 0);
-    return core::gsMakeDataExprPos_int(i);
+    return core::detail::gsMakeDataExprPos_int(i);
   }
 
   /// \brief Returns a nat with value i
   inline
   data_expression nat(unsigned int i)
   {
-    return core::gsMakeDataExprNat_int(i);
+    return core::detail::gsMakeDataExprNat_int(i);
   }
 
   /// \brief Returns an int with value i
   inline
   data_expression int_(int i)
   {
-    return core::gsMakeDataExprInt_int(i);
+    return core::detail::gsMakeDataExprInt_int(i);
   }
 
   /// \brief Returns the expression true
   inline
   data_expression true_()
   {
-    return data_expression(core::gsMakeDataExprTrue());
+    return data_expression(core::detail::gsMakeDataExprTrue());
   }
 
   /// \brief Returns the expression false
   inline
   data_expression false_()
   {
-    return data_expression(core::gsMakeDataExprFalse());
+    return data_expression(core::detail::gsMakeDataExprFalse());
   }
 
   /// \brief Returns not applied to p
@@ -226,7 +226,7 @@ namespace data_expr {
   inline
   data_expression not_(data_expression p)
   {
-    return data_expression(core::gsMakeDataExprNot(p));
+    return data_expression(core::detail::gsMakeDataExprNot(p));
   }
 
   /// \brief Returns and applied to p and q
@@ -234,7 +234,7 @@ namespace data_expr {
   inline
   data_expression and_(data_expression p, data_expression q)
   {
-    return data_expression(core::gsMakeDataExprAnd(p,q));
+    return data_expression(core::detail::gsMakeDataExprAnd(p,q));
   }
 
   /// \brief Returns or applied to p and q
@@ -242,7 +242,7 @@ namespace data_expr {
   inline
   data_expression or_(data_expression p, data_expression q)
   {
-    return data_expression(core::gsMakeDataExprOr(p,q));
+    return data_expression(core::detail::gsMakeDataExprOr(p,q));
   }
 
   /// \brief Returns or applied to the sequence of data expressions [first, last[
@@ -260,160 +260,160 @@ namespace data_expr {
   }
 
   /// \brief Returns true if t is a negate expression
-  inline bool is_negate(data_expression t) { return core::gsIsDataExprNeg(t); }
+  inline bool is_negate(data_expression t) { return core::detail::gsIsDataExprNeg(t); }
 
   /// \brief Returns true if t is a plus expression
-  inline bool is_plus(data_expression t) { return core::gsIsDataExprAdd(t); }
+  inline bool is_plus(data_expression t) { return core::detail::gsIsDataExprAdd(t); }
 
   /// \brief Returns true if t is a minus expression
-  inline bool is_minus(data_expression t) { return core::gsIsDataExprSubt(t); }
+  inline bool is_minus(data_expression t) { return core::detail::gsIsDataExprSubt(t); }
 
   /// \brief Returns true if t is a multiply expression
-  inline bool is_multiplies(data_expression t) { return core::gsIsDataExprMult(t); }
+  inline bool is_multiplies(data_expression t) { return core::detail::gsIsDataExprMult(t); }
 
   /// \brief Returns true if t is a division expression
-  inline bool is_divides(data_expression t) { return core::gsIsDataExprDiv(t); }
+  inline bool is_divides(data_expression t) { return core::detail::gsIsDataExprDiv(t); }
 
   /// \brief Returns true if t is a modulus expression
-  inline bool is_modulus(data_expression t) { return core::gsIsDataExprMod(t); }
+  inline bool is_modulus(data_expression t) { return core::detail::gsIsDataExprMod(t); }
 
   /// \brief Returns true if t is an equality expression
-  inline bool is_equal_to(data_expression t) { return core::gsIsDataExprEq(t); }
+  inline bool is_equal_to(data_expression t) { return core::detail::gsIsDataExprEq(t); }
 
   /// \brief Returns true if t is an inequality expression
-  inline bool is_not_equal_to(data_expression t) { return core::gsIsDataExprNeq(t); }
+  inline bool is_not_equal_to(data_expression t) { return core::detail::gsIsDataExprNeq(t); }
 
   /// \brief Returns true if t is a less expression
-  inline bool is_less(data_expression t) { return core::gsIsDataExprLT(t); }
+  inline bool is_less(data_expression t) { return core::detail::gsIsDataExprLT(t); }
 
   /// \brief Returns true if t is a greater expression
-  inline bool is_greater(data_expression t) { return core::gsIsDataExprGT(t); }
+  inline bool is_greater(data_expression t) { return core::detail::gsIsDataExprGT(t); }
 
   /// \brief Returns true if t is a less-equal expression
-  inline bool is_less_equal(data_expression t) { return core::gsIsDataExprLTE(t); }
+  inline bool is_less_equal(data_expression t) { return core::detail::gsIsDataExprLTE(t); }
 
   /// \brief Returns true if t is a greater-equal expression
-  inline bool is_greater_equal(data_expression t) { return core::gsIsDataExprGTE(t); }
+  inline bool is_greater_equal(data_expression t) { return core::detail::gsIsDataExprGTE(t); }
 
   /// \brief Returns true if t is a min expression
-  inline bool is_min(data_expression t) { return core::gsIsDataExprMin(t); }
+  inline bool is_min(data_expression t) { return core::detail::gsIsDataExprMin(t); }
 
   /// \brief Returns true if t is a max expression
-  inline bool is_max(data_expression t) { return core::gsIsDataExprMax(t); }
+  inline bool is_max(data_expression t) { return core::detail::gsIsDataExprMax(t); }
 
   /// \brief Returns true if t is an abs expression
-  inline bool is_abs(data_expression t) { return core::gsIsDataExprAbs(t); }
+  inline bool is_abs(data_expression t) { return core::detail::gsIsDataExprAbs(t); }
 
   /// \brief Returns the expression d - e
   inline
   data_expression negate(data_expression d)
   {
-    return core::gsMakeDataExprNeg(d);
+    return core::detail::gsMakeDataExprNeg(d);
   }
 
   /// \brief Returns the expression d + e
   inline
   data_expression plus(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprAdd(d, e);
+    return core::detail::gsMakeDataExprAdd(d, e);
   }
 
   /// \brief Returns the expression d - e
   inline
   data_expression minus(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprSubt(d, e);
+    return core::detail::gsMakeDataExprSubt(d, e);
   }
 
   /// \brief Returns the expression d * e
   inline
   data_expression multiplies(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprMult(d, e);
+    return core::detail::gsMakeDataExprMult(d, e);
   }
 
   /// \brief Returns the expression d / e
   inline
   data_expression divides(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprDiv(d, e);
+    return core::detail::gsMakeDataExprDiv(d, e);
   }
 
   /// \brief Returns the expression d % e
   inline
   data_expression modulus(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprMod(d, e);
+    return core::detail::gsMakeDataExprMod(d, e);
   }
 
   /// \brief Returns the expression d = e
   inline
   data_expression equal_to(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprEq(d, e);
+    return core::detail::gsMakeDataExprEq(d, e);
   }
 
   /// \brief Returns the expression d != e
   inline
   data_expression not_equal_to(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprNeq(d, e);
+    return core::detail::gsMakeDataExprNeq(d, e);
   }
 
   /// \brief Returns the expression d < e
   inline
   data_expression less(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprLT(d, e);
+    return core::detail::gsMakeDataExprLT(d, e);
   }
 
   /// \brief Returns the expression d > e
   inline
   data_expression greater(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprGT(d, e);
+    return core::detail::gsMakeDataExprGT(d, e);
   }
 
   /// \brief Returns the expression d <= e
   inline
   data_expression less_equal(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprLTE(d, e);
+    return core::detail::gsMakeDataExprLTE(d, e);
   }
 
   /// \brief Returns the expression d >= e
   inline
   data_expression greater_equal(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprGTE(d, e);
+    return core::detail::gsMakeDataExprGTE(d, e);
   }
 
   /// \brief Returns an expression for the minimum of d and e
   inline
   data_expression min_(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprMin(d, e);
+    return core::detail::gsMakeDataExprMin(d, e);
   }
 
   /// \brief Returns an expression for the maximum of d and e
   inline
   data_expression max_(data_expression d, data_expression e)
   {
-    return core::gsMakeDataExprMax(d, e);
+    return core::detail::gsMakeDataExprMax(d, e);
   }
 
   /// \brief Returns an expression for the absolute value of d
   inline
   data_expression abs(data_expression d)
   {
-    return core::gsMakeDataExprAbs(d);
+    return core::detail::gsMakeDataExprAbs(d);
   }
 
   /// \brief Returns the expression 'if i then t else e'
   inline
   data_expression if_(data_expression i, data_expression t, data_expression e)
   {
-    return core::gsMakeDataExprIf(i, t, e);
+    return core::detail::gsMakeDataExprIf(i, t, e);
   }
 
   namespace optimized {

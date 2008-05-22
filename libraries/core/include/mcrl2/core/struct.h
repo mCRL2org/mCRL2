@@ -26,6 +26,7 @@
 
 namespace mcrl2 {
   namespace core {
+    namespace detail {
 
 
 // Sort expressions
@@ -1570,6 +1571,7 @@ bool gsIsPBExpr(ATermAppl Term);
 ///\return Term is a fixpoint
 bool gsIsFixpoint(ATermAppl Term);
 
+    }
   }
 }
 

@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
   /// The class BDD_Info provides information about the structure of binary decision diagrams.
 class BDD_Info {
