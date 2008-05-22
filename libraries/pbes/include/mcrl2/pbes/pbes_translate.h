@@ -1,4 +1,6 @@
-//#define MCRL2_PBES_TRANSLATE_DEBUG
+// #define MCRL2_PBES_TRANSLATE_DEBUG
+// #define MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
+
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
@@ -13,6 +15,7 @@
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
+#include <sstream>
 #include <algorithm>
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
@@ -120,6 +123,13 @@ class pbes_translate_algorithm
           return to;
         }
     };
+
+//    std::string pp(timed_action a)
+//    {
+//      std::ostringstream out;
+//      out << pp(actions);
+//      return out.str();
+//    }
 
     data::data_variable_list Par(core::identifier_string x, data::data_variable_list l, modal::state_formula f)
     {
@@ -230,6 +240,9 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 
     pbes_expression sat_top(timed_action a, modal::action_formula b)
     {
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+std::cout << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
+#endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
       namespace d = data::data_expr;
@@ -270,6 +283,9 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       } else {
         throw std::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+std::cout << "\n<satresult>" << pp(result) << std::flush;
+#endif
       return result;
     }
 
@@ -475,7 +491,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(result) << std::flush;
+std::cout << "\n<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -580,7 +596,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }
@@ -639,6 +655,9 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
   protected:
     pbes_expression sat_top(lps::action_list a, modal::action_formula b)
     {
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+std::cout << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
+#endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
       namespace p = pbes_expr_optimized;
@@ -681,6 +700,9 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
       } else {
         throw std::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
       }
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+std::cout << "\n<satresult>" << pp(result) << std::flush;
+#endif
       return result;
     }
 
@@ -849,7 +871,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(result) << std::flush;
+std::cout << "\n<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -956,7 +978,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << " -> " << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }

@@ -55,24 +55,38 @@ namespace detail {
     /// \pre a and b are sorted w.r.t. to the names of the actions.
     bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
     {
-      if(a.size() != b.size())
+      if (a.size() != b.size())
       {
         return false;
       }
       std::vector<lps::action>::const_iterator i, j;
       for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
       {
-        if (i->label().name() != j->label().name() || i->label().sorts() != j->label().sorts())
+        if (i->label() != j->label())
           return false;
       }
       return true;
     }
     
-    struct compare_action_name
+    // compare names and sorts of two actions
+    struct compare_actions
     {
       bool operator()(const lps::action& a, const lps::action& b) const
       {
-        return a.label().name() < b.label().name();
+        return a.label() < b.label();        
+      }
+    };
+    
+    struct compare_actions2
+    {
+      bool operator()(const lps::action& a, const lps::action& b) const
+      {
+        return a.label() < b.label();        
+        if (a.label().name() != b.label().name())
+        {
+          return a.label().name() ==  b.label().name();
+        }
+        return a.label().sorts() < b.label().sorts();
       }
     };
     
@@ -81,11 +95,11 @@ namespace detail {
     {
       const std::vector<lps::action>& a;
       const std::vector<lps::action>& b;
-      atermpp::vector<pbes_expression>& result;
+      atermpp::set<data::data_expression>& result;
     
       equal_data_parameters_builder(const std::vector<lps::action>& a_,
                                     const std::vector<lps::action>& b_,
-                                    atermpp::vector<pbes_expression>& result_
+                                    atermpp::set<data::data_expression>& result_
                                    )
         : a(a_),
           b(b_),
@@ -95,10 +109,10 @@ namespace detail {
       /// Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace pbes_expr_optimized;
+        using namespace data::data_expr::optimized;
         namespace d = data::data_expr;
     
-        atermpp::vector<pbes_expression> v;
+        atermpp::vector<data::data_expression> v;
         std::vector<lps::action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
@@ -108,10 +122,14 @@ namespace detail {
           data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(d::equal_to(*i1, *i2));
+            v.push_back(d::optimized::equal_to(*i1, *i2));
           }
         }
-        result.push_back(join_and(v.begin(), v.end()));
+        data::data_expression expr = join_and(v.begin(), v.end());
+#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
+std::cout << "  <and-term> " << pp(expr) << std::endl;
+#endif
+        result.insert(expr);
       }
     };
 
@@ -120,12 +138,12 @@ namespace detail {
     {
       const std::vector<lps::action>& a;
       const std::vector<lps::action>& b;
-      atermpp::vector<pbes_expression>& result;
+      atermpp::vector<data::data_expression>& result;
     
       not_equal_multi_actions_builder(const std::vector<lps::action>& a_,
-                                        const std::vector<lps::action>& b_,
-                                        atermpp::vector<pbes_expression>& result_
-                                       )
+                                      const std::vector<lps::action>& b_,
+                                      atermpp::vector<data::data_expression>& result_
+                                     )
         : a(a_),
           b(b_),
           result(result_)
@@ -134,10 +152,10 @@ namespace detail {
       /// Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace pbes_expr_optimized;
+        using namespace data::data_expr::optimized;
         namespace d = data::data_expr;
     
-        atermpp::vector<pbes_expression> v;
+        atermpp::vector<data::data_expression> v;
         std::vector<lps::action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
@@ -158,19 +176,29 @@ namespace detail {
     
     /// Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are equal.
-    pbes_expression equal_multi_actions(lps::action_list a, lps::action_list b)
+    data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
-      using namespace pbes_expr_optimized;
+#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
+std::cout << "\n<equal multi actions>" << std::endl;
+std::cout << "a = " << pp(a) << std::endl;
+std::cout << "b = " << pp(b) << std::endl;
+#endif
+      using namespace data::data_expr::optimized;
     
       // make copies of a and b and sort them
       std::vector<lps::action> va(a.begin(), a.end()); // protection not needed
       std::vector<lps::action> vb(b.begin(), b.end()); // protection not needed
-      std::sort(va.begin(), va.end(), detail::compare_action_name());
-      std::sort(vb.begin(), vb.end(), detail::compare_action_name());
-    
+      std::sort(va.begin(), va.end(), detail::compare_actions());
+      std::sort(vb.begin(), vb.end(), detail::compare_actions());
+
       if (!detail::equal_action_signatures(va, vb))
       {
-        return false_();
+#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
+std::cout << "different action signatures detected!" << std::endl;
+std::cout << "a = " << lps::action_list(va.begin(), va.end()) << std::endl;
+std::cout << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
+#endif
+        return data::data_expr::false_();
       }
     
       // compute the intervals of a with equal names
@@ -179,31 +207,34 @@ namespace detail {
       action_iterator first = va.begin();
       while (first != va.end())
       {
-        action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_name());
+        action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
         intervals.push_back(std::make_pair(first, next));
         first = next;
       }
-      atermpp::vector<pbes_expression> z;
+
+      atermpp::set<data::data_expression> z;
       detail::equal_data_parameters_builder f(va, vb, z);
       detail::forall_permutations(intervals.begin(), intervals.end(), f);
-      pbes_expression result = join_or(z.begin(), z.end());
+      data::data_expression result = join_or(z.begin(), z.end());
       return result;
     }
     
     /// Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are not equal.
-    pbes_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
+    data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
     {
-      using namespace pbes_expr_optimized;
+      using namespace data::data_expr::optimized;
     
       // make copies of a and b and sort them
       std::vector<lps::action> va(a.begin(), a.end());
       std::vector<lps::action> vb(b.begin(), b.end());
-      std::sort(va.begin(), va.end(), detail::compare_action_name());
-      std::sort(vb.begin(), vb.end(), detail::compare_action_name());
+      std::sort(va.begin(), va.end(), detail::compare_actions());
+      std::sort(vb.begin(), vb.end(), detail::compare_actions());
     
       if (!detail::equal_action_signatures(va, vb))
-        return true_();
+      {
+        return data::data_expr::true_();
+      }   
     
       // compute the intervals of a with equal names
       typedef std::vector<lps::action>::iterator action_iterator;
@@ -211,14 +242,14 @@ namespace detail {
       action_iterator first = va.begin();
       while (first != va.end())
       {
-        action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_name());
+        action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_actions());
         intervals.push_back(std::make_pair(first, next));
         first = next;
       }
-      atermpp::vector<pbes_expression> z;
+      atermpp::vector<data::data_expression> z;
       detail::not_equal_multi_actions_builder f(va, vb, z);
       detail::forall_permutations(intervals.begin(), intervals.end(), f);
-      pbes_expression result = join_and(z.begin(), z.end());
+      data::data_expression result = join_and(z.begin(), z.end());
       return result;
     }
 

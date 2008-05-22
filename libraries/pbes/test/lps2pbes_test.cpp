@@ -17,18 +17,22 @@
 #include <boost/algorithm/string.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+#include "mcrl2/core/text_utility.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/pbes/detail/test_utility.h"
 #include "test_specifications.h"
 
 using namespace std;
+using namespace mcrl2::core;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
 using namespace mcrl2::modal::detail;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::detail;
 namespace fs = boost::filesystem;
 
 const std::string ABP_SPECIFICATION =
@@ -251,6 +255,55 @@ void test_formulas()
   }
 }
 
+action act(std::string name, data_expression_list parameters)
+{
+  std::vector<sort_expression> sorts;
+  for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
+  {
+    sorts.push_back(i->sort());
+  }
+  action_label label(name, sort_expression_list(sorts.begin(), sorts.end()));
+  return action(label, parameters);
+}
+
+void test_multi_actions(action_list a, action_list b, data_expression expected_result = data_expression())
+{
+  data_expression result = equal_multi_actions(a, b);
+  std::cout << pp(result) << std::endl;
+  BOOST_CHECK(expected_result == data_expression() || result == expected_result);
+}
+
+void test_equal_multi_actions()
+{
+  namespace d = data_expr;
+
+  data_expression d1 = nat("d1");
+  data_expression d2 = nat("d2");
+  data_expression d3 = nat("d3");
+  data_expression d4 = nat("d4");
+  action_list a1  = make_list(act("a", make_list(d1)));
+  action_list a2  = make_list(act("a", make_list(d2)));
+  action_list b1  = make_list(act("b", make_list(d1)));
+  action_list b2  = make_list(act("b", make_list(d2)));
+  action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
+  action_list a12 = make_list(act("a", make_list(d1)), act("a", make_list(d2)));
+  action_list a21 = make_list(act("a", make_list(d2)), act("a", make_list(d1)));
+  action_list a22 = make_list(act("a", make_list(d2)), act("a", make_list(d2)));
+  action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
+  action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
+  action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
+
+  test_multi_actions( a1,  a1, d::true_());
+  test_multi_actions( a1,  a2, d::equal_to(d1, d2));
+  test_multi_actions(a11, a11, d::true_());
+  test_multi_actions(a12, a21, d::true_());
+  test_multi_actions(a11, a22, d::equal_to(d1, d2));
+  test_multi_actions(a1, a12,  d::false_());
+  test_multi_actions(a1, b1,   d::false_());
+  test_multi_actions(a12, a34);
+  test_multi_actions(a12b1, a34b2);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -259,6 +312,7 @@ int test_main(int argc, char* argv[])
   test_lps2pbes2();
   test_trivial();
   test_formulas();
+  test_equal_multi_actions();
   //test_directory();
 
   return 0;

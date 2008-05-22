@@ -440,6 +440,28 @@ namespace data_expr {
       namespace d = data_expr;
       return core::detail::optimized_or(p, q, d::or_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
+
+    /// \brief Returns the expression d = e
+    inline
+    data_expression equal_to(data_expression d, data_expression e)
+    {
+      if (d == e)
+      {
+        return data_expr::true_();
+      }
+      return core::gsMakeDataExprEq(d, e);
+    }
+    
+    /// \brief Returns the expression d != e
+    inline
+    data_expression not_equal_to(data_expression d, data_expression e)
+    {
+      if (d == e)
+      {
+        return data_expr::false_();
+      }
+      return core::gsMakeDataExprNeq(d, e);
+    }
     
     /// \brief Returns or applied to the sequence of data expressions [first, last[
     template <typename FwdIt>
