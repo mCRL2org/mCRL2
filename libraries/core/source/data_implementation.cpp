@@ -38,6 +38,14 @@ static ATermAppl implement_data_spec(ATermAppl spec);
 //     If something went wrong, an appropriate error message is printed and
 //     NULL is returned.
 
+static ATermList compute_sort_ref_substs(ATermAppl spec);
+//Pre: spec is a specification that adheres to the internal syntax after
+//     data implementation, with the exception that sort references may occur
+//Ret: the list of substitution such that if a sort reference is of the form
+//     sort_ref(n,e), where e is the implementation of a type constructor and
+//     sort_ref(n,e) is the first sort reference with e as a rhs, e := n is in
+//     the result; otherwise, n := e is in the result.
+
 static ATermAppl impl_sort_refs(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation, with the exception that sort references may occur
@@ -332,6 +340,56 @@ ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_sp
   return ar_spec;
 }
 
+ATermList compute_sort_ref_substs(ATermAppl spec)
+{
+  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  //get sort declarations
+  ATermAppl data_spec;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
+  ATermAppl sort_spec = ATAgetArgument(data_spec, 0);
+  ATermList sort_decls = ATLgetArgument(sort_spec, 0);
+  //split sort declarations in sort id's and sort references
+  ATermList sort_ids = NULL;
+  ATermList sort_refs = NULL;
+  split_sort_decls(sort_decls, &sort_ids, &sort_refs);
+  //replace the sort declarations in spec by the sort_ids, the list of
+  //identifiers
+  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
+  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
+  if (gsIsDataSpec(spec)) {
+    spec = data_spec;
+  } else {
+    spec = ATsetArgument(spec, (ATerm) data_spec, 0);
+  }
+  //make list of substitutions from sort_refs, the list of sort references
+  ATermList substs = ATmakeList0();
+  while (!ATisEmpty(sort_refs))
+  {
+    ATermAppl sort_ref = ATAgetFirst(sort_refs);
+    ATermAppl lhs = gsMakeSortId(ATAgetArgument(sort_ref, 0));
+    ATermAppl rhs = ATAgetArgument(sort_ref, 1);
+    //if rhs is the first occurrence of an implementation of a type constructor
+    //at the rhs of a sort reference, add rhs := lhs; otherwise add lhs := rhs
+    ATermAppl subst;
+    if (is_struct_sort_id(rhs) || is_list_sort_id(rhs) || is_set_sort_id(rhs) ||
+      is_bag_sort_id(rhs))
+    {
+      subst = gsMakeSubst_Appl(rhs, lhs);
+    } else {
+      subst = gsMakeSubst_Appl(lhs, rhs);
+    }
+    substs = ATinsert(substs, (ATerm) subst);
+    //perform substitution on the remaining elements of sort_refs
+    sort_refs = ATgetNext(sort_refs);    
+    sort_refs = gsSubstValues_List(ATmakeList1((ATerm) subst), sort_refs, true);
+  }
+  return substs;
+}
+
 ATermAppl impl_sort_refs(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
@@ -514,7 +572,13 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec)
   spec = add_data_decls(spec, data_decls);
   //implement numerical pattern matching
   spec = impl_numerical_pattern_matching(spec);
+  // compute substitutions for sort references
+  // and substitute these in the result
+  ATermList sort_ref_substs = compute_sort_ref_substs(spec);
+  part = gsSubstValues_Appl(sort_ref_substs, part, true);
   //implement sort references
+  //note that it is important that this is done AFTER computing the
+  //substitutions for part
   spec = impl_sort_refs(spec);
   //implement standard functions
   spec = impl_standard_functions_spec(spec);
