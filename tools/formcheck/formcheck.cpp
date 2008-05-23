@@ -16,7 +16,7 @@
 #include <fstream>
 
 #include "mcrl2/formula_checker.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/struct.h"
 #include "mcrl2/core/messaging.h"
@@ -37,19 +37,19 @@ using namespace mcrl2;
   /// \section section_additional_info Additional information
   /// More information about the tool and the classes used can be found in the corresponding tool manual page.
 
-// Class LPS_Form_Check ---------------------------------------------------------------------------
+// Class Form_Check ---------------------------------------------------------------------------
 
-  /// \brief The class LPS_Form_Check uses an instance of the class Formula_Checker to check whether
-  /// \brief or not the formula specified by LPS_Form_Check::f_formula_file_name is a tautology or a contradiction.
+  /// \brief The class Form_Check uses an instance of the class Formula_Checker to check whether
+  /// \brief or not the formula specified by Form_Check::f_formula_file_name is a tautology or a contradiction.
 
-  class LPS_Form_Check {
+  class Form_Check {
     private:
       /// \brief The name of the file containing the formula that is checked.
       std::string f_formula_file_name;
 
-      /// \brief The name of the file containing the LPS.
-      /// \brief If this string is 0, the input is read from stdin.
-      std::string f_lps_file_name;
+      /// \brief The name of the file containing the data specification.
+      /// \brief If this string is 0, a minimal data specification is used.
+      std::string f_spec_file_name;
 
       /// \brief The flag indicating whether or not counter examples are printed each time a formula is encountered
       /// \brief that is neither a contradiction nor a tautology.
@@ -78,23 +78,31 @@ using namespace mcrl2;
       /// \brief The flag indicating whether or not induction should be applied.
       bool f_apply_induction;
 
+      /// \brief Load a data specification from file.
+      /// \param[in] infilename a string representing the input file
+      /// \return if infilename is nonempty and if it contains a valid
+      ///  LPS or PBES, the data specification of this LPS or PBES is
+      ///  returned;
+      ///  if infilename is empty, a minimal data specification is returned
+      mcrl2::data::data_specification load_specification(const std::string &infilename);
+
     public:
       /// \brief Constructor setting all flags to their default values.
-      LPS_Form_Check();
+      Form_Check();
 
       /// \brief Parses command line options
       void get_options(int a_argc, char* a_argv[]);
 
       /// \brief Checks and indicates whether or not the formula specified by
-      /// \brief LPS_Form_Check::f_formula_file_name is a tautology or a contradiction.
+      /// \brief Form_Check::f_formula_file_name is a tautology or a contradiction.
       void check_formula();
   };
 
-  // Class LPS_Form_Check - Functions declared private --------------------------------------------
+  // Class Form_Check - Functions declared private --------------------------------------------
 
-  // Class LPS_Form_Check - Functions declared public ---------------------------------------------
+  // Class Form_Check - Functions declared public ---------------------------------------------
 
-    LPS_Form_Check::LPS_Form_Check() {
+    Form_Check::Form_Check() {
       f_counter_example = false;
       f_witness = false;
       f_strategy = GS_REWR_JITTY;
@@ -110,18 +118,17 @@ using namespace mcrl2;
     /// \param argc is the number of arguments passed on the command line
     /// \param argv is an array of all arguments passed on the command line
 
-    void LPS_Form_Check::get_options(int argc, char* argv[]) {
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --formula=FORMFILE [INFILE]\n"
+    void Form_Check::get_options(int argc, char* argv[]) {
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
-        "FORMFILE holds for the data specification of the linear process specification "
-        "(LPS) in INFILE. If INFILE is not present, stdin is used.");
+        "INFILE holds. If INFILE is not present, stdin is used.");
 
       clinterface.add_rewriting_options();
       clinterface.add_prover_options();
 
       clinterface.
-        add_option("formula", make_mandatory_argument("FORMFILE"), 
-          "use the formula in FORMFILE as input", 'f').
+        add_option("spec", make_mandatory_argument("SPECFILE"),
+          "check the formula against the data types from the LPS or PBES in SPECFILE", 's').
         add_option("counter-example",
           "display a valuation for which the formula does not hold, in case it is neither a "
           "contradiction nor a tautology", 'c').
@@ -142,12 +149,6 @@ using namespace mcrl2;
       f_apply_induction = 0 < parser.options.count("induction");
       f_witness         = 0 < parser.options.count("witness");
 
-      if (parser.options.count("formula")) {
-        f_formula_file_name = parser.option_argument_as< std::string >("formula");
-      }
-      else {
-        parser.error("a formula file must be specified using the option --formula=FORMFILE.");
-      }
       if (parser.options.count("print-dot")) {
         f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
       }
@@ -162,8 +163,12 @@ using namespace mcrl2;
         f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
       }
 
+      if (parser.options.count("spec")) {
+        f_spec_file_name = parser.option_argument_as< std::string >("spec");
+      }
+
       if (0 < parser.arguments.size()) {
-        f_lps_file_name = parser.arguments[0];
+        f_formula_file_name = parser.arguments[0];
       }
       if (1 < parser.arguments.size()) {
         parser.error("too many file arguments");
@@ -171,47 +176,97 @@ using namespace mcrl2;
     }
 
     // --------------------------------------------------------------------------------------------
+    
+    mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
+    {
+      ATermAppl raw_specification;
+      if (infilename.empty()) {
+        //use empty data specification
+        raw_specification = implement_data_data_spec(
+          gsMakeDataSpec(
+            gsMakeSortSpec(ATmakeList0()),
+            gsMakeConsSpec(ATmakeList0()),
+            gsMakeMapSpec(ATmakeList0()),
+            gsMakeDataEqnSpec(ATmakeList0())
+          )
+        );
+      } else {
+        //load data specification from file infilename
+        gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
+    
+        FILE *in_stream = fopen(infilename.c_str(), "rb");
+    
+        if (in_stream == 0) {
+          throw std::runtime_error("error: could not open input file '" + infilename + "' for reading");
+        }
+    
+        raw_specification = (ATermAppl) ATreadFromFile(in_stream);
+    
+        fclose(in_stream);
+    
+        if (raw_specification == 0) {
+          throw std::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
+        }
+        if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
+          throw std::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
+        }
+        raw_specification = ATAgetArgument(raw_specification, 0);
+      }
+      mcrl2::data::data_specification spec(raw_specification);
+      return spec;
+    }
 
-    /// Reads the list of formulas specified by LPS_Form_Check::f_formulas_file_name and the LPS
-    /// specified by LPS_Form_Check::f_file_name. The method determines and indicates whether or not the
+    // --------------------------------------------------------------------------------------------
+
+    /// Reads the list of formulas specified by Form_Check::f_formulas_file_name and the LPS
+    /// specified by Form_Check::f_file_name. The method determines and indicates whether or not the
     /// formulas in the list are tautologies or contradictions using the data equations of the LPS.
 
-    void LPS_Form_Check::check_formula() {
+    void Form_Check::check_formula() {
 
-      //Load LPS
-      lps::specification lps_specification;
-      lps_specification.load((f_lps_file_name.empty())?"-":f_lps_file_name.c_str());
+      //Load data specification
+      mcrl2::data::data_specification spec = load_specification(f_spec_file_name);
 
       // typechecking and data implementation use a specification before data
       // implementation.
-      ATermAppl v_reconstructed_lps = reconstruct_spec(lps_specification);
+      ATermAppl v_reconstructed_spec = reconstruct_spec(spec);
 
-      gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name.c_str());
-      //open the formula from f_formula_file_name
-      std::ifstream instream(f_formula_file_name.c_str());
-      if (!instream.is_open()) {
-        throw std::runtime_error("cannot open formula file '" + f_formula_file_name + "'");
+      ATermAppl f_formula;
+      //parse formula
+      if (f_formula_file_name.empty()) {
+        //parse formula from stdin
+        gsVerboseMsg("parsing formula file stdin...\n");
+        f_formula = parse_data_expr(std::cin);
+      } else {
+        //parse formula from f_formula_file_name
+        gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name.c_str());
+        std::ifstream instream(f_formula_file_name.c_str());
+        if (!instream.is_open()) {
+          throw std::runtime_error("cannot open formula file '" + f_formula_file_name + "'");
+        }
+        f_formula = parse_data_expr(instream);
+        instream.close();
       }
-      //parse the formula
-      ATermAppl f_formula = parse_data_expr(instream);
-      instream.close();
       if(!f_formula){
-        throw std::runtime_error("cannot parse formula from '" + f_formula_file_name + "'");
+        throw std::runtime_error("parsing formula from " + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "failed");
       }
       //typecheck the formula
-      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_lps);
+      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_spec);
       if(!f_formula){
-        throw std::runtime_error("type checking formula from '" + f_formula_file_name + "' failed");
+        throw std::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       //implement data in the formula
-      f_formula = implement_data_data_expr(f_formula,v_reconstructed_lps);
+      f_formula = implement_data_data_expr(f_formula,v_reconstructed_spec);
       if(!f_formula){
-        throw std::runtime_error("implementation of data types in the formula from '" + f_formula_file_name + "' failed");
+        throw std::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
+      
+      //update spec with the contents of v_reconstructed_spec
+      spec = mcrl2::data::data_specification(v_reconstructed_spec);
 
       //check formula
       Formula_Checker v_formula_checker(
-        ATAgetArgument(v_reconstructed_lps,0), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name.c_str());
+        spec, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_witness, f_dot_file_name.c_str());
       v_formula_checker.check_formulas(ATmakeList1((ATerm) f_formula));
     }
 
@@ -222,10 +277,10 @@ using namespace mcrl2;
     MCRL2_ATERM_INIT(argc, argv)
 
     try {
-      LPS_Form_Check v_lps_form_check;
+      Form_Check v_form_check;
 
-      v_lps_form_check.get_options(argc, argv);
-      v_lps_form_check.check_formula();
+      v_form_check.get_options(argc, argv);
+      v_form_check.check_formula();
 
       return EXIT_SUCCESS;
     }

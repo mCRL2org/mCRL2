@@ -87,11 +87,10 @@ class Formula_Checker {
   public:
     /// \brief Constructor that initializes Formula_Checker::f_counter_example, Formula_Checker::f_witness,
     /// \brief Formula_Checker::f_bdd_prover and Formula_Checker::f_dot_file_name.
-    /// precondition: the argument passed as parameter a_lps is an LPS
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Formula_Checker(
-      ATermAppl a_data_spec,
+      mcrl2::data::data_specification a_data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

@@ -300,7 +300,7 @@ static data_specification load_specification(const string &infilename)
     );
   } else {
     //load data specification from file infilename
-    gsVerboseMsg("reading LPS from '%s'\n", infilename.c_str());
+    gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
 
     FILE *in_stream = fopen(infilename.c_str(), "rb");
 

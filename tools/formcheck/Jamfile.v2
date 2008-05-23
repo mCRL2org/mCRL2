@@ -2,7 +2,7 @@ project toolset/formcheck ;
 
 tool formcheck
        : formcheck.cpp
-         /libraries//lps
+         /libraries//data
        ;
 
 install-tools formcheck ;

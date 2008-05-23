@@ -263,10 +263,10 @@ namespace mcrl2 {
 #if defined(HAVE_CVC)
         "  'ario' for the SMT solver Ario, or\n"
         "  'cvc' for the SMT solver CVC3;\n"
-        "  'cvc-fast' for the fast implementation of the SMT solver CVC3\n",
+        "  'cvc-fast' for the fast implementation of the SMT solver CVC3",
 #else
         "  'ario' for the SMT solver Ario, or\n"
-        "  'cvc' for the SMT solver CVC3;\n",
+        "  'cvc' for the SMT solver CVC3",
 #endif
         'z');
     }
