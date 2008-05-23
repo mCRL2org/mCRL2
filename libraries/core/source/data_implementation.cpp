@@ -356,15 +356,6 @@ ATermList compute_sort_ref_substs(ATermAppl spec)
   ATermList sort_ids = NULL;
   ATermList sort_refs = NULL;
   split_sort_decls(sort_decls, &sort_ids, &sort_refs);
-  //replace the sort declarations in spec by the sort_ids, the list of
-  //identifiers
-  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
-  data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
-  if (gsIsDataSpec(spec)) {
-    spec = data_spec;
-  } else {
-    spec = ATsetArgument(spec, (ATerm) data_spec, 0);
-  }
   //make list of substitutions from sort_refs, the list of sort references
   ATermList substs = ATmakeList0();
   while (!ATisEmpty(sort_refs))
