@@ -12,7 +12,7 @@
 #include "mcrl2/data/prover.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include <cstdlib>
 #include "mcrl2/utilities/utilities.h"

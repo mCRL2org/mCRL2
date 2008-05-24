@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

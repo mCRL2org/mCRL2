@@ -25,7 +25,7 @@
 
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/parse.h"

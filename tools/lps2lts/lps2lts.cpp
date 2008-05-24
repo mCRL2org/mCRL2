@@ -14,7 +14,7 @@
 #include <string>
 #include <cassert>
 #include <aterm2.h>
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "lps2lts.h"
 #include "exploration.h"

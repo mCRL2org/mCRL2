@@ -9,7 +9,7 @@
 /// \file induction.cpp
 
 #include "mcrl2/data/prover/induction.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 
 #include <cstdlib>
 

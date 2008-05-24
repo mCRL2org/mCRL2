@@ -19,7 +19,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/detail/data_utility.h"
 

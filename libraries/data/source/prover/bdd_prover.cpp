@@ -14,7 +14,7 @@
 #include "mcrl2/data/prover.h"
 #include "mcrl2/data/prover/bdd_prover.h"
 #include "mcrl2/utilities/utilities.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "time.h"
 #include <cstdlib>
 #include "mcrl2/data/prover/induction.h"

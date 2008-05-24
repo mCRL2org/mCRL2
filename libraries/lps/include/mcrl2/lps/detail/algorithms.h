@@ -20,7 +20,7 @@
 #include <fstream>
 #include "aterm2.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/alpha.h"

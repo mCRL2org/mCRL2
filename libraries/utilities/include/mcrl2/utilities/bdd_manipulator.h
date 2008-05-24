@@ -16,7 +16,7 @@
 #define BDD_MANIPULATOR_H
 
 #include "aterm2.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 
 /// The class BDD_Manipulator provides functionality for constructing binary decision diagrams.
 class BDD_Manipulator {

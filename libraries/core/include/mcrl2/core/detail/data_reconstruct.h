@@ -15,7 +15,7 @@
 #define MCRL2_DATA_RECONSTRUCT_H
 
 #include <aterm2.h>
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {
 

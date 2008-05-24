@@ -21,7 +21,7 @@
 #include <sstream>
 #include <aterm2.h>
 #include "xsimtrace.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/nextstate.h"

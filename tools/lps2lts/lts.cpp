@@ -13,7 +13,7 @@
 #include <aterm2.h>
 #include <mcrl2/lps/specification.h>
 #include "svc/svc.h" //XXX
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "lps2lts.h"
 #include "lts.h"

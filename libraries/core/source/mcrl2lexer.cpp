@@ -581,7 +581,7 @@ static yyconst flex_int16_t yy_chk[344] =
 #include <cstdio>
 #include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/mcrl2parser.hpp"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 
 //fix for the broken cygwin versions of flex

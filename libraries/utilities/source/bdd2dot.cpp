@@ -12,7 +12,7 @@
 // Implementation of class BDD2Dot
 // file: bdd2dot.cpp
 
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/bdd2dot.h"
 #include "mcrl2/core/messaging.h"

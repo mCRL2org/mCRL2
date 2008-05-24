@@ -27,7 +27,7 @@
 #include <aterm2.h>
 #include "simbase.h"
 #include "xsimmain.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/aterm_ext.h"

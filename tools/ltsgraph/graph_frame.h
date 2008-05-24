@@ -42,7 +42,7 @@
 
 //LTS
 #include <mcrl2/lts/liblts.h>
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 
 #include <mcrl2/utilities/spinctrlfloat.h>
 

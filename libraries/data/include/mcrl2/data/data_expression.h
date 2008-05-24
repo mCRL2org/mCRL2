@@ -14,7 +14,7 @@
 
 #include <string>
 #include <cassert>
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/sort_expression.h"

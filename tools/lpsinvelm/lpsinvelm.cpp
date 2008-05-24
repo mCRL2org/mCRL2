@@ -15,7 +15,7 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"

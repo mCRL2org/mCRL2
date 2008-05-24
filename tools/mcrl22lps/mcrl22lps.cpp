@@ -24,7 +24,7 @@
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/parse.h"
 #include "mcrl2/core/detail/typecheck.h"
 #include "mcrl2/core/detail/data_implementation.h"

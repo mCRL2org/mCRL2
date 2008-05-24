@@ -15,7 +15,7 @@
 #ifndef BDD_INFO_H
 #define BDD_INFO_H
 
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;

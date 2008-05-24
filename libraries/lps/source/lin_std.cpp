@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <string.h>
 #include "mcrl2/lps/lin_std.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

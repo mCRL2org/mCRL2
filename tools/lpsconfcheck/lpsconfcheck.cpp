@@ -20,7 +20,7 @@
 #include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/detail/data_reconstruct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/invariant_checker.h"

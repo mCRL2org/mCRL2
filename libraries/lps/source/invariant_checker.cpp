@@ -17,7 +17,7 @@
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/prover/bdd_prover.h"
 
 #ifdef __cplusplus

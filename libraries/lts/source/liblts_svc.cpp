@@ -13,7 +13,7 @@
 #include <svc/svc.h>
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/detail/parse.h"

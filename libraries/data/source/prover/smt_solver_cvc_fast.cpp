@@ -13,7 +13,7 @@
 #include "prover/smt_solver_cvc_fast.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/struct.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/utilities/utilities.h"
 
