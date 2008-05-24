@@ -163,7 +163,6 @@ class specification: public aterm_appl
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    /// \return true if the operation succeeded.
     ///
     void save(const std::string& filename, bool binary = true)
     {
