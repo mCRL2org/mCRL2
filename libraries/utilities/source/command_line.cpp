@@ -261,14 +261,14 @@ namespace mcrl2 {
         "use SOLVER to remove inconsistent paths from the internally used "
         "BDDs (by default, no path elimination is applied):\n"
 #if defined(HAVE_CVC)
-        "  'ario' for the SMT solver Ario, or\n"
-        "  'cvc' for the SMT solver CVC3;\n"
-        "  'cvc-fast' for the fast implementation of the SMT solver CVC3",
+        "  'ario' for the SMT solver Ario,\n"
+        "  'cvc' for the SMT solver CVC3, or\n"
+        "  'cvc-fast' for the fast implementation of the SMT solver CVC3"
 #else
         "  'ario' for the SMT solver Ario, or\n"
-        "  'cvc' for the SMT solver CVC3",
+        "  'cvc' for the SMT solver CVC3"
 #endif
-        'z');
+        , 'z');
     }
 
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {

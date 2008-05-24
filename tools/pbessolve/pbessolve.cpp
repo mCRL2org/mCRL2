@@ -199,9 +199,15 @@ t_tool_options parse_command_line(int ac, char** av)
              .add_option("pnf", "use the prenex normal form for the approximation", 'p')
              .add_option("solver", make_mandatory_argument("SOLVER"),
                "specify the SOLVER to be used by the prover:\n"
+#if defined(HAVE_CVC)
                "  'cvc' for the SMT solver CVC3 (default),\n"
-               "  'fast' for the SMT solver CVC3 (fast variant), or\n"
-               "  'ario' for the SMT solver Ario", 's');
+               "  'cvc-fast' for the SMT solver CVC3 (fast variant), or\n"
+               "  'ario' for the SMT solver Ario"
+#else
+               "  'cvc' for the SMT solver CVC3 (default), or\n"
+               "  'ario' for the SMT solver Ario"
+#endif
+               , 's');
 
   clinterface.add_rewriting_options();
 
@@ -225,8 +231,10 @@ t_tool_options parse_command_line(int ac, char** av)
     string s = parser.option_argument("solver");
     if (s == "cvc") {
       tool_options.solver = solver_type_cvc;
-    } else if (s == "fast") {
+#if defined(HAVE_CVC)
+    } else if (s == "cvc-fast") {
       tool_options.solver = solver_type_cvc_fast;
+#endif
     } else if (s == "ario") {
       tool_options.solver = solver_type_ario;
     } else {
