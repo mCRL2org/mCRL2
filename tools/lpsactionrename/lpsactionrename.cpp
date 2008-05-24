@@ -251,19 +251,21 @@ static t_tool_options parse_command_line(int argc, char **argv)
 
   clinterface.add_rewriting_options();
 
-  clinterface.
-    add_option("file", make_mandatory_argument("RENAMEFILE"),
-     "use the rename rules from RENAMEFILE", 'f').
-    add_option("no-rewrite",
+  clinterface.add_option("file", make_mandatory_argument("RENAMEFILE"),
+     "use the rename rules from RENAMEFILE", 'f');
+  clinterface.add_option("no-rewrite",
      "do not rewrite data terms while renaming; useful when the rewrite system "
-     "does not terminate", 'o').
-    add_option("no-sumelm",
-     "do not apply sum elimination to the final result", 'm').
-    add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop conversion after phase PHASE and output the result; PHASE can be "
-      "'pa' (parse), 'tc' (type check) or 'di' (data implementation)", 'p').
-    add_option("external",
-      "return the result in human readable format", 'e');
+     "does not terminate", 'o');
+  clinterface.add_option("no-sumelm",
+     "do not apply sum elimination to the final result", 'm');
+  clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop conversion after phase PHASE and output the action rename specification after PHASE "
+      "'pa' (parsing), "
+      "'tc' (type checking), or "
+      "'di' (data implementation)"
+    , 'p');
+  clinterface.add_option("pretty",
+      "return a pretty printed version of the output", 'P');
 
   command_line_parser parser(clinterface, argc, argv);
 
@@ -271,7 +273,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
 
   tool_options.no_rewrite = 0 < parser.options.count("no-rewrite"); 
   tool_options.no_sumelm  = 0 < parser.options.count("no-sumelm"); 
-  tool_options.pretty     = 0 < parser.options.count("external"); 
+  tool_options.pretty     = 0 < parser.options.count("pretty"); 
 
   if (parser.options.count("end-phase")) {
     std::string phase = parser.option_argument("end-phase");

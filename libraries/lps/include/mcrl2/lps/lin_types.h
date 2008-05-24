@@ -40,6 +40,7 @@ struct t_lin_options {
   bool add_delta;
   bool check_only;
   t_phase end_phase;
+  bool pretty;
   bool noalpha;
   string infilename;
   string outfilename;
@@ -58,6 +59,7 @@ struct t_lin_options {
       add_delta(false),
       check_only(false),
       end_phase(phNone),
+      pretty(false),
       noalpha(false)
   {}
 };

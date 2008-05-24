@@ -104,7 +104,6 @@ bool process(t_tool_options const& tool_options) {
       ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
       if (!outstream.is_open()) {
         throw std::runtime_error("error: could not open output file '" + outfilename + "' for writing");
-        return false;
       }
       PrintPart_CXX(outstream, (ATerm) result, tool_options.pretty?ppDefault:ppInternal);
       outstream.close();
@@ -295,30 +294,32 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 static t_tool_options parse_command_line(int argc, char **argv) {
   using namespace ::mcrl2::utilities;
 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... -fFILE [INFILE [OUTFILE]]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n"
     "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
     "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
     "present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
     "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>.");
 
-  clinterface.
-    add_option("formula", make_mandatory_argument("FILE"), 
-      "use the state formula from FILE", 'f').
-    add_option("external",
-      "return the result in the external format", 'e').
-    add_option("timed",
-      "use the timed version of the algorithm, even for untimed LPS's", 't').
-    add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop conversion and output the result after PHASE 'pa' (parsing), "
-      "'tc' (type checking), 'di' (data implementation) or 'rft' (regular "
-      "formula translation)", 'p');
+  clinterface.add_option("formula", make_mandatory_argument("FILE"), 
+      "use the state formula from FILE", 'f');
+  clinterface.add_option("timed",
+      "use the timed version of the algorithm, even for untimed LPS's", 't');
+  clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop conversion and output the state formula after PHASE "
+      "'pa' (parsing), "
+      "'tc' (type checking), "
+      "'di' (data implementation), or "
+      "'rft' (regular formula translation)"
+    , 'p');
+  clinterface.add_option("pretty",
+      "return a pretty printed version of the output", 'P');
 
   command_line_parser parser(clinterface, argc, argv);
 
   t_tool_options tool_options;
 
-  tool_options.pretty    = 0 < parser.options.count("external");
+  tool_options.pretty    = 0 < parser.options.count("pretty");
   tool_options.timed     = 0 < parser.options.count("timed");
   tool_options.end_phase = PH_NONE;
 

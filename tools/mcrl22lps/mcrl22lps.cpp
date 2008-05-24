@@ -395,54 +395,58 @@ static t_lin_options parse_command_line(int argc, char *argv[])
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used.");
 
-  clinterface.
-    add_option("stack",
+  clinterface.add_option("stack",
       "the LPS is generated using stack datatypes; useful when -1 and -2 "
-      " do not work", '0').
-    add_option("regular",
+      " do not work", '0');
+  clinterface.add_option("regular",
       "if the specification is regular, the LPS is generated in regular "
-      "form (default)", '1').
-    add_option("regular2",
+      "form (default)", '1');
+  clinterface.add_option("regular2",
       "a variant of regular that uses more data variables; "
-      "sometimes successful when -1 leads to non-termination", '2').
-    add_option("cluster",
-      "all actions in the final LPS are clustered", 'c').
-    add_option("no-cluster",
+      "sometimes successful when -1 leads to non-termination", '2');
+  clinterface.add_option("cluster",
+      "all actions in the final LPS are clustered", 'c');
+  clinterface.add_option("no-cluster",
       "the actions in intermediate LPSs are not clustered "
       "(default behaviour is that intermediate LPSs are "
-      "clustered and the final LPS is not clustered)", 'n').
-    add_option("no-alpha",
-      "alphabet reductions are not applied", 'r').
-    add_option("newstate",
+      "clustered and the final LPS is not clustered)", 'n');
+  clinterface.add_option("no-alpha",
+      "alphabet reductions are not applied", 'r');
+  clinterface.add_option("newstate",
       "state variables are encoded using enumerated types "
-      "(requires -1 or -2); without -w numbers are used", 'w').
-    add_option("binary",
+      "(requires -1 or -2); without -w numbers are used", 'w');
+  clinterface.add_option("binary",
       "when clustering use binary case functions instead of "
       "n-ary; in the presence of -w, state variables are "
-      "encoded by a vector of boolean variables", 'b').
-    add_option("statenames",
-      "the names of state variables are derived from the specification", 'a').
-    add_option("no-rewrite",
+      "encoded by a vector of boolean variables", 'b');
+  clinterface.add_option("statenames",
+      "the names of state variables are derived from the specification", 'a');
+  clinterface.add_option("no-rewrite",
       "do not rewrite data terms while linearising; useful when the rewrite "
-      "system does not terminate", 'o').
-    add_option("no-freevars",
+      "system does not terminate", 'o');
+  clinterface.add_option("no-freevars",
       "instantiate don't care values with arbitrary constants, "
-      "instead of modelling them by free variables", 'f').
-    add_option("no-sumelm",
-      "avoid applying sum elimination in parallel composition", 'm').
-    add_option("no-deltaelm",
-      "avoid removing spurious delta summands", 'g').
-    add_option("delta",
+      "instead of modelling them by free variables", 'f');
+  clinterface.add_option("no-sumelm",
+      "avoid applying sum elimination in parallel composition", 'm');
+  clinterface.add_option("no-deltaelm",
+      "avoid removing spurious delta summands", 'g');
+  clinterface.add_option("delta",
       "add a true->delta summands to each state in each process; "
       "these delta's subsume all other conditional timed delta's, "
       "effectively reducing the number of delta summands drastically "
-      "in the resulting linear process; speeds up linearisation ", 'D').
-    add_option("check-only",
-      "check syntax and static semantics; do not linearise", 'e').
-    add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop linearisation after phase PHASE and output the result; PHASE "
-      "can be 'pa' (parse), 'tc' (type check), 'ar' (alphabet reduction) or "
-      "'di' (data implementation)", 'p');
+      "in the resulting linear process; speeds up linearisation ", 'D');
+  clinterface.add_option("check-only",
+      "check syntax and static semantics; do not linearise", 'e');
+  clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
+      "stop linearisation after phase PHASE and output the mCRL2 specification after PHASE "
+      "'pa' (parsing), "
+      "'tc' (type checking), "
+      "'ar' (alphabet reduction), or "
+      "'di' (data implementation)"
+      , 'p');
+  clinterface.add_option("pretty",
+      "return a pretty printed version of the output", 'P');
 
   command_line_parser parser(clinterface, argc, argv);
 
@@ -459,6 +463,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
   options.nosumelm                = 0 < parser.options.count("no-sumelm");
   options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
   options.add_delta               = 0 < parser.options.count("delta");
+  options.pretty                  = 0 < parser.options.count("pretty");
   options.lin_method = lmRegular;
 
   if (0 < parser.options.count("check-only")) {
@@ -628,10 +633,7 @@ int main(int argc, char *argv[])
     if (result == NULL) {
       return EXIT_FAILURE;
     }
-    //initialise spec to check if it well-typed
-    if (lin_options.end_phase == phNone) {
-      lps::specification spec(result);
-    }
+    //report on well-formedness (if needed)
     if (lin_options.check_only) {
       if (lin_options.infilename == "") {
         fprintf(stdout, "stdin");
@@ -640,29 +642,33 @@ int main(int argc, char *argv[])
       }
       fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
       return EXIT_SUCCESS;
-    } else {
-      //store the result
-      if (lin_options.outfilename == "") {
-        gsVerboseMsg("saving result to stdout...\n");
-        ATwriteToSAFFile((ATerm) result, stdout);
-      } else { //outfilename != NULL
-        //open output filename
-        FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
-        if (outstream == NULL) {
-          gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
-          return EXIT_FAILURE;
-        }
-        gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-        ATwriteToSAFFile((ATerm) result, outstream);
-        fclose(outstream);
-      }
     }
-
+    //store the result
+    if (lin_options.outfilename.empty()) {
+      gsVerboseMsg("saving result to stdout...\n");
+    } else {
+      gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+    }
+    if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
+      lps::specification spec(result);
+      spec.save(lin_options.outfilename);
+    } else {
+      if (lin_options.outfilename.empty()) {
+        PrintPart_CXX(cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
+        cout << endl;
+      } else {
+        ofstream outstream(lin_options.outfilename.c_str(), ofstream::out|ofstream::binary);
+        if (!outstream.is_open()) {
+          throw std::runtime_error("error: could not open output file '" + lin_options.outfilename + "' for writing");
+        }
+        PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
+        outstream.close();
+      }     
+    }
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
-
-  return EXIT_FAILURE;
 }
