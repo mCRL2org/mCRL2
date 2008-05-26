@@ -31,6 +31,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/detail/shared_count.hpp>
 #include <boost/detail/workaround.hpp>
+#include <boost/detail/sp_convertible.hpp>
 
 #if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
 #include <boost/detail/spinlock_pool.hpp>
@@ -224,11 +225,20 @@ public:
     }
 
     template<class Y>
-    shared_ptr(shared_ptr<Y> const & r): px(r.px), pn(r.pn) // never throws
+#if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
+
+    shared_ptr( shared_ptr<Y> const & r, typename detail::sp_enable_if_convertible<Y,T>::type = detail::sp_empty() )
+
+#else
+
+    shared_ptr( shared_ptr<Y> const & r )
+
+#endif
+    : px( r.px ), pn( r.pn ) // never throws
     {
     }
 
-    shared_ptr(detail::shared_count const & c, T * p): px(p), pn(c) // never throws
+    shared_ptr( detail::shared_count const & c, T * p ): px( p ), pn( c ) // never throws
     {
     }
 
@@ -339,7 +349,16 @@ public:
     }
 
     template<class Y>
-    shared_ptr( shared_ptr<Y> && r ): px( r.px ), pn() // never throws
+#if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
+
+    shared_ptr( shared_ptr<Y> && r, typename detail::sp_enable_if_convertible<Y,T>::type = detail::sp_empty() )
+
+#else
+
+    shared_ptr( shared_ptr<Y> && r )
+
+#endif
+    : px( r.px ), pn() // never throws
     {
         pn.swap( r.pn );
         r.px = 0;
@@ -727,7 +746,11 @@ public:
         detail::shared_count().swap( _deleter );
     }
     template<typename D>
+#if defined( BOOST_MSVC ) && BOOST_WORKAROUND( BOOST_MSVC, < 1300 )
+    D* get_deleter( D* ) const
+#else
     D* get_deleter() const
+#endif
     {
         return boost::detail::basic_get_deleter<D>(_deleter);
     }
@@ -735,16 +758,29 @@ public:
 
 } // namespace detail
 
-template<class D, class T> D * get_deleter(shared_ptr<T> const & p)
+template<class D, class T> D * get_deleter( shared_ptr<T> const & p )
 {
-    D *del = detail::basic_get_deleter<D>(p.get_shared_count());
-    if(del == 0)
+    D *del = detail::basic_get_deleter<D>( p.get_shared_count() );
+
+    if( del == 0 )
     {
         detail::sp_deleter_wrapper *del_wrapper = detail::basic_get_deleter<detail::sp_deleter_wrapper>(p.get_shared_count());
-// The following get_deleter method call is fully qualified because
-// older versions of gcc (2.95, 3.2.3) fail to compile it when written del_wrapper->get_deleter<D>()
-        if(del_wrapper) del = del_wrapper->::boost::detail::sp_deleter_wrapper::get_deleter<D>();
+
+#if defined( BOOST_MSVC ) && BOOST_WORKAROUND( BOOST_MSVC, < 1300 )
+
+        if( del_wrapper ) del = del_wrapper->get_deleter( (D*)0 );
+
+#elif defined( __GNUC__ ) && BOOST_WORKAROUND( __GNUC__, < 4 )
+
+        if( del_wrapper ) del = del_wrapper->::boost::detail::sp_deleter_wrapper::get_deleter<D>();
+
+#else
+
+        if( del_wrapper ) del = del_wrapper->get_deleter<D>();
+
+#endif
     }
+
     return del;
 }
 

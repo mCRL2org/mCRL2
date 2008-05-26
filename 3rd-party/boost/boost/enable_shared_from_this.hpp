@@ -13,16 +13,21 @@
 //  http://www.boost.org/libs/smart_ptr/enable_shared_from_this.html
 //
 
+#include <boost/config.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/assert.hpp>
-#include <boost/config.hpp>
+#include <boost/detail/workaround.hpp>
 
 namespace boost
 {
 
+#if !defined( BOOST_NO_MEMBER_TEMPLATE_FRIENDS )
+
 template< class T > class enable_shared_from_this;
 template< class T, class Y > void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<T> const * pe );
 template< class T, class Y > void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<T> const * pe, void * /*pd*/ );
+
+#endif
 
 template< class T > class enable_shared_from_this
 {
@@ -77,13 +82,25 @@ private:
         }
     }
 
+#if !defined( BOOST_NO_MEMBER_TEMPLATE_FRIENDS )
+
+    template< class U, class Y > friend void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<U> const * pe );
+    template< class U, class Y > friend void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<U> const * pe, void * /*pd*/ );
+
+#else
+
+public:
+
+#endif
+
     template<typename U>
     void sp_accept_owner( shared_ptr<U> & owner ) const
     {
         if( _weak_count.use_count() == 0 )
         {
             _weak_count = owner.get_shared_count();
-        }else if( !_shared_count.empty() )
+        }
+        else if( !_shared_count.empty() )
         {
             BOOST_ASSERT( owner.unique() ); // no weak_ptrs to owner should exist either, but there's no way to check that
             detail::sp_deleter_wrapper * pd = detail::basic_get_deleter<detail::sp_deleter_wrapper>( _shared_count );
@@ -94,9 +111,6 @@ private:
             detail::shared_count().swap( _shared_count );
         }
     }
-
-    template< class U, class Y > friend void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<U> const * pe );
-    template< class U, class Y > friend void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<U> const * pe, void * /*pd*/ );
 };
 
 template< class T, class Y > inline void sp_accept_owner( shared_ptr<Y> * ptr, enable_shared_from_this<T> const * pe )
