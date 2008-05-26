@@ -399,17 +399,20 @@ def main():
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
         print 'updated %s' % filename
-    elif options.libstruct:
+    
+    if options.libstruct:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
         print 'updated %s' % filename
-    elif options.constructors:
+
+    if options.constructors:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/constructors.h'
         generate_constructor_functions(rules, filename, ignored_phases)
         print 'updated %s' % filename
-    else:
+
+    if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()
 
 if __name__ == "__main__":
