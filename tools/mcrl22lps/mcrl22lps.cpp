@@ -439,7 +439,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
   clinterface.add_option("check-only",
       "check syntax and static semantics; do not linearise", 'e');
   clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop linearisation after phase PHASE and output the mCRL2 specification after PHASE "
+      "stop linearisation and output the mCRL2 specification after phase PHASE: "
       "'pa' (parsing), "
       "'tc' (type checking), "
       "'ar' (alphabet reduction), or "

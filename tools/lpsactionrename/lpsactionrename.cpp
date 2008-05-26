@@ -259,7 +259,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
   clinterface.add_option("no-sumelm",
      "do not apply sum elimination to the final result", 'm');
   clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop conversion after phase PHASE and output the action rename specification after PHASE "
+      "stop conversion and output the action rename specification after phase PHASE: "
       "'pa' (parsing), "
       "'tc' (type checking), or "
       "'di' (data implementation)"

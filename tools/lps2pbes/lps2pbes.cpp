@@ -306,7 +306,7 @@ static t_tool_options parse_command_line(int argc, char **argv) {
   clinterface.add_option("timed",
       "use the timed version of the algorithm, even for untimed LPS's", 't');
   clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
-      "stop conversion and output the state formula after PHASE "
+      "stop conversion and output the state formula after phase PHASE: "
       "'pa' (parsing), "
       "'tc' (type checking), "
       "'di' (data implementation), or "
