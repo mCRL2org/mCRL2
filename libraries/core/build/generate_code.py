@@ -6,6 +6,7 @@ import os
 import re
 from optparse import OptionParser
 from mcrl2_parser import *
+from path import *
 
 #--------------------------------------------------------#
 #                insert_text_in_file
@@ -381,6 +382,25 @@ def parse_ebnf(filename):
     return rules
 
 #---------------------------------------------------------------#
+#                          postprocess_libstruct
+#---------------------------------------------------------------#
+def postprocess_libstruct(filename):
+    src = '''ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
+\{
+'''
+    dest = '''ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
+{    
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+'''
+    text = path(filename).text()
+    #src = 'gsMakeProcess'    
+    text = re.sub(re.compile(src, re.M), dest, text)
+    path(filename).write_text(text)
+
+#---------------------------------------------------------------#
 #                          main
 #---------------------------------------------------------------#
 def main():
@@ -404,6 +424,7 @@ def main():
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
+        postprocess_libstruct(filename)
         print 'updated %s' % filename
 
     if options.constructors:
