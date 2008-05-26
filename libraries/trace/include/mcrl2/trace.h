@@ -77,7 +77,7 @@ class Trace
 /// is automatically determined what the format of the trace is.
 /// \param[in] is The input stream from which the trace is read.
 /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		Trace(std::istream &is, TraceFormat tf = tfUnknown);
 
@@ -86,7 +86,7 @@ class Trace
 /// is automatically determined what the format of the trace is.
 /// \param[in] filename The name of the file from which the trace is read.
 /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		Trace(std::string const& filename, TraceFormat tf = tfUnknown);
 
@@ -183,7 +183,7 @@ class Trace
 /// If the format is tfPlain the trace can only consist of actions.
 /// \param [in] is The stream from which the trace is read.
 /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		void load(std::istream &is, TraceFormat tf = tfUnknown);
 
@@ -192,7 +192,7 @@ class Trace
 /// If the format is tfPlain the trace can only consist of actions.
 /// \param [in] filename The name of the file from which the trace is read.
 /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		void load(std::string const& filename, TraceFormat tf = tfUnknown);
 
@@ -202,7 +202,7 @@ class Trace
 /// \param [in] os The stream to which the trace is written.
 /// \param [in] tf The format used to represent the trace in the stream. If 
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		void save(std::ostream &os, TraceFormat tf = tfMcrl2);
 
@@ -211,7 +211,7 @@ class Trace
 /// \param [in] filename The name of the file that is written.
 /// \param [in] tf The format used to represent the trace in the stream. If 
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
-/// \exception std::runtime_error message in case of failure
+/// \exception mcrl2::runtime_error message in case of failure
 
 		void save(std::string const& filename, TraceFormat tf = tfMcrl2);
 

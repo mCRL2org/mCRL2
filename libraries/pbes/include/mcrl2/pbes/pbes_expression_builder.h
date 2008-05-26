@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
 #define MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
 
-#include <stdexcept>
+#include "mcrl2/exception.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
@@ -113,11 +113,11 @@ struct pbes_builder
   }
   
   /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
-  /// By default a std::runtime_error exception will be generated.
+  /// By default a mcrl2::runtime_error exception will be generated.
   ///
   virtual pbes_expression visit_unknown(const pbes_expression& e, Arg& /* arg */)
   {
-    throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
     return pbes_expression();
   }
 
@@ -283,11 +283,11 @@ struct pbes_expression_builder: public pbes_builder<int>
   }
   
   /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
-  /// By default a std::runtime_error exception will be generated.
+  /// By default a mcrl2::runtime_error exception will be generated.
   ///
   virtual pbes_expression visit_unknown(const pbes_expression& e)
   {
-    throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
     return pbes_expression();
   }
 
@@ -362,11 +362,11 @@ struct pbes_expression_builder: public pbes_builder<int>
   }
   
   /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
-  /// By default a std::runtime_error exception will be generated.
+  /// By default a mcrl2::runtime_error exception will be generated.
   ///
   pbes_expression visit_unknown(const pbes_expression& e, int&)
   {
-    throw std::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
+    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
     return visit_unknown(e);
   }
 

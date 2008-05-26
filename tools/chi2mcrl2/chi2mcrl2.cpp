@@ -218,7 +218,7 @@ ATermAppl translate_file(t_options &options)
     //parse specification from infilename
     ifstream instream(options.infilename.c_str());
     if (!instream.is_open()) {
-      throw std::runtime_error("cannot open input file '" + options.infilename + "'");
+      throw mcrl2::runtime_error("cannot open input file '" + options.infilename + "'");
     }
     gsVerboseMsg("Parsing input file '%s'...\n", options.infilename.c_str());
 	result = parse_stream(instream);
@@ -227,7 +227,7 @@ ATermAppl translate_file(t_options &options)
   
   if (result == NULL) 
   {
-    throw std::runtime_error("parsing failed");
+    throw mcrl2::runtime_error("parsing failed");
   }
 
   return result; 
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
       //open output filename
       FILE *outstream = fopen(options.outfilename.c_str(), "w");
       if (outstream == NULL) {
-        throw std::runtime_error("cannot open output file '" + options.outfilename + "'");
+        throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
       }
       gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
       fputs (mcrl2spec.c_str(), outstream); 

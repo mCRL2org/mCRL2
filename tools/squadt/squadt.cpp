@@ -37,6 +37,20 @@
 
 using namespace squadt::GUI;
 
+std::string get_about_message() {
+  static const std::string version_information =
+        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
+                                                        version_information() +
+           std::string("\n"
+           "This tool is part of the mCRL2 toolset.\n"
+           "For information see http://www.mcrl2.org\n"
+           "\n"
+           "For feature requests or bug reports,\n"
+           "please visit http://www.mcrl2.org/issuetracker");
+
+  return version_information;
+}
+
 /* SQuADt class declaration */
 class SQuADt : public wxApp {
 
@@ -196,7 +210,8 @@ bool SQuADt::OnInit() {
       while (!finished);
 
       if (!retry_list.empty()) {
-        wxMessageDialog retry(0, wxT("Initialisation of several tools failed.\nDo you want to point the system where it can find each of these tools?"),
+        wxMessageDialog retry(0, wxT("Initialisation of some tools failed.\n"
+                "Do you want to retry initialisation of these tools interactively?"),
                 wxT("Initialisation failure!"), wxYES_NO|wxICON_WARNING);
 
         if (retry.ShowModal() == wxID_YES) {
@@ -204,7 +219,7 @@ bool SQuADt::OnInit() {
             inline static bool query_with_path(tool& t, boost::filesystem::path const& p) {
               boost::shared_ptr< tool > dummy(new tool(t));
 
-              dummy->set_location(p / t.get_location().leaf());
+              dummy->set_location(p);
 
               if (squadt::global_build_system.get_tool_manager().query_tool(dummy)) {
                 t.set_location(dummy->get_location());
@@ -217,7 +232,7 @@ bool SQuADt::OnInit() {
             }
           };
 
-          boost::filesystem::path path_to_try;
+          boost::filesystem::path path_to_try(retry_list[0]->get_location().branch_path());
 
           // Perform initialisation
           for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
@@ -226,17 +241,20 @@ bool SQuADt::OnInit() {
               splash_window->update();
 
               if (!path_to_try.empty()) {
-                if (tester::query_with_path(**t, path_to_try)) {
+                if (tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf())) {
                   continue;
                 }
               }
 
-              wxDirDialog directory_picker(0, wxT("Choose a path"), wxT(""), wxDD_DEFAULT_STYLE|wxDD_DIR_MUST_EXIST);
+              wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
+                        wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
+                                wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
 
-              if (directory_picker.ShowModal() == wxID_OK) {
-                path_to_try = std::string(directory_picker.GetPath().fn_str());
+              if (file_picker.ShowModal() == wxID_OK) {
+                path_to_try = boost::filesystem::path(
+                        std::string(file_picker.GetFilename().fn_str())).branch_path();
 
-                tester::query_with_path(**t, path_to_try);
+                tester::query_with_path(**t, std::string(file_picker.GetFilename().fn_str()));
               }
             }
           }
@@ -262,7 +280,9 @@ bool SQuADt::OnInit() {
     catch (...) {
       splash_window->set_done();
 
-      wxMessageDialog(0, wxT("Initialisation failed! Another instance, or tool related to a previous instance, is probably still active and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+      wxMessageDialog(0, wxT("Initialisation failed! Another instance, "
+        "or tool related to a previous instance, is probably still active"
+        "and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
 
       return (false);
     }

@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     
     return EXIT_SUCCESS;
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   {
     std::cerr << e.what() << std::endl;
   }

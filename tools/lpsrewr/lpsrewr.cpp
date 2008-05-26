@@ -101,10 +101,10 @@ int main(int argc, char **argv)
       result = (ATermAppl) ATreadFromFile(stdin);
 
       if (result == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
+        throw mcrl2::runtime_error("could not read LPS from '" + options.infilename + "'");
       }
       if (!is_valid_lps(result)) {
-        throw std::runtime_error("stdin does not contain an LPS");
+        throw mcrl2::runtime_error("stdin does not contain an LPS");
       }
     }
     else {
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
       FILE *in_stream = fopen(options.infilename.c_str(), "rb");
 
       if (in_stream == 0) {
-        throw std::runtime_error("could not open input file '" + options.infilename + "' for reading");
+        throw mcrl2::runtime_error("could not open input file '" + options.infilename + "' for reading");
       }
 
       result = (ATermAppl) ATreadFromFile(in_stream);
@@ -121,10 +121,10 @@ int main(int argc, char **argv)
       fclose(in_stream);
 
       if (result == 0) {
-        throw std::runtime_error("could not read LPS from '" + options.infilename + "'");
+        throw mcrl2::runtime_error("could not read LPS from '" + options.infilename + "'");
       }
       if (!is_valid_lps(result)) {
-        throw std::runtime_error("'" + options.infilename + "' does not contain an LPS");
+        throw mcrl2::runtime_error("'" + options.infilename + "' does not contain an LPS");
       }
     }
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
         //open output filename
         FILE *outstream = fopen(options.outfilename.c_str(), "wb");
         if (outstream == NULL) {
-          throw std::runtime_error("cannot open output file '" + options.outfilename + "'");
+          throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
         }
         ATwriteToSAFFile((ATerm) result, outstream);
         fclose(outstream);

@@ -8,16 +8,18 @@
 //
 /// \file prover.cpp
 
+#include <cstdlib>
+
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/prover.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewrite.h"
-#include <cstdlib>
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/exception.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -56,31 +58,31 @@ using namespace mcrl2::core;
           break;
         }
         case (GS_REWR_INNERC): {
-          throw std::runtime_error("The compiled innermost rewriter is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover.");
           break;
         }
         case (GS_REWR_INNER_P): {
-          throw std::runtime_error("The innermost rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_INNERC_P): {
-          std::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
+          mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTYC): {
-          throw std::runtime_error("The compiled jitty rewriter is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTY_P): {
-          throw std::runtime_error("The jitty rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover.");
           break;
         }
         case (GS_REWR_JITTYC_P): {
-          throw std::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
           break;
         }
         default: {
-          std::runtime_error("Unknown type of rewriter.");
+          mcrl2::runtime_error("Unknown type of rewriter.");
           break;
         }
       }

@@ -120,7 +120,7 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
         core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
         core::gsErrorMsg("Computation aborted.\n");
         std::cout << "Problematic Term: " << pp(*del_i) << std::endl;
-        throw std::runtime_error("exit!");
+        throw mcrl2::runtime_error("exit!");
       }
       else if (is_data_application(*del_i))
       { // If p is a data application
@@ -131,7 +131,7 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
       {
         core::gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
         std::cout << "Problematic Term: " << pp(*del_i) << std::endl;
-        throw std::runtime_error("exit!");
+        throw mcrl2::runtime_error("exit!");
       }
     }
   }
@@ -161,7 +161,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
         core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
         core::gsErrorMsg("Computation aborted.\n");
         std::cout << "Problematic Term: " << pp(*p) << std::endl;
-        throw std::runtime_error("exit!");
+        throw mcrl2::runtime_error("exit!");
       }
     }
     else
@@ -183,7 +183,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   if (!pbes_spec.instantiate_free_variables())
   {
     core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-    throw std::runtime_error("exit!");
+    throw mcrl2::runtime_error("exit!");
   }
   core::gsVerboseMsg("Using lazy approach...\n");
 
@@ -289,7 +289,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   if (!pbes_spec.instantiate_free_variables())
   {
     core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-    throw std::runtime_error("exit!");
+    throw mcrl2::runtime_error("exit!");
   }
   core::gsVerboseMsg("Using finite approach...\n");
 

@@ -33,6 +33,20 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
+std::string get_about_message() {
+  static const std::string version_information =
+        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
+                                                        version_information() +
+           std::string("\n"
+           "This tool is part of the mCRL2 toolset.\n"
+           "For information see http://www.mcrl2.org\n"
+           "\n"
+           "For feature requests or bug reports,\n"
+           "please visit http://www.mcrl2.org/issuetracker");
+
+  return version_information;
+}
+
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
  

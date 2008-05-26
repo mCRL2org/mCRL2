@@ -9,15 +9,12 @@
 /// \file source/formula_checker.cpp
 /// \brief Add your file description here.
 
-// Implementation of class Formula_Checker
-// file: formula_checker.cpp
-
 #include <sstream>
-#include <exception>
 
 #include "mcrl2/formula_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/exception.h"
 
 #ifdef __cplusplus
 using namespace ::mcrl2::utilities;
@@ -33,7 +30,7 @@ using namespace mcrl2::core;
 
         v_counter_example = f_bdd_prover.get_counter_example();
         if (v_counter_example == 0) {
-          throw std::runtime_error(
+          throw mcrl2::runtime_error(
             "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
           );
@@ -51,7 +48,7 @@ using namespace mcrl2::core;
 
         v_witness = f_bdd_prover.get_witness();
         if (v_witness == 0) {
-          throw std::runtime_error(
+          throw mcrl2::runtime_error(
             "Cannot print witness. This is probably caused by an abrupt stop of the\n"
             "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
           );

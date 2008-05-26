@@ -1327,7 +1327,7 @@ pbes<> load_pbes(t_tool_options tool_options)
     {
       pbes_spec.load("-");
     }
-    catch (std::runtime_error e)   
+    catch (mcrl2::runtime_error e)   
     {
       gsErrorMsg("Cannot open PBES from stdin\n");
       exit(1);
@@ -1339,7 +1339,7 @@ pbes<> load_pbes(t_tool_options tool_options)
     {
       pbes_spec.load(infilename);
     }
-    catch (std::runtime_error e)   
+    catch (mcrl2::runtime_error e)   
     {
       gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str());
       exit(1);

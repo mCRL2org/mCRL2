@@ -31,7 +31,6 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/version_info.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -39,8 +38,7 @@
 # define wxFD_CHANGE_DIR wxCHANGE_DIR
 #endif
 
-#define NAME "XSim"
-#define AUTHOR "Muck van Weerdenburg"
+std::string get_about_message();
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -702,19 +700,9 @@ void XSimMain::OnStop( wxCommandEvent& /* event */ )
 
 void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
-  wxString ttl = wxT("About XSim");
-  wxString msg = wxString();
-  msg += wxString(get_version_information(NAME, AUTHOR).c_str(),wxConvLocal);
-  //msg += wxT("\n");
-  //msg += wxT("Tool for simulation of linear process specifications.\n");
-  msg += wxT("\n");
-  msg += wxT("This tool is part of the mCRL2 toolset.\n");
-  msg += wxT("For information see http://www.mcrl2.org\n");
-  msg += wxT("\n");
-  msg += wxT("For feature requests or bug reports,\n");
-  msg += wxT("please visit http://www.mcrl2.org/issuetracker");
-  wxMessageDialog dialog(this, msg, ttl, wxOK|wxICON_INFORMATION);
-  dialog.ShowModal();
+  wxMessageDialog(this,
+        wxString(get_about_message().c_str(), wxConvLocal),
+                wxT("About XSim"), wxOK|wxICON_INFORMATION).ShowModal();
 }
 
 void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )

@@ -85,7 +85,7 @@ state_formula normalize(state_formula f)
     } else if (is_delay(f)) {
       return yaled();
     } else if (is_var(f)) {
-      throw std::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     } else if (is_mu(f)) {
       return nu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
     } else if (is_nu(f)) {
@@ -132,7 +132,7 @@ state_formula normalize(state_formula f)
       return nu(name(f), ass(f), normalize(arg(f)));
     }
   }
-  throw std::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
+  throw mcrl2::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
   return state_formula();
 }
 

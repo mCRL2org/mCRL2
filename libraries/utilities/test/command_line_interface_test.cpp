@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(parsing) {
   // Repeated options --help options
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --verbose -v -v"));
   // Invalid combination of short options
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test -ve"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test -ve"), mcrl2::runtime_error);
 
   // Duplicate long option without argument
   BOOST_CHECK_THROW(test_interface.add_option("verbose","An option"), std::logic_error);
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(parsing) {
 
   test_interface.add_option("mandatory", make_mandatory_argument("STR"), "option with mandatory argument", 'm');
   // Missing mandatory argument for option --mandatory
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --mandatory"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --mandatory"), mcrl2::runtime_error);
   // Valid option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --mandatory=test"));
   // Valid option with valid argument
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(conformance) {
   wchar_t* arguments[] = { L"test", L"--debug", L"--verbose=2" } ;
 
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 2, arguments));
-  BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), mcrl2::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(rewriting_options) {
@@ -133,13 +133,13 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
   test_interface.add_rewriting_options();
 
   // Missing mandatory argument for option --rewriter
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter"), mcrl2::runtime_error);
   // Valid rewriter option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --rewriter=jittyc"));
   // Valid rewriter option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -rjittyc"));
   // Valid rewriter option with invalid argument
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), mcrl2::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(prover_options) {
@@ -159,13 +159,13 @@ BOOST_AUTO_TEST_CASE(prover_options) {
   test_interface.add_prover_options();
 
   // Missing mandatory argument for option --rewriter
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), mcrl2::runtime_error);
   // Valid rewriter option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --smt-solver=ario"));
   // Valid rewriter option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -zcvc"));
   // Valid rewriter option with invalid argument
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), mcrl2::runtime_error);
 }
 
 inline std::string const& first_of(command_line_parser const& p, std::string const& option) {

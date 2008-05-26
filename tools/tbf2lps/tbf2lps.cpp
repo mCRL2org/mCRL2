@@ -90,10 +90,10 @@ int main(int argc, char **argv)
       mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
 
       if (mcrl_spec == 0) {
-        throw std::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
+        throw mcrl2::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
       }
       if (!is_mCRL_spec(mcrl_spec)) {
-        throw std::runtime_error("stdin does not contain an mCRL LPS");
+        throw mcrl2::runtime_error("stdin does not contain an mCRL LPS");
       }
     }
     else {
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
       FILE *in_stream = fopen(options.infilename.c_str(), "rb");
 
       if (in_stream == 0) {
-        throw std::runtime_error("could not open input file '" + options.infilename + "' for reading");
+        throw mcrl2::runtime_error("could not open input file '" + options.infilename + "' for reading");
       }
 
       mcrl_spec = (ATermAppl) ATreadFromFile(in_stream);
@@ -110,10 +110,10 @@ int main(int argc, char **argv)
       fclose(in_stream);
 
       if (mcrl_spec == 0) {
-        throw std::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
+        throw mcrl2::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
       }
       if (!is_mCRL_spec(mcrl_spec)) {
-        throw std::runtime_error("'" + options.infilename + "' does not contain an mCRL LPS");
+        throw mcrl2::runtime_error("'" + options.infilename + "' does not contain an mCRL LPS");
       }
     }
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
       FILE *outstream = fopen(options.outfilename.c_str(), "wb");
 
       if (outstream == NULL) {
-        throw std::runtime_error("cannot open output file '" + options.outfilename + "'");
+        throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
       }
 
       ATwriteToSAFFile((ATerm) spec,outstream);

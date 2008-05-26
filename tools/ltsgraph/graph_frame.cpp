@@ -10,14 +10,12 @@
 
 #include "graph_frame.h"
 #include "workarounds.h"
-#include "mcrl2/utilities/version_info.h"
 
 #include <map>
 
-#define NAME "LTSGraph"
-#define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
-
 static const wxColour &border_colour_selected = *wxBLUE;
+
+std::string get_about_message();
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -692,16 +690,8 @@ void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
   }
 }
 void GraphFrame::on_about(wxCommandEvent& /* event */) {
-  wxString caption = wxT("About LTSGraph");
-  wxString content = wxString();
-  content += wxString(get_version_information(NAME, AUTHOR).c_str(),wxConvLocal);
-  content += wxT("\n");
-  content += wxT("This tool is part of the mCRL2 toolset.\n");
-  content += wxT("For information see http://www.mcrl2.org\n");
-  content += wxT("\n");
-  content += wxT("For feature requests or bug reports,\n");
-  content += wxT("please visit http://www.mcrl2.org/issuetracker");
-  wxMessageBox(content, caption, wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
+  wxMessageBox(wxString(get_about_message().c_str(), wxConvLocal),
+        wxT("About LTSGraph"), wxOK| wxICON_INFORMATION, this, wxDefaultPosition.x, wxDefaultPosition.y);
 }
 
  

@@ -223,7 +223,7 @@ struct state_formula_builder
       state_formula result = visit_nu(e, n, a, f);
       return (result == state_formula()) ? nu(n, a, visit(f)) : result;
     } else {
-      throw std::runtime_error(std::string("error in state_formula_builder::visit() : unknown lps expression ") + e.to_string());
+      throw mcrl2::runtime_error(std::string("error in state_formula_builder::visit() : unknown lps expression ") + e.to_string());
       return state_formula();
     }
   }

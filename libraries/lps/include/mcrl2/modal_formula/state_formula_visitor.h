@@ -304,7 +304,7 @@ struct state_formula_visitor
         visit(f);
       }
     } else {
-      throw std::runtime_error(std::string("error in state_formula_visitor::visit() : unknown lps expression ") + e.to_string());
+      throw mcrl2::runtime_error(std::string("error in state_formula_visitor::visit() : unknown lps expression ") + e.to_string());
     }
   }
 };

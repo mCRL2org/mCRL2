@@ -107,11 +107,11 @@ int main(int argc, char *argv[])
 
     if ( SVCopen(inFile, const_cast < char* > (options.inputname.c_str()), SVCread, readIndex) )
     {
-      throw std::runtime_error(options.inputname + ": " + std::string(SVCerror(SVCerrno)));
+      throw mcrl2::runtime_error(options.inputname + ": " + std::string(SVCerror(SVCerrno)));
     } else {
       if ( SVCopen(outFile, const_cast < char* > (options.outputname.c_str()), SVCwrite, &indexed) )
       {
-        throw std::runtime_error(options.outputname + ": " + std::string(SVCerror(SVCerrno)));
+        throw mcrl2::runtime_error(options.outputname + ": " + std::string(SVCerror(SVCerrno)));
       } else {
         SVCsetVersion(outFile , MCRL2_VERSION); 
       }

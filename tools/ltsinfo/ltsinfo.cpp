@@ -314,7 +314,7 @@ void process(tool_options const& opts) {
     gsVerboseMsg("reading LTS from stdin...\n");
 
     if ( !l.read_from(std::cin, opts.intype) ) {
-      throw std::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+      throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
     }
   }
   else {
@@ -331,7 +331,7 @@ void process(tool_options const& opts) {
       }
     }
     if (!success) {
-      throw std::runtime_error("cannot read LTS from file '" + opts.infilename +
+      throw mcrl2::runtime_error("cannot read LTS from file '" + opts.infilename +
                                              "'\nretry with -v/--verbose for more information");
     }
   }

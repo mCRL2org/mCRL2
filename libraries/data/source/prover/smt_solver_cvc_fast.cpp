@@ -99,7 +99,7 @@ using namespace mcrl2::core;
           for (int i = 0; i < v_number_of_arguments; ++i) {
             v_type = f_sort_info.get_type_of_argument(a_sort_expression, i);
             if (f_sort_info.is_sort_bool(v_type)) {
-              throw std::runtime_error("CVC Lite cannot deal with functions that have boolean arguments.");
+              throw mcrl2::runtime_error("CVC Lite cannot deal with functions that have boolean arguments.");
             }
             v_translated_type = translate_sort(v_type);
             v_translated_domain.push_back(v_translated_type);
@@ -129,7 +129,7 @@ using namespace mcrl2::core;
           }
           return v_translated_type;
         } else {
-          throw std::runtime_error("Unable to handle the current sort expression (" +
+          throw mcrl2::runtime_error("Unable to handle the current sort expression (" +
                         pretty_print(a_sort_expression) + ").");
         }
       }
@@ -203,7 +203,7 @@ using namespace mcrl2::core;
       } else if (f_expression_info.is_constant(a_clause)) {
         return translate_constant(a_clause);
       } else {
-        throw std::runtime_error("Unable to handle the current clause (" +
+        throw mcrl2::runtime_error("Unable to handle the current clause (" +
                                                 pretty_print(a_clause) + ").");
       }
     }

@@ -67,7 +67,7 @@ int main(int argc, char** argv)
       p.save(result_file);
     }
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   {
     std::cerr << e.what() << std::endl;
   }     

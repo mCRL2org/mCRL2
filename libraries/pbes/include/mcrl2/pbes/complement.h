@@ -106,7 +106,7 @@ struct complement_builder: public pbes_expression_builder
   ///
   pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
-    throw std::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + pp(v));
+    throw mcrl2::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + pp(v));
     return pbes_expression();
   }
 };

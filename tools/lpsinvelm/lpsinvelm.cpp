@@ -269,7 +269,7 @@ using namespace mcrl2;
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name.c_str());
       if (!instream.is_open()) {
-        throw std::runtime_error("error: cannot open input file '" + f_invariant_file_name +"'");
+        throw mcrl2::runtime_error("error: cannot open input file '" + f_invariant_file_name +"'");
       }
       gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
       f_invariant = parse_data_expr(instream);

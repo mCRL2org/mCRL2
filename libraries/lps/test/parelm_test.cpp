@@ -70,7 +70,7 @@ const std::string case_7(
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   using namespace mcrl2::lps;
 

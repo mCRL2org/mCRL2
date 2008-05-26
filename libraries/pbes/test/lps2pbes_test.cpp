@@ -191,7 +191,7 @@ void test_directory(int argc, char** argv)
               cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
             BOOST_CHECK(cmp);
           }
-          catch (std::runtime_error e)
+          catch (mcrl2::runtime_error e)
           {
             cerr << e.what() << endl;
           }
@@ -208,7 +208,7 @@ void test_directory(int argc, char** argv)
               cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
             BOOST_CHECK(cmp);
           }
-          catch (std::runtime_error e)
+          catch (mcrl2::runtime_error e)
           {
             cerr << e.what() << endl;
           }

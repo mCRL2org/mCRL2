@@ -10,13 +10,9 @@
 
 #include "frame.h"
 #include "figures.xpm"
-#include "mcrl2/utilities/version_info.h"
 
 #include <iostream>
 using namespace std;
-
-#define NAME "Diagraphica"
-#define AUTHOR "A. Johannes Pretorius"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -25,6 +21,7 @@ using namespace std;
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
 
+std::string get_about_message();
 
 // -- constructors and destructor -----------------------------------
 
@@ -2070,27 +2067,7 @@ void Frame::initAboutFrame()
     panel->SetSizer( sizer );
 
     // message
-    wxString msg = wxString();
-    msg += wxString( get_version_information(NAME, AUTHOR).c_str(), wxConvLocal );
-    msg += wxT( "\n" );
-
-    msg += wxT( "For more information please see:\n" );
-    msg += wxT( "www.win.tue.nl/~apretori/diagraphica\n" );
-    msg += wxT( "\n" );
-
-    msg += wxT( "You are free to use images produced with DiaGraphica. " );
-    msg += wxT( "In this case, image credits would be much appreciated.\n" );
-    msg += wxT( "\n" );
-
-    msg += wxT( "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and " );
-    msg += wxT( "uses the TinyXML parser (tinyxml.sourceforge.net). " );
-    msg += wxT( "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n" );
-    msg += wxT( "\n" );
-
-    msg += wxT( "This version of DiaGraphica is part of the mCRL2 toolset.\n" );
-    msg += wxT( "For information see http://www.mcrl2.org\n");
-    msg += wxT( "\n" );
-    msg += wxT( "Please report bugs at http://www.mcrl2.org/issuetracker\n" );
+    wxString msg = wxString(get_about_message().c_str(), wxConvLocal);
 
     wxTextCtrl* textCtrl = new wxTextCtrl(
         panel, 

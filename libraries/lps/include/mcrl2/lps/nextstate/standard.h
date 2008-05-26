@@ -90,6 +90,7 @@ class NextStateStandard : public NextState
 		ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
 
 		Rewriter *getRewriter();
+		Enumerator* getEnumerator();
 
 	private:
 		ns_info info;

@@ -18,6 +18,7 @@
 #include <locale>
 
 #include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/compare.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 // dummy necessary for compiling
@@ -223,7 +224,7 @@ namespace mcrl2 {
     }
 
     std::string interface_description::copyright_message() const {
-      return "Copyright (c) " + std::string(MCRL2_COPYRIGHT_YEAR) +
+      return "Copyright (c) " + copyright_period +
                                         " Eindhoven University of Technology.\n"
         "This is free software.  You may redistribute copies of it under the\n"
         "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
@@ -414,12 +415,11 @@ namespace mcrl2 {
 
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
                   << boost::gregorian::day_clock::local_day() << "\" \"" 
-                  << m_name << " " << std::string(MCRL2_VERSION)
+                  << m_name << " " << version_tag
         << "\" \"User Commands\"" << std::endl;
 
       s << ".SH NAME" << std::endl 
-        << m_name << " - manual page for " << m_name << " "
-                                         << std::string(MCRL2_VERSION) << std::endl;
+        << m_name << " - manual page for " << m_name << " " << version_tag << std::endl;
 
       s << ".SH SYNOPSIS" << std::endl 
         << ".B " << m_name << std::endl
@@ -467,7 +467,7 @@ namespace mcrl2 {
       s << ".SH \"REPORTING BUGS\"" << std::endl 
         << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
       s << ".SH COPYRIGHT" << std::endl
-        << "Copyright \\(co " + std::string(MCRL2_COPYRIGHT_YEAR) +
+        << "Copyright \\(co " + copyright_period +
                                         " Eindhoven University of Technology.\n"
         << ".br" << std::endl
         << "This is free software.  You may redistribute copies of it under the\n"
@@ -669,7 +669,7 @@ namespace mcrl2 {
      * \param[in] message the body of the exception message
      **/
     void command_line_parser::error(std::string const& message) const {
-      throw std::runtime_error(m_interface.m_name + ": " + message
+      throw mcrl2::runtime_error(m_interface.m_name + ": " + message
                 + "\nTry `" + m_interface.m_name + " --help' for more information.");
     }
 

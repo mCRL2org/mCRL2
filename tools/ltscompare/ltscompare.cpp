@@ -167,7 +167,7 @@ int process(t_tool_options const & tool_options) {
     gsVerboseMsg("reading first LTS from stdin...\n");
 
     if ( !l1.read_from(std::cin, tool_options.format_for_first) ) {
-      throw std::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+      throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
     }
   } else {
     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
@@ -183,7 +183,7 @@ int process(t_tool_options const & tool_options) {
         } 
       } 
       if ( failed ) {
-        throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
+        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
       }
     }
   }
@@ -201,7 +201,7 @@ int process(t_tool_options const & tool_options) {
       } 
     } 
     if ( failed ) {
-      throw std::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
+      throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
     }
   }
 

@@ -9,7 +9,6 @@
 /// \file: smt_lib_solver.cpp
 
 #include <cstdlib>
-#include <stdexcept>
 
 #include "mcrl2/data/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
@@ -17,6 +16,7 @@
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/exception.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -102,7 +102,7 @@ using namespace std;
             {
               v_sort_domain_elt = ATAgetFirst(l);
               if (f_sort_info.is_sort_arrow_prod(v_sort_domain_elt)) {
-                throw std::runtime_error("Function " + pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + pp(v_operator) +
                         " cannot be translated to the SMT-LIB format.");
               }
               if (f_sort_info.is_sort_int(v_sort_domain_elt)) {
@@ -721,7 +721,7 @@ using namespace std;
       } else if (gsIsOpId(a_clause)) {
         translate_constant(a_clause);
       } else {
-        throw std::runtime_error("Unable to handle the current clause (" +
+        throw mcrl2::runtime_error("Unable to handle the current clause (" +
                 pp(a_clause) + ").");
       }
     }

@@ -149,7 +149,7 @@ int main(int argc, char **argv)
   
     if ( SpecStream == NULL )
     {
-      throw std::runtime_error("could not open input file '" +
+      throw mcrl2::runtime_error("could not open input file '" +
                      options.lps_file_argument + "' for reading\n");
     }
     ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
@@ -157,13 +157,13 @@ int main(int argc, char **argv)
     if ( Spec == NULL )
     {
       fclose(SpecStream);
-      throw std::runtime_error("could not read LPS from '" +
+      throw mcrl2::runtime_error("could not read LPS from '" +
                      options.lps_file_argument + "'\n");
     }
     assert(Spec != NULL);
     if (!gsIsSpecV1(Spec)) {
       fclose(SpecStream);
-      throw std::runtime_error("'" +
+      throw mcrl2::runtime_error("'" +
                      options.lps_file_argument + "' does not contain an LPS\n");
     }
     assert(gsIsSpecV1(Spec));

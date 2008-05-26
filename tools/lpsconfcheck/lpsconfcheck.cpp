@@ -524,14 +524,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         //instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
 
         if (!instream.is_open()) {
-          throw std::runtime_error("error: cannot open input file '" + f_invariant_file_name + "'");
+          throw mcrl2::runtime_error("error: cannot open input file '" + f_invariant_file_name + "'");
         }
 
         gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
 
         if (!(f_invariant = parse_data_expr(instream))) {
           instream.close();
-          throw std::runtime_error("error: parsing failed!");
+          throw mcrl2::runtime_error("error: parsing failed!");
         }
 
         instream.close();
@@ -562,13 +562,13 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), f_reconstructed_lps, var_table);
       ATtableDestroy(var_table);
       if (!f_invariant) {
-        throw std::runtime_error("Typechecking of the invariant formula failed.\n");
+        throw mcrl2::runtime_error("Typechecking of the invariant formula failed.\n");
       }
      
       //data implement the invariant formula
       f_invariant = implement_data_data_expr(f_invariant, f_reconstructed_lps);
       if (!f_invariant) {
-        throw std::runtime_error("Data implementation of the invariant formula failed.\n");
+        throw mcrl2::runtime_error("Data implementation of the invariant formula failed.\n");
       }
 
       f_lps = specification(f_reconstructed_lps);

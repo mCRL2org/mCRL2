@@ -65,11 +65,11 @@ class my_program: public filter_program
       specification spec = read_specification();
       if (!spec)
       {
-        throw std::runtime_error("failed to read specification from " + input_file());
+        throw mcrl2::runtime_error("failed to read specification from " + input_file());
       }
       if (!write_specification(spec))
       {
-        throw std::runtime_error("failed to write specification to " + output_file());
+        throw mcrl2::runtime_error("failed to write specification to " + output_file());
       }
     }
 };
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     
     program.run();
   }
-  catch(std::runtime_error e)
+  catch(mcrl2::runtime_error e)
   {
     std::cerr << "parse error: " << e.what() << std::endl;
     return EXIT_FAILURE;

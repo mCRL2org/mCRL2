@@ -140,7 +140,7 @@ class t_tool_options {
       }
     
       if (!success) {
-        throw std::runtime_error("cannot read LTS from " + source_string() +
+        throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
                                                "\nretry with -v/--verbose for more information");
       }
     
@@ -192,7 +192,7 @@ class t_tool_options {
       }
     
       if (!success) { 
-        throw std::runtime_error("cannot write LTS to " + target_string() +
+        throw mcrl2::runtime_error("cannot write LTS to " + target_string() +
                                                "\nretry with -v/--verbose for more information");
       }
     }

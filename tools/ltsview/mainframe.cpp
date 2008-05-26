@@ -21,6 +21,8 @@
 # define wxFD_OPEN wxOPEN
 #endif
 
+std::string get_about_message();
+
 using namespace std;
 using namespace Utils;
 using namespace IDs;
@@ -202,26 +204,9 @@ void MainFrame::setFileInfo(wxFileName fn) {
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  wxString ttl = wxT("About LTSView");
-  wxString msg = wxString(mediator->getVersionString().c_str(),wxConvLocal);
-  msg += wxT("\n");
-  msg += wxT("Tool for interactive visualisation of state transition systems.\n");
-  msg += wxT("Developed by Bas Ploeger and Carst Tankink.\n");
-  msg += wxT("\n");
-  msg += wxT("LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. ");
-  msg += wxT("See: F. van Ham, H. van de Wetering and J.J. van Wijk, ");
-  msg += wxT("\"Visualization of State Transition Graphs\". ");
-  msg += wxT("Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n");
-  msg += wxT("\n");
-  msg += wxT("The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n");
-  msg += wxT("\n");
-  msg += wxT("This tool is part of the mCRL2 toolset.\n");
-  msg += wxT("For information see http://www.mcrl2.org\n");
-  msg += wxT("\n");
-  msg += wxT("For feature requests or bug reports,\n");
-  msg += wxT("please visit http://www.mcrl2.org/issuetracker");
-  wxMessageDialog dlg(this, msg, ttl, wxOK|wxICON_INFORMATION);
-  dlg.ShowModal();
+  wxMessageDialog(this,
+        wxString(get_about_message().c_str(), wxConvLocal),
+                wxT("About LTSView"), wxOK|wxICON_INFORMATION).ShowModal();
 }
 
 /*

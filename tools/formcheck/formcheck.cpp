@@ -197,7 +197,7 @@ using namespace mcrl2;
         FILE *in_stream = fopen(infilename.c_str(), "rb");
     
         if (in_stream == 0) {
-          throw std::runtime_error("error: could not open input file '" + infilename + "' for reading");
+          throw mcrl2::runtime_error("error: could not open input file '" + infilename + "' for reading");
         }
     
         raw_specification = (ATermAppl) ATreadFromFile(in_stream);
@@ -205,10 +205,10 @@ using namespace mcrl2;
         fclose(in_stream);
     
         if (raw_specification == 0) {
-          throw std::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
+          throw mcrl2::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
         }
         if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
-          throw std::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
+          throw mcrl2::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
       }
@@ -242,23 +242,23 @@ using namespace mcrl2;
         gsVerboseMsg("parsing formula file '%s'...\n", f_formula_file_name.c_str());
         std::ifstream instream(f_formula_file_name.c_str());
         if (!instream.is_open()) {
-          throw std::runtime_error("cannot open formula file '" + f_formula_file_name + "'");
+          throw mcrl2::runtime_error("cannot open formula file '" + f_formula_file_name + "'");
         }
         f_formula = parse_data_expr(instream);
         instream.close();
       }
       if(!f_formula){
-        throw std::runtime_error("parsing formula from " + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "failed");
+        throw mcrl2::runtime_error("parsing formula from " + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "failed");
       }
       //typecheck the formula
       f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_spec);
       if(!f_formula){
-        throw std::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
+        throw mcrl2::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       //implement data in the formula
       f_formula = implement_data_data_expr(f_formula,v_reconstructed_spec);
       if(!f_formula){
-        throw std::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
+        throw mcrl2::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       
       //update spec with the contents of v_reconstructed_spec

@@ -10,12 +10,12 @@
 
 #include <ctime>
 #include <cstdlib>
-#include <stdexcept>
 
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/exception.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -157,13 +157,13 @@ using namespace mcrl2::core;
 #ifdef HAVE_CVC
         f_smt_solver = new SMT_Solver_CVC_Fast();
 #else
-        throw std::runtime_error("The fast implementation of CVC Lite is not available.");
+        throw mcrl2::runtime_error("The fast implementation of CVC Lite is not available.");
 #endif
       } else {
-        throw std::runtime_error("An unknown SMT solver type was passed as argument.");
+        throw mcrl2::runtime_error("An unknown SMT solver type was passed as argument.");
       }
 #else
-      throw std::runtime_error("No SMT solvers available on this platform.");
+      throw mcrl2::runtime_error("No SMT solvers available on this platform.");
 #endif // _MSC_VER
     }
 

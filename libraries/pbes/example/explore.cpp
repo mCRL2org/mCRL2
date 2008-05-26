@@ -31,7 +31,7 @@ int main(int argc, char** argv)
   {
     pbes_spec.load("abp.pbes");
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   { std::cerr << "Cannot load abp.pbes\n";
     exit(1);
   }

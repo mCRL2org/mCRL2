@@ -41,7 +41,7 @@ namespace detail {
   {
     ATermAppl result = core::detail::parse_proc_spec(from);
     if (result == NULL)
-      throw std::runtime_error("parse error");
+      throw mcrl2::runtime_error("parse error");
     return result;
   }
   
@@ -50,7 +50,7 @@ namespace detail {
   {
     ATermAppl result = core::detail::type_check_proc_spec(spec);
     if (result == NULL)
-      throw std::runtime_error("type check error");
+      throw mcrl2::runtime_error("type check error");
     return result;
   }
   
@@ -59,7 +59,7 @@ namespace detail {
   {
     ATermAppl result = core::gsAlpha(spec);
     if (result == NULL)
-      throw std::runtime_error("alpha reduction error");
+      throw mcrl2::runtime_error("alpha reduction error");
     return result;
   }
   
@@ -68,7 +68,7 @@ namespace detail {
   {
     ATermAppl result = core::detail::implement_data_proc_spec(spec);
     if (result == NULL)
-      throw std::runtime_error("data implementation error");
+      throw mcrl2::runtime_error("data implementation error");
     return result;
   }
 } // namespace detail

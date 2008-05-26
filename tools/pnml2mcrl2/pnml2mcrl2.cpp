@@ -125,7 +125,7 @@ bool perform_task(tool_options_type const& tool_options) {
     OutStream = fopen(tool_options.outfilename.c_str(),"w");
   
     if (OutStream == 0) {
-      throw std::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
+      throw mcrl2::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
     }
   }
   

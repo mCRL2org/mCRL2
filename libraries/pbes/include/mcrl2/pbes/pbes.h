@@ -311,12 +311,12 @@ class pbes
     {
       aterm t = atermpp::read_from_named_file(filename);
       if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(aterm_appl(t)))
-        throw std::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
+        throw mcrl2::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
       init_term(aterm_appl(t));
 
       if (!is_well_typed())
-        throw std::runtime_error("Error in pbes::load(): term is not well typed");
+        throw mcrl2::runtime_error("Error in pbes::load(): term is not well typed");
     }
 
     /// Returns true if the PBES is a BES (boolean equation system).
@@ -375,7 +375,7 @@ class pbes
     bool save(const std::string& filename, bool binary = true) const
     {
       if (!is_well_typed())
-        throw std::runtime_error("Error in pbes::save(): term is not well typed");
+        throw mcrl2::runtime_error("Error in pbes::save(): term is not well typed");
 
       aterm t = ATermAppl(*this);
       if (binary)

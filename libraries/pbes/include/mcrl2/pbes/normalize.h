@@ -74,7 +74,7 @@ pbes_expression normalize(pbes_expression f)
     } else if (is_pbes_exists(f)) {
       return forall(var(f), normalize(not_(arg(f))));
     } else if (is_propositional_variable_instantiation(f)) {
-      throw std::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     }
   }
   else // !is_pbes_not(f)
@@ -101,7 +101,7 @@ pbes_expression normalize(pbes_expression f)
       return f;
     }
   }
-  throw std::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
+  throw mcrl2::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
   return pbes_expression();
 }
 

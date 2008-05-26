@@ -164,7 +164,7 @@ void test_pbes()
     p.load("non-existing file");
     BOOST_CHECK(false); // loading is expected to fail
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   {
   }
 
@@ -176,7 +176,7 @@ void test_pbes()
     p.load(filename);
     BOOST_CHECK(false); // loading is expected to fail
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   {
   }
   p.save("pbes_test_file.pbes");
@@ -211,7 +211,7 @@ void test_free_variables()
     freevars = p.free_variables();
     BOOST_CHECK(freevars.size() == 15);
   }
-  catch (std::runtime_error e)
+  catch (mcrl2::runtime_error e)
   {
     cout << e.what() << endl;
     BOOST_CHECK(false); // loading is expected to succeed

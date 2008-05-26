@@ -281,7 +281,7 @@ std::cout << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
         data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
         result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else {
-        throw std::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
+        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cout << "\n<satresult>" << pp(result) << std::flush;
@@ -430,7 +430,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
           data::data_variable_list xp = lps.process_parameters();
           result = propositional_variable_instantiation(X, T + d + xp + Par(X, data::data_variable_list(), f0));
         } else {
-          throw std::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
         }
       }
       else // the formula is a negation
@@ -487,7 +487,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, T, context);
           }
         } else {
-          throw std::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -546,7 +546,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_delay_timed(f)) {
           // do nothing
         } else {
-          throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
         }
       }
       else // the formula is a negation
@@ -592,7 +592,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_delay_timed(f)) {
           // do nothing
         } else {
-          throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -698,7 +698,7 @@ std::cout << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
         else
           result = sat_top(a, alpha);
       } else {
-        throw std::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
+        throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cout << "\n<satresult>" << pp(result) << std::flush;
@@ -812,7 +812,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
           data::data_variable_list xp = lps.process_parameters();
           result = propositional_variable_instantiation(X, d + xp + Par(X, data::data_variable_list(), f0));
         } else {
-          throw std::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
         }
       }
       else // the formula is a negation
@@ -867,7 +867,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             result = RHS(f0, s::nu(X, xf, s::not_(phi)), lps, context);
           }
         } else {
-          throw std::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -928,7 +928,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_delay(f)) {
           // do nothing
         } else {
-          throw std::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
         }
       }
       else // the formula is a negation
@@ -974,7 +974,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_delay_timed(f)) {
           // do nothing
         } else {
-          throw std::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG

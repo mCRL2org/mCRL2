@@ -67,7 +67,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
     if (variable < 0)
     {
       core::gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.\n");
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
     }
     else
     {
@@ -79,7 +79,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   else
   {
     core::gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
-    throw std::runtime_error("exit!");
+    throw mcrl2::runtime_error("exit!");
   }
   return result;
 }
@@ -136,7 +136,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
       else
       {
         core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-        throw std::runtime_error("exit!");
+        throw mcrl2::runtime_error("exit!");
       }
     }
     outputfile.close();
@@ -163,10 +163,10 @@ pbes<> load_pbes(std::string infilename)
     {
       pbes_spec.load("-");
     }
-    catch (std::runtime_error e)
+    catch (mcrl2::runtime_error e)
     {
       core::gsErrorMsg("Cannot open PBES from stdin\n");
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
     }
   }
   else
@@ -175,10 +175,10 @@ pbes<> load_pbes(std::string infilename)
     {
       pbes_spec.load(infilename);
     }
-    catch (std::runtime_error e)
+    catch (mcrl2::runtime_error e)
     {
       core::gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str());
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
     }
   }
   return pbes_spec;
@@ -208,7 +208,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
     if (!pbes_spec.save(outfilename, false))
     {
       core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
     }
   }
   else if (outputformat == "binary")
@@ -217,7 +217,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
     if (!pbes_spec.save(outfilename, true))
     {
       core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
     }
   }
   else if (outputformat == "cwi")
@@ -233,7 +233,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
       if (!pbes_spec.save(outfilename, true))
       {
         core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw std::runtime_error("exit!");
+      throw mcrl2::runtime_error("exit!");
       }
     }
   }

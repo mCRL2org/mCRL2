@@ -709,6 +709,11 @@ Rewriter *NextStateStandard::getRewriter()
 }
 
 
+Enumerator *NextStateStandard::getEnumerator()
+{
+	return info.enum_obj;
+}
+
 
 
 ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)

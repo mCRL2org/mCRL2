@@ -71,7 +71,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_not
   (const pbes_expression&  f, const pbes_expression& arg )
   {
-    throw std::runtime_error(std::string("prenex error: illegal expression ") + f.to_string());
+    throw mcrl2::runtime_error(std::string("prenex error: illegal expression ") + f.to_string());
     return f;
   }
 
@@ -96,7 +96,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder
   pbes_expression visit_imp
   (const pbes_expression& f, const pbes_expression& left, const pbes_expression& right)
   {
-    throw std::runtime_error(std::string("prenex error: illegal expression ") + f.to_string());
+    throw mcrl2::runtime_error(std::string("prenex error: illegal expression ") + f.to_string());
     return f;
   }    
   

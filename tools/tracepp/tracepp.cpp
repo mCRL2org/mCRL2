@@ -160,7 +160,7 @@ void process(t_tool_options const& tool_options) {
       trace.load(in);
     }
     else {
-      throw std::runtime_error("could not open input file '" + 
+      throw mcrl2::runtime_error("could not open input file '" + 
           tool_options.name_for_input + "' for reading");
     }
   }
@@ -194,7 +194,7 @@ void process(t_tool_options const& tool_options) {
       }
     }
     else {
-      throw std::runtime_error("could not open output file '" +
+      throw mcrl2::runtime_error("could not open output file '" +
                   tool_options.name_for_output +  "' for writing");
     }
   }

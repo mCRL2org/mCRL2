@@ -305,7 +305,7 @@ static data_specification load_specification(const string &infilename)
     FILE *in_stream = fopen(infilename.c_str(), "rb");
 
     if (in_stream == 0) {
-      throw std::runtime_error("error: could not open input file '" + infilename + "' for reading");
+      throw mcrl2::runtime_error("error: could not open input file '" + infilename + "' for reading");
     }
 
     raw_specification = (ATermAppl) ATreadFromFile(in_stream);
@@ -313,10 +313,10 @@ static data_specification load_specification(const string &infilename)
     fclose(in_stream);
 
     if (raw_specification == 0) {
-      throw std::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
+      throw mcrl2::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
     }
     if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
-      throw std::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
+      throw mcrl2::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
     }
     raw_specification = ATAgetArgument(raw_specification, 0);
   }

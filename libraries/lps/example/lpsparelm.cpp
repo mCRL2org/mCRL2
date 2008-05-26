@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     specification result = parelm2(spec);
     result.save(outfile);
   }
-  catch(std::runtime_error e)
+  catch(mcrl2::runtime_error e)
   {
     std::cerr << "runtime error: " << e.what() << std::endl;
     std::exit(1);

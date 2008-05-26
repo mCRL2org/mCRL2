@@ -14,6 +14,31 @@
 
 #include <string>
 #include <wx/wx.h>
+#include "mcrl2/utilities/command_line_interface.h"
+
+std::string get_about_message() {
+  static const std::string version_information =
+        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
+                                                        version_information() +
+    std::string("\n"
+     "Tool for interactive visualisation of state transition systems.\n"
+     "Developed by Bas Ploeger and Carst Tankink.\n"
+     "\n"
+     "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. "
+     "See: F. van Ham, H. van de Wetering and J.J. van Wijk, "
+     "\"Visualization of State Transition Graphs\". "
+     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+     "\n"
+     "The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n"
+     "\n"
+     "This tool is part of the mCRL2 toolset.\n"
+     "For information see http://www.mcrl2.org\n"
+     "\n"
+     "For feature requests or bug reports,\n"
+     "please visit http://www.mcrl2.org/issuetracker");
+
+  return version_information;
+}
 
 std::string lts_file_argument;
 
@@ -64,7 +89,6 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 #include "markstateruledialog.h"
 #include "fileloader.h"
 #include "settings.h"
-#include "mcrl2/utilities/command_line_interface.h"
 
 using namespace std;
 using namespace Utils;
@@ -166,7 +190,8 @@ int LTSView::OnExit() {
 }
 
 std::string LTSView::getVersionString() {
-  return get_version_information(NAME, AUTHOR);
+  return mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
+                                                        version_information();
 }
 
 void LTSView::openFile(string fileName) {
