@@ -75,7 +75,7 @@ class pbes_constelm_algorithm
 
         std::map<core::identifier_string, std::vector<edge> >::iterator j = m_edges.insert(std::make_pair(name, std::vector<edge>()));
         std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(i->formula());
-        for (std::set<propositional_variable_instantiation>::k = inst.begin(); k != inst.end(); ++k)
+        for (std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
         {
           (i->second).push_back(edge(i->variable(), *k));
         }
@@ -99,13 +99,13 @@ class pbes_constelm_algorithm
       // initialize the todo list of vertices that need to be processed
       std::deque<propositional_variable> todo;
       std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(kappa);
-      for (std::set<propositional_variable_instantiation>::i = inst.begin(); i != inst.end(); ++i)
+      for (std::set<propositional_variable_instantiation>::iterator i = inst.begin(); i != inst.end(); ++i)
       {
         propositional_variable v = m_vertices[i->name()].variable;
         todo.push_back(v);
-        m_edges.push_back(edge(v, *j));
+        m_edges[i->name()].push_back(edge(v, *i));
       }
-      
+            
       while (!todo.empty())
       {
         propositional_variable var = todo.front();
