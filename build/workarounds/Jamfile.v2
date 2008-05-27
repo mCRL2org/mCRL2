@@ -17,6 +17,7 @@ alias configuration : : <os>CYGWIN <toolset>gcc :
 # MinGW
 alias configuration : : <os>NT <toolset>gcc :
        : <include>$(TOP)/build/workarounds/mingw
+         <toolset-gcc:version>4.3.0:<define>_GLIBCPP_NO_CONCEPT_CHECKS
          <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
          <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
        ;

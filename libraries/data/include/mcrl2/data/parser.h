@@ -12,13 +12,13 @@
 #ifndef MCRL2_DATA_PARSER_H
 #define MCRL2_DATA_PARSER_H
 
-#include <stdexcept>
 #include <sstream>
 #include <climits>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
