@@ -152,7 +152,7 @@ class specification: public aterm_appl
         if (!is_well_typed())
           throw mcrl2::runtime_error("specification is not well typed (specification::load())");
       } catch (std::exception &e) {
-        throw mcrl2::runtime_error(std::string("error: ") + e.what());
+        throw mcrl2::runtime_error(e.what());
       }
     }
 
@@ -198,7 +198,7 @@ class specification: public aterm_appl
           throw mcrl2::runtime_error("could not write LPS to " + ((spec_stream == stdout)?"stdout":("'" + filename + "'")));
         }
       } catch (std::exception &e) {
-        throw mcrl2::runtime_error(std::string("error: ") + e.what());
+        throw mcrl2::runtime_error(e.what());
       }
     }
 

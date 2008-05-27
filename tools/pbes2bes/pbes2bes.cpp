@@ -24,9 +24,9 @@
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/detail/old_rewriter.h"
+#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
