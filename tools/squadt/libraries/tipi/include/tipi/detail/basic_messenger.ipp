@@ -26,12 +26,12 @@
 #include <tipi/detail/utility/standard_utility.hpp>
 #include <tipi/common.hpp>
 
-#include <boost/ref.hpp>
-#include <boost/bind.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/xtime.hpp>
+#include "boost/ref.hpp"
+#include "boost/bind.hpp"
+#include "boost/foreach.hpp"
+#include "boost/thread/thread.hpp"
+#include "boost/thread/condition.hpp"
+#include "boost/thread/xtime.hpp"
 
 /// \cond INTERNAL_DOCS
 /**

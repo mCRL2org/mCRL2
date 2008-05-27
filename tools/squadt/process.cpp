@@ -35,11 +35,12 @@
 
 #undef barrier
 
-#include <boost/bind.hpp>
-#include <boost/format.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/filesystem/convenience.hpp>
+#include "boost/bind.hpp"
+#include "boost/format.hpp"
+#include "boost/foreach.hpp"
+#include "boost/thread/condition.hpp"
+#include "boost/thread/thread.hpp"
+#include "boost/filesystem/convenience.hpp"
 
 #include "command.hpp"
 #include "process.hpp"

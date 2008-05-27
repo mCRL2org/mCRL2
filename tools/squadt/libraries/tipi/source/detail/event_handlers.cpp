@@ -1,20 +1,27 @@
-#include <map>
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+// \file event_handlers.cpp
+
+#include <map>
 #include <utility>
 
-#include <boost/bind.hpp>
-#include <boost/foreach.hpp>
-#include <boost/shared_ptr.hpp>
+#include "boost/bind.hpp"
+#include "boost/foreach.hpp"
+#include "boost/shared_ptr.hpp"
 
 // Workaround for building with Cygwin 
 #if defined(__CYGWIN__)
-#include <boost/asio.hpp>
+#include "boost/asio.hpp"
 #endif
 
-#include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
+#include "boost/thread/thread.hpp"
+#include "boost/thread/mutex.hpp"
+#include "boost/thread/condition.hpp"
 
 #include <tipi/detail/event_handlers.hpp>
 
