@@ -82,10 +82,11 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the format for INFILE1 (or stdin)", 'i').
     add_option("in2", make_mandatory_argument("FORMAT"),
       "use FORMAT as the format for INFILE2", 'j').
-    add_option("strong",
-      "use strong bisimulation equivalence (default)", 's').
-    add_option("branching",
-      "use branching bisimulation equivalence", 'b').
+    add_option("equivalence", make_mandatory_argument("NAME"),
+      "use equivalence NAME:\n"
+      "  'strong' for strong bisimulation (default), or\n"
+      "  'branching' for branching bisimulation,\n"
+      , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
       "be internal (tau) actions in addition to those defined as such by "
@@ -101,12 +102,18 @@ t_tool_options parse_command_line(int ac, char** av) {
     print_formats(stderr);
     exit(EXIT_SUCCESS);
   }
-  if (parser.options.count("strong")) {
-    tool_options.equivalence = lts_eq_strong;
+
+  if (parser.options.count("equivalence")) {
+    std::string eq_name(parser.option_argument("equivalence"));
+    if (eq_name == "strong") {
+      tool_options.equivalence = lts_eq_strong;
+    } else if (eq_name == "branching") {
+      tool_options.equivalence = lts_eq_branch;
+    } else {
+      parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+    }
   }
-  if (parser.options.count("branching")) {
-    tool_options.equivalence = lts_eq_branch;
-  }
+
   if (parser.options.count("tau")) {
     lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
   }
@@ -205,7 +212,7 @@ int process(t_tool_options const & tool_options) {
     }
   }
 
-  gsVerboseMsg("comparing LTSs...\n");
+  gsVerboseMsg("comparing LTSs (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence));
 
   bool result = l1.compare(l2,tool_options.equivalence,tool_options.eq_opts);
 
