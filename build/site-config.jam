@@ -171,6 +171,9 @@ if ! $(BOOST_INCLUDE_PATH) {
 else if $(BOOST_INCLUDE_PATH) != "default" {
   alias boost_headers : : <include>$(BOOST_INCLUDE_PATH) ;
 }
+else {
+  alias boost_headers ;
+}
 
 boost-library filesystem ;
 boost-library program_options ;
