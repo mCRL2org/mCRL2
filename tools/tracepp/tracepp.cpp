@@ -225,7 +225,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   clinterface.add_option("formats", "list accepted output formats", 'f');
   clinterface.add_option("out", make_mandatory_argument("FORMAT"),
-    "use FORMAT as the output format; for accepted formats, see --formats", 'o');
+    "use FORMAT as the output format; for accepted formats see -f/--formats", 'o');
 
 
   command_line_parser parser(clinterface, ac, av);

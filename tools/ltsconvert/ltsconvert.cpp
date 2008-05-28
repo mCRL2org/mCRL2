@@ -321,7 +321,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   }
 
   if (parser.options.count("formats")) {
-    print_formats(stderr);
+    print_formats(stdout);
     exit(EXIT_SUCCESS);
   }
 

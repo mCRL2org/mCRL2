@@ -501,7 +501,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
     } else if (phase == "di") {
       options.end_phase = phDataImpl;
     } else {
-      parser.error("option -p has illegal argument '" + parser.option_argument("end-phase") + "'");
+      parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
     }
   }
 

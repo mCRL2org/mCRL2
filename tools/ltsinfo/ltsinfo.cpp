@@ -275,7 +275,7 @@ tool_options parse_command_line(int argc, char** argv) {
   tool_options opts = { "", mcrl2::lts::lts_none, mcrl2::lts::lts_eq_isomorph };
 
   if (parser.options.count("formats")) {
-    print_formats(stderr);
+    print_formats(stdout);
     exit(EXIT_SUCCESS);
   }
   if (parser.options.count("equiv")) {

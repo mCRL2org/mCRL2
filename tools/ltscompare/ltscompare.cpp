@@ -85,7 +85,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
       "  'strong' for strong bisimulation (default), or\n"
-      "  'branching' for branching bisimulation,\n"
+      "  'branching' for branching bisimulation\n"
       , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
