@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
       } else {
         ofstream outstream(lin_options.outfilename.c_str(), ofstream::out|ofstream::binary);
         if (!outstream.is_open()) {
-          throw mcrl2::runtime_error("error: could not open output file '" + lin_options.outfilename + "' for writing");
+          throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
         }
         PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
         outstream.close();

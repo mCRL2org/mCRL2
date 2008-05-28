@@ -524,14 +524,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         //instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
 
         if (!instream.is_open()) {
-          throw mcrl2::runtime_error("error: cannot open input file '" + f_invariant_file_name + "'");
+          throw mcrl2::runtime_error("cannot open input file '" + f_invariant_file_name + "'");
         }
 
         gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
 
         if (!(f_invariant = parse_data_expr(instream))) {
           instream.close();
-          throw mcrl2::runtime_error("error: parsing failed!");
+          throw mcrl2::runtime_error("parsing failed");
         }
 
         instream.close();

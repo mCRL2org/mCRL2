@@ -561,7 +561,7 @@ extern ATermIndexedSet parser_protect_table;
  */
 int yyerror(const char *s)
 {
-  gsErrorMsg("error: %s at line: %d col: %d\n",s,line,col);
+  gsErrorMsg("%s at line: %d col: %d\n",s,line,col);
   return 0;
 }
 

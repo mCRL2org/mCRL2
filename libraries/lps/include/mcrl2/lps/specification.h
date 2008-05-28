@@ -121,39 +121,35 @@ class specification: public aterm_appl
     ///
     void load(const std::string& filename)
     {
-      try {
-        //open filename for reading as spec_stream
-        FILE *spec_stream = NULL;
-        if (filename.empty()) {
-          spec_stream = stdin;
-        } else {
-          spec_stream = fopen(filename.c_str(), "rb");
-        }
-        if (spec_stream == NULL) {
-          std::string err_msg(strerror(errno)); 
-          if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
-            err_msg.replace(err_msg.length()-1, 1, "");
-          }
-          throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading (" + err_msg + ")");
-        }
-        //read specification from spec_stream
-        ATermAppl spec_term = (ATermAppl) ATreadFromFile(spec_stream);
-        if (spec_stream != stdin) {
-          fclose(spec_stream);
-        }
-        if (spec_term == NULL) {
-          throw mcrl2::runtime_error("could not read LPS from " + ((spec_stream == stdin)?"stdin":("'" + filename + "'")));
-        }
-        if (!core::detail::gsIsSpecV1(spec_term)) {
-          throw mcrl2::runtime_error(((spec_stream == stdin)?"stdin":("'" + filename + "'")) + " does not contain an LPS");
-        }
-        //store the term locally
-        init_term(aterm_appl(spec_term));
-        if (!is_well_typed())
-          throw mcrl2::runtime_error("specification is not well typed (specification::load())");
-      } catch (std::exception &e) {
-        throw mcrl2::runtime_error(e.what());
+      //open filename for reading as spec_stream
+      FILE *spec_stream = NULL;
+      if (filename.empty()) {
+        spec_stream = stdin;
+      } else {
+        spec_stream = fopen(filename.c_str(), "rb");
       }
+      if (spec_stream == NULL) {
+        std::string err_msg(strerror(errno)); 
+        if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
+          err_msg.replace(err_msg.length()-1, 1, "");
+        }
+        throw mcrl2::runtime_error("could not open input file '" + filename + "' for reading (" + err_msg + ")");
+      }
+      //read specification from spec_stream
+      ATermAppl spec_term = (ATermAppl) ATreadFromFile(spec_stream);
+      if (spec_stream != stdin) {
+        fclose(spec_stream);
+      }
+      if (spec_term == NULL) {
+        throw mcrl2::runtime_error("could not read LPS from " + ((spec_stream == stdin)?"stdin":("'" + filename + "'")));
+      }
+      if (!core::detail::gsIsSpecV1(spec_term)) {
+        throw mcrl2::runtime_error(((spec_stream == stdin)?"stdin":("'" + filename + "'")) + " does not contain an LPS");
+      }
+      //store the term locally
+      init_term(aterm_appl(spec_term));
+      if (!is_well_typed())
+        throw mcrl2::runtime_error("specification is not well typed (specification::load())");
     }
 
     /// \brief Writes the specification to file.
@@ -167,38 +163,34 @@ class specification: public aterm_appl
     ///
     void save(const std::string& filename, bool binary = true)
     {
-      try {
-        if (!is_well_typed())
-          throw mcrl2::runtime_error("specification is not well typed (specification::save())");
-        //open filename for writing as spec_stream
-        FILE *spec_stream = NULL;
-        if (filename.empty()) {
-          spec_stream = stdout;
-        } else {
-          spec_stream = fopen(filename.c_str(), binary?"wb":"w");
+      if (!is_well_typed())
+        throw mcrl2::runtime_error("specification is not well typed (specification::save())");
+      //open filename for writing as spec_stream
+      FILE *spec_stream = NULL;
+      if (filename.empty()) {
+        spec_stream = stdout;
+      } else {
+        spec_stream = fopen(filename.c_str(), binary?"wb":"w");
+      }
+      if (spec_stream == NULL) {
+        std::string err_msg(strerror(errno)); 
+        if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
+          err_msg.replace(err_msg.length()-1, 1, "");
         }
-        if (spec_stream == NULL) {
-          std::string err_msg(strerror(errno)); 
-          if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
-            err_msg.replace(err_msg.length()-1, 1, "");
-          }
-          throw mcrl2::runtime_error("could not open output file '" + filename + "' for writing (" + err_msg + ")");
-        }
-        //write specification to spec_stream
-        ATbool result;
-        if (binary) {
-          result = ATwriteToSAFFile(m_term, spec_stream);
-        } else {
-          result = ATwriteToTextFile(m_term, spec_stream);
-        }
-        if (spec_stream != stdout) {
-          fclose(spec_stream);
-        }
-        if (result == ATfalse) {
-          throw mcrl2::runtime_error("could not write LPS to " + ((spec_stream == stdout)?"stdout":("'" + filename + "'")));
-        }
-      } catch (std::exception &e) {
-        throw mcrl2::runtime_error(e.what());
+        throw mcrl2::runtime_error("could not open output file '" + filename + "' for writing (" + err_msg + ")");
+      }
+      //write specification to spec_stream
+      ATbool result;
+      if (binary) {
+        result = ATwriteToSAFFile(m_term, spec_stream);
+      } else {
+        result = ATwriteToTextFile(m_term, spec_stream);
+      }
+      if (spec_stream != stdout) {
+        fclose(spec_stream);
+      }
+      if (result == ATfalse) {
+        throw mcrl2::runtime_error("could not write LPS to " + ((spec_stream == stdout)?"stdout":("'" + filename + "'")));
       }
     }
 

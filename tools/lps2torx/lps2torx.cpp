@@ -201,10 +201,10 @@ int main(int argc, char **argv)
       Spec = (ATermAppl) ATreadFromFile(stdin);
 
       if (Spec == 0) {
-        throw mcrl2::runtime_error("error: could not read LPS from stdin");
+        throw mcrl2::runtime_error("could not read LPS from stdin");
       }
       if (!gsIsSpecV1(Spec)) {
-        throw mcrl2::runtime_error("error: stdin does not contain an LPS");
+        throw mcrl2::runtime_error("stdin does not contain an LPS");
       }
     }
     else {
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
       FILE *in_stream = fopen(options.name_for_input.c_str(), "rb");
 
       if (in_stream == 0) {
-        throw mcrl2::runtime_error("error: could not open input file '" + options.name_for_input + "' for reading");
+        throw mcrl2::runtime_error("could not open input file '" + options.name_for_input + "' for reading");
       }
 
       Spec = (ATermAppl) ATreadFromFile(in_stream);
@@ -221,10 +221,10 @@ int main(int argc, char **argv)
       fclose(in_stream);
 
       if (Spec == 0) {
-        throw mcrl2::runtime_error("error: could not read LPS from '" + options.name_for_input + "'");
+        throw mcrl2::runtime_error("could not read LPS from '" + options.name_for_input + "'");
       }
       if (!gsIsSpecV1(Spec)) {
-        throw mcrl2::runtime_error("error: '" + options.name_for_input + "' does not contain an LPS");
+        throw mcrl2::runtime_error("'" + options.name_for_input + "' does not contain an LPS");
       }
     }
  

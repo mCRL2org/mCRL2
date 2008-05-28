@@ -20,7 +20,7 @@ using namespace mcrl2::core::detail;
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
 {
-	gsMessage("error: compiling Innermost rewriter is not available\n");
+	gsErrorMsg("compiling Innermost rewriter is not available\n");
 	exit(1);
 }
 

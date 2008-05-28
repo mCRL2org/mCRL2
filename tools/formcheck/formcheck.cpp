@@ -197,7 +197,7 @@ using namespace mcrl2;
         FILE *in_stream = fopen(infilename.c_str(), "rb");
     
         if (in_stream == 0) {
-          throw mcrl2::runtime_error("error: could not open input file '" + infilename + "' for reading");
+          throw mcrl2::runtime_error("could not open input file '" + infilename + "' for reading");
         }
     
         raw_specification = (ATermAppl) ATreadFromFile(in_stream);
@@ -205,10 +205,10 @@ using namespace mcrl2;
         fclose(in_stream);
     
         if (raw_specification == 0) {
-          throw mcrl2::runtime_error("error: could not read LPS or PBES from '" + infilename + "'");
+          throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
         }
         if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
-          throw mcrl2::runtime_error("error: '" + infilename + "' does not contain an LPS or PBES");
+          throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
       }

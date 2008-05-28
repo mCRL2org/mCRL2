@@ -103,7 +103,7 @@ bool process(t_tool_options const& tool_options) {
     } else {
       ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
       if (!outstream.is_open()) {
-        throw mcrl2::runtime_error("error: could not open output file '" + outfilename + "' for writing");
+        throw mcrl2::runtime_error("could not open output file '" + outfilename + "' for writing");
       }
       PrintPart_CXX(outstream, (ATerm) result, tool_options.pretty?ppDefault:ppInternal);
       outstream.close();
