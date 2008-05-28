@@ -165,11 +165,11 @@ rule boost-library ( name : use-local-boost ? : use-system-boost ? ) {
   explicit boost_$(name) ;
 }
 
-if $(BOOST_INCLUDE_PATH) {
-  alias boost_headers : : <include>$(BOOST_INCLUDE_PATH) ;
-}
-else {
+if ! $(BOOST_INCLUDE_PATH) {
   alias boost_headers : /boost//headers ;
+}
+else if $(BOOST_INCLUDE_PATH) != "default" {
+  alias boost_headers : : <include>$(BOOST_INCLUDE_PATH) ;
 }
 
 boost-library filesystem ;

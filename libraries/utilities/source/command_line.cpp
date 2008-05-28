@@ -669,7 +669,7 @@ namespace mcrl2 {
      * \param[in] message the body of the exception message
      **/
     void command_line_parser::error(std::string const& message) const {
-      throw mcrl2::runtime_error(m_interface.m_name + ": " + message
+      throw std::runtime_error(m_interface.m_name + ": " + message
                 + "\nTry `" + m_interface.m_name + " --help' for more information.");
     }
 

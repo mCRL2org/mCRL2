@@ -413,8 +413,8 @@ namespace mcrl2 {
          * \param[in] short_identifier an optional single-character short representation of the option
          * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
          * \pre short_identifier must a single character [a-zA-Z0-9]
-         * \throw mcrl2::runtime_error when an option with long_identifier is already part of the interface
-         * \throw mcrl2::runtime_error when an option with short_identifier is already part of the interface
+         * \throw std::runtime_error when an option with long_identifier is already part of the interface
+         * \throw std::runtime_error when an option with short_identifier is already part of the interface
          * \see add_option(std::string const&, std::string const&, char const)
          *
          * The following example shows how to add mandatory and optional options:
@@ -448,8 +448,8 @@ namespace mcrl2 {
          * \param[in] short_identifier an optional single-character short representation of the option
          * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
          * \pre short_identifier must a single character [a-zA-Z0-9]
-         * \throw mcrl2::runtime_error when an option with long_identifier is already part of the interface
-         * \throw mcrl2::runtime_error when an option with short_identifier is already part of the interface
+         * \throw std::runtime_error when an option with long_identifier is already part of the interface
+         * \throw std::runtime_error when an option with short_identifier is already part of the interface
          *
          * The following example shows how to add an option without arguments
          * \code
@@ -627,7 +627,7 @@ namespace mcrl2 {
                                 const int argument_count, CharacterType const* const* const arguments);
 
         /**
-         * \brief Throws standard formatted mcrl2::runtime_error exception
+         * \brief Throws standard formatted std::runtime_error exception
          * \param[in] message the exception message
          *
          * The following example shows the output of this method for a tool named test.

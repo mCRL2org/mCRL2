@@ -437,7 +437,7 @@ else
            [BOOST_INCLUDE_PATH=default
             BOOST_LIBRARY_PATH=], [], [])
   
-  USE_BOOST=builtin
+  USE_BOOST=system
 fi
 
 AC_SUBST([BOOST_INCLUDE_PATH],[])

@@ -16,13 +16,13 @@ constant BOOST_VERSION_TAG : $(version-tag:J="_") ;
 
 project boost
        : requirements
-          <include>$(BOOST_ROOT)
+          <include>.
           <toolset>gcc:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <toolset>darwin:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
           <tag>@$(__name__).tag
        : usage-requirements
-          <include>$(BOOST_ROOT)
+          <include>.
           <toolset>gcc:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <toolset>darwin:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
