@@ -226,7 +226,7 @@ void process(t_tool_options const& tool_options) {
 
   if ( tool_options.equivalence != lts_eq_none )
   {
-    gsVerboseMsg("reducing LTS...\n");
+    gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence));
     gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
     l.reduce(tool_options.equivalence, tool_options.eq_opts);
     gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
@@ -254,36 +254,32 @@ t_tool_options parse_command_line(int ac, char** av) {
     "format is determined by the content of INFILE. Options --in and --out can be\n"
     "used to force the input and output formats.");
 
-  clinterface.
-    add_option("no-reach",
-      "do not perform a reachability check on the input LTS").
-    add_option("no-state",
-      "leave out state information when saving in dot format", 'n').
-    add_option("determinise", "determinise LTS", 'D').
-    add_option("formats", "list accepted formats", 'f').
-    add_option("lps", make_mandatory_argument("FILE"),
+  clinterface.add_option("no-reach",
+      "do not perform a reachability check on the input LTS");
+  clinterface.add_option("no-state",
+      "leave out state information when saving in dot format", 'n');
+  clinterface.add_option("determinise", "determinise LTS", 'D');
+  clinterface.add_option("formats", "list accepted formats", 'f');
+  clinterface.add_option("lps", make_mandatory_argument("FILE"),
       "use FILE as the LPS from which the input LTS was generated; this is "
       "needed to store the correct parameter names of states when saving "
-      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
-    add_option("in", make_mandatory_argument("FORMAT"),
+      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
+  clinterface.add_option("in", make_mandatory_argument("FORMAT"),
       "use FORMAT as the input format", 'i').
     add_option("out", make_mandatory_argument("FORMAT"),
       "use FORMAT as the output format", 'o');
-  clinterface.add_option("none",
-      "do not minimise (default)").
-    add_option("strong",
-      "minimise using strong bisimulation", 's').
-    add_option("branching",
-      "minimise using branching bisimulation", 'b').
-    add_option("trace",
-      "determinise and then minimise using trace equivalence", 't').
-    add_option("weak-trace",
-      "determinise and then minimise using weak trace equivalence", 'u').
-    add_option("add",
+  clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
+      "minimise modulo equivalence NAME:\n"
+      "  'strong' for strong bisimulation,\n"
+      "  'branching' for branching bisimulation,\n"
+      "  'trace' for trace, or\n"
+      "  'weak-trace' for weak-trace"
+      , 'e');
+  clinterface.add_option("add",
       "do not minimise but save a copy of the original LTS extended with a "
       "state parameter indicating the bisimulation class a state belongs to "
-      "(only for mCRL2)", 'a').
-    add_option("tau", make_mandatory_argument("ACTNAMES"),
+      "(only for mCRL2)", 'a');
+  clinterface.add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
       "be internal (tau) actions in addition to those defined as such by "
       "the input");
@@ -328,21 +324,22 @@ t_tool_options parse_command_line(int ac, char** av) {
     print_formats(stderr);
     exit(EXIT_SUCCESS);
   }
-  if (parser.options.count("none")) {
-    tool_options.equivalence = lts_eq_none;
+
+  if (parser.options.count("equivalence")) {
+    std::string eq_name(parser.option_argument("equivalence"));
+    if (eq_name == "strong") {
+      tool_options.equivalence = lts_eq_strong;
+    } else if (eq_name == "branching") {
+      tool_options.equivalence = lts_eq_branch;
+    } else if (eq_name == "trace") {
+      tool_options.equivalence = lts_eq_trace;
+    } else if (eq_name == "weak-trace") {
+      tool_options.equivalence = lts_eq_weak_trace;
+    } else {
+      parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+    }
   }
-  if (parser.options.count("strong")) {
-    tool_options.equivalence = lts_eq_strong;
-  }
-  if (parser.options.count("branching")) {
-    tool_options.equivalence = lts_eq_branch;
-  }
-  if (parser.options.count("trace")) {
-    tool_options.equivalence = lts_eq_trace;
-  }
-  if (parser.options.count("weak-trace")) {
-    tool_options.equivalence = lts_eq_weak_trace;
-  }
+
   if (parser.options.count("tau")) {
     lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
   }
