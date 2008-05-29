@@ -1871,7 +1871,18 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
     }
   //else if(gsIsMerge(a)||gsIsLMerge(a)) r=mCRL_aterm;
   else if(gsIsSync(a)||gsIsMerge(a)||gsIsLMerge(a)){
-    if(ATindexOf(gsaGetDeps(a),(ATerm)context,0)>=0) r=mCRL_aterm;
+    ATermList deps=gsaGetDeps(a);
+    if(ATindexOf(deps,(ATerm)context,0)>=0) r=mCRL_aterm;
+    else{
+      //if any process name in deps is recursive, also r=mCRL_aterm;
+      for(ATermList l=deps; !ATisEmpty(l); l=ATgetNext(l)){
+        if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)ATAgetFirst(l)),1),rec_aterm)){
+          r=mCRL_aterm;
+          break;
+        }
+      }
+    }
+    //gsVerboseMsg("Trying to see if parallelism is really recursive:\n a: %P\n gsaGetDeps(a): %P\n context: %P\n r:%P\n\n",a,gsaGetDeps(a),context,r);
   }
   else 
     assert(0);
