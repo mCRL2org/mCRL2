@@ -1555,7 +1555,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     a=ATAgetArgument(a,0);
     l=ATLtableGet(alphas,(ATerm)a);
     if(!l){
-      //this should be a mCRL process (pCRL processes always have an entry). 
+      //this should be an mCRL process (pCRL processes always have an entry). 
       //we apply the alphabeth reductions to its body and then we know the alphabet
       //gsWarningMsg("Exploring new mCRL process %T, allowed: %T, length: %d\n\n",a,allowed,length);
       l=gsaGetAlpha(ATAtableGet(procs,(ATerm)a),length,allowed,ignore);
@@ -1869,8 +1869,8 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
     if(ATisEqual(p,mCRL_aterm)) r=mCRL_aterm;
     if(args==2 && ATisEqual(gsaGetProp(ATAgetArgument(a,ia2),context),mCRL_aterm)) r=mCRL_aterm;
     }
-  else if(gsIsMerge(a)||gsIsLMerge(a)) r=mCRL_aterm;
-  else if(gsIsSync(a)){
+  //else if(gsIsMerge(a)||gsIsLMerge(a)) r=mCRL_aterm;
+  else if(gsIsSync(a)||gsIsMerge(a)||gsIsLMerge(a)){
     if(ATindexOf(gsaGetDeps(a),(ATerm)context,0)>=0) r=mCRL_aterm;
   }
   else 
