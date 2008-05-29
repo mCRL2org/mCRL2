@@ -42,10 +42,10 @@ namespace mcrl2 {
 //- argv on non-Windows platforms
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT(argc, argv)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(&argv));
+  ATinit(argc, argv, reinterpret_cast<ATerm*>(&argv));
 #else
 #define MCRL2_ATERM_INIT(argc, argv)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
+  ATinit(argc, argv, reinterpret_cast<ATerm*>(argv));
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 //MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
