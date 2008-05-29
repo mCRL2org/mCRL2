@@ -78,7 +78,7 @@ ATerm NextStateStandard::buildTree(ATerm *args)
 		for (int i=0; i<info.statelen; i++)
 			tree_init[i] = false;
 		n = 1;
-		while ( n < info.statelen )
+		while ( n <= info.statelen )
 		{
 			n *= 2;
 		}
