@@ -51,7 +51,7 @@ struct t_tool_options {
 
 t_tool_options parse_command_line(int ac, char** av)
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
     "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
 

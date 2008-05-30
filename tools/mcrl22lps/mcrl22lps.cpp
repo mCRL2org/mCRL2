@@ -390,7 +390,7 @@ using namespace std;
 
 static t_lin_options parse_command_line(int argc, char *argv[])
 { 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used.");

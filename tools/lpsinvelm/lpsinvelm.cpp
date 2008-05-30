@@ -158,7 +158,7 @@ using namespace mcrl2;
     // --------------------------------------------------------------------------------------------
 
     void LPS_Inv_Elm::get_options(int argc, char* argv[]) {
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --invariant=INVFILE [INFILE [OUTFILE]]\n"
+      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --invariant=INVFILE [INFILE [OUTFILE]]\n",
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
         "INVFILE is an invariant of the linear process specification (LPS) in INFILE. "
         "If this is the case, the tool eliminates all summands of the LPS whose condition "

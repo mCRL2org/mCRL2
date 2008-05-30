@@ -21,9 +21,11 @@
 #include "boost/algorithm/string/compare.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
+/// \cond DUMMY
 // dummy necessary for compiling
 #define MCRL2_REVISION "0"
 #define __COMMAND_LINE_INTERFACE__
+/// \endcond
 
 #include <mcrl2/utilities/command_line_interface.h>
 
@@ -182,8 +184,9 @@ namespace mcrl2 {
     /// \endcond
 
     /**
-     * \param[in] name the name used to reference the argument
+     * \param[in] name the name used to reference the argument in textual descriptions
      * \param[in] default_value the default value
+     * \return a basic_argument derived object that represents an untyped optional option argument
      **/
     interface_description::optional_argument< std::string >
        make_optional_argument(std::string const& name, std::string const& default_value) {
@@ -192,7 +195,8 @@ namespace mcrl2 {
     }
 
     /**
-     * \param[in] name the name used to reference the argument
+     * \param[in] name the name used to reference the argument in textual descriptions
+     * \return a basic_argument derived object that represents an untyped mandatory option argument
      **/
     interface_description::mandatory_argument< std::string >
                                 make_mandatory_argument(std::string const& name) {
@@ -200,20 +204,11 @@ namespace mcrl2 {
     }
 
     interface_description::interface_description(std::string const& path,
-          std::string const& name, std::string const& authors, std::string const& usage,
-          std::string const& known_issues) :
+          std::string const& name, std::string const& authors, std::string const& synopsis,
+          std::string const& description, std::string const& known_issues) :
                                     m_path(path), m_name(name), m_authors(authors),
+                                    m_usage(synopsis), m_description(description),
                                     m_known_issues(known_issues) {
-
-      std::istringstream usage_and_description(usage);
-
-      getline(usage_and_description, m_usage);
-
-      std::ostringstream description_only;
-
-      description_only << usage_and_description.rdbuf();
-
-      m_description = description_only.str();
 
       // Add mandatory options
       add_hidden_option("help", "display help information", 'h');
@@ -225,7 +220,7 @@ namespace mcrl2 {
 
     std::string interface_description::copyright_message() const {
       return "Copyright (c) " + copyright_period +
-                                        " Eindhoven University of Technology.\n"
+                                        " Technische Universiteit Eindhoven.\n"
         "This is free software.  You may redistribute copies of it under the\n"
         "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
         "There is NO WARRANTY, to the extent permitted by law.\n";
@@ -251,7 +246,7 @@ namespace mcrl2 {
       m_options.find(long_identifier)->second.m_show = false;
     }
 
-    void interface_description::add_rewriting_options() {
+    interface_description& interface_description::add_rewriting_options() {
       add_option(
         "rewriter", make_mandatory_argument("NAME"),
         "use rewrite strategy NAME:\n"
@@ -263,21 +258,19 @@ namespace mcrl2 {
         "  'innerc' for compiled innermost rewriting",
         'r'
       );
+
+      return *this;
     }
 
-    void interface_description::add_prover_options() {
+    interface_description& interface_description::add_prover_options() {
       add_option("smt-solver", make_mandatory_argument("SOLVER"),
         "use SOLVER to remove inconsistent paths from the internally used "
         "BDDs (by default, no path elimination is applied):\n"
-#if defined(HAVE_CVC)
-        "  'ario' for the SMT solver Ario,\n"
-        "  'cvc' for the SMT solver CVC3, or\n"
-        "  'cvc-fast' for the fast implementation of the SMT solver CVC3"
-#else
         "  'ario' for the SMT solver Ario, or\n"
         "  'cvc' for the SMT solver CVC3"
-#endif
         , 'z');
+
+      return *this;
     }
 
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
@@ -378,7 +371,7 @@ namespace mcrl2 {
       return s.str();
     }
 
-    inline std::string mark_name_in_usage(std::string const& usage) {
+    inline static std::string mark_name_in_usage(std::string const& usage) {
       std::string result;
       bool        name_character = false;
 
@@ -468,7 +461,7 @@ namespace mcrl2 {
         << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
       s << ".SH COPYRIGHT" << std::endl
         << "Copyright \\(co " + copyright_period +
-                                        " Eindhoven University of Technology.\n"
+                                        " Technische Universiteit Eindhoven.\n"
         << ".br" << std::endl
         << "This is free software.  You may redistribute copies of it under the\n"
            "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
@@ -491,6 +484,7 @@ namespace mcrl2 {
      *
      * \param[in] d interface description
      * \param[in] arguments vector (as ordered list) with command line arguments
+     * \throw std::runtime_error with parse error message
      **/
     void command_line_parser::collect(interface_description& d, std::vector< std::string > const& arguments) {
       if (0 < arguments.size()) {
@@ -667,6 +661,7 @@ namespace mcrl2 {
 
     /**
      * \param[in] message the body of the exception message
+     * \throw std::runtime_error with an appropriately formatted versions of the message argument
      **/
     void command_line_parser::error(std::string const& message) const {
       throw std::runtime_error(m_interface.m_name + ": " + message

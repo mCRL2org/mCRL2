@@ -244,7 +244,7 @@ void process(t_tool_options const& tool_options) {
 }
 
 t_tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
     "requested format after applying the selected minimisation method (default is\n"
     "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"

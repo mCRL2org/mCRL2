@@ -333,7 +333,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 //---------------------------
 t_tool_options parse_command_line(int ac, char** av)
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
       "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is\n"
       "not present, stdin is used. If OUTFILE is not present, stdout is used.");
 

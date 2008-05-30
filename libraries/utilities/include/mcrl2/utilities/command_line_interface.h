@@ -23,11 +23,13 @@
 namespace mcrl2 {
   namespace utilities {
 
+    /// \cond INTERNAL
     /** \brief toolset version tag */
     const std::string version_tag("July 2008 (development)");
 
     /** \brief toolset copyright period description */
     const std::string copyright_period("2008");
+    /// \endcond
 
 #if defined(__LIBREWRITE_H)
     inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
@@ -51,16 +53,13 @@ namespace mcrl2 {
       /// no standard conversion available function, so implement on-the-spot
       is.readsome(solver_type, 10);
 
-      s = solver_type_cvc_fast;
+      s = solver_type_cvc;
 
       if (std::strncmp(solver_type, "ario", 5) == 0) {
         s = solver_type_ario;
       }
       else if (std::strncmp(solver_type, "cvc", 3) == 0) {
-        if (solver_type[3] == '\0') {
-          s = solver_type_cvc;
-        }
-        else if (std::strncmp(&solver_type[3], "-fast", 6) != 0) {
+        if (solver_type[3] != '\0') {
           is.setstate(std::ios_base::failbit);
         }
       }
@@ -85,6 +84,60 @@ namespace mcrl2 {
      * added to the interface. Options for functionality in toolset libraries
      * that are shared amongst multiple tools can be predefined in this
      * component and included on demand for individual tools.
+     *
+     * The following example illustrates use of the interface description class:
+     * \code
+     *  interface_description interface("/path/to/demo-tool",
+     *          "demo-tool", "Rincewind", "[OPTIONS]... [PATHS]"
+     *          "Serves as demonstration of the features of the interface_description class.");
+     *
+     *  // Note default options: --help,(-h), --version, --verbose, --debug (-d) and --quiet (-q)
+     *  cli.
+     *   add_option("recursive", "recursively test all files in directories", 'r').
+     *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with").
+     *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period (default 2 seconds)").
+     *   add_rewriting_options().
+     *   add_prover_options();
+     *
+     *  std::cerr << cli.textual_description() << std::endl;
+     *
+     *  std::cerr << "VERSION INFORMATION:" << std::endl
+     *            << std::endl
+     *            << cli.version_information() << std::endl;
+     * \endcode
+     * The output produced when running the program is something similar to:
+     * \verbatim
+        interface description:
+        /path/to/demo-tool [OPTIONS]... [PATHS]
+        Serves as demonstration of the features of the interface_description
+        class.
+      
+        Options:
+          -r, --recursive          recursively test all files in directories
+          -t[SEC], --timeout=[SEC] optional timeout period (default 2 seconds)
+              --tool=FOO           path that identifies the tool executable
+                                   to test with
+      
+        Standard options:
+          -q, --quiet              do not display warning messages
+          -v, --verbose            display short intermediate messages
+          -d, --debug              display detailed intermediate messages
+          -h, --help               display help information
+              --version            display version information
+      
+        Report bugs at <http://www.mcrl2.org/issuetracker>.
+      
+        See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
+      
+        VERSION INFORMATION:
+      
+        demo-tool July 2008 (development) (revision 4624M-shared)
+        Copyright (c) 2008 Technische Universiteit Eindhoven.
+        This is free software.  You may redistribute copies of it under the
+        terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.
+        There is NO WARRANTY, to the extent permitted by law.
+      
+        Written by Rincewind. \endverbatim
      **/
     class interface_description {
       friend class command_line_parser;
@@ -259,7 +312,6 @@ namespace mcrl2 {
               return boost::is_iless()(s1, s2) || (boost::is_iequal()(s1, s2) && s2 < s1);
             }
           };
-
         /// \endcond
 
       friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
@@ -341,12 +393,12 @@ namespace mcrl2 {
          * \param[in] path path or name that identifies the executable
          * \param[in] name the name of the tool
          * \param[in] authors string with the names of the authors
-         * \param[in] usage message that explains tool usage and description
+         * \param[in] synopsis message that gives an abstract summary of tool usage
+         * \param[in] description message that explains tool usage and description
          * \param[in] known_issues textual description of known issues with the tool
-         * \param[in] messaging_options adds messaging options (-q,--quiet, -v,--verbose and -d,--debug) to interface
          **/
         interface_description(std::string const& path, std::string const& name, std::string const& authors,
-                     std::string const& usage, std::string const& known_issues = "");
+                     std::string const& synopsis, std::string const& description, std::string const& known_issues = "");
 
         /**
          * \brief Composes a copyright message
@@ -367,14 +419,13 @@ namespace mcrl2 {
          * The output is:
          *
          * \verbatim
-         * test January 2008 (revision 4321M-shared)
-         * Copyright (C) 2008 Eindhoven University of Technology.
-         * This is free software.  You may redistribute copies of it under the
-         * terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.
-         * There is NO WARRANTY, to the extent permitted by law.
-         *
-         * Written by John Doe
-         * \endverbatim
+           test January 2008 (revision 4321M-shared)
+           Copyright (C) 2008 Technische Universiteit Eindhoven.
+           This is free software.  You may redistribute copies of it under the
+           terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.
+           There is NO WARRANTY, to the extent permitted by law.
+          
+           Written by John Doe \endverbatim
          *
          * Where toolset version, revision and copyright year are constants
          * supplied internally at compile time.
@@ -393,25 +444,32 @@ namespace mcrl2 {
          * mandatory. In the former case a default value is assumed when the
          * option is found on a command line command.
          *
-         * The template parameter T is used to select between optional and
-         * mandatory option argument types. More specifically it specifies one
-         * of the two template types:
-         *  \li template < S > interface_description::optional_argument representing a typed optional option argument or,
-         *  \li template < S > interface_description::mandatory_argument representing a typed mandatory option argument.
-         * The special case in which template parameter S is equal to
-         * std::string represents the untyped argument. The current state of
-         * implementation is that typed arguments are unchecked. The parser
-         * does not check that an argument with type mandatory_argument< int >
-         * found in a command is convertible to type int. At the moment only
-         * the two friend functions make_mandatory_argument and
-         * make_optional_argument can be used to create the arguments (that are
-         * untyped).
-         *
          * \param[in] long_identifier the long option representation of the option
          * \param[in] argument_specification a mandatory or optional argument to the option
          * \param[in] description description of the option
          * \param[in] short_identifier an optional single-character short representation of the option
-         * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
+         *
+         * The argument_specification parameter is an object of a class derived
+         * from basic_argument. Appropriate argument specification objects can
+         * be obtained by using the friend functions make_mandatory_argument()
+         * and make_optional_argument().
+         *
+         * More specifically it specifies one of the two template types:
+         * \li template < S > interface_description::optional_argument
+         * representing a typed optional option argument or,
+         * \li template < S >
+         * interface_description::mandatory_argument representing a typed
+         * mandatory option argument.
+         * The special case in which template parameter S is equal to
+         * std::string represents the untyped argument.
+         *
+         * The current implementation does not perform type checking of
+         * arguments. More concretely it does not check whether a value
+         * representing an argument with type mandatory_argument< int > to type
+         * int.
+         *
+         * \return *this
+         * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-'
          * \pre short_identifier must a single character [a-zA-Z0-9]
          * \throw std::runtime_error when an option with long_identifier is already part of the interface
          * \throw std::runtime_error when an option with short_identifier is already part of the interface
@@ -433,8 +491,8 @@ namespace mcrl2 {
          * The human readable interface specification for these options is as follows:
          *
          * \verbatim
-             -t, --timeout=SEC        timeout occurs after SEC number of seconds
-             -r, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
+             -tSEC, --timeout=SEC        timeout occurs after SEC number of seconds
+             -rDEPTH, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
          **/
         interface_description& add_option(std::string const& long_identifier,
                                           basic_argument const& argument_specification,
@@ -446,6 +504,7 @@ namespace mcrl2 {
          * \param[in] long_identifier the long option representation of the option
          * \param[in] description description of the option
          * \param[in] short_identifier an optional single-character short representation of the option
+         * \return *this
          * \pre long_identifier must be a non-empty string that only contain characters from [a-z0-9] or `-' '_'
          * \pre short_identifier must a single character [a-zA-Z0-9]
          * \throw std::runtime_error when an option with long_identifier is already part of the interface
@@ -477,22 +536,26 @@ namespace mcrl2 {
 
         /**
          * \brief Adds options for the rewriter
+         * \return *this
          **/
-        void add_rewriting_options();
+        interface_description& add_rewriting_options();
 
         /**
          * \brief Adds options for the prover
+         * \return *this
          **/
-        void add_prover_options();
+        interface_description& add_prover_options();
 
         /**
-         * \brief Returns a human readable interface description
+         * \brief Generates a human readable interface description (used for -h,--help)
+         * \return string containing a description of the interface
          **/
         std::string textual_description() const;
 
         /**
          * \brief Returns the text of a man page
-         * \param[in] revision 
+         * \param[in] revision the revision tag used in the heading of the man page
+         * \return string containing a man page description of the interface
          **/
         std::string man_page(std::string const& revision) const;
     };
@@ -519,7 +582,7 @@ namespace mcrl2 {
      * \code
      *  interface_description interface("tool", "tool-name", "John Doe", "[OPTIONS]... [PATHS]");
      *
-     *  // Note default options: --help,(-h), --version, --verbose (-v), --debug (-d) and --quiet (-q)
+     *  // Note default options: --help,(-h), --version, --verbose, --debug (-d) and --quiet (-q)
      *  cli.
      *   add_option("recursive", "recursively test all files in directories", 'r').
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with", 't').
@@ -550,8 +613,8 @@ namespace mcrl2 {
      *
      * Note the use of the option_argument method.  It simplifies argument
      * extraction in the case that the same option does not occur multiple
-     * times the auxiliary option_argument() and option_argument_as()
-     * functions are provided.
+     * times the auxiliary functions option_argument() and option_argument_as()
+     * are provided.
      **/
     class command_line_parser {
 
@@ -650,13 +713,21 @@ namespace mcrl2 {
         void error(std::string const& message) const;
 
         /**
-         * \brief Returns the argument (or the empty string) of the first option matching a name
+         * \brief Returns the argument of the first option matching a name
          * \param[in] long_identifier the long identifier for the option
+         * \return options.find(long_identifier)->second
          * \pre 0 < options.count(long_identifier)
+         * \throw std::logic_error containing a message that the option
+         * was not part of the command
+         * \throw std::logic_error containing a message that the option
+         * does not take argument
          **/
         std::string const& option_argument(std::string const& long_identifier) {
           if (options.count(long_identifier) == 0) {
-            throw std::logic_error("Fatal error: argument requested of unspecified option! (this is a bug)\n");
+            throw std::logic_error("Fatal error: argument requested of unspecified option!");
+          }
+          else if (!m_interface.m_options.find(long_identifier)->second.accepts_argument()) {
+            throw std::logic_error("Fatal error: argument requested of option that does not take an argument!");
           }
 
           return options.find(long_identifier)->second;
@@ -666,7 +737,8 @@ namespace mcrl2 {
          * \brief Returns the converted argument of the first option matching a name
          * \param[in] long_identifier the long identifier for the option
          * \pre 0 < options.count(long_identifier) and !options.find(long_identifier)->second.empty()
-         * \throw std::runtime_exception containing a message that the argument cannot be converted to the specified type
+         * \throw std::runtime_error containing a message that the argument cannot be converted to the specified type
+         * \return t : T where t << std::istringstream(options.find(long_identifier)->second)
          **/
         template < typename T >
         inline T option_argument_as(std::string const& long_identifier) {
@@ -815,7 +887,7 @@ namespace mcrl2 {
       process_default_options(d);
     }
 
-#ifndef __CYGWIN__ // wstring is not available for cygwin
+#ifndef __CYGWIN__ // std::wstring is not available for Cygwin
     template <>
     command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
                                          m_interface(d), options(m_options), arguments(m_arguments) {

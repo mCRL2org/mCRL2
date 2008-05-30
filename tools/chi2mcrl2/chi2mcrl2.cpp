@@ -176,7 +176,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 t_options parse_command_line(int argc, char *argv[])
 { 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Translates the Chi specifiation in INFILE and writes the resulting mCRL2 "
     "OUTFILE. if OUTFILE is not present, stdout is used. If INFILE is not present "
     "stdin is used.");

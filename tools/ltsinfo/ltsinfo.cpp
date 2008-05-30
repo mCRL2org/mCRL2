@@ -249,7 +249,7 @@ static void print_formats(FILE *f)
 tool_options parse_command_line(int argc, char** argv) {
   using mcrl2::lts::lts;
 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
     "Print information about the labelled transition system (LTS) in INFILE. "
     "If INFILE is not supplied, stdin is used.\n"
     "\n"

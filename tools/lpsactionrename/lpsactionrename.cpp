@@ -245,7 +245,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 static t_tool_options parse_command_line(int argc, char **argv)
 {
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --file=RENAMEFILE [INFILE [OUTFILE]]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --file=RENAMEFILE [INFILE [OUTFILE]]\n",
     "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
     "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used.");
 

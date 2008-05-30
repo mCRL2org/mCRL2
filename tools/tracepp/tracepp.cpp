@@ -201,7 +201,7 @@ void process(t_tool_options const& tool_options) {
 }
 
 t_tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [[INFILE] OUTFILE]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [[INFILE] OUTFILE]\n",
     "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"

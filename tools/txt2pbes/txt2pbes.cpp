@@ -522,7 +522,7 @@ void print_syntax(void)
 t_tool_options parse_command_line(int ac, char **av)
 //==========================
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
     "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
     "A BNF syntax description of the current ad hoc parser can be displayed using the --syntax option.",

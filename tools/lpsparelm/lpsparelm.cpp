@@ -35,7 +35,7 @@ struct tool_configuration {
   }
 
   tool_configuration(int ac, char** av) {
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
                              "Remove unused parameters from the linear process specification (LPS) in INFILE\n"
                              "and write the result to OUTFILE. If INFILE is not present, stdin is used. If\n"
                              "OUTFILE is not present, stdout is used.\n");

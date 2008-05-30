@@ -294,7 +294,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 static t_tool_options parse_command_line(int argc, char **argv) {
   using namespace ::mcrl2::utilities;
 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n"
+  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n",
     "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
     "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
     "present, stdout is used. If INFILE is not present, stdin is used.\n"

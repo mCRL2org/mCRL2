@@ -93,7 +93,7 @@ static void print_formats(FILE *f)
 }
 
 lts_generation_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. If "
     "OUTFILE is not supplied, the LTS is not stored.\n"
     "\n"

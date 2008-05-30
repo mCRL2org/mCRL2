@@ -103,7 +103,7 @@ void parse_command_line(int argc, wxChar** argv) {
 
   interface_description clinterface(
         std::string(wxString(argv[0], wxConvLocal).fn_str()),
-        NAME, AUTHOR, "[OPTION]... [INFILE]\n"
+        NAME, AUTHOR, "[OPTION]... [INFILE]\n",
     "Start the LTSView application and open INFILE. If INFILE is not"
     "supplied then LTSView is started without opening an LTS.\n"
     "\n"

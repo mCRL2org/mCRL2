@@ -62,7 +62,7 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 //implementation
 
 t_tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
     "is not present, stdout is used. If INFILE is not present, stdin is used.");
 

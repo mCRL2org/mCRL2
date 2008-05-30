@@ -35,7 +35,7 @@ struct tool_options_type {
 };
 
 tool_options_type parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to "
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"

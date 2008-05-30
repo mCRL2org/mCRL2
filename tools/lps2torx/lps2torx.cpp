@@ -138,7 +138,7 @@ struct tool_options_type {
 };
 
 tool_options_type parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n"
+  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n",
     "Provide a TorX explorer interface to the LPS in INFILE. "
     "\n\n"
     "The LPS can be explored using TorX as described in torx_explorer(5).");
