@@ -61,23 +61,33 @@ namespace lts
   };
 
   /** \brief LTS equivalence relations.
-   * \details This enumerated type defines equivalence relations on LTSs.
-   * They can be used to reduce an LTS or decide whether two LTSs are equivalent.
-   */
+   * \details This enumerated type defines equivalence relations on 
+   * LTSs. They can be used to reduce an LTS or decide whether two LTSs
+   * are equivalent. */
   enum lts_equivalence
   {
-    lts_eq_none,        /**< unknown or no equivalence */
-    lts_eq_trace,       /**< Trace equivalence*/
-    lts_eq_strong,      /**< Strong bisimulation equivalence */ 
-    lts_eq_weak_trace,  /**< Weak trace equivalence */ 
-    lts_eq_branch,      /**< Branching bisimulation equivalence */ 
-    lts_eq_isomorph     /**< Isomorphism */
+    lts_eq_none,             /**< Unknown or no equivalence */
+    lts_eq_bisim,            /**< Strong bisimulation equivalence */
+    lts_eq_branching_bisim,  /**< Branching bisimulation equivalence */
+    lts_eq_sim,              /**< Strong simulation equivalence */
+    lts_eq_trace,            /**< Trace equivalence*/
+    lts_eq_weak_trace,       /**< Weak trace equivalence */
+    lts_eq_isomorph          /**< Isomorphism */
+  };
+
+  /** \brief LTS preorder relations.
+   * \details This enumerated type defines preorder relations on LTSs.
+   * They can be used to decide whether one LTS is behaviourally
+   * contained in another LTS. */
+  enum lts_preorder
+  {
+    lts_pre_none,  /**< Unknown or no preorder */
+    lts_pre_sim    /**< Strong simulation preorder */
   };
 
   /** \brief Options for equivalence checking/reduction algorithms
    *  \details This class stores options for the algorithms that reduce an LTS
-   *  modulo an equivalence or check the equivalence of two LTSs.
-   */
+   *  modulo an equivalence or check the equivalence of two LTSs. */
   class lts_eq_options
   {
     public:
@@ -312,6 +322,7 @@ namespace lts
        * \li "dot" for the GraphViz format;
        * \li "bcg" for the BCG format (only available if the LTS library is built
        * with BCG support).
+       *
        * \param[in] s The format specification string.
        * \return The LTS format based on the value of \a s.
        * If no supported format can be determined then \a lts_none is returned.
@@ -320,9 +331,9 @@ namespace lts
 
       /** Gives a string representation of an LTS format. (This is the "inverse"
        * of parse_format.)
-       * \param[in] s The LTS format.
-       * \return The name of the LTS format specified by \a s. */
-      static char const* string_for_type(const lts_type s);
+       * \param[in] type The LTS format.
+       * \return The name of the LTS format specified by \a type. */
+      static char const* string_for_type(const lts_type type);
 
       /** Gives the filename extension associated with an LTS format.
        * \param[in] type The LTS format.
@@ -332,36 +343,60 @@ namespace lts
 
       /** Determines the equivalence from a string. The following strings may be
        * used:
-       * \li "strong" for strong bisimilarity;
-       * \li "branch" for branching bisimilarity;
+       * \li "bisim" for strong bisimilarity;
+       * \li "branching-bisim" for branching bisimilarity;
+       * \li "sim" for strong simulation equivalence;
        * \li "trace" for trace equivalence;
-       * \li "wtrace" for weak trace equivalence;
+       * \li "weak-trace" for weak trace equivalence;
        * \li "isomorph" for isomorphism.
+       *
        * \param[in] s The string specifying the equivalence.
        * \return The equivalence type specified by \a s.
-       * If \a s is none of the above values then \a lts_eq_none is returned.
-       */
+       * If \a s is none of the above values then \a lts_eq_none is returned. */
       static lts_equivalence parse_equivalence(char const* s);
       
       /** Gives the short name of an equivalence.
-       * \param[in] s The equivalence type.
+       * \param[in] eq The equivalence type.
        * \return A short string representing the equivalence specified by \a
-       * s. The returned value is one of the strings listed for
+       * eq. The returned value is one of the strings listed for
        * \ref parse_equivalence. */
-      static char const* string_for_equivalence(const lts_equivalence s);
+      static char const* string_for_equivalence(const lts_equivalence eq);
 
       /** Gives the full name of an equivalence.
-       * \param[in] s The equivalence type.
-       * \return The full, descriptive name of the equivalence specified by \a s. */
-      static char const* name_of_equivalence(const lts_equivalence s);
+       * \param[in] eq The equivalence type.
+       * \return The full, descriptive name of the equivalence specified by \a eq. */
+      static char const* name_of_equivalence(const lts_equivalence eq);
+
+      /** Determines the preorder from a string. The following strings may be
+       * used:
+       * \li "sim" for strong simulation preorder.
+       *
+       * \param[in] s The string specifying the preorder.
+       * \return The preorder type specified by \a s.
+       * If \a s is none of the above values then \a lts_pre_none is returned. */
+      static lts_preorder parse_preorder(char const* s);
+      
+      /** Gives the short name of a preorder.
+       * \param[in] pre The preorder type.
+       * \return A short string representing the preorder specified by \a
+       * pre. The returned value is one of the strings listed for
+       * \ref parse_preorder. */
+      static char const* string_for_preorder(const lts_preorder pre);
+
+      /** Gives the full name of a preorder.
+       * \param[in] pre The preorder type.
+       * \return The full, descriptive name of the preorder specified by \a pre. */
+      static char const* name_of_preorder(const lts_preorder pre);
 
     public:
+
       /** Creates an empty LTS.
        * \param[in] state_info Indicates whether state parameter information
        * will be present.
        * \param[in] label_info Indicates whether label information will be
        * present. */
       lts(bool state_info = true, bool label_info = true);
+
       /** Creates an LTS and reads its data from a file.
        * \param[in] filename The name of the file from which the data will be
        * read.
@@ -369,12 +404,14 @@ namespace lts
        * an attempt is made to determine the format from the contents of the
        * file. */
       lts(std::string &filename, lts_type type = lts_none);
+
       /** Creates an LTS and reads its data from an input stream.
        * \param[in] is The input stream from which the data will be read.
        * \param[in] type The format of the data. If \a lts_none is passed then
        * an attempt is made to determine the format from the contents of the
        * stream. */
       lts(std::istream &is, lts_type type = lts_none);
+
       /** Frees the memory occupied by this LTS. */
       ~lts();
 
@@ -394,6 +431,7 @@ namespace lts
        * \retval true if the read operation succeeded;
        * \retval false otherwise.*/
       bool read_from(std::string const& filename, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+
       /** Reads LTS data from an input stream. This is not supported for SVC,
        * Dot, and BCG files.
        * \param[in] is The input stream from which data will be read.
@@ -425,9 +463,11 @@ namespace lts
       /** Gets the number of states of this LTS.
        * \return The number of states of this LTS. */
       unsigned int num_states();
+
       /** Gets the number of transitions of this LTS.
        * \return The number of transitions of this LTS. */
       unsigned int num_transitions();
+
       /** Gets the number of labels of this LTS.
        * \return The number of labels of this LTS. */
       unsigned int num_labels();
@@ -435,6 +475,7 @@ namespace lts
       /** Gets the number of the initial state of this LTS.
        * \return The number of the initial state of this LTS. */
       unsigned int initial_state();
+
       /** Sets the initial state of this LTS.
        * \param[in] state The number of the state that will become the initial
        * state. */
@@ -444,15 +485,18 @@ namespace lts
        * \param[in] value The value of the state. 
        * \return The number of the added state. */
       unsigned int add_state(ATerm value = NULL);
+
       /** Adds a label to this LTS.
        * \param[in] value The value of the label. 
        * \param[in] is_tau Indicates whether the label is a tau action.
        * \return The number of the added label. */
       unsigned int add_label(ATerm value = NULL, bool is_tau = false);
+
       /** Adds a label to this LTS.
        * \param[in] is_tau Indicates whether the label is a tau action.
        * \return The number of the added label. */
       unsigned int add_label(bool is_tau);
+
       /** Adds a transition to this LTS.
        * \param[in] from The number of the transition's source state.
        * \param[in] label The number of the transition's label.
@@ -466,6 +510,7 @@ namespace lts
        * \param[in] state The number of the state.
        * \param[in] value The value that will be assigned to the state. */
       void set_state(unsigned int state, ATerm value);
+
       /** Sets the value of a label.
        * \param[in] label The number of the label.
        * \param[in] value The value that will be assigned to the label.
@@ -476,26 +521,32 @@ namespace lts
        * \param[in] state The number of the state. 
        * \return The value of the state. */
       ATerm state_value(unsigned int state);
+
       /** Gets the value of a label.
        * \param[in] label The number of the label. 
        * \return The value of the label. */
       ATerm label_value(unsigned int label);
+
       /** Gets the value of a state as a string.
        * \param[in] state The number of the state. 
        * \return A string representation of the value of the state. */
       std::string state_value_str(unsigned int state);
+
       /** Gets the value of a label as a string.
        * \param[in] label The number of the label. 
        * \return A string representation of the value of the label. */
       std::string label_value_str(unsigned int label);
+
       /** Gets the source state of a transition.
        * \param[in] transition The number of the transition. 
        * \return The number of the transition's source state. */
       unsigned int transition_from(unsigned int transition);
+
       /** Gets the label of a transition.
        * \param[in] transition The number of the transition. 
        * \return The number of the transition's label. */
       unsigned int transition_label(unsigned int transition);
+
       /** Gets the target state of a transition.
        * \param[in] transition The number of the transition. 
        * \return The number of the transition's target state. */
@@ -504,9 +555,11 @@ namespace lts
       /** Gets an iterator to the states of this LTS.
        * \return An iterator to the states of this LTS. */
       state_iterator get_states();
+
       /** Gets an iterator to the labels of this LTS.
        * \return An iterator to the labels of this LTS. */
       label_iterator get_labels();
+
       /** Gets an iterator to the transitions of this LTS.
        * \return An iterator to the transitions of this LTS. */
       transition_iterator get_transitions();
@@ -516,6 +569,7 @@ namespace lts
        * \retval true if the label is a tau action;
        * \retval false otherwise.  */
       bool is_tau(unsigned int label);
+
       /** Sets the tau attribute of a label.
        * \param[in] label The number of the label.
        * \param[in] is_tau Indicates whether the label should become a tau action. */
@@ -526,9 +580,11 @@ namespace lts
        * \retval true if the label has a creator;
        * \retval false otherwise.  */
       bool has_creator();
+
       /** Gets the creator of this LTS.
        * \return The creator string.*/
       std::string get_creator();
+
       /** Sets the creator of this LTS.
        * \param[in] creator The creator string.*/
       void set_creator(std::string creator);
@@ -543,6 +599,7 @@ namespace lts
        * \retval true if the LTS has state information;
        * \retval false otherwise.  */
       bool has_state_info();
+
       /** Checks whether this LTS has label values associated with its labels.
        * \retval true if the LTS has label information;
        * \retval false otherwise.  */
@@ -554,11 +611,14 @@ namespace lts
       /** Sorts the transitions first on source state number, then on label
        * number, then on target state number. */
       void sort_transitions();
+
       /** Gets an array specifying for each state, the range of transitions of
        * which that state is the source state.
        * \pre The transitions are sorted on source state number.
-       * \return An array \e A of size \ref num_states()+1 such that for every state <em>s</em>:
-       * [ \e A[\e s] .. \e A[<em>s</em>+1] ) are all transitions of which \e s is the source state. */
+       * \return An array \e A of size \ref num_states()+1 such that 
+       * for every state <em>s</em>: 
+       * [ \e A[\e s] .. \e A[<em>s</em>+1] ) 
+       * are all transitions of which \e s is the source state. */
       unsigned int* get_transition_indices();
       
       /** Applies a reduction algorithm to this LTS.
@@ -568,6 +628,7 @@ namespace lts
        * \retval true if the reduction succeeded;
        * \retval false otherwise. */
       bool reduce(lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+
       /** Checks whether this LTS is equivalent to another LTS.
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] eq The equivalence with respect to which the LTSs will be
@@ -576,8 +637,20 @@ namespace lts
        * \retval true if the LTSs are found to be equivalent.
        * \retval false otherwise. */
       bool compare(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+      
+      /** Checks whether this LTS is smaller than another LTS according
+       * to a certain preorder.
+       * \param[in] l The LTS to which this LTS will be compared.
+       * \param[in] pre The preorder with respect to which the LTSs will be
+       * compared.
+       * \retval true if this LTS is smaller than LTS \a l according to
+       * preorder \a pre.
+       * \retval false otherwise. */
+      bool compare(lts &l, lts_preorder pre);
+
       /** Determinises this LTS. */
       void determinise();
+      
       /** Checks whether all states in this LTS are reachable from the initial
        * state. Runs in O(\ref num_states * \ref num_transitions) time.
        * \param[in] remove_unreachable Indicates whether all unreachable states
@@ -587,6 +660,7 @@ namespace lts
        * \retval true if all states are reachable from the initial state;
        * \retval false otherwise. */
       bool reachability_check(bool remove_unreachable = false);
+
       /** Checks whether this LTS is deterministic.
        * \retval true if this LTS is deterministic;
        * \retval false otherwise. */

@@ -28,9 +28,9 @@ static const char *equivalent_string(lts_equivalence eq)
 {
   switch ( eq )
   {
-    case lts_eq_strong:
+    case lts_eq_bisim:
       return "strongly bisimilar";
-    case lts_eq_branch:
+    case lts_eq_branching_bisim:
       return "branching bisimilar";
     default:
       return "equivalent";
@@ -84,8 +84,10 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the format for INFILE2", 'j').
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
-      "  'strong' for strong bisimulation (default), or\n"
-      "  'branching' for branching bisimulation\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for "
+            + std::string(lts::name_of_equivalence(lts_eq_bisim)) + " (default), or\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
+            + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + "\n"
       , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
@@ -96,7 +98,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   t_tool_options tool_options;
 
-  tool_options.equivalence = lts_eq_strong;
+  tool_options.equivalence = lts_eq_bisim;
 
   if (parser.options.count("formats")) {
     print_formats(stderr);
@@ -104,13 +106,15 @@ t_tool_options parse_command_line(int ac, char** av) {
   }
 
   if (parser.options.count("equivalence")) {
-    std::string eq_name(parser.option_argument("equivalence"));
-    if (eq_name == "strong") {
-      tool_options.equivalence = lts_eq_strong;
-    } else if (eq_name == "branching") {
-      tool_options.equivalence = lts_eq_branch;
-    } else {
-      parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+
+    tool_options.equivalence = lts::parse_equivalence(
+        parser.option_argument("equivalence").c_str());
+    
+    if (tool_options.equivalence != lts_eq_bisim &&
+        tool_options.equivalence != lts_eq_branching_bisim)
+    {
+      parser.error("option -e/--equivalence has illegal argument '" + 
+          parser.option_argument("equivalence") + "'");
     }
   }
 

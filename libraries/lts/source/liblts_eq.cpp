@@ -50,9 +50,9 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
     case lts_eq_none:
     case lts_eq_isomorph:
       return true;
-    case lts_eq_strong:
+    case lts_eq_bisim:
       return bisimulation_reduce(*this,false,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
-    case lts_eq_branch:
+    case lts_eq_branching_bisim:
       return bisimulation_reduce(*this,true,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
     case lts_eq_trace:
       bisimulation_reduce(*this,false);
@@ -75,9 +75,9 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
   {
     case lts_eq_none:
       return false;
-    case lts_eq_strong:
+    case lts_eq_bisim:
       return bisimulation_compare(*this,l,false,&opts.reduce.tau_actions);
-    case lts_eq_branch:
+    case lts_eq_branching_bisim:
       return bisimulation_compare(*this,l,true,&opts.reduce.tau_actions);
     case lts_eq_trace:
     case lts_eq_weak_trace:

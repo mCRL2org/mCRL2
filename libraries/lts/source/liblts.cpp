@@ -1534,7 +1534,7 @@ lts_type lts::parse_format(char const* s) {
 
 char const* p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
                                                                                                       
-char const* p_lts::extension_strings[] = { "",        "svc",   "aut", "svc",  "svc", "fsm", "dot", "bcg" };
+char const* p_lts::extension_strings[] = { "", "svc", "aut", "svc", "svc", "fsm", "dot", "bcg" };
 
 char const* lts::string_for_type(const lts_type type) {
   return (type_strings[type]);
@@ -1546,16 +1546,16 @@ char const* lts::extension_for_type(const lts_type type) {
 
 lts_equivalence lts::parse_equivalence(char const* s)
 {
-  if ( !strcmp(s,"strong") )
+  if ( !strcmp(s,"bisim") )
   {
-    return lts_eq_strong;
-  } else if ( !strcmp(s,"branch") )
+    return lts_eq_bisim;
+  } else if ( !strcmp(s,"branching-bisim") )
   {
-    return lts_eq_branch;
+    return lts_eq_branching_bisim;
   } else if ( !strcmp(s,"trace") )
   {
     return lts_eq_trace;
-  } else if ( !strcmp(s,"wtrace") )
+  } else if ( !strcmp(s,"weak-trace") )
   {
     return lts_eq_weak_trace;
   } else if ( !strcmp(s,"isomorph") )
@@ -1566,18 +1566,42 @@ lts_equivalence lts::parse_equivalence(char const* s)
   }
 }
 
-char const* p_lts::equivalence_strings[]      = { "unknown", "trace", "strong", "branch", "wtrace", "isomorph" };
-                                                                                                      
-char const* p_lts::equivalence_desc_strings[] = { "unknown equivalence", "trace equivalence", "strong bisimilarity", "weak trace equivalence", "branching bisimilarity", "isomorphism" };
+char const* p_lts::equivalence_strings[]      = { "unknown", "bisim", "branching-bisim", "sim", "trace", "weak-trace", "isomorph" };
 
-char const* lts::string_for_equivalence(const lts_equivalence s)
+char const* p_lts::equivalence_desc_strings[] = { "unknown equivalence", "strong bisimilarity", "branching bisimilarity", "strong simulation equivalence", "trace equivalence", "weak trace equivalence", "isomorphism" };
+
+char const* lts::string_for_equivalence(const lts_equivalence eq)
 {
-  return equivalence_strings[s];
+  return equivalence_strings[eq];
 }
 
-char const* lts::name_of_equivalence(const lts_equivalence s)
+char const* lts::name_of_equivalence(const lts_equivalence eq)
 {
-  return equivalence_desc_strings[s];
+  return equivalence_desc_strings[eq];
+}
+
+lts_preorder lts::parse_preorder(char const* s)
+{
+  if ( !strcmp(s,"sim") )
+  {
+    return lts_pre_sim;
+  } else {
+    return lts_pre_none;
+  }
+}
+
+char const* p_lts::preorder_strings[]      = { "unknown", "sim" };
+
+char const* p_lts::preorder_desc_strings[] = { "unknown preorder", "strong simulation preorder" };
+
+char const* lts::string_for_preorder(const lts_preorder pre)
+{
+  return preorder_strings[pre];
+}
+
+char const* lts::name_of_preorder(const lts_preorder pre)
+{
+  return preorder_desc_strings[pre];
 }
 
 }

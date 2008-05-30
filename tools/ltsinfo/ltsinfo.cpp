@@ -103,8 +103,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     append(d.create< horizontal_box >().
         append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
         append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
-        append(determinism_selector.associate(mcrl2::lts::lts_eq_strong, "Strong bisimilarity")).
-        append(determinism_selector.associate(mcrl2::lts::lts_eq_branch, "Branching bisimilarity")));
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
+        append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")));
 
   // Add okay button
   button& okay_button = d.create< button >().set_label("OK");
@@ -247,6 +247,7 @@ static void print_formats(FILE *f)
 }
 
 tool_options parse_command_line(int argc, char** argv) {
+  using namespace mcrl2::lts;
   using mcrl2::lts::lts;
 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
@@ -259,11 +260,14 @@ tool_options parse_command_line(int argc, char** argv) {
     );
 
   clinterface.
-    add_option("equiv", make_mandatory_argument("EQ"),
-      "use equivalence EQ for deterministic check:\n"
-      "  'isomorph' for isomorphism (default),\n"
-      "  'strong' for strong bisimilarity,\n"
-      "  'branch' for branching bisimilarity, or\n"
+    add_option("equiv", make_mandatory_argument("NAME"),
+      "use equivalence NAME for deterministic check:\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_isomorph)) + "' for " 
+      + std::string(lts::name_of_equivalence(lts_eq_isomorph)) + " (default),\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for " 
+      + std::string(lts::name_of_equivalence(lts_eq_bisim)) + ",\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
+      + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + ", or\n"
       "  'none' for not performing the check at all",
       'e').
     add_option("in", make_mandatory_argument("FORMAT"),

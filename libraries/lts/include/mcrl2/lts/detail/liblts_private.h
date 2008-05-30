@@ -64,6 +64,9 @@
       static char const* equivalence_strings[];
       static char const* equivalence_desc_strings[];
 
+      static char const* preorder_strings[];
+      static char const* preorder_desc_strings[];
+
       lts *lts_object;
       lts_type type;
       std::string creator;

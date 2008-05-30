@@ -270,10 +270,14 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the output format", 'o');
   clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
       "minimise modulo equivalence NAME:\n"
-      "  'strong' for strong bisimulation,\n"
-      "  'branching' for branching bisimulation,\n"
-      "  'trace' for trace, or\n"
-      "  'weak-trace' for weak-trace"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for "
+            + std::string(lts::name_of_equivalence(lts_eq_bisim)) + ",\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
+            + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + ",\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_trace)) + "' for "
+            + std::string(lts::name_of_equivalence(lts_eq_trace)) + ", or\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_weak_trace)) + "' for "
+            + std::string(lts::name_of_equivalence(lts_eq_weak_trace)) + "\n"
       , 'e');
   clinterface.add_option("add",
       "do not minimise but save a copy of the original LTS extended with a "
@@ -326,17 +330,14 @@ t_tool_options parse_command_line(int ac, char** av) {
   }
 
   if (parser.options.count("equivalence")) {
-    std::string eq_name(parser.option_argument("equivalence"));
-    if (eq_name == "strong") {
-      tool_options.equivalence = lts_eq_strong;
-    } else if (eq_name == "branching") {
-      tool_options.equivalence = lts_eq_branch;
-    } else if (eq_name == "trace") {
-      tool_options.equivalence = lts_eq_trace;
-    } else if (eq_name == "weak-trace") {
-      tool_options.equivalence = lts_eq_weak_trace;
-    } else {
-      parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+
+    tool_options.equivalence = lts::parse_equivalence(
+        parser.option_argument("equivalence").c_str());
+
+    if (tool_options.equivalence == lts_eq_none)
+    {
+      parser.error("option -e/--equivalence has illegal argument '" + 
+          parser.option_argument("equivalence") + "'");
     }
   }
 
@@ -698,10 +699,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   if (method != no_transformation) {
     switch (method) {
       case minimisation_modulo_strong_bisimulation:
-        tool_options.equivalence = lts_eq_strong;
+        tool_options.equivalence = lts_eq_bisim;
         break;
       case minimisation_modulo_branching_bisimulation:
-        tool_options.equivalence = lts_eq_branch;
+        tool_options.equivalence = lts_eq_branching_bisim;
         break;
       case minimisation_modulo_trace_equivalence:
         tool_options.equivalence = lts_eq_trace;
