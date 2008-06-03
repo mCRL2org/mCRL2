@@ -156,7 +156,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::object& input_object = c.get_input(lts_file_for_input);
 
   lts l;
-  mcrl2::lts::lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type().c_str());
+  mcrl2::lts::lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type());
 
   tool_options task_options;
 
@@ -262,12 +262,12 @@ tool_options parse_command_line(int argc, char** argv) {
   clinterface.
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME for deterministic check:\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_isomorph)) + "' for " 
-      + std::string(lts::name_of_equivalence(lts_eq_isomorph)) + " (default),\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for " 
-      + std::string(lts::name_of_equivalence(lts_eq_bisim)) + ",\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
-      + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + ", or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for " 
+            + lts::name_of_equivalence(lts_eq_isomorph) + " (default),\n"
+      "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for " 
+            + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
+      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for " 
+            + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
       "  'none' for not performing the check at all",
       'e').
     add_option("in", make_mandatory_argument("FORMAT"),
@@ -283,7 +283,7 @@ tool_options parse_command_line(int argc, char** argv) {
     exit(EXIT_SUCCESS);
   }
   if (parser.options.count("equivalence")) {
-    opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence").c_str());
+    opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
     if (opts.determinism_equivalence != lts_eq_isomorph &&
         opts.determinism_equivalence != lts_eq_bisim &&
         opts.determinism_equivalence != lts_eq_branching_bisim &&
@@ -307,7 +307,7 @@ tool_options parse_command_line(int argc, char** argv) {
       std::cerr << "warning: multiple input formats specified; can only use one\n";
     }
 
-    opts.intype = lts::parse_format(parser.option_argument("in").c_str());
+    opts.intype = lts::parse_format(parser.option_argument("in"));
 
     if (opts.intype) {
       std::cerr << "warning: format '" << parser.option_argument("in") <<
@@ -377,7 +377,7 @@ void process(tool_options const& opts) {
   }
   if ( opts.determinism_equivalence != lts_eq_none )
   {
-    gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence));
+    gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(opts.determinism_equivalence).c_str());
     gsVerboseMsg("minimisation...\n");
 
     l.reduce(opts.determinism_equivalence);

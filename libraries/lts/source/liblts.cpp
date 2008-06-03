@@ -62,7 +62,7 @@ ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
   return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
 }
 
-static int compare_transitions(const void *t1, const void *t2) {
+static int compare_transitions_slt(const void *t1, const void *t2) {
   if (((transition*)t1)->from != ((transition*)t2)->from) {
     return int(((transition*)t1)->from) - int(((transition*)t2)->from);
   } else if (((transition*)t1)->label != ((transition*)t2)->label) {
@@ -70,6 +70,16 @@ static int compare_transitions(const void *t1, const void *t2) {
   } else  {
     return int(((transition*)t1)->to) - int(((transition*)t2)->to);
   } 
+}
+
+static int compare_transitions_lts(const void *t1, const void *t2) {
+  if (((transition*)t1)->label != ((transition*)t2)->label) {
+    return int(((transition*)t1)->label) - int(((transition*)t2)->label);
+  } else if (((transition*)t1)->to != ((transition*)t2)->to) {
+    return int(((transition*)t1)->to) - int(((transition*)t2)->to);
+  } else {
+    return int(((transition*)t1)->from) - int(((transition*)t2)->from);
+  }
 }
 
 
@@ -899,8 +909,17 @@ unsigned int p_lts::p_add_transition(unsigned int from,
   return ntransitions++;
 }
 
-void p_lts::p_sort_transitions() {
-  qsort(transitions,ntransitions,sizeof(transition),compare_transitions);
+void p_lts::p_sort_transitions(transition_sort_style ts) {
+  switch (ts)
+  {
+    case lbl_tgt_src:
+      qsort(transitions,ntransitions,sizeof(transition),compare_transitions_lts);
+      break;
+    case src_lbl_tgt:
+    default:
+      qsort(transitions,ntransitions,sizeof(transition),compare_transitions_slt);
+      break;
+  }
 }
 
 unsigned int* p_lts::p_get_transition_indices() {
@@ -916,6 +935,38 @@ unsigned int* p_lts::p_get_transition_indices() {
       ++t;
     }
     A[s] = t;
+  }
+  return A;
+}
+
+unsigned int** p_lts::p_get_transition_pre_table()
+{
+  unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
+  if (A == NULL) {
+    gsErrorMsg("out of memory\n");
+    exit(1);
+  }
+
+  unsigned int t = 0;
+  unsigned int s, l;
+  for (l = 0; l < nlabels; ++l)
+  {
+    A[l] = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
+    if (A[l] == NULL) {
+      gsErrorMsg("out of memory\n");
+      exit(1);
+    }
+
+    A[l][0] = t;
+    for (s = 1; s <= nstates; ++s)
+    {
+      while (t < ntransitions && transitions[t].label == l-1
+          && transitions[t].to == s)
+      {
+        ++t;
+      }
+      A[l][s] = t;
+    }
   }
   return A;
 }
@@ -1108,12 +1159,16 @@ void lts::remove_state_values() {
   }
 }
 
-void lts::sort_transitions() {
-  p_sort_transitions();
+void lts::sort_transitions(transition_sort_style ts) {
+  p_sort_transitions(ts);
 }
 
 unsigned int* lts::get_transition_indices() {
   return p_get_transition_indices();
+}
+
+unsigned int** lts::get_transition_pre_table() {
+  return p_get_transition_pre_table();
 }
 
 bool lts::reachability_check(bool remove_unreachable)
@@ -1503,27 +1558,27 @@ lts_type lts::guess_format(string const& s) {
   return lts_none;
 }
 
-lts_type lts::parse_format(char const* s) {
-  if ( !strcmp(s,"aut") )
+lts_type lts::parse_format(std::string const& s) {
+  if ( s == "aut" )
   {
     return lts_aut;
-  } else if ( !strcmp(s,"mcrl") || !strcmp(s,"svc+mcrl"))
+  } else if ( s == "mcrl" || s == "svc+mcrl")
   {
     return lts_mcrl;
-  } else if ( !strcmp(s,"mcrl2") || !strcmp(s,"svc+mcrl2"))
+  } else if ( s == "mcrl2" || s == "svc+mcrl2")
   {
     return lts_mcrl2;
-  } else if ( !strcmp(s,"svc") )
+  } else if ( s == "svc" )
   {
     return lts_svc;
-  } else if ( !strcmp(s,"fsm") )
+  } else if ( s == "fsm" )
   {
     return lts_fsm;
-  } else if ( !strcmp(s,"dot") )
+  } else if ( s == "dot" )
   {
     return lts_dot;
 #ifdef MCRL2_BCG
-  } else if ( !strcmp(s,"bcg") )
+  } else if ( s == "bcg" )
   {
     return lts_bcg;
 #endif
@@ -1532,33 +1587,33 @@ lts_type lts::parse_format(char const* s) {
   return lts_none;
 }
 
-char const* p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
+std::string p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
                                                                                                       
-char const* p_lts::extension_strings[] = { "", "svc", "aut", "svc", "svc", "fsm", "dot", "bcg" };
+std::string p_lts::extension_strings[] = { "", "svc", "aut", "svc", "svc", "fsm", "dot", "bcg" };
 
-char const* lts::string_for_type(const lts_type type) {
+std::string lts::string_for_type(const lts_type type) {
   return (type_strings[type]);
 }
 
-char const* lts::extension_for_type(const lts_type type) {
+std::string lts::extension_for_type(const lts_type type) {
   return (extension_strings[type]);
 }
 
-lts_equivalence lts::parse_equivalence(char const* s)
+lts_equivalence lts::parse_equivalence(std::string const& s)
 {
-  if ( !strcmp(s,"bisim") )
+  if ( s == "bisim" )
   {
     return lts_eq_bisim;
-  } else if ( !strcmp(s,"branching-bisim") )
+  } else if ( s == "branching-bisim" )
   {
     return lts_eq_branching_bisim;
-  } else if ( !strcmp(s,"trace") )
+  } else if ( s == "trace" )
   {
     return lts_eq_trace;
-  } else if ( !strcmp(s,"weak-trace") )
+  } else if ( s == "weak-trace" )
   {
     return lts_eq_weak_trace;
-  } else if ( !strcmp(s,"isomorph") )
+  } else if ( s == "isomorph" )
   {
     return lts_eq_isomorph;
   } else {
@@ -1566,23 +1621,23 @@ lts_equivalence lts::parse_equivalence(char const* s)
   }
 }
 
-char const* p_lts::equivalence_strings[]      = { "unknown", "bisim", "branching-bisim", "sim", "trace", "weak-trace", "isomorph" };
+std::string p_lts::equivalence_strings[]      = { "unknown", "bisim", "branching-bisim", "sim", "trace", "weak-trace", "isomorph" };
 
-char const* p_lts::equivalence_desc_strings[] = { "unknown equivalence", "strong bisimilarity", "branching bisimilarity", "strong simulation equivalence", "trace equivalence", "weak trace equivalence", "isomorphism" };
+std::string p_lts::equivalence_desc_strings[] = { "unknown equivalence", "strong bisimilarity", "branching bisimilarity", "strong simulation equivalence", "trace equivalence", "weak trace equivalence", "isomorphism" };
 
-char const* lts::string_for_equivalence(const lts_equivalence eq)
+std::string lts::string_for_equivalence(const lts_equivalence eq)
 {
   return equivalence_strings[eq];
 }
 
-char const* lts::name_of_equivalence(const lts_equivalence eq)
+std::string lts::name_of_equivalence(const lts_equivalence eq)
 {
   return equivalence_desc_strings[eq];
 }
 
-lts_preorder lts::parse_preorder(char const* s)
+lts_preorder lts::parse_preorder(std::string const& s)
 {
-  if ( !strcmp(s,"sim") )
+  if ( s == "sim" )
   {
     return lts_pre_sim;
   } else {
@@ -1590,16 +1645,16 @@ lts_preorder lts::parse_preorder(char const* s)
   }
 }
 
-char const* p_lts::preorder_strings[]      = { "unknown", "sim" };
+std::string p_lts::preorder_strings[]      = { "unknown", "sim" };
 
-char const* p_lts::preorder_desc_strings[] = { "unknown preorder", "strong simulation preorder" };
+std::string p_lts::preorder_desc_strings[] = { "unknown preorder", "strong simulation preorder" };
 
-char const* lts::string_for_preorder(const lts_preorder pre)
+std::string lts::string_for_preorder(const lts_preorder pre)
 {
   return preorder_strings[pre];
 }
 
-char const* lts::name_of_preorder(const lts_preorder pre)
+std::string lts::name_of_preorder(const lts_preorder pre)
 {
   return preorder_desc_strings[pre];
 }

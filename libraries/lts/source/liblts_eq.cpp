@@ -15,6 +15,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
+#include "mcrl2/lts/detail/liblts_sim.h"
 
 using namespace std;
 using namespace mcrl2::core;
@@ -54,6 +55,11 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
       return bisimulation_reduce(*this,false,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
     case lts_eq_branching_bisim:
       return bisimulation_reduce(*this,true,opts.reduce.add_class_to_state,&opts.reduce.tau_actions);
+    case lts_eq_sim:
+      {
+        sim_partitioner sp(this);
+        return sp.reduce();
+      }
     case lts_eq_trace:
       bisimulation_reduce(*this,false);
       determinise();

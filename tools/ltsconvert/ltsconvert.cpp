@@ -226,7 +226,7 @@ void process(t_tool_options const& tool_options) {
 
   if ( tool_options.equivalence != lts_eq_none )
   {
-    gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence));
+    gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
     gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
     l.reduce(tool_options.equivalence, tool_options.eq_opts);
     gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
@@ -270,18 +270,18 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the output format", 'o');
   clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
       "generate an equivalent LTS, preserving equivalence NAME:\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim))
+      "  '" + lts::string_for_equivalence(lts_eq_bisim)
             + "' minimise modulo "
-            + std::string(lts::name_of_equivalence(lts_eq_bisim)) + ",\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim))
+            + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
+      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim)
             + "' minimise modulo " 
-            + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + ",\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_trace))
+            + lts::name_of_equivalence(lts_eq_branching_bisim) + ",\n"
+      "  '" + lts::string_for_equivalence(lts_eq_trace)
             + "' determinise and then minimise modulo "
-            + std::string(lts::name_of_equivalence(lts_eq_trace)) + ", or\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_weak_trace)) 
+            + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_weak_trace)
             + "' determinise and then minimise modulo "
-            + std::string(lts::name_of_equivalence(lts_eq_weak_trace))
+            + lts::name_of_equivalence(lts_eq_weak_trace)
       , 'e');
   clinterface.add_option("add",
       "do not minimise but save a copy of the original LTS extended with a "
@@ -308,7 +308,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       std::cerr << "warning: multiple input formats specified; can only use one\n";
     }
 
-    tool_options.intype = lts::parse_format(parser.option_argument("in").c_str());
+    tool_options.intype = lts::parse_format(parser.option_argument("in"));
 
     if (tool_options.intype == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("in") <<
@@ -320,7 +320,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       std::cerr << "warning: multiple output formats specified; can only use one\n";
     }
 
-    tool_options.outtype = lts::parse_format(parser.option_argument("out").c_str());
+    tool_options.outtype = lts::parse_format(parser.option_argument("out"));
 
     if (tool_options.outtype == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("out") <<
@@ -336,7 +336,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   if (parser.options.count("equivalence")) {
 
     tool_options.equivalence = lts::parse_equivalence(
-        parser.option_argument("equivalence").c_str());
+        parser.option_argument("equivalence"));
 
     if (tool_options.equivalence != lts_eq_bisim &&
         tool_options.equivalence != lts_eq_branching_bisim &&
@@ -585,7 +585,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button.await_change();
   
-  static char const* extensions[6] = {
+  static std::string extensions[6] = {
     lts::extension_for_type(lts_aut),
     lts::extension_for_type(lts_mcrl),
     lts::extension_for_type(lts_mcrl2),
@@ -677,7 +677,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
     lts_eq_options eq_opts;
 
     /* Need to detect whether the next operation completes successfully or not, exceptions anyone? */
-    lts_reduce_add_tau_actions(eq_opts,(c.get_option_argument< std::string >(option_tau_actions)).c_str());
+    lts_reduce_add_tau_actions(eq_opts,(c.get_option_argument< std::string >(option_tau_actions)));
   }
 
   return (result);
@@ -696,8 +696,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).get_mime_type().get_sub_type().c_str());
-  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type().c_str());
+  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).get_mime_type().get_sub_type());
+  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type());
   tool_options.set_source(c.get_input(lts_file_for_input).get_location());
   tool_options.set_target(c.get_output(lts_file_for_output).get_location());
 
@@ -728,7 +728,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }
     if (c.option_exists(option_tau_actions)) {
-      lts_reduce_add_tau_actions(tool_options.eq_opts, c.get_option_argument< std::string >(option_tau_actions).c_str());
+      lts_reduce_add_tau_actions(tool_options.eq_opts, c.get_option_argument< std::string >(option_tau_actions));
     }
   }
  

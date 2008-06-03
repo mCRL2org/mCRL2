@@ -80,7 +80,7 @@ void open_lts(const char *filename, lts_options &opts)
       gsVerboseMsg("not saving state space.\n");
       break;
     default:
-      gsVerboseMsg("writing state space in %s format to '%s'.\n",lts::string_for_type(lts_opts.outformat),filename);
+      gsVerboseMsg("writing state space in %s format to '%s'.\n",lts::string_for_type(lts_opts.outformat).c_str(),filename);
       generic_lts = new lts();
       aterm2state = ATtableCreate(10000,50);
       aterm2label = ATtableCreate(100,50);

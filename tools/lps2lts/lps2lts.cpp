@@ -196,7 +196,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
     }
   }
   if (parser.options.count("out")) {
-    options.outformat = lts::parse_format(parser.option_argument("out").c_str());
+    options.outformat = lts::parse_format(parser.option_argument("out"));
 
     if (options.outformat == lts_none) {
       parser.error("format '" + parser.option_argument("out") + "' is not recognised; option ignored");

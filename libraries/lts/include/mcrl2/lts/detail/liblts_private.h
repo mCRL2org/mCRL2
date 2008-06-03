@@ -56,16 +56,16 @@
   {
     protected:
       /** \brief String representations for lts_type */
-      static char const* type_strings[];
+      static std::string type_strings[];
 
       /** \brief Extensions associated with elements of lts_type (except lts_none) */
-      static char const* extension_strings[];
+      static std::string extension_strings[];
       
-      static char const* equivalence_strings[];
-      static char const* equivalence_desc_strings[];
+      static std::string equivalence_strings[];
+      static std::string equivalence_desc_strings[];
 
-      static char const* preorder_strings[];
-      static char const* preorder_desc_strings[];
+      static std::string preorder_strings[];
+      static std::string preorder_desc_strings[];
 
       lts *lts_object;
       lts_type type;
@@ -131,8 +131,9 @@
       bool write_to_bcg(std::string const& filename);
 #endif
       
-      void p_sort_transitions();
+      void p_sort_transitions(transition_sort_style ts = src_lbl_tgt);
       unsigned int* p_get_transition_indices();
+      unsigned int** p_get_transition_pre_table();
 
       void tau_star_reduce(); // This method assumes the absence of tau loops!
   };

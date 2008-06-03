@@ -85,6 +85,16 @@ namespace lts
     lts_pre_sim    /**< Strong simulation preorder */
   };
 
+  /** \brief Transition sort styles.
+   * \details This enumerated type defines sort styles for transitions.
+   * They can be used to sort the transitions of an LTS based on various
+   * criteria. */
+  enum transition_sort_style
+  {
+    src_lbl_tgt, /**< Sort first on source state, then on label, then on target state */
+    lbl_tgt_src  /**< Sort first on label, then on target state, then on source state*/
+  };
+
   /** \brief Options for equivalence checking/reduction algorithms
    *  \details This class stores options for the algorithms that reduce an LTS
    *  modulo an equivalence or check the equivalence of two LTSs. */
@@ -327,19 +337,19 @@ namespace lts
        * \return The LTS format based on the value of \a s.
        * If no supported format can be determined then \a lts_none is returned.
        */
-      static lts_type parse_format(char const* s);
+      static lts_type parse_format(std::string const& s);
 
       /** Gives a string representation of an LTS format. (This is the "inverse"
        * of parse_format.)
        * \param[in] type The LTS format.
        * \return The name of the LTS format specified by \a type. */
-      static char const* string_for_type(const lts_type type);
+      static std::string string_for_type(const lts_type type);
 
       /** Gives the filename extension associated with an LTS format.
        * \param[in] type The LTS format.
        * \return The filename extension of the LTS format specified by \a type.
        */
-      static char const* extension_for_type(const lts_type type);
+      static std::string extension_for_type(const lts_type type);
 
       /** Determines the equivalence from a string. The following strings may be
        * used:
@@ -353,19 +363,19 @@ namespace lts
        * \param[in] s The string specifying the equivalence.
        * \return The equivalence type specified by \a s.
        * If \a s is none of the above values then \a lts_eq_none is returned. */
-      static lts_equivalence parse_equivalence(char const* s);
+      static lts_equivalence parse_equivalence(std::string const& s);
       
       /** Gives the short name of an equivalence.
        * \param[in] eq The equivalence type.
        * \return A short string representing the equivalence specified by \a
        * eq. The returned value is one of the strings listed for
        * \ref parse_equivalence. */
-      static char const* string_for_equivalence(const lts_equivalence eq);
+      static std::string string_for_equivalence(const lts_equivalence eq);
 
       /** Gives the full name of an equivalence.
        * \param[in] eq The equivalence type.
        * \return The full, descriptive name of the equivalence specified by \a eq. */
-      static char const* name_of_equivalence(const lts_equivalence eq);
+      static std::string name_of_equivalence(const lts_equivalence eq);
 
       /** Determines the preorder from a string. The following strings may be
        * used:
@@ -374,19 +384,19 @@ namespace lts
        * \param[in] s The string specifying the preorder.
        * \return The preorder type specified by \a s.
        * If \a s is none of the above values then \a lts_pre_none is returned. */
-      static lts_preorder parse_preorder(char const* s);
+      static lts_preorder parse_preorder(std::string const& s);
       
       /** Gives the short name of a preorder.
        * \param[in] pre The preorder type.
        * \return A short string representing the preorder specified by \a
        * pre. The returned value is one of the strings listed for
        * \ref parse_preorder. */
-      static char const* string_for_preorder(const lts_preorder pre);
+      static std::string string_for_preorder(const lts_preorder pre);
 
       /** Gives the full name of a preorder.
        * \param[in] pre The preorder type.
        * \return The full, descriptive name of the preorder specified by \a pre. */
-      static char const* name_of_preorder(const lts_preorder pre);
+      static std::string name_of_preorder(const lts_preorder pre);
 
     public:
 
@@ -608,9 +618,9 @@ namespace lts
       /** Removes the state values from all states. */
       void remove_state_values();
 
-      /** Sorts the transitions first on source state number, then on label
-       * number, then on target state number. */
-      void sort_transitions();
+      /** Sorts the transitions using a sort style.
+       * \param[in] ts The sort style to use. */
+      void sort_transitions(transition_sort_style ts = src_lbl_tgt);
 
       /** Gets an array specifying for each state, the range of transitions of
        * which that state is the source state.
@@ -620,6 +630,16 @@ namespace lts
        * [ \e A[\e s] .. \e A[<em>s</em>+1] ) 
        * are all transitions of which \e s is the source state. */
       unsigned int* get_transition_indices();
+
+      /** Gets a table specifying for each state and label number, the
+       * range of transitions having that label and target state.
+       * \pre The transitions are sorted first on label number, then on
+       * target state number.
+       * \return A table \e A of size \ref num_labels() * (\ref num_states()+1) 
+       * such that for every label <em>l</em> and state <em>t</em>: 
+       * [ \e A[\e l][\e t] .. \e A[\e l][<em>t</em>+1] ) 
+       * are all <em>l</em>-labelled transitions of which \e t is the target state. */
+      unsigned int** get_transition_pre_table();
       
       /** Applies a reduction algorithm to this LTS.
        * \param[in] eq The equivalence with respect to which the LTS will be

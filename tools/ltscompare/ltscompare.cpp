@@ -84,10 +84,10 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the format for INFILE2", 'j').
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for "
-            + std::string(lts::name_of_equivalence(lts_eq_bisim)) + " (default), or\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
-            + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + "\n"
+      "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
+            + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for " 
+            + lts::name_of_equivalence(lts_eq_branching_bisim) + "\n"
       , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
@@ -108,7 +108,7 @@ t_tool_options parse_command_line(int ac, char** av) {
   if (parser.options.count("equivalence")) {
 
     tool_options.equivalence = lts::parse_equivalence(
-        parser.option_argument("equivalence").c_str());
+        parser.option_argument("equivalence"));
     
     if (tool_options.equivalence != lts_eq_bisim &&
         tool_options.equivalence != lts_eq_branching_bisim)
@@ -142,7 +142,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
     }
 
-    tool_options.format_for_first = lts::parse_format(parser.option_argument("in1").c_str());
+    tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
 
     if (tool_options.format_for_first == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("in1") <<
@@ -157,7 +157,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
     }
 
-    tool_options.format_for_second = lts::parse_format(parser.option_argument("in2").c_str());
+    tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
 
     if (tool_options.format_for_second == lts_none) {
       std::cerr << "warning: format '" << parser.option_argument("in2") <<
@@ -183,12 +183,12 @@ int process(t_tool_options const & tool_options) {
   } else {
     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
-    if ( !l1.read_from(tool_options.name_for_first.c_str(), tool_options.format_for_first) ) {
+    if ( !l1.read_from(tool_options.name_for_first, tool_options.format_for_first) ) {
       bool failed = true; 
       if ( tool_options.format_for_first == lts_none ) { // XXX really do this? 
         gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
         lts_type guessedtype = lts::guess_format(tool_options.name_for_first); 
-        if ( (guessedtype != lts_none) && l1.read_from(tool_options.name_for_first.c_str(),guessedtype) ) 
+        if ( (guessedtype != lts_none) && l1.read_from(tool_options.name_for_first,guessedtype) ) 
         { 
           failed = false; 
         } 
@@ -201,12 +201,12 @@ int process(t_tool_options const & tool_options) {
 
   gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
-  if ( !l2.read_from(tool_options.name_for_second.c_str(), tool_options.format_for_second) ) {
+  if ( !l2.read_from(tool_options.name_for_second, tool_options.format_for_second) ) {
     bool failed = true; 
     if ( tool_options.format_for_second == lts_none ) { // XXX really do this? 
       gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
       lts_type guessedtype = lts::guess_format(tool_options.name_for_second); 
-      if ( (guessedtype != lts_none) && l2.read_from(tool_options.name_for_second.c_str(),guessedtype) ) 
+      if ( (guessedtype != lts_none) && l2.read_from(tool_options.name_for_second,guessedtype) ) 
       { 
         failed = false; 
       } 
@@ -216,7 +216,7 @@ int process(t_tool_options const & tool_options) {
     }
   }
 
-  gsVerboseMsg("comparing LTSs (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence));
+  gsVerboseMsg("comparing LTSs (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
 
   bool result = l1.compare(l2,tool_options.equivalence,tool_options.eq_opts);
 
