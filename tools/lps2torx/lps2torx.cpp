@@ -146,32 +146,51 @@ tool_options_type parse_command_line(int ac, char** av) {
   clinterface.add_rewriting_options();
 
   clinterface.
-    add_option("freevar",
-      "do not replace free variables in the LPS with dummy values", 'f').
-    add_option("dummy",
-      "replace free variables in the LPS with dummy values (default)", 'y').
+    add_option("dummy", make_mandatory_argument("BOOL"),
+      "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
     add_option("unused-data",
       "do not remove unused parts of the data specification", 'u').
-    add_option("vector",
-      "store state in a vector (fastest, default)", 'c').
-    add_option("tree",
-      "store state in a tree (for memory efficiency)", 'T');
+    add_option("state-format", make_mandatory_argument("NAME"),
+      "store state internally in format NAME:\n"
+      "  'vector' for a vector (fastest, default), or\n"
+      "  'tree' for a tree (for memory efficiency)"
+      , 'f');
 
   command_line_parser parser(clinterface, ac, av);
 
   tool_options_type options;
 
-  options.usedummies   = parser.options.count("freevar") == 0;
-  options.usedummies   = 0 < parser.options.count("dummy");
+  options.usedummies   = true;
   options.removeunused = parser.options.count("unused-data") == 0;
   options.strategy     = parser.option_argument_as< RewriteStrategy >("rewriter");
   options.stateformat  = GS_STATE_VECTOR;
 
-  if (parser.options.count("vector")) {
-    options.stateformat = GS_STATE_VECTOR; 
+  if (parser.options.count("dummy")) {
+    if (parser.options.count("dummy") > 1) {
+      parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
+    }
+    std::string dummy_str(parser.option_argument("dummy"));
+    if (dummy_str == "yes") {
+      options.usedummies = true;
+    } else if (dummy_str == "no") {
+      options.usedummies = false;
+    } else {
+      parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
+    }
   }
-  if (parser.options.count("tree")) {
-    options.stateformat = GS_STATE_TREE; 
+
+  if (parser.options.count("state-format")) {
+    if (parser.options.count("state-format") > 1) {
+      parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
+    }
+    std::string state_format_str(parser.option_argument("state-format"));
+    if (state_format_str == "vector") {
+      options.stateformat = GS_STATE_VECTOR;
+    } else if (state_format_str == "tree") {
+      options.stateformat = GS_STATE_TREE;
+    } else {
+      parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
+    }
   }
 
   if (parser.arguments.size() == 0) {
