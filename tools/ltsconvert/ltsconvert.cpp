@@ -269,15 +269,19 @@ t_tool_options parse_command_line(int ac, char** av) {
     add_option("out", make_mandatory_argument("FORMAT"),
       "use FORMAT as the output format", 'o');
   clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
-      "minimise modulo equivalence NAME:\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim)) + "' for "
+      "generate an equivalent LTS, preserving equivalence NAME:\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_bisim))
+            + "' minimise modulo "
             + std::string(lts::name_of_equivalence(lts_eq_bisim)) + ",\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim)) + "' for " 
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_branching_bisim))
+            + "' minimise modulo " 
             + std::string(lts::name_of_equivalence(lts_eq_branching_bisim)) + ",\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_trace)) + "' for "
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_trace))
+            + "' determinise and then minimise modulo "
             + std::string(lts::name_of_equivalence(lts_eq_trace)) + ", or\n"
-      "  '" + std::string(lts::string_for_equivalence(lts_eq_weak_trace)) + "' for "
-            + std::string(lts::name_of_equivalence(lts_eq_weak_trace)) + "\n"
+      "  '" + std::string(lts::string_for_equivalence(lts_eq_weak_trace)) 
+            + "' determinise and then minimise modulo "
+            + std::string(lts::name_of_equivalence(lts_eq_weak_trace))
       , 'e');
   clinterface.add_option("add",
       "do not minimise but save a copy of the original LTS extended with a "
@@ -334,7 +338,10 @@ t_tool_options parse_command_line(int ac, char** av) {
     tool_options.equivalence = lts::parse_equivalence(
         parser.option_argument("equivalence").c_str());
 
-    if (tool_options.equivalence == lts_eq_none)
+    if (tool_options.equivalence != lts_eq_bisim &&
+        tool_options.equivalence != lts_eq_branching_bisim &&
+        tool_options.equivalence != lts_eq_trace &&
+        tool_options.equivalence != lts_eq_weak_trace)
     {
       parser.error("option -e/--equivalence has illegal argument '" + 
           parser.option_argument("equivalence") + "'");
@@ -419,8 +426,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       no_transformation,                          ///< copies from one format to the other without transformation
       minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation
       minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation
-      minimisation_modulo_trace_equivalence,      ///< minimisation modulo trace equivalence
-      minimisation_modulo_weak_trace_equivalence, ///< minimisation modulo weak trace equivalence
+      minimisation_modulo_trace_equivalence,      ///< determinisation and then minimisation modulo trace equivalence
+      minimisation_modulo_weak_trace_equivalence, ///< determinisation and then minimisation modulo weak trace equivalence
       determinisation                             ///< determinisation
     };
 
@@ -522,8 +529,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(no_transformation, "none", true)).
     append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation")).
     append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation")).
-    append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "reduction modulo trace equivalence")).
-    append(transformation_selector.associate(minimisation_modulo_weak_trace_equivalence, "reduction modulo weak trace equivalence")).
+    append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "determinisation and reduction modulo trace equivalence")).
+    append(transformation_selector.associate(minimisation_modulo_weak_trace_equivalence, "determinisation and reduction modulo weak trace equivalence")).
     append(transformation_selector.associate(determinisation, "determinisation"));
   
   checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();

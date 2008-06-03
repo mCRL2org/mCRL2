@@ -260,7 +260,7 @@ tool_options parse_command_line(int argc, char** argv) {
     );
 
   clinterface.
-    add_option("equiv", make_mandatory_argument("NAME"),
+    add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME for deterministic check:\n"
       "  '" + std::string(lts::string_for_equivalence(lts_eq_isomorph)) + "' for " 
       + std::string(lts::name_of_equivalence(lts_eq_isomorph)) + " (default),\n"
@@ -282,8 +282,17 @@ tool_options parse_command_line(int argc, char** argv) {
     print_formats(stdout);
     exit(EXIT_SUCCESS);
   }
-  if (parser.options.count("equiv")) {
-    opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equiv").c_str());
+  if (parser.options.count("equivalence")) {
+    opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence").c_str());
+    if (opts.determinism_equivalence != lts_eq_isomorph &&
+        opts.determinism_equivalence != lts_eq_bisim &&
+        opts.determinism_equivalence != lts_eq_branching_bisim &&
+        (opts.determinism_equivalence != lts_eq_none ||
+        parser.option_argument("equivalence") == "none"))
+    {
+      parser.error("option -e/--equivalence has illegal argument '" + 
+          parser.option_argument("equivalence") + "'");
+    }
   }
 
   if (0 < parser.arguments.size()) {
