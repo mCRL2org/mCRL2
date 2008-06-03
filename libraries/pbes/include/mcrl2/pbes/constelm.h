@@ -118,12 +118,12 @@ namespace pbes_system {
         }
 
         // Accept new values for the parameters, and update the constraints accordingly.
-        void update(data::data_expression condition,
+        bool update(data::data_expression condition,
                     data::data_expression_list new_values,
                     DataRewriter r,
                     const constraint_map& new_value_constraints = constraint_map())
         {
-//std::cout << "<updating> " << pp(variable) << " new_values = " << pp(new_values) << std::endl;
+          bool changed = false;
           data::data_variable_list params = variable.parameters();
           if (condition == data::data_expr::true_())
           {
@@ -141,27 +141,26 @@ namespace pbes_system {
                 {
                   data::data_expression old_value = k->second;
                   data::data_expression new_value = r(data::data_variable_map_replace(*i, new_value_constraints));
-//std::cout << "<old_value> " << pp(old_value) << " new_value " << pp(new_value) << std::endl;
                   if (old_value != new_value)
                   {
                     non_constants.insert(d);
+                    changed = true;
                   }
                 }
               }
               else
               {
+                changed = true;
                 data::data_expression new_value = r(data::data_variable_map_replace(*i, new_value_constraints));
-//std::cout << " new_value " << pp(new_value) << std::endl;
                 constraints[d] = new_value;
                 if (!is_constant_expression(new_value))
                 {
-//std::cout << pp(new_value) << " is not constant!" << std::endl;
                   non_constants.insert(d);
                 }
               }
             }
           }
-//std::cout << "<updated> " << to_string() << std::endl;
+          return changed;
         }
       };
 
@@ -271,7 +270,15 @@ namespace pbes_system {
           {
             const edge& e = *ei;
             vertex& v = m_vertices[e.right.name()];
-            v.update(e.condition, e.right.parameters(), m_rewriter, u.constraints);
+//std::cout << "<update>" << pp(u.variable.name()) << ", " << pp(u.variable.name()) << std::endl;
+//std::cout << "<edge>" << e.to_string() << std::endl;
+//std::cout << "<v before>" << v.to_string() << std::endl;
+            bool changed = v.update(e.condition, e.right.parameters(), m_rewriter, u.constraints);
+            if (changed)
+            {
+              todo.push_back(v.variable);
+            }
+//std::cout << "<v after>" << v.to_string() << std::endl;
           }
         }
 
