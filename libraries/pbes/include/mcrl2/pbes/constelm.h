@@ -16,6 +16,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <algorithm>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -260,7 +261,9 @@ namespace pbes_system {
         while (!todo.empty())
         {
           propositional_variable var = todo.front();
-          todo.pop_front();
+          
+          // remove all occurrences of var from todo
+          todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
 
           const vertex& u = m_vertices[var.name()];
           std::vector<edge>& u_edges = m_edges[var.name()];
