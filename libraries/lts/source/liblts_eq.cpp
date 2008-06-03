@@ -86,7 +86,43 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
     case lts_eq_branching_bisim:
       return bisimulation_compare(*this,l,true,&opts.reduce.tau_actions);
     case lts_eq_trace:
+      {
+        // Copy LTSs
+        lts l1(*this);
+        lts l2(l);
+
+        // Determinise first LTS
+        bisimulation_reduce(l1,false);
+        l1.determinise();
+        
+        // Determinise second LTS
+        bisimulation_reduce(l2,false);
+        l2.determinise();
+
+        // Trace equivalence now corresponds to bisimilarity
+        return bisimulation_compare(l1,l2,false);
+      }
     case lts_eq_weak_trace:
+      {
+        // Copy LTSs
+        lts l1(*this);
+        lts l2(l);
+
+        // Eliminate silent steps and determinise first LTS
+        bisimulation_reduce(l1,true,false,&opts.reduce.tau_actions);
+        l1.tau_star_reduce();
+        bisimulation_reduce(l1,false);
+        l1.determinise();
+        
+        // Eliminate silent steps and determinise second LTS
+        bisimulation_reduce(l2,true,false,&opts.reduce.tau_actions);
+        l2.tau_star_reduce();
+        bisimulation_reduce(l2,false);
+        l2.determinise();
+
+        // Weak trace equivalence now corresponds to bisimilarity
+        return bisimulation_compare(l1,l2,false);
+      }
     case lts_eq_isomorph:
     default:
       gsErrorMsg("comparision for this equivalence is not yet implemented\n");

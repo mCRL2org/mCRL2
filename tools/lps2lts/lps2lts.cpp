@@ -98,7 +98,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
     "OUTFILE is not supplied, the LTS is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified "
-    "by an option). If the extension is unknown, the SVC format will be used.");
+    "by an option). If the extension is unknown, the mCRL2 SVC format will be used.");
 
   clinterface.add_rewriting_options();
 

@@ -32,6 +32,10 @@ static const char *equivalent_string(lts_equivalence eq)
       return "strongly bisimilar";
     case lts_eq_branching_bisim:
       return "branching bisimilar";
+    case lts_eq_trace:
+      return "trace equivalent";
+    case lts_eq_weak_trace:
+      return "weak trace equivalent";
     default:
       return "equivalent";
   }
@@ -86,8 +90,12 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use equivalence NAME:\n"
       "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
             + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for " 
-            + lts::name_of_equivalence(lts_eq_branching_bisim) + "\n"
+      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
+            + lts::name_of_equivalence(lts_eq_branching_bisim) + " (default), or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
+            + lts::name_of_equivalence(lts_eq_trace) + " (default), or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
+            + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
       , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
@@ -111,7 +119,9 @@ t_tool_options parse_command_line(int ac, char** av) {
         parser.option_argument("equivalence"));
     
     if (tool_options.equivalence != lts_eq_bisim &&
-        tool_options.equivalence != lts_eq_branching_bisim)
+        tool_options.equivalence != lts_eq_branching_bisim &&
+        tool_options.equivalence != lts_eq_trace &&
+        tool_options.equivalence != lts_eq_weak_trace)
     {
       parser.error("option -e/--equivalence has illegal argument '" + 
           parser.option_argument("equivalence") + "'");

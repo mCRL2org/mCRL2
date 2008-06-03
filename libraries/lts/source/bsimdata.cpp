@@ -48,6 +48,37 @@ static ATbool omitTauLoops;
 
 int label_tau = -1;
 
+static int s_pt = 0;
+
+static ATermIndexedSet indeks = NULL;
+
+static void reset_dfsn();
+
+static void reset_data()
+{
+  bsim_reset_kernel_data();
+  reset_dfsn();
+
+  Pi_pt = 0;
+  n_partitions = 0;     
+  nstate=0;
+  nlabel=0;
+  npar=0;
+  n_transitions = 0;
+  n_states = 0;
+  label_tau = -1;
+
+  s_pt = 0;
+
+  // XXX clean up all used memory!!
+
+  if ( indeks != NULL )
+  {
+    ATindexedSetDestroy(indeks);
+    indeks = NULL;
+  }
+}
+
 static ATerm *MakeArrayOfATerms(int n)
      {
      ATerm *result = (ATerm *) calloc(n, sizeof(ATerm));
@@ -128,6 +159,11 @@ void StartSplitting(void) {
 */
 static int *dfsn2state, *visited, dfsn;
 
+static void reset_dfsn()
+{
+  dfsn = 0;
+}
+
 static void ExtraNode(void) {
      /* Add extra node which is connected to each point */
      int i;
@@ -163,7 +199,6 @@ void DfsNumbering(ATerm t) {
 } 
 
 int TakeComponent(ATerm t) {
-     static int s_pt = 0;
      int d = ATgetInt((ATermInt) t);
      /* ATwarning("Help d = %d visited[d] = %d dfsn = %d\n",d, visited[d], dfsn); */
      if (visited[d]<0) return s_pt;
@@ -323,6 +358,7 @@ static int get_label_index(lts &l, unsigned int idx, int tau_idx, int offset = 0
 
 int ReadData(lts &l) 
    {
+   reset_data();
    nstate = l.num_states(); 
    nlabel = l.num_labels() + 1; // +1 for tau label
    AllocData();
@@ -358,6 +394,7 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
    second_lts_states_offset = l1.num_states();
    int offset = second_lts_states_offset;
    
+   reset_data();
    nstate = l1.num_states()+l2.num_states(); 
    nlabel = l1.num_labels()+l2.num_labels()+1; 
    AllocData();
@@ -396,7 +433,6 @@ static ATermList Union(ATermList t1s, ATermList t2s)
      }
 
 static ATerm BlockCode(int b) {
-     static ATermIndexedSet indeks = NULL;
      int d = -1;
      ATbool nnew;
      if (b< 0) {

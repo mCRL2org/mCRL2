@@ -90,6 +90,7 @@
       lts_type detect_type(std::istream &is);
 
       void init(bool state_info = true, bool label_info = true);
+      void init(p_lts const &l);
       void clear(bool state_info = true, bool label_info = true);
 
       unsigned int p_add_state(ATerm value = NULL);

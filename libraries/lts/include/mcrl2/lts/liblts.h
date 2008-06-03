@@ -422,6 +422,10 @@ namespace lts
        * stream. */
       lts(std::istream &is, lts_type type = lts_none);
 
+      /** Creates an copy of the supplied LTS.
+       * \param[in] l The LTS to copy. */
+      lts(lts const &l);
+
       /** Frees the memory occupied by this LTS. */
       ~lts();
 

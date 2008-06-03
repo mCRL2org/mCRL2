@@ -90,3 +90,5 @@ void SCC(void);
 bool Compare(int init1, int init2); 
 bool CompareBranching(int init1, int init2);
 int ReturnEquivalenceClasses(int initState, ATbool tauloops);
+
+void bsim_reset_kernel_data();

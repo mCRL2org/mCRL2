@@ -153,6 +153,11 @@ lts::lts(istream &is, lts_type type) : p_lts(this)
   read_from(is,type);
 }
 
+lts::lts(lts const &l) : p_lts(this)
+{
+  init(l);
+}
+
 lts::~lts()
 {
   if ( state_values != NULL )
@@ -193,6 +198,66 @@ void p_lts::init(bool state_info, bool label_info)
   this->type = lts_none;
   this->state_info = state_info;
   this->label_info = label_info;
+}
+
+void p_lts::init(p_lts const &l)
+{
+  init_state = l.init_state;
+
+  states_size = l.nstates;
+  nstates = l.nstates;
+
+  labels_size = l.nlabels;
+  nlabels = l.nlabels;
+
+  transitions_size = l.ntransitions;
+  ntransitions = l.ntransitions;
+  
+  type = l.type;
+  state_info = l.state_info;
+  label_info = l.label_info;
+ 
+  if ( state_info )
+  {
+    state_values = (ATerm *) malloc(states_size * sizeof(ATerm));
+    if ( state_values == NULL )
+    {
+      throw mcrl2::runtime_error("could not allocate enough memory\n");
+    }
+    memcpy(state_values,l.state_values,nstates*sizeof(ATerm));
+    ATprotectArray(state_values,nstates);
+  } else {
+    state_values = NULL;
+  }
+  
+  taus = (bool *) malloc(labels_size * sizeof(bool));
+  if ( taus == NULL )
+  {
+    throw mcrl2::runtime_error("could not allocate enough memory\n");
+  }
+  memcpy(taus,l.taus,nlabels*sizeof(bool));
+
+  if ( label_info )
+  {
+    label_values = (ATerm *) malloc(labels_size * sizeof(ATerm));
+    if ( label_values == NULL )
+    {
+      throw mcrl2::runtime_error("could not allocate enough memory\n");
+    }
+    memcpy(label_values,l.label_values,nlabels*sizeof(ATerm));
+    ATprotectArray(label_values,nlabels);
+  } else {
+    label_values = NULL;
+  }
+
+  transitions = (transition *) malloc(transitions_size * sizeof(transition));
+  if ( transitions == NULL )
+  {
+    throw mcrl2::runtime_error("could not allocate enough memory\n");
+  }
+  memcpy(transitions,l.transitions,ntransitions*sizeof(transition));
+
+  creator = l.creator;
 }
 
 void p_lts::clear(bool state_info, bool label_info)
@@ -557,7 +622,6 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
       return read_from_aut(filename);
     case lts_mcrl:
       return read_from_svc(filename,lts_mcrl);
-      break;
     case lts_mcrl2:
       return read_from_svc(filename,lts_mcrl2);
     case lts_svc:

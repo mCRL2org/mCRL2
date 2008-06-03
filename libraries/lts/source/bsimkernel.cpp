@@ -17,6 +17,11 @@ static ATbool branching = ATfalse;
 
 static int offset = -1;
 
+void bsim_reset_kernel_data()
+{
+  offset = -1;
+}
+
 static int IndexOf(ATermList ls, int k, int i) {
      for (;!ATisEmpty(ls);ls=ATgetNext(ls),i++) 
      if (ATgetInt((ATermInt) ATgetFirst(ls))==k) return i;

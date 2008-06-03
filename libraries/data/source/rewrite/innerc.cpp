@@ -2193,16 +2193,31 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
   gsVerboseMsg("compiling rewriter...\n");
   sprintf(t,INNERC_COMPILE_COMMAND,s);
   gsVerboseMsg("%s\n",t);
-  system(t);
+  if ( system(t) != 0 )
+  {
+    gsErrorMsg("could not compile rewriter\n");
+    unlink(file_c);
+    exit(1);
+  }
+
   gsVerboseMsg("linking rewriter...\n");
   sprintf(t,INNERC_LINK_COMMAND,s,s);
   gsVerboseMsg("%s\n",t);
-  system(t);
+  if ( system(t) != 0 )
+  {
+    gsErrorMsg("could not link rewriter\n");
+    unlink(file_o);
+    unlink(file_c);
+    exit(1);
+  }
 
   sprintf(t,"./%s.so",s);
   if ( (h = dlopen(t,RTLD_NOW)) == NULL )
   {
     gsErrorMsg("cannot load rewriter: %s\n",dlerror());
+    unlink(file_so);
+    unlink(file_o);
+    unlink(file_c);
     exit(1);
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
@@ -2225,6 +2240,9 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
        (so_clear_substs == NULL ) )
   {
     gsErrorMsg("cannot load rewriter functions\n");
+    unlink(file_so);
+    unlink(file_o);
+    unlink(file_c);
     exit(1);
   }
 
