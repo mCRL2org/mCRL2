@@ -60,6 +60,8 @@ feature.feature testing.launcher   : : free optional ;
 
 feature.feature test-info          : : free incidental ;
 feature.feature testing.arg        : : free incidental ;
+feature.feature testing.pre-pipes  : : free dependency optional ;
+feature.feature testing.post-pipes : : free dependency optional ;
 feature.feature testing.input-file : : free dependency ;
 feature.feature testing.preserve   : : free optional ;
 
@@ -400,6 +402,8 @@ if --preserve-test-targets in $(argv)
 
 
 toolset.flags testing.capture-output ARGS <testing.arg> ;
+toolset.flags testing.capture-output PRE_PIPES <testing.pre-pipes> ;
+toolset.flags testing.capture-output POST_PIPES <testing.post-pipes> ;
 toolset.flags testing.capture-output INPUT_FILES <testing.input-file> ;
 toolset.flags testing.capture-output LAUNCHER <testing.launcher> ;
 toolset.flags testing.capture-output PRESERVE <testing.preserve> ;
@@ -427,7 +431,7 @@ rule capture-output ( target : source : properties * : targets-to-remove * )
     # before target is created. Therefore, they are bound using SEARCH setting
     # on them and not LOCATE setting of $(target), as in other case (due to jam
     # bug).
-    DEPENDS $(target) : [ on $(target) return $(INPUT_FILES) ] ;
+    DEPENDS $(target) : [ on $(target) return $(INPUT_FILES) $(PRE_PIPES) $(POST_PIPES) ] ;
 
     if $(targets-to-remove) = none
     {
@@ -495,10 +499,10 @@ else
 RM = [ common.rm-command ] ;
 
 
-actions capture-output bind INPUT_FILES output-file
+actions capture-output bind PRE_PIPES POST_PIPES INPUT_FILES output-file
 {
     $(PATH_SETUP)
-    $(LAUNCHER) "$(>)" $(ARGS) "$(INPUT_FILES)" > "$(output-file)" 2>&1
+    $(PRE_PIPES)| $(LAUNCHER) "$(>)" $(ARGS) "$(INPUT_FILES)" |$(POST_PIPES) > "$(output-file)" 2>&1
     $(SET_STATUS)
     $(RUN_OUTPUT_NL) >> "$(output-file)"
     echo EXIT STATUS: $(STATUS) >> "$(output-file)"

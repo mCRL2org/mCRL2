@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
   try {
     //print specification  
-    return PrintSpecificationFileName(parse_command_line(argc, argv));
+    return PrintSpecificationFileName(parse_command_line(argc, argv)) == false;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

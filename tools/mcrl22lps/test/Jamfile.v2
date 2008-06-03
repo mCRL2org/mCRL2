@@ -1,13 +1,21 @@
 project toolset/mcrl22lps/test ;
 
-use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
+import set ;
 
-for file in [ path.glob-tree $(TOP)/examples : *.mcrl2 ] {
+use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
+use-project /tools/lpspp : $(TOP)/tools/lpspp ;
+
+test-cases = [ set.difference
+                [ path.glob-tree $(TOP)/examples : *.mcrl2 ] :
+                [ path.glob-tree $(TOP)/examples/project : *.mcrl2 ] ] ;
+
+for file in $(test-cases) {
   tests-with-files += [
         run /tools/mcrl22lps//mcrl22lps
               : -D
               : $(file)
               : <testing.preserve>true
+                <testing.post-pipes>/tools/lpspp//lpspp
               : mcrl22lps-$(file:B) ] ;
 }
 

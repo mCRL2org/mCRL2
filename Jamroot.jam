@@ -51,6 +51,7 @@ import path ;
 import property ;
 import regex ;
 import set ;
+import testing ;
 
 # Constants for commonly used paths
 path-constant TOP             : . ;
