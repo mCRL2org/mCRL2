@@ -13,7 +13,8 @@ exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
 exe bessolve     : bessolve.cpp : ;
 exe pbes_rewrite : pbes_rewrite.cpp : ;
-exe pbesparelm : pbesparelm.cpp : ;
+exe pbesparelm   : pbesparelm.cpp : ;
+exe pbesconstelm : pbesconstelm.cpp : ;
 
 install dist
    :
@@ -22,5 +23,6 @@ install dist
      bessolve
      pbes_rewrite
      pbesparelm
+     pbesconstelm
    :
    ;
