@@ -34,6 +34,10 @@ int test_main(int argc, char **argv)
     l3.add_state();
     l4.add_state();
   }
+  l1.set_initial_state(0);
+  l2.set_initial_state(0);
+  l3.set_initial_state(0);
+  l4.set_initial_state(0);
 
   l1.add_label(lab_a);
   l1.add_label(lab_b);
