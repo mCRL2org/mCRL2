@@ -304,14 +304,13 @@ tool_options parse_command_line(int argc, char** argv) {
 
   if (parser.options.count("in")) {
     if (1 < parser.options.count("in")) {
-      std::cerr << "warning: multiple input formats specified; can only use one\n";
+      parser.error("multiple input formats specified; can only use one");
     }
 
     opts.intype = lts::parse_format(parser.option_argument("in"));
-
-    if (opts.intype) {
-      std::cerr << "warning: format '" << parser.option_argument("in") <<
-                   "' is not recognised; option ignored" << std::endl;
+    if (opts.intype == lts_none || opts.intype == lts_dot)  {
+      parser.error("option -i/--in has illegal argument '" +
+        parser.option_argument("in") + "'");
     }
   }
 
