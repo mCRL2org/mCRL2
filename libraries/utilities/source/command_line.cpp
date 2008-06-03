@@ -210,6 +210,8 @@ namespace mcrl2 {
                                     m_usage(synopsis), m_description(description),
                                     m_known_issues(known_issues) {
 
+      m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
+
       // Add mandatory options
       add_hidden_option("help", "display help information", 'h');
       add_hidden_option("version", "display version information");
