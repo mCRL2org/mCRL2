@@ -395,15 +395,15 @@ static t_lin_options parse_command_line(int argc, char *argv[])
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used.");
 
-  clinterface.add_option("stack",
-      "the LPS is generated using stack datatypes; useful when -1 and -2 "
-      " do not work", '0');
-  clinterface.add_option("regular",
-      "if the specification is regular, the LPS is generated in regular "
-      "form (default)", '1');
-  clinterface.add_option("regular2",
-      "a variant of regular that uses more data variables; "
-      "sometimes successful when -1 leads to non-termination", '2');
+  clinterface.add_option("lin-method", make_mandatory_argument("NAME"),
+      "use linearisation method NAME:\n"
+      "  'regular' for generating an LPS in regular form\n"
+      "  (specification should be regular, default),\n"
+      "  'regular2' for a variant of 'regular' that uses more data variables\n"
+      "  (useful when 'regular' does not work), or\n"
+      "  'stack' for using stack data types\n"
+      "  (useful when 'regular' and 'regular2' do not work)"
+      , 'l');
   clinterface.add_option("cluster",
       "all actions in the final LPS are clustered", 'c');
   clinterface.add_option("no-cluster",
@@ -471,27 +471,27 @@ static t_lin_options parse_command_line(int argc, char *argv[])
     options.end_phase  = phTypeCheck;
   }
 
-  size_t method_count = 0;
-
-  if (0 < parser.options.count("stack")) {
-    options.lin_method = lmStack;
-    ++method_count;
-  }
-  if (parser.options.count("regular")) {
-    options.lin_method = lmRegular;
-    ++method_count;
-  }
-  if (parser.options.count("regular2")) {
-    options.lin_method = lmRegular2;
-    ++method_count;
-  }
-  if (1 < method_count) {
-    parser.error("only one method of linearisation is allowed");
+  if (0 < parser.options.count("lin-method")) {
+    if (1 < parser.options.count("lin-method")) {
+      parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
+    }
+    std::string lin_method_str(parser.option_argument("lin-method"));
+    if (lin_method_str == "stack") {
+      options.lin_method = lmStack;
+    } else if (lin_method_str == "regular") {
+      options.lin_method = lmRegular;
+    } else if (lin_method_str == "regular2") {
+      options.lin_method = lmRegular2;
+    } else {
+      parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
+    }
   }
 
   if (parser.options.count("end-phase")) {
+    if (1 < parser.options.count("end-phase")) {
+      parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
+    }
     std::string phase(parser.option_argument("end-phase"));
-
     if (phase == "pa") {
       options.end_phase = phParse;
     } else if (phase == "tc") {
