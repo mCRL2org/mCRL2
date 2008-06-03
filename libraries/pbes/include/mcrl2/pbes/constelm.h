@@ -118,7 +118,6 @@ namespace pbes_system {
         }
 
         // Accept new values for the parameters, and update the constraints accordingly.
-        template <typename DataRewriter>
         void update(data::data_expression condition,
                     data::data_expression_list new_values,
                     DataRewriter r,
@@ -186,7 +185,7 @@ namespace pbes_system {
       // Prints the vertices of the dependency graph.
       void print_vertices() const
       {
-        for (vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
           std::cout << i->second.to_string() << std::endl;
         }
@@ -195,9 +194,9 @@ namespace pbes_system {
       // Prints the edges of the dependency graph.
       void print_edges() const
       {
-        for (edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+        for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
-          for (std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             std::cout << j->to_string() << std::endl;
           }
@@ -218,7 +217,7 @@ namespace pbes_system {
           core::identifier_string name = i->variable().name();
           m_vertices[name] = vertex(i->variable());
 
-          edge_map::iterator ei = m_edges.insert(std::make_pair(name, std::vector<edge>())).first;
+          typename edge_map::iterator ei = m_edges.insert(std::make_pair(name, std::vector<edge>())).first;
           std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(i->formula());
           for (std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
           {
@@ -234,7 +233,7 @@ namespace pbes_system {
           const std::vector<edge>& edges = m_edges[name];
 
           // TODO: build a tree with true- and false-conditions
-          for (std::vector<edge>::const_iterator j = edges.begin(); j != edges.end(); ++j)
+          for (typename std::vector<edge>::const_iterator j = edges.begin(); j != edges.end(); ++j)
           {
             // TODO: use the tree to set the condition of edge *j
           }
@@ -268,7 +267,7 @@ namespace pbes_system {
           std::vector<edge>& u_edges = m_edges[var.name()];
           data::data_variable_list Xparams = u.variable.parameters();
 
-          for (std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
+          for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
           {
             const edge& e = *ei;
             vertex& v = m_vertices[e.right.name()];
@@ -285,7 +284,7 @@ namespace pbes_system {
         if (mcrl2::core::gsVerbose)
         {
           std::cout << "\nremoving the following constant parameters:" << std::endl;
-          for (vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+          for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             const vertex& u = i->second;
             std::vector<data::data_variable> removed = u.constant_parameters();
