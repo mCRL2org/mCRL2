@@ -1,11 +1,1 @@
-#EXCLUDE_PATTERNS      += */source/* */mcrl2parser.cpp */mcrl2lexer.cpp
-EXCLUDE_PATTERNS      = */.svn/* */source/* */mcrl2parser.cpp */mcrl2lexer.cpp \
-*/constructors.h \
-*/data_common.h \
-*/data_reconstruct.h \
-*/mcrl2lexer.h \
-*/mcrl2parser.hpp \
-*/print_implementation.h \
-*/regfrmtrans.h \
-*/soundness_checks.h \
-*/struct_core.h
+EXCLUDE_PATTERNS      += */source/* */mcrl2parser.cpp */mcrl2lexer.cpp
