@@ -20,18 +20,21 @@ namespace mcrl2 {
    **/
   class runtime_error : public std::runtime_error {
 
+      std::string m_message;
+
     public:
 
       /// \brief Constructor
       /// \param[in] message the exception message
-      runtime_error(std::string const& message) : std::runtime_error(message) {
+      runtime_error(std::string const& message) : std::runtime_error(message), m_message(std::string("error: ") + message) {
       }
 
       /// \brief error: to message
-      const char* what() const throw() {
-        std::string result("error: ");
+      const char* what() const throw () {
+        return m_message.c_str();
+      }
 
-        return result.append(std::runtime_error::what()).c_str(); 
+      ~runtime_error() throw () {
       }
   };
 }

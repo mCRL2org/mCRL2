@@ -19,7 +19,7 @@ for file in [ glob-tree *.mcrl2 ] {
               : # no arguments
               : $(file)
               : <testing.preserve>true
-                <testing.pipes>/tools/lpspp//lpspp
+                <testing.post-pipes>/tools/lpspp//lpspp
               : mcrl22lps-core-$(file:B) ] ;
 }
 
