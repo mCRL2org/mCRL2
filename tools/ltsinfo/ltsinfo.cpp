@@ -41,7 +41,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > determinism_equivalence_enumeration;
+    boost::shared_ptr< tipi::datatype::basic_enumeration > determinism_equivalence_enumeration;
 
     /** \brief compiles a tool_options instance from a configuration */
     bool extract_task_options(tipi::configuration const& c, tool_options&) const;
@@ -67,9 +67,17 @@ const char* lts_file_for_input  = "lts_in";
 const char* option_determinism_equivalence = "determinism_equivalence";
 
 squadt_interactor::squadt_interactor() {
-  determinism_equivalence_enumeration.reset(new tipi::datatype::enumeration("none"));
+  using namespace mcrl2::lts;
 
-  *determinism_equivalence_enumeration % "trace" % "strong-bisimilarity" % "weak-trace" % "branching-bisimilarity" % "isomorphism";
+  determinism_equivalence_enumeration.reset(new tipi::datatype::enumeration< lts_equivalence >);
+
+  determinism_equivalence_enumeration->add(lts_eq_none, "none").
+       add(lts_eq_bisim, "bisimilarity").
+       add(lts_eq_branching_bisim, "branching-bisimilarity").
+       add(lts_eq_sim, "strong-simulation").
+       add(lts_eq_trace, "trace").
+       add(lts_eq_weak_trace, "weak-trace").
+       add(lts_eq_isomorph, "isomorphism");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -114,8 +122,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values for options if the configuration specifies them
   if (c.option_exists(option_determinism_equivalence)) {
-    determinism_selector.set_selection(static_cast < mcrl2::lts::lts_equivalence > (
-        c.get_option_argument< size_t >(option_determinism_equivalence, 0)));
+    determinism_selector.set_selection(
+        c.get_option_argument< mcrl2::lts::lts_equivalence >(option_determinism_equivalence, 0));
   }
 
   // Display
@@ -142,7 +150,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::extract_task_options(tipi::configuration const& c, tool_options& task_options) const {
   bool result = true;
 
-  task_options.determinism_equivalence = static_cast < mcrl2::lts::lts_equivalence > (boost::any_cast < size_t > (c.get_option_argument(option_determinism_equivalence, 0)));
+  task_options.determinism_equivalence = c.get_option_argument< mcrl2::lts::lts_equivalence >(option_determinism_equivalence, 0);
 
   return (result);
 }
@@ -153,7 +161,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  tipi::object& input_object = c.get_input(lts_file_for_input);
+  tipi::configuration::object& input_object = c.get_input(lts_file_for_input);
 
   lts l;
   mcrl2::lts::lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type());

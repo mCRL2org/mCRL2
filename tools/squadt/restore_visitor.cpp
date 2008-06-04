@@ -292,7 +292,7 @@ namespace utility {
     h.tree->GetAttribute("output-directory", &p.output_directory, false);
 
     for (ticpp::Element* e = h.tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      tipi::configuration::parameter_identifier tipi_id;
+      tipi::configuration::parameter::identifier tipi_id;
 
       if (e->Value() == "input") {
         /* Read input */

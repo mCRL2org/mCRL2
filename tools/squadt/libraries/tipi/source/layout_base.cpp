@@ -16,7 +16,6 @@
 #include <memory>
 
 #include "tipi/layout_base.hpp"
-#include "tipi/object.hpp"
 #include "tipi/layout_manager.hpp"
 #include "tipi/layout_elements.hpp"
 #include "tipi/detail/layout_mediator.hpp"

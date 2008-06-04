@@ -438,8 +438,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > transformation_method_enumeration;
-    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > transformation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
 
   public:
 
@@ -460,22 +460,25 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 };
 
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new tipi::datatype::enumeration("none"));
+  transformation_method_enumeration.reset(new tipi::datatype::enumeration< transformation_options >());
 
-  transformation_method_enumeration->add_value("modulo_strong_bisimulation");
-  transformation_method_enumeration->add_value("modulo_branching_bisimulation");
-  transformation_method_enumeration->add_value("modulo_strong_simulation");
-  transformation_method_enumeration->add_value("modulo_trace_equivalence");
-  transformation_method_enumeration->add_value("modulo_weak_trace_equivalence");
-  transformation_method_enumeration->add_value("determinise");
+  transformation_method_enumeration->add(no_transformation, "none").
+                                     add(minimisation_modulo_strong_bisimulation, "modulo_strong_bisimulation").
+                                     add(minimisation_modulo_branching_bisimulation, "modulo_branching_bisimulation").
+                                     add(minimisation_modulo_trace_equivalence, "modulo_trace_equivalence").
+                                     add(minimisation_modulo_weak_trace_equivalence, "modulo_weak_trace_equivalence").
+                                     add(determinisation, "determinise");
 
-  output_format_enumeration.reset(new tipi::datatype::enumeration("Aldebaran"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration< lts_output_format >());
 
-  output_format_enumeration->add_value("SVC_mCRL");
-  output_format_enumeration->add_value("SVC_mCRL2");
-  output_format_enumeration->add_value("BCG");
-  output_format_enumeration->add_value("FSM");
-  output_format_enumeration->add_value("dot");
+  output_format_enumeration->add(aldebaran, "Aldebaran").
+                             add(svc_mcrl, "SVC_mCRL").
+                             add(svc_mcrl2, "SVC_mCRL2").
+#ifdef MCRL2_BCG
+                             add(bcg, "BCG").
+#endif
+                             add(fsm, "FSM").
+                             add(dot, "dot");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -564,12 +567,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Add some default values for existing options in the current configuration
   if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(static_cast < lts_output_format > (
-        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+    format_selector.set_selection(c.get_option_argument< lts_output_format >(option_selected_output_format, 0));
   }
   if (c.option_exists(option_selected_transformation)) {
-    transformation_selector.set_selection(static_cast < transformation_options > (
-        c.get_option_argument< size_t >(option_selected_transformation, 0)));
+    transformation_selector.set_selection(c.get_option_argument< transformation_options >(option_selected_transformation, 0));
   }
   if (c.input_exists(lps_file_auxiliary)) {
       lps_file_field.set_text(c.get_input(lps_file_auxiliary).get_location());
@@ -606,7 +607,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Add output file to the configuration */
   if (c.output_exists(lts_file_for_output)) {
     std::string  extension(extensions[format_selector.get_selection()]);
-    tipi::object& output_file = c.get_output(lts_file_for_output);
+    tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
  
     output_file.set_mime_type(tipi::mime_type(extension));
     output_file.set_location(c.get_output_name("." + extension));
@@ -638,10 +639,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.remove_input(lps_file_auxiliary);
   }
 
-  transformation_options selected_transformation = static_cast < transformation_options > (transformation_selector.get_selection());
+  transformation_options selected_transformation = transformation_selector.get_selection();
 
   c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, selected_transformation);
-  c.add_option(option_selected_output_format).append_argument(output_format_enumeration, static_cast < lts_output_format > (format_selector.get_selection()));
+  c.add_option(option_selected_output_format).append_argument(output_format_enumeration, format_selector.get_selection());
   
   if ((selected_transformation == minimisation_modulo_strong_bisimulation ||
        selected_transformation == minimisation_modulo_branching_bisimulation)) {
@@ -708,7 +709,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.set_source(c.get_input(lts_file_for_input).get_location());
   tool_options.set_target(c.get_output(lts_file_for_output).get_location());
 
-  transformation_options method = static_cast < transformation_options > (c.get_option_argument< size_t >(option_selected_transformation));
+  transformation_options method = c.get_option_argument< transformation_options >(option_selected_transformation);
 
   if (method != no_transformation) {
     switch (method) {

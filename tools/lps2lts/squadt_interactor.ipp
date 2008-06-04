@@ -47,11 +47,12 @@ const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
 const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
 const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
-static boost::shared_ptr < tipi::datatype::enumeration > exploration_strategy_enumeration; 
+static boost::shared_ptr < tipi::datatype::basic_enumeration > exploration_strategy_enumeration; 
 
 squadt_interactor::squadt_interactor() {
-  exploration_strategy_enumeration.reset(new tipi::datatype::enumeration("breadth-first"));
-  *exploration_strategy_enumeration % "depth-first" % "random";
+  exploration_strategy_enumeration.reset(new tipi::datatype::enumeration< exploration_strategy >());
+
+  exploration_strategy_enumeration->add(es_breadth, "breadth-first").add(es_depth, "depth-first").add(es_random, "random");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {
@@ -127,7 +128,7 @@ class squadt_interactor::storage_configuration {
     void update_configuration(boost::shared_ptr< squadt_interactor::storage_configuration >, tipi::configuration& c) {
       /* Add output file to the configuration */
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
-        tipi::object& o = c.get_output(lts_file_for_output);
+        tipi::configuration::object& o = c.get_output(lts_file_for_output);
       
         o.set_mime_type(tipi::mime_type(cb_aut.get_status()?"text/aut":"application/svc+mcrl2"));
         o.set_location(c.get_output_name(cb_aut.get_status()?".aut":".svc"));
@@ -261,12 +262,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
     tf_actions.set_text(c.get_option_argument< std::string >(option_detect_actions));
   }
   if (c.option_exists(option_rewrite_strategy)) {
-    rewrite_strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+    rewrite_strategy_selector.set_selection(
+        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
   if (c.option_exists(option_exploration_strategy)) {
-    exploration_strategy_selector.set_selection(static_cast < exploration_strategy > (
-        c.get_option_argument< size_t >(option_exploration_strategy, 0)));
+    exploration_strategy_selector.set_selection(
+        c.get_option_argument< exploration_strategy >(option_exploration_strategy, 0));
   }
 
   send_display_layout(d.set_manager(m));
@@ -280,14 +281,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   }
 
   if (c.option_exists(option_rewrite_strategy)) {
-    c.get_option(option_rewrite_strategy).set_argument_value< 0, tipi::datatype::enumeration >(rewrite_strategy_selector.get_selection());
+    c.get_option(option_rewrite_strategy).set_argument_value< 0,
+         tipi::datatype::enumeration< RewriteStrategy > >(rewrite_strategy_selector.get_selection());
   }
   else {
     c.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, rewrite_strategy_selector.get_selection());
   }
 
   if (c.option_exists(option_exploration_strategy)) {
-    c.get_option(option_exploration_strategy).set_argument_value< 0, tipi::datatype::enumeration >(exploration_strategy_selector.get_selection());
+    c.get_option(option_exploration_strategy).set_argument_value< 0,
+         tipi::datatype::enumeration< exploration_strategy > >(exploration_strategy_selector.get_selection());
   }
   else {
     c.add_option(option_exploration_strategy).append_argument(exploration_strategy_enumeration, exploration_strategy_selector.get_selection());
@@ -433,8 +436,8 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   }
   
-  lgopts.strat      = static_cast < RewriteStrategy > (configuration.get_option_argument< size_t >(option_rewrite_strategy));
-  lgopts.expl_strat = static_cast < exploration_strategy > (configuration.get_option_argument< size_t >(option_exploration_strategy));
+  lgopts.strat      = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy);
+  lgopts.expl_strat = configuration.get_option_argument< exploration_strategy >(option_exploration_strategy);
   
   lgopts.detect_deadlock  = configuration.get_option_argument< bool >(option_detect_deadlock);
 

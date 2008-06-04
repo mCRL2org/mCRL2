@@ -134,17 +134,25 @@ namespace tipi {
 
       clear_handlers(tipi::message_display_data);
 
-      tipi::message m(tipi::visitors::store(display), tipi::message_display_layout);
+      try {
+        tipi::message m(tipi::visitors::store(display), tipi::message_display_layout);
 
-      send_message(m);
+        send_message(m);
+      }
+      catch (...) {
+      }
     }
 
     /* Send a specification of the tools capabilities */
     inline void communicator_impl::handle_capabilities_request(boost::shared_ptr< const tipi::message >& m) {
       if (m->is_empty()) {
-        tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_capabilities);
+        try {
+          tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_capabilities);
  
-        send_message(m);
+          send_message(m);
+        }
+        catch (...) {
+        }
       }
     }
  
@@ -155,7 +163,11 @@ namespace tipi {
     inline void communicator_impl::receive_display_data_handler(boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < layout::tool_display > d) {
       std::vector < tipi::layout::element const* > elements;
 
-      d->update(m->to_string(), elements);
+      try {
+        d->update(m->to_string(), elements);
+      }
+      catch (...) {
+      }
     }
     
     /**
@@ -164,12 +176,14 @@ namespace tipi {
     inline void communicator_impl::receive_configuration_handler(boost::shared_ptr< const tipi::message >& m) {
       assert(m->get_type() == tipi::message_configuration);
 
-      if (m.get() != 0) {
+      try {
         boost::shared_ptr < configuration > c(new configuration);
 
         tipi::visitors::restore(*c, m->to_string());
 
         current_configuration = c;
+      }
+      catch (...) {
       }
     }
     /// \endcond

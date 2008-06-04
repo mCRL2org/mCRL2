@@ -11,6 +11,7 @@
 #ifndef UTILITY_GENERIC_VISITOR_H__
 #define UTILITY_GENERIC_VISITOR_H__
 
+#include <iostream>
 #include <stdexcept>
 #include <algorithm>
 #include <typeinfo>
@@ -88,10 +89,10 @@ namespace utility {
     public:
 
       /** \brief Map containing the callback functions */
-      typedef detail::type_info_callback_wrapper                                                        argument_type_for_visit_callback;
+      typedef detail::type_info_callback_wrapper                                                       argument_type_for_visit_callback;
 
       /** \brief Map from target type_info_wrapper to argument map */
-      typedef detail::vector_map < detail::type_info_map_wrapper< argument_type_for_visit_callback > >  visitable_type_tree;
+      typedef detail::vector_map< detail::type_info_map_wrapper< argument_type_for_visit_callback > >  visitable_type_tree;
 
     private:
 
@@ -150,28 +151,52 @@ namespace utility {
 
       protected:
 
-        std::vector < S > m_map;
+        std::vector< S > m_map;
   
       public:
 
-        inline S& insert(S const& e) {
-          typename std::vector < S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), e);
+        inline S& insert(S const& o) {
+          typename std::vector < S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), o);
   
-          if (i == m_map.end() || *i != e) {
-            i = m_map.insert(i, e);
+          if (i == m_map.end() || *i != o) {
+            i = m_map.insert(i, o);
           }
 
           return *i;
         }
 
-        inline S& find(S const& e) {
-          typename std::vector < S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), e);
+        inline S& find(S const& o) {
+          typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), o);
   
-          if (i == m_map.end() || *i != e) {
+          if (i == m_map.end() || *i != o) {
             throw std::runtime_error("No visit method found with the requested signature");
           }
 
           return *i;
+        }
+
+        inline S& search(visitable const& e) {
+          typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), typeid(e));
+  
+          if (i == m_map.end() || *i != typeid(e)) {
+            for (typename std::vector< S >::iterator j = m_map.begin(); j != m_map.end(); ++j) {
+              if (j->try_cast(&e)) {
+                return *j;
+              }
+            }
+
+            throw std::runtime_error("No visit method found with the requested signature (or fallback)");
+          }
+
+          return *i;
+        }
+
+        typename std::vector< S >::iterator begin() {
+          return m_map.begin();
+        }
+
+        typename std::vector< S >::iterator end() {
+          return m_map.end();
         }
     };
 
@@ -198,15 +223,58 @@ namespace utility {
       }
     };
 
+    struct basic_caster {
+
+        virtual bool try_cast(visitable const* target) const = 0;
+        virtual bool try_cast(visitable* target) const = 0;
+
+        virtual ~basic_caster() {
+        }
+    };
+
+    template < typename T >
+    struct caster : public basic_caster {
+      bool try_cast(visitable* target) const {
+        return dynamic_cast< T* > (target) != 0;
+      }
+
+      bool try_cast(visitable const* target) const {
+        return dynamic_cast< T const* > (target) != 0;
+      }
+    };
+
     class type_info_wrapper {
 
       protected:
   
-        std::type_info const* m_info;
+        std::type_info const*             m_info;
+
+        boost::shared_ptr< basic_caster > m_caster;
   
       public:
   
         type_info_wrapper(std::type_info const& o) : m_info(&o) {
+        }
+
+        template < typename T >
+        void set_caster() {
+          m_caster.reset(new caster< T >);
+        }
+
+        template < typename T >
+        type_info_wrapper(type_info_wrapper const& o) : m_info(o.m_info), m_caster(o.m_caster) {
+        }
+
+        std::string name() const {
+          return m_info->name();
+        }
+
+        inline bool try_cast(visitable* target) const {
+          return m_caster->try_cast(target);
+        }
+
+        inline bool try_cast(visitable const* target) const {
+          return m_caster->try_cast(target);
         }
 
         bool operator==(std::type_info const& o) const {
@@ -217,10 +285,18 @@ namespace utility {
           return (*m_info == *o.m_info);
         }
   
+        bool operator!=(std::type_info const& o) const {
+          return (*m_info != o);
+        }
+  
         bool operator!=(type_info_wrapper const& o) const {
           return (*m_info != *o.m_info);
         }
   
+        bool operator<(std::type_info const& o) const {
+          return (m_info->before(o) != 0);
+        };
+
         bool operator<(type_info_wrapper const& o) const {
           return (m_info->before(*o.m_info) != 0);
         };
@@ -229,21 +305,39 @@ namespace utility {
     template < typename S >
     class type_info_map_wrapper : public type_info_wrapper  {
 
+      template < typename T >
+      friend T& vector_map< T >::search(visitable const&);
+
       private:
   
         vector_map< S > m_map;
 
-      public:
+      private:
   
         inline type_info_map_wrapper(std::type_info const& o) : type_info_wrapper(o) {
         }
 
-        inline S& insert(std::type_info const& e) {
-          return m_map.insert(S(e));
+      public:
+
+        template < typename T >
+        static type_info_map_wrapper create() {
+          type_info_map_wrapper w(typeid(T));
+
+          w.set_caster< T >();
+
+          return w;
+        }
+  
+        template < typename T >
+        inline S& insert() {
+          S& w(m_map.insert(S::template create< T >()));
+
+          return w;
         }
 
-        inline S& find(std::type_info const& e) {
-          return m_map.find(S(e));
+        template < typename T >
+        inline S& find() {
+          return m_map.find(S::template create< T >());
         }
     };
 
@@ -253,15 +347,24 @@ namespace utility {
 
         boost::shared_ptr < basic_visit_method_wrapper > callback;
 
-      public:
+      private:
 
         inline type_info_callback_wrapper(std::type_info const& o) : type_info_wrapper(o) {
         }
+
+      public:
 
         inline type_info_callback_wrapper(type_info_callback_wrapper const& o) :
                 type_info_wrapper(static_cast < type_info_wrapper const& > (o)), callback(o.callback) {
         }
 
+        template < typename T >
+        static type_info_callback_wrapper create() {
+          type_info_callback_wrapper w(typeid(T));
+
+          return w;
+        }
+  
         template < typename R, typename V, typename T, typename U >
         inline void set(visit_method_wrapper< R, V, T, U > const& o) {
           callback.reset(new visit_method_wrapper< R, V, T, U >(o));
@@ -276,7 +379,7 @@ namespace utility {
 
   template < typename R >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t) {
-    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().find(typeid(t)).find(typeid(void)).get();
+    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< void >().get();
 
     return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback(v, t);
   }
@@ -284,7 +387,7 @@ namespace utility {
   template < typename R >
   template < typename U >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t, U& u) {
-    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().find(typeid(t)).find(typeid(U)).get();
+    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< U >().get();
 
     return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback(v, t, u);
   }
@@ -332,7 +435,9 @@ namespace utility {
           }
         };
 
-        get_master_types().insert(typeid(T)).insert(typeid(void)).
+        typedef typename abstract_visitor< R >::visitable_type_tree::value_type master_type;
+
+        get_master_types().insert(master_type::template create< T >()).template insert< void >().
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
 		typename detail::visitable_type_helper< T >::visitable_type, void >(&local::trampoline));
       }
@@ -348,7 +453,9 @@ namespace utility {
           }
         };
 
-        get_master_types().insert(typeid(T)).insert(typeid(U)).
+        typedef typename abstract_visitor< R >::visitable_type_tree::value_type master_type;
+
+        get_master_types().insert(master_type::template create< T >()).template insert< U >().
             set(detail::visit_method_wrapper< R, abstract_visitor< R >,
 		typename detail::visitable_type_helper< T >::visitable_type, U >(&local::trampoline));
       }

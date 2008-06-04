@@ -170,13 +170,13 @@ namespace squadt {
       std::string get_output_prefix(std::string const&) const;
 
       /** \brief Extracts useful information from a configuration object */
-      void process_configuration(boost::shared_ptr < tipi::configuration >&, std::set < tipi::object const* >&, bool = true);
+      void process_configuration(boost::shared_ptr < tipi::configuration >&, std::set < tipi::configuration::object const* >&, bool = true);
 
       /** \brief Find an object descriptor for a given pointer to an object */
-      boost::shared_ptr < processor::object_descriptor > find_output_by_id(tipi::configuration::parameter_identifier const&);
+      boost::shared_ptr < processor::object_descriptor > find_output_by_id(tipi::configuration::parameter::identifier const&);
  
       /** \brief Find an object descriptor for a given pointer to an object */
-      boost::shared_ptr < processor::object_descriptor > find_input_by_id(tipi::configuration::parameter_identifier const&);
+      boost::shared_ptr < processor::object_descriptor > find_input_by_id(tipi::configuration::parameter::identifier const&);
  
       /** \brief Get the most original (main) input */
       boost::shared_ptr < object_descriptor > find_primary_input();
@@ -221,13 +221,13 @@ namespace squadt {
       void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
       /** \brief Add (or modify) an output object */
-      void register_input(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor > const&);
+      void register_input(tipi::configuration::parameter::identifier const&, boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Add (or modify) an output object */
-      void register_output(tipi::configuration::parameter_identifier const&, boost::shared_ptr < object_descriptor >&);
+      void register_output(tipi::configuration::parameter::identifier const&, boost::shared_ptr < object_descriptor >&);
 
       /** \brief Add an output object */
-      void register_output(tipi::configuration::parameter_identifier const&, tipi::object const&,
+      void register_output(tipi::configuration::parameter::identifier const&, tipi::configuration::object const&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
 
       /** \brief Removes the outputs of this processor from storage */

@@ -179,7 +179,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
   options.suminst_opts.tau_only = configuration.option_exists(option_tau_only);
   options.suminst_opts.finite_only = configuration.option_exists(option_finite_only);
-  options.suminst_opts.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
+  options.suminst_opts.strategy = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
 
   /* Create display */
   tipi::layout::tool_display d;

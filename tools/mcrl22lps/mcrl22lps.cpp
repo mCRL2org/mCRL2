@@ -54,9 +54,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > linearisation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > linearisation_method_enumeration;
 
-    boost::shared_ptr < tipi::datatype::enumeration > linearisation_phase_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > linearisation_phase_enumeration;
 
   private:
 
@@ -99,13 +99,19 @@ const char* option_end_phase                = "end_phase";
 const char* option_add_delta                = "add_delta";
 
 squadt_interactor::squadt_interactor() {
-  linearisation_method_enumeration.reset(new tipi::datatype::enumeration("stack"));
+  linearisation_method_enumeration.reset(new tipi::datatype::enumeration< t_lin_method >);
 
-  *linearisation_method_enumeration % "regular" % "regular2" % "expansion";
+  linearisation_method_enumeration->add(lmRegular, "regular").
+                                    add(lmRegular2, "regular2").
+                                    add(lmStack, "expansion");
 
-  linearisation_phase_enumeration.reset(new tipi::datatype::enumeration("all"));
+  linearisation_phase_enumeration.reset(new tipi::datatype::enumeration< t_phase >);
 
-  *linearisation_phase_enumeration % "parsing" % "type-checking" % "alphabet_reduction" % "data_implementation";
+  linearisation_phase_enumeration->add(phNone, "all").
+                                   add(phParse, "parsing").
+                                   add(phTypeCheck, "type-checking").
+                                   add(phAlphaRed, "alphabet_reduction").
+                                   add(phDataImpl, "data_implementation");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -220,12 +226,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values for options if the configuration specifies them
   if (c.option_exists(option_end_phase)) {
-    phase_selector.set_selection(static_cast < t_phase > (
-        c.get_option_argument< size_t >(option_end_phase, 0)));
+    phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase, 0));
   }
   if (c.option_exists(option_linearisation_method)) {
-    method_selector.set_selection(static_cast < t_lin_method > (
-        c.get_option_argument< size_t >(option_linearisation_method, 0)));
+    method_selector.set_selection(c.get_option_argument< t_lin_method >(option_linearisation_method, 0));
   }
 
   send_display_layout(d.set_manager(m));
@@ -297,7 +301,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   }
 
   if (c.option_exists(option_linearisation_method)) {
-    task_options.lin_method = static_cast < t_lin_method > (boost::any_cast < size_t > (c.get_option_argument(option_linearisation_method, 0)));
+    task_options.lin_method = c.get_option_argument< t_lin_method >(option_linearisation_method, 0);
   }
   else {
     send_error("Configuration does not contain a linearisation method\n");
@@ -307,7 +311,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
 
   task_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
   task_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
-  task_options.noalpha             = c.get_option_argument< bool >(option_no_alpha);
+  task_options.noalpha                 = c.get_option_argument< bool >(option_no_alpha);
   task_options.newstate                = c.get_option_argument< bool >(option_newstate);
   task_options.binary                  = c.get_option_argument< bool >(option_binary);
   task_options.statenames              = c.get_option_argument< bool >(option_statenames);
@@ -317,7 +321,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   task_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
   task_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
   
-  task_options.end_phase = static_cast < t_phase > (boost::any_cast < size_t > (c.get_option_argument(option_end_phase, 0)));
+  task_options.end_phase = c.get_option_argument< t_phase >(option_end_phase, 0);
 
   task_options.check_only = (task_options.end_phase != phNone);
 

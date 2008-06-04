@@ -92,8 +92,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > transformation_strategy_enumeration;
-    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > transformation_strategy_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
 
   public:
 
@@ -127,13 +127,15 @@ const char* option_tree                    = "tree";
 const char* option_unused_data             = "unused_data";
 
 squadt_interactor::squadt_interactor() {
-  transformation_strategy_enumeration.reset(new tipi::datatype::enumeration("lazy"));
+  transformation_strategy_enumeration.reset(new tipi::datatype::enumeration< transformation_strategy >);
 
-  *transformation_strategy_enumeration % "optimize" % "on-the-fly" % "on-the-fly-with-fixpoints";
+  transformation_strategy_enumeration->add(lazy, "lazy").
+    add(optimize, "optimize").add(on_the_fly, "on-the-fly").
+    add(on_the_fly_with_fixed_points, "on-the-fly-with-fixed-points");
 
-  output_format_enumeration.reset(new tipi::datatype::enumeration("none"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration< bes_output_format >);
 
-  *output_format_enumeration % "vasy" % "cwi";
+  output_format_enumeration->add(none, "none").add(vasy, "vasy").add(cwi, "cwi");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -226,16 +228,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /// Copy values from options specified in the configuration
   if (c.option_exists(option_transformation_strategy)) {
-    strategy_selector.set_selection(static_cast < transformation_strategy > (
-        c.get_option_argument< size_t >(option_transformation_strategy, 0)));
+    strategy_selector.set_selection(
+        c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
   }
   if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(static_cast < bes_output_format > (
-        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+    format_selector.set_selection(
+        c.get_option_argument< bes_output_format >(option_selected_output_format, 0));
   }
   if (c.option_exists(option_rewrite_strategy)) {
-    rewrite_strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+    rewrite_strategy_selector.set_selection(
+        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
 
   send_display_layout(d.set_manager(m));
@@ -254,7 +256,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   {
     /* Add output file to the configuration */
     if (c.output_exists(bes_file_for_output)) {
-      tipi::object& output_file = c.get_output(bes_file_for_output);
+      tipi::configuration::object& output_file = c.get_output(bes_file_for_output);
    
       output_file.set_location(c.get_output_name(".txt"));
     }
@@ -299,8 +301,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.opt_store_as_tree             = c.get_option_argument< bool >(option_tree);
   tool_options.opt_data_elm                  = c.get_option_argument< bool >(option_unused_data);;
   tool_options.opt_use_hashtables            = c.get_option_argument< bool >(option_hash_table);;
-  tool_options.rewrite_strategy              = static_cast < RewriteStrategy > (
-                        c.get_option_argument< size_t >(option_rewrite_strategy, 0));
+  tool_options.rewrite_strategy              = c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
 
   if (tool_options.opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
@@ -311,8 +312,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
 
-  tool_options.opt_strategy = static_cast < transformation_strategy > (
-                        c.get_option_argument< size_t >(option_transformation_strategy, 0));
+  tool_options.opt_strategy = c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0);
 
   tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
 

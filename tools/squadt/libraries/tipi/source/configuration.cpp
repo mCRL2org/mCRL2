@@ -95,20 +95,20 @@ namespace tipi {
   }
 
   /**
-   * \param[in] o the tipi::option object for which to find the identifier
+   * \param[in] o the tipi::configuration::option object for which to find the identifier
    *
    * Throws an exception when the option is not part of the configuration
    **/
-  std::string configuration::get_identifier(tipi::option const& o) const {
+  std::string configuration::get_identifier(configuration::option const& o) const {
     return (get_identifier(static_cast < parameter const& > (o)));
   }
 
   /**
-   * \param[in] o the tipi::object object for which to find the identifier
+   * \param[in] o the tipi::configuration::object object for which to find the identifier
    *
    * Throws an exception when the object is not part of the configuration
    **/
-  std::string configuration::get_identifier(tipi::object const& o) const {
+  std::string configuration::get_identifier(configuration::object const& o) const {
     return (get_identifier(static_cast < parameter const& > (o)));
   }
 
@@ -146,11 +146,11 @@ namespace tipi {
    * \param id an identifier for the option
    * \param r whether or not to replace an existing option with the same id
    **/
-  option& configuration::add_option(std::string const& id, bool r) {
+  configuration::option& configuration::add_option(std::string const& id, bool r) {
     assert(m_parameter_by_id.count(id) == 0 || r);
 
     if ((m_parameter_by_id.count(id) == 0)) {
-      boost::shared_ptr < option > new_option(new tipi::option);
+      boost::shared_ptr < option > new_option(new option);
 
       m_parameter_by_id[id] = m_positions.size();
       m_positions.push_back(new_option);
@@ -159,10 +159,10 @@ namespace tipi {
       return *new_option;
     }
     else if (r) {
-      static_cast < tipi::option& > (*m_positions[m_parameter_by_id[id]]).clear();
+      static_cast < option& > (*m_positions[m_parameter_by_id[id]]).clear();
     }
 
-    return static_cast < tipi::option& > (*m_positions[m_parameter_by_id[id]]);
+    return static_cast < option& > (*m_positions[m_parameter_by_id[id]]);
   }
 
   /**
@@ -170,7 +170,7 @@ namespace tipi {
    * \param o the option object to add
    * \param r whether or not to replace an existing option with the same id
    **/
-  option& configuration::add_option(std::string const& id, boost::shared_ptr < option >& o, bool r) {
+  configuration::option& configuration::add_option(std::string const& id, boost::shared_ptr < option >& o, bool r) {
     assert(m_parameter_by_id.count(id) == 0 || r);
 
     if (m_parameter_by_id.count(id) == 0) {
@@ -190,10 +190,10 @@ namespace tipi {
    * \param[in] o shared pointer to object
    * \pre no object or option is known by this identifier
    **/
-  object& configuration::add_input(std::string const& id, boost::shared_ptr < object >& o) {
+  configuration::object& configuration::add_input(std::string const& id, boost::shared_ptr < object >& o) {
     if (m_parameter_by_id.count(id) == 0) {
       m_parameter_by_id[id] = m_positions.size();
-      m_positions.push_back(boost::dynamic_pointer_cast< tipi::parameter >(o));
+      m_positions.push_back(boost::dynamic_pointer_cast< parameter >(o));
       m_input_objects.insert(o.get());
     }
 
@@ -205,12 +205,12 @@ namespace tipi {
    * \param[in] o shared pointer to object
    * \pre no object or option is known by this identifier
    **/
-  object& configuration::add_output(std::string const& id, boost::shared_ptr < object >& o) {
+  configuration::object& configuration::add_output(std::string const& id, boost::shared_ptr < object >& o) {
     assert(m_parameter_by_id.count(id) == 0);
 
     if (m_parameter_by_id.count(id) == 0) {
       m_parameter_by_id[id] = m_positions.size();
-      m_positions.push_back(boost::dynamic_pointer_cast< tipi::parameter >(o));
+      m_positions.push_back(boost::dynamic_pointer_cast< parameter >(o));
       m_output_objects.insert(o.get());
     }
 
@@ -334,7 +334,7 @@ namespace tipi {
    * \pre option with this identifier must be part of the configuration, use
    *      option_exists member to establish this
    **/
-  option const& configuration::get_option(std::string const& id) const {
+  configuration::option const& configuration::get_option(std::string const& id) const {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (* boost::static_pointer_cast < const option > (
@@ -346,23 +346,9 @@ namespace tipi {
    * \pre option with this identifier must be part of the configuration, use
    *      option_exists member to establish this
    **/
-  option& configuration::get_option(std::string const& id) {
+  configuration::option& configuration::get_option(std::string const& id) {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (*boost::static_pointer_cast < option > (m_positions[(*m_parameter_by_id.find(id)).second]));
-  }
-
-  /**
-   * \param[in] id an identifier for the option
-   * \param[in] n an optional identifier for the option
-   * \pre option must take at least one argument and n must be smaller than the number of arguments
-   * \pre option with this identifier must be part of the configuration, use
-   *      option_exists member to establish this
-   **/
-  boost::any configuration::get_option_argument(std::string const& id, size_t const& n) const {
-    assert(m_parameter_by_id.count(id) != 0);
-
-    return (boost::static_pointer_cast < const option > (
-        const_cast < position_list& > (m_positions)[(*m_parameter_by_id.find(id)).second])->get_value(n));
   }
 }

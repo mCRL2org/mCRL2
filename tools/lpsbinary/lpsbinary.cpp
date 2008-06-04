@@ -55,14 +55,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
 
     static const char*  option_rewrite_strategy;
 
-  private:
-
-    boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
-
   public:
-
-    /** \brief constructor */
-    squadt_interactor();
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -82,11 +75,6 @@ const char* squadt_interactor::lps_file_for_output = "lps_out";
 
 const char* squadt_interactor::option_rewrite_strategy = "rewrite_strategy";
 
-squadt_interactor::squadt_interactor() {
-  rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
-  *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
-}
-
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& capabilities) const
 {
   // The tool has only one main input combination
@@ -99,6 +87,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   using namespace tipi::layout;
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
+  using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
 
   /* Set defaults where the supplied configuration does not have values */
   if (!configuration.output_exists(lps_file_for_output)) {
@@ -161,9 +150,9 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   using namespace tipi::layout::elements;
 
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
+  options.input_file  = configuration.get_input(lps_file_for_input).get_location();
   options.output_file = configuration.get_output(lps_file_for_output).get_location();
-  options.strategy = static_cast < RewriteStrategy > (boost::any_cast < size_t > (configuration.get_option_argument(option_rewrite_strategy, 0)));
+  options.strategy    = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
 
   /* Create display */
   tipi::layout::tool_display d;

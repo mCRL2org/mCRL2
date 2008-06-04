@@ -127,7 +127,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > end_phase_enumeration;
 
   public:
 
@@ -156,9 +157,17 @@ const char* option_end_phase                  = "stop_after_phase";
 const char* option_timed                      = "use_timed_algorithm";
 
 squadt_interactor::squadt_interactor() {
-  output_format_enumeration.reset(new tipi::datatype::enumeration("normal"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration< pbes_output_format >());
 
-  output_format_enumeration->add_value("readable");
+  output_format_enumeration->add(readable, "readable").add(normal, "normal");
+
+  end_phase_enumeration.reset(new tipi::datatype::enumeration< t_phase >());
+
+  end_phase_enumeration->add(PH_NONE, "none").
+                         add(PH_PARSE, "parse").
+                         add(PH_TYPE_CHECK, "type_check").
+                         add(PH_DATA_IMPL, "data_implementation").
+                         add(PH_REG_FRM_TRANS, "formula_translation");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -213,12 +222,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values if the configuration specifies them
   if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(static_cast < pbes_output_format > (
-        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+    format_selector.set_selection(
+        c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
   }
   if (c.option_exists(option_end_phase)) {
-    phase_selector.set_selection(static_cast < t_phase > (
-        c.get_option_argument< long int >(option_end_phase)));
+    phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase));
   }
   if (c.input_exists(formula_file_for_input)) {
     formula_field.set_text(c.get_input(formula_file_for_input).get_location());
@@ -238,7 +246,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
-    tipi::object& output_file = c.get_output(pbes_file_for_output);
+    tipi::configuration::object& output_file = c.get_output(pbes_file_for_output);
 
     output_file.set_location(c.get_output_name(".pbes"));
   }
@@ -252,9 +260,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
-  c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
-                                static_cast < pbes_output_format > (format_selector.get_selection()));
-  c.add_option(option_end_phase).set_argument_value< 0, tipi::datatype::integer >(static_cast < t_phase > (phase_selector.get_selection()));
+  c.add_option(option_selected_output_format).replace_argument(0, output_format_enumeration, format_selector.get_selection());
+  c.add_option(option_end_phase).replace_argument(0, end_phase_enumeration, phase_selector.get_selection());
 
   send_clear_display();
 }
@@ -274,9 +281,9 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
-  tool_options.pretty           = static_cast < pbes_output_format > (c.get_option_argument< size_t >(option_selected_output_format)) != normal;
+  tool_options.pretty           = c.get_option_argument< pbes_output_format >(option_selected_output_format) != normal;
   tool_options.timed            = c.get_option_argument< bool >(option_timed);
-  tool_options.end_phase        = static_cast < t_phase > (c.get_option_argument< long int >(option_end_phase));
+  tool_options.end_phase        = c.get_option_argument< t_phase >(option_end_phase);
   tool_options.formfilename     = c.get_input(formula_file_for_input).get_location();
   tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
   tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();

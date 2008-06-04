@@ -16,8 +16,8 @@
 #include <boost/foreach.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 
-#include <tipi/visitors.hpp>
 #include <tipi/report.hpp>
+#include <tipi/visitors.hpp>
 #include <tipi/controller/capabilities.hpp>
 #include <tipi/tool/capabilities.hpp>
 #include <tipi/layout_elements.hpp>
@@ -167,11 +167,11 @@ namespace utility {
   }
 
   /**
-   * \param[in] o the tipi::object object to store
+   * \param[in] o the tipi::configuration::object object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::object const& o) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::configuration::object const& o) {
     if (!o.m_location.empty()) {
       out << " location=\"" << o.m_location << "\"";
     }
@@ -180,15 +180,15 @@ namespace utility {
   }
 
   /**
-   * \param[in] o the tipi::option object to store
+   * \param[in] o the tipi::configuration::option object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::option const& o) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::configuration::option const& o) {
     out << ">";
 
     if (o.takes_arguments()) {
-      BOOST_FOREACH(tipi::option::type_value_list::value_type i, o.m_arguments) {
+      BOOST_FOREACH(tipi::configuration::option::type_value_list::value_type i, o.m_arguments) {
         do_visit(*i.first, i.second);
       }
     }
@@ -217,7 +217,7 @@ namespace utility {
       if (c.is_option(**i)) {
         out << "<option id=\"" << c.get_identifier(**i) << "\"";
     
-        do_visit(static_cast < tipi::option const& >(**i));
+        do_visit(static_cast < tipi::configuration::option const& >(**i));
 
         out << "</option>";
       }
@@ -225,7 +225,7 @@ namespace utility {
         out << "<object id=\"" << c.get_identifier(**i) << "\" type=\""
             << std::string((c.is_input(**i)) ? "in" : "out") << "put\"";
      
-        do_visit(static_cast < tipi::object const& >(**i));
+        do_visit(static_cast < tipi::configuration::object const& >(**i));
      
         out << "/>";
       }
@@ -243,7 +243,7 @@ namespace utility {
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::boolean const& e, std::string const& s) {
     out << "<boolean";
     
-    if (s.compare(tipi::datatype::boolean::true_string) == 0) {
+    if (s.compare("true") == 0) {
       out << " value=\"" << s << "\"";
     }
 
@@ -256,26 +256,14 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::integer const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_integer_range const& e, std::string const& s) {
     out << "<integer";
 
     if (!s.empty()) {
-      out << " value=\"" << std::dec << s << "\"";
+      out << " value=\"" << s << "\"";
     }
 
-    if (e.m_minimum != tipi::datatype::integer::implementation_minimum) {
-      out << " minimum=\"" << e.m_minimum << "\"";
-    }
-      
-    if (e.m_maximum != tipi::datatype::integer::implementation_maximum) {
-      out << " maximum=\"" << e.m_maximum << "\"";
-    }
-
-    if (e.m_default_value != e.m_minimum) {
-      out << " default=\"" << e.m_default_value << "\"";
-    }
-
-    out << "/>";
+    out << " range=\"" << e << "\"/>";
   }
 
   /**
@@ -284,26 +272,14 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::real const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_real_range const& e, std::string const& s) {
     out << "<real";
 
     if (!s.empty()) {
-      out << " value=\"" << std::dec << s << "\"";
+      out << " value=\"" << s << "\"";
     }
 
-    if (e.m_minimum != tipi::datatype::real::implementation_minimum) {
-      out << " minimum=\"" << e.m_minimum << "\"";
-    }
-      
-    if (e.m_maximum != tipi::datatype::real::implementation_maximum) {
-      out << " maximum=\"" << e.m_maximum << "\"";
-    }
-
-    if (e.m_default_value != e.m_minimum) {
-      out << " default=\"" << e.m_default_value << "\"";
-    }
-
-    out << "/>";
+    out << " range=\"" << e << "\"/>";
   }
 
   /**
@@ -312,20 +288,17 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::enumeration const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_enumeration const& e, std::string const& s) {
     out << "<enumeration";
    
     if (!s.empty()) {
       out << " value=\"" << s << "\"";;
     }
-    else if (e.m_default_value != 0) {
-      out << " default=\"" << e.m_default_value << "\"";
-    }
 
     out << ">";
 
-    for (std::vector < std::string >::const_iterator i = e.m_values.begin(); i != e.m_values.end(); ++i) {
-      out << "<element value=\"" << *i << "\"/>";
+    for (tipi::datatype::basic_enumeration::const_iterator_range i = e.values(); i.first != i.second; ++i.first) {
+      out << "<element value=\"" << i.first->first << "\"><![CDATA[" << i.first->second << "]]></element>";
     }
 
     out << "</enumeration>";
@@ -347,12 +320,8 @@ namespace utility {
     if (e.m_minimum_length != 0) {
       out << " minimum-length=\"" << e.m_minimum_length << "\"";
     }
-    if (e.m_maximum_length != tipi::datatype::string::implementation_maximum_length) {
+    if (e.m_maximum_length != boost::integer_traits< size_t >::const_max) {
       out << " maximum-length=\"" << e.m_maximum_length << "\"";
-    }
-
-    if (!e.m_default_value.empty()) {
-      out << " default=\"" << e.m_default_value << "\"";
     }
 
     if (!s.empty()) {
@@ -665,12 +634,12 @@ namespace utility {
   bool visitor< tipi::store_visitor_impl >::initialise() {
     register_visit_method< const tipi::message >();
     register_visit_method< const tipi::datatype::boolean, const std::string >();
-    register_visit_method< const tipi::datatype::integer, const std::string >();
-    register_visit_method< const tipi::datatype::real, const std::string >();
-    register_visit_method< const tipi::datatype::enumeration, const std::string >();
+    register_visit_method< const tipi::datatype::basic_integer_range, const std::string >();
+    register_visit_method< const tipi::datatype::basic_real_range, const std::string >();
+    register_visit_method< const tipi::datatype::basic_enumeration, const std::string >();
     register_visit_method< const tipi::datatype::string, const std::string >();
-    register_visit_method< const tipi::object >();
-    register_visit_method< const tipi::option >();
+    register_visit_method< const tipi::configuration::object >();
+    register_visit_method< const tipi::configuration::option >();
     register_visit_method< const tipi::configuration >();
     register_visit_method< const tipi::controller::capabilities >();
     register_visit_method< const tipi::tool::capabilities >();

@@ -105,8 +105,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::enumeration > transformation_method_enumeration;
-    boost::shared_ptr < tipi::datatype::enumeration > output_format_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > transformation_method_enumeration;
+    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
 
   public:
 
@@ -133,14 +133,13 @@ const char* squadt_interactor::option_transformation_strategy = "transformation_
 const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
 
 squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new tipi::datatype::enumeration("lazy"));
+  transformation_method_enumeration.reset(new tipi::datatype::enumeration< transformation_strategy >());
 
-  transformation_method_enumeration->add_value("finite");
+  transformation_method_enumeration->add(lazy, "lazy").add(finite, "finite");
 
-  output_format_enumeration.reset(new tipi::datatype::enumeration("binary"));
+  output_format_enumeration.reset(new tipi::datatype::enumeration< pbes_output_format >());
 
-  output_format_enumeration->add_value("internal");
-  output_format_enumeration->add_value("cwi");
+  output_format_enumeration->add(binary, "binary").add(internal, "internal").add(cwi, "cwi");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -180,12 +179,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /// Copy values from options specified in the configuration
   if (c.option_exists(option_transformation_strategy)) {
-    strategy_selector.set_selection(static_cast < transformation_strategy > (
-        c.get_option_argument< size_t >(option_transformation_strategy, 0)));
+    strategy_selector.set_selection(
+        c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
   }
   if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(static_cast < pbes_output_format > (
-        c.get_option_argument< size_t >(option_selected_output_format, 0)));
+    format_selector.set_selection(
+        c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
   }
   
   send_display_layout(d.set_manager(m));
@@ -195,7 +194,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
-    tipi::object& output_file = c.get_output(pbes_file_for_output);
+    tipi::configuration::object& output_file = c.get_output(pbes_file_for_output);
  
     output_file.set_location(c.get_output_name(".pbes"));
   }
@@ -204,9 +203,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
-                                static_cast < transformation_strategy > (strategy_selector.get_selection()));
+                                strategy_selector.get_selection());
   c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
-                                static_cast < pbes_output_format > (format_selector.get_selection()));
+                                format_selector.get_selection());
 
   send_clear_display();
 }

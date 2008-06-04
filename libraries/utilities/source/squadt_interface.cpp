@@ -14,6 +14,7 @@
 #include <tipi/detail/utility/standard_utility.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/data/rewrite.h"
 
 #if defined(__APPLE__)
 # include <Carbon/Carbon.h>
@@ -241,11 +242,14 @@ namespace mcrl2 {
       }
   
       /// \cond INTERNAL_DOCS
-      boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
+      boost::shared_ptr < tipi::datatype::basic_enumeration > rewrite_strategy_enumeration;
   
       static bool initialise() {
-        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration("inner"));
-        *rewrite_strategy_enumeration % "innerc" % "jitty" % "jittyc";
+        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration< RewriteStrategy >);
+        rewrite_strategy_enumeration->add(GS_REWR_INNER, "inner").
+                                      add(GS_REWR_INNERC, "innerc").
+                                      add(GS_REWR_JITTY, "jitty").
+                                      add(GS_REWR_JITTYC, "jittyc");
 
         return true;
       }

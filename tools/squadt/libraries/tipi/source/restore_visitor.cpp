@@ -12,6 +12,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
+#include <boost/integer_traits.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <tipi/detail/utility/generic_visitor.hpp>
@@ -162,17 +163,13 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::boolean& e, std::string& s) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
 
-    s = tree->GetAttribute("value", false);
-
-    if (s != tipi::datatype::boolean::true_string) {
-      s = tipi::datatype::boolean::false_string;
-    }
+    tree->GetAttributeOrDefault("value", &s, "false");
 
     assert(e.validate(s));
 
     /* Set to default if value is invalid */
     if (!(e.validate(s))) {
-      s = tipi::datatype::boolean::false_string;
+      s.assign("false");
     }
   }
 
@@ -182,14 +179,11 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::integer& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_integer_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer_range");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, tipi::datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, tipi::datatype::integer::implementation_maximum);
-    tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
-    tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
+    tree->GetAttributeOrDefault("value", &s, 0);
 
     assert(e.validate(s));
 
@@ -205,14 +199,11 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::real& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_real_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real_range");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, tipi::datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, tipi::datatype::integer::implementation_maximum);
-    tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
-    tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
+    tree->GetAttributeOrDefault("value", &s, 0);
 
     assert(e.validate(s));
 
@@ -228,19 +219,17 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::enumeration& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_enumeration& e, std::string& s) {
     /* Current element must be <enumeration> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration");
 
-    tree->GetAttributeOrDefault("default", &e.m_default_value, 0);
-
     for (ticpp::Element* ae = tree->FirstChildElement(false); ae != 0; ae = ae->NextSiblingElement(false)) {
       if (ae->Value() == "element") {
-        e.add_value(ae->GetAttribute("value"));
+        e.add(boost::lexical_cast< size_t >(ae->GetAttribute("value")), ae->GetText(false));
       }
     }
 
-    tree->GetAttributeOrDefault("value", &s, e.m_values[e.m_default_value]);
+    tree->GetAttribute("value", &s, false);
 
     assert(e.validate(s));
   }
@@ -255,9 +244,8 @@ namespace utility {
     /* Current element must be <string> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "string");
 
-    tree->GetAttributeOrDefault("default", &e.m_default_value, "");
     tree->GetAttributeOrDefault("minimum", &e.m_minimum_length, 0);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, tipi::datatype::string::implementation_maximum_length);
+    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, boost::integer_traits< size_t >::const_max);
 
     s = tree->GetText(false);
 
@@ -274,16 +262,16 @@ namespace utility {
     std::string name(tree->Value());
 
     if (name == "enumeration") {
-      c.reset(new tipi::datatype::enumeration);
+      c.reset(new tipi::datatype::enumeration< size_t >);
     }
     else if (name == "boolean") {
       c.reset(new tipi::datatype::boolean);
     }
     else if (name == "integer") {
-      c.reset(new tipi::datatype::integer);
+      c = tipi::datatype::basic_integer_range::reconstruct(tree->GetAttribute("range", false));
     }
     else if (name == "real") {
-      c.reset(new tipi::datatype::real);
+      c = tipi::datatype::basic_real_range::reconstruct(tree->GetAttribute("range", false));
     }
     else if (name == "uri") {
     }
@@ -299,11 +287,11 @@ namespace utility {
   }
 
   /**
-   * \param[in] o a tipi::object object to restore
+   * \param[in] o a tipi::configuration::object object to restore
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::object& o) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::object& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
     o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
@@ -316,7 +304,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::option& o) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::option& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
@@ -357,14 +345,14 @@ namespace utility {
       std::string identifier = e->GetAttribute("id");
      
       if (e->Value() == "option") {
-        boost::shared_ptr < tipi::option > o(new tipi::option);
+        boost::shared_ptr < tipi::configuration::option > o(new tipi::configuration::option);
 
         visitor< tipi::restore_visitor_impl >(e).visit(*o);
 
         c.add_option(identifier, o);
       }
       else if (e->Value() == "object") {
-        boost::shared_ptr < tipi::object > o(new tipi::object);
+        boost::shared_ptr < tipi::configuration::object > o(new tipi::configuration::object);
 
         visitor< tipi::restore_visitor_impl >(e).visit(*o);
 
@@ -918,12 +906,12 @@ namespace utility {
   bool visitor< tipi::restore_visitor_impl >::initialise() {
     register_visit_method< tipi::message >();
     register_visit_method< tipi::datatype::boolean, std::string >();
-    register_visit_method< tipi::datatype::integer, std::string >();
-    register_visit_method< tipi::datatype::real, std::string >();
-    register_visit_method< tipi::datatype::enumeration, std::string >();
+    register_visit_method< tipi::datatype::basic_integer_range, std::string >();
+    register_visit_method< tipi::datatype::basic_real_range, std::string >();
+    register_visit_method< tipi::datatype::basic_enumeration, std::string >();
     register_visit_method< tipi::datatype::string, std::string >();
-    register_visit_method< tipi::object >();
-    register_visit_method< tipi::option >();
+    register_visit_method< tipi::configuration::object >();
+    register_visit_method< tipi::configuration::option >();
     register_visit_method< tipi::configuration >();
     register_visit_method< tipi::controller::capabilities >();
     register_visit_method< tipi::tool::capabilities >();

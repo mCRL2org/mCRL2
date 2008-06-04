@@ -11,17 +11,16 @@
 #ifndef TIPI_BASIC_DATATYPE
 #define TIPI_BASIC_DATATYPE
 
-#include <cstdio>
-#include <climits>
-#include <cfloat>
 #include <string>
-#include <ostream>
 #include <utility>
-#include <iostream>
+#include <sstream>
+#include <limits>
+#include <map>
 
 #include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/integer_traits.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
@@ -37,269 +36,514 @@ namespace tipi {
     /** \brief Base class for classes that specify types */
     class basic_datatype : public ::utility::visitable {
 
-      public:
-
-        /** \brief Boost shared pointer type alias */
-        typedef boost::shared_ptr < basic_datatype > sptr;
-
-      public:
-
-        /** \brief Converts a boolean to a string representation */
-        template < typename U >
-        std::string convert(U const&) const;
+      protected:
 
         /** \brief Converts to underlying type */
-        virtual boost::any evaluate(std::string const&) const = 0;
+        virtual boost::any specialised_evaluate(std::string const&) const = 0;
+
+        /** \brief Converts from the underlying implementation type */
+        virtual std::string specialised_convert(boost::any const&) const = 0;
+
+      public:
+
+        /** \brief Converts a value of an arbitrary type to its string representation */
+        template < typename T >
+        inline std::string convert(T const& t) const {
+          return specialised_convert(boost::any(t));
+        }
+
+        /** \brief Specialisation for constant character arrays */
+        template < typename T, size_t s >
+        inline std::string convert(T (&t)[s]) const {
+          return specialised_convert(boost::any(std::string(t)));
+        }
+
+        /** \brief Converts to underlying type */
+        template < typename T >
+        inline typename boost::disable_if_c< boost::is_enum< T >::value, T >::type evaluate(std::string const& s) const {
+          return boost::any_cast< T >(specialised_evaluate(s));
+        }
+
+        /** \brief Converts to underlying type */
+        template < typename T >
+        inline typename boost::enable_if_c< boost::is_enum< T >::value, T >::type evaluate(std::string const& s) const {
+          return static_cast< T > (boost::any_cast< size_t >(specialised_evaluate(s)));
+        }
 
         /** \brief Establishes whether value is valid for an element of this type */
         virtual bool validate(std::string const& value) const = 0;
 
         /** \brief Pure virtual destructor */
-        virtual ~basic_datatype() = 0;
+        virtual ~basic_datatype() {
+        }
     };
+
+    /** \brief Specialisation for C strings */
+    template < >
+    inline std::string basic_datatype::convert(char* const& t) const {
+      return specialised_convert(boost::any(std::string(t)));
+    }
+
+    template < typename T >
+    class enumeration;
 
     /**
      * \brief Derived data type specifier for enumerations
      *
      * An enumeration is a finite set of alternatives.
      **/
-    class enumeration : public basic_datatype {
+    class basic_enumeration : public basic_datatype {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
-      private:
-        
-        /** \brief The possible values in the domain */
-        std::vector < std::string > m_values;
+      public:
 
-        /** \brief Index into values of the default value for elements of the specified type */
-        size_t                      m_default_value;
+        typedef std::pair< std::map < size_t, std::string >::const_iterator,
+                 std::map < size_t, std::string >::const_iterator > const_iterator_range;
+        
+      public:
+        
+        /** \brief Add value **/
+        virtual basic_enumeration& add(const size_t v, std::string const& s) = 0;
+
+        /** \brief Establishes whether value is valid for an element of this type **/
+        virtual bool validate(std::string const& s) const = 0;
+
+        virtual const_iterator_range values() const = 0;
+
+        /** \brief Constructor */
+        virtual ~basic_enumeration() { }
+    };
+
+    template < typename C = size_t >
+    class enumeration : public basic_enumeration {
+      template < typename V, typename R, typename S >
+      friend class ::utility::visitor;
 
       public:
 
         /** \brief POD type used for implementation */
         typedef std::string implementation_type;
 
+      private:
+        
+        /** \brief The possible values in the domain */
+        std::map < size_t, std::string > m_values;
+
+      private:
+
+        enumeration< size_t >& get_single_instance() const {
+          static std::auto_ptr< enumeration< size_t > > instance(new enumeration< size_t >);
+
+          return *instance;
+        }
+
+      protected:
+
+        /** \brief Converts to underlying type */
+        boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
+
+        /** \brief Converts from the underlying implementation type */
+        std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< C >(v));
+        }
+
+        basic_enumeration::const_iterator_range values() const {
+          return get_single_instance().values();
+        }
+
       public:
         
-        /** \brief Constructor */
-        enumeration();
+        /** \brief Add value
+         * \param[in] v value of the chosen carrier type
+         * \param[in] s any string
+         * \return *this
+         **/
+        enumeration< C >& add(const size_t v, std::string const& s) {
+          get_single_instance().add(static_cast< const size_t > (v), s);
 
-        /** \brief Constructor */
-        enumeration(std::string const& s);
+          return *this;
+        }
 
-        /** \brief Add value */
-        void add_value(std::string const&, bool = false);
+        std::string convert(C const& s) const {
+          return get_single_instance().convert(s);
+        }
 
-        /** \brief Converts to a string representation */
-        template < typename T >
-        std::string convert(T const&) const;
+        bool validate(std::string const& s) const {
+          return get_single_instance().validate(s);
+        }
 
-        /** \brief Converts a string to an index representation */
-        boost::any evaluate(std::string const&) const;
-
-        /** \brief Establishes whether value is valid for an element of this type */
-        inline bool validate(std::string const& value) const;
-
-        /** \brief Convenience method for adding values */
-        enumeration& operator% (std::string const&);
+        /** \brief Converts a string to an index representation
+         * \param[in] s the string to evaluate
+         **/
+        C evaluate(std::string const& s) const {
+          return static_cast < C > (get_single_instance().evaluate(s));
+        }
     };
+
+    template < >
+    class enumeration< size_t > : public basic_enumeration {
+      template < typename V, typename R, typename S >
+      friend class ::utility::visitor;
+
+      template < typename T >
+      friend class enumeration;
+
+      public:
+
+        /** \brief POD type used for implementation */
+        typedef std::string implementation_type;
+
+      private:
+        
+        /** \brief The possible values in the domain */
+        std::map < size_t, std::string > m_values;
+
+      protected:
+
+        /** \brief Converts to underlying type */
+        inline boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
+
+        /** \brief Converts from the underlying implementation type */
+        inline std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< size_t >(v));
+        }
+
+        inline basic_enumeration::const_iterator_range values() const {
+          return std::make_pair(m_values.begin(), m_values.end());
+        }
+
+      public:
+        
+        /** \brief Add value
+         * \param[in] v value of the chosen carrier type
+         * \param[in] s any string
+         * \return *this
+         **/
+        enumeration< size_t >& add(const size_t v, std::string const& s);
+
+        std::string convert(size_t const& s) const;
+
+        bool validate(std::string const& s) const;
+
+        /** \brief Converts a string to an index representation
+         * \param[in] s the string to evaluate
+         **/
+        size_t evaluate(std::string const& s) const;
+    };
+
+
+    /**
+     * \brief Base class for ranges of integers
+     **/
+    class basic_integer_range :  public basic_datatype {
+      template < typename V, typename R, typename S >
+      friend class ::utility::visitor;
+
+      friend std::ostream& operator<<(std::ostream&, basic_integer_range const&);
+
+      protected:
+
+        /// \brief prints range
+        virtual std::ostream& print(std::ostream&) const = 0;
+
+        /// \brief reconstructs a range from a string
+        static std::auto_ptr < basic_integer_range > reconstruct(std::string const&);
+    };
+
+    /// \cond INTERNAL_DOCS
+    inline std::ostream& operator<<(std::ostream& o, tipi::datatype::basic_integer_range const& e) {
+      return e.print(o);
+    }
+    /// \endcond
 
     /**
      * \brief Derived data type specifier for integer number ranges (finite using long int)
      * 
      * The range is specified by a minimum and a maximum. The minimum, of
-     * course, must be smaller than the maximum. The default value is taken to
-     * be the minimum, unless it is specified at construction time.
+     * course, must be smaller than the maximum.
      **/
-    class integer : public basic_datatype {
-      template < typename R, typename S >
+    template < typename C >
+    class integer_range : protected basic_integer_range {
+      template < typename V, typename R, typename S >
       friend class ::utility::visitor;
 
       protected:
 
-        /** \brief The minimum integer value in the range */
-        long int m_minimum;
+        /** \brief Maximum value that specifies the lower bound of a range */
+        C m_minimum;
 
-        /** \brief The maximum integer value in the range */
-        long int m_maximum;
+        /** \brief Maximum value that specifies the upper bound of a range */
+        C m_maximum;
 
-        /** \brief The default value for elements of the specified type */
-        long int m_default_value;
+      protected:
 
-      public:
+        /** \brief Converts to underlying type */
+        boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
 
-        /** \brief Implementation dependent limitation (minimum value) */
-        static const long int implementation_minimum;
-
-        /** \brief Implementation dependent limitation (maximum value) */
-        static const long int implementation_maximum;
+        /** \brief Converts from the underlying implementation type */
+        std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< C >(v));
+        }
 
       public:
 
         /** \brief POD type used for implementation */
-        typedef long int implementation_type;
+        typedef C implementation_type;
 
       public:
 
-        /** \brief Constructor */
-        integer(long int = implementation_minimum, long int = implementation_minimum, long int = implementation_maximum);
+        /** \brief Constructor
+         * \param[in] min the minimum value that specifies the range
+         * \param[in] max the maximum value that specifies the range
+         **/
+        integer_range(C min = boost::integer_traits< C >::const_min, C max = boost::integer_traits< C >::const_max) : m_minimum(min), m_maximum(max) {
+          // \todo REGISTER WITH VISITOR
 
-        /** \brief Converts a long int to a string representation */
-        static std::string convert(long int const&);
+          assert(m_minimum < m_maximum);
+        }
 
-        /** \brief Converts a string to a long int representation */
-        boost::any evaluate(std::string const&) const;
+        /** \brief Converts a value to a string representation
+         * \param[in] s the integer to convert
+         **/
+        static std::string convert(C const& v) {
+          return (std::ostringstream() << v).str();
+        }
 
-        /** \brief Establishes whether value is valid for an element of this type */
-        inline bool validate(std::string const& value) const;
+        /** \brief Converts a string to a value of the chosen numeric type
+         * \param[in] s the string to evaluate
+         **/
+        static C evaluate(std::string const& s) {
+          C v;
+          
+          v << std::istringstream(s);
+
+          return v;
+        }
+
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        inline bool validate(std::string const& s) const {
+          C v = evaluate(s);
+      
+          return m_minimum < v && v < m_maximum;
+        }
+
+        /// \brief prints range
+        std::ostream& print(std::ostream& o) const {
+          return o << "[" << m_minimum << "..." << m_maximum << "]";
+        }
     };
 
     /**
-     * \brief Sub range of the integers that makes up the Natural numbers
+     * \brief Base class for ranges of reals
      **/
-    class natural : public datatype::integer {
-      template < typename R, typename S >
+    class basic_real_range : public basic_datatype {
+      template < typename V, typename R, typename S >
       friend class ::utility::visitor;
 
-      public:
+      friend std::ostream& operator<<(std::ostream&, basic_real_range const&);
 
-        /** \brief Constructor */
-        natural();
+      protected:
+
+        /// \brief prints range
+        virtual std::ostream& print(std::ostream&) const = 0;
+
+        /// \brief reconstructs a range from a string
+        static std::auto_ptr < basic_real_range > reconstruct(std::string const& s);
     };
 
-    /**
-     * \brief Sub range of the integers that makes up the positive Natural numbers
-     **/
-    class positive_integer : public datatype::integer {
-      template < typename R, typename S >
-      friend class ::utility::visitor;
-
-      public:
-
-        /** \brief Constructor */
-        positive_integer();
-    };
+    /// \cond INTERNAL_DOCS
+    inline std::ostream& operator<<(std::ostream& o, tipi::datatype::basic_real_range const& e) {
+      return e.print(o);
+    }
+    /// \endcond
 
     /**
-     * \brief Sub range of the integers that makes up the negative integers
-     **/
-    class negative_integer : public datatype::integer {
-      template < typename R, typename S >
-      friend class ::utility::visitor;
-
-      public:
-
-        /** \brief Constructor */
-        negative_integer();
-    };
-
-    /**
-     * \brief Derived data type specifier for real number ranges (finite using double)
+     * \brief Derived data type specifier for real number ranges
      *
      * The range is specified by a minimum and a maximum. The minimum, of
-     * course, must be smaller than the maximum. The default value is taken to
-     * be the minimum, unless it is specified at construction time.
+     * course, must be smaller than the maximum.
      *
      * \note The current implementation is based on commonly used finite
      * representations (double).
      **/
-    class real : public basic_datatype {
-      template < typename R, typename S >
+    template < typename C, bool minimum_included = true, bool maximum_included = true >
+    class real_range : protected basic_real_range {
+      template < typename V, typename R, typename S >
       friend class ::utility::visitor;
 
       protected:
 
-        /** \brief The minimum integer value in the range */
-        double m_minimum;
+        /** \brief Maximum value that specifies the lower bound of a range */
+        C m_minimum;
 
-        /** \brief The maximum integer value in the range */
-        double m_maximum;
+        /** \brief Maximum value that specifies the upper bound of a range */
+        C m_maximum;
 
-        /** \brief The default value for elements of the specified type */
-        double m_default_value;
+      protected:
 
-        /** \brief Whether or not the minimum is included in the range */
-        bool   m_minimum_included;
+        /** \brief Converts to underlying type */
+        boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
 
-        /** \brief Whether or not the maximum is included in the range */
-        bool   m_maximum_included;
-
-      public:
-
-        /** \brief Implementation dependent limitation (minimum value) */
-        static const double implementation_minimum;
-
-        /** \brief Implementation dependent limitation (maximum value) */
-        static const double implementation_maximum;
+        /** \brief Converts from the underlying implementation type */
+        std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< C >(v));
+        }
 
       public:
 
         /** \brief POD type used for implementation */
-        typedef double implementation_type;
+        typedef C implementation_type;
 
       public:
 
-        /** \brief Constructor */
-        real(double d = implementation_minimum, double = implementation_minimum, double = implementation_maximum);
+        /** \brief Constructor
+         * \param[in] min the minimum value that specifies the range
+         * \param[in] max the maximum value that specifies the range
+         **/
+        real_range(C min = std::numeric_limits< C >::min(), C max = std::numeric_limits< C >::max()) : m_minimum(min), m_maximum(max) {
+          // \todo REGISTER WITH VISITOR
 
-        /** \brief whether the minimum bound should be interpreted as open-ended or close-ended */
-        void set_include_minimum(bool b);
+          assert(m_minimum < m_maximum);
+        }
 
-        /** \brief whether the maximum bound should be interpreted as open-ended or close-ended */
-        void set_include_maximum(bool b);
+        /** \brief Converts a value to a string representation
+         * \param[in] s the value to convert
+         **/
+        static std::string convert(const C v) {
+          return (std::ostringstream() << v).str();
+        }
 
-        /** \brief Converts a double to a string representation */
-        static std::string convert(double const&);
+        /** \brief Converts a string to a value of the chosen type
+         * \param[in] s the string to evaluate
+         **/
+        static C evaluate(std::string const& s) {
+          C v;
+          
+          v << std::istringstream(s);
 
-        /** \brief Converts a string to a long int representation */
-        boost::any evaluate(std::string const&) const;
+          return v;
+        }
 
-        /** \brief Establishes whether value is valid for an element of this type */
-        inline bool validate(std::string const& value) const;
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        bool validate(std::string const& s) const {
+          C v(evaluate(s));
+          
+          return (m_minimum <= v) && (v <= m_maximum);
+        }
+
+        /// \brief prints range
+        std::ostream& print(std::ostream& o) const {
+          return o << "[" << m_minimum << "..." << m_maximum << "]";
+        }
     };
 
     /**
-     * \brief Sub range of the reals that makes up the positive reals
+     * Specialisation for ranges with the maximum value not part of the range
      **/
-    class positive_real : public datatype::real {
-      template < typename R, typename S >
-      friend class ::utility::visitor;
+    template < typename C >
+    class real_range< C, true, false > : public real_range< C, true, true > {
+
+        using real_range< C, true, true >::m_minimum; 
+        using real_range< C, true, true >::m_maximum; 
 
       public:
 
-        /** \brief Constructor */
-        positive_real();
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        bool validate(std::string const& s) const {
+          C v(real_range< C, true, true >::evaluate(s));
+          
+          return (m_minimum <= v) && (v < m_maximum);
+        }
+
+        /// \brief prints range
+        std::ostream& print(std::ostream& o) const {
+          return o << "[" << m_minimum << "..." << m_maximum << ")";
+        }
     };
 
     /**
-     * \brief Sub range of the reals that makes up the negative reals
+     * Specialisation for ranges with the minimum value not part of the range
      **/
-    class negative_real : public datatype::real {
-      template < typename R, typename S >
-      friend class ::utility::visitor;
+    template < typename C >
+    class real_range< C, false, true > : public real_range< C, true, true > {
+
+        using real_range< C, true, true >::m_minimum; 
+        using real_range< C, true, true >::m_maximum; 
 
       public:
 
-        /** \brief Constructor */
-        negative_real();
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        bool validate(std::string const& s) const {
+          C v(real_range< C, true, true >::evaluate(s));
+          
+          return (m_minimum < v) && (v <= m_maximum);
+        }
+
+        /// \brief prints range
+        std::ostream& print(std::ostream& o) const {
+          return o << "(" << m_minimum << "..." << m_maximum << "]";
+        }
     };
 
-//    class uri : public basic_datatype {
-//    };
+    /**
+     * Specialisation for ranges with the minimum value not part of the range
+     **/
+    template < typename C >
+    class real_range< C, false, false > : public real_range< C, true, true > {
+
+        using real_range< C, true, true >::m_minimum; 
+        using real_range< C, true, true >::m_maximum; 
+
+      public:
+
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        bool validate(std::string const& s) const {
+          C v(real_range< C, true, true >::evaluate(s));
+          
+          return (m_minimum < v) && (v < m_maximum);
+        }
+
+        /// \brief prints range
+        std::ostream& print(std::ostream& o) const {
+          return o << "(" << m_minimum << "..." << m_maximum << ")";
+        }
+    };
 
     /** \brief Derived data type specifier for booleans */
     class boolean : public basic_datatype {
-      template < typename R, typename S >
+      template < typename V, typename R, typename S >
       friend class ::utility::visitor;
 
-      public:
+      protected:
 
-        /** \brief The string that represents true */
-        static const std::string true_string;
+        /** \brief Converts to underlying type */
+        boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
 
-        /** \brief The string that represents false */
-        static const std::string false_string;
+        /** \brief Converts from the underlying implementation type */
+        std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< bool >(v));
+        }
 
       public:
 
@@ -309,16 +553,29 @@ namespace tipi {
       public:
 
         /** \brief Constructor */
-        boolean();
+        boolean() {
+        }
 
-        /** \brief Converts a boolean to a string representation */
-        static std::string convert(bool const&);
+        /** \brief Converts a boolean to a string representation
+         * \param[in] s the boolean to convert
+         **/
+        static std::string convert(const bool v) {
+          return ((v) ? "true" : "false");
+        }
 
-        /** \brief Converts a string to a boolean representation */
-        boost::any evaluate(std::string const&) const;
+        /** \brief Converts a string to a boolean representation
+         * \param[in] s the string to evaluate
+         **/
+        static bool evaluate(std::string const& s) {
+          return s.compare("true") == 0;
+        }
 
-        /** \brief Establishes whether value is valid for an element of this type */
-        inline bool validate(std::string const& value) const;
+        /** \brief Establishes whether value is valid for an element of this type
+         * \param[in] s the string to evaluate
+         **/
+        bool validate(std::string const& s) const {
+          return (s == "true" || s == "false");
+        }
     };
 
     /** \brief Derived data type for strings */
@@ -328,372 +585,54 @@ namespace tipi {
 
       protected:
 
-        /** \brief The minimum length a string of this type has */
-        unsigned int       m_minimum_length;
+        /** \brief Maximum value that specifies the lower bound of a range */
+        size_t m_minimum_length;
 
-        /** \brief The maximum length a string of this type has */
-        unsigned int       m_maximum_length;
+        /** \brief Maximum value that specifies the upper bound of a range */
+        size_t m_maximum_length;
 
-        /** \brief The default value for elements of the specified type */
-        std::string        m_default_value;
+      protected:
+
+        /** \brief Converts to underlying type */
+        boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
+
+        /** \brief Converts from the underlying implementation type */
+        std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< std::string >(v));
+        }
 
       public:
 
-        /** \brief The maximum length a string may have */
-        static const unsigned int implementation_maximum_length;
-
-      public:
-
-        /** \brief POD type used for implementation */
+        /** \brief type used for implementation */
         typedef std::string implementation_type;
 
       public:
 
         /** \brief Constructor */
-        string();
-
-        /** \brief Constructor */
-        string(std::string const&, unsigned int minimum = 0, unsigned int maximum = implementation_maximum_length); 
-
-        /** \brief Set the minimum length of a string of this type */
-        void set_minimum_length(unsigned int);
-
-        /** \brief Set the maximum length of a string of this type */
-        void set_maximum_length(unsigned int);
+        string(size_t min = 0, size_t max = boost::integer_traits< size_t >::max()) : m_minimum_length(min), m_maximum_length(max) {
+          assert(m_minimum_length < m_maximum_length);
+        }
 
         /** \brief Converts a string to a string representation (copy) */
-        static std::string convert(std::string const& s);
+        static std::string convert(std::string const& s) {
+          return s;
+        }
 
         /** \brief Converts a string to a string representation (copy) */
-        boost::any evaluate(std::string const&) const;
+        static std::string evaluate(std::string const& s) {
+          return s;
+        }
 
         /** \brief Establishes whether value is valid for an element of this type */
-        bool validate(std::string const& value) const;
+        bool validate(std::string const& v) const {
+          return (m_minimum_length <= v.size() && v.size() <= m_maximum_length);
+        }
     };
 
-    /*************************************************************************
-     * Implementation of basic_datatype
-     ************************************************************************/
-    inline basic_datatype::~basic_datatype() {
-    }
-
-/// \cond INTERNAL_DOCS
-    /**
-     * Specialisation for choosing conversion to enumeration
-     **/
-    template < typename T, bool e >
-    inline std::string convert(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
-      return static_cast < enumeration const* > (t)->convert(s);
-    }
-
-    /**
-     * Specialisation for choosing conversion to real
-     **/
-    template < typename T >
-    inline std::string convert(basic_datatype const* const t, T const& s, boost::false_type const&) {
-      return convertr(t, s, boost::is_floating_point< T >());
-    }
-
-    /**
-     * Specialisation for doing conversion to real
-     **/
-    template < typename T, bool e >
-    inline std::string convertr(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
-      return static_cast < real const* > (t)->convert(s);
-    }
-
-    /**
-     * Specialisation for choosing conversion to integer
-     **/
-    template < typename T >
-    inline std::string convertr(basic_datatype const* const t, T const& s, boost::false_type const&) {
-      return converti(t, s, boost::is_integral< T >());
-    }
-
-    /**
-     * Specialisation for doing conversion to integer
-     **/
-    template < typename T, bool e >
-    inline std::string converti(basic_datatype const* const t, T const& s, boost::integral_constant< bool, e > const&) {
-      return static_cast < integer const* > (t)->convert(s);
-    }
-
-    /**
-     * Specialisation for doing conversion to string
-     **/
-    template < typename T >
-    inline std::string converti(basic_datatype const* const t, T const& s, boost::false_type const&) {
-      return static_cast < string const* > (t)->convert(s);
-    }
-/// \endcond
-
-    /**
-     * Specialisation for doing conversion to enumeration
-     **/
-    template < typename T >
-    inline std::string basic_datatype::convert(T const& s) const {
-      return datatype::convert(this, s, boost::is_enum< T >());
-    }
-
-    /** \brief Converts a boolean */
-    template <>
-    inline std::string basic_datatype::convert(bool const& s) const {
-      return (boolean::convert(s));
-    }
-
-    /** \brief Converts a long int */
-    template <>
-    inline std::string basic_datatype::convert(long int const& s) const {
-      return (integer::convert(s));
-    }
-
-    /** \brief Converts a double */
-    template <>
-    inline std::string basic_datatype::convert(double const& s) const {
-      return (real::convert(s));
-    }
-
-    /** \brief Converts a string */
-    template <>
-    inline std::string basic_datatype::convert(std::string const& s) const {
-      return (s);
-    }
-
-    /** \brief Converts a string */
-    template <>
-    inline std::string basic_datatype::convert(const char* const& s) const {
-      return (std::string(s));
-    }
-
-    /************************************************************************
-     * Implementation of Boolean
-     ************************************************************************/
-
-    inline boolean::boolean() {
-    }
-
-    /**
-     * \param[in] s the boolean to convert
-     **/
-    inline std::string boolean::convert(bool const& s) {
-      return ((s) ? boolean::true_string : boolean::false_string);
-    }
-
-    /**
-     * \param[in] s the string to convert
-     **/
-    inline boost::any boolean::evaluate(std::string const& s) const {
-      return (boost::any(s == boolean::true_string));
-    }
-
-    /**
-     * \param[in] s any string
-     **/
-    inline bool boolean::validate(std::string const& s) const {
-      return (s == true_string || s == false_string);
-    }
-
-    /************************************************************************
-     * Implementation of Integer
-     ************************************************************************/
-
-    /**
-     * \param[in] min the minimum value in the domain
-     * \param[in] max the maximum value in the domain
-     * \param[in] d the default value in the domain
-     **/
-    inline integer::integer(long int d, long int min, long int max) : m_minimum(min), m_maximum(max), m_default_value(d) {
-    }
-
-    inline natural::natural() : integer(0, 0, implementation_maximum) {
-    }
-
-    inline positive_integer::positive_integer() : integer(1, 1, implementation_maximum) {
-    }
-
-    inline negative_integer::negative_integer() : integer(-1, implementation_minimum, -1) {
-    }
-
-    /**
-     * \param[in] s the integer to convert
-     **/
-    inline std::string integer::convert(long int const& s) {
-      boost::format f("%ld");
-
-      return ((f % s).str());
-    }
-
-    /**
-     * \param[in] s the string to convert
-     *
-     * \pre the string should be parsable as long int
-     **/
-    inline boost::any integer::evaluate(std::string const& s) const {
-      long int b;
-
-      sscanf(s.c_str(), "%ld", &b);
-
-      return (b);
-    }
-
-    /**
-     * \param[in] s any string
-     **/
-    inline bool integer::validate(std::string const& s) const {
-      long int b;
-
-      return (sscanf(s.c_str(), "%ld", &b) == 1);
-    }
-
-    /************************************************************************
-     * Implementation of Real 
-     ************************************************************************/
-
-    /**
-     * \param[in] min the minimum value in the domain
-     * \param[in] max the maximum value in the domain
-     * \param[in] d the default value in the domain
-     **/
-    inline real::real(double d, double min, double max) : m_minimum(min), m_maximum(max), m_default_value(d),
-       m_minimum_included(true), m_maximum_included(true) {
-    }
-
-    inline positive_real::positive_real() : real(implementation_maximum, 0, implementation_maximum) {
-      m_minimum_included = false;
-    }
-
-    inline negative_real::negative_real() : real(implementation_minimum, implementation_minimum, 0) {
-      m_maximum_included = false;
-    }
-
-    /**
-     * \param[in] b the new value for whether the minimum is open-ended or close-ended
-     **/
-    inline void real::set_include_minimum(bool b) {
-      m_minimum_included = b;
-    }
-
-    /**
-     * \param[in] b the new value for whether the minimum is open-ended or close-ended
-     **/
-    inline void real::set_include_maximum(bool b) {
-      m_maximum_included = b;
-    }
-
-    /**
-     * \param[in] s the double to convert
-     **/
-    inline std::string real::convert(double const& s) {
-      boost::format f("%lf");
-
-      return ((f % s).str());
-    }
-
-    /**
-     * \param[in] s the string to convert
-     *
-     * \pre the string should be parsable as long int
-     **/
-    inline boost::any real::evaluate(std::string const& s) const {
-      double b;
-
-      sscanf(s.c_str(), "%lf", &b);
-
-      return (b);
-    }
-
-    /**
-     * \param[in] s any string
-     **/
-    inline bool real::validate(std::string const& s) const {
-      double b;
-
-      return (sscanf(s.c_str(), "%lf", &b) == 1);
-    }
-
-    /************************************************************************
-     * Implementation of Enumeration
-     ************************************************************************/
-
-    inline enumeration::enumeration() : m_default_value(0) {
-    }
-
-    /**
-     * \param[in] s any string
-     **/
-    inline enumeration& enumeration::operator% (std::string const& s) {
-      add_value(s);
-
-      return (*this);
-    }
-
-    /**
-     * \param[in] s the string to convert (value must be in the domain)
-     **/
-    template < typename T >
-    inline std::string enumeration::convert(T const& s) const {
-      return (0 < s && static_cast < size_t > (s) < m_values.size()) ? m_values[s] : m_values[m_default_value];
-    }
-
-    /**
-     * \param[in] s the string to convert
-     *
-     * \pre the string should be parsable as one of the values
-     **/
-    inline boost::any enumeration::evaluate(std::string const& s) const {
-      std::vector< std::string >::const_iterator i = std::find(m_values.begin(), m_values.end(), s);
-
-      return static_cast < size_t > (i == m_values.end() ? m_default_value : i - m_values.begin());
-    }
-
-    /**
-     * \param[in] s any string
-     **/
-    inline bool enumeration::validate(std::string const& s) const {
-      return boost::any_cast < size_t > (evaluate(s)) < m_values.size();
-    }
-
-    /************************************************************************
-     * Implementation of String
-     ************************************************************************/
-
-    inline string::string() : m_minimum_length(0), m_maximum_length(UINT_MAX), m_default_value("") {
-    }
-
-    /**
-     * \param[in] minimum the minimum length
-     * \param[in] maximum the maximum length
-     * \param[in] d the default value
-     **/
-    inline string::string(std::string const& d, unsigned int minimum, unsigned int maximum) :
-                m_minimum_length(minimum), m_maximum_length(maximum), m_default_value(d) {
-    }
-
-    inline void string::set_maximum_length(unsigned int m) {
-      m_maximum_length = m;
-    }
-
-    inline void string::set_minimum_length(unsigned int m) {
-      m_minimum_length = m;
-    }
-
-    /**
-     * \param[in] s the string to convert
-     **/
-    inline std::string string::convert(std::string const& s) {
-      return (s);
-    }
-
-    /**
-     * \param[in] s the string to convert
-     **/
-    inline boost::any string::evaluate(std::string const& s) const {
-      return (s);
-    }
-
-    inline bool string::validate(std::string const& s) const {
-      return (m_minimum_length <= s.size() && (m_maximum_length <= m_minimum_length || s.size() <= m_maximum_length));
-    }
+//    class uri : public basic_datatype {
+//    };
   }
 }
 

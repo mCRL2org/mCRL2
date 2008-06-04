@@ -73,7 +73,7 @@ namespace squadt {
   }
 
   static processor::configurated_object_descriptor make_configurated_object_descriptor(
-        tipi::configuration::parameter_identifier const& id, boost::shared_ptr < processor::object_descriptor > const& o) {
+        tipi::configuration::parameter::identifier const& id, boost::shared_ptr < processor::object_descriptor > const& o) {
 
     processor::configurated_object_descriptor new_descriptor;
 
@@ -87,7 +87,7 @@ namespace squadt {
    * \param[in] id the identifier for the object
    * \param[in] p shared pointer to an object descriptor
    **/
-  void processor_impl::register_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor > const& o) {
+  void processor_impl::register_input(tipi::configuration::parameter::identifier const& id, boost::shared_ptr < object_descriptor > const& o) {
     for (input_list::iterator i = inputs.begin(); i != inputs.end(); ++i) {
       if (id == i->identifier) {
         i->object = o;
@@ -105,7 +105,7 @@ namespace squadt {
    * \note the object descriptor can be replaced by the already registered object descriptor
    * \pre o->generator.lock().get() == interface_object.lock().get()
    **/
-  void processor_impl::register_output(tipi::configuration::parameter_identifier const& id, boost::shared_ptr < object_descriptor >& o) {
+  void processor_impl::register_output(tipi::configuration::parameter::identifier const& id, boost::shared_ptr < object_descriptor >& o) {
     assert(o->generator.lock().get() == interface_object.lock().get());
 
     boost::shared_ptr < project_manager > guard(manager.lock());
@@ -169,11 +169,11 @@ namespace squadt {
   }
 
   /**
-   * \param[in] o a tipi::object object that describes an output object
+   * \param[in] o a tipi::configuration::object object that describes an output object
    * \param[in] id the unique identifier for this object in the configuration
    * \param[in] s the status of the new object
    **/
-  void processor_impl::register_output(tipi::configuration::parameter_identifier const& id, tipi::object const& o, object_descriptor::status_type const& s) {
+  void processor_impl::register_output(tipi::configuration::parameter::identifier const& id, tipi::configuration::object const& o, object_descriptor::status_type const& s) {
     boost::shared_ptr< object_descriptor > p(new
                 object_descriptor(interface_object, manager, o.get_mime_type(), try_convert_to_store_relative(o.get_location()).string()));
 
@@ -307,7 +307,7 @@ namespace squadt {
   /**
    * \param[in] id the identifier of the object to find
    **/
-  boost::shared_ptr < processor::object_descriptor > processor_impl::find_output_by_id(tipi::configuration::parameter_identifier const& id) {
+  boost::shared_ptr < processor::object_descriptor > processor_impl::find_output_by_id(tipi::configuration::parameter::identifier const& id) {
     boost::shared_ptr < processor::object_descriptor > object;
 
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
@@ -324,7 +324,7 @@ namespace squadt {
   /**
    * \param[in] id the identifier of the object to find
    **/
-  boost::shared_ptr < processor::object_descriptor > processor_impl::find_input_by_id(tipi::configuration::parameter_identifier const& id) {
+  boost::shared_ptr < processor::object_descriptor > processor_impl::find_input_by_id(tipi::configuration::parameter::identifier const& id) {
     boost::shared_ptr < processor::object_descriptor > object;
 
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
@@ -410,7 +410,7 @@ namespace squadt {
    * \param[in] check whether or not to check for existence of concrete outputs
    **/
   void processor_impl::process_configuration(boost::shared_ptr < tipi::configuration >& c,
-                                                    std::set < tipi::object const* >& p, bool check) {
+                                                    std::set < tipi::configuration::object const* >& p, bool check) {
     boost::shared_ptr < project_manager > g(manager.lock());
 
     if (g.get() != 0) {
@@ -436,7 +436,7 @@ namespace squadt {
       for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
         tipi::configuration::object& object(static_cast < tipi::configuration::object& > (*i));
 
-        tipi::configuration::parameter_identifier  id = c->get_identifier(*i);
+        tipi::configuration::parameter::identifier  id = c->get_identifier(*i);
        
         boost::filesystem::path new_object_location(try_convert_to_store_relative(object.get_location()));
 
@@ -466,7 +466,7 @@ namespace squadt {
         }
 
         /* Remove object from p if it is part of the new configuration too */
-        for (std::set< tipi::object const* >::iterator j = p.begin(); j != p.end(); ++j) {
+        for (std::set< tipi::configuration::object const* >::iterator j = p.begin(); j != p.end(); ++j) {
           if ((*j)->get_location() == object.get_location()) {
             p.erase(j);
             break;
@@ -475,7 +475,7 @@ namespace squadt {
       }
 
       /* Remove files from the old configuration that do not appear in the new one */
-      for (std::set< tipi::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
+      for (std::set< tipi::configuration::object const* >::const_iterator i = p.begin(); i != p.end(); ++i) {
         remove((*i)->get_location());
       }
 
@@ -900,12 +900,12 @@ namespace squadt {
       assert(t.get() == owner.lock().get());
      
       /* collect set of output arguments of the existing configuration */
-      std::set < tipi::object const* > old_outputs;
+      std::set < tipi::configuration::object const* > old_outputs;
      
       tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
      
       for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-        old_outputs.insert(static_cast < tipi::object const* > (&*i));
+        old_outputs.insert(static_cast < tipi::configuration::object const* > (&*i));
       }
      
       /* Wait until the tool has connected and identified itself */
@@ -942,12 +942,12 @@ namespace squadt {
      
       if (guard) {
         /* collect set of output arguments of the existing configuration */
-        std::set < tipi::object const* > old_outputs;
+        std::set < tipi::configuration::object const* > old_outputs;
        
         tipi::configuration::const_iterator_output_range ir(c->get_output_objects());
        
         for (tipi::configuration::const_iterator_output_range::const_iterator i = ir.begin(); i != ir.end(); ++i) {
-          old_outputs.insert(static_cast < tipi::object const* > (&*i));
+          old_outputs.insert(static_cast < tipi::configuration::object const* > (&*i));
         }
        
         /* Wait until the tool has connected and identified itself */
@@ -1134,7 +1134,7 @@ namespace squadt {
   /**
    * \param p weak pointer to an object descriptor
    **/
-  void processor::register_input(tipi::configuration::parameter_identifier const& id, boost::shared_ptr< object_descriptor > const& p) {
+  void processor::register_input(tipi::configuration::parameter::identifier const& id, boost::shared_ptr< object_descriptor > const& p) {
     impl->register_input(id, boost::static_pointer_cast< processor_impl::object_descriptor > (p));
   }
 
@@ -1182,7 +1182,7 @@ namespace squadt {
    * \param[in] u a URI (local path) to where the file is stored
    * \param[in] s the status of the new object
    **/
-  void processor::register_output(tipi::configuration::parameter_identifier const& id, build_system::mime_type const& m, const std::string& u, object_descriptor::status_type const& s) {
+  void processor::register_output(tipi::configuration::parameter::identifier const& id, build_system::mime_type const& m, const std::string& u, object_descriptor::status_type const& s) {
     boost::shared_ptr< processor_impl::object_descriptor > p(new processor_impl::object_descriptor(impl->interface_object, impl->manager, m, u, s));
 
     impl->register_output(id, p);

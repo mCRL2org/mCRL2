@@ -255,7 +255,7 @@ namespace tipi {
           std::string          m_text;
      
           /** \brief Type for validation purposes */
-          basic_datatype::sptr m_type;
+          boost::shared_ptr< basic_datatype > m_type;
      
         private:
      

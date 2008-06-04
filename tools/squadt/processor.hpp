@@ -107,8 +107,8 @@ namespace squadt {
 
       /** \brief Type that is used to associate a configuration object identifier to an object descriptor */
       struct configurated_object_descriptor {
-        tipi::configuration::parameter_identifier identifier; ///< The identifier of the associated output object in a configuration
-        boost::shared_ptr < object_descriptor >   object;
+        tipi::configuration::parameter::identifier identifier; ///< The identifier of the associated output object in a configuration
+        boost::shared_ptr < object_descriptor >    object;
 
         inline configurated_object_descriptor() {
         }
@@ -207,16 +207,16 @@ namespace squadt {
       boost::iterator_range < output_object_iterator > get_output_iterators() const;
  
       /** \brief Add (or modify) an input object */
-      void register_input(tipi::configuration::parameter_identifier const&,
+      void register_input(tipi::configuration::parameter::identifier const&,
                         boost::shared_ptr < object_descriptor > const&);
 
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
       const boost::shared_ptr < object_descriptor > find_input(
-                        tipi::configuration::parameter_identifier const&) const;
+                        tipi::configuration::parameter::identifier const&) const;
  
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
       const boost::shared_ptr < object_descriptor > find_output(
-                        tipi::configuration::parameter_identifier const&) const;
+                        tipi::configuration::parameter::identifier const&) const;
  
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void relocate_output(object_descriptor&, std::string const&);
@@ -225,13 +225,13 @@ namespace squadt {
       void relocate_input(object_descriptor&, std::string const&);
  
       /** \brief Add an output object */
-      void register_output(tipi::configuration::parameter_identifier const&,
+      void register_output(tipi::configuration::parameter::identifier const&,
                 const build_system::storage_format&, const std::string&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
  
       /** \brief Add an output object */
-      void replace_output(tipi::configuration::parameter_identifier const&,
-                boost::shared_ptr < object_descriptor >, tipi::object const&,
+      void replace_output(tipi::configuration::parameter::identifier const&,
+                boost::shared_ptr < object_descriptor >, tipi::configuration::object const&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief The number of input objects of this processor */

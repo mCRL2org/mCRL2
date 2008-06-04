@@ -201,7 +201,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Add output file to the configuration */
   if (c.output_exists(lps_file_for_output)) {
-    tipi::object& output_file = c.get_output(lps_file_for_output);
+    tipi::configuration::object& output_file = c.get_output(lps_file_for_output);
 
     output_file.set_location(c.get_output_name(".lps"));
   }

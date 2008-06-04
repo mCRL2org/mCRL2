@@ -59,7 +59,7 @@ namespace tipi {
 
           private:
 
-            typedef std::map< tipi::configuration::parameter_identifier, tipi::mime_type > object_map;
+            typedef std::map< tipi::configuration::parameter::identifier, tipi::mime_type > object_map;
  
           public:
 
@@ -80,7 +80,7 @@ namespace tipi {
  
             /** \brief Constructor */
             inline input_configuration(tool::category const& c,
-                        mime_type const& m, tipi::configuration::parameter_identifier const& id) : m_category(c) {
+                        mime_type const& m, tipi::configuration::parameter::identifier const& id) : m_category(c) {
 
               m_object_map.insert(std::make_pair(id, m));
             }
@@ -128,12 +128,12 @@ namespace tipi {
           private:
  
             mime_type                                 m_mime_type;  ///< storage format
-            tipi::configuration::parameter_identifier m_identifier; ///< identifier of primary input
+            tipi::configuration::parameter::identifier m_identifier; ///< identifier of primary input
  
           public:
  
             /** \brief Constructor */
-            inline output_configuration(mime_type const& m, tipi::configuration::parameter_identifier id) : m_mime_type(m), m_identifier(id) {
+            inline output_configuration(mime_type const& m, tipi::configuration::parameter::identifier id) : m_mime_type(m), m_identifier(id) {
             }
  
             /** \brief Gets the format */

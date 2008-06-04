@@ -97,7 +97,7 @@ namespace squadt {
     }
     
     void project::builder::process(wxTimerEvent&) {
-      std::deque < boost::function < void () > > local_tasks;
+      std::deque < boost::function< void () > > local_tasks;
 
       local_tasks.swap(tasks);
 
@@ -105,7 +105,7 @@ namespace squadt {
         timer.Stop();
 
         do {
-          for (std::deque < boost::function < void () > >::const_iterator task = local_tasks.begin(); task != local_tasks.end(); ++task) {
+          for (std::deque < boost::function< void () > >::const_iterator task = local_tasks.begin(); task != local_tasks.end(); ++task) {
             if (!task->empty()) {
               /* Execute task */
               (*task)();
@@ -121,7 +121,7 @@ namespace squadt {
       }
     }
     
-    void project::builder::schedule_update(boost::function < void () > l) {
+    void project::builder::schedule_update(boost::function< void () > l) {
       tasks.push_back(l);
     }
         

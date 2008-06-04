@@ -330,7 +330,7 @@ namespace mcrl2 {
       };
 
       /** \brief Standard type for communication of rewrite strategy */
-      extern boost::shared_ptr < tipi::datatype::enumeration > rewrite_strategy_enumeration;
+      extern boost::shared_ptr < tipi::datatype::basic_enumeration > rewrite_strategy_enumeration;
   
       /// \brief Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
