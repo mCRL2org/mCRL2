@@ -95,7 +95,7 @@ t_tool_options parse_command_line(int ac, char** av) {
       "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
             + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
-            + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
+            + lts::name_of_equivalence(lts_eq_weak_trace)
       , 'e').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
