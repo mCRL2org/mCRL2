@@ -15,7 +15,6 @@
 
 namespace mcrl2 {
   namespace core {
-    namespace detail {
 
 //Global preconditions:
 //- the ATerm library has been initialised
@@ -27,7 +26,6 @@ namespace mcrl2 {
  **/
 ATermAppl translate_reg_frms(ATermAppl state_frm);
    
-    } // namespace detail
   }   // namespace core
 }     // namespace mcrl2
 

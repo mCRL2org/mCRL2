@@ -19,7 +19,6 @@
 
 namespace mcrl2 {
   namespace core {
-    namespace detail {
   
 //Global precondition: the ATerm library has been initialised
 
@@ -97,7 +96,6 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
 **/ 
 ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
 
-    }
   }
 }
 

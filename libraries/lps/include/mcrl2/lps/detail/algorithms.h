@@ -40,7 +40,7 @@ namespace detail {
   inline
   ATermAppl parse_specification(std::istream& from)
   {
-    ATermAppl result = core::detail::parse_proc_spec(from);
+    ATermAppl result = core::parse_proc_spec(from);
     if (result == NULL)
       throw mcrl2::runtime_error("parse error");
     return result;
@@ -49,7 +49,7 @@ namespace detail {
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
-    ATermAppl result = core::detail::type_check_proc_spec(spec);
+    ATermAppl result = core::type_check_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("type check error");
     return result;
@@ -67,7 +67,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::detail::implement_data_proc_spec(spec);
+    ATermAppl result = core::implement_data_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -85,7 +85,7 @@ namespace detail {
   inline
   ATermAppl parse_state_formula(istream& from)
   {
-    ATermAppl result = core::detail::parse_state_frm(from);
+    ATermAppl result = core::parse_state_frm(from);
     if (result == NULL)
       throw mcrl2::runtime_error("parse error in parse_state_frm()");
     return result;
@@ -96,7 +96,7 @@ namespace detail {
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
-    ATermAppl result = core::detail::type_check_state_frm(formula, spec);
+    ATermAppl result = core::type_check_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("type check error");
     return result;
@@ -107,7 +107,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = core::detail::implement_data_state_frm(formula, spec);
+    ATermAppl result = core::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -116,7 +116,7 @@ namespace detail {
   inline
   modal::state_formula translate_regular_formula(ATermAppl formula)
   {
-    ATermAppl result = core::detail::translate_reg_frms(formula);
+    ATermAppl result = core::translate_reg_frms(formula);
     if (result == NULL)
       throw mcrl2::runtime_error("formula translation error");
     return result;

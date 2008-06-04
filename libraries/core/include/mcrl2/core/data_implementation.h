@@ -20,9 +20,10 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/data_common.h"
 
+using namespace mcrl2::core::detail;
+
 namespace mcrl2 {
   namespace core {
-    namespace detail {
 
 
 /// \pre spec represents an mCRL2 data specification that adheres to the
@@ -261,7 +262,6 @@ ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);
 
 
-    }
   }
 }
 #endif // MCRL2_DATAIMPL_H

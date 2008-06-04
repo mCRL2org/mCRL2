@@ -17,11 +17,11 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 
-namespace mcrl2 {
+using namespace mcrl2::core::detail;
 
+namespace mcrl2 {
   namespace core {
 
-    namespace detail {
 /// \brief Reconstructs as much of expr as possible to the mcrl2 format.
 /// \pre expr adheres to the internal format after data implementation
 ///       spec, if provided, adheres to the internal format after data
@@ -34,10 +34,8 @@ inline ATermAppl reconstruct_spec(ATermAppl spec) {
   assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
-    }
    
   }
-
 }
 
 #endif

@@ -17,7 +17,6 @@
 
 namespace mcrl2 {
   namespace core {
-    namespace detail{
  
 //Global preconditions:
 //- the ATerm library has been initialised
@@ -166,7 +165,6 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl spec);
  **/
 ATermAppl type_check_pbes_spec(ATermAppl pbes_spec);
 
-    } 
   }
 }
 

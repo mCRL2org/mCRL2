@@ -30,7 +30,6 @@ using namespace mcrl2::core;
 
 namespace mcrl2 {
   namespace core {
-   namespace detail {
 
 // declarations
 // ----------------------------------------------
@@ -1923,6 +1922,5 @@ bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
   return false;
 }
 
-    } //namespace detail
   }   //namespace core
 }     //namespace mcrl2

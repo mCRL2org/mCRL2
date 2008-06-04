@@ -29,7 +29,6 @@ using namespace mcrl2::core;
 
 namespace mcrl2 {
   namespace core {
-    namespace detail {
 
 //local declarations
 //------------------
@@ -248,6 +247,5 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
   return result;  
 } 
 
-    } // namespace detail
   }   // namespace core
 }     // namespace mcrl2
