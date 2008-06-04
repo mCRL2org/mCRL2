@@ -1006,7 +1006,8 @@ unsigned int* p_lts::p_get_transition_indices() {
 unsigned int** p_lts::p_get_transition_pre_table()
 {
   unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
-  if (A == NULL) {
+  if (A == NULL)
+  {
     gsErrorMsg("out of memory\n");
     exit(1);
   }
@@ -1016,7 +1017,8 @@ unsigned int** p_lts::p_get_transition_pre_table()
   for (l = 0; l < nlabels; ++l)
   {
     A[l] = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
-    if (A[l] == NULL) {
+    if (A[l] == NULL)
+    {
       gsErrorMsg("out of memory\n");
       exit(1);
     }
@@ -1024,8 +1026,8 @@ unsigned int** p_lts::p_get_transition_pre_table()
     A[l][0] = t;
     for (s = 1; s <= nstates; ++s)
     {
-      while (t < ntransitions && transitions[t].label == l-1
-          && transitions[t].to == s)
+      while (t < ntransitions && transitions[t].label == l
+          && transitions[t].to == s-1)
       {
         ++t;
       }
@@ -1671,6 +1673,9 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   } else if ( s == "branching-bisim" )
   {
     return lts_eq_branching_bisim;
+  } else if ( s == "sim" )
+  {
+    return lts_eq_sim;
   } else if ( s == "trace" )
   {
     return lts_eq_trace;

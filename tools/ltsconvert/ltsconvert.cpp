@@ -276,6 +276,9 @@ t_tool_options parse_command_line(int ac, char** av) {
       "  '" + lts::string_for_equivalence(lts_eq_branching_bisim)
             + "' minimise modulo " 
             + lts::name_of_equivalence(lts_eq_branching_bisim) + ",\n"
+      "  '" + lts::string_for_equivalence(lts_eq_sim)
+            + "' minimise modulo " 
+            + lts::name_of_equivalence(lts_eq_sim) + ",\n"
       "  '" + lts::string_for_equivalence(lts_eq_trace)
             + "' determinise and then minimise modulo "
             + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
@@ -340,6 +343,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
     if (tool_options.equivalence != lts_eq_bisim &&
         tool_options.equivalence != lts_eq_branching_bisim &&
+        tool_options.equivalence != lts_eq_sim &&
         tool_options.equivalence != lts_eq_trace &&
         tool_options.equivalence != lts_eq_weak_trace)
     {
@@ -424,8 +428,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     enum transformation_options {
       no_transformation,                          ///< copies from one format to the other without transformation
-      minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation
-      minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation
+      minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation equivalence
+      minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation equivalence
+      minimisation_modulo_strong_simulation,      ///< minimisation modulo strong simulation equivalence
       minimisation_modulo_trace_equivalence,      ///< determinisation and then minimisation modulo trace equivalence
       minimisation_modulo_weak_trace_equivalence, ///< determinisation and then minimisation modulo weak trace equivalence
       determinisation                             ///< determinisation
@@ -459,6 +464,7 @@ squadt_interactor::squadt_interactor() {
 
   transformation_method_enumeration->add_value("modulo_strong_bisimulation");
   transformation_method_enumeration->add_value("modulo_branching_bisimulation");
+  transformation_method_enumeration->add_value("modulo_strong_simulation");
   transformation_method_enumeration->add_value("modulo_trace_equivalence");
   transformation_method_enumeration->add_value("modulo_weak_trace_equivalence");
   transformation_method_enumeration->add_value("determinise");
@@ -527,8 +533,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< label >().set_text("LTS transformation:")).
     append(transformation_selector.associate(no_transformation, "none", true)).
-    append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation")).
-    append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation")).
+    append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation equivalence")).
+    append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation equivalence")).
+    append(transformation_selector.associate(minimisation_modulo_strong_simulation, "reduction modulo strong simulation equivalence")).
     append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "determinisation and reduction modulo trace equivalence")).
     append(transformation_selector.associate(minimisation_modulo_weak_trace_equivalence, "determinisation and reduction modulo weak trace equivalence")).
     append(transformation_selector.associate(determinisation, "determinisation"));
@@ -710,6 +717,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         break;
       case minimisation_modulo_branching_bisimulation:
         tool_options.equivalence = lts_eq_branching_bisim;
+        break;
+      case minimisation_modulo_strong_simulation:
+        tool_options.equivalence = lts_eq_sim;
         break;
       case minimisation_modulo_trace_equivalence:
         tool_options.equivalence = lts_eq_trace;

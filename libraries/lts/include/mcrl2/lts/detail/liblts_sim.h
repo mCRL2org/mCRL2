@@ -8,6 +8,7 @@
 //
 /// \file liblts_sim.h
 /// \brief Header file for the simulation preorder algorithm
+
 #ifndef LIBLTS_SIM_H
 #define LIBLTS_SIM_H
 #include <vector>
@@ -19,9 +20,63 @@ typedef unsigned int uint;
 class sim_partitioner
 {
   public:
+    /** Creates a partitioner for an LTS.
+     * \param[in] l Pointer to the LTS. */
     sim_partitioner(mcrl2::lts::lts *l);
+
+    /** Destroys this partitioner. */
     ~sim_partitioner();
-    bool reduce();
+
+    /** Computes the simulation equivalence classes and preorder
+     * relations of the LTS. */
+    void partitioning_algorithm();
+
+    /** Gives the transition relation on the computed equivalence
+     * classes of the LTS. The label numbers of the transitions
+     * correspond to the label numbers of the LTS that was passed as an
+     * argument to the constructor of this partitioner.
+     * The state numbers of the transitions are the equivalence class
+     * numbers which range from 0 upto (and excluding) \ref num_eq_classes().
+     *
+     * \pre The simulation equivalence classes have been computed. 
+     * \param[out] nt Used to store the number of transitions between the
+     * simulation equivalence classes.
+     * \param[out] size Used to store the length of the returned array.
+     * \return An array containing the transitions between the
+     * simulation equivalence classes. */
+    mcrl2::lts::transition* get_transitions(uint& nt,uint& size) const;
+
+    /** Gives the number of simulation equivalence classes of the LTS.
+     * \pre The simulation equivalence classes have been computed. 
+     * \return The number of simulation equivalence classes of the LTS.
+     */
+    uint num_eq_classes() const;
+
+    /** Gives the equivalence class number of a state.
+     * The equivalence class numbers range from 0 upto (and excluding)
+     * \ref num_eq_classes().
+     * \pre The simulation equivalence classes have been computed.
+     * \param[in] s A state number.
+     * \return The number of the equivalence class to which \e s
+     * belongs. */
+    uint get_eq_class(uint s) const;
+
+    /** Returns whether one state is simulated by another state.
+     * \pre The simulation preorder has been computed. 
+     * \param[in] s A state number.
+     * \param[in] t A state number.
+     * \retval true if \e s is simulated by \e t;
+     * \retval false otherwise. */
+    bool in_preorder(uint s,uint t) const;
+
+    /** Returns whether two states are simulation equivalent. 
+     * \pre The simulation equivalence classes have been computed. 
+     * \param[in] s A state number.
+     * \param[in] t A state number.
+     * \retval true if \e s and \e t are simulation equivalent;
+     * \retval false otherwise. */
+    bool in_eq_class(uint s,uint t) const;
+
   private:
     struct state_bucket
     {
@@ -54,7 +109,7 @@ class sim_partitioner
     std::vector<uint> touched_blocks;
     std::vector<uint> contents;
 
-    void initialise();
+    void initialise_datastructures();
     //void read_partition_from_file(char *parfile);
 
     void refine(bool &change);
@@ -75,13 +130,12 @@ class sim_partitioner
     void initialise_pre_EA();
     void induce_P_on_Pi();
 
-    /*
     void print_Sigma_P();
     void print_Pi_Q();
     void print_Sigma();
     void print_Pi();
     void print_relation(uint s,std::vector< std::vector<bool> > &R);
     void print_block(uint b);
-    void print_structure(hash_table3 *struc);*/
+    void print_structure(hash_table3 *struc);
 };
 #endif

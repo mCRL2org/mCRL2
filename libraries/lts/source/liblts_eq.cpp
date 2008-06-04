@@ -58,7 +58,33 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
     case lts_eq_sim:
       {
         sim_partitioner sp(this);
-        return sp.reduce();
+        sp.partitioning_algorithm();
+        // clear the data structure, but keep the labels!
+        type = lts_none;
+        state_info = false;
+
+        states_size = 0;
+        nstates = 0;
+        if (state_values != NULL)
+        {
+          ATunprotectArray(state_values);
+          free(state_values);
+          state_values = NULL;
+        }          
+        
+        transitions_size = 0;
+        ntransitions = 0;
+        free(transitions);
+
+        // assign the reduced LTS
+        transitions = sp.get_transitions(ntransitions,transitions_size);
+        nstates = sp.num_eq_classes();
+        init_state = sp.get_eq_class(init_state);
+
+        // remove unreachable parts
+        sort_transitions();
+        reachability_check(true);
+        return true;
       }
     case lts_eq_trace:
       bisimulation_reduce(*this,false);

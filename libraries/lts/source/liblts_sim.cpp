@@ -8,17 +8,94 @@
 //
 /// \file liblts_sim.cpp
 #include "mcrl2/lts/detail/liblts_sim.h"
-#include <iostream>
-#include <fstream>
-#include <queue>
+#include "mcrl2/core/messaging.h"
 
 #define LIST_END (-1)
+using namespace mcrl2::core;
 
 sim_partitioner::sim_partitioner(mcrl2::lts::lts *l)
   : aut(l), trans_index(NULL)
 { }
 
-void sim_partitioner::initialise()
+sim_partitioner::~sim_partitioner()
+{
+  if (trans_index != NULL)
+  {
+    for (unsigned int l = 0; l < aut->num_labels(); ++l)
+    {
+      free(trans_index[l]);
+    }
+  }
+  free(trans_index);
+  aut = NULL;
+  delete match;
+  delete exists;
+  delete forall;
+}
+
+/* ----------------- PARTITIONING ALGORITHM ------------------------- */
+
+void sim_partitioner::partitioning_algorithm()
+{
+  initialise_datastructures();
+
+  if (gsDebug)
+  {
+    gsMessage("--------------------- INITIALISATION ---------------------------\n");
+  }
+
+  gsVerboseMsg("  initialisation; number of blocks: %u\n",s_Sigma);
+  bool change;
+  uint i;
+
+  refine(change);
+  update();
+
+  change = true;
+  i = 0;
+  while (change)
+  {
+    change = false;
+
+    /* Set Sigma to Pi and P to Q*/
+    s_Sigma = s_Pi;
+    /* The following statement simultaneously assigns P to Q and Q to P.
+     * The assignment of Q to P is safe because Q is not used in
+     * refine() and will be freshly computed at the start of update().
+     * The advantage of using swap() is that it is executed in constant
+     * time. */
+    P.swap(Q);
+    
+    if (gsDebug)
+    {
+      gsMessage("--------------------- ITERATION %u ----------------------------------\n",i);
+    }
+     
+    gsVerboseMsg("  iteration %u; number of blocks: %u\n",i,s_Sigma);
+
+    refine(change);
+    if (change)
+    {
+      update();
+    }
+    else
+    {
+      /* No blocks were split by refine(), so update() need not be
+       * called. However, we do need to swap P and Q again: Q currently
+       * contains the P-relation of the previous iteration (due to the
+       * call to swap() prior to the call to refine()) but we want it to
+       * contain that of the current iteration! */
+      P.swap(Q);
+    }
+    ++i;
+  }
+  if (gsDebug)
+  {
+    print_Pi_Q();
+  }
+}
+
+void sim_partitioner::initialise_datastructures()
 {
   aut->sort_transitions(mcrl2::lts::lbl_tgt_src);
   trans_index = aut->get_transition_pre_table();
@@ -71,163 +148,6 @@ void sim_partitioner::initialise()
     children[i].push_back(i);
     P[i][i] = true;
   }
-}
-
-sim_partitioner::~sim_partitioner()
-{
-  if (trans_index != NULL)
-  {
-    for (unsigned int l = 0; l < aut->num_labels(); ++l)
-    {
-      free(trans_index[l]);
-    }
-  }
-  free(trans_index);
-  aut = NULL;
-  delete match;
-  delete exists;
-  delete forall;
-}
-
-void sim_partitioner::touch(uint a,uint alpha)
-{
-  state_touched[a] = true;
-  int p = state_buckets[a].prev;
-  int n = state_buckets[a].next;
-  if (p == LIST_END)
-  {
-    contents_u[alpha] = n;
-  }
-  else
-  {
-    state_buckets[p].next = n;
-  }
-  if (n != LIST_END)
-  {
-    state_buckets[n].prev = p;
-  }
-  state_buckets[a].prev = LIST_END;
-  state_buckets[a].next = contents_t[alpha];
-  if (contents_t[alpha] != LIST_END)
-  {
-    state_buckets[contents_t[alpha]].prev = a;
-  }
-  contents_t[alpha] = a;
-}
-
-/* PRE: contents_t[alpha] != LIST_END */
-void sim_partitioner::untouch(uint alpha)
-{
-  // search linearly for the last element of contents_t[alpha];
-  // untouch every state we encounter along the way
-  int i = contents_t[alpha];
-  while (state_buckets[i].next != LIST_END)
-  {
-    state_touched[i] = false;
-    i = state_buckets[i].next;
-  }
-  // last element has not been untouched yet
-  state_touched[i] = false;
-
-  // insert the list contents_t[alpha] at the beginning of
-  // contents_u[alpha]
-  state_buckets[i].next = contents_u[alpha];
-  if (contents_u[alpha] != LIST_END)
-  {
-    state_buckets[contents_u[alpha]].prev = i;
-  }
-  contents_u[alpha] = contents_t[alpha];
-  contents_t[alpha] = LIST_END;
-  block_touched[alpha] = false;
-}
-
-/* ----------------- PARTITIONING ALGORITHM ------------------------- */
-
-bool sim_partitioner::reduce()
-{
-  initialise();
-  /*
-  if (options->verbosity >= DEBUG)
-  {
-    std::cerr << "--------------------- INITIALISATION";
-    std::cerr << " ---------------------------" << std::endl;
-    print_Sigma_P();
-  }
-  if (options->verbosity == VERBOSE)
-  {
-    std::cerr << "  initialisation; number of blocks: " <<
-      s_Sigma << std::endl;
-  }*/
-
-  bool change;
-  uint i;
-
-  /* Initialise Pi to Sigma; before calling refine() we need to
-   * establish that Sigma = Pi
-  s_Pi = s_Sigma;
-  block_Pi = block_Sigma; */
-
-  refine(change);
-  update();
-
-  change = true;
-  i = 0;
-  while (change)
-  {
-    change = false;
-
-    /* Set Sigma to Pi and P to Q*/
-    s_Sigma = s_Pi;
-    //block_Sigma = block_Pi;
-    
-    /* The following statement simultaneously assigns P to Q and Q to P.
-     * The assignment of Q to P is safe because Q is not used in
-     * refine() and will be freshly computed at the start of update().
-     * The advantage of using swap() is that it is executed in constant
-     * time. */
-    P.swap(Q);
-    
-    /*
-    if (options->verbosity >= DEBUG)
-    {
-      std::cerr << "--------------------- ITERATION " << i;
-      std::cerr << " ----------------------------------" << std::endl;
-      print_Sigma_P();
-    }
-    if (options->verbosity == VERBOSE)
-    {
-      std::cerr << "  iteration " << i << "; number of blocks: " <<
-        s_Sigma << std::endl;
-    }
-    */
-
-    refine(change);
-    if (change)
-    {
-      update();
-    }
-    else
-    {
-      /* No blocks were split by refine(), so update() need not be
-       * called. However, we do need to swap P and Q again: Q currently
-       * contains the P-relation of the previous iteration (due to the
-       * call to swap() prior to the call to refine()) but we want it to
-       * contain that of the current iteration! */
-      P.swap(Q);
-    }
-    ++i;
-  }
-  /*
-  if (options->verbosity >= DEBUG)
-  {
-    print_Pi_Q();
-  }
-  */
-
-  /* Store the minimised graph in place of the original one, along with
-   * the simulation preorder on the nodes */
-  //update_nfa();
-  return true;
 }
 
 /* ----------------- INITIALISE ------------------------------------- */
@@ -286,15 +206,6 @@ void sim_partitioner::initialise_Sigma(uint gamma,uint l)
 /* PRE: s_Sigma = s_Pi */
 void sim_partitioner::refine(bool &change)
 {
-  /*
-  if (options->verbosity >= DEBUG)
-  {
-    std::cerr << "--------------------- Refine";
-    std::cerr << " ---------------------------------------"
-      << std::endl;
-  }
-  */
-
   /* Initialise the parent and children functions */
   std::vector<uint> v;
   children.assign(s_Pi,v);
@@ -305,27 +216,31 @@ void sim_partitioner::refine(bool &change)
     children[alpha].push_back(alpha);
     parent[alpha] = alpha;
   }
+    
+  if (gsDebug)
+  {
+    gsMessage("--------------------- Refine ---------------------------------------\n");
+    print_Sigma_P();
+  }
   
   /* Compute a reverse topological sorting of Sigma w.r.t. P */
   std::vector<uint> Sort;
   Sort.reserve(s_Sigma);
   reverse_topological_sort(Sort);
 
-  /*
-  if (options->verbosity >= DEBUG)
+  if (gsDebug)
   {
-    std::cerr << "reverse topological sort is: [";
+    gsMessage("reverse topological sort is: [");
     for (uint i = 0; i < Sort.size(); ++i)
     {
-      std::cerr << Sort[i];
+      gsMessage("%u",Sort[i]);
       if (i+1 < Sort.size())
       {
-        std::cerr << ",";
+        gsMessage(",");
       }
     }
-    std::cerr << "]" << std::endl;
+    gsMessage("]\n");
   }
-  */
 
   /* Some local variables */
   std::vector<bool> v_false(s_Sigma,false);
@@ -338,15 +253,11 @@ void sim_partitioner::refine(bool &change)
   /* The main loop */
   for (l = 0; l < aut->num_labels(); ++l)
   {
-    /*
-    if (options->verbosity >= DEBUG)
+    if (gsDebug)
     {
-      std::cerr << "---------------------------------------------------"
-        << std::endl;
-      std::cerr << "Label = \"" << label_store->get_label(l) << "\""
-        << std::endl;
+      gsMessage("---------------------------------------------------\n");
+      gsMessage("Label = \"%s\"\n", aut->label_value_str(l).c_str());
     }
-    */
 
     /* reset the stable function */
     stable.assign(s_Pi,v_false);
@@ -437,19 +348,67 @@ void sim_partitioner::dfs_visit(uint u,std::vector<bool> &visited,
   Sort.push_back(u);
 }
 
+void sim_partitioner::touch(uint a,uint alpha)
+{
+  state_touched[a] = true;
+  int p = state_buckets[a].prev;
+  int n = state_buckets[a].next;
+  if (p == LIST_END)
+  {
+    contents_u[alpha] = n;
+  }
+  else
+  {
+    state_buckets[p].next = n;
+  }
+  if (n != LIST_END)
+  {
+    state_buckets[n].prev = p;
+  }
+  state_buckets[a].prev = LIST_END;
+  state_buckets[a].next = contents_t[alpha];
+  if (contents_t[alpha] != LIST_END)
+  {
+    state_buckets[contents_t[alpha]].prev = a;
+  }
+  contents_t[alpha] = a;
+}
+
+/* PRE: contents_t[alpha] != LIST_END */
+void sim_partitioner::untouch(uint alpha)
+{
+  // search linearly for the last element of contents_t[alpha];
+  // untouch every state we encounter along the way
+  int i = contents_t[alpha];
+  while (state_buckets[i].next != LIST_END)
+  {
+    state_touched[i] = false;
+    i = state_buckets[i].next;
+  }
+  // last element has not been untouched yet
+  state_touched[i] = false;
+
+  // insert the list contents_t[alpha] at the beginning of
+  // contents_u[alpha]
+  state_buckets[i].next = contents_u[alpha];
+  if (contents_u[alpha] != LIST_END)
+  {
+    state_buckets[contents_u[alpha]].prev = i;
+  }
+  contents_u[alpha] = contents_t[alpha];
+  contents_t[alpha] = LIST_END;
+  block_touched[alpha] = false;
+}
+
 /* ----------------- UPDATE ----------------------------------------- */
 
 void sim_partitioner::update()
 {
-  using namespace std;
-  /*
-  if (options->verbosity >= DEBUG)
+  if (gsDebug)
   {
-    cerr << "--------------------- Update";
-    cerr << " ---------------------------------------"
-      << endl;
+    gsMessage("--------------------- Update ---------------------------------------\n");
   }
-  */
+
   uint l,alpha,gamma;
   std::vector<uint>::iterator alphai, last;
 
@@ -484,20 +443,15 @@ void sim_partitioner::update()
     }
   }
   
-  /*
-  if (options->verbosity >= DEBUG)
+  if (gsDebug)
   {
-    cerr << "------ Filter(false) ------" << endl;
-    cerr << "Exists: ";
+    gsMessage("------ Filter(false) ------\nExists: ");
     print_structure(exists);
-    cerr << endl;
-    cerr << "Forall: ";
+    gsMessage("\nForall: ");
     print_structure(forall);
-    cerr << endl;
-    cerr << "Simulation relation: ";
+    gsMessage("\nSimulation relation: ");
     print_relation(s_Pi,Q);
   }
-  */
 
   /* Apply the first filtering to Q */
   filter(s_Sigma,P,false);
@@ -531,20 +485,15 @@ void sim_partitioner::update()
       pre_forall[l].push_back(forall->get_num_elements());
     }
   }
-  /*
-  if (options->verbosity >= DEBUG)
+  if (gsDebug)
   {
-    cerr << "------ Filter(true) ------" << endl;
-    cerr << "Exists: ";
+    gsMessage("------ Filter(true) ------\nExists: ");
     print_structure(exists);
-    cerr << endl;
-    cerr << "Forall: ";
+    gsMessage("\nForall: ");
     print_structure(forall);
-    cerr << endl;
-    cerr << "Simulation relation: ";
+    gsMessage("\nSimulation relation: ");
     print_relation(s_Pi,Q);
   }
-  */
 
   /* Apply the second filtering to Q */
   filter(s_Pi,Q,true);
@@ -675,7 +624,86 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
   }
 }
 
-/* ----------------- COMPUTE TRANSITION RELATION -------------------- */
+/* ----------------- FOR POST-PROCESSING ---------------------------- */
+
+
+mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) const
+{
+  using namespace mcrl2::lts;
+
+  size = forall->get_num_elements();
+  transition* ts = (transition*)malloc(size*sizeof(transition));
+  if (ts == NULL)
+  {
+    gsErrorMsg("out of memory\n");
+    exit(1);
+  }
+
+  nt = 0;
+  std::vector<bool> pre_sim;
+  uint l,beta,gamma;
+  hash_table3_iterator alphai(exists);
+  hash_table3_iterator gammai(forall);
+  for (beta = 0; beta < s_Pi; ++beta)
+  {
+    for (l = 0; l < aut->num_labels(); ++l)
+    {
+      // there is an l-transition from alpha to beta iff:
+      // - alpha -l->A [beta]
+      // - not Exists gamma : beta Q gamma  /\  alpha -l->E gamma
+      // first compute for which alpha the latter statement does not
+      // hold
+      pre_sim.assign(s_Pi,false);
+      for (gamma = 0; gamma < s_Pi; ++gamma)
+      {
+        // only consider gammas that are unequal to beta
+        if (gamma != beta && Q[beta][gamma])
+        {
+          alphai.set_end(pre_exists[l][gamma+1]);
+          for (alphai.set(pre_exists[l][gamma]); !alphai.is_end();
+              ++alphai)
+          {
+            pre_sim[alphai.get_x()] = true;
+          }
+        }
+      }
+      gammai.set_end(pre_forall[l][beta+1]);
+      for (gammai.set(pre_forall[l][beta]); !gammai.is_end(); ++gammai)
+      {
+        gamma = gammai.get_x();
+        if (!pre_sim[gamma])
+        {
+          // add the transition gamma -l-> beta
+          ts[nt].from = gamma;
+          ts[nt].label = l;
+          ts[nt].to = beta;
+          ++nt;
+        }
+      }
+    }
+  }
+  return ts;
+}
+
+uint sim_partitioner::num_eq_classes() const
+{
+  return s_Pi;
+}
+
+uint sim_partitioner::get_eq_class(uint s) const
+{
+  return block_Pi[s];
+}
+
+bool sim_partitioner::in_preorder(uint s,uint t) const
+{
+  return Q[block_Pi[s]][block_Pi[t]];
+}
+
+bool sim_partitioner::in_eq_class(uint s,uint t) const
+{
+  return (block_Pi[s] == block_Pi[t]);
+}
 
 /*
 // PRE: FORALL and EXISTS structures on Pi are computed
@@ -808,18 +836,17 @@ void sim_partitioner::update_nfa()
 
 /* ----------------- FOR DEBUGGING ---------------------------------- */
 
-/*
 void sim_partitioner::print_Sigma_P()
 {
   print_Sigma();
-  std::cerr << "Simulation relation: ";
+  gsMessage( "Simulation relation: ");
   print_relation(s_Sigma,P);
 }
 
 void sim_partitioner::print_Pi_Q()
 {
   print_Pi();
-  std::cerr << "Simulation relation: ";
+  gsMessage("Simulation relation: ");
   print_relation(s_Pi,Q);
 }
 
@@ -828,13 +855,13 @@ void sim_partitioner::print_Sigma()
   std::vector<uint>::iterator ci, last;
   for (uint b = 0; b < s_Sigma; ++b)
   {
-    std::cerr << "block " << b << ": {";
+    gsMessage("block %u: {",b);
     last = children[b].end();
     for (ci = children[b].begin(); ci != last; ++ci)
     {
       print_block(*ci);
     }
-    std::cerr << "}" << std::endl;
+    gsMessage("}\n");
   }
 }
 
@@ -842,9 +869,9 @@ void sim_partitioner::print_Pi()
 {
   for (uint b = 0; b < s_Pi; ++b)
   {
-    std::cerr << "block " << b << ": {";
+    gsMessage("block %u: {",b);
     print_block(b);
-    std::cerr << "}" << std::endl;
+    gsMessage("}\n");
   }
 }
 
@@ -852,18 +879,18 @@ void sim_partitioner::print_block(uint b)
 {
   for (int i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
   {
-    std::cerr << i << ",";
+    gsMessage("%d,",i);
   }
   for (int i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
   {
-    std::cerr << i << ",";
+    gsMessage("%d,",i);
   }
 }
 
 void sim_partitioner::print_relation(uint s,
     std::vector< std::vector<bool> > &R)
 {
-  std::cerr << "{";
+  gsMessage("{");
   uint beta,gamma;
   for (beta = 0; beta < s; ++beta)
   {
@@ -871,27 +898,24 @@ void sim_partitioner::print_relation(uint s,
     {
       if (R[beta][gamma])
       {
-        std::cerr << "(" << beta << "," << gamma << "),";
+        gsMessage("(%u,%u),",beta,gamma);
       }
     }
   }
-  std::cerr << "}" << std::endl;
+  gsMessage("}\n");
 }
 
 void sim_partitioner::print_structure(hash_table3 *struc)
 {
-  std::cerr << "{";
+  gsMessage("{");
   hash_table3_iterator i(struc);
   for ( ; !i.is_end(); ++i)
   {
-    std::cerr << "(" << i.get_x() 
-      << "," << label_store->get_label(i.get_y())
-      << "," << i.get_z() << ")";
-    std::cerr << ",";
+    gsMessage("(%u,%s,%u),", i.get_x(), 
+        aut->label_value_str(i.get_y()).c_str(), i.get_z());
   }
-  std::cerr << "}";
+  gsMessage("}");
 }
-*/
 
 /* Needed only for reading an initial partition from a file; this is
  * probably not needed in the LTS library
