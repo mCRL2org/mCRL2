@@ -413,7 +413,7 @@ namespace mcrl2 {
          * The following example shows the effect of this method for a tool named test and author John Doe.
          *
          * \code
-         *  version_information(std::cerr);
+         *  std::cout << version_information();
          * \endcode
          *
          * The output is:
