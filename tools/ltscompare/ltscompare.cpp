@@ -91,9 +91,9 @@ t_tool_options parse_command_line(int ac, char** av) {
       "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
             + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
       "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_branching_bisim) + " (default), or\n"
+            + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
-            + lts::name_of_equivalence(lts_eq_trace) + " (default), or\n"
+            + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
             + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
       , 'e').
