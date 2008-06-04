@@ -24,7 +24,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
-#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/data_implementation.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
 

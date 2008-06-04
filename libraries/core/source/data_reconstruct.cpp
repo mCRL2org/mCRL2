@@ -17,9 +17,9 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
 
-#include "mcrl2/core/detail/data_reconstruct.h"
+#include "mcrl2/core/data_reconstruct.h"
+#include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/detail/data_common.h"
-#include "mcrl2/core/detail/data_implementation.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"

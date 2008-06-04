@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "mcrl2/core/detail/data_implementation.h"
+#include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"

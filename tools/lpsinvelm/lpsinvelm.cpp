@@ -16,10 +16,10 @@
 #include <fstream>
 
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/detail/parse.h"
-#include "mcrl2/core/detail/typecheck.h"
-#include "mcrl2/core/detail/data_implementation.h"
-#include "mcrl2/core/detail/data_reconstruct.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"

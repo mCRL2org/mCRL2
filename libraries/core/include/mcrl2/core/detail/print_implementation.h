@@ -35,7 +35,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/core/detail/data_reconstruct.h"
+#include "mcrl2/core/data_reconstruct.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

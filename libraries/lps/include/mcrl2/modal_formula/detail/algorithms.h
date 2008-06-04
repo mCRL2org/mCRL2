@@ -20,11 +20,11 @@
 #include <fstream>
 #include "aterm2.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/parse.h"
-#include "mcrl2/core/detail/typecheck.h"
-#include "mcrl2/core/detail/data_implementation.h"
-#include "mcrl2/core/detail/data_reconstruct.h"
-#include "mcrl2/core/detail/regfrmtrans.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/data_reconstruct.h"
+#include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/specification.h"
 

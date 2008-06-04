@@ -20,7 +20,7 @@
 #include "mcrl2/data/sort_utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/detail/data_implementation.h" // implement_data_data::data_expr
+#include "mcrl2/core/data_implementation.h" // implement_data_data::data_expr
 
 // JFG:
 #include "mcrl2/data/rewrite.h"
