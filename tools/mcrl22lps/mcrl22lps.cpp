@@ -507,13 +507,13 @@ static t_lin_options parse_command_line(int argc, char *argv[])
 
   //check for dangerous and illegal option combinations
   if (options.newstate && options.lin_method == lmStack) {
-    parser.error("option -w can only be used with -1 or -2");
+    parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
   }
   if (options.check_only && options.end_phase != phTypeCheck) {
-    parser.error("options -e and -p may not be used in conjunction");
+    parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
   }
   if (options.noalpha && options.end_phase == phAlphaRed) {
-    parser.error("options -r and -p ar may not be used in conjunction");
+    parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
   }
 
   if (2 < parser.arguments.size()) {
