@@ -103,15 +103,31 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     static const char* option_transformation_strategy;
     static const char* option_selected_output_format;
 
-  private:
+    static bool initialise_types() {
+      tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
+    
+      transformation_strategy_enumeration.
+        add(lazy, "lazy").
+        add(finite, "finite");
+    
+      tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
+    
+      output_format_enumeration.
+        add(binary, "binary").
+        add(internal, "internal").
+        add(cwi, "cwi");
 
-    boost::shared_ptr < tipi::datatype::basic_enumeration > transformation_method_enumeration;
-    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
+      return true;
+    }
 
   public:
 
     /** \brief constructor */
-    squadt_interactor();
+    squadt_interactor() {
+      static bool initialised = initialise_types();
+
+      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+    }
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -131,16 +147,6 @@ const char* squadt_interactor::pbes_file_for_output = "pbes_out";
 
 const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
 const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
-
-squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new tipi::datatype::enumeration< transformation_strategy >());
-
-  transformation_method_enumeration->add(lazy, "lazy").add(finite, "finite");
-
-  output_format_enumeration.reset(new tipi::datatype::enumeration< pbes_output_format >());
-
-  output_format_enumeration->add(binary, "binary").add(internal, "internal").add(cwi, "cwi");
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(pbes_file_for_input, tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
@@ -202,10 +208,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_output(pbes_file_for_output, tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
   }
 
-  c.add_option(option_transformation_strategy).append_argument(transformation_method_enumeration,
-                                strategy_selector.get_selection());
-  c.add_option(option_selected_output_format).append_argument(output_format_enumeration,
-                                format_selector.get_selection());
+  c.add_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
+  c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
 
   send_clear_display();
 }

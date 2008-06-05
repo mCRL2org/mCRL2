@@ -331,11 +331,14 @@ namespace tipi {
 
   /**
    * \param[in] id an identifier for the option
-   * \pre option with this identifier must be part of the configuration, use
-   *      option_exists member to establish this
+   * \return option identified by id
+   *
+   * \throws std::runtime_error if the option is not found
    **/
   configuration::option const& configuration::get_option(std::string const& id) const {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      throw std::runtime_error(std::string("no option found with identifier ").append(id));
+    }
 
     return (* boost::static_pointer_cast < const option > (
         const_cast < position_list& > (m_positions)[(*m_parameter_by_id.find(id)).second]));
@@ -343,11 +346,12 @@ namespace tipi {
 
   /**
    * \param[in] id an identifier for the option
-   * \pre option with this identifier must be part of the configuration, use
-   *      option_exists member to establish this
+   * \return option identified by id
    **/
   configuration::option& configuration::get_option(std::string const& id) {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      return add_option(id);
+    }
 
     return (*boost::static_pointer_cast < option > (m_positions[(*m_parameter_by_id.find(id)).second]));
   }

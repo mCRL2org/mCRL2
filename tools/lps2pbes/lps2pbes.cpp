@@ -50,14 +50,14 @@ using namespace mcrl2::modal;
 typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
 
 //t_tool_options represents the options of the tool
-typedef struct {
+struct t_tool_options {
   bool pretty;
   bool timed;
   t_phase end_phase;
   string formfilename;
   string infilename;
   string outfilename;
-} t_tool_options;
+};
 
 //Functions used by the main program
 //----------------------------------
@@ -125,15 +125,33 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       readable
     };
 
-  private:
+    static bool initialise_types() {
+      tipi::datatype::enumeration< pbes_output_format > output_format_enumeration;
 
-    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
-    boost::shared_ptr < tipi::datatype::basic_enumeration > end_phase_enumeration;
+      output_format_enumeration.
+        add(readable, "readable").
+        add(normal, "normal");
+
+      tipi::datatype::enumeration< t_phase > end_phase_enumeration;
+
+      end_phase_enumeration.
+        add(PH_NONE, "none").
+        add(PH_PARSE, "parse").
+        add(PH_TYPE_CHECK, "type_check").
+        add(PH_DATA_IMPL, "data_implementation").
+        add(PH_REG_FRM_TRANS, "formula_translation");
+
+      return true;
+    }
 
   public:
 
     /** \brief constructor */
-    squadt_interactor();
+    squadt_interactor() {
+      static bool initialised = initialise_types();
+
+      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+    }
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -155,20 +173,6 @@ const char* pbes_file_for_output   = "pbes_out";
 const char* option_selected_output_format     = "selected_output_format";
 const char* option_end_phase                  = "stop_after_phase";
 const char* option_timed                      = "use_timed_algorithm";
-
-squadt_interactor::squadt_interactor() {
-  output_format_enumeration.reset(new tipi::datatype::enumeration< pbes_output_format >());
-
-  output_format_enumeration->add(readable, "readable").add(normal, "normal");
-
-  end_phase_enumeration.reset(new tipi::datatype::enumeration< t_phase >());
-
-  end_phase_enumeration->add(PH_NONE, "none").
-                         add(PH_PARSE, "parse").
-                         add(PH_TYPE_CHECK, "type_check").
-                         add(PH_DATA_IMPL, "data_implementation").
-                         add(PH_REG_FRM_TRANS, "formula_translation");
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
@@ -260,8 +264,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
-  c.add_option(option_selected_output_format).replace_argument(0, output_format_enumeration, format_selector.get_selection());
-  c.add_option(option_end_phase).replace_argument(0, end_phase_enumeration, phase_selector.get_selection());
+  c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
+  c.add_option(option_end_phase).set_argument_value< 0 >(phase_selector.get_selection());
 
   send_clear_display();
 }

@@ -242,14 +242,14 @@ namespace mcrl2 {
       }
   
       /// \cond INTERNAL_DOCS
-      boost::shared_ptr < tipi::datatype::basic_enumeration > rewrite_strategy_enumeration;
-  
       static bool initialise() {
-        rewrite_strategy_enumeration.reset(new tipi::datatype::enumeration< RewriteStrategy >);
-        rewrite_strategy_enumeration->add(GS_REWR_INNER, "inner").
-                                      add(GS_REWR_INNERC, "innerc").
-                                      add(GS_REWR_JITTY, "jitty").
-                                      add(GS_REWR_JITTYC, "jittyc");
+        tipi::datatype::enumeration< RewriteStrategy > strategy_enumeration;
+
+        strategy_enumeration.
+          add(GS_REWR_INNER, "inner").
+          add(GS_REWR_INNERC, "innerc").
+          add(GS_REWR_JITTY, "jitty").
+          add(GS_REWR_JITTYC, "jittyc");
 
         return true;
       }

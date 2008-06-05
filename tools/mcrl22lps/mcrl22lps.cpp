@@ -54,19 +54,37 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr < tipi::datatype::basic_enumeration > linearisation_method_enumeration;
-
-    boost::shared_ptr < tipi::datatype::basic_enumeration > linearisation_phase_enumeration;
-
-  private:
-
     /** \brief compiles a t_lin_options instance from a configuration */
     bool extract_task_options(tipi::configuration const& c, t_lin_options&) const;
+
+    static bool initialise_types() {
+      tipi::datatype::enumeration< t_lin_method > method_enumeration;
+
+      method_enumeration.
+        add(lmRegular, "regular").
+        add(lmRegular2, "regular2").
+        add(lmStack, "expansion");
+
+      tipi::datatype::enumeration< t_phase > phase_enumeration;
+
+      phase_enumeration.
+        add(phNone, "all").
+        add(phParse, "parsing").
+        add(phTypeCheck, "type-checking").
+        add(phAlphaRed, "alphabet_reduction").
+        add(phDataImpl, "data_implementation");
+
+      return true;
+    }
 
   public:
 
     /** \brief constructor */
-    squadt_interactor();
+    squadt_interactor() {
+      static bool initialised = initialise_types();
+
+      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+    }
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -97,22 +115,6 @@ const char* option_no_sumelm                = "no_sumelm";
 const char* option_no_deltaelm              = "no_dataelm";
 const char* option_end_phase                = "end_phase";
 const char* option_add_delta                = "add_delta";
-
-squadt_interactor::squadt_interactor() {
-  linearisation_method_enumeration.reset(new tipi::datatype::enumeration< t_lin_method >);
-
-  linearisation_method_enumeration->add(lmRegular, "regular").
-                                    add(lmRegular2, "regular2").
-                                    add(lmStack, "expansion");
-
-  linearisation_phase_enumeration.reset(new tipi::datatype::enumeration< t_phase >);
-
-  linearisation_phase_enumeration->add(phNone, "all").
-                                   add(phParse, "parsing").
-                                   add(phTypeCheck, "type-checking").
-                                   add(phAlphaRed, "alphabet_reduction").
-                                   add(phDataImpl, "data_implementation");
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(mcrl2_file_for_input, tipi::mime_type("mcrl2", tipi::mime_type::text),
@@ -243,10 +245,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_linearisation_method).
-          append_argument(linearisation_method_enumeration, method_selector.get_selection());
+          append_argument(method_selector.get_selection());
 
   c.add_option(option_end_phase).
-          append_argument(linearisation_phase_enumeration, phase_selector.get_selection());
+          append_argument(phase_selector.get_selection());
 
   if (phase_selector.get_selection() != phNone) { // file will not be produced
     c.remove_output(lps_file_for_output);

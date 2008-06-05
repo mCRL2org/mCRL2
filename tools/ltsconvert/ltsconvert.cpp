@@ -436,15 +436,40 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       determinisation                             ///< determinisation
     };
 
-  private:
+    static bool initialise_types() {
+      tipi::datatype::enumeration< transformation_options > transformation_method_enumeration;
 
-    boost::shared_ptr < tipi::datatype::basic_enumeration > transformation_method_enumeration;
-    boost::shared_ptr < tipi::datatype::basic_enumeration > output_format_enumeration;
+      transformation_method_enumeration.
+        add(no_transformation, "none").
+        add(minimisation_modulo_strong_bisimulation, "modulo_strong_bisimulation").
+        add(minimisation_modulo_branching_bisimulation, "modulo_branching_bisimulation").
+        add(minimisation_modulo_trace_equivalence, "modulo_trace_equivalence").
+        add(minimisation_modulo_weak_trace_equivalence, "modulo_weak_trace_equivalence").
+        add(determinisation, "determinise");
+
+      tipi::datatype::enumeration< lts_output_format > output_format_enumeration;
+
+      output_format_enumeration.
+        add(aldebaran, "Aldebaran").
+        add(svc_mcrl, "SVC_mCRL").
+        add(svc_mcrl2, "SVC_mCRL2").
+#ifdef MCRL2_BCG
+        add(bcg, "BCG").
+#endif
+        add(fsm, "FSM").
+        add(dot, "dot");
+
+        return true;
+      }
 
   public:
 
     /** \brief constructor */
-    squadt_interactor();
+    squadt_interactor() {
+      static bool initialised = initialise_types();
+
+      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+    }
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -458,28 +483,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration&);
 };
-
-squadt_interactor::squadt_interactor() {
-  transformation_method_enumeration.reset(new tipi::datatype::enumeration< transformation_options >());
-
-  transformation_method_enumeration->add(no_transformation, "none").
-                                     add(minimisation_modulo_strong_bisimulation, "modulo_strong_bisimulation").
-                                     add(minimisation_modulo_branching_bisimulation, "modulo_branching_bisimulation").
-                                     add(minimisation_modulo_trace_equivalence, "modulo_trace_equivalence").
-                                     add(minimisation_modulo_weak_trace_equivalence, "modulo_weak_trace_equivalence").
-                                     add(determinisation, "determinise");
-
-  output_format_enumeration.reset(new tipi::datatype::enumeration< lts_output_format >());
-
-  output_format_enumeration->add(aldebaran, "Aldebaran").
-                             add(svc_mcrl, "SVC_mCRL").
-                             add(svc_mcrl2, "SVC_mCRL2").
-#ifdef MCRL2_BCG
-                             add(bcg, "BCG").
-#endif
-                             add(fsm, "FSM").
-                             add(dot, "dot");
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::conversion);
@@ -641,8 +644,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   transformation_options selected_transformation = transformation_selector.get_selection();
 
-  c.add_option(option_selected_transformation).append_argument(transformation_method_enumeration, selected_transformation);
-  c.add_option(option_selected_output_format).append_argument(output_format_enumeration, format_selector.get_selection());
+  c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
+  c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
   
   if ((selected_transformation == minimisation_modulo_strong_bisimulation ||
        selected_transformation == minimisation_modulo_branching_bisimulation)) {

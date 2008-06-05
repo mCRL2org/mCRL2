@@ -47,12 +47,21 @@ const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
 const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
 const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
-static boost::shared_ptr < tipi::datatype::basic_enumeration > exploration_strategy_enumeration; 
+static bool initialise_types() {
+  tipi::datatype::enumeration< exploration_strategy > exploration_enumeration;
+
+  exploration_enumeration.
+    add(es_breadth, "breadth-first").
+    add(es_depth, "depth-first").
+    add(es_random, "random");
+
+  return true;
+}
 
 squadt_interactor::squadt_interactor() {
-  exploration_strategy_enumeration.reset(new tipi::datatype::enumeration< exploration_strategy >());
+  static bool initialised = initialise_types();
 
-  exploration_strategy_enumeration->add(es_breadth, "breadth-first").add(es_depth, "depth-first").add(es_random, "random");
+  static_cast< void > (initialised); // harmless, and prevents unused variable warnings
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {
@@ -152,8 +161,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
   
-  using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
-
   bool make_lts = c.get_category() == tipi::tool::category::transformation;
 
   /* Set default configuration, for unspecified options */
@@ -280,22 +287,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
     update_configuration(c);
   }
 
-  if (c.option_exists(option_rewrite_strategy)) {
-    c.get_option(option_rewrite_strategy).set_argument_value< 0,
-         tipi::datatype::enumeration< RewriteStrategy > >(rewrite_strategy_selector.get_selection());
+  if (!c.option_exists(option_rewrite_strategy)) {
+    c.add_option(option_rewrite_strategy);
   }
-  else {
-    c.add_option(option_rewrite_strategy).append_argument(rewrite_strategy_enumeration, rewrite_strategy_selector.get_selection());
-  }
-
-  if (c.option_exists(option_exploration_strategy)) {
-    c.get_option(option_exploration_strategy).set_argument_value< 0,
-         tipi::datatype::enumeration< exploration_strategy > >(exploration_strategy_selector.get_selection());
-  }
-  else {
-    c.add_option(option_exploration_strategy).append_argument(exploration_strategy_enumeration, exploration_strategy_selector.get_selection());
+  if (!c.option_exists(option_exploration_strategy)) {
+    c.add_option(option_exploration_strategy);
   }
 
+  c.get_option(option_rewrite_strategy).set_argument_value< 0 >(rewrite_strategy_selector.get_selection());
+  c.get_option(option_exploration_strategy).set_argument_value< 0 >(exploration_strategy_selector.get_selection());
   c.add_option(option_detect_deadlock).set_argument_value< 0, tipi::datatype::boolean >(cb_deadlock.get_status());
 
   if (cb_actions.get_status() && !tf_actions.get_text().empty()) {

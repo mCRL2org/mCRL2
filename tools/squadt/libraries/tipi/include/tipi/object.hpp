@@ -80,7 +80,6 @@ namespace tipi {
         m_location = l;
       }
   };
-
 }
 
 #endif

@@ -41,14 +41,34 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    boost::shared_ptr< tipi::datatype::basic_enumeration > determinism_equivalence_enumeration;
-
     /** \brief compiles a tool_options instance from a configuration */
     bool extract_task_options(tipi::configuration const& c, tool_options&) const;
 
+    static bool initialise_types() {
+      using namespace mcrl2::lts;
+  
+      tipi::datatype::enumeration< lts_equivalence > determinism_equivalence_enumeration;
+  
+      determinism_equivalence_enumeration.
+        add(lts_eq_none, "none").
+        add(lts_eq_bisim, "bisimilarity").
+        add(lts_eq_branching_bisim, "branching-bisimilarity").
+        add(lts_eq_sim, "strong-simulation").
+        add(lts_eq_trace, "trace").
+        add(lts_eq_weak_trace, "weak-trace").
+        add(lts_eq_isomorph, "isomorphism");
+
+      return true;
+    }
+
   public:
+
     /** \brief constructor */
-    squadt_interactor();
+    squadt_interactor() {
+      static bool initialised = initialise_types();
+
+      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+    }
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
@@ -65,20 +85,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
 const char* lts_file_for_input  = "lts_in";
 const char* option_determinism_equivalence = "determinism_equivalence";
-
-squadt_interactor::squadt_interactor() {
-  using namespace mcrl2::lts;
-
-  determinism_equivalence_enumeration.reset(new tipi::datatype::enumeration< lts_equivalence >);
-
-  determinism_equivalence_enumeration->add(lts_eq_none, "none").
-       add(lts_eq_bisim, "bisimilarity").
-       add(lts_eq_branching_bisim, "branching-bisimilarity").
-       add(lts_eq_sim, "strong-simulation").
-       add(lts_eq_trace, "trace").
-       add(lts_eq_weak_trace, "weak-trace").
-       add(lts_eq_isomorph, "isomorphism");
-}
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::reporting);
@@ -103,7 +109,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   tipi::layout::tool_display d;
 
   // Helper for linearisation method selection
-  mcrl2::utilities::squadt::radio_button_helper < mcrl2::lts::lts_equivalence > determinism_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_equivalence > determinism_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
@@ -132,8 +138,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Wait for the OK button to be pressed */
   okay_button.await_change();
 
-  c.add_option(option_determinism_equivalence).
-          append_argument(determinism_equivalence_enumeration, determinism_selector.get_selection());
+  c.add_option(option_determinism_equivalence). set_argument_value< 0 >(determinism_selector.get_selection());
 
   send_clear_display();
 }

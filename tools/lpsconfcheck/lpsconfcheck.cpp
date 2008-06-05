@@ -171,9 +171,12 @@ const char* option_rewrite_strategy    = "rewrite_strategy";
 const char* option_smt_solver          = "smt_solver";
 
 squadt_interactor::squadt_interactor() {
-  smt_solver_enumeration.reset(new tipi::datatype::enumeration("none"));
+  tipi::datatype::enumeration< SMT_Solver_Type > smt_solver_enumeration;
 
-  *smt_solver_enumeration % "ario" % "cvc";
+  smt_solver_enumeration.
+    add(solver_type_cvc_fast, "none")
+    add(solver_type_ario, "ario")
+    add(solver_type_cvc, "cvc");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -265,8 +268,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values for options if the configuration specifies them
   if (c.option_exists(option_rewrite_strategy)) {
-    strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        c.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+    strategy_selector.set_selection(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
   if (c.option_exists(option_invariant)) {
     invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
@@ -315,8 +317,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_time_limit).set_argument_value< 0, tipi::datatype::natural >(time_limit.get_text());
   }
 
-  c.get_option(option_rewrite_strategy).replace_argument(0, rewrite_strategy_enumeration, strategy_selector.get_selection());
-  c.get_option(option_smt_solver).replace_argument(0, smt_solver_enumeration, solver_selector.get_selection());
+  c.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
+  c.get_option(option_smt_solver).set_argument_value< 0 >(solver_selector.get_selection());
 
   send_clear_display();
 }

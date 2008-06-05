@@ -136,7 +136,7 @@ void report_exchange() {
   config->add_input(input_file, "text/mcrl2", "examples/abp.mcrl2");
   config->add_output(output_file, "text/plain", "/etc/passwd");
 
-  tipi::option::ptr t = config->get_option(f_option);
+  tipi::configuration::option::ptr t = config->get_option(f_option);
 
   /* The option has a URI as argument */
 //  t.append_argument(tipi::datatype::uri, std::string("/bin/bash"));

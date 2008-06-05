@@ -97,12 +97,12 @@ namespace squadt {
     }
     
     void project::builder::process(wxTimerEvent&) {
-      std::deque < boost::function< void () > > local_tasks;
-
-      local_tasks.swap(tasks);
-
-      if (0 < local_tasks.size()) {
+      if (0 < tasks.size()) {
         timer.Stop();
+
+        std::deque < boost::function< void () > > local_tasks;
+
+        local_tasks.swap(tasks);
 
         do {
           for (std::deque < boost::function< void () > >::const_iterator task = local_tasks.begin(); task != local_tasks.end(); ++task) {

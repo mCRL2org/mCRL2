@@ -13,6 +13,8 @@
 
 
 #include <boost/shared_ptr.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_enum.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #ifndef NDEBUG
@@ -109,24 +111,21 @@ namespace tipi {
         return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
       }
 
-      /** \brief Append to the type (option takes an additional argument of the specified type) */
-      void append_type(boost::shared_ptr< datatype::basic_datatype > const&);
-
-      /** \brief Append to the type (option takes an additional argument of the specified type) */
-      template < typename S >
-      void append_type();
-
       /** \brief Append type and instance ... */
       template < typename S, typename T >
       void append_argument(boost::shared_ptr< S > const&, T const&);
 
       /** \brief Append type and instance ... */
-      template < typename S, typename T >
-      void append_argument(T const&);
+      template < typename T >
+      typename boost::enable_if_c< boost::is_enum< T >::value, void >::type option::append_argument(T const& d);
 
-      /** \brief Special function to set/replace the value first argument ... */
+      /** \brief Special function to set/replace the value of an argument ... */
       template < unsigned int n, typename S, typename T >
       void set_argument_value(T const&, bool = true);
+
+      /** \brief Special function to set/replace the value of an argument ... */
+      template < unsigned int n, typename T >
+      inline typename boost::enable_if_c< boost::is_enum< T >::value, void >::type set_argument_value(T const& t);
 
       /** \brief Replace an argument (type and instance) ... */
       template < typename T >
@@ -157,19 +156,6 @@ namespace tipi {
     return (m_arguments[n].first->evaluate< T >(m_arguments[n].second));
   }
 
-  inline void configuration::option::append_type(boost::shared_ptr< datatype::basic_datatype > const& t) {
-    assert(t.get() != 0);
-
-    m_arguments.push_back(std::make_pair(t, ""));
-  }
-
-  template < typename S >
-  inline void configuration::option::append_type() {
-    boost::shared_ptr < S > p(new S);
-
-    m_arguments.push_back(std::make_pair(p, ""));
-  }
-
   /**
    * \param[in] t smart pointer to the data type definition
    * \param[in] d data that must be an instance of the chosen data type
@@ -197,11 +183,11 @@ namespace tipi {
   /**
    * \param[in] d data that must be an instance of the chosen data type
    **/
-  template < typename S, typename T >
-  inline void configuration::option::append_argument(T const& d) {
-    boost::shared_ptr< S > p(new S);
+  template < typename T >
+  inline typename boost::enable_if_c< boost::is_enum< T >::value, void >::type configuration::option::append_argument(T const& d) {
+    boost::shared_ptr< datatype::basic_datatype > p(new datatype::enumeration< T >);
 
-    append_argument< S, T >(p, d);
+    append_argument(p, d);
   }
 
   /**
@@ -218,8 +204,22 @@ namespace tipi {
       }
     }
     else {
-      append_argument< S >(t);
+      append_argument(boost::shared_ptr< S >(new S), t);
     }
+  }
+
+  /**
+   * \param[in] t pointer to the data type definition
+   * \param[in] b whether or not to add if the argument is already present
+   * \pre n <= m_arguments.size()
+   **/
+  template < unsigned int n, typename T >
+  inline typename boost::enable_if_c< boost::is_enum< T >::value, void >::type
+         configuration::option::set_argument_value(T const& t) {
+
+    assert(n <= m_arguments.size());
+
+    set_argument_value< n, datatype::enumeration< T >, T >(t, true);
   }
 
   /**

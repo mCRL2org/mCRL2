@@ -98,9 +98,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   if (!configuration.output_exists(lps_file_for_output)) {
     configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
   }
-  if (!configuration.option_exists(option_rewrite_strategy)) {
-    configuration.add_option(option_rewrite_strategy).append_argument(mcrl2::utilities::squadt::rewrite_strategy_enumeration, 0);
-  }
   if (!configuration.option_exists(option_tau_only)) {
     configuration.add_option(option_tau_only).
        set_argument_value< 0, tipi::datatype::boolean >(true, false);
@@ -140,8 +137,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
     append(okay_button, layout::right);
 
   if (configuration.option_exists(option_rewrite_strategy)) {
-    strategy_selector.set_selection(static_cast < RewriteStrategy > (
-        configuration.get_option_argument< size_t >(option_rewrite_strategy, 0)));
+    strategy_selector.set_selection(configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
   
   send_display_layout(d.set_manager(m));
@@ -154,7 +150,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   configuration.get_option(option_finite_only).
      set_argument_value< 0, tipi::datatype::boolean >(finite_only.get_status());
 
-  configuration.get_option(option_rewrite_strategy).replace_argument(0, mcrl2::utilities::squadt::rewrite_strategy_enumeration, strategy_selector.get_selection());
+  configuration.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& configuration) const

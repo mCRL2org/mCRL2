@@ -14,6 +14,7 @@
 #include <boost/foreach.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <tipi/detail/utility/generic_visitor.hpp>
 #include "tipi/visitors.hpp"

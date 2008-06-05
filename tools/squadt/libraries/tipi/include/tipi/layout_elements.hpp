@@ -252,7 +252,7 @@ namespace tipi {
         private:
      
           /** \brief The text to be displayed initially */
-          std::string          m_text;
+          std::string                         m_text;
      
           /** \brief Type for validation purposes */
           boost::shared_ptr< basic_datatype > m_type;

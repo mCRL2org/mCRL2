@@ -18,14 +18,9 @@
 #include <map>
 
 #include <boost/any.hpp>
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/integer_traits.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
-#include <boost/type_traits/is_integral.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
 
 #include "tipi/visitors.hpp"
 
@@ -67,7 +62,13 @@ namespace tipi {
         /** \brief Converts to underlying type */
         template < typename T >
         inline typename boost::enable_if_c< boost::is_enum< T >::value, T >::type evaluate(std::string const& s) const {
-          return static_cast< T > (boost::any_cast< size_t >(specialised_evaluate(s)));
+          boost::any result(specialised_evaluate(s));
+
+          if (result.type() == typeid(size_t)) {
+            return static_cast< T > (boost::any_cast< size_t >(result));
+          }
+
+          return boost::any_cast< T >(result);
         }
 
         /** \brief Establishes whether value is valid for an element of this type */
@@ -147,7 +148,7 @@ namespace tipi {
 
         /** \brief Converts from the underlying implementation type */
         std::string specialised_convert(boost::any const& v) const {
-          return convert(boost::any_cast< C >(v));
+          return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
         }
 
         basic_enumeration::const_iterator_range values() const {
@@ -168,7 +169,7 @@ namespace tipi {
         }
 
         std::string convert(C const& s) const {
-          return get_single_instance().convert(s);
+          return get_single_instance().convert(static_cast< const size_t > (s));
         }
 
         bool validate(std::string const& s) const {

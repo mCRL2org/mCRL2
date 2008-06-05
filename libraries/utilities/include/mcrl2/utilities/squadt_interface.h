@@ -23,6 +23,7 @@
 #ifndef NO_MCRL2_TOOL_FACILITIES
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #endif
 
@@ -329,9 +330,6 @@ namespace mcrl2 {
 #endif
       };
 
-      /** \brief Standard type for communication of rewrite strategy */
-      extern boost::shared_ptr < tipi::datatype::basic_enumeration > rewrite_strategy_enumeration;
-  
       /// \brief Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
         char buf[21];
