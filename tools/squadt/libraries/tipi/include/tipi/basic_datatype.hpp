@@ -117,6 +117,62 @@ namespace tipi {
     };
 
     template < typename C = size_t >
+    class enumeration;
+
+    template < >
+    class enumeration< size_t > : public basic_enumeration {
+      template < typename V, typename R, typename S >
+      friend class ::utility::visitor;
+
+      template < typename T >
+      friend class enumeration;
+
+      public:
+
+        /** \brief POD type used for implementation */
+        typedef std::string implementation_type;
+
+      private:
+        
+        /** \brief The possible values in the domain */
+        std::map < size_t, std::string > m_values;
+
+      protected:
+
+        /** \brief Converts to underlying type */
+        inline boost::any specialised_evaluate(std::string const& s) const {
+          return evaluate(s);
+        }
+
+        /** \brief Converts from the underlying implementation type */
+        inline std::string specialised_convert(boost::any const& v) const {
+          return convert(boost::any_cast< size_t >(v));
+        }
+
+        inline basic_enumeration::const_iterator_range values() const {
+          return std::make_pair(m_values.begin(), m_values.end());
+        }
+
+      public:
+        
+        /** \brief Add value
+         * \param[in] v value of the chosen carrier type
+         * \param[in] s any string
+         * \return *this
+         **/
+        enumeration< size_t >& add(const size_t v, std::string const& s);
+
+        std::string convert(size_t const& s) const;
+
+        bool validate(std::string const& s) const;
+
+        /** \brief Converts a string to an index representation
+         * \param[in] s the string to evaluate
+         **/
+        size_t evaluate(std::string const& s) const;
+    };
+
+    template < typename C >
     class enumeration : public basic_enumeration {
       template < typename V, typename R, typename S >
       friend class ::utility::visitor;
@@ -183,60 +239,6 @@ namespace tipi {
           return static_cast < C > (get_single_instance().evaluate(s));
         }
     };
-
-    template < >
-    class enumeration< size_t > : public basic_enumeration {
-      template < typename V, typename R, typename S >
-      friend class ::utility::visitor;
-
-      template < typename T >
-      friend class enumeration;
-
-      public:
-
-        /** \brief POD type used for implementation */
-        typedef std::string implementation_type;
-
-      private:
-        
-        /** \brief The possible values in the domain */
-        std::map < size_t, std::string > m_values;
-
-      protected:
-
-        /** \brief Converts to underlying type */
-        inline boost::any specialised_evaluate(std::string const& s) const {
-          return evaluate(s);
-        }
-
-        /** \brief Converts from the underlying implementation type */
-        inline std::string specialised_convert(boost::any const& v) const {
-          return convert(boost::any_cast< size_t >(v));
-        }
-
-        inline basic_enumeration::const_iterator_range values() const {
-          return std::make_pair(m_values.begin(), m_values.end());
-        }
-
-      public:
-        
-        /** \brief Add value
-         * \param[in] v value of the chosen carrier type
-         * \param[in] s any string
-         * \return *this
-         **/
-        enumeration< size_t >& add(const size_t v, std::string const& s);
-
-        std::string convert(size_t const& s) const;
-
-        bool validate(std::string const& s) const;
-
-        /** \brief Converts a string to an index representation
-         * \param[in] s the string to evaluate
-         **/
-        size_t evaluate(std::string const& s) const;
-    };
-
 
     /**
      * \brief Base class for ranges of integers

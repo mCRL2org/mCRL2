@@ -117,7 +117,7 @@ namespace tipi {
 
       /** \brief Append type and instance ... */
       template < typename T >
-      typename boost::enable_if_c< boost::is_enum< T >::value, void >::type option::append_argument(T const& d);
+      typename boost::enable_if_c< boost::is_enum< T >::value, void >::type append_argument(T const& d);
 
       /** \brief Special function to set/replace the value of an argument ... */
       template < unsigned int n, typename S, typename T >
