@@ -37,7 +37,7 @@ namespace detail {
   inline
   ATermAppl parse_state_formula(std::istream& from)
   {
-    ATermAppl result = core::detail::parse_state_frm(from);
+    ATermAppl result = core::parse_state_frm(from);
     if (result == NULL)
       throw mcrl2::runtime_error("parse error in parse_state_frm()");
     return result;
@@ -50,7 +50,7 @@ namespace detail {
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
-    ATermAppl result = core::detail::type_check_state_frm(formula, spec);
+    ATermAppl result = core::type_check_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("type check error");
     return result;
@@ -64,7 +64,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = core::detail::implement_data_state_frm(formula, spec);
+    ATermAppl result = core::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -73,7 +73,7 @@ namespace detail {
   inline
   state_formula translate_regular_formula(ATermAppl formula)
   {
-    ATermAppl result = core::detail::translate_reg_frms(formula);
+    ATermAppl result = core::translate_reg_frms(formula);
     if (result == NULL)
       throw mcrl2::runtime_error("formula translation error");
     return result;
@@ -87,7 +87,7 @@ namespace detail {
     std::stringstream formula_stream;
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
-    ATermAppl reconstructed_spec = mcrl2::core::detail::reconstruct_spec(spec);
+    ATermAppl reconstructed_spec = mcrl2::core::reconstruct_spec(spec);
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
