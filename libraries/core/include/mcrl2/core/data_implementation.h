@@ -8,8 +8,7 @@
 //
 /// \file data_implementation.h
 ///
-/// \brief A library for specifying data types in a 
-/// specification as higher order data types.
+/// \brief Implement data types in type checked mCRL2 specifications and expressions.
 ///
 /// \pre Global preconditions:
 ///      - the ATerm library has been initialised
@@ -26,134 +25,181 @@ namespace mcrl2 {
   namespace core {
 
 
-/// \pre spec represents an mCRL2 data specification that adheres to the
-///     internal ATerm structure after the type checking phase.
-/// \post The datatypes of spec are implemented as higher-order abstract data
-///     types.
-/// \return if the data implementation went well, an equivalent version of spec is
-///     returned that adheres to the internal ATerm structure after data
-///     implementation.
-///     If something went wrong, an appropriate error message is printed and
-///     NULL is returned.
+/** \brief     Implement data types of a type checked mCRL2 data
+ *             specification.
+ *  \param[in] spec An ATerm representation of an mCRL2 data
+ *             specification that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \post      The datatypes of spec are implemented as higher-order
+ *             abstract data types.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of spec is returned that adheres to the internal
+ *             ATerm structure after data implementation.  If something
+ *             went wrong, an appropriate error message is printed and
+ *             NULL is returned.
+ **/
 ATermAppl implement_data_data_spec(ATermAppl spec);
 
 
-/// \pre spec represents an mCRL2 process specification that adheres to the
-///     internal ATerm structure after the type checking phase.
-/// \post The datatypes of spec are implemented as higher-order abstract data
-///     types.
-/// \return if the data implementation went well, an equivalent version of spec is
-///     returned that adheres to the internal ATerm structure after data
-///     implementation.
-///     If something went wrong, an appropriate error message is printed and
-///     NULL is returned.
+/** \brief     Implement data types of a type checked mCRL2 process
+ *             specification.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \post      The datatypes of spec are implemented as higher-order
+ *             abstract data types.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of spec is returned that adheres to the internal
+ *             ATerm structure after data implementation.  If something
+ *             went wrong, an appropriate error message is printed and
+ *             NULL is returned.
+**/
 ATermAppl implement_data_proc_spec(ATermAppl spec);
 
 
-/// \pre spec represents a PBES specification that adheres to the
-///     internal ATerm structure after the type checking phase.
-/// \post The datatypes of spec are implemented as higher-order abstract data
-///     types.
-/// \return if the data implementation went well, an equivalent version of spec is
-///     returned that adheres to the internal ATerm structure after data
-///     implementation.
-///     If something went wrong, an appropriate error message is printed and
-///     NULL is returned.
+/** \brief     Implement data types of a type checked mCRL2 parameterised
+ *             boolean equation system (PBES) specification.
+ *  \param[in] spec An ATerm representation of an mCRL2 PBES
+ *             specification that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \post      The datatypes of spec are implemented as higher-order
+ *             abstract data types.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of spec is returned that adheres to the internal
+ *             ATerm structure after data implementation.  If something
+ *             went wrong, an appropriate error message is printed and
+ *             NULL is returned.
+**/
 ATermAppl implement_data_pbes_spec(ATermAppl spec);
 
 
-/** \pre sort_expr represents a sort expression that adheres to the internal
- *     ATerm structure after the type checking phase.
- *     spec represents an LPS specification, a PBES or a data specification in
- *     the internal format before data implementation.
- * \post The datatypes of sort_expr are implemented as higher-order abstract data
- *     types in spec
- *     spec is updated to be the equivalent of spec in the internal format after
- *     data implementation.
- * \return if the data implementation went well, an equivalent version of sort_expr
- *     is returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 sort
+ *             expression with respect to a type checked mCRL2
+ *             specification.
+ *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
+ *             expression that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \post      The data types of sort_expr are implemented as
+ *             higher-order abstract data types in spec.
+ *             spec is updated to be the equivalent of spec in the
+ *             internal format after data implementation.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of sort_expr is returned that adheres to the
+ *             internal ATerm structure after data implementation.  If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec);
 
 
-/** \pre data_expr represents a data expression that adheres to the internal
- *     ATerm structure after the type checking phase.
- *     spec represents an LPS specification before data implementation
- * \post The datatypes of spec are implemented as higher-order abstract data
- *     types.
- * \return if the data implementation went well, an equivalent version of data_expr
- *     is returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 data expression
+ *             with respect to a type checked mCRL2 specification.
+ *  \param[in] data_expr An ATerm representation of an mCRL2 data
+ *             expression that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \post      The data types of data_expr are implemented as
+ *             higher-order abstract data types in spec.
+ *             spec is updated to be the equivalent of spec in the
+ *             internal format after data implementation.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of data_expr is returned that adheres to the
+ *             internal ATerm structure after data implementation.  If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec);
 
 
-/** \pre mult_act represents a multiaction that adheres to the internal ATerm
- *     structure after the type checking phase.
- *     spec represents an LPS specification in the internal format before data
- *     implementation.
- * \post The datatypes of spec are implemented as higher-order abstract data
- *     types in spec
- * \return if the data implementation went well, an equivalent version of mult_act
- *     is returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 multiaction
+ *             with respect to a type checked mCRL2 specification.
+ *  \param[in] mult_act An ATerm representation of an mCRL2 multiaction
+ *             that adheres to the internal ATerm structure after the
+ *             type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \post      The data types of mult_act are implemented as
+ *             higher-order abstract data types in spec.
+ *             spec is updated to be the equivalent of spec in the
+ *             internal format after data implementation.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of mult_act is returned that adheres to the
+ *             internal ATerm structure after data implementation.  If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec);
 
 
-/** \pre proc_expr represents a process expression that adheres to the internal
- *     ATerm structure after the type checking phase.
- *     spec represents an LPS specification, a PBES or a data specification in
- *     the internal format before data implementation.
- * \post The datatypes of proc_expr are implemented as higher-order abstract data
- *     types in spec
- * \return if the data implementation went well, an equivalent version of proc_expr
- *     is returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 process
+ *             expression with respect to a type checked mCRL2
+ *             specification.
+ *  \param[in] proc_expr An ATerm representation of an mCRL2 process
+ *             expression that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \post      The data types of proc_expr are implemented as
+ *             higher-order abstract data types in spec.
+ *             spec is updated to be the equivalent of spec in the
+ *             internal format after data implementation.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of proc_expr is returned that adheres to the
+ *             internal ATerm structure after data implementation.  If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec);
 
 
-/** \pre state_frm represents a state formula that adheres to the internal ATerm
- *     structure after the type checking phase.
- *     spec represents either an LPS specification, a PBES or a data
- *     specification, all before data implementation
- * \post The datatypes of spec are implemented as higher-order abstract data
- *     types in spec
- * \return if the data implementation went well, an equivalent version of state_frm
- *     is returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 state formula
+ *             with respect to a type checked mCRL2 specification.
+ *  \param[in] state_frm An ATerm representation of an mCRL2 state
+ *             formula that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \post      The data types of state_frm are implemented as
+ *             higher-order abstract data types in spec.
+ *             spec is updated to be the equivalent of spec in the
+ *             internal format after data implementation.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of state_frm is returned that adheres to the
+ *             internal ATerm structure after data implementation.  If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
 
 
-/** \pre ar_spec represents an action rename specification that
- *     adheres to the internal ATerm structure after the type checking fase.
- *     lps_spec represents an LPS specification in the internal format before
- *     data implementation.
- * \post The datatypes in action_rename_spec are implemented as higher-order
- *     abstract data types types and the data types of lps_spec are added
- *     to the data types of ar_spec.
- *     The datatypes of lps_spec are implemented as higher-order abstract data
- *     types in lps_spec
- * \return if the data implementation went well, an equivalent version of
- *     ar_spec is returned that adheres to the internal ATerm
- *     structure after data implementation, also containing the data
- *     specification of lps_spec
- *     If something went wrong, an appropriate error message is printed and
- *     NULL is returned.
- **/
+/** \brief     Implement data types of a type checked mCRL2 action rename
+ *             specification with respect to a type checked mCRL2 linear
+ *             process specification (LPS).
+ *  \param[in] ar_spec An ATerm representation of an mCRL2 action rename
+ *             specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after the type checking phase.
+ *  \post      The data types in action_rename_spec are implemented as
+ *             higher-order abstract data types types and the data types
+ *             of lps_spec are added to the data types of ar_spec.  The
+ *             datatypes of lps_spec are implemented as higher-order
+ *             abstract data types in lps_spec
+ *  \return    If the data implementation went well, an equivalent
+ *             version of ar_spec is returned that adheres to the
+ *             internal ATerm structure after data implementation, also
+ *             containing the data specification of lps_spec If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
 ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec);
 
 

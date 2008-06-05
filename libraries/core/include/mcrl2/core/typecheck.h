@@ -8,7 +8,7 @@
 //
 /// \file typecheck.h
 ///
-/// \brief A library for type checking (parts of) the internal mCRL2 data structure.
+/// \brief Type check parsed mCRL2 specifications and expressions.
 
 #ifndef PARSER_TYPECHECK_H
 #define PARSER_TYPECHECK_H
@@ -21,149 +21,197 @@ namespace mcrl2 {
 //Global preconditions:
 //- the ATerm library has been initialised
 
-/** \pre  data_spec represents an mCRL2 data specification that adheres to
- *      the initial internal ATerm structure.
- * \post data_spec is type checked.
- * \return  if type checking went well, an equivalent version of data_spec is
- *      returned that adheres to the internal ATerm structure after type
- *      checking. if something went wrong, an appropriate error message is
- *      printed and NULL is returned.
+/** \brief     Type check a parsed mCRL2 data specification.
+ *  \param[in] data_spec An ATerm representation of an mCRL2 data
+ *             specification that adheres to the initial internal ATerm
+ *             structure.
+ *  \post      data_spec is type checked.
+ *  \return    If type checking went well, an equivalent version of
+ *             data_spec is returned that adheres to the internal ATerm
+ *             structure after type checking. If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_data_spec(ATermAppl data_spec);
 
-/** \pre  proc_spec represents an mCRL2 process specification that adheres to
- *      the initial internal ATerm structure.
- * \post proc_spec is type checked.
- * \return  if type checking went well, an equivalent version of proc_spec is
- *      returned that adheres to the internal ATerm structure after type
- *      checking. if something went wrong, an appropriate error message is
- *      printed and NULL is returned.
+/** \brief     Type check a parsed mCRL2 process specification.
+ *  \param[in] proc_spec An ATerm representation of an mCRL2 process
+ *             specification that adheres to the initial internal ATerm
+ *             structure.
+ *  \post      proc_spec is type checked.
+ *  \return    If type checking went well, an equivalent version of
+ *             proc_spec is returned that adheres to the internal ATerm
+ *             structure after type checking. If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_proc_spec(ATermAppl proc_spec);
 
 
-/** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
- *      initial internal ATerm structure.
- *      spec represents an LPS specification, a PBES or a data specification
- *      in the internal format before data implementation.
- * \post sort_expr is type checked using the declaration from spec
- * \return  if type checking went well, an equivalent version of sort_expr is
- *      returned that adheres to the internal ATerm structure after type
- *      checking. if something went wrong, an appropriate error message is
- *      printed and NULL is returned.
+/** \brief     Type check a parsed mCRL2 parameterised boolean equation
+ *             system (PBES) specification.
+ *  \param[in] pbes_spec An ATerm representation of an mCRL2 PBES
+ *             specification that adheres to the initial internal ATerm
+ *             structure.
+ *  \post      pbes_spec is type checked.
+ *  \return    If type checking went well, an equivalent version of
+ *             pbes_spec is returned that adheres to the internal ATerm
+ *             structure after type checking. If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
+ **/
+ATermAppl type_check_pbes_spec(ATermAppl pbes_spec);
+
+
+/** \brief     Type check a parsed mCRL2 sort expression with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
+ *             expression that adheres to the initial internal ATerm
+ *             structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
+ *             data specification that adheres to the internal ATerm
+ *             structure after type checking.
+ *  \post      sort_expr is type checked using the declaration from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             sort_expr is returned that adheres to the internal ATerm
+ *             structure after type checking. if something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
 
 
-/** \pre  sort_expr represents an mCRL2 sort expression that adheres to the
- *      initial internal ATerm structure.
- *      spec represents a (partial) mCRL2 specification that adheres to the initial
- *      internal ATerm structure (without init).
- * \post sort_expr is type checked using the declaration from spec
- * \return  if type checking went well, an equivalent version of sort_expr is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 sort expression with respect to a
+ *             type checked partial mCRL2 specification.
+ *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
+ *             expression that adheres to the initial internal ATerm
+ *             structure.
+ *  \param[in] spec An ATerm representation of a (partial) mCRL2
+ *             specification that adheres to the initial internal ATerm structure
+ *             (without init).
+ *  \post      sort_expr is type checked using the declaration from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             sort_expr is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec=NULL);
 
 
-/** \pre  data_expr represents an mCRL2 data expression that adheres to the
- *      initial internal ATerm structure.
- *      sort_expr represents an mCRL2 sort expression that adheres to the
- *      internal ATerm structure after type checking or is NULL.
- *      spec represents an LPS specification, a PBES or a data specification in
- *      the format before data implementation.
- *      Vars contains any extra variables that can be used in the data expression
- * \post data_expr is type checked using the declaration from spec and, if
- *      sort_expr is not NULL, it is type checked as being of type sort_expr
- * \return  if type checking went well, an equivalent version of data_expr is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 data expression with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] data_expr An ATerm representation of an mCRL2 data
+ *             expression that adheres to the initial internal ATerm
+ *             structure.
+ *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
+ *             expression that adheres to the internal ATerm structure
+ *             after type checking, or NULL.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES, or
+ *             data specification that adheres to the internal ATerm
+ *             structure after type checking.
+ *  \param[in] Vars A table of variables that may occur in the data expression.
+ *  \post      data_expr is type checked using the declaration from spec
+ *             and, if sort_expr is not NULL, it is type checked as
+ *             being of type sort_expr.
+ *  \return    If type checking went well, an equivalent version of
+ *             data_expr is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars=NULL);
 
 
-/** \pre  data_expr represents an mCRL2 data expression that adheres to the
- *      initial internal ATerm structure.
- *      sort_expr represents an mCRL2 sort expression that adheres to the
- *      internal ATerm structure after type checking.
- *      spec represents a (partial) mCRL2 specification that adheres to the initial
- *      internal ATerm structure (without init).
- * \post data_expr is type checked as being of type sort_expr using the
- *      declaration from spec
- * \return  if type checking went well, an equivalent version of data_expr is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 data expression with respect to a
+ *             type checked partial mCRL2 specification.
+ *  \param[in] data_expr An ATerm representation of an mCRL2 data
+ *             expression that adheres to the initial internal ATerm
+ *             structure.
+ *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
+ *             expression that adheres to the internal ATerm structure
+ *             after type checking, or NULL.
+ *  \param[in] spec An ATerm representation of a partial (without init)
+ *             mCRL2 LPS, PBES, or data specification that adheres to
+ *             the internal ATerm structure after type checking.
+ *  \param[in] Vars A table of variables that may occur in the data expression.
+ *  \post      data_expr is type checked as being of type sort_expr using the
+ *             declaration from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             data_expr is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec=NULL, ATermTable Vars=NULL);
 
 
-/** \pre  mult_act represents an mCRL2 multi-action that adheres to the initial
- *      internal ATerm structure.
- *      spec represents an LPS specification in
- *      the internal format before data implementation.
- * \post mult_act is type checked using the declarations from spec
- * \return  if type checking went well, an equivalent version of mult_act is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 multiaction with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] mult_act An ATerm representation of an mCRL2 multiaction
+ *             that adheres to the initial internal ATerm structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after type checking.
+ *  \post      mult_act is type checked using the declarations from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             mult_act is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
 
 
-/** \pre  proc_expr represents an mCRL2 proc expression that adheres to the
- *      initial internal ATerm structure.
- *      spec represents an LPS specification, a PBES or a data specification in
- *      the internal format before data implementation.
- * \post proc_expr is type checked using the declaration from spec
- * \return  if type checking went well, an equivalent version of proc_expr is returned
- *      that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 process expression with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] proc_expr An ATerm representation of an mCRL2 process
+ *             expression that adheres to the initial internal ATerm structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after type checking.
+ *  \post      proc_expr is type checked using the declarations from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             proc_expr is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec);
 
 
-/** \pre  state_formula represents an mCRL2 state formula that adheres to the
- *      initial internal ATerm structure.
- *      spec represents either an LPS specification, or a PBES or a data
- *      specification, all before data implementation
- * \post state_formula is type checked using the declarations from lps_spec
- * \return  if type checking went well, an equivalent version of state_formula is
- *      returned that adheres to the internal ATerm structure after type
- *      checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 state formula with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] state_formula An ATerm representation of an mCRL2 state
+ *             formula that adheres to the initial internal ATerm structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after type checking.
+ *  \post      state_formula is type checked using the declarations from
+ *             lps_spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             state_formula is returned that adheres to the internal
+ *             ATerm structure after type checking.  If something went
+ *             wrong, an appropriate error message is printed and NULL
+ *             is returned.
  **/
 ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec);
 
 
-/** \pre  ar_spec represents an action rename specification that adheres to the
- *      initial internal ATerm structure.
- *      spec represents an LPS specification in the internal format before data
- *      implementation.
- * \post ar_spec is type checked using the declarations from spec and its
- *      own declarations
- * \return  if type checking went well, an equivalent version of ar_spec is returned
- *     that adheres to the internal ATerm structure after type checking.
- *      if something went wrong, an appropriate error message is printed and
- *      NULL is returned.
+/** \brief     Type check a parsed mCRL2 action rename specification with respect to a
+ *             type checked mCRL2 specification.
+ *  \param[in] ar_spec An ATerm representation of an mCRL2 action rename
+ *             specification formula that adheres to the initial
+ *             internal ATerm structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after type checking.
+ *  \post      ar_spec is type checked using the declarations from spec and its
+ *             own declarations.
+ *  \return    If type checking went well, an equivalent version of
+ *             ar_spec is returned that adheres to the internal ATerm
+ *             structure after type checking.  If something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
  **/
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl spec);
 
-
-/** \pre  pbes_spec represents a PBES specification that adheres to the
- *      initial internal ATerm structure.
- * \post pbes_spec is type checked.
- * \return  if type checking went well, an equivalent version of pbes_spec is
- *      returned that adheres to the internal ATerm structure after type
- *      checking. if something went wrong, an appropriate error message is
- *      printed and NULL is returned.
- **/
-ATermAppl type_check_pbes_spec(ATermAppl pbes_spec);
 
   }
 }

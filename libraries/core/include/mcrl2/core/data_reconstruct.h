@@ -8,7 +8,7 @@
 //
 /// \file data_reconstruct.h
 ///
-/// \brief This file contains the public interface of the data reconstruction.
+/// \brief Reconstruct data types from mCRL2 specification and expressions.
 
 
 #ifndef MCRL2_DATA_RECONSTRUCT_H
@@ -22,14 +22,34 @@ using namespace mcrl2::core::detail;
 namespace mcrl2 {
   namespace core {
 
-/// \brief Reconstructs as much of expr as possible to the mcrl2 format.
-/// \pre expr adheres to the internal format after data implementation
-///       spec, if provided, adheres to the internal format after data
-///       implementation.
+/// \brief     Reconstruct data types of an mCRL2 expression after data
+///            implementation with respect to a type checked mCRL2
+///            specification.
+/// \param[in] expr An ATerm representation of an mCRL2 expression that
+///            adheres to the internal ATerm structure after data
+///            implementation.
+/// \param[in] spec An ATerm representation of an mCRL2 specification that
+///            adheres to the internal ATerm structure after data
+///            implementation, or NULL.
+/// \post      The data types of expr are reconstructed with respect to spec.
+/// \return    If data reconstruction went well, an equivalent version
+///            of expr is returned that adheres to the internal ATerm
+///            structure after type checking.
+///            If something went wrong, an appropriate error message is printed
+///            and NULL is returned.
 ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 
-/// \brief Reconstruct spec (in the internal format after data implementation)
-///         to the mcrl2 format.
+/// \brief     Reconstruct data types of an mCRL2 specification
+///            after data implementation.
+/// \param[in] spec An ATerm representation of an mCRL2 specification
+///            that adheres to the internal ATerm structure after data
+///            implementation.
+/// \post      The data types of spec are reconstructed.
+/// \return    If data reconstruction went well, an equivalent version
+///            of spec is returned that adheres to the internal ATerm
+///            structure after type checking.
+///            If something went wrong, an appropriate error
+///            message is printed and NULL is returned.
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
   assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
