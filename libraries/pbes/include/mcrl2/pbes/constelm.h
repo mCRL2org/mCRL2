@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
+#include <sstream>
 #include <iostream>
 #include <utility>
 #include <deque>
