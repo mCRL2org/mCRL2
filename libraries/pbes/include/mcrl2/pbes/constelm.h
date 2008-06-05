@@ -21,6 +21,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/remove_parameters.h"
 
 namespace mcrl2 {
 
@@ -104,6 +105,21 @@ namespace pbes_system {
           return result;
         }
 
+        // Returns the indices of the constant parameters of this vertex.
+        std::vector<int> constant_parameter_indices() const
+        {
+          std::vector<int> result;
+          int index = 0;
+          for (data::data_variable_list::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i, index++)
+          {
+            if (is_constant(*i))
+            {
+              result.push_back(index);
+            }
+          }
+          return result;
+        }
+
         // Returns a string representation of the vertex.
         std::string to_string() const
         {
@@ -162,6 +178,24 @@ namespace pbes_system {
             }
           }
           return changed;
+        }
+
+        // Removes NaC constraints.
+        void remove_nac_constraints()
+        {
+          // See [Josuttis, "The C++ Standard Library" page 205]
+          constraint_map::iterator pos;
+          for (pos = constraints.begin(); pos != constraints.end(); )
+          {
+            if (non_constants.find(pos->first) != non_constants.end())
+            {
+              constraints.erase(pos++);
+            }
+            else
+            {
+              ++pos;
+            }
+          }
         }
       };
 
@@ -291,6 +325,7 @@ namespace pbes_system {
           print_vertices();
         }
 
+        // print the parameters that will be removed
         if (mcrl2::core::gsVerbose)
         {
           std::cout << "\nremoving the following constant parameters:" << std::endl;
@@ -303,6 +338,35 @@ namespace pbes_system {
               std::cout << "(" << pp(u.variable.name()) << ", " << pp(*j) << ")" << std::endl;
             }
           }
+        }
+        
+        // actually remove the parameters
+        std::map<core::identifier_string, std::vector<int> > to_be_removed;       
+        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          core::identifier_string name = i->variable().name();
+          vertex& v = m_vertices[name];
+          std::vector<int> r = v.constant_parameter_indices();
+          if (!r.empty())
+          {
+            to_be_removed[name] = r;
+          }
+        }
+        remove_parameters(p, to_be_removed);
+        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          core::identifier_string name = i->variable().name();
+          vertex& v = m_vertices[name];
+          v.remove_nac_constraints();
+          if (v.constraints.empty())
+          {
+            continue;
+          }
+          *i = pbes_equation(
+            i->symbol(),
+            i->variable(),
+            data::data_variable_map_replace(i->formula(), v.constraints)
+          );
         }
       }
   };
