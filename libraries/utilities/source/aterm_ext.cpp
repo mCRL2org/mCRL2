@@ -18,11 +18,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "workarounds.h"
 
-#ifdef __cplusplus
 namespace mcrl2 {
   namespace utilities {
-    extern "C" {
-#endif
 
 
       //Substitutions on ATerm's
@@ -213,9 +210,7 @@ namespace mcrl2 {
         }
         return result;
       }
-#ifdef __cplusplus
-    }
+
   }
 }
-#endif
 

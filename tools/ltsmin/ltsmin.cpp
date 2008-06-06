@@ -18,10 +18,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
-#ifdef __cplusplus
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
@@ -32,7 +30,6 @@ struct t_tool_options {
 };
 
 t_tool_options parse_command_line(int ac, char** av) {
-  using namespace mcrl2::utilities;
 
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE OUTFILE\n",
     "Minimise the LTS in the SVC format from INFILE using bisimulation reduction and save the resulting LTS to OUTFILE.\n"

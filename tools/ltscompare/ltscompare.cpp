@@ -20,8 +20,8 @@
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
-using namespace ::mcrl2::lts;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::lts;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 static const char *equivalent_string(lts_equivalence eq)

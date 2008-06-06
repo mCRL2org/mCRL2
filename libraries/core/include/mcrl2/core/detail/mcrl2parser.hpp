@@ -144,11 +144,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 
-#ifdef __cplusplus
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-#endif
 
 //Global precondition: the ATerm library has been initialised
 
@@ -200,13 +198,13 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 82 "mcrl2parser.yy"
+#line 80 "mcrl2parser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 210 "mcrl2parser.hpp"
+#line 208 "mcrl2parser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

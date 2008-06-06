@@ -30,9 +30,8 @@
 #define STRINGIFY(x) __STRINGIFY(x)
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 using namespace mcrl2::lts;
 
 ATermAppl *parse_action_list(const char *s, int *len)
@@ -64,7 +63,7 @@ ATermAppl *parse_action_list(const char *s, int *len)
   int i=0;
   while ( p != NULL )
   {
-    r[i] = gsString2ATermAppl(p);
+    r[i] = mcrl2::core::detail::gsString2ATermAppl(p);
     i++;
     p = strtok(NULL,",");
   }

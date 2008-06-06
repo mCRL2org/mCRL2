@@ -31,10 +31,8 @@
 #include <mcrl2/lps/binary.h>
 
 // For Aterm library extension functions
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 using namespace atermpp;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;

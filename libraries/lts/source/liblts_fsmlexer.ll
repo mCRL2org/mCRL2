@@ -15,9 +15,7 @@
 #include "liblts_fsmlexer.h"
 #include "mcrl2/liblts_fsmparser.hpp"
 
-#ifdef __cplusplus
 using namespace mcrl2::core;
-#endif
 
 //using namespace std;
 

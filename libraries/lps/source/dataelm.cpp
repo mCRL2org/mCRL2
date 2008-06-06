@@ -18,10 +18,8 @@
 #include <mcrl2/pbes/pbes.h>
 #include <mcrl2/data/data_variable.h>
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 using namespace mcrl2::data;
 using namespace mcrl2::lps;

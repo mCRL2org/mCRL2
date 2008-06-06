@@ -41,10 +41,8 @@
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-using namespace mcrl2;
 
 template <class T>
 inline std::string to_string (const T& t)
@@ -67,7 +65,7 @@ class lpsConstElm {
     atermpp::set< mcrl2::data::data_expression >      p_freeVarSet;
     atermpp::set< int >                       p_V;
     atermpp::set< int >                       p_S;
-    atermpp::set< lps::summand >          p_visitedSummands;
+    atermpp::set< mcrl2::lps::summand >          p_visitedSummands;
     atermpp::set< mcrl2::data::data_expression >      p_variableList;
     atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > > p_changed_assignements_per_cycle;
     int                                   p_newVarCounter;
@@ -77,7 +75,7 @@ class lpsConstElm {
     bool                                  p_show;
     std::string                           p_logfile;
     std::string                           p_logstring;
-    lps::specification                    p_spec;
+    mcrl2::lps::specification                    p_spec;
     atermpp::set< sort_expression >       p_singletonSort;
     Rewriter*                             rewr;
 
@@ -684,8 +682,8 @@ void lpsConstElm::removeSingleton(int n)
 // Constant parameters (stored in p_S)
 //
 inline bool lpsConstElm::output() {
-  lps::linear_process p_process = p_spec.process();
-  lps::summand_list rebuild_summandlist;
+  linear_process p_process = p_spec.process();
+  summand_list rebuild_summandlist;
 
   //Remove the summands that are never visited
   //
@@ -799,13 +797,13 @@ inline bool lpsConstElm::output() {
   }
   //Remove process parameters in in summand
   //
-  lps::summand_list rebuild_summandlist_no_cp;
+  summand_list rebuild_summandlist_no_cp;
 
-  for(lps::summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
+  for(summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
 
     //construct new LPS_summand
     //
-    lps::summand tmp;
+    summand tmp;
 
     //Remove constant process parameters from the summands assignments
     //
@@ -818,7 +816,7 @@ inline bool lpsConstElm::output() {
 
     //Rebuild actions
     //
-    lps::action_list rebuild_actions;
+    action_list rebuild_actions;
     for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end() ; i++){
       data_expression_list argumentList;
 	  for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
@@ -879,8 +877,8 @@ inline bool lpsConstElm::output() {
   //
   //linear_process(data_variable_list free_variables, data_variable_list process_parameters,
   //  summand_list summands);
-  lps::linear_process rebuild_process;
-  rebuild_process = lps::linear_process(
+  linear_process rebuild_process;
+  rebuild_process = linear_process(
     setToList(usedFreeVars),
     vectorToList(variablePPvar),
     atermpp::reverse(rebuild_summandlist_no_cp)
@@ -910,7 +908,7 @@ inline bool lpsConstElm::output() {
   //
 //data_assignment_expressions(data_assignment_list());
 //data_assignment_list xyz = make_assignment_list(data_variable_list(), data_expression_list());
-    lps::specification rebuild_spec = lps::specification(
+    specification rebuild_spec = specification(
     p_spec.data(),
     p_spec.action_labels(),
     rebuild_process,
@@ -1017,7 +1015,7 @@ bool lpsConstElm::filter() {
   p_cycle = 0;
   p_newVarCounter  = 0;
 
-  lps::linear_process p_process = p_spec.process();
+  linear_process p_process = p_spec.process();
   rewr           = createRewriter(p_spec.data());
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
@@ -1025,7 +1023,7 @@ bool lpsConstElm::filter() {
   if (p_show)
   {
     
-    for( data::data_assignment_list::iterator i = initial_assignments.begin()
+    for( data_assignment_list::iterator i = initial_assignments.begin()
        ; i != initial_assignments.end()
        ; ++i
        )

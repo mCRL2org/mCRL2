@@ -19,10 +19,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
-using namespace ::mcrl2::lts;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::lts;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 
 static inline std::string get_base(std::string const& s) {
   return s.substr(0, s.find_last_of('.'));
@@ -37,7 +36,7 @@ static ATermAppl get_lps(std::string const& filename)
       ATerm t = ATreadFromFile(file);
       fclose(file);
       
-      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
+      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(mcrl2::core::detail::gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
       {
         gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
       }
@@ -96,7 +95,7 @@ class t_tool_options {
     
           if ( spec != NULL )
           {
-            if ( gsIsSpecV1(spec) )
+            if ( mcrl2::core::detail::gsIsSpecV1(spec) )
             {
               return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
             } else {

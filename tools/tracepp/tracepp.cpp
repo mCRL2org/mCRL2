@@ -25,9 +25,7 @@
 using namespace std;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
-using namespace mcrl2;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };
 
@@ -69,7 +67,7 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
       os << "\"];" << endl;
     }
     os << i << " -> " << i+1 << " [label=\"";
-    if ( gsIsMultAct(act) )
+    if ( mcrl2::core::detail::gsIsMultAct(act) )
     {
       PrintPart_CXX(os,(ATerm) act,ppDefault);
     } else {
@@ -96,7 +94,7 @@ static void trace2aut(ostream &os, Trace &trace)
   while ( (act = trace.nextAction()) != NULL )
   {
     os << "(" << i << ",\"";
-    if ( gsIsMultAct(act) )
+    if ( mcrl2::core::detail::gsIsMultAct(act) )
     {
       PrintPart_CXX(os,(ATerm) act,ppDefault);
     } else {

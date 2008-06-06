@@ -12,20 +12,14 @@
 #ifndef __ATERM_EXT_H__
 #define __ATERM_EXT_H__
 
-#ifndef __cplusplus
-# include <stdbool.h>
-#endif
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>
 
 #include <workarounds.h>
 
-#ifdef __cplusplus
 namespace mcrl2 {
   namespace utilities {
-    extern "C" {
-#endif
 
 //Workarounds for the initialisation of the ATerm library
 //-------------------------------------------------------
@@ -394,10 +388,7 @@ int gsCount(ATerm elt, ATerm term);
  * \return the number of fun occurs in term (as an AFun)
  **/
 int gsCountAFun(AFun fun, ATerm term);
-#ifdef __cplusplus
-    }
   }
 }
-#endif
 
 #endif

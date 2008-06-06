@@ -17,10 +17,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/lts/liblts.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)

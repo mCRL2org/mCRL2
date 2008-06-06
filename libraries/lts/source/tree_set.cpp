@@ -13,9 +13,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
 
-#ifdef __cplusplus
 using namespace mcrl2::core;
-#endif
 
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)

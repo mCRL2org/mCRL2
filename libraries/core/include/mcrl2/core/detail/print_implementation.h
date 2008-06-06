@@ -15,9 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #define PRINT_OUTTYPE FILE*
 #define PRINT_FUNC(x) x ## _C
 #endif

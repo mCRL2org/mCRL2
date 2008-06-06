@@ -13,10 +13,8 @@
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/lts/detail/bsim.h"
 
-#ifdef __cplusplus
 using namespace mcrl2::core;
 using namespace std;
-#endif
 
 int traceLevel = 0, optimal = 0, classes = 0; 
 

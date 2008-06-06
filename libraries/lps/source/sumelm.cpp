@@ -28,10 +28,8 @@
 #include "mcrl2/lps/sumelm.h"
 
 // For Aterm library extension functions
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::data::data_expr;

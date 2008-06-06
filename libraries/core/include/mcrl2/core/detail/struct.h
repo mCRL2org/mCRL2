@@ -19,9 +19,6 @@
 
 #include "mcrl2/core/detail/struct_core.h"
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <aterm2.h>
 
 namespace mcrl2 {

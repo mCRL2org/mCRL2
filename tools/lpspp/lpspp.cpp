@@ -26,8 +26,6 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace mcrl2;
 
 //local declarations
 
@@ -150,7 +148,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     return false;
   }
   assert(Spec != NULL);
-  if (!gsIsSpecV1(Spec)) {
+  if (!mcrl2::core::detail::gsIsSpecV1(Spec)) {
     if (SpecStream == stdin) {
       gsErrorMsg("stdin does not contain an LPS\n");
     } else {
@@ -160,7 +158,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     }
     return false;
   }
-  assert(gsIsSpecV1(Spec));
+  assert(mcrl2::core::detail::gsIsSpecV1(Spec));
   //open output file for writing or set to stdout
   if (tool_options.output_file_name.empty()) {
     OutputStream = stdout;

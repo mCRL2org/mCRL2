@@ -22,10 +22,8 @@ using std::cin;
 using std::cout;
 #endif
 
-#ifdef __cplusplus
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 //fix for newer versions of flex (>= 2.5.31)
 #ifndef yywrap

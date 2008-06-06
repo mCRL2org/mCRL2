@@ -99,7 +99,7 @@ END_EVENT_TABLE()
 
 void parse_command_line(int argc, wxChar** argv) {
 
-  using namespace ::mcrl2::utilities;
+  using namespace mcrl2::utilities;
 
   interface_description clinterface(
         std::string(wxString(argv[0], wxConvLocal).fn_str()),

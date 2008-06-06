@@ -12,20 +12,14 @@
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__
 #define __NUMERIC_STRING_FUNCTIONS_H__
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>
 
 #include <workarounds.h>
 
-#ifdef __cplusplus
 namespace mcrl2 {
   namespace utilities {
-    extern "C" {
-#endif
 
 //String representations of numbers
 //---------------------------------
@@ -64,10 +58,7 @@ char *gsStringDub(const char *n, const int inc);
  **/
 int NrOfChars(const int n);
 
-#ifdef __cplusplus
-    }
   }
 }
-#endif
 
 #endif

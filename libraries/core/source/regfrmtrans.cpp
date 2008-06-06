@@ -22,10 +22,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
-#ifdef __cplusplus
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 namespace mcrl2 {
   namespace core {

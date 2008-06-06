@@ -19,10 +19,8 @@
 #include <mcrl2/utilities/utilities.h>
 #include <mcrl2/utilities/aterm_ext.h>
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 inline static Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2) {
   return (a_result1 != compare_result_equal) ? a_result1 : a_result2;

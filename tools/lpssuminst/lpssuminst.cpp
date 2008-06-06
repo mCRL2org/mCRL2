@@ -26,9 +26,9 @@
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2;
+using namespace mcrl2::lps;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -36,7 +36,7 @@ using namespace mcrl2;
 struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
-  lps::t_suminst_options suminst_opts; ///< Options of the algorithm
+  t_suminst_options suminst_opts; ///< Options of the algorithm
   
   tool_options() {}
 };
@@ -199,12 +199,12 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 ///applies instantiation of sums to it and writes the result to output_file.
 int do_suminst(const tool_options& options)
 {
-  lps::specification lps_specification;
+  specification lps_specification;
 
   lps_specification.load(options.input_file);
   Rewriter* r = createRewriter(lps_specification.data(), options.suminst_opts.strategy);
 
-  lps::specification result = lps::instantiate_sums(lps_specification, *r, options.suminst_opts);
+  specification result = instantiate_sums(lps_specification, *r, options.suminst_opts);
 
   result.save(options.output_file);
 

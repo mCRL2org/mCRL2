@@ -18,12 +18,9 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "workarounds.h"
 
-#ifdef __cplusplus
 namespace mcrl2 {
   namespace utilities {
-#endif
 
-    extern "C" {
       //String representations of numbers
       //---------------------------------
   
@@ -109,8 +106,6 @@ namespace mcrl2 {
         else //n < 0
           return (int) ceil(log10((double) abs(n))) + 1;
       }
-    }
-#ifdef __cplusplus
+
   }
 }
-#endif

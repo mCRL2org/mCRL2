@@ -14,16 +14,9 @@
 //This file describes the functions that can be used for the internal ATerm
 //structure.
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <aterm2.h>
 #include <string.h>
 #include <ctype.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 //Global precondition: the ATerm library has been initialised
 
@@ -1460,9 +1453,5 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
 //Ret: "s", if it does not occur in Term, and TryNoSuffix holds
 //     "sk" as a quoted ATermAppl constant, where k is the smallest natural
 //     number such that "sk" does not occur in Term, otherwise
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // MCRL2_LIBSTRUCT_CORE_H

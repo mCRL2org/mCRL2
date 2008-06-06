@@ -37,7 +37,7 @@
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;

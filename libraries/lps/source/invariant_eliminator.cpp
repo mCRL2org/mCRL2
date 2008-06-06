@@ -18,10 +18,8 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/prover/bdd_prover.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 // Class Invariant_Eliminator ---------------------------------------------------------------------
   // Class Invariant_Eliminator - Functions declared private --------------------------------------

@@ -17,10 +17,8 @@
 #include "mcrl2/utilities/bdd2dot.h"
 #include "mcrl2/core/messaging.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 // Class BDD2Dot --------------------------------------------------------------------------------
   // Class BDD2Dot - Functions declared private -------------------------------------------------

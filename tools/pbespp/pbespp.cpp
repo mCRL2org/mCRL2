@@ -24,10 +24,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace mcrl2;
 
 //local declarations
 
@@ -156,7 +154,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     return false;
   }
   assert(Spec != NULL);
-  if (!gsIsPBES(Spec)) {
+  if (!mcrl2::core::detail::gsIsPBES(Spec)) {
     if (SpecStream == stdin) {
       gsErrorMsg("stdin does not contain a PBES\n");
     } else {
@@ -166,7 +164,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     }
     return false;
   }
-  assert(gsIsPBES(Spec));
+  assert(mcrl2::core::detail::gsIsPBES(Spec));
   //open output file for writing or set to stdout
   if (tool_options.output_file_name.empty()) {
     OutputStream = stdout;

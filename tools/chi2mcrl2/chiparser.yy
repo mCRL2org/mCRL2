@@ -20,11 +20,9 @@
 extern int yylex( void );
 extern char* yytext; */
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
-#endif
 
 //external declarations from lexer.l
 void chiyyerror( const char *s );

@@ -14,9 +14,6 @@
 //This file describes the functions that can be used for the internal ATerm
 //structure.
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <aterm2.h>
 #include <string.h>
 #include <ctype.h>

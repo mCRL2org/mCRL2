@@ -26,9 +26,9 @@
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2;
+using namespace mcrl2::lps;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief structure that holds all options available for the tool.
@@ -177,14 +177,14 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 ///applies binary to it and writes the result to output_file.
 int do_binary(const tool_options& options)
 {
-  lps::specification lps_specification;
+  specification lps_specification;
   lps_specification.load(options.input_file);
   // apply binary on lps_specification and save the output to a binary file
 
   Rewriter* r = createRewriter(lps_specification.data(), options.strategy);
 
-  lps::specification result;
-  result = lps::binary(lps_specification, *r);
+  specification result;
+  result = binary(lps_specification, *r);
 
   result.save(options.output_file);
 

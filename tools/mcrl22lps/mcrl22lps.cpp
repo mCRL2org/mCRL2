@@ -34,12 +34,8 @@
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace::mcrl2;
-#endif
 
 //Functions used by the main program
 static t_lin_options parse_command_line(int argc, char *argv[]);
@@ -391,8 +387,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 
 #endif
-
-using namespace std;
 
 static t_lin_options parse_command_line(int argc, char *argv[])
 { 

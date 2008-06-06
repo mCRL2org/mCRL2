@@ -1,6 +1,4 @@
 /* A Bison parser, made by GNU Bison 2.3.  */
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 
 /* Skeleton interface for Bison GLR parsers in C
 
@@ -155,11 +153,9 @@
 extern int yylex( void );
 extern char* yytext; */
 
-#ifdef __cplusplus
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
-#endif
 
 //external declarations from lexer.l
 void chiyyerror( const char *s );
@@ -197,13 +193,13 @@ bool is_number(std::string s);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 63 "chiparser.yy"
+#line 61 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 205 "chiparser.hpp"
+#line 203 "chiparser.hpp"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

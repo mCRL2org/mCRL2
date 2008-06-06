@@ -25,9 +25,9 @@
 #include <mcrl2/lps/sumelm.h>
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2;
+using namespace mcrl2::lps;
 
 struct tool_options {
   std::string input_file; ///< Name of the file to read input from
@@ -109,12 +109,12 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 ///applies sum elimination to it and writes the result to output_file.
 int do_sumelm(const tool_options& options)
 {
-  lps::specification lps_specification;
+  specification lps_specification;
     
   lps_specification.load(options.input_file);
 
   // Untime lps_specification and save the output to a binary file
-  lps::specification new_spec = lps::sumelm(lps_specification);
+  specification new_spec = sumelm(lps_specification);
 
   gsDebugMsg("Sum elimination completed, saving to %s\n", options.output_file.c_str());
   new_spec.save(options.output_file);

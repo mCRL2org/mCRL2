@@ -14,9 +14,6 @@
 #ifndef __MCRL2_MESSAGING_H__
 #define __MCRL2_MESSAGING_H__
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <stdarg.h>
 #include <assert.h>
 #include <aterm2.h>

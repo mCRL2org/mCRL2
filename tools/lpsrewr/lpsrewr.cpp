@@ -23,10 +23,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace mcrl2;
 
 //Functions used by the main program
 static bool is_valid_lps(ATermAppl spec);
@@ -174,8 +172,8 @@ int main(int argc, char **argv)
 
 bool is_valid_lps(ATermAppl spec)
 {
-  if (gsIsSpecV1(spec)) {
-    return gsIsLinearProcess(ATAgetArgument(spec,2));
+  if (mcrl2::core::detail::gsIsSpecV1(spec)) {
+    return mcrl2::core::detail::gsIsLinearProcess(ATAgetArgument(spec,2));
   }
 
   return false;
@@ -194,7 +192,7 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
     ATermAppl DataEqn = ATAgetFirst(DataEqns);
     //rewrite condition
     ATermAppl Cond = ATAgetArgument(DataEqn, 1);
-    if (!gsIsNil(Cond)) {
+    if (!mcrl2::core::detail::gsIsNil(Cond)) {
       Cond = rewr->rewrite(Cond);
       DataEqn = ATsetArgument(DataEqn, (ATerm) Cond, 1);
     }
@@ -220,7 +218,7 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
     ATermAppl Cond = ATAgetArgument(LinearProcessSummand, 1);
     Cond = rewr->rewrite(Cond);
     ATermAppl MultAct = ATAgetArgument(LinearProcessSummand, 2);
-    if ( gsIsMultAct(MultAct) ) {
+    if ( mcrl2::core::detail::gsIsMultAct(MultAct) ) {
       ATermList Acts = ATLgetArgument(MultAct, 0);
       ATermList m = ATmakeList0();
       for (; !ATisEmpty(Acts); Acts = ATgetNext(Acts))
@@ -231,10 +229,10 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
         Act = ATsetArgument(Act, (ATerm) Pars, 1);
         m = ATinsert(m, (ATerm) Act);
       }
-      MultAct = gsMakeMultAct(ATreverse(m));
+      MultAct = mcrl2::core::detail::gsMakeMultAct(ATreverse(m));
     }
     ATermAppl Time = ATAgetArgument(LinearProcessSummand, 3);
-    if ( !gsIsNil(Time) ) {
+    if ( !mcrl2::core::detail::gsIsNil(Time) ) {
       Time = rewr->rewrite(Time);
     }
     ATermList Assignments = ATLgetArgument(LinearProcessSummand, 4);
@@ -247,7 +245,7 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
       m = ATinsert(m, (ATerm) Assignment);
     }
     Assignments = ATreverse(m);
-    LinearProcessSummand = gsMakeLinearProcessSummand(LPSVars, Cond, MultAct, Time, Assignments);
+    LinearProcessSummand = mcrl2::core::detail::gsMakeLinearProcessSummand(LPSVars, Cond, MultAct, Time, Assignments);
     l = ATinsert(l, (ATerm) LinearProcessSummand);
   }
   LinearProcessSummands = ATreverse(l);
@@ -271,58 +269,3 @@ static ATermAppl rewrite_lps(ATermAppl Spec)
  
   return Spec;
 }
-
-/*
-ATermAppl rewrite_proc(ATermAppl p)
-{
-  ATermList l,m;
-
-  if ( gsIsAction(p) || gsIsProcess(p) )
-  {
-    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewr->rewriteList(ATLgetArgument(p,1)));
-  } else if ( gsIsAtTime(p) )
-  {
-    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewr->rewrite(ATAgetArgument(p,1)));
-  } else if ( gsIsSum(p) || gsIsAllow(p) || gsIsBlock(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
-  {
-    return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewrite_proc(ATAgetArgument(p,1)));
-  } else if ( gsIsIfThenElse(p) )
-  {
-    return gsMakeIfThenElse(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1)),rewrite_proc(ATAgetArgument(p,2)));
-  } else if ( gsIsIfThen(p) )
-  {
-    return gsMakeIfThen(rewr->rewrite(ATAgetArgument(p,0)),rewrite_proc(ATAgetArgument(p,1))));
-  } else {
-    l = ATgetArguments(p);
-    m = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      m = ATinsert(m,(ATerm) rewrite_proc(ATAgetFirst(l)));
-    }
-    return ATmakeApplList(ATgetAFun(p),ATreverse(m));
-  }
-}
-
-static ATermAppl rewrite_nolps(ATermAppl Spec)
-{
-  ATermAppl a;
-  ATermList l,m;
-
-  l = ATLgetArgument(ATAgetArgument(Spec,5),0);
-  m = ATmakeList0();
-  for (; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    a = ATAgetArgument(ATAgetFirst(l),3);
-    a = rewrite_proc(a);
-    m = ATinsert(m,(ATerm) ATsetArgument(ATAgetFirst(l),(ATerm) a,3));
-  }
-  m = ATreverse(m);
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(m),5);
-
-  a = ATAgetArgument(ATAgetArgument(Spec,6),1);
-  a = rewrite_proc(a);
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeInit(ATLgetArgument(ATAgetArgument(Spec,6),0),a),6);
-
-  return Spec;
-}
-*/

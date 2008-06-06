@@ -25,11 +25,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 
-#ifdef __cplusplus
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-#endif
 
 //Global precondition: the ATerm library has been initialised
 

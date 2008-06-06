@@ -16,10 +16,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/exception.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-#endif
 
 // Class Formula_Checker --------------------------------------------------------------------------
   // Class Formula_Checker - Functions declared private -------------------------------------------

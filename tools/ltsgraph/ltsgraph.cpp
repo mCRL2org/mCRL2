@@ -90,7 +90,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 
 void parse_command_line(int argc, wxChar** argv) {
 
-  using namespace ::mcrl2::utilities;
+  using namespace mcrl2::utilities;
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
         NAME, AUTHOR, "[OPTION]... [INFILE]\n",

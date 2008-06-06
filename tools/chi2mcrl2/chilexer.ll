@@ -16,11 +16,9 @@
 #define yywrap chiyywrap
 #endif
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
-#endif
 
 int line = 1, col = 1;
 int scope_lvl;

@@ -9,10 +9,6 @@
 /// \file ltsmin.h
 /// \brief Based on bsim.h (revision 1.1.1.1) from the muCRL toolset
 
-#ifdef __cplusplus
-extern "C" {
-#endif 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -117,7 +113,3 @@ void SCC(void);
 int Compare(SVCstateIndex init1,SVCstateIndex init2); 
 int CompareBranching(SVCstateIndex init1,SVCstateIndex init2);
 SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool tauloops);
-#ifdef __cplusplus
-}
-#endif 
-

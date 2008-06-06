@@ -26,9 +26,8 @@
 #include <mcrl2/lps/untime.h>
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2;
 
 struct tool_options {
   std::string input_file; // Name of the file to read input from
@@ -99,9 +98,9 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 
 int do_untime(const tool_options& options)
 {
-  lps::specification lps_specification;
+  mcrl2::lps::specification lps_specification;
   lps_specification.load(options.input_file);
-  lps::untime(lps_specification).save(options.output_file); 
+  mcrl2::lps::untime(lps_specification).save(options.output_file); 
   return 0;
 }
 

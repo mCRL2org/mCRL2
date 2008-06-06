@@ -62,7 +62,6 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
   }
 }
 
-#ifdef __cplusplus
 #include <ostream>
 #include <string>
 #include "mcrl2/atermpp/atermpp.h"
@@ -94,7 +93,5 @@ std::string pp(Term t)
 {
   return pretty_print(atermpp::aterm_traits<Term>::term(t));
 }
-
-#endif
 
 #endif //MCRL2_PRINT_H

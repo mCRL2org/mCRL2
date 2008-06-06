@@ -56,8 +56,6 @@ using namespace mcrl2::pbes_system;
  
 using atermpp::make_substitution; 
  
-using namespace ::mcrl2::utilities;
-
 //Type definitions ====================== 
  
 // the command line options 

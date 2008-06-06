@@ -37,10 +37,9 @@
 
 using namespace std;
 using namespace atermpp;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace mcrl2;
+using namespace mcrl2::lps;
 
 /* Name of the file to read input from (or standard input if empty) */
 std::string file_name;
@@ -48,16 +47,16 @@ std::string file_name;
 /* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
 static inline bool is_tau_summand(ATermAppl a_summand) {
     ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
-    if (gsIsMultAct(v_multi_action_or_delta)) {
+    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta)) {
       return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
     } else {
       return false;
     }
   }
 
-static inline int get_number_of_tau_summands(lps::linear_process lps) {
+static inline int get_number_of_tau_summands(linear_process lps) {
   int numOfTau = 0;
-  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
 	if ( is_tau_summand(*currentSummand)){
 		++numOfTau;
 	}
@@ -65,10 +64,10 @@ static inline int get_number_of_tau_summands(lps::linear_process lps) {
   return numOfTau;
 }
 
-static inline int get_number_of_used_actions(lps::linear_process lps){
+static inline int get_number_of_used_actions(linear_process lps){
   std::set<action_label > actionSet;
-  for(lps::summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	for(lps::action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); ++currentAction){
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+	for(action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); ++currentAction){
 		actionSet.insert(currentAction->label());
 	}
   }
@@ -135,11 +134,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
  
-  lps::specification lps_specification;
+  specification lps_specification;
 
   lps_specification.load(c.get_input(lps_file_for_input).get_location());
 
-  lps::linear_process lps = lps_specification.process();
+  linear_process lps = lps_specification.process();
 
   /* Create display */
   tipi::layout::tool_display d;
@@ -186,10 +185,10 @@ int main(int argc, char** argv)
 #endif
     parse_command_line(argc,argv);
 
-    lps::specification lps_specification;
+    specification lps_specification;
  
     lps_specification.load(file_name);
-    lps::linear_process lps = lps_specification.process();
+    linear_process lps = lps_specification.process();
       	 
     cout << "Input read from " << (file_name.empty()?"stdin":("'" + file_name + "'")) << endl;
     cout << endl;   
