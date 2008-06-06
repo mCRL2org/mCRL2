@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file expression_info.h
-/// \brief Interface to classes Expression_Info.
+/// \file mcrl2/utilities/expression_info.h
+/// \brief Interface to classes Expression_Info
 
 #ifndef EXPRESSION_INFO_H
 #define EXPRESSION_INFO_H

@@ -6,17 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/aterm_ext.h
-/// \brief Add your file description here.
+/// \file mcrl2/utilities/aterm_ext.h
+/// \brief Collection of convenience functions for ATerms
 
 #ifndef __ATERM_EXT_H__
 #define __ATERM_EXT_H__
 
-#include <stdarg.h>
-#include <assert.h>
+#include <cstdarg>
+#include <cassert>
 #include <aterm2.h>
 
-#include <workarounds.h>
+#include "workarounds.h"
 
 namespace mcrl2 {
   namespace utilities {
@@ -29,11 +29,11 @@ namespace mcrl2 {
 //statement. Failing to do so may lead to crashes when the garbage collector
 //is started.
 
-//MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
-//one of the parameters as the bottom of the stack. The parameter that is
-//actually depends on the platform:
-//- &argv on Windows platforms
-//- argv on non-Windows platforms
+///MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
+///one of the parameters as the bottom of the stack. The parameter that is
+///actually depends on the platform:
+///- &argv on Windows platforms
+///- argv on non-Windows platforms
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT(argc, argv)\
   ATinit(argc, argv, reinterpret_cast<ATerm*>(&argv));
@@ -42,11 +42,11 @@ namespace mcrl2 {
   ATinit(argc, argv, reinterpret_cast<ATerm*>(argv));
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 
-//MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
-//debugging information enabled, using one of the parameters as the bottom
-//of the stack. The parameter that is actually depends on the platform:
-//- &argv on Windows platforms
-//- argv on non-Windows platforms
+///MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
+///debugging information enabled, using one of the parameters as the bottom
+///of the stack. The parameter that is actually depends on the platform:
+///- &argv on Windows platforms
+///- argv on non-Windows platforms
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\

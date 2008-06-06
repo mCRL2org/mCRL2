@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file utilities.h
-/// \brief Interface to utility functions.
+/// \file mcrl2/utilities/utilities.h
+/// \brief Miscellaneous utility functions
 
 #ifndef UTILITIES_H
 #define UTILITIES_H

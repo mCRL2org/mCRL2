@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/colorbutton.h
-/// \brief Add your file description here.
+/// \file mcrl2/utilities/colorbutton.h
+/// \brief Implementation of a colour selection widget shaped as button
 
 #ifndef COLORBUTTON_H
 #define COLORBUTTON_H

@@ -6,21 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/aterm_ext.cpp
-/// \brief Add your file description here.
+/// \file aterm_ext.cpp
+/// \brief Collection of convenience functions for ATerms
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
+#include <cctype>
 
 #include "mcrl2/utilities/aterm_ext.h"
 #include "workarounds.h"
 
 namespace mcrl2 {
   namespace utilities {
-
 
       //Substitutions on ATerm's
       //------------------------

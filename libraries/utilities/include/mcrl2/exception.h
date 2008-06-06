@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/exception.h
+/// \brief Exception classes for use in libraries and tools
 
 #ifndef __MCRL2_EXCEPTION_H__
 #define __MCRL2_EXCEPTION_H__
@@ -16,9 +17,11 @@
 namespace mcrl2 {
 
   /**
-   *
+   * \brief Standard exception class for reporting runtime errors.
    **/
   class runtime_error : public std::runtime_error {
+
+    private:
 
       std::string m_message;
 
@@ -38,9 +41,5 @@ namespace mcrl2 {
       }
   };
 }
-
-// forcing use of mcrl2::runtime_error over mcrl2::runtime_error when namespace
-// qualifier is not present
-using mcrl2::runtime_error;
 
 #endif

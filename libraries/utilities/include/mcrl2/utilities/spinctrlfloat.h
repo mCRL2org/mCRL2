@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/spinctrlfloat.h
-/// \brief Add your file description here.
+/// \file mcrl2/utilities/spinctrlfloat.h
+/// \brief Interface of a floating point selection widget
 
 #ifndef SPINCTRLFLOAT_H
 #define SPINCTRLFLOAT_H

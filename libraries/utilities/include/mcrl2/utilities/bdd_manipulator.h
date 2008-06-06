@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bdd_manipulator.h
-/// \brief Interface to class BDD_Manipulator.
+/// \file mcrl2/utilities/bdd_manipulator.h
+/// \brief Interface to class BDD_Manipulator
 
 #ifndef BDD_MANIPULATOR_H
 #define BDD_MANIPULATOR_H

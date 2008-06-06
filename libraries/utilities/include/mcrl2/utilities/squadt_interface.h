@@ -6,7 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/squadt_interface.h
+/// \file mcrl2/utilities/squadt_interface.h
+/// \brief Interface for simplified connection and communication with SQuADT
 
 #ifndef MCRL2_SQUADT_INTERFACE_H_
 #define MCRL2_SQUADT_INTERFACE_H_
@@ -148,9 +149,11 @@ namespace mcrl2 {
 
         private:
 
-          /** \brief send status message, used only to relay messages */
-          static boost::function< void (const tipi::report::type, std::string const&) >& get_reporting_method() {
-            static boost::function< void (const tipi::report::type, std::string const&) > reporter;
+          typedef boost::function< void (const tipi::report::type, std::string const&) > relay_handler;
+
+          /* send status message, used only to relay messages */
+          static relay_handler& get_reporting_method() {
+            static relay_handler reporter;
 
             return reporter;
           }

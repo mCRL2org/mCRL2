@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bdd_info.h
-/// \brief Interface to class BDD_Info.
+/// \file mcrl2/utilities/bdd_info.h
+/// \brief Interface to class BDD_Info
 
 #ifndef BDD_INFO_H
 #define BDD_INFO_H

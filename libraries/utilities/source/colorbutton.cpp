@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/colorbutton.cpp
-/// \brief Add your file description here.
+/// \file colorbutton.cpp
+/// \brief Implementation of a colour selection widget shaped as button
 
 #include "colorbutton.h"
 

@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/tipi_ext.h
-/// \brief Add your file description here.
+/// \file mcrl2/utilities/tipi_ext.h
+/// \brief Convenience functions for working with the tipi library
 
 #ifndef SQUADT_UTILITY_H_
 #define SQUADT_UTILITY_H_
@@ -20,11 +20,11 @@
 #include <tipi/layout_elements.hpp>
 
 /**
- * \brief Name space for all mCRL2 toolset related functionality
+ * \brief mCRL2 toolset related functionality
  **/
 namespace mcrl2 {
   /**
-   * \brief Name space for all utility functionality
+   * \brief Utility functionality that does not fit in other mCRL2 libraries
    **/
   namespace utilities {
     namespace squadt {

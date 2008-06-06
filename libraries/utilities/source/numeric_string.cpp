@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/numeric_string.cpp
-/// \brief Add your file description here.
+/// \file numeric_string.cpp
+/// \brief Collection of functions dealing with strings representing numbers
 
 #include <string.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ namespace mcrl2 {
        * \param[in] c a character that represents a decimal digit
        * \return integer value corresponding to c
        **/
-      inline int gsChar2Int(const char c) {
+      static inline int gsChar2Int(const char c) {
         assert(c >= '0' && c <= '9');
         return c - '0';
       }
@@ -39,7 +39,7 @@ namespace mcrl2 {
        * \param[in] n an integer value
        * \return character value corresponding to n
        **/
-      inline char gsInt2Char(const int n) {
+      static inline char gsInt2Char(const int n) {
         assert(n >= 0 && n <= 9);
         return n + '0';
       }

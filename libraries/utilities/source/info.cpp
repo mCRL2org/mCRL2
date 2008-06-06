@@ -6,18 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/info.cpp
-/// \brief Add your file description here.
-
-// Implementation of classes ATerm_Info, AI_Jitty and AI_Inner
-// file: info.cpp
+/// \file info.cpp
+/// \brief Implementation of classes ATerm_Info, AI_Jitty and AI_Inner
 
 #include "aterm2.h"
-#include <mcrl2/data/rewrite.h>
+#include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/detail/struct.h"
-#include <mcrl2/utilities/info.h>
-#include <mcrl2/utilities/utilities.h>
-#include <mcrl2/utilities/aterm_ext.h>
+#include "mcrl2/utilities/info.h"
+#include "mcrl2/utilities/utilities.h"
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

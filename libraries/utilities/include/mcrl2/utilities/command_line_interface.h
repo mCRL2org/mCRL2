@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/utilities/command_line_interface.h
+/// \brief Components for command line interfaces of mCRL2 tools
 
 #include <algorithm>
 #include <vector>

@@ -6,11 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/bdd2dot.cpp
-/// \brief Add your file description here.
-
-// Implementation of class BDD2Dot
-// file: bdd2dot.cpp
+/// \file bdd2dot.cpp
+/// \brief Implementation of class BDD2Dot
 
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"

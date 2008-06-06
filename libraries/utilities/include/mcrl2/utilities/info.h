@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file info.h
-/// \brief Interface to classes ATerm_Info, AI_Jitty and AI_Inner.
+/// \file mcrl2/utilities/info.h
+/// \brief Interface to classes ATerm_Info, AI_Jitty and AI_Inner
 
 #ifndef INFO_H
 #define INFO_H
 
-#include <mcrl2/data/rewrite.h>
-#include <mcrl2/utilities/utilities.h>
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/utilities/utilities.h"
 
 enum Compare_Result {
   compare_result_smaller,

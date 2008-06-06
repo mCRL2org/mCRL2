@@ -6,17 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/manipulator.cpp
-/// \brief Add your file description here.
-
-// Implementation of classes ATerm_Manipulator, AM_Jitty and AM_Inner
-// file: manipulator.cpp
+/// \file manipulator.cpp
+/// \brief Implementation of classes ATerm_Manipulator, AM_Jitty and AM_Inner
 
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
-#include <mcrl2/data/rewrite.h>
-#include <mcrl2/utilities/manipulator.h>
-#include <mcrl2/utilities/info.h>
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/utilities/manipulator.h"
+#include "mcrl2/utilities/info.h"
 
 using namespace mcrl2::core;
 

@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file sort_info.h
-/// \brief Interface to classes Sort_Info.
+/// \file mcrl2/utilities/sort_info.h
+/// \brief Interface to classes Sort_Info
 
 #ifndef SORT_INFO_H
 #define SORT_INFO_H

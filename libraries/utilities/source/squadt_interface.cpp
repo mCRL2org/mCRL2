@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file source/squadt_interface.cpp
-/// \brief Add your file description here.
+/// \file squadt_interface.cpp
+/// \brief Implementation of component for simplified connection and communication with SQuADT
 
 #define NO_MCRL2_TOOL_FACILITIES
 #include <tipi/tool.hpp>
@@ -254,7 +254,7 @@ namespace mcrl2 {
         return true;
       }
   
-      bool initialised = initialise();
+      static bool initialised = initialise();
       /// \endcond
     }
   }
