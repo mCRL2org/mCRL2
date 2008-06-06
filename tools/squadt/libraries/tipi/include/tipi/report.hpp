@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/report.hpp
+/// \brief Type used to represent a report (protocol concept)
 
 #ifndef TIPI_REPORT_H
 #define TIPI_REPORT_H

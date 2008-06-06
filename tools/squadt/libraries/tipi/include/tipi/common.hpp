@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/common.hpp
+/// \brief Collection of commonly used declarations
 
 #ifndef TIPI_COMMON_H_
 #define TIPI_COMMON_H_

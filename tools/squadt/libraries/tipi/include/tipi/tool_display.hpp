@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/tool_display.hpp
+/// \brief Type used to represent a tool display (protocol concept)
 
 #ifndef TIPI_LAYOUT_TOOL_DISPLAY_H
 #define TIPI_LAYOUT_TOOL_DISPLAY_H
@@ -15,8 +16,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <tipi/display.hpp>
-#include <tipi/layout_manager.hpp>
+#include "tipi/display.hpp"
+#include "tipi/layout_manager.hpp"
 
 namespace tipi {
   namespace layout {

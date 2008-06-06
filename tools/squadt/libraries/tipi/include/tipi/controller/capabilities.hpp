@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/controller/capabilities.hpp
+/// \brief Type for representing a controller's capabilities (protocol concept)
 
 #ifndef TIPI_CONTROLLER_CAPABILITIES_H
 #define TIPI_CONTROLLER_CAPABILITIES_H

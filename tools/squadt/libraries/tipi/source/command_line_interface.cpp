@@ -5,8 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file source/command_line_interface.cpp
 
 #ifndef TIPI_COMMAND_LINE_INTERFACE_TCC
 #define TIPI_COMMAND_LINE_INTERFACE_TCC
@@ -19,8 +17,8 @@
 #include <boost/lexical_cast.hpp>
 
 #include "tipi/detail/command_line_interface.hpp"
-#include <tipi/detail/tool.ipp>
-#include <tipi/detail/schemes.ipp>
+#include "tipi/detail/tool.ipp"
+#include "tipi/detail/schemes.ipp"
 #include "tipi/detail/utility/logger.hpp"
 
 namespace tipi {

@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/configuration.hpp
+/// \brief Type used for representing tool configurations (protocol concept)
 
 #ifndef TIPI_CONFIGURATION_H__
 #define TIPI_CONFIGURATION_H__
@@ -79,6 +80,7 @@ namespace tipi {
 
         public:
 
+          /** \brief Parameter identifier */
           typedef std::string identifier;
 
         public:

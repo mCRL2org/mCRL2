@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file squadt.cpp
-/// \brief Add your file description here.
 
 #define NAME "squadt"
 #define AUTHOR "Jeroen van der Wulp"

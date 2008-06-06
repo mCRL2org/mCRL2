@@ -5,14 +5,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file tool/communicator.cpp
 
 #include <boost/shared_array.hpp>
 
 #include "tipi/tool/category.hpp"
 #include "tipi/controller/capabilities.hpp"
-#include <tipi/detail/tool.ipp>
+#include "tipi/detail/tool.ipp"
 #include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {

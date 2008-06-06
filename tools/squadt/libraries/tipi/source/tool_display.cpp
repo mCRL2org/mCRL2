@@ -1,7 +1,13 @@
-#include <tipi/tool_display.hpp>
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#include <tipi/visitors.hpp>
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "tipi/tool_display.hpp"
+#include "tipi/visitors.hpp"
 
 namespace tipi {
   namespace layout {

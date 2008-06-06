@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/mime_type.hpp
+/// \brief Type used for representing MIME-types
 
 #ifndef MIME_TYPE_H__
 #define MIME_TYPE_H__

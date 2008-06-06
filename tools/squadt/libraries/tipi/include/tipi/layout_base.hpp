@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/layout_base.hpp
+/// \brief Abstract interface for layout elements (display related)
 
 #ifndef LAYOUT_BASE_H
 #define LAYOUT_BASE_H

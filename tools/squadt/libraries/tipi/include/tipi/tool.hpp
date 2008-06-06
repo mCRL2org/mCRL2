@@ -7,11 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/tool.hpp
+/// \brief Main interface for a tool (protocol communication partner)
 
 #ifndef TIPI_TOOL_H
 #define TIPI_TOOL_H
-
-#include <set>
 
 #include "tipi/tool_display.hpp"
 #include "tipi/layout_elements.hpp"

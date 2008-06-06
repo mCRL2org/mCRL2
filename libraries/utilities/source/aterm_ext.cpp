@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file aterm_ext.cpp
-/// \brief Collection of convenience functions for ATerms
 
 #include <cstring>
 #include <cstdlib>

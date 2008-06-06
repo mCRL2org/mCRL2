@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/basic_datatype.hpp
+/// \brief Data types for input validation
 
 #ifndef TIPI_BASIC_DATATYPE
 #define TIPI_BASIC_DATATYPE
@@ -91,7 +92,7 @@ namespace tipi {
     /**
      * \brief Derived data type specifier for enumerations
      *
-     * An enumeration is a finite set of alternatives.
+     * An enumeration is a finite set of entities.
      **/
     class basic_enumeration : public basic_datatype {
       template < typename R, typename S >
@@ -99,6 +100,7 @@ namespace tipi {
 
       public:
 
+        /// Iterator range for traversing the elements of the type
         typedef std::pair< std::map < size_t, std::string >::const_iterator,
                  std::map < size_t, std::string >::const_iterator > const_iterator_range;
         
@@ -110,6 +112,7 @@ namespace tipi {
         /** \brief Establishes whether value is valid for an element of this type **/
         virtual bool validate(std::string const& s) const = 0;
 
+        /** \brief Gets an iterator over the possible elements of the type */
         virtual const_iterator_range values() const = 0;
 
         /** \brief Constructor */
@@ -119,6 +122,17 @@ namespace tipi {
     template < typename C = size_t >
     class enumeration;
 
+    /**
+     * \brief Derived data type specifier for enumerations
+     *
+     * An enumeration is a finite set of alternatives whose implementation is
+     * based on the type of a standard enumerated type. A subset of values of
+     * the enumerated type are given names and represent the new enumeration.
+     *
+     * This is the specialisation in which template parameter C is size_t,
+     * instead of an enumerated type. The alternate implementations (with
+     * enumerated types for C) all use instances of this type.
+     **/
     template < >
     class enumeration< size_t > : public basic_enumeration {
       template < typename R, typename S >
@@ -162,8 +176,10 @@ namespace tipi {
          **/
         enumeration< size_t >& add(const size_t v, std::string const& s);
 
+        /// \brief converts a value of the enumerated type to its associated string
         std::string convert(size_t const& s) const;
 
+        /// \brief validates whether a string is a value of the enumerated type
         bool validate(std::string const& s) const;
 
         /** \brief Converts a string to an index representation
@@ -172,6 +188,13 @@ namespace tipi {
         size_t evaluate(std::string const& s) const;
     };
 
+    /**
+     * \brief Derived data type specifier for enumerations
+     *
+     * An enumeration is a finite set of alternatives whose implementation is
+     * based on the type of a standard enumerated type. A subset of values of
+     * the enumerated type are given names and represent the new enumeration.
+     **/
     template < typename C >
     class enumeration : public basic_enumeration {
       template < typename R, typename S >
@@ -224,10 +247,12 @@ namespace tipi {
           return *this;
         }
 
+        /// \brief converts a value of the enumerated type to its associated string
         std::string convert(C const& s) const {
           return get_single_instance().convert(static_cast< const size_t > (s));
         }
 
+        /// \brief validates whether a string is a value of the enumerated type
         bool validate(std::string const& s) const {
           return get_single_instance().validate(s);
         }
@@ -307,15 +332,13 @@ namespace tipi {
          * \param[in] max the maximum value that specifies the range
          **/
         integer_range(C min = boost::integer_traits< C >::const_min, C max = boost::integer_traits< C >::const_max) : m_minimum(min), m_maximum(max) {
-          // \todo REGISTER WITH VISITOR
-
           assert(m_minimum < m_maximum);
         }
 
         /** \brief Converts a value to a string representation
-         * \param[in] s the integer to convert
+         * \param[in] v the value to convert
          **/
-        static std::string convert(C const& v) {
+        static std::string convert(const C v) {
           return (std::ostringstream() << v).str();
         }
 
@@ -415,13 +438,11 @@ namespace tipi {
          * \param[in] max the maximum value that specifies the range
          **/
         real_range(C min = std::numeric_limits< C >::min(), C max = std::numeric_limits< C >::max()) : m_minimum(min), m_maximum(max) {
-          // \todo REGISTER WITH VISITOR
-
           assert(m_minimum < m_maximum);
         }
 
         /** \brief Converts a value to a string representation
-         * \param[in] s the value to convert
+         * \param[in] v the value to convert
          **/
         static std::string convert(const C v) {
           return (std::ostringstream() << v).str();
@@ -453,6 +474,7 @@ namespace tipi {
         }
     };
 
+    /// \cond INTERNAL
     /**
      * Specialisation for ranges with the maximum value not part of the range
      **/
@@ -530,6 +552,7 @@ namespace tipi {
           return o << "(" << m_minimum << "..." << m_maximum << ")";
         }
     };
+    /// \endcond INTERNAL
 
     /** \brief Derived data type specifier for booleans */
     class boolean : public basic_datatype {
@@ -560,7 +583,7 @@ namespace tipi {
         }
 
         /** \brief Converts a boolean to a string representation
-         * \param[in] s the boolean to convert
+         * \param[in] v the boolean to convert
          **/
         static std::string convert(const bool v) {
           return ((v) ? "true" : "false");

@@ -7,10 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/option.hpp
+/// \brief Type used to represent an option in a configuration (protocol concept) 
 
 #ifndef TIPI_OPTION_H
 #define TIPI_OPTION_H
-
 
 #include <boost/shared_ptr.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -210,7 +210,6 @@ namespace tipi {
 
   /**
    * \param[in] t pointer to the data type definition
-   * \param[in] b whether or not to add if the argument is already present
    * \pre n <= m_arguments.size()
    **/
   template < unsigned int n, typename T >

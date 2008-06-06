@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/display.hpp
+/// \brief Abstract interface for display implementations (protocol concept)
 
 #ifndef TIPI_LAYOUT_DISPLAY_H
 #define TIPI_LAYOUT_DISPLAY_H

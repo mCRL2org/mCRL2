@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file info.cpp
-/// \brief Implementation of classes ATerm_Info, AI_Jitty and AI_Inner
 
 #include "aterm2.h"
 #include "mcrl2/data/rewrite.h"

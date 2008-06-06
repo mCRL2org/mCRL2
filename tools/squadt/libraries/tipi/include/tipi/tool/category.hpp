@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/tool/category.hpp
+/// \brief Type for representing a tool functionality category (protocol concept)
 
 #ifndef __TIPI_CATEGORY_H__
 #define __TIPI_CATEGORY_H__

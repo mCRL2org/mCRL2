@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/visitors.hpp
+/// \brief Visitor types and functions for (de)serialisation
 
 #ifndef TIPI_VISITORS_H__
 #define TIPI_VISITORS_H__

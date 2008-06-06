@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/layout_manager.hpp
+/// \brief Implementations of layout managers (display related)
 
 #ifndef LAYOUT_MANAGER_H
 #define LAYOUT_MANAGER_H

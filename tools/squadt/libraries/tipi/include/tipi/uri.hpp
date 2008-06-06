@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/uri.hpp
+/// \brief Type used for representing URIs
 
 #ifndef TIPI_URI_H__
 #define TIPI_URI_H__

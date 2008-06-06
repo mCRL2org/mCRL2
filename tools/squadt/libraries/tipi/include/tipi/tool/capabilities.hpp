@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/tool/capabilities.hpp
+/// \brief Type for representing a tools's capabilities (protocol concept)
 
 #ifndef TIPI_TOOL_CAPABILITIES_H
 #define TIPI_TOOL_CAPABILITIES_H

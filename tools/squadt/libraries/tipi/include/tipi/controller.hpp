@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/controller.hpp
+/// \brief Main interface for the controller (protocol communication partner)
 
 #ifndef TIPI_CONTROLLER_H
 #define TIPI_CONTROLLER_H

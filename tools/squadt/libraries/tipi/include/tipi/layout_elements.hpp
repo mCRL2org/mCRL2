@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/layout_elements.hpp
+/// \brief Concrete implementation of some layout elements (display related)
 
 #ifndef LAYOUT_ELEMENTS_H
 #define LAYOUT_ELEMENTS_H
