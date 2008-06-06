@@ -341,25 +341,12 @@ rule install-tools ( executables * : requirements * ) {
   }
 
   # OS X bundle installation
-  if [ modules.peek : OS ] = MACOSX {
-    import build/macosx/mac-bundle ;
-
-    # wxWidgets support is activated, so creation of application bundles may be required
+  if [ modules.peek : OS ] = MACOSX && $(WX_CPPFLAGS) {
     bundles = [ MATCH (.*).plist : [ glob *.plist ] ] ;
-
-    # Create bundle targets
-    for bundle in $(bundles) {
-      mac-bundle $(bundle).app
-           : $(bundle)
-             $(bundle).plist
-             $(bundle).icns
-           : <location>$(prefix)
-           ;
-    }
 
     executables = [ set.difference $(executables) : $(bundles) ] ;
 
-    if $(bundles) && $(WX_CPPFLAGS) {
+    if $(bundles) {
       targets += $(bundles).app ;
     }
   }
@@ -514,6 +501,28 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
   }
   else {
     exe $(name) : $(sources) : $(requirements) $(additional-requirements) : $(defaults) : $(usage-requirements) ;
+  }
+
+  # Mac application bundle
+  if [ modules.peek : OS ] = MACOSX {
+    import build/macosx/mac-bundle ;
+ 
+    bundle = [ MATCH (.*).plist : [ glob $(name).plist ] ] ;
+
+    if $(bundle) {
+      if $(make_alias) = true {
+        alias $(name).app ;
+      }
+      else {
+        # Create bundle targets
+        mac-bundle $(bundle).app
+             : $(bundle)
+               $(bundle).plist
+               $(bundle).icns
+             : <location>$(prefix)
+             ;
+      }
+    }
   }
 }
 

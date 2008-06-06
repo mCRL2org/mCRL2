@@ -1,12 +1,11 @@
 project toolset/grape ;
 
 tool grape
-      : [ glob-tree *.cpp ]
+      : [ MATCH $(TOP)/tools/grape/(.*) : [ glob-tree *.cpp ] ]
         /site-config//wx_gl
         /libraries//core
         /libraries/utilities//command_line_interfacing
-      : <dependency>/libraries//ticpp
-        <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
+      : <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
         <include>libgrape
         <include>grapeapp
         <include>.
