@@ -47,8 +47,8 @@ struct t_tool_options {
 
 bool process(t_tool_options tool_options)
 {
-  typedef data::rewriter data_rewriter;
-  typedef pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
+  typedef mcrl2::data::rewriter data_rewriter;
+  typedef mcrl2::pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
 
   pbes<> pbes_spec = load_pbes(tool_options.infilename);
   data_rewriter datar(pbes_spec.data());
@@ -56,12 +56,12 @@ bool process(t_tool_options tool_options)
 
   if (!pbes_spec.is_well_typed())
   {
-    core::gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+    gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
   }
 
   if (!pbes_spec.is_closed())
   {
-    core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+    gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
   }
 
   if (tool_options.opt_strategy == "finite")

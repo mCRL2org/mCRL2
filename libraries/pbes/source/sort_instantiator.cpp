@@ -58,7 +58,7 @@ data_expression_list instantiate_sort(data_operation_list fl, sort_expression s)
       for (sort_expression_list::iterator d = domains.begin(); d != domains.end(); d++)
 	{
 	  domain_instance = instantiate_sort(fl,*d);
-	  gsVerboseMsg(".....instaniate_sort %s: constructor %s, domain %s, domain_instance %s\n", 
+	  mcrl2::core::gsVerboseMsg(".....instantiate_sort %s: constructor %s, domain %s, domain_instance %s\n", 
 		       pp(s).c_str(), pp(*c).c_str(), pp(domains).c_str(), pp(domain_instance).c_str());
 	  // apply c on domain_instance
 	  for (data_expression_list::iterator i = domain_instance.begin(); 

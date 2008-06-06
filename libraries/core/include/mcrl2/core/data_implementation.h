@@ -18,10 +18,7 @@
 
 #include <aterm2.h>
 #include "mcrl2/core/detail/data_implementation_concrete.h"
-#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
-
-using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
   namespace core {
@@ -42,7 +39,7 @@ namespace mcrl2 {
  **/
 inline ATermAppl implement_data_data_spec(ATermAppl spec)
 {
-  assert(gsIsDataSpec(spec));
+  assert(detail::gsIsDataSpec(spec));
   return detail::implement_data_spec(spec);
 }
 
@@ -61,7 +58,7 @@ inline ATermAppl implement_data_data_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec));
+  assert(detail::gsIsSpecV1(spec));
   return detail::implement_data_spec(spec);
 }
 
@@ -80,7 +77,7 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 {
-  assert(gsIsPBES(spec));
+  assert(detail::gsIsPBES(spec));
   return detail::implement_data_spec(spec);
 }
 
@@ -105,7 +102,7 @@ inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
 {
-  assert(gsIsSortExpr(sort_expr));
+  assert(detail::gsIsSortExpr(sort_expr));
   return detail::impl_exprs_with_spec(sort_expr, spec);
 }
 
@@ -129,7 +126,7 @@ inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
 {
-  assert(gsIsDataExpr(data_expr));
+  assert(detail::gsIsDataExpr(data_expr));
   return detail::impl_exprs_with_spec(data_expr, spec);
 }
 
@@ -153,7 +150,7 @@ inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 {
-  assert(gsIsMultAct(mult_act));
+  assert(detail::gsIsMultAct(mult_act));
   return detail::impl_exprs_with_spec(mult_act, spec);
 }
 
@@ -178,7 +175,7 @@ inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
 {
-  assert(gsIsProcExpr(proc_expr));
+  assert(detail::gsIsProcExpr(proc_expr));
   return detail::impl_exprs_with_spec(proc_expr, spec);
 }
 
@@ -202,7 +199,7 @@ inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 {
-  assert(gsIsStateFrm(state_frm));
+  assert(detail::gsIsStateFrm(state_frm));
   return detail::impl_exprs_with_spec(state_frm, spec);
 }
 
@@ -228,8 +225,8 @@ inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
-  assert(gsIsActionRenameSpec(ar_spec));
-  assert(gsIsSpecV1(lps_spec));
+  assert(detail::gsIsActionRenameSpec(ar_spec));
+  assert(detail::gsIsSpecV1(lps_spec));
   return detail::impl_data_action_rename_spec_detail(ar_spec, lps_spec);
 }
 

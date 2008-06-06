@@ -17,8 +17,6 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 
-using namespace mcrl2::core::detail;
-
 namespace mcrl2 {
   namespace core {
 
@@ -51,7 +49,7 @@ ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 ///            If something went wrong, an appropriate error
 ///            message is printed and NULL is returned.
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  assert(detail::gsIsSpecV1(spec) || detail::gsIsPBES(spec) || detail::gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
    

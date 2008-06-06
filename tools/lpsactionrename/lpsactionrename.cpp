@@ -44,6 +44,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data::data_expr;
 using namespace mcrl2::data;
+using namespace mcrl2::lps;
 using namespace std;
 
 //Type definitions
@@ -103,7 +104,7 @@ int process(t_tool_options const& tool_options)
     gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
   }
   if (tool_options.end_phase == PH_NONE && !tool_options.pretty) {
-    lps::specification lps_spec(result);
+    specification lps_spec(result);
     lps_spec.save(outfilename);
   } else {
     if (outfilename.empty()) {
@@ -336,7 +337,7 @@ int main(int argc, char **argv)
 }
 
 template <typename IdentifierGenerator>
-void rename_renamerule_variables(data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
+void rename_renamerule_variables(data_expression& rcond, action& rleft, action& rright, IdentifierGenerator& generator)
 {
   std::vector<data_variable> src;  // contains the variables that need to be renamed
   std::vector<data_variable> dest; // contains the corresponding replacements
@@ -359,19 +360,19 @@ void rename_renamerule_variables(data_expression& rcond, lps::action& rleft, lps
     }
   }
 
-  rcond = atermpp::partial_replace(rcond, lps::detail::make_data_variable_replacer(src, dest));
-  rleft = atermpp::partial_replace(rleft, lps::detail::make_data_variable_replacer(src, dest));
-  rright = atermpp::partial_replace(rright, lps::detail::make_data_variable_replacer(src, dest));
+  rcond = atermpp::partial_replace(rcond, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
+  rleft = atermpp::partial_replace(rleft, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
+  rright = atermpp::partial_replace(rright, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
 }
 
-lps::specification rewrite_lps(lps::specification lps, RewriteStrategy rewrite_strategy)
+specification rewrite_lps(specification lps, RewriteStrategy rewrite_strategy)
 {
-  lps::summand_list lps_summands = lps.process().summands();
-  lps::summand_list new_summands;
-  lps::summand new_summand;
-  lps::action_list lps_actions;
-  lps::action_list new_actions;
-  lps::action new_action;
+  summand_list lps_summands = lps.process().summands();
+  summand_list new_summands;
+  summand new_summand;
+  action_list lps_actions;
+  action_list new_actions;
+  action new_action;
   data_expression_list lps_arguments;
   data_expression_list new_arguments;
   data_expression new_expression;
@@ -381,13 +382,13 @@ lps::specification rewrite_lps(lps::specification lps, RewriteStrategy rewrite_s
 
   Rewriter *rewr = createRewriter(lps.data(), rewrite_strategy);
 
-  new_summands = lps::summand_list();
-  for(lps::summand_list::iterator si = lps_summands.begin(); si != lps_summands.end(); ++si)
+  new_summands = summand_list();
+  for(summand_list::iterator si = lps_summands.begin(); si != lps_summands.end(); ++si)
   {
     //rewrite the arguments of the actions
     lps_actions = si->actions();
-    new_actions = lps::action_list();
-    for(lps::action_list::iterator ai = lps_actions.begin(); ai != lps_actions.end(); ++ai){
+    new_actions = action_list();
+    for(action_list::iterator ai = lps_actions.begin(); ai != lps_actions.end(); ++ai){
       lps_arguments = ai->arguments();
       new_arguments = data_expression_list();
       for(data_expression_list::iterator argi = lps_arguments.begin();
@@ -397,7 +398,7 @@ lps::specification rewrite_lps(lps::specification lps, RewriteStrategy rewrite_s
         new_arguments = push_front(new_arguments, new_expression);
       }
       new_arguments = reverse(new_arguments);
-      new_action = lps::action(ai->label(), new_arguments);
+      new_action = action(ai->label(), new_arguments);
       new_actions = push_front(new_actions, new_action);
     }
     new_actions = reverse(new_actions);
@@ -431,7 +432,7 @@ lps::specification rewrite_lps(lps::specification lps, RewriteStrategy rewrite_s
 
 ATermAppl rename(
             ATermAppl action_rename,
-            lps::specification lps_old_spec,
+            specification lps_old_spec,
             RewriteStrategy rewrite_strategy,
             bool norewrite, 
             bool nosumelm)
@@ -439,9 +440,9 @@ ATermAppl rename(
   // In the line below the reverse is necessary, because the parser puts the
   // rename rules in the reversed order compared to the order they appear in the text.
   aterm_list rename_rules = ATreverse(ATLgetArgument(ATAgetArgument(action_rename, 2), 0));
-  lps::summand_list lps_old_summands = lps_old_spec.process().summands();
-  lps::summand_list lps_summands = lps::summand_list(); //for changes in lps_old_summands
-  lps::action_list lps_new_actions = lps::action_list();;
+  summand_list lps_old_summands = lps_old_spec.process().summands();
+  summand_list lps_summands = summand_list(); //for changes in lps_old_summands
+  action_list lps_new_actions = action_list();;
 
   std::set<identifier_string> s;
   postfix_identifier_generator generator("");
@@ -454,25 +455,25 @@ ATermAppl rename(
   gsVerboseMsg("rename rules found: %i\n", rename_rules.size());
   for(aterm_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
-    lps::summand_list lps_new_summands;
+    summand_list lps_new_summands;
     aterm_appl rename_rule = *i;
     
     aterm_appl::iterator j =  rename_rule.begin();
     //skipping the data_variable_list j
     data_expression rule_condition = data_expression(*++j);     
-    lps::action rule_old_action =  lps::action(*++j);      
-    lps::action rule_new_action;
+    action rule_old_action =  action(*++j);      
+    action rule_new_action;
     aterm_appl new_element = *++j;
 
-    if(lps::is_action(new_element))
+    if(is_action(new_element))
     {
-      rule_new_action =  lps::action(new_element);
+      rule_new_action =  action(new_element);
       to_tau = false;
       to_delta = false;
     }
     else
     {
-      rule_new_action = lps::action();
+      rule_new_action = action();
       if(gsIsTau(new_element)){ to_tau = true; to_delta = false;}
       else if (gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
     }
@@ -537,14 +538,14 @@ ATermAppl rename(
     assert(variables_in_old_rule.empty());
  
 
-    lps_summands = lps::summand_list();
+    lps_summands = summand_list();
     //go through the summands of the old lps
     gsVerboseMsg("summands found: %i\n", lps_old_summands.size());
-    for(lps::summand_list::iterator losi = lps_old_summands.begin(); 
+    for(summand_list::iterator losi = lps_old_summands.begin(); 
                                     losi != lps_old_summands.end(); ++losi)
     {
-      lps::summand lps_old_summand = *losi;
-      lps::action_list lps_old_actions = lps_old_summand.actions();
+      summand lps_old_summand = *losi;
+      action_list lps_old_actions = lps_old_summand.actions();
 
       /* For each individual action in the multi-action, for which the 
          rename rule applies, two new summands must be made, namely one
@@ -556,14 +557,14 @@ ATermAppl rename(
                            lps_new_sum_vars(1,lps_old_summand.summation_variables());
       atermpp::vector < data_expression > 
                          lps_new_condition(1,lps_old_summand.condition());
-      atermpp::vector < std::pair <bool, lps::action_list > >
-                           lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),lps::action_list()));
+      atermpp::vector < std::pair <bool, action_list > >
+                           lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),action_list()));
       
       gsVerboseMsg("actions in summand found: %i\n", lps_old_actions.size());
-      for(lps::action_list::iterator loai = lps_old_actions.begin(); 
+      for(action_list::iterator loai = lps_old_actions.begin(); 
                 loai != lps_old_actions.end(); loai++)
       { 
-        lps::action lps_old_action = *loai;
+        action lps_old_action = *loai;
 
         if (equal_signatures(lps_old_action, rule_old_action)) 
         {
@@ -571,8 +572,8 @@ ATermAppl rename(
 
           //rename all previously used variables
           data_expression renamed_rule_condition=rule_condition;
-          lps::action renamed_rule_old_action=rule_old_action;
-          lps::action renamed_rule_new_action=rule_new_action;
+          action renamed_rule_old_action=rule_old_action;
+          action renamed_rule_new_action=rule_new_action;
           rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
           if (is_nil(renamed_rule_condition))
@@ -621,14 +622,14 @@ ATermAppl rename(
           if (is_true(renamed_rule_condition))
           { 
             if (to_delta)
-            { for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator 
+            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator 
                       i=lps_new_actions.begin() ;
                       i!=lps_new_actions.end() ; i++ )
-              { *i=std::make_pair(true,lps::action_list()); /* the action becomes delta */
+              { *i=std::make_pair(true,action_list()); /* the action becomes delta */
               }
             }
             else if (!to_tau)
-            { for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i=lps_new_actions.begin() ;
+            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
               { if (!((*i).first)) // the action is not delta
                 { *i=std::make_pair(false,push_front((*i).second,renamed_rule_new_action));
@@ -638,7 +639,7 @@ ATermAppl rename(
           }
           else if (is_false(renamed_rule_condition))
           {
-            for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i=lps_new_actions.begin() ;
+            for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
             { if (!((*i).first)) // The action does not equal delta.
               { *i=std::make_pair(false,push_front((*i).second,lps_old_action));
@@ -650,14 +651,14 @@ ATermAppl rename(
           { /* Duplicate summands, one where the renaming is applied, and one where it is not
                applied. */
 
-            atermpp::vector < std::pair <bool, lps::action_list > > lps_new_actions_temp(lps_new_actions);
+            atermpp::vector < std::pair <bool, action_list > > lps_new_actions_temp(lps_new_actions);
 
             if (!to_tau) // if the new element is tau, we do not insert it in the multi-action.
-            { for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator 
+            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator 
                         i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
               { if (to_delta) 
-                { *i=std::make_pair(true,lps::action_list());
+                { *i=std::make_pair(true,action_list());
                 }
                 else 
                 { *i=std::make_pair(false,push_front(i->second,renamed_rule_new_action));
@@ -665,7 +666,7 @@ ATermAppl rename(
               }
             }
 
-            for(atermpp::vector < std::pair <bool, lps::action_list > > :: iterator      
+            for(atermpp::vector < std::pair <bool, action_list > > :: iterator      
                         i=lps_new_actions_temp.begin() ;
                         i!=lps_new_actions_temp.end() ; i++ )
             { if (!(i->first)) // The element is not equal to delta 
@@ -703,7 +704,7 @@ ATermAppl rename(
 
         }//end if(equal_signatures(...))
         else
-        { for ( atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i=lps_new_actions.begin() ;
+        { for ( atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
                 i!=lps_new_actions.end() ; i++ )
           { *i = std::make_pair((*i).first,push_front((*i).second, lps_old_action));
           }
@@ -714,13 +715,13 @@ ATermAppl rename(
 
       /* Add the summands to lps_new_summands */
 
-      atermpp::vector < std::pair <bool, lps::action_list > > :: iterator i_act=lps_new_actions.begin();
+      atermpp::vector < std::pair <bool, action_list > > :: iterator i_act=lps_new_actions.begin();
       atermpp::vector < data_variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
       for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
       { 
         //create a summand for the new lps
-        lps::summand lps_new_summand = lps::summand(
+        summand lps_new_summand = summand(
                                            *i_sumvars,
                                            *i_cond,
                                            (*i_act).first,
@@ -737,17 +738,17 @@ ATermAppl rename(
 
   gsVerboseMsg("simplifying the result...\n");
 
-  lps::specification lps_new_spec = lps::specification(
+  specification lps_new_spec = specification(
                                           lps_old_spec.data(),
                                           lps_old_spec.action_labels(),
-                                          lps::linear_process(
+                                          linear_process(
                                                       lps_old_spec.process().free_variables(),
                                                       lps_old_spec.process().process_parameters(),
                                                       lps_old_summands), // These are the renamed sumands.
                                           lps_old_spec.initial_process());
 
   if(!norewrite) lps_new_spec = rewrite_lps(lps_new_spec, rewrite_strategy);
-  if(!nosumelm)  lps_new_spec = lps::sumelm(lps_new_spec);
+  if(!nosumelm)  lps_new_spec = sumelm(lps_new_spec);
   if(!nosumelm && !norewrite) lps_new_spec = rewrite_lps(lps_new_spec, rewrite_strategy);
 
   gsVerboseMsg("new lps complete\n");
@@ -762,7 +763,7 @@ ATermAppl rename_actions(t_tool_options tool_options)
 
   //open infilename
   gsVerboseMsg("loading lps...\n");
-  lps::specification lps_old_spec;
+  specification lps_old_spec;
   lps_old_spec.load(tool_options.infilename);
 
   //parse the action rename file

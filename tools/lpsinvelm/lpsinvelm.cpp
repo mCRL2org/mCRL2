@@ -257,7 +257,7 @@ using namespace mcrl2::core;
     void LPS_Inv_Elm::read_input() {
 
       //read the LPS
-      lps::specification lps_specification;
+      mcrl2::lps::specification lps_specification;
       lps_specification.load(f_lps_file_name);
 
       // type checking and data implementation of data expressions use an lps
@@ -297,7 +297,7 @@ using namespace mcrl2::core;
         exit(1);
       }
 
-      f_lps = lps::specification(f_reconstructed_spec);
+      f_lps = mcrl2::lps::specification(f_reconstructed_spec);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -345,7 +345,7 @@ using namespace mcrl2::core;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        lps::specification lps_specification(f_lps);
+        mcrl2::lps::specification lps_specification(f_lps);
         lps_specification.save(f_output_file_name);
       }
     }

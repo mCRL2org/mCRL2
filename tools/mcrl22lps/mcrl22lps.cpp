@@ -650,7 +650,7 @@ int main(int argc, char *argv[])
       gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
     }
     if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
-      lps::specification spec(result);
+      mcrl2::lps::specification spec(result);
       spec.save(lin_options.outfilename);
     } else {
       if (lin_options.outfilename.empty()) {
