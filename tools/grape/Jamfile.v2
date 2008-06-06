@@ -1,0 +1,18 @@
+project toolset/grape ;
+
+tool grape
+      : [ glob-tree *.cpp ]
+        /site-config//wx_gl
+        /libraries//core
+        /libraries/utilities//command_line_interfacing
+      : <dependency>/libraries//ticpp
+        <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
+        <include>libgrape
+        <include>grapeapp
+        <include>.
+        <wx>yes
+        <opengl>yes
+        <status>experimental
+      ;
+
+install-tools grape ;

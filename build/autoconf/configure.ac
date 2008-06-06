@@ -522,7 +522,7 @@ if test $WX_CONFIG; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl)"
+  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl,xml,html,adv)"
 else
   USE_WX=no
 fi
