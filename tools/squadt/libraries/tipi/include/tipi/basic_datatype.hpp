@@ -121,7 +121,7 @@ namespace tipi {
 
     template < >
     class enumeration< size_t > : public basic_enumeration {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       template < typename T >
@@ -174,7 +174,7 @@ namespace tipi {
 
     template < typename C >
     class enumeration : public basic_enumeration {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       public:
@@ -244,7 +244,7 @@ namespace tipi {
      * \brief Base class for ranges of integers
      **/
     class basic_integer_range :  public basic_datatype {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       friend std::ostream& operator<<(std::ostream&, basic_integer_range const&);
@@ -272,7 +272,7 @@ namespace tipi {
      **/
     template < typename C >
     class integer_range : protected basic_integer_range {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       protected:
@@ -349,7 +349,7 @@ namespace tipi {
      * \brief Base class for ranges of reals
      **/
     class basic_real_range : public basic_datatype {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       friend std::ostream& operator<<(std::ostream&, basic_real_range const&);
@@ -380,7 +380,7 @@ namespace tipi {
      **/
     template < typename C, bool minimum_included = true, bool maximum_included = true >
     class real_range : protected basic_real_range {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       protected:
@@ -533,7 +533,7 @@ namespace tipi {
 
     /** \brief Derived data type specifier for booleans */
     class boolean : public basic_datatype {
-      template < typename V, typename R, typename S >
+      template < typename R, typename S >
       friend class ::utility::visitor;
 
       protected:

@@ -37,7 +37,7 @@ namespace tipi {
   class configuration::object : public configuration::parameter {
     friend class tipi::configuration;
 
-    template < typename V, typename R, typename S >
+    template < typename R, typename S >
     friend class ::utility::visitor;
 
     private:

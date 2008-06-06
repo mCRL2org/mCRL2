@@ -63,7 +63,7 @@ namespace tipi {
     friend class tipi::controller::communicator_impl;
     friend class tipi::controller::communicator;
 
-    template < typename V, typename R, typename S >
+    template < typename R, typename S >
     friend class ::utility::visitor;
 
     public:

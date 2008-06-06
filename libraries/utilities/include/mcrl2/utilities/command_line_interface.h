@@ -23,13 +23,11 @@
 namespace mcrl2 {
   namespace utilities {
 
-    /// \cond INTERNAL
     /** \brief toolset version tag */
     const std::string version_tag("July 2008 (development)");
 
     /** \brief toolset copyright period description */
     const std::string copyright_period("2008");
-    /// \endcond
 
 #if defined(__LIBREWRITE_H)
     inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
@@ -431,7 +429,7 @@ namespace mcrl2 {
          * supplied internally at compile time.
          **/
         inline std::string version_information() const {
-          return m_name + " " + version_tag + " (revision " + std::string(MCRL2_REVISION) + ")\n" +
+          return m_name + " mCRL2 toolset " + version_tag + " (revision " + std::string(MCRL2_REVISION) + ")\n" +
                  copyright_message() +
                  "\nWritten by " + m_authors + ".\n";
         }
@@ -455,13 +453,10 @@ namespace mcrl2 {
          * and make_optional_argument().
          *
          * More specifically it specifies one of the two template types:
-         * \li template < S > interface_description::optional_argument
-         * representing a typed optional option argument or,
-         * \li template < S >
-         * interface_description::mandatory_argument representing a typed
+         * \li interface_description::optional_argument< std::string >
+         * representing a untyped optional option argument or,
+         * interface_description::mandatory_argument< std::string > representing a untyped
          * mandatory option argument.
-         * The special case in which template parameter S is equal to
-         * std::string represents the untyped argument.
          *
          * The current implementation does not perform type checking of
          * arguments. More concretely it does not check whether a value
