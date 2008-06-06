@@ -492,8 +492,8 @@ bool grape_event_remove_diagram::Do( void )
     }
 
     // check whether any architecturereferences exist that should no longer point to the diagram.
-    architecture_diagram* nil = 0;
-    spec->check_references( del_arch_dia_ptr->get_name(), nil );
+    architecture_diagram* dummy = 0;
+    spec->check_references( del_arch_dia_ptr->get_name(), dummy );
 
     // update architecture listbox
     wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
@@ -562,8 +562,8 @@ bool grape_event_remove_diagram::Do( void )
       event.Do();
     }
     // check whether any processreferences exist that should no longer point to the diagram.
-    process_diagram* nil = 0;
-    spec->check_references( proc_dia_ptr->get_name(), nil );
+    process_diagram* dummy = 0;
+    spec->check_references( proc_dia_ptr->get_name(), dummy );
 
     // update process listbox
     wxListBox *proc_listbox = m_main_frame->get_process_diagram_listbox();
