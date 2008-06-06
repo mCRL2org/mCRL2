@@ -17,7 +17,9 @@
 #define MCRL2_DATAIMPL_H
 
 #include <aterm2.h>
+#include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
+#include "mcrl2/core/detail/struct.h"
 
 using namespace mcrl2::core::detail;
 
@@ -38,8 +40,11 @@ namespace mcrl2 {
  *             went wrong, an appropriate error message is printed and
  *             NULL is returned.
  **/
-ATermAppl implement_data_data_spec(ATermAppl spec);
-
+inline ATermAppl implement_data_data_spec(ATermAppl spec)
+{
+  assert(gsIsDataSpec(spec));
+  return detail::implement_data_spec(spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 process
  *             specification.
@@ -54,8 +59,11 @@ ATermAppl implement_data_data_spec(ATermAppl spec);
  *             went wrong, an appropriate error message is printed and
  *             NULL is returned.
 **/
-ATermAppl implement_data_proc_spec(ATermAppl spec);
-
+inline ATermAppl implement_data_proc_spec(ATermAppl spec)
+{
+  assert(gsIsSpecV1(spec));
+  return detail::implement_data_spec(spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 parameterised
  *             boolean equation system (PBES) specification.
@@ -70,8 +78,11 @@ ATermAppl implement_data_proc_spec(ATermAppl spec);
  *             went wrong, an appropriate error message is printed and
  *             NULL is returned.
 **/
-ATermAppl implement_data_pbes_spec(ATermAppl spec);
-
+inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
+{
+  assert(gsIsPBES(spec));
+  return detail::implement_data_spec(spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 sort
  *             expression with respect to a type checked mCRL2
@@ -92,8 +103,11 @@ ATermAppl implement_data_pbes_spec(ATermAppl spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec);
-
+inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
+{
+  assert(gsIsSortExpr(sort_expr));
+  return detail::impl_exprs_with_spec(sort_expr, spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 data expression
  *             with respect to a type checked mCRL2 specification.
@@ -113,8 +127,11 @@ ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec);
-
+inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
+{
+  assert(gsIsDataExpr(data_expr));
+  return detail::impl_exprs_with_spec(data_expr, spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 multiaction
  *             with respect to a type checked mCRL2 specification.
@@ -134,8 +151,11 @@ ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec);
-
+inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
+{
+  assert(gsIsMultAct(mult_act));
+  return detail::impl_exprs_with_spec(mult_act, spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 process
  *             expression with respect to a type checked mCRL2
@@ -156,8 +176,11 @@ ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec);
-
+inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
+{
+  assert(gsIsProcExpr(proc_expr));
+  return detail::impl_exprs_with_spec(proc_expr, spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 state formula
  *             with respect to a type checked mCRL2 specification.
@@ -177,8 +200,11 @@ ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
-
+inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
+{
+  assert(gsIsStateFrm(state_frm));
+  return detail::impl_exprs_with_spec(state_frm, spec);
+}
 
 /** \brief     Implement data types of a type checked mCRL2 action rename
  *             specification with respect to a type checked mCRL2 linear
@@ -200,113 +226,12 @@ ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec);
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec);
-
-
-
-/* ============================================================================
- * Detailed data implementation, this is used by data reconstruction only!
- * ============================================================================
- */
-
-/// \pre sort_elt and sort_list are sort expressions.
-/// \return the list of data equations belonging to the list sort sort_list, with
-//     elements sort_elt.
-ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_list);
-
-/// \pre sort_list is a list sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_expression_list
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_expression_list
-/// \post an implementation of sort_list is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_list
-ATermAppl impl_sort_list(ATermAppl sort_expression_list, ATermList *p_substs,
-  t_data_decls *p_data_decls);
-
-/// \pre sort_elt and sort_list are sort expressions
-/// \return the list of data equations belonging to the set sort_set, with elements
-///     of sort_elt
-ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set);
-
-/// \pre sort_set is a set sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_set
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_set
-/// \post an implementation of sort_set is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_set
-ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
-  t_data_decls *p_data_decls);
-
-/// \pre sort_elt and sort_list are sort expressions
-/// \return the list of data equations belonging to the set sort_set, with elements
-///     of sort_elt
-ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl sort_set);
-
-/// \pre sort_bag is a bag sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_bag
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_bag
-/// \post an implementation of sort_bag is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_bag
-ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
-  t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort Bool is added to *p_data_decls
-void impl_sort_bool(t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort Pos is added to *p_data_decls
-void impl_sort_pos(t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort Nat is added to *p_data_decls
-void impl_sort_nat(t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort PairNat is added to *p_data_decls
-void impl_sort_nat_pair(t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort Int is added to *p_data_decls
-void impl_sort_int(t_data_decls *p_data_decls);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort Real is added to *p_data_decls
-void impl_sort_real(t_data_decls *p_data_decls);
-
-/// \pre sort is a sort expression that adheres to the internal syntax after
-///     data implementation
-///     p_data_decls represents a pointer to data declarations
-/// \post an implementation of equality, inequality and if for sort expression
-///     sort is added to *p_data_decls
-void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
-
-/// \pre op_id is an operation identifier of sort s_op_id; here s_op_id is:
-///     - either a sort identifier
-///     - or it is of the form s_0 x ... x s_n -> s, where the s_i and s are
-///       sort expressions
-///     p_args points to a list
-///     p_vars points to a list of DataVarIds
-///     context is some term
-/// \return op_id, if s_op_id is a sort identifier
-///     op_id(v_0,...,v_n), if s_op_id is of the form s_0 x ... x s_n -> s;
-///     here for 1 <= i <= n, v_i is a data variable of sort s_i different from
-///     the other v_j, and either
-///     - v_i occurs in *p_vars
-///     - v_i does not occur in *p_vars and context
-/// \post *p_args = [v_0,...,v_n]
-///     *p_vars is extended with newly introduced v_i (which did not occur in
-///     *p_vars and context)
-ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
-                                   ATermList *p_vars, ATerm context);
-
+inline ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
+{
+  assert(gsIsActionRenameSpec(ar_spec));
+  assert(gsIsSpecV1(lps_spec));
+  return detail::impl_data_action_rename_spec_detail(ar_spec, lps_spec);
+}
 
   }
 }

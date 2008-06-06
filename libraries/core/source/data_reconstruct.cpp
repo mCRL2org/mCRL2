@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/table.h"
 
 #include "mcrl2/core/data_reconstruct.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -27,6 +27,7 @@
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
   namespace core {

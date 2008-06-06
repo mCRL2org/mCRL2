@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
@@ -22,21 +22,11 @@
 using namespace ::mcrl2::utilities;
 namespace mcrl2 {
   namespace core {
+    namespace detail {
 
 //local declarations
 //------------------
 
-
-static ATermAppl implement_data_spec(ATermAppl spec);
-//Pre: spec represents an mCRL2 data, process or PBES specification that
-//     adheres to the internal ATerm structure after the type checking phase.
-//Post:The datatypes of spec are implemented as higher-order abstract data
-//     types.
-//Ret: if the data implementation went well, an equivalent version of spec is
-//     returned that adheres to the internal ATerm structure after data
-//     implementation.
-//     If something went wrong, an appropriate error message is printed and
-//     NULL is returned.
 
 static ATermList compute_sort_ref_substs(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
@@ -91,20 +81,6 @@ static ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr,
 //     top_level indicates if data_expr contains the top-level operation
 //Ret: data_expr in which numerical patterns can be matched if they do not occur
 //     at top level
-
-static ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
-//Pre: part is an expression that adheres to the internal syntax after type
-//     checking.
-//     spec represents an LPS specification in the internal syntax after type
-//     checking.
-//Post: The datatypes of spec are implemented as higher-order abstract data
-//     types in spec
-//Ret: if the data implementation went well, an equivalent version of part
-//     is returned that adheres to the internal ATerm structure after data
-//     implementation.
-//     If something went wrong, an appropriate error message is printed and
-//     NULL is returned.
-
 
 static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
@@ -193,55 +169,6 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //implementation
 //--------------
 
-
-ATermAppl implement_data_data_spec(ATermAppl spec)
-{
-  assert(gsIsDataSpec(spec));
-  return implement_data_spec(spec);
-}
-
-ATermAppl implement_data_proc_spec(ATermAppl spec)
-{
-  assert(gsIsSpecV1(spec));
-  return implement_data_spec(spec);
-}
-
-ATermAppl implement_data_pbes_spec(ATermAppl spec)
-{
-  assert(gsIsPBES(spec));
-  return implement_data_spec(spec);
-}
-
-ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
-{
-  assert(gsIsSortExpr(sort_expr));
-  return impl_exprs_with_spec(sort_expr, spec);
-}
-
-ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
-{
-  assert(gsIsDataExpr(data_expr));
-  return impl_exprs_with_spec(data_expr, spec);
-}
-
-ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
-{
-  assert(gsIsMultAct(mult_act));
-  return impl_exprs_with_spec(mult_act, spec);
-}
-
-ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
-{
-  assert(gsIsProcExpr(proc_expr));
-  return impl_exprs_with_spec(proc_expr, spec);
-}
-
-ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
-{
-  assert(gsIsStateFrm(state_frm));
-  return impl_exprs_with_spec(state_frm, spec);
-}
-
 ATermAppl implement_data_spec(ATermAppl spec)
 {
   assert(gsIsDataSpec(spec) || gsIsSpecV1(spec) || gsIsPBES(spec));
@@ -276,7 +203,7 @@ ATermAppl implement_data_spec(ATermAppl spec)
   return spec;
 }
 
-ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
+ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
   assert(gsIsActionRenameSpec(ar_spec));
   assert(gsIsSpecV1(lps_spec));
@@ -2755,5 +2682,6 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
   *p_sort_refs = ATreverse(sort_refs);
 }
 
+    } // namespace detail
   }   // namespace core
 }     // namespace mcrl2
