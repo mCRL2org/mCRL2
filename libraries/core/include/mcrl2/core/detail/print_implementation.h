@@ -6,10 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/print/implementation.h
-
-//This file contains a generic implementation of the PrintPart functions for
-//both C and C++. It should NEVER be included directly. Use mcrl2/print.h.
+/// \file print_implementation.h
+/// \brief This file contains a generic implementation of the PrintPart functions for
+//both C and C++. It should NEVER be included directly. Use print.h.
 
 #if defined(PRINT_C)
 #include <stdio.h>
@@ -34,9 +33,7 @@
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/data_reconstruct.h"
 
-using namespace ::mcrl2::utilities;
-using namespace mcrl2::core;
-
+using namespace mcrl2::utilities;
 
 namespace mcrl2 {
   namespace core { 
