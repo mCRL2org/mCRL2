@@ -353,34 +353,34 @@ fi
 # Sort LIBRARY_LIST alphabetically by library name
 LIBRARY_LIST=`echo "$LIBRARY_LIST" | sort`
 
-# First we generate a tag file called for every library in its root directory.
-TAGFILES=""
-# LIBRARY_LIST is a newline-separated list, so define \n to be the internal
-# field separator.
-OLDIFS=$IFS
-IFS=$'\n'
-
-for L in $LIBRARY_LIST ; do
-  # set variables $1, $2 and $3 to each of the colon-separated fields of $L
-  # respectively
-  IFS=$':'
-  set -- $L
-  IFS=$OLDIFS
-
-  determine_input $3
-
-  TAGFILES="$TAGFILES $3/$2.tag=../$2"
-  DOXYCONFIG="
-    GENERATE_TAGFILE = $3/$2.tag
-    INPUT = $DOXYINPUT"
-  if [ -e $3/doc/Doxyfile ] ; then
-    ( cat $DOXYMASTER $3/doc/Doxyfile ; echo "$DOXYCONFIG" ) | doxygen -
-  else
-    ( cat $DOXYMASTER ; echo "$DOXYCONFIG" ) | doxygen -
-  fi
-done
-
 if [ ! $OFFLINE ] ; then
+  # First we generate a tag file called for every library in its root directory.
+  TAGFILES=""
+  # LIBRARY_LIST is a newline-separated list, so define \n to be the internal
+  # field separator.
+  OLDIFS=$IFS
+  IFS=$'\n'
+
+  for L in $LIBRARY_LIST ; do
+    # set variables $1, $2 and $3 to each of the colon-separated fields of $L
+    # respectively
+    IFS=$':'
+    set -- $L
+    IFS=$OLDIFS
+
+    determine_input $3
+
+    TAGFILES="$TAGFILES $3/$2.tag=../$2"
+    DOXYCONFIG="
+      GENERATE_TAGFILE = $3/$2.tag
+      INPUT = $DOXYINPUT"
+    if [ -e $3/doc/Doxyfile ] ; then
+      ( cat $DOXYMASTER $3/doc/Doxyfile ; echo "$DOXYCONFIG" ) | doxygen -
+    else
+      ( cat $DOXYMASTER ; echo "$DOXYCONFIG" ) | doxygen -
+    fi
+  done
+
   # Create the footer that will be used for all generated files
   write_doxyfooter
 fi
@@ -398,17 +398,12 @@ for L in $LIBRARY_LIST ; do
   
   determine_input $3
 
-  # This library's tag file must *not* be in the list of tag files that
-  # are passed to Doxygen via the TAGFILES variable. Otherwise, the
-  # reference pages will be rather empty. So we filter it out.
-  TAGFILES_NOT_SELF=`echo "$TAGFILES" | sed -e "s|$3/$2.tag=../$2||"`
   DOXYCONFIG="
     PROJECT_NAME = \"$1\" 
     INPUT = $DOXYINPUT
     GENERATE_HTML = YES
     OUTPUT_DIRECTORY = $OUTPUT_DIR
     HTML_OUTPUT = $2
-    TAGFILES = $TAGFILES_NOT_SELF
     STRIP_FROM_PATH = $TRUNK/$3
     STRIP_FROM_INC_PATH = $TRUNK/$3/include $TRUNK/$3/source"
 
@@ -416,8 +411,13 @@ for L in $LIBRARY_LIST ; do
     # Generating pages for online viewing at mCRL2.org so create the PHP
     # header
     write_doxyheader $2
+    # This library's tag file must *not* be in the list of tag files that
+    # are passed to Doxygen via the TAGFILES variable. Otherwise, the
+    # reference pages will be rather empty. So we filter it out.
+    TAGFILES_NOT_SELF=`echo "$TAGFILES" | sed -e "s|$3/$2.tag=../$2||"`
     # And set additional configuration options
     DOXYCONFIG="$DOXYCONFIG
+    TAGFILES = $TAGFILES_NOT_SELF
     HTML_FILE_EXTENSION = .php
     HTML_HEADER = $DOXYHEADER
     HTML_FOOTER = $DOXYFOOTER"

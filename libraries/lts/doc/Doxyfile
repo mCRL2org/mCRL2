@@ -1,2 +1,2 @@
-EXCLUDE_PATTERNS += */fsmlexer.cpp */fsmparser.cpp */fsmparser.hpp */source/*
+EXCLUDE_PATTERNS += */fsmlexer.cpp */fsmparser.cpp */fsmparser.hpp */source/* */include/mcrl2/liblts_fsmparser.hpp
 PREDEFINED = MCRL2_BCG=1
