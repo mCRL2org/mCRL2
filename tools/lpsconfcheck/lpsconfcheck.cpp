@@ -539,7 +539,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         instream.close();
       }
       else {
-        f_invariant = gsMakeOpIdTrue();
+        f_invariant = mcrl2::core::detail::gsMakeOpIdTrue();
       }
 
       specification lps_specification;
@@ -554,14 +554,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
       //typecheck the invariant formula
       ATermAppl process = ATAgetArgument(f_reconstructed_lps, 2);
-      assert(gsIsLinearProcess(process));
+      assert(mcrl2::core::detail::gsIsLinearProcess(process));
       ATermList vars = ATLgetArgument(process, 1);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       }
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), f_reconstructed_lps, var_table);
+      f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_lps, var_table);
       ATtableDestroy(var_table);
       if (!f_invariant) {
         throw mcrl2::runtime_error("Typechecking of the invariant formula failed.\n");

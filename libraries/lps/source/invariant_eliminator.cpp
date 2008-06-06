@@ -20,6 +20,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 // Class Invariant_Eliminator ---------------------------------------------------------------------
   // Class Invariant_Eliminator - Functions declared private --------------------------------------

@@ -283,7 +283,7 @@ using namespace mcrl2::core;
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       } 
-      f_invariant = type_check_data_expr(f_invariant, gsMakeSortIdBool(), f_reconstructed_spec, var_table);
+      f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_spec, var_table);
       ATtableDestroy(var_table);
       if(!f_invariant){
         gsErrorMsg("Typechecking of the invariant formula failed.\n");

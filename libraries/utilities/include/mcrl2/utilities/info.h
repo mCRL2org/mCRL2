@@ -6,11 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/info.h
-/// \brief Add your file description here.
-
-// Interface to classes ATerm_Info, AI_Jitty and AI_Inner
-// file: mcrl2/utilities/info.h
+/// \file info.h
+/// \brief Interface to classes ATerm_Info, AI_Jitty and AI_Inner.
 
 #ifndef INFO_H
 #define INFO_H

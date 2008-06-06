@@ -21,7 +21,7 @@
 #include "mcrl2/data/prover/bdd_prover.h"
 #include "mcrl2/exception.h"
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 // Class Invariant_Checker ------------------------------------------------------------------------
@@ -109,9 +109,9 @@ using namespace mcrl2::core;
       }
 
       ATermAppl v_subst_invariant = gsSubstValues_Appl(v_substitutions, a_invariant, true);
-      ATermAppl v_formula = gsMakeDataExprAnd(a_invariant, v_condition);
+      ATermAppl v_formula = mcrl2::core::detail::gsMakeDataExprAnd(a_invariant, v_condition);
 
-      v_formula = gsMakeDataExprImp(v_formula, v_subst_invariant);
+      v_formula = mcrl2::core::detail::gsMakeDataExprImp(v_formula, v_subst_invariant);
       f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_tautology() == answer_yes) {
         gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);

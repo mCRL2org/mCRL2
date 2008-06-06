@@ -22,7 +22,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/rewrite/with_prover.h"
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 RewriterProver::RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat)
@@ -57,7 +57,7 @@ ATerm RewriterProver::rewriteInternal(ATerm Term)
 
 ATermAppl RewriterProver::rewrite(ATermAppl Term)
 {
-  if ( gsGetSort(Term) == gsMakeSortExprBool() )
+  if ( mcrl2::core::detail::gsGetSort(Term) == mcrl2::core::detail::gsMakeSortExprBool() )
   {
     prover_obj->set_formula(Term);
     return prover_obj->get_bdd();

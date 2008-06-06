@@ -23,6 +23,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------

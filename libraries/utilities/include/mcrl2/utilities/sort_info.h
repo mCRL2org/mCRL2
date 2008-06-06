@@ -6,21 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/sort_info.h
-/// \brief Add your file description here.
-
-// Interface to classes Sort_Info
-// file: sort_info.h
+/// \file sort_info.h
+/// \brief Interface to classes Sort_Info.
 
 #ifndef SORT_INFO_H
 #define SORT_INFO_H
 
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-
-using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 
 /// \brief Class that provides information on sort expressions.
 class Sort_Info {
@@ -45,21 +38,21 @@ class Sort_Info {
 
     /// \brief Constructor that initializes the fields of the class.
     inline Sort_Info() {
-      f_sort_id_int = gsMakeSortIdInt();
-      f_sort_id_nat = gsMakeSortIdNat();
-      f_sort_id_pos = gsMakeSortIdPos();
-      f_sort_id_real = gsMakeSortIdReal();
-      f_sort_id_bool = gsMakeSortIdBool();
+      f_sort_id_int = mcrl2::core::detail::gsMakeSortIdInt();
+      f_sort_id_nat = mcrl2::core::detail::gsMakeSortIdNat();
+      f_sort_id_pos = mcrl2::core::detail::gsMakeSortIdPos();
+      f_sort_id_real = mcrl2::core::detail::gsMakeSortIdReal();
+      f_sort_id_bool = mcrl2::core::detail::gsMakeSortIdBool();
     }
 
     /// \brief Indicates whether or not a sort expression is a base type.
     inline bool is_sort_id(ATermAppl a_sort_expression) {
-      return gsIsSortId(a_sort_expression);
+      return mcrl2::core::detail::gsIsSortId(a_sort_expression);
     }
 
     /// \brief Indicates whether or not the main operator of a sort expression is an arrow product.
     inline bool is_sort_arrow_prod(ATermAppl a_sort_expression) {
-      return gsIsSortArrow(a_sort_expression);
+      return mcrl2::core::detail::gsIsSortArrow(a_sort_expression);
     }
 
     /// \brief Indicates whether or not a sort expression represents the sort Int.
@@ -90,33 +83,33 @@ class Sort_Info {
     /// \brief Indicates whether or not a sort expression represents the sort List.
     inline bool is_sort_list(ATermAppl a_sort_expression) {
       return strncmp(
-        gsATermAppl2String(ATAgetArgument(a_sort_expression, 0)), "List@", 5) == 0;
+        mcrl2::core::detail::gsATermAppl2String(mcrl2::utilities::ATAgetArgument(a_sort_expression, 0)), "List@", 5) == 0;
     }
 
     /// \brief Indicates whether or not a sort expression represents the sort Bool.
     inline bool returns_bool(ATermAppl a_sort_expression) {
-      return gsGetSortExprResult(a_sort_expression) == f_sort_id_bool;
+      return mcrl2::core::detail::gsGetSortExprResult(a_sort_expression) == f_sort_id_bool;
     }
 
     /// \brief Returns the ID of the sort.
     inline char* get_sort_id(ATermAppl a_sort_expression) {
-      return gsATermAppl2String(ATAgetArgument(a_sort_expression, 0));
+      return mcrl2::core::detail::gsATermAppl2String(mcrl2::utilities::ATAgetArgument(a_sort_expression, 0));
     }
 
     /// \brief Returns the domain of a sort expression.
     inline ATermList get_domain(ATermAppl a_sort_expression) {
-      return gsGetSortExprDomain(a_sort_expression);
+      return mcrl2::core::detail::gsGetSortExprDomain(a_sort_expression);
     }
 
     /// \brief Returns the range of a sort expression.
     inline ATermAppl get_range(ATermAppl a_sort_expression) {
-      return gsGetSortExprResult(a_sort_expression);
+      return mcrl2::core::detail::gsGetSortExprResult(a_sort_expression);
     }
 
     /// \brief Returns the number of arguments accepted by a function with this type;
     inline int get_number_of_arguments(ATermAppl a_sort_expression) {
       if (is_sort_arrow_prod(a_sort_expression)) {
-        return ATgetLength(ATLgetArgument(a_sort_expression, 0));
+        return ATgetLength(mcrl2::utilities::ATLgetArgument(a_sort_expression, 0));
       }
 
       return 0;
@@ -124,12 +117,12 @@ class Sort_Info {
 
     /// \brief Returns the type of the argument with the given number.
     inline ATermAppl get_type_of_argument(ATermAppl a_sort_expression, int a_number) {
-      return ATAelementAt(get_domain(a_sort_expression), a_number);
+      return mcrl2::utilities::ATAelementAt(get_domain(a_sort_expression), a_number);
     }
 
     /// \brief Returns the result type of a sort expression.
     inline ATermAppl get_result_type(ATermAppl a_sort_expression) {
-      return ATAgetArgument(a_sort_expression, 1);
+      return mcrl2::utilities::ATAgetArgument(a_sort_expression, 1);
     }
 };
 

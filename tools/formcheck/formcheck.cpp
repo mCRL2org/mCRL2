@@ -180,6 +180,7 @@ using namespace mcrl2::core;
     {
       ATermAppl raw_specification;
       if (infilename.empty()) {
+        using namespace mcrl2::core::detail;
         //use empty data specification
         raw_specification = implement_data_data_spec(
           gsMakeDataSpec(
@@ -206,7 +207,7 @@ using namespace mcrl2::core;
         if (raw_specification == 0) {
           throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
         }
-        if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
+        if (!mcrl2::core::detail::gsIsSpecV1(raw_specification) && !mcrl2::core::detail::gsIsPBES(raw_specification)) {
           throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
@@ -250,7 +251,7 @@ using namespace mcrl2::core;
         throw mcrl2::runtime_error("parsing formula from " + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "failed");
       }
       //typecheck the formula
-      f_formula = type_check_data_expr(f_formula, gsMakeSortIdBool(), v_reconstructed_spec);
+      f_formula = type_check_data_expr(f_formula, mcrl2::core::detail::gsMakeSortIdBool(), v_reconstructed_spec);
       if(!f_formula){
         throw mcrl2::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }

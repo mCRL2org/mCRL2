@@ -6,11 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/utilities.h
-/// \brief Add your file description here.
-
-// Interface to utility functions
-// file: utilities.h
+/// \file utilities.h
+/// \brief Interface to utility functions.
 
 #ifndef UTILITIES_H
 #define UTILITIES_H
@@ -19,7 +16,6 @@
 
 #include "aterm2.h"
 
-using namespace mcrl2::core::detail;
 
 /**
  * \brief Converts to textual representation for a boolean
@@ -50,7 +46,7 @@ ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
  * \brief Creates an identifier for the for the ctau action
  **/
 inline ATermAppl make_ctau_act_id() {
-  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
+  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
 
   assert(ctau_act_id);
 
@@ -61,7 +57,7 @@ inline ATermAppl make_ctau_act_id() {
  * \brief Creates the ctau action
  **/
 inline ATermAppl make_ctau_action() {
-  static ATermAppl ctau_action = initAtermAppl(ctau_action, gsMakeAction(make_ctau_act_id(), ATmakeList0()));
+  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
 
   assert(ctau_action);
 
