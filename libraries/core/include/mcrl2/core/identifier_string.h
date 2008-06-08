@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/identifier_string.h
-/// \brief Library for ATerm strings.
+/// \brief ATerm representations of identifier strings.
 
 #ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
 #define MCRL2_BASIC_IDENTIFIER_STRING_H
@@ -21,7 +21,9 @@ namespace mcrl2 {
   /// Identifier strings are represented internally as ATerms.
   typedef atermpp::aterm_string identifier_string;
   
-  /// Tests if a term is an identifier string.
+  /// \brief Tests if a term is an identifier string.
+  /// \param[in] t an ATerm
+  /// \returns Whether t is an identifier string.
   inline
   bool is_identifier_string(atermpp::aterm t)
   {

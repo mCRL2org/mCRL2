@@ -7,8 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/reachable_nodes.h
-/// \brief Function for computing reachable nodes in a graph.
-/// This is used by parameter elimination algorithms.
+/// \brief Compute reachable nodes in a graph.
 
 #ifndef MCRL2_CORE_REACHABLE_NODES_H
 #define MCRL2_CORE_REACHABLE_NODES_H
@@ -43,8 +42,12 @@ namespace detail {
 
 } // namespace detail
 
-  /// Returns the indices of the nodes that are reachable from the nodes
-  /// given by the range of vertex descriptors [first, last[.
+  /// \brief Compute reachable nodes in a graph.
+  /// \param[in] g A graph.
+  /// \param[in] first Iterator to the first node.
+  /// \param[in] last Iterator to the last node.
+  /// \returns The indices of the nodes that are reachable from the nodes
+  /// given by the range of vertex descriptors [first, last].
   template <typename Graph, typename Iter>
   std::vector<int> reachable_nodes(const Graph& g, Iter first, Iter last)
   {

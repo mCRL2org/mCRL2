@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/text_utility.h
-/// \brief .
+/// \brief String manipulation functions.
 
 #ifndef MCRL2_CORE_TEXT_UTILITY_H
 #define MCRL2_CORE_TEXT_UTILITY_H
@@ -24,7 +24,7 @@ namespace mcrl2 {
 
 namespace core {
 
-  /// Splits a string into paragraphs.
+  /// \brief Split a string into paragraphs.
   std::vector<std::string> split_paragraphs(const std::string& text)
   {
     using namespace boost::xpressive;
@@ -51,7 +51,7 @@ namespace core {
     return result;
   }
 
-  /// read text from a file
+  /// \brief Read text from a file.
   inline
   std::string read_text(const std::string& filename, bool warn=false)
   {
@@ -74,7 +74,7 @@ namespace core {
     return s;
   }
 
-  /// Remove comments from a text (everything from '%' until end of line)
+  /// \brief Remove comments from a text (everything from '%' until end of line).
   inline
   std::string remove_comments(const std::string& text)
   {

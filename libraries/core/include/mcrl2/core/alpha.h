@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/alpha.h
-/// \brief Library for applying alphabet reductions to specifications 
+/// \brief Alphabet reductions of mCRL2 process specifications.
 
 #ifndef PARSER_LIBALPHA_H
 #define PARSER_LIBALPHA_H
@@ -17,7 +17,12 @@
 namespace mcrl2 {
   namespace core {
 
-/// Applies an alphabet reduction to a specification
+/** \brief     Apply alphabet reduction to an mCRL2 process specification.
+ *  \param[in] Spec An ATerm representation of an mCRL2 process
+ *             specification in the internal format after data
+ *             implementation.
+ *  \return    Spec after applying alphabet reductions.
+**/
 ATermAppl gsAlpha(ATermAppl Spec);
 
   }
