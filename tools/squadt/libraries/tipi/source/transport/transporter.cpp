@@ -152,6 +152,8 @@ namespace transport {
           connections.erase(i);
          
           t->owner.reset();
+
+          on_disconnect(t);
      
           break;
         }

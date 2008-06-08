@@ -13,6 +13,7 @@
 #define TIPI_VISITORS_H__
 
 #include <iostream>
+#include <sstream>
 
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/not.hpp>
@@ -26,29 +27,20 @@
 namespace tipi {
 
   /// \cond INTERNAL_DOCS
-
-  /// \cond IMPLEMENTATION_DOCS
   class store_visitor_impl;
-  /// \endcond
+  class restore_visitor_impl;
 
   /** \brief Visitor type for storing object hierarchies */
   class store_visitor : public ::utility::visitor_interface< tipi::store_visitor_impl > {
 
     public:
 
-      /** \brief Constructor to write to string */
-      store_visitor(std::string&);
-
       /** \brief Constructor to write to file */
-      store_visitor(boost::filesystem::path const&);
+      explicit store_visitor(boost::filesystem::path const&);
 
       /** \brief Constructor to writes to stream */
       store_visitor(std::ostream&);
   };
-
-  /// \cond IMPLEMENTATION_DOCS
-  class restore_visitor_impl;
-  /// \endcond
 
   /** \brief Visitor type for restoring object hierarchies */
   class restore_visitor : public ::utility::visitor_interface< tipi::restore_visitor_impl > {
@@ -92,8 +84,8 @@ namespace tipi {
       static std::string store(T const&);
 
       /** \brief Writes to string */
-      template < typename T >
-      static void store(T const&, std::string&);
+      template < typename T, typename U >
+      static std::string store(T const&, U&);
 
       /** \brief Writes to file */
       template < typename T >
@@ -122,18 +114,22 @@ namespace tipi {
 
   template < typename T >
   std::string visitors::store(T const& t) {
-    std::string output;
+    std::ostringstream out;
 
-    store(t, output);
+    tipi::store_visitor(out).visit(t);
 
-    return (output);
+    return out.str();
   }
 
-  template < typename T >
-  inline void visitors::store(T const& t, std::string& s) {
-    tipi::store_visitor  v(s);
+  template < typename T, typename U >
+  inline std::string visitors::store(T const& t, U& u) {
+    std::ostringstream out;
 
-    v.visit(t);
+    tipi::store_visitor v(out);
+
+    v.visit(t, u);
+
+    return out.str();
   }
 
   template < typename T >

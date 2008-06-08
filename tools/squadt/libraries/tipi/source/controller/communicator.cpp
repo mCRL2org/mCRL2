@@ -164,7 +164,9 @@ namespace tipi {
           if (g) {
             std::vector < tipi::layout::element const* > elements;
      
-            g->update(m->to_string(), elements);
+            if (g->get_manager() != 0) {
+              tipi::visitors::restore(*g, elements, m->to_string());
+            }
      
             h(elements);
           }
@@ -174,31 +176,29 @@ namespace tipi {
           boost::shared_ptr < communicator_impl > g(impl.lock());
       
           if (g.get() != 0) {
-            std::string c; 
-      
             try {
-              tipi::store_visitor v(c); 
-      
               if (dynamic_cast< tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) { // safe to do reinterpret cast
-                v.visit(*reinterpret_cast < tipi::layout::element const* > (e),
-                  display->find(reinterpret_cast < tipi::layout::element const* > (e))); 
+                g->send_message(tipi::message(
+                      visitors::store(*reinterpret_cast < tipi::layout::element const* > (e),
+                            display->find(reinterpret_cast < tipi::layout::element const* > (e))), tipi::message_display_data)); 
               }
             } 
             catch (bool) {
               // find failed for some reason
             }
-      
-            g->send_message(tipi::message(c, tipi::message_display_data)); 
+            catch (std::exception& e) {
+              g->logger->log(1, "Failed sending data message: `" + std::string(e.what()) + "'\n");
+            }
           }
         } 
 
         static void instantiate(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < communicator_impl > impl, display_layout_handler_function h1, display_update_handler_function h2) {
-          boost::shared_ptr < communicator_impl > g(impl.lock());
+          boost::shared_ptr< communicator_impl > g(impl.lock());
 
           if (g) {
-            tipi::layout::tool_display::sptr d(new layout::tool_display);
+            boost::shared_ptr< tipi::layout::tool_display > d(new layout::tool_display);
           
-            // Make sure the global event handler (the default event handler does not have a global event) is empty
+            // Make sure the global event handler is empty
             d->remove();
           
             try {

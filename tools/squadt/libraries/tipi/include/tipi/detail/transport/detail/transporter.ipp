@@ -50,6 +50,9 @@ namespace transport {
       /** \brief Abstract function for the delivery of streamed data to the client program */
       virtual void deliver(std::string const&, basic_transceiver const*) = 0;
 
+      /** \brief Abstract function to signal a disconnection has occurred */
+      virtual void on_disconnect(basic_transceiver const*) = 0;
+
     protected:
 
       /** \brief Associate a connection with this transporter */

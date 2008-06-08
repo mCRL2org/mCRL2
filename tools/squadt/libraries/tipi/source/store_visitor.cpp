@@ -40,7 +40,8 @@ namespace tipi {
     protected:
 
       /** \brief Writes to stream */
-      store_visitor_impl(std::ostream&);
+      store_visitor_impl(std::ostream& o) : out(o) {
+      }
   };
 
   class store_visitor_path_impl : public ::utility::visitor< store_visitor_impl > {
@@ -53,56 +54,19 @@ namespace tipi {
     public:
 
       /** \brief Writes to file */
-      store_visitor_path_impl(boost::filesystem::path const&);
-  };
-
-  class store_visitor_string_impl : public ::utility::visitor< store_visitor_impl > {
-
-    private:
-
-      /** \brief Storage for temporary std::ostream object */
-      std::ostringstream  m_help_stream;
-
-      /** \brief Storage for character data */
-      std::string&        m_target_string;
-
-    public:
-
-      /** \brief Constructor for writing to string */
-      store_visitor_string_impl(std::string&);
-
-      /** \brief Destructor */
-      ~store_visitor_string_impl();
-  };
-
-  inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
-                                ::utility::visitor< store_visitor_impl >(m_help_stream),
-                                m_target_string(s) {
-  }
-
-  inline store_visitor_string_impl::~store_visitor_string_impl() {
-    m_target_string.assign(m_help_stream.str());
-  }
-
-  inline store_visitor_path_impl::store_visitor_path_impl(boost::filesystem::path const& p) :
+      store_visitor_path_impl(boost::filesystem::path const& p) :
                                 ::utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_help_stream(p.string().c_str(), std::ios_base::out) {
 
-    m_help_stream.exceptions(std::ofstream::failbit|std::ofstream::badbit);
-  }
+        m_help_stream.exceptions(std::ofstream::failbit|std::ofstream::badbit);
+      }
+  };
 
-  inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
-  }
-  
   /** \brief Maps alignment to a string */
   static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};
 
   /** \brief Maps visibility to a string */
   static const char* visibility_to_text[3] = {"visible","hidden","none"};
-
-  store_visitor::store_visitor(std::string& s) :
-        ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
-  }
 
   store_visitor::store_visitor(boost::filesystem::path const& p) :
         ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {

@@ -169,7 +169,7 @@ namespace utility {
           typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), o);
   
           if (i == m_map.end() || *i != o) {
-            throw std::runtime_error("No visit method found with the requested signature");
+            throw false;
           }
 
           return *i;
@@ -185,7 +185,7 @@ namespace utility {
               }
             }
 
-            throw std::runtime_error("No visit method found with the requested signature (or fallback)");
+            throw false;
           }
 
           return *i;
@@ -261,7 +261,6 @@ namespace utility {
           m_caster.reset(new caster< T >);
         }
 
-        template < typename T >
         type_info_wrapper(type_info_wrapper const& o) : m_info(o.m_info), m_caster(o.m_caster) {
         }
 
@@ -379,17 +378,27 @@ namespace utility {
 
   template < typename R >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t) {
-    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< void >().get();
+    try {
+      detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< void >().get();
 
-    return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback(v, t);
+      return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback(v, t);
+    }
+    catch (std::exception& e) {
+      throw std::runtime_error(std::string("No compatible visit method found for :").append(typeid(v).name()).append("::visit(").append(typeid(t).name()).append(")"));
+    }
   }
 
   template < typename R >
   template < typename U >
   R abstract_visitor< R >::call_visit(abstract_visitor& v, visitable const& t, U& u) {
-    detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< U >().get();
+    try {
+      detail::basic_visit_method_wrapper& visit_method = v.get_visitable_type_tree().search(t).template find< U >().get();
 
-    return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback(v, t, u);
+      return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback(v, t, u);
+    }
+    catch (std::exception& e) {
+      throw std::runtime_error(std::string("No compatible visit method found for :").append(typeid(v).name()).append("::visit(").append(typeid(t).name()).append(",").append(typeid(U).name()).append(")"));
+    }
   }
 
   /**
@@ -484,16 +493,25 @@ namespace utility {
 
       /** \brief Default constructor */
       visitor() : visitable_types(get_master_types()) {
+        static bool initialised = initialise();
+
+        static_cast< void > (initialised);
       }
 
       /** \brief Alternative initialisation with reference argument */
       template < typename T >
       visitor(T& t) : S(t), visitable_types(get_master_types()) {
+        static bool initialised = initialise();
+
+        static_cast< void > (initialised);
       }
 
       /** \brief Alternative initialisation with pointer argument */
       template < typename T >
       visitor(T* t) : S(t), visitable_types(get_master_types()) {
+        static bool initialised = initialise();
+
+        static_cast< void > (initialised);
       }
   };
   /// \endcond
@@ -534,16 +552,6 @@ namespace utility {
       /** \brief Pointer to implementation object (handle-body idiom) */
       boost::shared_ptr < abstract_visitor< R > > impl;
 
-    private:
-
-      /** \brief Method that is used for automated registration of visit functions */
-      inline void initialise() {
-        static const bool initialised(visitor< S, R >::initialise());
-       
-        if (initialised) {
-        }
-      }
-
     public:
 
       /** \brief Visit constant interface function */
@@ -573,12 +581,10 @@ namespace utility {
 
   template < typename S, typename R >
   inline visitor_interface< S, R >::visitor_interface() : impl(new visitor< S, R >) {
-    initialise();
   }
 
   template < typename S, typename R >
   inline visitor_interface< S, R >::visitor_interface(boost::shared_ptr< visitor< S, R > > const& c) : impl(c) {
-    initialise();
   }
 }
 

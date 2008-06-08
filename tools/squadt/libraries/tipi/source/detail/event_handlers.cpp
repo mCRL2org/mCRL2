@@ -8,6 +8,7 @@
 // \file event_handlers.cpp
 
 #include <map>
+#include <deque>
 #include <utility>
 
 #include "boost/bind.hpp"
@@ -31,34 +32,44 @@ namespace tipi {
     /**
      * \cond INTERNAL_DOCS
      **/
+    template < typename T >
     class basic_event_handler_impl {
       friend class basic_event_handler;
 
       private:
    
         /** \brief Basic type of event handler functions */
-        typedef basic_event_handler::handler_function                             handler_function;
+        typedef basic_event_handler::handler_function                 handler_function;
 
         /** \brief Type for the map that associates a number of handlers to a pointer */
-        typedef std::multimap < const void*, handler_function >                   handler_map;
+        typedef std::multimap< T, handler_function >                  handler_map;
    
         /** \brief Type for the map that associates a number of handlers to a pointer */
-        typedef std::map < const void*, boost::shared_ptr < boost::condition > >  waiter_map;
+        typedef std::map< T, boost::shared_ptr < boost::condition > > waiter_map;
+   
+        /** \brief Type for the queue of events to be processed */
+        typedef std::deque< std::pair< T, bool > >                    event_queue;
    
       private:
    
         /** \brief For waiter events, and for processing events in a mutual exclusive manner */
-        boost::mutex      lock;
+        boost::mutex      m_wait_lock;
 
         /** \brief The list of functions that are to be executed  */
-        handler_function  global_handler;
+        event_queue       m_events;
+
+        /** \brief The global (default) handler */
+        handler_function  m_global_handler;
    
         /** \brief The list of functions that are to be executed  */
-        handler_map       handlers;
+        handler_map       m_handlers;
    
         /** \brief The synchronisation constructs for waking up waiters */
-        waiter_map        waiters;
+        waiter_map        m_waiters;
    
+        /** \brief Thread activity flag for handler execution */
+        bool              m_handler_execution_thread;
+
       public:
 
         /** \brief Destructor */
@@ -67,34 +78,37 @@ namespace tipi {
       private:
    
         /** \brief Wakes up all waiters that match an identifier or all waiters if the identifier is 0 */
-        void wake(const void* = 0);
+        void wake(T = 0);
 
         /** \brief Set a global handler */
         void add(handler_function);
    
         /** \brief Register an arbitrary handler for a specific object */
-        void add(const void*, handler_function);
+        void add(T, handler_function);
 
         /** \brief Whether a specific handler is registered for the object */
-        bool has_handler(const void*) const;
+        bool has_handler(T) const;
 
         /** \brief Moves registered event handlers that match the id to another object */
-        void transfer(basic_event_handler_impl&, const void* = 0);
+        void transfer(basic_event_handler_impl&, T = 0);
 
         /** \brief Remove the global handler */
         void remove();
 
         /** \brief Remove the handlers for a specific object */
-        void remove(const void*);
+        void remove(T);
 
         /** \brief Process an event for a specific object */
-        void process(boost::shared_ptr < basic_event_handler_impl > p, const void*, bool = true);
+        void process(boost::shared_ptr< basic_event_handler_impl > p, T, bool = true);
    
         /** \brief Execute handlers for a specific object */
-        void execute_handlers(boost::shared_ptr < basic_event_handler_impl > p, const void*, bool);
+        void execute_handlers(boost::shared_ptr < basic_event_handler_impl > p);
+
+        /** \brief Execute handlers for a specific object */
+        void execute_handlers(const T id, bool b);
    
         /** \brief Block until the next event has been processed */
-        void await_change(const void*);
+        void await_change(T);
 
         /** \brief Remove all stored non-global handlers */
         void clear();
@@ -103,63 +117,68 @@ namespace tipi {
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      *
-     * \pre lock is in the locked state
+     * \pre m_wait_lock is in the locked state
      **/
-    inline void basic_event_handler_impl::wake(const void* id) {
-      waiter_map::iterator w = waiters.find(id);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::wake(T id) {
+      typename waiter_map::iterator w = m_waiters.find(id);
    
-      if (w != waiters.end()) {
+      if (w != m_waiters.end()) {
         (*w).second->notify_all();
    
-        waiters.erase(w);
+        m_waiters.erase(w);
       }
     }
    
     /**
      * \param[in] h a function object that is to be invoked at an event
      **/
-    inline void basic_event_handler_impl::add(handler_function h) {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::add(handler_function h) {
+      boost::mutex::scoped_lock l(m_wait_lock);
    
-      global_handler = h;
+      m_global_handler = h;
     }
    
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] h a function object that is to be invoked at an event
      **/
-    inline void basic_event_handler_impl::add(const void* id, handler_function h) {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::add(T id, handler_function h) {
+      boost::mutex::scoped_lock l(m_wait_lock);
    
-      handlers.insert(std::make_pair(id, h));
+      m_handlers.insert(std::make_pair(id, h));
     }
    
-    inline bool basic_event_handler_impl::has_handler(const void* id) const {
-      return handlers.count(id) != 0;
+    template < typename T >
+    inline bool basic_event_handler_impl< T >::has_handler(T id) const {
+      return m_handlers.count(id) != 0;
     }
 
     /**
      * \param[in] e the target event handler object to which the handlers should be relocated
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      **/
-    inline void basic_event_handler_impl::transfer(basic_event_handler_impl& e, const void* id) {
+    template < typename T >
+    inline void basic_event_handler_impl< T >::transfer(basic_event_handler_impl& e, T id) {
       if (&e != this) {
-        boost::mutex::scoped_lock l(lock);
-        boost::mutex::scoped_lock k(e.lock);
+        boost::mutex::scoped_lock l(m_wait_lock);
+        boost::mutex::scoped_lock k(e.m_wait_lock);
       
-        std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(id);
+        std::pair< typename handler_map::iterator, typename handler_map::iterator > p = m_handlers.equal_range(id);
       
-        e.handlers.insert(p.first, p.second);
+        e.m_handlers.insert(p.first, p.second);
       
-        handlers.erase(p.first, p.second);
+        m_handlers.erase(p.first, p.second);
       
-        waiter_map::iterator w = waiters.find(id);
+        typename waiter_map::iterator w = m_waiters.find(id);
       
-        if (w != waiters.end()) {
-          /* Transfer waiters */
-          e.waiters.insert(*w);
+        if (w != m_waiters.end()) {
+          /* Transfer m_waiters */
+          e.m_waiters.insert(*w);
       
-          waiters.erase(w);
+          m_waiters.erase(w);
         }
       }
     }
@@ -168,14 +187,16 @@ namespace tipi {
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
      **/
-    inline void basic_event_handler_impl::process(boost::shared_ptr < basic_event_handler_impl > p, const void* id, bool b) {
-      if (0 < handlers.count(id) || !global_handler.empty()) {
-        boost::thread t(boost::bind(&basic_event_handler_impl::execute_handlers, this, p, id, b));
-      }
-      else if (0 < waiters.size()) {
-        boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::process(boost::shared_ptr < basic_event_handler_impl > p, T id, bool b) {
+      m_events.push_back(std::make_pair(id, b));
 
-        wake(id);
+      boost::mutex::scoped_lock l(m_wait_lock);
+
+      if (!m_handler_execution_thread) {
+        m_handler_execution_thread = true;
+
+        boost::thread(boost::bind(&basic_event_handler_impl::execute_handlers, this, p));
       }
     }
 
@@ -183,39 +204,72 @@ namespace tipi {
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
      **/
-    inline void basic_event_handler_impl::execute_handlers(boost::shared_ptr < basic_event_handler_impl > p, const void* id, bool b) {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::execute_handlers(boost::shared_ptr < basic_event_handler_impl > p) {
+      boost::mutex::scoped_lock l(m_wait_lock);
 
-      if (!global_handler.empty() && b) {
-        global_handler(id);
+      while (0 < m_events.size()) {
+        std::pair< T, bool > event(m_events.front());
+
+        try {
+          m_events.pop_front();
+         
+          if (event.second && !m_global_handler.empty()) {
+            m_global_handler(event.first);
+          }
+         
+          std::pair < typename handler_map::const_iterator,
+                      typename handler_map::const_iterator > range(m_handlers.equal_range(event.first));
+        
+          BOOST_FOREACH(typename handler_map::value_type p, range) {
+            p.second(event.first);
+          }
+         
+          wake(event.first);
+        }
+        catch (std::exception& e) {
+          std::cerr << e.what() << std::endl;
+        }
       }
-   
-      std::pair < handler_map::const_iterator, handler_map::const_iterator > range(handlers.equal_range(id));
 
-      BOOST_FOREACH(handler_map::value_type p, range) {
+      m_handler_execution_thread = false;
+    }
+
+    template < typename T >
+    void basic_event_handler_impl< T >::execute_handlers(const T id, bool b) {
+      boost::mutex::scoped_lock l(m_wait_lock);
+
+      if (b && !m_global_handler.empty()) {
+        m_global_handler(id);
+      }
+      
+      std::pair < typename handler_map::const_iterator,
+                  typename handler_map::const_iterator > range(m_handlers.equal_range(id));
+      
+      BOOST_FOREACH(typename handler_map::value_type p, range) {
         p.second(id);
       }
-   
-      if (0 < waiters.size()) {
-        wake(id);
-      }
+      
+      wake(id);
     }
    
-    inline void basic_event_handler_impl::remove() {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::remove() {
+      boost::mutex::scoped_lock l(m_wait_lock);
    
-      global_handler.clear();
+      m_global_handler.clear();
     }
 
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      **/
-    inline void basic_event_handler_impl::remove(const void* id) {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::remove(T id) {
+      boost::mutex::scoped_lock l(m_wait_lock);
    
-      std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(id);
+      std::pair < typename handler_map::iterator, typename handler_map::iterator > p = m_handlers.equal_range(id);
    
-      handlers.erase(p.first, p.second);
+      m_handlers.erase(p.first, p.second);
 
       wake(id);
     }
@@ -225,18 +279,19 @@ namespace tipi {
      *
      * \attention also unblocks if the object is destroyed
      **/
-    inline void basic_event_handler_impl::await_change(const void* id) {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline void basic_event_handler_impl< T >::await_change(T id) {
+      boost::mutex::scoped_lock l(m_wait_lock);
    
       boost::shared_ptr < boost::condition > anchor;
 
-      waiter_map::iterator w = waiters.find(id);
+      typename waiter_map::iterator w = m_waiters.find(id);
    
-      if (w == waiters.end()) {
+      if (w == m_waiters.end()) {
         /* Create new waiter */
         anchor = boost::shared_ptr < boost::condition > (new boost::condition);
 
-        waiters[id] = anchor;
+        m_waiters[id] = anchor;
       }
       else {
         anchor = (*w).second;
@@ -246,18 +301,22 @@ namespace tipi {
       anchor->wait(l);
     }
    
-    inline void basic_event_handler_impl::clear() {
-      handlers.clear();
+    template < typename T >
+    inline void basic_event_handler_impl< T >::clear() {
+      boost::mutex::scoped_lock l(m_wait_lock);
+
+      m_handlers.clear();
     }
 
-    inline basic_event_handler_impl::~basic_event_handler_impl() {
-      boost::mutex::scoped_lock l(lock);
+    template < typename T >
+    inline basic_event_handler_impl< T >::~basic_event_handler_impl() {
+      boost::mutex::scoped_lock l(m_wait_lock);
 
       wake();
     }
     /// \endcond
 
-    basic_event_handler::basic_event_handler() : impl(new basic_event_handler_impl) {
+    basic_event_handler::basic_event_handler() : impl(new basic_event_handler_impl< const void* >) {
     }
    
     /**
@@ -280,7 +339,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e the target event handler object to which the handlers should be relocated
+     * \param[in] e the target event handler object to which the m_handlers should be relocated
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      **/
     void basic_event_handler::transfer(basic_event_handler& e, const void* id) {
@@ -300,7 +359,7 @@ namespace tipi {
      * \param[in] b whether or not to execute the global handler
      **/
     void basic_event_handler::execute_handlers(const void* id, bool b) {
-      impl->execute_handlers(impl, id, b);
+      impl->execute_handlers(id, b);
     }
    
     void basic_event_handler::remove() {

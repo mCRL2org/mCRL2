@@ -36,7 +36,7 @@ namespace tipi {
     public:
 
       /** \brief Type for element identifiers */
-      typedef boost::uint_t< (sizeof(::tipi::layout::element*) << 3) >::least                      element_identifier;
+      typedef boost::uint_t< (sizeof(::tipi::layout::element*) << 3) >::least                element_identifier;
 
       /** \brief Type alias for a mapping from identifier to element */
       typedef std::map < const element_identifier, boost::shared_ptr < ::tipi::layout::element > > element_by_id;

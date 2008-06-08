@@ -15,7 +15,6 @@
 #include <iosfwd>
 
 #include "tipi/layout_base.hpp"
-#include "tipi/detail/layout_mediator.hpp"
 #include "tipi/basic_datatype.hpp"
 
 namespace tipi {
@@ -39,18 +38,27 @@ namespace tipi {
         private:
      
           /** \brief Default constructor */
-          label();
+          inline label() {}
      
         public:
      
           /** \brief Change the text */
-          std::string get_text() const;
+          inline std::string get_text() const {
+            return m_text;
+          }
 
-          /** \brief Change the text */
-          label& set_text(std::string const&);
+          /**
+           * \brief Change the text
+           * \param[in] t the text of the label
+           * \return *this
+           **/
+          inline label& set_text(std::string const& t) {
+            m_text = t;
 
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+            activate_handlers();
+
+            return *this;
+          }
       };
      
       /** \brief A basic button widget */
@@ -68,21 +76,34 @@ namespace tipi {
         private:
      
           /** \brief Default constructor */
-          button();
+          inline button() {
+            set_grow(false);
+          }
      
         public:
      
           /** \brief Change the text */
-          std::string get_label() const;
+          inline std::string get_label() const {
+            return m_label;
+          }
 
-          /** \brief Change the label */
-          button& set_label(std::string const&);
+          /**
+           * \brief Change the label
+           * \param[in] l the label for the button
+           * \return *this
+           **/
+          inline button& set_label(std::string const& l) {
+            m_label = l;
+
+            activate_handlers();
+
+            return *this;
+          }
 
           /** \brief Activates the button */
-          void activate();
-     
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          void activate() {
+            activate_handlers();
+          }
       };
      
       /**
@@ -115,40 +136,113 @@ namespace tipi {
 
         private:
      
-          /** \brief Set state of the radio button */
-          void set_selected(bool = false);
+          /**
+           * \brief Set state of the radio button
+           * \param[in] b whether or not to send an event
+           **/
+          void set_selected(bool b = false) {
+            for (radio_button* r = m_connection; r != this; r = r->m_connection) {
+              if (r->m_selected) {
+                r->m_selected = false;
+       
+                break;
+              }
+            }
+       
+            m_selected = true;
+ 
+            activate_handlers(b);
+          }
 
           /** \brief Constructor */
-          radio_button();
+          radio_button() : m_selected(true) {
+            m_connection = this;
+          }
 
         public:
      
-          /** \brief sets the label for the radio button */
-          radio_button& set_label(std::string const&);
+          /**
+           * \brief sets the label for the radio button
+           * \param[in] l the new text of the label for the radio button
+           * \return *this
+           **/
+          inline radio_button& set_label(std::string const& l) {
+            m_label = l;
+
+            return *this;
+          }
 
           /** \brief Returns the current label */
-          std::string get_label() const;
+          inline std::string get_label() const {
+            return m_label;
+          }
 
-          /** \brief Connects the button to another group */
-          radio_button& connect(radio_button&);
+          /**
+           * \brief Connects the button to another group
+           * \param[in] r the button in the group to connect with
+           **/
+          inline radio_button& connect(radio_button& r) {
+            if (&r != this) {
+              // disconnect from group if it contains more than one button
+              if (r.m_connection != &r) {
+                radio_button* n = r.m_connection;
+           
+                while (n->m_connection != &r) {
+                  n = n->m_connection;
+                }
+           
+                n->m_connection = r.m_connection;
+           
+                if (r.m_selected) {
+                  n->m_selected = true;
+                }
+              }
+           
+              r.m_selected   = false;
+              r.m_connection = m_connection;
+              m_connection   = &r;
+            }
+           
+            return *this;
+          }
 
           /** \brief The next radio button in the group */
-          radio_button const& connected_to() const;
+          inline radio_button const& connected_to() const {
+            return *m_connection;
+          }
 
           /** \brief The next radio button in the group */
-          radio_button& connected_to();
+          inline radio_button& connected_to() {
+            return *m_connection;
+          }
 
-          /** \brief set radio button */
-          radio_button& select();
+          /**
+           * \brief set radio button
+           * \return *this
+           */
+          inline radio_button& select() {
+            if (!m_selected) {
+              set_selected(true);
+            }
+
+            return *this;
+          }
 
           /** \brief Gets a pointer to the radio button in the group that is selected */
-          radio_button const& get_selected() const;
+          inline radio_button const& selected() const {
+            radio_button const* r = this;
+
+            while (!r->m_selected) {
+              r = r->m_connection;
+            }
+
+            return *r;
+          }
 
           /** \brief Whether the radion button is selected or not */
-          bool is_selected() const;
-     
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline bool is_selected() const {
+            return m_selected;
+          }
       };
      
       /**
@@ -171,24 +265,42 @@ namespace tipi {
         private:
      
           /** \brief Default constructor */
-          checkbox();
+          inline checkbox() {}
 
         public:
      
-          /** \brief Set the status */
-          checkbox& set_status(bool);
+          /**
+           * \brief Set the status
+           * \param[in] b the new status
+           * \return *this
+           **/
+          inline checkbox& set_status(bool b) {
+            m_status = b;
 
-          /** \brief sets the label for the radio button */
-          checkbox& set_label(std::string const&);
+            activate_handlers();
+
+            return *this;
+          }
+
+          /** \brief sets the label for the radio button
+           * \param[in] l the new text of the label for the radio button
+           * \return *this
+           **/
+          inline checkbox& set_label(std::string const& l) {
+            m_label = l;
+
+            return *this;
+          }
 
           /** \brief Returns the current label */
-          std::string get_label() const;
+          inline std::string get_label() const {
+            return m_label;
+          }
 
           /** \brief Gets the status */
-          bool get_status() const;
-     
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline bool get_status() const {
+            return m_status;
+          }
       };
      
       /** \brief A basic progress bar widget */
@@ -212,30 +324,66 @@ namespace tipi {
         private:
      
           /** \brief Default constructor */
-          progress_bar();
+          inline progress_bar() : m_minimum(0), m_maximum(0), m_current(0) {
+          }
+
 
         public:
      
-          /** \brief Sets the current value of the progress bar */
-          progress_bar& set_value(unsigned int);
+          /**
+           * \brief Sets the current value of the progress bar
+           * \param[in] v the new value
+           * \return *this
+           * \pre minimum <= v <= maximum
+           **/
+          inline progress_bar& set_value(unsigned int v) {
+            m_current = v;
+
+            activate_handlers();
+
+            return *this;
+          }
      
           /** \brief Gets the current value of the progress bar */
-          unsigned int get_value() const;
+          inline unsigned int get_value() const {
+            return m_current;
+          }
+     
+          /**
+           * \brief Sets the minimum value of the progress bar
+           * \param[in] v the new value
+           * \return *this
+           **/
+          inline progress_bar& set_minimum(unsigned int v) {
+            m_minimum = v;
+
+            activate_handlers();
+
+            return *this;
+          }
      
           /** \brief Sets the minimum value of the progress bar */
-          progress_bar& set_minimum(unsigned int);
+          inline unsigned int get_minimum() const {
+            return m_minimum;
+          }
      
-          /** \brief Sets the minimum value of the progress bar */
-          unsigned int get_minimum() const;
-     
-          /** \brief Sets the minimum value of the progress bar */
-          progress_bar& set_maximum(unsigned int);
+          /**
+           * \brief Sets the minimum value of the progress bar
+           * \param[in] v the new value
+           * \return *this
+           **/
+          inline progress_bar& set_maximum(unsigned int v) {
+            m_maximum = v;
+
+            activate_handlers();
+
+            return *this;
+          }
 
           /** \brief Sets the minimum value of the progress bar */
-          unsigned int get_maximum() const;
-     
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline unsigned int get_maximum() const {
+            return m_maximum;
+          }
       };
      
       /**
@@ -261,21 +409,41 @@ namespace tipi {
         private:
      
           /** \brief Default constructor */
-          text_field();
+          inline text_field() : m_text(""), m_type(new tipi::datatype::string()) {
+          }
 
         public:
      
-          /** \brief Sets the text */
-          text_field& set_text(std::string const&);
+          /**
+           * \brief Sets the text
+           * \param[in] s the new text
+           * \return *this
+           **/
+          inline text_field& set_text(std::string const& s) {
+            m_text = s;
+
+            activate_handlers();
+
+            return *this;
+          }
      
-          /** \brief Sets the type */
-          text_field& set_type(boost::shared_ptr < basic_datatype >&);
+          /**
+           * \brief Sets the type
+           * \param[in] t the new type to validate against
+           * \return *this
+           **/
+          inline text_field& set_type(boost::shared_ptr < basic_datatype >& t) {
+            m_type = t;
+
+            activate_handlers();
+
+            return *this;
+          }
 
           /** \brief Get the text */
-          std::string get_text() const;
-     
-          /** \brief Instantiate a layout element, through a mediator */
-          layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline std::string get_text() const {
+            return m_text;
+          }
       };
     }
   }

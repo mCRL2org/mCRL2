@@ -17,6 +17,7 @@
 namespace tipi {
   namespace layout {
 
+    template < typename T >
     class basic_event_handler_impl;
 
     /**
@@ -31,7 +32,7 @@ namespace tipi {
       private:
 
         /** \brief implementation object (handle body idiom) */
-        boost::shared_ptr < basic_event_handler_impl > impl;
+        boost::shared_ptr< basic_event_handler_impl< const void* > > impl;
 
       public:
    

@@ -18,7 +18,6 @@
 #include <memory>
 
 #include "tipi/layout_base.hpp"
-#include "tipi/detail/layout_mediator.hpp"
 
 namespace tipi {
   namespace layout {
@@ -202,9 +201,6 @@ namespace tipi {
         /** \brief Constructor */
         manager();
 
-        /** \brief Attaches a layout element to a manager, using layout properties */
-        inline void attach(layout::mediator*, mediator::wrapper_aptr, properties const*) const;
-
       public:
 
         /** \brief Adds a new element to the box */
@@ -259,9 +255,6 @@ namespace tipi {
         /** \brief Makes an element invisible */ 
         virtual void hide(element*) = 0;
 
-        /** \brief Instantiate a layout element, through a mediator */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
-
         /** \brief Destructor */
         virtual ~manager() = 0;
     };
@@ -301,9 +294,6 @@ namespace tipi {
 
         /** \brief Adds a new element to the box */
         element& add(element&, properties const&);
-
-        /** \brief Instantiate a layout element, through a mediator */
-        mediator::wrapper_aptr instantiate(std::auto_ptr < layout::mediator >) const;
 
       public:
 
@@ -370,9 +360,6 @@ namespace tipi {
 
         /** \brief Makes an element invisible */ 
         void hide(element*);
-
-        /** \brief Instantiate a layout element, through a mediator */
-        mediator::wrapper_aptr instantiate(layout::mediator*);
     };
 
     /**
@@ -388,15 +375,6 @@ namespace tipi {
      * Elements are laid out horizontally one after the other in the available space
      **/
     typedef box< vertical_alignment >   horizontal_box;
-
-    /**
-     * \param m the mediator object to use
-     * \param d the data needed
-     * \param c the layout properties
-     **/
-    inline void manager::attach(layout::mediator* m, mediator::wrapper_aptr d, properties const* c) const {
-      m->attach(d, c);
-    }
 
     inline manager::~manager() {
     }
@@ -763,36 +741,6 @@ namespace tipi {
       box::add(e, properties(manager::get_default_vertical_alignment(), manager::get_default_horizontal_alignment(), manager::get_default_margins(), v));
 
       return *this;
-    }
-
-    /**
-     * \param m the mediator object to use
-     **/
-    template < typename A >
-    inline layout::mediator::wrapper_aptr box< A >::instantiate(std::auto_ptr < layout::mediator > m) const {
-      layout::mediator* n = m.get();
-
-      for (children_list::const_iterator i = m_children.begin(); i != m_children.end(); ++i) {
-        manager::attach(n, (i->layout_element)->instantiate(n), static_cast < const layout::properties* > (&(i->layout_properties)));
-      }
-
-      return (n->extract_data());
-    }
-
-    /**
-     * \param m the mediator object to use
-     **/
-    template < >
-    inline layout::mediator::wrapper_aptr box< vertical_alignment >::instantiate(layout::mediator* m) {
-      return (box::instantiate(m->build_horizontal_box()));
-    }
-
-    /**
-     * \param m the mediator object to use
-     **/
-    template < >
-    inline layout::mediator::wrapper_aptr box< horizontal_alignment >::instantiate(layout::mediator* m) {
-      return (box::instantiate(m->build_vertical_box()));
     }
   }
 }

@@ -106,7 +106,7 @@ namespace squadt {
         inline void on_status_change(boost::function < void () >);
 
         /** \brief Associates a process with this listener */
-        void attach_process(const process::sptr& p);
+        inline void attach_process(const process::sptr& p);
 
         /** \brief Terminate communication and reset internal state */
         inline bool disconnect(boost::shared_ptr < execution::process > p);

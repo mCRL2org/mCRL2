@@ -39,25 +39,25 @@ namespace squadt {
       private:
 
         /** \brief The GUI project view to which this display `belongs' */
-        GUI::project*                                     m_project;
+        GUI::project*                                           m_project;
 
         /** \brief Abstract description of the current layout of this panel */
-        boost::shared_ptr < tipi::layout::tool_display >  m_layout;
+        boost::shared_ptr < tipi::layout::tool_display >        m_layout;
 
         /** \brief Sizer that contains the content part */
-        wxSizer*                                          m_content;
+        wxSizer*                                                m_content;
 
         /** \brief Sizer of the tool display control buttons */
-        wxSizer*                                          m_control_bar;
+        wxSizer*                                                m_control_bar;
 
         /** \brief Connected monitor */
-        boost::shared_ptr < processor::monitor >          m_monitor;
+        boost::shared_ptr < processor::monitor >                m_monitor;
 
         /** \brief Sizer of the tool display control buttons */
-        wxTextCtrl*                                       m_log;
+        wxTextCtrl*                                             m_log;
 
         /** \brief Sizer of the tool display control buttons */
-        tipi::layout::basic_event_handler                 m_event_handler;
+        boost::shared_ptr< tipi::layout::basic_event_handler >  m_mediator;
 
       private:
 
@@ -65,10 +65,10 @@ namespace squadt {
         void build();
 
         /** \brief Builds the specified layout within this window */
-        void instantiate(boost::weak_ptr < tipi::layout::tool_display >, tipi::layout::tool_display::sptr l);
+        void instantiate(boost::weak_ptr< tipi::layout::tool_display >, boost::shared_ptr< tipi::layout::tool_display > l);
 
         /** \brief Update the (G)UI state for a list of elements */
-        void update(boost::weak_ptr < tipi::layout::tool_display >, std::vector < tipi::layout::element const* >);
+        void update(boost::weak_ptr< tipi::layout::tool_display >, std::vector < tipi::layout::element const* >);
 
         /** \brief Update the log with incoming status messages */
         void update_log(boost::shared_ptr< tipi::report > l);
@@ -100,7 +100,9 @@ namespace squadt {
         void remove(bool = true);
 
         /** \brief Destructor */
-        ~tool_display();
+        ~tool_display() {
+          remove(false);
+        }
     };
   }
 }

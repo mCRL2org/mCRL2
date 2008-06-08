@@ -176,12 +176,12 @@ namespace mcrl2 {
   
       template < typename T >
       inline T radio_button_helper< T >::get_selection() {
-        return selector[&first->get_selected()];
+        return selector[&first->selected()];
       }
   
       template < typename T >
       std::string radio_button_helper< T >::get_selection_label() const {
-        return first->get_selected().get_label();
+        return first->selected().get_label();
       }
     }
   }

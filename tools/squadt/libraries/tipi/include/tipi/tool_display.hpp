@@ -35,11 +35,8 @@ namespace tipi {
 
       public:
 
-        /** \brief Convenience type alias to hide the shared pointer implementation */
-        typedef boost::shared_ptr < tool_display >          sptr;
-
         /** \brief Convenience type for passing and returning a sequence of layout elements */
-        typedef std::vector < tipi::layout::element const* > constant_elements;
+        typedef std::vector< tipi::layout::element const* > constant_elements;
 
       private:
 
@@ -70,12 +67,6 @@ namespace tipi {
 
         /** \brief Set the layout manager that contains all widgets for this display */
         inline tool_display& set_manager(::tipi::layout::manager&);
-
-        /** \brief Creates a (G)UI for this tool_display */
-        mediator::wrapper_aptr instantiate(mediator* m) const;
-
-        /** \brief Update (part of) the layout structure */
-        void update(std::string const&, std::vector < tipi::layout::element const* >& elements);
     };
 
     inline tool_display::tool_display() : m_visible(true) {
@@ -88,7 +79,7 @@ namespace tipi {
     }
 
     inline layout::manager const* tool_display::get_manager() const {
-      return (m_manager.get());
+      return m_manager.get();
     }
 
     /**

@@ -38,55 +38,64 @@ namespace mcrl2 {
   
           try {
             while (!termination_requested) {
-              switch (m_communicator->await_message(tipi::message_any)->get_type()) {
-                case tipi::message_configuration: {
-                    tipi::configuration& configuration = m_communicator->get_configuration();
-           
-                    /* Insert configuration in tool communicator object */
-                    valid_configuration_present = check_configuration(configuration);
-           
-                    if (configuration.is_fresh()) {
-                      do {
-                        user_interactive_configuration(configuration);
-           
-                        /* Insert configuration in tool communicator object */
-                        valid_configuration_present = check_configuration(configuration);
-                   
-                      } while (!valid_configuration_present);
-                    }
-           
-                    /* Signal that the configuration is acceptable */
-                    m_communicator->send_configuration(configuration);
-                  }
-                  break;
-                case tipi::message_task: // task start signal
-                  if (valid_configuration_present) {
-                    tipi::configuration& configuration = m_communicator->get_configuration();
+              boost::shared_ptr< const tipi::message > new_message(m_communicator->await_message(tipi::message_any, 5));
 
-                    /* Signal that the job is finished */
-                    bool result = perform_task(configuration);
-  
-                    if (!result) {
-                      send_error("Operation failed; tool may have crashed!");
-                    }
-                    else {
+              if (new_message.get()) {
+                switch (new_message->get_type()) {
+                  case tipi::message_configuration: {
+                      tipi::configuration& configuration = m_communicator->get_configuration();
+
+                      /* Insert configuration in tool communicator object */
+                      valid_configuration_present = check_configuration(configuration);
+
+                      if (configuration.is_fresh()) {
+                        do {
+                          user_interactive_configuration(configuration);
+
+                          /* Insert configuration in tool communicator object */
+                          valid_configuration_present = check_configuration(configuration);
+
+                        } while (!valid_configuration_present);
+                      }
+
+                      /* Signal that the configuration is acceptable */
                       m_communicator->send_configuration(configuration);
                     }
-  
-                    m_communicator->send_task_done(result);
-                  }
-                  else {
-                    send_error("Start signal received without valid configuration!");
-                  }
+                    break;
+                  case tipi::message_task: // task start signal
+                    if (valid_configuration_present) {
+                      tipi::configuration& configuration = m_communicator->get_configuration();
+
+                      /* Signal that the job is finished */
+                      bool result = perform_task(configuration);
+
+                      if (!result) {
+                        send_error("Operation failed; tool may have crashed!");
+                      }
+                      else {
+                        m_communicator->send_configuration(configuration);
+                      }
+
+                      m_communicator->send_task_done(result);
+                    }
+                    else {
+                      send_error("Start signal received without valid configuration!");
+                    }
+                    break;
+                  case tipi::message_termination:
+
+                    termination_requested = true;
+
+                    break;
+                  default:
+                    /* Messages with a type that do not need to be handled */
+                    break;
+                }
+              }
+              else {
+                if (m_communicator->number_of_connections() == 0) {
                   break;
-                case tipi::message_termination:
-           
-                  termination_requested = true;
-           
-                  break;
-                default:
-                  /* Messages with a type that do not need to be handled */
-                  break;
+                }
               }
             }
           }

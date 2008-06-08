@@ -17,8 +17,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "tipi/detail/command_line_interface.hpp"
-#include "tipi/detail/tool.ipp"
-#include "tipi/detail/schemes.ipp"
+#include <tipi/detail/schemes.ipp>
 #include "tipi/detail/utility/logger.hpp"
 
 namespace tipi {

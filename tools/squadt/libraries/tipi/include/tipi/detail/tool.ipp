@@ -161,10 +161,12 @@ namespace tipi {
      * \param[out] d tool display on which to execute changes
      **/
     inline void communicator_impl::receive_display_data_handler(boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < layout::tool_display > d) {
-      std::vector < tipi::layout::element const* > elements;
-
       try {
-        d->update(m->to_string(), elements);
+        std::vector < tipi::layout::element const* > elements;
+
+        if (d->get_manager() != 0) {
+          tipi::visitors::restore(*d, elements, m->to_string());
+        }
       }
       catch (...) {
       }

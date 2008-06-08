@@ -176,6 +176,15 @@ namespace tipi {
         /** \brief Remove a message from the queue */
         void remove_message(boost::shared_ptr < const M >& p);
 
+        /** \brief Queues incoming messages */
+        virtual void deliver(std::istream&, typename M::end_point);
+ 
+        /** \brief Queues incoming messages */
+        virtual void deliver(std::string const&, typename M::end_point);
+ 
+        /** \brief Wakes waiters if no connections remain */
+        virtual void on_disconnect(typename M::end_point o);
+
       public:
 
         /** \brief Default constructor */
@@ -184,12 +193,6 @@ namespace tipi {
         /** \brief Default constructor */
         basic_messenger_impl(boost::shared_ptr< utility::logger >&);
 
-        /** \brief Queues incoming messages */
-        virtual void deliver(std::istream&, typename M::end_point);
- 
-        /** \brief Queues incoming messages */
-        virtual void deliver(std::string const&, typename M::end_point);
- 
         /** \brief Send a message */
         void send_message(M const&);
  
@@ -324,6 +327,18 @@ namespace tipi {
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl() :
        message_open(false), delivery_thread_active(false), partially_matched(0), logger(get_default_logger()) {
+    }
+
+    template < class M >
+    inline void basic_messenger_impl< M >::on_disconnect(typename M::end_point o) {
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
+
+      if (number_of_connections() == 0) {
+        // Unblock all waiters;
+        BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
+          w.second->wake();
+        }
+      }
     }
 
     template < class M >
@@ -743,7 +758,7 @@ namespace tipi {
 
       boost::shared_ptr < const M > p(find_message(t));
 
-      if (p.get() == 0) {
+      if (!p) {
         if (waiters.count(t) == 0) {
           waiters[t] = boost::shared_ptr < waiter_data > (new waiter_data(p));
         }
@@ -751,6 +766,10 @@ namespace tipi {
         boost::shared_ptr < waiter_data > wd = waiters[t];
 
         wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w), ts);
+
+        if (!p) {
+          throw std::runtime_error("Connection aborted!");
+        }
       }
       else {
         remove_message(p);
@@ -770,7 +789,7 @@ namespace tipi {
 
       boost::shared_ptr< const M > p(find_message(t));
 
-      if (p.get() == 0) {
+      if (!p) {
         if (waiters.count(t) == 0) {
           waiters[t] = boost::shared_ptr < waiter_data > (new waiter_data(p));
         }
@@ -778,6 +797,10 @@ namespace tipi {
         boost::shared_ptr < waiter_data > wd = waiters[t];
 
         wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w));
+
+        if (!p) {
+          throw std::runtime_error("Connection aborted!");
+        }
       }
       else {
         remove_message(p);

@@ -105,7 +105,7 @@ namespace tipi {
 
           break;
         }
-      } while (1);
+      } while (true);
     }
  
     /* Send a specification of the current configuration (it may change during tool execution) */
@@ -144,24 +144,29 @@ namespace tipi {
      **/
     void communicator::send_display_layout(boost::shared_ptr< layout::tool_display > d) {
       struct trampoline {
-        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl, boost::weak_ptr< layout::tool_display > d, void const* e) {
+        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl,
+                         tipi::utility::logger& logger, boost::weak_ptr< layout::tool_display > d, void const* e) {
+
           boost::shared_ptr < layout::tool_display > g(d.lock());
 
           if (!d.expired()) {
-            std::string c;
-           
-            if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
-              tipi::store_visitor v(c);
-           
-              v.visit(*reinterpret_cast < tipi::layout::element const* > (e), reinterpret_cast < ::tipi::display::element_identifier > (e));
+            try {
+              if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
+                boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
+                      visitors::store(*reinterpret_cast < tipi::layout::element const* > (e),
+                                       reinterpret_cast < const ::tipi::display::element_identifier > (e)), tipi::message_display_data));
+
+              }
             }
-           
-            boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
+            catch (std::exception& e) {
+              logger.log(1, "Failure sending display data (" + std::string(e.what()) + ")\n");
+            }
           }
         }
       };
 
-      d->add(boost::bind(trampoline::send_display_data, boost::static_pointer_cast < communicator_impl > (impl), d, _1));
+      d->add(boost::bind(trampoline::send_display_data,
+                 boost::static_pointer_cast < communicator_impl > (impl), boost::ref(get_logger()), d, _1));
 
       boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
     }
@@ -205,15 +210,15 @@ namespace tipi {
      * \param[in] e pointer to a tipi layout element of which the data is to be sent
      **/
     void communicator::send_display_data(layout::element const* e) {
-      std::string        c;
-
       if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
-        tipi::store_visitor v(c);
-
-        v.visit(*e,reinterpret_cast < ::tipi::display::element_identifier> (e));
+        try {
+          boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
+              visitors::store(*e, reinterpret_cast < const ::tipi::display::element_identifier> (e)), tipi::message_display_data));
+        }
+        catch (std::exception& e) {
+          get_logger().log(1, "Failure sending display data (" + std::string(e.what()) + ")\n");
+        }
       }
-
-      boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(c, tipi::message_display_data));
     }
 
     void communicator::await_configuration() const {
