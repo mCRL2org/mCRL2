@@ -8,6 +8,3 @@
  * More information about this library can be found in the <a
  * href="http://www.mcrl2.org/wiki/index.php/Core_library">Core user manual</a>.
  */
-/** \namespace mcrl2::core
-  * \brief The main namespace for the Core library.
-  */

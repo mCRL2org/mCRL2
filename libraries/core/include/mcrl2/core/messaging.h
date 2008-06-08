@@ -21,6 +21,7 @@
 #include <workarounds.h>
 
 namespace mcrl2 {
+  /// \brief The main namespace for the Core library.
   namespace core {
 
   
