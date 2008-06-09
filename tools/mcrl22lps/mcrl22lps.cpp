@@ -241,10 +241,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   c.add_option(option_linearisation_method).
-          append_argument(method_selector.get_selection());
+          set_argument_value< 0 >(method_selector.get_selection());
 
   c.add_option(option_end_phase).
-          append_argument(phase_selector.get_selection());
+          set_argument_value< 0 >(phase_selector.get_selection());
 
   if (phase_selector.get_selection() != phNone) { // file will not be produced
     c.remove_output(lps_file_for_output);

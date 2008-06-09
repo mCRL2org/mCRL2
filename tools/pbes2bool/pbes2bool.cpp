@@ -1,5 +1,4 @@
-// Author(s): Jan Friso Groote
-// Copyright: see the accompanying file COPYING or copy at
+// Author(s): Jan Friso Groote // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -154,28 +153,28 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout::elements;
 
   if (!c.option_exists(option_precompile)) {
-    c.add_option(option_precompile).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_precompile).set_argument_value< 0, datatype::boolean >(false);
   }
   if (!c.option_exists(option_counter)) {
-    c.add_option(option_counter).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_counter).set_argument_value< 0, datatype::boolean >(false);
   }
   if (!c.option_exists(option_hash_table)) {
-    c.add_option(option_hash_table).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_hash_table).set_argument_value< 0, datatype::boolean >(false);
   }
   if (!c.option_exists(option_tree)) {
-    c.add_option(option_tree).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_tree).set_argument_value< 0, datatype::boolean >(false);
   }
   if (!c.option_exists(option_unused_data)) {
-    c.add_option(option_unused_data).set_argument_value< 0, tipi::datatype::boolean >(true);
+    c.add_option(option_unused_data).set_argument_value< 0, datatype::boolean >(true);
   }
   if (!c.option_exists(option_rewrite_strategy)) {
-    c.add_option(option_rewrite_strategy).append_argument(GS_REWR_JITTY);
+    c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);
   }
   if (!c.option_exists(option_transformation_strategy)) {
-    c.add_option(option_transformation_strategy).append_argument(lazy);
+    c.add_option(option_transformation_strategy).set_argument_value< 0 >(lazy);
   }
   if (!c.option_exists(option_selected_output_format)) {
-    c.add_option(option_selected_output_format).append_argument(none);
+    c.add_option(option_selected_output_format).set_argument_value< 0 >(none);
   }
 
   /* Create display */

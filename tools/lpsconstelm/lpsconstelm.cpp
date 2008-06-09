@@ -18,12 +18,11 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <stdbool.h>
 #include <string>
 #include <iterator>
 #include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 
 //Rewriter

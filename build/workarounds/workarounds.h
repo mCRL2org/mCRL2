@@ -1,6 +1,8 @@
 #ifndef WORKAROUNDS_H__
 #define WORKAROUNDS_H__
 
+#include <limits.h>
+
 //String manipulation
 //-------------------
 //

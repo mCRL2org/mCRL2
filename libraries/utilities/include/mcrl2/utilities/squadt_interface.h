@@ -309,15 +309,15 @@ namespace mcrl2 {
           inline static bool free_activation(int& ac, char**& av) {
             T communicator;
 
-#ifdef __WXWINDOWS__
+#if defined(__WXWINDOWS__)
             communicator.m_starter.reset(new entry_wrapper(ac, av));
 #endif
-           
+
             return (communicator.try_interaction(ac, av));
           }
 #endif
 
-#ifdef __WINDOWS__
+#if defined(__WINDOWS__)
           inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
             T communicator;
 

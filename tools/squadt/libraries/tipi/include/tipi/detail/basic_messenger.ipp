@@ -294,7 +294,7 @@ namespace tipi {
      **/
     template < typename M >
     void basic_messenger< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
-      remove_handler(t, h);
+      boost::static_pointer_cast < basic_messenger_impl< M > > (impl)->remove_handler(t, h);
     }
 
     /**
