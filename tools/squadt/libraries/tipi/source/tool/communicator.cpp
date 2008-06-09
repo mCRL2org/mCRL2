@@ -153,8 +153,9 @@ namespace tipi {
             try {
               if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
                 boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
-                      visitors::store(*reinterpret_cast < tipi::layout::element const* > (e),
-                                       reinterpret_cast < const ::tipi::display::element_identifier > (e)), tipi::message_display_data));
+                      visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
+		           (*reinterpret_cast < tipi::layout::element const* > (e),
+                           reinterpret_cast < const ::tipi::display::element_identifier& > (e)), tipi::message_display_data));
 
               }
             }
@@ -213,7 +214,8 @@ namespace tipi {
       if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
         try {
           boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
-              visitors::store(*e, reinterpret_cast < const ::tipi::display::element_identifier> (e)), tipi::message_display_data));
+              visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
+                    (*e, reinterpret_cast < const ::tipi::display::element_identifier> (e)), tipi::message_display_data));
         }
         catch (std::exception& e) {
           get_logger().log(1, "Failure sending display data (" + std::string(e.what()) + ")\n");

@@ -10,6 +10,7 @@ tool diagraphica
       : <squadt-connectivity>implemented
         <wx>yes
         <opengl>yes
+        <define>NO_MCRL2_TOOL_FACILITIES
       ;
 
 install-tools diagraphica ;

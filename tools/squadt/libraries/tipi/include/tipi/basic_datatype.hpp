@@ -22,6 +22,7 @@
 #include <boost/integer_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
+#include <boost/type_traits/is_pod.hpp>
 
 #include "tipi/visitors.hpp"
 
@@ -44,7 +45,12 @@ namespace tipi {
 
         /** \brief Converts a value of an arbitrary type to its string representation */
         template < typename T >
-        inline std::string convert(T const& t) const {
+        inline typename boost::disable_if< typename boost::is_pod< T >::type, std::string >::type convert(T const& t) const {
+          return specialised_convert(boost::any(t));
+        }
+
+        template < typename T >
+        inline typename boost::enable_if< typename boost::is_pod< T >::type, std::string >::type convert(T t) const {
           return specialised_convert(boost::any(t));
         }
 
@@ -82,7 +88,8 @@ namespace tipi {
 
     /** \brief Specialisation for C strings */
     template < >
-    inline std::string basic_datatype::convert(char* const& t) const {
+    inline typename boost::enable_if< typename boost::is_pod< char* >::type, std::string >::type
+    basic_datatype::convert(char* t) const {
       return specialised_convert(boost::any(std::string(t)));
     }
 
@@ -328,10 +335,10 @@ namespace tipi {
       public:
 
         /** \brief Constructor
-         * \param[in] min the minimum value that specifies the range
-         * \param[in] max the maximum value that specifies the range
+         * \param[in] minimum the minimum value that specifies the range
+         * \param[in] maximum the maximum value that specifies the range
          **/
-        integer_range(C min = boost::integer_traits< C >::const_min, C max = boost::integer_traits< C >::const_max) : m_minimum(min), m_maximum(max) {
+        integer_range(C minimum = boost::integer_traits< C >::const_min, C max = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(max) {
           assert(m_minimum < m_maximum);
         }
 
@@ -339,7 +346,11 @@ namespace tipi {
          * \param[in] v the value to convert
          **/
         static std::string convert(const C v) {
-          return (std::ostringstream() << v).str();
+          std::ostringstream temporary;
+
+	  temporary << v;
+
+          return temporary.str();
         }
 
         /** \brief Converts a string to a value of the chosen numeric type
@@ -348,7 +359,7 @@ namespace tipi {
         static C evaluate(std::string const& s) {
           C v;
           
-          v << std::istringstream(s);
+          std::istringstream(s) >> v;
 
           return v;
         }
@@ -437,7 +448,8 @@ namespace tipi {
          * \param[in] minimum the minimum value that specifies the range
          * \param[in] maximum the maximum value that specifies the range
          **/
-        real_range(C minimum = std::numeric_limits< C >::min(), C maximum = std::numeric_limits< C >::max()) : m_minimum(minimum), m_maximum(maximum) {
+        real_range(C minimum = (std::numeric_limits< C >::min)(), C maximum = (std::numeric_limits< C >::max)())
+	       			: m_minimum(minimum), m_maximum(maximum) {
           assert(m_minimum < m_maximum);
         }
 
@@ -445,7 +457,11 @@ namespace tipi {
          * \param[in] v the value to convert
          **/
         static std::string convert(const C v) {
-          return (std::ostringstream() << v).str();
+          std::ostringstream temporary;
+
+	  temporary << v;
+
+          return temporary.str();
         }
 
         /** \brief Converts a string to a value of the chosen type
@@ -454,7 +470,7 @@ namespace tipi {
         static C evaluate(std::string const& s) {
           C v;
           
-          v << std::istringstream(s);
+          std::istringstream(s) >> v;
 
           return v;
         }
@@ -637,7 +653,7 @@ namespace tipi {
       public:
 
         /** \brief Constructor */
-        string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::max()) :
+        string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::const_max) :
                                                 m_minimum_length(minimum), m_maximum_length(maximum) {
           assert(m_minimum_length < m_maximum_length);
         }

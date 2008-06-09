@@ -14,28 +14,28 @@ namespace tipi {
 
   namespace datatype {
 
-    class integer_range< char >;
-    class integer_range< unsigned char >;
-    class integer_range< short >;
-    class integer_range< unsigned short >;
-    class integer_range< int >;
-    class integer_range< unsigned int >;
-    class integer_range< long int >;
-    class integer_range< unsigned long int >;
-    class integer_range< long long int >;
-    class integer_range< unsigned long long int >;
-    class real_range< float, false, false >;
-    class real_range< float, false, true >;
-    class real_range< float, true, false >;
-    class real_range< float, true, true>;
-    class real_range< double, false, false >;
-    class real_range< double, false, true >;
-    class real_range< double, true, false >;
-    class real_range< double, true, true >;
-    class real_range< long double, false, false >;
-    class real_range< long double, false, true >;
-    class real_range< long double, true, false >;
-    class real_range< long double, true, true >;
+    template class integer_range< char >;
+    template class integer_range< unsigned char >;
+    template class integer_range< short >;
+    template class integer_range< unsigned short >;
+    template class integer_range< int >;
+    template class integer_range< unsigned int >;
+    template class integer_range< long int >;
+    template class integer_range< unsigned long int >;
+    template class integer_range< long long int >;
+    template class integer_range< unsigned long long int >;
+    template class real_range< float, false, false >;
+    template class real_range< float, false, true >;
+    template class real_range< float, true, false >;
+    template class real_range< float, true, true>;
+    template class real_range< double, false, false >;
+    template class real_range< double, false, true >;
+    template class real_range< double, true, false >;
+    template class real_range< double, true, true >;
+    template class real_range< long double, false, false >;
+    template class real_range< long double, false, true >;
+    template class real_range< long double, true, false >;
+    template class real_range< long double, true, true >;
 
     /*
      * \param[in] v value of the chosen carrier type

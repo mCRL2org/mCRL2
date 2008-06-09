@@ -383,7 +383,7 @@ namespace utility {
 
       return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, void >& > (visit_method).callback(v, t);
     }
-    catch (std::exception& e) {
+    catch (...) {
       throw std::runtime_error(std::string("No compatible visit method found for :").append(typeid(v).name()).append("::visit(").append(typeid(t).name()).append(")"));
     }
   }
@@ -396,7 +396,7 @@ namespace utility {
 
       return static_cast < detail::visit_method_wrapper< R, abstract_visitor, const visitable, U >& > (visit_method).callback(v, t, u);
     }
-    catch (std::exception& e) {
+    catch (...) {
       throw std::runtime_error(std::string("No compatible visit method found for :").append(typeid(v).name()).append("::visit(").append(typeid(t).name()).append(",").append(typeid(U).name()).append(")"));
     }
   }

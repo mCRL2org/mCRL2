@@ -24,7 +24,6 @@
 #ifndef NO_MCRL2_TOOL_FACILITIES
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #endif
 
