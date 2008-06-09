@@ -192,7 +192,7 @@ namespace tipi {
    **/
   template < >
   inline void configuration::option::append_argument< datatype::basic_datatype, const std::string >(
- 	boost::shared_ptr< datatype::basic_datatype > const& t, typename boost::call_traits< const std::string >::param_type d) {
+ 	boost::shared_ptr< datatype::basic_datatype > const& t, boost::call_traits< const std::string >::param_type d) {
 
     assert(t->validate(d));
 
