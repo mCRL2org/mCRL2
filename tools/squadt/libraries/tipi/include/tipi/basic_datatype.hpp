@@ -88,7 +88,7 @@ namespace tipi {
 
     /** \brief Specialisation for C strings */
     template < >
-    inline typename boost::enable_if< typename boost::is_pod< char* >::type, std::string >::type
+    inline boost::enable_if< boost::is_pod< char* >::type, std::string >::type
     basic_datatype::convert(char* t) const {
       return specialised_convert(boost::any(std::string(t)));
     }
@@ -359,7 +359,9 @@ namespace tipi {
         static C evaluate(std::string const& s) {
           C v;
           
-          std::istringstream(s) >> v;
+          std::istringstream temporary(s);
+           
+          temporary >> v;
 
           return v;
         }

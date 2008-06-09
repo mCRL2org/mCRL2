@@ -119,7 +119,7 @@ namespace tipi {
        **/
       template < typename S, typename T >
       typename boost::disable_if< typename boost::is_pod< T >::type, void >::type 
-      append_argument(boost::shared_ptr< S > const&, T const&) {
+      append_argument(boost::shared_ptr< S > const& t, T const& d) {
         append_argument(boost::static_pointer_cast< tipi::datatype::basic_datatype > (t), t->convert(d));
       }
 

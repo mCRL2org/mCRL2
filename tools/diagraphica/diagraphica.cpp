@@ -51,8 +51,8 @@ std::string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-# define NO_MCRL2_TOOL_FACILITIES
 # include <mcrl2/utilities/squadt_interface.h>
+
   using namespace mcrl2::utilities::squadt;
 
   const char* fsm_file_for_input = "fsm_in";
