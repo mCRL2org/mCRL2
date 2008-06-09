@@ -16,19 +16,21 @@
 #define PRINT_CXX
 #include "mcrl2/core/detail/print_implementation.h"
 
-using namespace std;
-using namespace mcrl2::core::detail;
+namespace mcrl2 {
+  namespace core {
 
-void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
+void PrintPart_CXX(std::ostream &out_stream, const ATerm part,
   t_pp_format pp_format)
 {
-  PrintPart__CXX(OutStream, (ATerm) Part, pp_format);
+  mcrl2::core::detail::PrintPart__CXX(out_stream, part, pp_format);
 }
 
-string PrintPart_CXX(const ATerm Part, t_pp_format pp_format)
+std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format)
 {
-  stringstream ss;
-  PrintPart_CXX(ss, Part, pp_format);
+  std::stringstream ss;
+  PrintPart_CXX(ss, part, pp_format);
   return ss.str();
 }
 
+  }
+}

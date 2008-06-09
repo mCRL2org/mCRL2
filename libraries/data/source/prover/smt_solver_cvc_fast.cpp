@@ -128,7 +128,7 @@ using namespace mcrl2::core;
           return v_translated_type;
         } else {
           throw mcrl2::runtime_error("Unable to handle the current sort expression (" +
-                        pretty_print(a_sort_expression) + ").");
+                        PrintPart_CXX(a_sort_expression) + ").");
         }
       }
     }
@@ -202,7 +202,7 @@ using namespace mcrl2::core;
         return translate_constant(a_clause);
       } else {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                                                pretty_print(a_clause) + ").");
+                                                PrintPart_CXX(a_clause) + ").");
       }
     }
 

@@ -91,15 +91,16 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
 inline
 specification parelm(const specification& spec)
 {
+  using namespace mcrl2::core;
   std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
     
   // logging statements
-  mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
-    mcrl2::core::gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
+    gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
   }
-  mcrl2::core::gsVerboseMsg("\n");
+  gsVerboseMsg("\n");
     
   specification result = detail::remove_parameters(spec, to_be_removed);
   assert(result.is_well_typed());
@@ -176,12 +177,13 @@ specification parelm2(const specification& spec)
   }
 
   // logging statements
-  mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  using namespace mcrl2::core;
+  gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
-    mcrl2::core::gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
+    gsVerboseMsg("%s:%s ", pp(*i).c_str(), pp(i->sort()).c_str());
   }
-  mcrl2::core::gsVerboseMsg("\n");
+  gsVerboseMsg("\n");
     
   specification result = detail::remove_parameters(spec, to_be_removed);
   assert(result.is_well_typed());

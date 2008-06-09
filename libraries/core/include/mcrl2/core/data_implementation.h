@@ -9,9 +9,6 @@
 /// \file data_implementation.h
 ///
 /// \brief Implement data types in type checked mCRL2 specifications and expressions.
-///
-/// \pre Global preconditions:
-///      - the ATerm library has been initialised
 
 #ifndef MCRL2_DATAIMPL_H
 #define MCRL2_DATAIMPL_H

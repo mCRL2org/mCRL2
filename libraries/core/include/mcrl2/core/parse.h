@@ -20,8 +20,6 @@
 namespace mcrl2 {
   namespace core {
   
-//Global precondition: the ATerm library has been initialised
-
 /** \brief  Parse an mCRL2 sort expression.
   * \param[in] se_stream An input stream from which can be read.
   * \post   The content of se_stream is parsed as an mCRL2 sort expression.

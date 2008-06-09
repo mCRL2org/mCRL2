@@ -245,7 +245,7 @@ class specification: public aterm_appl
       {
         if (!(mcrl2::data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
         {
-          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << pp(i->summation_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << mcrl2::core::pp(i->summation_variables()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
           return false;
         }
       }
@@ -253,21 +253,21 @@ class specification: public aterm_appl
       // check 2)
       if (!(mcrl2::data::detail::check_variable_sorts(process().process_parameters(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << pp(process().process_parameters()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << mcrl2::core::pp(process().process_parameters()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 3)
       if (!(mcrl2::data::detail::check_variable_sorts(process().free_variables(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << pp(process().free_variables()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << mcrl2::core::pp(process().free_variables()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 4)
       if (!(detail::check_action_label_sorts(action_labels(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << pp(action_labels()) << " are not declared in the data specification " << pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << mcrl2::core::pp(action_labels()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
         return false;
       }
 
@@ -276,7 +276,7 @@ class specification: public aterm_appl
       {
         if (!(detail::check_action_labels(i->actions(), declared_labels)))
         {
-          std::cerr << "specification::is_well_typed() failed: some of the labels occurring in the actions " << pp(i->actions()) << " are not declared in the action specification " << pp(action_labels()) << std::endl;
+          std::cerr << "specification::is_well_typed() failed: some of the labels occurring in the actions " << mcrl2::core::pp(i->actions()) << " are not declared in the action specification " << mcrl2::core::pp(action_labels()) << std::endl;
           return false;
         }
       }

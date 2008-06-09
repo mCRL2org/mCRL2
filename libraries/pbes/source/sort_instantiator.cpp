@@ -59,7 +59,7 @@ data_expression_list instantiate_sort(data_operation_list fl, sort_expression s)
 	{
 	  domain_instance = instantiate_sort(fl,*d);
 	  mcrl2::core::gsVerboseMsg(".....instantiate_sort %s: constructor %s, domain %s, domain_instance %s\n", 
-		       pp(s).c_str(), pp(*c).c_str(), pp(domains).c_str(), pp(domain_instance).c_str());
+		       mcrl2::core::pp(s).c_str(), mcrl2::core::pp(*c).c_str(), mcrl2::core::pp(domains).c_str(), mcrl2::core::pp(domain_instance).c_str());
 	  // apply c on domain_instance
 	  for (data_expression_list::iterator i = domain_instance.begin(); 
 	       i != domain_instance.end(); i++)

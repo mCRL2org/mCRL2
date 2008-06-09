@@ -564,7 +564,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
-                      { std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      { std::cerr << "Vars: " << mcrl2::core::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars=push_front(new_data_vars,new_data_variable);
@@ -594,10 +594,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       if (!new_data_vars.empty())
       { 
         if (use_internal_rewrite_format)
-        { std::cerr << "Cannot eliminate universal quantifiers of variables " << pp(new_data_vars) << std::endl;
+        { std::cerr << "Cannot eliminate universal quantifiers of variables " << mcrl2::core::pp(new_data_vars) << std::endl;
         }
         else
-        { std::cerr << "Cannot eliminate universal quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        { std::cerr << "Cannot eliminate universal quantifiers of variables " << mcrl2::core::pp(new_data_vars) << " in " << mcrl2::core::pp(p) << std::endl;
         }
         std::cerr << "Aborting\n";
         exit(1);
@@ -664,7 +664,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
-                      { std::cerr << "Vars: " << pp(data_vars) << "\nExpression: " << pp(*t) << std::endl;
+                      { std::cerr << "Vars: " << mcrl2::core::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars=push_front(new_data_vars,new_data_variable);
@@ -695,10 +695,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       if (!new_data_vars.empty())
       { 
         if (use_internal_rewrite_format)
-        { std::cerr << "Cannot eliminate existential quantifiers of variables " << pp(new_data_vars) << " in " << pp(p) << std::endl;
+        { std::cerr << "Cannot eliminate existential quantifiers of variables " << mcrl2::core::pp(new_data_vars) << " in " << mcrl2::core::pp(p) << std::endl;
         }
         else
-        { std::cerr << "Cannot eliminate existential quantifiers of variables " << pp(new_data_vars) << std::endl;
+        { std::cerr << "Cannot eliminate existential quantifiers of variables " << mcrl2::core::pp(new_data_vars) << std::endl;
         }
         std::cerr << "Aborting\n";
         exit(1);

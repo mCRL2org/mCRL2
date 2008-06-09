@@ -8,8 +8,6 @@
 //
 /// \file messaging.h
 /// \brief Controlling and printing of messages.  
-///
-/// Global precondition: the ATerm library has been initialised
 
 #ifndef __MCRL2_MESSAGING_H__
 #define __MCRL2_MESSAGING_H__

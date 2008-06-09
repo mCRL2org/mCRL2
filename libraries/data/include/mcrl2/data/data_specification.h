@@ -301,14 +301,14 @@ class data_specification: public aterm_appl
       // check 1)
       if (!detail::check_data_spec_sorts(constructors(), sorts))
       {
-        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors " << pp(constructors()) << " are declared in " << m_sorts << std::endl;
+        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors " << mcrl2::core::pp(constructors()) << " are declared in " << m_sorts << std::endl;
         return false;
       }
 
       // check 2)
       if (!detail::check_data_spec_sorts(mappings(), sorts))
       {
-        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings " << pp(mappings()) << " are declared in " << m_sorts << std::endl;
+        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings " << mcrl2::core::pp(mappings()) << " are declared in " << m_sorts << std::endl;
         return false;
       }
 

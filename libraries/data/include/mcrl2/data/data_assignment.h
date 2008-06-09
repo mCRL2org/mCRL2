@@ -72,7 +72,7 @@ class data_assignment: public aterm_appl
       bool result = m_lhs.sort() == m_rhs.sort();
       if (!result)
       {
-        std::cerr << "data_assignment::is_well_typed() failed: the left and right hand sides " << pp(m_lhs) << " and " << pp(m_rhs) << " have different sorts." << std::endl;
+        std::cerr << "data_assignment::is_well_typed() failed: the left and right hand sides " << mcrl2::core::pp(m_lhs) << " and " << mcrl2::core::pp(m_rhs) << " have different sorts." << std::endl;
         return false;
       }
       return true;

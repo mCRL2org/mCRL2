@@ -550,9 +550,9 @@ class pbes
          )
       {
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables "
-                  << pp(data::data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
+                  << mcrl2::core::pp(data::data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
                   << " are not declared in the data specification "
-                  << pp(data().sorts())
+                  << mcrl2::core::pp(data().sorts())
                   << std::endl;
         return false;
       }
@@ -569,9 +569,9 @@ class pbes
            )
         {
           std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
-                    << pp(i->variable())
+                    << mcrl2::core::pp(i->variable())
                     << " are not declared in the data specification "
-                    << pp(data().sorts())
+                    << mcrl2::core::pp(data().sorts())
                     << std::endl;
           return false;
         }
@@ -586,9 +586,9 @@ class pbes
          )
       {
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
-                  << pp(data::data_variable_list(quantifier_variables.begin(), quantifier_variables.end()))
+                  << mcrl2::core::pp(data::data_variable_list(quantifier_variables.begin(), quantifier_variables.end()))
                   << " are not declared in the data specification "
-                  << pp(data().sorts())
+                  << mcrl2::core::pp(data().sorts())
                   << std::endl;
         return false;
       }
@@ -613,8 +613,8 @@ class pbes
          )
       {
         std::cerr << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
-                  << "free variables: " << pp(data::data_variable_list(occurring_free_variables.begin(), occurring_free_variables.end())) << "\n"
-                  << "declared free variables: " << pp(data::data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
+                  << "free variables: " << mcrl2::core::pp(data::data_variable_list(occurring_free_variables.begin(), occurring_free_variables.end())) << "\n"
+                  << "declared free variables: " << mcrl2::core::pp(data::data_variable_list(declared_free_variables.begin(), declared_free_variables.end()))
                   << std::endl;
         return false;
       }
@@ -642,7 +642,7 @@ class pbes
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {
-          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << pp(*i) << " conflicts with its declaration!" << std::endl;
+          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << mcrl2::core::pp(*i) << " conflicts with its declaration!" << std::endl;
           return false;
         }
       }

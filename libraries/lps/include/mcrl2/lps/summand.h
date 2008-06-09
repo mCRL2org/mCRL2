@@ -242,21 +242,21 @@ class summand: public aterm_appl
       // check 2)
       if (has_time() && !data::data_expr::is_real(m_time))
       {
-        std::cerr << "summand::is_well_typed() failed: time " << pp(m_time) << " doesn't have type real." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
       if (!data::data_expr::is_bool(m_condition))
       {
-        std::cerr << "summand::is_well_typed() failed: condition " << pp(m_condition) << " doesn't have type bool." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: condition " << mcrl2::core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
       }
 
       // check 4)
       if (!mcrl2::data::detail::unique_names(m_summation_variables))
       {
-        std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: summation variables " << mcrl2::core::pp(m_summation_variables) << " don't have unique names." << std::endl;
         return false;
       }
 
@@ -267,7 +267,7 @@ class summand: public aterm_appl
               )
          )
       {
-        std::cerr << "summand::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: data assignments " << mcrl2::core::pp(m_assignments) << " don't have unique left hand sides." << std::endl;
         return false;
       }
 

@@ -55,8 +55,7 @@ namespace detail {
     
     std::string to_string() const
     {
-      using ::pp;
-      return pp(expression()) + " " + pp(variables());
+      return mcrl2::core::pp(expression()) + " " + mcrl2::core::pp(variables());
     }
   };
   

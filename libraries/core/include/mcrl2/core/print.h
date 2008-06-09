@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file print.h
-/// \brief Library for pretty printing of ATerms
+/// \brief Functions for pretty printing ATerms.
 
 #ifndef MCRL2_PRINT_H
 #define MCRL2_PRINT_H
@@ -16,82 +16,87 @@
 #include <ctype.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <ostream>
+#include <string>
 #include "aterm2.h"
-
-//Type definitions for both pretty pretty printers
-
-///t_pp_format represents the available pretty print formats
-typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
+#include "mcrl2/atermpp/atermpp.h"
 
 namespace mcrl2 {
   namespace core {
 
-//This file contains C specific printing functions
+/// \brief t_pp_format represents the available pretty print formats
+typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
 
-//Global preconditions:
-//- the ATerm library has been initialised
-
-/*! \pre OutStream points to a stream to which can be written
-         Part is an ATerm containing a part of a mCRL2 specification
-    \post A textual (pretty printed) representation of Part is written to
-         OutStream using method pp_format
-*/
-void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format);
-
-///Extensions of the printf function. The following new conversion formats are
-///supported:
-///- '%P' for the pretty printing ATerm's
-///- '%T' for the normal printing of ATerm's 
-///- '%F' for the printing of AFun's
+/** \brief Extensions of the printf function. The following new
+ *         conversion formats are supported:
+ *         - '%P' for pretty printing ATerm's
+ *         - '%T' for normal printing of ATerm's 
+ *         - '%F' for printing of AFun's
+**/
 int gsprintf(const char *format, ...);
 
-///Extensions of the printf function. The following new conversion formats are
-///supported:
-///- '%P' for the pretty printing ATerm's
-///- '%T' for the normal printing of ATerm's 
-///- '%F' for the printing of AFun's
+/** \brief Extensions of the fprintf function. The following new
+ *         conversion formats are supported:
+ *         - '%P' for pretty printing ATerm's
+ *         - '%T' for normal printing of ATerm's 
+ *         - '%F' for printing of AFun's
+**/
 int gsfprintf(FILE *stream, const char *format, ...);
 
-///Extensions of the vfprintf functions. The following new conversion formats are
-///supported:
-///- '%P' for the pretty printing ATerm's
-///- '%T' for the normal printing of ATerm's 
-///- '%F' for the printing of AFun's
+/** \brief Extensions of the vfprintf functions. The following new
+ *         conversion formats are supported:
+ *         - '%P' for the pretty printing ATerm's
+ *         - '%T' for the normal printing of ATerm's 
+ *         - '%F' for the printing of AFun's
+**/
 int gsvfprintf(FILE *stream, const char *format, va_list args);
 
-  }
-}
+/** \brief Print a textual description of an ATerm representation of an
+ *         mCRL2 specification or expression to an output stream.
+ *  \param[in] out_stream A pointer to a stream to which can be written.
+ *  \param[in] part An ATerm representation of a part of an mCRL2
+ *             specification or expression.
+ *  \param[in] pp_format A pretty print format.
+ *  \post A textual representation of part is written to out_stream using
+ *        method pp_format.
+**/
+void PrintPart_C(FILE *out_stream, const ATerm part, t_pp_format pp_format = ppDefault);
 
-#include <ostream>
-#include <string>
-#include "mcrl2/atermpp/atermpp.h"
+/** \brief Print a textual description of an ATerm representation of an
+ *         mCRL2 specification or expression to an output stream.
+ *  \param[in] out_stream A stream to which can be written.
+ *  \param[in] part An ATerm representation of a part of an mCRL2
+ *             specification or expression.
+ *  \param[in] pp_format A pretty print format.
+ *  \post A textual representation of part is written to out_stream using
+ *        method pp_format.
+**/
+void PrintPart_CXX(std::ostream &out_stream, const ATerm part,
+  t_pp_format pp_format = ppDefault);
 
-//Global preconditions:
-//- the ATerm library has been initialised
+/** \brief Return a textual description of an ATerm representation of an
+ *         mCRL2 specification or expression.
+ *  \param[in] part An ATerm representation of a part of an mCRL2
+ *             specification or expression.
+ *  \param[in] pp_format A pretty print format.
+ *  \return A textual representation of part according to method pp_format.
+**/
+std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format = ppDefault);
 
-/// \pre OutStream points to a stream to which can be written
-///         Part is an ATerm containing a part of a mCRL2 specification or state
-///         formula.
-/// \return A textual representation of Part is written to OutStream using method
-///         pp_format.
-void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
-  t_pp_format pp_format);
-
-/// \pre Part is an ATerm containing a part of a mCRL2 specification or state
-///      formula.
-/// \post A textual representation of Part pretty printed using method pp_format.
-std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
-
-inline
-std::string pretty_print(ATerm t)
-{
-  return PrintPart_CXX(t, ppDefault);
-}
-
+/** \brief Return a textual description of an ATerm representation of an
+ *         mCRL2 specification or expression.
+ *  \param[in] part An ATerm representation of a part of an mCRL2
+ *             specification or expression.
+ *  \param[in] pp_format A pretty print format.
+ *  \return A textual representation of part according to method pp_format.
+**/
 template <typename Term>
-std::string pp(Term t)
+std::string pp(Term part, t_pp_format pp_format = ppDefault)
 {
-  return pretty_print(atermpp::aterm_traits<Term>::term(t));
+  return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
+}
+
+  }
 }
 
 #endif //MCRL2_PRINT_H

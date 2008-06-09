@@ -110,7 +110,7 @@ class process_initializer: public aterm_appl
               )
          )
       {
-        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
+        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << mcrl2::core::pp(m_assignments) << " don't have unique left hand sides." << std::endl;
         return false;
       }
 

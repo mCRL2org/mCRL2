@@ -121,9 +121,9 @@ void test_data_assignment_list()
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
   data_expression t1 = partial_replace(t, data_assignment_list_replacer(l));
   data_expression t2 = t.substitute(assignment_list_substitution(l));
-  std::cerr << "t  == " << pp(t) << std::endl;
-  std::cerr << "t1 == " << pp(t1) << std::endl;
-  std::cerr << "t2 == " << pp(t2) << std::endl;
+  std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
+  std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
+  std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t1);
   BOOST_CHECK(t0 == t2);
 }

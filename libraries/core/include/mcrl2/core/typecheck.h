@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file typecheck.h
-///
 /// \brief Type check parsed mCRL2 specifications and expressions.
 
 #ifndef PARSER_TYPECHECK_H
@@ -18,9 +17,6 @@
 namespace mcrl2 {
   namespace core {
  
-//Global preconditions:
-//- the ATerm library has been initialised
-
 /** \brief     Type check a parsed mCRL2 data specification.
  *  \param[in] data_spec An ATerm representation of an mCRL2 data
  *             specification that adheres to the initial internal ATerm

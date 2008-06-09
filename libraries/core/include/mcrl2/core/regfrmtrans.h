@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file regfrmtrans.h
-///
 /// \brief Translate regular formulas in terms of state and action formulas.
 
 #ifndef MCRL2_REGFRMTRANS_H
@@ -17,9 +16,6 @@
 
 namespace mcrl2 {
   namespace core {
-
-//Global preconditions:
-//- the ATerm library has been initialised
 
 /** \brief     Translate regular formulas in terms of state and action formulas.
  *  \param[in] state_frm An ATerm representation of a state formula according

@@ -200,12 +200,12 @@ class linear_process: public aterm_appl
         std::cerr << "declared free variables: ";
         for (std::set<data::data_variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
         {
-          std::cerr << pp(*i) << " ";
+          std::cerr << mcrl2::core::pp(*i) << " ";
         }
         std::cerr << "\noccurring free variables: ";
         for (std::set<data::data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
         {
-          std::cerr << pp(*i) << " ";
+          std::cerr << mcrl2::core::pp(*i) << " ";
         }
         std::cerr << std::endl;
         return false;
@@ -214,14 +214,14 @@ class linear_process: public aterm_appl
       // check 2)
       if (!mcrl2::data::detail::unique_names(m_process_parameters))
       {
-        std::cerr << "linear_process::is_well_typed() failed: process parameters " << pp(m_process_parameters) << " don't have unique names." << std::endl;
+        std::cerr << "linear_process::is_well_typed() failed: process parameters " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 3)
       if (!mcrl2::data::detail::unique_names(m_free_variables))
       {
-        std::cerr << "linear_process::is_well_typed() failed: free variables " << pp(m_process_parameters) << " don't have unique names." << std::endl;
+        std::cerr << "linear_process::is_well_typed() failed: free variables " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
@@ -235,7 +235,7 @@ class linear_process: public aterm_appl
       {
         if (!mcrl2::data::detail::check_variable_names(i->summation_variables(), names))
         {
-          std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
+          std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << mcrl2::core::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
           return false;
         }
       }
@@ -245,7 +245,7 @@ class linear_process: public aterm_appl
       {
         if (!mcrl2::data::detail::check_assignment_variables(i->assignments(), m_process_parameters))
         {
-          std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << pp(i->assignments()) << " do not appear as process parameters." << std::endl;
+          std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << mcrl2::core::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
         }
       }

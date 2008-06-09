@@ -69,9 +69,9 @@ std::set<data_variable> find_all_data_variables(Term t)
   if (result != result2)
   {
     std::cout << "Error in find_all_data_variables!" << std::endl;
-    std::cout << "<find_all_data_variables>" << pp(t) << " " << t << std::endl;
-    std::cout << "<result>" << pp(data_variable_list(result.begin(), result.end())) << std::endl;
-    std::cout << "<result2>" << pp(data_variable_list(result2.begin(), result2.end())) << std::endl;
+    std::cout << "<find_all_data_variables>" << mcrl2::core::pp(t) << " " << t << std::endl;
+    std::cout << "<result>" << mcrl2::core::pp(data_variable_list(result.begin(), result.end())) << std::endl;
+    std::cout << "<result2>" << mcrl2::core::pp(data_variable_list(result2.begin(), result2.end())) << std::endl;
   }
 #endif
 

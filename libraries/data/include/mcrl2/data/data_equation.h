@@ -129,7 +129,7 @@ class data_equation: public aterm_appl
       // check 1)
       if (m_lhs.sort() != m_rhs.sort())
       {
-        std::cerr << "data_equation::is_well_typed() failed: the left and right hand sides " << pp(m_lhs) << " and " << pp(m_rhs) << " have different types." << std::endl;
+        std::cerr << "data_equation::is_well_typed() failed: the left and right hand sides " << mcrl2::core::pp(m_lhs) << " and " << mcrl2::core::pp(m_rhs) << " have different types." << std::endl;
         return false;
       }
       

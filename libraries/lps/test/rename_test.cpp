@@ -95,8 +95,8 @@ void test_rename()
   specification spec = mcrl22lps(SPECIFICATION3);
   std::set<identifier_string> forbidden_names;
   specification spec2 = rename_process_parameters(spec, forbidden_names, "_A");
-  std::cout << "<spec>" << pp(spec) << std::endl;
-  std::cout << "<spec2>" << pp(spec2) << std::endl;
+  std::cout << "<spec>" << mcrl2::core::pp(spec) << std::endl;
+  std::cout << "<spec2>" << mcrl2::core::pp(spec2) << std::endl;
   BOOST_CHECK(spec2.process().process_parameters().size() == 1);
   BOOST_CHECK(spec.process().process_parameters().front().name() == spec2.process().process_parameters().front().name());
 }
