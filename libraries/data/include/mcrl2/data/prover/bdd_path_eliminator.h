@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/prover/bdd_path_eliminator.h
+/// \brief BDD inconsistent path elimination using external SMT solvers
 
 #ifndef BDD_PATH_ELIMINATOR_H
 #define BDD_PATH_ELIMINATOR_H

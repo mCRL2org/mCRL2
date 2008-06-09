@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsbinary.cpp
-/// file: mcrl2/data/induction.h
+/// \file mcrl2/data/induction.h
+/// \brief Proving with induction on lists
 
 #ifndef INDUCTION_H
 #define INDUCTION_H
@@ -27,7 +27,7 @@ class Induction {
     /// \brief The number of variables used during the last application of induction.
     unsigned int f_count;
 
-    /// \brief An expression of soort Bool in mCRL2 format.
+    /// \brief An expression of sort Bool in mCRL2 format.
     ATermAppl f_formula;
 
     /// \brief 

@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/prover/smt_lib_solver.h
+/// \brief Abstract interface for SMT solvers based on the SMT-LIB format
 
 #ifndef SMT_LIB_SOLVER_H
 #define SMT_LIB_SOLVER_H

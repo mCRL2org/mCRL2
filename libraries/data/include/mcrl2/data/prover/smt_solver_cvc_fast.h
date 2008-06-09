@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/prover/smt_solver_cvc_fast.h
+/// \brief SMT solver based on the CVC3 library
 
 #ifdef HAVE_CVC
 

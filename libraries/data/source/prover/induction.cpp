@@ -5,14 +5,11 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file induction.cpp
-
-#include "mcrl2/data/prover/induction.h"
-#include "mcrl2/core/detail/struct.h"
 
 #include <cstdlib>
 
+#include "mcrl2/data/prover/induction.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"

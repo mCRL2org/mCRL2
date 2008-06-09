@@ -434,10 +434,10 @@ namespace tipi {
       public:
 
         /** \brief Constructor
-         * \param[in] min the minimum value that specifies the range
-         * \param[in] max the maximum value that specifies the range
+         * \param[in] minimum the minimum value that specifies the range
+         * \param[in] maximum the maximum value that specifies the range
          **/
-        real_range(C min = std::numeric_limits< C >::min(), C max = std::numeric_limits< C >::max()) : m_minimum(min), m_maximum(max) {
+        real_range(C minimum = std::numeric_limits< C >::min(), C maximum = std::numeric_limits< C >::max()) : m_minimum(minimum), m_maximum(maximum) {
           assert(m_minimum < m_maximum);
         }
 
@@ -637,7 +637,8 @@ namespace tipi {
       public:
 
         /** \brief Constructor */
-        string(size_t min = 0, size_t max = boost::integer_traits< size_t >::max()) : m_minimum_length(min), m_maximum_length(max) {
+        string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::max()) :
+                                                m_minimum_length(minimum), m_maximum_length(maximum) {
           assert(m_minimum_length < m_maximum_length);
         }
 

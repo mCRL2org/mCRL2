@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/prover/bdd_simplifier.h
+/// \brief Abstract interface for BDD simplifiers
 
 #ifndef BDD_SIMPLIFIER_H
 #define BDD_SIMPLIFIER_H
@@ -25,7 +26,8 @@ class BDD_Simplifier {
     int f_deadline;
   public:
     /// \brief Destructor without any additional functionality.
-    virtual ~BDD_Simplifier();
+    virtual ~BDD_Simplifier() {
+    }
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
     void set_time_limit(int a_time_limit);
@@ -35,7 +37,9 @@ class BDD_Simplifier {
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    virtual ATermAppl simplify(ATermAppl a_bdd);
+    virtual ATermAppl simplify(ATermAppl a_bdd) {
+      return a_bdd;
+    }
 };
 
 #endif

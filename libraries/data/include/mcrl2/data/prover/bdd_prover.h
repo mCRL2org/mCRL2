@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/prover/bdd_prover.h
+/// \brief EQ-BDD based prover for mCRL2 boolean data expressions
 
 #ifndef BDD_PROVER_H
 #define BDD_PROVER_H
