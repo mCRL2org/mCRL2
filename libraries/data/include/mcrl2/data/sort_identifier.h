@@ -22,7 +22,6 @@ namespace data {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
-using namespace core::detail;
 using core::identifier_string;
 
 class sort_identifier;

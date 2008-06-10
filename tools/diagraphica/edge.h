@@ -13,8 +13,6 @@
 
 #include <cstddef>
 #include <string>
-#include <vector>
-using namespace std;
 
 class Bundle;
 class Node;
@@ -25,7 +23,7 @@ public:
 	// -- constructors and destructor -------------------------------
     Edge( 
         const int &idx,
-        const string &lbl );
+        const std::string &lbl );
 	virtual ~Edge();
 	
     // -- set functions ---------------------------------------------
@@ -35,7 +33,7 @@ public:
     
     // -- get functions ---------------------------------------------
     int getIndex();
-    string getLabel();
+    std::string getLabel();
     Node* getInNode();
     Node* getOutNode();
     Bundle* getBundle();
@@ -48,7 +46,7 @@ public:
 protected:
     // -- data members ----------------------------------------------
 	int index;      // index in list of graph edges
-    string label;   // "action label"
+    std::string label;   // "action label"
     Node* inNode;   // association
 	Node* outNode;  // association
     Bundle* bundle; // association

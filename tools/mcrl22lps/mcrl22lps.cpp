@@ -538,10 +538,10 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   if (lin_options.infilename == "") {
     //parse specification from stdin
     gsVerboseMsg("parsing input from stdin...\n");
-    result = parse_proc_spec(cin);
+    result = parse_proc_spec(std::cin);
   } else {
     //parse specification from infilename
-    ifstream instream(lin_options.infilename.c_str(), ifstream::in|ifstream::binary);
+    std::ifstream instream(lin_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
     if (!instream.is_open()) {
       gsErrorMsg("cannot open input file '%s'\n", lin_options.infilename.c_str());
       return NULL;
@@ -654,10 +654,10 @@ int main(int argc, char *argv[])
       spec.save(lin_options.outfilename);
     } else {
       if (lin_options.outfilename.empty()) {
-        PrintPart_CXX(cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
-        cout << endl;
+        PrintPart_CXX(std::cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
+        std::cout << std::endl;
       } else {
-        ofstream outstream(lin_options.outfilename.c_str(), ofstream::out|ofstream::binary);
+        std::ofstream outstream(lin_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
         if (!outstream.is_open()) {
           throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
         }

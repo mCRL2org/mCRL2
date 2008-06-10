@@ -88,10 +88,10 @@ void Visualizer::printMouseVariables()
     if(mouseDrag == MSE_DRAG_FALSE)
     	md = "NOT_DRAG";
     	 
-    std::clog << "Mouse Button: " << mb << endl;
-    std::clog << "Mouse Side: " << ms << endl;
-    std::clog << "Mouse Click: " << mc << endl;
-    std::clog << "Mouse Drag: " << md << endl << endl;
+    std::clog << "Mouse Button: " << mb << std::endl;
+    std::clog << "Mouse Side: " << ms << std::endl;
+    std::clog << "Mouse Click: " << mc << std::endl;
+    std::clog << "Mouse Drag: " << md << std::endl << std::endl;
 }
 
 

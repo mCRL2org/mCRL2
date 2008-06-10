@@ -16,6 +16,8 @@
 #include <math.h>
 #include <boost/format.hpp>
 
+using namespace std;
+
 #define PI 3.14159265
 const std::string default_border_colour = "black";
 const std::string init_border_colour = "red";

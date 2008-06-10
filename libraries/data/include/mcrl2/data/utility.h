@@ -34,7 +34,6 @@ namespace data {
 
 using atermpp::aterm;
 using atermpp::aterm_traits;
-using namespace detail;
 
 /// Returns a copy of t, but with a common postfix added to each variable name,
 /// and such that the new names do not appear in context.

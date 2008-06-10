@@ -31,18 +31,12 @@
 #include <wx/colordlg.h>
 #include <wx/textdlg.h>
 
-#include <vector>
-#include <iostream>
 #include <string>
 #include "stdlib.h"
 
 //random
 #include <cstdlib>
 #include <ctime> 
-
-//LTS
-#include <mcrl2/lts/liblts.h>
-#include "mcrl2/core/detail/struct.h"
 
 #include <mcrl2/utilities/spinctrlfloat.h>
 
@@ -55,9 +49,6 @@
 #define INITIAL_WIN_HEIGHT 780
 #define INITIAL_WIN_WIDTH  1024
 
-
-using namespace std;
-using namespace mcrl2::lts;
 
 const int ID_OPTIMIZE            = wxID_HIGHEST +  0;
 const int ID_STOP_OPTIMIZE       = wxID_HIGHEST +  1;
@@ -136,7 +127,7 @@ private:
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
   int node_radius;
-  string inputFileName;
+  std::string inputFileName;
 
   bool curve_edges;
 

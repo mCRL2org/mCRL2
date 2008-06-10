@@ -11,8 +11,6 @@
 #ifndef PARTITIONFRAME_H
 #define PARTITIONFRAME_H
 
-#include <vector>
-using namespace std;
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include "attribute.h"

@@ -58,6 +58,7 @@ int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 using namespace pbes_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
@@ -969,7 +970,7 @@ data_expression data_expression_simplify
 #endif
   
   // fill in the list of occuring variables
-  std::set<data_variable> setfv = data::find_all_data_variables(d);
+  std::set<data_variable> setfv = find_all_data_variables(d);
   for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
     *fv = push_back(*fv,*i);
   return f;

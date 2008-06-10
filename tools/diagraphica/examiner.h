@@ -14,9 +14,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
-#include <string>
 #include <vector>
-using namespace std;
 #include <wx/event.h>
 #include <wx/timer.h>
 #include "bundle.h"
@@ -58,13 +56,13 @@ public:
     void setDiagram( Diagram *dgrm );
     void setFrame( 
         Cluster* frme,
-        const vector< Attribute* > &attrs,
+        const std::vector< Attribute* > &attrs,
         ColorRGB col );
     void clrFrame();
 
     void addFrameHist(
         Cluster* frme,
-        const vector< Attribute* > &attrs );
+        const std::vector< Attribute* > &attrs );
     void clrFrameHist();
     void clrFrameHistCur();
     int getSizeFramesHist();
@@ -104,7 +102,7 @@ public:
 protected:
     // -- utility functions -----------------------------------------
 /*
-    void initAttributes( const vector< Attribute* > &attrs );
+    void initAttributes( const std::vector< Attribute* > &attrs );
     void initFrames();
     void initBundles();
 */    
@@ -118,7 +116,7 @@ protected:
     void clearFrames();
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void handleIconRwnd();
     void handleIconLft();
     /*
@@ -162,16 +160,16 @@ protected:
     
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
+    std::vector< Attribute* > attributes; // association
 
     Cluster* frame;                  // composition
     ColorRGB colFrm;
 
-    vector< Cluster* > framesHist;            // composition
-    vector< vector< Attribute* > > attrsHist; // association
+    std::vector< Cluster* > framesHist;            // composition
+    std::vector< std::vector< Attribute* > > attrsHist; // association
 
     Position2D posFrame;
-    vector< Position2D > posFramesHist;
+    std::vector< Position2D > posFramesHist;
 
     size_t focusFrameIdx;
 

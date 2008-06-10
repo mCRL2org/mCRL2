@@ -16,7 +16,6 @@
 #include <string>
 #include <map>
 #include <vector>
-using namespace std;
 #include "colleague.h"
 #include "value.h"
 
@@ -26,28 +25,28 @@ public:
     // -- constructors and destructor -------------------------------
     Attribute(
         Mediator* m,
-        const string &nam,
-        const string &typ,
+        const std::string &nam,
+        const std::string &typ,
         const int &idx );
     Attribute( const Attribute &attr );
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
-    void setName( const string &nme );
-    void setType( const string &typ );
+    void setName( const std::string &nme );
+    void setType( const std::string &typ );
 
     virtual void clusterValues(
-        const vector< int > &indices,
-        const string &newValue );
+        const std::vector< int > &indices,
+        const std::string &newValue );
     virtual void moveValue(
         const int &idxFr,
         const int &idxTo );
     
     // functions overridden by AttrDiscr
     virtual void configValues(
-        const vector< string > &curDomain,
-        map< int, int  > &origToCurDomain );
+        const std::vector< std::string > &curDomain,
+        std::map< int, int  > &origToCurDomain );
 
     // functions overridden by AttrConti
     virtual void classifyEqualIntervals( const int &number );
@@ -57,8 +56,8 @@ public:
 
     // -- get functions ---------------------------------------------
     int getIndex();
-    string getName();
-    string getType();
+    std::string getName();
+    std::string getType();
     virtual int getAttrType() = 0;
 
     // functions overridden by AttrDiscr
@@ -96,8 +95,8 @@ protected:
 
     // -- data members ----------------------------------------------
     int    index;
-    string name;
-    string type;
+    std::string name;
+    std::string type;
 };
 
 #endif

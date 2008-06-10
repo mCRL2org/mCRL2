@@ -11,9 +11,6 @@
 #ifndef BITMAPPANEL_H
 #define BITMAPPANEL_H
 
-#include <vector>
-using namespace std;
-
 #include <wx/wx.h>
 #include <wx/image.h>
 

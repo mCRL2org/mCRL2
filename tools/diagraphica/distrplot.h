@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
+#include <string>
 #include "diagram.h"
 #include "graph.h"
 #include "utils.h"
@@ -34,7 +34,7 @@ public:
     // -- set data functions ----------------------------------------
     void setValues(
         const int &idx,
-        const vector< int > &num );
+        const std::vector< int > &num );
     void clearValues();
 
 	void setDiagram( Diagram* dgrm );
@@ -76,20 +76,20 @@ protected:
     // -- data members ----------------------------------------------
     // data
     int              attrIdx;
-    vector< int >    number;
+    std::vector< int >    number;
     int              maxNumber;
     // vis settings
     int    minHgtHintPx; // height cannot be smaller than this
     int    maxWthHintPx; // width cannot be greater than this
     double width;        // actual width calculated & used for every bar
-    vector< Position2D > positions;
+    std::vector< Position2D > positions;
 	// diagram
 	Diagram*   diagram;        // association, user-defined diagram
     double     scaleDgrm;      // scale factor for diagram
     Position2D posDgrm;        // positions of diagram
     bool       showDgrm;       // show or hide diagram
     int        attrValIdxDgrm; // value idx of attribute associated with diagram
-    string     msgDgrm;        // message to show with diagram
+    std::string     msgDgrm;        // message to show with diagram
 };
 
 #endif

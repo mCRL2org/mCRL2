@@ -14,6 +14,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
+#include <string>
+#include <vector>
 #include "colorchooser.h"
 #include "dof.h"
 #include "diagram.h"
@@ -110,7 +112,7 @@ public:
     void handleKeyUpEvent( const int &keyCode, const int &specialKey );
     void handleKeyDownEvent( const int &keyCode, const int &specialKey );
     
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void handleHitDiagramOnly();
     void handleHitShape( const int &shapeIdx );
     void handleHitShapeHandle( 
@@ -124,9 +126,9 @@ public:
         const int &y,
         const vector< int > &data );
     */
-    void handleShowVariable( const string &variable, const int &variableId );
-    void handleShowNote( const string &variable, const int &shapeId );
-    void handleAddText( string &variable, int &shapeId );
+    void handleShowVariable( const std::string &variable, const int &variableId );
+    void handleShowNote( const std::string &variable, const int &shapeId );
+    void handleAddText( std::string &variable, int &shapeId );
     void handleTextSize( int &textSize, int &shapeId );
     void handleSetTextSize( int &textSize, int &shapeId );
     void handleCut();
@@ -206,7 +208,7 @@ protected:
     double selectedX1, selectedX2, selectedY1, selectedY2;
     
     Shape* clipBoardShape; // composition
-    vector < Shape* > clipBoardList;
+    std::vector < Shape* > clipBoardList;
     double xPaste, yPaste;
     
     // -- static variables ------------------------------------------

@@ -59,7 +59,7 @@ namespace pbes_system {
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << pp(left.name()) << ", " << pp(right.name()) << ")  label = " << pp(right) << "  condition = " << pp(condition);
+          out << "(" << mcrl2::core::pp(left.name()) << ", " << mcrl2::core::pp(right.name()) << ")  label = " << mcrl2::core::pp(right) << "  condition = " << mcrl2::core::pp(condition);
           return out.str();
         }
       };
@@ -125,11 +125,11 @@ namespace pbes_system {
         std::string to_string() const
         {
           std::ostringstream out;
-          out << pp(variable) << "  assertions = ";
+          out << mcrl2::core::pp(variable) << "  assertions = ";
           for (constraint_map::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
           {
-            std::string lhs = pp(i->first);
-            std::string rhs = is_constant(i->first) ? pp(i->second) : "NaC";
+            std::string lhs = mcrl2::core::pp(i->first);
+            std::string rhs = is_constant(i->first) ? mcrl2::core::pp(i->second) : "NaC";
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -336,7 +336,7 @@ namespace pbes_system {
             std::vector<data::data_variable> removed = u.constant_parameters();
             for (std::vector<data::data_variable>::iterator j = removed.begin(); j != removed.end(); ++j)
             {
-              std::cout << "(" << pp(u.variable.name()) << ", " << pp(*j) << ")" << std::endl;
+              std::cout << "(" << mcrl2::core::pp(u.variable.name()) << ", " << mcrl2::core::pp(*j) << ")" << std::endl;
             }
           }
         }

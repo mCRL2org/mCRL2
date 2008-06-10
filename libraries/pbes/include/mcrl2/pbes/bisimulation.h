@@ -130,7 +130,7 @@ class bisimulation_algorithm
       {
         if (free_variables.find(*i) == free_variables.end())
         {
-          std::cerr << "error: " << msg << pp(*i) << " is free! " << pp(expr) << std::endl;
+          std::cerr << "error: " << msg << mcrl2::core::pp(*i) << " is free! " << mcrl2::core::pp(expr) << std::endl;
         }
       }
     }
@@ -581,7 +581,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<std::string> used_names = find_variable_name_strings(atermpp::make_list(p, q));
+        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(p, q));
         data_variable_list e1_new = fresh_variables(e1, used_names);
         data_expression    cj_new = cj.substitute(make_list_substitution(e1, e1_new));
         data_variable_list gj_new = gj.substitute(make_list_substitution(e1, e1_new));

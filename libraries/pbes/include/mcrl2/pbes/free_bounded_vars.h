@@ -20,21 +20,15 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/util.h"
 
-using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::pbes_expr;
-using namespace mcrl2::pbes_system::accessors;
-
 std::set<std::string> context;
 
 // auxiliary function that replaces all variables
 // from the given list bv with new variables
-pbes_expression newnames(pbes_expression p, data_variable_list bv)
+mcrl2::pbes_system::pbes_expression newnames(mcrl2::pbes_system::pbes_expression p, mcrl2::data::data_variable_list bv)
 {
   if (bv.empty()) return p;
-  data_variable_list newbv = fresh_variables(bv,context,"%d");
-  for (data_variable_list::iterator x = newbv.begin(); x != newbv.end(); x++)
+  mcrl2::data::data_variable_list newbv = fresh_variables(bv,context,"%d");
+  for (mcrl2::data::data_variable_list::iterator x = newbv.begin(); x != newbv.end(); x++)
     context.insert(x->name());
   //  std::cout<<"\nNEWNAMES bv="<< pp(bv).c_str()<<" , newbv=" << pp(newbv).c_str()<<"\n";
   return p.substitute(make_list_substitution(bv, newbv));
@@ -53,9 +47,15 @@ pbes_expression newnames(pbes_expression p, data_variable_list bv)
 ///
 /// As side effect, two variable lists are returned:
 /// the free and the bounded occurences
-pbes_expression remove_double_variables_rec
-(pbes_expression p, data_variable_list* fv, data_variable_list* bv)
+mcrl2::pbes_system::pbes_expression remove_double_variables_rec
+(mcrl2::pbes_system::pbes_expression p, mcrl2::data::data_variable_list* fv, mcrl2::data::data_variable_list* bv)
 {
+  using namespace mcrl2;
+  using namespace mcrl2::data;
+  using namespace mcrl2::pbes_system;
+  using namespace mcrl2::pbes_system::pbes_expr;
+  using namespace mcrl2::pbes_system::accessors;
+
   //  std::cout<<"RDV: start "<<pp(p).c_str()<<"\n";
 
   if ((is_and(p)) || (is_or(p)) || (is_imp(p))) {
@@ -116,11 +116,11 @@ pbes_expression remove_double_variables_rec
 ///
 /// As side effect, two variable lists are returned:
 /// the free and the bounded occurences
-pbes_expression remove_double_variables(pbes_expression p)
+mcrl2::pbes_system::pbes_expression remove_double_variables(mcrl2::pbes_system::pbes_expression p)
 {
-  data_variable_list fv;
-  data_variable_list bv;
-  context = data::detail::find_variable_name_strings(p);
+  mcrl2::data::data_variable_list fv;
+  mcrl2::data::data_variable_list bv;
+  context = mcrl2::data::detail::find_variable_name_strings(p);
   return (remove_double_variables_rec(p,&fv,&bv));
 }
 
@@ -132,7 +132,7 @@ pbes_expression remove_double_variables(pbes_expression p)
 /// but differently implemented (BRUTE FORCE): 
 /// all quantified variables are simply renamed with new names, 
 /// within the scope of their quantifier.
-pbes_expression remove_double_variables_fast(pbes_expression p)
+mcrl2::pbes_system::pbes_expression remove_double_variables_fast(mcrl2::pbes_system::pbes_expression p)
 {
  
   // !!!! IMPLEMENT THIS

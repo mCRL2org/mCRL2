@@ -10,8 +10,9 @@
 
 #include "colorchooser.h"
 
-// -- static variables ----------------------------------------------
+using namespace std;
 
+// -- static variables ----------------------------------------------
 
 double ColorChooser::hdlSzeHnt =  5.0;
 

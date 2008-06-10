@@ -11,6 +11,7 @@
 
 #include "opacitychooser.h"
 
+using namespace std;
 
 // -- static variables ----------------------------------------------
 

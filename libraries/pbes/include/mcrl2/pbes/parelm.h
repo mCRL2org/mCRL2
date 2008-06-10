@@ -83,11 +83,11 @@ class pbes_parelm_algorithm
       {
         if (print_index)
         {
-          std::cout << index++ << " " << pp(*i) << std::endl;
+          std::cout << index++ << " " << mcrl2::core::pp(*i) << std::endl;
         }
         else
         {
-          std::cout << pp(*i) << " ";
+          std::cout << mcrl2::core::pp(*i) << " ";
         }
       }
       std::cout << std::endl;
@@ -160,7 +160,7 @@ class pbes_parelm_algorithm
           int k = variable_index(i->variable().parameters(), *j);
           if (k < 0)
           {
-            std::cerr << "<variable error>" << pp(*j) << std::endl;
+            std::cerr << "<variable error>" << mcrl2::core::pp(*j) << std::endl;
             continue;
           }
           v.insert(offset + k);
@@ -236,7 +236,7 @@ class pbes_parelm_algorithm
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::data_variable v1 = predicate_variables[*i];
-          std::cout << "(" + pp(X1) + ", " + pp(v1) + ")\n";
+          std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
         std::cout << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
@@ -252,8 +252,8 @@ class pbes_parelm_algorithm
           int i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::data_variable v2 = predicate_variables[i2];
-          std::string left  = "(" + pp(X1) + ", " + pp(v1) + ")";
-          std::string right = "(" + pp(X2) + ", " + pp(v2) + ")";
+          std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
+          std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
           std::cout << left << " -> " << right << std::endl;
         }
       }
@@ -269,7 +269,7 @@ class pbes_parelm_algorithm
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::data_variable v1 = predicate_variables[*j];
-            std::cout << "(" + pp(X1) + ", " + pp(v1) + ")\n";
+            std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
       }

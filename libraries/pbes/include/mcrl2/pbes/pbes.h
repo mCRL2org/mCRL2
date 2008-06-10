@@ -651,7 +651,7 @@ class pbes
       // check 9)
       if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
       {
-        std::cerr << "pbes::is_well_typed() failed: the initial state " << pp(initial_state()) << " conflicts with its declaration!" << std::endl;
+        std::cerr << "pbes::is_well_typed() failed: the initial state " << mcrl2::core::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
         return false;
       }
 

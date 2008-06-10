@@ -21,7 +21,6 @@ namespace data {
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::term_list;
-using namespace core::detail;
 
 class sort_arrow;
 

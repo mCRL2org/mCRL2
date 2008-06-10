@@ -15,8 +15,6 @@
 #include <stdbool.h>
 #include <string>
 
-using namespace std;
-
 //Type definitions for all linearisers
 
 //t_lin_method represents the available linearisation methods
@@ -42,8 +40,8 @@ struct t_lin_options {
   t_phase end_phase;
   bool pretty;
   bool noalpha;
-  string infilename;
-  string outfilename;
+  std::string infilename;
+  std::string outfilename;
   
   t_lin_options()
     : lin_method(lmRegular),

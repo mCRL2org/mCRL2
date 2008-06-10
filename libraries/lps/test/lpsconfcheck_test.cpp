@@ -21,6 +21,7 @@
 using namespace atermpp;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
+using namespace mcrl2::utilities;
 
 // Parameter i should be removed
 const std::string case_1(
@@ -46,7 +47,7 @@ static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
   for( ;  !ATisEmpty(v_summands) ; v_summands=ATgetNext(v_summands))
   { ATermAppl v_summand=ATAgetFirst(v_summands);
     ATermAppl v_multi_action_or_delta = ATAgetArgument(v_summand, 2);
-    if (gsIsMultAct(v_multi_action_or_delta)) 
+    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta)) 
     {
       ATermList v_actions=ATLgetArgument(v_multi_action_or_delta, 0);
       for( ; !ATisEmpty(v_actions) ; v_actions=ATgetNext(v_actions))
@@ -73,21 +74,21 @@ int test_main(int argc, char** argv)
   // case 1
   s0 = mcrl22lps(case_1);
   Confluence_Checker checker1(s0);
-  s1=checker1.check_confluence_and_mark(gsMakeDataExprTrue(),0);  // Check confluence for all summands and
+  s1=checker1.check_confluence_and_mark(mcrl2::core::detail::gsMakeDataExprTrue(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
 
   // case 2
   s0 = mcrl22lps(case_2);
   Confluence_Checker checker2(s0);
-  s1=checker2.check_confluence_and_mark(gsMakeDataExprTrue(),0);  // Check confluence for all summands and
+  s1=checker2.check_confluence_and_mark(mcrl2::core::detail::gsMakeDataExprTrue(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(check_for_ctau(s1));
 
   // case 3
   s0 = mcrl22lps(case_3);
   Confluence_Checker checker3(s0);
-  s1=checker3.check_confluence_and_mark(gsMakeDataExprTrue(),0);  // Check confluence for all summands and
+  s1=checker3.check_confluence_and_mark(mcrl2::core::detail::gsMakeDataExprTrue(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
 

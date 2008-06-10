@@ -12,6 +12,7 @@
 
 // -- constructors and destructor -----------------------------------
 
+using namespace std;
 
 // ------------------------
 CombnPlot::CombnPlot(

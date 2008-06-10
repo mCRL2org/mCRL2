@@ -180,7 +180,7 @@ void test_directory(int argc, char** argv)
       {
         std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + "expected_timed_result";
         std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + "expected_untimed_result";
-        std::string formula = core::read_text(filename);
+        std::string formula = mcrl2::core::read_text(filename);
         if (fs::exists(timed_result_file))
         {
           try {

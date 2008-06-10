@@ -3198,7 +3198,7 @@ void VisUtils::drawLabel(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     if ( label.size() > 0 )
@@ -3251,7 +3251,7 @@ void VisUtils::drawLabelRight(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     drawLabel(
@@ -3269,7 +3269,7 @@ void VisUtils::drawLabelLeft(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     double translate = label.length()*CHARWIDTH*scaling;
@@ -3288,7 +3288,7 @@ void VisUtils::drawLabelCenter(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     double translate = 0.5*label.length()*CHARWIDTH*scaling;
@@ -3307,7 +3307,7 @@ void VisUtils::drawLabelVert(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     if ( label.size() > 0 )
@@ -3356,7 +3356,7 @@ void VisUtils::drawLabelVertAbove(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     drawLabelVert(
@@ -3374,7 +3374,7 @@ void VisUtils::drawLabelVertBelow(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // -------------------------------
 {
     double translate = label.length()*CHARWIDTH*scaling;
@@ -3393,7 +3393,7 @@ void VisUtils::drawLabelVertCenter(
     const double &xCoord,
     const double &yCoord,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // --------------------------------
 {
     double translate = 0.5*label.length()*CHARWIDTH*scaling;
@@ -3414,7 +3414,7 @@ void VisUtils::drawLabelInBoundBox(
     const double &yTop,
     const double &yBot,
     const double &scaling,
-    const string &label )
+    const std::string &label )
 // ----------------------------------
 {
     double w = xRgt - xLft;
@@ -3424,7 +3424,7 @@ void VisUtils::drawLabelInBoundBox(
     double charWidth = (CHARWIDTH*scaling);
     double lblLength = label.size()*charWidth;
     int    numToCrop;
-    string cropLbl = label;
+    std::string cropLbl = label;
 
     if ( r >= 1.0 ) // longer than tall or short label
     {

@@ -333,9 +333,9 @@ pbes_equation to_pbes_eq(int n){
   fixpoint_symbol f;
   propositional_variable prop;
   if (ps->op[ps->arg1[n]] == 'm')
-    f = fixpoint_symbol(gsMakeMu()); // mu()
+    f = fixpoint_symbol(mcrl2::core::detail::gsMakeMu()); // mu()
   else if (ps->op[ps->arg1[n]] == 'n')
-    f = fixpoint_symbol(gsMakeNu()); //nu();
+    f = fixpoint_symbol(mcrl2::core::detail::gsMakeNu()); //nu();
   else {
     gsErrorMsg("fixpoint expected\n");
     exit(0);

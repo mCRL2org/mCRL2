@@ -26,8 +26,6 @@
 #define CIRCLE_RADIUS 10
 
 
-using namespace std;
-
 class Node
 {
 public:

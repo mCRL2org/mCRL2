@@ -40,6 +40,7 @@
 using namespace std;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 
 char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "

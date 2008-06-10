@@ -11,6 +11,7 @@
 
 #include "parser.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 

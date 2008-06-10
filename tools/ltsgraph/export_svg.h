@@ -15,7 +15,6 @@
 #include <vector>
 #include <wx/string.h>
 #include <wx/gdicmn.h>
-using namespace std;
 
 typedef struct {
   unsigned int num; // Identifier of the node
@@ -46,16 +45,16 @@ typedef struct {
 
 class export_to_svg {
   public:
-    export_to_svg(wxString _filename, vector<node_svg> _nodes, 
-                vector<edge_svg> _edges, double _height, double _width);
+    export_to_svg(wxString _filename, std::vector<node_svg> _nodes, 
+                std::vector<edge_svg> _edges, double _height, double _width);
     bool generate();
 
   private:
     wxString filename;
-    string svg_code;
+    std::string svg_code;
 
-    vector<node_svg> nodes;
-    vector<edge_svg> edges;
+    std::vector<node_svg> nodes;
+    std::vector<edge_svg> edges;
 
     double height;
     double width;

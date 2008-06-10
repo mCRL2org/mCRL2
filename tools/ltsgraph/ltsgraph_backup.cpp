@@ -16,7 +16,7 @@
 
 LtsgraphBackup::LtsgraphBackup(wxSize _sz) : sz(_sz) {}
 
-void LtsgraphBackup::SetLayout(vector<Node*> _BackupVectNode, vector<edge*> _BackupVectEdge) {
+void LtsgraphBackup::SetLayout(std::vector<Node*> _BackupVectNode, std::vector<edge*> _BackupVectEdge) {
 
 	BackupVectNode = _BackupVectNode;
 	BackupVectEdge = _BackupVectEdge;
@@ -153,7 +153,7 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 		return false;
         TransitionLabel = tmp;
 
-	map<unsigned int, Node*> NodeMap;
+	std::map<unsigned int, Node*> NodeMap;
 	wxString wxstr = RtrFile.GetNextLine();
 
 	for ( ;!RtrFile.Eof() ; wxstr = RtrFile.GetNextLine() ) {
@@ -215,11 +215,11 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 	return true;
 }
 
-vector<Node*> LtsgraphBackup::GetVectNode() {
+std::vector<Node*> LtsgraphBackup::GetVectNode() {
 	return BackupVectNode;
 }
 
-vector<edge*> LtsgraphBackup::GetVectEdge() {
+std::vector<edge*> LtsgraphBackup::GetVectEdge() {
 	return BackupVectEdge;
 }
 		

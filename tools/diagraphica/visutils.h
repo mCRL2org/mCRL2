@@ -21,7 +21,6 @@
     #include <GL/glu.h>
 #endif
 #include <string>
-using namespace std;
 #include <wx/bitmap.h>
 #include <wx/image.h>
 #include "utils.h"
@@ -66,7 +65,7 @@ struct Position2D
 const int CHARSETSIZE = 95;
 const int CHARWIDTH   = 16;
 const int CHARHEIGHT  = 32;
-const string CHARPATH = "Chars/";
+const std::string CHARPATH = "Chars/";
 
 // -- data for cushion textures -------------------------------------
 
@@ -75,7 +74,7 @@ const int CUSHSIZE    = 256;
 // -- data for gradient textures ------------------------------------
 
 const int GRADSIZE    = 256;
-const string GRADPATH = "Grads/";
+const std::string GRADPATH = "Grads/";
 
 class VisUtils
 {
@@ -468,50 +467,50 @@ public:
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelRight(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelLeft(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelCenter(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     
     static void drawLabelVert(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelVertAbove(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelVertBelow(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
     static void drawLabelVertCenter(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
         const double &yCoord,
         const double &scaling,
-        const string &label );
+        const std::string &label );
 
     static void drawLabelInBoundBox(
         GLuint texCharId[CHARSETSIZE],
@@ -520,7 +519,7 @@ public:
         const double &yTop,
         const double &yBot,
         const double &scaling,
-        const string &label );
+        const std::string &label );
 
     // -- cushions --------------------------------------------------
     

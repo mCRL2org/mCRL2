@@ -207,7 +207,7 @@ void test_free_variables()
     BOOST_CHECK(freevars.size() == 20);
     for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
     {
-      cout << "<var>" << pp(*i) << endl;
+      cout << "<var>" << mcrl2::core::pp(*i) << endl;
     }
     freevars = p.free_variables();
     BOOST_CHECK(freevars.size() == 15);
@@ -254,8 +254,8 @@ void test_quantifier_rename_builder()
     forall(make_list(mN), exists(make_list(mN, nN), g))
   );
   pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1); 
-  std::cout << "p1 = " << pp(p1) << std::endl;
-  std::cout << "q1 = " << pp(q1) << std::endl;
+  std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
+  std::cout << "q1 = " << mcrl2::core::pp(q1) << std::endl;
 
   pbes_expression p2 = 
   and_(
@@ -263,8 +263,8 @@ void test_quantifier_rename_builder()
     forall(make_list(mN), exists(make_list(mN, nN), q1))
   );
   pbes_expression q2 = rename_quantifier_variables(p2, make_list(data_variable("n00:N"), data_variable("n01:N")));
-  std::cout << "p2 = " << pp(p2) << std::endl;
-  std::cout << "q2 = " << pp(q2) << std::endl;
+  std::cout << "p2 = " << mcrl2::core::pp(p2) << std::endl;
+  std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
 
   // BOOST_CHECK(false);
 }
@@ -279,9 +279,9 @@ void test_complement_method_builder()
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
-  std::cout << "p             = " << pp(p) << std::endl;
-  std::cout << "q             = " << pp(q) << std::endl;
-  std::cout << "complement(p) = " << pp(complement(p)) << std::endl;
+  std::cout << "p             = " << mcrl2::core::pp(p) << std::endl;
+  std::cout << "q             = " << mcrl2::core::pp(q) << std::endl;
+  std::cout << "complement(p) = " << mcrl2::core::pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
 }
 
@@ -292,7 +292,7 @@ void test_pbes_expression()
 
   data_variable x1("x1:X");
   pbes_expression e = x1;
-  data_expression x2 = pbes_system::accessors::val(e);
+  data_expression x2 = mcrl2::pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);
   
   pbes_expression v_expr = propositional_variable_instantiation("v:V");
@@ -322,11 +322,11 @@ void test_instantiate_free_variables()
   state_formula formula = mcf2statefrm(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-std::cout << "<before>" << pp(p) << std::endl;  
-std::cout << "<lps>" << pp(spec) << std::endl;  
+  std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;  
+  std::cout << "<lps>" << mcrl2::core::pp(spec) << std::endl;  
   bool result = p.instantiate_free_variables();
-std::cout << "<result>" << result << std::endl;  
-std::cout << "<after>" << pp(p) << std::endl;  
+  std::cout << "<result>" << result << std::endl;  
+  std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;  
 }
 
 int test_main(int argc, char** argv)

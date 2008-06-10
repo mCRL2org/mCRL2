@@ -11,6 +11,7 @@
 
 #include "glcanvas.h"
 
+using namespace std;
 
 int attribList[11] = {
     WX_GL_RGBA, 

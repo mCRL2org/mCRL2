@@ -164,9 +164,9 @@ void test_data_variable_replace()
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
   data_expression t1 = data_variable_sequence_replace(t, variables, replacements);
   data_expression t2 = data_variable_sequence_replace(t, v, l);
-  std::cerr << "t  == " << pp(t) << std::endl;
-  std::cerr << "t1 == " << pp(t1) << std::endl;
-  std::cerr << "t2 == " << pp(t2) << std::endl;
+  std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
+  std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
+  std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t1 == t2);
 }
 
@@ -200,10 +200,10 @@ void test_data_expression_replace()
 
   data_expression u = data_expr::plus(data_expr::real(4), data_expr::real(1));
   data_expression v = data_expr::plus(y, data_expr::real(1));
-  std::cerr << "u = " << pp(u) << std::endl;
-  std::cerr << "v = " << pp(v) << std::endl;
+  std::cerr << "u = " << mcrl2::core::pp(u) << std::endl;
+  std::cerr << "v = " << mcrl2::core::pp(v) << std::endl;
   data_expression v_ = data_expression_map_replace(v, replacements);
-  std::cerr << "v_ = " << pp(v_) << std::endl;
+  std::cerr << "v_ = " << mcrl2::core::pp(v_) << std::endl;
   BOOST_CHECK(v_ != u); 
 }
 

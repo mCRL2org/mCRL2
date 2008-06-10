@@ -13,7 +13,7 @@
 
 #include <cstddef>
 #include <string>
-using namespace std;
+#include <vector>
 #include <wx/wx.h>
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
@@ -42,10 +42,10 @@ public:
     virtual ~Frame();
 
     // -- set functions ---------------------------------------------
-    void setTitleText( const string &msg );
-    void setStatusText( const string &msg );
-    void setOutputText( const string &msg );
-    void appOutputText( const string &msg );
+    void setTitleText( const std::string &msg );
+    void setStatusText( const std::string &msg );
+    void setOutputText( const std::string &msg );
+    void appOutputText( const std::string &msg );
     void enableEditMode( const bool &enable);
     
     void setFileOptionsActive();
@@ -57,28 +57,28 @@ public:
 	void setDOFOpacitySelected();
 
     // -- display functions -----------------------------------------
-    void handleNote( const int &shapeId, const string &msg );
+    void handleNote( const int &shapeId, const std::string &msg );
     void handleTextSize( const int &shapeId, const int &textSize );
     void displNumNodes( const int &val );
     void displNumEdges( const int &val );
     void displAttrInfo( 
-        const vector< int > &indices,
-        const vector< string > &names,
-        const vector< string > &types,
-        const vector< int > &cards,
-        const vector< string > &range );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names,
+        const std::vector< std::string > &types,
+        const std::vector< int > &cards,
+        const std::vector< std::string > &range );
     void displAttrInfo(
         const int &selectIdx,
-        const vector< int > &indices,
-        const vector< string > &names,
-        const vector< string > &types,
-        const vector< int > &cards,
-        const vector< string > &range );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names,
+        const std::vector< std::string > &types,
+        const std::vector< int > &cards,
+        const std::vector< std::string > &range );
     void displDomainInfo( 
-        const vector< int > &indices,
-        const vector< string > &values,
-        const vector< int > &number,
-        const vector< double > &perc );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &values,
+        const std::vector< int > &number,
+        const std::vector< double > &perc );
     void clearDomainInfo();
     
     void displShapeMenu(
@@ -101,19 +101,19 @@ public:
         const bool &sentSetToExnr );
     
     void displDOFInfo(
-        const vector< int > &degsOfFrdmIndcs,
-        const vector< string > &degsOfFrdm,
-        const vector< string > &attrNames,
+        const std::vector< int > &degsOfFrdmIndcs,
+        const std::vector< std::string > &degsOfFrdm,
+        const std::vector< std::string > &attrNames,
         const int &selIdx );
     void clearDOFInfo();
 
     void displClustMenu();
     void displAttrInfoClust(
-        const vector< int > &indices,
-        const vector< string > &names );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names );
 
     void displAttrInfoPart( 
-        string attrName,
+        std::string attrName,
         int minParts,
         int maxParts,
         int curParts );
@@ -130,7 +130,7 @@ public:
         const int &tgtId,
         const int &tgtX,
         const int &tgtY,
-        const vector< int > &data );
+        const std::vector< int > &data );
 
     void closePopupFrames();
     void handleCloseFrame( PopupFrame* f );
@@ -151,7 +151,7 @@ public:
     void clearOuput();
 
     // -- overloaded operators --------------------------------------
-    void operator<<( const string &msg );
+    void operator<<( const std::string &msg );
 
 private:
     // -- GUI initialization ----------------------------------------
@@ -246,7 +246,7 @@ private:
     
     // -- note -----------------------------------------------------
     int			  	  currentShapeId;
-    string			  currentShapeNote;
+    std::string			  currentShapeNote;
     int				  currentTextSize;
 
     // -- left panel ------------------------------------------------

@@ -82,11 +82,11 @@ void test_gauss_elimination()
   specification spec    = mcrl22lps(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA, spec);
 
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  typedef mcrl2::data::data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<mcrl2::data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
     
-  data::rewriter datar(spec.data());
+  mcrl2::data::rewriter datar(spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);    

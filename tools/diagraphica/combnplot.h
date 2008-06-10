@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
+#include <string>
 #include "diagram.h"
 #include "graph.h"
 #include "utils.h"
@@ -33,9 +33,9 @@ public:
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const vector< int > &attrIndcs,
-        vector< vector< int > > &combs,
-        vector< int > &number );
+        const std::vector< int > &attrIndcs,
+        std::vector< std::vector< int > > &combs,
+        std::vector< int > &number );
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
@@ -93,22 +93,22 @@ protected:
     };
     
     // data
-    vector< string >        attributeLabels;
-    vector< int >           attributeIndcs;
+    std::vector< std::string >        attributeLabels;
+    std::vector< int >           attributeIndcs;
     int                     maxAttrCard;
-    vector< vector< int > > combinations;
-    vector< int >           numberPerComb;
+    std::vector< std::vector< int > > combinations;
+    std::vector< int >           numberPerComb;
     int                     maxNumberPerComb;
 
     // bar chart
     int    minHgtHintPixBC;     // bar height cannot be less
     int    maxWthHintPixBC;     // bar width cannot be more
     double widthBC;             // actual width calculated & used for every bar
-    vector< Position2D > posBC; // top, center
+    std::vector< Position2D > posBC; // top, center
 
     // combination plot
-    vector< vector< Position2D > > posLftTop;
-    vector< vector< Position2D > > posRgtBot;
+    std::vector< std::vector< Position2D > > posLftTop;
+    std::vector< std::vector< Position2D > > posRgtBot;
 
     bool   mouseInside;
     size_t    mouseCombnIdx;
@@ -118,8 +118,8 @@ protected:
     double        scaleDgrm;       // scale factor for diagram
     Position2D    posDgrm;         // positions of diagram
     bool          showDgrm;        // show or hide diagram
-    vector< double > attrValIdcsDgrm; // value idx of attribute associated with diagram
-    string        msgDgrm;         // message to show with diagram
+    std::vector< double > attrValIdcsDgrm; // value idx of attribute associated with diagram
+    std::string        msgDgrm;         // message to show with diagram
 };
 
 #endif

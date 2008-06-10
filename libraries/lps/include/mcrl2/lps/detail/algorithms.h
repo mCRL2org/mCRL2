@@ -83,7 +83,7 @@ namespace detail {
   }
 
   inline
-  ATermAppl parse_state_formula(istream& from)
+  ATermAppl parse_state_formula(std::istream& from)
   {
     ATermAppl result = core::parse_state_frm(from);
     if (result == NULL)

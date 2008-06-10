@@ -21,6 +21,7 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
+using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
@@ -49,12 +50,12 @@ void print(atermpp::set<pbes_expression> q)
 
 void test_accessors()
 {
-  using namespace pbes_system::accessors;
+  using namespace mcrl2::pbes_system::accessors;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
   pbes_expression x = expressions[0];
   pbes_expression y = expressions[1];
-  data_variable d(core::identifier_string("d"), sort_expr::nat());
+  data_variable d(identifier_string("d"), sort_expr::nat());
   data_variable_list v = make_list(d);
   pbes_expression z = d; 
   propositional_variable_instantiation X(identifier_string("X"), make_list(d));
@@ -66,7 +67,7 @@ void test_accessors()
 
   {
     using namespace pbes_expr;
-    using namespace pbes_system::accessors;
+    using namespace mcrl2::pbes_system::accessors;
 
     pbes_expression a, b, c;
     data_variable_list w;

@@ -24,8 +24,6 @@
 #define POS_EDGE_LBL_X -10.0
 #define POS_EDGE_LBL_Y -15.0
 
-using namespace std;
-
 class edge
 {
 public:
@@ -41,7 +39,7 @@ public:
   Node* get_n2();
 
   // Returns the transition label
-  string get_lbl();
+  std::string get_lbl();
   void set_label_text(wxString new_text);
 
   // Returns the x and y positions of the nodes and the spline control

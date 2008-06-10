@@ -19,7 +19,6 @@
 #include <map>
 #include <set>
 #include <vector>
-using namespace std;
 
 const double PI = 3.14159265;
 const double E  = 2.71828183;
@@ -27,11 +26,11 @@ const double E  = 2.71828183;
 class Utils
 {
 public:
-    // -- string conversion functions -------------------------------
-    static string dblToStr( const double &d );
-    static string intToStr( const int &i );
-    static double strToDbl( const string &s );
-    static int strToInt( const string &s );
+    // -- std::string conversion functions -------------------------------
+    static std::string dblToStr( const double &d );
+    static std::string intToStr( const int &i );
+    static double strToDbl( const std::string &s );
+    static int strToInt( const std::string &s );
     
     // -- trig functions --------------------------------------------
     static double radToDegr( const double &r );
@@ -73,32 +72,32 @@ public:
         const double &value );
 
     // -- statistics functions --------------------------------------
-    static double mean( const vector< double > vals );
-    static double variance( const vector< double > vals );
-    static double stdDev( const vector< double > vals );
+    static double mean( const std::vector< double > vals );
+    static double variance( const std::vector< double > vals );
+    static double stdDev( const std::vector< double > vals );
 
     // -- classification (binning ) ---------------------------------
     static void classEqualIntervals(
         const size_t &numClasses,
-        const vector< double > &values,
-        vector< string > &legendClasses,
-        map< double, int > &valuesToClasses );
+        const std::vector< double > &values,
+        std::vector< std::string > &legendClasses,
+        std::map< double, int > &valuesToClasses );
     static void classifyQuantiles(
         const size_t &numClasses,
-        set< double > &values,
-        vector< string > &legendClasses,
-        map< double, int > &valuesToClasses );
+        std::set< double > &values,
+        std::vector< std::string > &legendClasses,
+        std::map< double, int > &valuesToClasses );
     static void classifyMeanStandardDeviation(
         const size_t &numClasses,
-        const vector< double > &values,
-        vector< string > &legendClasses,
-        map< double, int > &valuesToClasses );
+        const std::vector< double > &values,
+        std::vector< std::string > &legendClasses,
+        std::map< double, int > &valuesToClasses );
     /*
     static void classifyOptimal(
         const int &numClasses,
-        const vector< double > &values,
-        vector< string > &legendClasses,
-        map< double, int > &valuesToClasses );
+        const std::vector< double > &values,
+        std::vector< std::string > &legendClasses,
+        std::map< double, int > &valuesToClasses );
     */
 };
 

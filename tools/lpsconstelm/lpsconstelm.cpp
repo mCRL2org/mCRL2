@@ -40,6 +40,7 @@
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 

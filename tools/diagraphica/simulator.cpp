@@ -11,6 +11,7 @@
 
 #include "simulator.h"
 
+using namespace std;
 
 // -- static variables ----------------------------------------------
 

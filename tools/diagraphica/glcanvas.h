@@ -21,6 +21,7 @@
 #endif
 #include <cstddef>
 #include <cmath>
+#include <string>
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/tooltip.h>
@@ -75,7 +76,7 @@ public:
     void clear();
     void display();
 
-    void showToolTip( const string &msg );
+    void showToolTip( const std::string &msg );
     void clearToolTip();
 
     void onEvtPaint( wxPaintEvent &event );

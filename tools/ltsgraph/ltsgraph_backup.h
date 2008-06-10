@@ -19,14 +19,12 @@
 #include <wx/gdicmn.h>
 
 
-using namespace std;
-
 class LtsgraphBackup
 {
 public:
 	LtsgraphBackup(wxSize _sz);
 
-	void SetLayout(vector<Node*> _BackupVectNode, vector<edge*> _BackupVectEdge);
+	void SetLayout(std::vector<Node*> _BackupVectNode, std::vector<edge*> _BackupVectEdge);
 	void SetInformation(wxString _InitialState, wxString _NumStates, wxString _NumTransitions, wxString _NumLabels);
 	void SetAlgoSettings(double _EdgeStiffness, double _NodeStrength, double _NaturalLength);
 	void SetOtherSettings(int _StateRadius = 10, bool _StateLabel = true, bool _TransitionLabel = true);
@@ -35,8 +33,8 @@ public:
 
 	bool Restore(wxString filename = wxT("backup.ltsgraph"));
 
-	vector<Node*> GetVectNode();
-	vector<edge*> GetVectEdge();
+	std::vector<Node*> GetVectNode();
+	std::vector<edge*> GetVectEdge();
 		
 	wxString GetInitialState();
 	wxString GetNumStates();
@@ -55,8 +53,8 @@ private:
 
 	wxSize sz;
 
-	vector<Node*> BackupVectNode;
-	vector<edge*> BackupVectEdge;
+	std::vector<Node*> BackupVectNode;
+	std::vector<edge*> BackupVectEdge;
 
 	wxString InitialState;
 	wxString NumStates;

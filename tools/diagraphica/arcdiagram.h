@@ -20,7 +20,6 @@
 #include <cmath>
 #include <map>
 #include <vector>
-using namespace std;
 #include <wx/timer.h>
 #include "diagram.h"
 #include "graph.h"
@@ -53,7 +52,7 @@ public:
     static ColorRGB getColorBundles();
     static double getTrspBundles();
 
-    void getAttrsTree( vector< int > &idcs );
+    void getAttrsTree( std::vector< int > &idcs );
 
     // -- set functions ---------------------------------------------
     static void setColorClr( const ColorRGB &col );
@@ -70,7 +69,7 @@ public:
     static void setColorBundles( const ColorRGB &col );
     static void setTrspBundles( const double &trsp );
 
-    void setAttrsTree( const vector< int > idcs );
+    void setAttrsTree( const std::vector< int > idcs );
 
     void setDiagram( Diagram *dgrm );
     void hideAllDiagrams();
@@ -155,7 +154,7 @@ protected:
     // -- utility event handlers ------------------------------------
     void onTimer( wxTimerEvent &e );
 
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     
     void handleHoverCluster( 
         const int &i,
@@ -202,34 +201,34 @@ protected:
     // -- data members ----------------------------------------------
     
     // vis settings bundles
-    vector< Position2D > posBundles;
-    vector< double >     radiusBundles;
-    vector< double >     widthBundles;
-    vector< int >        orientBundles;
-    vector< bool >       markBundles;
+    std::vector< Position2D > posBundles;
+    std::vector< double >     radiusBundles;
+    std::vector< double >     widthBundles;
+    std::vector< int >        orientBundles;
+    std::vector< bool >       markBundles;
     
     // vis settings leaves
-    vector< Position2D > posLeaves;
+    std::vector< Position2D > posLeaves;
     double               radLeaves;
     int                  idxInitStLeaves;
     
     // vis settings hierarchy
-    vector< Attribute* >           attrsTree;
-    vector< vector< Position2D > > posTreeTopLft;
-    vector< vector< Position2D > > posTreeBotRgt;
-    vector< vector< Cluster* > >   mapPosToClust;
+    std::vector< Attribute* >           attrsTree;
+    std::vector< std::vector< Position2D > > posTreeTopLft;
+    std::vector< std::vector< Position2D > > posTreeBotRgt;
+    std::vector< std::vector< Cluster* > >   mapPosToClust;
     
     // vis settings bar tree
-    vector< vector< Position2D > > posBarTreeTopLft;
-    vector< vector< Position2D > > posBarTreeBotRgt;
+    std::vector< std::vector< Position2D > > posBarTreeTopLft;
+    std::vector< std::vector< Position2D > > posBarTreeBotRgt;
     
     // diagrams
     Diagram*                       diagram;         // association, user-defined diagram   
-    vector< bool >                 showDgrm;        // show/hide diagram for every leaf node
-    vector< vector< Attribute* > > attrsDgrm;       // association, attributes linked to shown diagrams
-    vector< vector< Cluster* > >   framesDgrm;      // composition, clusters of identical states for shown diagrams
-    vector< int >                  frameIdxDgrm;    // current index into framesDgrm
-    vector< Position2D >           posDgrm;         // positions of diagrams
+    std::vector< bool >                 showDgrm;        // show/hide diagram for every leaf node
+    std::vector< std::vector< Attribute* > > attrsDgrm;       // association, attributes linked to shown diagrams
+    std::vector< std::vector< Cluster* > >   framesDgrm;      // composition, clusters of identical states for shown diagrams
+    std::vector< int >                  frameIdxDgrm;    // current index into framesDgrm
+    std::vector< Position2D >           posDgrm;         // positions of diagrams
     int                            dragIdxDgrm;     // diagram currently being dragged
     size_t                         animIdxDgrm;     // diagram currently being animated
     size_t                         currIdxDgrm;
@@ -238,7 +237,7 @@ protected:
     int prevFrameIdxClust;
     int currFrameIdxClust;
     int nextFrameIdxClust;
-    map< int, vector< ColorRGB > > markLeaves;
+    std::map< int, std::vector< ColorRGB > > markLeaves;
     
     // animation
     wxTimer* timerAnim;

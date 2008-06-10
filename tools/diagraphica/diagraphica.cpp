@@ -24,11 +24,13 @@
   #include <crtdbg.h>
 #endif
 
-std::string get_about_message() {
-  static const std::string version_information =
+using namespace std;
+
+string get_about_message() {
+  static const string version_information =
         mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
                                                         version_information() +
-    std::string("\n"
+    string("\n"
      "For more information please see:\n"
      "www.win.tue.nl/~apretori/diagraphica\n"
      "\n"
@@ -47,7 +49,7 @@ std::string get_about_message() {
   return version_information;
 }
 
-std::string fsm_file_argument;
+string fsm_file_argument;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY

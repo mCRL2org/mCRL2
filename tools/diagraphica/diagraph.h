@@ -21,6 +21,9 @@
 #define DIAGRAPH_H
 
 #include <cstddef>
+#include <string>
+#include <vector>
+#include <set>
 #include <wx/wx.h>
 #include <wx/busyinfo.h>
 #include <wx/cmdline.h>
@@ -50,24 +53,24 @@ public:
 	virtual int OnExit();
 	
 	// -- load & save data ------------------------------------------
-	void openFile( const string &path );
-	void saveFile( const string &path );
-	void handleLoadAttrConfig( const string &path );
-	void handleSaveAttrConfig( const string &path );
-	void handleLoadDiagram( const string &path );
-	void handleSaveDiagram( const string &path );
+	void openFile( const std::string &path );
+	void saveFile( const std::string &path );
+	void handleLoadAttrConfig( const std::string &path );
+	void handleSaveAttrConfig( const std::string &path );
+	void handleLoadDiagram( const std::string &path );
+	void handleSaveDiagram( const std::string &path );
 	
 	// -- general input & output ------------------------------------
 	void initProgress(
-	const string &title,
-	const string &msg,
+	const std::string &title,
+	const std::string &msg,
 	const int &max );
 	void updateProgress( const int &val );
 	void closeProgress();
 	
-	void setOutputText( const string &msg );
+	void setOutputText( const std::string &msg );
 	void setOutputText( const int &msg );
-	void appOutputText( const string &msg );
+	void appOutputText( const std::string &msg );
 	void appOutputText( const int &msg );
 	
 	void getColor( ColorRGB &col );
@@ -78,15 +81,15 @@ public:
 	void handleMoveAttr( 
 	const int &idxFr,
 	const int &idxTo );
-	void handleAttributeDuplicate( const vector< int > &indcs );
+	void handleAttributeDuplicate( const std::vector< int > &indcs );
 	/*
-	void handleAttributeDelete( const vector< int > &indcs );
+	void handleAttributeDelete( const std::vector< int > &indcs );
 	*/
 	void handleAttributeDelete( const int &idx );
 	void handleAttributeRename( 
 	const int &idx,
-	const string &name );
-	void handleAttributeCluster( const vector< int > &indcs );
+	const std::string &name );
+	void handleAttributeCluster( const std::vector< int > &indcs );
 	
 	// -*- //
 	void handleAttrPartition( const int &attrIdx );
@@ -98,10 +101,10 @@ public:
 	
 	void getAttrValues(
 	const int &attrIdx,
-	vector< double > &vals );
+	std::vector< double > &vals );
 	void getAttrValues(
 	const int &attrIdx,
-	set< double > &vals );
+	std::set< double > &vals );
 	// -*- //
 	
 	void handleMoveDomVal(
@@ -110,13 +113,13 @@ public:
 	const int &idxTo );
 	void handleDomainGroup(
 	const int &attrIdx,
-	const vector< int > domIndcs,
-	const string &newValue );
+	const std::vector< int > domIndcs,
+	const std::string &newValue );
 	void handleDomainUngroup( const int &attrIdx );
 	
 	void getAttributeNames( 
-	const vector< int > &indcs,
-	vector< wxString > &names );
+	const std::vector< int > &indcs,
+	std::vector< wxString > &names );
 	int getAttributeType( const int &idx );
 	int getAttrSizeCurDomain( const int &idx );
 	
@@ -125,7 +128,7 @@ public:
 	void handleAttributePlot( 
 	const int &idx1,
 	const int &idx2 );
-	void handleAttributePlot( const vector< int > &indcs );
+	void handleAttributePlot( const std::vector< int > &indcs );
 	void handlePlotFrameDestroy();
 	
 	void handleEditClust( Cluster* c );
@@ -134,7 +137,7 @@ public:
 	void handleClustPlotFrameDisplay( 
 	const int &idx1,
 	const int &idx2 );
-	void handleClustPlotFrameDisplay( const vector< int > &indcs );
+	void handleClustPlotFrameDisplay( const std::vector< int > &indcs );
 	void setClustMode( const int &m );
 	int getClustMode();
 	
@@ -150,7 +153,7 @@ public:
 	// -- diagram editor --------------------------------------------
 	
 	void* getGraph();
-	void handleNote( const int &shapeId, const string &msg );
+	void handleNote( const int &shapeId, const std::string &msg );
 	void handleEditModeSelect();
 	void handleEditModeNote();
 	void handleEditModeDOF( Colleague* c );
@@ -175,9 +178,9 @@ public:
 	const bool &sendBackward,
 	const bool &editDOF,
 	const int  &checkedItem );
-	void handleShowVariable( const string &variable, const int &variableId );
-	void handleShowNote( const string &variable, const int &shapeId );
-	void handleAddText( string &variable, int &shapeId );
+	void handleShowVariable( const std::string &variable, const int &variableId );
+	void handleShowNote( const std::string &variable, const int &shapeId );
+	void handleAddText( std::string &variable, int &shapeId );
 	void handleTextSize( int &textSize, int &shapeId );
 	void handleSetTextSize( int &textSize, int &shapeId );
 	void handleCutShape();
@@ -193,9 +196,9 @@ public:
 	void handleCheckedVariable( const int &idDOF, const int &variableId );
 	
 	void handleEditDOF( 
-	const vector< int > &degsOfFrdmIds,
-	const vector< string > &degsOfFrdm,
-	const vector< int > &attrIndcs,
+	const std::vector< int > &degsOfFrdmIds,
+	const std::vector< std::string > &degsOfFrdm,
+	const std::vector< int > &attrIndcs,
 	const int &selIdx );
 	void handleDOFSel( const int &DOFIdx );
 	
@@ -219,8 +222,8 @@ public:
 	void handleDOFColClear(
 	const int &idx );
 	void handleDOFColSetValuesEdt(
-	const vector< double > &hue,
-	const vector< double > &y );
+	const std::vector< double > &hue,
+	const std::vector< double > &y );
 	
 	void handleDOFOpaActivate();
 	void handleDOFOpaDeactivate();
@@ -234,8 +237,8 @@ public:
 	void handleDOFOpaClear(
 	const int &idx );
 	void handleDOFOpaSetValuesEdt(
-	const vector< double > &opa,
-	const vector< double > &y );
+	const std::vector< double > &opa,
+	const std::vector< double > &y );
 	
 	void handleLinkDOFAttr(
 	const int DOFIdx,
@@ -247,22 +250,22 @@ public:
 	// -- simulator, time series & examiner -------------------------
 	void initSimulator(
 	Cluster* currFrame,
-	const vector< Attribute* > &attrs );
+	const std::vector< Attribute* > &attrs );
 	
-	void initTimeSeries( const vector< int > attrIdcs );
+	void initTimeSeries( const std::vector< int > attrIdcs );
 	void markTimeSeries( 
 	Colleague* sender,
 	Cluster* currFrame );
 	void markTimeSeries( 
 	Colleague* sender,
-	const vector< Cluster* > frames );
+	const std::vector< Cluster* > frames );
 	
 	void addToExaminer(
 	Cluster* currFrame,
-	const vector< Attribute* > &attrs );
+	const std::vector< Attribute* > &attrs );
 	void addToExaminer(
-	const vector< Cluster* > frames,
-	const vector< Attribute* > &attrs );
+	const std::vector< Cluster* > frames,
+	const std::vector< Attribute* > &attrs );
 	
 	void handleShowClusterMenu();
 	void handleSendDgrm(
@@ -290,7 +293,7 @@ public:
 	
 	void handleShowFrame(
 	Cluster* frame,
-	const vector< Attribute* > &attrs,
+	const std::vector< Attribute* > &attrs,
 	ColorRGB &col );
 	void handleUnshowFrame();
 	
@@ -348,7 +351,7 @@ public:
 	const int &tgtWindowId,
 	const int &tgtX,
 	const int &tgtY,
-	const vector< int > &data );
+	const std::vector< int > &data );
 	
 	void handleMouseLftDownEvent( 
 	GLCanvas* c, 
@@ -398,7 +401,7 @@ public:
 	const int &specialKey );
 	
 	// -- overloaded operators --------------------------------------
-	void operator<<( const string &msg );
+	void operator<<( const std::string &msg );
 	void operator<<( const int &msg );
 
 protected:

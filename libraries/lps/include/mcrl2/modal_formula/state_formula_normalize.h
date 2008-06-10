@@ -30,11 +30,9 @@ struct state_variable_negation
   
   aterm_appl operator()(aterm_appl t) const
   {
-    using namespace modal::state_frm;
-
-    if (is_var(t) && (name(t) == X))
+    if (state_frm::is_var(t) && (state_frm::name(t) == X))
     {
-      return not_(t);
+      return state_frm::not_(t);
     }
     else
     {
@@ -49,7 +47,7 @@ struct state_variable_negation
 inline
 state_formula normalize(state_formula f)
 {
-  using namespace modal::state_frm;
+  using namespace state_frm;
 
   if (is_not(f))
   {

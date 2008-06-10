@@ -14,7 +14,7 @@
 
 #include <boost/format.hpp>
 
-ExportToLatex::ExportToLatex(wxString _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height) : 
+ExportToLatex::ExportToLatex(wxString _filename, std::vector<nodeLatex> _node, std::vector<edgeLatex> _edge, int _height) : 
 		filename(_filename) , node(_node), edge(_edge), height(_height)
 {}
 
@@ -95,26 +95,26 @@ bool ExportToLatex::Generate() {
 
 }
 
-string ExportToLatex::EscSpecChar(string str) {
+std::string ExportToLatex::EscSpecChar(std::string str) {
 
 	str = str_replace("_","\\_",str);
 	return str;
 }
 
-string ExportToLatex::str_replace(string to_replace, string replace_by, string replace_in) {
+std::string ExportToLatex::str_replace(std::string to_replace, std::string replace_by, std::string replace_in) {
 	int i_pos;
-	string text_left;
-	string text_right;
-	string str_result="";
+	std::string text_left;
+	std::string text_right;
+	std::string str_result="";
 
 	i_pos = replace_in.find(to_replace);
-	if(i_pos == -1 || i_pos == (int)string::npos)
+	if(i_pos == -1 || i_pos == (int)std::string::npos)
 	{
 		str_result = replace_in;
 	}
 	else
 	{
-		while(i_pos != -1 && i_pos != (int)string::npos)
+		while(i_pos != -1 && i_pos != (int)std::string::npos)
 		{
 			text_left = replace_in.substr(0, i_pos);
 			text_right = replace_in.substr((i_pos + to_replace.size()), (replace_in.size() - (i_pos + to_replace.size())));

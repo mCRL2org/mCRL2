@@ -15,17 +15,15 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 typedef struct {
 	unsigned int num;
 	double x, y;
-	string lbl;
+	std::string lbl;
 } nodeLatex;
 
 typedef struct {
 	unsigned int numNode1, numNode2;
-	string lbl;
+	std::string lbl;
 } edgeLatex ;
 
 
@@ -33,20 +31,20 @@ typedef struct {
 class ExportToLatex
 {
 public:
-	ExportToLatex(wxString _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height);
+	ExportToLatex(wxString _filename, std::vector<nodeLatex> _node, std::vector<edgeLatex> _edge, int _height);
 	bool Generate();
 	
 
 private:
 
-	string EscSpecChar(string);//To escape special characters
-	string str_replace(string to_replace, string replace_by, string replace_in);
+	std::string EscSpecChar(std::string);//To escape special characters
+	std::string str_replace(std::string to_replace, std::string replace_by, std::string replace_in);
 
 	wxString filename;
-	string LatexCode;
+	std::string LatexCode;
 
-	vector<nodeLatex> node;
-	vector<edgeLatex> edge;
+	std::vector<nodeLatex> node;
+	std::vector<edgeLatex> edge;
 
 	int height; //height of the drawing area
 

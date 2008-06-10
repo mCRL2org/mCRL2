@@ -13,7 +13,6 @@
 
 #include <cstddef>
 #include <string>
-using namespace std;
 
 class Value
 {
@@ -21,22 +20,22 @@ public:
 	// -- constructors and destructor -------------------------------
     Value( 
         const int &idx,
-        const string &val );
+        const std::string &val );
     Value( const Value &val );
 	virtual ~Value();
 	
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
-    void setValue( const string &val );
+    void setValue( const std::string &val );
     
     // -- get functions ---------------------------------------------
     int getIndex();
-    string getValue();
+    std::string getValue();
 
 protected:
     // -- data members ----------------------------------------------
 	int    index; // index in attribute
-    string value; // actual value
+    std::string value; // actual value
 };
 
 #endif

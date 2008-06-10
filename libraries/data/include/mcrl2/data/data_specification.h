@@ -30,7 +30,6 @@ namespace data {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-using namespace core::detail;
 
 /// \cond INTERNAL_DOCS
 

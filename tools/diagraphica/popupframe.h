@@ -11,9 +11,6 @@
 #ifndef POPUPFRAME_H
 #define POPUPFRAME_H
 
-#include <vector>
-using namespace std;
-
 #include <wx/wx.h>
 #include "colleague.h"
 #include "mediator.h"

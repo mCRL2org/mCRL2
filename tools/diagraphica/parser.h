@@ -17,7 +17,6 @@
 #include <map>
 #include <string>
 #include <vector>
-using namespace std;
 #include "colleague.h"
 #include "diagram.h"
 #include "dof.h"
@@ -35,35 +34,35 @@ public:
     virtual ~Parser();
 
     // -- parsing functions -----------------------------------------
-    int getFileSize( const string &path );
+    int getFileSize( const std::string &path );
     
     // fsm files
     void parseFSMFile( 
-        const string &path,
+        const std::string &path,
         Graph* graph );
     void writeFSMFile(
-        const string &path,
+        const std::string &path,
         Graph* graph );
 
     // dgc files
     void parseAttrConfig(
-        const string &path,
+        const std::string &path,
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains );
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains );
     void writeAttrConfig(
-        const string &path,
+        const std::string &path,
         Graph* graph );
 
     // dgd files
     void parseDiagram(
-        const string &path,
+        const std::string &path,
         Graph* graph,
         Diagram* dgrmOld,
         Diagram* dgrmNew );
     void writeDiagram(
-        const string &path,
+        const std::string &path,
         Graph* graph,
         Diagram* diagram );
             
@@ -71,28 +70,28 @@ private:
     // -- private utility functions ---------------------------------
     // fsm files
     void parseStateVarDescr( 
-        const string &nextLine,
+        const std::string &nextLine,
         Graph* graph );
     void parseStates( 
-        const string &nextLine,
+        const std::string &nextLine,
         Graph* graph );
     void parseTransitions( 
         const int &lineNumber,
-        const string &nextLine,
+        const std::string &nextLine,
         Graph* graph );
 
     // dgc files
     void parseAttrConfig(
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains,
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
         TiXmlElement* curNode );
     void parseAttr(
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains,
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
         TiXmlElement* curNode );
 
     // dgd files
@@ -108,7 +107,7 @@ private:
         TiXmlElement* curNode );
 
     // -- data members ----------------------------------------------
-    string delims;
+    std::string delims;
 };
 
 #endif

@@ -11,9 +11,11 @@
 
 #include "node.h"
 
+#include <string>
 
 // -- constructors and destructors ----------------------------------
 
+using namespace std;
 
 // -------------------------
 Node::Node( const int &idx )

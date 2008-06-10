@@ -14,6 +14,7 @@
 
 // -- constructors and destructor -----------------------------------
 
+using namespace std;
 
 // --------------------
 Edge::Edge( 

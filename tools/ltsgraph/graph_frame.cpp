@@ -10,6 +10,7 @@
 
 #include "graph_frame.h"
 #include "workarounds.h"
+#include <mcrl2/lts/liblts.h>
 
 #include <map>
 
@@ -60,8 +61,8 @@ END_EVENT_TABLE()
 
 static const int ctrl_radius = 3;
 
-static vector<Node*> vectNode;
-static vector<edge*> vectEdge;
+static std::vector<Node*> vectNode;
+static std::vector<edge*> vectEdge;
 
 GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
   : wxFrame(NULL, -1, title, pos, size, style) {
@@ -429,10 +430,10 @@ void GraphFrame::Init(wxString LTSfile) {
   title.append(LTSfile);
   SetTitle(title);
   
-  string st_LTSfile = string(LTSfile.fn_str());
+  std::string st_LTSfile = std::string(LTSfile.fn_str());
   
   //Find extension
-  string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
+  std::string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
   
   //initialize file name
   inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
@@ -440,7 +441,7 @@ void GraphFrame::Init(wxString LTSfile) {
   
   if (ext != "ltsgraph") {
     //read lts file
-    lts mylts;
+    mcrl2::lts::lts mylts;
     
     if (mylts.read_from(st_LTSfile)) {
     	
@@ -456,7 +457,7 @@ void GraphFrame::Init(wxString LTSfile) {
 
       std::map< size_t, Node* > number_to_node;
 
-      for (state_iterator si = mylts.get_states(); si.more(); ++si) {
+      for (mcrl2::lts::state_iterator si = mylts.get_states(); si.more(); ++si) {
         // The node used to contain the state number used by the input, this is changed to the index to fix a serious bug
         Node* new_node = new Node(vectNode.size(), static_cast< double > (rand() % xmax + node_radius),
                                                    static_cast< double > (rand() % ymax + node_radius), wxString::Format(wxT("%d"), *si), (mylts.initial_state() == *si));
@@ -470,7 +471,7 @@ void GraphFrame::Init(wxString LTSfile) {
       }   
 
       //initialize vectEdge
-      for (transition_iterator ti = mylts.get_transitions(); ti.more(); ++ti) {
+      for (mcrl2::lts::transition_iterator ti = mylts.get_transitions(); ti.more(); ++ti) {
         // todo error detection ...
         vectEdge.push_back(new edge(number_to_node[ti.from()], number_to_node[ti.to()], wxString(mylts.label_value_str(ti.label()).c_str(), wxConvLocal)));
       }
@@ -696,7 +697,7 @@ void GraphFrame::on_about(wxCommandEvent& /* event */) {
 
  
 void GraphFrame::on_export(wxCommandEvent& /* event */) {
-  string str(inputFileName);
+  std::string str(inputFileName);
   wxString wx_str(str.c_str(), wxConvLocal);
   
   wxString caption = wxT("Export layout as");
@@ -740,8 +741,8 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
 
 void GraphFrame::export_to_latex( wxString export_file_name) {
 
-	vector<nodeLatex> vectNodeLatex;
-	vector<edgeLatex> vectEdgeLatex;
+	std::vector<nodeLatex> vectNodeLatex;
+	std::vector<edgeLatex> vectEdgeLatex;
 
 	nodeLatex StructNodeLatex;
 	edgeLatex StructEdgeLatex;
@@ -794,8 +795,8 @@ void GraphFrame::export_to_latex( wxString export_file_name) {
 }
 
 void GraphFrame::export_svg(wxString export_file_name) {
-  vector<node_svg> vect_node_svg;
-  vector<edge_svg> vect_edge_svg;
+  std::vector<node_svg> vect_node_svg;
+  std::vector<edge_svg> vect_edge_svg;
 
   node_svg struct_node_svg;
   edge_svg struct_edge_svg;

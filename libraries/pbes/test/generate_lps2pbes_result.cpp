@@ -38,10 +38,10 @@ int main(int argc, char** argv)
   }
 
   std::string specification_file = argv[1];
-  std::string spec = core::read_text(specification_file, true);
+  std::string spec = mcrl2::core::read_text(specification_file, true);
 
   std::string formula_file = argv[2];
-  std::string formula = core::read_text(formula_file, true);
+  std::string formula = mcrl2::core::read_text(formula_file, true);
 
   bool timed = (std::string(argv[3]) == "timed");
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     }
     else
     {
-      cout << formula_file << "[untimed] ";
+      std::cout << formula_file << "[untimed] ";
       pbes<> p = lps2pbes(spec, formula, false);
       pbes_equation_list eqn(p.equations().begin(), p.equations().end());
       // std::cout << pp(eqn) << std::endl;

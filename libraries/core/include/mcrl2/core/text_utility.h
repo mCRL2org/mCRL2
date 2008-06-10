@@ -27,17 +27,15 @@ namespace core {
   /// \brief Split a string into paragraphs.
   std::vector<std::string> split_paragraphs(const std::string& text)
   {
-    using namespace boost::xpressive;
-      
     std::vector<std::string> result;
 
     // find multiple line endings
-    sregex paragraph_split = sregex::compile( "\\n\\s*\\n" );
+    boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile( "\\n\\s*\\n" );
   
     // the -1 below directs the token iterator to display the parts of
     // the string that did NOT match the regular expression.
-    sregex_token_iterator cur( text.begin(), text.end(), paragraph_split, -1 );
-    sregex_token_iterator end;
+    boost::xpressive::sregex_token_iterator cur( text.begin(), text.end(), paragraph_split, -1 );
+    boost::xpressive::sregex_token_iterator end;
 
     for( ; cur != end; ++cur )
     {
@@ -78,13 +76,11 @@ namespace core {
   inline
   std::string remove_comments(const std::string& text)
   {
-    using namespace boost::xpressive;
-
     // matches everything from '%' until end of line
-    sregex src = sregex::compile( "%[^\\n]*\\n" );
+    boost::xpressive::sregex src = boost::xpressive::sregex::compile( "%[^\\n]*\\n" );
 
     std::string dest( "\n" );
-    return regex_replace(text, src, dest);
+    return boost::xpressive::regex_replace(text, src, dest);
   }
 
 } // namespace core

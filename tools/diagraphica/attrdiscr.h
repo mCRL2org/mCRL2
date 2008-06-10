@@ -16,7 +16,6 @@
 #include <string>
 #include <map>
 #include <vector>
-using namespace std;
 #include "attribute.h"
 #include "value.h"
 
@@ -26,23 +25,23 @@ public:
     // -- constructors and destructor -------------------------------
     AttrDiscr(
         Mediator* m,
-        const string &nam,
-        const string &typ,
+        const std::string &nam,
+        const std::string &typ,
         const int &idx,
-        const vector< string > &vals );
+        const std::vector< std::string > &vals );
     AttrDiscr( const AttrDiscr &attr );
     virtual ~AttrDiscr();
 
     // -- set functions ---------------------------------------------
     void clusterValues(
-        const vector< int > &indices,
-        const string &newValue );
+        const std::vector< int > &indices,
+        const std::string &newValue );
     void moveValue(
         const int &idxFr,
         const int &idxTo );
     void configValues(
-        const vector< string > &curDomain,
-        map< int, int  > &origToCurDomain );
+        const std::vector< std::string > &curDomain,
+        std::map< int, int  > &origToCurDomain );
 
     // -- get functions ---------------------------------------------
     int getAttrType();
@@ -59,16 +58,16 @@ public:
 
 protected:
     // -- private utility functions ---------------------------------
-    void initValues( const vector< string > &vals );
+    void initValues( const std::vector< std::string > &vals );
     void resetCurValues();
     void deleteOrigValues();
     void deleteCurValues();
     void deleteCurMap();
 
     // -- data members ----------------------------------------------
-    vector< Value* >  origValues; // original domain
-    vector< Value* >  curValues;  // composition, current domain
-    vector< Value** > curMap;     // composition, map to current values
+    std::vector< Value* >  origValues; // original domain
+    std::vector< Value* >  curValues;  // composition, current domain
+    std::vector< Value** > curMap;     // composition, std::map to current values
 
 };
 

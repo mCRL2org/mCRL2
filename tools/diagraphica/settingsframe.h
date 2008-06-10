@@ -11,9 +11,6 @@
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
 
-#include <vector>
-using namespace std;
-
 #include <wx/wx.h>
 #include <wx/notebook.h>
 #include "glcanvas.h"

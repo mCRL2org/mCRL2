@@ -12,9 +12,7 @@
 #define DIAGRAM_H
 
 #include <cstddef>
-#include <string>
 #include <vector>
-using namespace std;
 #include "colleague.h"
 #include "glcanvas.h"
 #include "visutils.h"
@@ -56,20 +54,20 @@ public:
     void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs );
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs );
     void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs,
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs,
 	const double &pix );
     void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas,
         const double &opacity,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs );
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs );
 
 
 protected:
@@ -97,7 +95,7 @@ protected:
         GLCanvas* canvas );
     
     // -- data members ----------------------------------------------
-    vector< Shape* > shapes; // composition
+    std::vector< Shape* > shapes; // composition
 
     bool   showGrid;
     bool   snapGrid;

@@ -16,7 +16,6 @@
 #include <string>
 #include <map>
 #include <vector>
-using namespace std;
 #include "attribute.h"
 #include "value.h"
 
@@ -26,8 +25,8 @@ public:
     // -- constructors and destructor -------------------------------
     AttrConti(
         Mediator* m,
-        const string &nam,
-        const string &typ,
+        const std::string &nam,
+        const std::string &typ,
         const int &idx,
         const double &lwrBnd,
         const double &uprBnd );
@@ -37,8 +36,8 @@ public:
     // -- set functions ---------------------------------------------
     
     void clusterValues(
-        const vector< int > &indices,
-        const string &newValue );
+        const std::vector< int > &indices,
+        const std::string &newValue );
     void moveValue(
         const size_t &idxFr,
         const size_t &idxTo );
@@ -74,8 +73,8 @@ protected:
     void deleteCurMap();
 
     // -- data members ----------------------------------------------
-    vector< Value* >  curValues;  // composition, current domain
-    map< double, Value* > curMap; // composition, map to current values
+    std::vector< Value* >  curValues;  // composition, current domain
+    std::map< double, Value* > curMap; // composition, std::map to current values
 
     double lowerBound;
     double upperBound;

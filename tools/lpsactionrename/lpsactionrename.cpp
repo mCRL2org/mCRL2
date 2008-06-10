@@ -474,8 +474,8 @@ ATermAppl rename(
     else
     {
       rule_new_action = action();
-      if(gsIsTau(new_element)){ to_tau = true; to_delta = false;}
-      else if (gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
+      if(mcrl2::core::detail::gsIsTau(new_element)){ to_tau = true; to_delta = false;}
+      else if (mcrl2::core::detail::gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
     }
 
     // Check here that the arguments of the rule_old_action only consist

@@ -72,8 +72,8 @@ void test_result(PbesRewriter& r, pbes_expression x, pbes_expression y)
 
 void test_builder()
 {
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewrite_builder<mcrl2::data::rewriter, my_enumerator> my_pbes_rewriter;
 
   using namespace pbes_expr;
 
@@ -84,7 +84,7 @@ void test_builder()
   data_expression z;
   specification spec = mcrl22lps(SPECIFICATION);
 
-  data::rewriter datar(spec.data()); 
+  mcrl2::data::rewriter datar(spec.data()); 
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_pbes_rewriter builder1(datar, datae);    
@@ -111,16 +111,16 @@ void test_rewriter()
 {
   using namespace pbes_expr;
 
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewriter<data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<mcrl2::data::rewriter, my_enumerator> my_pbes_rewriter;
 
   specification spec = mcrl22lps(SPECIFICATION);
-  data::rewriter datar(spec.data());
+  mcrl2::data::rewriter datar(spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_pbes_rewriter pbesr(datar, datae);    
-  pbes_system::simplify_rewriter_jfg simp_rewr(spec.data());
-  pbes_system::substitute_rewriter_jfg subst_rewr(datar, spec.data());
+  mcrl2::pbes_system::simplify_rewriter_jfg simp_rewr(spec.data());
+  mcrl2::pbes_system::substitute_rewriter_jfg subst_rewr(datar, spec.data());
 
   //state_formula formula = mcf2statefrm(FORMULA, spec);
   //bool timed = false;

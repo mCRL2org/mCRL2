@@ -286,8 +286,8 @@ double edge::get_x_pos1() {
   return N1->GetX();
 }
 
-string edge::get_lbl() {
-	string st_lbl = string(lbl.fn_str());
+std::string edge::get_lbl() {
+	std::string st_lbl = std::string(lbl.fn_str());
 	return st_lbl;
 }
 

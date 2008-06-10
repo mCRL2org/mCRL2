@@ -26,8 +26,6 @@ namespace lps {
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
   {   
-    using namespace lps::detail;
-
     lin_std_initialize_global_variables();
     
     // the lineariser expects data from a stream...
@@ -38,7 +36,7 @@ namespace lps {
     result           = detail::type_check_specification(result);
     result           = detail::alpha_reduce(result);
     result           = detail::implement_data_specification(result);
-    return linearise(result, options);
+    return detail::linearise(result, options);
   }
 
 } // namespace lps

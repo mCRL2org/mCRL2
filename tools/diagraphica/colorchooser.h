@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
 #include "graph.h"
 #include "shape.h"
 #include "utils.h"
@@ -34,8 +33,8 @@ public:
     // -- set functions ---------------------------------------------
     void setActive( const bool &flag );
     void setPoints(
-        const vector< double > &hue,
-        const vector< double > &y );
+        const std::vector< double > &hue,
+        const std::vector< double > &y );
     
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
@@ -69,7 +68,7 @@ protected:
     void drawPoints( const bool &inSelectMode );
     
     // -- utility event handlers ------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void handleDrag();
    
     // -- hit detection ---------------------------------------------
@@ -80,14 +79,14 @@ protected:
     // -- data members ----------------------------------------------
     bool active;
     
-    vector< double > positionsX;
-    vector< double > positionsY;
+    std::vector< double > positionsX;
+    std::vector< double > positionsY;
     int dragIdx;
 
     // vis settings
     double hdlSize;
     /*
-    vector< Position2D > positions;
+    std::vector< Position2D > positions;
     */
 };
 

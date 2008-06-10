@@ -12,9 +12,6 @@
 #define DROPTARGET_H
 
 #include <cstddef>
-#include <string>
-#include <vector>
-using namespace std;
 #include <wx/dnd.h>
 #include <wx/listctrl.h>
 #include <wx/tokenzr.h>

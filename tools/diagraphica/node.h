@@ -13,9 +13,7 @@
 
 #include <cstddef>
 #include <map>
-#include <string>
 #include <vector>
-using namespace std;
 
 class Cluster;
 class Edge;
@@ -27,7 +25,7 @@ public:
     Node( const int &idx );
     Node( 
         const int &idx,
-        const vector< double > &tpl );
+        const std::vector< double > &tpl );
 	virtual ~Node();
 	
     // -- set functions ---------------------------------------------
@@ -37,15 +35,15 @@ public:
     void moveTupleVal( 
         const size_t &idxFr,
         const size_t &idxTo );
-    void moveTupleVals( map< int, int > &idcsFrTo );
+    void moveTupleVals( std::map< int, int > &idcsFrTo );
     void addTupleVal( 
         const int &idx,
         const double &val );
     void delTupleVal( const int &idx );
     void addInEdge( Edge* e );
-    void setInEdges( const vector< Edge* > e );
+    void setInEdges( const std::vector< Edge* > e );
     void addOutEdge( Edge* e );
-    void setOutEdges( const vector< Edge* > e );
+    void setOutEdges( const std::vector< Edge* > e );
     void setCluster( Cluster* c );
     
     // -- get functions ---------------------------------------------
@@ -66,9 +64,9 @@ public:
 protected:
     // -- data members ----------------------------------------------
     int index; // index in list of graph nodes
-    vector< double >   tuple;
-    vector< Edge* > inEdges;  // association
-	vector< Edge* > outEdges; // association
+    std::vector< double >   tuple;
+    std::vector< Edge* > inEdges;  // association
+	std::vector< Edge* > outEdges; // association
     Cluster* cluster;
 };
 

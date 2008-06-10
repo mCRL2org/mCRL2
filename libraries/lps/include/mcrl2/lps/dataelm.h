@@ -12,10 +12,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/pbes/pbes.h>
 
-using namespace mcrl2::lps;
-using namespace mcrl2::pbes_system;
-
-specification remove_unused_data(specification spec, bool keep_basis = true);
-pbes<> remove_unused_data(pbes<> spec, bool keep_basis = true);
+mcrl2::lps::specification remove_unused_data(mcrl2::lps::specification spec, bool keep_basis = true);
+mcrl2::pbes_system::pbes<> remove_unused_data(mcrl2::pbes_system::pbes<> spec, bool keep_basis = true);
 
 ATermAppl removeUnusedData(ATermAppl Spec, bool keep_basis = true); // deprecated

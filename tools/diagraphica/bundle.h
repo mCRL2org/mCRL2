@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <map>
 #include <vector>
-using namespace std;
+#include <string>
 #include "edge.h"
 #include "cluster.h"
 
@@ -36,10 +36,10 @@ public:
     void setInCluster( Cluster* in );
     void setOutCluster( Cluster* out );
     void addEdge( Edge* e );
-    void setEdges( const vector< Edge* > &e );
+    void setEdges( const std::vector< Edge* > &e );
     void updateLabel(
-        const string &lbl,
-        const string &status );
+        const std::string &lbl,
+        const std::string &status );
     
     // -- get functions ---------------------------------------------
     int getIndex();
@@ -50,13 +50,13 @@ public:
     Cluster* getOutCluster();
     int getSizeEdges();
     Edge* getEdge( const size_t &idx );
-    void getLabels( vector< string > &lbls );
+    void getLabels( std::vector< std::string > &lbls );
     void getLabels( 
-        vector< string > &lbls,
-        vector< string > &status );
+        std::vector< std::string > &lbls,
+        std::vector< std::string > &status );
     void getLabels( 
-        string &separator,
-        string &lbls );
+        std::string &separator,
+        std::string &lbls );
     
     // -- clear functions -------------------------------------------
     void clearParent();
@@ -69,11 +69,11 @@ protected:
     // -- data members ----------------------------------------------
 	int index;
     Bundle* parent;
-    vector< Bundle* > children; // association
+    std::vector< Bundle* > children; // association
     Cluster* inCluster;         // association
 	Cluster* outCluster;        // association
-    vector< Edge* > edges;      // association
-    map< string, string > labels;
+    std::vector< Edge* > edges;      // association
+    std::map< std::string, std::string > labels;
 };
 
 #endif

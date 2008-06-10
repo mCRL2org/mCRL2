@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <string>
 #include <map>
-using namespace std;
+#include <vector>
 #include "colleague.h"
 #include "dof.h"
 #include "glcanvas.h"
@@ -42,10 +42,10 @@ public:
 
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
-    void setVariable( const string &msg );
-    void setVariableName( const string &msg );
+    void setVariable( const std::string &msg );
+    void setVariableName( const std::string &msg );
     void setCheckedId( const int &id );
-    void setNote( const string &msg );
+    void setNote( const std::string &msg );
     void setTextSize( const int &size );
 
     void setCenter( const double &xC, const double &yC );
@@ -104,9 +104,9 @@ public:
     // -- get functions ---------------------------------------------
     int getIndex();
     int getCheckedId();
-    string getNote();
-    string getVariable();
-    string getVariableName();
+    std::string getNote();
+    std::string getVariable();
+    std::string getVariableName();
     int getTextSize();
     
     void getCenter( double &x, double &y );
@@ -138,11 +138,11 @@ public:
     DOF* getDOFAgl();
     DOF* getDOFCol();
     DOF* getDOFText();
-    void getDOFColYValues( vector< double > &yVals );
+    void getDOFColYValues( std::vector< double > &yVals );
     DOF* getDOFOpa();
-    void getDOFOpaYValues( vector< double > &yVals );
+    void getDOFOpaYValues( std::vector< double > &yVals );
 
-    void getDOFAttrs( vector< Attribute* > &attrs );
+    void getDOFAttrs( std::vector< Attribute* > &attrs );
 
     // -- visualization ---------------------------------------------
     void visualize( 
@@ -150,18 +150,18 @@ public:
         GLCanvas* canvas );
     void visualize(
         GLCanvas* canvas,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs );
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs );
     void visualize(
         GLCanvas* canvas,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs,
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs,
 	const double &pix );
     void visualize(
         GLCanvas* canvas,
         const double &opacity,
-        const vector< Attribute* > attrs,
-        const vector< double > attrValIdcs );
+        const std::vector< Attribute* > attrs,
+        const std::vector< double > attrValIdcs );
     
     void setTransf();
     void clrTransf();
@@ -280,9 +280,9 @@ protected:
     ColorRGB colFil;    // fill color
     double   hdlSze;    // handle size,     pix
     int checkedVariableId; // Event id of the variable displayed on the shape;
-    string	 variable;  //variable shown on the shape
-    string	 variableName; // name of the variable
-    string	 note; // note shown on the shape
+    std::string	 variable;  //variable shown on the shape
+    std::string	 variableName; // name of the variable
+    std::string	 note; // note shown on the shape
     double	 currentPix; // used in Simulator for drawing text more readable
     GLuint  texCharId[CHARSETSIZE]; // resources for drawing text
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH]; // resources for drawing text
@@ -299,9 +299,9 @@ protected:
     double xHge,   yHge;   // hinge point, relative to center
 
     DOF* colDOF;  // composition
-    vector< double > colYValues;
+    std::vector< double > colYValues;
     DOF* opaDOF;  // composition
-    vector< double > opaYValues;
+    std::vector< double > opaYValues;
 };
 
 #endif

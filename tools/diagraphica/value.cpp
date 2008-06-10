@@ -11,6 +11,7 @@
 
 #include "value.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 

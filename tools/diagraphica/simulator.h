@@ -14,10 +14,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
-#include <set>
 #include <string>
 #include <vector>
-using namespace std;
 #include <wx/event.h>
 #include <wx/timer.h>
 #include "bundle.h"
@@ -61,7 +59,7 @@ public:
     void setDiagram( Diagram *dgrm );
     void initFrameCurr( 
         Cluster* frame,
-        const vector< Attribute* > &attrs );
+        const std::vector< Attribute* > &attrs );
     void updateFrameCurr( 
         Cluster* frame,
         const Position2D &pos );
@@ -102,7 +100,7 @@ public:
 
 protected:
     // -- utility functions -----------------------------------------
-    void initAttributes( const vector< Attribute* > &attrs );
+    void initAttributes( const std::vector< Attribute* > &attrs );
     void initFramesPrevNext();
     void initBundles();
     void sortFramesPrevNext();
@@ -126,7 +124,7 @@ protected:
     void clearBundles();
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void processHits( 
         GLint hits, 
         GLuint buffer[] );
@@ -182,16 +180,16 @@ protected:
     
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
+    std::vector< Attribute* > attributes; // association
 
     Cluster* frameCurr;            // composition
-    vector< Cluster* > framesPrev; // composition
-    vector< Cluster* > framesNext; // composition
-    vector< Bundle* >  bundles;    // composition
+    std::vector< Cluster* > framesPrev; // composition
+    std::vector< Cluster* > framesNext; // composition
+    std::vector< Bundle* >  bundles;    // composition
     
-    vector< Bundle* >  bundlesByLbl;
-    vector< Bundle* >  bundlesPrevByLbl;
-    vector< Bundle* >  bundlesNextByLbl;
+    std::vector< Bundle* >  bundlesByLbl;
+    std::vector< Bundle* >  bundlesPrevByLbl;
+    std::vector< Bundle* >  bundlesNextByLbl;
     
     static int itvLblPixVert;
     double scaleDgrmHori;
@@ -207,18 +205,18 @@ protected:
     int fcsLblNextIdx;
 
     Position2D posFrameCurr;
-    vector< Position2D > posFramesPrev;
-    vector< Position2D > posFramesNext;
+    std::vector< Position2D > posFramesPrev;
+    std::vector< Position2D > posFramesNext;
     
-    vector< Position2D > posBdlLblGridPrevTopLft;
-    vector< Position2D > posBdlLblGridPrevBotRgt;
-    vector< Position2D > posBdlLblGridNextTopLft;
-    vector< Position2D > posBdlLblGridNextBotRgt;
+    std::vector< Position2D > posBdlLblGridPrevTopLft;
+    std::vector< Position2D > posBdlLblGridPrevBotRgt;
+    std::vector< Position2D > posBdlLblGridNextTopLft;
+    std::vector< Position2D > posBdlLblGridNextBotRgt;
 
-    vector< vector< Position2D > > posBundlesPrevTopLft;
-    vector< vector< Position2D > > posBundlesPrevBotRgt;
-    vector< vector< Position2D > > posBundlesNextTopLft;
-    vector< vector< Position2D > > posBundlesNextBotRgt;
+    std::vector< std::vector< Position2D > > posBundlesPrevTopLft;
+    std::vector< std::vector< Position2D > > posBundlesPrevBotRgt;
+    std::vector< std::vector< Position2D > > posBundlesNextTopLft;
+    std::vector< std::vector< Position2D > > posBundlesNextBotRgt;
     
     // animation
     static int itvTmrMS;

@@ -18,7 +18,6 @@
 #include <set>
 #include <string>
 #include <vector>
-using namespace std;
 //#include <wx/event.h>
 #include "attribute.h"
 #include "diagram.h"
@@ -38,23 +37,23 @@ public:
 
     // -- get functions ---------------------------------------------
     static bool getUseShading();
-    void getIdcsClstMarked( set< int > &idcs );
+    void getIdcsClstMarked( std::set< int > &idcs );
     void getIdcsClstMarked(
-        set< int > &idcs ,
+        std::set< int > &idcs ,
         ColorRGB &col );
     void getIdxMseOver(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
     void getCurrIdxDgrm(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
     void getAnimIdxDgrm(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
-    void getAttrIdcs( vector< int > &idcs );
+    void getAttrIdcs( std::vector< int > &idcs );
 
     // -- set functions ---------------------------------------------
     static void setUseShading( const bool &useShd );
@@ -63,11 +62,11 @@ public:
     static void setSizeTxt( const int &sze );
     
     void setDiagram( Diagram *dgrm );
-    void initAttributes( const vector< int > attrIdcs );
+    void initAttributes( const std::vector< int > attrIdcs );
     void clearData();
 
     void markItems( Cluster* frame );
-    void markItems( const vector< Cluster* > frames );
+    void markItems( const std::vector< Cluster* > frames );
 
     void handleSendDgrmSglToExnr();
     
@@ -120,7 +119,7 @@ protected:
     void handleNextDiagram( const int &dgrmIdx );
     
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void processHits( 
         GLint hits, 
         GLuint buffer[] );
@@ -181,7 +180,7 @@ protected:
     
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
+    std::vector< Attribute* > attributes; // association
     
     static bool useShading;
 
@@ -201,17 +200,17 @@ protected:
     int    wdwStartIdx;
     int    nodesItvScale;      // number of nodes per marked interval
 
-    vector< Position2D > posAxesTopLft;
-    vector< Position2D > posAxesBotRgt;
+    std::vector< Position2D > posAxesTopLft;
+    std::vector< Position2D > posAxesBotRgt;
     
-    vector< vector< Position2D> > posValues;
+    std::vector< std::vector< Position2D> > posValues;
 
     // interaction
     int dragStatus;
     double dragDistNodes;
 
     // selection
-    set< int > itemsMarked;
+    std::set< int > itemsMarked;
     int  shiftStartIdx;
     int  dragStartIdx;
     int  dragDir;
@@ -221,7 +220,7 @@ protected:
 
     // diagrams
     double scaleDgrm;
-    map< int, Position2D > showDgrm;
+    std::map< int, Position2D > showDgrm;
     int dragIdxDgrm; // diagram currently being dragged
     int currIdxDgrm; // currently selected diagram
     int animIdxDgrm; // diagram being animated
@@ -232,7 +231,7 @@ protected:
     // animation
     wxTimer* timerAnim;
     static int itvAnim;
-    set< int >::iterator animFrame;
+    std::set< int >::iterator animFrame;
     
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE();

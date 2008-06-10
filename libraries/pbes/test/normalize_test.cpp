@@ -22,6 +22,7 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
+using namespace mcrl2::modal;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
@@ -90,7 +91,7 @@ void test_normalize1()
 
   pbes_expression T = true_();
   pbes_expression F = false_();
-  x = pbes_expression(gsMakePBESImp(T, F));
+  x = pbes_expression(mcrl2::core::detail::gsMakePBESImp(T, F));
   y = normalize(x);
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
@@ -98,7 +99,7 @@ void test_normalize1()
   data_variable_list ab;
   ab = push_front(ab, data_variable("s:S"));
   x = propositional_variable_instantiation("x:X");
-  y = and_(x, imp(pbes_expression(gsMakePBESAnd(false_(), false_())), false_()));
+  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
   z = normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
@@ -108,7 +109,7 @@ void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
   specification spec     = mcrl22lps("init tau + tau;");
-  state_formula formula  = modal::detail::mcf2statefrm("nu X. [true]X", spec);
+  state_formula formula  = mcrl2::modal::detail::mcf2statefrm("nu X. [true]X", spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   p.normalize();
@@ -121,7 +122,7 @@ void test_normalize3()
     "proc P = tau.P;\n"
     "init P;        \n"
   );
-  state_formula formula  = modal::detail::mcf2statefrm("![true*]<true>true", spec);
+  state_formula formula  = mcrl2::modal::detail::mcf2statefrm("![true*]<true>true", spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   p.normalize();

@@ -23,7 +23,6 @@
 #include <set>
 #include <string>
 #include <vector>
-using namespace std;
 #include <wx/wx.h>
 #include "visutils.h"
 
@@ -41,24 +40,24 @@ public:
 	virtual ~Mediator() {}
 	
 	// -- load & save data ------------------------------------------
-	virtual void openFile( const string &path ) = 0;
-	virtual void saveFile( const string &path ) = 0;
-	virtual void handleLoadAttrConfig( const string &path ) = 0;
-	virtual void handleSaveAttrConfig( const string &path ) = 0;
-	virtual void handleLoadDiagram( const string &path ) = 0;
-	virtual void handleSaveDiagram( const string &path ) = 0;
+	virtual void openFile( const std::string &path ) = 0;
+	virtual void saveFile( const std::string &path ) = 0;
+	virtual void handleLoadAttrConfig( const std::string &path ) = 0;
+	virtual void handleSaveAttrConfig( const std::string &path ) = 0;
+	virtual void handleLoadDiagram( const std::string &path ) = 0;
+	virtual void handleSaveDiagram( const std::string &path ) = 0;
 	
 	// -- general input & output ------------------------------------
 	virtual void initProgress(
-		const string &title,
-		const string &msg,
+		const std::string &title,
+		const std::string &msg,
 		const int &max ) = 0;
 	virtual void updateProgress( const int &val ) = 0;
 	virtual void closeProgress() = 0;
 	
-	virtual void setOutputText( const string &msg ) = 0;
+	virtual void setOutputText( const std::string &msg ) = 0;
 	virtual void setOutputText( const int &val ) = 0;
-	virtual void appOutputText( const string &msg ) = 0;
+	virtual void appOutputText( const std::string &msg ) = 0;
 	virtual void appOutputText( const int &val ) = 0;
 	
 	virtual void getColor( ColorRGB &col ) = 0;
@@ -69,15 +68,15 @@ public:
 	virtual void handleMoveAttr( 
 		const int &idxFr,
 		const int &idxTo ) = 0;
-	virtual void handleAttributeDuplicate( const vector< int > &indcs ) = 0;
+	virtual void handleAttributeDuplicate( const std::vector< int > &indcs ) = 0;
 	/*
-	virtual void handleAttributeDelete( const vector< int > &indcs ) = 0;
+	virtual void handleAttributeDelete( const std::vector< int > &indcs ) = 0;
 	*/
 	virtual void handleAttributeDelete( const int &idx ) = 0;
 	virtual void handleAttributeRename( 
 		const int &idx,
-		const string &name ) = 0;
-	virtual void handleAttributeCluster( const vector< int > &indcs ) = 0;
+		const std::string &name ) = 0;
+	virtual void handleAttributeCluster( const std::vector< int > &indcs ) = 0;
 	
 	// -*- //
 	virtual void handleAttrPartition( const int &attrIdx ) = 0;
@@ -89,10 +88,10 @@ public:
 	
 	virtual void getAttrValues(
 		const int &attrIdx,
-		vector< double > &vals ) = 0;
+		std::vector< double > &vals ) = 0;
 	virtual void getAttrValues(
 		const int &attrIdx,
-		set< double > &vals ) = 0;
+		std::set< double > &vals ) = 0;
 	
 	// -*- //
 	
@@ -102,13 +101,13 @@ public:
 		const int &idxTo ) = 0;
 	virtual void handleDomainGroup(
 		const int &attrIdx,
-		const vector< int > domIndcs,
-		const string &newValue ) = 0;
+		const std::vector< int > domIndcs,
+		const std::string &newValue ) = 0;
 	virtual void handleDomainUngroup( const int &attrIdx ) = 0;
 	
 	virtual void getAttributeNames( 
-		const vector< int > &indcs,
-		vector< wxString > &names ) = 0;
+		const std::vector< int > &indcs,
+		std::vector< wxString > &names ) = 0;
 	virtual int getAttributeType( const int &idx ) = 0;
 	virtual int getAttrSizeCurDomain( const int &idx ) = 0;
 	
@@ -117,7 +116,7 @@ public:
 	virtual void handleAttributePlot( 
 		const int &idx1,
 		const int &idx2 ) = 0;
-	virtual void handleAttributePlot( const vector< int > &indcs ) = 0;
+	virtual void handleAttributePlot( const std::vector< int > &indcs ) = 0;
 	virtual void handlePlotFrameDestroy() = 0;
 	
 	virtual void handleEditClust( Cluster* c ) = 0;
@@ -126,7 +125,7 @@ public:
 	virtual void handleClustPlotFrameDisplay( 
 		const int &idx1,
 		const int &idx2 ) = 0;
-	virtual void handleClustPlotFrameDisplay( const vector< int > &indcs ) = 0;
+	virtual void handleClustPlotFrameDisplay( const std::vector< int > &indcs ) = 0;
 	virtual void setClustMode( const int &m ) = 0;
 	virtual int getClustMode() = 0;
 	
@@ -141,7 +140,7 @@ public:
 	
 	// -- diagram editor --------------------------------------------
 	virtual void* getGraph() = 0;
-	virtual void handleNote( const int &shapeId, const string &msg ) = 0;
+	virtual void handleNote( const int &shapeId, const std::string &msg ) = 0;
 	virtual void handleEditModeSelect() = 0;
 	virtual void handleEditModeNote() = 0;
 	virtual void handleEditModeDOF( Colleague* c ) = 0;
@@ -166,9 +165,9 @@ public:
 		const bool &sendBackward,
 		const bool &editDOF,
 		const int  &checkedItem ) = 0;
-	virtual void handleShowVariable( const string &variable, const int &variableId ) = 0;
-	virtual void handleShowNote( const string &variable, const int &shapeId ) = 0;
-	virtual void handleAddText( string &variable, int &shapeId ) = 0;
+	virtual void handleShowVariable( const std::string &variable, const int &variableId ) = 0;
+	virtual void handleShowNote( const std::string &variable, const int &shapeId ) = 0;
+	virtual void handleAddText( std::string &variable, int &shapeId ) = 0;
 	virtual void handleTextSize( int &textSize, int &shapeId ) = 0;
 	virtual void handleSetTextSize( int &textSize, int &shapeId ) = 0;
 	virtual void handleCutShape() = 0;
@@ -184,9 +183,9 @@ public:
 	virtual void handleCheckedVariable( const int &idDOF, const int &variableId ) = 0;
 	
 	virtual void handleEditDOF( 
-		const vector< int > &degsOfFrdmIds,
-		const vector< string > &degsOfFrdm,
-		const vector< int > &attrIndcs,
+		const std::vector< int > &degsOfFrdmIds,
+		const std::vector< std::string > &degsOfFrdm,
+		const std::vector< int > &attrIndcs,
 		const int &selIdx ) = 0;
 	virtual void handleDOFSel( const int &DOFIdx ) = 0;
 	
@@ -210,8 +209,8 @@ public:
 	virtual void handleDOFColClear(
 		const int &idx ) = 0;
 	virtual void handleDOFColSetValuesEdt(
-		const vector< double > &hue,
-		const vector< double > &y ) = 0;
+		const std::vector< double > &hue,
+		const std::vector< double > &y ) = 0;
 	
 	virtual void handleDOFOpaActivate() = 0;
 	virtual void handleDOFOpaDeactivate() = 0;
@@ -225,8 +224,8 @@ public:
 	virtual void handleDOFOpaClear(
 		const int &idx ) = 0;
 	virtual void handleDOFOpaSetValuesEdt(
-		const vector< double > &hue,
-		const vector< double > &y ) = 0;
+		const std::vector< double > &hue,
+		const std::vector< double > &y ) = 0;
 	
 	virtual void handleLinkDOFAttr(
 		const int DOFIdx,
@@ -238,22 +237,22 @@ public:
 	// -- simulator, time series & examiner -------------------------
 	virtual void initSimulator(
 		Cluster* currFrame,
-		const vector< Attribute* > &attrs ) = 0;
+		const std::vector< Attribute* > &attrs ) = 0;
 	
-	virtual void initTimeSeries( const vector< int > attrIdcs ) = 0;
+	virtual void initTimeSeries( const std::vector< int > attrIdcs ) = 0;
 	virtual void markTimeSeries( 
 		Colleague* sender,
 		Cluster* currFrame ) = 0;
 	virtual void markTimeSeries( 
 		Colleague* sender,
-		const vector< Cluster* > frames ) = 0;
+		const std::vector< Cluster* > frames ) = 0;
 	
 	virtual void addToExaminer(
 		Cluster* currFrame,
-		const vector< Attribute* > &attrs ) = 0;
+		const std::vector< Attribute* > &attrs ) = 0;
 	virtual void addToExaminer(
-		const vector< Cluster* > frames,
-		const vector< Attribute* > &attrs ) = 0;
+		const std::vector< Cluster* > frames,
+		const std::vector< Attribute* > &attrs ) = 0;
 	
 	virtual void handleShowClusterMenu() = 0;
 	virtual void handleSendDgrm(
@@ -281,11 +280,11 @@ public:
 	
 	virtual void handleShowFrame(
 		Cluster* frame,
-		const vector< Attribute* > &attrs,
+		const std::vector< Attribute* > &attrs,
 		ColorRGB &col ) = 0;
 	virtual void handleUnshowFrame() = 0;
 	
-	// -- visualization settings ------------------------------------
+	// -- visualization std::settings ------------------------------------
 	virtual void setSettingsGeneral( 
 		const wxColour &colClr,
 		const wxColour &colTxt,
@@ -339,7 +338,7 @@ public:
 		const int &tgtWindowId,
 		const int &tgtX,
 		const int &tgtY,
-		const vector< int > &data ) = 0;
+		const std::vector< int > &data ) = 0;
 	
 	virtual void handleMouseLftDownEvent( 
 		GLCanvas* c, 
@@ -389,7 +388,7 @@ public:
 		const int &specialKey ) = 0;
 	
 	// -- overloaded operators --------------------------------------
-	virtual void operator<<( const string &msg ) = 0;
+	virtual void operator<<( const std::string &msg ) = 0;
 	virtual void operator<<( const int& msg ) = 0;
 	
 	// -- public constants ------------------------------------------

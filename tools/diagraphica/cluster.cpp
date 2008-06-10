@@ -12,6 +12,7 @@
 
 // -- constructors and destructors ----------------------------------
 
+using namespace std;
 
 // ---------------
 Cluster::Cluster()
