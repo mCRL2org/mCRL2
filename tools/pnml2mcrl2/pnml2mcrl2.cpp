@@ -1745,7 +1745,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 	
         //typechecking of the place-related data and putting it into the tables:
         ATermAppl Value=ATAgetArgument(ATAgetFirst(APlaces), 2);
-        ATermAppl Type=type_check_data_expr_part(Value, gsMakeSortIdNat());
+        ATermAppl Type=type_check_data_expr(Value, gsMakeSortIdNat(), gsMakeEmptyDataSpec());
         if(!Type) {gsErrorMsg("Type-checking of the initial marking of place %T failed (%T is not a natural number)\n",CurrentKey,Value); return NULL;}
 	ATtablePut(context.place_mark, CurrentKey, (ATerm)Value);
 
@@ -2194,13 +2194,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     ATermAppl Result=ATAgetArgument(Spec, 4); // prelude
     if(ATisEqual(Result,Appl0)){
-      Result=gsMakeSpecV1(
-			  gsMakeDataSpec(
-					 gsMakeSortSpec(ATmakeList0()),
-					 gsMakeConsSpec(ATmakeList0()),
-					 gsMakeMapSpec(ATmakeList0()),
-					 gsMakeDataEqnSpec(ATmakeList0())
-					 ),
+      Result=gsMakeSpecV1(gsMakeEmptyDataSpec(),
 			  gsMakeActSpec(Actions),
 			  gsMakeProcEqnSpec(ProcEqns),
 			  gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))

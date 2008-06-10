@@ -182,14 +182,7 @@ using namespace mcrl2::core;
       if (infilename.empty()) {
         using namespace mcrl2::core::detail;
         //use empty data specification
-        raw_specification = implement_data_data_spec(
-          gsMakeDataSpec(
-            gsMakeSortSpec(ATmakeList0()),
-            gsMakeConsSpec(ATmakeList0()),
-            gsMakeMapSpec(ATmakeList0()),
-            gsMakeDataEqnSpec(ATmakeList0())
-          )
-        );
+        raw_specification = implement_data_data_spec(gsMakeEmptyDataSpec());
       } else {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());

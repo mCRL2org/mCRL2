@@ -3689,6 +3689,22 @@ bool gsIsActFrm(ATermAppl Term)
     gsIsActExists(Term) || gsIsActAt(Term);
 }
 
+// Data specifications
+// -------------------
+
+ATermAppl gsMakeEmptyDataSpec()
+{
+  return gsMakeDataSpec(
+    gsMakeSortSpec(ATmakeList0()),
+    gsMakeConsSpec(ATmakeList0()),
+    gsMakeMapSpec(ATmakeList0()),
+    gsMakeDataEqnSpec(ATmakeList0())
+  );
+}
+
+// PBES's
+// ------
+
 bool gsIsPBExpr(ATermAppl Term)
 {
   return gsIsDataExpr(Term)

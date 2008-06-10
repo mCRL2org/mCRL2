@@ -1557,6 +1557,13 @@ bool gsIsRegFrm(ATermAppl Term);
 bool gsIsActFrm(ATermAppl Term);
 
 
+// Data specifications
+// -------------------
+
+///\return An empty data specification.
+ATermAppl gsMakeEmptyDataSpec();
+
+
 // PBES's
 // ------
 
