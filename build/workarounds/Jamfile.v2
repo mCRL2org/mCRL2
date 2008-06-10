@@ -2,6 +2,9 @@ import project ;
 
 project.initialize $(__name__) ;
 
+# versions of gcc without signed overflow (breaks ATerm library)
+gcc-no-overflow = 4.3.0 4.3.1 ;
+
 project workarounds 
        : usage-requirements
           <include>$(TOP)/build/workarounds/all
@@ -10,16 +13,16 @@ project workarounds
 # Cygwin
 alias configuration : : <os>CYGWIN <toolset>gcc :
        : <include>$(TOP)/build/workarounds/cygwin
-         <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
-         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
        ;
 
 # MinGW
 alias configuration : : <os>NT <toolset>gcc :
        : <include>$(TOP)/build/workarounds/mingw
-         <toolset-gcc:version>4.3.0:<define>_GLIBCPP_NO_CONCEPT_CHECKS
-         <toolset-gcc:version>4.3.0:<cxxflags>"-fno-strict-overflow"
-         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<define>_GLIBCPP_NO_CONCEPT_CHECKS
+         <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
        ;
 
 # MSVC
@@ -51,10 +54,8 @@ alias configuration : : <toolset>sun :
 # Default gcc (known to work on Linux)
 alias configuration : : <toolset>gcc :
        : <include>$(TOP)/build/workarounds
-         <cxxflags>"-std=c++98"
-         <cflags>"-std=c99"
-         <toolset-gcc:version>4.3.0:<cxxflags>"-std=c++98 -fno-strict-overflow"
-         <toolset-gcc:version>4.3.0:<cflags>"-std=c99 -fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-std=c++98 -fno-strict-overflow"
+         <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
          <link>static:<linkflags>-export-dynamic
        ;
 

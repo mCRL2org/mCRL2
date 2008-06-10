@@ -23,6 +23,7 @@
 
 using namespace atermpp;
 using namespace mcrl2::data;
+using mcrl2::core::pp;
 
 struct add_zero
 {

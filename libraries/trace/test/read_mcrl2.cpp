@@ -36,7 +36,7 @@ void test_next_action(Trace &t, const char *s)
   BOOST_CHECK( (a != NULL) && (ATgetType(a) == AT_APPL) );
   if ( (a != NULL) && (ATgetType(a) == AT_APPL) )
   {
-    string action(PrintPart_CXX(a,ppDefault));
+    string action(mcrl2::core::PrintPart_CXX(a));
     BOOST_CHECK( action == s );
   }
 }

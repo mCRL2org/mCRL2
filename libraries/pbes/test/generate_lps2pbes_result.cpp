@@ -20,6 +20,7 @@
 #include "mcrl2/core/text_utility.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;

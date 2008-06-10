@@ -47,6 +47,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+using mcrl2::core::pp;
 using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::read_from_named_file;

@@ -15,6 +15,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/confluence_checker.h>
 #include <mcrl2/lps/mcrl22lps.h>
+#include <mcrl2/utilities/aterm_ext.h>
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
@@ -37,6 +38,8 @@ const std::string case_3(
 
 static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
 { 
+  using namespace mcrl2::utilities;
+
   ATermAppl v_process_equation = ATAgetArgument(s1, 2);
   ATermList v_summands = ATLgetArgument(v_process_equation, 2);
 
