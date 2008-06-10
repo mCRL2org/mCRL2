@@ -157,7 +157,7 @@ namespace mcrl2 {
           }
       
           inline static void exec() {
-            ::execlp("cvc3", "cvc3", "-lang", "smt-lib", 0);
+            ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
           }
       
         public:
@@ -190,7 +190,7 @@ namespace mcrl2 {
           }
       
           inline static void exec() {
-            ::execlp("ario", "ario", 0);
+            ::execlp("ario", "ario", (char*)0);
           }
       
         public:
