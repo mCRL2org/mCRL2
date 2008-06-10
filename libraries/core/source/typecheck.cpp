@@ -1,6 +1,12 @@
-#include <string.h>
+// Author(s): Yaroslav Usenko
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
@@ -10,7 +16,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
@@ -258,98 +264,6 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
   if (Result != NULL) {
     gsDebugMsg("return %T\n", Result);
   } 
-  else {
-    gsDebugMsg("return NULL\n");
-  }
-  gstcDataDestroy();
-  return Result;
-}
-
-ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
-  assert(gsIsSortExpr(sort_expr));
-  ATermAppl Result=NULL;
-  gsDebugMsg ("type checking sort expression part phase started\n");
-  gstcDataInit();
-
-  gsDebugMsg ("type checking sort expression part read-in phase started\n");
-
-  ATermAppl data_spec=NULL;
-  if(spec) data_spec = ATAgetArgument(spec, 0);
-  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
-    // Check sorts for loops
-    // Unwind sorts to enable equiv and subtype relations
-    gsDebugMsg ("type checking sort expression part read-in phase finished\n");
-  
-    if(!gsIsNotInferred(sort_expr)){
-      if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
-    }
-    else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
-    }
-  }
-  gsDebugMsg ("type checking sort expression part phase finished\n");
-
-  if (Result != NULL) {
-    gsDebugMsg("return %T\n", Result);
-  }
-  else {
-    gsDebugMsg("return NULL\n");
-  }
-  gstcDataDestroy();
-  return Result;
-}
-
-ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars){
-  assert(gsIsSortExpr(sort_expr));
-  ATermAppl Result=NULL;
-  gsDebugMsg ("type checking data expression part phase started\n");
-  gstcDataInit();
-
-  gsDebugMsg ("type checking data expression part read-in phase started\n");
-
-  ATermAppl data_spec=NULL;
-  if(spec) data_spec = ATAgetArgument(spec, 0);
-  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
-    // Check sorts for loops
-    // Unwind sorts to enable equiv and subtype relations
-    if(!spec || gstcReadInConstructors()) {
-      if(!spec || gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                                   ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
-        gsDebugMsg ("type checking data expression part read-in phase finished\n");
-        
-        if(gsIsNotInferred(sort_expr)){
-          gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
-        }
-        else
-        {
-          if(gstcIsSortExprDeclared(sort_expr)){
-            if(!gsIsDataExpr(data_expr)){
-              gsErrorMsg("type checking of data expression failed (%T is not a data expression)\n",data_expr);
-            }
-            else
-            {
-              bool destroy_vars=(!Vars);
-              if(destroy_vars) Vars=ATtableCreate(63,50);
-
-              ATermAppl data=data_expr;
-              ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
-
-              if(destroy_vars) ATtableDestroy(Vars);
-
-              if(Type) Result=data;
-              else gsErrorMsg("type checking of data expressions failed\n");
-
-              gsDebugMsg ("type checking data expression part phase finished\n");
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (Result != NULL) {
-    gsDebugMsg("return %T\n", Result);
-  }
   else {
     gsDebugMsg("return NULL\n");
   }
@@ -4036,5 +3950,100 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
   return NULL;
 }
 
+namespace detail {
+
+ATermAppl type_check_sort_expr_part(ATermAppl sort_expr, ATermAppl spec){
+  assert(gsIsSortExpr(sort_expr));
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking sort expression part phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking sort expression part read-in phase started\n");
+
+  ATermAppl data_spec=NULL;
+  if(spec) data_spec = ATAgetArgument(spec, 0);
+  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+    // Check sorts for loops
+    // Unwind sorts to enable equiv and subtype relations
+    gsDebugMsg ("type checking sort expression part read-in phase finished\n");
+  
+    if(!gsIsNotInferred(sort_expr)){
+      if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
+    }
+    else {
+      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
+    }
+  }
+  gsDebugMsg ("type checking sort expression part phase finished\n");
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  }
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
+ATermAppl type_check_data_expr_part(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars){
+  assert(gsIsSortExpr(sort_expr));
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking data expression part phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking data expression part read-in phase started\n");
+
+  ATermAppl data_spec=NULL;
+  if(spec) data_spec = ATAgetArgument(spec, 0);
+  if(!spec || gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+    // Check sorts for loops
+    // Unwind sorts to enable equiv and subtype relations
+    if(!spec || gstcReadInConstructors()) {
+      if(!spec || gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                                   ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+        gsDebugMsg ("type checking data expression part read-in phase finished\n");
+        
+        if(gsIsNotInferred(sort_expr)){
+          gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
+        }
+        else
+        {
+          if(gstcIsSortExprDeclared(sort_expr)){
+            if(!gsIsDataExpr(data_expr)){
+              gsErrorMsg("type checking of data expression failed (%T is not a data expression)\n",data_expr);
+            }
+            else
+            {
+              bool destroy_vars=(!Vars);
+              if(destroy_vars) Vars=ATtableCreate(63,50);
+
+              ATermAppl data=data_expr;
+              ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr);
+
+              if(destroy_vars) ATtableDestroy(Vars);
+
+              if(Type) Result=data;
+              else gsErrorMsg("type checking of data expressions failed\n");
+
+              gsDebugMsg ("type checking data expression part phase finished\n");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  }
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
+    }
   }
 }
