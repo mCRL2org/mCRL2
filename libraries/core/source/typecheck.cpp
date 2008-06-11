@@ -2098,7 +2098,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
           if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
@@ -2114,7 +2114,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
-          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous);
+          ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous);
           if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);

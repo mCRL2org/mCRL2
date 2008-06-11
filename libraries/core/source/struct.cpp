@@ -2732,7 +2732,7 @@ ATermAppl gsMakeDataExprBagEnum(ATermList DataExprs, ATermAppl SortExpr)
       DomSort=ATinsert(DomSort,(ATerm) NatSort);
     }
     assert(ATgetLength(DomSort)==ATgetLength(DataExprs));
-    SortExpr=gsMakeSortArrow(DomSort, SortExpr);
+    SortExpr=gsMakeSortArrow(ATreverse(DomSort), SortExpr);
     assert(ATisEqual(ATgetLength(DomSort),ATgetLength(DataExprs)));
     return gsMakeDataAppl(gsMakeOpIdBagEnum(SortExpr), DataExprs);
   } // If the list of data expressions is empty, we just use SortExpr
