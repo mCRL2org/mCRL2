@@ -24,7 +24,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/detail/typecheck_part.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
