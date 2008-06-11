@@ -38,7 +38,7 @@
 #include "mcrl2/atermpp/set.h"
 
 // For Aterm library extension functions
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -2253,7 +2253,7 @@ static ATermAppl newprocess(
 { 
   numberOfNewProcesses++;
   if (numberOfNewProcesses == warningNumber)
-  { gsWarningMsg("generated %d new internal processes. A possible unbounded loop can be avoided by using the flag -2 (--regular2) instead of the default -1 (--regular).\n",
+  { gsWarningMsg("generated %d new internal processes. A possible unbounded loop can be avoided by using the regular2 linearisation method instead of the default regular method.\n",
                          numberOfNewProcesses);
     warningNumber=warningNumber*2;
   }
