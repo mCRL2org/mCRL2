@@ -109,7 +109,7 @@ static ATermList pn2gsMakeDataVarIds(ATermList l, ATermAppl Type);
 static ATermAppl pn2gsMakeBagVars(ATermList l);
 static ATermList pn2gsMakeListOfLists(ATermList l);
 
-static char *pn2gsGetText(ticpp::Element* cur);
+static std::string pn2gsGetText(ticpp::Element* cur);
 
 struct tool_options_type {
   std::string infilename;
@@ -354,7 +354,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   //==================================================
   // pn2gsGetText gets the contents of a child <text> element of cur
   //==================================================
-  static char* pn2gsGetText(ticpp::Element* cur) {
+  static std::string pn2gsGetText(ticpp::Element* cur) {
     // input: a pointer to the current element
     // output: the contents of the first <text> attribute 
     //         of the current element
@@ -362,7 +362,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     // this function is used for the retrieval of types, initial markings, etc.
     while (cur != 0) {
       if (cur->Value() == "text") {
-        return const_cast < char* > (cur->GetText().c_str());
+        return cur->GetText(); //const_cast < char* > (cur->GetText().c_str());
       }
 
       cur = cur->NextSiblingElement(false);
@@ -374,7 +374,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   //==================================================
   // pn2gsGetElement gets the contents of a child name element of cur
   //==================================================
-  static char *pn2gsGetElement(ticpp::Element* cur, std::string const& name) {
+  static std::string pn2gsGetElement(ticpp::Element* cur, std::string const& name) {
     // input: a pointer to the current element
     // output: the contents of the first child <name> attribute 
     //         of the current element
@@ -446,13 +446,14 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         //for coloured petri nets initialMarking can also contain a toolspecific element
         for (ticpp::Element* curl = cur->FirstChildElement(false); curl != 0; curl = curl->NextSiblingElement(false)) {
           if (curl->Value() == "text") {
-	    char *im=pn2gsGetText(curl);
-            if(im){
-              std::istringstream iss(im);
-              ATermAppl Marking=parse_data_expr(iss);
-              if(!Marking) {gsErrorMsg("Parsing of the initial marking for place %T failed\n", Aid); return NULL;}
-	      AinitialMarking=Marking;
-            }
+	    std::string im=pn2gsGetText(curl);
+            //if(im){
+            std::istringstream iss(im);
+            ATermAppl Marking=parse_data_expr(iss);
+            if(!Marking) {gsErrorMsg("Parsing of the initial marking for place %T failed\n", Aid); return NULL;}
+	    AinitialMarking=Marking;
+            //}
+
             //if (!im) im="0";
 	    //if (atoi(im) < 0) {
 	    //  // if the initial marking is less than zero, it is resetted to zero
@@ -462,8 +463,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
             //AinitialMarking=im;
           }
           else if(with_colors && curl->Value() == "toolspecific") {
-            const char *mcrl2marking=pn2gsGetElement(curl,"mcrl2marking");
-            if(mcrl2marking){
+            std::string mcrl2marking=pn2gsGetElement(curl,"mcrl2marking");
+            if(mcrl2marking!=""){
               colored=ATtrue;
               std::istringstream iss(mcrl2marking);
               ATermAppl A=parse_data_expr(iss);
@@ -499,9 +500,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	// this element contains a childelement <mcrl2sort> which contains
 	// a childelement <text> which contains the type of the place
 	
-	const char *sort=pn2gsGetElement(cur,"mcrl2sort");
+	std::string sort=pn2gsGetElement(cur,"mcrl2sort");
 
-	if(sort){
+	if(sort!=""){
 	  colored=ATtrue;
 	  std::istringstream iss(sort);
 
@@ -574,9 +575,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	// this element contains a childelement <mcrl2sort> which contains
 	// a childelement <text> which contains the type of the place
 	
-	const char *predicate=pn2gsGetElement(cur,"mcrl2predicate");
+	std::string predicate=pn2gsGetElement(cur,"mcrl2predicate");
+        //gsVerboseMsg("predicate %s\n", predicate);
 
-	if(predicate){
+	if(predicate!=""){
 	  colored=ATtrue;
 	  std::istringstream iss(predicate);
 	  ATermAppl Predicate=parse_data_expr(iss);
@@ -696,8 +698,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       else if (cur->Value() == "name") {
 	// the arc contains a <name> element
 	// this element contains a childelement <text> which contains the type of the transition
-        const char *name=pn2gsGetText(cur->FirstChildElement());
-        if(name){
+        std::string name=pn2gsGetText(cur->FirstChildElement());
+        if(name!=""){
           colored=ATtrue;
           std::istringstream iss(name);
 
@@ -850,9 +852,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	}
       }
       else if (with_colors && cur->Value() == "toolspecific") {
-        const char *prelude=pn2gsGetElement(cur,"mcrl2prelude");
+        std::string prelude=pn2gsGetElement(cur,"mcrl2prelude");
 
-	if(prelude){
+	if(prelude!=""){
 	  colored=ATtrue;
 	  std::string s(prelude);
           std::istringstream iss(s+"init delta;");
@@ -1724,7 +1726,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // used for Places, Transitions and Arcs!!!
     ATerm CurrentKey;
     ATermAppl Prelude=ATAgetArgument(Spec,4);    
-    if(ATisEqual(Prelude,Appl0)) Prelude=NULL;
+    if(ATisEqual(Prelude,Appl0)) Prelude=gsMakeEmptyDataSpec(); //NULL;
 
     gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
     while (ATisEmpty(APlaces) == ATfalse) {
@@ -1752,7 +1754,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
         Value=ATAgetArgument(ATAgetFirst(APlaces), 3);
         if(!ATisEqual(Value,Appl0)){
-          Type=type_check_sort_expr_part(Value,Prelude);
+          Type=type_check_sort_expr(Value,Prelude);
           if(!Type) {gsErrorMsg("Type-checking of sort expression %P as a type of place %T failed \n",Value,CurrentKey); return NULL;}
         }
         ATtablePut(context.place_type_mcrl2, CurrentKey, (ATerm)Value);
@@ -1761,7 +1763,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
         
         Value=ATAgetArgument(ATAgetFirst(APlaces), 4);
         if(!ATisEqual(Value,Appl0)){
-          Type=type_check_data_expr_part(Value,gsMakeSortExprBag(SortValue),Prelude);
+          Type=type_check_data_expr(Value,gsMakeSortExprBag(SortValue),Prelude);
           if(!Type) {gsErrorMsg("Type-checking of data expression %T as an initial mCRL2 marking of place %T failed \n",Value,CurrentKey); return NULL;}
 	}
         ATtablePut(context.place_mark_mcrl2, CurrentKey, (ATerm)Value);
@@ -2161,7 +2163,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       
       ATermAppl Value=ATAtableGet(context.trans_predicate,(ATerm)Tran);
       if(!ATisEqual(Value,Appl0)){
-	ATermAppl Type=type_check_data_expr_part(Value,gsMakeSortIdBool(),Prelude,Vars);
+	ATermAppl Type=type_check_data_expr(Value,gsMakeSortIdBool(),Prelude,Vars);
 	if(!Type) {
 	  ATtableDestroy(Vars);
 	  gsErrorMsg("Type-checking of the mCRL2 predicate %P of transition %T failed\n",Value,Tran); 
@@ -2702,7 +2704,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     if(Type){
       Cond=NULL;
       if(nOut>0){
-	Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(ATgetSlice(VarNames,0,nIn)),IdX);//make nOut <= x
+	Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,nIn))),IdX);//subbag 
       }
       if(inhib){
 	ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,IdX,EmptyBag);//make x=={}
