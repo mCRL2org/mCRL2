@@ -414,10 +414,10 @@ static t_lin_options parse_command_line(int argc, char *argv[])
       "alphabet reductions are not applied", 'r');
   clinterface.add_option("newstate",
       "state variables are encoded using enumerated types "
-      "(requires -1 or -2); without -w numbers are used", 'w');
+      "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
   clinterface.add_option("binary",
       "when clustering use binary case functions instead of "
-      "n-ary; in the presence of -w, state variables are "
+      "n-ary; in the presence of -w/--newstate, state variables are "
       "encoded by a vector of boolean variables", 'b');
   clinterface.add_option("statenames",
       "the names of state variables are derived from the specification", 'a');
