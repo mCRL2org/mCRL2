@@ -103,11 +103,5 @@ else {
   import_user_config ;
 }
 
-using boostbook
-  : $(TOP)/3rd-party/docbook/xsl
-  : $(TOP)/3rd-party/docbook/dtd
-  ; 
-
 using xsltproc : xsltproc ;
 using doxygen : doxygen ;
-using quickbook : "$(TOP)/build/bin/quickbook" ;
