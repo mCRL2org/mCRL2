@@ -78,7 +78,16 @@ lts_generation_options parse_command_line(int ac, char** av) {
     "OUTFILE is not supplied, the LTS is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified "
-    "by an option). If the extension is unknown, the mCRL2 SVC format will be used.");
+    "by an option). The supported formats are:\n"
+    "  'aut' for the Aldebaran format (CADP),\n"
+#ifdef MCRL2_BCG
+    "  'bcg' for the Binary Coded Graph format (CADP),\n"
+#endif
+    "  'dot' for the GraphViz format,\n"
+    "  'fsm' for the Finite State Machine format,\n"
+    "  'mcrl' for the mCRL SVC format, or\n"
+    "  'mcrl2' for the mCRL2 SVC format (default)"
+  );
 
   clinterface.add_rewriting_options();
 
@@ -122,16 +131,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
       "  'd', 'depth'     depth-first search\n"
       "  'r', 'random'    random simulation", 's').
     add_option("out", make_mandatory_argument("FORMAT"),
-      "save the output in the specified FORMAT:\n"
-      "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
-      "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-      "  'dot' for the GraphViz format,\n"
-      "  'fsm' for the Finite State Machine format,\n"
-      "  'mcrl' for the mCRL SVC format, or\n"
-      "  'mcrl2' for the mCRL2 SVC format (default)"
-    , 'o').
+      "save the output in the specified FORMAT", 'o').
     add_option("no-info", "do not add state information to OUTFILE").
     add_option("init-tsize", make_mandatory_argument("NUM"),
       "set the initial size of the internally used hash tables (default is 10000)");
