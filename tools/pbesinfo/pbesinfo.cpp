@@ -189,7 +189,7 @@ int main(int argc, char** argv)
      	    cout << "Predicate variables: " << pv_i->name() << " :: ";
      	  else
      	    cout << "                     " << pv_i->name() << " :: ";
-     	  for (term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
+     	  for (atermpp::term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
      	  {
      	    cout << pp(dv_i->sort());
      	    if (nr_sorts < bv_size)
