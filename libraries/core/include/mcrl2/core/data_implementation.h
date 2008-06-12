@@ -206,7 +206,7 @@ inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
  *  \param[in] ar_spec An ATerm representation of an mCRL2 action rename
  *             specification that adheres to the internal ATerm
  *             structure after the type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *  \param[in] lps_spec An ATerm representation of an mCRL2 LPS that adheres
  *             to the internal ATerm structure after the type checking phase.
  *  \post      The data types in action_rename_spec are implemented as
  *             higher-order abstract data types types and the data types
