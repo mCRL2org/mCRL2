@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_reconstruct_test.cpp
-/// \brief Add your file description here.
+/// \file data_reconstruct_spec_test.cpp
+/// \brief Tests data reconstruction of complete specifications.
 
 #include <iostream>
 #include <string>
@@ -283,21 +283,6 @@ void test_data_reconstruct_bool_function_one_eq()
   BOOST_CHECK(find_term(rec_data(3), ct));
 }
 
-void test_data_reconstruct_sort_expr()
-{
-  std::string text =
-  "map f: List(Nat) -> List(Nat);\n"
-  ;
-
-  data_specification data = parse_data_specification(text);
-
-  sort_expression l("List@0");
-  std::cerr << l << std::endl;
-  BOOST_CHECK(find_term(data(2),l));
-
-  BOOST_CHECK(reconstruct_exprs(aterm(l), data) != l);
-}
-
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -309,7 +294,6 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_simple_constructor();
   test_data_reconstruct_bool_function();
   test_data_reconstruct_bool_function_one_eq();
-  test_data_reconstruct_sort_expr();
 
   return 0;
 }
