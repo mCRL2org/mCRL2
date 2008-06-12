@@ -3610,6 +3610,8 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   //at this point we know that Arguments cannot be cast to CandidateType. We need to find out why and print.
   assert (ATgetLength(Arguments)==ATgetLength(ArgumentTypes));
 
+  //gsVerboseMsg("CandidateType: %T, Arguments %T, ArgumentTypes %T\n",CandidateType,Arguments,ArgumentTypes);
+
   ATermList CandidateList;
   if(gsIsSortsPossible(CandidateType)) CandidateList=ATLgetArgument(CandidateType,0); 
   else CandidateList=ATmakeList1((ATerm)CandidateType);
@@ -3642,7 +3644,9 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   }
   CandidateList=ATreverse(CandidateList);
 
-  for(ATermList l=Arguments, m=ArgumentTypes, n=CandidateList;!ATisEmpty(l);l=ATgetNext(l), m=ATgetNext(m), n=ATgetNext(n)){
+  //gsVerboseMsg("CandidateList: %T, Arguments %T, ArgumentTypes %T\n",CandidateList,Arguments,ArgumentTypes);
+
+  for(ATermList l=Arguments, m=ArgumentTypes, n=CandidateList;!(ATisEmpty(l)||ATisEmpty(m)||ATisEmpty(n));l=ATgetNext(l), m=ATgetNext(m), n=ATgetNext(n)){
     ATermList PosTypes=ATLgetFirst(n);
     ATermAppl NeededType=ATAgetFirst(m);
     bool found=true;
