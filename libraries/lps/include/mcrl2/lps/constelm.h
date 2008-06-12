@@ -33,6 +33,8 @@ namespace lps {
 template <typename Rewriter>
 std::map<data::data_variable, data::data_expression> compute_constant_parameters(const linear_process& p, data::data_expression_list init, Rewriter& r)
 {
+  using namespace data::data_expr;
+  
   std::map<data::data_variable, data::data_expression> replacements;
   data::data_variable_list::iterator i = p.process_parameters().begin();
   data::data_expression_list::iterator j = init.begin();
@@ -81,6 +83,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
 /// constant value.
 std::map<data::data_variable, data::data_expression> compute_constant_parameters_subst(const linear_process& p, data::data_expression_list init, data::rewriter& r)
 {
+  using namespace data::data_expr;
   namespace opt = data::data_expr::optimized;
   
   typedef std::map<data::data_variable, std::list<data::rewriter::substitution>::iterator> index_map;
@@ -145,6 +148,8 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
 template <typename Rewriter>
 specification constelm(const specification& spec, Rewriter& r, bool verbose = false)
 {
+  using core::pp;
+
   std::map<data::data_variable, data::data_expression> replacements = compute_constant_parameters_subst(spec.process(), spec.initial_process().state(), r);
   std::set<data::data_variable> constant_parameters;
   for (std::map<data::data_variable, data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
