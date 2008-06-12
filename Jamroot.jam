@@ -166,8 +166,6 @@ if ! $(BUILD_TAG) {
   BUILD_TAG = "$(revision)-$(link-variant[1])" ;
 }
  
-prefix = [ path.make $(TOP)/build/stage ] ;
-
 if [ get-option prefix : no ] = no {
   ECHO "Warning: missing final installation path!" ;
   ECHO "" ;
@@ -177,9 +175,12 @@ if [ get-option prefix : no ] = no {
   ECHO "" ;
 }
 
+prefix         = [ path.make $(TOP)/build/stage ] ;
+install-prefix = [ get-option prefix : $(prefix) ] ;
+
 # Set installation/stage locations
 if [ feature.defaults <install> ] = <install>yes {
-  prefix     = [ get-option prefix     : [ path.make $(prefix) ] ] ;
+  prefix     = $(install-prefix) ;
   bindir     = [ get-option bindir     : [ path.make $(prefix)/bin ] ] ;
   libdir     = [ get-option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
   plugindir  = [ path.make $(libdir)/plugins ] ;
@@ -187,8 +188,6 @@ if [ feature.defaults <install> ] = <install>yes {
   datadir    = [ get-option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
 }
 else {
-  local install-prefix = [ get-option prefix : [ path.make $(prefix) ] ] ;
-
   bindir    = [ path.make $(prefix) ] ;
   libdir    = [ get-option libdir : [ path.make $(install-prefix)/lib/mcrl2 ] ] ;
   plugindir = [ path.make $(prefix)/plugins ] ;
@@ -462,7 +461,7 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 # Target for a tool in the mcrl2 toolset
 rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
   local make_alias = false ;
-  local additional-requirements = <define>PREFIX=\"\\\"$(prefix)\\\"\"
+  local additional-requirements = <define>PREFIX=\"\\\"$(install-prefix)\\\"\"
                                   <define>PLUGINDIR=\"\\\"$(plugindir)\\\"\"
                                   <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\" ;
 
