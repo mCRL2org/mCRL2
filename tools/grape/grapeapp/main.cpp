@@ -70,8 +70,8 @@ bool grape_app::OnInit()
   {
     interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
         NAME, AUTHOR, "[OPTION]... [INFILE]",
-        "Graphical editing environment for mCRL2 process specifications."
-        "If INFILE is supplied, it is loaded as a specification."); 
+        "Graphical editing environment for mCRL2 process specifications. "
+        "If INFILE is supplied, it is loaded as a GraPE specification."); 
 
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
  
