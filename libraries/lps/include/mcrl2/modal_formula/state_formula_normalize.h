@@ -28,7 +28,7 @@ struct state_variable_negation
     : X(X_)
   {}
   
-  aterm_appl operator()(aterm_appl t) const
+  atermpp::aterm_appl operator()(atermpp::aterm_appl t) const
   {
     if (state_frm::is_var(t) && (state_frm::name(t) == X))
     {

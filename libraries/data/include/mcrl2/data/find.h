@@ -24,15 +24,12 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm;
-using atermpp::aterm_traits;
-
 /// \brief Returns the set of all identifier strings occurring in the term t
 template <typename Term>
 std::set<core::identifier_string> find_identifiers(Term t)
 {
   std::set<core::identifier_string> result;
-  find_all_if(aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
+  find_all_if(atermpp::aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
   return result;
 }
  
@@ -82,7 +79,7 @@ std::set<data_variable> find_all_data_variables(Term t)
 template <typename Term>
 bool find_sort_identifier(Term t, const sort_identifier& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<aterm_appl>(), s, _1)) != atermpp::aterm();
+  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
@@ -98,7 +95,7 @@ std::set<sort_identifier> find_all_sort_identifiers(Term t)
 template <typename Term>
 bool find_sort_expression(Term t, const sort_expression& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<aterm_appl>(), s, _1)) != atermpp::aterm();
+  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all sort expressions that occur in the term t
@@ -114,7 +111,7 @@ std::set<sort_expression> find_all_sort_expressions(Term t)
 template <typename Term>
 bool find_data_expression(Term t, const data_expression& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<aterm_appl>(), s, _1)) != atermpp::aterm();
+  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all data expressions that occur in the term t

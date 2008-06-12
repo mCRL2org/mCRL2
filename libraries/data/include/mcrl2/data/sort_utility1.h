@@ -30,7 +30,7 @@ struct compare_sort
     : s(s_)
   {}
 
-  bool operator()(aterm_appl t) const
+  bool operator()(atermpp::aterm_appl t) const
   {
     return s == t;
   }
@@ -41,7 +41,7 @@ struct compare_sort
 template <typename list_type>
 bool occurs_in(list_type l, sort_expression s)
 {
-  return atermpp::find_if(l, compare_sort(s)) != aterm();
+  return atermpp::find_if(l, compare_sort(s)) != atermpp::aterm();
 }
 
 ///\ret the list of all functions f of sort s in fl
@@ -62,7 +62,7 @@ inline data_operation_list get_constructors(const data_operation_list& fl, const
 ///\ret true if f has 1 or more arguments, false otherwise
 inline bool has_arguments(const data_operation& f)
 {
-  return !core::detail::gsIsSortId(aterm_appl(f.argument(1)));
+  return !core::detail::gsIsSortId(atermpp::aterm_appl(f.argument(1)));
 }
 
 //prototype

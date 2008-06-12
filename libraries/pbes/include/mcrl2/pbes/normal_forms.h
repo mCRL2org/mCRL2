@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
+using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;

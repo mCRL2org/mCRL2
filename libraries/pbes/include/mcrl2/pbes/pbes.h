@@ -48,9 +48,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 using mcrl2::core::pp;
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::read_from_named_file;
 
 /// \cond INTERNAL_DOCS
 struct normalize_pbes_equation
@@ -105,7 +102,7 @@ std::set<data::data_variable> compute_quantifier_variables(Iterator first, Itera
 template <typename Container = atermpp::vector<pbes_equation> >
 class pbes
 {
-  friend struct atermpp::aterm_traits<pbes>;
+  friend struct atermpp::aterm_traits<pbes<Container> >;
 
   protected:
     data::data_specification m_data;
@@ -118,13 +115,13 @@ class pbes
       return reinterpret_cast<ATerm>(ATermAppl(*this));
     }
 
-    /// Initialize the pbes with an aterm_appl.
+    /// Initialize the pbes with an atermpp::aterm_appl.
     ///
-    void init_term(aterm_appl t)
+    void init_term(atermpp::aterm_appl t)
     {
-      aterm_appl::iterator i = t.begin();
-      m_data          = aterm_appl(*i++);
-      aterm_appl eqn_spec = *i++;
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_data          = atermpp::aterm_appl(*i++);
+      atermpp::aterm_appl eqn_spec = *i++;
       pbes_initializer init = pbes_initializer(*i);
 
       m_initial_state = init.variable();
@@ -216,7 +213,7 @@ class pbes
 
     /// Constructor.
     ///
-    pbes(aterm_appl t)
+    pbes(atermpp::aterm_appl t)
     {
       init_term(t);
       assert(core::detail::check_rule_PBES(term()));
@@ -310,11 +307,11 @@ class pbes
     ///
     void load(const std::string& filename)
     {
-      aterm t = atermpp::read_from_named_file(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(aterm_appl(t)))
+      atermpp::aterm t = atermpp::read_from_named_file(filename);
+      if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
         throw mcrl2::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 
-      init_term(aterm_appl(t));
+      init_term(atermpp::aterm_appl(t));
 
       if (!is_well_typed())
         throw mcrl2::runtime_error("Error in pbes::load(): term is not well typed");
@@ -337,7 +334,7 @@ class pbes
     /// Attempts to eliminate the free variables of the pbes, by substituting a default
     /// value for them. Variables for which no default value can be found are untouched.
     /// So, upon return the sequence of free variables of the pbes contains exactly those
-    /// variables for which no default value could be found. 
+    /// variables for which no default value could be found.
     /// Returns true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
@@ -378,7 +375,7 @@ class pbes
       if (!is_well_typed())
         throw mcrl2::runtime_error("Error in pbes::save(): term is not well typed");
 
-      aterm t = ATermAppl(*this);
+      atermpp::aterm t = ATermAppl(*this);
       if (binary)
       {
         return atermpp::write_to_named_saf_file(t, filename);
@@ -460,7 +457,7 @@ class pbes
     }
 
     /// Applies normalization to the equations of the pbes.
-    /// 
+    ///
     void normalize()
     {
       std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
@@ -485,7 +482,7 @@ class pbes
     }
 
     /// Applies a substitution to the pbes equations.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     void substitute(Substitution f)
@@ -680,22 +677,18 @@ std::set<data::data_variable> compute_free_variables(const pbes<Container>& p)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::pbes;
-
+namespace atermpp {
 template<typename Container>
-struct aterm_traits<pbes<Container> >
+struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 {
   typedef ATermAppl aterm_type;
-  static void protect(pbes<Container> t)   { t.protect(); }
-  static void unprotect(pbes<Container> t) { t.unprotect(); }
-  static void mark(pbes<Container> t)      { t.mark(); }
-  static ATerm term(pbes<Container> t)     { return t.term(); }
-  // static ATerm* ptr(pbes& t) undefined for pbes!
+  static void protect(mcrl2::pbes_system::pbes<Container> t)   { t.protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes<Container> t) { t.unprotect(); }
+  static void mark(mcrl2::pbes_system::pbes<Container> t)      { t.mark(); }
+  static ATerm term(mcrl2::pbes_system::pbes<Container> t)     { return t.term(); }
+  static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { return &t.term(); }
 };
-
-} // namespace atermpp
+}
 /// \endcond
 
 #endif // MCRL2_PBES_PBES_H

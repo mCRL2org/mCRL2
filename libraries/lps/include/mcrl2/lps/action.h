@@ -22,13 +22,10 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 /// \brief Represents an action.
 ///
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
-class action: public aterm_appl
+class action: public atermpp::aterm_appl
 {
   protected:
     action_label m_label;
@@ -38,16 +35,16 @@ class action: public aterm_appl
     /// Constructor.
     ///
     action()
-      : aterm_appl(mcrl2::core::detail::constructAction())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructAction())
     {}
 
     /// Constructor.
     ///
-    action(aterm_appl t)
-     : aterm_appl(t)
+    action(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_Action(m_term));
-      aterm_appl::iterator i = t.begin();
+      atermpp::aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
       m_arguments = data::data_expression_list(*i);
     }
@@ -55,7 +52,7 @@ class action: public aterm_appl
     /// Constructor.
     ///
     action(const action_label& label, const data::data_expression_list& arguments)
-     : aterm_appl(core::detail::gsMakeAction(label, arguments)),
+     : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
        m_label(label),
        m_arguments(arguments)
     {}
@@ -75,20 +72,20 @@ class action: public aterm_appl
     }
 
     /// Applies a substitution to this action and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     template <typename Substitution>
     action substitute(Substitution f)
     {
-      return action(f(aterm_appl(*this)));
+      return action(f(atermpp::aterm_appl(*this)));
     }     
 };
 
 /// singly linked list of actions
-typedef term_list<action> action_list;
+typedef atermpp::term_list<action> action_list;
 
 /// Returns true if the term t is an action
 inline
-bool is_action(aterm_appl t)
+bool is_action(atermpp::aterm_appl t)
 {
   return core::detail::gsIsAction(t);
 }
@@ -115,22 +112,7 @@ bool equal_signatures(const action& a, const action& b)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::action;
-
-template<>
-struct aterm_traits<action>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(action t)   { t.protect(); }
-  static void unprotect(action t) { t.unprotect(); }
-  static void mark(action t)      { t.mark(); }
-  static ATerm term(action t)     { return t.term(); }
-  static ATerm* ptr(action& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::action)
 /// \endcond
 
 #endif // MCRL2_LPS_ACTION_H

@@ -708,7 +708,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           assert(elist!=current_variable_instantiation.parameters().end());
           
           if (tool_options.opt_precompile_pbes)
-          { rewriter->setSubstitution(*vlist,(aterm)*elist);
+          { rewriter->setSubstitution(*vlist,(atermpp::aterm)*elist);
           }
           else
           { 

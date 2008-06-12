@@ -34,11 +34,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::read_from_named_file;
-using atermpp::aterm_traits;
-
 /// \brief Linear process specification.
 ///
 // sort ...;
@@ -54,7 +49,7 @@ using atermpp::aterm_traits;
 // init P(true, 0);
 //
 //<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
-class specification: public aterm_appl
+class specification: public atermpp::aterm_appl
 {
   protected:
     data::data_specification   m_data;
@@ -62,29 +57,29 @@ class specification: public aterm_appl
     linear_process       m_process;
     process_initializer  m_initial_process;
 
-    /// Initialize the specification with an aterm_appl.
+    /// Initialize the specification with an atermpp::aterm_appl.
     ///
-    void init_term(aterm_appl t)
+    void init_term(atermpp::aterm_appl t)
     {
-      m_term = aterm_traits<aterm_appl>::term(t);
-      aterm_appl::iterator i = t.begin();
-      m_data            = aterm_appl(*i++);
-      m_action_labels   = aterm_appl(*i++)(0);
-      m_process         = aterm_appl(*i++);
-      m_initial_process = aterm_appl(*i);
+      m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_data            = atermpp::aterm_appl(*i++);
+      m_action_labels   = atermpp::aterm_appl(*i++)(0);
+      m_process         = atermpp::aterm_appl(*i++);
+      m_initial_process = atermpp::aterm_appl(*i);
     }
 
   public:
     /// \brief Constructor.
     ///
     specification()
-      : aterm_appl(mcrl2::core::detail::constructProcSpec())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructProcSpec())
     { }
 
     /// \brief Constructor.
     ///
-    specification(aterm_appl t)
-      : aterm_appl(t)
+    specification(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_ProcSpec(m_term));
       init_term(t);
@@ -147,7 +142,7 @@ class specification: public aterm_appl
         throw mcrl2::runtime_error(((spec_stream == stdin)?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }
       //store the term locally
-      init_term(aterm_appl(spec_term));
+      init_term(atermpp::aterm_appl(spec_term));
       if (!is_well_typed())
         throw mcrl2::runtime_error("specification is not well typed (specification::load())");
     }
@@ -371,22 +366,7 @@ specification repair_free_variables(const specification& spec)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::specification;
-
-template<>
-struct aterm_traits<specification>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(specification t)   { t.protect(); }
-  static void unprotect(specification t) { t.unprotect(); }
-  static void mark(specification t)      { t.mark(); }
-  static ATerm term(specification t)     { return t.term(); }
-  static ATerm* ptr(specification& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::specification)
 /// \endcond
 
 #endif // MCRL2_LPS_SPECIFICATION_H

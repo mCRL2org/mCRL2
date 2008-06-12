@@ -52,7 +52,7 @@ data_expression_list instantiate_sort(data_operation_list fl, sort_expression s)
       sort_expression_list domains = domain_sorts(c->sort());
       
       data_expression_list domain_instance;
-      data_expression dec = data_expression((aterm_appl)(*c));    
+      data_expression dec = data_expression((atermpp::aterm_appl)(*c));    
       // instantiate each domain, then apply the constructor c
       // to obtain something of sort s
       for (sort_expression_list::iterator d = domains.begin(); d != domains.end(); d++)

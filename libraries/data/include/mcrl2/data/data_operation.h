@@ -24,10 +24,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::arg1;
-
 /// \brief An operation on data.
 ///
 class data_operation: public data_expression
@@ -41,7 +37,7 @@ class data_operation: public data_expression
 
     /// Constructor.
     ///             
-    data_operation(aterm_appl t)
+    data_operation(atermpp::aterm_appl t)
      : data_expression(t)
     {
       assert(core::detail::check_rule_OpId(m_term));
@@ -57,14 +53,14 @@ class data_operation: public data_expression
     ///
     core::identifier_string name() const
     {
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
     
     /// Returns the sort of the data_operation.
     ///
     sort_expression sort() const
     {
-      return arg2(*this);
+      return atermpp::arg2(*this);
     }
 
     /// Apply the data_operation to a list of arguments.
@@ -84,11 +80,11 @@ class data_operation: public data_expression
                                                             
 /// \brief singly linked list of data operations
 ///
-typedef term_list<data_operation> data_operation_list;
+typedef atermpp::term_list<data_operation> data_operation_list;
 
 /// \brief Returns true if the term t is a data operation
 inline
-bool is_data_operation(aterm_appl t)
+bool is_data_operation(atermpp::aterm_appl t)
 {
   return core::detail::gsIsOpId(t);
 }
@@ -98,22 +94,7 @@ bool is_data_operation(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_operation;
-
-template<>
-struct aterm_traits<data_operation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_operation t)   { t.protect(); }
-  static void unprotect(data_operation t) { t.unprotect(); }
-  static void mark(data_operation t)      { t.mark(); }
-  static ATerm term(data_operation t)     { return t.term(); }
-  static ATerm* ptr(data_operation& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_operation)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_OPERATION_H

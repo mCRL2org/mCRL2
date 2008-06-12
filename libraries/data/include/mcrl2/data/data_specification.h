@@ -28,9 +28,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-
 /// \cond INTERNAL_DOCS
 
 namespace detail {
@@ -57,7 +54,7 @@ namespace detail {
 ///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
-class data_specification: public aterm_appl
+class data_specification: public atermpp::aterm_appl
 {
 
   protected:
@@ -87,26 +84,26 @@ class data_specification: public aterm_appl
     /// Constructor.
     ///             
     data_specification()
-      : aterm_appl(core::detail::constructDataSpec())
+      : atermpp::aterm_appl(core::detail::constructDataSpec())
     {}
 
     /// Constructor.
     ///             
-    data_specification(aterm_appl t)
-      : aterm_appl(t)
+    data_specification(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_DataSpec(m_term));
-      aterm_appl::iterator i = t.begin();
-      m_sorts        = sort_expression_list(aterm_appl(*i++).argument(0));
-      m_constructors = data_operation_list(aterm_appl(*i++).argument(0));
-      m_mappings     = data_operation_list(aterm_appl(*i++).argument(0));
-      m_equations    = data_equation_list(aterm_appl(*i++).argument(0));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_sorts        = sort_expression_list(atermpp::aterm_appl(*i++).argument(0));
+      m_constructors = data_operation_list(atermpp::aterm_appl(*i++).argument(0));
+      m_mappings     = data_operation_list(atermpp::aterm_appl(*i++).argument(0));
+      m_equations    = data_equation_list(atermpp::aterm_appl(*i++).argument(0));
     }
 
     /// Constructor.
     ///             
     data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
-      : aterm_appl(core::detail::gsMakeDataSpec(
+      : atermpp::aterm_appl(core::detail::gsMakeDataSpec(
                       core::detail::gsMakeSortSpec(sorts),
                       core::detail::gsMakeConsSpec(constructors),
                       core::detail::gsMakeMapSpec(mappings),
@@ -206,7 +203,7 @@ class data_specification: public aterm_appl
                                                      detail::is_constant_operation());
       if (i != constructors().end())
       { 
-        result=data_expression((aterm_appl)*i);
+        result=data_expression((atermpp::aterm_appl)*i);
         default_expression_map.insert(std::make_pair(s,result));
         return result;
       }
@@ -215,7 +212,7 @@ class data_specification: public aterm_appl
       i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
       if (i != mappings().end())
       { 
-        result=data_expression((aterm_appl)*i);
+        result=data_expression((atermpp::aterm_appl)*i);
         default_expression_map.insert(std::make_pair(s,result));
         return result;
       }
@@ -238,7 +235,7 @@ class data_specification: public aterm_appl
             if (j==argument_sorts.end())
             { // a suitable set of arguments is found
               arguments=reverse(arguments);
-              result=data_application((aterm_appl)*i,arguments);
+              result=data_application((atermpp::aterm_appl)*i,arguments);
               default_expression_map.insert(std::make_pair(s,result));
               return result;
             }
@@ -262,7 +259,7 @@ class data_specification: public aterm_appl
             if (j==argument_sorts.end())
             { // a suitable set of arguments is found
               arguments=reverse(arguments);
-              result=data_application((aterm_appl)*i,arguments);
+              result=data_application((atermpp::aterm_appl)*i,arguments);
               default_expression_map.insert(std::make_pair(s,result));
               return result;
             }
@@ -364,22 +361,7 @@ data_specification set_equations(data_specification s, data_equation_list equati
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_specification;
-
-template<>
-struct aterm_traits<data_specification>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_specification t)   { t.protect(); }
-  static void unprotect(data_specification t) { t.unprotect(); }
-  static void mark(data_specification t)      { t.mark(); }
-  static ATerm term(data_specification t)     { return t.term(); }
-  static ATerm* ptr(data_specification& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_specification)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

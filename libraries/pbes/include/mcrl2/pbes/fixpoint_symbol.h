@@ -24,33 +24,30 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-
 /// \brief Pbes fixpoint symbol (mu or nu).
 ///
 // <FixPoint>     ::= Mu
 //                  | Nu
-class fixpoint_symbol: public aterm_appl
+class fixpoint_symbol: public atermpp::aterm_appl
 {
   public:
     /// Constructor.
     ///
     fixpoint_symbol()
-      : aterm_appl(core::detail::constructFixPoint())
+      : atermpp::aterm_appl(core::detail::constructFixPoint())
     {}
 
     /// Constructor.
     ///
-    fixpoint_symbol(aterm_appl t)
-      : aterm_appl(t)
+    fixpoint_symbol(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_FixPoint(m_term));
     }
     
     /// Assignment operator.
     ///
-    fixpoint_symbol& operator=(aterm t)
+    fixpoint_symbol& operator=(atermpp::aterm t)
     {
       m_term = t;
       return *this;
@@ -90,22 +87,7 @@ class fixpoint_symbol: public aterm_appl
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::fixpoint_symbol;
-
-template<>
-struct aterm_traits<fixpoint_symbol>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(fixpoint_symbol t)   { t.protect(); }
-  static void unprotect(fixpoint_symbol t) { t.unprotect(); }
-  static void mark(fixpoint_symbol t)      { t.mark(); }
-  static ATerm term(fixpoint_symbol t)     { return t.term(); }
-  static ATerm* ptr(fixpoint_symbol& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::fixpoint_symbol)
 /// \endcond
 
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

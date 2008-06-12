@@ -55,22 +55,22 @@ struct sequence_substitution
       : m_assignments(assignments)
     {}
     
-    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
       {
-        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
       }
 
       data_variable v(t);
       typename Container::const_iterator i = std::find_if(m_assignments.begin(), m_assignments.end(), compare_assignment_lhs(v));
       if (i != m_assignments.end())
       {
-        return std::pair<aterm_appl, bool>(i->second, false); // false means: don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(i->second, false); // false means: don't continue the recursion
       }
       else
       {
-        return std::pair<aterm_appl, bool>(t, false);
+        return std::pair<atermpp::aterm_appl, bool>(t, false);
       }
     }
   };
@@ -81,7 +81,7 @@ struct sequence_substitution
   
   /// Applies the assignments to the term t and returns the result.
   ///
-  aterm operator()(aterm t) const
+  atermpp::aterm operator()(atermpp::aterm t) const
   {
     return atermpp::partial_replace(t, sequence_substitution_helper(m_assignments));
   }

@@ -47,7 +47,7 @@ struct data_variable_collector
       m_dest(dest)
   {}
   
-  bool operator()(aterm_appl t)
+  bool operator()(atermpp::aterm_appl t)
   {
     if (is_data_variable(t))
     {

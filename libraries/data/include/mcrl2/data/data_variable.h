@@ -25,10 +25,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::arg1;
-
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
 /// \brief data variable
@@ -45,7 +41,7 @@ class data_variable: public data_expression
 
     /// Constructor.
     ///             
-    data_variable(aterm_appl t)
+    data_variable(atermpp::aterm_appl t)
      : data_expression(t)
     {
       assert(core::detail::check_rule_DataVarId(m_term));
@@ -79,24 +75,24 @@ class data_variable: public data_expression
     ///
     core::identifier_string name() const
     {
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// Returns the sort of the data_variable.
     ///
     data::sort_expression sort() const
     {
-      return arg2(*this);
+      return atermpp::arg2(*this);
     }
   };
                                                             
 /// \brief singly linked list of data variables
 ///
-typedef term_list<data_variable> data_variable_list;
+typedef atermpp::term_list<data_variable> data_variable_list;
 
 /// \brief Returns true if the term t is a data variable
 inline
-bool is_data_variable(aterm_appl t)
+bool is_data_variable(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataVarId(t);
 }
@@ -113,22 +109,7 @@ data_expression_list make_data_expression_list(data_variable_list l)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_variable;
-
-template<>
-struct aterm_traits<data_variable>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_variable t)   { t.protect(); }
-  static void unprotect(data_variable t) { t.unprotect(); }
-  static void mark(data_variable t)      { t.mark(); }
-  static ATerm term(data_variable t)     { return t.term(); }
-  static ATerm* ptr(data_variable& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_variable)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_VARIABLE_H

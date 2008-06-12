@@ -79,7 +79,7 @@ namespace detail {
     ATermAppl result = linearise_std(spec, options);
     if (result == NULL)
       throw mcrl2::runtime_error("linearisation error");
-    return aterm_appl(result);
+    return atermpp::aterm_appl(result);
   }
 
   inline

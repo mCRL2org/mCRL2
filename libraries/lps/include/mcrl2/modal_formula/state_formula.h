@@ -28,11 +28,6 @@ namespace mcrl2 {
 
 namespace modal {
 
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-using atermpp::aterm;
-using atermpp::term_list;
-
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula
 /// \brief state formula
@@ -55,21 +50,21 @@ using atermpp::term_list;
 //                 | StateVar(<String>, <DataExpr>*)
 //                 | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
 //                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
-class state_formula: public aterm_appl
+class state_formula: public atermpp::aterm_appl
 {
   public:
     state_formula()
-      : aterm_appl(mcrl2::core::detail::constructStateFrm())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructStateFrm())
     {}
 
     state_formula(ATermAppl t)
-      : aterm_appl(aterm_appl(t))
+      : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
     }
 
-    state_formula(aterm_appl t)
-      : aterm_appl(t)
+    state_formula(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
     }
@@ -79,11 +74,11 @@ class state_formula: public aterm_appl
     bool has_time() const;
 
     /// \brief Applies a substitution to this state formula and returns the result
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     template <typename Substitution>
     state_formula substitute(Substitution f) const
     {
-      return state_formula(f(aterm(*this)));
+      return state_formula(f(atermpp::aterm(*this)));
     }     
 };
 
@@ -91,18 +86,11 @@ class state_formula: public aterm_appl
 // state_formula_list
 /// \brief singly linked list of state formulas
 ///
-typedef term_list<state_formula> state_formula_list;
+typedef atermpp::term_list<state_formula> state_formula_list;
 
 /// Accessor functions and predicates for state formulas.
 namespace state_frm
 { 
-
-using atermpp::arg1;
-using atermpp::arg2;
-using atermpp::arg3;
-using atermpp::list_arg1;
-using atermpp::list_arg2;
-
   /// \brief Returns the expression false
   inline
   state_formula false_()
@@ -227,58 +215,58 @@ using atermpp::list_arg2;
   }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(aterm_appl t) { return core::detail::gsIsDataExpr(t); }
+  inline bool is_data(atermpp::aterm_appl t) { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(aterm_appl t) { return core::detail::gsIsStateTrue(t); }
+  inline bool is_true(atermpp::aterm_appl t) { return core::detail::gsIsStateTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(aterm_appl t) { return core::detail::gsIsStateFalse(t); }
+  inline bool is_false(atermpp::aterm_appl t) { return core::detail::gsIsStateFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(aterm_appl t) { return core::detail::gsIsStateNot(t); }
+  inline bool is_not(atermpp::aterm_appl t) { return core::detail::gsIsStateNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(aterm_appl t) { return core::detail::gsIsStateAnd(t); }
+  inline bool is_and(atermpp::aterm_appl t) { return core::detail::gsIsStateAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(aterm_appl t) { return core::detail::gsIsStateOr(t); }
+  inline bool is_or(atermpp::aterm_appl t) { return core::detail::gsIsStateOr(t); }
 
   /// \brief Returns true if the term t is an implication expression
-  inline bool is_imp(aterm_appl t) { return core::detail::gsIsStateImp(t); }
+  inline bool is_imp(atermpp::aterm_appl t) { return core::detail::gsIsStateImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(aterm_appl t) { return core::detail::gsIsStateForall(t); }
+  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsStateForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(aterm_appl t) { return core::detail::gsIsStateExists(t); }
+  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsStateExists(t); }
 
   /// \brief Returns true if the term t is a must expression
-  inline bool is_must(aterm_appl t) { return core::detail::gsIsStateMust(t); }
+  inline bool is_must(atermpp::aterm_appl t) { return core::detail::gsIsStateMust(t); }
 
   /// \brief Returns true if the term t is a must expression
-  inline bool is_may(aterm_appl t) { return core::detail::gsIsStateMay(t); }
+  inline bool is_may(atermpp::aterm_appl t) { return core::detail::gsIsStateMay(t); }
 
   /// \brief Returns true if the term t is a delay expression
-  inline bool is_delay(aterm_appl t) { return core::detail::gsIsStateDelay(t); }
+  inline bool is_delay(atermpp::aterm_appl t) { return core::detail::gsIsStateDelay(t); }
 
   /// \brief Returns true if the term t is a timed delay expression
-  inline bool is_delay_timed(aterm_appl t) { return core::detail::gsIsStateDelayTimed(t); }
+  inline bool is_delay_timed(atermpp::aterm_appl t) { return core::detail::gsIsStateDelayTimed(t); }
 
   /// \brief Returns true if the term t is a yaled expression
-  inline bool is_yaled(aterm_appl t) { return core::detail::gsIsStateYaled(t); }
+  inline bool is_yaled(atermpp::aterm_appl t) { return core::detail::gsIsStateYaled(t); }
 
   /// \brief Returns true if the term t is a timed yaled expression
-  inline bool is_yaled_timed(aterm_appl t) { return core::detail::gsIsStateYaledTimed(t); }
+  inline bool is_yaled_timed(atermpp::aterm_appl t) { return core::detail::gsIsStateYaledTimed(t); }
 
   /// \brief Returns true if the term t is a variable expression
-  inline bool is_var(aterm_appl t) { return core::detail::gsIsStateVar(t); }
+  inline bool is_var(atermpp::aterm_appl t) { return core::detail::gsIsStateVar(t); }
 
   /// \brief Returns true if the term t is a nu expression
-  inline bool is_nu(aterm_appl t) { return core::detail::gsIsStateNu(t); }
+  inline bool is_nu(atermpp::aterm_appl t) { return core::detail::gsIsStateNu(t); }
 
   /// \brief Returns true if the term t is a mu expression
-  inline bool is_mu(aterm_appl t) { return core::detail::gsIsStateMu(t); }
+  inline bool is_mu(atermpp::aterm_appl t) { return core::detail::gsIsStateMu(t); }
 
   /// \brief Returns the argument of a data expression
   inline
@@ -295,18 +283,18 @@ using atermpp::list_arg2;
   {
     if (core::detail::gsIsStateNot(t))
     {
-      return arg1(t);
+      return atermpp::arg1(t);
     }
     if (core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t))
     {
-      return arg3(t);
+      return atermpp::arg3(t);
     }
     assert(core::detail::gsIsStateExists(t) ||
            core::detail::gsIsStateForall(t) ||
            core::detail::gsIsStateMust(t)   ||
            core::detail::gsIsStateMay(t)
           );
-    return arg2(t);   
+    return atermpp::arg2(t);   
   }
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
@@ -314,7 +302,7 @@ using atermpp::list_arg2;
   state_formula left(state_formula t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
@@ -322,7 +310,7 @@ using atermpp::list_arg2;
   state_formula right(state_formula t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
-    return arg2(t);
+    return atermpp::arg2(t);
   }
   
   /// \brief Returns the variables of a quantification expression
@@ -330,7 +318,7 @@ using atermpp::list_arg2;
   data::data_variable_list var(state_formula t)
   {
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
-    return list_arg1(t);
+    return atermpp::list_arg1(t);
   }
   
   /// \brief Returns the time of delay or yaled expression
@@ -338,7 +326,7 @@ using atermpp::list_arg2;
   data::data_expression time(state_formula t)
   {
     assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the name of a variable expression
@@ -349,7 +337,7 @@ using atermpp::list_arg2;
            core::detail::gsIsStateMu(t)  ||
            core::detail::gsIsStateNu(t)
           );
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the parameters of a variable expression
@@ -357,7 +345,7 @@ using atermpp::list_arg2;
   data::data_expression_list param(state_formula t)
   {
     assert(core::detail::gsIsStateVar(t));
-    return list_arg2(t);
+    return atermpp::list_arg2(t);
   }
   
   /// \brief Returns the parameters of a mu or nu expression
@@ -365,7 +353,7 @@ using atermpp::list_arg2;
   data::data_assignment_list ass(state_formula t)
   {
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-    return list_arg2(t);
+    return atermpp::list_arg2(t);
   }
   
   /// \brief Returns the regular formula of a must or may expression
@@ -373,13 +361,13 @@ using atermpp::list_arg2;
   regular_formula act(state_formula t)
   {
     assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \internal
   struct is_timed_subterm
   {
-    bool operator()(aterm_appl t) const
+    bool operator()(atermpp::aterm_appl t) const
     {
       return is_delay_timed(t) || is_yaled_timed(t) || act_frm::is_at(t);
     }
@@ -390,29 +378,15 @@ using atermpp::list_arg2;
   inline
   bool state_formula::has_time() const
   {
-    return atermpp::find_if(*this, state_frm::is_timed_subterm()) != aterm();
+    return atermpp::find_if(*this, state_frm::is_timed_subterm()) != atermpp::aterm();
   }
 
 } // namespace modal
 
 } // namespace mcrl2
 
-/// \internal
-namespace atermpp
-{
-using mcrl2::modal::state_formula;
-
-template<>
-struct aterm_traits<state_formula>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(state_formula t)   { t.protect(); }
-  static void unprotect(state_formula t) { t.unprotect(); }
-  static void mark(state_formula t)      { t.mark(); }
-  static ATerm term(state_formula t)     { return t.term(); }
-  static ATerm* ptr(state_formula& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::state_formula)
+/// \endcond
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

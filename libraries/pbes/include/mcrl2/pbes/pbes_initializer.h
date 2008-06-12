@@ -25,11 +25,9 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm_appl;
-
 /// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
-class pbes_initializer: public aterm_appl
+class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
     data::data_variable_list   m_free_variables;
@@ -39,7 +37,7 @@ class pbes_initializer: public aterm_appl
     /// Constructor.
     ///
     pbes_initializer()
-      : aterm_appl(core::detail::constructPBInit())
+      : atermpp::aterm_appl(core::detail::constructPBInit())
     {}
 
     /// Constructor.
@@ -47,7 +45,7 @@ class pbes_initializer: public aterm_appl
     pbes_initializer(data::data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
-     : aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
+     : atermpp::aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
        m_free_variables(free_variables),
        m_variable(variable)
     {
@@ -55,11 +53,11 @@ class pbes_initializer: public aterm_appl
 
     /// Constructor.
     ///
-    pbes_initializer(aterm_appl t)
-      : aterm_appl(t)
+    pbes_initializer(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_term_PBInit(m_term));
-      aterm_appl::iterator i   = t.begin();
+      atermpp::aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_variable = propositional_variable_instantiation(*i);
     }
@@ -79,12 +77,12 @@ class pbes_initializer: public aterm_appl
     }
 
     /// Applies a substitution to this pbes initializer and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     pbes_initializer substitute(Substitution f)
     {
-      return pbes_initializer(f(aterm(*this)));
+      return pbes_initializer(f(atermpp::aterm(*this)));
     }     
 
     /// Returns true (there are no well typedness checks defined yet).
@@ -100,22 +98,7 @@ class pbes_initializer: public aterm_appl
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::pbes_initializer;
-
-template<>
-struct aterm_traits<pbes_initializer>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(pbes_initializer t)   { t.protect(); }
-  static void unprotect(pbes_initializer t) { t.unprotect(); }
-  static void mark(pbes_initializer t)      { t.mark(); }
-  static ATerm term(pbes_initializer t)     { return t.term(); }
-  static ATerm* ptr(pbes_initializer& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_initializer)
 /// \endcond
 
 #endif // MCRL2_PBES_PBES_INITIALIZER_H

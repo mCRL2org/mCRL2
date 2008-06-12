@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -25,15 +26,11 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 class sort_expression;
 
 /// \brief singly linked list of sort expressions
 ///
-typedef term_list<sort_expression> sort_expression_list;
+typedef atermpp::term_list<sort_expression> sort_expression_list;
 
 /// \brief sort expression.
 ///
@@ -48,27 +45,27 @@ typedef term_list<sort_expression> sort_expression_list;
 //                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
 //
 //<SortId>       ::= SortId(<String>)
-class sort_expression: public aterm_appl
+class sort_expression: public atermpp::aterm_appl
 {
   public:
     /// Constructor.
     ///
     sort_expression()
-      : aterm_appl(core::detail::constructSortId())
+      : atermpp::aterm_appl(core::detail::constructSortId())
     {}
 
     /// Constructor.
     ///
     sort_expression(ATermAppl t)
-      : aterm_appl(t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_SortExpr(m_term));
     }
 
     /// Constructor.
     ///
-    sort_expression(aterm_appl t)
-      : aterm_appl(t)
+    sort_expression(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_SortExpr(m_term));
     }
@@ -76,7 +73,7 @@ class sort_expression: public aterm_appl
     /// Constructor.
     ///
     sort_expression(std::string s)
-      : aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
+      : atermpp::aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
     
     /// Returns true if it is a sort_expression of type A -> B.
@@ -89,7 +86,7 @@ class sort_expression: public aterm_appl
 
 /// \brief Returns true if the term t is a sort_expression
 inline
-bool is_sort_expression(aterm_appl t)
+bool is_sort_expression(atermpp::aterm_appl t)
 {
   return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
 }
@@ -186,19 +183,19 @@ namespace sort_expr {
   }
 
   /// \brief Returns true if the term t equals the sort_expression real
-  inline bool is_real(aterm_appl t) { return t == real(); }
+  inline bool is_real(atermpp::aterm_appl t) { return t == real(); }
 
   /// \brief Returns true if the term t equals the sort_expression int
-  inline bool is_int (aterm_appl t) { return t == int_(); }
+  inline bool is_int (atermpp::aterm_appl t) { return t == int_(); }
 
   /// \brief Returns true if the term t equals the sort_expression pos
-  inline bool is_pos (aterm_appl t) { return t == pos(); }
+  inline bool is_pos (atermpp::aterm_appl t) { return t == pos(); }
 
   /// \brief Returns true if the term t equals the sort_expression nat
-  inline bool is_nat (aterm_appl t) { return t == nat(); }                                 
+  inline bool is_nat (atermpp::aterm_appl t) { return t == nat(); }                                 
 
   /// \brief Returns true if the term t equals the sort_expression bool
-  inline bool is_bool(aterm_appl t) { return t == bool_(); }                                 
+  inline bool is_bool(atermpp::aterm_appl t) { return t == bool_(); }                                 
 
 } // namespace sort_expr
 
@@ -207,22 +204,7 @@ namespace sort_expr {
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::sort_expression;
-
-template<>
-struct aterm_traits<sort_expression>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(sort_expression t)   { t.protect(); }
-  static void unprotect(sort_expression t) { t.unprotect(); }
-  static void mark(sort_expression t)      { t.mark(); }
-  static ATerm term(sort_expression t)     { return t.term(); }
-  static ATerm* ptr(sort_expression& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::sort_expression)
 /// \endcond
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H

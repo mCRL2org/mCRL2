@@ -30,8 +30,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-
 /// \brief LPS summand.
 ///
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
@@ -41,7 +39,7 @@ using atermpp::aterm_appl;
 //                 | Delta
 // <MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
 //                  | MultAct(<Action>*)                                    (+ tc)
-class summand: public aterm_appl
+class summand: public atermpp::aterm_appl
 {
   protected:
     data::data_variable_list   m_summation_variables;
@@ -55,20 +53,20 @@ class summand: public aterm_appl
     /// Constructor.
     ///
     summand()
-      : aterm_appl(mcrl2::core::detail::constructLinearProcessSummand())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessSummand())
     {}
 
     /// Constructor.
     ///
-    summand(aterm_appl t)
-     : aterm_appl(t)
+    summand(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_LinearProcessSummand(m_term));
-      aterm_appl::iterator i = t.begin();
+      atermpp::aterm_appl::iterator i = t.begin();
 
       m_summation_variables = data::data_variable_list(*i++);
       m_condition           = data::data_expression(*i++);
-      aterm_appl x          = *i++;
+      atermpp::aterm_appl x          = *i++;
       m_delta = core::detail::gsIsDelta(x);
       if (!m_delta)
       {
@@ -87,7 +85,7 @@ class summand: public aterm_appl
                 action_list          actions,
                 data::data_assignment_list assignments
                )
-      : aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                core::detail::gsMakeNil(),
@@ -110,7 +108,7 @@ class summand: public aterm_appl
                 data::data_expression      time,
                 data::data_assignment_list assignments
                )
-      : aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                time,
@@ -203,7 +201,7 @@ class summand: public aterm_appl
     }
 
     /// Applies a substitution to this summand and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     summand substitute(Substitution f) const
@@ -354,29 +352,14 @@ summand set_assignments(summand s, data::data_assignment_list assignments)
 }
 
 /// \brief singly linked list of summands
-typedef term_list<summand> summand_list;
+typedef atermpp::term_list<summand> summand_list;
 
 } // namespace lps
 
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::summand;
-
-template<>
-struct aterm_traits<summand>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(summand t)   { t.protect(); }
-  static void unprotect(summand t) { t.unprotect(); }
-  static void mark(summand t)      { t.mark(); }
-  static ATerm term(summand t)     { return t.term(); }
-  static ATerm* ptr(summand& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::summand)
 /// \endcond
 
 #endif // MCRL2_LPS_SUMMAND_H

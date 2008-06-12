@@ -24,16 +24,9 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::arg1;
-using atermpp::arg2;
-using atermpp::list_arg1;
-using atermpp::list_arg2;
-
 // prototype
 inline
-bool is_bes(aterm_appl t);
+bool is_bes(atermpp::aterm_appl t);
 
 /// \brief pbes expression
 ///
@@ -47,25 +40,25 @@ bool is_bes(aterm_appl t);
 //                  | PBESForall(<DataVarId>+, <PBExpr>)
 //                  | PBESExists(<DataVarId>+, <PBExpr>)
 //                  | <PropVarInst>
-class pbes_expression: public aterm_appl
+class pbes_expression: public atermpp::aterm_appl
 {
   public:
     /// Constructor.
     ///
     pbes_expression()
-      : aterm_appl(core::detail::constructPBExpr())
+      : atermpp::aterm_appl(core::detail::constructPBExpr())
     {}
 
     /// Constructor.
     ///
-    pbes_expression(aterm_appl term)
-      : aterm_appl(term)
+    pbes_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(m_term));
     }
 
     /// Applies a substitution to this pbes expression and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     pbes_expression substitute(Substitution f) const
@@ -83,7 +76,7 @@ class pbes_expression: public aterm_appl
 
 /// \brief singly linked list of data expressions
 ///
-typedef term_list<pbes_expression> pbes_expression_list;
+typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
 /// Accessor functions and predicates for pbes expressions.
 namespace pbes_expr {
@@ -153,7 +146,7 @@ namespace accessors {
   data::data_expression val(pbes_expression t)
   {
     assert(core::detail::gsIsDataExpr(t));
-    return aterm_appl(t);
+    return atermpp::aterm_appl(t);
   }
 
   /// \brief Returns the pbes expression argument of expressions of type not,
@@ -163,13 +156,13 @@ namespace accessors {
   {
     if (pbes_expr::is_pbes_not(t))
     {
-      return arg1(t);
+      return atermpp::arg1(t);
     }
     assert(data::data_expr::is_not(t) ||
            pbes_expr::is_forall(t)    ||
            pbes_expr::is_exists(t)
           );
-    return arg2(t); 
+    return atermpp::arg2(t); 
   }
 
   /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -177,7 +170,7 @@ namespace accessors {
   pbes_expression left(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the right hand side of an expression of type and, or or imp.
@@ -185,7 +178,7 @@ namespace accessors {
   pbes_expression right(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
-    return arg2(t);
+    return atermpp::arg2(t);
   }
   
   /// \brief Returns the variables of a quantification expression
@@ -193,7 +186,7 @@ namespace accessors {
   data::data_variable_list var(pbes_expression t)
   {
     assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
-    return list_arg1(t);
+    return atermpp::list_arg1(t);
   }
   
   /// \brief Returns the name of a propositional variable expression
@@ -201,7 +194,7 @@ namespace accessors {
   core::identifier_string name(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the parameters of a propositional variable instantiation.
@@ -209,7 +202,7 @@ namespace accessors {
   data::data_expression_list param(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
-    return list_arg2(t);
+    return atermpp::list_arg2(t);
   }
 } // accessors
 
@@ -415,7 +408,7 @@ namespace pbes_expr_optimized {
 
 /// \brief Returns true if the pbes expression t is a boolean expression
 inline
-bool is_bes(aterm_appl t)
+bool is_bes(atermpp::aterm_appl t)
 {
   using namespace pbes_expr;
   using namespace accessors;
@@ -450,22 +443,7 @@ bool is_bes(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::pbes_expression;
-
-template<>
-struct aterm_traits<pbes_expression>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(pbes_expression t)   { t.protect(); }
-  static void unprotect(pbes_expression t) { t.unprotect(); }
-  static void mark(pbes_expression t)      { t.mark(); }
-  static ATerm term(pbes_expression t)     { return t.term(); }
-  static ATerm* ptr(pbes_expression& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_expression)
 /// \endcond
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

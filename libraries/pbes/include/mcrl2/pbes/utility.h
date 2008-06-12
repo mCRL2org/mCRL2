@@ -62,13 +62,13 @@ static bool is_false_in_internal_rewrite_format(data::data_expression d,Rewriter
 
 struct compare_data_variableL
 {
-  aterm v;
+  atermpp::aterm v;
 
   compare_data_variableL(data::data_variable v_)
-    : v(aterm_appl(v_))
+    : v(atermpp::aterm_appl(v_))
   {}
 
-  bool operator()(aterm t) const
+  bool operator()(atermpp::aterm t) const
   {
     return v == t;
   }
@@ -76,9 +76,9 @@ struct compare_data_variableL
 
 //  variable v occurs in l.
 //
-static bool occurs_in_varL(aterm_appl l, data::data_variable v)
+static bool occurs_in_varL(atermpp::aterm_appl l, data::data_variable v)
 {
-  return find_if(l, compare_data_variableL(v)) != aterm();
+  return find_if(l, compare_data_variableL(v)) != atermpp::aterm();
 }
 
 
@@ -326,7 +326,7 @@ inline pbes_expression give_the_instantiated_rhs(
     assert(elist!=current_variable_instantiation.parameters().end());
 
     if (use_internal_rewriter_format)
-    { rewriter->setSubstitution(*vlist,(aterm)*elist);
+    { rewriter->setSubstitution(*vlist,(atermpp::aterm)*elist);
     }
     else
     { 
@@ -724,7 +724,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   { // p is a data::data_expression
     if (use_internal_rewrite_format)  
     {
-      data::data_expression d = (data::data_expression)rewriter->rewriteInternal((aterm)p);
+      data::data_expression d = (data::data_expression)rewriter->rewriteInternal((atermpp::aterm)p);
       if (is_true_in_internal_rewrite_format(d,rewriter))   
       { result = pbes_expr::true_();
       }

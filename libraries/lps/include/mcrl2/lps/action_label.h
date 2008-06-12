@@ -22,15 +22,12 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
 /// \brief Represents a label of an action.
 ///
 // <ActId>        ::= ActId(<String>, <SortExpr>*)
-class action_label: public aterm_appl
+class action_label: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
@@ -40,16 +37,16 @@ class action_label: public aterm_appl
     /// Constructor.
     ///
     action_label()
-      : aterm_appl(mcrl2::core::detail::constructActId())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructActId())
     {}
 
     /// Constructor.
     ///
-    action_label(aterm_appl t)
-     : aterm_appl(t)
+    action_label(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_ActId(m_term));
-      aterm_appl::iterator i = t.begin();
+      atermpp::aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;
     }
@@ -57,7 +54,7 @@ class action_label: public aterm_appl
     /// Constructor.
     ///
     action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
-     : aterm_appl(core::detail::gsMakeActId(name, sorts)),
+     : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}
@@ -77,7 +74,7 @@ class action_label: public aterm_appl
     }
 
     /// Applies a substitution to this action label and returns the result
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     action_label substitute(Substitution f)
@@ -87,11 +84,11 @@ class action_label: public aterm_appl
 };
 
 /// \brief singly linked list of action labels
-typedef term_list<action_label> action_label_list;
+typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label
 inline
-bool is_action_label(aterm_appl t)
+bool is_action_label(atermpp::aterm_appl t)
 {
   return core::detail::gsIsActId(t);
 };
@@ -101,22 +98,7 @@ bool is_action_label(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::action_label;
-
-template<>
-struct aterm_traits<action_label>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(action_label t)   { t.protect(); }
-  static void unprotect(action_label t) { t.unprotect(); }
-  static void mark(action_label t)      { t.mark(); }
-  static ATerm term(action_label t)     { return t.term(); }
-  static ATerm* ptr(action_label& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::action_label)
 /// \endcond
 
 #endif // MCRL2_LPS_ACTION_LABEL_H

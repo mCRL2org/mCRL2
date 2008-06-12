@@ -25,13 +25,9 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::aterm;
-
 /// \brief data_assignment is an assignment of a data expression to a data variable.
 ///
-class data_assignment: public aterm_appl
+class data_assignment: public atermpp::aterm_appl
 {
   protected:
     data_variable   m_lhs;         // left hand side of the assignment
@@ -41,16 +37,16 @@ class data_assignment: public aterm_appl
     /// Constructor.
     ///             
     data_assignment()
-      : aterm_appl(core::detail::constructPBExpr())
+      : atermpp::aterm_appl(core::detail::constructPBExpr())
     {}
 
     /// Constructor.
     ///             
-    data_assignment(aterm_appl t)
-     : aterm_appl(t)
+    data_assignment(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_DataVarIdInit(m_term));
-      aterm_appl::iterator i = t.begin();
+      atermpp::aterm_appl::iterator i = t.begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
     }
@@ -59,7 +55,7 @@ class data_assignment: public aterm_appl
     ///             
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
+       atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -80,9 +76,9 @@ class data_assignment: public aterm_appl
 
     /// Applies the assignment to t and returns the result.
     ///
-    aterm operator()(aterm t) const
+    atermpp::aterm operator()(atermpp::aterm t) const
     {
-      return atermpp::replace(t, aterm(m_lhs), aterm(m_rhs));
+      return atermpp::replace(t, atermpp::aterm(m_lhs), atermpp::aterm(m_rhs));
     }
 
     /// Returns the left hand side of the assignment.
@@ -104,11 +100,11 @@ class data_assignment: public aterm_appl
 // data_assignment_list
 /// \brief singly linked list of data assignments
 ///
-typedef term_list<data_assignment> data_assignment_list;
+typedef atermpp::term_list<data_assignment> data_assignment_list;
 
 /// \brief Returns true if the term t is a data assignment
 inline
-bool is_data_assignment(aterm_appl t)
+bool is_data_assignment(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataVarIdInit(t);
 }
@@ -176,20 +172,20 @@ struct assignment_list_substitution
       : l(l_)
     {}
     
-    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
       {
-        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
       }
       data_assignment_list::iterator i = std::find_if(l.begin(), l.end(), compare_assignment_lhs(t));
       if (i == l.end())
       {
-        return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
       }
       else
       {
-        return std::pair<aterm_appl, bool>(i->rhs(), false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(i->rhs(), false); // don't continue the recursion
       }
     }
   };
@@ -203,7 +199,7 @@ struct assignment_list_substitution
   
   /// Applies the assignments to the term t and returns the result.
   ///
-  aterm operator()(aterm t) const
+  atermpp::aterm operator()(atermpp::aterm t) const
   {
     return partial_replace(t, assignment_list_substitution_helper(m_assignments));
   }
@@ -220,22 +216,7 @@ struct assignment_list_substitution
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_assignment;
-
-template<>
-struct aterm_traits<data_assignment>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_assignment t)   { t.protect(); }
-  static void unprotect(data_assignment t) { t.unprotect(); }
-  static void mark(data_assignment t)      { t.mark(); }
-  static ATerm term(data_assignment t)     { return t.term(); }
-  static ATerm* ptr(data_assignment& t)    { return &t.term(); }
-};
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_assignment)
 /// \endcond
-
-} // namespace atermpp
 
 #endif // MCRL2_DATA_DATA_ASSIGNMENT_H

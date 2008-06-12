@@ -40,11 +40,6 @@ namespace pbes_system {
 
 namespace detail {
 
-using atermpp::aterm_appl;
-using atermpp::make_list;
-using atermpp::make_substitution;
-using modal::state_formula;
-
 /*
 inline
 std::string pp(std::set<data::data_variable> s)
@@ -70,7 +65,7 @@ struct prop_var_visitor
     : m_identifiers(identifiers)
   {}
 
-  bool operator()(aterm_appl t)
+  bool operator()(atermpp::aterm_appl t)
   {
     bool result = true;
     if (is_propositional_variable(t))
@@ -98,7 +93,7 @@ std::set<core::identifier_string> propositional_variable_names(Term t)
 
 /// \brief Returns the variables corresponding to ass(f)
 inline
-data::data_variable_list mu_variables(state_formula f)
+data::data_variable_list mu_variables(modal::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
   data::data_assignment_list l = modal::state_frm::ass(f);
@@ -112,7 +107,7 @@ data::data_variable_list mu_variables(state_formula f)
 
 /// \brief Returns the data expressions corresponding to ass(f)
 inline
-data::data_expression_list mu_expressions(state_formula f)
+data::data_expression_list mu_expressions(modal::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
   data::data_assignment_list l = modal::state_frm::ass(f);

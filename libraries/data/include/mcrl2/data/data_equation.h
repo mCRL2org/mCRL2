@@ -23,10 +23,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::aterm;
-
 /// \brief A conditional data equation. The equality holds if
 /// the condition evaluates to true. A declaration of variables
 /// that can be used in the expressions is included. The condition
@@ -35,7 +31,7 @@ using atermpp::aterm;
 ///
 //<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
 //                     <DataExpr>, <DataExpr>)
-class data_equation: public aterm_appl
+class data_equation: public atermpp::aterm_appl
 {
   protected:
     data_variable_list m_variables;
@@ -49,16 +45,16 @@ class data_equation: public aterm_appl
     /// Constructor.
     ///             
     data_equation()
-      : aterm_appl(core::detail::constructDataEqn())
+      : atermpp::aterm_appl(core::detail::constructDataEqn())
     {}
 
     /// Constructor.
     ///             
-    data_equation(aterm_appl t)
-     : aterm_appl(t)
+    data_equation(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_DataEqn(m_term));
-      aterm_appl::iterator i = t.begin();
+      atermpp::aterm_appl::iterator i = t.begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
@@ -73,7 +69,7 @@ class data_equation: public aterm_appl
                   data_expression    lhs,
                   data_expression    rhs
                  )
-     : aterm_appl(core::detail::gsMakeDataEqn(variables, condition, lhs, rhs)),
+     : atermpp::aterm_appl(core::detail::gsMakeDataEqn(variables, condition, lhs, rhs)),
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
@@ -111,12 +107,12 @@ class data_equation: public aterm_appl
     }
 
     /// Applies a substitution to this data equation and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
-      return data_equation(f(aterm(*this)));
+      return data_equation(f(atermpp::aterm(*this)));
     }
     
     /// Returns true if
@@ -139,11 +135,11 @@ class data_equation: public aterm_appl
 
 /// \brief singly linked list of data equations
 ///
-typedef term_list<data_equation> data_equation_list;
+typedef atermpp::term_list<data_equation> data_equation_list;
 
 /// \brief Returns true if the term t is a data equation
 inline
-bool is_data_equation(aterm_appl t)
+bool is_data_equation(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataEqn(t);
 }
@@ -153,22 +149,7 @@ bool is_data_equation(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_equation;
-
-template<>
-struct aterm_traits<data_equation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_equation t)   { t.protect(); }
-  static void unprotect(data_equation t) { t.unprotect(); }
-  static void mark(data_equation t)      { t.mark(); }
-  static ATerm term(data_equation t)     { return t.term(); }
-  static ATerm* ptr(data_equation& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_equation)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_EQUATION_H

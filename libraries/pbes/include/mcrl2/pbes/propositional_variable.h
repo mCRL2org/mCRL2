@@ -27,15 +27,10 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::read_from_named_file;
-
 /// \brief A propositional variable declaration.
 ///
 // <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
-class propositional_variable: public aterm_appl
+class propositional_variable: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
@@ -45,7 +40,7 @@ class propositional_variable: public aterm_appl
     /// Constructor.
     ///
     propositional_variable()
-      : aterm_appl(core::detail::constructPropVarDecl())
+      : atermpp::aterm_appl(core::detail::constructPropVarDecl())
     {}
 
     /// Constructor.
@@ -60,8 +55,8 @@ class propositional_variable: public aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable(aterm_appl t)
-      : aterm_appl(t)
+    propositional_variable(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
@@ -72,7 +67,7 @@ class propositional_variable: public aterm_appl
     /// Constructor.
     ///
     propositional_variable(core::identifier_string name, data::data_variable_list parameters)
-      : aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
+      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {
@@ -95,11 +90,11 @@ class propositional_variable: public aterm_appl
 
 /// \brief singly linked list of propositional variable declarations
 ///
-typedef term_list<propositional_variable> propositional_variable_list;
+typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
 /// \brief Returns true if the term t is a propositional variable declaration
 inline
-bool is_propositional_variable(aterm_appl t)
+bool is_propositional_variable(atermpp::aterm_appl t)
 {
   return core::detail::gsIsPropVarDecl(t);
 }
@@ -107,7 +102,7 @@ bool is_propositional_variable(aterm_appl t)
 /// \brief A propositional variable instantiation.
 ///
 // <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
-class propositional_variable_instantiation: public aterm_appl
+class propositional_variable_instantiation: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
@@ -117,7 +112,7 @@ class propositional_variable_instantiation: public aterm_appl
     /// Constructor.
     ///
     propositional_variable_instantiation()
-      : aterm_appl(core::detail::constructPropVarInst())
+      : atermpp::aterm_appl(core::detail::constructPropVarInst())
     {}
 
     /// Constructor.
@@ -132,8 +127,8 @@ class propositional_variable_instantiation: public aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable_instantiation(aterm_appl t)
-      : aterm_appl(t)
+    propositional_variable_instantiation(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_PropVarInst(m_term));
       iterator i = t.begin();
@@ -144,7 +139,7 @@ class propositional_variable_instantiation: public aterm_appl
     /// Constructor.
     ///
     propositional_variable_instantiation(core::identifier_string name, data::data_expression_list parameters)
-      : aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
+      : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {
@@ -180,11 +175,11 @@ class propositional_variable_instantiation: public aterm_appl
 
 /// \brief singly linked list of propositional variables instantiations
 ///
-typedef term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
 /// \brief Returns true if the term t is a propositional variable instantiation
 inline
-bool is_propositional_variable_instantiation(aterm_appl t)
+bool is_propositional_variable_instantiation(atermpp::aterm_appl t)
 {
   return core::detail::gsIsPropVarInst(t);
 }
@@ -194,34 +189,8 @@ bool is_propositional_variable_instantiation(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::propositional_variable;
-using mcrl2::pbes_system::propositional_variable_instantiation;
-
-template<>
-struct aterm_traits<propositional_variable>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(propositional_variable t)   { t.protect(); }
-  static void unprotect(propositional_variable t) { t.unprotect(); }
-  static void mark(propositional_variable t)      { t.mark(); }
-  static ATerm term(propositional_variable t)     { return t.term(); }
-  static ATerm* ptr(propositional_variable& t)    { return &t.term(); }
-};
-
-template<>
-struct aterm_traits<propositional_variable_instantiation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(propositional_variable_instantiation t)   { t.protect(); }
-  static void unprotect(propositional_variable_instantiation t) { t.unprotect(); }
-  static void mark(propositional_variable_instantiation t)      { t.mark(); }
-  static ATerm term(propositional_variable_instantiation t)     { return t.term(); }
-  static ATerm* ptr(propositional_variable_instantiation& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::propositional_variable)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::propositional_variable_instantiation)
 /// \endcond
 
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

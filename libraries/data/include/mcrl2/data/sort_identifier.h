@@ -19,16 +19,11 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using core::identifier_string;
-
 class sort_identifier;
 
 /// \brief singly linked list of sorts
 ///
-typedef term_list<sort_identifier> sort_identifier_list;
+typedef atermpp::term_list<sort_identifier> sort_identifier_list;
 
 /// \brief sort id.
 ///
@@ -52,7 +47,7 @@ class sort_identifier: public sort_expression
 
     /// Constructor.
     ///
-    sort_identifier(aterm_appl t)
+    sort_identifier(atermpp::aterm_appl t)
       : sort_expression(t)
     {
       assert(core::detail::check_rule_SortId(m_term));
@@ -60,7 +55,7 @@ class sort_identifier: public sort_expression
 
     /// Constructor.
     ///
-    sort_identifier(identifier_string name)
+    sort_identifier(core::identifier_string name)
       : sort_expression(core::detail::gsMakeSortId(name))
     {
       assert(core::detail::check_rule_SortId(m_term));
@@ -89,7 +84,7 @@ class sort_identifier: public sort_expression
 
 /// \brief Returns true if the term t is a sort identifier.
 inline
-bool is_sort_identifier(aterm_appl t)
+bool is_sort_identifier(atermpp::aterm_appl t)
 {
   return core::detail::gsIsSortId(t);
 }
@@ -99,22 +94,7 @@ bool is_sort_identifier(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::sort_identifier;
-
-template<>
-struct aterm_traits<sort_identifier>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(sort_identifier t)   { t.protect(); }
-  static void unprotect(sort_identifier t) { t.unprotect(); }
-  static void mark(sort_identifier t)      { t.mark(); }
-  static ATerm term(sort_identifier t)     { return t.term(); }
-  static ATerm* ptr(sort_identifier& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::sort_identifier)
 /// \endcond
 
 #endif // MCRL2_DATA_SORT_ID_H

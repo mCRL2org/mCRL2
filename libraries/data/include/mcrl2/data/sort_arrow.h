@@ -18,15 +18,11 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 class sort_arrow;
 
 /// \brief singly linked list of sorts
 ///
-typedef term_list<sort_arrow> sort_arrow_list;
+typedef atermpp::term_list<sort_arrow> sort_arrow_list;
 
 /// \brief sort arrow.
 ///
@@ -58,7 +54,7 @@ class sort_arrow: public sort_expression
 
     /// Constructor.
     ///
-    sort_arrow(aterm_appl t)
+    sort_arrow(atermpp::aterm_appl t)
       : sort_expression(t)
     {
       assert(core::detail::check_term_SortArrow(m_term));
@@ -96,7 +92,7 @@ class sort_arrow: public sort_expression
 
 /// \brief Returns true if the term t is a sort arrow.
 inline
-bool is_sort_arrow(aterm_appl t)
+bool is_sort_arrow(atermpp::aterm_appl t)
 {
   return core::detail::gsIsSortArrow(t);
 }
@@ -106,22 +102,7 @@ bool is_sort_arrow(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::sort_arrow;
-
-template<>
-struct aterm_traits<sort_arrow>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(sort_arrow t)   { t.protect(); }
-  static void unprotect(sort_arrow t) { t.unprotect(); }
-  static void mark(sort_arrow t)      { t.mark(); }
-  static ATerm term(sort_arrow t)     { return t.term(); }
-  static ATerm* ptr(sort_arrow& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::sort_arrow)
 /// \endcond
 
 #endif // MCRL2_DATA_SORT_ARROW_H

@@ -25,41 +25,36 @@ namespace mcrl2 {
 
 namespace modal {
 
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-using atermpp::aterm;
-using atermpp::term_list;
-
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula
 /// \brief regular formula expression.
 ///
-class regular_formula: public aterm_appl
+class regular_formula: public atermpp::aterm_appl
 {
   public:
     regular_formula()
-      : aterm_appl(mcrl2::core::detail::constructRegFrm())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructRegFrm())
     {}
 
     regular_formula(ATermAppl t)
-      : aterm_appl(aterm_appl(t))
+      : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
-    regular_formula(aterm_appl t)
-      : aterm_appl(t)
+    regular_formula(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
     /// Applies a substitution to this regular formula and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {
-      return regular_formula(f(aterm(*this)));
+      return regular_formula(f(atermpp::aterm(*this)));
     }     
 };
 
@@ -67,28 +62,14 @@ class regular_formula: public aterm_appl
 // regular_formula_list
 /// \brief singly linked list of regular expressions
 ///
-typedef term_list<regular_formula> regular_formula_list;
+typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 } // namespace modal
 
 } // namespace mcrl2
 
-/// \internal
-namespace atermpp
-{
-using mcrl2::modal::regular_formula;
-
-template<>
-struct aterm_traits<regular_formula>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(regular_formula t)   { t.protect(); }
-  static void unprotect(regular_formula t) { t.unprotect(); }
-  static void mark(regular_formula t)      { t.mark(); }
-  static ATerm term(regular_formula t)     { return t.term(); }
-  static ATerm* ptr(regular_formula& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::regular_formula)
+/// \endcond
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

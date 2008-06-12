@@ -25,9 +25,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm;
-using atermpp::aterm_traits;
-
 /// Returns true if the term has a given variable as subterm.
 template <typename Term>
 bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)

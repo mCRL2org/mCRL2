@@ -26,12 +26,9 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-using atermpp::aterm;
-
 /// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
-class process_initializer: public aterm_appl
+class process_initializer: public atermpp::aterm_appl
 {
   protected:
     data::data_variable_list   m_free_variables;
@@ -41,7 +38,7 @@ class process_initializer: public aterm_appl
     /// Constructor.
     ///
     process_initializer()
-      : aterm_appl(mcrl2::core::detail::constructLinearProcessInit())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessInit())
     {}
 
     /// Constructor.
@@ -49,7 +46,7 @@ class process_initializer: public aterm_appl
     process_initializer(data::data_variable_list free_variables,
                         data::data_assignment_list assignments
                        )
-     : aterm_appl(core::detail::gsMakeLinearProcessInit(free_variables, assignments)),
+     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(free_variables, assignments)),
        m_free_variables(free_variables),
        m_assignments(assignments)
     {
@@ -57,11 +54,11 @@ class process_initializer: public aterm_appl
 
     /// Constructor.
     ///
-    process_initializer(aterm_appl t)
-      : aterm_appl(t)
+    process_initializer(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_term_LinearProcessInit(m_term));
-      aterm_appl::iterator i   = t.begin();
+      atermpp::aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
       m_assignments    = *i;
     }
@@ -88,12 +85,12 @@ class process_initializer: public aterm_appl
     }
 
     /// Applies a substitution to this process initializer and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     process_initializer substitute(Substitution f)
     {
-      return process_initializer(f(aterm(*this)));
+      return process_initializer(f(atermpp::aterm(*this)));
     }     
 
     /// Returns true if
@@ -123,22 +120,7 @@ class process_initializer: public aterm_appl
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::process_initializer;
-
-template<>
-struct aterm_traits<process_initializer>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(process_initializer t)   { t.protect(); }
-  static void unprotect(process_initializer t) { t.unprotect(); }
-  static void mark(process_initializer t)      { t.mark(); }
-  static ATerm term(process_initializer t)     { return t.term(); }
-  static ATerm* ptr(process_initializer& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_initializer)
 /// \endcond
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

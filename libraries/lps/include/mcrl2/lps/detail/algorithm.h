@@ -30,10 +30,6 @@ namespace lps {
   
 namespace detail {
 
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-using atermpp::apply;
-
 /// Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
 struct make_timed_lps_summand
@@ -59,10 +55,10 @@ struct make_timed_lps_summand
 /// Adds time parameters to the lps if needed and returns the result. The times
 /// are chosen such that they don't appear in context.
 inline
-linear_process make_timed_lps(linear_process lps, aterm context)
+linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
   data::fresh_variable_generator generator(context);
-  summand_list new_summands = apply(lps.summands(), make_timed_lps_summand(generator));
+  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
 
@@ -80,11 +76,11 @@ struct data_variable_replacer
     assert(src_.size() == dest_.size());
   }
   
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (!data::is_data_variable(t))
     {
-      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
@@ -92,10 +88,10 @@ struct data_variable_replacer
     {
       if (t == *i)
       {
-        return std::pair<aterm_appl, bool>(*j, false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(*j, false); // don't continue the recursion
       }
     }
-    return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
+    return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
   }
 };
 
@@ -120,11 +116,11 @@ struct data_variable_name_replacer
     assert(src_.size() == dest_.size());
   }
   
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (!data::is_data_variable(t))
     {
-      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
     data::data_variable v(t);
     typename SrcList::const_iterator i = src_.begin();
@@ -133,10 +129,10 @@ struct data_variable_name_replacer
     {
       if (v.name() == *i)
       {
-        return std::pair<aterm_appl, bool>(data::data_variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(data::data_variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
-    return std::pair<aterm_appl, bool>(t, false); // don't continue the recursion
+    return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
   }
 };
 

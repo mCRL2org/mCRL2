@@ -32,9 +32,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-using atermpp::read_from_named_file;
-
 /// \cond INTERNAL_DOCS
 struct is_non_delta_summand
 {
@@ -57,7 +54,7 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
 // linear_process
 /// \brief linear process.
 ///
-class linear_process: public aterm_appl
+class linear_process: public atermpp::aterm_appl
 {
   protected:
     data::data_variable_list m_free_variables;
@@ -68,7 +65,7 @@ class linear_process: public aterm_appl
     /// Constructor.
     ///
     linear_process()
-      : aterm_appl(mcrl2::core::detail::constructLinearProcess())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcess())
     {}
 
     /// Constructor.
@@ -77,7 +74,7 @@ class linear_process: public aterm_appl
         data::data_variable_list process_parameters,
         summand_list       summands
        )
-     : aterm_appl(core::detail::gsMakeLinearProcess(free_variables, process_parameters, summands)),
+     : atermpp::aterm_appl(core::detail::gsMakeLinearProcess(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          )
@@ -85,13 +82,13 @@ class linear_process: public aterm_appl
 
     /// Constructor.
     ///
-    linear_process(aterm_appl lps)
-      : aterm_appl(lps)
+    linear_process(atermpp::aterm_appl lps)
+      : atermpp::aterm_appl(lps)
     {
       assert(core::detail::check_term_LinearProcess(m_term));
 
       // unpack LPS(.,.,.) term
-      aterm_appl::iterator i = lps.begin();
+      atermpp::aterm_appl::iterator i = lps.begin();
       m_free_variables     = data::data_variable_list(*i++);
       m_process_parameters = data::data_variable_list(*i++);
       m_summands           = summand_list(*i);
@@ -139,7 +136,7 @@ class linear_process: public aterm_appl
     }
 
     /// Applies a substitution to this LPS and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     linear_process substitute(Substitution f)
@@ -163,7 +160,7 @@ class linear_process: public aterm_appl
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         std::set<data::data_variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
-        std::set<data::data_variable> used_variables = data::find_all_data_variables(make_list(i->condition(), i->actions(), i->time(), i->assignments()));
+        std::set<data::data_variable> used_variables = data::find_all_data_variables(atermpp::make_list(i->condition(), i->actions(), i->time(), i->assignments()));
         std::set<data::data_variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
         std::set<data::data_variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());
@@ -318,22 +315,7 @@ linear_process set_summands(linear_process l, summand_list summands)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::lps::linear_process;
-
-template<>
-struct aterm_traits<linear_process>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(linear_process t)   { t.protect(); }
-  static void unprotect(linear_process t) { t.unprotect(); }
-  static void mark(linear_process t)      { t.mark(); }
-  static ATerm term(linear_process t)     { return t.term(); }
-  static ATerm* ptr(linear_process& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::linear_process)
 /// \endcond
 
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

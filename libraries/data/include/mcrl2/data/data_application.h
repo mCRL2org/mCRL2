@@ -23,9 +23,6 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 /// \brief Data application.
 ///
 // DataAppl(<DataExpr>, <DataExpr>+)
@@ -40,7 +37,7 @@ class data_application: public data_expression
 
     /// Constructor.
     ///
-    data_application(aterm_appl t)
+    data_application(atermpp::aterm_appl t)
      : data_expression(t)
     {
       assert(core::detail::check_term_DataAppl(m_term));
@@ -77,11 +74,11 @@ class data_application: public data_expression
 
 /// \brief singly linked list of data applications
 ///
-typedef term_list<data_application> data_application_list;
+typedef atermpp::term_list<data_application> data_application_list;
 
 /// \brief Returns true if the term t is a data application
 inline
-bool is_data_application(aterm_appl t)
+bool is_data_application(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataAppl(t);
 }
@@ -91,22 +88,7 @@ bool is_data_application(aterm_appl t)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_application;
-
-template<>
-struct aterm_traits<data_application>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_application t)   { t.protect(); }
-  static void unprotect(data_application t) { t.unprotect(); }
-  static void mark(data_application t)      { t.mark(); }
-  static ATerm term(data_application t)     { return t.term(); }
-  static ATerm* ptr(data_application& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_application)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_APPLICATION_H

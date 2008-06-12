@@ -30,14 +30,6 @@
 
 namespace bes 
 {
-  using atermpp::aterm_int;
-  using atermpp::aterm;
-  using atermpp::aterm_appl;
-  using atermpp::arg1;
-  using atermpp::arg2;
-  using mcrl2::pbes_system::fixpoint_symbol;
-
-
 // a bes variable_type is an unsigned long. 
 
   typedef unsigned long variable_type; /* valid values start at 1 */
@@ -148,19 +140,19 @@ namespace bes
 // below we define functions to construct bes_expressions using aterms.
 //
 
-  class bes_expression: public aterm
+  class bes_expression: public atermpp::aterm
   {
     public:
       bes_expression()
-        : aterm()
+        : atermpp::aterm()
       {}
 
-      bes_expression(aterm_appl term)
-          : aterm(term)
+      bes_expression(atermpp::aterm_appl term)
+          : atermpp::aterm(term)
       {}
 
       // bes_expression(atermpp::term_appl<atermpp::aterm> &term)
-      //    : aterm_appl(term)
+      //    : atermpp::aterm_appl(term)
       // {}
 
       // allow assignment from aterms
@@ -355,15 +347,15 @@ namespace bes
   inline bes_expression and_(bes_expression b1,bes_expression b2)
   { return bes_expression(
                ATmakeAppl2(AFunBESAnd(),
-                           (aterm)(b1),
-                           (aterm)(b2)));
+                           (atermpp::aterm)(b1),
+                           (atermpp::aterm)(b2)));
   }
 
   inline bes_expression or_(bes_expression b1,bes_expression b2)
   { return bes_expression(
                ATmakeAppl2(AFunBESOr(),
-                           (aterm)(b1),
-                           (aterm)(b2)));
+                           (atermpp::aterm)(b1),
+                           (atermpp::aterm)(b2)));
   }
 
   inline bool is_variable(bes_expression b)
@@ -374,9 +366,9 @@ namespace bes
   { 
     return bes_expression(
                ATmakeAppl3(AFunBESIf(),
-                           (aterm)(b1),
-                           (aterm)(b2),
-                           (aterm)(b3)));
+                           (atermpp::aterm)(b1),
+                           (atermpp::aterm)(b2),
+                           (atermpp::aterm)(b3)));
   }
 
   inline bes_expression ifAUX_(bes_expression b1,bes_expression b2,bes_expression b3)
@@ -387,7 +379,7 @@ namespace bes
   }
 
   inline bes_expression variable(variable_type n)
-  { return bes_expression((aterm)aterm_int(n));
+  { return bes_expression((atermpp::aterm)atermpp::aterm_int(n));
   }
 
   inline bool is_false(bes_expression b)
@@ -417,34 +409,34 @@ namespace bes
 
   inline bes_expression lhs(bes_expression b)
   { assert(is_and(b) || is_or(b));
-    return bes_expression(aterm_appl(b)(0));
+    return bes_expression(atermpp::aterm_appl(b)(0));
   }
 
   inline bes_expression rhs(bes_expression b)
   { assert(is_and(b) || is_or(b));
-    return bes_expression(aterm_appl(b)(1));
+    return bes_expression(atermpp::aterm_appl(b)(1));
   }
 
   inline bes_expression condition(bes_expression b)
   { 
     assert(is_if(b));
-    return bes_expression(aterm_appl(b)(0));
+    return bes_expression(atermpp::aterm_appl(b)(0));
   }
 
   inline bes_expression then_branch(bes_expression b)
   { assert(is_if(b));
-    return bes_expression(aterm_appl(b)(1));
+    return bes_expression(atermpp::aterm_appl(b)(1));
   }
 
   inline bes_expression else_branch(bes_expression b)
   { 
     assert(is_if(b));
-    return bes_expression(aterm_appl(b)(2));
+    return bes_expression(atermpp::aterm_appl(b)(2));
   }
 
   inline variable_type get_variable(bes_expression b)
   { assert(is_variable(b));
-    return ((aterm_int)b).value();
+    return ((atermpp::aterm_int)b).value();
   }
 
   inline bes_expression substitute_true_false_rec(
@@ -875,13 +867,13 @@ namespace bes
       { return control_info.size()-1; /* there is no equation at position 0 */
       }
 
-      inline fixpoint_symbol get_fixpoint_symbol(variable_type v)
+      inline mcrl2::pbes_system::fixpoint_symbol get_fixpoint_symbol(variable_type v)
       {
         assert(v>0); /* variable indices start at 1. 0 is used as an indicator of error */
         assert(v<=nr_of_variables());
         assert(control_info[v]>0);
 
-        return (((control_info[v] & FIXPOINT_MASK) ==0) ? fixpoint_symbol::nu() : fixpoint_symbol::mu());
+        return (((control_info[v] & FIXPOINT_MASK) ==0) ? mcrl2::pbes_system::fixpoint_symbol::nu() : mcrl2::pbes_system::fixpoint_symbol::mu());
       }
 
 
@@ -894,7 +886,7 @@ namespace bes
       }
 
       void add_equation(variable_type v, 
-                        fixpoint_symbol sigma,
+                        mcrl2::pbes_system::fixpoint_symbol sigma,
                         unsigned long rank,
                         bes_expression rhs,
                         std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
@@ -1064,7 +1056,7 @@ namespace bes
           { variable_occurrence_sets[w].erase(v);
           }
           // Using hash tables this can be made more efficient, by employing
-          // sharing of the aterm representing b.
+          // sharing of the atermpp::aterm representing b.
           remove_variables_from_occurrence_sets(v,then_branch(b),v_except,use_indexed_set,indexed_set);
           remove_variables_from_occurrence_sets(v,else_branch(b),v_except,use_indexed_set,indexed_set);
           return;
@@ -1357,18 +1349,8 @@ namespace bes
 
 } // namespace bes.
 
-namespace atermpp
-{
-  template<>
-    struct aterm_traits<bes::bes_expression>
-    {
-      typedef ATermAppl aterm_type;
-      static void protect(bes::bes_expression t)   { t.protect(); }
-      static void unprotect(bes::bes_expression t) { t.unprotect(); }
-      static void mark(bes::bes_expression t)      { t.mark(); }
-      static ATerm term(bes::bes_expression t)     { return t.term(); }
-      static ATerm* ptr(bes::bes_expression& t)    { return &t.term(); }
-    };
-} // namespace atermpp
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(bes::bes_expression)
+/// \endcond
 
 #endif

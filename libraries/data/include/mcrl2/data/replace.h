@@ -34,15 +34,15 @@ struct replace_data_variables_helper
     : r_(r)
   {}
   
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_variable(t))
     {
-      return std::pair<aterm_appl, bool>(r_(t), false); // do not continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(r_(t), false); // do not continue the recursion
     }
     else
     {
-      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
   }
 };
@@ -119,7 +119,7 @@ struct data_variable_map_replace_helper
     typename MapContainer::const_iterator i = replacements_.find(t);
     if (i == replacements_.end())
     {
-      return aterm_appl(t);
+      return atermpp::aterm_appl(t);
     }
     else
     {
@@ -150,15 +150,15 @@ struct replace_data_expressions_helper
     : r_(r)
   {}
   
-  std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_expression(t))
     {
-      return std::pair<aterm_appl, bool>(r_(t), false); // do not continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(r_(t), false); // do not continue the recursion
     }
     else
     {
-      return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
   }
 };
@@ -235,7 +235,7 @@ struct data_expression_map_replace_helper
     typename MapContainer::const_iterator i = replacements_.find(t);
     if (i == replacements_.end())
     {
-      return aterm_appl(t);
+      return atermpp::aterm_appl(t);
     }
     else
     {

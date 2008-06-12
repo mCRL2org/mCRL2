@@ -14,6 +14,7 @@
 
 #include <string>
 #include <cassert>
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
@@ -23,35 +24,31 @@ namespace mcrl2 {
 
 namespace data {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-using atermpp::aterm;
-
 // prototypes
 class data_expression;
 
 /// \brief singly linked list of data expressions
 ///
-typedef term_list<data_expression> data_expression_list;
+typedef atermpp::term_list<data_expression> data_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
 /// \brief data expression
 /// Represents a data expression or nil.
 /// Before using a data expression, the user must make sure that it is not nil.
-class data_expression: public aterm_appl
+class data_expression: public atermpp::aterm_appl
 {
   public:
     /// Constructor.
     ///             
     data_expression()
-      : aterm_appl(core::detail::constructDataExpr())
+      : atermpp::aterm_appl(core::detail::constructDataExpr())
     {}
 
     /// Constructor.
     ///             
-    data_expression(aterm_appl term)
-      : aterm_appl(term)
+    data_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
     }
@@ -59,7 +56,7 @@ class data_expression: public aterm_appl
     /// Constructor.
     ///             
     data_expression(ATermAppl term)
-      : aterm_appl(term)
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
     }
@@ -74,18 +71,18 @@ class data_expression: public aterm_appl
     }
 
     /// Applies a substitution to this data expression and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
-      return data_expression(f(aterm(*this)));
+      return data_expression(f(atermpp::aterm(*this)));
     }
 };
 
 /// \brief Returns true if the term t is a data expression
 inline
-bool is_data_expression(aterm_appl t)
+bool is_data_expression(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataExpr(t);
 }
@@ -121,59 +118,59 @@ namespace data_expr {
   //                  | Whr(<DataExpr>, <WhrDecl>+)                           (- di)
 
   /// \brief Returns true if the term t is equal to nil
-  inline bool is_nil(aterm_appl t) { return t == core::detail::gsMakeNil(); }
+  inline bool is_nil(atermpp::aterm_appl t) { return t == core::detail::gsMakeNil(); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(aterm_appl t) { return core::detail::gsIsDataExprTrue(t); }
+  inline bool is_true(atermpp::aterm_appl t) { return core::detail::gsIsDataExprTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(aterm_appl t) { return core::detail::gsIsDataExprFalse(t); }
+  inline bool is_false(atermpp::aterm_appl t) { return core::detail::gsIsDataExprFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(aterm_appl t) { return core::detail::gsIsDataExprNot(t); }
+  inline bool is_not(atermpp::aterm_appl t) { return core::detail::gsIsDataExprNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(aterm_appl t) { return core::detail::gsIsDataExprAnd(t); }
+  inline bool is_and(atermpp::aterm_appl t) { return core::detail::gsIsDataExprAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(aterm_appl t) { return core::detail::gsIsDataExprOr(t); }
+  inline bool is_or(atermpp::aterm_appl t) { return core::detail::gsIsDataExprOr(t); }
 
   /// \brief Returns true if the term t is an implication
-  inline bool is_imp(aterm_appl t) { return core::detail::gsIsDataExprImp(t); }
+  inline bool is_imp(atermpp::aterm_appl t) { return core::detail::gsIsDataExprImp(t); }
 
   /// \brief Returns true if the term t is a 'binder'
-  inline bool is_binder(aterm_appl t) { return core::detail::gsIsBinder(t); }
+  inline bool is_binder(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t); }
 
   /// \brief Returns true if the term t is a where expression
-  inline bool is_where(aterm_appl t) { return core::detail::gsIsWhr(t); }
+  inline bool is_where(atermpp::aterm_appl t) { return core::detail::gsIsWhr(t); }
 
   /// \brief Returns true if the term t has type real
-  inline bool is_real(aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
+  inline bool is_real(atermpp::aterm_appl t) { return sort_expr::is_real(data_expression(t).sort()); }
 
   /// \brief Returns true if the term t has type int
-  inline bool is_int(aterm_appl t) { return sort_expr::is_int (data_expression(t).sort()); }
+  inline bool is_int(atermpp::aterm_appl t) { return sort_expr::is_int (data_expression(t).sort()); }
 
   /// \brief Returns true if the term t has type pos
-  inline bool is_pos(aterm_appl t) { return sort_expr::is_pos (data_expression(t).sort()); }
+  inline bool is_pos(atermpp::aterm_appl t) { return sort_expr::is_pos (data_expression(t).sort()); }
 
   /// \brief Returns true if the term t has type nat
-  inline bool is_nat(aterm_appl t) { return sort_expr::is_nat (data_expression(t).sort()); }
+  inline bool is_nat(atermpp::aterm_appl t) { return sort_expr::is_nat (data_expression(t).sort()); }
 
   /// \brief Returns true if the term t has type bool
-  inline bool is_bool(aterm_appl t) { return sort_expr::is_bool(data_expression(t).sort()); }
+  inline bool is_bool(atermpp::aterm_appl t) { return sort_expr::is_bool(data_expression(t).sort()); }
 
   // TODO: The following three functions do not belong here anymore, we need to find
   // a better place for these. Note that they have been changed to make sure
   // that we know we are working with a Binder before we take the binding operator.
 
   /// \brief Returns true if the term t is an existial quantification
-  inline bool is_exists(aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsExists(aterm_appl(t(0))); }
+  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsExists(atermpp::aterm_appl(t(0))); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(aterm_appl(t(0))); }
+  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(atermpp::aterm_appl(t(0))); }
 
   /// \brief Returns true if the term t is a lambda expression
-  inline bool is_lambda(aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(aterm_appl(t(0))); }
+  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
 
   /// \brief Returns a real with value i
   // TODO: a function gsMakaDataExprReal_int will be added by Aad
@@ -487,22 +484,7 @@ namespace data_expr {
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::data::data_expression;
-
-template<>
-struct aterm_traits<data_expression>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(data_expression t)   { t.protect(); }
-  static void unprotect(data_expression t) { t.unprotect(); }
-  static void mark(data_expression t)      { t.mark(); }
-  static ATerm term(data_expression t)     { return t.term(); }
-  static ATerm* ptr(data_expression& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_expression)
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H

@@ -100,7 +100,7 @@ bool check_assignment_variables(data_assignment_list assignments, data_variable_
 /// Function object for checking if a term is a constant sort.
 struct is_constant_sort
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(atermpp::aterm_appl t) const
   {
     return is_sort_expression(t) && !sort_expression(t).is_arrow();
   }
@@ -109,7 +109,7 @@ struct is_constant_sort
 /// Function object for checking if an operator is a constant sort.
 struct is_constant_operation
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(atermpp::aterm_appl t) const
   { data_operation op=t;
     return is_sort_expression(op.sort()) && !sort_expression(op.sort()).is_arrow();
   }
@@ -118,7 +118,7 @@ struct is_constant_operation
 /// Function object for checking if an operator is a not a constant sort.
 struct is_not_a_constant_operation
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(atermpp::aterm_appl t) const
   { data_operation op=t;
     return is_sort_expression(op.sort()) && sort_expression(op.sort()).is_arrow();
   }

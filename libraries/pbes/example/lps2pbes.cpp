@@ -17,6 +17,7 @@
 #include "mcrl2/core/text_utility.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::modal;

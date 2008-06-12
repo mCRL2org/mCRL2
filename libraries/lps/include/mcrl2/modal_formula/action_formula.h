@@ -25,11 +25,6 @@ namespace mcrl2 {
 
 namespace modal {
 
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-using atermpp::aterm;
-using atermpp::term_list;
-
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula
 /// \brief action formula expression.
@@ -45,32 +40,32 @@ using atermpp::term_list;
 //                 | ActForall(<DataVarId>+, <ActFrm>)
 //                 | ActExists(<DataVarId>+, <ActFrm>)
 //                 | ActAt(<ActFrm>, <DataExpr>)
-class action_formula: public aterm_appl
+class action_formula: public atermpp::aterm_appl
 {
   public:
     action_formula()
-      : aterm_appl(mcrl2::core::detail::constructActFrm())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructActFrm())
     {}
 
     action_formula(ATermAppl t)
-      : aterm_appl(aterm_appl(t))
+      : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
-    action_formula(aterm_appl t)
-      : aterm_appl(t)
+    action_formula(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
     /// \brief Applies a substitution to this action_formula and returns the result
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
-      return action_formula(f(aterm(*this)));
+      return action_formula(f(atermpp::aterm(*this)));
     }     
 };
 
@@ -78,17 +73,11 @@ class action_formula: public aterm_appl
 // action_formula_list
 /// \brief singly linked list of data expressions
 ///
-typedef term_list<action_formula> action_formula_list;
+typedef atermpp::term_list<action_formula> action_formula_list;
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm
 { 
-
-using atermpp::arg1;
-using atermpp::arg2;
-using atermpp::arg3;
-using atermpp::list_arg1;
-using atermpp::list_arg2;
 
   /// \brief Returns the expression true
   inline
@@ -158,37 +147,37 @@ using atermpp::list_arg2;
   }
 
   /// \brief Returns true if the term t is a multi action
-  inline bool is_mult_act(aterm_appl t) { return core::detail::gsIsMultAct(t); }
+  inline bool is_mult_act(atermpp::aterm_appl t) { return core::detail::gsIsMultAct(t); }
 
   /// \brief Returns true if the term t is a data expression
-  inline bool is_data(aterm_appl t) { return core::detail::gsIsDataExpr(t); }
+  inline bool is_data(atermpp::aterm_appl t) { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(aterm_appl t) { return core::detail::gsIsActTrue(t); }
+  inline bool is_true(atermpp::aterm_appl t) { return core::detail::gsIsActTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(aterm_appl t) { return core::detail::gsIsActFalse(t); }
+  inline bool is_false(atermpp::aterm_appl t) { return core::detail::gsIsActFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(aterm_appl t) { return core::detail::gsIsActNot(t); }
+  inline bool is_not(atermpp::aterm_appl t) { return core::detail::gsIsActNot(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(aterm_appl t) { return core::detail::gsIsActAnd(t); }
+  inline bool is_and(atermpp::aterm_appl t) { return core::detail::gsIsActAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(aterm_appl t) { return core::detail::gsIsActOr(t); }
+  inline bool is_or(atermpp::aterm_appl t) { return core::detail::gsIsActOr(t); }
 
   /// \brief Returns true if the term t is an implication expression
-  inline bool is_imp(aterm_appl t) { return core::detail::gsIsActImp(t); }
+  inline bool is_imp(atermpp::aterm_appl t) { return core::detail::gsIsActImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(aterm_appl t) { return core::detail::gsIsActForall(t); }
+  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsActForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
-  inline bool is_exists(aterm_appl t) { return core::detail::gsIsActExists(t); }
+  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsActExists(t); }
 
   /// \brief Returns true if the term t is an at expression
-  inline bool is_at(aterm_appl t) { return core::detail::gsIsActAt(t); }
+  inline bool is_at(atermpp::aterm_appl t) { return core::detail::gsIsActAt(t); }
 
 } // namespace act_frm
 
@@ -199,7 +188,7 @@ namespace accessors
   lps::action_list mult_params(action_formula t)
   {
     assert(core::detail::gsIsMultAct(t));
-    return list_arg1(t);
+    return atermpp::list_arg1(t);
   }
   
   /// \brief Returns the action formula argument of an expression of
@@ -209,10 +198,10 @@ namespace accessors
   {
     if (core::detail::gsIsActNot(t) || core::detail::gsIsActAt(t))
     {
-      return arg1(t);
+      return atermpp::arg1(t);
     }
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-    return arg2(t);
+    return atermpp::arg2(t);
   }
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
@@ -220,7 +209,7 @@ namespace accessors
   action_formula left(action_formula t)
   {
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
-    return arg1(t);
+    return atermpp::arg1(t);
   }
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
@@ -228,7 +217,7 @@ namespace accessors
   action_formula right(action_formula t)
   {
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
-    return arg2(t);
+    return atermpp::arg2(t);
   }
   
   /// \brief Returns the variables of a quantification expression
@@ -236,7 +225,7 @@ namespace accessors
   data::data_variable_list var(action_formula t)
   {
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-    return list_arg1(t);
+    return atermpp::list_arg1(t);
   }
   
   /// \brief Returns the time of an at expression
@@ -244,7 +233,7 @@ namespace accessors
   data::data_expression time(action_formula t)
   {
     assert(core::detail::gsIsActAt(t));
-    return arg2(t);
+    return atermpp::arg2(t);
   }
 
 } // namespace accessors
@@ -253,22 +242,8 @@ namespace accessors
 
 } // namespace mcrl2
 
-/// \internal
-namespace atermpp
-{
-using mcrl2::modal::action_formula;
-
-template<>
-struct aterm_traits<action_formula>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(action_formula t)   { t.protect(); }
-  static void unprotect(action_formula t) { t.unprotect(); }
-  static void mark(action_formula t)      { t.mark(); }
-  static ATerm term(action_formula t)     { return t.term(); }
-  static ATerm* ptr(action_formula& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::action_formula)
+/// \endcond
 
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

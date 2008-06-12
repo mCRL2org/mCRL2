@@ -51,27 +51,27 @@ namespace lps {
       : m_replacements(replacements)
     {}
     
-    std::pair<aterm_appl, bool> operator()(aterm_appl t) const
+    std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (is_sort_expression(t))
       {
-        return std::pair<aterm_appl, bool>(t, false); // do not continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(t, false); // do not continue the recursion
       }
       else if (is_data_expression(t))
       {
         std::map<data_expression, data_expression>::const_iterator i = m_replacements.find(t);
         if (i == m_replacements.end())
         {         
-          return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+          return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
         }
         else
         {
-          return std::pair<aterm_appl, bool>(i->second, false); // do not continue the recursion
+          return std::pair<atermpp::aterm_appl, bool>(i->second, false); // do not continue the recursion
         }
       }
       else
       {
-        return std::pair<aterm_appl, bool>(t, true); // continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
       }
     }
   };

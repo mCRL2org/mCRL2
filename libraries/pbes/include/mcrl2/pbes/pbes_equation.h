@@ -24,13 +24,9 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
 /// \brief pbes equation.
 ///
-class pbes_equation: public aterm_appl
+class pbes_equation: public atermpp::aterm_appl
 {
   protected:
     fixpoint_symbol        m_symbol;
@@ -41,13 +37,13 @@ class pbes_equation: public aterm_appl
     /// Constructor.
     ///
     pbes_equation()
-      : aterm_appl(core::detail::constructPBEqn())
+      : atermpp::aterm_appl(core::detail::constructPBEqn())
     {}
 
     /// Constructor.
     ///
-    pbes_equation(aterm_appl t)
-      : aterm_appl(t)
+    pbes_equation(atermpp::aterm_appl t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_PBEqn(m_term));
       iterator i = t.begin();
@@ -59,7 +55,7 @@ class pbes_equation: public aterm_appl
     /// Constructor.
     ///
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
-      : aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
+      : atermpp::aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
         m_variable(variable),
         m_formula(expr)
@@ -68,7 +64,7 @@ class pbes_equation: public aterm_appl
 
     /// Assignment operator.
     ///
-    pbes_equation& operator=(aterm t)
+    pbes_equation& operator=(atermpp::aterm t)
     {
       m_term = t;
       return *this;
@@ -100,8 +96,8 @@ class pbes_equation: public aterm_appl
     ///
     bool is_solved() const
     {
-      aterm t = atermpp::find_if(ATermAppl(m_formula), modal::state_frm::is_var);
-      return t == aterm(); // true if nothing was found
+      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), modal::state_frm::is_var);
+      return t == atermpp::aterm(); // true if nothing was found
     }
 
     /// Returns true if the equation is a BES (boolean equation system).
@@ -161,7 +157,7 @@ class pbes_equation: public aterm_appl
 
 /// \brief singly linked list of data expressions
 ///
-typedef term_list<pbes_equation> pbes_equation_list;
+typedef atermpp::term_list<pbes_equation> pbes_equation_list;
 
 } // namespace pbes_system
 
@@ -182,22 +178,7 @@ struct term_list_iterator_traits<pbes_equation>
 /// \endcond
 
 /// \cond INTERNAL_DOCS
-namespace atermpp
-{
-using mcrl2::pbes_system::pbes_equation;
-
-template<>
-struct aterm_traits<pbes_equation>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(pbes_equation t)   { t.protect(); }
-  static void unprotect(pbes_equation t) { t.unprotect(); }
-  static void mark(pbes_equation t)      { t.mark(); }
-  static ATerm term(pbes_equation t)     { return t.term(); }
-  static ATerm* ptr(pbes_equation& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_equation)
 /// \endcond
 
 #endif // MCRL2_PBES_PBES_EQUATION_H

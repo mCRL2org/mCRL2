@@ -32,14 +32,14 @@ data_expression_list operator+(data_variable_list l, data_expression_list m)
 inline
 data_expression_list operator+(data_variable v, data_expression_list l)
 {
-  return data_expression(aterm_appl(v)) + l;
+  return data_expression(atermpp::aterm_appl(v)) + l;
 }
 
 /// \brief Returns the concatenation of the list l and [v].
 inline
 data_expression_list operator+(data_expression_list l, data_variable v)
 {
-  return l + data_expression(aterm_appl(v));
+  return l + data_expression(atermpp::aterm_appl(v));
 }
 
 } // namespace data

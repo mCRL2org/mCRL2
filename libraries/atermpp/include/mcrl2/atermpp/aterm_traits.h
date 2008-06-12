@@ -111,4 +111,18 @@ struct aterm_traits<ATermInt>
                                       
 } // namespace atermpp
 
+#define MCRL2_ATERM_TRAITS_SPECIALIZATION(type)          \
+namespace atermpp {                                   \
+template<>                                            \
+struct aterm_traits<type>                             \
+{                                                     \
+  typedef ATermAppl aterm_type;                       \
+  static void protect(type t)   { t.protect(); }      \
+  static void unprotect(type t) { t.unprotect(); }    \
+  static void mark(type t)      { t.mark(); }         \
+  static ATerm term(type t)     { return t.term(); }  \
+  static ATerm* ptr(type& t)    { return &t.term(); } \
+};                                                    \
+}
+
 #endif // MCRL2_ATERMPP_ATERM_TRAITS_H

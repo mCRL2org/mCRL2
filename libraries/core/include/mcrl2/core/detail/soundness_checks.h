@@ -29,11 +29,6 @@ namespace core {
 
 namespace detail {
 
-using atermpp::aterm;
-using atermpp::aterm_list;
-using atermpp::aterm_appl;
-using atermpp::aterm_traits;
-
 // checks
 // 1) if term t satisfies the predicate f
 template <typename Term, typename CheckFunction>
@@ -49,13 +44,13 @@ bool check_term_argument(Term t, CheckFunction f)
 template <typename Term, typename CheckFunction>
 bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
 {
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (t.type() != AT_LIST)
     return false;
-  aterm_list l(term);
+  atermpp::aterm_list l(term);
   if (l.size() < minimum_size)
     return false;
-  for (aterm_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (atermpp::aterm_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     if (!f(*i))
       return false;
@@ -66,10 +61,10 @@ bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
 template <typename Term>
 bool check_rule_String(Term t)
 {
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (a.size() > 0)
     return false;
   return true;
@@ -78,10 +73,10 @@ bool check_rule_String(Term t)
 template <typename Term>
 bool check_rule_NumberString(Term t)
 {
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (a.size() > 0)
     return false;
   return true;
@@ -831,10 +826,10 @@ bool check_term_ProcEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsProcEqn(a))
     return false;
 
@@ -842,22 +837,22 @@ bool check_term_ProcEqn(Term t)
   if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcVarId<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcVarId<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(2), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(2), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(3), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -874,10 +869,10 @@ bool check_term_Hide(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsHide(a))
     return false;
 
@@ -885,12 +880,12 @@ bool check_term_Hide(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_String<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_String<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -907,10 +902,10 @@ bool check_term_SortArrow(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSortArrow(a))
     return false;
 
@@ -918,12 +913,12 @@ bool check_term_SortArrow(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_SortExpr<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_SortExpr<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -940,10 +935,10 @@ bool check_term_Action(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsAction(a))
     return false;
 
@@ -951,12 +946,12 @@ bool check_term_Action(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActId<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActId<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -973,10 +968,10 @@ bool check_term_CommExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsCommExpr(a))
     return false;
 
@@ -984,12 +979,12 @@ bool check_term_CommExpr(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_MultActName<aterm>))
+  if (!check_term_argument(a(0), check_rule_MultActName<atermpp::aterm>))
     {
       std::cerr << "check_rule_MultActName" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StringOrNil<aterm>))
+  if (!check_term_argument(a(1), check_rule_StringOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_StringOrNil" << std::endl;
       return false;
@@ -1006,10 +1001,10 @@ bool check_term_StateNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateNot(a))
     return false;
 
@@ -1017,7 +1012,7 @@ bool check_term_StateNot(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -1034,10 +1029,10 @@ bool check_term_IfThen(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsIfThen(a))
     return false;
 
@@ -1045,12 +1040,12 @@ bool check_term_IfThen(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -1067,10 +1062,10 @@ bool check_term_StateImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateImp(a))
     return false;
 
@@ -1078,12 +1073,12 @@ bool check_term_StateImp(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -1100,10 +1095,10 @@ bool check_term_PBESExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESExists(a))
     return false;
 
@@ -1111,12 +1106,12 @@ bool check_term_PBESExists(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -1133,10 +1128,10 @@ bool check_term_PBESImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESImp(a))
     return false;
 
@@ -1144,12 +1139,12 @@ bool check_term_PBESImp(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -1166,10 +1161,10 @@ bool check_term_StateForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateForall(a))
     return false;
 
@@ -1177,12 +1172,12 @@ bool check_term_StateForall(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -1199,10 +1194,10 @@ bool check_term_SortId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSortId(a))
     return false;
 
@@ -1210,7 +1205,7 @@ bool check_term_SortId(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
@@ -1227,10 +1222,10 @@ bool check_term_StateNu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateNu(a))
     return false;
 
@@ -1238,17 +1233,17 @@ bool check_term_StateNu(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataVarIdInit<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarIdInit" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(2), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -1265,10 +1260,10 @@ bool check_term_DataSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataSpec(a))
     return false;
 
@@ -1276,22 +1271,22 @@ bool check_term_DataSpec(Term t)
   if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_SortSpec<aterm>))
+  if (!check_term_argument(a(0), check_rule_SortSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ConsSpec<aterm>))
+  if (!check_term_argument(a(1), check_rule_ConsSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_ConsSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_MapSpec<aterm>))
+  if (!check_term_argument(a(2), check_rule_MapSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_MapSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_DataEqnSpec<aterm>))
+  if (!check_term_argument(a(3), check_rule_DataEqnSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataEqnSpec" << std::endl;
       return false;
@@ -1308,10 +1303,10 @@ bool check_term_SpecV1(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSpecV1(a))
     return false;
 
@@ -1319,22 +1314,22 @@ bool check_term_SpecV1(Term t)
   if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActSpec<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_ProcEqnSpec<aterm>))
+  if (!check_term_argument(a(2), check_rule_ProcEqnSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcEqnSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_ProcInit<aterm>))
+  if (!check_term_argument(a(3), check_rule_ProcInit<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcInit" << std::endl;
       return false;
@@ -1351,10 +1346,10 @@ bool check_term_Tau(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsTau(a))
     return false;
 
@@ -1372,10 +1367,10 @@ bool check_term_StateYaledTimed(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateYaledTimed(a))
     return false;
 
@@ -1383,7 +1378,7 @@ bool check_term_StateYaledTimed(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -1400,10 +1395,10 @@ bool check_term_DataEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataEqnSpec(a))
     return false;
 
@@ -1411,7 +1406,7 @@ bool check_term_DataEqnSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataEqn<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataEqn<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataEqn" << std::endl;
       return false;
@@ -1428,10 +1423,10 @@ bool check_term_LinearProcessSummand(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsLinearProcessSummand(a))
     return false;
 
@@ -1439,27 +1434,27 @@ bool check_term_LinearProcessSummand(Term t)
   if (a.size() != 5)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_MultActOrDelta<aterm>))
+  if (!check_term_argument(a(2), check_rule_MultActOrDelta<atermpp::aterm>))
     {
       std::cerr << "check_rule_MultActOrDelta" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_DataExprOrNil<aterm>))
+  if (!check_term_argument(a(3), check_rule_DataExprOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExprOrNil" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(4), check_rule_DataVarIdInit<aterm>, 0))
+  if (!check_list_argument(a(4), check_rule_DataVarIdInit<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarIdInit" << std::endl;
       return false;
@@ -1476,10 +1471,10 @@ bool check_term_SortSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSortSpec(a))
     return false;
 
@@ -1487,7 +1482,7 @@ bool check_term_SortSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_SortDecl<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_SortDecl<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_SortDecl" << std::endl;
       return false;
@@ -1504,10 +1499,10 @@ bool check_term_ActionRenameRules(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActionRenameRules(a))
     return false;
 
@@ -1515,7 +1510,7 @@ bool check_term_ActionRenameRules(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_ActionRenameRule<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_ActionRenameRule<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_ActionRenameRule" << std::endl;
       return false;
@@ -1532,10 +1527,10 @@ bool check_term_ConsSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsConsSpec(a))
     return false;
 
@@ -1543,7 +1538,7 @@ bool check_term_ConsSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_OpId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_OpId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_OpId" << std::endl;
       return false;
@@ -1560,10 +1555,10 @@ bool check_term_Sum(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSum(a))
     return false;
 
@@ -1571,12 +1566,12 @@ bool check_term_Sum(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -1593,10 +1588,10 @@ bool check_term_DataVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataVarId(a))
     return false;
 
@@ -1604,12 +1599,12 @@ bool check_term_DataVarId(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -1626,10 +1621,10 @@ bool check_term_ProcVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsProcVarId(a))
     return false;
 
@@ -1637,12 +1632,12 @@ bool check_term_ProcVarId(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_SortExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_SortExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -1659,10 +1654,10 @@ bool check_term_MapSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsMapSpec(a))
     return false;
 
@@ -1670,7 +1665,7 @@ bool check_term_MapSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_OpId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_OpId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_OpId" << std::endl;
       return false;
@@ -1687,10 +1682,10 @@ bool check_term_StateYaled(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateYaled(a))
     return false;
 
@@ -1708,10 +1703,10 @@ bool check_term_Choice(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsChoice(a))
     return false;
 
@@ -1719,12 +1714,12 @@ bool check_term_Choice(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -1741,10 +1736,10 @@ bool check_term_LinearProcessInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsLinearProcessInit(a))
     return false;
 
@@ -1752,12 +1747,12 @@ bool check_term_LinearProcessInit(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataVarIdInit<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarIdInit" << std::endl;
       return false;
@@ -1774,10 +1769,10 @@ bool check_term_MultAct(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsMultAct(a))
     return false;
 
@@ -1785,7 +1780,7 @@ bool check_term_MultAct(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_ParamIdOrAction<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_ParamIdOrAction<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_ParamIdOrAction" << std::endl;
       return false;
@@ -1802,10 +1797,10 @@ bool check_term_PropVarInst(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPropVarInst(a))
     return false;
 
@@ -1813,12 +1808,12 @@ bool check_term_PropVarInst(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -1835,10 +1830,10 @@ bool check_term_BagComp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsBagComp(a))
     return false;
 
@@ -1856,10 +1851,10 @@ bool check_term_StateDelay(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateDelay(a))
     return false;
 
@@ -1877,10 +1872,10 @@ bool check_term_StructCons(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStructCons(a))
     return false;
 
@@ -1888,17 +1883,17 @@ bool check_term_StructCons(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_StructProj<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_StructProj<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_StructProj" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_StringOrNil<aterm>))
+  if (!check_term_argument(a(2), check_rule_StringOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_StringOrNil" << std::endl;
       return false;
@@ -1915,10 +1910,10 @@ bool check_term_Mu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsMu(a))
     return false;
 
@@ -1936,10 +1931,10 @@ bool check_term_PBEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBEqnSpec(a))
     return false;
 
@@ -1947,12 +1942,12 @@ bool check_term_PBEqnSpec(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_PBEqn<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_PBEqn<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_PBEqn" << std::endl;
       return false;
@@ -1969,10 +1964,10 @@ bool check_term_ActNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActNot(a))
     return false;
 
@@ -1980,7 +1975,7 @@ bool check_term_ActNot(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -1997,10 +1992,10 @@ bool check_term_Block(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsBlock(a))
     return false;
 
@@ -2008,12 +2003,12 @@ bool check_term_Block(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_String<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_String<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2030,10 +2025,10 @@ bool check_term_Rename(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsRename(a))
     return false;
 
@@ -2041,12 +2036,12 @@ bool check_term_Rename(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_RenameExpr<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_RenameExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_RenameExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2063,10 +2058,10 @@ bool check_term_Exists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsExists(a))
     return false;
 
@@ -2084,10 +2079,10 @@ bool check_term_Sync(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSync(a))
     return false;
 
@@ -2095,12 +2090,12 @@ bool check_term_Sync(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2117,10 +2112,10 @@ bool check_term_StateMu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateMu(a))
     return false;
 
@@ -2128,17 +2123,17 @@ bool check_term_StateMu(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataVarIdInit<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataVarIdInit<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarIdInit" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(2), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -2155,10 +2150,10 @@ bool check_term_StateFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateFalse(a))
     return false;
 
@@ -2176,10 +2171,10 @@ bool check_term_PBESForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESForall(a))
     return false;
 
@@ -2187,12 +2182,12 @@ bool check_term_PBESForall(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -2209,10 +2204,10 @@ bool check_term_StateTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateTrue(a))
     return false;
 
@@ -2230,10 +2225,10 @@ bool check_term_BInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsBInit(a))
     return false;
 
@@ -2241,12 +2236,12 @@ bool check_term_BInit(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2263,10 +2258,10 @@ bool check_term_PBESFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESFalse(a))
     return false;
 
@@ -2284,10 +2279,10 @@ bool check_term_DataAppl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataAppl(a))
     return false;
 
@@ -2295,12 +2290,12 @@ bool check_term_DataAppl(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 1))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -2317,10 +2312,10 @@ bool check_term_StateDelayTimed(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateDelayTimed(a))
     return false;
 
@@ -2328,7 +2323,7 @@ bool check_term_StateDelayTimed(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -2345,10 +2340,10 @@ bool check_term_Nu(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsNu(a))
     return false;
 
@@ -2366,10 +2361,10 @@ bool check_term_AtTime(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsAtTime(a))
     return false;
 
@@ -2377,12 +2372,12 @@ bool check_term_AtTime(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -2399,10 +2394,10 @@ bool check_term_ActOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActOr(a))
     return false;
 
@@ -2410,12 +2405,12 @@ bool check_term_ActOr(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -2432,10 +2427,10 @@ bool check_term_Comm(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsComm(a))
     return false;
 
@@ -2443,12 +2438,12 @@ bool check_term_Comm(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_CommExpr<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_CommExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_CommExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2465,10 +2460,10 @@ bool check_term_Delta(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDelta(a))
     return false;
 
@@ -2486,10 +2481,10 @@ bool check_term_StateAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateAnd(a))
     return false;
 
@@ -2497,12 +2492,12 @@ bool check_term_StateAnd(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -2519,10 +2514,10 @@ bool check_term_ActionRenameRule(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActionRenameRule(a))
     return false;
 
@@ -2530,22 +2525,22 @@ bool check_term_ActionRenameRule(Term t)
   if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExprOrNil<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExprOrNil" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_ParamIdOrAction<aterm>))
+  if (!check_term_argument(a(2), check_rule_ParamIdOrAction<atermpp::aterm>))
     {
       std::cerr << "check_rule_ParamIdOrAction" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_ActionRenameRuleRHS<aterm>))
+  if (!check_term_argument(a(3), check_rule_ActionRenameRuleRHS<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActionRenameRuleRHS" << std::endl;
       return false;
@@ -2562,10 +2557,10 @@ bool check_term_SetComp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSetComp(a))
     return false;
 
@@ -2583,10 +2578,10 @@ bool check_term_ActForall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActForall(a))
     return false;
 
@@ -2594,12 +2589,12 @@ bool check_term_ActForall(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -2616,10 +2611,10 @@ bool check_term_RenameExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsRenameExpr(a))
     return false;
 
@@ -2627,12 +2622,12 @@ bool check_term_RenameExpr(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_String<aterm>))
+  if (!check_term_argument(a(1), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
@@ -2649,10 +2644,10 @@ bool check_term_Merge(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsMerge(a))
     return false;
 
@@ -2660,12 +2655,12 @@ bool check_term_Merge(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2682,10 +2677,10 @@ bool check_term_ActSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActSpec(a))
     return false;
 
@@ -2693,7 +2688,7 @@ bool check_term_ActSpec(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_ActId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_ActId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_ActId" << std::endl;
       return false;
@@ -2710,10 +2705,10 @@ bool check_term_Forall(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsForall(a))
     return false;
 
@@ -2731,10 +2726,10 @@ bool check_term_PBESAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESAnd(a))
     return false;
 
@@ -2742,12 +2737,12 @@ bool check_term_PBESAnd(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -2764,10 +2759,10 @@ bool check_term_Lambda(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsLambda(a))
     return false;
 
@@ -2785,10 +2780,10 @@ bool check_term_StateMust(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateMust(a))
     return false;
 
@@ -2796,12 +2791,12 @@ bool check_term_StateMust(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_RegFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_RegFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_RegFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -2818,10 +2813,10 @@ bool check_term_Seq(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsSeq(a))
     return false;
 
@@ -2829,12 +2824,12 @@ bool check_term_Seq(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -2851,10 +2846,10 @@ bool check_term_DataVarIdInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataVarIdInit(a))
     return false;
 
@@ -2862,12 +2857,12 @@ bool check_term_DataVarIdInit(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataVarId<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataVarId<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -2884,10 +2879,10 @@ bool check_term_Process(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsProcess(a))
     return false;
 
@@ -2895,12 +2890,12 @@ bool check_term_Process(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcVarId<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcVarId<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -2917,10 +2912,10 @@ bool check_term_ActAnd(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActAnd(a))
     return false;
 
@@ -2928,12 +2923,12 @@ bool check_term_ActAnd(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -2950,10 +2945,10 @@ bool check_term_ActionRenameSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActionRenameSpec(a))
     return false;
 
@@ -2961,17 +2956,17 @@ bool check_term_ActionRenameSpec(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActSpec<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_ActionRenameRules<aterm>))
+  if (!check_term_argument(a(2), check_rule_ActionRenameRules<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActionRenameRules" << std::endl;
       return false;
@@ -2988,10 +2983,10 @@ bool check_term_PBES(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBES(a))
     return false;
 
@@ -2999,17 +2994,17 @@ bool check_term_PBES(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataSpec<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBEqnSpec<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBEqnSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBEqnSpec" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_PBInit<aterm>))
+  if (!check_term_argument(a(2), check_rule_PBInit<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBInit" << std::endl;
       return false;
@@ -3026,10 +3021,10 @@ bool check_term_StateVar(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateVar(a))
     return false;
 
@@ -3037,12 +3032,12 @@ bool check_term_StateVar(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -3059,10 +3054,10 @@ bool check_term_LMerge(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsLMerge(a))
     return false;
 
@@ -3070,12 +3065,12 @@ bool check_term_LMerge(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -3092,10 +3087,10 @@ bool check_term_LinearProcess(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsLinearProcess(a))
     return false;
 
@@ -3103,17 +3098,17 @@ bool check_term_LinearProcess(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(2), check_rule_LinearProcessSummand<aterm>, 0))
+  if (!check_list_argument(a(2), check_rule_LinearProcessSummand<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_LinearProcessSummand" << std::endl;
       return false;
@@ -3130,10 +3125,10 @@ bool check_term_ActAt(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActAt(a))
     return false;
 
@@ -3141,12 +3136,12 @@ bool check_term_ActAt(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -3163,10 +3158,10 @@ bool check_term_DataEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsDataEqn(a))
     return false;
 
@@ -3174,22 +3169,22 @@ bool check_term_DataEqn(Term t)
   if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExprOrNil<aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExprOrNil" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(2), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(3), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(3), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -3206,10 +3201,10 @@ bool check_term_PBESNot(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESNot(a))
     return false;
 
@@ -3217,7 +3212,7 @@ bool check_term_PBESNot(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -3234,10 +3229,10 @@ bool check_term_StateExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateExists(a))
     return false;
 
@@ -3245,12 +3240,12 @@ bool check_term_StateExists(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -3267,10 +3262,10 @@ bool check_term_StateMay(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateMay(a))
     return false;
 
@@ -3278,12 +3273,12 @@ bool check_term_StateMay(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_RegFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_RegFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_RegFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -3300,10 +3295,10 @@ bool check_term_ParamId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsParamId(a))
     return false;
 
@@ -3311,12 +3306,12 @@ bool check_term_ParamId(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
@@ -3333,10 +3328,10 @@ bool check_term_PBESTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESTrue(a))
     return false;
 
@@ -3354,10 +3349,10 @@ bool check_term_MultActName(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsMultActName(a))
     return false;
 
@@ -3365,7 +3360,7 @@ bool check_term_MultActName(Term t)
   if (a.size() != 1)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_String<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_String<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
@@ -3382,10 +3377,10 @@ bool check_term_IfThenElse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsIfThenElse(a))
     return false;
 
@@ -3393,17 +3388,17 @@ bool check_term_IfThenElse(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(2), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -3420,10 +3415,10 @@ bool check_term_Nil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsNil(a))
     return false;
 
@@ -3441,10 +3436,10 @@ bool check_term_StateOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStateOr(a))
     return false;
 
@@ -3452,12 +3447,12 @@ bool check_term_StateOr(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_StateFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_StateFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_StateFrm" << std::endl;
       return false;
@@ -3474,10 +3469,10 @@ bool check_term_StructProj(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsStructProj(a))
     return false;
 
@@ -3485,12 +3480,12 @@ bool check_term_StructProj(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_StringOrNil<aterm>))
+  if (!check_term_argument(a(0), check_rule_StringOrNil<atermpp::aterm>))
     {
       std::cerr << "check_rule_StringOrNil" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -3507,10 +3502,10 @@ bool check_term_PBEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBEqn(a))
     return false;
 
@@ -3518,17 +3513,17 @@ bool check_term_PBEqn(Term t)
   if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_FixPoint<aterm>))
+  if (!check_term_argument(a(0), check_rule_FixPoint<atermpp::aterm>))
     {
       std::cerr << "check_rule_FixPoint" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PropVarDecl<aterm>))
+  if (!check_term_argument(a(1), check_rule_PropVarDecl<atermpp::aterm>))
     {
       std::cerr << "check_rule_PropVarDecl" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(2), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(2), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -3545,10 +3540,10 @@ bool check_term_OpId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsOpId(a))
     return false;
 
@@ -3556,12 +3551,12 @@ bool check_term_OpId(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_SortExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -3578,10 +3573,10 @@ bool check_term_ActFalse(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActFalse(a))
     return false;
 
@@ -3599,10 +3594,10 @@ bool check_term_ActId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActId(a))
     return false;
 
@@ -3610,12 +3605,12 @@ bool check_term_ActId(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_SortExpr<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_SortExpr<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
       return false;
@@ -3632,10 +3627,10 @@ bool check_term_PBESOr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBESOr(a))
     return false;
 
@@ -3643,12 +3638,12 @@ bool check_term_PBESOr(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(0), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PBExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_PBExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_PBExpr" << std::endl;
       return false;
@@ -3665,10 +3660,10 @@ bool check_term_ActExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActExists(a))
     return false;
 
@@ -3676,12 +3671,12 @@ bool check_term_ActExists(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 1))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -3698,10 +3693,10 @@ bool check_term_Allow(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsAllow(a))
     return false;
 
@@ -3709,12 +3704,12 @@ bool check_term_Allow(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_MultActName<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_MultActName<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_MultActName" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
@@ -3731,10 +3726,10 @@ bool check_term_PropVarDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPropVarDecl(a))
     return false;
 
@@ -3742,12 +3737,12 @@ bool check_term_PropVarDecl(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<aterm>))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
       std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_list_argument(a(1), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(1), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
@@ -3764,10 +3759,10 @@ bool check_term_ActImp(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActImp(a))
     return false;
 
@@ -3775,12 +3770,12 @@ bool check_term_ActImp(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(0), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
       std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
@@ -3797,10 +3792,10 @@ bool check_term_PBInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsPBInit(a))
     return false;
 
@@ -3808,12 +3803,12 @@ bool check_term_PBInit(Term t)
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<aterm>, 0))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_PropVarInst<aterm>))
+  if (!check_term_argument(a(1), check_rule_PropVarInst<atermpp::aterm>))
     {
       std::cerr << "check_rule_PropVarInst" << std::endl;
       return false;
@@ -3830,10 +3825,10 @@ bool check_term_ActTrue(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIsActTrue(a))
     return false;
 
