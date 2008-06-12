@@ -14,7 +14,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/enum/standard.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

@@ -62,13 +62,13 @@ namespace tipi {
 
         /** \brief Converts to underlying type */
         template < typename T >
-        inline typename boost::disable_if_c< boost::is_enum< T >::value, T >::type evaluate(std::string const& s) const {
+        inline typename boost::disable_if< typename boost::is_enum< T >::type, T >::type evaluate(std::string const& s) const {
           return boost::any_cast< T >(specialised_evaluate(s));
         }
 
         /** \brief Converts to underlying type */
         template < typename T >
-        inline typename boost::enable_if_c< boost::is_enum< T >::value, T >::type evaluate(std::string const& s) const {
+        inline typename boost::enable_if< typename boost::is_enum< T >::type, T >::type evaluate(std::string const& s) const {
           boost::any result(specialised_evaluate(s));
 
           if (result.type() == typeid(size_t)) {

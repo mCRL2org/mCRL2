@@ -18,7 +18,7 @@
 
 #ifdef NO_DYNLOAD
 
-#include "mcrl2/data/rewrite/jittyc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
 
 #include <cstdlib>
 #include "mcrl2/core/messaging.h"
@@ -100,7 +100,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/data/rewrite/jittyc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

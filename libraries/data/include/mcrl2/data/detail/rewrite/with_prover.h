@@ -6,14 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewr_prover.h
+/// \file mcrl2/data/rewrite/with_prover.h
+/// \brief Rewriting combined with semantic simplification using a prover
 
 #ifndef __REWR_PROVER_H
 #define __REWR_PROVER_H
 
 #include <aterm2.h>
 #include <mcrl2/data/data_specification.h>
-#include <mcrl2/data/prover/bdd_prover.h>
+#include <mcrl2/data/bdd_prover.h>
 #include "mcrl2/data/rewrite.h"
 
 class RewriterProver: public Rewriter

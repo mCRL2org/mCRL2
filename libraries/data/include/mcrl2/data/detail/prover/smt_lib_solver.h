@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/prover/smt_lib_solver.h
+/// \file mcrl2/data/detail/prover/smt_lib_solver.h
 /// \brief Abstract interface for SMT solvers based on the SMT-LIB format
 
 #ifndef SMT_LIB_SOLVER_H
 #define SMT_LIB_SOLVER_H
 
 #include "aterm2.h"
-#include "mcrl2/data/prover/smt_solver.h"
+#include "mcrl2/data/detail/prover/smt_solver.h"
 #include "mcrl2/utilities/expression_info.h"
 #include "mcrl2/utilities/sort_info.h"
 

@@ -8,7 +8,7 @@
 
 #include <cstdlib>
 
-#include "mcrl2/data/prover/smt_lib_solver.h"
+#include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/utilities.h"

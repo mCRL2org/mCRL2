@@ -17,7 +17,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/prover/bdd_prover.h"
+#include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/utilities/bdd2dot.h"
 
   /// \brief The class formula checker takes a data specification in mCRL2 format and a list of expressions

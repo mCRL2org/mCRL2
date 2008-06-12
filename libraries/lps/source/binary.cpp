@@ -25,7 +25,7 @@
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/utilities/aterm_ext.h>
 //Enumerator
-#include <mcrl2/data/enum/standard.h>
+#include <mcrl2/data/detail/enum/standard.h>
 #include <mcrl2/lps/nextstate.h>
 
 #include <mcrl2/lps/binary.h>

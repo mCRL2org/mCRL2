@@ -5,8 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file rewrite.cpp
 
 #include <cstdlib>
 #include <cassert>
@@ -16,11 +14,11 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/rewrite/inner.h"
-#include "mcrl2/data/rewrite/jitty.h"
-#include "mcrl2/data/rewrite/innerc.h"
-#include "mcrl2/data/rewrite/jittyc.h"
-#include "mcrl2/data/rewrite/with_prover.h"
+#include "mcrl2/data/detail/rewrite/inner.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/innerc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
+#include "mcrl2/data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

@@ -8,7 +8,7 @@
 
 #include <cstdlib>
 
-#include "mcrl2/data/prover/induction.h"
+#include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"

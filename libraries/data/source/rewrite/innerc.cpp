@@ -5,12 +5,10 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file innerc.cpp
 
 #ifdef NO_DYNLOAD
 
-#include "mcrl2/data/rewrite/innerc.h"
+#include "mcrl2/data/detail/rewrite/innerc.h"
 
 #include <cstdlib>
 #include "mcrl2/core/messaging.h"
@@ -89,7 +87,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/data/rewrite/innerc.h"
+#include "mcrl2/data/detail/rewrite/innerc.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

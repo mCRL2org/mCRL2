@@ -5,22 +5,20 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file rewr_prover.cpp
 
 #define NAME "rewr_prover"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <aterm2.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
 #include <memory.h>
-#include <assert.h>
+#include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/prover/bdd_prover.h"
+#include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/rewrite/with_prover.h"
+#include "mcrl2/data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

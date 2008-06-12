@@ -8,7 +8,7 @@
 //
 /// \file rewr_inner.cpp
 
-#include "mcrl2/data/rewrite/inner.h"
+#include "mcrl2/data/detail/rewrite/inner.h"
 
 #define NAME "rewr_inner"
 

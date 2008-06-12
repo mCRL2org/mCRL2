@@ -16,7 +16,7 @@ use-project /tools/lpspp : $(TOP)/tools/lpspp ;
 for file in [ glob-tree *.mcrl2 ] {
   tests-with-files += [
         run /tools/mcrl22lps//mcrl22lps
-              : # no arguments
+              : -D
               : $(file)
               : <testing.preserve>true
                 <testing.post-pipes>/tools/lpspp//lpspp

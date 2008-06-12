@@ -8,7 +8,7 @@
 //
 /// \file rewr_jitty.cpp
 
-#include "mcrl2/data/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
 
 #define NAME "rewr_jitty"
 
