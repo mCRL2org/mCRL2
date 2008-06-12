@@ -72,25 +72,6 @@ ATermAppl *parse_action_list(const char *s, int *len)
   return r;
 }
 
-static void print_formats(FILE *f)
-{
-  fprintf(f,
-    "The following formats are accepted by " NAME ":\n"
-    "\n"
-    "  format  ext.  description                       remarks\n"
-    "  -----------------------------------------------------------\n"
-    "  aut     .aut  Aldebaran format (CADP)\n"
-#ifdef MCRL2_BCG
-    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
-#endif
-    "  dot     .dot  GraphViz format\n"
-    "  fsm     .fsm  Finite State Machine format\n"
-    "  mcrl    .svc  mCRL SVC format\n"
-    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
-    "\n"
-    );
-}
-
 lts_generation_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. If "
@@ -141,8 +122,16 @@ lts_generation_options parse_command_line(int ac, char** av) {
       "  'd', 'depth'     depth-first search\n"
       "  'r', 'random'    random simulation", 's').
     add_option("out", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the output format; for accepted formats, see --formats", 'o').
-    add_option("formats", "list accepted output formats").
+      "save the output in the specified FORMAT:\n"
+      "  'aut' for the Aldebaran format (CADP),\n"
+#ifdef MCRL2_BCG
+      "  'bcg' for the Binary Coded Graph format (CADP),\n"
+#endif
+      "  'dot' for the GraphViz format,\n"
+      "  'fsm' for the Finite State Machine format,\n"
+      "  'mcrl' for the mCRL SVC format, or\n"
+      "  'mcrl2' for the mCRL2 SVC format (default)"
+    , 'o').
     add_option("no-info", "do not add state information to OUTFILE").
     add_option("init-tsize", make_mandatory_argument("NUM"),
       "set the initial size of the internally used hash tables (default is 10000)");
@@ -213,12 +202,8 @@ lts_generation_options parse_command_line(int ac, char** av) {
     options.outformat = lts::parse_format(parser.option_argument("out"));
 
     if (options.outformat == lts_none) {
-      parser.error("format '" + parser.option_argument("out") + "' is not recognised; option ignored");
+      parser.error("format '" + parser.option_argument("out") + "' is not recognised");
     }
-  }
-  if (parser.options.count("formats")) {
-    print_formats(stdout);
-    exit(EXIT_SUCCESS);
   }
   if (parser.options.count("init-tsize")) {
     options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");

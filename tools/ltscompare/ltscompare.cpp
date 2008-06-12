@@ -41,23 +41,6 @@ static const char *equivalent_string(lts_equivalence eq)
   }
 }
 
-static void print_formats(FILE *f)
-{
-  fprintf(f,
-    "The following formats are accepted by " NAME ":\n"
-    "\n"
-    "  format  ext.  description                       remarks\n"
-    "  -----------------------------------------------------------\n"
-    "  aut     .aut  Aldebaran format (CADP)\n"
-#ifdef MCRL2_BCG
-    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
-#endif
-    "  mcrl    .svc  mCRL SVC format\n"
-    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
-    "\n"
-    );
-}
-
 struct t_tool_options {
   std::string     name_for_first;
   std::string     name_for_second;
@@ -74,10 +57,17 @@ t_tool_options parse_command_line(int ac, char** av) {
     "\n"
     "The input formats are determined by the contents of INFILE1 and INFILE2. "
     "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
-    "A list of supported formats can be requested using the option --formats.");
+    "The supported formats are:\n"
+    "  'aut' for the Aldebaran format (CADP),\n"
+#ifdef MCRL2_BCG
+    "  'bcg' for the Binary Coded Graph format (CADP),\n"
+#endif
+    "  'fsm' for the Finite State Machine format,\n"
+    "  'mcrl' for the mCRL SVC format, or\n"
+    "  'mcrl2' for the mCRL2 SVC format (default)"
+  );
 
   clinterface.
-    add_option("formats", "list accepted formats", 'f').
     add_option("lps", make_mandatory_argument("FILE"),
       "use FILE as the LPS from which the input LTS was generated; this is "
       "needed to store the correct parameter names of states when saving "
@@ -107,11 +97,6 @@ t_tool_options parse_command_line(int ac, char** av) {
   t_tool_options tool_options;
 
   tool_options.equivalence = lts_eq_bisim;
-
-  if (parser.options.count("formats")) {
-    print_formats(stderr);
-    exit(EXIT_SUCCESS);
-  }
 
   if (parser.options.count("equivalence")) {
 

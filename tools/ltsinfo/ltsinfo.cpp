@@ -241,24 +241,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-static void print_formats(FILE *f)
-{
-  fprintf(f,
-    "The following formats are accepted by " NAME ":\n"
-    "\n"
-    "  format  ext.  description                       remarks\n"
-    "  -----------------------------------------------------------\n"
-    "  aut     .aut  Aldebaran format (CADP)\n"
-#ifdef MCRL2_BCG
-    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
-#endif
-    "  fsm     .fsm  Finite State Machine format\n"
-    "  mcrl    .svc  mCRL SVC format\n"
-    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
-    "\n"
-    );
-}
-
 tool_options parse_command_line(int argc, char** argv) {
   using namespace mcrl2::lts;
   using mcrl2::lts::lts;
@@ -269,8 +251,15 @@ tool_options parse_command_line(int argc, char** argv) {
     "\n"
     "The format of INFILE is determined by its contents. "
     "The option --in can be used to force the format for INFILE. "
-    "A list of supported formats can be requested by using the option --formats" 
-    );
+    "The supported formats are:\n"
+    "  'aut' for the Aldebaran format (CADP),\n"
+#ifdef MCRL2_BCG
+    "  'bcg' for the Binary Coded Graph format (CADP),\n"
+#endif
+    "  'fsm' for the Finite State Machine format,\n"
+    "  'mcrl' for the mCRL SVC format, or\n"
+    "  'mcrl2' for the mCRL2 SVC format (default)"
+  );
 
   clinterface.
     add_option("equivalence", make_mandatory_argument("NAME"),
@@ -284,17 +273,12 @@ tool_options parse_command_line(int argc, char** argv) {
       "  'none' for not performing the check at all",
       'e').
     add_option("in", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the input format", 'i').
-    add_option("formats", "list accepted formats", 'f');
+      "use FORMAT as the input format", 'i');
 
   command_line_parser parser(clinterface, argc, argv);
 
   tool_options opts = { "", mcrl2::lts::lts_none, mcrl2::lts::lts_eq_isomorph };
 
-  if (parser.options.count("formats")) {
-    print_formats(stdout);
-    exit(EXIT_SUCCESS);
-  }
   if (parser.options.count("equivalence")) {
     opts.determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
     if (opts.determinism_equivalence != lts_eq_isomorph &&

@@ -199,25 +199,6 @@ class t_tool_options {
 
 using namespace std;
 
-static void print_formats(FILE *f)
-{
-  fprintf(f,
-    "The following formats are accepted by " NAME ":\n"
-    "\n"
-    "  format  ext.  description                       remarks\n"
-    "  -----------------------------------------------------------\n"
-    "  aut     .aut  Aldebaran format (CADP)\n"
-#ifdef MCRL2_BCG
-    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
-#endif
-    "  dot     .dot  GraphViz format                   output only\n"
-    "  fsm     .fsm  Finite State Machine format\n"
-    "  mcrl    .svc  mCRL SVC format\n"
-    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
-    "\n"
-    );
-}
-
 void process(t_tool_options const& tool_options) {
   lts l;
 
@@ -251,14 +232,22 @@ t_tool_options parse_command_line(int ac, char** av) {
     "\n"
     "The output format is determined by the extension of OUTFILE, whereas the input\n"
     "format is determined by the content of INFILE. Options --in and --out can be\n"
-    "used to force the input and output formats.");
+    "used to force the input and output formats. The supported formats are:\n"
+    "  'aut' for the Aldebaran format (CADP),\n"
+#ifdef MCRL2_BCG
+    "  'bcg' for the Binary Coded Graph format (CADP),\n"
+#endif
+    "  'dot' for the GraphViz format (output only),\n"
+    "  'fsm' for the Finite State Machine format,\n"
+    "  'mcrl' for the mCRL SVC format, or\n"
+    "  'mcrl2' for the mCRL2 SVC format (default)"
+  );
 
   clinterface.add_option("no-reach",
       "do not perform a reachability check on the input LTS");
   clinterface.add_option("no-state",
       "leave out state information when saving in dot format", 'n');
   clinterface.add_option("determinise", "determinise LTS", 'D');
-  clinterface.add_option("formats", "list accepted formats", 'f');
   clinterface.add_option("lps", make_mandatory_argument("FILE"),
       "use FILE as the LPS from which the input LTS was generated; this is "
       "needed to store the correct parameter names of states when saving "
@@ -328,11 +317,6 @@ t_tool_options parse_command_line(int ac, char** av) {
       std::cerr << "warning: format '" << parser.option_argument("out") <<
                    "' is not recognised; option ignored" << std::endl;
     }
-  }
-
-  if (parser.options.count("formats")) {
-    print_formats(stdout);
-    exit(EXIT_SUCCESS);
   }
 
   if (parser.options.count("equivalence")) {
