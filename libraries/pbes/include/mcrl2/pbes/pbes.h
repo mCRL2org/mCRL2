@@ -27,11 +27,12 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
@@ -373,17 +374,11 @@ class pbes
     bool save(const std::string& filename, bool binary = true) const
     {
       if (!is_well_typed())
-        throw mcrl2::runtime_error("Error in pbes::save(): term is not well typed");
-
+      {
+        throw mcrl2::runtime_error("PBES is not well typed (pbes::save())");
+      }
       atermpp::aterm t = ATermAppl(*this);
-      if (binary)
-      {
-        return atermpp::write_to_named_saf_file(t, filename);
-      }
-      else
-      {
-        return atermpp::write_to_named_text_file(t, filename);
-      }
+      core::detail::save_aterm(t, filename, binary);
     }
 
     /// Conversion to ATermAppl.
