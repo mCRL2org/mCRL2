@@ -1136,9 +1136,11 @@ RewriterInnermost::RewriterInnermost(mcrl2::data::data_specification DataSpec)
 	l = DataSpec.equations();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		if ( !isValidRewriteRule(ATAgetFirst(l)) )
+		try
 		{
-			gsWarningMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+			CheckRewriteRule(ATAgetFirst(l));
+		} catch ( std::runtime_error &e ) {
+			gsWarningMsg("%s\n",e.what());
 			continue;
 		}
 
@@ -1220,9 +1222,11 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 	ATermInt i,j;
 	int old_num;
 
-	if ( !isValidRewriteRule(Rule) )
+	try
 	{
-		gsWarningMsg("data equation %P is not suitable for rewriting; ignoring\n",Rule);
+		CheckRewriteRule(Rule);
+	} catch ( std::runtime_error &e ) {
+		gsWarningMsg("%s\n",e.what());
 		return false;
 	}
 

@@ -8,6 +8,8 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <stdexcept>
+#include <string>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
@@ -24,6 +26,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
+using namespace std;
 
 Rewriter::Rewriter()
 {
@@ -198,85 +201,120 @@ Rewriter *createRewriter(data_specification DataSpec, RewriteStrategy Strategy)
 }
 
 //Prototype
-static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL);
+static void checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL);
 
-static bool checkVars(ATermList Exprs, ATermList Vars, ATermList *UsedVars = NULL)
+static void checkVars(ATermList Exprs, ATermList Vars, ATermList *UsedVars = NULL)
 {
         assert(ATgetType(Exprs) == AT_LIST);
-        bool result = true;
 
-        for( ; !ATisEmpty(Exprs) && result ; Exprs = ATgetNext(Exprs))
+        for( ; !ATisEmpty(Exprs); Exprs = ATgetNext(Exprs))
         {
-                result = result && checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
+                checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
         }
-
-        return result;
 }
 
-static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
+static void checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
 {
 	assert(ATgetType(Expr) == AT_APPL);
 
-	if ( gsIsNil(Expr) || gsIsOpId(Expr) )
+	if ( gsIsDataAppl(Expr) )
 	{
-		return true;
-	} else if ( gsIsDataAppl(Expr) )
+		checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars);
+		checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
+	} else if ( gsIsDataVarId(Expr) )
 	{
-		return checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars) && checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
-	} else { // gsIsDataVarId(Expr)
-		assert(gsIsDataVarId(Expr));
-
 		if ( (UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) < 0) )
 		{
 			*UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
 		}
 
-		return (ATindexOf(Vars,(ATerm) Expr,0) >= 0);
+		if ( ATindexOf(Vars,(ATerm) Expr,0) == -1 )
+		{
+			throw Expr;
+		}
 	}
 }
 
 //Prototype
-static bool checkPattern(ATermAppl p);
+static void checkPattern(ATermAppl p);
 
-static bool checkPattern(ATermList l)
+static void checkPattern(ATermList l)
 {
-        bool result = true;
-        for( ; !ATisEmpty(l) && result; l = ATgetNext(l) )
+        for( ; !ATisEmpty(l); l = ATgetNext(l) )
         {
-                result = result && checkPattern(ATAgetFirst(l));
+                checkPattern(ATAgetFirst(l));
         }
-        return result;
 }
 
-static bool checkPattern(ATermAppl p)
+static void checkPattern(ATermAppl p)
 {
-	if ( gsIsDataVarId(p) || gsIsOpId(p) )
+	if ( gsIsDataAppl(p) )
+        {
+		if ( gsIsDataVarId(ATAgetArgument(p,0)) )
+		{
+			throw string("variable "+PrintPart_CXX(ATgetArgument(p,0),ppDefault)+" is used as head symbol in an application, which is not supported");
+		}
+		checkPattern(ATAgetArgument(p,0));
+		checkPattern(ATLgetArgument(p,1));
+	}
+}
+
+void CheckRewriteRule(ATermAppl DataEqn)
+{
+	assert(gsIsDataEqn(DataEqn));
+
+	ATermList rule_vars = ATLgetArgument(DataEqn,0);
+
+	// collect variables from lhs and check that they are in rule_vars
+	ATermList lhs_vars = ATmakeList0();
+	try
 	{
-		return true;
-	} else { // gsIsDataAppl(p)
-		return !gsIsDataVarId(ATAgetArgument(p,0)) &&
-		       checkPattern(ATAgetArgument(p,0))   &&
-		       checkPattern(ATLgetArgument(p,1));
+		checkVars(ATAgetArgument(DataEqn,2),rule_vars,&lhs_vars);
+	} catch ( ATermAppl var )
+	{
+		// This should never occur if DataEqn is a valid data equation
+		assert(0);
+		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
+	}
+
+	// check that variables from the rhs are occur in the lhs
+	try
+	{
+		checkVars(ATAgetArgument(DataEqn,1),lhs_vars);
+	} catch ( ATermAppl var )
+	{
+		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in condition of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+	}
+
+	// check that variables from the condition occur in the lhs
+	try
+	{
+		checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
+	} catch ( ATermAppl var )
+	{
+		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in right-hand side of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+	}
+
+	// check that the lhs is a supported pattern
+	try
+	{
+		checkPattern(ATAgetArgument(DataEqn,2));
+	} catch ( string &s )
+	{
+		throw runtime_error(s+" (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
 	}
 }
 
 bool isValidRewriteRule(ATermAppl DataEqn)
 {
-	assert(gsIsDataEqn(DataEqn));
-
-	ATermList vars = ATLgetArgument(DataEqn,0);
-	ATermList lhs_vars = ATmakeList0();
-	if ( !checkVars(ATAgetArgument(DataEqn,2),vars,&lhs_vars) )
-	{
-		return false;
-	}
-
-	if ( !checkVars(ATAgetArgument(DataEqn,1),lhs_vars) )
-	{
-		return false;
-	}
-
-	return checkVars(ATAgetArgument(DataEqn,3),lhs_vars) && checkPattern(ATAgetArgument(DataEqn,2));
+  try
+  {
+    CheckRewriteRule(DataEqn);
+    return true;
+  } catch ( runtime_error &e )
+  {
+    return false;
+  }
 }
 
 void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)

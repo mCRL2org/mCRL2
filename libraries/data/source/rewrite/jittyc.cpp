@@ -2911,9 +2911,11 @@ void RewriterCompilingJitty::CompileRewriteSystem(mcrl2::data::data_specificatio
   l = DataSpec.equations();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    if ( !isValidRewriteRule(ATAgetFirst(l)) )
+    try
     {
-      gsWarningMsg("data equation %P is not suitable for rewriting; ignoring\n",ATAgetFirst(l));
+      CheckRewriteRule(ATAgetFirst(l));
+    } catch ( std::runtime_error &e ) {
+      gsWarningMsg("%s\n",e.what());
       continue;
     }
 

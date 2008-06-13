@@ -226,10 +226,10 @@ int main(int argc, char **argv)
           if ( idx < (unsigned int) ATgetLength(next_states) )
           {
             gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));
+            simulator.ChooseTransition(idx);
             gsMessage("current state: [ ");
             PrintState(simulator.GetState(),simulator.GetNextState());
             gsMessage(" ]\n\n");
-            simulator.ChooseTransition(idx);
             break;
           } else {
             cout << "invalid transition index";

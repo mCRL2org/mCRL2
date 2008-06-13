@@ -195,6 +195,13 @@ class Rewriter
 Rewriter *createRewriter(mcrl2::data::data_specification DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 /**
+ * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.
+ * \param DataEqn The mCRL2 data equation to be checked.
+ * \throw std::runtime_error containing a reason why DataEqn is not a valid rewrite rule.
+ **/
+void CheckRewriteRule(ATermAppl DataEqn);
+
+/**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.
  * \param DataEqn The mCRL2 data equation to be checked.
  * \return Whether or not DataEqn is a valid rewrite rule.
