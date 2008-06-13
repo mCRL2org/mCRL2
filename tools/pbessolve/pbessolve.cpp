@@ -89,7 +89,6 @@ struct t_tool_options {
  
 //Local functions ======================== 
 static t_tool_options parse_command_line(int argc, char** argv); 
-pbes<> load_pbes(string infilename);
 
 pbes_expression interpret_solution(pbes<> pbes_spec, 
 				   atermpp::vector<pbes_equation> es_solution, 
@@ -113,7 +112,8 @@ int main(int argc, char** argv)
     t_tool_options tool_options = parse_command_line(argc, argv); 
      
     //Load the pbes 
-    pbes<> pbes_spec = load_pbes(tool_options.infilename); 
+    pbes<> pbes_spec;
+    pbes_spec.load(tool_options.infilename); 
      
     //Solve the pbes. 
     //The solution will be returned as an equation system,  
@@ -147,39 +147,6 @@ int main(int argc, char** argv)
  
  
  
-//========================================= 
-// Loads a PBES from a file. 
-// (function copied from pbes2bes)
-pbes<> load_pbes(string infilename) 
-{ 
-  pbes<> pbes_spec; 
-  if (infilename == "") 
-  {
-    try
-    {
-      pbes_spec.load("-");
-    }
-    catch (mcrl2::runtime_error e)   
-    { 
-	    gsErrorMsg("Cannot open PBES from stdin\n"); 
-	    exit(1); 
-	  } 
-  } 
-  else 
-  { 
-    try
-    {
-      pbes_spec.load(infilename);
-  }
-    catch (mcrl2::runtime_error e)
-    { 
-      gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str()); 
-      exit(1); 
-    } 
-  } 
-  return pbes_spec; 
-} 
-//======================================== 
  
  
  

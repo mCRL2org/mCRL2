@@ -45,6 +45,10 @@ using namespace mcrl2::pbes_system;
 struct t_tool_options {
   string infile_name, outfile_name;
   RewriteStrategy rewrite_strategy;
+  
+  t_tool_options()
+    : rewrite_strategy(GS_REWR_JITTY)
+  {}
 };
 
 // Name of the file to read input from
@@ -59,7 +63,8 @@ t_tool_options parse_command_line(int ac, char** av)
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options = { "-", "-", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
+  t_tool_options tool_options;
+  tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
 
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");

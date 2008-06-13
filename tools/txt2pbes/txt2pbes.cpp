@@ -612,19 +612,8 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
       }
       //store the result
-      if (tool_options.outfilename == "") {
-        gsVerboseMsg("saving result to stdout...\n");
-        ATwriteToSAFFile((ATerm) result, stdout);
-      } else {
-        FILE *outstream = fopen(tool_options.outfilename.c_str(), "wb");
-        if (outstream == NULL) {
-          gsErrorMsg("cannot open output file '%s'\n", tool_options.outfilename.c_str());
-          return EXIT_FAILURE;
-        }
-        gsVerboseMsg("saving result to '%s'...\n", tool_options.outfilename.c_str());
-        ATwriteToSAFFile((ATerm) result, outstream);
-        fclose(outstream);
-      }
+      pbes<> p(result);
+      p.save(tool_options.outfilename);
     } else {
       //!tool_options.new_parser
 

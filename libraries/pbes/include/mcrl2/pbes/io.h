@@ -150,40 +150,6 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
   }
 }
 
-//function load_pbes
-//------------------
-/// \brief Load a PBES.
-inline
-pbes<> load_pbes(std::string infilename)
-{
-  pbes<> pbes_spec;
-  if (infilename == "-")
-  {
-    try
-    {
-      pbes_spec.load("-");
-    }
-    catch (mcrl2::runtime_error e)
-    {
-      core::gsErrorMsg("Cannot open PBES from stdin\n");
-      throw mcrl2::runtime_error("exit!");
-    }
-  }
-  else
-  {
-    try
-    {
-      pbes_spec.load(infilename);
-    }
-    catch (mcrl2::runtime_error e)
-    {
-      core::gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str());
-      throw mcrl2::runtime_error("exit!");
-    }
-  }
-  return pbes_spec;
-}
-
 //function save_pbes
 //------------------
 /// \brief Save a PBES in the format specified.

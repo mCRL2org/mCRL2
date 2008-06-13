@@ -43,6 +43,10 @@ struct t_tool_options {
 	string opt_strategy;
 	string infilename;
 	string outfilename;
+
+  t_tool_options()
+    : opt_outputformat("lazy"), opt_strategy("binary")
+  {}
 };
 
 bool process(t_tool_options tool_options)
@@ -50,7 +54,8 @@ bool process(t_tool_options tool_options)
   typedef mcrl2::data::rewriter data_rewriter;
   typedef mcrl2::pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
 
-  pbes<> pbes_spec = load_pbes(tool_options.infilename);
+  pbes<> pbes_spec;
+  pbes_spec.load(tool_options.infilename);
   data_rewriter datar(pbes_spec.data());
   pbes_rewriter pbesr(datar, pbes_spec.data());
 
@@ -272,11 +277,6 @@ t_tool_options parse_command_line(int ac, char** av)
   command_line_parser parser(clinterface, ac, av);
 
   t_tool_options tool_options;
-
-  tool_options.opt_outputformat = "lazy";
-  tool_options.opt_strategy     = "binary";
-  tool_options.infilename       = "-";
-  tool_options.outfilename      = "-";
 
   if (parser.options.count("output")) { // Output format
     std::string format = parser.option_argument("output");

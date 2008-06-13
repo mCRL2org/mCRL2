@@ -408,7 +408,7 @@ t_tool_options parse_command_line(int ac, char** av)
   tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
   tool_options.opt_outputformat              = "none";
   tool_options.opt_strategy                  = lazy;
-  tool_options.infilename                    = "-";
+  tool_options.infilename                    = "";
   tool_options.outfilename                   = "-";
   
   if (parser.options.count("output")) { // Output format

@@ -308,7 +308,7 @@ class pbes
     ///
     void load(const std::string& filename)
     {
-      atermpp::aterm t = atermpp::read_from_named_file(filename);
+      atermpp::aterm t = core::detail::load_aterm(filename);
       if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
         throw mcrl2::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
 

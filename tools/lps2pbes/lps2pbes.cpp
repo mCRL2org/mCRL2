@@ -94,7 +94,7 @@ bool process(t_tool_options const& tool_options) {
   }
   if ((tool_options.end_phase == PH_NONE) && (!tool_options.pretty)) {
     mcrl2::pbes_system::pbes<> pbes_spec(result);
-    pbes_spec.save(outfilename.empty()?"-":outfilename);
+    pbes_spec.save(outfilename);
   } else {
     if (outfilename.empty()) {
       PrintPart_CXX(cout, (ATerm) result, (tool_options.pretty)?ppDefault:ppInternal);

@@ -77,11 +77,11 @@ static void calculate_bes(pbes<> pbes_spec,
                           atermpp::indexed_set &variable_index,
                           Rewriter *rewriter);
 
-//Post: tool_options.infilename contains a PBES ("-" indicates stdin)
+//Post: tool_options.infilename contains a PBES ("" indicates stdin)
 //Ret:  The BES generated from the PBES
 
 pbes<> load_pbes(t_tool_options tool_options);
-//Post: tool_options.infilename contains a PBES ("-" indicates stdin)
+//Post: tool_options.infilename contains a PBES ("" indicates stdin)
 //Ret: The pbes loaded from infile
 
 static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equations);
@@ -232,7 +232,8 @@ static bool solve_bes(const t_tool_options &,
 void process(t_tool_options const& tool_options) 
 {
   //Load PBES
-  pbes<> pbes_spec = load_pbes(tool_options);
+  pbes<> pbes_spec;
+  pbes_spec.load(tool_options.infilename);
   
   if (!pbes_spec.is_well_typed())
   { gsErrorMsg("The pbes is not well typed\n");
@@ -1313,40 +1314,6 @@ bool solve_bes(const t_tool_options &tool_options,
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
 }
-
-//function load_pbes
-//------------------
-pbes<> load_pbes(t_tool_options tool_options)
-{
-  string infilename = tool_options.infilename;
-
-  pbes<> pbes_spec;
-  if (infilename == "-")
-  {
-    try
-    {
-      pbes_spec.load("-");
-    }
-    catch (mcrl2::runtime_error e)   
-    {
-      gsErrorMsg("Cannot open PBES from stdin\n");
-      exit(1);
-    }
-  }
-  else
-  {
-    try
-    {
-      pbes_spec.load(infilename);
-    }
-    catch (mcrl2::runtime_error e)   
-    {
-      gsErrorMsg("Cannot open PBES from '%s'\n", infilename.c_str());
-      exit(1);
-    }
-  }
-  return pbes_spec;
-} 
 
 //function save_bes_in_vasy_format
 //--------------------------------

@@ -55,7 +55,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options = { (0 < parser.options.count("full")), "-" };
+  t_tool_options tool_options = { (0 < parser.options.count("full")), "" };
 
   if (0 < parser.arguments.size()) {
     tool_options.file_name = parser.arguments[0];
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
      }
      		
      // Show file from which PBES was read
-     cout << "Input read from '" << ((tool_options.file_name == "-") ? "standard input" : tool_options.file_name) << "'" << endl << endl;
+     cout << "Input read from '" << ((tool_options.file_name == "") ? "standard input" : tool_options.file_name) << "'" << endl << endl;
      
      // Check if errors occurred in reading PBEs
      if (fp_errors != 0)
