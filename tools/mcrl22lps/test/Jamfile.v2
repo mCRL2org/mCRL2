@@ -5,7 +5,7 @@ import set ;
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 use-project /tools/lpspp : $(TOP)/tools/lpspp ;
 
-test-cases = [ glob *.mcrl2 ] ;
+test-cases = [ glob-tree *.mcrl2 ] ;
 
 for file in $(test-cases) {
   tests-with-files += [
