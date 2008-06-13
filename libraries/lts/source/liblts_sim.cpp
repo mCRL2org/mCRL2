@@ -700,7 +700,7 @@ bool sim_partitioner::in_preorder(uint s,uint t) const
   return Q[block_Pi[s]][block_Pi[t]];
 }
 
-bool sim_partitioner::in_eq_class(uint s,uint t) const
+bool sim_partitioner::in_same_class(uint s,uint t) const
 {
   return (block_Pi[s] == block_Pi[t]);
 }

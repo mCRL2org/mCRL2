@@ -262,20 +262,177 @@ void p_lts::init(p_lts const &l)
 
 void p_lts::clear(bool state_info, bool label_info)
 {
-  if ( state_values != NULL )
+  clear_states();
+  clear_labels();
+  clear_transitions();
+  clear_type();
+
+  this->state_info = state_info;
+  this->label_info = label_info;
+}
+
+void p_lts::clear_states()
+{
+  p_remove_state_values();
+  states_size = 0;
+  nstates = 0;
+}
+
+void p_lts::clear_labels()
+{
+  if ( taus != NULL )
   {
-    ATunprotectArray(state_values);
-    free(state_values);
+    free(taus);
+    taus = NULL;
   }
-  free(taus);
   if ( label_values != NULL )
   {
     ATunprotectArray(label_values);
     free(label_values);
+    label_values = NULL;
   }
-  free(transitions);
+  label_info = false;
+  labels_size = 0;
+  nlabels = 0;
+}
 
-  init(state_info,label_info);
+void p_lts::clear_transitions()
+{
+  if (transitions != NULL)
+  {
+    free(transitions);
+    transitions = NULL;
+  }
+  transitions_size = 0;
+  ntransitions = 0;
+}
+
+// Merges an LTS L with this LTS (say K) and stores the resulting LTS
+// (say M) in this LTS datastructure, effectively replacing K.
+// Conceptually, we just take the union of the sets of states and the
+// sets of transitions of K and L:
+//   States_M      = States_K + States_L
+//   Transitions_M = Transitions_K + Transitions_L
+// where + denotes set union.
+// However, this assumes that States_K and States_L are disjoint,
+// which is generally not the case. More specifically we have:
+//   States_K = { 0, ..., N_K - 1 }   and
+//   States_L = { 0, ..., N_L - 1 }
+// for some N_K, N_L > 0.
+// Therefore, state i of L will be numbered |N_K| + i in the resulting
+// LTS M and state i of K will be numbered i in M. This yields:
+//   States_M = { 0, ..., N_K + N_L - 1 }.
+void p_lts::merge(lts *l)
+{
+  unsigned int new_nstates = nstates + l->num_states();
+  unsigned int new_ntransitions = ntransitions + l->num_transitions();
+  
+  // The resulting LTS will have state information only if BOTH LTSs
+  // currently have state information.
+  if ( state_info && l->has_state_info() )
+  {
+    if ( state_values != NULL )
+    {
+      ATunprotectArray(state_values);
+    }
+    states_size = new_nstates;
+    state_values = (ATerm*)realloc(state_values,states_size*sizeof(ATerm));
+    if ( state_values == NULL ) 
+    {
+      gsErrorMsg("insufficient memory\n");
+      exit(1);
+    }
+    for (state_iterator i = l->get_states(); i.more(); ++i)
+    {
+      state_values[nstates + *i] = l->state_value(*i);
+    }
+    ATprotectArray(state_values,states_size);
+  }
+  else
+  {
+    // remove state information from this LTS, if any
+    p_remove_state_values();
+  }
+
+  // Resize the transitions array so l's transitions can be added
+  transitions_size = new_ntransitions;
+  transitions = (transition*)realloc(transitions,transitions_size*sizeof(transition));
+  if ( transitions == NULL )
+  {
+    gsErrorMsg("insufficient memory\n");
+    exit(1);
+  }
+
+  // Before we can set the data in the realloc'ed transitions array, we
+  // first have to collect the labels of both LTSs in an indexed set.
+  ATermIndexedSet labs = ATindexedSetCreate(nlabels + l->num_labels(),75);
+  // count the number of labels that the resulting LTS will contain
+  unsigned new_nlabels = 0;
+  ATbool b;
+  // add the labels of this LTS
+  for (unsigned int i = 0; i < nlabels; ++i)
+  {
+    ATindexedSetPut(labs,label_values[i],&b);
+    if ( b )
+    {
+      ++new_nlabels;
+    }
+  }
+  // add the labels of LTS l
+  for (label_iterator i = l->get_labels(); i.more(); ++i)
+  {
+    ATindexedSetPut(labs,l->label_value(*i),&b);
+    if ( b )
+    {
+      ++new_nlabels;
+    }
+  }
+
+  // We first update the label numbers of all transitions of this LTS to
+  // the new indices as given by the indexed set.
+  for (unsigned int i = 0; i < ntransitions; ++i)
+  {
+    transitions[i].label =
+      ATindexedSetGetIndex(labs,label_values[transitions[i].label]);
+  }
+
+  // Now add the transitions of LTS l
+  unsigned int j = ntransitions;
+  for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+  {
+    transitions[j].from  = i.from() + nstates;
+    transitions[j].to    = i.to() + nstates;
+    transitions[j].label =
+      ATindexedSetGetIndex(labs,l->label_value(i.label()));
+    ++j;
+  }
+
+  // Store the label values contained in the indexed set
+  labels_size = new_nlabels;
+  ATunprotectArray(label_values);
+  label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
+  if ( label_values == NULL )
+  {
+    gsErrorMsg("insufficient memory\n");
+    exit(1);
+  }
+  for (unsigned int i = 0; i < new_nlabels; ++i)
+  {
+    label_values[i] = ATindexedSetGetElem(labs,i);
+  }
+  ATprotectArray(label_values,labels_size);
+
+  ATindexedSetDestroy(labs);
+
+  // Finally update the fields that have not been updated yet
+  nstates      = new_nstates;
+  ntransitions = new_ntransitions;
+  nlabels      = new_nlabels;
+}
+
+void p_lts::clear_type()
+{
+  type = lts_none;
 }
 
 lts_type p_lts::detect_type(string const& filename)
@@ -1215,7 +1372,13 @@ bool lts::has_label_info()
   return label_info;
 }
 
-void lts::remove_state_values() {
+void lts::remove_state_values()
+{
+  p_remove_state_values();
+}
+
+void p_lts::p_remove_state_values()
+{
   state_info = false;
   if ( state_values != NULL )
   {

@@ -62,26 +62,14 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
         sp.partitioning_algorithm();
 
         // Clear this LTS, but keep the labels
-        type = lts_none;
-        state_info = false;
-
-        states_size = 0;
-        nstates = 0;
-        if (state_values != NULL)
-        {
-          ATunprotectArray(state_values);
-          free(state_values);
-          state_values = NULL;
-        }          
-        
-        transitions_size = 0;
-        ntransitions = 0;
-        free(transitions);
+        clear_type();
+        clear_states();
+        clear_transitions();
 
         // Assign the reduced LTS
-        transitions = sp.get_transitions(ntransitions,transitions_size);
         nstates = sp.num_eq_classes();
         init_state = sp.get_eq_class(init_state);
+        transitions = sp.get_transitions(ntransitions,transitions_size);
 
         // Remove unreachable parts
         sort_transitions();
@@ -114,6 +102,24 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
       return bisimulation_compare(*this,l,false,&opts.reduce.tau_actions);
     case lts_eq_branching_bisim:
       return bisimulation_compare(*this,l,true,&opts.reduce.tau_actions);
+    case lts_eq_sim:
+      {
+        // Merge this LTS and l and store the result in this LTS.
+        // In the resulting LTS, the initial state i of l will have the
+        // state number i + N where N is the number of states in this
+        // LTS (before the merge).
+        unsigned int init_l = l.initial_state() + nstates;
+        merge(&l);
+
+        // We no longer need l, so clear it to save memory
+        l.clear();
+
+        // Run the partitioning algorithm on this merged LTS
+        sim_partitioner sp(this);
+        sp.partitioning_algorithm();
+
+        return sp.in_same_class(init_state,init_l);
+      }
     case lts_eq_trace:
       {
         // Copy LTSs
@@ -154,7 +160,35 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
       }
     case lts_eq_isomorph:
     default:
-      gsErrorMsg("comparision for this equivalence is not yet implemented\n");
+      gsErrorMsg("comparison for this equivalence is not available\n");
+      return false;
+  }
+}
+ 
+bool lts::compare(lts &l, lts_preorder pre)
+{
+  switch ( pre )
+  {
+    case lts_pre_sim:
+      {
+        // Merge this LTS and l and store the result in this LTS.
+        // In the resulting LTS, the initial state i of l will have the
+        // state number i + N where N is the number of states in this
+        // LTS (before the merge).
+        unsigned int init_l = l.initial_state() + nstates;
+        merge(&l);
+
+        // We no longer need l, so clear it to save memory
+        l.clear();
+
+        // Run the partitioning algorithm on this merged LTS
+        sim_partitioner sp(this);
+        sp.partitioning_algorithm();
+
+        return sp.in_preorder(init_state,init_l);
+      }
+    default:
+      gsErrorMsg("comparison for this preorder is not available\n");
       return false;
   }
 }

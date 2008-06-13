@@ -235,18 +235,21 @@ namespace lts
   {
     public:
       /** \brief Creates a state iterator for an LTS.
+       * \details The created iterator will point to the first state of
+       * the LTS.
        * \param[in] l The LTS for which the state iterator will be created. */
       state_iterator(lts *l);
 
       /** \brief Checks whether there are more states to iterate over.
-       * \retval false if this iterator points to the last state of the LTS;
-       * \retval true otherwise.*/
+       * \retval true if there are more states to iterate over;
+       * \retval false otherwise. */
       bool more();
 
       /** \brief Dereferences the iterator.
        * \return The state to which this iterator points.*/
       unsigned int operator *();
-      /** \brief Increments the iterator. */
+      /** \brief Increments the iterator. 
+       * \details Makes this iterator point to the next state of the LTS. */
       void operator ++();
   };
 
@@ -257,20 +260,22 @@ namespace lts
   {
     public:
       /** \brief Creates a transition label iterator for an LTS.
+       * \details The created iterator will point to the first label of
+       * the LTS.
        * \param[in] l The LTS for which the transition label iterator will be
        * created. */
       label_iterator(lts *l);
       
       /** \brief Checks whether there are more transition labels to iterate over.
-       * \retval false if this iterator points to the last transition label of
-       * the LTS;
-       * \retval true otherwise.*/
+       * \retval true if there are more labels to iterate over;
+       * \retval false otherwise. */
       bool more();
 
       /** \brief Dereferences the iterator.
        * \return The transition label to which this iterator points.*/
       unsigned int operator *();
-      /** \brief Increments the iterator. */
+      /** \brief Increments the iterator.
+       * \details Makes this iterator point to the next label of the LTS. */
       void operator ++();
   };
 
@@ -281,14 +286,15 @@ namespace lts
   {
     public:
       /** \brief Creates a transition iterator for an LTS.
+       * \details The created iterator will point to the first
+       * transition of the LTS.
        * \param[in] l The LTS for which the transition iterator will be created.
        */
       transition_iterator(lts *l);
       
       /** \brief Checks whether there are more transitions to iterate over.
-       * \retval false if this iterator points to the last transition of the
-       * LTS;
-       * \retval true otherwise.*/
+       * \retval true if there are more transitions to iterate over;
+       * \retval false otherwise. */
       bool more();
 
       /** \brief Gets the transition's source state.
@@ -301,7 +307,8 @@ namespace lts
        * \return The target state of the transition to which this iterator points.*/
       unsigned int to();
 
-      /** \brief Increments the iterator. */
+      /** \brief Increments the iterator.
+       * \details Makes this iterator point to the next transition of the LTS. */
       void operator ++();
   };
 

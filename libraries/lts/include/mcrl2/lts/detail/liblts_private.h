@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts/detail/liblts_private.h
+/// \file liblts_private.h
 
   class p_lts_extra
   {
@@ -91,7 +91,14 @@
 
       void init(bool state_info = true, bool label_info = true);
       void init(p_lts const &l);
+
       void clear(bool state_info = true, bool label_info = true);
+      void clear_states();
+      void clear_labels();
+      void clear_transitions();
+      void clear_type();
+
+      void merge(lts *l);
 
       unsigned int p_add_state(ATerm value = NULL);
       unsigned int p_add_label(ATerm value = NULL, bool is_tau = false);
@@ -101,6 +108,8 @@
       
       std::string p_state_value_str(unsigned int state);
       std::string p_label_value_str(unsigned int label);
+
+      void p_remove_state_values();
 
       bool read_from_aut(std::string const& filename);
       bool read_from_aut(std::istream &is);

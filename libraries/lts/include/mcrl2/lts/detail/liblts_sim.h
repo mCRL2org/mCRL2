@@ -69,13 +69,15 @@ class sim_partitioner
      * \retval false otherwise. */
     bool in_preorder(uint s,uint t) const;
 
-    /** Returns whether two states are simulation equivalent. 
+    /** Returns whether two states are in the same simulation
+     * equivalence class.
      * \pre The simulation equivalence classes have been computed. 
      * \param[in] s A state number.
      * \param[in] t A state number.
-     * \retval true if \e s and \e t are simulation equivalent;
+     * \retval true if \e s and \e t are in the same simulation
+     * equivalence class;
      * \retval false otherwise. */
-    bool in_eq_class(uint s,uint t) const;
+    bool in_same_class(uint s,uint t) const;
 
   private:
     struct state_bucket
