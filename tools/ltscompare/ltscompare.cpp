@@ -99,12 +99,14 @@ t_tool_options parse_command_line(int ac, char** av) {
       "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
             + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
-            + lts::name_of_equivalence(lts_eq_weak_trace)
+            + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
+      "(not allowed in combination with -p/--preorder)"
       , 'e').
     add_option("preorder", make_mandatory_argument("NAME"),
       "use preorder NAME:\n"
       "  '" + lts::string_for_preorder(lts_pre_sim) + "' for "
-            + lts::name_of_preorder(lts_pre_sim)
+            + lts::name_of_preorder(lts_pre_sim) + "\n"
+      "(not allowed in combination with -e/--equivalence)"
       , 'p').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
       "consider actions with a name in the comma separated list ACTNAMES to "
