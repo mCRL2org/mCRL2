@@ -1,5 +1,5 @@
-% This is a specification of the dining philosophers problem
-% for 3 philosophers.
+% This is a specification of a solution to the dining philosophers
+% problem for 3 philosophers using a scheduler.
 
 sort Phil = struct p1 | p2 | p3;
      Fork = struct f1 | f2 | f3;
@@ -12,7 +12,7 @@ eqn lf(p1) = f1;
     rf(p2) = f1;
     rf(p3) = f2;
 
-act get, put, up, down, lock, free: Phil # Fork;
+act ack_get, get, put, up, down, lock, free: Phil # Fork;
     eat: Phil;
 
 proc P_Phil(p: Phil) =
@@ -23,9 +23,13 @@ proc P_Phil(p: Phil) =
        (put(p,lf(p)).put(p,rf(p)) + put(p,rf(p)).put(p,lf(p)) + put(p,lf(p))|put(p,rf(p)))
        . P_Phil(p);
      P_Fork(f: Fork) = sum p:Phil. up(p,f) . down(p,f) . P_Fork(f);
+     Waiter = ack_get(p1, lf(p1)) . ack_get(p1, rf(p1)) .
+              ack_get(p2, lf(p2)) . ack_get(p2, rf(p2)) .
+              ack_get(p3, lf(p3)) . ack_get(p3, rf(p3)) . Waiter;
 
-init block( { get, put, up, down },
-       comm( { get|up->lock, put|down->free },
+init allow ( { lock, free, eat },
+       comm( { ack_get|get|up->lock, put|down->free },
+         Waiter ||
          P_Fork(f1) || P_Fork(f2) || P_Fork(f3) ||
          P_Phil(p1) || P_Phil(p2) || P_Phil(p3)
      ));

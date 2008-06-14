@@ -1,5 +1,5 @@
-% This is a corrected version of the naive solution to the dining philosophers
-% problem for 3 philosophers.
+% This is a corrected version of the naive solution to
+% the dining philosophers problem for 3 philosophers.
 
 sort Phil = struct p1 | p2 | p3;
      Fork = struct f1 | f2 | f3;
@@ -16,11 +16,14 @@ act get, put, up, down, lock, free: Phil # Fork;
     eat: Phil;
 
 proc P_Phil(p: Phil) =
-       (p == p1) -> get(p,rf(p)) . get(p,lf(p)) . eat(p) . put(p,rf(p)) . put(p,lf(p)) . P_Phil(p)
-                 <> get(p,lf(p)) . get(p,rf(p)) . eat(p) . put(p,lf(p)) . put(p,rf(p)) . P_Phil(p);
+       (p == p1) -> get(p,rf(p)) . get(p,lf(p)) . eat(p) .
+                    put(p,rf(p)) . put(p,lf(p)) . P_Phil(p)
+                 <> get(p,lf(p)) . get(p,rf(p)) . eat(p) .
+                    put(p,lf(p)) . put(p,rf(p)) . P_Phil(p);
      P_Fork(f: Fork) = sum p:Phil. up(p,f) . down(p,f) . P_Fork(f);
 
 init block( { get, put, up, down },
        comm( { get|up->lock, put|down->free },
-         P_Fork(f1) || P_Fork(f2) || P_Fork(f3) || P_Phil(p1) || P_Phil(p2) || P_Phil(p3)
+         P_Fork(f1) || P_Fork(f2) || P_Fork(f3) ||
+         P_Phil(p1) || P_Phil(p2) || P_Phil(p3)
      ));
