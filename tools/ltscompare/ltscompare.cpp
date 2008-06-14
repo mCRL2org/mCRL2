@@ -82,10 +82,6 @@ t_tool_options parse_command_line(int ac, char** av) {
   );
 
   clinterface.
-    add_option("lps", make_mandatory_argument("FILE"),
-      "use FILE as the LPS from which the input LTS was generated; this is "
-      "needed to store the correct parameter names of states when saving "
-      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l').
     add_option("in1", make_mandatory_argument("FORMAT"),
       "use FORMAT as the format for INFILE1 (or stdin)", 'i').
     add_option("in2", make_mandatory_argument("FORMAT"),

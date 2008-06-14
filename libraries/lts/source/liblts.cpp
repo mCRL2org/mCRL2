@@ -363,68 +363,137 @@ void p_lts::merge(lts *l)
     exit(1);
   }
 
-  // Before we can set the data in the realloc'ed transitions array, we
-  // first have to collect the labels of both LTSs in an indexed set.
-  ATermIndexedSet labs = ATindexedSetCreate(nlabels + l->num_labels(),75);
-  // count the number of labels that the resulting LTS will contain
-  unsigned new_nlabels = 0;
-  ATbool b;
-  // add the labels of this LTS
-  for (unsigned int i = 0; i < nlabels; ++i)
-  {
-    ATindexedSetPut(labs,label_values[i],&b);
-    if ( b )
-    {
-      ++new_nlabels;
-    }
-  }
-  // add the labels of LTS l
-  for (label_iterator i = l->get_labels(); i.more(); ++i)
-  {
-    ATindexedSetPut(labs,l->label_value(*i),&b);
-    if ( b )
-    {
-      ++new_nlabels;
-    }
-  }
-
-  // We first update the label numbers of all transitions of this LTS to
-  // the new indices as given by the indexed set.
-  for (unsigned int i = 0; i < ntransitions; ++i)
-  {
-    transitions[i].label =
-      ATindexedSetGetIndex(labs,label_values[transitions[i].label]);
-  }
-
-  // Now add the transitions of LTS l
+  // Now add the source and target states of the transitions of LTS l.
+  // The labels will be added below, depending on whether there is label
+  // information in both LTSs.
   unsigned int j = ntransitions;
   for (transition_iterator i = l->get_transitions(); i.more(); ++i)
   {
     transitions[j].from  = i.from() + nstates;
     transitions[j].to    = i.to() + nstates;
-    transitions[j].label =
-      ATindexedSetGetIndex(labs,l->label_value(i.label()));
     ++j;
   }
 
-  // Store the label values contained in the indexed set
-  labels_size = new_nlabels;
-  ATunprotectArray(label_values);
-  label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
-  if ( label_values == NULL )
+  unsigned new_nlabels = 0;
+  if (label_info && l->has_label_info())
   {
-    gsErrorMsg("insufficient memory\n");
-    exit(1);
-  }
-  for (unsigned int i = 0; i < new_nlabels; ++i)
-  {
-    label_values[i] = ATindexedSetGetElem(labs,i);
-  }
-  ATprotectArray(label_values,labels_size);
+    // Before we can set the label data in the realloc'ed transitions
+    // array, we first have to collect the labels of both LTSs in an
+    // indexed set.
+    ATermIndexedSet labs = ATindexedSetCreate(nlabels + l->num_labels(),75);
+    ATbool b;
 
-  ATindexedSetDestroy(labs);
+    // Add the labels of this LTS and count the number of labels that
+    // the resulting LTS will contain
+    for (unsigned int i = 0; i < nlabels; ++i)
+    {
+      ATindexedSetPut(labs,label_values[i],&b);
+      if ( b )
+      {
+        ++new_nlabels;
+      }
+    }
+    // Same for LTS l
+    for (label_iterator i = l->get_labels(); i.more(); ++i)
+    {
+      ATindexedSetPut(labs,l->label_value(*i),&b);
+      if ( b )
+      {
+        ++new_nlabels;
+      }
+    }
 
-  // Finally update the fields that have not been updated yet
+    // Update the tau-information
+    bool* new_taus = (bool*)malloc(new_nlabels*sizeof(bool));
+    if (new_taus == NULL)
+    {
+      gsErrorMsg("insufficient memory\n");
+      exit(1);
+    }
+    for (unsigned int i = 0; i < nlabels; ++i)
+    {
+      new_taus[ATindexedSetGetIndex(labs,label_values[i])] = taus[i];
+    }
+    for (unsigned int i = 0; i < l->num_labels(); ++i)
+    {
+      new_taus[ATindexedSetGetIndex(labs,l->label_value(i))] =
+        l->is_tau(i);
+    }
+    free(taus);
+    taus = new_taus;
+    new_taus = NULL;
+
+    // Update the label numbers of all transitions of this LTS to
+    // the new indices as given by the indexed set.
+    for (unsigned int i = 0; i < ntransitions; ++i)
+    {
+      transitions[i].label =
+        ATindexedSetGetIndex(labs,label_values[transitions[i].label]);
+    }
+    // Now add the transition labels of LTS l
+    j = ntransitions;
+    for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+    {
+      transitions[j].label =
+        ATindexedSetGetIndex(labs,l->label_value(i.label()));
+      ++j;
+    }
+
+    // Store the label values contained in the indexed set
+    labels_size = new_nlabels;
+    ATunprotectArray(label_values);
+    label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
+    if ( label_values == NULL )
+    {
+      gsErrorMsg("insufficient memory\n");
+      exit(1);
+    }
+    for (unsigned int i = 0; i < new_nlabels; ++i)
+    {
+      label_values[i] = ATindexedSetGetElem(labs,i);
+    }
+    ATprotectArray(label_values,labels_size);
+
+    ATindexedSetDestroy(labs);
+  }
+  else
+  { 
+    // One of the LTSs does not have label info, so the resulting LTS
+    // will not have label info either. Moreover, we consider the sets
+    // of labels of the LTSs to be disjoint
+    new_nlabels = nlabels + l->num_labels();
+
+    // Add the transition labels of LTS l
+    j = ntransitions;
+    for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+    {
+      transitions[j].label = nlabels + i.label();
+      ++j;
+    }
+
+    // Add taus from LTS l
+    taus = (bool*)realloc(taus,new_nlabels*sizeof(bool));
+    if ( taus == NULL )
+    {
+      gsErrorMsg("insufficient memory\n");
+      exit(1);
+    }
+    for (unsigned int i = 0; i < l->num_labels(); ++i)
+    {
+      taus[nlabels + i] = l->is_tau(i);
+    }
+
+    // Remove label info from this LTS, if any
+    if ( label_info )
+    {
+      label_info = false;
+      free(label_values);
+      label_values = NULL;
+      labels_size = 0;
+    }
+  }
+
+  // Update the fields that have not been updated yet
   nstates      = new_nstates;
   ntransitions = new_ntransitions;
   nlabels      = new_nlabels;
