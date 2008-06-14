@@ -148,7 +148,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     return false;
   }
   assert(Spec != NULL);
-  if (!mcrl2::core::detail::gsIsSpecV1(Spec)) {
+  if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
     if (SpecStream == stdin) {
       gsErrorMsg("stdin does not contain an LPS\n");
     } else {
@@ -158,7 +158,7 @@ bool PrintSpecificationFileName(t_tool_options const& tool_options)
     }
     return false;
   }
-  assert(mcrl2::core::detail::gsIsSpecV1(Spec));
+  assert(mcrl2::core::detail::gsIsLinProcSpec(Spec));
   //open output file for writing or set to stdout
   if (tool_options.output_file_name.empty()) {
     OutputStream = stdout;

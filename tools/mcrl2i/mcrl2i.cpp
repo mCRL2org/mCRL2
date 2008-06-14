@@ -308,7 +308,7 @@ static data_specification load_specification(const string &infilename)
     if (raw_specification == 0) {
       throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
     }
-    if (!gsIsSpecV1(raw_specification) && !gsIsPBES(raw_specification)) {
+    if (!gsIsLinProcSpec(raw_specification) && !gsIsPBES(raw_specification)) {
       throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
     }
     raw_specification = ATAgetArgument(raw_specification, 0);

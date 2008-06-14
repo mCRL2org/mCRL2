@@ -111,7 +111,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     return false;
   }
   assert(Spec != NULL);
-  if (!gsIsSpecV1((ATermAppl) Spec)) {
+  if (!gsIsLinProcSpec((ATermAppl) Spec)) {
     gsErrorMsg("'%s' does not contain an LPS\n", lgopts->specification.c_str());
     return false;
   }

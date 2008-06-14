@@ -49,7 +49,7 @@ namespace lps {
 //
 // init P(true, 0);
 //
-//<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
+//<Spec>         ::= LinProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
 class specification: public atermpp::aterm_appl
 {
   protected:
@@ -74,7 +74,7 @@ class specification: public atermpp::aterm_appl
     /// \brief Constructor.
     ///
     specification()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructProcSpec())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructLinProcSpec())
     { }
 
     /// \brief Constructor.
@@ -82,7 +82,7 @@ class specification: public atermpp::aterm_appl
     specification(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_ProcSpec(m_term));
+      assert(core::detail::check_rule_LinProcSpec(m_term));
       init_term(t);
     }
 
@@ -101,7 +101,7 @@ class specification: public atermpp::aterm_appl
         m_initial_process(initial_process)
     {
       m_term = reinterpret_cast<ATerm>(
-        core::detail::gsMakeSpecV1(
+        core::detail::gsMakeLinProcSpec(
           data,
           core::detail::gsMakeActSpec(action_labels),
           lps,
@@ -118,7 +118,7 @@ class specification: public atermpp::aterm_appl
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
-      if (!t || t.type() != AT_APPL || !core::detail::gsIsSpecV1(atermpp::aterm_appl(t)))
+      if (!t || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }

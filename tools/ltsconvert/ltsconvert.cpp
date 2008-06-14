@@ -36,7 +36,7 @@ static ATermAppl get_lps(std::string const& filename)
       ATerm t = ATreadFromFile(file);
       fclose(file);
       
-      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(mcrl2::core::detail::gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
+      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(mcrl2::core::detail::gsIsLinProcSpec((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
       {
         gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
       }
@@ -95,7 +95,7 @@ class t_tool_options {
     
           if ( spec != NULL )
           {
-            if ( mcrl2::core::detail::gsIsSpecV1(spec) )
+            if ( mcrl2::core::detail::gsIsLinProcSpec(spec) )
             {
               return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
             } else {

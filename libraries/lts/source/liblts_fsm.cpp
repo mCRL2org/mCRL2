@@ -394,7 +394,7 @@ static ATermList get_lps_params(ATerm lps)
   {
     params = ATmakeList0();
 
-    if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
+    if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
     {
       ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,5),1);
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
@@ -607,7 +607,7 @@ static lts_type get_lps_type(ATerm lps)
   if ( lps == NULL )
   {
     return lts_none;
-  } else if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
+  } else if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
   {
     gsVerboseMsg("detected mCRL2 LPS\n");
     return lts_mcrl2;

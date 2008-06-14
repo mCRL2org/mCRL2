@@ -158,7 +158,7 @@ bool is_list_enum_impl(ATermAppl data_expr)
 
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   assert(data_decls_is_initialised(data_decls));
   ATermAppl data_spec;
   if (gsIsDataSpec(spec)) {

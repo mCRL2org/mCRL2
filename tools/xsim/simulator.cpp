@@ -84,7 +84,7 @@ StandardSimulator::~StandardSimulator()
 
 void StandardSimulator::LoadSpec(ATermAppl spec)
 {
-    assert( (spec != NULL) && gsIsSpecV1(spec) );
+    assert( (spec != NULL) && gsIsLinProcSpec(spec) );
 
     ATermList l = ATLgetArgument(ATAgetArgument(spec,2),1);
     state_vars = ATmakeList0();

@@ -155,10 +155,10 @@ bool %(check_name)s(Term t)
 
 '''
 CHECK_TERM_TYPE = '''  // check the type of the term
-  aterm term(aterm_traits<Term>::term(t));
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
     return false;
-  aterm_appl a(term);
+  atermpp::aterm_appl a(term);
   if (!gsIs%(name)s(a))
     return false;
 
@@ -208,11 +208,11 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
             for i in range(arity):
                 arg = f.arguments[i]
                 if arg.repetitions == '':
-                    body = body + '  if (!check_term_argument(a(%d), %s<aterm>))\n'    % (i, arg.check_name())
+                    body = body + '  if (!check_term_argument(a(%d), %s<atermpp::aterm>))\n'    % (i, arg.check_name())
                 elif arg.repetitions == '*':
-                    body = body + '  if (!check_list_argument(a(%d), %s<aterm>, 0))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
-                    body = body + '  if (!check_list_argument(a(%d), %s<aterm>, 1))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '    {\n'
                 body = body + '      std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
 #                body = body + '      std::cerr << a(%d).to_string() << std::endl;\n'   % (i)

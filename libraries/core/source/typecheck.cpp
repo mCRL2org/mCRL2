@@ -273,10 +273,10 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 {
-  //check correctness of the sort expression in sort_expr using
-  //the LPS specification in lps_spec
+  //check correctness of the sort expression in sort_expr
+  //using the specification in spec
   assert(gsIsSortExpr(sort_expr));
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   //gsWarningMsg("type checking of sort expressions is partially implemented\n");
   
   ATermAppl Result=NULL;
@@ -288,17 +288,14 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
   gsDebugMsg ("type checking of sort expressions read-in phase started\n");
 
   ATermAppl data_spec = NULL;
-  if (gsIsSpecV1(spec) || gsIsPBES(spec))
-  {
-    data_spec = ATAgetArgument(spec, 0);
-  }
-  else
-  {
+  if (gsIsDataSpec(spec)) {
     data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
   }
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
 
-  //XXX read-in from LPS (not finished)
+  //XXX read-in from spec (not finished)
   if(gstcReadInSorts(sorts,false)){
     gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
@@ -320,10 +317,10 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars)
 {
   //check correctness of the data expression in data_expr using
-  //the LPS specification in spec
+  //the specification in spec
   
   //check preconditions
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   assert(gsIsDataExpr(data_expr));
   assert((sort_expr == NULL) || gsIsSortExpr(sort_expr));
 
@@ -336,19 +333,16 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
   gsDebugMsg ("type checking of data expression read-in phase started\n");
 
   ATermAppl data_spec = NULL;
-  if (gsIsSpecV1(spec) || gsIsPBES(spec))
-  {
-    data_spec = ATAgetArgument(spec, 0);
-  }
-  else
-  {
+  if (gsIsDataSpec(spec)) {
     data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
   }
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
   ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
   ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
 
-  //XXX read-in from LPS (not finished)
+  //XXX read-in from spec (not finished)
   if (gstcReadInSorts(sorts,false) &&
       gstcReadInConstructors() &&
       gstcReadInFuncs(ATconcat(constructors,mappings),false))
@@ -377,9 +371,8 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
 ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
 {
   //check correctness of the multi-action in mult_act using
-  //the LPS specification in lps_spec
-  //gsWarningMsg("type checking of multiactions is partially implemented\n");
-  assert (gsIsSpecV1(spec));
+  //the process specification or LPS in spec
+  assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   ATermAppl Result=NULL;
 
   gsDebugMsg ("type checking phase started\n");
@@ -393,7 +386,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
   ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
   ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
-  //XXX read-in from LPS (not finished)
+  //XXX read-in from spec (not finished)
     if(gstcReadInSorts(sorts,false)
        && gstcReadInConstructors()
        && gstcReadInFuncs(ATconcat(constructors,mappings),false)
@@ -430,17 +423,17 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 {
   //check correctness of the process expression in proc_expr using
-  //the LPS specification in lps_spec
-  assert (gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  //the process specification or LPS in spec
+  assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   gsWarningMsg("type checking of process expressions is not yet implemented\n");
   return proc_expr;
 }
 
 ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   //check correctness of the state formula in state_formula using
-  //the LPS specification in spec as follows:
+  //the process specification or LPS in spec as follows:
   //1) determine the types of actions according to the definitions
   //   in spec
   //2) determine the types of data expressions according to the
@@ -457,28 +450,14 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 
   gsDebugMsg ("type checking of state formulas read-in phase started\n");
 
-  ATermAppl data_spec = NULL;
-  ATermList action_labels = NULL;
-  ATermList process_parameters = NULL;
-  if (gsIsDataSpec(spec))
-  {
-    data_spec = spec;
-  }
-  else
-  {
-    data_spec = ATAgetArgument(spec, 0);
-    if (gsIsSpecV1(spec))
-    {
-      action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
-      process_parameters = ATLgetArgument(ATAgetArgument(spec, 2), 1);
-    }
-  }
+  ATermAppl data_spec = ATAgetArgument(spec, 0);
+  ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
   ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
   ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
 
-  //XXX read-in from LPS (not finished)
+  //XXX read-in from spec (not finished)
   if(gstcReadInSorts(sorts,false)){
     if(gstcReadInConstructors()){
        if(gstcReadInFuncs(ATconcat(constructors,mappings),false)){
@@ -685,7 +664,7 @@ void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 
 ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 {
-  assert(gsIsDataSpec(Spec) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
+  assert(gsIsDataSpec(Spec) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
   assert(gsIsSortSpec(SortSpec));
   if (gsIsDataSpec(Spec)) {
     Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
@@ -699,7 +678,7 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
-  assert(gsIsDataSpec(Spec) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
+  assert(gsIsDataSpec(Spec) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
   gsDebugMsg("specification before folding:\n%T\n\n", Spec);
   //get sort declarations
   ATermAppl DataSpec;

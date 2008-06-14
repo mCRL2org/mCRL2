@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 
 bool is_valid_lps(ATermAppl spec)
 {
-  if (mcrl2::core::detail::gsIsSpecV1(spec)) {
+  if (mcrl2::core::detail::gsIsLinProcSpec(spec)) {
     return mcrl2::core::detail::gsIsLinearProcess(ATAgetArgument(spec,2));
   }
 

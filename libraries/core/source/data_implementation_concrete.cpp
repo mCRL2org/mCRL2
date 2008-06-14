@@ -171,7 +171,7 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 
 ATermAppl implement_data_spec(ATermAppl spec)
 {
-  assert(gsIsDataSpec(spec) || gsIsSpecV1(spec) || gsIsPBES(spec));
+  assert(gsIsDataSpec(spec) || gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec));
   int occ =
     gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
     gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);
@@ -206,7 +206,7 @@ ATermAppl implement_data_spec(ATermAppl spec)
 ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
   assert(gsIsActionRenameSpec(ar_spec));
-  assert(gsIsSpecV1(lps_spec));
+  assert(gsIsLinProcSpec(lps_spec));
 
   int occ =
     gsCount((ATerm) gsMakeSortUnknown(), (ATerm) lps_spec) +
@@ -269,7 +269,7 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
 
 ATermList compute_sort_ref_substs(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get sort declarations
   ATermAppl data_spec;
   if (gsIsDataSpec(spec)) {
@@ -310,7 +310,7 @@ ATermList compute_sort_ref_substs(ATermAppl spec)
 
 ATermAppl impl_sort_refs(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get sort declarations
   ATermAppl data_spec;
   if (gsIsDataSpec(spec)) {
@@ -362,7 +362,7 @@ ATermAppl impl_sort_refs(ATermAppl spec)
 
 ATermAppl impl_standard_functions_spec(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //initalise data declarations
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
@@ -381,7 +381,7 @@ ATermAppl impl_standard_functions_spec(ATermAppl spec)
 
 ATermAppl impl_numerical_pattern_matching(ATermAppl spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get data equations
   ATermAppl data_spec;
   if (gsIsDataSpec(spec)) {
@@ -458,7 +458,7 @@ ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr, bool top_lev
 
 ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
   int occ =
     gsCount((ATerm) gsMakeSortUnknown(), (ATerm) spec) +
     gsCountAFun(gsAFunSortsPossible(), (ATerm) spec);

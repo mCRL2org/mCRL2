@@ -10,7 +10,6 @@
 // - the following phases of implementation are distinguised:
 //   tc : type checking
 //   di : data implementation
-//   lin: linearisation
 //   rft: regular formula translation
 // - [+p]/[-p] at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
@@ -32,13 +31,6 @@
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
-// - a number of restrictions apply to the Assignment's, which we denote by A,
-//   of a Linear process summand:
-//   + the lhs of an element of A should be declared by the linear process
-//   + A may not contain duplicate lhs's
-//   + the lhs's of A should obey the order in which they are declared 
-// - the DataVarId's of the Assignment's of an LinearProcessInit should be 
-//   identical to the DataVarId's of the corresponding Linear Process
 
 
 //Sort expressions
@@ -133,8 +125,8 @@
                  | Nil
 
 
-//Multi-actions
-//-------------
+//Multiactions
+//------------
 
 //multiaction
 <MultAct>      ::= MultAct(<ParamIdOrAction>*)
@@ -194,23 +186,16 @@
 //----------------------
 
 //process specification
-<ProcSpec>     ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
 
 //process equations or linear processes
-<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               [-lin]
-                 | LinearProcess(<DataVarId>*, <DataVarId>*, 
-                    <LinearProcessSummand>*)                             [+lin]
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*) 
 
 //process equation
 <ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
-
-//Linear process summand
-<LinearProcessSummand>   
-               ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, 
-                    <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
 
 //multiaction or delta
 <MultActOrDelta>
@@ -218,8 +203,28 @@
                  | Delta
 
 //process initialisation
-<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)                 [-lin]
-                 | LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)     [+lin]
+<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)
+
+
+//Linear process specifications
+//-----------------------------
+
+//process specification
+<LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <LinearProcess>,
+                      <LinearProcessInit>)
+
+//process equations or linear processes
+<LinearProcess> ::= LinearProcess(<DataVarId>*, <DataVarId>*,
+                      <LinearProcessSummand>*)
+
+//Linear process summand
+<LinearProcessSummand>   
+                ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, 
+                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
+
+//process initialisation
+<LinearProcessInit>
+                ::= LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 
 
 //Mu-calculus formulas

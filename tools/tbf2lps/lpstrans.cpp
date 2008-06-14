@@ -389,7 +389,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 	gsVerboseMsg("constructing action declarations...\n");
 	act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
-	ATermAppl r = gsMakeSpecV1(data_spec, act_spec, lps, init);
+	ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, lps, init);
 
 	ATermList substs = get_substs(ids);
 

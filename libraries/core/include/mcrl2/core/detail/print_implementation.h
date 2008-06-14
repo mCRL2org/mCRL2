@@ -394,7 +394,9 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
     ATerm ReconstructedPart = Part;
     // Do not do data reconstruction in case of a debug print
     if (pp_format != ppDebug) {
-      if (gsIsDataSpec((ATermAppl) Part) || gsIsSpecV1((ATermAppl) Part) || gsIsPBES((ATermAppl) Part)) {
+      if (gsIsDataSpec((ATermAppl) Part) || gsIsProcSpec((ATermAppl) Part) ||
+          gsIsLinProcSpec((ATermAppl) Part) || gsIsPBES((ATermAppl) Part))
+      {
         ReconstructedPart = reconstruct_exprs(Part, (ATermAppl) Part);
       } else {
         ReconstructedPart = reconstruct_exprs(Part, NULL);
@@ -543,15 +545,15 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(PrintPart_Appl)(OutStream, CommResult,
         pp_format, ShowSorts, PrecLevel);
     }
-  } else if (gsIsSpecV1(Part)) {
-    //print specification
+  } else if (gsIsProcSpec(Part) || gsIsLinProcSpec(Part)) {
+    //print process specification or linear process specification
     PRINT_FUNC(dbg_prints)("printing specification\n");
     for (int i = 0; i < 4; i++) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
         pp_format, ShowSorts, PrecLevel);
     }
   } else if (gsIsDataSpec(Part)) {
-    //print specification
+    //print data specification
     PRINT_FUNC(dbg_prints)("printing data specification\n");
     for (int i = 0; i < 4; i++) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),

@@ -2196,11 +2196,11 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     ATermAppl Result=ATAgetArgument(Spec, 4); // prelude
     if(ATisEqual(Result,Appl0)){
-      Result=gsMakeSpecV1(gsMakeEmptyDataSpec(),
-			  gsMakeActSpec(Actions),
-			  gsMakeProcEqnSpec(ProcEqns),
-			  gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
-			  );
+      Result=gsMakeProcSpec(gsMakeEmptyDataSpec(),
+			    gsMakeActSpec(Actions),
+			    gsMakeProcEqnSpec(ProcEqns),
+			    gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
+			    );
     }
     else {
       Result=ATsetArgument(Result,(ATerm)gsMakeActSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,1),0),Actions)),1);

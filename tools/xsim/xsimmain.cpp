@@ -343,7 +343,7 @@ void XSimMain::LoadFile(const wxString &filename)
     ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
     fclose(f);
 
-    if ( (Spec == NULL) || !gsIsSpecV1(Spec) )
+    if ( (Spec == NULL) || !gsIsLinProcSpec(Spec) )
     {
 	    wxMessageDialog msg(this, wxT("Invalid file."),
 		wxT("Error"), wxOK|wxICON_ERROR);

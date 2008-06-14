@@ -55,7 +55,7 @@ inline ATermAppl implement_data_data_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
-  assert(detail::gsIsSpecV1(spec));
+  assert(detail::gsIsProcSpec(spec));
   return detail::implement_data_spec(spec);
 }
 
@@ -84,9 +84,10 @@ inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
  *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
  *             expression that adheres to the internal ATerm structure
  *             after the type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification, LPS, PBES or data specification that
+ *             adheres to the internal ATerm structure after the type
+ *             checking phase.
  *  \post      The data types of sort_expr are implemented as
  *             higher-order abstract data types in spec.
  *             spec is updated to be the equivalent of spec in the
@@ -108,9 +109,10 @@ inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
  *  \param[in] data_expr An ATerm representation of an mCRL2 data
  *             expression that adheres to the internal ATerm structure
  *             after the type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification, LPS, PBES or data specification that
+ *             adheres to the internal ATerm structure after the type
+ *             checking phase.
  *  \post      The data types of data_expr are implemented as
  *             higher-order abstract data types in spec.
  *             spec is updated to be the equivalent of spec in the
@@ -132,9 +134,10 @@ inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
  *  \param[in] mult_act An ATerm representation of an mCRL2 multiaction
  *             that adheres to the internal ATerm structure after the
  *             type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification, LPS, PBES or data specification that
+ *             adheres to the internal ATerm structure after the type
+ *             checking phase.
  *  \post      The data types of mult_act are implemented as
  *             higher-order abstract data types in spec.
  *             spec is updated to be the equivalent of spec in the
@@ -157,9 +160,10 @@ inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
  *  \param[in] proc_expr An ATerm representation of an mCRL2 process
  *             expression that adheres to the internal ATerm structure
  *             after the type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification, LPS, PBES or data specification that
+ *             adheres to the internal ATerm structure after the type
+ *             checking phase.
  *  \post      The data types of proc_expr are implemented as
  *             higher-order abstract data types in spec.
  *             spec is updated to be the equivalent of spec in the
@@ -181,9 +185,10 @@ inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
  *  \param[in] state_frm An ATerm representation of an mCRL2 state
  *             formula that adheres to the internal ATerm structure
  *             after the type checking phase.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 process
+ *             specification, LPS, PBES or data specification that
+ *             adheres to the internal ATerm structure after the type
+ *             checking phase.
  *  \post      The data types of state_frm are implemented as
  *             higher-order abstract data types in spec.
  *             spec is updated to be the equivalent of spec in the
@@ -223,7 +228,7 @@ inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 inline ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
   assert(detail::gsIsActionRenameSpec(ar_spec));
-  assert(detail::gsIsSpecV1(lps_spec));
+  assert(detail::gsIsLinProcSpec(lps_spec));
   return detail::impl_data_action_rename_spec_detail(ar_spec, lps_spec);
 }
 

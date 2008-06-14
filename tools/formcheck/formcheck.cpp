@@ -200,7 +200,7 @@ using namespace mcrl2::core;
         if (raw_specification == 0) {
           throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
         }
-        if (!mcrl2::core::detail::gsIsSpecV1(raw_specification) && !mcrl2::core::detail::gsIsPBES(raw_specification)) {
+        if (!mcrl2::core::detail::gsIsLinProcSpec(raw_specification) && !mcrl2::core::detail::gsIsPBES(raw_specification)) {
           throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
         }
         raw_specification = ATAgetArgument(raw_specification, 0);

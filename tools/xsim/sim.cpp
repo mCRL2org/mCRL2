@@ -161,12 +161,12 @@ int main(int argc, char **argv)
                      options.lps_file_argument + "'\n");
     }
     assert(Spec != NULL);
-    if (!gsIsSpecV1(Spec)) {
+    if (!gsIsLinProcSpec(Spec)) {
       fclose(SpecStream);
       throw mcrl2::runtime_error("'" +
                      options.lps_file_argument + "' does not contain an LPS\n");
     }
-    assert(gsIsSpecV1(Spec));
+    assert(gsIsLinProcSpec(Spec));
 
     StandardSimulator simulator;
     simulator.rewr_strat = options.rewrite_strategy;

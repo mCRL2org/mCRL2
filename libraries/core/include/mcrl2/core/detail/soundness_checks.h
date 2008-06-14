@@ -116,9 +116,12 @@ template <typename Term> bool check_rule_ProcSpec(Term t);
 template <typename Term> bool check_rule_ActSpec(Term t);
 template <typename Term> bool check_rule_ProcEqnSpec(Term t);
 template <typename Term> bool check_rule_ProcEqn(Term t);
-template <typename Term> bool check_rule_LinearProcessSummand(Term t);
 template <typename Term> bool check_rule_MultActOrDelta(Term t);
 template <typename Term> bool check_rule_ProcInit(Term t);
+template <typename Term> bool check_rule_LinProcSpec(Term t);
+template <typename Term> bool check_rule_LinearProcess(Term t);
+template <typename Term> bool check_rule_LinearProcessSummand(Term t);
+template <typename Term> bool check_rule_LinearProcessInit(Term t);
 template <typename Term> bool check_rule_StateFrm(Term t);
 template <typename Term> bool check_rule_DataVarIdInit(Term t);
 template <typename Term> bool check_rule_RegFrm(Term t);
@@ -145,11 +148,11 @@ template <typename Term> bool check_term_IfThen(Term t);
 template <typename Term> bool check_term_StateImp(Term t);
 template <typename Term> bool check_term_PBESExists(Term t);
 template <typename Term> bool check_term_PBESImp(Term t);
+template <typename Term> bool check_term_ProcEqnSpec(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_SortId(Term t);
 template <typename Term> bool check_term_StateNu(Term t);
 template <typename Term> bool check_term_DataSpec(Term t);
-template <typename Term> bool check_term_SpecV1(Term t);
 template <typename Term> bool check_term_Tau(Term t);
 template <typename Term> bool check_term_StateYaledTimed(Term t);
 template <typename Term> bool check_term_DataEqnSpec(Term t);
@@ -160,8 +163,10 @@ template <typename Term> bool check_term_ConsSpec(Term t);
 template <typename Term> bool check_term_Sum(Term t);
 template <typename Term> bool check_term_DataVarId(Term t);
 template <typename Term> bool check_term_ProcVarId(Term t);
+template <typename Term> bool check_term_ProcessInit(Term t);
 template <typename Term> bool check_term_MapSpec(Term t);
 template <typename Term> bool check_term_StateYaled(Term t);
+template <typename Term> bool check_term_LinProcSpec(Term t);
 template <typename Term> bool check_term_Choice(Term t);
 template <typename Term> bool check_term_LinearProcessInit(Term t);
 template <typename Term> bool check_term_MultAct(Term t);
@@ -176,6 +181,7 @@ template <typename Term> bool check_term_Block(Term t);
 template <typename Term> bool check_term_Rename(Term t);
 template <typename Term> bool check_term_Exists(Term t);
 template <typename Term> bool check_term_Sync(Term t);
+template <typename Term> bool check_term_ProcSpec(Term t);
 template <typename Term> bool check_term_StateMu(Term t);
 template <typename Term> bool check_term_StateFalse(Term t);
 template <typename Term> bool check_term_PBESForall(Term t);
@@ -554,7 +560,7 @@ template <typename Term>
 bool check_rule_ProcSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_SpecV1(t);
+  return    check_term_ProcSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -574,7 +580,7 @@ template <typename Term>
 bool check_rule_ProcEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinearProcess(t);
+  return    check_term_ProcEqnSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -585,16 +591,6 @@ bool check_rule_ProcEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_term_ProcEqn(t);
-#else
-  return true;
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-}
-
-template <typename Term>
-bool check_rule_LinearProcessSummand(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinearProcessSummand(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -613,6 +609,46 @@ bool check_rule_MultActOrDelta(Term t)
 
 template <typename Term>
 bool check_rule_ProcInit(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return    check_term_ProcessInit(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_LinProcSpec(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return    check_term_LinProcSpec(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_LinearProcess(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return    check_term_LinearProcess(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_LinearProcessSummand(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  return    check_term_LinearProcessSummand(t);
+#else
+  return true;
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+}
+
+template <typename Term>
+bool check_rule_LinearProcessInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_term_LinearProcessInit(t);
@@ -1155,6 +1191,34 @@ bool check_term_PBESImp(Term t)
   return true;
 }
 
+// ProcEqnSpec(ProcEqn*)
+template <typename Term>
+bool check_term_ProcEqnSpec(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsProcEqnSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_ProcEqn<atermpp::aterm>, 0))
+    {
+      std::cerr << "check_rule_ProcEqn" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // StateForall(DataVarId+, StateFrm)
 template <typename Term>
 bool check_term_StateForall(Term t)
@@ -1289,49 +1353,6 @@ bool check_term_DataSpec(Term t)
   if (!check_term_argument(a(3), check_rule_DataEqnSpec<atermpp::aterm>))
     {
       std::cerr << "check_rule_DataEqnSpec" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// SpecV1(DataSpec, ActSpec, ProcEqnSpec, ProcInit)
-template <typename Term>
-bool check_term_SpecV1(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (!gsIsSpecV1(a))
-    return false;
-
-  // check the children
-  if (a.size() != 4)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_DataSpec" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(1), check_rule_ActSpec<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_ActSpec" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(2), check_rule_ProcEqnSpec<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_ProcEqnSpec" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(3), check_rule_ProcInit<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_ProcInit" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1648,6 +1669,39 @@ bool check_term_ProcVarId(Term t)
   return true;
 }
 
+// ProcessInit(DataVarId*, ProcExpr)
+template <typename Term>
+bool check_term_ProcessInit(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsProcessInit(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
+    {
+      std::cerr << "check_rule_DataVarId" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ProcExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // MapSpec(OpId*)
 template <typename Term>
 bool check_term_MapSpec(Term t)
@@ -1692,6 +1746,49 @@ bool check_term_StateYaled(Term t)
   // check the children
   if (a.size() != 0)
     return false;
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// LinProcSpec(DataSpec, ActSpec, LinearProcess, LinearProcessInit)
+template <typename Term>
+bool check_term_LinProcSpec(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsLinProcSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 4)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_DataSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_ActSpec<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ActSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_LinearProcess<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_LinearProcess" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_LinearProcessInit<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_LinearProcessInit" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -2098,6 +2195,49 @@ bool check_term_Sync(Term t)
   if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_ProcExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcSpec(DataSpec, ActSpec, ProcEqnSpec, ProcInit)
+template <typename Term>
+bool check_term_ProcSpec(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsProcSpec(a))
+    return false;
+
+  // check the children
+  if (a.size() != 4)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_DataSpec<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_DataSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_ActSpec<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ActSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_ProcEqnSpec<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ProcEqnSpec" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_ProcInit<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ProcInit" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

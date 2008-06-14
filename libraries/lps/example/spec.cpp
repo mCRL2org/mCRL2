@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
   
   specification spec = mcrl22lps(ABP_SPECIFICATION);
-  cout << "check_term_SpecV1(spec) = " << check_term_SpecV1(spec) << endl;
+  cout << "check_term_LinProcSpec(spec) = " << check_term_LinProcSpec(spec) << endl;
 
   aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
   cout << "check_rule_OpId(f1) = " << check_rule_OpId(f1) << endl;

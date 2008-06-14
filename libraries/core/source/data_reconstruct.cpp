@@ -309,30 +309,32 @@ static bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx);
 // ----------------------------------------------
 ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
-assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
-/*
-if (Spec == NULL) {
-  gsDebugMsg("No specification given, "
-               "therefore not all components can be reconstructed\n");
-} else {
-  gsDebugMsg("Specification provided, performing full reconstruction\n");
-}
-*/
-
-ATerm Result;
-ATermList substs = ATmakeList0();
-if (ATgetType(Part) == AT_APPL) {
-  Result = (ATerm) reconstruct_exprs_appl((ATermAppl) Part, &substs, Spec);
-  } else { //(ATgetType(Part) == AT_LIST) {
-    Result = (ATerm) reconstruct_exprs_list((ATermList) Part, &substs, Spec);
+  assert ((Spec == NULL) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
+    gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  /*
+  if (Spec == NULL) {
+    gsDebugMsg("No specification given, "
+                 "therefore not all components can be reconstructed\n");
+  } else {
+    gsDebugMsg("Specification provided, performing full reconstruction\n");
   }
-//  gsDebugMsg("Finished data reconstruction\n");
-  return Result;
+  */
+  
+  ATerm Result;
+  ATermList substs = ATmakeList0();
+  if (ATgetType(Part) == AT_APPL) {
+    Result = (ATerm) reconstruct_exprs_appl((ATermAppl) Part, &substs, Spec);
+    } else { //(ATgetType(Part) == AT_LIST) {
+      Result = (ATerm) reconstruct_exprs_list((ATermList) Part, &substs, Spec);
+    }
+  //  gsDebugMsg("Finished data reconstruction\n");
+    return Result;
 }
 
 ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  assert ((Spec == NULL) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
+    gsIsPBES(Spec) || gsIsDataSpec(Spec));
   bool recursive = true;
 
   if (gsIsDataSpec(Part) && Spec != NULL) {
@@ -387,7 +389,8 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
 
 ATermList reconstruct_exprs_list(ATermList Parts, ATermList* p_substs, const ATermAppl Spec)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  assert ((Spec == NULL) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
+    gsIsPBES(Spec) || gsIsDataSpec(Spec));
 
   ATermList result = ATmakeList0();
   while (!ATisEmpty(Parts))
@@ -401,7 +404,8 @@ ATermList reconstruct_exprs_list(ATermList Parts, ATermList* p_substs, const ATe
 
 ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATermAppl Spec, bool* recursive)
 {
-  assert ((Spec == NULL) || gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  assert ((Spec == NULL) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
+    gsIsPBES(Spec) || gsIsDataSpec(Spec));
   assert(gsIsDataExpr(Part));
 
   if (gsIsDataExprBagComp(Part)) {
@@ -786,15 +790,13 @@ bool is_lambda_binder_application(ATermAppl data_expr)
 ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_substs)
 {
 //  gsDebugMsg("Removing headers from specification\n");
-  assert(gsIsSpecV1(Spec) || gsIsPBES(Spec) || gsIsDataSpec(Spec));
+  assert (gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
+          gsIsPBES(Spec) || gsIsDataSpec(Spec));
   ATermAppl DataSpec = NULL;
-  if (gsIsSpecV1(Spec) || gsIsPBES(Spec))
-  {
-    DataSpec = ATAgetArgument(Spec, 0);
-  }
-  else
-  { //gsIsDataSpec(Spec)
+  if (gsIsDataSpec(Spec)) {
     DataSpec = Spec;
+  } else {
+    DataSpec = ATAgetArgument(Spec, 0);
   }
 
 //  gsDebugMsg("Dissecting data specification\n");
@@ -902,19 +904,10 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
     MapSpec     = gsMakeMapSpec    (data_decls.ops);
     DataEqnSpec = gsMakeDataEqnSpec(data_decls.data_eqns);
     DataSpec    = gsMakeDataSpec   (SortSpec, ConsSpec, MapSpec, DataEqnSpec);
-    if (gsIsSpecV1(Spec)) {
-      Spec        = gsMakeSpecV1(DataSpec,
-                                 ATAgetArgument(Spec, 1),
-                                 ATAgetArgument(Spec, 2),
-                                 ATAgetArgument(Spec, 3));
-    } 
-    else if (gsIsPBES(Spec)) {
-      Spec = gsMakePBES(DataSpec,
-                        ATAgetArgument(Spec, 1),
-                        ATAgetArgument(Spec, 2));
-    }
-    else {
+    if (gsIsDataSpec(Spec)) {
       Spec = DataSpec;
+    } else {
+      Spec = ATsetArgument(Spec, (ATerm) DataSpec, 0);
     }
     return Spec;
   }

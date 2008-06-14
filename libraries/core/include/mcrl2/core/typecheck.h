@@ -64,9 +64,9 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec);
  *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
  *             expression that adheres to the initial internal ATerm
  *             structure.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES or
- *             data specification that adheres to the internal ATerm
- *             structure after type checking.
+ *  \param[in] spec An ATerm representation of an mCRL2 process specification,
+ *             LPS, PBES or data specification that adheres to the
+ *             internal ATerm structure after type checking.
  *  \post      sort_expr is type checked using the declaration from spec.
  *  \return    If type checking went well, an equivalent version of
  *             sort_expr is returned that adheres to the internal ATerm
@@ -85,9 +85,9 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
  *  \param[in] sort_expr An ATerm representation of an mCRL2 sort
  *             expression that adheres to the internal ATerm structure
  *             after type checking, or NULL.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS, PBES, or
- *             data specification that adheres to the internal ATerm
- *             structure after type checking.
+ *  \param[in] spec An ATerm representation of an mCRL2 process specification,
+ *             LPS, PBES or data specification that adheres to the
+ *             internal ATerm structure after type checking.
  *  \param[in] Vars A table of variables that may occur in the data expression.
  *  \post      data_expr is type checked using the declaration from spec
  *             and, if sort_expr is not NULL, it is type checked as

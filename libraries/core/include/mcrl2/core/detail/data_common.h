@@ -213,7 +213,7 @@ inline t_data_decls get_data_decls(ATermAppl spec)
 /// \ret spec in which the data declarations are replaced by data_decls
 inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
-  assert(gsIsSpecV1(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   assert(data_decls_is_initialised(data_decls));
   if (!data_decls_equal(data_decls, get_data_decls(spec))) {
     ATermAppl sorts = gsMakeSortSpec(data_decls.sorts);

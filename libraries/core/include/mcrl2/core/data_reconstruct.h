@@ -26,9 +26,9 @@ namespace mcrl2 {
 /// \param[in] expr An ATerm representation of an mCRL2 expression that
 ///            adheres to the internal ATerm structure after data
 ///            implementation.
-/// \param[in] spec An ATerm representation of an mCRL2 specification that
-///            adheres to the internal ATerm structure after data
-///            implementation, or NULL.
+/// \param[in] spec An ATerm representation of an mCRL2 process specification,
+///            LPS, PBES or data specification that adheres to the internal
+///            ATerm structure after data implementation, or NULL.
 /// \post      The data types of expr are reconstructed with respect to spec.
 /// \return    If data reconstruction went well, an equivalent version
 ///            of expr is returned that adheres to the internal ATerm
@@ -39,9 +39,9 @@ ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 
 /// \brief     Reconstruct data types of an mCRL2 specification
 ///            after data implementation.
-/// \param[in] spec An ATerm representation of an mCRL2 specification
-///            that adheres to the internal ATerm structure after data
-///            implementation.
+/// \param[in] spec An ATerm representation of an mCRL2 process specification,
+///            LPS, PBES or data specification that adheres to the internal
+///            ATerm structure after data implementation.
 /// \post      The data types of spec are reconstructed.
 /// \return    If data reconstruction went well, an equivalent version
 ///            of spec is returned that adheres to the internal ATerm
@@ -49,7 +49,8 @@ ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 ///            If something went wrong, an appropriate error
 ///            message is printed and NULL is returned.
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
-  assert(detail::gsIsSpecV1(spec) || detail::gsIsPBES(spec) || detail::gsIsDataSpec(spec));
+  assert(detail::gsIsProcSpec(spec) || detail::gsIsLinProcSpec(spec) ||
+         detail::gsIsPBES(spec) || detail::gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
    

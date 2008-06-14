@@ -930,7 +930,7 @@ inline bool lpsConstElm::output() {
       gsVerboseMsg("lpsconstelm: constant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
     } 
   }
-  assert(gsIsSpecV1((ATermAppl) rebuild_spec));
+  assert(gsIsLinProcSpec((ATermAppl) rebuild_spec));
 
   rebuild_spec.save(p_outputfile);
   

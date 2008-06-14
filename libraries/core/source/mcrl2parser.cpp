@@ -6940,7 +6940,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
     gsErrorMsg("parse error: missing initialisation\n");
     return NULL;
   }
-  Result = gsMakeSpecV1(
+  Result = gsMakeProcSpec(
     gsMakeDataSpec(
       gsMakeSortSpec(SortDecls),
       gsMakeConsSpec(ConsDecls),

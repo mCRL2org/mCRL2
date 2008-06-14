@@ -63,7 +63,6 @@ ATermAppl constructSortId();
 ATermAppl constructStateNu();
 ATermAppl constructRegNil();
 ATermAppl constructDataSpec();
-ATermAppl constructSpecV1();
 ATermAppl constructTau();
 ATermAppl constructStateYaledTimed();
 ATermAppl constructSortCons();
@@ -79,6 +78,7 @@ ATermAppl constructProcVarId();
 ATermAppl constructProcessInit();
 ATermAppl constructMapSpec();
 ATermAppl constructStateYaled();
+ATermAppl constructLinProcSpec();
 ATermAppl constructSetBagComp();
 ATermAppl constructChoice();
 ATermAppl constructLinearProcessInit();
@@ -96,6 +96,7 @@ ATermAppl constructRename();
 ATermAppl constructExists();
 ATermAppl constructSync();
 ATermAppl constructActExists();
+ATermAppl constructProcSpec();
 ATermAppl constructStateMu();
 ATermAppl constructStateFalse();
 ATermAppl constructPBESForall();
@@ -170,7 +171,6 @@ ATermAppl constructSortDecl();
 ATermAppl constructDataExprOrNil();
 ATermAppl constructParamIdOrAction();
 ATermAppl constructProcExpr();
-ATermAppl constructProcSpec();
 ATermAppl constructMultActOrDelta();
 ATermAppl constructProcInit();
 ATermAppl constructStateFrm();
@@ -484,22 +484,6 @@ ATermAppl constructDataSpec()
   return t;
 }
 
-// SpecV1
-inline
-ATermAppl initConstructSpecV1(ATermAppl& t)
-{
-  t = ATmakeAppl4(gsAFunSpecV1(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructSpecV1()
-{
-  static ATermAppl t = initConstructSpecV1(t);
-  return t;
-}
-
 // Tau
 inline
 ATermAppl initConstructTau(ATermAppl& t)
@@ -737,6 +721,22 @@ inline
 ATermAppl constructStateYaled()
 {
   static ATermAppl t = initConstructStateYaled(t);
+  return t;
+}
+
+// LinProcSpec
+inline
+ATermAppl initConstructLinProcSpec(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunLinProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructLinearProcess()), reinterpret_cast<ATerm>(constructLinearProcessInit()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructLinProcSpec()
+{
+  static ATermAppl t = initConstructLinProcSpec(t);
   return t;
 }
 
@@ -1009,6 +1009,22 @@ inline
 ATermAppl constructActExists()
 {
   static ATermAppl t = initConstructActExists(t);
+  return t;
+}
+
+// ProcSpec
+inline
+ATermAppl initConstructProcSpec(ATermAppl& t)
+{
+  t = ATmakeAppl4(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructProcSpec()
+{
+  static ATermAppl t = initConstructProcSpec(t);
   return t;
 }
 
@@ -2113,13 +2129,6 @@ inline
 ATermAppl constructProcExpr()
 {
   return constructParamId();
-}
-
-// ProcSpec
-inline
-ATermAppl constructProcSpec()
-{
-  return constructSpecV1();
 }
 
 // MultActOrDelta

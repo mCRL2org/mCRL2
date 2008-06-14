@@ -903,7 +903,7 @@ static void storeact(ATermList acts)
 
 static specificationbasictype *create_spec(ATermAppl t) 
 { 
-  assert(gsIsSpecV1(t));
+  assert(gsIsProcSpec(t));
   
   specificationbasictype *spec =
     (specificationbasictype *) malloc(sizeof(specificationbasictype));
@@ -9129,7 +9129,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
     uninitialize_symbols();
     return NULL;
   }
-  result = gsMakeSpecV1(
+  result = gsMakeLinProcSpec(
     gsMakeDataSpec(
       gsMakeSortSpec(spec_int->sorts),
       gsMakeConsSpec(spec_int->funcs),
@@ -9145,7 +9145,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
       ATreverse(ATLgetArgument(result,2))),  // reverse, to let the list
                                              // of summands appear in the same
                                              // order as in the input, if the 
-                                             // input were an LPE.
+                                             // input were an LPS.
     gsMakeLinearProcessInit(SieveProcDataVarsAssignments(
                    spec_int->procdatavars,
                    ATLgetArgument(result,0),

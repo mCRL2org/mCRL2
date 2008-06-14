@@ -907,6 +907,28 @@ bool gsIsLambda(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunLambda();
 }
 
+// LinProcSpec
+inline
+AFun initAFunLinProcSpec(AFun& f)
+{
+  f = ATmakeAFun("LinProcSpec", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunLinProcSpec()
+{
+  static AFun AFunLinProcSpec = initAFunLinProcSpec(AFunLinProcSpec);
+  return AFunLinProcSpec;
+}
+
+inline
+bool gsIsLinProcSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunLinProcSpec();
+}
+
 // LinearProcess
 inline
 AFun initAFunLinearProcess(AFun& f)
@@ -1479,6 +1501,28 @@ bool gsIsProcEqnSpec(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunProcEqnSpec();
 }
 
+// ProcSpec
+inline
+AFun initAFunProcSpec(AFun& f)
+{
+  f = ATmakeAFun("ProcSpec", 4, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcSpec()
+{
+  static AFun AFunProcSpec = initAFunProcSpec(AFunProcSpec);
+  return AFunProcSpec;
+}
+
+inline
+bool gsIsProcSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcSpec();
+}
+
 // ProcVarId
 inline
 AFun initAFunProcVarId(AFun& f)
@@ -2049,28 +2093,6 @@ inline
 bool gsIsSortsPossible(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunSortsPossible();
-}
-
-// SpecV1
-inline
-AFun initAFunSpecV1(AFun& f)
-{
-  f = ATmakeAFun("SpecV1", 4, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunSpecV1()
-{
-  static AFun AFunSpecV1 = initAFunSpecV1(AFunSpecV1);
-  return AFunSpecV1;
-}
-
-inline
-bool gsIsSpecV1(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunSpecV1();
 }
 
 // StateAnd
@@ -2842,6 +2864,12 @@ ATermAppl gsMakeLambda()
 }
 
 inline
+ATermAppl gsMakeLinProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl LinearProcess_2, ATermAppl LinearProcessInit_3)
+{
+  return ATmakeAppl4(gsAFunLinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) LinearProcess_2, (ATerm) LinearProcessInit_3);
+}
+
+inline
 ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList DataVarId_1, ATermList LinearProcessSummand_2)
 {
   return ATmakeAppl3(gsAFunLinearProcess(), (ATerm) DataVarId_0, (ATerm) DataVarId_1, (ATerm) LinearProcessSummand_2);
@@ -2995,6 +3023,12 @@ inline
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqn_0)
 {
   return ATmakeAppl1(gsAFunProcEqnSpec(), (ATerm) ProcEqn_0);
+}
+
+inline
+ATermAppl gsMakeProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl ProcInit_3)
+{
+  return ATmakeAppl4(gsAFunProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) ProcInit_3);
 }
 
 inline
@@ -3155,12 +3189,6 @@ inline
 ATermAppl gsMakeSortsPossible(ATermList SortExpr_0)
 {
   return ATmakeAppl1(gsAFunSortsPossible(), (ATerm) SortExpr_0);
-}
-
-inline
-ATermAppl gsMakeSpecV1(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl ProcInit_3)
-{
-  return ATmakeAppl4(gsAFunSpecV1(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) ProcInit_3);
 }
 
 inline

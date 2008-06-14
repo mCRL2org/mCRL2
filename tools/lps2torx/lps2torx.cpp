@@ -221,7 +221,7 @@ int main(int argc, char **argv)
       if (Spec == 0) {
         throw mcrl2::runtime_error("could not read LPS from stdin");
       }
-      if (!mcrl2::core::detail::gsIsSpecV1(Spec)) {
+      if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
         throw mcrl2::runtime_error("stdin does not contain an LPS");
       }
     }
@@ -241,12 +241,12 @@ int main(int argc, char **argv)
       if (Spec == 0) {
         throw mcrl2::runtime_error("could not read LPS from '" + options.name_for_input + "'");
       }
-      if (!mcrl2::core::detail::gsIsSpecV1(Spec)) {
+      if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
         throw mcrl2::runtime_error("'" + options.name_for_input + "' does not contain an LPS");
       }
     }
  
-    assert(mcrl2::core::detail::gsIsSpecV1(Spec));
+    assert(mcrl2::core::detail::gsIsLinProcSpec(Spec));
  
     if ( options.removeunused )
     {
