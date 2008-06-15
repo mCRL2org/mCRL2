@@ -2,7 +2,7 @@
 
 sort D = struct d1 | d2;
 
-map  invert: D # D -> D;
+map  invert: D -> D;
 eqn  invert(d1) = d2;
      invert(d2) = d1;
 
