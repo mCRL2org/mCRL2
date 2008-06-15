@@ -14,6 +14,7 @@
 
 #include <stdbool.h>
 #include <string>
+#include "mcrl2/data/rewrite.h"
 
 //Type definitions for all linearisers
 
@@ -40,6 +41,7 @@ struct t_lin_options {
   t_phase end_phase;
   bool pretty;
   bool noalpha;
+  RewriteStrategy rewrite_strategy;
   std::string infilename;
   std::string outfilename;
   
@@ -58,7 +60,8 @@ struct t_lin_options {
       check_only(false),
       end_phase(phNone),
       pretty(false),
-      noalpha(false)
+      noalpha(false),
+      rewrite_strategy(GS_REWR_JITTY)
   {}
 };
 

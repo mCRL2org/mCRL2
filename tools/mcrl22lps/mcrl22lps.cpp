@@ -411,7 +411,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
       "(default behaviour is that intermediate LPSs are "
       "clustered and the final LPS is not clustered)", 'n');
   clinterface.add_option("no-alpha",
-      "alphabet reductions are not applied", 'r');
+      "alphabet reductions are not applied", 'z');
   clinterface.add_option("newstate",
       "state variables are encoded using enumerated types "
       "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
@@ -447,6 +447,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
       , 'p');
   clinterface.add_option("pretty",
       "return a pretty printed version of the output", 'P');
+  clinterface.add_rewriting_options();
 
   command_line_parser parser(clinterface, argc, argv);
 
@@ -464,6 +465,7 @@ static t_lin_options parse_command_line(int argc, char *argv[])
   options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
   options.add_delta               = 0 < parser.options.count("delta");
   options.pretty                  = 0 < parser.options.count("pretty");
+  options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
   options.lin_method = lmRegular;
 
   if (0 < parser.options.count("check-only")) {
