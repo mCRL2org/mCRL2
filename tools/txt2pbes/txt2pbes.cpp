@@ -627,21 +627,17 @@ int main(int argc, char** argv)
         gsVerboseMsg("The resulting PBES is:\n");
         PrintPart_CXX(cout, (ATerm) ap, ppDefault);
         cout << endl;
-      } else
-        if(!p.save(tool_options.outfilename, false)){
-          gsErrorMsg("writing to %s failed\n",tool_options.outfilename.c_str());
-          exit(1);
-        }
-
+      } else {
+        p.save(tool_options.outfilename, false);
+      }
       cerr <<"done\n";
     }
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
-
-  return EXIT_FAILURE;
 }
 //========================================
 

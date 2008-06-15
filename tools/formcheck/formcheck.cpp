@@ -19,6 +19,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
@@ -180,26 +181,12 @@ using namespace mcrl2::core;
     {
       ATermAppl raw_specification;
       if (infilename.empty()) {
-        using namespace mcrl2::core::detail;
         //use empty data specification
-        raw_specification = implement_data_data_spec(gsMakeEmptyDataSpec());
+        raw_specification = implement_data_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
       } else {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-    
-        FILE *in_stream = fopen(infilename.c_str(), "rb");
-    
-        if (in_stream == 0) {
-          throw mcrl2::runtime_error("could not open input file '" + infilename + "' for reading");
-        }
-    
-        raw_specification = (ATermAppl) ATreadFromFile(in_stream);
-    
-        fclose(in_stream);
-    
-        if (raw_specification == 0) {
-          throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
-        }
+        raw_specification = (ATermAppl) mcrl2::core::detail::load_aterm(infilename);
         if (!mcrl2::core::detail::gsIsLinProcSpec(raw_specification) && !mcrl2::core::detail::gsIsPBES(raw_specification)) {
           throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
         }

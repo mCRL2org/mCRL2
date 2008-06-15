@@ -18,6 +18,7 @@
 #include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -27,7 +28,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 //Functions used by the main program
-static bool is_valid_lps(ATermAppl spec);
 static ATermAppl rewrite_lps(ATermAppl Spec);
 
 //Globally used rewriter
@@ -66,13 +66,11 @@ tool_options_type parse_command_line(int ac, char** av) {
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      options.outfilename = parser.arguments[1];
-    }
+  if (0 < parser.arguments.size()) {
+    options.infilename = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    options.outfilename = parser.arguments[1];
   }
 
   return options;
@@ -91,42 +89,12 @@ int main(int argc, char **argv)
       gsWarningMsg("output will not be saved to '%s'\n", options.outfilename.c_str());
     }
 
-    ATermAppl result;
-
-    if (options.infilename.empty()) {
-      gsVerboseMsg("reading LPS from stdin\n");
-
-      result = (ATermAppl) ATreadFromFile(stdin);
-
-      if (result == 0) {
-        throw mcrl2::runtime_error("could not read LPS from '" + options.infilename + "'");
-      }
-      if (!is_valid_lps(result)) {
-        throw mcrl2::runtime_error("stdin does not contain an LPS");
-      }
+    std::string str_in = (options.infilename.empty())?"stdin":("'" + options.infilename+ "'");
+    gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
+    ATermAppl result = (ATermAppl) mcrl2::core::detail::load_aterm(options.infilename);
+    if (!mcrl2::core::detail::gsIsLinProcSpec(result)) {
+      throw mcrl2::runtime_error(str_in + " does not contain an LPS");
     }
-    else {
-      gsVerboseMsg("reading LPS from '%s'\n", options.infilename.c_str());
-
-      FILE *in_stream = fopen(options.infilename.c_str(), "rb");
-
-      if (in_stream == 0) {
-        throw mcrl2::runtime_error("could not open input file '" + options.infilename + "' for reading");
-      }
-
-      result = (ATermAppl) ATreadFromFile(in_stream);
-
-      fclose(in_stream);
-
-      if (result == 0) {
-        throw mcrl2::runtime_error("could not read LPS from '" + options.infilename + "'");
-      }
-      if (!is_valid_lps(result)) {
-        throw mcrl2::runtime_error("'" + options.infilename + "' does not contain an LPS");
-      }
-    }
-
-    assert(is_valid_lps(result));
 
     //initialise rewriter
     if (gsVerbose) {
@@ -162,21 +130,12 @@ int main(int argc, char **argv)
       }
     }
     delete rewr;
+    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
-
-  return EXIT_FAILURE;
-}
-
-bool is_valid_lps(ATermAppl spec)
-{
-  if (mcrl2::core::detail::gsIsLinProcSpec(spec)) {
-    return mcrl2::core::detail::gsIsLinearProcess(ATAgetArgument(spec,2));
-  }
-
-  return false;
 }
 
 static ATermAppl rewrite_lps(ATermAppl Spec)

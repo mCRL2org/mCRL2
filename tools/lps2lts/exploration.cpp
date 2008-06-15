@@ -96,30 +96,15 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   lg_error = false;
  
-  FILE *SpecStream;
-  if ( (SpecStream = fopen(lgopts->specification.c_str(), "rb")) == NULL )
-  {
-    gsErrorMsg("could not open input file '%s' for reading: ", lgopts->specification.c_str());
-    perror(NULL);
-    return false;
-  }
-  gsVerboseMsg("reading LPS from '%s'\n", lgopts->specification.c_str());
-  ATerm Spec = ATreadFromFile(SpecStream);
-  if ( Spec == NULL )
-  {
-    gsErrorMsg("could not read LPS from '%s'\n", lgopts->specification.c_str());
-    return false;
-  }
-  assert(Spec != NULL);
-  if (!gsIsLinProcSpec((ATermAppl) Spec)) {
-    gsErrorMsg("'%s' does not contain an LPS\n", lgopts->specification.c_str());
-    return false;
+  ATermAppl Spec = (ATermAppl) load_aterm(lgopts->specification);
+  if (!gsIsLinProcSpec(Spec)) {
+    throw mcrl2::runtime_error(((lgopts->specification.empty())?"stdin":("'" + lgopts->specification + "'")) + " does not contain an LPS");
   }
 
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
+    Spec = removeUnusedData(Spec);
   }
 
   basefilename = strdup(lgopts->specification.c_str());
@@ -157,7 +142,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
  
-  nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
+  nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
  
   if ( lgopts->priority_action != "" )
   {
@@ -178,7 +163,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
-    lts_opts.spec = (ATermAppl) Spec;
+    lts_opts.spec = Spec;
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
     lgopts->outformat = mcrl2::lts::lts_none;

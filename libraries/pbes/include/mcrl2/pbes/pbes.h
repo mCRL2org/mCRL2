@@ -366,12 +366,12 @@ class pbes
       return m_free_variables.empty();
     }
 
-    /// Writes the pbes to file and returns true if the operation succeeded.
+    /// Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
     ///
-    bool save(const std::string& filename, bool binary = true) const
+    void save(const std::string& filename, bool binary = true) const
     {
       if (!is_well_typed())
       {

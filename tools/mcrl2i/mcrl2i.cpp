@@ -26,6 +26,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
@@ -294,20 +295,7 @@ static data_specification load_specification(const string &infilename)
   } else {
     //load data specification from file infilename
     gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-
-    FILE *in_stream = fopen(infilename.c_str(), "rb");
-
-    if (in_stream == 0) {
-      throw mcrl2::runtime_error("could not open input file '" + infilename + "' for reading");
-    }
-
-    raw_specification = (ATermAppl) ATreadFromFile(in_stream);
-
-    fclose(in_stream);
-
-    if (raw_specification == 0) {
-      throw mcrl2::runtime_error("could not read LPS or PBES from '" + infilename + "'");
-    }
+    raw_specification = (ATermAppl) mcrl2::core::detail::load_aterm(infilename);
     if (!gsIsLinProcSpec(raw_specification) && !gsIsPBES(raw_specification)) {
       throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
     }

@@ -74,8 +74,9 @@ ATermAppl *parse_action_list(const char *s, int *len)
 
 lts_generation_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-    "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. If "
-    "OUTFILE is not supplied, the LTS is not stored.\n"
+    "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. "
+    "If INFILE is not supplied, stdin is used. "
+    "If OUTFILE is not supplied, the LTS is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified "
     "by an option). The supported formats are:\n"
@@ -222,16 +223,11 @@ lts_generation_options parse_command_line(int ac, char** av) {
   if (2 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
-  else if (parser.arguments.size() == 0) {
-    parser.error("no LPS file specified");
+  if (0 < parser.arguments.size()) {
+    options.specification = parser.arguments[0];
   }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.specification = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      options.lts = parser.arguments[1];
-    }
+  if (1 < parser.arguments.size()) {
+    options.lts = parser.arguments[1];
   }
 
   if (!options.lts.empty()) {

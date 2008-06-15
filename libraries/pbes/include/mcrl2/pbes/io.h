@@ -171,20 +171,12 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
   if (outputformat == "internal")
   { // In internal format
     core::gsVerboseMsg("Saving result in internal format...\n");
-    if (!pbes_spec.save(outfilename, false))
-    {
-      core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw mcrl2::runtime_error("exit!");
-    }
+    pbes_spec.save(outfilename, false);
   }
   else if (outputformat == "binary")
   { // in binary format
     core::gsVerboseMsg("Saving result in binary format...\n");
-    if (!pbes_spec.save(outfilename, true))
-    {
-      core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw mcrl2::runtime_error("exit!");
-    }
+    pbes_spec.save(outfilename, true);
   }
   else if (outputformat == "cwi")
   { // in CWI format only if the result is a BES, otherwise Binary
@@ -196,11 +188,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
     else
     {
       core::gsWarningMsg("Saving in CWI format not possible. Saving result in binary format.\n");
-      if (!pbes_spec.save(outfilename, true))
-      {
-        core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-      throw mcrl2::runtime_error("exit!");
-      }
+      pbes_spec.save(outfilename, true);
     }
   }
 }

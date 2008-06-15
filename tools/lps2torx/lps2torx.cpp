@@ -21,6 +21,7 @@
 #include <sstream>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/enum.h"
@@ -211,42 +212,12 @@ int main(int argc, char **argv)
   try {
     tool_options_type options = parse_command_line(argc, argv);
 
-    ATermAppl Spec;
-
-    if (options.name_for_input.empty()) {
-      gsVerboseMsg("reading LPS from stdin\n");
-
-      Spec = (ATermAppl) ATreadFromFile(stdin);
-
-      if (Spec == 0) {
-        throw mcrl2::runtime_error("could not read LPS from stdin");
-      }
-      if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
-        throw mcrl2::runtime_error("stdin does not contain an LPS");
-      }
+    std::string str_in = (options.name_for_input.empty())?"stdin":("'" + options.name_for_input + "'");
+    gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
+    ATermAppl Spec = (ATermAppl) mcrl2::core::detail::load_aterm(options.name_for_input);
+    if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
+      throw mcrl2::runtime_error(str_in + " does not contain an LPS");
     }
-    else {
-      gsVerboseMsg("reading LPS from '%s'\n", options.name_for_input.c_str());
-
-      FILE *in_stream = fopen(options.name_for_input.c_str(), "rb");
-
-      if (in_stream == 0) {
-        throw mcrl2::runtime_error("could not open input file '" + options.name_for_input + "' for reading");
-      }
-
-      Spec = (ATermAppl) ATreadFromFile(in_stream);
-
-      fclose(in_stream);
-
-      if (Spec == 0) {
-        throw mcrl2::runtime_error("could not read LPS from '" + options.name_for_input + "'");
-      }
-      if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
-        throw mcrl2::runtime_error("'" + options.name_for_input + "' does not contain an LPS");
-      }
-    }
- 
-    assert(mcrl2::core::detail::gsIsLinProcSpec(Spec));
  
     if ( options.removeunused )
     {
