@@ -2253,8 +2253,16 @@ static ATermAppl newprocess(
 { 
   numberOfNewProcesses++;
   if (numberOfNewProcesses == warningNumber)
-  { gsWarningMsg("generated %d new internal processes. A possible unbounded loop can be avoided by using the regular2 linearisation method instead of the default regular method.\n",
-                         numberOfNewProcesses);
+  { gsWarningMsg("generated %d new internal processes.",numberOfNewProcesses);
+    if (regular)
+    { gsWarningMsg(" A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method.\n");
+    }
+    else if (regular2)
+    { gsWarningMsg(" A possible unbounded loop can be avoided by using `stack' as the linearisation method.\n");
+    }
+    else
+    { gsWarningMsg("\n");
+    }
     warningNumber=warningNumber*2;
   }
   parameters=parameters_that_occur_in_body(parameters, body);
