@@ -626,7 +626,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
       PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
     }
     //print process name and variable declarations
@@ -682,7 +682,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
       PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
       PRINT_FUNC(fprints)(OutStream, "\n");
     }
@@ -696,7 +696,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
       PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
     }
     PRINT_FUNC(fprints)(OutStream, "init P");
@@ -740,7 +740,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
       PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
     }
     ATermList PBEqns = ATLgetArgument(Part, 1);
@@ -756,7 +756,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
       PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(Vars),
+      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
     }
     PRINT_FUNC(fprints)(OutStream, "init ");
@@ -893,7 +893,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       ATermList DataDecls = ATLgetArgument(Eqn, 0);
       if (!ATisEmpty(DataDecls)) {
         PRINT_FUNC(fprints)(OutStream, "var  ");
-        PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(DataDecls),
+        PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?DataDecls:gsGroupDeclsBySort(DataDecls),
           pp_format, ";\n", "     ");
       }
       if (gsIsDataEqn(Eqn)) {
@@ -950,7 +950,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
           ATermList VarDecls = ATtableValues(VarDeclTable);
           if (ATgetLength(VarDecls) > 0) {
             PRINT_FUNC(fprints)(OutStream, "var  ");
-            PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(VarDecls),
+            PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?VarDecls:gsGroupDeclsBySort(VarDecls),
               pp_format, ";\n", "     ");
           }
           if (gsIsDataEqn(Eqn)) {
