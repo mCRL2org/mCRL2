@@ -1412,7 +1412,7 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
   /* Third save the equations in the forms of blocks of equal rank */
 
   ofstream outputfile;
-  if (outfilename!="-")
+  if (outfilename!="")
   { outputfile.open(outfilename.c_str(), ios::trunc);
     if (!outputfile.is_open())
     { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
@@ -1425,23 +1425,23 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
     for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
       { if (first)
-        { ((outfilename=="-")?cout:outputfile) << 
+        { ((outfilename=="")?cout:outputfile) << 
              "block " << 
              ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
              r-1 <<
              " is " << endl;
            first=false;
         }
-        ((outfilename=="-")?cout:outputfile) << "  X" << variable_index[i] << " = ";
-        save_rhs_in_vasy_form(((outfilename=="-")?cout:outputfile),
+        ((outfilename=="")?cout:outputfile) << "  X" << variable_index[i] << " = ";
+        save_rhs_in_vasy_form(((outfilename=="")?cout:outputfile),
                                  bes_equations.get_rhs(i),
                                  variable_index,
                                  r,
                                  bes_equations);
-        ((outfilename=="-")?cout:outputfile) << endl;
+        ((outfilename=="")?cout:outputfile) << endl;
       }
     }
-    ((outfilename=="-")?cout:outputfile) << "end block" << endl << endl;
+    ((outfilename=="")?cout:outputfile) << "end block" << endl << endl;
   }
 
   outputfile.close();
@@ -1499,7 +1499,7 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
   // Use an indexed set to keep track of the variables and their cwi-representations
 
   ofstream outputfile;
-  if (outfilename!="-")
+  if (outfilename!="")
   { outputfile.open(outfilename.c_str(), ios::trunc);
     if (!outputfile.is_open())
     { gsErrorMsg("Could not save BES to %s\n", outfilename.c_str());
@@ -1511,10 +1511,10 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
   { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { 
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
-      { ((outfilename=="-")?cout:outputfile) << 
+      { ((outfilename=="")?cout:outputfile) << 
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
-        save_rhs_in_cwi_form(((outfilename=="-")?cout:outputfile),bes_equations.get_rhs(i),bes_equations);
-        ((outfilename=="-")?cout:outputfile) << endl;
+        save_rhs_in_cwi_form(((outfilename=="")?cout:outputfile),bes_equations.get_rhs(i),bes_equations);
+        ((outfilename=="")?cout:outputfile) << endl;
       }
     }
   }
