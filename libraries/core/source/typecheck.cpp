@@ -49,12 +49,14 @@ typedef struct {
   //ATermIndexedSet typedactions;	//name#type
   ATermTable processes;	        //name -> Set(List(sort expression)) bacause of process polymorphism
   //ATermIndexedSet typedprocesses: use keys of body.proc_pars
+  ATermTable PBs;
 } Context;
 static Context context;
 
 // the body may be transformed
 typedef struct { 
   ATermList equations;	
+  ATermTable proc_freevars;     //name#type -> List(Vars)
   ATermTable proc_pars;	        //name#type -> List(Vars)
   ATermTable proc_bodies;	//name#type -> rhs 
   //ATermAppl init;             //in the hash tables proc_pars and proc_bodies with key "init#[]" (beware when writing)
@@ -69,11 +71,14 @@ static ATbool gstcReadInConstructors(ATermList NewSorts=NULL);
 static ATbool gstcReadInFuncs(ATermList, bool high_level=true);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
+static ATbool gstcReadInPBESAndInit(ATermAppl, ATermAppl);
 
 static ATbool gstcTransformVarConsTypeData(void);
 static ATbool gstcTransformActProcVarConst(void);
+static ATbool gstcTransformPBESVarConst(void);
 
 static ATermList gstcWriteProcs(ATermList);
+static ATermList gstcWritePBES(ATermList);
 
 static ATbool gstcInTypesA(ATermAppl, ATermList);
 static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
@@ -95,9 +100,10 @@ static void gstcATermTableCopy(ATermTable Vars, ATermTable CopyVars);
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls);
 static ATbool gstcVarsUnique(ATermList VarDecls);
-static ATermAppl gstcRewrActProc(ATermTable, ATermAppl);
+static ATermAppl gstcRewrActProc(ATermTable, ATermAppl, bool is_pbes=false);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
+static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true);
 static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, int nPars = -1);
 
@@ -634,8 +640,69 @@ finally:
 ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
 {
   //check correctness of the PBES specification in pbes_spec 
-  gsWarningMsg("type checking of PBES specifications is not yet implemented\n");
-  return pbes_spec;
+  //gsWarningMsg("type checking of PBES specifications is only partially implemented\n");
+
+  assert(gsIsPBES(pbes_spec));
+
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking phase of PBES specifications started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking of PBES specification read-in phase started\n");
+
+  
+  ATermAppl data_spec = ATAgetArgument(pbes_spec,0);
+  ATermAppl pb_eqn_spec = ATAgetArgument(pbes_spec,1);
+  ATermAppl pb_init = ATAgetArgument(pbes_spec,2);
+
+  if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+    goto finally;
+  }
+  gsDebugMsg ("type checking of PBES specification read-in phase of sorts finished\n");
+
+  // Check sorts for loops
+  // Unwind sorts to enable equiv and subtype relations
+  if(!gstcReadInConstructors()) {
+    goto finally;
+  }
+  gsDebugMsg ("type checking of PBES specification read-in phase of constructors finished\n");
+
+  if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                               ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+    goto finally;
+  }
+  gsDebugMsg ("type checking of PBES specification read-in phase of functions finished\n");
+
+  body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+
+  if(!gstcReadInPBESAndInit(pb_eqn_spec,pb_init)) {
+    goto finally;
+  }
+  gsDebugMsg ("type checking PBES read-in phase finished\n");
+  
+  gsDebugMsg ("type checking transform Data+PBES phase started\n");
+  if(!gstcTransformVarConsTypeData()){
+    goto finally;
+  }
+  if(!gstcTransformPBESVarConst()){
+    goto finally;
+  }
+  gsDebugMsg ("type checking transform Data+PBES phase finished\n");
+
+  data_spec=ATsetArgument(data_spec,(ATerm)gsMakeDataEqnSpec(body.equations),3);
+  Result=ATsetArgument(pbes_spec,(ATerm)data_spec,0);
+
+  pb_eqn_spec=ATsetArgument(pb_eqn_spec,(ATerm)gstcWritePBES(ATLgetArgument(pb_eqn_spec,1)),1);
+  Result=ATsetArgument(Result,(ATerm)pb_eqn_spec,1);
+
+  pb_init=ATsetArgument(pb_init,(ATerm)ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY()),1);
+  Result=ATsetArgument(Result,(ATerm)pb_init,2);
+
+  Result=gstcFoldSortRefs(Result);
+
+finally:
+  gstcDataDestroy();
+  return Result;
 }
 
 //local functions
@@ -798,6 +865,8 @@ void gstcDataInit(void){
   context.functions=ATtableCreate(63,50);
   context.actions=ATtableCreate(63,50);
   context.processes=ATtableCreate(63,50);
+  context.PBs=ATtableCreate(63,50);
+  body.proc_freevars=ATtableCreate(63,50);
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
   ATprotectList(&body.equations);
@@ -950,6 +1019,8 @@ void gstcDataDestroy(void){
   ATtableDestroy(context.functions);
   ATtableDestroy(context.actions);
   ATtableDestroy(context.processes);
+  ATtableDestroy(context.PBs);
+  ATtableDestroy(body.proc_freevars);
   ATtableDestroy(body.proc_pars);
   ATtableDestroy(body.proc_bodies);
   ATunprotectList(&body.equations);
@@ -1118,6 +1189,61 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
   return Result;
 } 
 
+static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit){
+  ATbool Result=ATtrue;
+
+  ATermList PBFreeVars=ATLgetArgument(PBEqnSpec,0);
+  ATermList PBEqns=ATLgetArgument(PBEqnSpec,1);
+
+  for(;!ATisEmpty(PBEqns);PBEqns=ATgetNext(PBEqns)){
+    ATermAppl PBEqn=ATAgetFirst(PBEqns);
+    ATermAppl PBName=ATAgetArgument(ATAgetArgument(PBEqn,1),0);
+    
+    ATermList PBVars=ATLgetArgument(ATAgetArgument(PBEqn,1),1);
+
+    ATermList PBType=ATmakeList0();
+    for(ATermList l=PBVars; !ATisEmpty(l); l=ATgetNext(l)){
+      PBType=ATinsert(PBType,(ATerm)ATAgetArgument(ATAgetFirst(l),1));
+    }
+    PBType=ATreverse(PBType);
+
+    if(!gstcIsSortExprListDeclared(PBType)) { return ATfalse; }
+
+    ATermList Types=ATLtableGet(context.PBs,(ATerm)PBName);
+    if(!Types){
+      Types=ATmakeList1((ATerm)PBType);
+    }
+    else{
+      // the table context.PBs contains a list of types for each
+      // PBES name. We need to check if there is already such a type 
+      // in the list. If so -- error, otherwise -- add
+      if (gstcInTypesL(PBType, Types)){
+	gsErrorMsg("double declaration of propositional variable %P\n", PBName);
+	return ATfalse;
+      }
+      else{
+	Types=ATappend(Types,(ATerm)PBType);
+      }
+    }
+    ATtablePut(context.PBs,(ATerm)PBName,(ATerm)Types);
+
+    //check that all formal parameters of the PBES are unique.
+    if(!gstcVarsUnique(ATconcat(PBVars,PBFreeVars))){ gsErrorMsg("the formal and/or free variables in PBES %P are not unique\n",PBEqn); return ATfalse;}
+
+    //This is a fake ProcVarId (There is no PBVarId)
+    ATermAppl Index=gsMakeProcVarId(PBName,PBType);
+    ATtablePut(body.proc_freevars,(ATerm)Index,(ATerm)PBFreeVars);
+    ATtablePut(body.proc_pars,(ATerm)Index,(ATerm)PBVars);
+    ATtablePut(body.proc_bodies,(ATerm)Index,(ATerm)ATAgetArgument(PBEqn,2));
+    gsDebugMsg("Read-in Proc Name %T, Types %T\n",PBName,Types);    
+  }
+  ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)ATLgetArgument(PBInit,0));
+  ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
+  ATtablePut(body.proc_bodies,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(PBInit,1));
+ 
+  return Result;
+} 
+
 static ATermList gstcWriteProcs(ATermList oldprocs){
   ATermList Result=ATmakeList0();
   for(ATermList ProcVars=oldprocs;!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
@@ -1132,6 +1258,27 @@ static ATermList gstcWriteProcs(ATermList oldprocs){
   }
   return ATreverse(Result);
 }
+
+static ATermList gstcWritePBES(ATermList oldPBES){
+  ATermList Result=ATmakeList0();
+  for(ATermList PBEqns=oldPBES;!ATisEmpty(PBEqns);PBEqns=ATgetNext(PBEqns)){
+    ATermAppl PBEqn=ATAgetFirst(PBEqns);
+    ATermAppl PBESVar=ATAgetArgument(PBEqn,1);
+
+    ATermList PBType=ATmakeList0();
+    for(ATermList l=ATLgetArgument(PBESVar,1); !ATisEmpty(l); l=ATgetNext(l)){
+      PBType=ATinsert(PBType,(ATerm)ATAgetArgument(ATAgetFirst(l),1));
+    }
+    PBType=ATreverse(PBType);
+
+    ATermAppl Index=gsMakeProcVarId(ATAgetArgument(PBESVar,0),PBType);
+
+    if(Index==INIT_KEY()) continue;
+    Result=ATinsert(Result,(ATerm)ATsetArgument(PBEqn,(ATerm)ATAtableGet(body.proc_bodies,(ATerm)Index),2));
+  }
+  return ATreverse(Result);
+}
+
 
 static ATbool gstcTransformVarConsTypeData(void){
   ATbool Result=ATtrue;
@@ -1207,6 +1354,33 @@ static ATbool gstcTransformActProcVarConst(void){
   ATtableDestroy(Vars);
   return Result;
 }
+
+static ATbool gstcTransformPBESVarConst(void){
+  ATbool Result=ATtrue;
+  ATermTable Vars=ATtableCreate(63,50);
+
+  //PBEs and data terms in PBEqns and init
+  for(ATermList PBVars=ATtableKeys(body.proc_pars);!ATisEmpty(PBVars);PBVars=ATgetNext(PBVars)){
+    ATermAppl PBVar=ATAgetFirst(PBVars);
+    ATtableReset(Vars);
+
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_freevars,(ATerm)PBVar));
+    if(!NewVars){ Result = ATfalse; break; }
+    else Vars=NewVars; 
+
+    NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)PBVar));
+    if(!NewVars){ Result = ATfalse; break; }
+    else Vars=NewVars; 
+
+    ATermAppl NewPBTerm=gstcTraversePBESVarConstPB(Vars,ATAtableGet(body.proc_bodies,(ATerm)PBVar));
+    if(!NewPBTerm){ Result = ATfalse; break; }
+    ATtablePut(body.proc_bodies,(ATerm)PBVar,(ATerm)NewPBTerm);
+  } 
+
+  ATtableDestroy(Vars);
+  return Result;
+}
+
 
 // ======== Auxiliary functions
 static ATbool gstcInTypesA(ATermAppl Type, ATermList Types){
@@ -1505,29 +1679,38 @@ static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls){
   return Vars;
 }
 
-static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
+static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pbes){
   ATermAppl Result=NULL;
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
   ATermList ParList;
 
   ATbool action;
 
-  if((ParList=ATLtableGet(context.actions,(ATerm)Name))){
-    action=ATtrue;
-  }
-  else{
-    if((ParList=ATLtableGet(context.processes,(ATerm)Name))){
-      action=ATfalse;
+  if(!is_pbes){
+    if((ParList=ATLtableGet(context.actions,(ATerm)Name))){
+      action=ATtrue;
     }
     else{
-      gsErrorMsg("action or process %P not declared\n", Name);
+      if((ParList=ATLtableGet(context.processes,(ATerm)Name))){
+        action=ATfalse;
+      }
+      else{
+        gsErrorMsg("action or process %P not declared\n", Name);
+        return NULL;
+      }
+    }
+  }
+  else {
+    if(!(ParList=ATLtableGet(context.PBs,(ATerm)Name))){
+      gsErrorMsg("propositional variable %P not declared\n", Name);
       return NULL;
     }
   }
   assert(!ATisEmpty(ParList));
   
   unsigned int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
-  const char *msg=(action)?"action":"process";
+  const char *msg=(is_pbes)?"propositional variable":((action)?"action":"process");
+  
   
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   {
@@ -1606,6 +1789,8 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   }
     
   Result=gstcMakeActionOrProc(action,Name,PosTypeList,NewPars);
+
+  if(is_pbes) Result=ATsetArgument(ProcTerm,(ATerm)NewPars,1);
 
   gsDebugMsg("recognized %s %T\n",msg,Result);    
   return Result;
@@ -1833,6 +2018,55 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
   }
   
+  assert(0);
+  return Result;
+}
+
+static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm){
+  ATermAppl Result=NULL;
+
+  if(gsIsDataExpr(PBESTerm)){
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&PBESTerm,gsMakeSortIdBool());
+    if(!NewType) {return NULL;}
+    return PBESTerm;
+  }
+
+  if(gsIsPBESTrue(PBESTerm) || gsIsPBESFalse(PBESTerm)) return PBESTerm;
+
+  if(gsIsPBESNot(PBESTerm)){
+    ATermAppl NewArg=gstcTraversePBESVarConstPB(Vars,ATAgetArgument(PBESTerm,0));
+    if(!NewArg) {return NULL;}
+    return ATsetArgument(PBESTerm,(ATerm)NewArg,0);
+  }
+ 
+  if(gsIsPBESAnd(PBESTerm) || gsIsPBESOr(PBESTerm) || gsIsPBESImp(PBESTerm)){
+    ATermAppl NewLeft=gstcTraversePBESVarConstPB(Vars,ATAgetArgument(PBESTerm,0));
+    if(!NewLeft) {return NULL;}
+    ATermAppl NewRight=gstcTraversePBESVarConstPB(Vars,ATAgetArgument(PBESTerm,1));
+    if(!NewRight) {return NULL;}
+    return ATsetArgument(ATsetArgument(PBESTerm,(ATerm)NewLeft,0),(ATerm)NewRight,1);
+  }
+
+  if(gsIsPBESForall(PBESTerm)||gsIsPBESExists(PBESTerm)){
+    ATermTable CopyVars=ATtableCreate(63,50);
+    gstcATermTableCopy(Vars,CopyVars);
+
+    ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(PBESTerm,0));
+    if(!NewVars) {
+      ATtableDestroy(CopyVars); 
+      gsErrorMsg("type error while typechecking %P\n",PBESTerm);    
+      return NULL;
+    }
+    ATermAppl NewPBES=gstcTraversePBESVarConstPB(NewVars,ATAgetArgument(PBESTerm,1));
+    ATtableDestroy(CopyVars);
+    if(!NewPBES) {gsErrorMsg("while typechecking %P\n",PBESTerm);return NULL;}
+    return ATsetArgument(PBESTerm,(ATerm)NewPBES,1);
+  }
+
+  if(gsIsPropVarInst(PBESTerm)){
+    return gstcRewrActProc(Vars, PBESTerm, true);    
+  }
+
   assert(0);
   return Result;
 }
