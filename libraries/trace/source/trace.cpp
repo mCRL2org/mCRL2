@@ -7,6 +7,30 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file trace.cpp
+/// \brief This file contains the implementation of the trace class
+/// \details The mCRL2 Trace Format is given by the followin syntax.
+///
+///  Bytes      Information
+///
+///   0 -  9    Marker "mCRL2Trace"
+///  10 - 11    Version number (little endian)
+///  12 -       Binary ATermList representing the trace
+///
+/// The contents of the trace ATermList have the following form.
+///
+///   T   ::=  T'  |  State |> T'  |  State
+///   T'  ::=  pair(Action,Time) |> T  |  pair(Action,Time)  |  T''
+///   T'' ::=  Action |> T  |  Action
+///
+/// This means that a trace is a sequence of Action/Time-pairs with at most one
+/// State between every pair and at the beginning and end of the trace.
+/// Actions are in the mCRL2 MultAct(<Action>*) format, Time is a mCRL2
+/// <DataExpr> of the sort Time and States are ATermAppls with "STATE" as
+/// function symbol and mCRL2 <DataExpr>s as * arguments.
+///
+/// Note that T'' is only here for backwards compatibility with the previous
+/// untimed version.
+
 
 #include <aterm2.h>
 #include <assert.h>
@@ -26,29 +50,6 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
 
 
-/* mCRL2 Trace Format
- *
- *   Bytes      Information
- *
- *    0 -  9    Marker "mCRL2Trace"
- *   10 - 11    Version number (little endian)
- *   12 -       Binary ATermList representing the trace
- *
- * The contents of the trace ATermList have the following form.
- *
- *   T   ::=  T'  |  State |> T'  |  State
- *   T'  ::=  pair(Action,Time) |> T  |  pair(Action,Time)  |  T''
- *   T'' ::=  Action |> T  |  Action
- *
- * This means that a trace is a sequence of Action/Time-pairs with at most one
- * State between every pair and at the beginning and end of the trace.
- * Actions are in the mCRL2 MultAct(<Action>*) format, Time is a mCRL2
- * <DataExpr> of the sort Time and States are ATermAppls with "STATE" as
- * function symbol and mCRL2 <DataExpr>s as * arguments.
- *
- * Note that T'' is only here for backwards compatibility with the previous
- * untimed version.
- */
 
 #define TRACE_MCRL2_MARKER "mCRL2Trace"
 #define TRACE_MCRL2_MARKER_SIZE 10
