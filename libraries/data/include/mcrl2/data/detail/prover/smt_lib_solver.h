@@ -212,9 +212,9 @@ namespace mcrl2 {
             return execute(f_benchmark);
           }
       };
-#endif
     }
   }
 }
+#endif
 
 #endif
