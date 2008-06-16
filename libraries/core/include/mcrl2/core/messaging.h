@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file messaging.h
+/// \file mcrl2/core/messaging.h
 /// \brief Controlling and printing of messages.  
 
 #ifndef __MCRL2_MESSAGING_H__
 #define __MCRL2_MESSAGING_H__
 
-#include <stdarg.h>
-#include <assert.h>
+#include <cstdarg>
+#include <cassert>
 #include <aterm2.h>
 
 #include <workarounds.h>
@@ -28,19 +28,19 @@ namespace mcrl2 {
 
       /// \brief Printing of warnings, verbose information and extended debugging
       ///      information during program execution is disabled.
-      void gsSetQuietMsg(void);
+      void gsSetQuietMsg();
   
       /// \brief Printing of warnings during program execution is enabled. Printing of
       ///      verbose information and extended debugging information is disabled.
-      void gsSetNormalMsg(void);
+      void gsSetNormalMsg();
   
       /// \brief Printing of warnings and verbose information during program execution
       ///      is enabled. Printing of extended debugging information is disabled.
-      void gsSetVerboseMsg(void);
+      void gsSetVerboseMsg();
   
       /// \brief Printing of warnings, verbose information and extended debugging
       ///      information during program execution is enabled.
-      void gsSetDebugMsg(void);
+      void gsSetDebugMsg();
   
       /// \brief If gsQuiet is set, printing of warnings, verbose information and extended debugging
       /// information during program execution is disabled.
@@ -62,15 +62,15 @@ namespace mcrl2 {
       enum messageType {gs_notice, gs_warning, gs_error};
  
       /// \brief Function for printing regular messages  .
-      extern void gsMessage(const char *Format, ...);
+      void gsMessage(const char *Format, ...);
       /// \brief Function for printing error messages.
-      extern void gsErrorMsg(const char *Format, ...);
+      void gsErrorMsg(const char *Format, ...);
       /// \brief Function for printing verbose messages.
-      extern void gsVerboseMsg(const char *Format, ...);
+      void gsVerboseMsg(const char *Format, ...);
       /// \brief Function for printing warning messages.
-      extern void gsWarningMsg(const char *Format, ...);
+      void gsWarningMsg(const char *Format, ...);
       /// \brief Function for printing debug messages.
-      extern void gsDebugMsg(const char *Format, ...);
+      void gsDebugMsg(const char *Format, ...);
   
       /// \brief Replaces message_handler by the function pointer passed as argument.
       void gsSetCustomMessageHandler(void (*)(messageType, const char*));

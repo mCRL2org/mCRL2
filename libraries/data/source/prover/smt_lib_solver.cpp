@@ -8,11 +8,11 @@
 
 #include <cstdlib>
 
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/utilities.h"
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/exception.h"
 
@@ -843,16 +843,16 @@ namespace mcrl2 {
      
         // fork process
         pid_t pid = ::fork();
-     
+
         if (pid == 0) {
           ::dup2(pipe_stdin[0], STDIN_FILENO);
           ::dup2(pipe_stdout[1], STDOUT_FILENO);
           ::dup2(pipe_stderr[1], STDERR_FILENO);
-     
+
           ::close(pipe_stdin[1]);
           ::close(pipe_stdout[0]);
           ::close(pipe_stderr[0]);
-     
+
           T::exec();
      
           ::_exit(errno);

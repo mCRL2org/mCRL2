@@ -40,8 +40,6 @@ namespace tipi {
     };
 
     /* Explicit instantiations for tipi::message */
-    template basic_messenger< tipi::message >::basic_messenger();
-    template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < utility::logger > l);
     template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c);
     template utility::logger& basic_messenger< tipi::message >::get_logger();
     template utility::logger& basic_messenger< tipi::message >::get_default_logger();

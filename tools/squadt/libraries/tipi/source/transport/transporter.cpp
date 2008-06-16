@@ -62,8 +62,6 @@ namespace transport {
   }
 
   transporter_impl::~transporter_impl() {
-    using namespace boost;
-
     boost::recursive_mutex::scoped_lock l(lock);
 
     /* Shutdown listeners */
@@ -137,9 +135,7 @@ namespace transport {
    *
    * \return a shared pointer to the transceiver that is removed
    **/
-  basic_transceiver::ptr transporter_impl::disassociate(basic_transceiver* t) {
-    basic_transceiver::ptr p;
-
+  boost::shared_ptr< basic_transceiver > transporter_impl::disassociate(basic_transceiver* t) {
     boost::recursive_mutex::scoped_lock l(lock);
 
     if (t->owner.lock().get() != 0) {
@@ -147,20 +143,20 @@ namespace transport {
      
       for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
         if (i->get() == t) {
-          p = *i;
+          boost::shared_ptr< basic_transceiver > target(*i); 
          
           connections.erase(i);
          
           t->owner.reset();
 
-          on_disconnect(t);
+          on_disconnect(target.get());
      
-          break;
+          return target;
         }
       }
     }
 
-    return (p);
+    return boost::shared_ptr< basic_transceiver >();
   }
 
   /**

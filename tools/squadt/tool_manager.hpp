@@ -79,7 +79,10 @@ namespace squadt {
     public:
  
       /** \brief Constructor */
-      tool_manager(tipi::tcp_port port = 10949);
+      tool_manager();
+ 
+      /** \brief Constructor */
+      tool_manager(tipi::tcp_port port);
  
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(std::string const&) const;

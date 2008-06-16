@@ -242,7 +242,7 @@ bool SQuADt::OnInit() {
               splash_window->update();
 
               if (!path_to_try.empty()) {
-                if (tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf())) {
+                if (tester::query_with_path(**t, path_to_try.branch_path() / (*t)->get_location().leaf())) {
                   continue;
                 }
               }

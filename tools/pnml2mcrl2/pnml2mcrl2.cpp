@@ -2408,7 +2408,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     command_line_parser parser(clinterface, ac, av);
 
-    tool_options_type tool_options = { "-", "-" };
+    tool_options_type tool_options;
 
     if (parser.options.count("error")) {
       error = parser.option_argument_as< unsigned long >("error");

@@ -93,13 +93,11 @@ namespace squadt {
     project::builder::builder() : timer(this, wxID_ANY) {
       Connect(wxEVT_TIMER, wxTimerEventHandler(builder::process));
 
-      timer.Start(50);
+      timer.Start(50, wxTIMER_ONE_SHOT);
     }
     
     void project::builder::process(wxTimerEvent&) {
       if (0 < tasks.size()) {
-        timer.Stop();
-
         std::deque < boost::function< void () > > local_tasks;
 
         local_tasks.swap(tasks);
@@ -116,9 +114,9 @@ namespace squadt {
           local_tasks.swap(tasks);
         }
         while (0 < local_tasks.size());
-
-        timer.Start(50);
       }
+
+      timer.Start(50, wxTIMER_ONE_SHOT);
     }
     
     void project::builder::schedule_update(boost::function< void () > l) {

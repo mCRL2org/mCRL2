@@ -54,12 +54,6 @@ namespace tipi {
  
       public:
 
-        /** \brief Default constructor */
-        basic_messenger();
-
-        /** \brief Default constructor */
-        basic_messenger(boost::shared_ptr < utility::logger >);
-
         /** \brief Destroys all connections */
         void disconnect();
  

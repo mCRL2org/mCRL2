@@ -68,7 +68,10 @@ namespace squadt {
     public:
 
       /** \brief Default constructor */
-      tool_manager_impl(tipi::tcp_port port);
+      tool_manager_impl();
+
+      /** \brief Disconnect and terminate running tools */
+      void activate(tipi::tcp_port port);
 
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(std::string const&) const;

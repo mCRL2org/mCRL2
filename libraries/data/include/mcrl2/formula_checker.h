@@ -7,10 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/formula_checker.h
-/// \brief Add your file description here.
-
-// Interface to class Formula_Checker
-// file: formula_checker.h
+/// \brief Interface to class Formula_Checker
 
 #ifndef FORMULA_CHECKER_H
 #define FORMULA_CHECKER_H

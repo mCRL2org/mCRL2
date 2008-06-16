@@ -161,6 +161,9 @@ namespace tipi {
 
       protected:
 
+        /** \brief Type for callback functions to handle events */
+        typedef typename M::end_point                        end_point;
+
         /** \brief Standard (clog) logging component */
         static boost::shared_ptr < utility::logger > get_default_logger() {
           static utility::logger the_default_logger;
@@ -182,9 +185,6 @@ namespace tipi {
         /** \brief Queues incoming messages */
         virtual void deliver(std::string const&, typename M::end_point);
  
-        /** \brief Wakes waiters if no connections remain */
-        virtual void on_disconnect(typename M::end_point o);
-
       public:
 
         /** \brief Default constructor */
@@ -222,21 +222,6 @@ namespace tipi {
           disconnect();
         }
     };
-
-    /** Default constructor */
-    template < typename M >
-    basic_messenger< M >::basic_messenger() :
-        transport::transporter(boost::shared_ptr < transport::transporter_impl > (
-                new basic_messenger_impl< M >())) {
-    }
-
-    /**
-     * \param[in] l pointer to a logger object
-     **/
-    template < typename M >
-    basic_messenger< M >::basic_messenger(boost::shared_ptr < utility::logger > l) :
-        transport::transporter(boost::shared_ptr < transport::transporter_impl > (new basic_messenger_impl< M >(l))) {
-    }
 
     /**
      * \param[in] c pointer to an implementation object
@@ -327,18 +312,6 @@ namespace tipi {
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl() :
        message_open(false), delivery_thread_active(false), partially_matched(0), logger(get_default_logger()) {
-    }
-
-    template < class M >
-    inline void basic_messenger_impl< M >::on_disconnect(typename M::end_point o) {
-      boost::recursive_mutex::scoped_lock w(waiter_lock);
-
-      if (number_of_connections() == 0) {
-        // Unblock all waiters;
-        BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
-          w.second->wake();
-        }
-      }
     }
 
     template < class M >

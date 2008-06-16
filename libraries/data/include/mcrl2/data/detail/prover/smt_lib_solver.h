@@ -12,12 +12,12 @@
 #ifndef SMT_LIB_SOLVER_H
 #define SMT_LIB_SOLVER_H
 
+#include <string>
+
 #include "aterm2.h"
 #include "mcrl2/data/detail/prover/smt_solver.h"
 #include "mcrl2/utilities/expression_info.h"
 #include "mcrl2/utilities/sort_info.h"
-
-#include <string>
 
   /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
   /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
@@ -136,8 +136,16 @@ namespace mcrl2 {
           // \brief Checks the availability/usability of the prover
           static bool usable();
       };
-
+    }
+  }
+}
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+# include "mcrl2/core/messaging.h"
+
+namespace mcrl2 {
+  namespace data {
+    namespace prover {
+
       /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
       /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
       /// of propositional formulas. To use the solver CVC / the directory containing

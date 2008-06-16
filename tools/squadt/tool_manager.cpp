@@ -39,8 +39,8 @@ namespace squadt {
   const boost::shared_ptr < tipi::tool::capabilities > tool::no_capabilities(new tipi::tool::capabilities());
 
   /// \cond INTERNAL_DOCS
-  tool_manager_impl::tool_manager_impl(tipi::tcp_port port)
-                            : tipi::controller::communicator(), tcp_port_number(port) {
+  tool_manager_impl::tool_manager_impl()
+                            : tipi::controller::communicator() {
     struct local {
       /**
        * \param[in] m the incoming message
@@ -71,11 +71,15 @@ namespace squadt {
       }
     };
 
-    /* Listen for incoming socket connections on the default interface with the default port */
-    add_listener("", tcp_port_number);
-
     /* Set handler for incoming instance identification messages */
     add_handler(tipi::message_identification, boost::bind(&local::handle_relay_connection, boost::ref(*this), _1));
+  }
+
+  void tool_manager_impl::activate(tipi::tcp_port port) {
+    tcp_port_number = port;
+
+    /* Listen for incoming socket connections on the default interface with the default port */
+    add_listener("", tcp_port_number);
   }
 
   /**
@@ -134,34 +138,45 @@ namespace squadt {
           static void store_capabilities(boost::weak_ptr < extractor > e, boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < tool > t) {
             boost::shared_ptr < extractor > guard(e.lock());
        
-            if (guard) {
-              t->m_capabilities.reset(new tipi::tool::capabilities);
+            try {
+              if (guard) {
+                t->m_capabilities.reset(new tipi::tool::capabilities);
+  
+                tipi::visitors::restore(*t->m_capabilities, m->to_string());
 
-              tipi::visitors::restore(*t->m_capabilities, m->to_string());
+                return;
+              }
             }
+            catch(...) {
+            }
+
+            t->m_capabilities.reset();
           }
         };
-       
-        bool return_value = false;
        
         boost::shared_ptr < extractor > guard(e.lock());
         
         if (guard) {
-          add_handler(tipi::message_capabilities, bind(&local::store_capabilities, e, _1, t));
+          try {
+            add_handler(tipi::message_capabilities, bind(&local::store_capabilities, e, _1, t));
        
-          /* Await connection */
-          if (await_connection(5)) {
-            request_tool_capabilities();
+            /* Await connection */
+            if (await_connection(5)) {
+              request_tool_capabilities();
+            }
+
+            await_message(tipi::message_capabilities, 2);
         
-            return_value = await_message(tipi::message_capabilities, 1).get() != 0;
+            finish();
           }
-        
-          finish();
+          catch (...) {
+            // ignore exceptions, the capabilities object is the only thing that matters
+          }
         }
        
-        return return_value;
+        return t->m_capabilities.get() != 0;
       }
-    };
+  };
 
   /**
    * \param[in] t the tool to run
@@ -270,11 +285,13 @@ namespace squadt {
   }
   /// \endcond
 
-  /**
-   * Default constructor
-   **/
+  tool_manager::tool_manager() :
+                                        impl(new tool_manager_impl()) {
+  }
+
   tool_manager::tool_manager(tipi::tcp_port port) :
-                                        impl(new tool_manager_impl(port)) {
+                                        impl(new tool_manager_impl()) {
+    impl->activate(port);
   }
 
   /**

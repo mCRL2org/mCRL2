@@ -49,6 +49,10 @@ namespace tipi {
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
         boost::shared_ptr < configuration >  m_configuration;
 
+        /** \brief Wakes waiters if no connections remain */
+        void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point o) {
+        }
+
       public:
 
         /** \brief Default constructor */
