@@ -856,10 +856,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	if(prelude!=""){
 	  colored=ATtrue;
 	  std::string s(prelude);
-          std::istringstream iss(s+"init delta;");
-	  ATermAppl Prelude=parse_proc_spec(iss);
+          //std::istringstream iss(s+"init delta;");
+	  ATermAppl Prelude=parse_data_spec(s); //iss
           if(!Prelude) {gsErrorMsg("Parsing of the mCRL2 prelude failed\n"); return NULL;}
-          Prelude=type_check_proc_spec(Prelude);
+          Prelude=type_check_data_spec(Prelude);
           if(!Prelude) {gsErrorMsg("Type-checking of the mCRL2 prelude failed\n"); return NULL;}
           Net_prelude=Prelude;
 	}
@@ -1726,6 +1726,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATerm CurrentKey;
     ATermAppl Prelude=ATAgetArgument(Spec,4);    
     if(ATisEqual(Prelude,Appl0)) Prelude=gsMakeEmptyDataSpec(); //NULL;
+    assert(gsIsDataSpec(Prelude));
 
     gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
     while (ATisEmpty(APlaces) == ATfalse) {
