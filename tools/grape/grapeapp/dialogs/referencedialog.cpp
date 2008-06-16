@@ -29,8 +29,15 @@ grape_reference_dialog::grape_reference_dialog( reference_state *p_ref, grape_sp
   init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_text(), p_spec );
 }
 
+// The following exception is to make grape compile on Apple platforms, where wxWidgets do
+// not contain the iostreams package. This should be removed in due time (JFG: 16/6/2008).
+#ifdef __APPLE__
+grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
+: wxDialog( 0, wxID_ANY, _T("Edit architecture reference") , wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+#else
 grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T("Edit architecture reference") )
+#endif
 {
   wxPanel *panel = new wxPanel( this );
 

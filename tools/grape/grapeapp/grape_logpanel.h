@@ -33,7 +33,12 @@ namespace grape
          */
         grape_logpanel(void);
 
+#ifndef __APPLE__
+// Currently the std_iostreams are not included in wxwidgets on apple by default.
+// If this is the case, this ifndef can be removed.
+
         wxStreamToTextRedirector *m_cerr_catcher; /**Provides functionality to reroute cerr to this control.*/
+#endif
 
       public:
         /**

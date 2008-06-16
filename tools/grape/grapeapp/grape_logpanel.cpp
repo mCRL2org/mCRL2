@@ -23,12 +23,20 @@ grape_logpanel::grape_logpanel(void) : wxTextCtrl()
 grape_logpanel::grape_logpanel(wxWindow *p_parent)
 : wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY)
 {
+#ifndef __APPLE__
+// Currently the std_iostreams are not included in wxwidgets on apple by default.
+// If this is the case, this ifndef can be removed.
   m_cerr_catcher = new wxStreamToTextRedirector( this, &std::cerr );
+#endif
 }
 
 grape_logpanel::~grape_logpanel(void)
 {
+#ifndef __APPLE__
+// Currently the std_iostreams are not included in wxwidgets on apple by default.
+// If this is the case, this ifndef can be removed.
   delete m_cerr_catcher;
+#endif
 }
 
 void grape_logpanel::enable_catch_cout(void)
