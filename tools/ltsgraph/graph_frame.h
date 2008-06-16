@@ -32,7 +32,7 @@
 #include <wx/textdlg.h>
 
 #include <string>
-#include "stdlib.h"
+#include <cstdlib>
 
 //random
 #include <cstdlib>

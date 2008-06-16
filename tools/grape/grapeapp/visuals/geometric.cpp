@@ -8,27 +8,12 @@
 //
 // Implements the visualcomment class.
 
+#include <algorithm>
+
 #include "geometric.h"
 #include "font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
-
-#ifdef __APPLE__
-// Functions below do not appear to be defined on Apple.
-namespace std
-{ 
-  
-template <class T>
-  inline T min(T a,T b)
-  { return ((a<b)?a:b);
-  }
-
-template <class T>
-  inline T max(T a,T b)
-  { return ((a<b)?b:a);
-  }
-}
-#endif
 
 using namespace grape::grapeapp;
 
@@ -202,10 +187,10 @@ bool grape::grapeapp::is_inside_line( const coordinate &p_begin, const coordinat
 {
   // Remember, the y axis is negative.
   // Create a bounding box for the line
-  float low_x = std::min( p_begin.m_x, p_end.m_x );
-  float low_y = std::max( p_begin.m_y, p_end.m_y );
-  float high_x = std::max( p_begin.m_x, p_end.m_x );
-  float high_y = std::min( p_begin.m_y, p_end.m_y );
+  float low_x = (std::min)( p_begin.m_x, p_end.m_x );
+  float low_y = (std::max)( p_begin.m_y, p_end.m_y );
+  float high_x = (std::max)( p_begin.m_x, p_end.m_x );
+  float high_y = (std::min)( p_begin.m_y, p_end.m_y );
 
   if ( p_coord.m_x > low_x  - g_cursor_margin && p_coord.m_x < high_x + g_cursor_margin && p_coord.m_y < low_y  + g_cursor_margin && p_coord.m_y > high_y - g_cursor_margin )
   {
@@ -444,7 +429,7 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
   float distance_lower_y = lower_y - result.m_y;
   float distance_upper_y = result.m_y - upper_y;
   // find out which distance is the lowest.
-  float lowest = std::min( distance_lower_x, std::min( distance_upper_x, std::min( distance_lower_y, distance_upper_y ) ) );
+  float lowest = (std::min)( distance_lower_x, (std::min)( distance_upper_x, (std::min)( distance_lower_y, distance_upper_y ) ) );
   if ( lowest == distance_lower_x )
   {
     result.m_x = lower_x;

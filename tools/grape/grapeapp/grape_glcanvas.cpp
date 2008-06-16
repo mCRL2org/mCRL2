@@ -8,7 +8,8 @@
 //
 // Implements the OpenGL canvas used to draw objects.
 
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 
 #include "grape_glcanvas.h"
 #include "grape_frame.h"
@@ -29,23 +30,6 @@
 #include "visuals/visualarchitecture_reference.h"
 #include "visuals/visualchannel.h"
 #include "visuals/visualvisibilityframe.h"
-
-#ifdef __APPLE__
-// Functions below do not appear to be defined on Apple.
-namespace std
-{ 
-  
-template <class T>
-  inline T min(T a,T b)
-  { return ((a<b)?a:b);
-  }
-
-template <class T>
-  inline T max(T a,T b)
-  { return ((a<b)?b:a);
-  }
-}
-#endif
 
 using namespace grape::grapeapp;
 
@@ -317,7 +301,7 @@ void grape_glcanvas::event_scroll_lineup(wxScrollWinEvent &p_event)
     {
       m_scroll_x = m_min_size_x;
     }
-    SetScrollbar(wxHORIZONTAL, std::max(0, GetScrollPos(wxHORIZONTAL)-99), GetScrollThumb(wxHORIZONTAL), GetScrollRange(wxHORIZONTAL));
+    SetScrollbar(wxHORIZONTAL, (std::max)(0, GetScrollPos(wxHORIZONTAL)-99), GetScrollThumb(wxHORIZONTAL), GetScrollRange(wxHORIZONTAL));
   }
   else
   {
@@ -326,7 +310,7 @@ void grape_glcanvas::event_scroll_lineup(wxScrollWinEvent &p_event)
     {
       m_scroll_y = m_min_size_y;
     }
-    SetScrollbar(wxVERTICAL, std::max(0, GetScrollPos(wxVERTICAL)-99), GetScrollThumb(wxVERTICAL), GetScrollRange(wxVERTICAL));
+    SetScrollbar(wxVERTICAL, (std::max)(0, GetScrollPos(wxVERTICAL)-99), GetScrollThumb(wxVERTICAL), GetScrollRange(wxVERTICAL));
   }
 
   store_scroll_info();
@@ -342,7 +326,7 @@ void grape_glcanvas::event_scroll_linedown(wxScrollWinEvent &p_event)
     {
       m_scroll_x = ((-m_max_size_x)+((float)GetScrollThumb(wxHORIZONTAL)/300.0f));
     }
-    SetScrollbar(wxHORIZONTAL, std::min(GetScrollRange(wxHORIZONTAL)-GetScrollThumb(wxHORIZONTAL), GetScrollPos(wxHORIZONTAL)+99), GetScrollThumb(wxHORIZONTAL), GetScrollRange(wxHORIZONTAL));
+    SetScrollbar(wxHORIZONTAL, (std::min)(GetScrollRange(wxHORIZONTAL)-GetScrollThumb(wxHORIZONTAL), GetScrollPos(wxHORIZONTAL)+99), GetScrollThumb(wxHORIZONTAL), GetScrollRange(wxHORIZONTAL));
   }
   else
   {
@@ -351,7 +335,7 @@ void grape_glcanvas::event_scroll_linedown(wxScrollWinEvent &p_event)
     {
       m_scroll_y = ((-m_max_size_y)+((float)GetScrollThumb(wxVERTICAL)/300.0f));
     }
-    SetScrollbar(wxVERTICAL, std::min(GetScrollRange(wxVERTICAL)-GetScrollThumb(wxVERTICAL), GetScrollPos(wxVERTICAL)+99), GetScrollThumb(wxVERTICAL), GetScrollRange(wxVERTICAL));
+    SetScrollbar(wxVERTICAL, (std::min)(GetScrollRange(wxVERTICAL)-GetScrollThumb(wxVERTICAL), GetScrollPos(wxVERTICAL)+99), GetScrollThumb(wxVERTICAL), GetScrollRange(wxVERTICAL));
   }
 
   store_scroll_info();
