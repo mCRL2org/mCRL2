@@ -855,7 +855,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 	if(prelude!=""){
 	  colored=ATtrue;
-	  std::string s(prelude);
+	  std::istringstream s(prelude);
           //std::istringstream iss(s+"init delta;");
 	  ATermAppl Prelude=parse_data_spec(s); //iss
           if(!Prelude) {gsErrorMsg("Parsing of the mCRL2 prelude failed\n"); return NULL;}
