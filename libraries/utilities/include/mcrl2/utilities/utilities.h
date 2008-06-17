@@ -30,7 +30,12 @@ inline const char* bool_to_char_string(bool b) {
  * \brief Computes the number of digits in decimal representation
  **/
 inline int number_of_digits(const int a_integer) {
-  return static_cast < int > (std::ceil(std::log10(static_cast < double > (a_integer))));
+  assert(a_integer >= 0);
+  if (a_integer == 0) {
+    return 1;
+  } else {
+    return static_cast < int > (std::ceil(std::log10(static_cast < double > (a_integer))));
+  }
 }
 
 inline 
