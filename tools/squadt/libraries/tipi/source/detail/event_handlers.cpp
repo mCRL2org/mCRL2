@@ -76,7 +76,10 @@ namespace tipi {
         ~basic_event_handler_impl();
 
       private:
-   
+
+        basic_event_handler_impl() : m_handler_execution_thread(false) {
+        }
+
         /** \brief Wakes up all waiters that match an identifier or all waiters if the identifier is 0 */
         void wake(T = 0);
 

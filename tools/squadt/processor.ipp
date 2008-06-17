@@ -36,7 +36,7 @@ namespace squadt {
     friend class project_manager_impl;
     friend class squadt::restore_visitor_impl;
 
-    friend struct processor::object_descriptor;
+    friend class processor::object_descriptor;
 
     template < typename R, typename S >
     friend class utility::visitor;

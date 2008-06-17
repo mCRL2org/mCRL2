@@ -74,6 +74,7 @@ class event_helper : public wxEvtHandler, public wxClientData {
 
 template <>
 void event_helper< tipi::layout::elements::button, wxButton >::export_wx_changes(wxCommandEvent& e) {
+assert(false);
   tipi_element.activate();
 }
 
@@ -656,7 +657,7 @@ namespace squadt {
      * \param[in] l the layout elements that have changed
      **/
     void tool_display::update_log(boost::shared_ptr< tipi::report > l) {
-      wxString stamp = wxDateTime::Now().Format(wxT("%b %e %H:%M:%S "));
+      wxString stamp = wxDateTime::Now().Format(wxT("%b %d %H:%M:%S "));
 
       if (m_log == 0) {
         wxSizer* sizer = GetSizer();

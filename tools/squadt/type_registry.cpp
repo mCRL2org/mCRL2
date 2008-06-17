@@ -284,11 +284,11 @@ namespace squadt {
 
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
-                boost::bind(&mime_type::operator==, mime_type("text/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
+		  boost::bind(&mime_type::operator==, mime_type(t.get_sub_type(), mime_type::text), boost::bind(&actions_for_type::value_type::first, _1)));
     }
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
-                boost::bind(&mime_type::operator==, mime_type("application/" + t.get_sub_type()), boost::bind(&actions_for_type::value_type::first, _1)));
+		  boost::bind(&mime_type::operator==, mime_type(t.get_sub_type(), mime_type::application), boost::bind(&actions_for_type::value_type::first, _1)));
     }
 
     if (i == command_for_type.end()) {

@@ -322,7 +322,7 @@ namespace mcrl2 {
             T communicator;
 
 # ifdef __WXWINDOWS__
-            wxCmdLineArgType dummy_lpCmdLine = 0;
+            wxCmdLineArgType dummy_lpCmdLine = "squadt-tool";
 
             communicator.m_starter.reset(new entry_wrapper(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow));
 # endif

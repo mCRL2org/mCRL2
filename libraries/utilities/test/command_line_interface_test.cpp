@@ -155,16 +155,16 @@ BOOST_AUTO_TEST_CASE(prover_options) {
   string_to_prover_type_test< true >("cvc");
   string_to_prover_type_test< false >("acvc");
 
-  // Test rewriting options (-r and --rewrite with a mandatory argument)
+  // Test rewriting options (-z and --smt-solver with a mandatory argument)
   test_interface.add_prover_options();
 
-  // Missing mandatory argument for option --rewriter
+  // Missing mandatory argument for option --smt-solver
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), std::runtime_error);
-  // Valid rewriter option with valid argument
+  // Valid smt-solver option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --smt-solver=ario"));
-  // Valid rewriter option with valid argument
+  // Valid smt-solver option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -zcvc"));
-  // Valid rewriter option with invalid argument
+  // Valid smt-solver option with invalid argument
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), std::runtime_error);
 }
 
@@ -182,17 +182,17 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
 
   {
-    command_line_parser parser(test_interface, "test -v -d -q --verbose");
+    command_line_parser parser(test_interface, "test -v --debug -d --verbose");
  
     BOOST_CHECK(parser.options.size() == 4);
     BOOST_CHECK(parser.options.count("verbose") == 2);
     BOOST_CHECK(first_of(parser, "verbose").empty());
     BOOST_CHECK(last_of(parser, "verbose").empty());
     BOOST_CHECK_THROW(parser.option_argument("verbose"), std::logic_error);
-    BOOST_CHECK(parser.options.count("debug") == 1);
+    BOOST_CHECK(parser.options.count("debug") == 2);
     BOOST_CHECK(first_of(parser, "debug").empty());
-    BOOST_CHECK(parser.options.count("quiet") == 1);
-    BOOST_CHECK(first_of(parser, "quiet").empty());
+    BOOST_CHECK(last_of(parser, "debug").empty());
+    BOOST_CHECK(parser.options.count("quiet") == 0);
     BOOST_CHECK(parser.arguments.size() == 0);
   }
 

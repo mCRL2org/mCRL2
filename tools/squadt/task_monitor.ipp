@@ -276,12 +276,16 @@ namespace squadt {
      * \param[in] e the event type of which to execute the handler
      **/
     inline void task_monitor_impl::service_handlers(boost::shared_ptr < task_monitor_impl >& m, const event_type e) {
-      std::pair < handler_map::iterator, handler_map::iterator > p = m->handlers.equal_range(e);
+      std::vector< handler_map::key_type > handlers_to_remove;
       
-      for (handler_map::iterator i = p.first; i != p.second; ++i) {
-        if (i->second()) {
-          m->handlers.erase(i);
+      for (std::pair < handler_map::iterator, handler_map::iterator > r(m->handlers.equal_range(e)); r.first != r.second; ++r.first) {
+        if (r.first->second()) {
+          handlers_to_remove.push_back(r.first->first);
         }
+      }
+      
+      for (std::vector< handler_map::key_type >::const_iterator i = handlers_to_remove.begin(); i != handlers_to_remove.end(); ++i) {
+        m->handlers.erase(*i);
       }
     }
 

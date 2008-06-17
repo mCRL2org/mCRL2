@@ -28,7 +28,7 @@ namespace tipi {
                                              (sub= +(~(set = ' ','\n','(',')','<','>','@',',',';',':','\\','"','/','[',']','?','.','='))))))) {
 
       if (matches.size() == 3 && (matches[2].length() != 0)) {
-        m_sub = matches[2];
+        m_sub = matches[2].str();
 
         const char* const* x = &main_type_as_string[0];
 
