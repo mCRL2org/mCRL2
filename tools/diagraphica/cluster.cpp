@@ -246,7 +246,10 @@ Cluster* Cluster::getChild( const int &idx )
 int Cluster::getSizeNodes()
 // ------------------------
 {
-    return nodes.size();
+    if (this != NULL)
+      {return nodes.size();}
+    else
+      {return 0;}
 }
 
 
