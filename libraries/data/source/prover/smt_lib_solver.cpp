@@ -12,8 +12,8 @@
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/utilities/utilities.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
@@ -51,7 +51,7 @@ using namespace std;
           } else {
             v_sort = gsGetSort(v_variable);
             v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort, 0);
-            v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+            v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%d", v_sort_number);
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
             free(v_sort_string);
@@ -83,7 +83,7 @@ using namespace std;
           v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
+          v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
           free(v_operator_string);
@@ -114,7 +114,7 @@ using namespace std;
                 f_operators_extrafuns = f_operators_extrafuns + " Real";
               } else {
                 v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain_elt, 0);
-                v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+                v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
                 sprintf(v_sort_string, "sort%d", v_sort_number);
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
                 free(v_sort_string);
@@ -137,7 +137,7 @@ using namespace std;
         char* v_sort_string;
 
         v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) gsMakeSortIdBool());
-        v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+        v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
         sprintf(v_sort_string, "sort%d", v_sort_number);
         f_extrapreds = "  :extrapreds ((bool2pred ";
         f_extrapreds = f_extrapreds + v_sort_string + ")";
@@ -166,7 +166,7 @@ using namespace std;
           v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
           v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
-          v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+          v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
           f_extrasorts = f_extrasorts + v_sort_string;
           free(v_sort_string);
@@ -193,7 +193,7 @@ using namespace std;
           v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
           v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
-          v_sort_string = (char*) malloc((number_of_digits(v_sort_number) + 5) * sizeof(char));
+          v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
           v_sort_original_id = f_sort_info.get_sort_id(v_sort);
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
@@ -221,7 +221,7 @@ using namespace std;
           v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
+          v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
           v_operator_original_id = gsATermAppl2String(ATAgetArgument(v_operator, 0));
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
@@ -524,7 +524,7 @@ using namespace std;
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
-      v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
+      v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
       sprintf(v_operator_string, "op%d", v_operator_number);
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
@@ -632,7 +632,7 @@ using namespace std;
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
-      v_operator_string = (char*) malloc((number_of_digits(v_operator_number) + 3) * sizeof(char));
+      v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
       sprintf(v_operator_string, "op%d", v_operator_number);
       f_formula = f_formula + v_operator_string;
       free(v_operator_string);

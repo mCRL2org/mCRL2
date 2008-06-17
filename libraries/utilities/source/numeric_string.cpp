@@ -97,11 +97,11 @@ namespace mcrl2 {
       int NrOfChars(const int n)
       {
         if (n > 0)
-          return (int) ceil(log10((double) n));
+          return (int) floor(log10((double) n)) + 1;
         else if (n == 0)
           return 1;
         else //n < 0
-          return (int) ceil(log10((double) abs(n))) + 1;
+          return (int) floor(log10((double) abs(n))) + 2;
       }
 
   }

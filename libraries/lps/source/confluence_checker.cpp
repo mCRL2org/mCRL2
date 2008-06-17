@@ -14,6 +14,7 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/exception.h"
@@ -257,7 +258,7 @@ using namespace mcrl2::core::detail;
       char* v_file_name_suffix;
 
       if (f_dot_file_name != 0) {
-        v_file_name_suffix = (char*) malloc((number_of_digits(a_summand_number_1) + number_of_digits(a_summand_number_2) + 7) * sizeof(char));
+        v_file_name_suffix = (char*) malloc((NrOfChars(a_summand_number_1) + NrOfChars(a_summand_number_2) + 7) * sizeof(char));
         sprintf(v_file_name_suffix, "-%d-%d.dot", a_summand_number_1, a_summand_number_2);
         v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
         strcpy(v_file_name, f_dot_file_name);

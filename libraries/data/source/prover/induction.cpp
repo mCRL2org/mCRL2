@@ -10,7 +10,7 @@
 
 #include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/utilities/utilities.h"
+#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -96,7 +96,7 @@ using namespace mcrl2::core::detail;
       ATermAppl v_result;
 
       do {
-        v_dummy_string = (char*) malloc((number_of_digits(f_fresh_dummy_number) + 6) * sizeof(char));
+        v_dummy_string = (char*) malloc((NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
         sprintf(v_dummy_string, "dummy%d", f_fresh_dummy_number);
         v_dummy_name = gsString2ATermAppl(v_dummy_string);
         v_result = gsMakeDataVarId(v_dummy_name, a_sort);
