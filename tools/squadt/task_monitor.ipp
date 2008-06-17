@@ -276,15 +276,16 @@ namespace squadt {
      * \param[in] e the event type of which to execute the handler
      **/
     inline void task_monitor_impl::service_handlers(boost::shared_ptr < task_monitor_impl >& m, const event_type e) {
-      std::vector< handler_map::key_type > handlers_to_remove;
+      std::vector< handler_map::iterator > handlers_to_remove;
       
       for (std::pair < handler_map::iterator, handler_map::iterator > r(m->handlers.equal_range(e)); r.first != r.second; ++r.first) {
         if (r.first->second()) {
-          handlers_to_remove.push_back(r.first->first);
+          handlers_to_remove.push_back(r.first);
         }
       }
       
-      for (std::vector< handler_map::key_type >::const_iterator i = handlers_to_remove.begin(); i != handlers_to_remove.end(); ++i) {
+      // works because iterators of std::multimap are not invalidated by std::multimap::erase()
+      for (std::vector< handler_map::iterator >::const_iterator i = handlers_to_remove.begin(); i != handlers_to_remove.end(); ++i) {
         m->handlers.erase(*i);
       }
     }

@@ -74,7 +74,6 @@ class event_helper : public wxEvtHandler, public wxClientData {
 
 template <>
 void event_helper< tipi::layout::elements::button, wxButton >::export_wx_changes(wxCommandEvent& e) {
-assert(false);
   tipi_element.activate();
 }
 
