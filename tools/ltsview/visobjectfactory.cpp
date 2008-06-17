@@ -90,15 +90,15 @@ void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
       numColours = numColours << 1;
     }
     
-    GLubyte texture[numColours][4];
+    GLubyte* texture = (GLubyte*)malloc(4*numColours*sizeof(GLubyte));
 
     for(int i = 0; i < numColours; ++i)
     {
       int j = i % colours.size();
-      texture[i][0] = colours[j].r;
-      texture[i][1] = colours[j].g;
-      texture[i][2] = colours[j].b;
-      texture[i][3] = 255; // alpha value
+      texture[4*i]   = colours[j].r;
+      texture[4*i+1] = colours[j].g;
+      texture[4*i+2] = colours[j].b;
+      texture[4*i+3] = 255; // alpha value
     }
 
     glBindTexture(GL_TEXTURE_1D, texName); 
@@ -109,6 +109,7 @@ void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
 
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, numColours, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, texture);
+    free(texture);
   }
   else
   {
