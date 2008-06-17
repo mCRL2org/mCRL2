@@ -1606,7 +1606,13 @@ static ATermAppl fresh_name(char const* name)
   }
 
   for( ; (existsString(str->s)) ; i++)
-    { snprintf(str->s,STRINGLENGTH,"%s%d",name,i); }
+  { if (i==0)
+    { snprintf(str->s,STRINGLENGTH,"%s",name); 
+    }
+    else
+    { snprintf(str->s,STRINGLENGTH,"%s%d",name,i); 
+    }
+  }
   /* check that name does not already exist, otherwise,
      add some suffix and check again */
   ATtablePut(freshstringIndices,stringterm,(ATerm)ATmakeInt(i));
@@ -8112,7 +8118,16 @@ static ATermAppl generateLPEmCRLterm(
                               canterminate,
                               spec,
                               regular));
-    t3=make_parameters_and_sum_variables_unique(t3); 
+    long n=objectIndex(ATAgetArgument(t,0)); 
+    if ((objectdata[n].processstatus==GNF)||
+        (objectdata[n].processstatus==pCRL)||
+        (objectdata[n].processstatus==GNFalpha)||
+        (objectdata[n].processstatus==multiAction))
+    { t3=make_parameters_and_sum_variables_unique(t3,ATSgetArgument(objectdata[n].objectname,0)); 
+    }
+    else
+    { t3=make_parameters_and_sum_variables_unique(t3);
+    }
     return t3;
   }
   
@@ -8271,7 +8286,6 @@ static ATermAppl generateLPEmCRL(
   { ATermAppl t3=generateLPEpCRL(procIdDecl,
         (canterminate&&objectdata[n].canterminate),objectdata[n].containstime,spec,regular);
     t3=replaceArgumentsByAssignmentsIPS(t3); 
-    t3=make_parameters_and_sum_variables_unique(t3,ATSgetArgument(objectdata[n].objectname,0));
     return t3;
   }
   /* process is a mCRLdone ATerm */
@@ -8279,9 +8293,10 @@ static ATermAppl generateLPEmCRL(
               (objectdata[n].processstatus==mCRLlin)||
               (objectdata[n].processstatus==mCRL))
   { objectdata[n].processstatus=mCRLlin;
-    return generateLPEmCRLterm(objectdata[n].processbody,
-             (canterminate&&objectdata[n].canterminate),spec,
-             regular); 
+    ATermAppl t3=generateLPEmCRLterm(objectdata[n].processbody,
+                    (canterminate&&objectdata[n].canterminate),spec,
+                     regular); 
+    return t3;
   }
 
   gsErrorMsg("laststatus: %d\n",objectdata[n].processstatus);
@@ -9070,7 +9085,6 @@ static ATermAppl transform(
   { gsMessage("Warning: specification contains time due to translating c->p to c->p<>delta@0. Use SQuADT option `Add delta summands' or command line option `-D' to suppress.\n");
   }
   pcrlprocesslist=collectPcrlProcesses(init);
-
   if (pcrlprocesslist==ATempty) 
   { gsErrorMsg("there are no pCRL processes to be linearized\n"); 
     // Note that this can occur with a specification 
