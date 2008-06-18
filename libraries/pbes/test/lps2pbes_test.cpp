@@ -144,6 +144,10 @@ void test_lps2pbes2()
   pbes<> p;
   bool timed = false;
 
+  FORMULA = "mu X. !!X";
+  p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
+  BOOST_CHECK(p.is_well_typed());
+
   FORMULA = "nu X. ([true]X && <true>true)";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());

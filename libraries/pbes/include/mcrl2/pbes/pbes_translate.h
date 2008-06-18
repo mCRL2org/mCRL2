@@ -443,7 +443,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_false(f)) {
           result = true_();
         } else if (s::is_not(f)) {
-	  	    result = s::arg(f);
+	  	    result = RHS(f0, s::arg(f), lps, T, context);
         } else if (s::is_and(f)) {
 	  	    result = or_(RHS(f0, s::not_(s::left(f)), lps, T, context), RHS(f0, s::not_(s::right(f)), lps, T, context));
         } else if (s::is_or(f)) {
@@ -825,7 +825,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_false(f)) {
           result = true_();
         } else if (s::is_not(f)) {
-	  	    result = s::arg(f);
+          result = RHS(f0, s::arg(f), lps, context);
         } else if (s::is_and(f)) {
 	  	    result = or_(RHS(f0, s::not_(s::left(f)), lps, context), RHS(f0, s::not_(s::right(f)), lps, context));
         } else if (s::is_or(f)) {
