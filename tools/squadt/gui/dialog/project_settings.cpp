@@ -346,16 +346,16 @@ namespace squadt {
        * @param p the parent window
        * @param s path of the project store
        **/
-      add_to_project::add_to_project(wxWindow* p) : dialog::project(p, wxT("Select the file to add...")) {
+      add_to_project::add_to_project(wxWindow* p, std::string const& directory) : dialog::project(p, wxT("Select the file to add...")) {
 
-        build();
+        build(directory);
 
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::add_to_project::on_selection_changed));
         Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::add_to_project::on_name_updated));
         Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::add_to_project::on_button_clicked));
       }
 
-      void add_to_project::build() {
+      void add_to_project::build(std::string const& directory) {
         wxBoxSizer*       s = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       t = new wxBoxSizer(wxHORIZONTAL);
 
@@ -365,7 +365,7 @@ namespace squadt {
         t->AddSpacer(5);
         t->Add(name, 1, wxEXPAND);
 
-        file_selector = new wxGenericDirCtrl(main_panel, wxID_ANY, default_directory,
+        file_selector = new wxGenericDirCtrl(main_panel, wxID_ANY, wxString(directory.c_str(), wxConvLocal),
                         wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER);
 
         cannot_add = new wxBoxSizer(wxHORIZONTAL);

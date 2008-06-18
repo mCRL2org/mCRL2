@@ -26,16 +26,20 @@ namespace transport {
 
       private:
 
+        boost::shared_ptr< socket_scheduler > scheduler;
+
         /** \brief The socket listener */
-        boost::asio::ip::tcp::acceptor      acceptor;
+        boost::asio::ip::tcp::acceptor        acceptor;
 
         /** \brief For mutual exclusive event handling */
-        boost::asio::strand                 dispatcher;
+        boost::asio::strand                   dispatcher;
 
       private:
 
         /** \brief Handler for incoming socket connections */
-        void handle_accept(const boost::system::error_code&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
+        void handle_accept(const boost::system::error_code&,
+                boost::shared_ptr< transceiver::socket_transceiver >,
+                boost::shared_ptr< basic_listener >);
 
       public:
 
@@ -43,21 +47,18 @@ namespace transport {
         socket_listener(boost::shared_ptr < transport::transporter_impl > const&, boost::asio::ip::address const&, short int const& = 0);
 
         /** \brief Activate the listener */
-        void activate(basic_listener::ptr);
+        void activate(boost::shared_ptr< basic_listener >);
 
         /** \brief Schedule shutdown of listener */
-        void shutdown();
+        void shutdown() {
+          acceptor.close();
+        }
 
         /** \brief Destructor */
-        virtual inline ~socket_listener();
+        virtual ~socket_listener() {
+          shutdown();
+        }
     };
-
-    inline socket_listener::~socket_listener() {
-    }
-
-    inline void socket_listener::shutdown() {
-      acceptor.close();
-    }
   }
 }
 

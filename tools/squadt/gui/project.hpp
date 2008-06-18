@@ -88,7 +88,7 @@ namespace squadt {
         /** \brief The view on progress report regions for tools */
         wxScrolledWindow*                     process_display_view;
 
-        /** \brief The location (incomplete path) to project directory the project name is the basename */
+        /** \brief The project manager object (backend) */
         boost::shared_ptr < project_manager > manager;
 
         /** \brief Instantiation of a builder for this project */

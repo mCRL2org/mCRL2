@@ -42,50 +42,38 @@ namespace transport {
     class socket_transceiver : public basic_transceiver {
       friend class transport::listener::socket_listener;
   
-      public:
-
-        /** \brief Convenience type to hide the boost shared pointer implementation */
-        typedef boost::shared_ptr < socket_transceiver >  ptr;
-
-        /** \brief Convenience type to hide the boost shared pointer implementation */
-        typedef boost::shared_ptr < socket_transceiver >  sptr;
-
       private:
 
-        /** \brief Host name resolver */
-        static boost::asio::ip::tcp::resolver   resolver;
-
         /** \brief Scheduler for asynchronous socket communication */
-        static socket_scheduler                 scheduler;
+        static boost::shared_ptr< socket_scheduler > get_scheduler();
 
-        /** \brief Default port for socket connections */
-        static short int                        default_port;
-
-        /** \brief Size of the input buffer */
-        static unsigned int                     input_buffer_size;
+        static const short int default_port;
 
       private:
 
         /** \brief The input buffer */
-        boost::shared_array < char >           buffer;
+        boost::shared_array < char >                 m_buffer;
+
+        /** \brief Scheduler for socket operations */
+        boost::shared_ptr< socket_scheduler >        m_scheduler;
 
         /** \brief The local endpoint of a connection */
-        boost::asio::ip::tcp::socket           socket;
+        boost::asio::ip::tcp::socket                 m_socket;
  
         /** \brief Used to make operations: read, write and disconnect mutually exclusive */
-        boost::mutex                           operation_lock;
-
-        /** \brief Used to make sure that an object is not deleted when its methods are still executing */
-        boost::weak_ptr < socket_transceiver > this_ptr;
+        boost::mutex                                 m_operation_lock;
 
         /** \brief Used to make it possible to wait for send operations to complete */
-        boost::mutex                           send_lock;
+        boost::mutex                                 m_send_lock;
 
         /** \brief Used to make it possible to wait for send operations to complete */
-        boost::condition                       send_monitor;
+        boost::condition                             m_send_monitor;
 
         /** \brief The amount of send operations that are currently in progress */
-        unsigned int                           send_count;
+        unsigned int                                 m_send_count;
+
+        /** \brief Used to make sure that an object is not deleted when its methods are still executing */
+        boost::weak_ptr < socket_transceiver >       m_this_ptr;
 
       private:
 
@@ -122,7 +110,10 @@ namespace transport {
       public:
 
         /** \brief Factory function */
-        static inline socket_transceiver::ptr create(boost::shared_ptr < transporter_impl > const&);
+        static inline boost::shared_ptr< socket_transceiver > create(boost::shared_ptr < transporter_impl > const&);
+
+        /** \brief Returns an object with the local hosts name and addresses */
+        static boost::asio::ip::address resolve(std::string const&);
 
         /** \brief Returns an object with the local hosts name and addresses */
         static std::string get_local_host();
@@ -134,10 +125,10 @@ namespace transport {
         void send(std::istream&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const std::string&, short int const& = default_port);
+        void connect(const std::string&, short int const&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const boost::asio::ip::address& = boost::asio::ip::address_v4::any(), short int const& = default_port);
+        void connect(const boost::asio::ip::address& = boost::asio::ip::address_v4::any(), short int const& = 0);
 
         /** \brief Terminate connection with peer */
         void disconnect(boost::shared_ptr < basic_transceiver > const&);
@@ -152,19 +143,17 @@ namespace transport {
     /**
      * @param o a transporter to which to deliver data
      **/
-    inline socket_transceiver::socket_transceiver(boost::shared_ptr < transporter_impl > const& o) : basic_transceiver(o),
-                buffer(new char[input_buffer_size + 1]), socket(scheduler.io_service), send_count(0) {
-
-      buffer[input_buffer_size] = '\0';
+    inline socket_transceiver::socket_transceiver(boost::shared_ptr < transporter_impl > const& o) :
+            basic_transceiver(o), m_scheduler(get_scheduler()), m_socket(m_scheduler->io_service), m_send_count(0) {
     }
 
     /**
      * @param o a transporter to which to deliver data
      **/
-    inline boost::shared_ptr < socket_transceiver > socket_transceiver::create(boost::shared_ptr < transporter_impl > const& o) {
+    inline boost::shared_ptr < socket_transceiver > socket_transceiver::create(boost::shared_ptr< transporter_impl > const& o) {
       boost::shared_ptr < socket_transceiver > t(new socket_transceiver(o));
 
-      t->this_ptr = boost::weak_ptr < socket_transceiver >(t);
+      t->m_this_ptr = boost::weak_ptr < socket_transceiver >(t);
 
       return (t);
     }
@@ -173,42 +162,42 @@ namespace transport {
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::connect(const boost::asio::ip::address& a, short int const& p) {
-      connect(this_ptr.lock(), a, p);
+      connect(m_this_ptr.lock(), a, p);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::connect(const std::string& a, short int const& p) {
-      connect(this_ptr.lock(), a, p);
+      connect(m_this_ptr.lock(), a, p);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::send(const std::string& d) {
-      send(this_ptr.lock(), d);
+      send(m_this_ptr.lock(), d);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::send(std::istream& d) {
-      send(this_ptr.lock(), d);
+      send(m_this_ptr.lock(), d);
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::activate() {
-      activate(this_ptr.lock());
+      activate(m_this_ptr.lock());
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
     inline void socket_transceiver::disconnect(boost::shared_ptr < basic_transceiver > const& p) {
-      disconnect(this_ptr, p);
+      disconnect(m_this_ptr, p);
     }
   }
 }

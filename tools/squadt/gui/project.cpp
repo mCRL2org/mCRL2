@@ -363,7 +363,7 @@ namespace squadt {
     }
 
     void project::add_existing_file() {
-      dialog::add_to_project dialog(this);
+      dialog::add_to_project dialog(this, manager->get_project_store().string());
 
       if (dialog.ShowModal()) {
         /* File does not exist in project directory */
@@ -372,7 +372,8 @@ namespace squadt {
                               boost::filesystem::path(dialog.get_destination()).leaf()).get();
 
         /* Add to the new project */
-        wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(), wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
+        wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
+                wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
 
         object_view->SetItemData(i, new tool_data(*this, *p->get_output_iterators().begin()));
         object_view->EnsureVisible(i);

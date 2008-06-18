@@ -167,7 +167,7 @@ namespace squadt {
         private:
 
           /** \brief Helper function that places the widgets */
-          void build();
+          void build(std::string const&);
 
           /** \brief Handler for the event that one of the buttons is clicked */
           void on_button_clicked(wxCommandEvent&);
@@ -181,7 +181,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          add_to_project(wxWindow*);
+          add_to_project(wxWindow*, std::string const&);
 
           /** \brief Gets the name of the project */
           std::string get_name() const;

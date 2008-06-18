@@ -25,7 +25,7 @@ namespace transport {
      * @param p the port to listen on
      **/
     socket_listener::socket_listener(boost::shared_ptr < transport::transporter_impl > const& m, const boost::asio::ip::address& a, short int const& p) :
-      basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service)  {
+      basic_listener(m), scheduler(socket_transceiver::get_scheduler()), acceptor(scheduler->io_service), dispatcher(scheduler->io_service)  {
 
       using namespace boost;
       using namespace boost::asio;
@@ -47,14 +47,14 @@ namespace transport {
     /**
      * @param l a shared pointer to the listerner
      **/
-    void socket_listener::activate(basic_listener::ptr l) {
+    void socket_listener::activate(boost::shared_ptr< basic_listener > l) {
       /* Create a new socket transceiver that is not yet connected to the transporter */
       boost::shared_ptr < socket_transceiver > t(socket_transceiver::create(owner.lock()));
 
-      acceptor.async_accept(t->socket, bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l));
+      acceptor.async_accept(t->m_socket, bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l));
 
       /* Make sure the scheduler is running */
-      socket_transceiver::scheduler.run();
+      scheduler->run();
     }
 
     /**
@@ -62,12 +62,12 @@ namespace transport {
      * @param t the transceiver that will be the end point of this side of a new connection
      * @param l a shared pointer to the listerner
      **/
-    void socket_listener::handle_accept(const boost::system::error_code& e, transceiver::socket_transceiver::ptr t, basic_listener::ptr l) {
+    void socket_listener::handle_accept(const boost::system::error_code& e, boost::shared_ptr< transceiver::socket_transceiver > t, boost::shared_ptr< basic_listener > l) {
       if (!e) {
-        transceiver::socket_transceiver::ptr new_t(socket_transceiver::create(owner.lock()));
+        boost::shared_ptr< transceiver::socket_transceiver > new_t(socket_transceiver::create(owner.lock()));
 
         /* Listen for new connections */
-        acceptor.async_accept(new_t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, new_t, l)));
+        acceptor.async_accept(new_t->m_socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, new_t, l)));
 
         socket_listener::associate(t);
 
@@ -75,7 +75,7 @@ namespace transport {
       }
       else if (e == boost::asio::error::connection_aborted) {
         /* Listen for new connections */
-        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l)));
+        acceptor.async_accept(t->m_socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, boost::asio::placeholders::error, t, l)));
       }
       else if (e == boost::asio::error::operation_aborted) {
         return;
@@ -88,7 +88,7 @@ namespace transport {
       }
 
       /* Make sure the scheduler is running */
-      socket_transceiver::scheduler.run();
+      scheduler->run();
     }
   }
   /// \endcond

@@ -224,7 +224,7 @@ namespace mcrl2 {
       void tool_interface::send_report(const tipi::report::type m, std::string const& d) {
         m_communicator->send_status_report(m, d);
       }
-  
+
       /**
        * \param[in] d the display object that contains the data to communicate
        **/
@@ -234,19 +234,19 @@ namespace mcrl2 {
 
         m_communicator->send_display_layout(dsp);
       }
-  
+
       void tool_interface::send_clear_display() {
         m_communicator->send_clear_display();
       }
-  
+
       void tool_interface::send_hide_display() {
         boost::shared_ptr < tipi::layout::tool_display > p(new tipi::layout::tool_display());
-  
+
         p->show(false);
-  
+
         m_communicator->send_display_layout(p);
       }
-  
+
       /// \cond INTERNAL_DOCS
       static bool initialise() {
         tipi::datatype::enumeration< RewriteStrategy > strategy_enumeration;

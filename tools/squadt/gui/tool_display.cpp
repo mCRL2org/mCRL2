@@ -534,8 +534,6 @@ namespace squadt {
 
           s->Show(display, false, true);
           s->Detach(display);
-          s->Layout();
-          display->GetParent()->Refresh();
 
           display->toggle_scrollbar_helper();
 
@@ -561,6 +559,10 @@ namespace squadt {
       size_event.SetEventObject(GetParent());
 
       GetParent()->GetParent()->ProcessEvent(size_event);
+
+      GetParent()->Layout();
+
+      GetParent()->Refresh();
     }
 
     /**
@@ -616,12 +618,10 @@ namespace squadt {
             }
            
             Show(true);
-           
-            GetParent()->Layout();
-           
-            /* Toggle scrollbar availability on demand */
-            toggle_scrollbar_helper();
           }
+           
+          /* Toggle scrollbar availability on demand */
+          toggle_scrollbar_helper();
         }
         catch (...) {
           /* Consider every exception a failure to correctly read the layout, and bail */
@@ -644,8 +644,6 @@ namespace squadt {
           m_mediator->execute_handlers(i, false);
         }
        
-        GetParent()->Layout();
-
         /* Toggle scrollbar availability on demand */
         toggle_scrollbar_helper();
       }
@@ -665,8 +663,6 @@ namespace squadt {
         m_log->SetSize(-1, 40);
 
         sizer->Add(m_log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
-
-        GetParent()->Layout();
 
         /* Toggle scrollbar availability on demand */
         toggle_scrollbar_helper();

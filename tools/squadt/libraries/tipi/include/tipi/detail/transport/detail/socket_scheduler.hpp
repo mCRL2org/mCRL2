@@ -35,61 +35,55 @@ namespace transport {
       friend class listener::socket_listener;
 
       private:
+
         /** \brief The current state of the scheduler */
-        bool                                active;
+        bool                                         active;
 
         /** \brief The io_service */
-        boost::asio::io_service             io_service;
+        boost::asio::io_service                      io_service;
 
         /** \brief The thread in which the scheduling takes place */
-        boost::shared_ptr < boost::thread > thread;
+        boost::shared_ptr< boost::thread >           thread;
+
+      private:
 
         /** \brief Runs until no more tasks are registered, then resets */
-        void task();
+        void task() {
+          io_service.run();
+          io_service.reset();
+
+          active = false;
+        }
 
       public:
+
         /** \brief Constructor */
-        inline socket_scheduler();
+        inline socket_scheduler() : active(false) {
+        }
 
         /** \brief Run the io_service */
-        inline void run();
+        inline void run() {
+          if (!active) {
+            active = true;
+         
+            thread.reset(new boost::thread(boost::bind(&socket_scheduler::task, this)));
+          }
+        }
 
         /** \brief Stop the io_service */
-        inline void stop();
+        inline void stop() {
+          if (active) {
+            io_service.stop();
+         
+            thread->join();
+          }
+        }
 
         /** \brief Destructor */
-        inline ~socket_scheduler();
+        inline ~socket_scheduler() {
+          stop();
+        }
     };
-
-    inline socket_scheduler::socket_scheduler() : active(false) {
-    }
-
-    inline void socket_scheduler::task() {
-      io_service.run();
-      io_service.reset();
-
-      active = false;
-    }
-
-    inline void socket_scheduler::run() {
-      if (!active) {
-        active = true;
-
-        thread.reset(new boost::thread(boost::bind(&socket_scheduler::task, this)));
-      }
-    }
-
-    inline void socket_scheduler::stop() {
-      if (active) {
-        io_service.stop();
-
-        thread->join();
-      }
-    }
-
-    inline socket_scheduler::~socket_scheduler() {
-      stop();
-    }
   }
 }
 

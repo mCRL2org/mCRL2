@@ -14,10 +14,10 @@
 
 #include <boost/cstdint.hpp>
 
-#include <tipi/report.hpp>
-#include <tipi/tool_display.hpp>
-#include <tipi/configuration.hpp>
-#include <tipi/tool/capabilities.hpp>
+#include "tipi/report.hpp"
+#include "tipi/tool_display.hpp"
+#include "tipi/configuration.hpp"
+#include "tipi/tool/capabilities.hpp"
 
 #include "mcrl2/utilities/tipi_ext.h"
 
