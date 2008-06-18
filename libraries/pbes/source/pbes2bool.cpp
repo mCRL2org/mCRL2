@@ -45,7 +45,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes2bool.h"
-#include "mcrl2/lps/dataelm.h"
+#include "mcrl2/pbes/data_elimination.h"
 
 //ATERM-specific
 #include "mcrl2/atermpp/substitute.h"
@@ -65,7 +65,6 @@ using atermpp::make_substitution;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using bes::bes_expression;
 

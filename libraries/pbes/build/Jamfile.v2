@@ -11,11 +11,17 @@ project pbes
           <dependency>/libraries//atermpp
        ;
 
+obj pbes_data_elimination.o
+       : source/data_elimination.cpp
+       : <use>/libraries/data//headers
+       ;
+
 mcrl2-library pbes
        : source/pbes_rewrite.cpp
          source/pbes2bool.cpp
          source/gauss.cpp
          source/sort_instantiator.cpp
+         pbes_data_elimination.o
        : <use>/libraries/data//headers
        : <threading>single
        : <library>/libraries//data

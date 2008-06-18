@@ -26,7 +26,7 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/lps/dataelm.h"
+#include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h

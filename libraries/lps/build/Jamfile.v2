@@ -8,10 +8,15 @@ project lps
           <dependency>/site-config//boost_headers
        ;
 
+obj lps_data_elimination.o
+       : source/data_elimination.cpp
+       : <use>/libraries/data//headers
+       ;
+
 mcrl2-library lps
        : source/lin_std.cpp
          source/binary.cpp
-         source/dataelm.cpp
+         lps_data_elimination.o
          source/sumelm.cpp
          source/suminst.cpp
          source/untime.cpp

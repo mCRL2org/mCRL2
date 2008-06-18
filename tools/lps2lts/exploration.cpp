@@ -16,7 +16,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/dataelm.h"
+#include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/data/rewrite.h"

@@ -6,27 +6,24 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libdataelm.cpp
+/// \file data_elimination.cpp
 
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/lps/lin_std.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/core/detail/struct.h"
-#include <mcrl2/pbes/pbes.h>
+#include <mcrl2/core/data_implementation.h>
+#include <mcrl2/core/detail/struct.h>
+#include <mcrl2/core/messaging.h>
+#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/data/data_specification.h>
+#include <mcrl2/data/sort.h>
+#include <mcrl2/data/data_operation.h>
 #include <mcrl2/data/data_variable.h>
+#include <mcrl2/data/data_elimination.h>
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::pbes_expr;
-using namespace mcrl2::pbes_system::accessors;
+
 
 //Prototype
 static bool add_used_sort(ATermAppl expr, ATermIndexedSet s);
@@ -98,34 +95,6 @@ static bool add_used(data_expression_list l, ATermIndexedSet s)
 		b = b || c;
 	}
 	return b;
-}
-
-static bool add_used(propositional_variable_instantiation pvi, ATermIndexedSet s)
-{
-	return add_used(pvi.parameters(),s);
-}
-
-static bool add_used(pbes_expression expr, ATermIndexedSet s)
-{
-	if ( is_data(expr) )
-	{
-		return add_used(val(expr),s);
-	} else if ( is_and(expr) || is_or(expr) )
-	{
-		bool b = add_used(left(expr),s);
-		bool c = add_used(right(expr),s);
-		return b || c;
-	} else if ( is_forall(expr) || is_exists(expr) )
-	{
-		bool b = add_used(make_data_expression_list(var(expr)),s);
-		bool c = add_used(arg(expr),s);
-		return b || c;
-	} else if ( is_propositional_variable_instantiation(expr) )
-	{
-		return add_used(param(expr),s);
-	}
-
-	return false;
 }
 
 //Prototype
@@ -214,36 +183,28 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 	return true;
 }
 
-static ATermTable initialise_used_data(data_specification dspec, bool keep_basis)
+static void add_basis(ATermTable used_data)
 {
-	ATermTable used_data = ATtableCreate(2*(dspec.sorts().size()+dspec.constructors().size()+dspec.mappings().size()),50);
-
-	if ( keep_basis )
+	/* Add sorts/functions that should always be available */
+	data_specification data(implement_data_data_spec(gsMakeEmptyDataSpec()));
+	for (sort_expression_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
 	{
-		/* Add sorts/functions that should always be available */
-		specification basis_spec = mcrl22lps("init delta;");
-		data_specification data = basis_spec.data();
-		for (sort_expression_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
-		{
-			add_used_sort(*i,used_data);
-			add_used(gsMakeOpIdIf(*i),used_data);
-			add_used(gsMakeOpIdEq(*i),used_data);
-			add_used(gsMakeOpIdNeq(*i),used_data);
-		}
-		for (data_operation_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
-		{
-			add_used((ATermAppl) *i,used_data);
-		}
-		for (data_operation_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
-		{
-			add_used((ATermAppl) *i,used_data);
-		}
+		add_used_sort(*i,used_data);
+		add_used(gsMakeOpIdIf(*i),used_data);
+		add_used(gsMakeOpIdEq(*i),used_data);
+		add_used(gsMakeOpIdNeq(*i),used_data);
 	}
-
-	return used_data;
+	for (data_operation_list::iterator i = data.constructors().begin(); i != data.constructors().end(); i++)
+	{
+		add_used((ATermAppl) *i,used_data);
+	}
+	for (data_operation_list::iterator i = data.mappings().begin(); i != data.mappings().end(); i++)
+	{
+		add_used((ATermAppl) *i,used_data);
+	}
 }
 
-data_specification build_reduced_data_spec(data_specification dspec, ATermTable used_data, bool keep_basis)
+static data_specification build_reduced_data_spec(data_specification dspec, ATermTable used_data, bool keep_basis)
 {
 	ATermTable used_sorts = ATtableCreate(2*dspec.sorts().size(),50);
 	data_equation_list eqns = dspec.equations();
@@ -331,119 +292,40 @@ data_specification build_reduced_data_spec(data_specification dspec, ATermTable 
 	return new_data;
 }
 
-specification remove_unused_data(specification spec, bool keep_basis)
+
+data_elimination::data_elimination()
 {
-	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
-
-	linear_process l = spec.process();
-
-	action_label_list::iterator ab = spec.action_labels().begin();
-	action_label_list::iterator ae = spec.action_labels().end();
-	for (; ab != ae; ab++)
-	{
-		sort_expression_list::iterator sb = ab->sorts().begin();
-		sort_expression_list::iterator se = ab->sorts().end();
-		for (; sb != se; sb++)
-		{
-			add_used_sort((ATermAppl) *sb,used_data);
-		}
-	}
-
-	add_used(spec.initial_process().state(),used_data);
-
-	data_variable_list::iterator vb = spec.initial_process().free_variables().begin();
-	data_variable_list::iterator ve = spec.initial_process().free_variables().end();
-	for (; vb != ve; vb++)
-	{
-		add_used_sort((ATermAppl) vb->sort(),used_data);
-	}
-	vb = l.free_variables().begin();
-	ve = l.free_variables().end();
-	for (; vb != ve; vb++)
-	{
-		add_used_sort((ATermAppl) vb->sort(),used_data);
-	}
-
-	summand_list::iterator b = l.summands().begin();
-	summand_list::iterator e = l.summands().end();
-	for (; b != e; b++)
-	{
-		data_variable_list::iterator sb = (*b).summation_variables().begin();
-		data_variable_list::iterator se = (*b).summation_variables().end();
-		for (; sb != se; sb++)
-		{
-			add_used_sort((ATermAppl) sb->sort(),used_data);
-		}
-
-		add_used((ATermAppl) (*b).condition(),used_data);
-
-		if ( !(*b).is_delta() )
-		{
-			action_list::iterator ab = (*b).actions().begin();
-			action_list::iterator ae = (*b).actions().end();
-			for (; ab != ae; ab++)
-			{
-				add_used((*ab).arguments(),used_data);
-			}
-		}
-
-		if ( (*b).has_time() )
-		{
-			add_used((ATermAppl) (*b).time(),used_data);
-		}
-
-		data_assignment_list::iterator nb = (*b).assignments().begin();
-		data_assignment_list::iterator ne = (*b).assignments().end();
-		for (; nb != ne; nb++)
-		{
-			add_used((ATermAppl) (*nb).rhs(),used_data);
-		}
-	}
-
-	specification new_spec = set_data_specification(spec, build_reduced_data_spec(spec.data(),used_data,keep_basis));
-
-	ATtableDestroy(used_data);
-
-	return new_spec;
+  used_data = ATtableCreate(2000,50);
+  keep_basis = false;
 }
 
-pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
+data_elimination::~data_elimination()
 {
-	ATermTable used_data = initialise_used_data(spec.data(),keep_basis);
-
-	add_used(spec.initial_state(),used_data);
-
-	atermpp::set<data_variable>::iterator vb = spec.free_variables().begin();
-	atermpp::set<data_variable>::iterator ve = spec.free_variables().end();
-	for (; vb != ve; vb++)
-	{
-		add_used_sort((ATermAppl) vb->sort(),used_data);
-	}
-
-	atermpp::vector<pbes_equation>::iterator b = spec.equations().begin();
-	atermpp::vector<pbes_equation>::iterator e = spec.equations().end();
-	for (; b != e; b++)
-	{
-		data_variable_list::iterator sb = (*b).variable().parameters().begin();
-		data_variable_list::iterator se = (*b).variable().parameters().end();
-		for (; sb != se; sb++)
-		{
-			add_used_sort((ATermAppl) sb->sort(),used_data);
-		}
-
-		add_used((*b).formula(),used_data);
-	}
-
-	spec.data() = build_reduced_data_spec(spec.data(),used_data,keep_basis);
-
-	ATtableDestroy(used_data);
-
-	return spec;
+  ATtableDestroy(used_data);
 }
 
-ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis) // deprecated
+void data_elimination::keep_sort(sort_expression s)
 {
-	specification spec(ATSpec);
-	spec = remove_unused_data(spec,keep_basis);
-	return (ATermAppl) spec;
+  add_used_sort((ATermAppl) s, used_data);
+}
+
+void data_elimination::keep_function(data_operation op)
+{
+  add_used((ATermAppl) op, used_data);
+}
+
+void data_elimination::keep_standard_data()
+{
+  add_basis(used_data);
+  keep_basis = true;
+}
+
+void data_elimination::keep_data_from_expr(data_expression expr)
+{
+  add_used(expr, used_data);
+}
+
+data_specification data_elimination::apply(data_specification spec)
+{
+  return build_reduced_data_spec(spec,used_data,keep_basis);
 }
