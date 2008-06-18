@@ -2,7 +2,6 @@ project pbes
        : source-location ..
        : requirements
           <include>../include
-          <include>../../lps/include #Cyclic dependency that should be removed
           <dependency>/site-config//boost_headers
           <dependency>/libraries//atermpp
        : usage-requirements
@@ -14,6 +13,7 @@ project pbes
 obj pbes_data_elimination.o
        : source/data_elimination.cpp
        : <use>/libraries/data//headers
+         <use>/libraries/lps//headers
        ;
 
 mcrl2-library pbes
@@ -23,6 +23,8 @@ mcrl2-library pbes
          source/sort_instantiator.cpp
          pbes_data_elimination.o
        : <use>/libraries/data//headers
+         <use>/libraries/lps//headers
        : <threading>single
        : <library>/libraries//data
+         <library>/libraries//lps
        ;
