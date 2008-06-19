@@ -1331,6 +1331,8 @@ static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit){
       Types=ATmakeList1((ATerm)PBType);
     }
     else{
+      // temporarily prohibit overloading here
+      gsErrorMsg("attempt to overload propositional variable %P\n", PBName); return ATfalse;
       // the table context.PBs contains a list of types for each
       // PBES name. We need to check if there is already such a type 
       // in the list. If so -- error, otherwise -- add
