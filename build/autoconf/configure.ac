@@ -424,20 +424,35 @@ if test $with_boost; then
       #include "$with_boost/include/boost/version.hpp"
      ],
      [
-       BOOST_INCLUDE_PATH=$with_boost/include
-       BOOST_LIBRARY_PATH=$with_boost/lib
-       AC_MSG_RESULT(yes)
+       AC_RUN_IFELSE(
+       [
+        #include "$with_boost/include/boost/version.hpp"
+      
+        int main() {
+          return !(103500 <= BOOST_VERSION);
+        }
+       ],
+       [
+        BOOST_INCLUDE_PATH=$with_boost/include
+        BOOST_LIBRARY_PATH=$with_boost/lib
+        AC_MSG_RESULT(yes)
+       ],
+       [
+         AC_MSG_RESULT(not usable)
+         USE_BOOST=builtin
+       ],
+       [
+         AC_MSG_RESULT(no (safe default))
+         USE_BOOST=builtin
+       ]
+       )
      ],
      [
-       AC_MSG_RESULT(no)
+       AC_MSG_RESULT(no (or not usable))
        USE_BOOST=builtin
      ])
 else 
-  AC_CHECK_HEADER(boost/version.hpp,
-           [BOOST_INCLUDE_PATH=default
-            BOOST_LIBRARY_PATH=], [], [])
-  
-  USE_BOOST=system
+  USE_BOOST=builtin
 fi
 
 AC_SUBST([BOOST_INCLUDE_PATH],[])
