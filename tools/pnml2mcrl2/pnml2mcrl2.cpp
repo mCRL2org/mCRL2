@@ -1450,7 +1450,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ReturnList = ATinsert(ReturnList, (ATerm)Type);
       Places = ATgetNext(Places);
     }
-    return ReturnList;
+    return ATreverse(ReturnList);
   }
 
   //==================================================
@@ -1670,15 +1670,16 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       // ***** end changed by Yarick.
     }
 
+    ATermList Place_procs=ATtableKeys(context.place_process_name);
     ProcessList = 
       ATinsert(ProcessList, 
 	       (ATerm)gsMakeProcEqn(ATmakeList0(),
 				    gsMakeProcVarId(gsString2ATermAppl("PetriNet"),
-						    pn2gsPlacesParameterTypes(ATtableKeys(context.place_process_name))), 
-				    pn2gsPlacesParameters(ATtableKeys(context.place_process_name)), 
+						    pn2gsPlacesParameterTypes(Place_procs)), 
+				    pn2gsPlacesParameters(Place_procs), 
 				    Process)
 	       );
-    gsDebugMsg("Process PetriNet created.\n");
+    gsDebugMsg("Process PetriNet added (the whole list: %T).\n",ProcessList);
 
     // reminder: NetID == "Net_'ID of the Petri net'"
     // the Net_ is preceded to the ID of the Petri net to prevent that two processes would have the same name!
@@ -1686,9 +1687,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // NetID = PetriNet("...")
     // "..." is the initial marking of all places
 
-    Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_process_name)));
+    Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(Place_procs));
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
-    gsDebugMsg("Process %T created.\n", NetID);
+    gsDebugMsg("Process %T added (the whole list: %T).\n", NetID, ProcessList);
 
     //Now reverse the whole thing
     return ATreverse(ProcessList);
