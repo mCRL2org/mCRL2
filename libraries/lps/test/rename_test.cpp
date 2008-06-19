@@ -17,7 +17,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
-#include "mcrl2/pbes/lps2pbes.h"
 
 using namespace std;
 using namespace atermpp;
