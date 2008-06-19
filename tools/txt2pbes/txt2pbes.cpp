@@ -45,10 +45,7 @@ t_tool_options parse_command_line(int ac, char **av)
     "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
     "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
     "The textual description should adhere to the BNF syntax description at "
-    "<http://mcrl2.org/wiki/index.php/PBES_syntax>.",
-    "It is not possible to use overloading of propositional variables, "
-    "i.e. it is not possible to declare two propositional variables with the same name, "
-    "but with a different type."
+    "<http://mcrl2.org/wiki/index.php/PBES_syntax>."
   );
   command_line_parser parser(clinterface, ac, av);
   t_tool_options tool_options;
