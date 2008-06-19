@@ -16,7 +16,7 @@ test-suite pbes
     :
       [ run constelm_test.cpp ]
       [ run remove_parameters_test.cpp ]
-      [ run pbes_solve_test.cpp ]
+      #[ run pbes_solve_test.cpp ]
       [ run parelm_test.cpp ]
       [ run lps2pbes_test.cpp ]
       [ run pbes_test.cpp ]
