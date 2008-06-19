@@ -2195,19 +2195,11 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     gsDebugMsg("Conversion Succesful!");
     gsDebugMsg("\n\n====================\n\n");
 
-    ATermAppl Result=ATAgetArgument(Spec, 4); // prelude
-    if(ATisEqual(Result,Appl0)){
-      Result=gsMakeProcSpec(gsMakeEmptyDataSpec(),
+    ATermAppl Result=gsMakeProcSpec(Prelude,
 			    gsMakeActSpec(Actions),
 			    gsMakeProcEqnSpec(ProcEqns),
 			    gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
 			    );
-    }
-    else {
-      Result=ATsetArgument(Result,(ATerm)gsMakeActSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,1),0),Actions)),1);
-      Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(ATconcat(ATLgetArgument(ATAgetArgument(Result,2),0),ProcEqns)),2);
-      Result=ATsetArgument(Result,(ATerm)gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0())),3);
-    }
 
     // ***** Changed by Yarick 29.05.2006 to add error action ****
 
