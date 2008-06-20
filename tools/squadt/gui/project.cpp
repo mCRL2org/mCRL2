@@ -647,7 +647,7 @@ namespace squadt {
     void project::update_after_configuration(wxTreeItemId s, boost::shared_ptr< processor > tp, bool r) {
       if (0 < tp->number_of_outputs()) {
         /* Add the processor to the project */
-        if (add_outputs_as_objects(s, tp)) {
+        if (synchronise_outputs_with_objects(s, tp)) {
           processor::monitor& m = *(tp->get_monitor());
 
           /* Schedule GUI update */
@@ -673,7 +673,7 @@ namespace squadt {
      *
      * \return whether or no conflicts were found
      **/
-    bool project::add_outputs_as_objects(wxTreeItemId s, boost::shared_ptr< processor > tp) {
+    bool project::synchronise_outputs_with_objects(wxTreeItemId s, boost::shared_ptr< processor > tp) {
       if (object_view != 0) {
         std::set < std::string > existing;
        
@@ -687,8 +687,7 @@ namespace squadt {
             existing.insert(std::string(object_view->GetItemText(j).fn_str()));
           }
           else {
-            /* Remove from view */
-            object_view->DeleteChildren(j);
+            remove_from_object_view(j);
           }
         }
        
@@ -716,9 +715,23 @@ namespace squadt {
         else {
           boost::iterator_range< processor::output_object_iterator > output_range(tp->get_output_iterators());
 
+          /// Add new outputs as objects to view
           BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-            if (existing.find(boost::filesystem::path(object->get_location()).leaf()) == existing.end()) {
+            std::set< std::string >::const_iterator existing_object(existing.find(boost::filesystem::path(object->get_location()).leaf()));
+
+            if (existing_object == existing.end()) {
               add_to_object_view(s, object);
+            }
+            else {
+              existing.erase(existing_object);
+            }
+          }
+
+          /// Remove obsolete objects from view
+          for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
+            if (existing.find(std::string(object_view->GetItemText(j).fn_str())) != existing.end()) {
+              /* Remove from view */
+              remove_from_object_view(j);
             }
           }
         }
@@ -733,15 +746,39 @@ namespace squadt {
       wxMessageDialog(this, s, wxT("Warning: file overwritten"), wxOK).ShowModal();
     }
 
+    void project::remove_from_object_view(wxTreeItemId& s) {
+      struct trampoline {
+        static void remove_from_view(wxTreeCtrl* view, wxTreeItemId id) {
+          view->Delete(id);
+        }
+      };
+
+      gui_builder.schedule_update(boost::bind(&trampoline::remove_from_view, object_view, s));
+    }
+
     /**
      * \param[in] s the tree item to connect to
      * \param[in] t the object to associate the new item with
      **/
     void project::add_to_object_view(wxTreeItemId& s, boost::shared_ptr< processor::object_descriptor > t) {
-      wxTreeItemId item = object_view->AppendItem(s, wxString(boost::filesystem::path(t->get_location()).leaf().c_str(), wxConvLocal), t->get_status());
+      struct trampoline {
+        static void add_to_view(wxTreeCtrl* view, wxTreeItemId id, boost::shared_ptr< processor::object_descriptor > t) {
+          boost::shared_ptr< processor > owner(t->get_generator());
 
-      object_view->SetItemData(item, new tool_data(*this, t));
-      object_view->Expand(s);
+          if (owner.get() != 0) {
+            wxTreeItemId item = view->AppendItem(id,
+                   wxString(boost::filesystem::path(t->get_location()).leaf().c_str(), wxConvLocal), t->get_status());
+           
+            view->SetItemData(item, new tool_data(*static_cast< squadt::GUI::project* > (view->GetParent()), t));
+
+            if (!view->IsExpanded(id)) {
+              view->Expand(id);
+            }
+          }
+        }
+      };
+
+      gui_builder.schedule_update(boost::bind(&trampoline::add_to_view, object_view, s, t));
     }
 
     /**

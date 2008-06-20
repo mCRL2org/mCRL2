@@ -130,10 +130,13 @@ namespace squadt {
         void update_after_configuration(wxTreeItemId, boost::shared_ptr< processor >, bool);
 
         /** \brief Adds the outputs produced by a processor as objects to the object view */
-        bool add_outputs_as_objects(wxTreeItemId, boost::shared_ptr< processor >);
+        bool synchronise_outputs_with_objects(wxTreeItemId, boost::shared_ptr< processor >);
 
         /** \brief Adds a single object to the object view */
         void add_to_object_view(wxTreeItemId& s, boost::shared_ptr< processor::object_descriptor >);
+
+        /** \brief Removes a single object from the object view */
+        void remove_from_object_view(wxTreeItemId& s);
 
         /** \brief Add a new tool display to the process_display_view */
         GUI::tool_display* install_tool_display(boost::shared_ptr < processor::monitor >, std::string const&);
