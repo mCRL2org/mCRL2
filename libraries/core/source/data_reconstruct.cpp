@@ -1692,8 +1692,11 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
         // map is possibly a recogniser
         if (gsIsSortArrow(gsGetSort(map))) {
           if(ATisEqual(gsGetSortExprResult(gsGetSort(map)), gsMakeSortExprBool())) {
-            if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort] || p_ctx->num_sort_constructors[sort] == 0) {
-              remove_mapping_not_list(map, sort, p_ctx);
+            if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]
+              || p_ctx->num_sort_constructors[sort] == 0) {
+              if (p_ctx->num_map_equations[map] != 1) { // This is also not a projection function
+                remove_mapping_not_list(map, sort, p_ctx);
+              }
             } else {
               p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
             }

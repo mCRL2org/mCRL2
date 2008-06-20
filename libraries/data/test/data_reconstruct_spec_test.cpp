@@ -132,6 +132,14 @@ void test_data_reconstruct_struct_complex()
   BOOST_CHECK(find_term(rec_data(0), d3));
   BOOST_CHECK(find_term(rec_data(0), s));
   BOOST_CHECK(find_term(rec_data(0), d));
+
+  // Check that maps do not occur in the function declarations
+  BOOST_CHECK(!find_term(rec_data(1), d1_name));
+  BOOST_CHECK(!find_term(rec_data(1), d2_name));
+  BOOST_CHECK(!find_term(rec_data(1), d3_name));
+  BOOST_CHECK(!find_term(rec_data(2), is_d2_name));
+  BOOST_CHECK(!find_term(rec_data(2), is_d3_name));
+  BOOST_CHECK(!find_term(rec_data(2), arg3_name));
 }
 
 void test_data_reconstruct_struct_nest()
