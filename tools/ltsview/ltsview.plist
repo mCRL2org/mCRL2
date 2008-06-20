@@ -23,7 +23,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>ltsview release January 2008, Copyright 2005-2008 Technische Universiteit Eindhoven</string>
+	<string>ltsview July 2008 (development), Copyright 2005-2008 Technische Universiteit Eindhoven</string>
 	<key>CFBundleLongVersionString</key>
 	<string>July 2008 (development)</string>
 	<key>NSHumanReadableCopyright</key>

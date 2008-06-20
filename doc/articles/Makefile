@@ -4,6 +4,8 @@ all     :
 clean   :
 	rm -f *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.pdf
 
+*.tex: *.eps
+
 #LaTeX rules
 %.dvi   : %.tex
 	texi2dvi $^
