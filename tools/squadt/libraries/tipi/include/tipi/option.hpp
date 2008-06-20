@@ -144,9 +144,14 @@ namespace tipi {
       set_argument_value(const T t, bool b = true) {
         if (n < m_arguments.size()) {
           if (b) {
-            assert(typeid(S) == typeid(*m_arguments[n].first));
+            if (dynamic_cast< S const* > (m_arguments[n].first.get())) {
+              m_arguments[n].second = m_arguments[n].first->convert(t);
+            }
+            else {
+              boost::shared_ptr< S > a_type(new S);
        
-            m_arguments[n].second = m_arguments[n].first->convert(t);
+              m_arguments[n] = std::make_pair(a_type, a_type->convert(t));
+            }
           }
         }
         else {
