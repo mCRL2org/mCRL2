@@ -108,7 +108,7 @@ public:
     virtual int OnExit();
 };
 
-bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
+void parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
                         bool& dummies, std::string& lps_file_argument) {
 
   using namespace ::mcrl2::utilities;
@@ -135,8 +135,6 @@ bool parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
   if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
-
-  return (true);
 }
 
 static XSim *this_xsim = NULL;
@@ -190,14 +188,25 @@ bool XSim::OnInit()
   /* The rewrite strategy that will be used */
   RewriteStrategy rewrite_strategy = GS_REWR_JITTY;
  
-  if (!parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument)) {
-    return false;
+  std::string command_line_error;
+
+  try {
+    parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument);
+  }
+  catch (std::exception& e) {
+    command_line_error = e.what();
   }
 
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
   frame->simulator->use_dummies = dummies;
   frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
+
+  if (!command_line_error.empty()) {
+    wxMessageDialog(frame, wxString(command_line_error.
+           append("\n\nNote that other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
+                       wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
+  }
 
   if (!lps_file_argument.empty()) {
     frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));

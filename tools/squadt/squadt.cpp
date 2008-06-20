@@ -85,6 +85,8 @@ void SQuADt::parse_command_line() {
       add_option("create", "create new project in PATH", 'c').
       add_option("port", make_mandatory_argument("PORT"), "listen on TCP port number PORT", 'p');
 
+    tcp_port_number = 10949;
+
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
 
     // default log level
@@ -97,9 +99,6 @@ void SQuADt::parse_command_line() {
     }
     if (0 < parser.options.count("port")) {
       tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
-    }
-    else {
-      tcp_port_number = 10949;
     }
 
     if (parser.arguments.size() == 1) {
@@ -145,156 +144,161 @@ bool SQuADt::OnInit() {
   using namespace squadt;
   using namespace squadt::GUI;
 
+  std::string command_line_error;
+
   try {
     parse_command_line();
-
-    wxInitAllImageHandlers();
-
-    // Windows specific workaround for correct handling of icon transparency
-    wxSystemOptions::SetOption(wxT("msw.remap"), 0);
-    
-    splash* splash_window = new splash(1);
-
-    try {
-      struct local {
-        static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< tool > >& retry_list) {
-          tool_manager& local_tool_manager(squadt::global_build_system.get_tool_manager());
-
-          tool_manager::const_tool_sequence tools(local_tool_manager.get_tools());
-
-          for (tool_manager::const_tool_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
-            splash_window.set_operation("", (*t)->get_name());
-
-            if (!local_tool_manager.query_tool(*t)) {
-              retry_list.push_back(*t);
-            }
-          }
-
-          finished = true;
-        }
-      };
-
-      try {
-        std::auto_ptr < settings_manager > global_settings_manager(new settings_manager(std::string(wxFileName::GetHomeDir().fn_str())));
-
-        // Open log file
-        tipi::controller::communicator::get_default_logger().set_filter_level(3);
-        tipi::controller::communicator::get_default_logger().redirect(global_settings_manager->path_to_user_settings().append("/log"));
-
-        global_build_system.initialise(
-          global_settings_manager,
-          std::auto_ptr < tool_manager > (new tool_manager(tcp_port_number)),
-          std::auto_ptr < executor > (new executor()),
-          std::auto_ptr < type_registry > (new type_registry()));
-      }
-      catch (std::exception& e) {
-        wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
-
-        return false;
-      }
-     
-      splash_window->set_category("Querying tools", global_build_system.get_tool_manager().number_of_tools());
-     
-      /* Perform initialisation */
-      bool finished = false;
-      std::vector< boost::shared_ptr < tool > > retry_list;
-
-      boost::thread initialisation_thread(boost::bind(&local::initialise_tools,
-                        boost::ref(*splash_window), boost::ref(finished), boost::ref(retry_list)));
-
-      /* Cannot just wait because the splash screen would not be updated */
-      do {
-        wxApp::Yield();
-
-        splash_window->update();
-      }
-      while (!finished);
-
-      if (!retry_list.empty()) {
-        wxMessageDialog retry(0, wxT("Initialisation of some tools failed.\n"
-                "Do you want to retry initialisation of these tools interactively?"),
-                wxT("Initialisation failure!"), wxYES_NO|wxICON_WARNING);
-
-        if (retry.ShowModal() == wxID_YES) {
-          struct tester {
-            inline static bool query_with_path(tool& t, boost::filesystem::path const& p) {
-              boost::shared_ptr< tool > dummy(new tool(t));
-
-              dummy->set_location(p);
-
-              if (squadt::global_build_system.get_tool_manager().query_tool(dummy)) {
-                t.set_location(dummy->get_location());
-                t.set_capabilities(dummy->get_capabilities());
-
-                return true;
-              }
-
-              return false;
-            }
-          };
-
-          boost::filesystem::path path_to_try(retry_list[0]->get_location().branch_path());
-
-          // Perform initialisation
-          for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
-            if (!boost::filesystem::exists((*t)->get_location())) {
-              splash_window->set_operation("", (*t)->get_name());
-              splash_window->update();
-
-              if (!path_to_try.empty()) {
-                if (tester::query_with_path(**t, path_to_try.branch_path() / (*t)->get_location().leaf())) {
-                  continue;
-                }
-              }
-
-              wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
-                        wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
-                                wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
-
-              if (file_picker.ShowModal() == wxID_OK) {
-                path_to_try = boost::filesystem::path(
-                        std::string(file_picker.GetFilename().fn_str())).branch_path();
-
-                tester::query_with_path(**t, std::string(file_picker.GetFilename().fn_str()));
-              }
-            }
-          }
-        }
-      }
-
-      splash_window->set_category("Initialising components");
-
-      global_build_system.get_type_registry().rebuild_indices();
-
-      /* Disable splash */
-      splash_window->set_done();
-
-      /* Initialise main application window */
-      SetTopWindow(new squadt::GUI::main());
-     
-      if (action) {
-        action(static_cast < squadt::GUI::main* > (GetTopWindow()));
-      }
-
-      SetUseBestVisual(true);
-    }
-    catch (...) {
-      splash_window->set_done();
-
-      wxMessageDialog(0, wxT("Initialisation failed! Another instance, "
-        "or tool related to a previous instance, is probably still active"
-        "and blocking the initialisation."), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
-
-      return (false);
-    }
-
-    return true;
   }
   catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    command_line_error = e.what();
   }
 
-  return false;
+  wxInitAllImageHandlers();
+
+  // Windows specific workaround for correct handling of icon transparency
+  wxSystemOptions::SetOption(wxT("msw.remap"), 0);
+    
+  splash* splash_window = new splash(1);
+
+  try {
+    struct local {
+      static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< tool > >& retry_list) {
+        tool_manager& local_tool_manager(squadt::global_build_system.get_tool_manager());
+
+        tool_manager::const_tool_sequence tools(local_tool_manager.get_tools());
+
+        for (tool_manager::const_tool_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
+          splash_window.set_operation("", (*t)->get_name());
+
+          if (!local_tool_manager.query_tool(*t)) {
+            retry_list.push_back(*t);
+          }
+        }
+
+        finished = true;
+      }
+    };
+
+    try {
+      std::auto_ptr < settings_manager > global_settings_manager(new settings_manager(std::string(wxFileName::GetHomeDir().fn_str())));
+
+      // Open log file
+      tipi::controller::communicator::get_default_logger().set_filter_level(3);
+      tipi::controller::communicator::get_default_logger().redirect(global_settings_manager->path_to_user_settings().append("/log"));
+
+      global_build_system.initialise(
+        global_settings_manager,
+        std::auto_ptr < tool_manager > (new tool_manager(tcp_port_number)),
+        std::auto_ptr < executor > (new executor()),
+        std::auto_ptr < type_registry > (new type_registry()));
+    }
+    catch (std::exception& e) {
+      wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
+
+      return false;
+    }
+   
+    splash_window->set_category("Querying tools", global_build_system.get_tool_manager().number_of_tools());
+   
+    /* Perform initialisation */
+    bool finished = false;
+    std::vector< boost::shared_ptr < tool > > retry_list;
+
+    boost::thread initialisation_thread(boost::bind(&local::initialise_tools,
+                      boost::ref(*splash_window), boost::ref(finished), boost::ref(retry_list)));
+
+    /* Cannot just wait because the splash screen would not be updated */
+    do {
+      wxApp::Yield();
+
+      splash_window->update();
+    }
+    while (!finished);
+
+    if (!retry_list.empty()) {
+      wxMessageDialog retry(0, wxT("Initialisation of some tools failed.\n"
+              "Do you want to retry initialisation of these tools interactively?"),
+              wxT("Initialisation failure!"), wxYES_NO|wxICON_WARNING);
+
+      if (retry.ShowModal() == wxID_YES) {
+        struct tester {
+          inline static bool query_with_path(tool& t, boost::filesystem::path const& p) {
+            boost::shared_ptr< tool > dummy(new tool(t));
+
+            dummy->set_location(p);
+
+            if (squadt::global_build_system.get_tool_manager().query_tool(dummy)) {
+              t.set_location(dummy->get_location());
+              t.set_capabilities(dummy->get_capabilities());
+
+              return true;
+            }
+
+            return false;
+          }
+        };
+
+        boost::filesystem::path path_to_try(retry_list[0]->get_location().branch_path());
+
+        // Perform initialisation
+        for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
+          if (!boost::filesystem::exists((*t)->get_location())) {
+            splash_window->set_operation("", (*t)->get_name());
+            splash_window->update();
+
+            if (!path_to_try.empty()) {
+              if (tester::query_with_path(**t, path_to_try.branch_path() / (*t)->get_location().leaf())) {
+                continue;
+              }
+            }
+
+            wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
+                      wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
+                              wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
+
+            if (file_picker.ShowModal() == wxID_OK) {
+              path_to_try = boost::filesystem::path(
+                      std::string(file_picker.GetFilename().fn_str())).branch_path();
+
+              tester::query_with_path(**t, std::string(file_picker.GetFilename().fn_str()));
+            }
+          }
+        }
+      }
+    }
+
+    splash_window->set_category("Initialising components");
+
+    global_build_system.get_type_registry().rebuild_indices();
+
+    /* Disable splash */
+    splash_window->set_done();
+
+    /* Initialise main application window */
+    SetTopWindow(new squadt::GUI::main());
+
+    if (!command_line_error.empty()) {
+      wxMessageDialog(GetTopWindow(), wxString(command_line_error.
+             append("\n\nNote that other other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
+                         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
+    }
+    else if (action) {
+      action(static_cast < squadt::GUI::main* > (GetTopWindow()));
+    }
+
+    SetUseBestVisual(true);
+  }
+  catch (...) {
+    splash_window->set_done();
+
+    wxMessageDialog(0, wxT("Another instance or tool related to a previous instance, "
+      "is probably still active and blocking the initialisation."),
+                 wxT("Intialisation failed"), wxOK|wxICON_ERROR).ShowModal();
+
+    return false;
+  }
+
+  return true;
 }
 
 int SQuADt::OnExit() {
