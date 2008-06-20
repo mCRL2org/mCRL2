@@ -923,6 +923,7 @@ bool generate_lts()
           );
         }
       }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_breadth )
     {
@@ -1042,6 +1043,7 @@ bool generate_lts()
           prevtrans = trans;
         }
       }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_depth )
     {
@@ -1150,7 +1152,7 @@ bool generate_lts()
           }
         }
       }
-      lgopts->display_status(level,current_state,num_states,num_found_same,trans);
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
 
       for (unsigned long i=0; i<nsgens_size; i++)
       {

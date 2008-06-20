@@ -38,17 +38,17 @@ struct lts_generation_options {
   boost::function< std::string (std::string const&, std::string const&) >
                                                    generate_filename_for_trace;
   /* Method for status display */
-  boost::function< void (unsigned long&, unsigned long long&,
-                         unsigned long long&, unsigned long long const&,
-                         unsigned long long const&) > display_status;
+  boost::function< void (unsigned long, unsigned long long,
+                         unsigned long long, unsigned long long,
+                         unsigned long long) > display_status;
 
   /* Default function for generate_filename_for_trace */
   std::string generate_trace_file_name(std::string const& info, std::string const& extension);
 
   /* Default function for status display */
-  void update_status_display(unsigned long&, unsigned long long&,
-                             unsigned long long&, unsigned long long const&,
-                             unsigned long long const&) {
+  void update_status_display(unsigned long, unsigned long long,
+                             unsigned long long, unsigned long long const,
+                             unsigned long long) {
   }
 
   RewriteStrategy strat;

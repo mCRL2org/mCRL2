@@ -9,14 +9,17 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/exception.h"
 #include "lps2lts.h"
 #include "exploration.h"
+
+#include "mcrl2/core/messaging.h"
 
 #include "squadt_interactor.h"
 
 #include "workarounds.h" // for strdup
 
-const char*  ::squadt_interactor::option_as_aut               = "as_aut";
+const char*  ::squadt_interactor::option_lts_type             = "lts_type";
 const char*  ::squadt_interactor::option_out_info             = "out_info";
 
 const char*  ::squadt_interactor::option_usedummies           = "use_dummies";
@@ -49,11 +52,23 @@ const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
 static bool initialise_types() {
   tipi::datatype::enumeration< exploration_strategy > exploration_enumeration;
+  tipi::datatype::enumeration< mcrl2::lts::lts_type > lts_type_enumeration;
 
   exploration_enumeration.
     add(es_breadth, "breadth-first").
     add(es_depth, "depth-first").
     add(es_random, "random");
+
+  lts_type_enumeration.
+    add(mcrl2::lts::lts_aut, "Aldebaran").
+#ifdef MCRL2_BCG
+    add(mcrl2::lts::lts_bcg, "BCG").
+#endif
+    add(mcrl2::lts::lts_dot, "DOT").
+    add(mcrl2::lts::lts_fsm, "FSM").
+    add(mcrl2::lts::lts_svc, "SVC").
+    add(mcrl2::lts::lts_mcrl, "mCRL").
+    add(mcrl2::lts::lts_mcrl2, "mCRL2");
 
   return true;
 }
@@ -74,7 +89,6 @@ class squadt_interactor::storage_configuration {
 
   private:
 
-    tipi::layout::elements::checkbox& cb_aut;
     tipi::layout::elements::checkbox& cb_out_info;
     tipi::layout::elements::checkbox& cb_usedummies;
     tipi::layout::elements::checkbox& cb_state_format_tree;
@@ -84,7 +98,6 @@ class squadt_interactor::storage_configuration {
 
     template < typename M >
     storage_configuration(tipi::configuration& c, tipi::layout::tool_display& d, M& m) :
-      cb_aut(d.create< tipi::layout::elements::checkbox >()),
       cb_out_info(d.create< tipi::layout::elements::checkbox >()),
       cb_usedummies(d.create< tipi::layout::elements::checkbox >()),
       cb_state_format_tree(d.create< tipi::layout::elements::checkbox >()),
@@ -96,7 +109,6 @@ class squadt_interactor::storage_configuration {
 
       m.append(d.create< horizontal_box >().set_default_margins(margins(8, 5, 8, 5)).
             append(d.create< vertical_box >().
-                append(cb_aut.set_label("generate aut file")).
                 append(cb_out_info.set_label("save state information")).
                 append(cb_usedummies.set_label("fill in free variables"))).
             append(d.create< vertical_box >().set_default_alignment(layout::left).
@@ -106,7 +118,6 @@ class squadt_interactor::storage_configuration {
       set_defaults(c);
 
       /* Update state of controls */
-      cb_aut.set_status(c.get_option_argument< bool >(option_as_aut));
       cb_out_info.set_status(c.get_option_argument< bool >(option_out_info));
       cb_usedummies.set_status(c.get_option_argument< bool >(option_usedummies));
       cb_state_format_tree.set_status(c.get_option_argument< bool >(option_state_format_tree));
@@ -129,24 +140,59 @@ class squadt_interactor::storage_configuration {
       if (!c.option_exists(option_removeunused)) {
         c.add_option(option_removeunused).set_argument_value< 0, boolean >(true);
       }
-      if (!c.option_exists(option_as_aut)) {
-        c.add_option(option_as_aut).set_argument_value< 0, boolean >(false);
-      }
     }
 
     void update_configuration(boost::shared_ptr< squadt_interactor::storage_configuration >, tipi::configuration& c) {
       /* Add output file to the configuration */
+      std::string outfile;
+      tipi::mime_type mt("application/unknown");
+
+      if ( c.option_exists(option_lts_type) )
+      {
+        outfile = c.get_output_name("."+mcrl2::lts::lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type)));
+        switch ( c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type) )
+        {
+          case mcrl2::lts::lts_aut:
+            mt = tipi::mime_type("text/aut");
+            break;
+          case mcrl2::lts::lts_svc:
+            mt = tipi::mime_type("application/svc");
+            break;
+          case mcrl2::lts::lts_mcrl:
+            mt = tipi::mime_type("application/svc+mcrl");
+            break;
+          case mcrl2::lts::lts_mcrl2:
+            mt = tipi::mime_type("application/svc+mcrl2");
+            break;
+#ifdef MCRL2_BCG
+          case mcrl2::lts::lts_bcg:
+            mt = tipi::mime_type("application/bcg");
+            break;
+#endif
+          case mcrl2::lts::lts_fsm:
+            mt = tipi::mime_type("text/fsm");
+            break;
+          case mcrl2::lts::lts_dot:
+            mt = tipi::mime_type("text/dot");
+            break;
+          default:
+            assert(0);
+            throw mcrl2::runtime_error("unsupported LTS format used for output");
+        }
+      } else {
+        outfile = c.get_output_name(".svc");
+      }
+
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
         tipi::configuration::object& o = c.get_output(lts_file_for_output);
-      
-        o.set_mime_type(tipi::mime_type(cb_aut.get_status()?"text/aut":"application/svc+mcrl2"));
-        o.set_location(c.get_output_name(cb_aut.get_status()?".aut":".svc"));
+     
+        o.set_mime_type(mt);
+        o.set_location(outfile);
       }
       else {
-        c.add_output(lts_file_for_output, tipi::mime_type(cb_aut.get_status()?"text/aut":"application/svc+mcrl2"), c.get_output_name(cb_aut.get_status()?".aut":".svc"));
+        c.add_output(lts_file_for_output, mt, outfile);
       }
       
-      c.add_option(option_as_aut).set_argument_value< 0, tipi::datatype::boolean >(cb_aut.get_status());
       c.add_option(option_out_info).set_argument_value< 0, tipi::datatype::boolean >(cb_out_info.get_status());
       
       c.add_option(option_usedummies).set_argument_value< 0, tipi::datatype::boolean >(cb_usedummies.get_status());
@@ -203,6 +249,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   // Helper for rewrite strategy selection
   mcrl2::utilities::squadt::radio_button_helper< RewriteStrategy >      rewrite_strategy_selector(d);
+  
+  // Helper for rewrite strategy selection
+  mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type >      lts_type_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >();
 
@@ -218,7 +267,23 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
 
-  if (make_lts) {
+  if ( make_lts )
+  {
+    if ( !c.option_exists(option_lts_type) ) // do not allow format to be changed once it has been set
+    {
+      m.append(d.create< label >().set_text("Ouput format")).
+        append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
+                    append(lts_type_selector.associate(mcrl2::lts::lts_aut, "Aldebaran")).
+#ifdef MCRL2_BCG
+                    append(lts_type_selector.associate(mcrl2::lts::lts_bcg, "BCG")).
+#endif
+                    append(lts_type_selector.associate(mcrl2::lts::lts_dot, "DOT")).
+                    append(lts_type_selector.associate(mcrl2::lts::lts_fsm, "FSM")).
+                    append(lts_type_selector.associate(mcrl2::lts::lts_svc, "SVC")).
+                    append(lts_type_selector.associate(mcrl2::lts::lts_mcrl, "SVC/mCRL")).
+                    append(lts_type_selector.associate(mcrl2::lts::lts_mcrl2, "SVC/mCRL2", true)));
+    }
+
     boost::shared_ptr < storage_configuration > storage_controls(new storage_configuration(c, d, m));
 
     update_configuration = boost::bind(&storage_configuration::update_configuration, storage_controls.get(), storage_controls, _1);
@@ -284,6 +349,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   /* Values for the options */
   if (make_lts) {
+    if (!c.option_exists(option_lts_type)) {
+      c.add_option(option_lts_type);
+      c.get_option(option_lts_type).set_argument_value< 0 >(lts_type_selector.get_selection());
+    }
+
     update_configuration(c);
   }
 
@@ -351,8 +421,8 @@ class squadt_interactor::status_display {
 
     status_display(squadt_interactor& c, lts_generation_options&);
 
-    void update(unsigned long&, unsigned long long&, unsigned long long&,
-                unsigned long long const&, unsigned long long const&);
+    void update(unsigned long, unsigned long long, unsigned long long,
+                unsigned long long, unsigned long long);
 };
 
 squadt_interactor::status_display::status_display(squadt_interactor& c, lts_generation_options& lgopts) :
@@ -387,8 +457,8 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
   m_communicator.send_display_layout(display.set_manager(m));
 }
 
-void squadt_interactor::status_display::update(unsigned long& level, unsigned long long& explored,
-    unsigned long long& seen, unsigned long long const& num_found_same, unsigned long long const& transitions) {
+void squadt_interactor::status_display::update(unsigned long level, unsigned long long explored,
+    unsigned long long seen, unsigned long long num_found_same, unsigned long long transitions) {
 
   lb_level.set_text(boost::lexical_cast < std::string > (level));
   lb_explored.set_text(boost::lexical_cast < std::string > (explored));
@@ -429,7 +499,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
 
     lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);
  
-    lgopts.outformat = (configuration.get_option_argument< bool >(option_as_aut)) ? mcrl2::lts::lts_aut : mcrl2::lts::lts_mcrl2 ;
+    lgopts.outformat = configuration.get_option_argument< mcrl2::lts::lts_type >(option_lts_type);
  
     lgopts.usedummies   = configuration.get_option_argument< bool >(option_usedummies);
     lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;

@@ -28,7 +28,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   private:
 
-    static const char*  option_as_aut;
+    static const char*  option_lts_type;
     static const char*  option_out_info;
 
     static const char*  option_usedummies;
