@@ -123,6 +123,20 @@ void parse_command_line(int argc, wxChar** argv) {
 
 bool LTSView::OnInit()
 {
+  bool parse_error = false;
+  wxString error_string = wxEmptyString;
+  lts_file_argument = "";
+
+  try
+  {
+    parse_command_line(argc, argv);
+  }
+  catch (std::exception &e)
+  {
+    parse_error = true;
+    error_string = wxString(e.what(),wxConvLocal);
+  }
+
   lts = NULL;
   rankStyle = ITERATIVE;
   fsmStyle = false;
@@ -141,23 +155,18 @@ bool LTSView::OnInit()
 
   wxInitAllImageHandlers();
 
-  try
+  if ( parse_error )
   {
-    parse_command_line(argc, argv);
-    if (!lts_file_argument.empty())
-    {
-      wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
-      fileName.Normalize();
-      mainFrame->setFileInfo(fileName);
-      openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
-    }
-  }
-  catch (std::exception &e)
-  {
-    wxMessageDialog msg_dlg(mainFrame, 
-        wxString(e.what(),wxConvLocal),
+    wxMessageDialog msg_dlg(mainFrame, error_string,
         wxT("Command line error"), wxOK | wxICON_ERROR);
     msg_dlg.ShowModal();
+  }
+  else if (!lts_file_argument.empty())
+  {
+    wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
+    fileName.Normalize();
+    mainFrame->setFileInfo(fileName);
+    openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
   }
   return true;
 }
