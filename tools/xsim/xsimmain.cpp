@@ -403,8 +403,8 @@ void XSimMain::StateChanged(ATermAppl Transition, ATerm State, ATermList NextSta
         }
         if ( interactive )
 	{
-	  undo->Enable(simulator->GetTracePos()>1);
-	  redo->Enable(false);
+	  undo->Enable(simulator->GetTracePos()>0);
+	  redo->Enable(simulator->GetTracePos() != simulator->GetTraceLength()-1);
         }
 }
 
