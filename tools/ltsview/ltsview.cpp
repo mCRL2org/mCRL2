@@ -104,24 +104,25 @@ void parse_command_line(int argc, wxChar** argv) {
   interface_description clinterface(
         std::string(wxString(argv[0], wxConvLocal).fn_str()),
         NAME, AUTHOR, "[OPTION]... [INFILE]\n",
-    "Start the LTSView application and open INFILE. If INFILE is not"
+    "Start the LTSView application and open INFILE. If INFILE is not "
     "supplied then LTSView is started without opening an LTS.\n"
     "\n"
     "INFILE should be in the FSM format.");
 
   command_line_parser parser(clinterface, argc, argv);
 
-  if (0 < parser.arguments.size()) {
-    lts_file_argument = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
+  if (parser.arguments.size() > 1)
+  {
     parser.error("too many file arguments");
+  }
+  else if (parser.arguments.size() == 1)
+  {
+    lts_file_argument = parser.arguments[0];
   }
 }
 
-bool LTSView::OnInit() {
-  parse_command_line(argc, argv);
-
+bool LTSView::OnInit()
+{
   lts = NULL;
   rankStyle = ITERATIVE;
   fsmStyle = false;
@@ -140,11 +141,23 @@ bool LTSView::OnInit() {
 
   wxInitAllImageHandlers();
 
-  if (!lts_file_argument.empty()) {
-    wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
-    fileName.Normalize();
-    mainFrame->setFileInfo(fileName);
-    openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
+  try
+  {
+    parse_command_line(argc, argv);
+    if (!lts_file_argument.empty())
+    {
+      wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
+      fileName.Normalize();
+      mainFrame->setFileInfo(fileName);
+      openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
+    }
+  }
+  catch (std::exception &e)
+  {
+    wxMessageDialog msg_dlg(mainFrame, 
+        wxString(e.what(),wxConvLocal),
+        wxT("Command line error"), wxOK | wxICON_ERROR);
+    msg_dlg.ShowModal();
   }
   return true;
 }
