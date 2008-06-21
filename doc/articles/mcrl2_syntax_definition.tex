@@ -291,6 +291,12 @@
 \font \aap cmmi10        
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
+% initialisation
+\newcommand{\pinit}{\gg}
+
+% before
+\newcommand{\pbefore}{\ll}
+
 % ???
 \newcommand{\ap}{{:}}
 
@@ -344,18 +350,23 @@
 
 \maketitle
 
-This document describes the concrete syntax of mCRL2 expressions and specifications.
-The syntax is presented in Section~\ref{sec:syntax} in a rich text format.
+This document describes the syntax of mCRL2 expressions and specifications.
+We present the syntax in a rich text format.
 In Section~\ref{sec:symbols} a translation of rich text to plain text is given, which is needed for using the toolset.
-In both formats a $\%$-sign indicates the beginning of a comment that extends to the end of the line.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Concrete syntax}
-\label{sec:syntax}
+Throughout this document, suggestive dots ($\mb{\ldots}$, $\mb{\cdots}$) are used to indicate repeating patterns with one or more
+occurrence. Furthermore, $\mb{|}$ distinguishes alternatives (not to be mistaken with the pipe $|$),
+$\mb{(}\f{pattern}\mb{)^{+}}$ indicates one or more occurrences of $\f{pattern}$,
+and $\mb{(}\f{pattern}\mb{)^{*}}$ indicates zero or more occurrences of $\f{pattern}$.
+As opposed to real EBNF, we do not use quotes to separate the terminals from the non-terminals.
 
-In the following, an identifier is a string matching the pattern ``$[a{-}z\_][a{-}z\_0{-}9]*$'', excluding the following keywords:
+%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lexical syntax}
 
+We defined the notions of identifiers, numbers, whitespace and comments:
+\begin{itemize}
+\item
+An \emph{identifier} is a string matching the pattern ``$[A{-}Za{-}z\_][A{-}Za{-}z\_0{-}9]*$'', excluding the following reserved words: 
 \[\begin{tightarray}{L}
 sort
 cons
@@ -404,18 +415,20 @@ delay
 yaled
 nil
 \end{tightarray}\]
+Identifiers are used for representing sort names $b$, function names $f$, data variable names $x$, action names $a$, process reference names $P$, and propositional variable names $X$.
 
-Identifiers are used for representing sort names $b$, function names $f$, data variable names $x$, action names $a$, process reference names $P$, and propositional variable names $X$. Furthermore, $N$ stands for a number that matches the
-pattern ``$0\ |\ [1-9][0-9]*$''.  Suggestive dots ($\mb{\ldots}$,
-$\mb{\cdots}$) are used to indicate repeating patterns with one or more
-occurrence. Furthermore, $\mb{|}$ distinguishes alternatives (not to be
-mistaken with the pipe $|$).
-%, $\mb{(}\f{pattern}\mb{)^{+}}$ indicates one or more occurrences of
-%$\f{pattern}$, and $\mb{(}\f{pattern}\mb{)^{*}}$ indicates zero or more
-%occurrences of $\f{pattern}$.
-As opposed to real EBNF, we do not use quotes to separate the terminals from the non-terminals.
+\item
+A \emph{number} is a string that matches the pattern ``$0$'' or ``$[1-9][0-9]*$''.
 
-\subsection{Data specifications}
+\item
+Spaces, tabs and newlines are treated as \emph{whitespace}.
+
+\item
+A $\%$-sign indicates the beginning of a \emph{comment} that extends to the end of the line.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Data specifications}
 
 Sort expressions $s$:
 \[\begin{tightarray}{lrl}
@@ -423,25 +436,26 @@ s      & \mb{::=} & b\ \mb{|}\ s \to s\ \mb{|}\
                \sbool\ \mb{|}\ \spos\ \mb{|}\ \snat\ \mb{|}\ \sint\ \mb{|}\ \sreal\\
        & \mb{|}   &
                \kwstruct\ \f{scs}\,|\,\mb{\cdots}\,|\,\f{scs}\ \mb{|}\ 
-               \mathsf{List}(s)\ \mb{|}\ \mathsf{Set}(s)\ \mb{|}\ \mathsf{Bag}(s)\\
+               \mathsf{List}(s)\ \mb{|}\ \mathsf{Set}(s)\ \mb{|}\ \mathsf{Bag}(s)\ \mb{|}\ 
+               ( s )\\
 \f{scs} & \mb{::=} & f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})\ \mb{|}\ 
                 f ? f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})?f \\
 \f{spj} & \mb{::=} & s\ \mb{|}\ s \times \mb{\cdots} \times s \to s\ \mb{|}\ 
                 f: s\ \mb{|}\ f: s \times \mb{\cdots} \times s \to s
 \end{tightarray}\]
-Here $\f{scs}$ and $\f{spj}$ stand for the constructor and projection
-functions of a structured sort.
+Here $\f{scs}$ and $\f{spj}$ stand for the constructor and projection functions of a structured sort.
+The binary operator $\to$ associates to the right.
 
 Data expressions $d$:
 \[\begin{tightarray}{lrl}
-d      & \mb{::=} & x\ \mb{|}\ f(d, \mb{\ldots}, d)\ \mb{|}\ d(d)\ \mb{|}\ N\ \mb{|}\ 
+d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\ 
                \lnot d\ \mb{|}\ -d\ \mb{|}\ \overline{d}\ \mb{|}\ \#d\ \mb{|}\ d\ \oplus\ d\\
        & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\ 
                \set{d: d,\mb{\ldots},d: d}\ \mb{|}\ \scompr{x: s}{d}\\
-       & \mb{|} & \lambda_{\f{mvds}} d\ \mb{|}\ 
-               \forall_{\f{mvds}} d\ \mb{|}\ \exists_{\f{mvds}} d\ \mb{|}\ 
+       & \mb{|} & \lambda_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ 
+               \forall_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ \exists_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ 
                d\ \kwwhr\ x=d,\mb{\ldots},x=d\ \kwend\\
-\f{mvds}&\mb{::=} & \f{mvd},\mb{\ldots},\f{mvd}\\
+        & \mb{|} & ( d )\\
 \f{mvd}& \mb{::=} & x,\mb{\ldots},x: s\\
 \oplus & \mb{::=} & *\ \mb{|}\ .\ \mb{|}\ \cap\ \mb{|}\ 
                \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\ 
@@ -455,8 +469,7 @@ d      & \mb{::=} & x\ \mb{|}\ f(d, \mb{\ldots}, d)\ \mb{|}\ d(d)\ \mb{|}\ N\ \m
                \land\ \mb{|}\ \lor\ \mb{|}\ 
                \limp
 \end{tightarray}\]
-Here stands for $\f{mvds}$ for multiple data variable declarations,
-and $\f{mvd}$ for multiple data variable declaration.
+Here $\f{mvd}$ stands for a multiple data variable declaration, and $\oplus$ for a binary operator.
 The unary operators have the highest priority, followed by the infix operators,
 followed by $\lambda$, $\forall$ and $\exists$, followed by $\kwwhr\ \kwend$.
 The descending order of precedence of the infix operators is:
@@ -467,9 +480,9 @@ Of these operators $*$, $.$, $\cap$, $\kwdiv$, $\kwmod$, $+$, $-$, $\cup$ and
 $\concat$ associate to the left and $\approx$, $\not\approx$, $\land$, $\lor$
 and $\limp$ associate to the right.
 
-Data specification:
+Data specifications $\f{data\_spec}$:
 \[\begin{tightarray}{lrl}
-data\_spec
+\f{data\_spec}
 & \mb{::=} & \kwsort\ \mb{(}\f{sd};\mb{)^{+}}\\
 & \mb{|}   & \kwcons\ \mb{(}\f{mfd};\mb{)^{+}}\\
 & \mb{|}   & \kwmap\  \mb{(}\f{mfd};\mb{)^{+}}\\
@@ -484,7 +497,8 @@ $\f{mfd}$ for multiple function declaration,
 $\f{ed}$ for equation declaration,
 and $\f{ad}$ for action declaration.
 
-\subsection{Process specifications}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Process specifications}
 
 Process expressions $p$:
 \[\begin{tightarray}{lrl}
@@ -499,8 +513,9 @@ p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \s
             P(d, \mb{\ldots}, d)\ \mb{|}\ 
             c \to p \diamond p\ \mb{|}\ 
             c \to p\ \mb{|}\  
-            \sum_{\f{vd},\mb{\ldots},\f{vd}}p\ \mb{|}\ 
-            p\,\at\,t\\ 
+            \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
+     & \mb{|} & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\ 
+     & \mb{|} & ( d )\\
 as  & \mb{::=} & a |\,\mb{\cdots} | a\\
 ar  & \mb{::=} & a \to a\\
 ac  & \mb{::=} & a\sync\f{as}\ \mb{|}\ a\sync\f{as} \to a\\
@@ -508,56 +523,46 @@ ac  & \mb{::=} & a\sync\f{as}\ \mb{|}\ a\sync\f{as} \to a\\
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
 respectively. $\f{as}$ represents an action sequence, $\f{ar}$ an action
 renaming, and $\f{ac}$ an action communication. The descending order of
-precedence of the operators is: $\mid, \at, \seq, \to,
+precedence of the operators is: $\mid, \at, \seq, \set{\pinit, \pbefore}, \to,
 \set{\pmerge,\lmerge},\sum,\alt$. Of these operators $\alt$, $\pmerge$,
 $\lmerge$, $\seq$ and $\mid$ associate to the right.
 
-Process definitions $\f{pd}$:
-\[\begin{tightarray}{lrl}
-\f{pd}  & \mb{::=} & \f{prd} = p\\
-\f{prd} & \mb{::=} & P\ \mb{|}\ P(\f{mvd},\mb{\ldots},\f{mvd})
-\end{tightarray}\]
-Here, $\f{prd}$ stands for process reference declaration.
-
-Process specifications:
+Process specifications $\f{proc\_spec}$:
 \[\begin{tightarray}{lrl}
 \f{proc\_spec}      & \mb{::=} & \mb{(}\f{proc\_spec\_elt}\mb{)^{*}}\\
-\f{proc\_spec\_elt} & \mb{::=} & \f{data\_spec}\ \mb{|}\ \f{act\_spec}\ \mb{|}\ \f{proc\_eqn\_spec}\ \mb{|}\ \f{proc\_init}\\
-\f{act\_spec}       & \mb{::=} & \kwact\ \mb{(}\f{ad};\mb{)^{+}}\\
-\f{pd\_spec}        & \mb{::=} & \kwproc\ \mb{(}\f{pd};\mb{)^{+}}\\
-\f{p\_init}         & \mb{::=} & \kwinit\ p;\\
+\f{proc\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|}   & \kwact\ \mb{(}\f{ad};\mb{)^{+}}\\
+                    & \mb{|}   & \kwproc\ \mb{(}\f{pd};\mb{)^{+}}\\
+                    & \mb{|}   & \kwinit\ p;\\
+\f{pd}              & \mb{::=} & P = p\ \mb{|}\ P(\f{mvd},\mb{\ldots},\f{mvd}) = p\\
 \f{ad}              & \mb{::=} & a\ \mb{|}\ a: s \times \mb{\cdots} \times s
 \end{tightarray}\]
-Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{act\_spec}$ an action specification, $\f{pd\_spec}$ a specification of a process definition, $\f{p\_init}$ a specification of an initial process expression, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of $\f{pd\_spec}$ and $\f{p\_init}$.
+Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of each of the keywords $\kwproc$ and $\kwinit$.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mu-calculus formulae}
 
-\subsection{Mu-calculus formulae}
-
-Parameterised actions $\f{pa}$:
-\[\begin{tightarray}{lrl}
-\f{pa} & \mb{::=} & a\ \mb{|}\ a(d,\mb{\ldots},d)
-\end{tightarray}\]
-
-\noindent
 Multiactions $\f{ma}$:
 \[\begin{tightarray}{lrl}
 \f{ma} & \mb{::=} & \tau\ \mb{|}\ \f{pa}\,|\,\mb{\cdots} |\,\f{pa}\\
+\f{pa} & \mb{::=} & a\ \mb{|}\ a(d,\mb{\ldots},d)
 \end{tightarray}\]
+Here, $\f{pa}$ represents a parameterised action.
 
-\noindent
 Action formulae $\alpha$:
 \[\begin{tightarray}{lrl}
-\alpha & \mb{::=} & \mathsf{val}(c)\ \mb{|}\ 
-                       \mathsf{true}\ \mb{|}\ 
-                       \mathsf{false}\ \mb{|}\ 
-                       \neg \alpha\ \mb{|}\ 
-                       \alpha \land \alpha\ \mb{|}\ 
-                       \alpha \lor  \alpha\ \mb{|}\ 
-                       \alpha \limp \alpha\ \mb{|}\ 
-                       \forall_{\f{mvds}} \alpha\ \mb{|}\ 
-                       \exists_{\f{mvds}} \alpha\ \mb{|}\ 
-                       \f{ma}\ \mb{|}\ 
-                       \alpha\at t\\
+\alpha & \mb{::=} & \f{ma}\ \mb{|}\ 
+                    \alpha\at t\ \mb{|}\ 
+                    \mathsf{val}(c)\ \mb{|}\ 
+                    ( \alpha )\\ 
+       & \mb{|}   & \mathsf{true}\ \mb{|}\ 
+                    \mathsf{false}\ \mb{|}\ 
+                    \neg \alpha\ \mb{|}\ 
+                    \alpha \land \alpha\ \mb{|}\ 
+                    \alpha \lor  \alpha\ \mb{|}\ 
+                    \alpha \limp \alpha\ \mb{|}\ 
+                    \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\ \mb{|}\ 
+                    \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\\
 \end{tightarray}\]
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
 respectively.  The descending order of precedence of the operators is: $\neg,
@@ -572,31 +577,33 @@ Regular formulae $\varphi_r$:
                        \varphi_r \cdot \varphi_r\ \mb{|}\ 
                        \varphi_r + \varphi_r\ \mb{|}\ 
                        \varphi_r^{*} \ \mb{|}\ 
-                       \varphi_r^{+}
+                       \varphi_r^{+} \ \mb{|}\ 
+                       ( \varphi_r )
 \end{tightarray}\]
 The postfix operators ${}^{*}$ and ${}^{+}$ have the highest priority, followed
 by $\cdot$, followed by infix $+$. The infix operators associate to the right.
 
 State formulae $\varphi_s$:
 \[\begin{tightarray}{lrl}
-\varphi_s & \mb{::=} & \mathsf{val}(c)\ \mb{|}\ 
-                     \mathsf{true}\ \mb{|}\ 
-                     \mathsf{false}\ \mb{|}\ 
-                     \neg \varphi_s\ \mb{|}\ 
-                     \varphi_s \land \varphi_s\ \mb{|}\ 
-                     \varphi_s \lor  \varphi_s\ \mb{|}\ 
-                     \varphi_s \limp \varphi_s\ \mb{|}\ 
-                     \forall_{\f{mvds}} \varphi_s\ \mb{|}\ 
-                     \exists_{\f{mvds}} \varphi_s\\
-        & \mb{|}   & [\varphi_r]\varphi_s\ \mb{|}\ 
-                     \langle\varphi_r\rangle\varphi_s\ \mb{|}\ 
-                     \nabla(t)\ \mb{|}\ 
-                     \Delta(t)\ \mb{|}\ 
-                     \nabla\ \mb{|}\ 
-                     \Delta\ \mb{|}\ 
-                     \nu\,\f{pvd}.\varphi_s\ \mb{|}\ 
-                     \mu\,\f{pvd}.\varphi_s\ \mb{|}\ 
-                     \f{pvo}\\
+\varphi_s & \mb{::=} & [\varphi_r]\varphi_s\ \mb{|}\ 
+                       \langle\varphi_r\rangle\varphi_s\ \mb{|}\ 
+                       \nabla(t)\ \mb{|}\ 
+                       \Delta(t)\ \mb{|}\ 
+                       \nabla\ \mb{|}\ 
+                       \Delta\ \mb{|}\ 
+                       \nu\,\f{pvd}.\varphi_s\ \mb{|}\ 
+                       \mu\,\f{pvd}.\varphi_s\ \mb{|}\ 
+                       \f{pvo}\ \mb{|}\ 
+                       \mathsf{val}(c)\ \mb{|}\ 
+                       ( \varphi_s )\\
+          & \mb{|}   & \mathsf{true}\ \mb{|}\ 
+                       \mathsf{false}\ \mb{|}\ 
+                       \neg \varphi_s\ \mb{|}\ 
+                       \varphi_s \land \varphi_s\ \mb{|}\ 
+                       \varphi_s \lor  \varphi_s\ \mb{|}\ 
+                       \varphi_s \limp \varphi_s\ \mb{|}\ 
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\ 
+                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\\
 \f{pvd} & \mb{::=} & X\ \mb{|}\ X(\f{vdi},\mb{\ldots},\f{vdi})\\
 \f{pvo} & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
 \f{vdi} & \mb{::=} & x: s = d\\
@@ -611,43 +618,44 @@ of the operators is: $\set{\neg, \_[\_], \_\langle\_\rangle},
 \set{\land,\lor}, \limp, \set{\forall, \exists, \mu, \nu}$.  The infix
 operators $\land$, $\lor$ and $\limp$ associate to the right.
 
-\subsection{PBES's}
+%%%%%%%%%%%%%%%%
+\section{PBES's}
 
 Parameterised boolean expressions $\varphi_e$:
 \[\begin{tightarray}{lrl}
-\varphi_e & \mb{::=} & \mathsf{val}(c)\ \mb{|}\ 
-                       \mathsf{true}\ \mb{|}\ 
+\varphi_e & \mb{::=} & \f{pvo}\ \mb{|}\ 
+                       \mathsf{val}(c)\ \mb{|}\ 
+                       ( \varphi_e )\\ 
+          & \mb{|}   & \mathsf{true}\ \mb{|}\ 
                        \mathsf{false}\ \mb{|}\ 
                        \neg \varphi_e\ \mb{|}\ 
                        \varphi_e \land \varphi_e\ \mb{|}\ 
                        \varphi_e \lor \varphi_e\ \mb{|}\ 
                        \varphi_e \limp \varphi_e\ \mb{|}\ 
-                       \forall_{\f{mvds}} \varphi_e\ \mb{|}\ 
-                       \exists_{\f{mvds}} \varphi_e\ \mb{|}\ 
-                       \f{pvo}
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\ \mb{|}\ 
+                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\\ 
 \end{tightarray}\]
 The descending order of operator precedence is: $\neg, \set{\land, \lor}, \limp, \set{\forall, \exists}$.  
 The infix operators $\land$, $\lor$ and $\limp$ associate to the right.
 
-Parameterised boolean equations:
+Parameterised boolean equations $\f{pb\_eqn}$:
 \[\begin{tightarray}{lrl}
 \f{pb\_eqn} & \mb{::=} & \sigma\,\f{pvd} = \varphi_e\\
 \sigma      & \mb{::=} & \nu\ \mb{|}\ \mu
 \end{tightarray}\]
 Here $\sigma$ stands for a fixpoint symbol.
 
-PBES specifications:
+PBES specifications $\f{pbes\_spec}$:
 \[\begin{tightarray}{lrl}
 \f{pbes\_spec}      & \mb{::=} & \mb{(}\f{pbes\_spec\_elt}\mb{)^{*}}\\
-\f{pbes\_spec\_elt} & \mb{::=} & \f{data\_spec}\ \mb{|}\ \f{pb\_eqn\_spec}\ \mb{|}\ \f{pb\_init}\\
-\f{pb\_eqn\_spec}   & \mb{::=} & \kwpbes\ \mb{(}\f{pb\_eqn};\mb{)^{+}}\\
-\f{pb\_init}        & \mb{::=} & \kwinit\ \f{pvo};
+\f{pbes\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|} & \kwpbes\ \mb{(}\f{pb\_eqn};\mb{)^{+}}\\
+                    & \mb{|} & \kwinit\ \f{pvo};
 \end{tightarray}\]
-Here $\f{pbes\_spec\_elt}$ represents a PBES specification element, $\f{pb\_eqn\_spec}$ a parameterised boolean equation specification, and $\f{pb\_init}$ a specification of an initial parameterised boolean expression. Furthermore, we impose the restriction that $\f{pbes\_spec}$ should contain precisely one occurrence of $\f{pb\_eqn\_spec}$ and $\f{pb\_init}$.
+Here $\f{pbes\_spec\_elt}$ represents a PBES specification element. We impose the restriction that $\f{pbes\_spec}$ should contain precisely one occurrence of each of the keywords $\kwpbes$ and $\kwinit$.
 
 \newpage
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Table of symbols}
 \label{sec:symbols}
@@ -666,13 +674,13 @@ cross                  & \times                   & \verb+#+\\
 diamond                & \diamond                 & \verb+<>+\\
 \hline
 standard sorts         & \sbool,\spos,\snat,\sint,\sreal
-&\verb+Bool+,\verb+Pos+,\verb+Nat+,\verb+Int+,\verb+Real+\\
-equality and inequality& \approx,\not\approx      & \verb+==+,\verb+!=+\\
-logical operators      & \lnot,\land,\lor,\limp   & \verb+!+,\verb+&&+,\verb+||+,\verb+=>+\\
-relational numeric operators & \leq,\geq          & \verb+<=+,\verb+>=+\\
-relational set operators & \in, \subseteq, \subset& \verb+in+,\verb+<=+,\verb+<+\\
-set operators          & ^{\_},\cup,\cap          & \verb+!+,\verb-+-,\verb+*+\\
-list operators         & \cons,\snoc,\concat      & \verb+|>+,\verb+<|+,\verb-++-\\
+&\verb+Bool+, \verb+Pos+, \verb+Nat+, \verb+Int+, \verb+Real+\\
+equality and inequality& \approx,\not\approx      & \verb+==+, \verb+!=+\\
+logical operators      & \lnot,\land,\lor,\limp   & \verb+!+, \verb+&&+, \verb+||+, \verb+=>+\\
+relational numeric operators & \leq,\geq          & \verb+<=+, \verb+>=+\\
+relational set operators & \in, \subseteq, \subset& \verb+in+, \verb+<=+, \verb+<+\\
+set operators          & ^{\_},\cup,\cap          & \verb+!+, \verb-+-, \verb+*+\\
+list operators         & \cons,\snoc,\concat      & \verb+|>+, \verb+<|+, \verb-++-\\
 lambda abstraction     & \lambda_{x:s}d           & \verb+lambda x:s.d+\\
 universal quantification&\forall_{x:s}\varphi     & \verb+forall x:s.phi+\\
 existential quantification&\exists_{x:s}\varphi   & \verb+exists x:s.phi+\\
@@ -680,18 +688,18 @@ existential quantification&\exists_{x:s}\varphi   & \verb+exists x:s.phi+\\
 deadlock               & \delta                   & \verb+delta+\\
 internal action        & \tau                     & \verb+tau+\\
 left merge             & \lmerge                  & \verb+||_+\\
-at                     & \at                      & \verb+@+\\
 sum                    & \sum_{x:s}p              & \verb+sum x:s.p+\\
 allow                  & \allow{\set{a \mid b}}(p)& \verb+allow({a|b},p)+\\
 block                  & \block{\set{a}}(p)       & \verb+block({a},p)+\\
 hide                   & \hide{\set{a}}(p)        & \verb+hide({a},p)+\\
 rename                 & \ren{\set{a \to b}}(p)   & \verb+rename({a -> b},p)+\\
 communication          & \comm{\set{a \mid b\to c}}(p) & \verb+comm({a|b -> c},p)+\\
+time                   & \at,\pinit,\pbefore      & \verb+@+, \verb+>>+, \verb+<<+\\
 \hline
 negation of ultimate delay & \nabla               & \verb+yaled+\\
 ultimate delay         & \Delta                   & \verb+delay+\\
 nil                    & \epsilon                 & \verb+nil+\\
-fixpoint symbol        & \nu,\mu                  & \verb+nu+,\verb+mu+\\
+fixpoint symbol        & \nu,\mu                  & \verb+nu+, \verb+mu+\\
 maximal fixpoint       & \nu X(x:s = d).\varphi   & \verb+nu X(x:s = d).phi+\\
 minimal fixpoint       & \mu X(x:s = d).\varphi   & \verb+mu X(x:s = d).phi+\\
 \hline
