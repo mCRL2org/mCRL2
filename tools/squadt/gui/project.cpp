@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file gui/project.cpp
-/// \brief Add your file description here.
 
 #include <map>
 #include <set>
@@ -47,8 +46,31 @@
 #define cmID_DETAILS     (wxID_HIGHEST + 7)
 #define cmID_TOOLS       (wxID_HIGHEST + 8)
 
+#define wxEVT_DISPATCH   (-1)
+
 namespace squadt {
   namespace GUI {
+
+    class project::dispatch_event : public wxCommandEvent {
+      private:
+
+        boost::function< void () > m_handler;
+
+      public:
+
+        inline dispatch_event(boost::function< void () > const& h) :
+                                 wxCommandEvent(wxEVT_DISPATCH), m_handler(h) {
+          assert(!m_handler.empty());
+        }
+
+        inline void invoke() {
+          m_handler();
+        }
+
+        inline wxEvent* Clone() const {
+          return new dispatch_event(m_handler);
+        }
+    };
 
     class project::tool_data : public wxTreeItemData {
       friend class project;
@@ -90,54 +112,6 @@ namespace squadt {
         }
     };
 
-    project::builder::builder() : timer(this, wxID_ANY) {
-      Connect(wxEVT_TIMER, wxTimerEventHandler(builder::process));
-
-      timer.Start(50, wxTIMER_ONE_SHOT);
-    }
-    
-    void project::builder::process(wxTimerEvent&) {
-      if (0 < tasks.size()) {
-        std::deque < boost::function< void () > > local_tasks;
-
-        local_tasks.swap(tasks);
-
-        do {
-          for (std::deque < boost::function< void () > >::const_iterator task = local_tasks.begin(); task != local_tasks.end(); ++task) {
-            if (!task->empty()) {
-              /* Execute task */
-              (*task)();
-            }
-          }
-
-          local_tasks.clear();
-          local_tasks.swap(tasks);
-        }
-        while (0 < local_tasks.size());
-      }
-
-      timer.Start(50, wxTIMER_ONE_SHOT);
-    }
-    
-    void project::builder::schedule_update(boost::function< void () > l) {
-      tasks.push_back(l);
-    }
-        
-    project::~project() {
-      manager->store();
-
-      object_view = 0;
-
-      /* Close tool displays */
-      process_display_view->GetSizer()->Clear(true);
-
-      manager.reset();
-    }
-
-    void project::store() {
-      manager->store();
-    }
-
     /**
      * \param p the parent window
      * \param l is the path
@@ -157,6 +131,29 @@ namespace squadt {
       }
 
       build();
+    }
+
+    project::~project() {
+      manager->store();
+
+      object_view = 0;
+
+      /* Close tool displays */
+      process_display_view->GetSizer()->Clear(true);
+
+      manager.reset();
+    }
+
+    void project::schedule_update(boost::function< void () > const& action) {
+      AddPendingEvent(dispatch_event(action));
+    }
+
+    void project::synchronised_update(wxCommandEvent& e) {
+      static_cast< dispatch_event& >(e).invoke();
+    }
+
+    void project::store() {
+      manager->store();
     }
 
     void project::update_object_status(boost::weak_ptr< processor > const& w, const wxTreeItemId s) {
@@ -183,7 +180,7 @@ namespace squadt {
       boost::shared_ptr< processor > g = w.lock();
 
       if (g.get() != 0) {
-        gui_builder.schedule_update(boost::bind(&project::update_object_status, this, w, s));
+        schedule_update(boost::bind(&project::update_object_status, this, w, s));
       }
     }
 
@@ -293,6 +290,7 @@ namespace squadt {
       object_view->Connect(wxEVT_COMMAND_TREE_END_DRAG, wxTreeEventHandler(project::on_object_drag), 0, this);
 
       Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select));
+      Connect(wxEVT_DISPATCH, wxCommandEventHandler(project::synchronised_update));
     }
 
     /**
@@ -699,9 +697,8 @@ namespace squadt {
        
         if (0 < conflicts->size()) {
           for (project_manager::conflict_list::iterator j = conflicts->begin(); j != conflicts->end(); ++j) {
-            gui_builder.schedule_update(boost::bind(&project::report_conflict, this,
-                wxString(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
-                  "The original file will be restored.") % (*j)->get_location() % tp->get_tool()->get_name()).c_str(), wxConvLocal)));
+            report_conflict(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
+                  "The original file will be restored.") % (*j)->get_location() % tp->get_tool()->get_name()));
 
             (*j)->self_check();
 
@@ -729,7 +726,11 @@ namespace squadt {
 
           /// Remove obsolete objects from view
           for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
-            if (existing.find(std::string(object_view->GetItemText(j).fn_str())) != existing.end()) {
+            boost::shared_ptr< processor::object_descriptor > object = static_cast < tool_data* > (object_view->GetItemData(j))->get_object();
+
+            if (object.get() != 0 && object->get_generator() == tp &&
+                existing.find(std::string(object_view->GetItemText(j).fn_str())) != existing.end()) {
+
               /* Remove from view */
               remove_from_object_view(j);
             }
@@ -742,8 +743,14 @@ namespace squadt {
       return true;
     }
 
-    void project::report_conflict(wxString const& s) {
-      wxMessageDialog(this, s, wxT("Warning: file overwritten"), wxOK).ShowModal();
+    void project::report_conflict(std::string const& s) {
+      struct trampoline {
+        static void show_message(wxWindow* parent, wxString s) {
+          wxMessageDialog(parent, s, wxT("Warning: file overwritten"), wxOK).ShowModal();
+        }
+      };
+
+      schedule_update(boost::bind(&trampoline::show_message, this, wxString(s.c_str(), wxConvLocal)));
     }
 
     void project::remove_from_object_view(wxTreeItemId& s) {
@@ -753,23 +760,33 @@ namespace squadt {
         }
       };
 
-      gui_builder.schedule_update(boost::bind(&trampoline::remove_from_view, object_view, s));
+      schedule_update(boost::bind(&trampoline::remove_from_view, object_view, s));
     }
 
     /**
-     * \param[in] s the tree item to connect to
-     * \param[in] t the object to associate the new item with
+     * \param[in] id the tree item to connect to
+     * \param[in] target the object to associate the new item with
      **/
-    void project::add_to_object_view(wxTreeItemId& s, boost::shared_ptr< processor::object_descriptor > t) {
+    void project::add_to_object_view(wxTreeItemId& id, boost::shared_ptr< processor::object_descriptor > target) {
       struct trampoline {
-        static void add_to_view(wxTreeCtrl* view, wxTreeItemId id, boost::shared_ptr< processor::object_descriptor > t) {
-          boost::shared_ptr< processor > owner(t->get_generator());
+        static void add_to_view(wxTreeCtrl* view, wxTreeItemId id, boost::shared_ptr< processor::object_descriptor > target) {
+          boost::shared_ptr< processor > owner(target->get_generator());
 
           if (owner.get() != 0) {
+            wxTreeItemIdValue cookie;
+       
+            for (wxTreeItemId j = view->GetFirstChild(id, cookie); j.IsOk(); j = view->GetNextChild(id, cookie)) {
+              boost::shared_ptr< processor::object_descriptor > object = static_cast < tool_data* > (view->GetItemData(j))->get_object();
+
+              if (object == target) {
+                return; // object is already present in view
+              }
+            }
+
             wxTreeItemId item = view->AppendItem(id,
-                   wxString(boost::filesystem::path(t->get_location()).leaf().c_str(), wxConvLocal), t->get_status());
+                   wxString(boost::filesystem::path(target->get_location()).leaf().c_str(), wxConvLocal), target->get_status());
            
-            view->SetItemData(item, new tool_data(*static_cast< squadt::GUI::project* > (view->GetParent()), t));
+            view->SetItemData(item, new tool_data(*static_cast< squadt::GUI::project* > (view->GetParent()), target));
 
             if (!view->IsExpanded(id)) {
               view->Expand(id);
@@ -778,7 +795,7 @@ namespace squadt {
         }
       };
 
-      gui_builder.schedule_update(boost::bind(&trampoline::add_to_view, object_view, s, t));
+      schedule_update(boost::bind(&trampoline::add_to_view, object_view, id, target));
     }
 
     /**

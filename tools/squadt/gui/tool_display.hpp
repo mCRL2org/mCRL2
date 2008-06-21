@@ -34,7 +34,6 @@ namespace squadt {
      **/
     class tool_display : public wxPanel {
       friend class GUI::project;
-      friend class GUI::project::builder;
 
       private:
 

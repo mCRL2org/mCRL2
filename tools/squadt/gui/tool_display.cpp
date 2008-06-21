@@ -545,7 +545,7 @@ namespace squadt {
       m_mediator->clear();
 
       if (u) {
-        m_project->gui_builder.schedule_update(boost::bind(&local::trampoline, this));
+        m_project->schedule_update(boost::bind(&local::trampoline, this));
       }
 
       /* End tool execution, if it was still running */
@@ -577,7 +577,6 @@ namespace squadt {
           /* Forcibly refresh display to prevent a crash on Mac OS X */
           Refresh();
           Update();
-          wxTheApp->Yield();
 
           Freeze();
 
@@ -597,7 +596,6 @@ namespace squadt {
           /* Forcibly refresh display to remove display artifacts on Mac OS X and Windows */
           GetParent()->Refresh();
           GetParent()->Update();
-          wxTheApp->Yield();
         }
 
         // clear event handlers
@@ -681,7 +679,7 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_log_update(boost::shared_ptr< tipi::report > l) {
-      m_project->gui_builder.schedule_update(boost::bind(&tool_display::update_log, this, l));
+      m_project->schedule_update(boost::bind(&tool_display::update_log, this, l));
     }
 
     /**
@@ -689,13 +687,13 @@ namespace squadt {
      **/
     void tool_display::schedule_layout_change(boost::shared_ptr < tipi::layout::tool_display > l) {
       if (m_layout) {
-        m_project->gui_builder.schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
+        m_project->schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
       }
     }
 
     void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
       if (m_layout) {
-        m_project->gui_builder.schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
+        m_project->schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
       }
     }
   }

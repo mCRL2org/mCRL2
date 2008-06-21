@@ -7,12 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file gui/project.h
-/// \brief Add your file description here.
 
 #ifndef SQUADT_PROJECT_H
 #define SQUADT_PROJECT_H
-
-#include <deque>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
@@ -25,7 +22,6 @@
 #include <wx/splitter.h>
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
-#include <wx/timer.h>
 
 namespace squadt {
 
@@ -54,31 +50,11 @@ namespace squadt {
          **/
         class tool_data;
 
-        /** \brief Performs GUI updates in idle time on behalf of other threads */
-        class builder: public wxEvtHandler {
-          friend class GUI::tool_display;
-       
-          private:
-       
-            /** \brief The list of tool displays that need to be updated */
-            std::deque < boost::function < void () > > tasks;
-
-            /** \brief Timer for GUI update cycle for tool displays */
-            wxTimer                                    timer;
-       
-          private:
-       
-            /** \brief The event handler that does the actual updating */
-            void process(wxTimerEvent&);
-       
-          public:
-       
-            /** \brief Constructor */
-            builder();
-       
-            /** \brief Schedule a tool display for update */
-            void schedule_update(boost::function < void () >);
-        };
+        /**
+         * Simple component for using the wxWidgets event handling system to invoke
+         * arbitrary functors as event handler.
+         **/
+        class dispatch_event;
        
       private:
 
@@ -90,9 +66,6 @@ namespace squadt {
 
         /** \brief The project manager object (backend) */
         boost::shared_ptr < project_manager > manager;
-
-        /** \brief Instantiation of a builder for this project */
-        builder                               gui_builder;
 
       private:
 
@@ -148,13 +121,19 @@ namespace squadt {
         void resolve_conflict(wxTreeItemId s, boost::shared_ptr< processor::object_descriptor > e, boost::shared_ptr< processor::object_descriptor > n);
 
         /** \brief Reports a conflict by presenting a non-interactive dialog window with details */
-        void report_conflict(wxString const& s);
+        void report_conflict(std::string const& s);
 
         /** \brief Updates the status of files in the object view */
         void set_object_status(boost::weak_ptr< processor > const&, const wxTreeItemId);
 
         /** \brief Updates the status of files in the object view */
         void update_object_status(boost::weak_ptr< processor > const&, const wxTreeItemId);
+
+        /** \brief Executes event handler in the main thread */
+        void synchronised_update(wxCommandEvent&);
+
+        /** \brief Schedules an event from any thread */
+        void schedule_update(boost::function< void () > const&);
 
       public:
 

@@ -177,8 +177,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  int local_var;
-  MCRL2_ATERM_INIT(local_var, lpCmdLine) 
+  MCRL2_ATERM_INIT(0, lpCmdLine) 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {

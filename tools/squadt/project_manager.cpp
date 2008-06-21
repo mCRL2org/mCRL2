@@ -487,7 +487,7 @@ namespace squadt {
         throw std::runtime_error("Conflict, non-file with name `" + s.string() + "' in directory " + store.string() + ".");
       }
     }
-    if (s == store / settings_manager::project_definition_base_name) {
+    if (s == settings_manager::project_definition_base_name) {
       throw std::runtime_error("Sorry, name `" + s.string() + "' is not allowed.");
     }
 

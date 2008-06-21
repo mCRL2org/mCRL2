@@ -84,8 +84,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
 
-  int local_var;
-  MCRL2_ATERM_INIT(local_var, &lpCmdLine)
+  MCRL2_ATERM_INIT(0, &lpCmdLine)
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
