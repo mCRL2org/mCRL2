@@ -998,7 +998,7 @@ namespace squadt {
       }
     }
     catch(std::exception& e) {
-      get_logger().log(1, "Fatal exception occured:" + std::string(e.what()));
+      get_logger().log(1, "Fatal exception occurred:" + std::string(e.what()));
     }
   }
 

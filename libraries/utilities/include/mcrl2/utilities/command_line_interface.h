@@ -532,12 +532,14 @@ namespace mcrl2 {
 
         /**
          * \brief Adds options for the rewriter
+         * Adds a single option called `rewrite' with a mandatory argument.
          * \return *this
          **/
         interface_description& add_rewriting_options();
 
         /**
          * \brief Adds options for the prover
+         * Adds a single option called `smt-solver' with a mandatory argument.
          * \return *this
          **/
         interface_description& add_prover_options();
@@ -665,6 +667,7 @@ namespace mcrl2 {
          * line, and executes default procedures for default options.
          * \param[in] interface_specification the interface description
          * \param[in] command_line the string that represents the unparsed command line
+         * \throws std::runtime_error
          **/
         inline command_line_parser(interface_description& interface_specification, char const* const command_line) :
                                          m_interface(interface_specification), options(m_options), arguments(m_arguments) {
@@ -680,6 +683,7 @@ namespace mcrl2 {
          * \param[in] interface_specification the interface description
          * \param[in] argument_count amount of arguments
          * \param[in] arguments C-style array with arguments
+         * \throws std::runtime_error
          **/
         template < typename CharacterType >
         command_line_parser(interface_description& interface_specification,

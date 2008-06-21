@@ -16,7 +16,6 @@
 #include <functional>
 
 #include <boost/bind.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/filesystem/convenience.hpp>
 
 #include "tipi/visitors.hpp"
