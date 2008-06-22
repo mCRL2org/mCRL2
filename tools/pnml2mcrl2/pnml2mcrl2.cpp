@@ -290,7 +290,6 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     // output: an AFun with the string of the format [a-zA-Z_][a-zA-Z0-9_]*
     //         If the input-string is already of this format, it is returned unchanged.
     //         If a string is of a different format, all characters that do not follow the format are replaced with an _
-    
     std::string name(ATgetName(id));
 
     // check if the first character is of format [a-zA-Z_]
@@ -300,7 +299,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       id=ATprependAFun("c_",id);
     }
 
-    name=strdup(ATgetName(id));
+    name=ATgetName(id);
 
     for(size_t i=0; i< name.size(); ++i) {
       if(!(isalnum(name[i]))) {
@@ -367,7 +366,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       cur = cur->NextSiblingElement(false);
     }
 
-    return 0;
+    return std::string();
   }
 
   //==================================================
@@ -386,7 +385,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       }
     }
 
-    return 0;
+    return std::string();
   }
   
   //==================================================
@@ -501,7 +500,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	
 	std::string sort=pn2gsGetElement(cur,"mcrl2sort");
 
-	if(sort!=""){
+	if(!sort.empty()){
 	  colored=ATtrue;
 	  std::istringstream iss(sort);
 
@@ -577,7 +576,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	std::string predicate=pn2gsGetElement(cur,"mcrl2predicate");
         //gsVerboseMsg("predicate %s\n", predicate);
 
-	if(predicate!=""){
+	if(!predicate.empty()){
 	  colored=ATtrue;
 	  std::istringstream iss(predicate);
 	  ATermAppl Predicate=parse_data_expr(iss);
@@ -698,7 +697,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 	// the arc contains a <name> element
 	// this element contains a childelement <text> which contains the type of the transition
         std::string name=pn2gsGetText(cur->FirstChildElement());
-        if(name!=""){
+        if(!name.empty()){
           colored=ATtrue;
           std::istringstream iss(name);
 
@@ -853,7 +852,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       else if (with_colors && cur->Value() == "toolspecific") {
         std::string prelude=pn2gsGetElement(cur,"mcrl2prelude");
 
-	if(prelude!=""){
+	if(!prelude.empty()){
 	  colored=ATtrue;
 	  std::istringstream s(prelude);
           //std::istringstream iss(s+"init delta;");
@@ -2257,7 +2256,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ticpp::Document doc(InFileName);
    
     try {
-      if (std::strcmp(InFileName,"-\0") == 0) {
+      if (std::strcmp(InFileName,"\0") == 0) {
         std::cin >> doc;
       }
       else {
