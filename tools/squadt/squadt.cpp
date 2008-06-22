@@ -247,7 +247,7 @@ bool SQuADt::OnInit() {
             splash_window->update();
 
             if (!path_to_try.empty()) {
-              if (tester::query_with_path(**t, path_to_try.branch_path() / (*t)->get_location().leaf())) {
+              if (tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf())) {
                 continue;
               }
             }
@@ -258,9 +258,9 @@ bool SQuADt::OnInit() {
 
             if (file_picker.ShowModal() == wxID_OK) {
               path_to_try = boost::filesystem::path(
-                      std::string(file_picker.GetFilename().fn_str())).branch_path();
+                      std::string(file_picker.GetPath().fn_str())).branch_path();
 
-              tester::query_with_path(**t, std::string(file_picker.GetFilename().fn_str()));
+              tester::query_with_path(**t, std::string(file_picker.GetPath().fn_str()));
             }
           }
         }

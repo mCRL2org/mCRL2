@@ -741,7 +741,7 @@ namespace tipi {
         wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w), ts);
 
         if (!p) {
-          throw std::runtime_error("Connection aborted!");
+          throw std::runtime_error("Communication failure or connection aborted!");
         }
       }
       else {
@@ -772,7 +772,7 @@ namespace tipi {
         wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w));
 
         if (!p) {
-          throw std::runtime_error("Connection aborted!");
+          throw std::runtime_error("Communication failure or connection aborted!");
         }
       }
       else {

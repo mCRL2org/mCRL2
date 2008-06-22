@@ -145,7 +145,9 @@ namespace squadt {
     }
 
     void project::schedule_update(boost::function< void () > const& action) {
-      AddPendingEvent(dispatch_event(action));
+      dispatch_event event(action); // as local variable instead of temporary for wx 2.8 compatibility
+
+      AddPendingEvent(event);
     }
 
     void project::synchronised_update(wxCommandEvent& e) {

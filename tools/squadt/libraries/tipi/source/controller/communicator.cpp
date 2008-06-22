@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <exception>
-#include <cstdlib>
 #include <sstream>
 
 #include <boost/bind.hpp>
@@ -202,16 +201,18 @@ namespace tipi {
             d->remove();
           
             try {
-              visitors::restore(*d, m->to_string());
-            
-              d->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
-           
-              // Register handler function
+              // Remove existing display data handler
               g->clear_handlers(tipi::message_display_data);
            
-              g->add_handler(tipi::message_display_data, boost::bind(&trampoline::update, _1, d, h2));
-          
+              visitors::restore(*d, m->to_string());
+            
               h1(d);
+
+              // Register display data handler (incoming)
+              g->add_handler(tipi::message_display_data, boost::bind(&trampoline::update, _1, d, h2));
+
+              // Register interaction event handler (outgoing)
+              d->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
             }
             catch (std::runtime_error& e) {
               g->logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");

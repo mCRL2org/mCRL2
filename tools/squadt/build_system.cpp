@@ -33,7 +33,7 @@ namespace squadt {
       "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
       "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
       "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
-      "pbes2bes", "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
+      "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
 
     using boost::filesystem::basename;
     using boost::filesystem::path;

@@ -154,7 +154,7 @@ namespace squadt {
      **/
     inline bool task_monitor_impl::await_connection(unsigned int const& ts) {
       boost::mutex::scoped_lock l(register_lock);
- 
+
       boost::xtime time;
 
       xtime_get(&time, boost::TIME_UTC);
@@ -162,7 +162,9 @@ namespace squadt {
       time.sec += ts;
 
       /* Other side has not connected and the process has not been registered as terminated */
-      connection_condition.timed_wait(l, time);
+      if (number_of_connections() == 0) {
+        connection_condition.timed_wait(l, time);
+      }
 
       return 0 < number_of_connections();
     }
@@ -173,7 +175,7 @@ namespace squadt {
      **/
     inline bool task_monitor_impl::await_connection() {
       boost::mutex::scoped_lock l(register_lock);
- 
+
       /* Other side has not connected and the process has not been registered as terminated */
       if (number_of_connections() == 0) {
         connection_condition.wait(l);
@@ -214,7 +216,7 @@ namespace squadt {
      **/
     inline void task_monitor_impl::signal_connection(boost::shared_ptr < task_monitor_impl >& m, tipi::message::end_point) {
       boost::mutex::scoped_lock l(register_lock);
- 
+
       logger->log(1, boost::str(boost::format("connection established with `%s' (process id %u)\n")
                 % associated_process->get_executable_name() % associated_process->get_identifier()));
 

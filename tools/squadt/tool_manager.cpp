@@ -47,24 +47,24 @@ namespace squadt {
        **/
       static void handle_relay_connection(tool_manager_impl& owner, boost::shared_ptr< const tipi::message >& m) {
         instance_identifier id = boost::lexical_cast< instance_identifier > (m->to_string());
-  
+
         if (owner.instances.find(id) == owner.instances.end()) {
           static_cast< transporter& >(owner).disconnect(*(m->get_originator()));
-  
+
           owner.get_logger().log(1, "connection terminated; peer provided invalid instance identifier");
-  
+
           return;
         }
-  
+
         boost::shared_ptr < execution::task_monitor > monitor(owner.instances[id]);
-  
+
         if (monitor) {
           owner.relay_connection(monitor.get(), const_cast < transport::transceiver::basic_transceiver* > (m->get_originator()));
-         
+
           owner.instances.erase(id);
-         
+
           monitor->await_process();
-         
+
           /* Signal the listener that a connection has been established */
           monitor->signal_connection(m->get_originator());
         }
