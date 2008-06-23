@@ -469,7 +469,7 @@ d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|
                \land\ \mb{|}\ \lor\ \mb{|}\ 
                \limp
 \end{tightarray}\]
-Here $\f{mvd}$ stands for a multiple data variable declaration, and $\oplus$ for a binary operator.
+Here $\f{mvd}$ stands for a multiple data variable declaration, $\oplus$ for a binary operator, and $N$ for a number.
 The unary operators have the highest priority, followed by the infix operators,
 followed by $\lambda$, $\forall$ and $\exists$, followed by $\kwwhr\ \kwend$.
 The descending order of precedence of the infix operators is:
@@ -518,7 +518,7 @@ p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \s
      & \mb{|} & ( d )\\
 as  & \mb{::=} & a |\,\mb{\cdots} | a\\
 ar  & \mb{::=} & a \to a\\
-ac  & \mb{::=} & a\sync\f{as}\ \mb{|}\ a\sync\f{as} \to a\\
+ac  & \mb{::=} & a\sync\f{as} \to a\ \mb{|}\ a\sync\f{as} \to \tau\ \mb{|}\ a\sync\f{as}\\
 \end{tightarray}\]
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
 respectively. $\f{as}$ represents an action sequence, $\f{ar}$ an action
