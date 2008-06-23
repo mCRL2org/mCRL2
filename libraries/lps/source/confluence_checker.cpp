@@ -181,7 +181,8 @@ using namespace mcrl2::core::detail;
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables) {
+  ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables) 
+  {
     assert(is_tau_summand(a_summand_1));
     assert(!is_delta_summand(a_summand_2));
     ATermAppl v_condition_1, v_condition_2;
@@ -194,10 +195,6 @@ using namespace mcrl2::core::detail;
     ATermList v_actions;
     ATermAppl v_actions_equation;
 
-    std::cerr << "INVARIANT: " << pp(a_invariant) << "\n";
-    std::cerr << "SUMMAND1: " << pp(a_summand_1) << "\n";
-    std::cerr << "SUMMAND2: " << pp(a_summand_2) << "\n";
-    std::cerr << "Variables: " << pp(a_variables) << "\n";
     v_condition_1 = ATAgetArgument(a_summand_1, 1);
     v_assignments_1 = ATLgetArgument(a_summand_1, 4);
     v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
@@ -224,7 +221,6 @@ using namespace mcrl2::core::detail;
       v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
     }
-    std::cerr << "RESULT: " << pp(gsMakeDataExprImp(v_lhs,v_rhs)) << "\n";
     return gsMakeDataExprImp(v_lhs, v_rhs);
   }
 
