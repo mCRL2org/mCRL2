@@ -99,7 +99,7 @@ namespace lps {
       result = push_front(result, data_assignment(i->lhs(), sumelm_replace(i->rhs(), replacements)));
     }
 
-    return result;
+    return reverse(result);
   }
 
   /// Adds replacement lhs := rhs to the specified map of replacements.
@@ -161,7 +161,7 @@ namespace lps {
       result = push_front(result, data_assignment(i->lhs(), rhs));
     }
 
-    return result;
+    return reverse(result);
   }
 
   ////////////////////////////////////////////////////////////
