@@ -116,7 +116,8 @@ using namespace mcrl2::core::detail;
     ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
     bool v_next_1 = true, v_next_2 = true;
 
-    while (!ATisEmpty(a_variables)) {
+    while (!ATisEmpty(a_variables)) 
+    {
       v_variable = ATAgetFirst(a_variables);
       a_variables = ATgetNext(a_variables);
       if (!ATisEmpty(a_assignments_1) && v_next_1) {
@@ -149,6 +150,9 @@ using namespace mcrl2::core::detail;
         v_next_2 = true;
       }
     }
+    assert(ATisEmpty(a_assignments_1)); // If this is not the case, the assignments do not have the
+    assert(ATisEmpty(a_assignments_2)); // same order as the list of variables. This means that some equations
+                                        // have not been generated.
     return v_result;
   }
 
@@ -190,6 +194,10 @@ using namespace mcrl2::core::detail;
     ATermList v_actions;
     ATermAppl v_actions_equation;
 
+    std::cerr << "INVARIANT: " << pp(a_invariant) << "\n";
+    std::cerr << "SUMMAND1: " << pp(a_summand_1) << "\n";
+    std::cerr << "SUMMAND2: " << pp(a_summand_2) << "\n";
+    std::cerr << "Variables: " << pp(a_variables) << "\n";
     v_condition_1 = ATAgetArgument(a_summand_1, 1);
     v_assignments_1 = ATLgetArgument(a_summand_1, 4);
     v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
@@ -216,6 +224,7 @@ using namespace mcrl2::core::detail;
       v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
     }
+    std::cerr << "RESULT: " << pp(gsMakeDataExprImp(v_lhs,v_rhs)) << "\n";
     return gsMakeDataExprImp(v_lhs, v_rhs);
   }
 
