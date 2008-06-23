@@ -142,7 +142,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> proc_expr_at proc_expr_at_wo_cond proc_expr_sync
 %type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
 %type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
-%type <appl> proc_quant mult_act_name ren_expr comm_expr
+%type <appl> proc_quant ren_expr comm_expr comm_expr_lhs mult_act_name
 //process specifications
 %type <appl> proc_spec proc_spec_elt act_spec proc_eqn_spec proc_eqn_decl
 %type <appl> proc_init
@@ -1683,29 +1683,29 @@ comm_exprs_cs:
 
 //communication expression
 comm_expr:
-  mult_act_name
+  comm_expr_lhs
     {
       safe_assign($$, gsMakeCommExpr($1, gsMakeNil()));
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
-  | mult_act_name ARROW TAU
+  | comm_expr_lhs ARROW TAU
     {      
       safe_assign($$, gsMakeCommExpr($1, gsMakeNil()));
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
-  | mult_act_name ARROW ID
+  | comm_expr_lhs ARROW ID
     {      
       safe_assign($$, gsMakeCommExpr($1, $3));
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
   ;
 
-//multi action name
-mult_act_name:
-  ids_bs
+//left-hand side of a communication expression
+comm_expr_lhs:
+  ID BAR ids_bs
     {
-      safe_assign($$, gsMakeMultActName(ATreverse($1)));
-      gsDebugMsg("parsed multi action name\n  %T\n", $$);
+      safe_assign($$, gsMakeMultActName(ATinsert(ATreverse($3), (ATerm) $1)));
+      gsDebugMsg("parsed left-hand side of communication expression\n  %T\n", $$);
     }
   ;
 
@@ -1748,6 +1748,15 @@ mult_act_names_cs:
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
       gsDebugMsg("parsed multi action names\n  %T\n", $$);
+    }
+  ;
+
+//multi action name
+mult_act_name:
+  ids_bs
+    {
+      safe_assign($$, gsMakeMultActName(ATreverse($1)));
+      gsDebugMsg("parsed multi action name\n  %T\n", $$);
     }
   ;
 

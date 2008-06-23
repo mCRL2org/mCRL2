@@ -2002,9 +2002,11 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  assert(!ATisEmpty(MActFrom));
 	  ATermAppl ActTo=ATAgetArgument(Comm,1);
 	  
-	  if(ATgetLength(MActFrom)==1)
-	    gsWarningMsg("using Syncronization as Renaming (hiding) of action %P into %P (typechecking %P)\n",
-			 ATgetFirst(MActFrom),ActTo,ProcTerm);
+	  if(ATgetLength(MActFrom)==1) {
+	    gsErrorMsg("using synchronization as renaming/hiding of action %P into %P (typechecking %P)\n",
+	      ATgetFirst(MActFrom),ActTo,ProcTerm);
+            return NULL;
+          }
 	  
 	  //Actions must be declared
 	  ATermList ResTypes=NULL;
