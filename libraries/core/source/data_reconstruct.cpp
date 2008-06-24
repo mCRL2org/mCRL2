@@ -1682,31 +1682,105 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
   {
     ATermAppl sort = ATAgetFirst(l);
     assert(p_ctx->sort_mappings.count(sort) == 1);
+    // mappings corresponding to the sort
     ATermList maps = p_ctx->sort_mappings[sort].elements();
+    // determine for each of the mappings whether it could be a recogniser or a
+    // projection function.
     while(!ATisEmpty(maps)) {
       ATermAppl map = ATAgetFirst(maps);
       assert(gsIsOpId(map));
       if (!ATisEqual(gsMakeOpIdNameIf(), gsGetName(map)) &&
           !ATisEqual(gsMakeOpIdNameEq(), gsGetName(map)) &&
-          !ATisEqual(gsMakeOpIdNameNeq(), gsGetName(map))) {
-        // map is possibly a recogniser
-        if (gsIsSortArrow(gsGetSort(map))) {
-          if(ATisEqual(gsGetSortExprResult(gsGetSort(map)), gsMakeSortExprBool())) {
+          !ATisEqual(gsMakeOpIdNameNeq(), gsGetName(map))) { // ==. if. != cannot be recogniser/projection
+
+        // map is possibly a recogniser or a projection function.
+        ATermAppl map_sort = gsGetSort(map);
+        if (gsIsSortArrow(map_sort))
+        { // A recogniser or projection function always has a function type...
+          if(ATgetLength(ATLgetArgument(map_sort, 0)) == 1)
+          { //... with exactly one argument
+          if(ATisEqual(gsGetSortExprResult(map_sort), gsMakeSortExprBool()))
+          { // if the result sort is a boolean map might be a recogniser
+            // a recogniser satisfies #equations = #constructors, and there must
+            // be constructors because it belongs to a structured sort.
             if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]
-              || p_ctx->num_sort_constructors[sort] == 0) {
-              if (p_ctx->num_map_equations[map] != 1) { // This is also not a projection function
-                remove_mapping_not_list(map, sort, p_ctx);
+              || p_ctx->num_sort_constructors[sort] == 0)
+              { // If this is not the case, map could still be a projection function,
+                // but then it has to have 1 equation.
+                if (p_ctx->num_map_equations[map] != 1)
+                { // This is also not a projection function
+                  remove_mapping_not_list(map, sort, p_ctx);
+                }
+                else
+                { // This might be a projection function, hence check if the equation has the right form.
+                  ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
+                  if (!is_projection_equation(eqn))
+                  {
+                    remove_mapping_not_list(map, sort, p_ctx);
+                  }
+                }
+              } else {
+                // map has the right form to be a recogniser, but beware, it
+                // might as well be a projection function in some degenerate
+                // cases!
+                // First check whether there is only one equation, in which case
+                // we need to check both recogniser and projection.
+                if (p_ctx->num_map_equations[map] == 1)
+                {
+                  ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
+                  if (is_recogniser_equation(eqn))
+                  {
+                    p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
+                  }
+                  else if (!is_projection_equation(eqn))
+                  {
+                    remove_mapping_not_list(map, sort, p_ctx);
+                  }
+                }
+                else
+                {
+                  // Check that indeed all equations satisfy recogniser properties
+                  ATermList l = p_ctx->map_equations[map].elements();
+                  bool r = true;
+                  while (!ATisEmpty(l) && r)
+                  {
+                    r = r && is_recogniser_equation(ATAgetFirst(l));
+                    l = ATgetNext(l);
+                  }
+                  if(r)
+                  {
+                    p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
+                  }
+                  else
+                  {
+                  remove_mapping_not_list(map, sort, p_ctx);
+                  }
+                }
               }
-            } else {
-              p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
             }
-          } else if (p_ctx->num_map_equations[map] != 1) {
+          }
+          else if (p_ctx->num_map_equations[map] == 1)
+          {
+            // This might be a projection function, check the signature
+            ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
+            if (!is_projection_equation(eqn))
+            {
+              remove_mapping_not_list(map, sort, p_ctx);
+            }
+          }
+          else
+          { // This is neither a recogniser, nor a projection function
             remove_mapping_not_list(map, sort, p_ctx);
           }
-        } else {
+        } //endif gsIsSortArrow
+        else
+        { // A constant function is also not a recogniser, nor a projection function
           remove_mapping_not_list(map, sort, p_ctx);
         }
-      }
+      } // endif if, ==, !=
+      // else the function is ==, if or !=, which is not a recogniser or a
+      // projection function, but should still be removed from the
+      // specification.
       maps = ATgetNext(maps);
     }
   }
