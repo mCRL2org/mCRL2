@@ -10,7 +10,7 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
-#define MCRL2_PBES_CONSTELM_DEBUG
+// #define MCRL2_PBES_CONSTELM_DEBUG
 
 #include <sstream>
 #include <iostream>
@@ -262,7 +262,7 @@ namespace detail {
 
 } // namespace detail
 
-  template <typename DataRewriter, typename PbesRewriter, typename IdentifierGenerator>
+  template <typename DataRewriter, typename PbesRewriter>
   class pbes_constelm_algorithm
   {
     protected:

@@ -255,7 +255,6 @@ namespace pbes_expr {
   inline
   pbes_expression forall(data::data_variable_list l, pbes_expression p)
   {
-    // TODO: Due to a bug in the gs library this check has to be added.
     if (l.empty())
     {
       return p;
@@ -267,7 +266,6 @@ namespace pbes_expr {
   inline
   pbes_expression exists(data::data_variable_list l, pbes_expression p)
   {
-    // TODO: Due to a bug in the gs library this check has to be added.
     if (l.empty())
     {
       return p;
@@ -389,6 +387,15 @@ namespace pbes_expr_optimized {
     {
       return p;
     }
+    if (is_false(p))
+    {
+      // N.B. Here we use the fact that mCRL2 data types are never empty.
+      return false_();
+    }
+    if (is_true(p))
+    {
+      return true_();
+    }
     return pbes_expr::forall(l, p);
   }
   
@@ -400,6 +407,15 @@ namespace pbes_expr_optimized {
     if (l.empty())
     {
       return p;
+    }
+    if (is_false(p))
+    {
+      return false_();
+    }
+    if (is_true(p))
+    {
+      // N.B. Here we use the fact that mCRL2 data types are never empty.
+      return true_();
     }
     return pbes_expr::exists(l, p);
   }
