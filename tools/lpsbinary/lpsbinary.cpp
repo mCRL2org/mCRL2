@@ -94,7 +94,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for strategy selection
   mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
@@ -157,7 +157,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   options.strategy    = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   send_display_layout(d.set_manager(d.create< vertical_box >().
                 append(d.create< label >().set_text("Binary in progress"), layout::left)));

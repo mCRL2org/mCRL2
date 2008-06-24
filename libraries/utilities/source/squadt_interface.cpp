@@ -225,26 +225,20 @@ namespace mcrl2 {
         m_communicator->send_status_report(m, d);
       }
 
-      /**
-       * \param[in] d the display object that contains the data to communicate
-       **/
-      void tool_interface::send_display_layout(::tipi::layout::tool_display& d) {
-        boost::shared_ptr< ::tipi::layout::tool_display > dsp(&d,
-                              ::utility::trivial_deleter< ::tipi::layout::tool_display >());
-
-        m_communicator->send_display_layout(dsp);
-      }
-
       void tool_interface::send_clear_display() {
         m_communicator->send_clear_display();
       }
 
       void tool_interface::send_hide_display() {
-        boost::shared_ptr < tipi::layout::tool_display > p(new tipi::layout::tool_display());
+        tipi::tool_display d;
 
-        p->show(false);
+        d.show(false);
 
-        m_communicator->send_display_layout(p);
+        m_communicator->send_display_layout(d);
+      }
+
+      void tool_interface::send_display_layout(tipi::tool_display& d) {
+        m_communicator->send_display_layout(d);
       }
 
       /// \cond INTERNAL_DOCS
@@ -259,7 +253,7 @@ namespace mcrl2 {
 
         return true;
       }
-  
+
       static bool initialised = initialise();
       /// \endcond
     }

@@ -33,8 +33,7 @@ namespace tipi {
       "display_data",
       "identification",
       "report",
-      "task_start",
-      "task_done",
+      "task",
       "termination",
       "unknown"
     };

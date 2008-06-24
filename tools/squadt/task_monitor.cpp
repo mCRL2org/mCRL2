@@ -36,20 +36,22 @@ namespace squadt {
     }
 
     /**
-     * @param[in] b whether the function should block until the process has registered or not
+     * \param[in] b whether the function should block until the process has registered or not
      *
      * \return A pointer to the associated process, or 0 on program failure
      **/
     process::sptr task_monitor::get_process(const bool b) const {
       if (b) {
-        boost::static_pointer_cast < task_monitor_impl > (impl)->await_process();
+        boost::static_pointer_cast < task_monitor_impl >(impl)->
+                await_process(boost::static_pointer_cast < task_monitor_impl >(impl));
       }
 
       return (boost::static_pointer_cast < task_monitor_impl > (impl)->associated_process);
     }
 
     void task_monitor::await_process() const {
-      boost::static_pointer_cast < task_monitor_impl > (impl)->await_process();
+      boost::static_pointer_cast < task_monitor_impl > (impl)->
+                await_process(boost::static_pointer_cast < task_monitor_impl >(impl));
     }
 
     /**
@@ -68,26 +70,26 @@ namespace squadt {
      * \param[in] ts the maximum number of seconds to block
      **/
     bool task_monitor::await_connection(unsigned int const& ts) {
-      return boost::static_pointer_cast < task_monitor_impl > (impl)->await_connection(ts);
+      return boost::static_pointer_cast < task_monitor_impl > (impl)->
+                await_connection(boost::static_pointer_cast < task_monitor_impl > (impl), ts);
     }
 
     bool task_monitor::await_connection() {
-      return boost::static_pointer_cast < task_monitor_impl > (impl)->await_connection();
+      return boost::static_pointer_cast < task_monitor_impl > (impl)->
+                await_connection(boost::static_pointer_cast < task_monitor_impl > (impl));
     }
 
     bool task_monitor::await_completion() {
-      return boost::static_pointer_cast < task_monitor_impl > (impl)->await_completion();
+      return boost::static_pointer_cast < task_monitor_impl > (impl)->
+                await_completion(boost::static_pointer_cast < task_monitor_impl >(impl));
     }
 
     /**
      * @param[in] e the other end point of the connection
      **/
     void task_monitor::signal_connection(tipi::message::end_point e) {
-      boost::shared_ptr < task_monitor_impl > m = boost::static_pointer_cast < task_monitor_impl > (impl);
-
-      if (impl) {
-        m->signal_connection(m, e);
-      }
+      boost::static_pointer_cast < task_monitor_impl >(impl)->
+              signal_connection(boost::static_pointer_cast < task_monitor_impl >(impl), e);
     }
 
     /**

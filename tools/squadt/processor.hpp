@@ -264,10 +264,10 @@ namespace squadt {
       typedef boost::function < void () >                                                     status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (boost::shared_ptr < tipi::layout::tool_display >) >     display_layout_callback_function;
+      typedef boost::function < void (boost::shared_ptr < tipi::tool_display >) >     display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
-      typedef boost::function < void (tipi::layout::tool_display::constant_elements const&) > display_update_callback_function;
+      typedef boost::function < void (std::vector< tipi::layout::element const* > const&) > display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
       typedef boost::function < void (boost::shared_ptr < tipi::report >) >                   status_message_callback_function;

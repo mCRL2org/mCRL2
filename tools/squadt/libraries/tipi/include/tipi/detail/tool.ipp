@@ -9,7 +9,7 @@
 /// \file include/tipi/detail/tool.ipp
 
 #include "tipi/common.hpp"
-#include <tipi/detail/basic_messenger.ipp>
+#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/tool.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/layout_base.hpp"
@@ -44,9 +44,6 @@ namespace tipi {
         /** \brief Send details about the controllers capabilities */
         void handle_capabilities_request(boost::shared_ptr< const tipi::message >&);
 
-        /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
-        void receive_display_data_handler(boost::shared_ptr< const tipi::message >&, boost::shared_ptr < layout::tool_display >);
-
         /** \brief Extract a configuration from an offer_configuration message */
         void receive_configuration_handler(boost::shared_ptr< const tipi::message >& m);
 
@@ -72,7 +69,7 @@ namespace tipi {
         bool activate(tipi::tool::communicator*, command_line_interface::scheme_ptr const&, long const&);
 
         /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(boost::shared_ptr < layout::tool_display >);
+        void send_display_layout(boost::shared_ptr< communicator_impl >, tool_display&);
  
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();
@@ -126,18 +123,8 @@ namespace tipi {
       return (s.get() != 0);
     }
 
-    inline void communicator_impl::send_display_layout(boost::shared_ptr < layout::tool_display > d) {
-      tipi::message m(tipi::visitors::store(*d), tipi::message_display_layout);
-
-      send_message(m);
-
-      clear_handlers(tipi::message_display_data);
-
-      add_handler(tipi::message_display_data, boost::bind(&communicator_impl::receive_display_data_handler, this, _1, d));
-    }
-
     inline void communicator_impl::send_clear_display() {
-      layout::tool_display display;
+      tool_display display;
 
       clear_handlers(tipi::message_display_data);
 
@@ -160,22 +147,6 @@ namespace tipi {
         }
         catch (...) {
         }
-      }
-    }
- 
-    /**
-     * \param[in] m shared pointer to the message
-     * \param[out] d tool display on which to execute changes
-     **/
-    inline void communicator_impl::receive_display_data_handler(boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < layout::tool_display > d) {
-      try {
-        std::vector < tipi::layout::element const* > elements;
-
-        if (d->get_manager() != 0) {
-          tipi::visitors::restore(*d, elements, m->to_string());
-        }
-      }
-      catch (...) {
       }
     }
     

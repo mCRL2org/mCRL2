@@ -575,16 +575,16 @@ namespace utility {
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to store
+   * \param[in] c a tipi::tool_display object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::tool_display const& c) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::tool_display const& c) {
     out << "<display-layout visible=\"" << c.m_visible << "\">"
         << "<layout-manager>";
 
-    if (c.m_manager.get() != 0) {
-      do_visit(*c.m_manager, static_cast < tipi::display const& > (c));
+    if (c.get_manager() != 0) {
+      do_visit(*c.get_manager(), static_cast < tipi::display const& > (c));
     }
 
     out << "</layout-manager>"
@@ -607,7 +607,7 @@ namespace utility {
     register_visit_method< const tipi::tool::capabilities >();
     register_visit_method< const tipi::tool::capabilities::input_configuration >();
     register_visit_method< const tipi::report >();
-    register_visit_method< const tipi::layout::tool_display >();
+    register_visit_method< const tipi::tool_display >();
     register_visit_method< const tipi::layout::elements::button, const ::tipi::display::element_identifier >();
     register_visit_method< const tipi::layout::elements::checkbox, const ::tipi::display::element_identifier >();
     register_visit_method< const tipi::layout::elements::label, const ::tipi::display::element_identifier >();

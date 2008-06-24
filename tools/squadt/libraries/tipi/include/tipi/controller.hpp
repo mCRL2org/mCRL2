@@ -52,7 +52,7 @@ namespace tipi {
       public:
 
         /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (boost::shared_ptr< tipi::layout::tool_display >) >                     display_layout_handler_function;
+        typedef boost::function < void (boost::shared_ptr< tipi::tool_display >) >                     display_layout_handler_function;
 
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (std::vector < tipi::layout::element const* > const&) >  display_update_handler_function;

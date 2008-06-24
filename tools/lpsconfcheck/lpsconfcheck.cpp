@@ -214,7 +214,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for linearisation method selection
   mcrl2::utilities::squadt::radio_button_helper < SMT_Solver_Type > solver_selector(d);
@@ -346,7 +346,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   extract_task_options(c, task_options);
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   label& message = d.create< label >();
  

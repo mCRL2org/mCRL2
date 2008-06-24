@@ -97,7 +97,7 @@ class squadt_interactor::storage_configuration {
   public:
 
     template < typename M >
-    storage_configuration(tipi::configuration& c, tipi::layout::tool_display& d, M& m) :
+    storage_configuration(tipi::configuration& c, tipi::tool_display& d, M& m) :
       cb_out_info(d.create< tipi::layout::elements::checkbox >()),
       cb_usedummies(d.create< tipi::layout::elements::checkbox >()),
       cb_state_format_tree(d.create< tipi::layout::elements::checkbox >()),
@@ -242,7 +242,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   boost::function < void (tipi::configuration&) > update_configuration;
   
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for exploration strategy selection
   mcrl2::utilities::squadt::radio_button_helper< exploration_strategy > exploration_strategy_selector(d);
@@ -409,7 +409,7 @@ class squadt_interactor::status_display {
 
     squadt_interactor&  m_communicator;
 
-    tipi::layout::tool_display display;
+    tipi::tool_display display;
 
     tipi::layout::elements::label&        lb_level;
     tipi::layout::elements::label&        lb_explored;

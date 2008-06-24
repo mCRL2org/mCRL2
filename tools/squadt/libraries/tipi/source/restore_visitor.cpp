@@ -534,12 +534,12 @@ namespace utility {
 
       // Check whether the group is complete
       do {
-        i = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+        i = &d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
       }
       while (i != &c);
 
       do {
-        i->m_connection = d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+        i->m_connection = &d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
         i               = i->m_connection;
       } while (i != &c);
 
@@ -852,43 +852,43 @@ namespace utility {
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to restore
+   * \param[in] c a tipi::tool_display object to restore
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::tool_display& c) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout");
 
     if (tree->Value() == "display-layout") {
-      c.m_element_by_id.clear();
+      c.impl.reset(new tipi::display_impl);
 
       tree->GetAttribute("visible", &c.m_visible, false);
      
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
         if (e->Value() == "layout-manager" && !e->NoChildren()) {
-          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, static_cast < tipi::display& > (c));
+          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.impl->get_manager(), static_cast < tipi::display& > (c));
         }
       }
     }
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to restore
+   * \param[in] c a tipi::tool_display object to restore
    * \param[in,out] elements the list of tipi::layout::element objects that has been modified
    * \todo create and move this functionality to mediator / update visitors
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
   
-    if (c.m_manager.get() != 0) {
+    if (c.get_manager() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
           ::tipi::display::element_identifier id;
 
           e->GetAttribute("id", &id, false);
 
-          if (tipi::layout::element const* t = c.find< tipi::layout::element >(id)) {
+          if (tipi::layout::element const* t = &c.find< tipi::layout::element >(id)) {
             visitor< tipi::restore_visitor_impl >(e).do_visit(*t);
 
             elements.push_back(t);
@@ -917,8 +917,8 @@ namespace utility {
     register_visit_method< tipi::tool::capabilities::input_configuration,
                 boost::shared_ptr < tipi::tool::capabilities::input_configuration > >();
     register_visit_method< tipi::report >();
-    register_visit_method< tipi::layout::tool_display >();
-    register_visit_method< tipi::layout::tool_display, std::vector< tipi::layout::element const* > >();
+    register_visit_method< tipi::tool_display >();
+    register_visit_method< tipi::tool_display, std::vector< tipi::layout::element const* > >();
     register_visit_method< tipi::layout::elements::button >();
     register_visit_method< tipi::layout::elements::checkbox >();
     register_visit_method< tipi::layout::elements::label >();

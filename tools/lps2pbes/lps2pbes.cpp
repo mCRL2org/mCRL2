@@ -189,7 +189,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for end phase selection
   mcrl2::utilities::squadt::radio_button_helper < t_phase > phase_selector(d);

@@ -38,7 +38,6 @@
 #include "boost/bind.hpp"
 #include "boost/format.hpp"
 #include "boost/foreach.hpp"
-#include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/filesystem/convenience.hpp"
 
@@ -431,15 +430,7 @@ namespace squadt {
 
         m_status = process::aborted;
 
-        boost::timed_mutex m;
-
-        boost::xtime time;
-
-        xtime_get(&time, boost::TIME_UTC);
-
-        time.sec += 2;
-
-        boost::timed_mutex::scoped_timed_lock(m, time);
+        boost::this_thread::sleep(boost::posix_time::seconds(2));
 
         kill(m_information.process_identifier, SIGKILL);
       }

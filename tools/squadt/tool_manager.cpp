@@ -63,8 +63,6 @@ namespace squadt {
 
           owner.instances.erase(id);
 
-          monitor->await_process();
-
           /* Signal the listener that a connection has been established */
           monitor->signal_connection(m->get_originator());
         }

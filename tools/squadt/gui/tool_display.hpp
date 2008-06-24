@@ -41,7 +41,7 @@ namespace squadt {
         GUI::project*                                           m_project;
 
         /** \brief Abstract description of the current layout of this panel */
-        boost::shared_ptr < tipi::layout::tool_display >        m_layout;
+        boost::shared_ptr < tipi::tool_display >        m_layout;
 
         /** \brief Sizer that contains the content part */
         wxSizer*                                                m_content;
@@ -64,16 +64,16 @@ namespace squadt {
         void build();
 
         /** \brief Builds the specified layout within this window */
-        void instantiate(boost::weak_ptr< tipi::layout::tool_display >, boost::shared_ptr< tipi::layout::tool_display > l);
+        void instantiate(boost::weak_ptr< tipi::tool_display >, boost::shared_ptr< tipi::tool_display > l);
 
         /** \brief Update the (G)UI state for a list of elements */
-        void update(boost::weak_ptr< tipi::layout::tool_display >, std::vector < tipi::layout::element const* >);
+        void update(boost::weak_ptr< tipi::tool_display >, std::vector < tipi::layout::element const* >);
 
         /** \brief Update the log with incoming status messages */
         void update_log(boost::shared_ptr< tipi::report > l);
 
         /** \brief Set a new layout description */
-        void schedule_layout_change(boost::shared_ptr< tipi::layout::tool_display >);
+        void schedule_layout_change(boost::shared_ptr< tipi::tool_display >);
 
         /** \brief Set a new layout description */
         void schedule_layout_update(std::vector < tipi::layout::element const* > const&);

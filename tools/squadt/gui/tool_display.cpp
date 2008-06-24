@@ -97,7 +97,7 @@ namespace utility {
   // code could be more compact and clear but needs to be this way to circumvent buttom-up construction bug in wxWidgets
   template <>
   template <>
-  std::auto_ptr< wxObject > visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::visit(tipi::layout::tool_display const& t) {
+  std::auto_ptr< wxObject > visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::visit(tipi::tool_display const& t) {
     if (t.get_manager() != 0) {
       return do_visit(*t.get_manager());
     }
@@ -402,7 +402,7 @@ namespace utility {
 
   template <>
   bool visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::initialise() {
-    register_visit_method< const tipi::layout::tool_display >();
+    register_visit_method< const tipi::tool_display >();
     register_visit_method< const tipi::layout::vertical_box >();
     register_visit_method< const tipi::layout::horizontal_box >();
     register_visit_method< const tipi::layout::elements::label >();
@@ -444,7 +444,7 @@ namespace squadt {
      **/
     tool_display::tool_display(wxWindow* p, GUI::project* c, boost::shared_ptr < processor::monitor >& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                m_project(c), m_layout(new tipi::layout::tool_display), m_content(0),
+                                m_project(c), m_layout(new tipi::tool_display), m_content(0),
                                 m_monitor(s), m_log(0), m_mediator(new tool_display_mediator(*this)) {
 
       build();
@@ -569,8 +569,8 @@ namespace squadt {
      * \param[in] w weak pointer to the interface object
      * \param[in] l the new tool_display object
      **/
-    void tool_display::instantiate(boost::weak_ptr < tipi::layout::tool_display > w, boost::shared_ptr< tipi::layout::tool_display > l) {
-      boost::shared_ptr < tipi::layout::tool_display > g(w.lock());
+    void tool_display::instantiate(boost::weak_ptr < tipi::tool_display > w, boost::shared_ptr< tipi::tool_display > l) {
+      boost::shared_ptr < tipi::tool_display > g(w.lock());
 
       if (g.get() != 0) {
         if (m_content != 0) {
@@ -634,8 +634,8 @@ namespace squadt {
      * \param[in] w weak pointer to this object
      * \param[in] l the layout elements that have changed
      **/
-    void tool_display::update(boost::weak_ptr< tipi::layout::tool_display > w, std::vector < tipi::layout::element const* > l) {
-      boost::shared_ptr < tipi::layout::tool_display > p(w.lock()); 
+    void tool_display::update(boost::weak_ptr< tipi::tool_display > w, std::vector < tipi::layout::element const* > l) {
+      boost::shared_ptr < tipi::tool_display > p(w.lock()); 
 
       if (p) {
         BOOST_FOREACH(tipi::layout::element const* i, l) {
@@ -685,15 +685,15 @@ namespace squadt {
     /**
      * \param[in] l the layout specification
      **/
-    void tool_display::schedule_layout_change(boost::shared_ptr < tipi::layout::tool_display > l) {
+    void tool_display::schedule_layout_change(boost::shared_ptr < tipi::tool_display > l) {
       if (m_layout) {
-        m_project->schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
+        m_project->schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::tool_display >(m_layout), l));
       }
     }
 
     void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
       if (m_layout) {
-        m_project->schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::layout::tool_display >(m_layout), l));
+        m_project->schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::tool_display >(m_layout), l));
       }
     }
   }

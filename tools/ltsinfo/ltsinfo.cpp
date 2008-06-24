@@ -106,7 +106,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   std::string infilename = c.get_input(lts_file_for_input).get_location();
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for linearisation method selection
   mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_equivalence > determinism_selector(d);
@@ -178,7 +178,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   if (l.read_from(input_object.get_location(), t)) {
     /* Create and add the top layout manager */
-    tipi::layout::tool_display d;
+    tipi::tool_display d;
  
     layout::horizontal_box& m = d.create< horizontal_box >();
 

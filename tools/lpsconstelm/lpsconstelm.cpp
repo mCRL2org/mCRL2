@@ -207,7 +207,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   layout::horizontal_box& m = d.create< horizontal_box >();
 

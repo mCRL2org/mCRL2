@@ -30,8 +30,7 @@
 #include "boost/bind.hpp"
 #include "boost/foreach.hpp"
 #include "boost/thread/thread.hpp"
-#include "boost/thread/condition.hpp"
-#include "boost/thread/xtime.hpp"
+#include "boost/thread/condition_variable.hpp"
 
 /// \cond INTERNAL_DOCS
 /**
@@ -53,6 +52,8 @@ inline bool workaround() {
 namespace tipi {
 
   namespace messaging {
+
+    static size_t maximum_buffer_size = 64;
 
     /**
      * \brief Abstract communicator class that divides an incoming data stream in messages
@@ -79,33 +80,37 @@ namespace tipi {
         /** \brief Monitor synchronisation construct */
         class waiter_data {
        
-          private:
+          public:
        
             /** \brief boost::mutex synchronisation primitive */
             boost::mutex                                     mutex;
        
             /** \brief boost::condition synchronisation primitive */
-            boost::condition                                 condition;
+            boost::condition_variable                        condition;
+
+          private:
        
-            /** \brief pointers to local message variables */
-            std::vector < boost::shared_ptr < const M >* >   pointers;
+            boost::shared_ptr< const M >                     message;
        
           public:
        
-            /** \brief Constructor */
-            waiter_data(boost::shared_ptr < const M >&);
-       
-            /** \brief Block until the next message has been delivered, or the object is destroyed */
-            void wait(boost::function < void () >);
-       
-            /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
-            void wait(boost::function < void () >, long const&);
-       
-            /** \brief Wake up all treads that are blocked via wait(), and delivers a message */
-            void wake(boost::shared_ptr < const M > const&);
-       
-            /** \brief Wake up all treads that are blocked via wait() */
-            void wake();
+            /** \brief Wake up with timouut all treads that are blocked on the condition */
+            inline void wake(boost::shared_ptr< const M > const& m) {
+              message = m;
+
+              wake();
+            }
+
+            /** \brief Wake up all treads that are blocked on the condition */
+            inline void wake() {
+              boost::mutex::scoped_lock l(mutex);
+
+              condition.notify_all();
+            }
+
+            inline boost::shared_ptr< const M > get_message() const {
+              return message;
+            }
         };
 
       private:
@@ -133,9 +138,6 @@ namespace tipi {
         /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
         boost::recursive_mutex     waiter_lock;
 
-        /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
-        boost::mutex               delivery_lock;
-
         /** \brief The current task queue (messages to be delivered) */
         message_queue_t            task_queue;
 
@@ -148,11 +150,10 @@ namespace tipi {
         /** \brief Whether or not a message start tag has been matched after the most recent message end tag */
         bool                       message_open;
 
-        /** \brief Whether or not a delivery thread is active */
-        volatile bool              delivery_thread_active;
-
         /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
+
+        boost::shared_ptr< boost::mutex > delivery_lock;
 
       protected:
 
@@ -174,7 +175,7 @@ namespace tipi {
       private:
 
         /** \brief Helper function that services the handlers */
-        void service_handlers();
+        void service_handlers(boost::shared_ptr< boost::mutex >);
 
         /** \brief Remove a message from the queue */
         void remove_message(boost::shared_ptr < const M >& p);
@@ -205,7 +206,7 @@ namespace tipi {
         /** \brief Wait until the first message of type t has arrived */
         boost::shared_ptr < const M > find_message(const typename M::type_identifier_t);
  
-        /** \brief Destroys all connections */
+        /** \brief Breaks all connections */
         void disconnect();
  
         /** \brief Set the handler for a type */
@@ -219,7 +220,20 @@ namespace tipi {
 
         /** \brief Destructor */
         virtual ~basic_messenger_impl() {
+
           disconnect();
+
+          boost::recursive_mutex::scoped_lock w(waiter_lock);
+
+          task_queue.clear();
+          message_queue.clear();
+
+          // Unblock all waiters;
+          BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
+            w.second->wake();
+          }
+
+          waiters.clear();
         }
     };
 
@@ -306,29 +320,20 @@ namespace tipi {
      **/
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger >& l) :
-       message_open(false), delivery_thread_active(false), partially_matched(0), logger(l) {
+       message_open(false), partially_matched(0),
+       delivery_lock(new boost::mutex), logger(l) {
     }
 
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl() :
-       message_open(false), delivery_thread_active(false), partially_matched(0), logger(get_default_logger()) {
+       message_open(false), partially_matched(0),
+       delivery_lock(new boost::mutex), logger(get_default_logger()) {
     }
 
     template < class M >
     inline void basic_messenger_impl< M >::disconnect() {
 
-      boost::recursive_mutex::scoped_lock w(waiter_lock);
-      boost::mutex::scoped_lock           ww(delivery_lock);
-
       transporter_impl::disconnect();
-
-      task_queue.clear();
-      message_queue.clear();
-
-      // Unblock all waiters;
-      BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
-        w.second->wake();
-      }
     }
 
     /**
@@ -493,15 +498,10 @@ namespace tipi {
 
               task_queue.push_back(message);
 
-              if (task_queue.size() == 1) {
-                boost::mutex::scoped_lock w(delivery_lock);
-             
-                if (!delivery_thread_active) {
-                  delivery_thread_active = true;
-             
-                  /* Start delivery thread */
-                  boost::thread thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this));
-                }
+              if (delivery_lock->try_lock()) { /// Start delivery thread
+                delivery_lock->unlock();
+
+                boost::thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this, delivery_lock));
               }
             }
           }
@@ -605,19 +605,21 @@ namespace tipi {
      * \attention Meant to be called from a separate thread
      **/
     template < class M >
-    inline void basic_messenger_impl< M >::service_handlers() {
+    inline void basic_messenger_impl< M >::service_handlers(boost::shared_ptr< boost::mutex > delivery_lock) {
 
-      boost::recursive_mutex::scoped_lock ww(waiter_lock);
+      boost::mutex::scoped_lock w(*delivery_lock);
 
-      while (delivery_thread_active) {
+      if (!delivery_lock.unique()) { // object (*this) still exists
         while (0 < task_queue.size()) {
-       
+        
           boost::shared_ptr < const M > m(task_queue.front());
-      
+        
           task_queue.pop_front();
-      
+        
           typename M::type_identifier_t id = m->get_type();
-      
+        
+          boost::recursive_mutex::scoped_lock ww(waiter_lock);
+
           if (handlers.count(id)) {
             BOOST_FOREACH(handler_type h, handlers[id]) {
               h(m);
@@ -643,80 +645,12 @@ namespace tipi {
             /* Put message into queue */
             message_queue.push_back(m);
          
-            if (16 < message_queue.size()) {
+            if (maximum_buffer_size < message_queue.size()) {
               message_queue.pop_front();
             }
           }
         }
-
-        boost::mutex::scoped_lock w(delivery_lock);
-
-        delivery_thread_active = (task_queue.size() != 0);
       }
-    }
-
-    /**
-     * \param[in] m reference to the pointer to a message to deliver
-     **/
-    template < class M >
-    basic_messenger_impl< M >::waiter_data::waiter_data(boost::shared_ptr < const M >& m) {
-      pointers.push_back(&m);
-    }
-
-    /**
-     * \param[in] m reference to the pointer to a message to deliver
-     **/
-    template < class M >
-    void basic_messenger_impl< M >::waiter_data::wake(boost::shared_ptr< const M > const& m) {
-      boost::mutex::scoped_lock l(mutex);
-
-      BOOST_FOREACH(boost::shared_ptr < const M >* i, pointers) {
-        *i = m;
-      }
-
-      pointers.clear();
-
-      condition.notify_all();
-    }
-
-    template < class M >
-    void basic_messenger_impl< M >::waiter_data::wake() {
-      boost::mutex::scoped_lock l(mutex);
-
-      pointers.clear();
-
-      condition.notify_all();
-    }
-
-    /**
-     * \param[in] h a function, called after lock on mutex is obtained and before notification
-     **/
-    template < class M >
-    void basic_messenger_impl< M >::waiter_data::wait(boost::function< void () > h) {
-      boost::mutex::scoped_lock l(mutex);
-
-      h();
-
-      condition.wait(l);
-    }
-
-    /**
-     * \param[in] h a function, called after lock on mutex is obtained and before notification
-     * \param[in] ts the maximum time to wait in seconds
-     **/
-    template < class M >
-    void basic_messenger_impl< M >::waiter_data::wait(boost::function< void () > h, long const& ts) {
-      boost::mutex::scoped_lock l(mutex);
-
-      boost::xtime time;
-
-      boost::xtime_get(&time, boost::TIME_UTC);
-
-      time.sec += ts;
-
-      h();
-
-      condition.timed_wait(l, time);
     }
 
     /**
@@ -732,13 +666,21 @@ namespace tipi {
       boost::shared_ptr < const M > p(find_message(t));
 
       if (!p) {
-        if (waiters.count(t) == 0) {
-          waiters[t] = boost::shared_ptr < waiter_data > (new waiter_data(p));
+        boost::shared_ptr< waiter_data > waiter(waiters[t]);
+
+        if (!waiter) {
+          waiter.reset(new waiter_data);
+
+          waiters[t] = waiter;
         }
 
-        boost::shared_ptr < waiter_data > wd = waiters[t];
+        boost::mutex::scoped_lock ww(waiter->mutex);
 
-        wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w), ts);
+        w.unlock();
+
+        waiter->condition.timed_wait(ww, boost::get_system_time() + boost::posix_time::seconds(ts));
+
+        p = waiter->get_message();
 
         if (!p) {
           throw std::runtime_error("Communication failure or connection aborted!");
@@ -763,13 +705,21 @@ namespace tipi {
       boost::shared_ptr< const M > p(find_message(t));
 
       if (!p) {
-        if (waiters.count(t) == 0) {
-          waiters[t] = boost::shared_ptr < waiter_data > (new waiter_data(p));
+        boost::shared_ptr< waiter_data > waiter(waiters[t]);
+
+        if (!waiter) {
+          waiter.reset(new waiter_data);
+
+          waiters[t] = waiter;
         }
 
-        boost::shared_ptr < waiter_data > wd = waiters[t];
+        boost::mutex::scoped_lock ww(waiter->mutex);
 
-        wd->wait(boost::bind(&boost::recursive_mutex::scoped_lock::unlock, &w));
+        w.unlock();
+
+        waiter->condition.wait(ww);
+
+        p = waiter->get_message();
 
         if (!p) {
           throw std::runtime_error("Communication failure or connection aborted!");

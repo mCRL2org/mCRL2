@@ -141,7 +141,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   linear_process lps = lps_specification.process();
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   layout::horizontal_box& m = d.create< horizontal_box >().set_default_margins(margins(0, 5, 0, 5));
 

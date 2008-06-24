@@ -11,6 +11,7 @@
 #include "tipi/tool/category.hpp"
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/detail/tool.ipp"
+#include "tipi/display.hpp"
 #include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
@@ -142,17 +143,38 @@ namespace tipi {
      * The last communicated display layout is stored internally and is updated
      * accordingly when data is received.
      **/
-    void communicator::send_display_layout(boost::shared_ptr< layout::tool_display > d) {
-      struct trampoline {
-        inline static void send_display_data(boost::shared_ptr< communicator_impl > impl,
-                         tipi::utility::logger& logger, boost::weak_ptr< layout::tool_display > d, void const* e) {
+    void communicator::send_display_layout(tool_display& d) {
+      boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(
+                boost::static_pointer_cast< communicator_impl >(impl), d);
+    }
 
-          boost::shared_ptr < layout::tool_display > g(d.lock());
+    void communicator_impl::send_display_layout(boost::shared_ptr< communicator_impl > p, tool_display& d) {
+      struct trampoline {
+        static void receive_data(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < display > d) {
+          boost::shared_ptr< display > g(d.lock());
 
           if (!d.expired()) {
             try {
+              std::vector < tipi::layout::element const* > elements;
+           
+              if (g->impl->get_manager()) {
+                tipi::visitors::restore(*g, elements, m->to_string());
+              }
+            }
+            catch (...) {
+            }
+          }
+        }
+
+        static void send_display_data(boost::weak_ptr< communicator_impl > impl,
+                         tipi::utility::logger& logger, boost::shared_ptr< display > d, void const* e) {
+
+          boost::shared_ptr< communicator_impl > c(impl.lock());
+
+          if (!impl.expired()) {
+            try {
               if (dynamic_cast < tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) {
-                boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
+                c->send_message(tipi::message(
                       visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
 		           (*reinterpret_cast < tipi::layout::element const* > (e),
                            reinterpret_cast < const ::tipi::display::element_identifier > (e)), tipi::message_display_data));
@@ -166,10 +188,17 @@ namespace tipi {
         }
       };
 
-      d->add(boost::bind(trampoline::send_display_data,
-                 boost::static_pointer_cast < communicator_impl > (impl), boost::ref(get_logger()), d, _1));
+      clear_handlers(tipi::message_display_data);
 
-      boost::static_pointer_cast < communicator_impl > (impl)->send_display_layout(d);
+      boost::shared_ptr< tipi::tool_display > guard_display(new tipi::tool_display(d));
+
+      // handler for outgoing changes to elements on the display
+      guard_display->impl->add(boost::bind(trampoline::send_display_data, p, boost::ref(*logger), guard_display, _1));
+
+      // handler for incoming data from user interaction
+      add_handler(tipi::message_display_data, boost::bind(&trampoline::receive_data, _1, guard_display));
+
+      send_message(tipi::message(tipi::visitors::store(d), tipi::message_display_layout));
     }
 
     void communicator::send_clear_display() {

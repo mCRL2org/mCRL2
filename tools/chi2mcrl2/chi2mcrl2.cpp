@@ -113,7 +113,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
   t_options options;
   CAsttransform asttransform;
 

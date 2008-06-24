@@ -178,7 +178,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   // Helper for format selection
   mcrl2::utilities::squadt::radio_button_helper < bes_output_format > format_selector(d);

@@ -157,8 +157,8 @@ namespace tipi {
      **/
     void communicator_impl::activate_display_layout_handling(boost::weak_ptr < communicator_impl > impl, display_layout_handler_function const& hi, display_update_handler_function const& hu) {
       struct trampoline {
-        static void update(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < tipi::layout::tool_display > d, display_update_handler_function h) {
-          boost::shared_ptr < tipi::layout::tool_display > g(d.lock());
+        static void update(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < tipi::tool_display > d, display_update_handler_function h) {
+          boost::shared_ptr < tipi::tool_display > g(d.lock());
 
           if (g) {
             std::vector < tipi::layout::element const* > elements;
@@ -195,10 +195,10 @@ namespace tipi {
           boost::shared_ptr< communicator_impl > g(impl.lock());
 
           if (g) {
-            boost::shared_ptr< tipi::layout::tool_display > d(new layout::tool_display);
+            boost::shared_ptr< tipi::tool_display > d(new tool_display);
           
             // Make sure the global event handler is empty
-            d->remove();
+            d->impl->remove();
           
             try {
               // Remove existing display data handler
@@ -212,7 +212,7 @@ namespace tipi {
               g->add_handler(tipi::message_display_data, boost::bind(&trampoline::update, _1, d, h2));
 
               // Register interaction event handler (outgoing)
-              d->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
+              d->impl->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
             }
             catch (std::runtime_error& e) {
               g->logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");

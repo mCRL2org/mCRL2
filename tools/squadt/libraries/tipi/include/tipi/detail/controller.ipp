@@ -17,7 +17,7 @@
 #include "tipi/controller.hpp"
 #include "tipi/configuration.hpp"
 #include "tipi/controller/capabilities.hpp"
-#include <tipi/detail/basic_messenger.ipp>
+#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/common.hpp"
 #include "tipi/visitors.hpp"
 

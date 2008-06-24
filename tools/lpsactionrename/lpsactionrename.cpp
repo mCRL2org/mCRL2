@@ -166,7 +166,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Create display */
-  tipi::layout::tool_display d;
+  tipi::tool_display d;
 
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 

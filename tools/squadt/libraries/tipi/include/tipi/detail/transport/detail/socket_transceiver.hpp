@@ -20,8 +20,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/system/system_error.hpp>
+#include <boost/thread/condition_variable.hpp>
 
 #include <tipi/detail/transport/transporter.hpp>
 #include <tipi/detail/transport/detail/transceiver.ipp>
@@ -67,7 +66,7 @@ namespace transport {
         boost::mutex                                 m_send_lock;
 
         /** \brief Used to make it possible to wait for send operations to complete */
-        boost::condition                             m_send_monitor;
+        boost::condition_variable                    m_send_monitor;
 
         /** \brief The amount of send operations that are currently in progress */
         unsigned int                                 m_send_count;
