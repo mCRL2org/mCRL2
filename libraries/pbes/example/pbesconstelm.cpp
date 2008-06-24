@@ -17,6 +17,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/constelm.h"
+#include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -26,8 +27,13 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
+  typedef data::rewriter my_data_rewriter;
+  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef simplify_rewriter<data::rewriter> my_pbes_rewriter;
+
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
+  bool compute_conditions;
 
   try {
     //--- pbesconstelm options ---------
@@ -42,6 +48,7 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
+      ("compute-conditions,c", po::value<bool>(&compute_conditions)->default_value(false), "compute propagation conditions")
       ;
 
     //--- hidden options ---------
@@ -81,15 +88,30 @@ int main(int argc, char* argv[])
       std::cout << "pbesconstelm parameters:" << std::endl;
       std::cout << "  input file:         " << infile << std::endl;
       std::cout << "  output file:        " << outfile << std::endl;
+      std::cout << "  compute conditions: " << std::boolalpha << compute_conditions << std::endl;
     }
 
+    // load the pbes
     pbes<> p;
     p.load(infile);
-    data::rewriter datar(p.data());
+
+    // data rewriter
+    my_data_rewriter datar(p.data());
+
+    // name generator
     std::string prefix = "UNIQUE_PREFIX"; // unique_prefix(p);
-    data::number_postfix_generator generator(prefix);
-    pbes_constelm_algorithm<data::number_postfix_generator, data::rewriter> algorithm(generator, datar);
-    algorithm.run(p, p.initial_state());
+    data::number_postfix_generator name_generator(prefix);
+
+    // pbes rewriter
+    my_pbes_rewriter pbesr(datar);    
+
+    // constelm algorithm
+    pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter, data::number_postfix_generator> algorithm(datar, pbesr);
+
+    // run the algorithm
+    algorithm.run(p, p.initial_state(), name_generator, compute_conditions);
+    
+    // save the result
     p.save(outfile);
   }
   catch(mcrl2::runtime_error e)

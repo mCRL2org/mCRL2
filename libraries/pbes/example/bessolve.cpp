@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 
   typedef data::rewriter my_data_rewriter;
   typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;
   int type;

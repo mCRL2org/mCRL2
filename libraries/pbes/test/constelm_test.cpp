@@ -12,9 +12,24 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/constelm.h"
 
+// example 4.2.1 from "tools for PBES" report
+std::string EXAMPLE4_2_1 =
+  "pbes                                    \n"
+  "   mu X1(n1,m1:Nat) = X2(n1) || X2(m1); \n"
+  "   mu X2(n2:Nat)     = X1(n2,n2);       \n"
+  "init                                    \n"
+  "   X1(0,1);                             \n"
+;
+
+void test_pbes(const std::string& pbes_spec)
+{
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
+  //test_pbes(EXAMPLE4_2_1);
 
   return 0;
 }

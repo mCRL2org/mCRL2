@@ -70,6 +70,7 @@ void test_result(PbesRewriter& r, pbes_expression x, pbes_expression y)
   BOOST_CHECK(r(x) == y);
 }
 
+/*
 void test_builder()
 {
   typedef data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
@@ -182,13 +183,65 @@ void test_rewriter()
   my_pbes_rewriter pbesr1 = pbesr;
   test_expression(x, pbesr1);
 }
+*/
+
+void test_simplify_rewriter()
+{
+  using namespace pbes_expr;
+
+  specification spec = mcrl22lps(SPECIFICATION);
+  mcrl2::data::rewriter datar(spec.data());
+  mcrl2::pbes_system::simplify_rewriter<data::rewriter> pbesr(datar);
+
+  data_variable b  = bool_("b");
+  data_variable b1 = bool_("b1");
+  data_variable b2 = bool_("b2");
+  data_variable b3 = bool_("b3");
+
+  data_variable n  = nat("n");
+  data_variable n1 = nat("n1");
+  data_variable n2 = nat("n2");
+  data_variable n3 = nat("n3");
+
+  data_expression dT = data_expr::true_();
+  data_expression dF = data_expr::false_();
+  pbes_expression T  = true_();
+  pbes_expression F  = false_();
+
+  test_expression(T, pbesr);
+  test_expression(F, pbesr);
+  test_expression(and_(T, T), pbesr);
+  test_expression(and_(T, F), pbesr);
+  test_expression(and_(F, F), pbesr);
+  test_expression(imp(T, b), pbesr);
+
+  pbes_expression x = and_(b, T);
+  test_expression(x, pbesr);
+  //test_expression(x, simp_rewr);
+  //test_expression(x, subst_rewr);
+
+  propositional_variable_instantiation X  = propvarinst("X", make_list(n));
+  propositional_variable_instantiation X1 = propvarinst("X1", make_list(n));
+  propositional_variable_instantiation X2 = propvarinst("X2", make_list(n));
+  propositional_variable_instantiation X3 = propvarinst("X3", make_list(n));
+
+  BOOST_CHECK(pbesr(and_(T, T)) == T);
+  BOOST_CHECK(pbesr(and_(T, F)) == F);
+  BOOST_CHECK(pbesr(and_(F, F)) == F);
+  BOOST_CHECK(pbesr(imp(T, b))  == b);
+  BOOST_CHECK(pbesr(and_(and_(T, T), T)) == T);
+  BOOST_CHECK(pbesr(and_(X, T)) == X);
+  BOOST_CHECK(pbesr(and_(T, X)) == X);
+  BOOST_CHECK(pbesr(and_(X, F)) == F);
+  BOOST_CHECK(pbesr(and_(F, X)) == F);
+  BOOST_CHECK(pbesr(and_(X, and_(F, X))) == F);
+}
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  test_builder();
-  test_rewriter();
+  test_simplify_rewriter();
 
   return 0;
 }

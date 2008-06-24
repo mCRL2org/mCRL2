@@ -310,12 +310,14 @@ class pbes
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
       if (!t || t.type() != AT_APPL || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
-        throw mcrl2::runtime_error(std::string("Error in pbes::load(): could not read from file " + filename));
-
+      {
+        throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
+      }
       init_term(atermpp::aterm_appl(t));
-
       if (!is_well_typed())
-        throw mcrl2::runtime_error("Error in pbes::load(): term is not well typed");
+      {
+        throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
+      }
     }
 
     /// Returns true if the PBES is a BES (boolean equation system).

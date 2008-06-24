@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
+#define MCRL2_PBES_CONSTELM_DEBUG
+
 #include <sstream>
 #include <iostream>
 #include <utility>
@@ -22,13 +24,245 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/remove_parameters.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  template <typename IdentifierGenerator, typename DataRewriter>
+namespace detail {
+  inline
+  bool operator<(propositional_variable_instantiation v, propositional_variable_instantiation w)
+  {
+    return ATermAppl(v) < ATermAppl(w);
+  }
+
+  struct true_false_pair
+  {
+    pbes_expression TC;
+    pbes_expression FC;
+
+    true_false_pair()
+      : TC(pbes_expr::true_()), FC(pbes_expr::true_())
+    {}
+    
+    true_false_pair(pbes_expression t, pbes_expression f)
+      : TC(t), FC(f)
+    {}
+  };
+
+  struct apply_exists
+  {
+    data::data_variable_list variables_;
+
+    apply_exists(data::data_variable_list variables)
+      : variables_(variables)
+    {}
+
+    void operator()(true_false_pair& p) const
+    {
+      using namespace pbes_expr_optimized;
+      p.TC = exists(variables_, p.TC);
+      p.FC = forall(variables_, p.FC);
+    }
+  };
+
+  struct apply_forall
+  {
+    data::data_variable_list variables_;
+
+    apply_forall(data::data_variable_list variables)
+      : variables_(variables)
+    {}
+
+    void operator()(true_false_pair& p) const
+    {
+      using namespace pbes_expr_optimized;
+      p.TC = forall(variables_, p.TC);
+      p.FC = exists(variables_, p.FC);
+    }
+  };
+
+  typedef std::multimap<propositional_variable_instantiation, std::vector<true_false_pair> > condition_map;
+
+  struct edge_condition
+  {
+    pbes_expression TC;
+    pbes_expression FC;
+    condition_map condition;  // condT + condF
+
+    true_false_pair TCFC() const
+    {
+      return true_false_pair(TC, FC);
+    }
+
+    pbes_expression compute_condition(const std::vector<true_false_pair>& c) const
+    {
+      using namespace pbes_expr_optimized;
+      pbes_expression result = true_();      
+      for (std::vector<true_false_pair>::const_iterator i = c.begin(); i != c.end(); ++i)
+      {
+        result = and_(result, not_(i->TC));
+        result = and_(result, not_(i->FC));
+      }
+      return result;
+    }
+  };
+
+  struct edge_condition_visitor: public pbes_visitor<edge_condition>
+  {
+    // N.B. As a side effect ec1 and ec2 are changed!!!
+    void merge_conditions(edge_condition& ec1,
+                          edge_condition& ec2,
+                          edge_condition& ec
+                         )
+    {
+      for (condition_map::iterator i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
+      {
+        i->second.push_back(ec.TCFC());
+        ec.condition.insert(*i);
+      }
+      for (condition_map::iterator i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
+      {
+        i->second.push_back(ec.TCFC());
+        ec.condition.insert(*i);
+      }
+    }
+
+    /// Visit data expression node.
+    ///
+    bool visit_data_expression(const pbes_expression& e, const data::data_expression& d, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      ec.TC = d;
+      ec.FC = not_(d);
+      return stop_recursion;
+    }
+
+    /// Visit true node.
+    ///
+    bool visit_true(const pbes_expression& e, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      ec.TC = true_();
+      ec.FC = false_();
+      return stop_recursion;
+    }
+
+    /// Visit false node.
+    ///
+    bool visit_false(const pbes_expression& e, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      ec.TC = false_();
+      ec.FC = true_();
+      return stop_recursion;
+    }
+
+    /// Visit not node.
+    ///
+    bool visit_not(const pbes_expression& e, const pbes_expression& arg, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      edge_condition ec_arg;
+      visit(arg, ec_arg);
+      ec.TC = ec_arg.FC;
+      ec.FC = ec_arg.TC;
+      ec.condition = ec_arg.condition;
+      return stop_recursion;
+    }
+
+    /// Visit and node.
+    ///
+    bool visit_and(const pbes_expression& e, const pbes_expression& left, const pbes_expression&  right, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      edge_condition ec_left;
+      visit(left, ec_left);
+      edge_condition ec_right;
+      visit(right, ec_right);
+      ec.TC = and_(ec_left.TC, ec_right.TC);
+      ec.FC = or_(ec_left.FC, ec_right.FC);
+      merge_conditions(ec_left, ec_right, ec);
+      return stop_recursion;
+    }
+
+    /// Visit or node.
+    ///
+    bool visit_or(const pbes_expression& e, const pbes_expression&  left, const pbes_expression&  right, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      edge_condition ec_left;
+      visit(left, ec_left);
+      edge_condition ec_right;
+      visit(right, ec_right);
+      ec.TC = or_(ec_left.TC, ec_right.TC);
+      ec.FC = and_(ec_left.FC, ec_right.FC);
+      merge_conditions(ec_left, ec_right, ec);
+      return stop_recursion;
+    }
+
+    /// Visit imp node.
+    ///
+    bool visit_imp(const pbes_expression& e, const pbes_expression&  left, const pbes_expression&  right, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      edge_condition ec_left;
+      visit(left, ec_left);
+      edge_condition ec_right;
+      visit(right, ec_right);
+      ec.TC = or_(ec_left.FC, ec_right.TC);
+      ec.FC = and_(ec_left.TC, ec_right.FC);
+      merge_conditions(ec_left, ec_right, ec);
+      return stop_recursion;
+    }
+
+    /// Visit forall node.
+    ///
+    bool visit_forall(const pbes_expression& e, const data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      visit(expr, ec);
+      for (condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+      {
+        i->second.push_back(ec.TCFC());
+        std::for_each(i->second.begin(), i->second.end(), apply_forall(variables));
+      }
+      return stop_recursion;
+    }
+
+    /// Visit exists node.
+    ///
+    bool visit_exists(const pbes_expression& e, const data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      visit(expr, ec);
+      for (condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
+      {
+        i->second.push_back(ec.TCFC());
+        std::for_each(i->second.begin(), i->second.end(), apply_exists(variables));
+      }
+      return stop_recursion;
+    }
+
+    /// Visit propositional variable node.
+    ///
+    bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v, edge_condition& ec)
+    {
+      using namespace pbes_expr_optimized;
+      ec.TC = false_();
+      ec.FC = false_();
+      std::vector<true_false_pair> c;
+      c.push_back(true_false_pair(false_(), false_()));
+      ec.condition.insert(std::make_pair(v, c));
+      return stop_recursion;
+    }
+  };
+
+} // namespace detail
+
+  template <typename DataRewriter, typename PbesRewriter, typename IdentifierGenerator>
   class pbes_constelm_algorithm
   {
     protected:
@@ -42,7 +276,7 @@ namespace pbes_system {
       {
         propositional_variable left;
         propositional_variable_instantiation right;
-        data::data_expression condition;
+        pbes_expression condition;
 
         edge()
         {}
@@ -50,10 +284,10 @@ namespace pbes_system {
         edge(
           propositional_variable l,
           propositional_variable_instantiation r,
-          data::data_expression c = data::data_expr::true_()
+          pbes_expression c = pbes_expr::true_()
         )
          : left(l), right(r), condition(c)
-        {}       
+        {}
 
         // Returns a string representation of the edge.
         std::string to_string() const
@@ -68,8 +302,12 @@ namespace pbes_system {
       struct vertex
       {
         propositional_variable variable;
+        
+        // Maps data variables to data expressions. If the right hand side is a data
+        // variable, it means that it represents NaC ("not a constant"). In such case,
+        // a fresh variable is chosen, that does not appear anywhere else in the pbes
+        // that is under consideration.
         constraint_map constraints;
-        std::set<data::data_variable> non_constants;
 
         vertex()
         {}
@@ -85,11 +323,11 @@ namespace pbes_system {
           return data::find_all_data_variables(d).empty();
         }
 
-        // Return true if the data variable v appears in constraints, and
-        // not in non_constants.
+        // Return true if the data variable v has been assigned a constant expression.
         bool is_constant(data::data_variable v) const
         {
-          return (constraints.find(v) != constraints.end() && non_constants.find(v) == non_constants.end());
+          constraint_map::const_iterator i = constraints.find(v);
+          return i != constraints.end() && !data::is_data_variable(i->second);
         }
 
         // Returns the constant parameters of this vertex.
@@ -136,14 +374,17 @@ namespace pbes_system {
         }
 
         // Accept new values for the parameters, and update the constraints accordingly.
-        bool update(data::data_expression condition,
+        template <typename IdentifierGenerator>
+        bool update(pbes_expression condition,
                     data::data_expression_list new_values,
-                    DataRewriter r,
+                    DataRewriter datar,
+                    PbesRewriter pbesr,
+                    IdentifierGenerator name_generator,
                     const constraint_map& new_value_constraints = constraint_map())
         {
           bool changed = false;
           data::data_variable_list params = variable.parameters();
-          if (condition == data::data_expr::true_())
+          if (pbesr(condition) != pbes_expr::false_())
           {
             data::data_expression_list::iterator i;
             data::data_variable_list::iterator j;
@@ -155,13 +396,14 @@ namespace pbes_system {
 
               if (k != constraints.end())
               {
-                if (non_constants.find(d) == non_constants.end())
+                if (!data::is_data_variable(k->second)) // d has been assigned a constant value
                 {
                   data::data_expression old_value = k->second;
-                  data::data_expression new_value = r(data::data_variable_map_replace(*i, new_value_constraints));
+                  data::data_expression new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
                   if (old_value != new_value)
                   {
-                    non_constants.insert(d);
+                    // mark the parameter as NaC by assigning a fresh variable to it
+                    k->second = data::data_variable(name_generator(), j->sort());
                     changed = true;
                   }
                 }
@@ -169,11 +411,15 @@ namespace pbes_system {
               else
               {
                 changed = true;
-                data::data_expression new_value = r(data::data_variable_map_replace(*i, new_value_constraints));
-                constraints[d] = new_value;
-                if (!is_constant_expression(new_value))
+                data::data_expression new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
+                if (is_constant_expression(new_value))
                 {
-                  non_constants.insert(d);
+                  constraints[d] = new_value;
+                }
+                else
+                {
+                  // mark the parameter as NaC by assigning a fresh variable to it
+                  constraints[d] = data::data_variable(name_generator(), j->sort());
                 }
               }
             }
@@ -188,7 +434,7 @@ namespace pbes_system {
           constraint_map::iterator pos;
           for (pos = constraints.begin(); pos != constraints.end(); )
           {
-            if (non_constants.find(pos->first) != non_constants.end())
+            if (data::is_data_variable(pos->second)) // the value is NaC
             {
               constraints.erase(pos++);
             }
@@ -203,11 +449,11 @@ namespace pbes_system {
       typedef std::map<core::identifier_string, vertex> vertex_map;
       typedef std::map<core::identifier_string, std::vector<edge> > edge_map;
 
-      // Creates names that are guaranteed to be unique.
-      IdentifierGenerator m_generator;
+      // Compares data expressions for equality.
+      DataRewriter m_data_rewriter;
 
       // Compares data expressions for equality.
-      DataRewriter m_rewriter;
+      PbesRewriter m_pbes_rewriter;
 
       // The vertices of the dependency graph. They are stored in a map, to
       // support searching for a vertex.
@@ -239,38 +485,53 @@ namespace pbes_system {
       }
 
     public:
-      pbes_constelm_algorithm(IdentifierGenerator generator, DataRewriter rewriter)
-        : m_generator(generator), m_rewriter(rewriter)
+      pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
+        : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
       {}
 
-      template <typename Container>
-      void run(pbes<Container>& p, pbes_expression kappa)
+      template <typename Container, typename IdentifierGenerator>
+      void run(pbes<Container>& p, pbes_expression kappa, IdentifierGenerator name_generator, bool compute_conditions = false)
       {
+        using detail::edge_condition;
+        using detail::edge_condition_visitor;
+        using detail::condition_map;
+        using namespace pbes_expr_optimized;
+        
         // compute the vertices and edges of the dependency graph
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           core::identifier_string name = i->variable().name();
           m_vertices[name] = vertex(i->variable());
 
-          typename edge_map::iterator ei = m_edges.insert(std::make_pair(name, std::vector<edge>())).first;
-          std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(i->formula());
-          for (std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
+          if (compute_conditions)
           {
-            ei->second.push_back(edge(i->variable(), *k));
+            // use an edge_condition_visitor to compute the edges
+            edge_condition ec;
+            edge_condition_visitor visitor;
+            visitor.visit(i->formula(), ec);
+            if (!ec.condition.empty())
+            {
+              std::vector<edge>& edges = m_edges[name];
+              for (condition_map::iterator j = ec.condition.begin(); j != ec.condition.end(); ++j)
+              {
+                propositional_variable_instantiation X = j->first;
+                pbes_expression condition = ec.compute_condition(j->second);
+                edges.push_back(edge(i->variable(), X, condition));
+              }
+            }
           }
-        }
-
-        // fill in the edge conditions of the dependency graph
-        for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-        {
-          core::identifier_string name = i->variable().name();
-          const vertex& u = m_vertices[name];
-          const std::vector<edge>& edges = m_edges[name];
-
-          // TODO: build a tree with true- and false-conditions
-          for (typename std::vector<edge>::const_iterator j = edges.begin(); j != edges.end(); ++j)
+          else
           {
-            // TODO: use the tree to set the condition of edge *j
+            // use find function to compute the edges
+            std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(i->formula());
+            if (!inst.empty())
+            {
+              std::vector<edge>& edges = m_edges[name];
+              for (std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
+              {
+                edges.push_back(edge(i->variable(), *k));
+              }
+            }
           }
         }
 
@@ -281,7 +542,7 @@ namespace pbes_system {
         {
           data::data_expression_list new_values = i->parameters();
           vertex& u = m_vertices[i->name()];
-          u.update(data::data_expr::true_(), new_values, m_rewriter);
+          u.update(pbes_expr::true_(), new_values, m_data_rewriter, m_pbes_rewriter, name_generator);
           todo.push_back(u.variable);
         }
 
@@ -293,10 +554,14 @@ namespace pbes_system {
           print_edges();
         }
 
+        // propagate constraints over the edges until the todo list is empty
         while (!todo.empty())
         {
+#ifdef MCRL2_PBES_CONSTELM_DEBUG
+std::cout << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(), todo.end())) << std::endl;
+#endif MCRL2_PBES_CONSTELM_DEBUG
           propositional_variable var = todo.front();
-          
+
           // remove all occurrences of var from todo
           todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
 
@@ -308,15 +573,19 @@ namespace pbes_system {
           {
             const edge& e = *ei;
             vertex& v = m_vertices[e.right.name()];
-//std::cout << "<update>" << pp(u.variable.name()) << ", " << pp(u.variable.name()) << std::endl;
-//std::cout << "<edge>" << e.to_string() << std::endl;
-//std::cout << "<v before>" << v.to_string() << std::endl;
-            bool changed = v.update(e.condition, e.right.parameters(), m_rewriter, u.constraints);
+#ifdef MCRL2_PBES_CONSTELM_DEBUG
+std::cout << "\n<updating edge>" << e.to_string() << std::endl;
+std::cout << "  <source vertex       >" << u.to_string() << std::endl;
+std::cout << "  <target vertex before>" << v.to_string() << std::endl;
+#endif MCRL2_PBES_CONSTELM_DEBUG
+            bool changed = v.update(e.condition, e.right.parameters(), m_data_rewriter, m_pbes_rewriter, name_generator, u.constraints);
             if (changed)
             {
               todo.push_back(v.variable);
             }
-//std::cout << "<v after>" << v.to_string() << std::endl;
+#ifdef MCRL2_PBES_CONSTELM_DEBUG
+std::cout << "  <target vertex after >" << v.to_string() << std::endl;
+#endif MCRL2_PBES_CONSTELM_DEBUG
           }
         }
 
@@ -329,20 +598,27 @@ namespace pbes_system {
         // print the parameters that will be removed
         if (mcrl2::core::gsVerbose)
         {
-          std::cout << "\nremoving the following constant parameters:" << std::endl;
+          std::cout << "\nremoving the following constant parameters and equations:" << std::endl;
           for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             const vertex& u = i->second;
-            std::vector<data::data_variable> removed = u.constant_parameters();
-            for (std::vector<data::data_variable>::iterator j = removed.begin(); j != removed.end(); ++j)
+            if (u.constraints.empty())
             {
-              std::cout << "(" << mcrl2::core::pp(u.variable.name()) << ", " << mcrl2::core::pp(*j) << ")" << std::endl;
+              std::cout << core::pp(u.variable) << std::endl;
+            }
+            else
+            { 
+              std::vector<data::data_variable> removed = u.constant_parameters();
+              for (std::vector<data::data_variable>::iterator j = removed.begin(); j != removed.end(); ++j)
+              {
+                std::cout << "(" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
+              }
             }
           }
         }
-        
-        // actually remove the parameters
-        std::map<core::identifier_string, std::vector<int> > to_be_removed;       
+
+        // remove the constant parameters
+        std::map<core::identifier_string, std::vector<int> > to_be_removed_variables;
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           core::identifier_string name = i->variable().name();
@@ -350,10 +626,10 @@ namespace pbes_system {
           std::vector<int> r = v.constant_parameter_indices();
           if (!r.empty())
           {
-            to_be_removed[name] = r;
+            to_be_removed_variables[name] = r;
           }
         }
-        remove_parameters(p, to_be_removed);
+        remove_parameters(p, to_be_removed_variables);
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           core::identifier_string name = i->variable().name();
@@ -369,6 +645,18 @@ namespace pbes_system {
             data::data_variable_map_replace(i->formula(), v.constraints)
           );
         }
+        
+        // remove the equations corresponding to unused predicate variables
+        Container result;
+        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          const vertex& u = m_vertices[i->variable().name()];
+          if (!u.constraints.empty())
+          {
+            result.push_back(*i);
+          }
+        }
+        std::swap(p.equations(), result);
       }
   };
 

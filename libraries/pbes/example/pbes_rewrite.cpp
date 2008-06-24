@@ -24,10 +24,12 @@ using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-typedef pbes_rewrite_builder<data::rewriter, my_enumerator> my_pbes_rewriter;
+typedef simplify_rewriter<data::rewriter> my_simplify_rewriter;
+typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
-typedef boost::variant<my_pbes_rewriter,
+typedef boost::variant<my_simplify_rewriter,
+                       my_enumerate_quantifiers_rewriter,
                        pbes_system::substitute_rewriter_jfg,
                        pbes_system::simplify_rewriter_jfg,
                        pbes_system::pbessolve_rewriter
@@ -189,10 +191,11 @@ int main(int argc, char* argv[])
       "Reads a file containing pbes expressions, and applies the rewriter to it.\n"
       "\n"
       "The following choices of the pbes rewriter are available:\n"
-      "  0 : enumerating rewriter (Wieger)\n"
-      "  1 : enumerating rewriter (Jan Friso)\n"
-      "  2 : simplifying rewriter (Jan Friso)\n"
-      "  3 : simplifying rewriter, uses a prover (Simona)\n"
+      "  0 : simplify_rewriter\n"
+      "  1 : enumerate_quantifiers_rewriter\n"
+      "  2 : simplify_rewriter_jfg\n"
+      "  3 : substitute_rewriter_jfg\n"
+      "  4 : pbessolve_rewriter\n"
       "\n"
       "The following choices of the data rewriter are available:\n"
       "  0 : innermost\n"
@@ -277,21 +280,26 @@ int main(int argc, char* argv[])
         switch (*j)
         {
           case 0: {
-            my_pbes_rewriter pbesr(datar, datae);    
+            my_simplify_rewriter pbesr(datar);    
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 1: {
-            substitute_rewriter_jfg pbesr(datar, data_spec);            
+            my_enumerate_quantifiers_rewriter pbesr(datar, datae);    
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 2: {
-            simplify_rewriter_jfg pbesr(data_spec);
+            substitute_rewriter_jfg pbesr(datar, data_spec);            
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 3: {
+            simplify_rewriter_jfg pbesr(data_spec);
+            rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
+            break;
+          }
+          case 4: {
             for (std::vector<int>::iterator k = smt_solver_indices.begin(); k != smt_solver_indices.end(); ++k)
             {
               pbessolve_rewriter pbesr(datar, data_spec, data_RewriteStrategy(*i), smt_solver_type(*k));

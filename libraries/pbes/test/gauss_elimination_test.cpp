@@ -83,7 +83,7 @@ void test_gauss_elimination()
   state_formula formula = mcf2statefrm(FORMULA, spec);
 
   typedef mcrl2::data::data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewriter<mcrl2::data::rewriter, my_enumerator> my_rewriter;
+  typedef enumerate_quantifiers_rewriter<mcrl2::data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
     
   mcrl2::data::rewriter datar(spec.data());

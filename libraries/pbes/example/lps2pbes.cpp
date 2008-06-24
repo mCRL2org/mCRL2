@@ -27,7 +27,7 @@ using namespace mcrl2::pbes_system::pbes_expr;
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   string spec_file(argv[1]); // specification file
   string mcf_file(argv[2]);  // modal formula file
