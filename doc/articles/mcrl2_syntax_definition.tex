@@ -591,11 +591,14 @@ State formulae $\varphi_s$:
                        \Delta(t)\ \mb{|}\ 
                        \nabla\ \mb{|}\ 
                        \Delta\ \mb{|}\ 
-                       \nu\,\f{pvdi}.\varphi_s\ \mb{|}\ 
-                       \mu\,\f{pvdi}.\varphi_s\ \mb{|}\ 
-                       \f{pvo}\ \mb{|}\ 
                        \mathsf{val}(c)\ \mb{|}\ 
                        ( \varphi_s )\\
+          & \mb{|}   & \nu X. \varphi_s\ \mb{|}\ 
+                       \mu X.\varphi_s\ \mb{|}\ 
+                       \nu X(\f{vdi},\mb{\ldots},\f{vdi}). \varphi_s\ \mb{|}\ 
+                       \mu X(\f{vdi},\mb{\ldots},\f{vdi}).\varphi_s\ \mb{|}\ 
+                       X\ \mb{|}\ 
+                       X(d,\mb{\ldots},d)\\
           & \mb{|}   & \mathsf{true}\ \mb{|}\ 
                        \mathsf{false}\ \mb{|}\ 
                        \neg \varphi_s\ \mb{|}\ 
@@ -604,14 +607,9 @@ State formulae $\varphi_s$:
                        \varphi_s \limp \varphi_s\ \mb{|}\ 
                        \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\ 
                        \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\\
-\f{pvdi} & \mb{::=} & X\ \mb{|}\ X(\f{vdi},\mb{\ldots},\f{vdi})\\
-\f{pvo}  & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
 \f{vdi}  & \mb{::=} & x: s = d\\
 \end{tightarray}\]
-Here 
-$\f{pvdi}$ for propositional variable declaration and initialisation,
-$\f{pvo}$ for propositional variable occurrence,
-$\f{vdi}$ for data variable declaration and initialisation,
+Here $\f{vdi}$ stands for a data variable declaration and initialisation,
 and $c$ and $t$ stand for data expressions of
 sort $\sbool$ and $\sreal$, respectively.  The descending order of precedence
 of the operators is: $\set{\neg, \_[\_], \_\langle\_\rangle},
@@ -634,7 +632,9 @@ Parameterised boolean expressions $\varphi_e$:
                        \varphi_e \limp \varphi_e\ \mb{|}\ 
                        \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\ \mb{|}\ 
                        \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\\ 
+\f{pvo}  & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
 \end{tightarray}\]
+Here $\f{pvo}$ stands for a propositional variable occurrence,
 The descending order of operator precedence is: $\neg, \set{\land, \lor}, \limp, \set{\forall, \exists}$.  
 The infix operators $\land$, $\lor$ and $\limp$ associate to the right.
 
