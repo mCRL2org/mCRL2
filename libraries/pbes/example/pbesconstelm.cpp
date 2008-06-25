@@ -7,6 +7,9 @@
 /// \file pbesconstelm.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_PBES_CONSTELM_DEBUG
+// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+
 #include <cstdlib>
 #include <iostream>
 #include <string>

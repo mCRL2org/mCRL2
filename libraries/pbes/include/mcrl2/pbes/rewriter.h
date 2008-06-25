@@ -15,14 +15,10 @@
 #include <set>
 #include <utility>
 #include <vector>
-//#include <boost/bind.hpp>
-//#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
-//#include "mcrl2/data/enumerator.h"
-//#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"

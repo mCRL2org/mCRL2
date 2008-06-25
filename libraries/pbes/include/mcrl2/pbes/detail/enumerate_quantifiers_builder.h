@@ -188,7 +188,7 @@ namespace detail {
   
     /// Visit forall node.
     ///
-    pbes_expression visit_forall(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,
@@ -203,7 +203,7 @@ namespace detail {
   
     /// Visit exists node.
     ///
-    pbes_expression visit_exists(pbes_expression x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,

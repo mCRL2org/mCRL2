@@ -130,6 +130,10 @@ struct pbes_builder
     using namespace pbes_expr_optimized;
     using namespace accessors;
 
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+std::cout << "<visit>" << pp(e) << " " << e << std::endl;
+#endif
+
     pbes_expression result;
 
     if (is_data(e)) {
@@ -201,6 +205,11 @@ struct pbes_builder
         result = e;
       }
     }
+
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+std::cout << "<visit result>" << pp(result) << std::endl;
+#endif
+
     return result;
   }
 };
