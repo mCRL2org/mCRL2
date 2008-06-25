@@ -604,12 +604,12 @@ State formulae $\varphi_s$:
                        \varphi_s \limp \varphi_s\ \mb{|}\ 
                        \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\ 
                        \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\\
-\f{pvd} & \mb{::=} & X\ \mb{|}\ X(\f{vdi},\mb{\ldots},\f{vdi})\\
-\f{pvo} & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
-\f{vdi} & \mb{::=} & x: s = d\\
+\f{pvdi} & \mb{::=} & X\ \mb{|}\ X(\f{vdi},\mb{\ldots},\f{vdi})\\
+\f{pvo}  & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
+\f{vdi}  & \mb{::=} & x: s = d\\
 \end{tightarray}\]
 Here 
-$\f{pvd}$ for propositional variable declaration,
+$\f{pvdi}$ for propositional variable declaration and initialisation,
 $\f{pvo}$ for propositional variable occurrence,
 $\f{vdi}$ for data variable declaration and initialisation,
 and $c$ and $t$ stand for data expressions of
@@ -641,9 +641,10 @@ The infix operators $\land$, $\lor$ and $\limp$ associate to the right.
 Parameterised boolean equations $\f{pb\_eqn}$:
 \[\begin{tightarray}{lrl}
 \f{pb\_eqn} & \mb{::=} & \sigma\,\f{pvd} = \varphi_e\\
-\sigma      & \mb{::=} & \nu\ \mb{|}\ \mu
+\sigma      & \mb{::=} & \nu\ \mb{|}\ \mu\\
+\f{pvd}     & \mb{::=} & X\ \mb{|}\ X(\f{mvd},\mb{\ldots},\f{mvd})\\
 \end{tightarray}\]
-Here $\sigma$ stands for a fixpoint symbol.
+Here $\sigma$ stands for a fixpoint symbol, and $\f{pvd}$ for a propositional variable declaration.
 
 PBES specifications $\f{pbes\_spec}$:
 \[\begin{tightarray}{lrl}
