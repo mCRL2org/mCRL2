@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     my_pbes_rewriter pbesr(datar);    
 
     // constelm algorithm
-    pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter, data::number_postfix_generator> algorithm(datar, pbesr);
+    pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
     // run the algorithm
     algorithm.run(p, p.initial_state(), name_generator, compute_conditions);
