@@ -255,6 +255,10 @@ std::cout << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
         result = equal_multi_actions(a.actions(), b_actions);
       } else if (is_true(b)) {
         result = p::true_();
+      } else if (is_false(b)) {
+        result = p::false_();
+      } else if (is_data(b)) {
+        result = b;
       } else if (is_at(b)) {
         data::data_expression t = a.time();
         modal::action_formula alpha = arg(b);
@@ -669,6 +673,10 @@ std::cout << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
         result = equal_multi_actions(a, b_actions);
       } else if (is_true(b)) {
         result = p::true_();
+      } else if (is_false(b)) {
+        result = p::false_();
+      } else if (is_data(b)) {
+        result = b;
       } else if (is_not(b)) {
         result = p::not_(sat_top(a, arg(b)));
       } else if (is_and(b)) {
