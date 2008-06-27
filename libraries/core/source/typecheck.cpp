@@ -1805,7 +1805,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
   ATermList ParList;
 
-  ATbool action;
+  ATbool action=ATfalse;
 
   if(!is_pbes){
     if((ParList=ATLtableGet(context.actions,(ATerm)Name))){
@@ -3079,6 +3079,10 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
 
   if(gsIsSortUnknown(NeededType)) return Type;
   if(gstcEqTypesA(NeededType,Type)) return Type;
+
+  if(warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(ATAgetArgument(*Par,0)))) { 
+    warn_upcasting=false;
+  }
 
   // Try Upcasting to Pos
   if(gstcTypeMatchA(NeededType,gsMakeSortIdPos())){
