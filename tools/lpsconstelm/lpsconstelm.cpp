@@ -78,6 +78,8 @@ class lpsConstElm {
     mcrl2::lps::specification                    p_spec;
     atermpp::set< sort_expression >       p_singletonSort;
     Rewriter*                             rewr;
+    //rewrite strategy used by the rewriter.
+    RewriteStrategy p_strategy;
 
     atermpp::map< mcrl2::data::data_variable, atermpp::vector < mcrl2::data::data_expression > > p_parameter_trace ;
     int p_cycle;   
@@ -1016,7 +1018,7 @@ bool lpsConstElm::filter() {
   p_newVarCounter  = 0;
 
   linear_process p_process = p_spec.process();
-  rewr           = createRewriter(p_spec.data());
+  rewr           = createRewriter(p_spec.data(), p_strategy);
 
   data_assignment_list initial_assignments = p_spec.initial_process().assignments();
 
@@ -1212,12 +1214,15 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
   clinterface.add_option("no-condition", "treat all summand conditions as true (faster)");
   clinterface.add_option("no-reachable", "do not remove summands that are not visited");
   clinterface.add_option("csv", make_mandatory_argument("NAME"), "stores the value changes of the process parameters in the CSV file NAME", 'c');
+  clinterface.add_rewriting_options();
 
   command_line_parser parser(clinterface, ac, av);
 
   setNoSingleton(0 < parser.options.count("no-singleton"));
   setAllTrue(0 < parser.options.count("no-condition"));
   setReachable(0 == parser.options.count("no-reachable"));
+
+  p_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
   if(parser.options.count("csv"))
   {
