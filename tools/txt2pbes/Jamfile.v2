@@ -1,12 +1,10 @@
 project toolset/txt2pbes
        : requirements
-          <library>/libraries//lps
           <library>/libraries//pbes
        ;
 
 tool txt2pbes
        : txt2pbes.cpp
-       : <status>experimental
        ;
 
 install-tools txt2pbes ;
