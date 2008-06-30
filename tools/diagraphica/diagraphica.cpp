@@ -161,6 +161,19 @@ bool parse_command_line(int argc, wxChar** argv) {
 bool DiaGraph::OnInit()
 // --------------------
 {
+    bool parse_error = false;
+    wxString error_string = wxEmptyString;
+
+    try
+    {
+      parse_command_line(argc, argv);
+    }
+    catch (std::exception &e)
+    {
+      parse_error = true;
+      error_string = wxString(e.what(),wxConvLocal);
+    }
+
     // windows debugging
     #ifdef _MSC_VER
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -175,17 +188,18 @@ bool DiaGraph::OnInit()
     // set view
     view = VIEW_SIM;
 
-    // command line
-    if (!parse_command_line(argc, argv)) 
-    {
-        return (false);
-    };
-
     // init colleagues
     initColleagues();
 
 	clustered = false;
     critSect = false;
+
+    if ( parse_error )
+    {
+      wxMessageDialog msg_dlg(frame, error_string,
+        wxT("Command line error"), wxOK | wxICON_ERROR);
+      msg_dlg.ShowModal();
+    }
    
     if (!fsm_file_argument.empty()) {
       openFile(fsm_file_argument);
