@@ -131,6 +131,10 @@ static ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermL
 //      the data declarations.
 static void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs);
 
+//pre: spec is a specification
+//ret: true if Spec contains a sort reference, false otherwise.
+static bool has_sort_reference(const ATermAppl spec);
+
 //pre: data_expr is a data expression
 //ret: true if data_expr is of the form v_1 == w_1 && ... && v_n == w_n, where
 //     v_i, w_j are data variables,
@@ -339,6 +343,10 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
 
   if (gsIsDataSpec(Part) && Spec != NULL) {
 //    gsDebugMsg("Removing headers from specification\n");
+    if (has_sort_reference(Part))
+    {
+      return Part;
+    }
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
   }
   /*
@@ -515,7 +523,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
   } else if (gsIsDataExprC0(Part)) {
 //    gsDebugMsg("Reconstructing implementation of %T\n", Part);
     Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
-  } else if (gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part)) {
+  } else if ((gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part))
+            && (ATisEqual(gsGetSort(Part), gsMakeSortExprPos()))) {
 //    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
@@ -531,7 +540,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
   } else if (gsIsDataExprCNeg(Part)) {
 //    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
     Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
-  } else if (gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part)) {
+  } else if ((gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part))
+            && (ATisEqual(gsGetSort(Part), gsMakeSortExprNat()))) {
 //    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
@@ -542,7 +552,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
         Part = gsMakeOpId(name, gsMakeSortExprInt());
       }
     }
-  } else if (gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part)) {
+  } else if ((gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part))
+            && (ATisEqual(gsGetSort(Part), gsMakeSortExprInt()))) {
 //    gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
@@ -951,6 +962,21 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
   remove_data_equations(p_data_decls, &struct_equations, &lambda_substs);
 
   compute_sort_decls(p_data_decls, &ctx, p_substs);
+}
+
+bool has_sort_reference(const ATermAppl spec)
+{
+  assert(gsIsDataSpec(spec));
+  ATermList sorts = ATLgetArgument(ATAgetArgument(spec,0),0);
+  while(!ATisEmpty(sorts))
+  {
+    if(gsIsSortRef(ATAgetFirst(sorts)))
+    {
+      return true;
+    }
+    sorts = ATgetNext(sorts);
+  }
+  return false;
 }
 
 bool is_and_of_data_var_equalities(const ATermAppl data_expr)
