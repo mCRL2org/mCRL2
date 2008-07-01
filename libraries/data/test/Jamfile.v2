@@ -1,0 +1,14 @@
+project libraries/data/test
+   : requirements
+       <use>/site-config//boost_headers
+       <source>/libraries//data
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+   ;
+
+include $(TOP)/build/testing/header_test.jam ;
+
+test-suite data
+    :
+      [ compile-headers ../include ]
+    ;

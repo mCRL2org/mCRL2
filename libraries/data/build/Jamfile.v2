@@ -1,0 +1,19 @@
+project data
+       : source-location ..
+       : requirements
+          <include>../include
+       : usage-requirements
+          <include>../include
+       ;
+
+mcrl2-library data
+       : 
+       : 
+         <use>/libraries/atermpp//headers
+         <use>/site-config//cvc
+         <library>/site-config//m               # for rewrite
+         <library>/site-config//dynamic_loading # for rewrite
+       : <threading>single
+       : 
+         <library>/site-config//cvc
+       ;
