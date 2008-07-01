@@ -65,7 +65,7 @@ GLCanvas::~GLCanvas() {
 }
 
 void GLCanvas::initialize() {
-  SetCurrent();
+  setCurrent();
 
   glDepthFunc(GL_LEQUAL);
   glLoadIdentity();
@@ -146,6 +146,14 @@ void GLCanvas::setActiveTool(int t) {
   setMouseCursor();
 }
 
+void GLCanvas::setCurrent()
+{
+  if (GetParent()->IsShown())
+  {
+    SetCurrent();
+  }
+}
+
 void GLCanvas::display(bool coll_caller, bool selecting) {
   // coll_caller indicates whether the caller of display() is the 
   // getPictureData() method. While collecting data, only this method is allowed
@@ -164,7 +172,7 @@ void GLCanvas::display(bool coll_caller, bool selecting) {
 
     if (!selecting)
     {
-      SetCurrent();
+      setCurrent();
     }
     
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -297,7 +305,7 @@ void GLCanvas::reshape() {
   if (GetContext()) {
     int width,height;
     GetClientSize(&width,&height);
-    SetCurrent();
+    setCurrent();
     glViewport(0,0,width,height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -736,7 +744,7 @@ void GLCanvas::startForceDirected() {
   visualizer->forceDirectedInit();
   while (!stop_force_directed) {
     if (GetContext()) {
-      SetCurrent();
+      setCurrent();
     }
     visualizer->forceDirectedStep();
     display();
@@ -746,7 +754,7 @@ void GLCanvas::startForceDirected() {
   int n = 0;
   while (n < 10) {
     if (GetContext()) {
-      SetCurrent();
+      setCurrent();
     }
     #include <iostream>
     using namespace std;

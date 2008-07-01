@@ -45,6 +45,8 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     void      onSize(wxSizeEvent& event);
     void      OnEraseBackground(wxEraseEvent& event);
 
+    void      setCurrent();
+
     // Implemented for simReader interface
     void      refresh();
     void      selChange();
