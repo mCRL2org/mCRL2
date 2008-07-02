@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/data_expression.h
 /// \brief The class data_expression.
 
-#ifndef MCRL2_DATA_DATA_EXPRESSION_H
-#define MCRL2_DATA_DATA_EXPRESSION_H
+#ifndef MCRL2_OLD_DATA_DATA_EXPRESSION_H
+#define MCRL2_OLD_DATA_DATA_EXPRESSION_H
 
 #include <string>
 #include <cassert>
@@ -487,4 +487,4 @@ namespace data_expr {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::data_expression)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_EXPRESSION_H
+#endif // MCRL2_OLD_DATA_DATA_EXPRESSION_H

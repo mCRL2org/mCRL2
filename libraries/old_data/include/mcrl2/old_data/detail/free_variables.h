@@ -9,8 +9,8 @@
 /// \file free_variables.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_FREE_VARIABLES_H
-#define MCRL2_DATA_DETAIL_FREE_VARIABLES_H
+#ifndef MCRL2_OLD_DATA_DETAIL_FREE_VARIABLES_H
+#define MCRL2_OLD_DATA_DETAIL_FREE_VARIABLES_H
 
 #include <algorithm>
 #include <set>
@@ -81,4 +81,4 @@ make_data_variable_collector(InputIterator1 first1,
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_FREE_VARIABLES_H
+#endif // MCRL2_OLD_DATA_DETAIL_FREE_VARIABLES_H

@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/detail/find.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_FIND_H
-#define MCRL2_DATA_DETAIL_FIND_H
+#ifndef MCRL2_OLD_DATA_DETAIL_FIND_H
+#define MCRL2_OLD_DATA_DETAIL_FIND_H
 
 #include "mcrl2/old_data/find.h"
 
@@ -58,4 +58,4 @@ std::set<std::string> find_variable_name_strings(Term t)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_FIND_H
+#endif // MCRL2_OLD_DATA_DETAIL_FIND_H

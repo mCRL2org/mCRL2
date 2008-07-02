@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/detail/data_assignment_functional.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
-#define MCRL2_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
+#ifndef MCRL2_OLD_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
+#define MCRL2_OLD_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
 
 #include <set>
 #include "mcrl2/old_data/data.h"
@@ -66,4 +66,4 @@ struct has_left_hand_side_in
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
+#endif // MCRL2_OLD_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H

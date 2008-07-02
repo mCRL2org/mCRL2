@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/rewriter.h
 /// \brief The class rewriter.
 
-#ifndef MCRL2_DATA_REWRITER_H
-#define MCRL2_DATA_REWRITER_H
+#ifndef MCRL2_OLD_DATA_REWRITER_H
+#define MCRL2_OLD_DATA_REWRITER_H
 
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/old_data/rewrite.h"
@@ -180,4 +180,4 @@ class single_term_rewriter
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_REWRITER_H
+#endif // MCRL2_OLD_DATA_REWRITER_H

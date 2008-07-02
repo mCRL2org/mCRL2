@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/sort_utility1.h
 /// \brief Utility functions for sorts.
 
-#ifndef MCRL2_DATA_SORT_UTILITY1_H
-#define MCRL2_DATA_SORT_UTILITY1_H
+#ifndef MCRL2_OLD_DATA_SORT_UTILITY1_H
+#define MCRL2_OLD_DATA_SORT_UTILITY1_H
 
 #include <vector>
 #include <cassert>
@@ -121,4 +121,4 @@ inline bool is_finite(const data_operation_list& fl, const sort_expression& s, c
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SORT_UTILITY1_H
+#endif // MCRL2_OLD_DATA_SORT_UTILITY1_H

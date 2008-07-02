@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/data_application.h
 /// \brief The class data_application.
 
-#ifndef MCRL2_DATA_DATA_APPLICATION_H
-#define MCRL2_DATA_DATA_APPLICATION_H
+#ifndef MCRL2_OLD_DATA_DATA_APPLICATION_H
+#define MCRL2_OLD_DATA_DATA_APPLICATION_H
 
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -91,4 +91,4 @@ bool is_data_application(atermpp::aterm_appl t)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::data_application)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_APPLICATION_H
+#endif // MCRL2_OLD_DATA_DATA_APPLICATION_H

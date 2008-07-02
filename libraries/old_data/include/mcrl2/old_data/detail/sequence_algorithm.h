@@ -9,8 +9,8 @@
 /// \file sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
-#define MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_OLD_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#define MCRL2_OLD_DATA_DETAIL_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
@@ -75,4 +75,4 @@ std::set<typename Container::value_type> make_set(const Container& c)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#endif // MCRL2_OLD_DATA_DETAIL_SEQUENCE_ALGORITHM_H

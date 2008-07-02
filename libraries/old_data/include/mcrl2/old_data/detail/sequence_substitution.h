@@ -9,8 +9,8 @@
 /// \file sequence_substitution.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
-#define MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#ifndef MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#define MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
 
 #include <algorithm>
 #include <utility>
@@ -99,4 +99,4 @@ sequence_substitution<Container> make_sequence_substitution(const Container& c)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#endif // MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H

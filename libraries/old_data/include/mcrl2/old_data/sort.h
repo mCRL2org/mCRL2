@@ -9,11 +9,11 @@
 /// \file mcrl2/old_data/sort.h
 /// \brief Contains includes of frequently used header files.
 
-#ifndef MCRL2_DATA_SORT_H
-#define MCRL2_DATA_SORT_H
+#ifndef MCRL2_OLD_DATA_SORT_H
+#define MCRL2_OLD_DATA_SORT_H
 
 #include "mcrl2/old_data/sort_identifier.h"
 #include "mcrl2/old_data/sort_arrow.h"
 #include "mcrl2/old_data/sort_expression.h"
 
-#endif // MCRL2_DATA_SORT_H
+#endif // MCRL2_OLD_DATA_SORT_H

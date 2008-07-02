@@ -9,8 +9,8 @@
 /// \file sorted_sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
-#define MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_OLD_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#define MCRL2_OLD_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
@@ -52,4 +52,4 @@ std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SORTED_DETAIL_SEQUENCE_ALGORITHM_H
+#endif // MCRL2_OLD_DATA_SORTED_DETAIL_SEQUENCE_ALGORITHM_H

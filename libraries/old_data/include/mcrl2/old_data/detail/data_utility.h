@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/detail/data_utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
-#define MCRL2_DATA_DETAIL_DATA_UTILITY_H
+#ifndef MCRL2_OLD_DATA_DETAIL_DATA_UTILITY_H
+#define MCRL2_OLD_DATA_DETAIL_DATA_UTILITY_H
 
 #include <algorithm>
 #include <iterator>
@@ -201,4 +201,4 @@ std::vector<std::string> variable_strings(data_variable_list t)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_DATA_UTILITY_H
+#endif // MCRL2_OLD_DATA_DETAIL_DATA_UTILITY_H

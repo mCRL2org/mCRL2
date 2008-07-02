@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/enumerator.h
 /// \brief The class enumerator.
 
-#ifndef MCRL2_DATA_ENUMERATOR_H
-#define MCRL2_DATA_ENUMERATOR_H
+#ifndef MCRL2_OLD_DATA_ENUMERATOR_H
+#define MCRL2_OLD_DATA_ENUMERATOR_H
 
 #include <utility>
 #include <boost/shared_ptr.hpp>
@@ -203,4 +203,4 @@ class data_enumerator
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_ENUMERATOR_H
+#endif // MCRL2_OLD_DATA_ENUMERATOR_H

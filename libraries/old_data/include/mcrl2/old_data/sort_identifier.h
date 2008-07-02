@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/sort_identifier.h
 /// \brief Class sort_identifier.
 
-#ifndef MCRL2_DATA_SORT_ID_H
-#define MCRL2_DATA_SORT_ID_H
+#ifndef MCRL2_OLD_DATA_SORT_ID_H
+#define MCRL2_OLD_DATA_SORT_ID_H
 
 #include "mcrl2/old_data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
@@ -97,4 +97,4 @@ bool is_sort_identifier(atermpp::aterm_appl t)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::sort_identifier)
 /// \endcond
 
-#endif // MCRL2_DATA_SORT_ID_H
+#endif // MCRL2_OLD_DATA_SORT_ID_H

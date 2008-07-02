@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/find.h
 /// \brief Search functions of the data library.
 
-#ifndef MCRL2_DATA_FIND_H
-#define MCRL2_DATA_FIND_H
+#ifndef MCRL2_OLD_DATA_FIND_H
+#define MCRL2_OLD_DATA_FIND_H
 
 #include <set>
 #include <iterator>
@@ -127,4 +127,4 @@ std::set<data_expression> find_all_data_expressions(Term t)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_FIND_H
+#endif // MCRL2_OLD_DATA_FIND_H

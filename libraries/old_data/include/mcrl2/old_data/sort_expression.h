@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/sort_expression.h
 /// \brief The class sort_expression.
 
-#ifndef MCRL2_DATA_SORT_EXPRESSION_H
-#define MCRL2_DATA_SORT_EXPRESSION_H
+#ifndef MCRL2_OLD_DATA_SORT_EXPRESSION_H
+#define MCRL2_OLD_DATA_SORT_EXPRESSION_H
 
 #include <cassert>
 #include "mcrl2/atermpp/aterm.h"
@@ -207,4 +207,4 @@ namespace sort_expr {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::sort_expression)
 /// \endcond
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_OLD_DATA_SORT_EXPRESSION_H

@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/replace.h
 /// \brief Contains a function for replacing data variables in a term.
 
-#ifndef MCRL2_DATA_REPLACE_H
-#define MCRL2_DATA_REPLACE_H
+#ifndef MCRL2_OLD_DATA_REPLACE_H
+#define MCRL2_OLD_DATA_REPLACE_H
 
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
@@ -257,4 +257,4 @@ Term data_expression_map_replace(Term t, const MapContainer& replacements)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_REPLACE_H
+#endif // MCRL2_OLD_DATA_REPLACE_H

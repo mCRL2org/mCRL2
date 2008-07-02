@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/sort_arrow.h
 /// \brief The class sort_arrow.
 
-#ifndef MCRL2_DATA_SORT_ARROW_H
-#define MCRL2_DATA_SORT_ARROW_H
+#ifndef MCRL2_OLD_DATA_SORT_ARROW_H
+#define MCRL2_OLD_DATA_SORT_ARROW_H
 
 #include "mcrl2/old_data/sort_expression.h"
 
@@ -105,4 +105,4 @@ bool is_sort_arrow(atermpp::aterm_appl t)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::sort_arrow)
 /// \endcond
 
-#endif // MCRL2_DATA_SORT_ARROW_H
+#endif // MCRL2_OLD_DATA_SORT_ARROW_H

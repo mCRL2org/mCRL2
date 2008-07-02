@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/data.h
 /// \brief Contains includes of frequently used header files.
 
-#ifndef MCRL2_DATA_DATA_H
-#define MCRL2_DATA_DATA_H
+#ifndef MCRL2_OLD_DATA_DATA_H
+#define MCRL2_OLD_DATA_DATA_H
 
 #include "mcrl2/old_data/data_variable.h"
 #include "mcrl2/old_data/data_application.h"
@@ -18,4 +18,4 @@
 #include "mcrl2/old_data/data_equation.h"
 #include "mcrl2/old_data/data_operation.h"
 
-#endif // MCRL2_DATA_DATA_H
+#endif // MCRL2_OLD_DATA_DATA_H

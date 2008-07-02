@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/detail/data_functional.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H
-#define MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H
+#ifndef MCRL2_OLD_DATA_DETAIL_DATA_FUNCTIONAL_H
+#define MCRL2_OLD_DATA_DETAIL_DATA_FUNCTIONAL_H
 
 #include <algorithm>
 #include <functional>
@@ -157,4 +157,4 @@ sort_expression find_sort(data_specification data, std::string s)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H
+#endif // MCRL2_OLD_DATA_DETAIL_DATA_FUNCTIONAL_H

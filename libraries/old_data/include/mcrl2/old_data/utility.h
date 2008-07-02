@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/utility.h
 /// \brief Utility functions of the data library.
 
-#ifndef MCRL2_DATA_UTILITY_H
-#define MCRL2_DATA_UTILITY_H
+#ifndef MCRL2_OLD_DATA_UTILITY_H
+#define MCRL2_OLD_DATA_UTILITY_H
 
 #include <algorithm>
 #include <functional>
@@ -233,4 +233,4 @@ class fresh_variable_generator
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_UTILITY_H
+#endif // MCRL2_OLD_DATA_UTILITY_H

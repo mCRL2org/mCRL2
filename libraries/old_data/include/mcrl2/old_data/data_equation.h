@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/data_equation.h
 /// \brief The class data_equation.
 
-#ifndef MCRL2_DATA_DATA_EQUATION_H
-#define MCRL2_DATA_DATA_EQUATION_H
+#ifndef MCRL2_OLD_DATA_DATA_EQUATION_H
+#define MCRL2_OLD_DATA_DATA_EQUATION_H
 
 #include <cassert>
 #include <string>
@@ -152,4 +152,4 @@ bool is_data_equation(atermpp::aterm_appl t)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::data_equation)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_EQUATION_H
+#endif // MCRL2_OLD_DATA_DATA_EQUATION_H

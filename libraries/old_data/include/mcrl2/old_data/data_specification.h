@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/data_specification.h
 /// \brief The class data_specification.
 
-#ifndef MCRL2_DATA_DATA_SPECIFICATION_H
-#define MCRL2_DATA_DATA_SPECIFICATION_H
+#ifndef MCRL2_OLD_DATA_DATA_SPECIFICATION_H
+#define MCRL2_OLD_DATA_DATA_SPECIFICATION_H
 
 #include <set>
 #include <boost/iterator/filter_iterator.hpp>
@@ -364,4 +364,4 @@ data_specification set_equations(data_specification s, data_equation_list equati
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::old_data::data_specification)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_SPECIFICATION_H
+#endif // MCRL2_OLD_DATA_DATA_SPECIFICATION_H

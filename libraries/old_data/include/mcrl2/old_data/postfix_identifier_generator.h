@@ -9,8 +9,8 @@
 /// \file mcrl2/old_data/postfix_identifier_generator.h
 /// \brief The class postfix_identifier_generator.
 
-#ifndef MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
-#define MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#define MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
 
 #include "mcrl2/old_data/set_identifier_generator.h"
 
@@ -51,4 +51,4 @@ class postfix_identifier_generator: public set_identifier_generator
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
