@@ -94,7 +94,7 @@ specification parelm(const specification& spec)
   std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
     
   // logging statements
-  mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  mcrl2::core::gsVerboseMsg("lpsparelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
@@ -176,7 +176,7 @@ specification parelm2(const specification& spec)
   }
 
   // logging statements
-  mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
+  mcrl2::core::gsVerboseMsg("lpsparelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
