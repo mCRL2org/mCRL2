@@ -53,19 +53,20 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   os << "nodesep = 0.05;" << endl;
   ATermAppl act;
   int i = 0;
+  os << i << " [label=\"";
+  if ( trace.currentState() != NULL )
+  {
+    print_state(os,trace.currentState());
+  }
+  os << "\",peripheries=2];" << endl;
   while ( (act = trace.nextAction()) != NULL )
   {
-    os << i << " [label=\"";
+    os << i+1 << " [label=\"";
     if ( trace.currentState() != NULL )
     {
       print_state(os,trace.currentState());
     }
-    if ( i == 0 )
-    {
-      os << "\",peripheries=2];" << endl;
-    } else {
-      os << "\"];" << endl;
-    }
+    os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
     if ( mcrl2::core::detail::gsIsMultAct(act) )
     {
@@ -77,12 +78,6 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
     os << "\"];" << endl;
     i++;
   }
-  os << i << " [label=\"";
-  if ( trace.currentState() != NULL )
-  {
-    print_state(os,trace.currentState());
-  }
-  os << "\"];" << endl;
   os << "}" << endl;
 }
 
