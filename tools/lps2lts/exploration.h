@@ -19,7 +19,7 @@
 #include <aterm2.h>
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/lts/liblts.h"
 
 #include "workarounds.h"

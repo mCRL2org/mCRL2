@@ -19,14 +19,14 @@
 #include <sstream>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/detail/data_functional.h"
+#include "mcrl2/old_data/data_operators.h"
+#include "mcrl2/old_data/set_identifier_generator.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/old_data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/multi_action_equality.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
@@ -213,16 +213,16 @@ public:
     linear_process resolve_name_clashes(const linear_process& p, const linear_process& q)
     {
       std::set<core::identifier_string> used_names;
-      used_names.insert(boost::make_transform_iterator(p.process_parameters().begin(), data::detail::data_variable_name()),
-                        boost::make_transform_iterator(p.process_parameters().end()  , data::detail::data_variable_name())
+      used_names.insert(boost::make_transform_iterator(p.process_parameters().begin(), old_data::detail::data_variable_name()),
+                        boost::make_transform_iterator(p.process_parameters().end()  , old_data::detail::data_variable_name())
                        );
-      used_names.insert(boost::make_transform_iterator(p.free_variables().begin(), data::detail::data_variable_name()),
-                        boost::make_transform_iterator(p.free_variables().end()  , data::detail::data_variable_name())
+      used_names.insert(boost::make_transform_iterator(p.free_variables().begin(), old_data::detail::data_variable_name()),
+                        boost::make_transform_iterator(p.free_variables().end()  , old_data::detail::data_variable_name())
                        );
       for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
       {
-        used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), data::detail::data_variable_name()),
-                          boost::make_transform_iterator(i->summation_variables().end()  , data::detail::data_variable_name())
+        used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), old_data::detail::data_variable_name()),
+                          boost::make_transform_iterator(i->summation_variables().end()  , old_data::detail::data_variable_name())
                          );
       }
       linear_process result = q;
@@ -581,7 +581,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(p, q));
+        std::set<std::string> used_names = mcrl2::old_data::detail::find_variable_name_strings(atermpp::make_list(p, q));
         data_variable_list e1_new = fresh_variables(e1, used_names);
         data_expression    cj_new = cj.substitute(make_list_substitution(e1, e1_new));
         data_variable_list gj_new = gj.substitute(make_list_substitution(e1, e1_new));

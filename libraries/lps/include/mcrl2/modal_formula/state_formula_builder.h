@@ -45,7 +45,7 @@ struct state_formula_builder
   virtual ~state_formula_builder()
   { }
   
-  virtual state_formula visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
+  virtual state_formula visit_data_expression(const state_formula& /* e */, const old_data::data_expression& d)
   {
     return state_formula();
   }
@@ -80,12 +80,12 @@ struct state_formula_builder
     return state_formula();
   }    
 
-  virtual state_formula visit_forall(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual state_formula visit_forall(const state_formula& /* e */, const old_data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return state_formula();
   }
 
-  virtual state_formula visit_exists(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual state_formula visit_exists(const state_formula& /* e */, const old_data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return state_formula();
   }
@@ -105,7 +105,7 @@ struct state_formula_builder
     return state_formula();
   }
 
-  virtual state_formula visit_yaled_timed(const state_formula& /* e */, const data::data_expression& /* d */)
+  virtual state_formula visit_yaled_timed(const state_formula& /* e */, const old_data::data_expression& /* d */)
   {
     return state_formula();
   }
@@ -115,22 +115,22 @@ struct state_formula_builder
     return state_formula();
   }
 
-  virtual state_formula visit_delay_timed(const state_formula& /* e */, const data::data_expression& /* d */)
+  virtual state_formula visit_delay_timed(const state_formula& /* e */, const old_data::data_expression& /* d */)
   {
     return state_formula();
   }
 
-  virtual state_formula visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& /* l */)
+  virtual state_formula visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const old_data::data_expression_list& /* l */)
   {
     return state_formula();
   }
 
-  virtual state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const old_data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return state_formula();
   }
 
-  virtual state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const old_data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return state_formula();
   }
@@ -172,12 +172,12 @@ struct state_formula_builder
       state_formula result = visit_imp(e, l, r);
       return (result == state_formula()) ? imp(visit(l), visit(r)) : result;
     } else if (is_forall(e)) {
-      data::data_variable_list qvars = var(e);
+      old_data::data_variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       state_formula result = visit_forall(e, qvars, qexpr);
       return (result == state_formula()) ? forall(qvars, visit(qexpr)) : result;
     } else if (is_exists(e)) {
-      data::data_variable_list qvars = var(e);
+      old_data::data_variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       state_formula result = visit_exists(e, qvars, qexpr);
       return (result == state_formula()) ? exists(qvars, visit(qexpr)) : result;
@@ -195,30 +195,30 @@ struct state_formula_builder
       state_formula result = visit_yaled(e);
       return (result == state_formula()) ? e : result;
     } else if(is_yaled_timed(e)) {
-      const data::data_expression& t = time(e);
+      const old_data::data_expression& t = time(e);
       state_formula result = visit_yaled_timed(e, t);
       return (result == state_formula()) ? e : result;
     } else if (is_delay(e)) {
       state_formula result = visit_delay(e);
       return (result == state_formula()) ? e : result;
     } else if(is_delay_timed(e)) {
-      const data::data_expression& t = time(e);
+      const old_data::data_expression& t = time(e);
       state_formula result = visit_delay_timed(e, t);
       return (result == state_formula()) ? e : result;
     } else if(is_var(e)) {
       const core::identifier_string& n = name(e);
-      const data::data_expression_list& l = param(e);
+      const old_data::data_expression_list& l = param(e);
       state_formula result = visit_var(e, n, l);
       return (result == state_formula()) ? e : result;
     } else if(is_mu(e)) {
       const core::identifier_string& n = name(e);
-      const data::data_assignment_list& a = ass(e);
+      const old_data::data_assignment_list& a = ass(e);
       state_formula f = arg(e);
       state_formula result = visit_mu(e, n, a, f);
       return (result == state_formula()) ? mu(n, a, visit(f)) : result;
     } else if(is_nu(e)) {
       const core::identifier_string& n = name(e);
-      const data::data_assignment_list& a = ass(e);
+      const old_data::data_assignment_list& a = ass(e);
       state_formula f = arg(e);
       state_formula result = visit_nu(e, n, a, f);
       return (result == state_formula()) ? nu(n, a, visit(f)) : result;

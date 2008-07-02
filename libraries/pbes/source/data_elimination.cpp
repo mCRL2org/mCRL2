@@ -8,12 +8,12 @@
 //
 /// \file data_elimination.cpp
 
-#include <mcrl2/data/data_expression.h>
-#include <mcrl2/data/data_elimination.h>
+#include <mcrl2/old_data/data_expression.h>
+#include <mcrl2/old_data/data_elimination.h>
 #include <mcrl2/pbes/pbes.h>
 #include <mcrl2/pbes/data_elimination.h>
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
 

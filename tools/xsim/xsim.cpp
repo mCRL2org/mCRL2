@@ -28,7 +28,7 @@
 #include <aterm2.h>
 #include "xsimmain.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"

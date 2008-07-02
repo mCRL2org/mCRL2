@@ -16,12 +16,12 @@
 #include <string>
 #include <utility>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/find.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/old_data/detail/data_utility.h"
 
 namespace mcrl2 {
 
@@ -34,7 +34,7 @@ class propositional_variable: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
-    data::data_variable_list m_parameters;
+    old_data::data_variable_list m_parameters;
 
   public:
     /// Constructor.
@@ -47,7 +47,7 @@ class propositional_variable: public atermpp::aterm_appl
     ///
     propositional_variable(std::string s)
     {
-      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      std::pair<std::string, old_data::data_expression_list> p = old_data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
       m_parameters = p.second;
       m_term      = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
@@ -66,7 +66,7 @@ class propositional_variable: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable(core::identifier_string name, data::data_variable_list parameters)
+    propositional_variable(core::identifier_string name, old_data::data_variable_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
@@ -82,7 +82,7 @@ class propositional_variable: public atermpp::aterm_appl
 
     /// Returns the parameters of the propositional variable.
     ///
-    data::data_variable_list parameters() const
+    old_data::data_variable_list parameters() const
     {
       return m_parameters;
     }
@@ -106,7 +106,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
-    data::data_expression_list m_parameters;
+    old_data::data_expression_list m_parameters;
 
   public:
     /// Constructor.
@@ -119,7 +119,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     ///
     propositional_variable_instantiation(std::string s)
     {
-      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      std::pair<std::string, old_data::data_expression_list> p = old_data::detail::parse_variable(s);
       m_name        = core::identifier_string(p.first);
       m_parameters = p.second;
       m_term        = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
@@ -138,7 +138,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    propositional_variable_instantiation(core::identifier_string name, data::data_expression_list parameters)
+    propositional_variable_instantiation(core::identifier_string name, old_data::data_expression_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)
@@ -154,19 +154,19 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
 
     /// Returns the parameters of the propositional variable.
     ///
-    data::data_expression_list parameters() const
+    old_data::data_expression_list parameters() const
     {
       return m_parameters;
     }
     
     /// Returns the unbound variables appearing in the parameters.
     ///
-    std::set<data::data_variable> unbound_variables() const
+    std::set<old_data::data_variable> unbound_variables() const
     {
-      std::set<data::data_variable> result;
-      for (data::data_expression_list::iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
+      std::set<old_data::data_variable> result;
+      for (old_data::data_expression_list::iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
       {
-        std::set<data::data_variable> vars = data::find_all_data_variables(*i);
+        std::set<old_data::data_variable> vars = old_data::find_all_data_variables(*i);
         result.insert(vars.begin(), vars.end());
       }
       return result;

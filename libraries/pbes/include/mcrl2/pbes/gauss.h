@@ -20,13 +20,13 @@
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/data/rewrite.h" // rewriter
-#include "mcrl2/data/bdd_prover.h" // prover
+#include "mcrl2/old_data/rewrite.h" // rewriter
+#include "mcrl2/old_data/bdd_prover.h" // prover
 #include "mcrl2/core/messaging.h"
 
 #define PREDVAR_MARK '$'
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 

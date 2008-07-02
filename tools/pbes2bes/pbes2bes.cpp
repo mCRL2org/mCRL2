@@ -26,13 +26,13 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/pbes/detail/old_rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/old_data/rewriter.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 
@@ -51,7 +51,7 @@ struct t_tool_options {
 
 bool process(t_tool_options tool_options)
 {
-  typedef mcrl2::data::rewriter data_rewriter;
+  typedef mcrl2::old_data::rewriter data_rewriter;
   typedef mcrl2::pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
 
   pbes<> pbes_spec;

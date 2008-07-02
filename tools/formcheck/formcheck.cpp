@@ -16,8 +16,8 @@
 #include <fstream>
 
 #include "mcrl2/formula_checker.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/prover/bdd_path_eliminator.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/messaging.h"
@@ -84,7 +84,7 @@ using namespace mcrl2::core;
       ///  LPS or PBES, the data specification of this LPS or PBES is
       ///  returned;
       ///  if infilename is empty, a minimal data specification is returned
-      mcrl2::data::data_specification load_specification(const std::string &infilename);
+      mcrl2::old_data::data_specification load_specification(const std::string &infilename);
 
     public:
       /// \brief Constructor setting all flags to their default values.
@@ -177,7 +177,7 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
     
-    mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
+    mcrl2::old_data::data_specification Form_Check::load_specification(const std::string &infilename)
     {
       ATermAppl raw_specification;
       if (infilename.empty()) {
@@ -192,7 +192,7 @@ using namespace mcrl2::core;
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
       }
-      mcrl2::data::data_specification spec(raw_specification);
+      mcrl2::old_data::data_specification spec(raw_specification);
       return spec;
     }
 
@@ -205,7 +205,7 @@ using namespace mcrl2::core;
     void Form_Check::check_formula() {
 
       //Load data specification
-      mcrl2::data::data_specification spec = load_specification(f_spec_file_name);
+      mcrl2::old_data::data_specification spec = load_specification(f_spec_file_name);
 
       // typechecking and data implementation use a specification before data
       // implementation.
@@ -242,7 +242,7 @@ using namespace mcrl2::core;
       }
       
       //update spec with the contents of v_reconstructed_spec
-      spec = mcrl2::data::data_specification(v_reconstructed_spec);
+      spec = mcrl2::old_data::data_specification(v_reconstructed_spec);
 
       //check formula
       Formula_Checker v_formula_checker(

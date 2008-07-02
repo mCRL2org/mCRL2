@@ -2,7 +2,7 @@ project toolset/ltsmin ;
 
 tool ltsmin
        : ltsmin.cpp
-         ltsmindata.cpp
+         ltsminold_data.cpp
          ltsminkernel.cpp
          /libraries//core
          /libraries//svc

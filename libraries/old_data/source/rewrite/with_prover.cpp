@@ -15,15 +15,15 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/bdd_prover.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/detail/rewrite/with_prover.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/bdd_prover.h"
+#include "mcrl2/old_data/rewrite.h"
+#include "mcrl2/old_data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-RewriterProver::RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat)
+RewriterProver::RewriterProver(mcrl2::old_data::data_specification DataSpec, RewriteStrategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();

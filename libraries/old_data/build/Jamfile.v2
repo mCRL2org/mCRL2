@@ -1,4 +1,4 @@
-project data
+project old_data
        : source-location ..
        : requirements
           <include>../include
@@ -6,7 +6,7 @@ project data
           <include>../include
        ;
 
-mcrl2-library data
+mcrl2-library old_data
        : source/data_elimination.cpp
          source/enum.cpp
          source/enum_standard.cpp

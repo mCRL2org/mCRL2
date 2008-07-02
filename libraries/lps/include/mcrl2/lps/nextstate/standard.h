@@ -13,7 +13,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/lps/nextstate.h>
-#include <mcrl2/data/enum.h>
+#include <mcrl2/old_data/enum.h>
 
 class NextStateStandard;
 

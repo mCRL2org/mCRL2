@@ -1,14 +1,15 @@
-project libraries/data/test
+project libraries/old_data/test
    : requirements
        <use>/site-config//boost_headers
-       <source>/libraries//data
+       <library>/libraries//old_data
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
 
-test-suite data
+test-suite old_data
     :
+      [ run sort_expression_test.cpp : : : <dependency>/libraries//atermpp ]
       [ compile-headers ../include ]
     ;

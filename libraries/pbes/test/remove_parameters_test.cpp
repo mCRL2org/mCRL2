@@ -10,13 +10,13 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/data.h"
+#include "mcrl2/old_data/data.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 

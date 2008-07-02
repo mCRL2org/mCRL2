@@ -10,13 +10,13 @@
 #include <ctime>
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/prover.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/rewrite.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/prover.h"
+#include "mcrl2/old_data/bdd_prover.h"
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/detail/prover/induction.h"
+#include "mcrl2/old_data/detail/prover/induction.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -275,7 +275,7 @@ using namespace mcrl2::core::detail;
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      mcrl2::data::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      mcrl2::old_data::data_specification data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
       f_induction(data_spec)

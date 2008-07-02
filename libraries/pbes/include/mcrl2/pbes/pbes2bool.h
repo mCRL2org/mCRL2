@@ -5,7 +5,7 @@
 
 #include <string>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 
 enum transformation_strategy {
      lazy,          // generate equations but do not optimize on the fly

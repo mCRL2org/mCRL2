@@ -24,8 +24,8 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/enum.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/enum.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -33,7 +33,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))

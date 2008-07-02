@@ -18,7 +18,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/bdd_prover.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
@@ -149,7 +149,7 @@ using namespace mcrl2::core;
       ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_counter_example, bool a_all_violations, char const* a_dot_file_name
     ):
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(mcrl2::old_data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_init = ATAgetArgument(a_lps, 3);
       f_summands = ATLgetArgument(ATAgetArgument(a_lps, 2), 2);

@@ -26,21 +26,21 @@ namespace detail {
 
 /// Removes the parameters in to_be_removed from l.
 inline
-data::data_assignment_list remove_parameters(const data::data_assignment_list& l, const std::set<data::data_variable>& to_be_removed)
+old_data::data_assignment_list remove_parameters(const old_data::data_assignment_list& l, const std::set<old_data::data_variable>& to_be_removed)
 {
-  std::vector<data::data_assignment> a(l.begin(), l.end());
-  a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
-  return data::data_assignment_list(a.begin(), a.end()); 
+  std::vector<old_data::data_assignment> a(l.begin(), l.end());
+  a.erase(std::remove_if(a.begin(), a.end(), old_data::detail::has_left_hand_side_in(to_be_removed)), a.end());
+  return old_data::data_assignment_list(a.begin(), a.end()); 
 }
 
 /// Removes the parameters in to_be_removed from p.
 inline
-linear_process remove_parameters(const linear_process& p, const std::set<data::data_variable>& to_be_removed)
+linear_process remove_parameters(const linear_process& p, const std::set<old_data::data_variable>& to_be_removed)
 {
-  atermpp::vector<data::data_variable> v(p.process_parameters().begin(), p.process_parameters().end());
+  atermpp::vector<old_data::data_variable> v(p.process_parameters().begin(), p.process_parameters().end());
   atermpp::vector<summand> s(p.summands().begin(), p.summands().end());
 
-  for (std::set<data::data_variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  for (std::set<old_data::data_variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     v.erase(std::remove(v.begin(), v.end(), *i), v.end());
   }
@@ -50,7 +50,7 @@ linear_process remove_parameters(const linear_process& p, const std::set<data::d
     *i = set_assignments(*i, remove_parameters(i->assignments(), to_be_removed));
   }
   
-  data::data_variable_list new_process_parameters(v.begin(), v.end());
+  old_data::data_variable_list new_process_parameters(v.begin(), v.end());
   summand_list new_summands(s.begin(), s.end());
   linear_process result = set_process_parameters(p, new_process_parameters);
   result = set_summands(result, new_summands);
@@ -60,7 +60,7 @@ linear_process remove_parameters(const linear_process& p, const std::set<data::d
 
 /// Removes the parameters in to_be_removed from spec.
 inline
-specification remove_parameters(const specification& spec, const std::set<data::data_variable>& to_be_removed)
+specification remove_parameters(const specification& spec, const std::set<old_data::data_variable>& to_be_removed)
 {
   process_initializer new_initial_state(spec.initial_process().free_variables(),
                                         remove_parameters(spec.initial_process().assignments(), to_be_removed)

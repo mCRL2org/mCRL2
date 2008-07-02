@@ -15,17 +15,17 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/sort_arrow.h"
-#include "mcrl2/data/sort_utility.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/old_data/data_operation.h"
+#include "mcrl2/old_data/enumerator.h"
+#include "mcrl2/old_data/parser.h"
+#include "mcrl2/old_data/sort_arrow.h"
+#include "mcrl2/old_data/sort_utility.h"
+#include "mcrl2/old_data/detail/data_functional.h"
+#include "mcrl2/old_data/identifier_generator.h"
 
 using namespace atermpp;
-using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::detail;
 
 const std::string DATA_SPEC1 =
   "sort A;                     \n"

@@ -17,13 +17,13 @@
 
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/old_data/sort_expression.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;

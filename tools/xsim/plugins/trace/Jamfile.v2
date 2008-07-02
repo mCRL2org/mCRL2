@@ -7,7 +7,7 @@ use-project /tools/xsim : ../../ ;
 plugin xsim_trace_view
        : xsimtracedll.cpp
          /tools/xsim//xsim_core
-         /libraries//data
+         /libraries//old_data
          /site-config//wx_base
        : <include>../..
          <wx>yes

@@ -17,8 +17,8 @@
 #include <vector>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/data_implementation.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/rewriter.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
@@ -112,10 +112,10 @@ namespace pbes_system {
   /// The simplifying pbes rewriter used in pbes2bool.
   class simplify_rewriter_jfg
   {
-    data::rewriter datar;
+    old_data::rewriter datar;
     
     public:
-      simplify_rewriter_jfg(const data::data_specification& data)
+      simplify_rewriter_jfg(const old_data::data_specification& data)
         : datar(data)
       { }
       
@@ -129,11 +129,11 @@ namespace pbes_system {
   /// The substituting pbes rewriter used in pbes2bool.
   class substitute_rewriter_jfg
   {
-    data::rewriter& datar_;
-    const data::data_specification& data_spec;
+    old_data::rewriter& datar_;
+    const old_data::data_specification& data_spec;
    
     public:
-      substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
+      substitute_rewriter_jfg(old_data::rewriter& datar, const old_data::data_specification& data)
         : datar_(datar), data_spec(data)
       { }
       
@@ -147,14 +147,14 @@ namespace pbes_system {
   /// A pbes rewriter that uses a bdd based prover internally.
   class pbessolve_rewriter
   {
-    data::rewriter& datar_;
-    const data::data_specification& data_spec;
+    old_data::rewriter& datar_;
+    const old_data::data_specification& data_spec;
     int n;
     data_variable_list fv;
     boost::shared_ptr<BDD_Prover> prover;
    
     public:
-      pbessolve_rewriter(data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
+      pbessolve_rewriter(old_data::rewriter& datar, const old_data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
         : datar_(datar),
           data_spec(data),
           n(0),

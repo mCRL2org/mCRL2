@@ -15,7 +15,7 @@
 #include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/data/data_variable.h"
+#include "mcrl2/old_data/data_variable.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -106,22 +106,22 @@ namespace pbes_expr {
   inline bool is_pbes_exists(pbes_expression t) { return core::detail::gsIsPBESExists(t); }
 
   /// \brief Returns true if the term t is equal to true
-  inline bool is_true(pbes_expression t) { return is_pbes_true(t) || data::data_expr::is_true(t); }
+  inline bool is_true(pbes_expression t) { return is_pbes_true(t) || old_data::data_expr::is_true(t); }
 
   /// \brief Returns true if the term t is equal to false
-  inline bool is_false(pbes_expression t) { return is_pbes_false(t) || data::data_expr::is_false(t); }
+  inline bool is_false(pbes_expression t) { return is_pbes_false(t) || old_data::data_expr::is_false(t); }
 
   /// \brief Returns true if the term t is a not expression
-  inline bool is_not(pbes_expression t) { return is_pbes_not(t) || data::data_expr::is_not(t); }
+  inline bool is_not(pbes_expression t) { return is_pbes_not(t) || old_data::data_expr::is_not(t); }
 
   /// \brief Returns true if the term t is an and expression
-  inline bool is_and(pbes_expression t) { return is_pbes_and(t) || data::data_expr::is_and(t); }
+  inline bool is_and(pbes_expression t) { return is_pbes_and(t) || old_data::data_expr::is_and(t); }
 
   /// \brief Returns true if the term t is an or expression
-  inline bool is_or(pbes_expression t) { return is_pbes_or(t) || data::data_expr::is_or(t); }
+  inline bool is_or(pbes_expression t) { return is_pbes_or(t) || old_data::data_expr::is_or(t); }
 
   /// \brief Returns true if the term t is an imp expression
-  inline bool is_imp(pbes_expression t) { return is_pbes_imp(t) || data::data_expr::is_imp(t); }
+  inline bool is_imp(pbes_expression t) { return is_pbes_imp(t) || old_data::data_expr::is_imp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
   inline bool is_forall(pbes_expression t) { return is_pbes_forall(t); }
@@ -143,7 +143,7 @@ namespace accessors {
   /// \pre The pbes expression must be of the form val(d) for
   /// some data variable d.
   inline
-  data::data_expression val(pbes_expression t)
+  old_data::data_expression val(pbes_expression t)
   {
     assert(core::detail::gsIsDataExpr(t));
     return atermpp::aterm_appl(t);
@@ -158,7 +158,7 @@ namespace accessors {
     {
       return atermpp::arg1(t);
     }
-    assert(data::data_expr::is_not(t) ||
+    assert(old_data::data_expr::is_not(t) ||
            pbes_expr::is_forall(t)    ||
            pbes_expr::is_exists(t)
           );
@@ -183,7 +183,7 @@ namespace accessors {
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list var(pbes_expression t)
+  old_data::data_variable_list var(pbes_expression t)
   {
     assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
     return atermpp::list_arg1(t);
@@ -199,7 +199,7 @@ namespace accessors {
   
   /// \brief Returns the parameters of a propositional variable instantiation.
   inline
-  data::data_expression_list param(pbes_expression t)
+  old_data::data_expression_list param(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
     return atermpp::list_arg2(t);
@@ -253,7 +253,7 @@ namespace pbes_expr {
   
   /// \brief Returns the universal quantification of the expression p over the variables in l.
   inline
-  pbes_expression forall(data::data_variable_list l, pbes_expression p)
+  pbes_expression forall(old_data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
@@ -264,7 +264,7 @@ namespace pbes_expr {
   
   /// \brief Returns the existential quantification of the expression p over the variables in l.
   inline
-  pbes_expression exists(data::data_variable_list l, pbes_expression p)
+  pbes_expression exists(old_data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
@@ -381,7 +381,7 @@ namespace pbes_expr_optimized {
   /// \brief Returns the universal quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
   inline
-  pbes_expression forall(data::data_variable_list l, pbes_expression p)
+  pbes_expression forall(old_data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
@@ -402,7 +402,7 @@ namespace pbes_expr_optimized {
   /// \brief Returns the existential quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
   inline
-  pbes_expression exists(data::data_variable_list l, pbes_expression p)
+  pbes_expression exists(old_data::data_variable_list l, pbes_expression p)
   {
     if (l.empty())
     {

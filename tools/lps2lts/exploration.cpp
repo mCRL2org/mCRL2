@@ -15,11 +15,11 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/enum.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/enum.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/trace.h"
 #include "squadt_interactor.h"
 #include "exploration.h"
@@ -142,7 +142,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
  
-  nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
+  nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::old_data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::old_data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
  
   if ( lgopts->priority_action != "" )
   {

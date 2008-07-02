@@ -26,7 +26,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 #include "simulator.h"

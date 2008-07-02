@@ -13,28 +13,28 @@
 
 #include <string>
 
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/sort_utility.h"
+#include "mcrl2/old_data/data_expression.h"
+#include "mcrl2/old_data/sort_expression.h"
+#include "mcrl2/old_data/data_operation.h"
+#include "mcrl2/old_data/sort_utility.h"
 
 // enumerates finite sorts
 // i.e., produces all possible instantiations
 // for a given sort, or set of sorts
 typedef struct {
-  mcrl2::data::sort_expression s;
-  mcrl2::data::data_expression_list del;
+  mcrl2::old_data::sort_expression s;
+  mcrl2::old_data::data_expression_list del;
 } t_sdel;
   
   
 class sort_instantiator {
  private:
   std::vector<t_sdel> instantiated_sorts;
-  mcrl2::data::data_operation_list fl;
+  mcrl2::old_data::data_operation_list fl;
  public:
   sort_instantiator() {};
-  void set_data_operation_list(mcrl2::data::data_operation_list flist);
-  void instantiate_sorts(mcrl2::data::sort_expression_list sl);
-  mcrl2::data::data_expression_list get_enumeration(mcrl2::data::sort_expression s);    
-  bool is_finite(mcrl2::data::sort_expression s);
+  void set_data_operation_list(mcrl2::old_data::data_operation_list flist);
+  void instantiate_sorts(mcrl2::old_data::sort_expression_list sl);
+  mcrl2::old_data::data_expression_list get_enumeration(mcrl2::old_data::sort_expression s);    
+  bool is_finite(mcrl2::old_data::sort_expression s);
 } ;

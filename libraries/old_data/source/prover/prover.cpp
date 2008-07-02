@@ -8,12 +8,12 @@
 
 #include <cstdlib>
 
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/prover.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/prover.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/utilities/utilities.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -26,7 +26,7 @@ using namespace mcrl2::core;
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      mcrl2::data::data_specification data_spec,
+      mcrl2::old_data::data_specification data_spec,
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit
     ) {

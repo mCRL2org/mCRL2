@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/info.h"
 #include "mcrl2/utilities/utilities.h"

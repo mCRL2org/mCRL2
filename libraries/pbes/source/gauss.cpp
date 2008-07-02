@@ -28,17 +28,17 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/complement.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_utility.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/sort_utility.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 
 
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 
@@ -59,7 +59,7 @@ using namespace pbes_expr;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
@@ -407,8 +407,8 @@ data_expression pbes_to_data(pbes_expression e)
 //======================================================================
 {
  using namespace pbes_expr;
- namespace dname = mcrl2::data::data_expr;
- namespace sname = mcrl2::data::sort_expr;
+ namespace dname = mcrl2::old_data::data_expr;
+ namespace sname = mcrl2::old_data::sort_expr;
  
 #ifdef debug2
  gsVerboseMsg("P2D: %s\n",pp(e).c_str());
@@ -519,9 +519,9 @@ data_expression pbes_to_data(pbes_expression e)
  pbes_expression data_to_pbes_lazy(data_expression d)
 //======================================================================
 {
- namespace dname = mcrl2::data::data_expr;
+ namespace dname = mcrl2::old_data::data_expr;
  namespace pname = pbes_expr;
- namespace sname = mcrl2::data::sort_expr;
+ namespace sname = mcrl2::old_data::sort_expr;
  
  if (dname::is_true(d))
    return pname::true_();
@@ -638,9 +638,9 @@ data_expression pbes_to_data(pbes_expression e)
 
   // arg1 is not reliable
  
- namespace dname = mcrl2::data::data_expr;
+ namespace dname = mcrl2::old_data::data_expr;
  namespace pname = pbes_expr;
- namespace sname = mcrl2::data::sort_expr;
+ namespace sname = mcrl2::old_data::sort_expr;
  
  data_expression head = DEPRECATED_FUNCTION_HEAD(d);
  if (is_data_variable(head))
@@ -929,7 +929,7 @@ data_expression data_expression_simplify
 (data_expression d, data_variable_list *fv, BDD_Prover *prover)
 //======================================================================
 {
-  namespace dname = mcrl2::data::data_expr;
+  namespace dname = mcrl2::old_data::data_expr;
   
   data_expression e = d;
   

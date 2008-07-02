@@ -14,8 +14,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linear_process.h"
 //mCRL2 data
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/utility.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -25,8 +25,8 @@
 // For Aterm library extension functions
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
@@ -67,9 +67,9 @@ lps::specification untime(const lps::specification& spec) {
   lps::linear_process lps = spec.process(); // Original lps
   lps::linear_process untime_lps; // Updated lps
   lps::summand_list untime_summand_list; // Updated summand list
-  data::data_variable_list untime_process_parameters; // Updated process parameters
-  data::data_variable last_action_time; // Extra parameter to display the last action time
-  data::data_assignment_list untime_initial_assignments; // Updated initial assignments
+  old_data::data_variable_list untime_process_parameters; // Updated process parameters
+  old_data::data_variable last_action_time; // Extra parameter to display the last action time
+  old_data::data_assignment_list untime_initial_assignments; // Updated initial assignments
 
   gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
   
@@ -82,7 +82,7 @@ lps::specification untime(const lps::specification& spec) {
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = fresh_variable(spec, mcrl2::data::sort_expr::real(), "last_action_time");
+  last_action_time = fresh_variable(spec, mcrl2::old_data::sort_expr::real(), "last_action_time");
   untime_process_parameters = push_back(lps.process_parameters(), last_action_time);
       
   // Transpose the original summand list, and see if there are summands with time
@@ -94,9 +94,9 @@ lps::specification untime(const lps::specification& spec) {
     gsVerboseMsg("Untiming summand %d\n", j);
 
     // Declarations within scope of for-loop
-    data::data_variable_list untime_summation_variables; //Updated set of summation variables
-    data::data_expression untime_condition; //Updated condition
-    data::data_assignment_list untime_assignments; //Updated assignments (or next state)
+    old_data::data_variable_list untime_summation_variables; //Updated set of summation variables
+    old_data::data_expression untime_condition; //Updated condition
+    old_data::data_assignment_list untime_assignments; //Updated assignments (or next state)
     lps::summand untime_summand; //Updated summand
 
     // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
@@ -108,7 +108,7 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = i->summation_variables();
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = optimized::and_(i->condition(), data::data_expr::greater(i->time(),data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), old_data::data_expr::greater(i->time(),data_expression(last_action_time)));
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
@@ -118,11 +118,11 @@ lps::specification untime(const lps::specification& spec) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	mcrl2::data::data_variable time_var = fresh_variable(spec, data::sort_expr::real(), "time_var");
+	mcrl2::old_data::data_variable time_var = fresh_variable(spec, old_data::sort_expr::real(), "time_var");
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
-	untime_condition = optimized::and_(i->condition(), mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), mcrl2::old_data::data_expr::greater(time_var, data_expression(last_action_time)));
 
 
 	// Extend original assignments to include t.i(d,e.i)

@@ -16,10 +16,10 @@
 #include <mcrl2/atermpp/atermpp.h>
 #include <mcrl2/atermpp/detail/utility.h>
 
-#include <mcrl2/data/parser.h>
-#include <mcrl2/data/data_specification.h>
-#include <mcrl2/data/sort_identifier.h>
-#include <mcrl2/data/sort_expression.h>
+#include <mcrl2/old_data/parser.h>
+#include <mcrl2/old_data/data_specification.h>
+#include <mcrl2/old_data/sort_identifier.h>
+#include <mcrl2/old_data/sort_expression.h>
 #include <mcrl2/core/data_reconstruct.h>
 
 using namespace atermpp;
@@ -27,8 +27,8 @@ using namespace atermpp::detail;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 
 struct compare_term: public std::unary_function<aterm_appl, bool>
 {

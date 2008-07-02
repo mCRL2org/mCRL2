@@ -12,7 +12,7 @@ project pbes
 
 obj pbes_data_elimination.o
        : source/data_elimination.cpp
-       : <use>/libraries/data//headers
+       : <use>/libraries/old_data//headers
          <use>/libraries/lps//headers
        ;
 
@@ -22,9 +22,9 @@ mcrl2-library pbes
          source/gauss.cpp
          source/sort_instantiator.cpp
          pbes_data_elimination.o
-       : <use>/libraries/data//headers
+       : <use>/libraries/old_data//headers
          <use>/libraries/lps//headers
        : <threading>single
-       : <library>/libraries//data
+       : <library>/libraries//old_data
          <library>/libraries//lps
        ;

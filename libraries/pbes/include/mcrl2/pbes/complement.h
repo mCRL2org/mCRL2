@@ -35,9 +35,9 @@
 #include <utility>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/sequence_substitution.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/old_data/detail/data_functional.h"
+#include "mcrl2/old_data/detail/sequence_substitution.h"
+#include "mcrl2/old_data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
@@ -49,9 +49,9 @@ struct complement_builder: public pbes_expression_builder
 {
   /// \overload
   ///
-  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const old_data::data_expression& d)
   {
-    return data::data_expr::not_(d);
+    return old_data::data_expr::not_(d);
   }
 
   /// \overload
@@ -88,7 +88,7 @@ struct complement_builder: public pbes_expression_builder
 
   /// \overload
   ///
-  pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_forall(const pbes_expression& /* e */, const old_data::data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr_optimized;
     return exists(variables, visit(expression));
@@ -96,7 +96,7 @@ struct complement_builder: public pbes_expression_builder
 
   /// \overload
   ///
-  pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_exists(const pbes_expression& /* e */, const old_data::data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr_optimized;
     return forall(variables, visit(expression));

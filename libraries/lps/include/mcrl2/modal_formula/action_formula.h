@@ -124,7 +124,7 @@ namespace act_frm
   /// \brief Returns the universal quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  action_formula forall(data::data_variable_list l, action_formula p)
+  action_formula forall(old_data::data_variable_list l, action_formula p)
   {
     assert(!l.empty());
     return action_formula(core::detail::gsMakeActForall(l, p));
@@ -133,7 +133,7 @@ namespace act_frm
   /// \brief Returns the existential quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  action_formula exists(data::data_variable_list l, action_formula p)
+  action_formula exists(old_data::data_variable_list l, action_formula p)
   {
     assert(!l.empty());
     return action_formula(core::detail::gsMakeActExists(l, p));
@@ -141,7 +141,7 @@ namespace act_frm
 
   /// \brief Returns the 'p at d'
   inline
-  action_formula at(action_formula p, data::data_expression d)
+  action_formula at(action_formula p, old_data::data_expression d)
   {
     return action_formula(core::detail::gsMakeActAt(p,d));
   }
@@ -222,7 +222,7 @@ namespace accessors
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list var(action_formula t)
+  old_data::data_variable_list var(action_formula t)
   {
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return atermpp::list_arg1(t);
@@ -230,7 +230,7 @@ namespace accessors
   
   /// \brief Returns the time of an at expression
   inline
-  data::data_expression time(action_formula t)
+  old_data::data_expression time(action_formula t)
   {
     assert(core::detail::gsIsActAt(t));
     return atermpp::arg2(t);

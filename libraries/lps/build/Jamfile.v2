@@ -10,7 +10,7 @@ project lps
 
 obj lps_data_elimination.o
        : source/data_elimination.cpp
-       : <use>/libraries/data//headers
+       : <use>/libraries/old_data//headers
        ;
 
 mcrl2-library lps
@@ -26,8 +26,8 @@ mcrl2-library lps
          source/disjointness_checker.cpp
          source/invariant_checker.cpp
          source/invariant_eliminator.cpp
-       : <use>/libraries/data//headers
+       : <use>/libraries/old_data//headers
          <use>/libraries/atermpp//headers
        : <threading>single
-       : <library>/libraries//data
+       : <library>/libraries//old_data
        ;

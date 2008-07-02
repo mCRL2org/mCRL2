@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/old_data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -31,7 +31,7 @@ class action_label: public atermpp::aterm_appl
 {
   protected:
     core::identifier_string m_name;
-    data::sort_expression_list m_sorts;
+    old_data::sort_expression_list m_sorts;
 
   public:
     /// Constructor.
@@ -53,7 +53,7 @@ class action_label: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
+    action_label(const core::identifier_string& name, const old_data::sort_expression_list &sorts)
      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
@@ -68,7 +68,7 @@ class action_label: public atermpp::aterm_appl
 
     /// Returns the sorts of the action label
     ///
-    data::sort_expression_list sorts() const
+    old_data::sort_expression_list sorts() const
     {
       return m_sorts;
     }

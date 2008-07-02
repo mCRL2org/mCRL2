@@ -12,8 +12,8 @@
 #include <cstdlib>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/old_data/sort_identifier.h"
+#include "mcrl2/old_data/data.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -21,7 +21,7 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 
 int test_main(int argc, char** argv)
 {

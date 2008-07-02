@@ -13,8 +13,8 @@
 #define FORMULA_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/rewrite.h"
+#include "mcrl2/old_data/bdd_prover.h"
 #include "mcrl2/utilities/bdd2dot.h"
 
   /// \brief The class formula checker takes a data specification in mCRL2 format and a list of expressions
@@ -87,7 +87,7 @@ class Formula_Checker {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Formula_Checker(
-      mcrl2::data::data_specification a_data_spec,
+      mcrl2::old_data::data_specification a_data_spec,
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

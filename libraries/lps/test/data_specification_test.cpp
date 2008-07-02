@@ -15,7 +15,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 
 const std::string SPECIFICATION =

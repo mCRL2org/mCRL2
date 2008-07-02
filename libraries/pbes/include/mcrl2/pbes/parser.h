@@ -19,8 +19,8 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/old_data/parser.h"
+#include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 
@@ -36,7 +36,7 @@ namespace pbes_system {
   /// <li><tt>"expressions"</tt>, followed by a sequence of modal formulas separated by newlines</li>
   /// </ul>
   inline
-  std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text)
+  std::pair<std::vector<pbes_expression>, old_data::data_specification> parse_pbes_expressions(std::string text)
   {
     text = core::remove_comments(text);
     std::vector<pbes_expression> result;
@@ -48,11 +48,11 @@ namespace pbes_system {
       
     if (i == std::string::npos) {
       std::cout << "Error in parse_pbes_expressions: could not find keyword '" << separator1 << "'." << std::endl;
-      return std::make_pair(result, data::data_specification());
+      return std::make_pair(result, old_data::data_specification());
     }
     if (j == std::string::npos) {
       std::cout << "Error in parse_pbes_expressions: could not find keyword '" << separator2 << "'." << std::endl;
-      return std::make_pair(result, data::data_specification());
+      return std::make_pair(result, old_data::data_specification());
     }
 
     std::string data_text = text.substr(0, i);
@@ -61,7 +61,7 @@ namespace pbes_system {
     std::string expressions_text = text.substr(j + separator2.size());
 
     std::string spec_text = data_text + "\ninit delta;\n";
-    data::data_specification data_spec = data::parse_data_specification(data_text);
+    old_data::data_specification data_spec = old_data::parse_data_specification(data_text);
 
     boost::trim(variables_text);
     if (variables_text.size() > 0)

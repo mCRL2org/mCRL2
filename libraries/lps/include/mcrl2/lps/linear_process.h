@@ -21,11 +21,11 @@
 #include "mcrl2/atermpp/filtered_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/old_data/find.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/old_data/detail/sequence_algorithm.h"
+#include "mcrl2/old_data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/detail/free_variables.h"
 
 namespace mcrl2 {
@@ -48,7 +48,7 @@ typedef atermpp::filtered_list<summand_list, is_non_delta_summand> non_delta_sum
 class linear_process; // prototype declaration
 
 inline
-std::set<data::data_variable> compute_free_variables(const linear_process& process); // prototype declaration
+std::set<old_data::data_variable> compute_free_variables(const linear_process& process); // prototype declaration
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
@@ -57,8 +57,8 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
 class linear_process: public atermpp::aterm_appl
 {
   protected:
-    data::data_variable_list m_free_variables;
-    data::data_variable_list m_process_parameters;
+    old_data::data_variable_list m_free_variables;
+    old_data::data_variable_list m_process_parameters;
     summand_list       m_summands;
 
   public:
@@ -70,8 +70,8 @@ class linear_process: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    linear_process(data::data_variable_list free_variables,
-        data::data_variable_list process_parameters,
+    linear_process(old_data::data_variable_list free_variables,
+        old_data::data_variable_list process_parameters,
         summand_list       summands
        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcess(free_variables, process_parameters, summands)),
@@ -89,8 +89,8 @@ class linear_process: public atermpp::aterm_appl
 
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_free_variables     = data::data_variable_list(*i++);
-      m_process_parameters = data::data_variable_list(*i++);
+      m_free_variables     = old_data::data_variable_list(*i++);
+      m_process_parameters = old_data::data_variable_list(*i++);
       m_summands           = summand_list(*i);
     }
 
@@ -110,14 +110,14 @@ class linear_process: public atermpp::aterm_appl
 
     /// Returns the sequence of free variables.
     ///
-    data::data_variable_list free_variables() const
+    old_data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// Returns the sequence of process parameters.
     ///
-    data::data_variable_list process_parameters() const
+    old_data::data_variable_list process_parameters() const
     {
       return m_process_parameters;
     }
@@ -141,8 +141,8 @@ class linear_process: public atermpp::aterm_appl
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
-      data::data_variable_list d = m_free_variables    .substitute(f);
-      data::data_variable_list p = m_process_parameters.substitute(f);
+      old_data::data_variable_list d = m_free_variables    .substitute(f);
+      old_data::data_variable_list p = m_process_parameters.substitute(f);
       summand_list       s = m_summands          .substitute(f);
       return linear_process(d, p, s);
     }
@@ -150,19 +150,19 @@ class linear_process: public atermpp::aterm_appl
     /// Returns the set of free variables that appear in the process.
     /// This set is a subset of <tt>free_variables()</tt>.
     ///
-    std::set<data::data_variable> find_free_variables()
+    std::set<old_data::data_variable> find_free_variables()
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // TODO: the efficiency of this implementation is not optimal
-      std::set<data::data_variable> result;
-      std::set<data::data_variable> parameters = mcrl2::data::detail::make_set(process_parameters());
+      std::set<old_data::data_variable> result;
+      std::set<old_data::data_variable> parameters = mcrl2::old_data::detail::make_set(process_parameters());
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        std::set<data::data_variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
-        std::set<data::data_variable> used_variables = data::find_all_data_variables(atermpp::make_list(i->condition(), i->actions(), i->time(), i->assignments()));
-        std::set<data::data_variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
-        std::set<data::data_variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
+        std::set<old_data::data_variable> summation_variables = mcrl2::old_data::detail::make_set(i->summation_variables());
+        std::set<old_data::data_variable> used_variables = old_data::find_all_data_variables(atermpp::make_list(i->condition(), i->actions(), i->time(), i->assignments()));
+        std::set<old_data::data_variable> bound_variables = mcrl2::old_data::detail::set_union(parameters, summation_variables);
+        std::set<old_data::data_variable> free_variables = mcrl2::old_data::detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());
       }
       return result;
@@ -184,8 +184,8 @@ class linear_process: public atermpp::aterm_appl
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // check 1)
-      std::set<data::data_variable> declared_free_variables  = mcrl2::data::detail::make_set(free_variables());
-      std::set<data::data_variable> occurring_free_variables = compute_free_variables(*this);
+      std::set<old_data::data_variable> declared_free_variables  = mcrl2::old_data::detail::make_set(free_variables());
+      std::set<old_data::data_variable> occurring_free_variables = compute_free_variables(*this);
       if (!(std::includes(declared_free_variables.begin(),
                           declared_free_variables.end(),
                           occurring_free_variables.begin(),
@@ -195,12 +195,12 @@ class linear_process: public atermpp::aterm_appl
       {
         std::cerr << "linear_process::is_well_typed() failed: some of the free variables were not declared\n";
         std::cerr << "declared free variables: ";
-        for (std::set<data::data_variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
+        for (std::set<old_data::data_variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
         {
           std::cerr << mcrl2::core::pp(*i) << " ";
         }
         std::cerr << "\noccurring free variables: ";
-        for (std::set<data::data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
+        for (std::set<old_data::data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
         {
           std::cerr << mcrl2::core::pp(*i) << " ";
         }
@@ -209,14 +209,14 @@ class linear_process: public atermpp::aterm_appl
       }
 
       // check 2)
-      if (!mcrl2::data::detail::unique_names(m_process_parameters))
+      if (!mcrl2::old_data::detail::unique_names(m_process_parameters))
       {
         std::cerr << "linear_process::is_well_typed() failed: process parameters " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!mcrl2::data::detail::unique_names(m_free_variables))
+      if (!mcrl2::old_data::detail::unique_names(m_free_variables))
       {
         std::cerr << "linear_process::is_well_typed() failed: free variables " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
@@ -224,13 +224,13 @@ class linear_process: public atermpp::aterm_appl
 
       // check 4)
       std::set<core::identifier_string> names;
-      for (data::data_variable_list::iterator i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
+      for (old_data::data_variable_list::iterator i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
       {
         names.insert(i->name());
       }
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!mcrl2::data::detail::check_variable_names(i->summation_variables(), names))
+        if (!mcrl2::old_data::detail::check_variable_names(i->summation_variables(), names))
         {
           std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << mcrl2::core::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
           return false;
@@ -240,7 +240,7 @@ class linear_process: public atermpp::aterm_appl
       // check 5)
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!mcrl2::data::detail::check_assignment_variables(i->assignments(), m_process_parameters))
+        if (!mcrl2::old_data::detail::check_assignment_variables(i->assignments(), m_process_parameters))
         {
           std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << mcrl2::core::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
@@ -260,10 +260,10 @@ class linear_process: public atermpp::aterm_appl
 
 /// \brief Computes the free variables that occur in the specification
 inline
-std::set<data::data_variable> compute_free_variables(const linear_process& process)
+std::set<old_data::data_variable> compute_free_variables(const linear_process& process)
 {
-  std::set<data::data_variable> result;
-  std::set<data::data_variable> process_parameters = mcrl2::data::detail::make_set(process.process_parameters());
+  std::set<old_data::data_variable> result;
+  std::set<old_data::data_variable> process_parameters = mcrl2::old_data::detail::make_set(process.process_parameters());
   for (summand_list::iterator i = process.summands().begin(); i != process.summands().end(); ++i)
   {
     lps::detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
@@ -282,7 +282,7 @@ std::set<action_label> compute_action_labels(const linear_process& process)
 
 /// \brief Sets the free variables of l and returns the result
 inline
-linear_process set_free_variables(linear_process l, data::data_variable_list free_variables)
+linear_process set_free_variables(linear_process l, old_data::data_variable_list free_variables)
 {
   return linear_process(free_variables,
              l.process_parameters(),
@@ -292,7 +292,7 @@ linear_process set_free_variables(linear_process l, data::data_variable_list fre
 
 /// \brief Sets the process parameters of l and returns the result
 inline
-linear_process set_process_parameters(linear_process l, data::data_variable_list process_parameters)
+linear_process set_process_parameters(linear_process l, old_data::data_variable_list process_parameters)
 {
   return linear_process(l.free_variables    (),
              process_parameters,

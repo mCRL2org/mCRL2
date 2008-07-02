@@ -8,7 +8,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
 

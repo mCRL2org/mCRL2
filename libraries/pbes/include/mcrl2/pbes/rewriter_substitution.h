@@ -13,29 +13,29 @@
 #define MCRL2_PBES_REWRITER_SUBSTITUTION_H
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/old_data/rewriter.h"
+#include "mcrl2/old_data/enumerator.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  struct pbes_rewriter_substitution: public data::rewriter::substitution, public data::enumerator_expression
+  struct pbes_rewriter_substitution: public old_data::rewriter::substitution, public old_data::enumerator_expression
   {
     pbes_rewriter_substitution()
     {}
    
-    pbes_rewriter_substitution(const data::data_variable& variable, data::rewriter& datar)
-      : data::rewriter::substitution(datar, variable, variable),
-        data::enumerator_expression(ATermAppl(variable), make_list(variable))
+    pbes_rewriter_substitution(const old_data::data_variable& variable, old_data::rewriter& datar)
+      : old_data::rewriter::substitution(datar, variable, variable),
+        old_data::enumerator_expression(ATermAppl(variable), make_list(variable))
     {}
     
-    pbes_rewriter_substitution(const data::data_variable& variable,
-                             const data::enumerator_expression& t,
-                             data::rewriter& datar
+    pbes_rewriter_substitution(const old_data::data_variable& variable,
+                             const old_data::enumerator_expression& t,
+                             old_data::rewriter& datar
                             )
-      : data::rewriter::substitution(datar, variable, t.expression()),
-        data::enumerator_expression(t)
+      : old_data::rewriter::substitution(datar, variable, t.expression()),
+        old_data::enumerator_expression(t)
     {}
     
     std::string to_string() const

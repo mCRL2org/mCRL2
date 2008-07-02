@@ -16,16 +16,16 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/old_data/data.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 
-mcrl2::data::data_expression test_substitution(mcrl2::data::data_expression d)
+mcrl2::old_data::data_expression test_substitution(mcrl2::old_data::data_expression d)
 {
   data_variable a("i:Int");
   data_expression b = data_expression(gsMakeDataExprInt("4"));

@@ -13,15 +13,15 @@
 #include <iterator>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/old_data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 

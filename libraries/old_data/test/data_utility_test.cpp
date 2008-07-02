@@ -15,16 +15,16 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/utility.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 
 int test_main(int argc, char** argv)
 {

@@ -2,12 +2,12 @@ project libraries/utilities/test
    : requirements
        <use>/site-config//boost_headers
        <source>/libraries/utilities//command_line_interfacing
-       <source>/libraries//data
+       <source>/libraries//old_data
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
 
 test-suite utilities
-    : [ run command_line_interface_test.cpp : : : <dependency>/libraries//data ]
+    : [ run command_line_interface_test.cpp : : : <dependency>/libraries//old_data ]
       [ compile-headers ../include ]
     ;

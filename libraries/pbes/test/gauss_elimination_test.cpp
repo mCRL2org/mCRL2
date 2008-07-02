@@ -15,8 +15,8 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/rewriter.h"
+#include "mcrl2/old_data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -26,7 +26,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
@@ -82,11 +82,11 @@ void test_gauss_elimination()
   specification spec    = mcrl22lps(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA, spec);
 
-  typedef mcrl2::data::data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<mcrl2::data::rewriter, my_enumerator> my_rewriter;
+  typedef mcrl2::old_data::data_enumerator<mcrl2::old_data::rewriter, number_postfix_generator> my_enumerator;
+  typedef enumerate_quantifiers_rewriter<mcrl2::old_data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
     
-  mcrl2::data::rewriter datar(spec.data());
+  mcrl2::old_data::rewriter datar(spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);    

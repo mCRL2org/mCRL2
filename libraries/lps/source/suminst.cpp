@@ -15,17 +15,17 @@
 #include <mcrl2/atermpp/table.h>
 
 //LPS Framework
-#include <mcrl2/data/data_operation.h>
+#include <mcrl2/old_data/data_operation.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include <mcrl2/data/sort_utility.h>
-#include <mcrl2/data/find.h>
+#include <mcrl2/old_data/sort_utility.h>
+#include <mcrl2/old_data/find.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/old_data/detail/data_functional.h"
 
 //Enumerator
-#include <mcrl2/data/detail/enum/standard.h>
+#include <mcrl2/old_data/detail/enum/standard.h>
 #include <mcrl2/lps/nextstate.h>
 
 #include <mcrl2/lps/suminst.h>
@@ -35,7 +35,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 

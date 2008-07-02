@@ -12,12 +12,12 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/sort_arrow.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/sort_arrow.h"
 
 using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 
 inline
 data_variable nat(std::string name)

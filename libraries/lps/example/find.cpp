@@ -14,10 +14,10 @@
 
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
@@ -25,8 +25,8 @@
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::data_expr;
 using namespace mcrl2::lps;
 
 struct compare_variable

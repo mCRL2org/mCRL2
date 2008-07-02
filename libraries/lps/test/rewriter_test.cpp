@@ -14,16 +14,16 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/old_data/sort_identifier.h"
+#include "mcrl2/old_data/rewriter.h"
+#include "mcrl2/old_data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::old_data;
+using namespace mcrl2::old_data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 

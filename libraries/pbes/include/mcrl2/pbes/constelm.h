@@ -21,7 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/old_data/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -54,9 +54,9 @@ namespace detail {
 
   struct apply_exists
   {
-    data::data_variable_list variables_;
+    old_data::data_variable_list variables_;
 
-    apply_exists(data::data_variable_list variables)
+    apply_exists(old_data::data_variable_list variables)
       : variables_(variables)
     {}
 
@@ -70,9 +70,9 @@ namespace detail {
 
   struct apply_forall
   {
-    data::data_variable_list variables_;
+    old_data::data_variable_list variables_;
 
-    apply_forall(data::data_variable_list variables)
+    apply_forall(old_data::data_variable_list variables)
       : variables_(variables)
     {}
 
@@ -132,7 +132,7 @@ namespace detail {
 
     /// Visit data expression node.
     ///
-    bool visit_data_expression(const pbes_expression& e, const data::data_expression& d, edge_condition& ec)
+    bool visit_data_expression(const pbes_expression& e, const old_data::data_expression& d, edge_condition& ec)
     {
       using namespace pbes_expr_optimized;
       ec.TC = d;
@@ -220,7 +220,7 @@ namespace detail {
 
     /// Visit forall node.
     ///
-    bool visit_forall(const pbes_expression& e, const data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
+    bool visit_forall(const pbes_expression& e, const old_data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
     {
       using namespace pbes_expr_optimized;
       visit(expr, ec);
@@ -234,7 +234,7 @@ namespace detail {
 
     /// Visit exists node.
     ///
-    bool visit_exists(const pbes_expression& e, const data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
+    bool visit_exists(const pbes_expression& e, const old_data::data_variable_list&  variables, const pbes_expression& expr, edge_condition& ec)
     {
       using namespace pbes_expr_optimized;
       visit(expr, ec);
@@ -266,7 +266,7 @@ namespace detail {
   class pbes_constelm_algorithm
   {
     protected:
-      typedef std::map<data::data_variable, data::data_expression> constraint_map;
+      typedef std::map<old_data::data_variable, old_data::data_expression> constraint_map;
 
       // Represents an edge of the dependency graph. The assignments are stored
       // implicitly using the 'right' parameter. The condition determines under
@@ -318,23 +318,23 @@ namespace detail {
 
         // Returns true if the data expression is constant.
         // TODO: what to do with free variables?
-        bool is_constant_expression(data::data_expression d) const
+        bool is_constant_expression(old_data::data_expression d) const
         {
-          return data::find_all_data_variables(d).empty();
+          return old_data::find_all_data_variables(d).empty();
         }
 
         // Return true if the data variable v has been assigned a constant expression.
-        bool is_constant(data::data_variable v) const
+        bool is_constant(old_data::data_variable v) const
         {
           constraint_map::const_iterator i = constraints.find(v);
-          return i != constraints.end() && !data::is_data_variable(i->second);
+          return i != constraints.end() && !old_data::is_data_variable(i->second);
         }
 
         // Returns the constant parameters of this vertex.
-        std::vector<data::data_variable> constant_parameters() const
+        std::vector<old_data::data_variable> constant_parameters() const
         {
-          std::vector<data::data_variable> result;
-          for (data::data_variable_list::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i)
+          std::vector<old_data::data_variable> result;
+          for (old_data::data_variable_list::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i)
           {
             if (is_constant(*i))
             {
@@ -349,7 +349,7 @@ namespace detail {
         {
           std::vector<int> result;
           int index = 0;
-          for (data::data_variable_list::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i, index++)
+          for (old_data::data_variable_list::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i, index++)
           {
             if (is_constant(*i))
             {
@@ -376,32 +376,32 @@ namespace detail {
         // Assign new values to the parameters of this vertex, and update the constraints accordingly.
         // The new values have a number of constraints.
         template <typename IdentifierGenerator>
-        bool update(data::data_expression_list new_values,
+        bool update(old_data::data_expression_list new_values,
                     const constraint_map& new_value_constraints,
                     DataRewriter datar,
                     IdentifierGenerator name_generator
                    )
         {
           bool changed = false;
-          data::data_variable_list params = variable.parameters();
-          data::data_expression_list::iterator i;
-          data::data_variable_list::iterator j;
+          old_data::data_variable_list params = variable.parameters();
+          old_data::data_expression_list::iterator i;
+          old_data::data_variable_list::iterator j;
           for (i = new_values.begin(), j = params.begin(); i != new_values.end(); ++i, ++j)
           {
             // handle the parameter d
-            data::data_variable d = *j;
+            old_data::data_variable d = *j;
             constraint_map::iterator k = constraints.find(d);
 
             if (k != constraints.end())
             {
-              if (!data::is_data_variable(k->second)) // d has been assigned a constant value
+              if (!old_data::is_data_variable(k->second)) // d has been assigned a constant value
               {
-                data::data_expression old_value = k->second;
-                data::data_expression new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
+                old_data::data_expression old_value = k->second;
+                old_data::data_expression new_value = datar(old_data::data_variable_map_replace(*i, new_value_constraints));
                 if (old_value != new_value)
                 {
                   // mark the parameter as NaC by assigning a fresh variable to it
-                  k->second = data::data_variable(name_generator(), j->sort());
+                  k->second = old_data::data_variable(name_generator(), j->sort());
                   changed = true;
                 }
               }
@@ -409,7 +409,7 @@ namespace detail {
             else
             {
               changed = true;
-              data::data_expression new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
+              old_data::data_expression new_value = datar(old_data::data_variable_map_replace(*i, new_value_constraints));
               if (is_constant_expression(new_value))
               {
                 constraints[d] = new_value;
@@ -417,7 +417,7 @@ namespace detail {
               else
               {
                 // mark the parameter as NaC by assigning a fresh variable to it
-                constraints[d] = data::data_variable(name_generator(), j->sort());
+                constraints[d] = old_data::data_variable(name_generator(), j->sort());
               }
             }
           }
@@ -432,7 +432,7 @@ namespace detail {
           constraint_map::iterator pos;
           for (pos = constraints.begin(); pos != constraints.end(); )
           {
-            if (data::is_data_variable(pos->second)) // the value is NaC
+            if (old_data::is_data_variable(pos->second)) // the value is NaC
             {
               constraints.erase(pos++);
             }
@@ -538,7 +538,7 @@ namespace detail {
         std::set<propositional_variable_instantiation> inst = find_all_propositional_variable_instantiations(kappa);
         for (std::set<propositional_variable_instantiation>::iterator i = inst.begin(); i != inst.end(); ++i)
         {
-          data::data_expression_list new_values = i->parameters();
+          old_data::data_expression_list new_values = i->parameters();
           vertex& u = m_vertices[i->name()];
           u.update(new_values, constraint_map(), m_data_rewriter, name_generator);
           todo.push_back(u.variable);
@@ -565,7 +565,7 @@ std::cout << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
 
           const vertex& u = m_vertices[var.name()];
           std::vector<edge>& u_edges = m_edges[var.name()];
-          data::data_variable_list Xparams = u.variable.parameters();
+          old_data::data_variable_list Xparams = u.variable.parameters();
 
           for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
           {
@@ -577,7 +577,7 @@ std::cout << "  <source vertex       >" << u.to_string() << std::endl;
 std::cout << "  <target vertex before>" << v.to_string() << std::endl;
 #endif
 
-            if (m_pbes_rewriter(data::data_variable_map_replace(e.condition, u.constraints)) != false_())
+            if (m_pbes_rewriter(old_data::data_variable_map_replace(e.condition, u.constraints)) != false_())
             {              
               bool changed = v.update(e.right.parameters(), u.constraints, m_data_rewriter, name_generator);
               if (changed)
@@ -610,8 +610,8 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
             }
             else
             { 
-              std::vector<data::data_variable> removed = u.constant_parameters();
-              for (std::vector<data::data_variable>::iterator j = removed.begin(); j != removed.end(); ++j)
+              std::vector<old_data::data_variable> removed = u.constant_parameters();
+              for (std::vector<old_data::data_variable>::iterator j = removed.begin(); j != removed.end(); ++j)
               {
                 std::cout << "  parameter (" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
               }
@@ -644,7 +644,7 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
           *i = pbes_equation(
             i->symbol(),
             i->variable(),
-            data::data_variable_map_replace(i->formula(), v.constraints)
+            old_data::data_variable_map_replace(i->formula(), v.constraints)
           );
         }
         

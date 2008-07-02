@@ -16,8 +16,8 @@
 #define CONFLUENCE_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/rewrite.h"
+#include "mcrl2/old_data/bdd_prover.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/bdd2dot.h"

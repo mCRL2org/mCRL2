@@ -2,7 +2,7 @@ project toolset/mcrl2i ;
 
 tool mcrl2i
        : mcrl2i.cpp
-         /libraries//data
+         /libraries//old_data
        : <status>experimental
        ;
 

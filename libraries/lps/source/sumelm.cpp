@@ -18,10 +18,10 @@
 //LPS Framework
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/detail/data_functional.h"
+#include "mcrl2/old_data/replace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
@@ -30,9 +30,9 @@
 // For Aterm library extension functions
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data::data_expr;
 
 namespace mcrl2 {
 
@@ -145,7 +145,7 @@ namespace lps {
   data_expression swap_equality(const data_expression t)
   {
     assert(is_equal_to(t));
-    return data::data_expr::equal_to(rhs(t), lhs(t));
+    return old_data::data_expr::equal_to(rhs(t), lhs(t));
   }
 
   ///Apply substitution to the righthand sides of the assignments in dl

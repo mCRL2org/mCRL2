@@ -13,13 +13,13 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/data_operation.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/data_operation.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 
 class D: public aterm_appl
 {

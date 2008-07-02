@@ -18,11 +18,11 @@
 
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/replace.h"
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using mcrl2::core::pp;
 
 struct add_zero
@@ -84,7 +84,7 @@ struct data_assignment_list_replacer
 
 void test_replace()
 {
-  using namespace mcrl2::data::data_expr;
+  using namespace mcrl2::old_data::data_expr;
 
   data_variable d("d:D");
   data_variable e("e:D");
@@ -104,7 +104,7 @@ void test_replace()
 
 void test_data_assignment_list()
 {
-  using namespace mcrl2::data::data_expr;
+  using namespace mcrl2::old_data::data_expr;
 
   data_variable d1("d1:D");
   data_variable d2("d2:D");
@@ -131,7 +131,7 @@ void test_data_assignment_list()
 
 void test_data_variable_replace()
 {
-  using namespace mcrl2::data::data_expr;
+  using namespace mcrl2::old_data::data_expr;
 
   data_variable d1("d1:D");
   data_variable d2("d2:D");

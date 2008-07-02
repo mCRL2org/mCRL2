@@ -16,11 +16,11 @@
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_assignment_functional.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
-#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/old_data/detail/sequence_algorithm.h"
 
 namespace mcrl2 {
 
@@ -31,8 +31,8 @@ namespace lps {
 class process_initializer: public atermpp::aterm_appl
 {
   protected:
-    data::data_variable_list   m_free_variables;
-    data::data_assignment_list m_assignments;
+    old_data::data_variable_list   m_free_variables;
+    old_data::data_assignment_list m_assignments;
 
   public:
     /// Constructor.
@@ -43,8 +43,8 @@ class process_initializer: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    process_initializer(data::data_variable_list free_variables,
-                        data::data_assignment_list assignments
+    process_initializer(old_data::data_variable_list free_variables,
+                        old_data::data_assignment_list assignments
                        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(free_variables, assignments)),
        m_free_variables(free_variables),
@@ -65,21 +65,21 @@ class process_initializer: public atermpp::aterm_appl
 
     /// Returns the sequence of free variables.
     ///
-    data::data_variable_list free_variables() const
+    old_data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// Returns the sequence of assignments.
     ///
-    data::data_assignment_list assignments() const
+    old_data::data_assignment_list assignments() const
     {
       return m_assignments;
     }
 
     /// Returns the initial state of the LPS.
     ///
-    data::data_expression_list state() const
+    old_data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
@@ -101,9 +101,9 @@ class process_initializer: public atermpp::aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (mcrl2::data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), data::detail::data_assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , data::detail::data_assignment_lhs())
+      if (mcrl2::old_data::detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), old_data::detail::data_assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , old_data::detail::data_assignment_lhs())
               )
          )
       {

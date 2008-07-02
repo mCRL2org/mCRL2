@@ -16,8 +16,8 @@
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/utility.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 #include "mcrl2/pbes/propositional_variable.h"
 
@@ -30,7 +30,7 @@ namespace pbes_system {
 class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
-    data::data_variable_list   m_free_variables;
+    old_data::data_variable_list   m_free_variables;
     propositional_variable_instantiation m_variable;
 
   public:
@@ -42,7 +42,7 @@ class pbes_initializer: public atermpp::aterm_appl
 
     /// Constructor.
     ///
-    pbes_initializer(data::data_variable_list free_variables,
+    pbes_initializer(old_data::data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
      : atermpp::aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
@@ -64,7 +64,7 @@ class pbes_initializer: public atermpp::aterm_appl
 
     /// Returns the sequence of free variables.
     ///
-    data::data_variable_list free_variables() const
+    old_data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }

@@ -20,10 +20,10 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_assignment_functional.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/old_data/find.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/detail/data_assignment_functional.h"
+#include "mcrl2/old_data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
@@ -52,7 +52,7 @@ class pbes_parelm_algorithm
       }
     }
 
-    std::set<data::data_variable> unbound_variables(pbes_expression t, data::data_variable_list bound_variables) const
+    std::set<old_data::data_variable> unbound_variables(pbes_expression t, old_data::data_variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
       detail::free_variable_visitor visitor(bound_variables, search_propositional_variables);
@@ -60,10 +60,10 @@ class pbes_parelm_algorithm
       return visitor.result;      
     }
     
-    int variable_index(data::data_variable_list v, data::data_variable d) const
+    int variable_index(old_data::data_variable_list v, old_data::data_variable d) const
     {
       int index = 0;
-      for (data::data_variable_list::iterator i = v.begin(); i != v.end(); ++i)
+      for (old_data::data_variable_list::iterator i = v.begin(); i != v.end(); ++i)
       {
         if (*i == d)
         {
@@ -135,8 +135,8 @@ class pbes_parelm_algorithm
     template <typename Container>
     void run(pbes<Container>& p) const
     {
-      data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
-      std::vector<data::data_variable> predicate_variables;
+      old_data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
+      std::vector<old_data::data_variable> predicate_variables;
       
       // compute a mapping from propositional variable names to offsets
       int offset = 0;
@@ -154,8 +154,8 @@ class pbes_parelm_algorithm
       offset = 0;
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-        std::set<data::data_variable> uvars = unbound_variables(i->formula(), fvars);
-        for (std::set<data::data_variable>::iterator j = uvars.begin(); j != uvars.end(); ++j)
+        std::set<old_data::data_variable> uvars = unbound_variables(i->formula(), fvars);
+        for (std::set<old_data::data_variable>::iterator j = uvars.begin(); j != uvars.end(); ++j)
         {
           int k = variable_index(i->variable().parameters(), *j);
           if (k < 0)
@@ -174,7 +174,7 @@ class pbes_parelm_algorithm
       {
         // left hand side (X)
         core::identifier_string X = i->variable().name();
-        data::data_variable_list Xparams = i->variable().parameters();
+        old_data::data_variable_list Xparams = i->variable().parameters();
 
         // right hand side (Y)
         pbes_expression phi = i->formula();
@@ -182,12 +182,12 @@ class pbes_parelm_algorithm
         for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
           core::identifier_string Y = j->name();
-          data::data_expression_list Yparams = j->parameters();
+          old_data::data_expression_list Yparams = j->parameters();
           int Yindex = 0;
-          for (data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
+          for (old_data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
           {
-            std::set<data::data_variable> vars = data::find_all_data_variables(*y);
-            for (std::set<data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+            std::set<old_data::data_variable> vars = old_data::find_all_data_variables(*y);
+            for (std::set<old_data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
             {
               int Xindex = variable_index(Xparams, *k);
               if (Xindex < 0)
@@ -235,7 +235,7 @@ class pbes_parelm_algorithm
         for(std::set<int>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
-          data::data_variable v1 = predicate_variables[*i];
+          old_data::data_variable v1 = predicate_variables[*i];
           std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
         std::cout << "\ndependencies:" << std::endl;
@@ -248,10 +248,10 @@ class pbes_parelm_algorithm
           edge_descriptor e = *first;
           int i1 = boost::source(e, G);
           core::identifier_string X1 = find_predicate_variable(p, i1);
-          data::data_variable v1 = predicate_variables[i1];
+          old_data::data_variable v1 = predicate_variables[i1];
           int i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
-          data::data_variable v2 = predicate_variables[i2];
+          old_data::data_variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
           std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
           std::cout << left << " -> " << right << std::endl;
@@ -268,7 +268,7 @@ class pbes_parelm_algorithm
 
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
-            data::data_variable v1 = predicate_variables[*j];
+            old_data::data_variable v1 = predicate_variables[*j];
             std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }

@@ -12,17 +12,17 @@
 #include <mcrl2/core/detail/struct.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/utilities/aterm_ext.h>
-#include <mcrl2/data/data_specification.h>
-#include <mcrl2/data/sort.h>
-#include <mcrl2/data/data_operation.h>
-#include <mcrl2/data/data_variable.h>
-#include <mcrl2/data/data_elimination.h>
+#include <mcrl2/old_data/data_specification.h>
+#include <mcrl2/old_data/sort.h>
+#include <mcrl2/old_data/data_operation.h>
+#include <mcrl2/old_data/data_variable.h>
+#include <mcrl2/old_data/data_elimination.h>
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 
 
 //Prototype

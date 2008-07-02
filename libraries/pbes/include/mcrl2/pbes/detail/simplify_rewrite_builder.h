@@ -15,7 +15,7 @@
 #include <set>
 #include <utility>
 #include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/old_data/find.h"
 
 namespace mcrl2 {
 
@@ -25,51 +25,51 @@ namespace detail {
 
   // Is called in the case rewriting is done with a substitution range.
   template <typename DataRewriter, typename SubstitutionRange>
-  data::data_expression data_rewrite(DataRewriter rewr, data::data_expression d, const SubstitutionRange& sigma, bool& b)
+  old_data::data_expression data_rewrite(DataRewriter rewr, old_data::data_expression d, const SubstitutionRange& sigma, bool& b)
   {
-    data::data_expression result = rewr(d, sigma);
-    std::set<data::data_variable> v = data::find_all_data_variables(result);
+    old_data::data_expression result = rewr(d, sigma);
+    std::set<old_data::data_variable> v = old_data::find_all_data_variables(result);
     b = !v.empty();
     return result;
   }
 
   // Is called in the case rewriting is done without a substitution range.
   template <typename DataRewriter>
-  data::data_expression data_rewrite(DataRewriter rewr, data::data_expression d, const int&, bool&)
+  old_data::data_expression data_rewrite(DataRewriter rewr, old_data::data_expression d, const int&, bool&)
   {
     return rewr(d);
   }
 
   // Is called in the case rewriting is done with a substitution range.
   template <typename DataRewriter, typename SubstitutionRange>
-  data::data_expression_list data_rewrite_list(DataRewriter rewr, data::data_expression_list v, const SubstitutionRange& sigma, bool& b)
+  old_data::data_expression_list data_rewrite_list(DataRewriter rewr, old_data::data_expression_list v, const SubstitutionRange& sigma, bool& b)
   {
-    std::vector<data::data_expression> w;
+    std::vector<old_data::data_expression> w;
     b = false;
-    for (data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
+    for (old_data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
     {
-      data::data_expression d = rewr(*i, sigma);
+      old_data::data_expression d = rewr(*i, sigma);
       if (!b)
       {
-        std::set<data::data_variable> v = data::find_all_data_variables(d);
+        std::set<old_data::data_variable> v = old_data::find_all_data_variables(d);
         b = !v.empty();
       }
       w.push_back(d);
     }
-    return data::data_expression_list(w.begin(), w.end());
+    return old_data::data_expression_list(w.begin(), w.end());
   }
 
   // Is called in the case rewriting is done without a substitution range.
   template <typename DataRewriter>
-  data::data_expression_list data_rewrite_list(DataRewriter rewr, data::data_expression_list v, const int&, bool&)
+  old_data::data_expression_list data_rewrite_list(DataRewriter rewr, old_data::data_expression_list v, const int&, bool&)
   {
     // TODO: there is probably a more efficient way to compute this
-    std::vector<data::data_expression> w;
-    for (data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
+    std::vector<old_data::data_expression> w;
+    for (old_data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
     {
       w.push_back(rewr(*i));
     }
-    return data::data_expression_list(w.begin(), w.end());
+    return old_data::data_expression_list(w.begin(), w.end());
   }
 
   // Simplifying PBES rewriter.
@@ -92,9 +92,9 @@ namespace detail {
   
     /// Visit data expression node.
     ///
-    pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, argument_type& arg)
+    pbes_expression visit_data_expression(const pbes_expression& x, const old_data::data_expression& d, argument_type& arg)
     {
-      data::data_expression result = data_rewrite(m_data_rewriter, d, arg.first, arg.second);
+      old_data::data_expression result = data_rewrite(m_data_rewriter, d, arg.first, arg.second);
       return result;
     }
   
@@ -210,7 +210,7 @@ namespace detail {
 
     /// Visit forall node.
     ///
-    pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_forall(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       using namespace pbes_expr_optimized;
       return forall(variables, visit(phi, arg));
@@ -218,7 +218,7 @@ namespace detail {
   
     /// Visit exists node.
     ///
-    pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_exists(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       using namespace pbes_expr_optimized;
       return exists(variables, visit(phi, arg));

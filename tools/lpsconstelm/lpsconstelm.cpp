@@ -26,7 +26,7 @@
 #include <fstream>
 
 //Rewriter
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 
 //Aterm
 #include "mcrl2/atermpp/aterm.h"
@@ -41,7 +41,7 @@ using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 
 template <class T>
@@ -56,18 +56,18 @@ class lpsConstElm {
   private:
     ATermTable                            safeguard;
     std::string                           p_outputfile;
-    atermpp::vector< mcrl2::data::data_assignment >   p_currentState;
-    atermpp::vector< mcrl2::data::data_assignment >   p_newCurrentState;
-    atermpp::vector< mcrl2::data::data_assignment >   p_nextState;
-    atermpp::vector< mcrl2::data::data_assignment >   p_initAssignments;
-    atermpp::map< mcrl2::data::data_variable, int  >  p_lookupIndex;
-    atermpp::map< int, mcrl2::data::data_variable >   p_lookupDataVarIndex;
-    atermpp::set< mcrl2::data::data_expression >      p_freeVarSet;
+    atermpp::vector< mcrl2::old_data::data_assignment >   p_currentState;
+    atermpp::vector< mcrl2::old_data::data_assignment >   p_newCurrentState;
+    atermpp::vector< mcrl2::old_data::data_assignment >   p_nextState;
+    atermpp::vector< mcrl2::old_data::data_assignment >   p_initAssignments;
+    atermpp::map< mcrl2::old_data::data_variable, int  >  p_lookupIndex;
+    atermpp::map< int, mcrl2::old_data::data_variable >   p_lookupDataVarIndex;
+    atermpp::set< mcrl2::old_data::data_expression >      p_freeVarSet;
     atermpp::set< int >                       p_V;
     atermpp::set< int >                       p_S;
     atermpp::set< mcrl2::lps::summand >          p_visitedSummands;
-    atermpp::set< mcrl2::data::data_expression >      p_variableList;
-    atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > > p_changed_assignements_per_cycle;
+    atermpp::set< mcrl2::old_data::data_expression >      p_variableList;
+    atermpp::map< int, atermpp::vector< std::pair< mcrl2::old_data::data_assignment, mcrl2::old_data::data_assignment > > > p_changed_assignements_per_cycle;
     int                                   p_newVarCounter;
     bool                                  p_nosingleton;
     bool                                  p_alltrue;
@@ -81,14 +81,14 @@ class lpsConstElm {
     //rewrite strategy used by the rewriter.
     RewriteStrategy p_strategy;
 
-    atermpp::map< mcrl2::data::data_variable, atermpp::vector < mcrl2::data::data_expression > > p_parameter_trace ;
+    atermpp::map< mcrl2::old_data::data_variable, atermpp::vector < mcrl2::old_data::data_expression > > p_parameter_trace ;
     int p_cycle;   
 
     //Only used by getDataVarIDs
-    atermpp::set< mcrl2::data::data_variable >        p_foundFreeVars;
+    atermpp::set< mcrl2::old_data::data_variable >        p_foundFreeVars;
 
     //Only used by detectVar
-    atermpp::set< mcrl2::data::data_expression >      sum_vars;
+    atermpp::set< mcrl2::old_data::data_expression >      sum_vars;
 
   public:
 
@@ -100,18 +100,18 @@ class lpsConstElm {
 
     void parse_command_line(int argc, char** argv);
     void getDatVarRec(aterm_appl t);
-    atermpp::set< mcrl2::data::data_variable > getUsedFreeVars(aterm_appl input);
+    atermpp::set< mcrl2::old_data::data_variable > getUsedFreeVars(aterm_appl input);
     ATermAppl rewrite(ATermAppl t);
-    ATermAppl p_substitute(ATermAppl t, atermpp::vector< mcrl2::data::data_assignment > &y );
-    void calculateNextState(mcrl2::data::data_assignment_list assignments);
-    bool inFreeVarList(mcrl2::data::data_expression dexpr);
-    mcrl2::data::data_assignment newExpression(mcrl2::data::data_assignment ass);
-    bool compare(mcrl2::data::data_expression x, mcrl2::data::data_expression y);
+    ATermAppl p_substitute(ATermAppl t, atermpp::vector< mcrl2::old_data::data_assignment > &y );
+    void calculateNextState(mcrl2::old_data::data_assignment_list assignments);
+    bool inFreeVarList(mcrl2::old_data::data_expression dexpr);
+    mcrl2::old_data::data_assignment newExpression(mcrl2::old_data::data_assignment ass);
+    bool compare(mcrl2::old_data::data_expression x, mcrl2::old_data::data_expression y);
     bool cmpCurrToNext();
-    bool conditionTest(mcrl2::data::data_expression x);
+    bool conditionTest(mcrl2::old_data::data_expression x);
     void detectVar(int n);
-    bool recDetectVarList(mcrl2::data::data_expression_list l, atermpp::set<data_expression> &S);
-    bool recDetectVar(mcrl2::data::data_expression t, atermpp::set<mcrl2::data::data_expression> &S);
+    bool recDetectVarList(mcrl2::old_data::data_expression_list l, atermpp::set<data_expression> &S);
+    bool recDetectVar(mcrl2::old_data::data_expression t, atermpp::set<mcrl2::old_data::data_expression> &S);
     bool DetectVariableProcessParamtersInDataAppl (aterm_appl t); 
     template <typename Term>
     atermpp::term_list<Term> vectorToList(atermpp::vector<Term> y);
@@ -340,7 +340,7 @@ bool lpsConstElm::DetectVariableProcessParamtersInDataAppl (aterm_appl t) {
 
 // Returns a vector in which each element is a AtermsAppl (DataVarID)
 //
-inline atermpp::set< mcrl2::data::data_variable > lpsConstElm::getUsedFreeVars(aterm_appl input) {
+inline atermpp::set< mcrl2::old_data::data_variable > lpsConstElm::getUsedFreeVars(aterm_appl input) {
   p_foundFreeVars.clear();
   getDatVarRec(input);
   return p_foundFreeVars;
@@ -356,12 +356,12 @@ inline ATermAppl lpsConstElm::rewrite(ATermAppl t) {
 
 // Subsitutes a vectorlist of data assignements to a ATermAppl
 //
-inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, atermpp::vector< mcrl2::data::data_assignment > &y ) {
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
+inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, atermpp::vector< mcrl2::old_data::data_assignment > &y ) {
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
     rewr->setSubstitution(i->lhs() ,rewr->toRewriteFormat(i->rhs()));
   }
   ATermAppl result = rewr->rewrite(t);
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
     rewr->clearSubstitution(i->lhs());
   }
   return result;
@@ -370,17 +370,17 @@ inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, atermpp::vector< mcrl2::
 // stores the next state information in p_nextState
 //
 inline void lpsConstElm::calculateNextState(data_assignment_list assignments) {
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
     int index = p_lookupIndex[i->lhs()];
     if (p_V.find(index) == p_V.end()){
-      mcrl2::data::data_expression tmp = i->lhs();
-      for (mcrl2::data::data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
+      mcrl2::old_data::data_expression tmp = i->lhs();
+      for (mcrl2::old_data::data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
         if (j->lhs() == i->lhs()){
           tmp = j->rhs();
           break;
         }
       }
-      p_nextState.at(index) = mcrl2::data::data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
+      p_nextState.at(index) = mcrl2::old_data::data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
     } else {
       p_nextState.at(index) = *i;
     }
@@ -397,7 +397,7 @@ inline bool lpsConstElm::inFreeVarList(data_expression dexpr) {
 // these date_expressions are used to model that a process parameter has a
 // value which is not constant
 //
-inline mcrl2::data::data_assignment lpsConstElm::newExpression(mcrl2::data::data_assignment ass) {
+inline mcrl2::old_data::data_assignment lpsConstElm::newExpression(mcrl2::old_data::data_assignment ass) {
   char buffer [99];
   sprintf(buffer, "%s^%d", std::string(ass.lhs().name()).c_str(), p_newVarCounter++);
   data_variable w(buffer, ass.lhs().sort() );
@@ -421,7 +421,7 @@ inline bool lpsConstElm::conditionTest(data_expression x) {
 //
 inline bool lpsConstElm::cmpCurrToNext() {
   bool differs = false;
-  for(atermpp::vector< mcrl2::data::data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
+  for(atermpp::vector< mcrl2::old_data::data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
     int index = p_lookupIndex[i->lhs()];
     if (p_V.find(index) == p_V.end()) {
       if (inFreeVarList(i->rhs())) {
@@ -490,7 +490,7 @@ void lpsConstElm::detectVar(int n) {
 }
 
 // Return whether or not a summation variable occurs in a data term list
-bool lpsConstElm::recDetectVarList(mcrl2::data::data_expression_list l, atermpp::set<data_expression> &S) {
+bool lpsConstElm::recDetectVarList(mcrl2::old_data::data_expression_list l, atermpp::set<data_expression> &S) {
   //gsVerboseMsg("list: %s\n", l.to_string().c_str());
   bool b = false;
   for(data_expression_list::iterator i = l.begin(); i != l.end() && !(b); ++i) {
@@ -500,7 +500,7 @@ bool lpsConstElm::recDetectVarList(mcrl2::data::data_expression_list l, atermpp:
 }
 
 // Return whether or not a summation variable occurs in a data term
-bool lpsConstElm::recDetectVar(mcrl2::data::data_expression t, atermpp::set<data_expression> &S) {
+bool lpsConstElm::recDetectVar(mcrl2::old_data::data_expression t, atermpp::set<data_expression> &S) {
    //gsVerboseMsg("expr: %s\n", t.to_string().c_str());
    bool b = false;
    if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
@@ -543,12 +543,12 @@ void lpsConstElm::findSingleton() {
 
   atermpp::map< sort_expression, int >     p_countSort;
   //set< sort_expression > result;
-  for(mcrl2::data::sort_expression_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
+  for(mcrl2::old_data::sort_expression_list::iterator i = p_spec.data().sorts().begin(); i != p_spec.data().sorts().end() ; i++){
     p_countSort[*i] = 0;
     p_singletonSort.insert(*i);
   }
 
-  for(mcrl2::data::data_operation_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
+  for(mcrl2::old_data::data_operation_list::iterator i= p_spec.data().constructors().begin() ; i != p_spec.data().constructors().end() ; i++){
     p_countSort[result_sort(i->sort())]++;
   }
 
@@ -596,7 +596,7 @@ void lpsConstElm::findSingleton() {
 inline void lpsConstElm::printNextState() {
 // (JK: 16/1/2006: This function is never called)
   std::ostringstream result;
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
     result << "[" << pp(*i) << "]";
   }
   gsVerboseMsg("%s\n", result.str().c_str());
@@ -643,7 +643,7 @@ inline void lpsConstElm::printState() {
 inline void lpsConstElm::printCurrentState() {
 // (JK: 16/1/2006: This function is never called)
   std::ostringstream result;
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
     result << "[" << pp(*i) << "]";
   }
   gsVerboseMsg("%s\n", result.str().c_str());
@@ -698,22 +698,22 @@ inline bool lpsConstElm::output() {
   gsVerboseMsg("lpsconstelm: Number of summands of old LPS: %d\n", p_process.summands().size());
   gsVerboseMsg("lpsconstelm: Number of summands of new LPS: %d\n", rebuild_summandlist.size());
 
-  atermpp::set< mcrl2::data::data_variable > constantVar;
+  atermpp::set< mcrl2::old_data::data_variable > constantVar;
   for(atermpp::set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
     constantVar.insert(p_initAssignments.at(*i).lhs());
   }
 
-  atermpp::vector< mcrl2::data::data_assignment > constantPP;
+  atermpp::vector< mcrl2::old_data::data_assignment > constantPP;
   for(std::set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
     constantPP.push_back(p_currentState.at(*i));
   }
 
-  atermpp::vector< mcrl2::data::data_variable > variablePPvar;
+  atermpp::vector< mcrl2::old_data::data_variable > variablePPvar;
   for(atermpp::set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
     variablePPvar.push_back(p_initAssignments.at(*i).lhs());
   }
 
-  atermpp::vector< mcrl2::data::data_expression > variablePPexpr;
+  atermpp::vector< mcrl2::old_data::data_expression > variablePPexpr;
   for(atermpp::set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
     variablePPexpr.push_back(p_initAssignments.at(*i).rhs());
   }
@@ -727,7 +727,7 @@ inline bool lpsConstElm::output() {
     }
     p_logstring.append( "\n" ); 
 
-    for ( atermpp::map< mcrl2::data::data_variable, atermpp::vector< mcrl2::data::data_expression > >::iterator i = p_parameter_trace.begin()
+    for ( atermpp::map< mcrl2::old_data::data_variable, atermpp::vector< mcrl2::old_data::data_expression > >::iterator i = p_parameter_trace.begin()
         ; i != p_parameter_trace.end()
         ; ++i  )
     {
@@ -736,19 +736,19 @@ inline bool lpsConstElm::output() {
       int count = 0; 
       bool changed = false;     
 
-      for ( atermpp::vector< mcrl2::data::data_expression >::iterator j = i->second.begin()
+      for ( atermpp::vector< mcrl2::old_data::data_expression >::iterator j = i->second.begin()
           ; j != i->second.end()
           ; ++j )
       {
         bool printed = false;
-        atermpp::map< int, atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > > >::iterator it_capc = p_changed_assignements_per_cycle.find(count) ;
+        atermpp::map< int, atermpp::vector< std::pair< mcrl2::old_data::data_assignment, mcrl2::old_data::data_assignment > > >::iterator it_capc = p_changed_assignements_per_cycle.find(count) ;
    
         if ( it_capc != p_changed_assignements_per_cycle.end() )
         {
           if ( !(it_capc->second.empty()) )
           {
 
-            for ( atermpp::vector< std::pair< mcrl2::data::data_assignment, mcrl2::data::data_assignment > >::iterator  it_ca  = it_capc->second.begin()
+            for ( atermpp::vector< std::pair< mcrl2::old_data::data_assignment, mcrl2::old_data::data_assignment > >::iterator  it_ca  = it_capc->second.begin()
                   ; it_ca != it_capc->second.end()
                   ; ++it_ca )
             {
@@ -809,8 +809,8 @@ inline bool lpsConstElm::output() {
 
     //Remove constant process parameters from the summands assignments
     //
-    mcrl2::data::data_assignment_list rebuildAssignments;
-    for(mcrl2::data::data_assignment_list::iterator currentAssignment = currentSummand->assignments().begin(); currentAssignment != currentSummand->assignments().end() ; currentAssignment++){
+    mcrl2::old_data::data_assignment_list rebuildAssignments;
+    for(mcrl2::old_data::data_assignment_list::iterator currentAssignment = currentSummand->assignments().begin(); currentAssignment != currentSummand->assignments().end() ; currentAssignment++){
       if( constantVar.find(currentAssignment->lhs() ) == constantVar.end()){
         rebuildAssignments  = push_front(rebuildAssignments, data_assignment(currentAssignment->lhs(), data_expression(p_substitute(currentAssignment->rhs(), constantPP ))));
       }
@@ -848,24 +848,24 @@ inline bool lpsConstElm::output() {
   }
 
   //Move the 'constant' free variables to the set of usedFreeVars
-  mcrl2::data::data_variable_list lps_init_free_vars = p_spec.initial_process().free_variables();
-  atermpp::set <mcrl2::data::data_variable> init_free_vars;
-  for(mcrl2::data::data_variable_list::iterator i = lps_init_free_vars.begin(); i != lps_init_free_vars.end(); ++i)
+  mcrl2::old_data::data_variable_list lps_init_free_vars = p_spec.initial_process().free_variables();
+  atermpp::set <mcrl2::old_data::data_variable> init_free_vars;
+  for(mcrl2::old_data::data_variable_list::iterator i = lps_init_free_vars.begin(); i != lps_init_free_vars.end(); ++i)
   {
     init_free_vars.insert(*i);
   }
 
-  // atermpp::set< mcrl2::data::data_variable > usedFreeVars = (atermpp::set) p_process.find_free_variables();
+  // atermpp::set< mcrl2::old_data::data_variable > usedFreeVars = (atermpp::set) p_process.find_free_variables();
   // begin fix
-  std::set< mcrl2::data::data_variable > tmp_free_vars = p_process.find_free_variables();
-  atermpp::set< mcrl2::data::data_variable > usedFreeVars;
-  for(std::set< mcrl2::data::data_variable >::iterator i = tmp_free_vars.begin(); i != tmp_free_vars.end() ;++i )
+  std::set< mcrl2::old_data::data_variable > tmp_free_vars = p_process.find_free_variables();
+  atermpp::set< mcrl2::old_data::data_variable > usedFreeVars;
+  for(std::set< mcrl2::old_data::data_variable >::iterator i = tmp_free_vars.begin(); i != tmp_free_vars.end() ;++i )
   {
     usedFreeVars.insert( *i );
   }
   // end fix
 
-  for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); i++)
+  for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); i++)
   {
     if(is_data_variable(i->rhs()) && !init_free_vars.empty() && init_free_vars.find(i->rhs()) != init_free_vars.end() )
     {   
@@ -888,13 +888,13 @@ inline bool lpsConstElm::output() {
 
   //gsDebugMsg("%s\n", p_spec.initial_process().free_variables().to_string().c_str());
 
-  atermpp::set< mcrl2::data::data_variable > foundVars;
-  atermpp::set< mcrl2::data::data_variable > initial_free_variables;
+  atermpp::set< mcrl2::old_data::data_variable > foundVars;
+  atermpp::set< mcrl2::old_data::data_variable > initial_free_variables;
   usedFreeVars.empty();
 
-  for(atermpp::vector< mcrl2::data::data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
+  for(atermpp::vector< mcrl2::old_data::data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
      foundVars = getUsedFreeVars(aterm_appl(*i));
-     for(atermpp::set< mcrl2::data::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
+     for(atermpp::set< mcrl2::old_data::data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
        initial_free_variables.insert(*k);
      }
   }
@@ -927,7 +927,7 @@ inline bool lpsConstElm::output() {
   if (constantPP.begin() != constantPP.end()) 
   { 
     gsVerboseMsg("lpsconstelm: ===== Replacements =====\n");
-    for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
+    for(atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = constantPP.begin(); i != constantPP.end(); ++i)
     { 
       gsVerboseMsg("lpsconstelm: constant process parameter \"%s\" is replaced by \"%s\"\n", pp(i->lhs()).c_str(), pp(i->rhs()).c_str());
     } 
@@ -1035,7 +1035,7 @@ bool lpsConstElm::filter() {
   }
   
 
-  for(mcrl2::data::data_assignment_list::iterator i = initial_assignments.begin(); i != initial_assignments.end() ; i++ ){
+  for(mcrl2::old_data::data_assignment_list::iterator i = initial_assignments.begin(); i != initial_assignments.end() ; i++ ){
     p_lookupIndex[i->lhs()] = counter;
 //      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
     data_assignment da(i->lhs(),data_expression(rewrite(i->rhs())));
@@ -1104,7 +1104,7 @@ bool lpsConstElm::filter() {
 
       if (p_show)
       {
-         for( atermpp::vector< mcrl2::data::data_assignment >::iterator i = p_currentState.begin()
+         for( atermpp::vector< mcrl2::old_data::data_assignment >::iterator i = p_currentState.begin()
             ; i != p_currentState.end()
             ; ++i
             )

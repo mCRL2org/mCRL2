@@ -8,11 +8,11 @@
 
 #ifdef HAVE_CVC
 
-#include "mcrl2/data/detail/prover/smt_solver_cvc_fast.h"
+#include "mcrl2/old_data/detail/prover/smt_solver_cvc_fast.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/old_data/data_expression.h"
 #include "mcrl2/utilities/utilities.h"
 
 using namespace ::mcrl2::utilities;
@@ -136,7 +136,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     CVC3::Expr SMT_Solver_CVC_Fast::translate_clause(ATermAppl a_clause) {
-      using namespace mcrl2::data::data_expr;
+      using namespace mcrl2::old_data::data_expr;
 
       if (is_not(a_clause)) {
         return translate_not(a_clause);

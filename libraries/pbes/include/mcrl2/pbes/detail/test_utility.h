@@ -12,7 +12,7 @@
 #define MCRL2_PBES_DETAIL_TEST_UTILITY_H
 
 #include <string>
-#include "mcrl2/data/data.h"
+#include "mcrl2/old_data/data.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
@@ -22,27 +22,27 @@ namespace pbes_system {
 
 namespace detail {
 
-  data::data_variable nat(std::string name)
+  old_data::data_variable nat(std::string name)
   {
-    return data::data_variable(core::identifier_string(name), data::sort_expr::nat());
+    return old_data::data_variable(core::identifier_string(name), old_data::sort_expr::nat());
   }
 
-  data::data_variable pos(std::string name)
+  old_data::data_variable pos(std::string name)
   {
-    return data::data_variable(core::identifier_string(name), data::sort_expr::pos());
+    return old_data::data_variable(core::identifier_string(name), old_data::sort_expr::pos());
   } 
   
-  data::data_variable bool_(std::string name)
+  old_data::data_variable bool_(std::string name)
   {
-    return data::data_variable(core::identifier_string(name), data::sort_expr::bool_());
+    return old_data::data_variable(core::identifier_string(name), old_data::sort_expr::bool_());
   }
   
-  propositional_variable propvar(std::string name, data::data_variable_list parameters)
+  propositional_variable propvar(std::string name, old_data::data_variable_list parameters)
   {
     return propositional_variable(core::identifier_string(name), parameters);
   }
 
-  propositional_variable_instantiation propvarinst(std::string name, data::data_expression_list parameters)
+  propositional_variable_instantiation propvarinst(std::string name, old_data::data_expression_list parameters)
   {
     return propositional_variable_instantiation(core::identifier_string(name), parameters);
   }

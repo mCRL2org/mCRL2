@@ -40,10 +40,10 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/old_data/data_operators.h"
+#include "mcrl2/old_data/sort_expression.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/replace.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/data_elimination.h"
 
@@ -64,7 +64,7 @@ using namespace std;
 using atermpp::make_substitution;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::pbes_system;
 using bes::bes_expression;
 

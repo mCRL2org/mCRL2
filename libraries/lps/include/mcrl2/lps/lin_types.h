@@ -14,7 +14,7 @@
 
 #include <stdbool.h>
 #include <string>
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 
 //Type definitions for all linearisers
 

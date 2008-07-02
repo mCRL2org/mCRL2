@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
-#include "mcrl2/data/data_variable.h"
+#include "mcrl2/old_data/data_variable.h"
 
 namespace mcrl2 {
 
@@ -136,7 +136,7 @@ namespace state_frm
   /// \brief Returns the existential quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  state_formula exists(data::data_variable_list l, state_formula p)
+  state_formula exists(old_data::data_variable_list l, state_formula p)
   {
     assert(!l.empty());
     return state_formula(core::detail::gsMakeStateExists(l, p));
@@ -145,7 +145,7 @@ namespace state_frm
   /// \brief Returns the universal quantification of the formula p over the variables in l
   /// \pre l may not be empty
   inline
-  state_formula forall(data::data_variable_list l, state_formula p)
+  state_formula forall(old_data::data_variable_list l, state_formula p)
   {
     assert(!l.empty());
     return state_formula(core::detail::gsMakeStateForall(l, p));
@@ -174,7 +174,7 @@ namespace state_frm
 
   /// \brief Returns yaled(t)
   inline
-  state_formula yaled_timed(data::data_expression t)
+  state_formula yaled_timed(old_data::data_expression t)
   {
     return state_formula(core::detail::gsMakeStateYaledTimed(t));
   }
@@ -188,28 +188,28 @@ namespace state_frm
 
   /// \brief Returns delay(t)
   inline
-  state_formula delay_timed(data::data_expression t)
+  state_formula delay_timed(old_data::data_expression t)
   {
     return state_formula(core::detail::gsMakeStateDelayTimed(t));
   }
 
   /// \brief Returns a variable with the given name and arguments
   inline
-  state_formula var(core::identifier_string name, data::data_expression_list l)
+  state_formula var(core::identifier_string name, old_data::data_expression_list l)
   {
     return state_formula(core::detail::gsMakeStateVar(name, l));
   }
 
   /// \brief Returns a mu expression
   inline
-  state_formula mu(core::identifier_string name, data::data_assignment_list l, state_formula p)
+  state_formula mu(core::identifier_string name, old_data::data_assignment_list l, state_formula p)
   {
     return state_formula(core::detail::gsMakeStateMu(name, l, p));
   }
 
   /// \brief Returns a nu expression
   inline
-  state_formula nu(core::identifier_string name, data::data_assignment_list l, state_formula p)
+  state_formula nu(core::identifier_string name, old_data::data_assignment_list l, state_formula p)
   {
     return state_formula(core::detail::gsMakeStateNu(name, l, p));
   }
@@ -270,7 +270,7 @@ namespace state_frm
 
   /// \brief Returns the argument of a data expression
   inline
-  data::data_expression val(state_formula t)
+  old_data::data_expression val(state_formula t)
   {
     assert(core::detail::gsIsDataExpr(t));
     return t;
@@ -315,7 +315,7 @@ namespace state_frm
   
   /// \brief Returns the variables of a quantification expression
   inline
-  data::data_variable_list var(state_formula t)
+  old_data::data_variable_list var(state_formula t)
   {
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
     return atermpp::list_arg1(t);
@@ -323,7 +323,7 @@ namespace state_frm
   
   /// \brief Returns the time of delay or yaled expression
   inline
-  data::data_expression time(state_formula t)
+  old_data::data_expression time(state_formula t)
   {
     assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
     return atermpp::arg1(t);
@@ -342,7 +342,7 @@ namespace state_frm
   
   /// \brief Returns the parameters of a variable expression
   inline
-  data::data_expression_list param(state_formula t)
+  old_data::data_expression_list param(state_formula t)
   {
     assert(core::detail::gsIsStateVar(t));
     return atermpp::list_arg2(t);
@@ -350,7 +350,7 @@ namespace state_frm
   
   /// \brief Returns the parameters of a mu or nu expression
   inline
-  data::data_assignment_list ass(state_formula t)
+  old_data::data_assignment_list ass(state_formula t)
   {
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
     return atermpp::list_arg2(t);

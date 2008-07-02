@@ -53,7 +53,7 @@ state_formula normalize(state_formula f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::data_expr::not_(f);
+      return old_data::data_expr::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {

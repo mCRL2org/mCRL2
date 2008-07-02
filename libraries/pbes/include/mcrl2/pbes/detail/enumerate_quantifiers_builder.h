@@ -15,7 +15,7 @@
 #include <set>
 #include <utility>
 #include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/old_data/find.h"
 #include "mcrl2/pbes/rewriter_substitution.h"
 #include "mcrl2/atermpp/deque.h"
 
@@ -95,7 +95,7 @@ namespace detail {
             typename PbesRewriter,
             typename JoinFunction
            >
-  std::pair<pbes_expression, bool> enumerate_quantifiers(data::data_variable_list x,
+  std::pair<pbes_expression, bool> enumerate_quantifiers(old_data::data_variable_list x,
                                                          const pbes_expression& phi,
                                                          DataSubstitutionRange& sigma,
                                                          DataRewriter& datar,
@@ -110,11 +110,11 @@ namespace detail {
     atermpp::deque<std::pair<pbes_rewriter_substitution, unsigned int> > todo;
 
     // make a copy of x, to get random access
-    std::vector<data::data_variable> x_(x.begin(), x.end());
+    std::vector<old_data::data_variable> x_(x.begin(), x.end());
   
     // initialize D and todo
     unsigned int j = 0;
-    for (data::data_variable_list::iterator i = x.begin(); i != x.end(); ++i)
+    for (old_data::data_variable_list::iterator i = x.begin(); i != x.end(); ++i)
     {
       pbes_rewriter_substitution s(*i, datar);
       atermpp::vector<pbes_rewriter_substitution> d;
@@ -136,8 +136,8 @@ namespace detail {
   
       // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
       atermpp::vector<pbes_rewriter_substitution> Dk = D[k];
-      atermpp::vector<data::enumerator_expression> z = datae.enumerate(y);
-      for (atermpp::vector<data::enumerator_expression>::iterator i = z.begin(); i != z.end(); ++i)
+      atermpp::vector<old_data::enumerator_expression> z = datae.enumerate(y);
+      for (atermpp::vector<old_data::enumerator_expression>::iterator i = z.begin(); i != z.end(); ++i)
       {
         pbes_rewriter_substitution e(x_[k], *i, datar);
         try {
@@ -188,7 +188,7 @@ namespace detail {
   
     /// Visit forall node.
     ///
-    pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_forall(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,
@@ -203,7 +203,7 @@ namespace detail {
   
     /// Visit exists node.
     ///
-    pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    pbes_expression visit_exists(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,

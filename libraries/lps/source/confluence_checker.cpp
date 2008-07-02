@@ -16,7 +16,7 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/bdd_prover.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
@@ -424,7 +424,7 @@ using namespace mcrl2::core::detail;
     ):
       f_disjointness_checker(ATAgetArgument(a_lps, 2)),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(mcrl2::old_data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lps)) {
         throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");

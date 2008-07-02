@@ -12,7 +12,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "info.h"
 
 /// \brief Base class for classes that provide functionality to modify or create

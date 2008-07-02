@@ -11,7 +11,7 @@
 #include <tipi/detail/utility/standard_utility.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 
 #if defined(__APPLE__)
 # include <Carbon/Carbon.h>

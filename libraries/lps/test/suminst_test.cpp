@@ -17,7 +17,7 @@
 #include <mcrl2/lps/mcrl22lps.h>
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 
 ///sum d:D should be unfolded

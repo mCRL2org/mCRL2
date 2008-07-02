@@ -3,7 +3,7 @@ project libraries/utilities
        : requirements
           <include>../include
           <include>../../core/include      # Circular dependency
-          <include>../../data/include      # Circular dependency
+          <include>../../old_data/include      # Circular dependency
        : usage-requirements
           <include>../include
        ;

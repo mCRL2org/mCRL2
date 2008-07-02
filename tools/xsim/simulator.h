@@ -15,7 +15,7 @@
 #include <aterm2.h>
 
 #include <mcrl2/lps/nextstate.h>
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "simbase.h"
 
 class StandardSimulator: virtual public SimulatorInterface

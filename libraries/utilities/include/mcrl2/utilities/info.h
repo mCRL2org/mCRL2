@@ -12,7 +12,7 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/utilities/utilities.h"
 
 enum Compare_Result {

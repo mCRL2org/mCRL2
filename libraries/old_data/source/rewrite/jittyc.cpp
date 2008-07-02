@@ -18,7 +18,7 @@
 
 #ifdef NO_DYNLOAD
 
-#include "mcrl2/data/detail/rewrite/jittyc.h"
+#include "mcrl2/old_data/detail/rewrite/jittyc.h"
 
 #include <cstdlib>
 #include "mcrl2/core/messaging.h"
@@ -26,7 +26,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::old_data::data_specification DataSpec)
 {
 	gsErrorMsg("compiling JITty rewriter is not available\n");
 	exit(1);
@@ -98,9 +98,9 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/data/detail/rewrite/jittyc.h"
+#include "mcrl2/old_data/detail/rewrite/jittyc.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -2891,7 +2891,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   //PRINT_AR
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(mcrl2::old_data::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -3704,7 +3704,7 @@ static void cleanup_file(char *f)
   free(f);
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::old_data::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

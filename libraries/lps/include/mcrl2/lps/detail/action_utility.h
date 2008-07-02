@@ -14,7 +14,7 @@
 
 #include <set>
 #include "mcrl2/lps/action.h"
-#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/old_data/detail/data_utility.h"
 
 namespace mcrl2 {
 
@@ -24,14 +24,14 @@ namespace detail {
 
 /// Returns true if the sorts of the given actions are contained in sorts.
 inline
-bool check_action_sorts(action_list actions, const std::set<data::sort_expression>& sorts)
+bool check_action_sorts(action_list actions, const std::set<old_data::sort_expression>& sorts)
 {
   for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
   {
-    const data::sort_expression_list& s = i->label().sorts();
-    for (data::sort_expression_list::iterator j = s.begin(); j != s.end(); ++j)
+    const old_data::sort_expression_list& s = i->label().sorts();
+    for (old_data::sort_expression_list::iterator j = s.begin(); j != s.end(); ++j)
     {
-      if (!data::detail::check_sort(*j, sorts))
+      if (!old_data::detail::check_sort(*j, sorts))
         return false;
     }
   }
@@ -52,13 +52,13 @@ bool check_action_labels(action_list actions, const std::set<action_label>& labe
 
 /// Returns true if the sorts of the given action labels are contained in sorts.
 inline
-bool check_action_label_sorts(action_label_list action_labels, const std::set<data::sort_expression>& sorts)
+bool check_action_label_sorts(action_label_list action_labels, const std::set<old_data::sort_expression>& sorts)
 {
   for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
   {
-    for (data::sort_expression_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    for (old_data::sort_expression_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
     {
-      if (!data::detail::check_sort(*j, sorts))
+      if (!old_data::detail::check_sort(*j, sorts))
         return false;
     }
   }

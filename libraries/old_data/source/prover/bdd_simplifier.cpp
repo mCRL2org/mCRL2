@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "mcrl2/data/prover/bdd_simplifier.h"
+#include "mcrl2/old_data/prover/bdd_simplifier.h"
 #include "aterm2.h"
 #include "time.h"
 

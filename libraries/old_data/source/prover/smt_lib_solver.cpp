@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/detail/prover/smt_lib_solver.h"
+#include "mcrl2/old_data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -828,7 +828,7 @@ using namespace std;
 #include <unistd.h>
 #include <iostream>
 namespace mcrl2 {
-  namespace data {
+  namespace old_data {
     namespace prover {
       template < typename T >
       bool binary_smt_solver< T >::execute(std::string const& benchmark) {

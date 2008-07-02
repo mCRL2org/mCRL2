@@ -15,13 +15,13 @@
 
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/old_data/data_operators.h"
+#include "mcrl2/old_data/data.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace atermpp;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data::data_expr;
 
 int test_main(int argc, char** argv)
 {

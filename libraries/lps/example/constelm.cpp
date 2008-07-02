@@ -1,6 +1,6 @@
 #include <string>
 #include "mcrl2/lps/constelm.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/old_data/rewriter.h"
 
 using namespace mcrl2;
 
@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   spec1.protect();
 
   spec1.load(argv[1]);
-  data::rewriter r(spec1.data());
+  old_data::rewriter r(spec1.data());
   lps::specification spec2;
   spec2 = lps::constelm(spec1, r, true);
   spec2.save(argv[2]);

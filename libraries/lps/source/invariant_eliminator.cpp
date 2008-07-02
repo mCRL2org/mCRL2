@@ -16,7 +16,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/old_data/bdd_prover.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -47,7 +47,7 @@ using namespace mcrl2::core::detail;
       ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_simplify_all
     ):
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(mcrl2::old_data::data_specification(ATAgetArgument(a_lps, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_lps = a_lps;
       f_simplify_all = a_simplify_all;

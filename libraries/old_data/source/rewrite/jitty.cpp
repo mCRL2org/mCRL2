@@ -8,7 +8,7 @@
 //
 /// \file rewr_jitty.cpp
 
-#include "mcrl2/data/detail/rewrite/jitty.h"
+#include "mcrl2/old_data/detail/rewrite/jitty.h"
 
 #define NAME "rewr_jitty"
 
@@ -403,7 +403,7 @@ static ATermList create_strategy(ATermList rules)
 	return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
+RewriterJitty::RewriterJitty(mcrl2::old_data::data_specification DataSpec)
 {
 	ATermList l,n;
 	ATermTable tmp_eqns;

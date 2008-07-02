@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/nextstate.h
+/// \file mcrl2/old_data/nextstate.h
 
 #ifndef _LIBNEXTSTATE_H
 #define _LIBNEXTSTATE_H
 
 #include <aterm2.h>
-#include <mcrl2/data/enum.h>
-#include <mcrl2/data/rewrite.h>
+#include <mcrl2/old_data/enum.h>
+#include <mcrl2/old_data/rewrite.h>
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/

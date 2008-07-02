@@ -7,13 +7,10 @@ project data
        ;
 
 mcrl2-library data
-       : 
-       : 
+       : source/temp.cpp 
+       : <use>/libraries/core//headers 
          <use>/libraries/atermpp//headers
          <use>/site-config//cvc
-         <library>/site-config//m               # for rewrite
-         <library>/site-config//dynamic_loading # for rewrite
        : <threading>single
-       : 
-         <library>/site-config//cvc
+       : <library>/libraries/core 
        ;

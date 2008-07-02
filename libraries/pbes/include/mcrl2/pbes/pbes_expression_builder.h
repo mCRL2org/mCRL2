@@ -44,7 +44,7 @@ struct pbes_builder
 
   /// Visit data expression node.
   ///
-  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */, Arg& /* arg */)
+  virtual pbes_expression visit_data_expression(const pbes_expression& x, const old_data::data_expression& /* d */, Arg& /* arg */)
   {
     return pbes_expression();
   }
@@ -93,14 +93,14 @@ struct pbes_builder
 
   /// Visit forall node.
   ///
-  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  virtual pbes_expression visit_forall(const pbes_expression& x, const old_data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
     return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  virtual pbes_expression visit_exists(const pbes_expression& x, const old_data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
   {
     return pbes_expression();
   }
@@ -179,14 +179,14 @@ std::cout << "<visit>" << pp(e) << " " << e << std::endl;
         result = imp(visit(l, arg1), visit(r, arg1));
       }
     } else if (is_pbes_forall(e)) {
-      data::data_variable_list qvars = var(e);
+      old_data::data_variable_list qvars = var(e);
       pbes_expression qexpr = arg(e);
       result = visit_forall(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
         result = forall(qvars, visit(qexpr, arg1));
       }
     } else if (is_pbes_exists(e)) {
-      data::data_variable_list qvars = var(e);
+      old_data::data_variable_list qvars = var(e);
       pbes_expression qexpr = arg(e);
       result = visit_exists(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
@@ -223,7 +223,7 @@ struct pbes_expression_builder: public pbes_builder<int>
   
   /// Visit data expression node.
   ///
-  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */)
+  virtual pbes_expression visit_data_expression(const pbes_expression& x, const old_data::data_expression& /* d */)
   {
     return pbes_expression();
   }
@@ -272,14 +272,14 @@ struct pbes_expression_builder: public pbes_builder<int>
 
   /// Visit forall node.
   ///
-  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_forall(const pbes_expression& x, const old_data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
 
   /// Visit exists node.
   ///
-  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  virtual pbes_expression visit_exists(const pbes_expression& x, const old_data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
   {
     return pbes_expression();
   }
@@ -302,7 +302,7 @@ struct pbes_expression_builder: public pbes_builder<int>
 
   /// Visit data expression node.
   ///
-  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, int&)
+  pbes_expression visit_data_expression(const pbes_expression& x, const old_data::data_expression& d, int&)
   {
     return visit_data_expression(x, d);
   }
@@ -351,14 +351,14 @@ struct pbes_expression_builder: public pbes_builder<int>
 
   /// Visit forall node.
   ///
-  pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_forall(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& expression, int&)
   {
     return visit_forall(x, variables, expression);
   }
 
   /// Visit exists node.
   ///
-  pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_exists(const pbes_expression& x, const old_data::data_variable_list& variables, const pbes_expression& expression, int&)
   {
     return visit_exists(x, variables, expression);
   }

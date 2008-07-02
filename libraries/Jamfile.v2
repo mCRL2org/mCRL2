@@ -37,6 +37,7 @@ lib mcrl2
           /libraries/svc//svc.alias
           /libraries/aterm//aterm.alias
           /libraries/data//data.alias
+          /libraries/old_data//old_data.alias
           /libraries/core//core.alias
           /libraries/trace//trace.alias
           /libraries/utilities//utilities.alias

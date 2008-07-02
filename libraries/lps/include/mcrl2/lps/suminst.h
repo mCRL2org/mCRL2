@@ -13,7 +13,7 @@
 #define MCRL2_LPS_SUMINST_H
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 
 namespace mcrl2 {
 

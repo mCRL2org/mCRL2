@@ -9,7 +9,7 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "mcrl2/data/prover/bdd_path_eliminator.h"
+#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -141,14 +141,14 @@ using namespace mcrl2::core::detail;
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
       if (a_solver_type == solver_type_ario) {
-        if (mcrl2::data::prover::ario_smt_solver::usable()) {
-          f_smt_solver = new mcrl2::data::prover::ario_smt_solver();
+        if (mcrl2::old_data::prover::ario_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::old_data::prover::ario_smt_solver();
 
           return;
         }
       } else if (a_solver_type == solver_type_cvc) {
-        if (mcrl2::data::prover::cvc_smt_solver::usable()) {
-          f_smt_solver = new mcrl2::data::prover::cvc_smt_solver();
+        if (mcrl2::old_data::prover::cvc_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::old_data::prover::cvc_smt_solver();
 
           return;
         }

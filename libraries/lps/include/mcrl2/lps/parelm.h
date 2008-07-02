@@ -21,9 +21,9 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_assignment_functional.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/detail/data_assignment_functional.h"
+#include "mcrl2/old_data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
@@ -35,20 +35,20 @@ namespace lps {
 /// Returns the data variables that appear in the condition, action or time of
 /// the summands in the sequence [first, last[.
 template <typename Iterator>
-std::set<data::data_variable> transition_variables(Iterator first, Iterator last)
+std::set<old_data::data_variable> transition_variables(Iterator first, Iterator last)
 {
-  std::set<data::data_variable> result;
+  std::set<old_data::data_variable> result;
   for (Iterator i = first; i != last; ++i)
   {
     if (i->is_delta())
     {
       continue;
     }
-    atermpp::find_all_if(i->condition(), data::is_data_variable, std::inserter(result, result.end()));   
-    atermpp::find_all_if(i->actions(), data::is_data_variable, std::inserter(result, result.end()));   
+    atermpp::find_all_if(i->condition(), old_data::is_data_variable, std::inserter(result, result.end()));   
+    atermpp::find_all_if(i->actions(), old_data::is_data_variable, std::inserter(result, result.end()));   
     if (i->has_time())
     {
-      atermpp::find_all_if(i->time(), data::is_data_variable, std::inserter(result, result.end()));
+      atermpp::find_all_if(i->time(), old_data::is_data_variable, std::inserter(result, result.end()));
     }
   }
   return result;
@@ -56,46 +56,46 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
 
 /// Returns a set of insignificant process parameters that may be eliminated from p.
 inline
-std::set<data::data_variable> compute_insignificant_parameters(const linear_process& p)
+std::set<old_data::data_variable> compute_insignificant_parameters(const linear_process& p)
 {
-  std::set<data::data_variable> process_parameters(p.process_parameters().begin(), p.process_parameters().end());
+  std::set<old_data::data_variable> process_parameters(p.process_parameters().begin(), p.process_parameters().end());
 
   // significant variables may not be removed by parelm
-  std::set<data::data_variable> significant_variables = transition_variables(p.summands().begin(), p.summands().end());
+  std::set<old_data::data_variable> significant_variables = transition_variables(p.summands().begin(), p.summands().end());
 
   // recursively extend the set of significant variables
-  std::set<data::data_variable> todo = significant_variables;
+  std::set<old_data::data_variable> todo = significant_variables;
   while (!todo.empty())
   {
-    data::data_variable x = *todo.begin();
+    old_data::data_variable x = *todo.begin();
     todo.erase(todo.begin());
 
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
       if (!i->is_delta())
       {
-        data::data_assignment_list::iterator j = std::find_if(i->assignments().begin(), i->assignments().end(), data::detail::has_left_hand_side(x));
+        old_data::data_assignment_list::iterator j = std::find_if(i->assignments().begin(), i->assignments().end(), old_data::detail::has_left_hand_side(x));
         if (j != i->assignments().end())
         {
-          std::set<data::data_variable> new_variables = data::detail::set_difference(data::find_all_data_variables(j->rhs()), significant_variables);
+          std::set<old_data::data_variable> new_variables = old_data::detail::set_difference(old_data::find_all_data_variables(j->rhs()), significant_variables);
           todo.insert(new_variables.begin(), new_variables.end());
           significant_variables.insert(new_variables.begin(), new_variables.end());
         }
       }
     }
   }
-  return data::detail::set_difference(process_parameters, significant_variables);
+  return old_data::detail::set_difference(process_parameters, significant_variables);
 }
 
 /// Removes zero or more insignificant parameters from the specification spec.
 inline
 specification parelm(const specification& spec)
 {
-  std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
+  std::set<old_data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
     
   // logging statements
   mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
-  for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  for (std::set<old_data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }
@@ -123,20 +123,20 @@ namespace detail {
 inline
 specification parelm2(const specification& spec)
 {
-  std::vector<data::data_variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
+  std::vector<old_data::data_variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
   
   // create a mapping m from process parameters to integers
-  std::map<data::data_variable, int> m;
+  std::map<old_data::data_variable, int> m;
   int index = 0;
-  for (std::vector<data::data_variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  for (std::vector<old_data::data_variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     m[*i] = index++;
   }
 
   // compute the initial set v of significant variables
-  std::set<data::data_variable> tvars = transition_variables(spec.process().summands().begin(), spec.process().summands().end());
+  std::set<old_data::data_variable> tvars = transition_variables(spec.process().summands().begin(), spec.process().summands().end());
   std::vector<int> v;
-  for (std::set<data::data_variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
+  for (std::set<old_data::data_variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
   {
     v.push_back(m[*i]);
   }
@@ -149,11 +149,11 @@ specification parelm2(const specification& spec)
   {
     if (!i->is_delta())
     {
-      for (data::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      for (old_data::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
         int j0 = m[j->lhs()];
-        std::set<data::data_variable> vars = data::find_all_data_variables(j->rhs());
-        for (std::set<data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+        std::set<old_data::data_variable> vars = old_data::find_all_data_variables(j->rhs());
+        for (std::set<old_data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
         {
           int k0 = m[*k];
           boost::add_edge(j0, k0, G);
@@ -169,7 +169,7 @@ specification parelm2(const specification& spec)
   detail::iota(q.begin(), q.end(), 0);
   std::vector<int> s;
   std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
-  std::set<data::data_variable> to_be_removed;
+  std::set<old_data::data_variable> to_be_removed;
   for (std::vector<int>::iterator i = s.begin(); i != s.end(); ++i)
   {
     to_be_removed.insert(process_parameters[*i]);
@@ -177,7 +177,7 @@ specification parelm2(const specification& spec)
 
   // logging statements
   mcrl2::core::gsVerboseMsg("Parelm removed %d process parameters: ", to_be_removed.size());
-  for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  for (std::set<old_data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }

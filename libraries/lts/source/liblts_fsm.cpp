@@ -422,9 +422,9 @@ static ATermList get_lps_params(lps::linear_process &lps)
 {
   ATermList params = ATmakeList0();
 
-  data::data_variable_list pars = lps.process_parameters();
-  data::data_variable_list::iterator pb = pars.begin();
-  data::data_variable_list::iterator pe = pars.end();
+  old_data::data_variable_list pars = lps.process_parameters();
+  old_data::data_variable_list::iterator pb = pars.begin();
+  old_data::data_variable_list::iterator pe = pars.end();
   for (; pb != pe; pb++)
   {
     ATermAppl p = *pb;

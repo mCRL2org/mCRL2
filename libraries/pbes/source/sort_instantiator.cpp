@@ -19,22 +19,22 @@
 #include <utility> 
 
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_utility.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/sort_utility.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 
 
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 
 
 
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 
 // CLASS SORT_INSTANTIATOR
 
@@ -83,7 +83,7 @@ void sort_instantiator::set_data_operation_list (data_operation_list flist)
   fl = flist;
 }
 
-void sort_instantiator::instantiate_sorts (mcrl2::data::sort_expression_list sl)
+void sort_instantiator::instantiate_sorts (mcrl2::old_data::sort_expression_list sl)
 {
   for (sort_expression_list::iterator ss = sl.begin(); ss != sl.end(); ss++){
     t_sdel new_isort;
@@ -104,7 +104,7 @@ data_expression_list sort_instantiator::get_enumeration (sort_expression ss)
 
 bool sort_instantiator::is_finite(sort_expression s) 
 {
-  return mcrl2::data::is_finite(fl,s);
+  return mcrl2::old_data::is_finite(fl,s);
 };
 
 // END CLASS   SORT_INSTANTIATOR

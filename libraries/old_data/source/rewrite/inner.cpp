@@ -8,7 +8,7 @@
 //
 /// \file rewr_inner.cpp
 
-#include "mcrl2/data/detail/rewrite/inner.h"
+#include "mcrl2/old_data/detail/rewrite/inner.h"
 
 #define NAME "rewr_inner"
 
@@ -1107,7 +1107,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 	return a;
 }
 
-RewriterInnermost::RewriterInnermost(mcrl2::data::data_specification DataSpec)
+RewriterInnermost::RewriterInnermost(mcrl2::old_data::data_specification DataSpec)
 {
 	ATermList l,m,n;
 	ATermTable tmp_eqns;

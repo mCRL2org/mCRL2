@@ -15,13 +15,13 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/sort_arrow.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/old_data/data_operation.h"
+#include "mcrl2/old_data/parser.h"
+#include "mcrl2/old_data/sort_arrow.h"
+#include "mcrl2/old_data/detail/data_functional.h"
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 
 const std::string DATA_SPEC1 =
   "sort A;                     \n"
@@ -112,7 +112,7 @@ void test_sort()
 
 void test_sort_equality()
 {
-  using mcrl2::data::detail::find_constructor;
+  using mcrl2::old_data::detail::find_constructor;
 
   data_specification data = parse_data_specification(DATA_SPEC1);
 

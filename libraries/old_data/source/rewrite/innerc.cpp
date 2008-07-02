@@ -8,7 +8,7 @@
 
 #ifdef NO_DYNLOAD
 
-#include "mcrl2/data/detail/rewrite/innerc.h"
+#include "mcrl2/old_data/detail/rewrite/innerc.h"
 
 #include <cstdlib>
 #include "mcrl2/core/messaging.h"
@@ -16,7 +16,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::old_data::data_specification DataSpec)
 {
 	gsErrorMsg("compiling Innermost rewriter is not available\n");
 	exit(1);
@@ -85,9 +85,9 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/data/detail/rewrite/innerc.h"
+#include "mcrl2/old_data/detail/rewrite/innerc.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -1517,7 +1517,7 @@ static int getArity(ATermAppl op)
   return ATgetLength(gsGetSortExprDomain(sort));
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::old_data::data_specification DataSpec)
 {
   ATermList l,n;
   ATermTable tmp_eqns;
@@ -2261,7 +2261,7 @@ static void cleanup_file(char *f)
   free(f);
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::old_data::data_specification DataSpec)
 {
   term2int = ATtableCreate(100,75);
   initialise_common();

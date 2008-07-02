@@ -15,17 +15,17 @@
 #include <mcrl2/atermpp/table.h>
 
 //LPS Framework
-#include <mcrl2/data/data.h>
-#include <mcrl2/data/utility.h>
-#include <mcrl2/data/data_operation.h>
+#include <mcrl2/old_data/data.h>
+#include <mcrl2/old_data/utility.h>
+#include <mcrl2/old_data/data_operation.h>
 #include <mcrl2/lps/linear_process.h>
-#include <mcrl2/data/sort_utility.h>
+#include <mcrl2/old_data/sort_utility.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/detail/specification_utility.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/utilities/aterm_ext.h>
 //Enumerator
-#include <mcrl2/data/detail/enum/standard.h>
+#include <mcrl2/old_data/detail/enum/standard.h>
 #include <mcrl2/lps/nextstate.h>
 
 #include <mcrl2/lps/binary.h>
@@ -34,9 +34,9 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::old_data::data_expr;
 
 namespace mcrl2 {
 
@@ -330,7 +330,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       {
         if (!elts.empty())
         {
-          r = optimized::or_(r, data::data_expr::equal_to(arg, elts.front()));
+          r = optimized::or_(r, old_data::data_expr::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }

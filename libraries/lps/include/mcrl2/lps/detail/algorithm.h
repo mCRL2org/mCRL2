@@ -19,9 +19,9 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/old_data/data.h"
+#include "mcrl2/old_data/utility.h"
+#include "mcrl2/old_data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace mcrl2 {
@@ -34,9 +34,9 @@ namespace detail {
 /// is chosen such that it doesn't appear in context.
 struct make_timed_lps_summand
 {
-  data::fresh_variable_generator& m_generator;
+  old_data::fresh_variable_generator& m_generator;
 
-  make_timed_lps_summand(data::fresh_variable_generator& generator)
+  make_timed_lps_summand(old_data::fresh_variable_generator& generator)
     : m_generator(generator)
   {}
 
@@ -44,8 +44,8 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data::data_variable v = m_generator();
-      summand_ = set_time(summand_, data::data_expression(v));
+      old_data::data_variable v = m_generator();
+      summand_ = set_time(summand_, old_data::data_expression(v));
       summand_ = set_summation_variables(summand_, summand_.summation_variables() + v);
     }
     return summand_;
@@ -57,7 +57,7 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
-  data::fresh_variable_generator generator(context);
+  old_data::fresh_variable_generator generator(context);
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
@@ -78,7 +78,7 @@ struct data_variable_replacer
   
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::is_data_variable(t))
+    if (!old_data::is_data_variable(t))
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
@@ -118,18 +118,18 @@ struct data_variable_name_replacer
   
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::is_data_variable(t))
+    if (!old_data::is_data_variable(t))
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
-    data::data_variable v(t);
+    old_data::data_variable v(t);
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
     for (; i != src_.end(); ++i, ++j)
     {
       if (v.name() == *i)
       {
-        return std::pair<atermpp::aterm_appl, bool>(data::data_variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(old_data::data_variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
     return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion

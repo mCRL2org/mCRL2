@@ -15,25 +15,25 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/old_data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/old_data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/old_data/identifier_generator.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
@@ -73,8 +73,8 @@ void test_result(PbesRewriter& r, pbes_expression x, pbes_expression y)
 /*
 void test_builder()
 {
-  typedef data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewrite_builder<mcrl2::data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef data_enumerator<mcrl2::old_data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewrite_builder<mcrl2::old_data::rewriter, my_enumerator> my_pbes_rewriter;
 
   using namespace pbes_expr;
 
@@ -85,7 +85,7 @@ void test_builder()
   data_expression z;
   specification spec = mcrl22lps(SPECIFICATION);
 
-  mcrl2::data::rewriter datar(spec.data()); 
+  mcrl2::old_data::rewriter datar(spec.data()); 
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_pbes_rewriter builder1(datar, datae);    
@@ -97,10 +97,10 @@ void test_builder()
   my_pbes_rewriter builder2 = builder1;
   y = builder2.visit(x, dummy);
 
-//  pbes_simplify_expression_builder<data::rewriter> sbuilder1(datar, spec.data());   
+//  pbes_simplify_expression_builder<old_data::rewriter> sbuilder1(datar, spec.data());   
 //  y = sbuilder1.visit(x);
 //
-//  pbes_simplify_expression_builder<data::rewriter> sbuilder2 = sbuilder1;
+//  pbes_simplify_expression_builder<old_data::rewriter> sbuilder2 = sbuilder1;
 //  y = sbuilder2.visit(x);
 //
 //  z = sbuilder3.m_rewriter(T);
@@ -112,11 +112,11 @@ void test_rewriter()
 {
   using namespace pbes_expr;
 
-  typedef data_enumerator<mcrl2::data::rewriter, number_postfix_generator> my_enumerator;
-  typedef pbes_rewriter<mcrl2::data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef data_enumerator<mcrl2::old_data::rewriter, number_postfix_generator> my_enumerator;
+  typedef pbes_rewriter<mcrl2::old_data::rewriter, my_enumerator> my_pbes_rewriter;
 
   specification spec = mcrl22lps(SPECIFICATION);
-  mcrl2::data::rewriter datar(spec.data());
+  mcrl2::old_data::rewriter datar(spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(spec.data(), datar, name_generator);
   my_pbes_rewriter pbesr(datar, datae);    
@@ -190,8 +190,8 @@ void test_simplify_rewriter()
   using namespace pbes_expr;
 
   specification spec = mcrl22lps(SPECIFICATION);
-  mcrl2::data::rewriter datar(spec.data());
-  mcrl2::pbes_system::simplify_rewriter<data::rewriter> pbesr(datar);
+  mcrl2::old_data::rewriter datar(spec.data());
+  mcrl2::pbes_system::simplify_rewriter<old_data::rewriter> pbesr(datar);
 
   data_variable b  = bool_("b");
   data_variable b1 = bool_("b1");

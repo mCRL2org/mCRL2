@@ -21,7 +21,7 @@
 #include <mcrl2/lps/suminst.h>
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/old_data/rewriter.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 

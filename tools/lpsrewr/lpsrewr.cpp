@@ -19,7 +19,7 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
       PrintRewriteStrategy(stderr, options.strategy);  
       fprintf(stderr, "...\n");
     }
-    rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(result,0)), options.strategy);
+    rewr = createRewriter(mcrl2::old_data::data_specification(ATAgetArgument(result,0)), options.strategy);
 
     //rewrite result
     if (options.benchmark) {

@@ -14,18 +14,18 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/detail/rewrite/inner.h"
-#include "mcrl2/data/detail/rewrite/jitty.h"
-#include "mcrl2/data/detail/rewrite/innerc.h"
-#include "mcrl2/data/detail/rewrite/jittyc.h"
-#include "mcrl2/data/detail/rewrite/with_prover.h"
+#include "mcrl2/old_data/data_specification.h"
+#include "mcrl2/old_data/rewrite.h"
+#include "mcrl2/old_data/detail/rewrite/inner.h"
+#include "mcrl2/old_data/detail/rewrite/jitty.h"
+#include "mcrl2/old_data/detail/rewrite/innerc.h"
+#include "mcrl2/old_data/detail/rewrite/jittyc.h"
+#include "mcrl2/old_data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
+using namespace mcrl2::old_data;
 using namespace std;
 
 Rewriter::Rewriter()
