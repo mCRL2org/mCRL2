@@ -111,10 +111,20 @@ class GraphApp : public wxApp
 {
   public:
     bool OnInit() {
+      bool parse_error = false;
+      wxString error_string = wxEmptyString;
 
-      parse_command_line(argc, argv);
-
-      init_frame(lts_file_argument);
+      try
+      {
+        parse_command_line(argc, argv);
+      }
+      catch (std::exception &e)
+      {
+        parse_error = true;
+        error_string = wxString(e.what(), wxConvLocal);
+      }
+      
+      init_frame(lts_file_argument, parse_error, error_string);
       return true;
     }
 
@@ -123,7 +133,9 @@ class GraphApp : public wxApp
     }
 
   private:	
-    void init_frame(std::string lts_file_argument) {
+    void init_frame(std::string lts_file_argument, bool parse_error, 
+                    wxString error_string) 
+    {
       GraphFrame *frame;
 	
       wxSize maximum_size = wxGetClientDisplayRect().GetSize();
@@ -131,8 +143,16 @@ class GraphApp : public wxApp
       frame = new GraphFrame(wxT(NAME), wxPoint(150, 150),
                      wxSize((std::min)(maximum_size.GetWidth(),INITIAL_WIN_WIDTH), (std::min)(maximum_size.GetHeight(),INITIAL_WIN_HEIGHT)));
       frame->Show(true);
+
       frame->GetSizer()->RecalcSizes();
-      if (!lts_file_argument.empty()) {
+
+      if(parse_error)
+      {
+        wxMessageDialog msg_dlg(frame, error_string,
+                                wxT("Command line error"), wxOK | wxICON_ERROR);
+        msg_dlg.ShowModal();
+      }
+      else if (!lts_file_argument.empty()) {
         frame->Init(wxString(lts_file_argument.c_str(), wxConvLocal));
       }
     }

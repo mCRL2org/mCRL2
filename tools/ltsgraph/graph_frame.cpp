@@ -703,7 +703,7 @@ void GraphFrame::on_export(wxCommandEvent& /* event */) {
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|LaTeX source (*.tex)|*.tex");
   wxString default_dir = wxEmptyString;
-  wxString default_file_name = wx_str + wxT(".svg");
+  wxString default_file_name = wx_str;
 
   wxFileDialog export_dialog(this, caption, default_dir, default_file_name, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
@@ -840,7 +840,7 @@ void GraphFrame::export_svg(wxString export_file_name) {
     vectEdge[n]->get_arrow_points(struct_edge_svg.arrow_points);
     struct_edge_svg.lbl = vectEdge[n]->get_lbl();
     struct_edge_svg.lbl_x = vectEdge[n]->get_label_lower_x();
-    struct_edge_svg.lbl_y = vectEdge[n]->get_label_lower_y();
+    struct_edge_svg.lbl_y = vectEdge[n]->get_label_higher_y();
     struct_edge_svg.red = vectEdge[n]->get_label_colour().Red();
     struct_edge_svg.green = vectEdge[n]->get_label_colour().Green();
     struct_edge_svg.blue = vectEdge[n]->get_label_colour().Blue();

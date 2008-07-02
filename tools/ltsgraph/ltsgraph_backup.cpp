@@ -98,13 +98,17 @@ bool LtsgraphBackup::Backup(wxString Bfilename) {
            BckpFile.AddLine(tmp);
 	}
 
-	//EDGE:numNode1,numNode2,IsVisible?
+	//EDGE:numNode1,numNode2,IsVisible?,splineX,splineY
 	//label
   for (size_t n = 0; n < BackupVectEdge.size(); n++) {
 		wxString lbl(BackupVectEdge[n]->get_lbl().c_str(), wxConvLocal);
-		tmp.sprintf(wxT("EDGE:%d,%d,%d,%s"),  
-                BackupVectEdge[n]->get_n1()->Get_num(),BackupVectEdge[n]->get_n2()->Get_num(),BackupVectEdge[n]->LabelVisible(),
-		BackupVectEdge[n]->get_label_colour().GetAsString(wxC2S_CSS_SYNTAX).c_str());
+		tmp.sprintf(wxT("EDGE:%d,%d,%d,%s,%f,%f"),  
+                BackupVectEdge[n]->get_n1()->Get_num(),
+                BackupVectEdge[n]->get_n2()->Get_num(),
+                BackupVectEdge[n]->LabelVisible(),
+		BackupVectEdge[n]->get_label_colour().GetAsString(wxC2S_CSS_SYNTAX).c_str(),
+                BackupVectEdge[n]->get_x_control(),
+                BackupVectEdge[n]->get_y_control());
 		BckpFile.AddLine(tmp);
 		BckpFile.AddLine(lbl);
   }
@@ -196,9 +200,10 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
 			int IsVisible;
 			unsigned int NumNode1, NumNode2;
                         rgb_colour label_colour;
+                        double splineX, splineY; 
 
-			sscanf(wxstr.fn_str(),"EDGE:%d,%d,%d,rgb(%3d,%3d,%3d)", &NumNode1, &NumNode2, &IsVisible,
-                                &label_colour.red, &label_colour.green, &label_colour.blue);
+			sscanf(wxstr.fn_str(),"EDGE:%d,%d,%d,rgb(%3d,%3d,%3d),%lf,%lf", &NumNode1, &NumNode2, &IsVisible,
+                                &label_colour.red, &label_colour.green, &label_colour.blue,&splineX, &splineY);
 
 			if (!RtrFile.Eof())
 				wxstr = RtrFile.GetNextLine();
@@ -207,6 +212,7 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
                         BackupVectEdge.back()->set_label_colour(wxColour(static_cast< unsigned char > (label_colour.red),
                                                                          static_cast< unsigned char > (label_colour.green),
                                                                          static_cast< unsigned char > (label_colour.blue)));
+                        BackupVectEdge.back()->set_control(splineX, splineY);
 		}
 		else 
 			return false;
