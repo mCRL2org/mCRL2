@@ -645,6 +645,7 @@ namespace squadt {
      * \param[in] r whether or not to run the tool
      **/
     void project::update_after_configuration(wxTreeItemId s, boost::shared_ptr< processor > tp, bool r) {
+
       if (0 < tp->number_of_outputs()) {
         /* Add the processor to the project */
         if (synchronise_outputs_with_objects(s, tp)) {

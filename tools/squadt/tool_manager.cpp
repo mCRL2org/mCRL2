@@ -85,7 +85,7 @@ namespace squadt {
    * \param[in] p pointer to the associated monitor
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    **/
-  void tool_manager_impl::execute(execution::command const* c, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(execution::command const* c, boost::shared_ptr< execution::task_monitor > p, bool b) {
     global_build_system.get_executor().execute(*c, p, b);
   }
 
@@ -95,7 +95,7 @@ namespace squadt {
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    * \param[in] w the directory in which execution should take place
    **/
-  void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, boost::shared_ptr< execution::task_monitor > p, bool b) {
     static const char* socket_connect_pattern("--si-connect=tipi://%s:%s");
     static const char* identifier_pattern("--si-identifier=%s");
     static const char* log_filter_level_pattern("--si-log-filter-level=%s");

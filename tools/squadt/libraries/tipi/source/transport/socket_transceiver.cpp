@@ -39,7 +39,7 @@ namespace transport {
         m_buffer.reset(new char[input_buffer_size + 1]);
 
         /* Clear buffer */
-        for (size_t i = 0; i < input_buffer_size; ++i) {
+        for (size_t i = 0; i <= input_buffer_size; ++i) {
           m_buffer[i] = 0;
         }
 
@@ -185,7 +185,7 @@ namespace transport {
           basic_transceiver::deliver(std::string(m_buffer.get()));
 
           /* Clear buffer */
-          for (size_t i = 0; i < input_buffer_size; ++i) {
+          for (size_t i = 0; i <= input_buffer_size; ++i) {
             m_buffer[i] = 0;
           }
 
@@ -259,7 +259,7 @@ namespace transport {
         boost::mutex::scoped_lock l(m_operation_lock);
 
         /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
-        boost::shared_array < char > buffer(new char[d.size() + 1]);
+        boost::shared_array< char > buffer(new char[d.size() + 1]);
 
         d.copy(buffer.get(), d.size(), 0);
 
@@ -291,7 +291,7 @@ namespace transport {
         s << d.rdbuf();
 
         /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
-        shared_array < char > buffer(new char[s.str().size() + 1]);
+        shared_array< char > buffer(new char[s.str().size() + 1]);
 
         s.str().copy(buffer.get(), s.str().size(), 0);
 

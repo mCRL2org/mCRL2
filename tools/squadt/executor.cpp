@@ -166,10 +166,10 @@ namespace squadt {
     void executor_impl::handle_process_termination(boost::weak_ptr < executor_impl > w,
                                 boost::weak_ptr < task_monitor > l, boost::shared_ptr < process > p) {
 
-      boost::shared_ptr < executor_impl > alive(w.lock());
+      boost::shared_ptr< executor_impl > alive(w.lock());
 
       if (alive) {
-        boost::shared_ptr < task_monitor > monitor(l.lock());
+        boost::shared_ptr< task_monitor > monitor(l.lock());
 
         if (monitor) {
           monitor->signal_change(p, p->get_status());

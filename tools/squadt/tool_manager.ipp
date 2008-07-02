@@ -32,10 +32,10 @@ namespace squadt {
       typedef long int                                                        instance_identifier;
 
       /** \brief Maps an instance identifier to its associated task */
-      typedef std::map < instance_identifier, execution::task_monitor::sptr > instance_list;
+      typedef std::map < instance_identifier, boost::shared_ptr< execution::task_monitor > > instance_list;
 
       /** \brief Maps a task to its associated process */
-      typedef std::list < execution::task_monitor::sptr >                     validated_instance_list;
+      typedef std::list < boost::shared_ptr< execution::task_monitor > >                     validated_instance_list;
 
       /** \brief Convenient type alias from interface class */
       typedef tool_manager::tool_list                                         tool_list;
@@ -60,10 +60,10 @@ namespace squadt {
     private:
 
       /** \brief Start a tool */
-      void execute(tool const&, boost::filesystem::path const&, execution::task_monitor::sptr, bool);
+      void execute(tool const&, boost::filesystem::path const&, boost::shared_ptr< execution::task_monitor >, bool);
 
       /** \brief Execute a command */
-      void execute(execution::command const*, execution::task_monitor::sptr, bool);
+      void execute(execution::command const*, boost::shared_ptr< execution::task_monitor >, bool);
 
     public:
 

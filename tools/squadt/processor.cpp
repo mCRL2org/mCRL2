@@ -517,7 +517,7 @@ namespace squadt {
    * \attention This function is non-blocking
    * \pre t.get() == this
    **/
-  void processor_impl::configure(interface_ptr const& t, boost::shared_ptr < const tool::input_configuration > ic, const boost::filesystem::path& l, std::string const& w) {
+  void processor_impl::configure(boost::shared_ptr< processor > const& t, boost::shared_ptr < const tool::input_configuration > ic, const boost::filesystem::path& l, std::string const& w) {
     using namespace boost;
     using namespace boost::filesystem;
 
@@ -540,6 +540,36 @@ namespace squadt {
 
   /**
    * \param[in] t shared pointer to the interface object
+   * \param[in] w the path to the directory relative to the project directory in which to run the tool
+   * \param[in] c the configuration object to use
+   *
+   * \pre The existing configuration must contain the input object matching the selected input combination
+   * \pre t->impl.get() == this
+   *
+   * \attention This function is non-blocking
+   **/
+  void processor_impl::configure(boost::shared_ptr< processor > const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
+    struct trampoline {
+      static void execute(boost::shared_ptr< processor > g, std::string const d,
+                        boost::shared_ptr< tipi::configuration > c,
+                                        boost::shared_ptr< processor::monitor > m) {
+
+        m->tool_configuration(g, c);
+      }
+    };
+
+    output_directory = w;
+
+    global_build_system.get_tool_manager().impl->execute(*t->impl->tool_descriptor,
+        make_output_path(output_directory),
+               boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
+
+    boost::thread(boost::bind(&trampoline::execute, t,
+        make_output_path(output_directory), c, current_monitor));
+  }
+
+  /**
+   * \param[in] t shared pointer to the interface object
    * \param[in] b whether or not to run when there are no input objects defined
    * \param[in] c the configuration object to use
    *
@@ -547,7 +577,16 @@ namespace squadt {
    *
    * \pre !is_active() and t.get() == this
    **/
-  void processor_impl::run(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
+  void processor_impl::run(boost::shared_ptr< processor > const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
+    struct trampoline {
+      static void execute(boost::shared_ptr< processor > g, std::string d,
+                        boost::shared_ptr < tipi::configuration > c,
+                                        boost::shared_ptr< processor::monitor > m) {
+
+        m->tool_operation(g, c);
+      }
+    };
+
     if (!is_active() && c) {
       if (b || 0 < inputs.size()) {
         boost::shared_ptr < project_manager > g(manager);
@@ -579,10 +618,12 @@ namespace squadt {
           }
         }
 
-        current_monitor->start_tool_operation(t, c);
+        global_build_system.get_tool_manager().impl->execute(*t->impl->tool_descriptor,
+                make_output_path(output_directory),
+                   boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
 
-        global_build_system.get_tool_manager().impl->execute(*tool_descriptor, make_output_path(output_directory),
-           boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
+        boost::thread(boost::bind(&trampoline::execute, t,
+            make_output_path(output_directory), c, current_monitor));
       }
       else {
         /* Signal completion to environment via monitor */
@@ -600,7 +641,16 @@ namespace squadt {
    *
    * \pre !is_active() and t.get() == this
    **/
-  void processor_impl::update(interface_ptr const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
+  void processor_impl::update(boost::shared_ptr< processor > const& t, boost::shared_ptr < tipi::configuration > c, bool b) {
+    struct trampoline {
+      static void execute(boost::shared_ptr< processor > g,
+                std::string d, boost::shared_ptr< tipi::configuration > c,
+                                        boost::shared_ptr< processor::monitor > m) {
+
+        m->tool_operation(g, c);
+      }
+    };
+
     assert(t->impl.get() == this);
 
     if (!is_active() && c) {
@@ -632,10 +682,12 @@ namespace squadt {
           }
         }
 
-        current_monitor->start_tool_operation(t, c);
+        global_build_system.get_tool_manager().impl->execute(*t->impl->tool_descriptor,
+                make_output_path(output_directory),
+                   boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
 
-        global_build_system.get_tool_manager().impl->execute(*tool_descriptor, make_output_path(output_directory),
-           boost::dynamic_pointer_cast < execution::task_monitor > (current_monitor), false);
+        boost::thread(boost::bind(&trampoline::execute, t,
+            make_output_path(output_directory), c, current_monitor));
       }
       else {
         /* Signal completion to environment via monitor */
@@ -724,29 +776,25 @@ namespace squadt {
 
   bool processor_impl::object_descriptor::present_in_store() {
     if (exists(get_location())) {
-      return (true);
+      return true;
     }
     else {
       processor_impl::try_change_status(*this, reproducible_nonexistent);
-
-      return (false);
     }
+
+    return false;
   }
 
   bool processor::object_descriptor::is_up_to_date() {
-    if (status != original && status != reproducible_up_to_date) {
-      return (false);
-    }
-    else {
+    if (status == original || status == reproducible_up_to_date) {
       boost::shared_ptr < processor > p(get_generator());
 
       if (p) {
         return (!p->check_status(true));
       }
-      else {
-        return (false);
-      }
     }
+
+    return false;
   }
 
   bool processor_impl::object_descriptor::self_check() {
@@ -915,23 +963,19 @@ namespace squadt {
      
         /* Wait until configuration is accepted, or the tool has terminated */
         if (await_message(tipi::message_configuration).get() != 0) {
-          /* End tool execution */
-          finish();
-     
           boost::shared_ptr < tipi::configuration > configuration(get_configuration());
      
           /* Operation completed successfully */
           t->impl->process_configuration(configuration, old_outputs, false);
         }
       }
-      else {
-        /* End tool execution */
-        finish();
-      }
     }
     catch (std::exception& e) {
       get_logger().log(1, "Error detected, aborted configuration (" + std::string(e.what()) + ")\n");
     }
+
+    /* End tool execution */
+    finish(false);
   }
 
   void processor::monitor::tool_operation(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > const& c) {
@@ -988,7 +1032,7 @@ namespace squadt {
       }
      
       /* End tool execution */
-      finish();
+      finish(false);
      
       /* Force the project manager to do a status update */
       boost::shared_ptr < project_manager > g(t->impl->manager);
@@ -1037,17 +1081,6 @@ namespace squadt {
 
   void processor::monitor::set_status_handler(status_callback_function h) {
     status_change_handler = h;
-  }
-
-  void processor::monitor::start_tool_configuration(boost::shared_ptr< processor > const& t, boost::shared_ptr < tipi::configuration > const& c) {
-    boost::thread thread(boost::bind(&processor::monitor::tool_configuration, this, t, c));
-  }
-
-  void processor::monitor::start_tool_operation(boost::shared_ptr< processor > const& t, boost::shared_ptr < tipi::configuration > const& c) {
-    boost::thread thread(boost::bind(&processor::monitor::tool_operation, this, t, c));
-  }
-
-  processor::processor() {
   }
 
   /**

@@ -74,7 +74,99 @@ namespace tipi {
           public:
   
             /** \brief Comparison method */
-            inline bool operator()(handler_type const&, handler_type const&);
+            inline bool operator()(handler_type const& l, handler_type const& r) {
+              return &l < &r;
+            }
+        };
+
+        class waiter_data;
+
+        /** \brief Set of handlers */
+        typedef std::set < handler_type, compare_handlers >                                    handler_set;
+
+        /** \brief Type for the map used to associate a handler to a message type */
+        typedef std::map < typename M::type_identifier_t, handler_set >                        handler_map;
+
+        /** \brief Type for the map used to associate a handler to a lock primitive */
+        typedef std::map < typename M::type_identifier_t, boost::shared_ptr < waiter_data > >  waiter_map;
+
+        /** \brief Type for the message queue */
+        typedef std::deque < boost::shared_ptr < const M > >                                   message_queue_t;
+
+      private:
+
+        class delivery_data {
+
+          private:
+
+            mutable boost::mutex      m_lock;
+
+            /** \brief The current task queue (messages to be delivered) */
+            message_queue_t           m_tasks;
+
+            boost::function< void() > m_handler;
+
+            boost::thread             m_delivery_thread;
+
+            bool                      m_active;
+
+          public:
+
+            inline delivery_data(boost::function< void() > const& handler) : m_handler(handler), m_active(false) {
+              struct trampoline {
+                static void execute(bool& active, boost::function< void() > const& handler) {
+                  handler();
+
+                  active = false;
+                }
+              };
+
+              m_handler = boost::bind(&trampoline::execute, boost::ref(m_active), handler);
+            }
+
+            inline void push(boost::shared_ptr< const M > const& m) {
+              boost::mutex::scoped_lock l(m_lock);
+
+              m_tasks.push_back(m);
+
+              if (!m_active) {
+                m_delivery_thread = boost::thread(m_handler);
+
+                m_active = true;
+              }
+            }
+
+            inline boost::shared_ptr< const M > pop() {
+              boost::mutex::scoped_lock l(m_lock);
+
+              boost::shared_ptr< const M > m(m_tasks.front());
+
+              m_tasks.pop_front();
+
+              return m;
+            }
+
+            inline size_t size() const {
+              boost::mutex::scoped_lock l(m_lock);
+
+              return m_tasks.size();
+            }
+            
+            inline void clear() {
+              boost::mutex::scoped_lock l(m_lock);
+
+              m_tasks.clear();
+            }
+
+            inline void stop() {
+              boost::mutex::scoped_lock l(m_lock);
+
+              if (m_active) {
+                m_delivery_thread.join();
+              }
+
+              m_tasks.clear();
+            }
         };
 
         /** \brief Monitor synchronisation construct */
@@ -115,45 +207,29 @@ namespace tipi {
 
       private:
 
-        /** \brief Set of handlers */
-        typedef std::set < handler_type, compare_handlers >                                    handler_set;
-
-        /** \brief Type for the map used to associate a handler to a message type */
-        typedef std::map < typename M::type_identifier_t, handler_set >                        handler_map;
-
-        /** \brief Type for the map used to associate a handler to a lock primitive */
-        typedef std::map < typename M::type_identifier_t, boost::shared_ptr < waiter_data > >  waiter_map;
-
-        /** \brief Type for the message queue */
-        typedef std::deque < boost::shared_ptr < const M > >                                   message_queue_t;
-
-      private:
-
         /** \brief Handlers based on message types */
-        handler_map                handlers;
+        handler_map                        handlers;
  
         /** \brief For blocking until delivery (used with function await_message) */
-        waiter_map                 waiters;
+        waiter_map                         waiters;
  
         /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
-        boost::recursive_mutex     waiter_lock;
-
-        /** \brief The current task queue (messages to be delivered) */
-        message_queue_t            task_queue;
+        boost::recursive_mutex             waiter_lock;
 
         /** \brief The current message queue (unhandled messages end up here) */
-        message_queue_t            message_queue;
+        message_queue_t                    message_queue;
 
         /** \brief Buffer that holds content until a message is complete */
-        std::string                buffer;
+        std::string                        buffer;
  
         /** \brief Whether or not a message start tag has been matched after the most recent message end tag */
-        bool                       message_open;
+        bool                               message_open;
 
         /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
-        unsigned char              partially_matched;
+        unsigned char                      partially_matched;
 
-        boost::shared_ptr< boost::mutex > delivery_lock;
+        /** \brief Task queue and on demand thread creation for delivery tasks */
+        boost::shared_ptr< delivery_data > m_delivery_data;
 
       protected:
 
@@ -175,7 +251,7 @@ namespace tipi {
       private:
 
         /** \brief Helper function that services the handlers */
-        void service_handlers(boost::shared_ptr< boost::mutex >);
+        void service_handlers();
 
         /** \brief Remove a message from the queue */
         void remove_message(boost::shared_ptr < const M >& p);
@@ -223,17 +299,17 @@ namespace tipi {
 
           disconnect();
 
+          m_delivery_data->stop();
+
           boost::recursive_mutex::scoped_lock w(waiter_lock);
 
-          task_queue.clear();
-          message_queue.clear();
-
           // Unblock all waiters;
-          BOOST_FOREACH(typename waiter_map::value_type w, waiters) {
-            w.second->wake();
+          BOOST_FOREACH(typename waiter_map::value_type waiter, waiters) {
+            waiter.second->wake();
           }
 
           waiters.clear();
+          message_queue.clear();
         }
     };
 
@@ -321,13 +397,13 @@ namespace tipi {
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger >& l) :
        message_open(false), partially_matched(0),
-       delivery_lock(new boost::mutex), logger(l) {
+       m_delivery_data(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this))), logger(l) {
     }
 
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl() :
        message_open(false), partially_matched(0),
-       delivery_lock(new boost::mutex), logger(get_default_logger()) {
+       m_delivery_data(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this))), logger(get_default_logger()) {
     }
 
     template < class M >
@@ -360,11 +436,6 @@ namespace tipi {
       logger->log(2, boost::format(" data : \"%s\"\n") % m.to_string());
 
       send(tipi::visitors::store(m));
-    }
- 
-    template < class M >
-    inline bool basic_messenger_impl< M >::compare_handlers::operator()(handler_type const& l, handler_type const& r) {
-      return (&l < &r);
     }
 
     /**
@@ -496,13 +567,7 @@ namespace tipi {
               logger->log(2, boost::format(" data : \"%s\"\n") % message->to_string());
               logger->log(4, boost::format(" raw  : \"%s\"\n") % new_string);
 
-              task_queue.push_back(message);
-
-              if (delivery_lock->try_lock()) { /// Start delivery thread
-                delivery_lock->unlock();
-
-                boost::thread(boost::bind(&basic_messenger_impl< M >::service_handlers, this, delivery_lock));
-              }
+              m_delivery_data->push(message);
             }
           }
         }
@@ -605,49 +670,45 @@ namespace tipi {
      * \attention Meant to be called from a separate thread
      **/
     template < class M >
-    inline void basic_messenger_impl< M >::service_handlers(boost::shared_ptr< boost::mutex > delivery_lock) {
+    inline void basic_messenger_impl< M >::service_handlers() {
+      while (0 < m_delivery_data->size()) {
+        boost::shared_ptr< const M > m(m_delivery_data->pop());
+      
+        typename M::type_identifier_t id = m->get_type();
+      
+        boost::recursive_mutex::scoped_lock ww(waiter_lock);
 
-      boost::mutex::scoped_lock w(*delivery_lock);
+        if (handlers.count(id)) {
+          handler_set hs(handlers[id]);
 
-      if (!delivery_lock.unique()) { // object (*this) still exists
-        while (0 < task_queue.size()) {
-        
-          boost::shared_ptr < const M > m(task_queue.front());
-        
-          task_queue.pop_front();
-        
-          typename M::type_identifier_t id = m->get_type();
-        
-          boost::recursive_mutex::scoped_lock ww(waiter_lock);
+          BOOST_FOREACH(handler_type h, hs) {
+            h(m);
+          }
+        }
+        if (id != M::message_any && handlers.count(M::message_any)) {
+          handler_set hs(handlers[id]);
 
-          if (handlers.count(id)) {
-            BOOST_FOREACH(handler_type h, handlers[id]) {
-              h(m);
-            }
+          BOOST_FOREACH(handler_type h, hs) {
+            h(m);
           }
-          if (id != M::message_any && handlers.count(M::message_any)) {
-            BOOST_FOREACH(handler_type h, handlers[M::message_any]) {
-              h(m);
-            }
-          }
-         
-          if (0 < waiters.count(id)) {
-            waiters[id]->wake(m);
-         
-            waiters.erase(id);
-          }
-          if (id != M::message_any && 0 < waiters.count(M::message_any)) {
-            waiters[M::message_any]->wake(m);
-         
-            waiters.erase(M::message_any);
-          }
-          else if (waiters.count(id) == 0) {
-            /* Put message into queue */
-            message_queue.push_back(m);
-         
-            if (maximum_buffer_size < message_queue.size()) {
-              message_queue.pop_front();
-            }
+        }
+       
+        if (0 < waiters.count(id)) {
+          waiters[id]->wake(m);
+       
+          waiters.erase(id);
+        }
+        if (id != M::message_any && 0 < waiters.count(M::message_any)) {
+          waiters[M::message_any]->wake(m);
+       
+          waiters.erase(M::message_any);
+        }
+        else if (waiters.count(id) == 0) {
+          /* Put message into queue */
+          message_queue.push_back(m);
+       
+          if (maximum_buffer_size < message_queue.size()) {
+            message_queue.pop_front();
           }
         }
       }

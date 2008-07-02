@@ -45,7 +45,10 @@ namespace tipi {
     enumeration< size_t >& enumeration< size_t >::add(const size_t v, std::string const& s) {
       using namespace boost::xpressive;
  
-      assert(regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\']))));
+      if (!regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\'])))) {
+        throw std::runtime_error(std::string("malformed value `").
+                        append(s).append("' for enumerated type."));
+      }
  
       if (m_values.find(v) == m_values.end()) {
         m_values[v] = s;

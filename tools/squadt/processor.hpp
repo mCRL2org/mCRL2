@@ -138,7 +138,7 @@ namespace squadt {
     private:
 
       /** \brief Basic constructor */
-      processor();
+      inline processor() { }
 
     public:
 
@@ -264,10 +264,10 @@ namespace squadt {
       typedef boost::function < void () >                                                     status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (boost::shared_ptr < tipi::tool_display >) >     display_layout_callback_function;
+      typedef boost::function < void (boost::shared_ptr < tipi::tool_display >) >             display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
-      typedef boost::function < void (std::vector< tipi::layout::element const* > const&) > display_update_callback_function;
+      typedef boost::function < void (std::vector< tipi::layout::element const* > const&) >   display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
       typedef boost::function < void (boost::shared_ptr < tipi::report >) >                   status_message_callback_function;
@@ -289,12 +289,6 @@ namespace squadt {
 
       /** \brief Handler function that is called when an associated process changes state */
       void signal_change(boost::shared_ptr < execution::process >, const execution::process::status);
-
-      /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
-      void start_tool_configuration(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const& c);
-
-      /** \brief Helper function for communication with a tool, starts a new thread with tool_operation() */
-      void start_tool_operation(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool configuration operation */
       void tool_configuration(boost::shared_ptr < processor >, boost::shared_ptr < tipi::configuration >);

@@ -63,10 +63,13 @@ namespace squadt {
       private:
  
         /** \brief Associates a process with this listener */
-        void attach_process(const process::sptr& p);
+        void attach_process(const boost::shared_ptr< process >& p);
 
         /** \brief Blocks until the process has registered */
         void await_process() const;
+
+        /** \brief Disconnects from a running process (or make sure no connection exists) */
+        void disconnect(boost::weak_ptr < execution::process > const&);
 
       public:
 
@@ -74,7 +77,7 @@ namespace squadt {
         task_monitor();
  
         /** \brief Gets a pointer to the associated process */
-        process::sptr get_process(const bool b = false) const;
+        boost::shared_ptr< process > get_process(const bool b = false) const;
 
         /** \brief Terminate an associated process */
         void terminate_process();
@@ -94,11 +97,8 @@ namespace squadt {
         /** \brief Executes a handler function once status change */
         void on_status_change(boost::function < void () >);
 
-        /** \brief Disconnects from a running process (or make sure no connection exists) */
-        void disconnect(boost::weak_ptr < execution::process > const&);
-
         /** \brief Unblocks waiters and requests a tool to prepare termination */
-        void finish();
+        void finish(bool = true);
 
         /** \brief Terminates running processes and deactivates monitor */
         void shutdown();
