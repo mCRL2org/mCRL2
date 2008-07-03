@@ -336,7 +336,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 t_tool_options parse_command_line(int ac, char** av)
 {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-      "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is\n"
+      "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is "
       "not present, stdin is used. If OUTFILE is not present, stdout is used.");
 
   clinterface.add_rewriting_options();
@@ -371,11 +371,11 @@ t_tool_options parse_command_line(int ac, char** av)
     add_option("counter",
       "print at the end a tree labelled with instantiations "
       "of the left hand side of equations; this tree is an "
-      "indication of how pbes2bool came to the validity or\n"
+      "indication of how pbes2bool came to the validity or "
       "invalidity of the PBES",
       'c').
     add_option("precompile",
-      "precompile the pbes for faster rewriting; does not"
+      "precompile the pbes for faster rewriting; does not "
       "work when the toolset is compiled in debug mode",
       'p').
     add_option("hashtables",
