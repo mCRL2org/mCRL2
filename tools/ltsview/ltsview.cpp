@@ -125,7 +125,6 @@ bool LTSView::OnInit()
 {
   bool parse_error = false;
   wxString error_string = wxEmptyString;
-  lts_file_argument = "";
 
   try
   {
