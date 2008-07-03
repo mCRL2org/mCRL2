@@ -165,7 +165,7 @@ namespace utility {
     out << "<configuration";
 
     if (c.m_fresh) {
-      out << " fresh=\"true\"";
+      out << " interactive=\"true\"";
     }
 
     if (!c.m_output_prefix.empty()) {

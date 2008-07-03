@@ -24,6 +24,7 @@
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/condition.hpp"
 
+#include <tipi/layout_elements.hpp>
 #include <tipi/detail/event_handlers.hpp>
 
 namespace tipi {
@@ -70,6 +71,9 @@ namespace tipi {
         /** \brief Thread activity flag for handler execution */
         bool              m_handler_execution_thread;
 
+        /** \brief Whether the event handler is still active (or in state of shutdown) */
+        bool              m_active;
+
       public:
 
         /** \brief Destructor */
@@ -77,7 +81,7 @@ namespace tipi {
 
       private:
 
-        basic_event_handler_impl() : m_handler_execution_thread(false) {
+        basic_event_handler_impl() : m_handler_execution_thread(false), m_active(true) {
         }
 
         /** \brief Wakes up all waiters that match an identifier or all waiters if the identifier is 0 */
@@ -102,7 +106,7 @@ namespace tipi {
         void remove(T);
 
         /** \brief Process an event for a specific object */
-        void process(boost::shared_ptr< basic_event_handler_impl > p, T, bool = true);
+        void process(boost::shared_ptr< basic_event_handler_impl > p, T, bool = true, bool = false);
    
         /** \brief Execute handlers for a specific object */
         void execute_handlers(boost::shared_ptr < basic_event_handler_impl > p);
@@ -115,6 +119,9 @@ namespace tipi {
 
         /** \brief Remove all stored non-global handlers */
         void clear();
+
+        /** \brief Move to state of shutdown */
+        void shutdown();
     };
 
     /**
@@ -189,17 +196,23 @@ namespace tipi {
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
+     * \param[in] w whether or not to block until processing completes
      **/
     template < typename T >
-    inline void basic_event_handler_impl< T >::process(boost::shared_ptr < basic_event_handler_impl > p, T id, bool b) {
-      m_events.push_back(std::make_pair(id, b));
+    inline void basic_event_handler_impl< T >::process(boost::shared_ptr < basic_event_handler_impl > p, T id, bool b, bool w) {
+      if (w) {
+        if (!m_handler_execution_thread) {
+          boost::mutex::scoped_lock l(m_wait_lock);
 
-      boost::mutex::scoped_lock l(m_wait_lock);
+          m_events.push_back(std::make_pair(id, b));
 
-      if (!m_handler_execution_thread) {
-        m_handler_execution_thread = true;
+          m_handler_execution_thread = true;
 
-        boost::thread(boost::bind(&basic_event_handler_impl::execute_handlers, this, p));
+          boost::thread(boost::bind(&basic_event_handler_impl::execute_handlers, this, p));
+        }
+      }
+      else {
+        execute_handlers(id, b);
       }
     }
 
@@ -279,7 +292,7 @@ namespace tipi {
    
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
-     *
+     * \throw std::runtime_error on wake after shutdown
      * \attention also unblocks if the object is destroyed
      **/
     template < typename T >
@@ -302,6 +315,10 @@ namespace tipi {
    
       /* The condition with which synchronisation is performed */
       anchor->wait(l);
+
+      if (!m_active) {
+        throw std::runtime_error("Waiting for event failed due to premature shutdown.");
+      }
     }
    
     template < typename T >
@@ -312,16 +329,25 @@ namespace tipi {
     }
 
     template < typename T >
-    inline basic_event_handler_impl< T >::~basic_event_handler_impl() {
+    inline void basic_event_handler_impl< T >::shutdown() {
       boost::mutex::scoped_lock l(m_wait_lock);
 
+      m_handlers.clear();
+
+      m_active = false;
+
       wake();
+    }
+
+    template < typename T >
+    inline basic_event_handler_impl< T >::~basic_event_handler_impl() {
+      shutdown();
     }
     /// \endcond
 
     basic_event_handler::basic_event_handler() : impl(new basic_event_handler_impl< const void* >) {
     }
-   
+
     /**
      * \param[in] h a function object that is to be invoked at an event
      **/
@@ -352,9 +378,10 @@ namespace tipi {
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
+     * \param[in] w whether or not to block until processing completes
      **/
-    void basic_event_handler::process(const void* id, bool b) {
-      impl->process(impl, id, b);
+    void basic_event_handler::process(const void* id, bool b, bool w) {
+      impl->process(impl, id, b, w);
     }
 
     /**
@@ -389,7 +416,12 @@ namespace tipi {
       impl->clear();
     }
 
+    void basic_event_handler::shutdown() {
+      impl->shutdown();
+    }
+
     basic_event_handler::~basic_event_handler() {
+      shutdown();
     }
   }
 }

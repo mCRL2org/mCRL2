@@ -43,12 +43,13 @@ namespace squadt {
      * \return A pointer to the associated process, or 0 on program failure
      **/
     boost::shared_ptr< process > task_monitor::get_process(const bool b) const {
+      boost::shared_ptr< task_monitor_impl > limpl = boost::static_pointer_cast < task_monitor_impl >(impl);
+
       if (b) {
-        boost::static_pointer_cast < task_monitor_impl >(impl)->
-                await_process(boost::static_pointer_cast < task_monitor_impl >(impl));
+        limpl->await_process(boost::static_pointer_cast < task_monitor_impl >(impl));
       }
 
-      return (boost::static_pointer_cast < task_monitor_impl > (impl)->associated_process);
+      return limpl->associated_process;
     }
 
     void task_monitor::await_process() const {
@@ -125,14 +126,14 @@ namespace squadt {
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * @param[in] h the function object that is executed
      **/
     void task_monitor::on_completion(boost::function < void () > h) {
       boost::static_pointer_cast < task_monitor_impl > (impl)->on_completion(h);
     }
 
     /**
-     * @param[in] h the function object that is executed once a connection is established
+     * @param[in] h the function object that is executed
      **/
     void task_monitor::once_on_completion(boost::function < void () > h) {
       boost::static_pointer_cast < task_monitor_impl > (impl)->once_on_completion(h);
@@ -161,6 +162,10 @@ namespace squadt {
       if (pl) {
         boost::mutex::scoped_lock l(register_lock);
 
+        if (!associated_process) {
+          register_condition.wait(l);
+        }
+
         /* Other side has not connected and the process has not been registered as terminated */
         if (number_of_connections() == 0) {
           connection_condition.timed_wait(l, boost::get_system_time() + boost::posix_time::seconds(ts));
@@ -182,6 +187,10 @@ namespace squadt {
 
       if (pl) {
         boost::mutex::scoped_lock l(register_lock);
+
+        if (!associated_process) {
+          register_condition.wait(l);
+        }
 
         /* Other side has not connected and the process has not been registered as terminated */
         if (number_of_connections() == 0) {

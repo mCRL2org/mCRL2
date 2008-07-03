@@ -331,7 +331,7 @@ namespace utility {
     c.m_output_objects.clear();
     c.m_positions.clear();
 
-    tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("interactive", &c.m_fresh, false);
     tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
 
     std::string category;
@@ -342,7 +342,7 @@ namespace utility {
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       std::string identifier = e->GetAttribute("id");
-     
+
       if (e->Value() == "option") {
         boost::shared_ptr < tipi::configuration::option > o(new tipi::configuration::option);
 
@@ -466,7 +466,7 @@ namespace utility {
     
     c.m_text = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -479,7 +479,7 @@ namespace utility {
 
     c.m_label = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS
@@ -551,7 +551,7 @@ namespace utility {
     catch (...) {
     }
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -566,7 +566,7 @@ namespace utility {
 
     tree->GetAttributeOrDefault("checked", &c.m_status, false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -581,7 +581,7 @@ namespace utility {
     tree->GetAttribute("maximum", &c.m_maximum);
     tree->GetAttribute("current", &c.m_current);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -598,7 +598,7 @@ namespace utility {
       }
     }
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS

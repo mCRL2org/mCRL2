@@ -559,9 +559,7 @@ namespace squadt {
       size_event.SetEventObject(GetParent());
 
       GetParent()->GetParent()->ProcessEvent(size_event);
-
       GetParent()->Layout();
-
       GetParent()->Refresh();
     }
 

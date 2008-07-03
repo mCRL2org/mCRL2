@@ -36,6 +36,9 @@ namespace tipi {
         /** \brief This object reflects the current configuration */
         boost::shared_ptr < configuration >            current_configuration;
  
+        /** \brief This object reflects the current configuration */
+        boost::shared_ptr < display >                  current_display;
+ 
         /** \brief Unique identifier for the running tool, obtained via the command line */
         long                                           instance_identifier;
  
@@ -51,6 +54,11 @@ namespace tipi {
         void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point o) {
           if (number_of_connections() == 0) {
             disconnect();
+
+            // unblock all threads waiting for incoming data
+            if (current_display) {
+              current_display->impl->shutdown();
+            }
           }
         }
 

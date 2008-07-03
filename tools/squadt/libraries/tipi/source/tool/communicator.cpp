@@ -190,13 +190,13 @@ namespace tipi {
 
       clear_handlers(tipi::message_display_data);
 
-      boost::shared_ptr< tipi::tool_display > guard_display(new tipi::tool_display(d));
+      current_display.reset(new tipi::tool_display(d));
 
       // handler for outgoing changes to elements on the display
-      guard_display->impl->add(boost::bind(trampoline::send_display_data, p, boost::ref(*logger), guard_display, _1));
+      current_display->impl->add(boost::bind(trampoline::send_display_data, p, boost::ref(*logger), current_display, _1));
 
       // handler for incoming data from user interaction
-      add_handler(tipi::message_display_data, boost::bind(&trampoline::receive_data, _1, guard_display));
+      add_handler(tipi::message_display_data, boost::bind(&trampoline::receive_data, _1, current_display));
 
       send_message(tipi::message(tipi::visitors::store(d), tipi::message_display_layout));
     }
