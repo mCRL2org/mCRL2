@@ -26,6 +26,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/multi_action_equality.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
@@ -50,6 +51,29 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
   result.push_back(e);
   return result;
 }
+
+namespace detail {
+  struct propositional_variable_negator
+  {
+    const propositional_variable& v_;
+
+    propositional_variable_negator(const propositional_variable& v)
+      : v_(v)
+    {}
+        
+    pbes_expression operator()(propositional_variable_instantiation t) const
+    {
+      if (t.name() == v_.name())
+      {
+        return pbes_expr::not_(t);
+      }
+      else
+      {
+        return t;
+      }
+    }
+  };
+} // namespace detail
 
 /// \brief Abstract algorithm class for translating a state formula and a specification to a pbes.
 class pbes_translate_algorithm
@@ -477,7 +501,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
           data::data_expression t = s::time(f);
           result = RHS(f0, s::delay_timed(t), lps, T, context);
         } else if (s::is_var(f)) {
-          result = RHS(f0, f, lps, T, context);
+          result = not_(RHS(f0, f, lps, T, context));
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = s::name(f);
           data::data_assignment_list xf = s::ass(f);
@@ -523,7 +547,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_or(f)) {
           result = E(f0, left(f), lps, T) + E(f0, right(f), lps, T);
         } else if (is_imp(f)) {
-          result = E(f0, left(f), lps, T) + E(f0, right(f), lps, T);
+          result = E(f0, not_(left(f)), lps, T) + E(f0, right(f), lps, T);
         } else if (is_forall(f)) {
           result = E(f0, arg(f), lps, T);
         } else if (is_exists(f)) {
@@ -588,7 +612,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, T + xf + xp + Par(X, data::data_variable_list(), f0));
           std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, T, context);
+          pbes_expression expr = replace_propositional_variables(RHS(f0, g, lps, T, context), detail::propositional_variable_negator(v));
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
         } else if (is_yaled_timed(f)) {
@@ -742,7 +766,8 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_or(f)) {
           result = or_(RHS(f0, s::left(f), lps, context), RHS(f0, s::right(f), lps, context));
         } else if (s::is_imp(f)) {
-          result = imp(RHS(f0, s::left(f), lps, context), RHS(f0, s::right(f), lps, context));
+          // DANGEROUS! result = imp(RHS(f0, s::left(f), lps, context), RHS(f0, s::right(f), lps, context));
+	  	    result = or_(RHS(f0, s::not_(s::left(f)), lps, context), RHS(f0, s::right(f), lps, context));
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(s::var(f));
           context.insert(names.begin(), names.end());
@@ -861,7 +886,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_yaled(f)) {
           result = RHS(f0, s::delay(), lps, context);
         } else if (s::is_var(f)) {
-          result = RHS(f0, f, lps, context);
+          result = not_(RHS(f0, f, lps, context));
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = s::name(f);
           data::data_assignment_list xf = s::ass(f);
@@ -909,7 +934,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         } else if (is_or(f)) {
           result = E(f0, left(f), lps) + E(f0, right(f), lps);
         } else if (is_imp(f)) {
-          result = E(f0, left(f), lps) + E(f0, right(f), lps);
+          result = E(f0, not_(left(f)), lps) + E(f0, right(f), lps);
         } else if (is_forall(f)) {
           result = E(f0, arg(f), lps);
         } else if (is_exists(f)) {
@@ -974,7 +999,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, xf + xp + Par(X, data::data_variable_list(), f0));
           std::set<std::string> context;
-          pbes_expression expr = RHS(f0, g, lps, context);
+          pbes_expression expr = replace_propositional_variables(RHS(f0, g, lps, context), detail::propositional_variable_negator(v));
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
         } else if (is_yaled_timed(f)) {
