@@ -1,0 +1,88 @@
+// Author(s): Jeroen Keiren
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/list_sort.h
+/// \brief The class list_sort.
+
+#ifndef MCRL2_DATA_LIST_SORT_H
+#define MCRL2_DATA_LIST_SORT_H
+
+#include <iostream>
+#include <boost/range/iterator_range.hpp>
+
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/container_sort.h"
+
+namespace mcrl2 {
+  
+  namespace data {
+
+    /// \brief list sort.
+    ///
+    class list_sort: public container_sort
+    {
+
+      public:    
+
+        list_sort()
+          : container_sort()
+        {}
+
+        list_sort(sort_expression element_sort)
+          : container_sort("List", element_sort)
+        {}
+
+        /// \overload
+        ///
+        inline
+        std::string container_name() const
+        {
+          return "List";
+        }
+
+        /// \overload
+        ///
+        inline
+        bool is_list_sort() const
+        {
+          return true;
+        }
+
+        /// \overload
+        ///
+        inline
+        bool is_set_sort() const
+        {
+          return false;
+        }
+
+        /// \overload
+        ///
+        inline
+        bool is_bag_sort() const
+        {
+          return false;
+        }
+
+    }; // class list_sort
+
+    /// \brief list of list sorts
+    ///
+    typedef atermpp::vector<list_sort> list_sort_list;
+
+  } // namespace data
+
+} // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::list_sort)
+/// \endcond
+
+#endif // MCRL2_DATA_LIST_SORT_H
+
