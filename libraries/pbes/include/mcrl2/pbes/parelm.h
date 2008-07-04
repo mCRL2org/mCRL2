@@ -268,7 +268,7 @@ class pbes_parelm_algorithm
 
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
-            data::data_variable v1 = predicate_variables[*j];
+            data::data_variable v1 = predicate_variables[*j + propvar_offsets[X1]];
             std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
