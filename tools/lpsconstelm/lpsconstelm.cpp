@@ -136,6 +136,7 @@ class lpsConstElm {
     void setDebug(bool b);
     void setNoSingleton(bool b);
     void setAllTrue(bool b);
+    void setRewriteStrategy(RewriteStrategy s);
     void setReachable(bool b);
     void setShow(bool b);
     void printSetVar();
@@ -149,14 +150,6 @@ class lpsConstElm {
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
-  private:
-
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
-    static const char*  lps_file_for_output; ///< file used to write the output to
-
-    static const char*  option_remove_single_element_sorts;
-    static const char*  option_remove_unvisited_summands;
-    static const char*  option_ignore_summand_conditions;
 
   public:
 
@@ -173,12 +166,13 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     bool perform_task(tipi::configuration&);
 };
 
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-const char* squadt_interactor::lps_file_for_output = "lps_out";
+char const* lps_file_for_input  = "lps_in";  ///< file containing an LPS that can be imported
+char const* lps_file_for_output = "lps_out"; ///< file used to write the output to
 
-const char* squadt_interactor::option_remove_single_element_sorts = "remove_single_element_sorts";
-const char* squadt_interactor::option_remove_unvisited_summands   = "remove_unvisited_summands";
-const char* squadt_interactor::option_ignore_summand_conditions   = "ignore_summand_conditions";
+char const* option_remove_single_element_sorts = "remove_single_element_sorts";
+char const* option_remove_unvisited_summands   = "remove_unvisited_summands";
+char const* option_ignore_summand_conditions   = "ignore_summand_conditions";
+char const* option_rewrite_strategy            = "rewrite_strategy";
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
@@ -211,7 +205,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Create display */
   tipi::tool_display d;
 
-  layout::horizontal_box& m = d.create< horizontal_box >();
+  tipi::layout::vertical_box& m = d.create< vertical_box >();
+
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
+
+  m.append(d.create< label >().set_text("Rewrite strategy")).
+    append(d.create< horizontal_box >().
+                append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
+                append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
 
   checkbox& remove_single_element_sorts = d.create< checkbox >().
                         set_status(c.get_option_argument< bool >(option_remove_single_element_sorts));
@@ -226,6 +229,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
       append(ignore_summand_conditions.set_label("take summand conditions into account")),
     margins(0,5,0,5));
 
+  if (c.option_exists(option_rewrite_strategy)) {
+    strategy_selector.set_selection(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+  }
+  
   button& okay_button = d.create< button >().set_label("OK");
 
   m.append(d.create< label >().set_text(" ")).
@@ -243,6 +250,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
       set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands.get_status());
   c.get_option(option_ignore_summand_conditions).
       set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions.get_status());
+  c.get_option(option_rewrite_strategy).
+      set_argument_value< 0 >(strategy_selector.get_selection());
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
@@ -261,6 +270,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   constelm.setNoSingleton(c.option_exists(option_remove_single_element_sorts));
   constelm.setReachable(c.option_exists(option_remove_unvisited_summands));
   constelm.setAllTrue(c.option_exists(option_remove_unvisited_summands));
+  constelm.setRewriteStrategy(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
 
   send_hide_display();
 
@@ -974,6 +984,10 @@ inline void lpsConstElm::printSet() {
 //
 inline void lpsConstElm::setNoSingleton(bool b) {
   p_nosingleton = b;
+}
+
+inline void lpsConstElm::setRewriteStrategy(RewriteStrategy s) {
+  p_strategy = s;
 }
 
 // Sets all conditions to true
