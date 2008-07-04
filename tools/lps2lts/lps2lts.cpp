@@ -117,9 +117,9 @@ lts_generation_options parse_command_line(int ac, char** av) {
     add_option("action", make_mandatory_argument("NAMES"),
       "detect actions from NAMES, a comma-separated list of action names; a message "
       "is printed for every occurrence of one of these action names", 'a').
-    add_option("trace", make_optional_argument("NUM", "10"),
+    add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
       "write at most NUM traces to states detected with the --deadlock or --action "
-      "options (NUM is 10 by default)", 't').
+      "options (default is unlimited)", 't').
     add_option("error-trace",
       "if an error occurs during exploration, save a trace to the state that could "
       "not be explored").
