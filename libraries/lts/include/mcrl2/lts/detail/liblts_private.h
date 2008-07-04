@@ -136,7 +136,7 @@
       bool write_to_dot(std::ostream& os, lts_dot_options opts);
       bool write_to_dot(std::string const& filename, lts_dot_options opts);
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
       bool read_from_bcg(std::string const& filename);
       bool write_to_bcg(std::string const& filename);
 #endif

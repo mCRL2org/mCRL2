@@ -21,7 +21,8 @@ OPENGL_LPATH       = "@OPENGL_LPATH@" ;
 CADP_HEADERS       = "@CADP_HEADERS@" ;
 CADP_LIBRARIES     = "@CADP_LIBRARIES@" ;
 
-USE_CVC            = "@USE_CVC@" ;
+CVC                = "@CVC@" ;
+DL                 = "@DL@" ;
 
 BOOST_INCLUDE_PATH = "@BOOST_INCLUDE_PATH@" ;
 BOOST_LIBRARY_PATH = "@BOOST_LIBRARY_PATH@" ;

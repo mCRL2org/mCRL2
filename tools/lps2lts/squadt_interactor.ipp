@@ -69,7 +69,7 @@ static bool initialise_types() {
 
   lts_type_enumeration.
     add(mcrl2::lts::lts_aut, "Aldebaran").
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     add(mcrl2::lts::lts_bcg, "BCG").
 #endif
     add(mcrl2::lts::lts_dot, "DOT").
@@ -172,7 +172,7 @@ class squadt_interactor::storage_configuration {
           case mcrl2::lts::lts_mcrl2:
             mt = tipi::mime_type("application/svc+mcrl2");
             break;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
           case mcrl2::lts::lts_bcg:
             mt = tipi::mime_type("application/bcg");
             break;
@@ -282,7 +282,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
       m.append(d.create< label >().set_text("Ouput format")).
         append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
                     append(lts_type_selector.associate(mcrl2::lts::lts_aut, "Aldebaran")).
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
                     append(lts_type_selector.associate(mcrl2::lts::lts_bcg, "BCG")).
 #endif
                     append(lts_type_selector.associate(mcrl2::lts::lts_dot, "DOT")).

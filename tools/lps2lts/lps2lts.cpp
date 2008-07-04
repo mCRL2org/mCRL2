@@ -81,7 +81,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
     "The format of OUTFILE is determined by its extension (unless it is specified "
     "by an option). The supported formats are:\n"
     "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
     "  'dot' for the GraphViz format,\n"

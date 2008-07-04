@@ -88,7 +88,7 @@ const char* option_determinism_equivalence = "determinism_equivalence";
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::reporting);
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::reporting);
 #endif
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::reporting);
@@ -253,7 +253,7 @@ tool_options parse_command_line(int argc, char** argv) {
     "The option --in can be used to force the format for INFILE. "
     "The supported formats are:\n"
     "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
     "  'fsm' for the Finite State Machine format,\n"

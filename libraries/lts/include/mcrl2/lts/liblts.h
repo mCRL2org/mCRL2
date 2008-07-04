@@ -24,12 +24,8 @@
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
 
-#ifdef NO_DYNLOAD
-#include "mcrl2/setup.h"
-
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 #include "bcg_user.h"
-#endif
 #endif
 
 namespace mcrl2
@@ -52,7 +48,7 @@ namespace lts
     lts_svc,   /**< SVC format */
     lts_fsm,   /**< FSM format */
     lts_dot    /**< GraphViz format */
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
    ,lts_bcg /**< BCG format
               * \note Only available if the LTS library is built with BCG
               * support.*/

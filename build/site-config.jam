@@ -184,7 +184,13 @@ boost-library test ;
 boost-library system : ;
 boost-library md5 : local ;
 
-lib   dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
+if $(DL) {
+  lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
+}
+else {
+  alias dl : : : : <define>NO_DYNLOAD ;
+}
+
 lib   m  : : <name>"m" ;
 alias m  : : <os>NT ;
 lib   z  : : <name>"z" ;
@@ -217,7 +223,7 @@ if $(CADP_HEADERS) {
   lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;
   lib bcg_io : : <name>BCG_IO <search>$(CADP_LIBRARIES) ;
 
-  alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) ;
+  alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) <define>USE_BCG ;
 }
 else {
   print-notice "BCG format support for LTS library disabled!" ;

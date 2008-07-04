@@ -119,7 +119,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
     append(d.create< horizontal_box >().
                 append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
                 append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
-                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
 
   /* Prepare user interaction */

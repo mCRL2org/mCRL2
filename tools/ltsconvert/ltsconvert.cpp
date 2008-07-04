@@ -234,7 +234,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     "format is determined by the content of INFILE. Options --in and --out can be\n"
     "used to force the input and output formats. The supported formats are:\n"
     "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
     "  'dot' for the GraphViz format (output only),\n"
@@ -402,7 +402,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       aldebaran,   ///< Aldebaran format (AUT)
       svc_mcrl,    ///< SVC file (mCRL specific)
       svc_mcrl2,   ///< SVC file (mCRL2 specific)
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
       bcg,         ///< BCG
 #endif
       fsm,         ///< FSM
@@ -436,7 +436,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
         add(aldebaran, "Aldebaran").
         add(svc_mcrl, "SVC_mCRL").
         add(svc_mcrl2, "SVC_mCRL2").
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
         add(bcg, "BCG").
 #endif
         add(fsm, "FSM").
@@ -473,7 +473,7 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::conversion);
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::conversion);
 #endif
 }
@@ -496,7 +496,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(aldebaran, "Aldebaran",true)).
                 append(format_selector.associate(svc_mcrl, "SVC/mCRL")).
                 append(format_selector.associate(svc_mcrl2, "SVC/mCRL2")).
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
                 append(format_selector.associate(bcg, "BCG")).
 #endif
                 append(format_selector.associate(fsm, "FSM")).
@@ -583,7 +583,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     lts::extension_for_type(lts_aut),
     lts::extension_for_type(lts_mcrl),
     lts::extension_for_type(lts_mcrl2),
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     lts::extension_for_type(lts_bcg),
 #endif
     lts::extension_for_type(lts_fsm),

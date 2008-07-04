@@ -22,7 +22,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 #include <bcg_user.h>
 #endif
 
@@ -786,7 +786,7 @@ lts_type p_lts::detect_type(istream &is)
     }
   }
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   // detect lts_bcg
   if ( r >= 2 )
   {
@@ -865,7 +865,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
     case lts_dot:
       gsVerboseMsg("cannot read dot files\n");
       return false;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       return read_from_bcg(filename);
 #endif
@@ -911,7 +911,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
     case lts_dot:
       gsVerboseMsg("cannot read dot files\n");
       return false;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       gsVerboseMsg("cannot read BCG files from streams\n");
       return false;
@@ -962,7 +962,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         opts.print_states = false;
         return write_to_dot(filename,opts);
       }
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       return write_to_bcg(filename);
 #endif
@@ -1005,7 +1005,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         opts.print_states = false;
         return write_to_dot(os,opts);
       }
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       gsVerboseMsg("cannot write BCG files to streams\n");
       return false;
@@ -1844,7 +1844,7 @@ lts_type lts::guess_format(string const& s) {
     {
       gsVerboseMsg("detected dot extension\n");
       return lts_dot;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     } else if ( ext == "bcg" )
     {
       gsVerboseMsg("detected BCG extension\n");
@@ -1875,7 +1875,7 @@ lts_type lts::parse_format(std::string const& s) {
   } else if ( s == "dot" )
   {
     return lts_dot;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   } else if ( s == "bcg" )
   {
     return lts_bcg;

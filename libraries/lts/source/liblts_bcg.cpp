@@ -16,7 +16,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 
 #include <bcg_user.h>
 

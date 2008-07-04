@@ -73,7 +73,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
     "The supported formats are:\n"
     "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
     "  'fsm' for the Finite State Machine format,\n"
