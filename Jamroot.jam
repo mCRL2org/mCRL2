@@ -505,7 +505,9 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
   else {
     exe $(name) : $(sources) : $(requirements) $(additional-requirements) : $(defaults) : $(usage-requirements) ;
 
-    man $(name).1 : $(name) : <location>$(mandir)/man1 ;
+    if [ feature.defaults <install> ] = <install>yes {
+      man $(name).1 : $(name) : <location>$(mandir)/man1 ;
+    }
   }
 
   # Mac application bundle
