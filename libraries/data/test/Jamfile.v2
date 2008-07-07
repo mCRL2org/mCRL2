@@ -10,6 +10,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite data
     :
-      [ run sort_expression_test.cpp : : : <dependency>/libraries//atermpp ]
+      [ run sort_expression_test.cpp ]
+      [ run data_expression_test.cpp ]
       [ compile-headers ../include ]
     ;

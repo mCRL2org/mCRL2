@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/alias.h"
@@ -38,6 +39,11 @@ void basic_sort_test()
   basic_sort t("T");
   BOOST_CHECK(s != t);
   BOOST_CHECK(s.name() != t.name());
+
+  sort_expression t_e(t);
+  basic_sort t_e_(t_e);
+  BOOST_CHECK(t_e_ == t);
+  BOOST_CHECK(t_e_.name() == t.name());
 }
 
 void function_sort_test()
@@ -49,7 +55,7 @@ void function_sort_test()
   sort_expression_list s01;
   s01.push_back(s0);
   s01.push_back(s1);
-  boost::iterator_range<sort_expression_list::iterator> s01_range = boost::make_iterator_range(s01);
+  boost::iterator_range<sort_expression_list::const_iterator> s01_range = boost::make_iterator_range(s01);
   function_sort fs(s01_range, s);
   BOOST_CHECK(!fs.is_basic_sort());
   BOOST_CHECK(fs.is_function_sort());
@@ -71,12 +77,17 @@ void function_sort_test()
 
   BOOST_CHECK(fs.domain() == s01_range);
   BOOST_CHECK(fs.codomain() == s);
+
+  sort_expression fs_e(fs);
+  function_sort fs_e_(fs_e);
+  BOOST_CHECK(fs_e_ == fs);
+  BOOST_CHECK(fs_e_.domain() == fs.domain());
+  BOOST_CHECK(fs_e_.codomain() == fs.codomain());
 }
 
 void alias_test()
 {
   basic_sort s0("S0");
-  basic_sort s("S");
 
   std::string s0_name("other_S");
   alias s0_(s0_name, s0);
@@ -87,6 +98,12 @@ void alias_test()
   BOOST_CHECK(!s0_.is_container_sort());
   BOOST_CHECK(s0_.name() == s0_name);
   BOOST_CHECK(s0_.reference() == s0);
+
+  sort_expression s0_e(s0_);
+  alias s0_e_(s0_e);
+  BOOST_CHECK(s0_e_ == s0_);
+  BOOST_CHECK(s0_e_.name() == s0_.name());
+  BOOST_CHECK(s0_e_.reference() == s0_.reference());
 }
 
 void structured_sort_test()
@@ -130,6 +147,11 @@ void structured_sort_test()
   BOOST_CHECK(!s.is_container_sort());
 
   BOOST_CHECK(s.struct_constructors() == cs);
+  
+  sort_expression s_e(s);
+  structured_sort s_e_(s_e);
+  BOOST_CHECK(s_e_ == s);
+  BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
 }
 
 void container_sort_test()
@@ -164,17 +186,44 @@ void container_sort_test()
   BOOST_CHECK(bs0.is_bag_sort());
   BOOST_CHECK(ss0.element_sort() != ss1.element_sort());
 
-  container_sort cls0 = static_cast<container_sort>(ls0);
+  container_sort cls0(ls0);
   BOOST_CHECK(cls0.container_name() == "List");
   BOOST_CHECK(cls0.is_list_sort());
+  list_sort cls0_(cls0);
+  BOOST_CHECK(cls0_ == ls0);
+  BOOST_CHECK(cls0_.container_name() == ls0.container_name());
+  BOOST_CHECK(cls0_.element_sort() == ls0.element_sort());
+  sort_expression cls0_e(cls0);
+  container_sort cls0_e_(cls0_e);
+  BOOST_CHECK(cls0_e_ == cls0);
+  BOOST_CHECK(cls0_e_.container_name() == cls0.container_name());
+  BOOST_CHECK(cls0_e_.element_sort() == cls0.element_sort());
 
-  container_sort css0 = static_cast<container_sort>(ss0);
+  container_sort css0(ss0);
   BOOST_CHECK(css0.container_name() == "Set");
   BOOST_CHECK(css0.is_set_sort());
+  set_sort css0_(css0);
+  BOOST_CHECK(css0_ == ss0);
+  BOOST_CHECK(css0_.container_name() == ss0.container_name());
+  BOOST_CHECK(css0_.element_sort() == ss0.element_sort());
+  sort_expression css0_e(css0);
+  container_sort css0_e_(css0_e);
+  BOOST_CHECK(css0_e_ == css0);
+  BOOST_CHECK(css0_e_.container_name() == css0.container_name());
+  BOOST_CHECK(css0_e_.element_sort() == css0.element_sort());
 
-  container_sort cbs0 = static_cast<container_sort>(bs0);
+  container_sort cbs0(bs0);
   BOOST_CHECK(cbs0.container_name() == "Bag");
   BOOST_CHECK(cbs0.is_bag_sort());
+  bag_sort cbs0_(cbs0);
+  BOOST_CHECK(cbs0_ == bs0);
+  BOOST_CHECK(cbs0_.container_name() == bs0.container_name());
+  BOOST_CHECK(cbs0_.element_sort() == bs0.element_sort());
+  sort_expression cbs0_e(cbs0);
+  container_sort cbs0_e_(cbs0_e);
+  BOOST_CHECK(cbs0_e_ == cbs0);
+  BOOST_CHECK(cbs0_e_.container_name() == cbs0.container_name());
+  BOOST_CHECK(cbs0_e_.element_sort() == cbs0.element_sort());
 }
 
 int test_main(int argc, char** argv)
