@@ -13,6 +13,7 @@ import project ;
 import generators ;
 import targets ;
 import "class" : new ;
+import testing ;
 
 type.register MAN : 1 ;
 
@@ -21,7 +22,12 @@ generators.register-standard $(__name__).generate : EXE : MAN ;
 flags $(__name__).generate LOCATION <location> ;
 
 actions generate {
+  $(PATH_SETUP)
   $(>) --generate-man-page > $(LOCATION)/$(<:BS)
+}
+
+rule generate ( target : source : properties * ) {
+  testing.run-path-setup $(target) : $(source) : $(properties) ;
 }
 
 rule man ( target : source : requirements * : default-build * ) {
