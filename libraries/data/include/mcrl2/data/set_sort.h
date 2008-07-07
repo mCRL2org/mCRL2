@@ -30,45 +30,28 @@ namespace mcrl2 {
 
       public:    
 
+        /// \brief Constructor.
         set_sort()
           : container_sort()
         {}
 
-        set_sort(sort_expression element_sort)
+        /// \brief Constructor.
+        ///
+        /// \param[in] s A sort expression
+        /// \pre s is a set sort.
+        set_sort(const container_sort& s)
+          : container_sort(s)
+        {
+          assert(s.is_container_sort());
+          assert(static_cast<container_sort>(s).is_set_sort());
+        }
+
+        /// \brief Constructor.
+        ///
+        /// \param[in] element_sort The sort of the elements of the set.
+        set_sort(const sort_expression& element_sort)
           : container_sort("Set", element_sort)
         {}
-
-        /// \overload
-        ///
-        inline
-        std::string container_name() const
-        {
-          return "Set";
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_list_sort() const
-        {
-          return false;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_set_sort() const
-        {
-          return true;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_bag_sort() const
-        {
-          return false;
-        }
 
     }; // class set_sort
 

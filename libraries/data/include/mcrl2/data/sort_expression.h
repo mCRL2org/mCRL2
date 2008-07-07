@@ -34,14 +34,17 @@ namespace mcrl2 {
     {
       public:
 
-        /// Constructor.
+        /// \brief Constructor.
         ///
         sort_expression()
           : atermpp::aterm_appl(core::detail::constructSortId())
         {}
 
         /// \internal
-        sort_expression(atermpp::aterm_appl t)
+        /// \brief Constructor.
+        /// \param[in] t A term.
+        /// \pre t has the internal structure of a sort expression.
+        sort_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
         {}
 
@@ -49,35 +52,35 @@ namespace mcrl2 {
         inline
         bool is_basic_sort() const
         {
-          return false;
+          return core::detail::gsIsSortId(*this);
         }
 
         /// \brief Returns true iff this expression is a structured sort.
         inline
         bool is_structured_sort() const
         {
-          return false;
+          return core::detail::gsIsSortStruct(*this);
         }
 
         /// \brief Returns true iff this expression is a container sort.
         inline
         bool is_container_sort() const
         {
-          return false;
+          return core::detail::gsIsSortCons(*this);
         }
 
         /// \brief Returns true iff this expression is a function sort.
         inline
         bool is_function_sort() const
         {
-          return false;
+          return core::detail::gsIsSortArrow(*this);
         }
 
         /// \brief Returns true iff this expression is a sort alias.
         inline
         bool is_alias() const
         {
-          return false;
+          return core::detail::gsIsSortRef(*this);
         }
 
     }; // class sort_expression

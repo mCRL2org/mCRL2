@@ -39,19 +39,21 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] s A sort expression.
+        /// \pre s has the internal structure of a basic sort.
+        basic_sort(const sort_expression& s)
+          : sort_expression(s)
+        {
+          assert(s.is_basic_sort());
+        }
+
+        /// \brief Constructor
+        ///
         /// \param[in] s The name of the sort that is created.
         /// \post This is a sort with name s.
-        basic_sort(std::string s)
+        basic_sort(const std::string& s)
           : sort_expression(mcrl2::core::detail::gsMakeSortId(mcrl2::core::identifier_string(s)))
         {}
-
-        /// \overload
-        ///
-        inline
-        bool is_basic_sort()
-        {
-          return true;
-        }
 
         /// \brief Returns the name of this sort.
         inline

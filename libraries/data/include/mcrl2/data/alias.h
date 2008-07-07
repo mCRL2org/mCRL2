@@ -35,20 +35,20 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        alias(const sort_expression s)
+          : sort_expression(s)
+        {
+          assert(s.is_alias());
+        }
+
+        /// \brief Constructor
+        ///
         /// \param[in] n The name of the alias that is created.
         /// \param[in] s The sort for which an alias is created.
         /// \post n and s describe the same sort.
-        alias(std::string n, sort_expression s)
+        alias(const std::string& n, const sort_expression s)
           : sort_expression(mcrl2::core::detail::gsMakeSortRef(mcrl2::core::identifier_string(n), s))
         {}
-
-        /// \overload
-        ///
-        inline
-        bool is_alias()
-        {
-          return true;
-        }
 
         /// \brief Returns the name of this sort.
         ///

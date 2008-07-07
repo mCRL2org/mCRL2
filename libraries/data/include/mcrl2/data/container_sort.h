@@ -30,15 +30,13 @@ namespace mcrl2 {
     {
       protected:
 
-        /// \internal
-        ///
         /// \brief Converts a string to an internally used type.
         ///
         /// \param[in] The string to be converted. May only be any of "List",
         ///            "Set" or "Bag".
         /// \ret The internally used type corresponding to s.
         inline
-        atermpp::aterm_appl string_to_sort_cons_type(std::string s)
+        atermpp::aterm_appl string_to_sort_cons_type(const std::string& s) const
         {
           if (s == "List")
           {
@@ -58,6 +56,31 @@ namespace mcrl2 {
           }
         }
 
+        /// \brief Converts an internally used type to a string.
+        ///
+        /// \param[in] The internally used type to be converted.
+        /// \ret The string corresponding to s.
+        inline
+        std::string sort_cons_type_to_string(const atermpp::aterm_appl& s) const
+        {
+          if (core::detail::gsIsSortList(s))
+          {
+            return "List";
+          }
+          else if (core::detail::gsIsSortSet(s))
+          {
+            return "Set";
+          }
+          else if (core::detail::gsIsSortBag(s))
+          {
+            return "Bag";
+          }
+          else
+          {
+            assert(false);
+          }
+        }
+
       public:    
  
         /// \brief Constructor
@@ -68,10 +91,21 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] s A sort expression.
+        /// \pre s has the internal structure of a container sort.
+        container_sort(const sort_expression& s)
+          : sort_expression(s)
+        {
+          assert(s.is_container_sort());
+        }
+
+        /// \brief Constructor
+        ///
         /// \param[in] container_name Name of the container, should be one of
         ///            "List", "Set" or "Bag".
         /// \param[in] element_sort The sort of elements in the container.
-        container_sort(std::string container_name, sort_expression element_sort)
+        container_sort(const std::string& container_name,
+                       const sort_expression& element_sort)
           : sort_expression(core::detail::gsMakeSortCons(string_to_sort_cons_type(container_name), element_sort))
         {}
 
@@ -88,23 +122,7 @@ namespace mcrl2 {
         inline
         std::string container_name() const
         {
-          atermpp::aterm_appl n = atermpp::arg1(*this);
-          if (core::detail::gsIsSortList(n))
-          {
-            return "List";
-          }
-          else if (core::detail::gsIsSortSet(n))
-          {
-            return "Set";
-          }
-          else if (core::detail::gsIsSortBag(n))
-          {
-            return "Bag";
-          }
-          else
-          {
-            assert(false);
-          }
+          return sort_cons_type_to_string(atermpp::arg1(*this));
         }
 
         /// \brief Returns the element sort.

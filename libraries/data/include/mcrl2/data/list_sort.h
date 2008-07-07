@@ -30,45 +30,27 @@ namespace mcrl2 {
 
       public:    
 
+        /// \brief Constructor.
         list_sort()
           : container_sort()
         {}
 
-        list_sort(sort_expression element_sort)
+        /// \brief Constructor.
+        ///
+        /// \param[s] A sort expression.
+        /// \pre s is a container sort.
+        list_sort(const container_sort& s)
+          : container_sort(s)
+        {
+          assert(s.is_container_sort());
+        }
+
+        /// \brief Constructor.
+        ///
+        /// \param[element_sort] The sort of elements of the list.
+        list_sort(const sort_expression& element_sort)
           : container_sort("List", element_sort)
         {}
-
-        /// \overload
-        ///
-        inline
-        std::string container_name() const
-        {
-          return "List";
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_list_sort() const
-        {
-          return true;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_set_sort() const
-        {
-          return false;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_bag_sort() const
-        {
-          return false;
-        }
 
     }; // class list_sort
 

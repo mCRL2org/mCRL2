@@ -38,42 +38,20 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] s A container sort.
+        /// \pre s is has the internal structure of a bag sort.
+        bag_sort(const container_sort& s)
+          : container_sort(s)
+        {
+          assert(s.is_bag_sort());
+        }
+
+        /// \brief Constructor
+        ///
         /// \param [in] element_sort The sort of elements in the bag.
-        bag_sort(sort_expression element_sort)
+        bag_sort(const sort_expression& element_sort)
           : container_sort("Bag", element_sort)
         {}
-
-        /// \overload
-        ///
-        inline
-        std::string container_name() const
-        {
-          return "Bag";
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_list_sort() const
-        {
-          return false;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_set_sort() const
-        {
-          return false;
-        }
-
-        /// \overload
-        ///
-        inline
-        bool is_bag_sort() const
-        {
-          return true;
-        }
 
     }; // class bag_sort
 

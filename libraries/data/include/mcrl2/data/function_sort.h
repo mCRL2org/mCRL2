@@ -16,6 +16,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
@@ -31,7 +32,7 @@ namespace mcrl2 {
     {
       protected:
 
-        sort_expression_list m_domain;
+        sort_expression_list m_domain; ///< The domain of the sort.
 
       public:    
 
@@ -43,12 +44,27 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] s A sort expression.
+        /// \pre s is a function sort. 
+        function_sort(const sort_expression& s)
+          : sort_expression(s),
+            m_domain(atermpp::term_list<sort_expression>(atermpp::list_arg1(s)).begin(), atermpp::term_list<sort_expression>(atermpp::list_arg1(s)).end())
+        {
+          assert(s.is_function_sort());
+        }
+
+        /// \brief Constructor
+        ///
         /// \param[in] domain The domain of the sort.
         /// \param[in] codomain The codomain of the sort.
-        function_sort(boost::iterator_range<sort_expression_list::const_iterator> domain, sort_expression codomain)
+        /// \pre domain is not empty.
+        function_sort(const boost::iterator_range<sort_expression_list::const_iterator>& domain,
+                      const sort_expression& codomain)
           : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(domain.begin(), domain.end()), codomain)),
             m_domain (domain.begin(), domain.end())
-        {}
+        {
+          assert(!domain.empty());
+        }
 
         /// \overload
         ///

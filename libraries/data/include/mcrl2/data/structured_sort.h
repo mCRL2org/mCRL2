@@ -15,6 +15,7 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -38,18 +39,31 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructStructProj())
         {}
 
+        /// \internal
+        /// \brief Constructor
+        ///
+        /// \param[in] a A term.
+        /// \pre a has the internal format of a constructor argument of a
+        ///        structured sort.
+        structured_sort_constructor_argument(const atermpp::aterm_appl& a)
+          : atermpp::aterm_appl(a)
+        {
+          assert(core::detail::gsIsStructProj(a));
+        }
+
         /// \brief Constructor
         ///
         /// \param[in] name The name of the argument.
         /// \param[in] sort The sort of the argument.
-        structured_sort_constructor_argument(std::string name, sort_expression sort)
+        structured_sort_constructor_argument(const std::string& name,
+                                             const sort_expression& sort)
           : atermpp::aterm_appl(core::detail::gsMakeStructProj(atermpp::aterm_string(name), sort))
         {}
 
         /// \brief Constructor
         ///
         /// \param[in] sort The sort of the argument.
-        structured_sort_constructor_argument(sort_expression sort)
+        structured_sort_constructor_argument(const sort_expression& sort)
           : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::detail::gsMakeNil(), sort))
         {}
 
@@ -90,7 +104,7 @@ namespace mcrl2 {
     class structured_sort_constructor: public atermpp::aterm_appl
     {
       protected:
-        structured_sort_constructor_argument_list m_arguments;
+        structured_sort_constructor_argument_list m_arguments; ///< The arguments of the constructor
 
       public:
 
@@ -99,14 +113,37 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructStructCons())
         {}
 
+        /// \internal
+        /// \brief Constructor
+        ///
+        /// \param[in] c A term
+        /// \pre c has the internal format of a constructor of a structured
+        ///      sort.
+        structured_sort_constructor(const atermpp::aterm_appl c)
+          : atermpp::aterm_appl(c)
+        {
+          assert(core::detail::gsIsStructCons(c));
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] c is a structured sort constructor.
+        structured_sort_constructor(const structured_sort_constructor& c)
+          : atermpp::aterm_appl(c),
+            m_arguments(atermpp::term_list<structured_sort_constructor_argument>(atermpp::list_arg2(c)).begin(),
+                        atermpp::term_list<structured_sort_constructor_argument>(atermpp::list_arg2(c)).end())
+        {}
+
         /// \brief Constructor
         ///
         /// \param[in] name The name of the constructor.
         /// \param[in] arguments The arguments of the constructor.
         /// \param[in] recogniser The name of the recogniser.
-        structured_sort_constructor(std::string name,
-                                    boost::iterator_range<structured_sort_constructor_argument_list::const_iterator> arguments,
-                                    std::string recogniser)
+        /// \pre name is not empty.
+        /// \pre recogniser is not empty.
+        structured_sort_constructor(const std::string& name,
+                                    const boost::iterator_range<structured_sort_constructor_argument_list::const_iterator>& arguments,
+                                    const std::string& recogniser)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
                                                                atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
                                                                atermpp::aterm_string(recogniser))),
@@ -120,8 +157,9 @@ namespace mcrl2 {
         ///
         /// \param[in] name The name of the constructor.
         /// \param[in] arguments The arguments of the constructor.
-        structured_sort_constructor(std::string name,
-                                    boost::iterator_range<structured_sort_constructor_argument_list::const_iterator> arguments)
+        /// \pre name is not empty.
+        structured_sort_constructor(const std::string& name,
+                                    const boost::iterator_range<structured_sort_constructor_argument_list::const_iterator>& arguments)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
                                                                atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
                                                                core::detail::gsMakeNil())),
@@ -129,16 +167,6 @@ namespace mcrl2 {
         {
           assert(!name.empty());
         }
-
-        /* Is this needed?
-        /// \brief Copy constructor
-        ///
-        /// \param[in] c A structured sort constructor.
-        structured_sort_constructor(const structured_sort_constructor& c)
-          : atermpp::aterm_appl(c),
-            m_arguments(c.arguments().begin(), c.arguments().end())
-        {}
-        */
 
         /// \brief Returns the name of the constructor.
         ///
@@ -191,7 +219,7 @@ namespace mcrl2 {
     class structured_sort: public sort_expression
     {
       protected:
-        structured_sort_constructor_list m_struct_constructors;
+        structured_sort_constructor_list m_struct_constructors; ///< The list of constructors of the structured sort.
 
       public:    
 
@@ -202,9 +230,21 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] s The name of the sort that is created.
-        /// \post This is a sort with name s.
-        structured_sort(boost::iterator_range<structured_sort_constructor_list::const_iterator> struct_constructors)
+        /// \param[in] s A sort expression.
+        /// \pre s is a structured sort.
+        structured_sort(const sort_expression& s)
+          : sort_expression(s),
+            m_struct_constructors(atermpp::term_list<structured_sort_constructor>(atermpp::list_arg1(s)).begin(),
+                                  atermpp::term_list<structured_sort_constructor>(atermpp::list_arg1(s)).end())
+        {
+          assert(s.is_structured_sort());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        structured_sort(const boost::iterator_range<structured_sort_constructor_list::const_iterator>& struct_constructors)
           : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end()))),
             m_struct_constructors(struct_constructors.begin(), struct_constructors.end())
         {
