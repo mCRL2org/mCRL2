@@ -38,6 +38,13 @@ namespace atermpp
   {
     return aterm_appl(t)(2);
   }
+
+  /// Returns the fourth child of t casted to an aterm_appl.
+  inline
+  aterm_appl arg4(ATermAppl t)
+  {
+    return aterm_appl(t)(3);
+  }
   
   /// Returns the first child of t casted to an aterm_list.
   inline
@@ -58,6 +65,13 @@ namespace atermpp
   ATermList list_arg3(ATermAppl t)
   {
     return aterm_list(aterm_appl(t)(2));
+  }
+
+  /// Returns the fourth child of t casted to an aterm_list.
+  inline
+  ATermList list_arg4(ATermAppl t)
+  {
+    return aterm_list(aterm_appl(t)(3));
   }
 
 } // namespace atermpp
