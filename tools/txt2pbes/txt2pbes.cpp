@@ -99,6 +99,15 @@ int main(int argc, char** argv)
     if (result == NULL) {
       throw mcrl2::runtime_error("data implementation failed");
     }
+    //check if PBES is monotonic
+    try {
+      mcrl2::pbes_system::pbes<> p(result);
+      //TODO replace by a more sophisticated check
+      p.normalize();
+    }
+    catch (std::exception& e) {
+      throw mcrl2::runtime_error("PBES is not monotonic");
+    }
     //store the result
     mcrl2::pbes_system::pbes<> p(result);
     p.save(tool_options.outfilename);
