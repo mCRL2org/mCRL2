@@ -20,3 +20,54 @@ build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
 build-project ../libraries/utilities/test ;
 build-project ../tools/mcrl22lps/test ;
+
+import set ;
+
+use-project /tools/mcrl22lps : ../tools/mcrl22lps ;
+
+for tool in [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] {
+  use-project /tools/$(tool) : ../tools/$(tool) ;
+}
+
+local lps-tools  = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/lps*/Jamfile.v2 ] ] ;
+local pbes-tools = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/pbes*/Jamfile.v2 ] ] ;
+local lts-tools  = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/lts*/Jamfile.v2 ] ] ;
+
+lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
+lts-tools = [ set.difference $(lts-tools) : [ MATCH $(TOP)/tools/.*/(.*).plist : [ glob $(TOP)/tools/*/*.plist ] ] ] ;
+
+actions generate-lps {
+  $(>) $(<)
+}
+
+actions generate-pbes {
+  $(>[2]) --formula=$(>[3]) $(>[1]) $(<)
+}
+
+actions generate-lts {
+  $(>[2]) $(>[1]) $(<)
+}
+
+make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
+make test.pbes : /tools/lps2pbes//lps2pbes $(TOP)/examples/modal-formulas/nodeadlock.mcf test.lps : @generate-pbes ;
+make test.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
+make test2.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
+ 
+for tool in $(lps-tools) {
+  tests += [ run /tools/$(tool)//$(tool) : : test.lps ] ;
+}
+
+for tool in $(pbes-tools) {
+  tests += [ run /tools/$(tool)//$(tool) : : test.pbes ] ;
+}
+
+for tool in $(lts-tools) {
+  if $(tool) in ltscompare ltsmin  {
+    tests += [ run /tools/$(tool)//$(tool) : : test.svc test2.svc ] ;
+  }
+  else {
+    tests += [ run /tools/$(tool)//$(tool) : : test.svc ] ;
+  }
+}
+
+test-suite command-line-interface : $(tests) ;

@@ -6,6 +6,6 @@
 #~ LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 BOOST_ROOT = $(.boost-build-file:D) ;
-JAMFILE    = [Jj]amfile.v2 [Jj]amfile site-config.jam ;
+JAMFILE    = [Jj]amfile.v2 site-config.jam ;
 
 boost-build 3rd-party/boost/tools/build/v2 ;

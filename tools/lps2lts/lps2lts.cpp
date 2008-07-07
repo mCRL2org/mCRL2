@@ -104,7 +104,7 @@ lts_generation_options parse_command_line(int ac, char** av) {
       , 'f').
     add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
       "use bit hashing to store states and store at most NUM states; note that this "
-      " option may cause states to be mistaken for others (default value for NUM is "
+      "option may cause states to be mistaken for others (default value for NUM is "
       "approximately 2*10^8)",'b').
     add_option("max", make_mandatory_argument("NUM"),
       "explore at most NUM states", 'l').

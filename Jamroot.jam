@@ -41,17 +41,26 @@
 #
 #    --datadir                      directory where data is installed
 #
+#    --mandir                       directory where man pages are installed
+#
 #    --destdir                      direcory that is prepended to all of the above paths for installation,
 #                                   the built takes place as-if everything would be installed according to
 #                                   be above arguments (for binary packaging)
 #
 
 import feature ;
+import make ;
 import path ;
 import property ;
 import regex ;
 import set ;
 import testing ;
+
+import build/man ;
+
+if [ modules.peek : OS ] = MACOSX {
+  import build/macosx/mac-bundle ;
+}
 
 # Constants for commonly used paths
 path-constant TOP             : . ;
@@ -186,6 +195,7 @@ if [ feature.defaults <install> ] = <install>yes {
   plugindir  = [ path.make $(libdir)/plugins ] ;
   includedir = [ get-option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
   datadir    = [ get-option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
+  mandir     = [ get-option mandir     : [ path.make $(prefix)/share/man ] ] ;
 }
 else {
   bindir    = [ path.make $(prefix) ] ;
@@ -328,17 +338,6 @@ rule install-tools ( executables * : requirements * ) {
     destination = $(TOP)/build/stage ;
   }
 
-  if $(executables) {
-    if [ modules.peek : NT ] {
-#      install shared-libraries : $(executables) : <install-dependencies>on <install-type>SHARED_LIB <location>$(bindir) ;
-    }
-    else {
-#      install shared-libraries : $(executables) : <install-dependencies>on <install-type>LIB <location>$(libdir) ;
-    }
-
-#    targets = shared-libraries ; 
-  }
-
   # OS X bundle installation
   if [ modules.peek : OS ] = MACOSX && $(WX_CPPFLAGS) {
     bundles = [ MATCH (.*).plist : [ glob *.plist ] ] ;
@@ -360,6 +359,10 @@ rule install-tools ( executables * : requirements * ) {
     }
 
     targets += other ;
+
+    if $(rule-name) = install {
+      targets += $(executables).1 ;
+    }
   }
 
   alias $(rule-name) : $(targets) ;
@@ -497,15 +500,16 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
 
   if $(make_alias) = true {
     alias $(name) ;
+    alias $(name).1 ;
   }
   else {
     exe $(name) : $(sources) : $(requirements) $(additional-requirements) : $(defaults) : $(usage-requirements) ;
+
+    man $(name).1 : $(name) : <location>$(mandir)/man1 ;
   }
 
   # Mac application bundle
   if [ modules.peek : OS ] = MACOSX {
-    import build/macosx/mac-bundle ;
- 
     bundle = [ MATCH (.*).plist : [ glob $(name).plist ] ] ;
 
     if $(bundle) {

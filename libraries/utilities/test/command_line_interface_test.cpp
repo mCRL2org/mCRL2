@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(parsing) {
   // Valid option -h
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -v"));
   // Repeated options --help options
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --verbose -v -v"));
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --verbose -v -v"), std::runtime_error);
   // Invalid combination of short options
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test -ve"), std::runtime_error);
 
@@ -79,6 +79,8 @@ BOOST_AUTO_TEST_CASE(parsing) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --mandatory=test"));
   // Valid option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -m=test"));
+  // Valid option with valid argument
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -m test"));
   // Valid short option v followed by option m with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -vm=test"));
 
@@ -88,9 +90,11 @@ BOOST_AUTO_TEST_CASE(parsing) {
   // Valid option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --optional=test"));
   // Valid option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -o=test"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -otest"));
+  // Valid option without argument
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -o test"));
   // Valid short option v followed by option m with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -vm=test"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -vmtest"));
 }
 
 BOOST_AUTO_TEST_CASE(conformance) {
@@ -181,6 +185,9 @@ inline std::string const& last_of(command_line_parser const& p, std::string cons
 BOOST_AUTO_TEST_CASE(result_browsing) {
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
 
+  // disable check for duplicate options
+  test_interface.add_option("cli-testing-no-duplicate-option-checking", "");
+
   {
     command_line_parser parser(test_interface, "test -v --debug -d --verbose");
  
@@ -221,5 +228,12 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
     BOOST_CHECK(parser.option_argument_as< int >("optional") == 1234 ||
                 parser.option_argument_as< int >("optional") == 4321);
     BOOST_CHECK(parser.arguments.size() == 0);
+  }
+  {
+    command_line_parser parser(test_interface, "test -m BLA -o 1234");
+
+    BOOST_CHECK(first_of(parser, "mandatory") == "BLA");
+    BOOST_CHECK(parser.option_argument_as< int >("optional") == 4321);
+    BOOST_CHECK(parser.arguments.size() == 1);
   }
 }

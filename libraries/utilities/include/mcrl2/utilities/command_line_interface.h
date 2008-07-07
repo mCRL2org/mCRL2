@@ -902,6 +902,15 @@ namespace mcrl2 {
      * \param[in] d the interface description
      **/
     void command_line_parser::process_default_options(interface_description& d) {
+      if (d.m_options.find("cli-testing-no-duplicate-option-checking") == d.m_options.end()) {
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+          if (1 < m_options.count(i->first)) {
+            error("option -" + (d.long_to_short(i->first) != '\0' ?
+                   std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+          }
+        }
+      }
+
       if (m_options.count("help")) {
         std::cout << d.textual_description();
 
