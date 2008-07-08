@@ -20,6 +20,6 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite tipi
          : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool_interface ]
-           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool_interface ]
+#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool_interface ]
            [ compile-headers ../include ]
          ;
