@@ -25,16 +25,18 @@ import set ;
 
 use-project /tools/mcrl22lps : ../tools/mcrl22lps ;
 
-for tool in [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] {
+all-tools = [ path.glob-tree $(TOP)/tools/ : Jamfile.v2 ] ;
+
+for tool in [ MATCH .*/tools/(.*)/Jamfile.v2 : $(all-tools) ] {
   use-project /tools/$(tool) : ../tools/$(tool) ;
 }
 
-local lps-tools  = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/lps*/Jamfile.v2 ] ] ;
-local pbes-tools = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/pbes*/Jamfile.v2 ] ] ;
-local lts-tools  = [ MATCH $(TOP)/tools/(.*)/Jamfile.v2 : [ glob $(TOP)/tools/lts*/Jamfile.v2 ] ] ;
+local lps-tools  = [ MATCH .*/tools/(lps.*)/Jamfile.v2 : $(all-tools) ] ;
+local pbes-tools = [ MATCH .*/tools/(pbes.*)/Jamfile.v2 : $(all-tools) ] ;
+local lts-tools  = [ MATCH .*/tools/(lts.*)/Jamfile.v2 : $(all-tools) ] ;
 
 lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
-lts-tools = [ set.difference $(lts-tools) : [ MATCH $(TOP)/tools/.*/(.*).plist : [ glob $(TOP)/tools/*/*.plist ] ] ] ;
+lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] ] ;
 
 actions generate-lps {
   $(>) $(<)

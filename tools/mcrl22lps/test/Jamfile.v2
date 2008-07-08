@@ -1,7 +1,5 @@
 project toolset/mcrl22lps/test ;
 
-import set ;
-
 use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
 use-project /tools/lpspp : $(TOP)/tools/lpspp ;
 
