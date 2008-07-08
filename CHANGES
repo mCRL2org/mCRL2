@@ -36,7 +36,7 @@ Changes between toolset releases January 2008 and July 2008:
    - squadt: more time-efficient initialisation process
  
  Bug fixes:
-   - lpsdecluster: fixed issue with sorts without constructors
+   - lpssuminst: fixed issue with sorts without constructors
    - lpssumelm: fixed an issue where substitutions were carried out
      incorrectly, leading to incorrect results
    - squadt: fixed a number of race conditions and other issues found after
@@ -48,8 +48,8 @@ Changes between toolset releases January 2008 and July 2008:
    - ltscompare: added comparison using simulation preorder/equivalence
    - ltsconvert: added minimisation modulo simulation equivalence
    - pbes2bool, lpsactionrename, diagraphica: functional improvements
-   - lpssuminst: added (option -t/--tau) which only declusters tau summands
-   - formcheck: now also works with PBESes or without an model context
+   - lpssuminst: added (option -t/--tau) which only instantiates tau summands
+   - formcheck: now also works with PBESes or without a context specification
 
  Notes:
    - LPS or PBES files produced with the previous release cannot be used
