@@ -56,19 +56,27 @@ make test.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
 make test2.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
  
 for tool in $(lps-tools) {
-  tests += [ run /tools/$(tool)//$(tool) : : test.lps ] ;
+  if $(tool) in lpsinvelm {
+    tests += [ run /tools/$(tool)//$(tool) : --invariant=invariant.data : test.lps : <testing.preserve>true ] ;
+  }
+  else if $(tool) in lpsactionrename {
+    tests += [ run /tools/$(tool)//$(tool) : --file=rename.data : test.lps : <testing.preserve>true ] ;
+  }
+  else {
+    tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true ] ;
+  }
 }
 
 for tool in $(pbes-tools) {
-  tests += [ run /tools/$(tool)//$(tool) : : test.pbes ] ;
+  tests += [ run /tools/$(tool)//$(tool) : : test.pbes : <testing.preserve>true ] ;
 }
 
 for tool in $(lts-tools) {
-  if $(tool) in ltscompare ltsmin  {
-    tests += [ run /tools/$(tool)//$(tool) : : test.svc test2.svc ] ;
+  if $(tool) in ltscompare ltsmin {
+    tests += [ run /tools/$(tool)//$(tool) : : test.svc test2.svc : <testing.preserve>true ] ;
   }
   else {
-    tests += [ run /tools/$(tool)//$(tool) : : test.svc ] ;
+    tests += [ run /tools/$(tool)//$(tool) : : test.svc : <testing.preserve>true ] ;
   }
 }
 

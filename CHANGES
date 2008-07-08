@@ -3,21 +3,27 @@ Changes between toolset releases January 2008 and July 2008:
 ===============================================================================
  
  General:
-   - improved tool interfaces and help information:
+   - improved command line interfaces and help information:
      + simplified interfaces of most tools, especially mcrl22lps, lps2lts,
        lps2torx, ltscompare, ltsmin, ltsconvert, tracepp and formcheck
+     + improved consistency among tools
      + adherence to the GNU standard for command line interfaces
      + removed the undocumented feature that the argument '-' can be used
        for reading from standard input in or writing to standard output
      + improved error handling of loading and saving binary files
+   - added manual pages for tools
    - changed SVC library license from the
      GNU General Public License, version 2 (or newer), to the
      GNU Lesser General Public License, version 2.1 (or newer).
-   - added automated tests for algorithms in LPS library
-   - improvements to existing library documentation
+   - improvements to existing tool and library documentation
+   - improved regression testing
+   - lots of bug fixes
 
  Added tools:
    - txt2pbes: translates a textual PBES specification to the binary format
+
+ Removed tools:
+   - pbes2bes: most functionality is incorporated in pbes2bool
  
  Renamed tools:
    - lpsdecluster is now called lpssuminst
@@ -34,13 +40,6 @@ Changes between toolset releases January 2008 and July 2008:
    - lpssumelm: more time-efficient on specifications involving large
      conditions
    - squadt: more time-efficient initialisation process
- 
- Bug fixes:
-   - lpssuminst: fixed issue with sorts without constructors
-   - lpssumelm: fixed an issue where substitutions were carried out
-     incorrectly, leading to incorrect results
-   - squadt: fixed a number of race conditions and other issues found after
-     testing more extensively on the supported platforms
  
  New functionality:
    - ltsview: added new option for marking states: mark separately for 

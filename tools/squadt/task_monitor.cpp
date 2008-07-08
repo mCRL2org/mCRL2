@@ -347,7 +347,6 @@ namespace squadt {
      **/
     void task_monitor_impl::finish(boost::shared_ptr < task_monitor_impl > const& g, bool b) {
       boost::shared_ptr< process > process;
-      boost::function< void () > terminator();
 
       process.swap(associated_process);
 

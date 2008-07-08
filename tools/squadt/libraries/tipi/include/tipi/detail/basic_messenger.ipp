@@ -396,14 +396,16 @@ namespace tipi {
      **/
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl(boost::shared_ptr < utility::logger >& l) :
-       message_open(false), partially_matched(0),
-       m_delivery_data(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this))), logger(l) {
+       message_open(false), partially_matched(0), logger(l) {
+
+       m_delivery_data.reset(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this)));
     }
 
     template < class M >
     inline basic_messenger_impl< M >::basic_messenger_impl() :
-       message_open(false), partially_matched(0),
-       m_delivery_data(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this))), logger(get_default_logger()) {
+       message_open(false), partially_matched(0), logger(get_default_logger()) {
+
+       m_delivery_data.reset(new delivery_data(boost::bind(&basic_messenger_impl< M >::service_handlers, this)));
     }
 
     template < class M >

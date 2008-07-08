@@ -605,7 +605,7 @@ namespace mcrl2 {
                 }
               }
             }
-            catch (std::runtime_error& e) { // parse error
+            catch (std::runtime_error&) { // parse error
               if (argument.substr(1, 4) != "at-") { // does not match option pattern for ATerm library
                 throw;
               }
