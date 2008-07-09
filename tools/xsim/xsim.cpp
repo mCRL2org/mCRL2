@@ -103,13 +103,41 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
 //------------------------------------------------------------------------------
 class XSim: public wxApp
 {
+private:
+    RewriteStrategy rewrite_strategy;
+    bool            dummies;
+    std::string     parse_error;
+
 public:
     virtual bool OnInit();
+
+    void parse_command_line(int argc, wxChar** argv);
+
+    bool Initialize(int& argc, wxChar** argv) {
+      try {
+        parse_command_line(argc, argv);
+      }
+      catch (std::exception& e) {
+        if (wxApp::Initialize(argc, argv)) {
+          parse_error = std::string(e.what()).
+            append("\n\nNote that other command line options may have been ignored because of this error.");
+        }
+        else {
+          std::cerr << e.what() << std::endl;
+
+          return false;
+        }
+
+        return true;
+      }
+
+      return wxApp::Initialize(argc, argv);
+    }
+
     virtual int OnExit();
 };
 
-void parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
-                        bool& dummies, std::string& lps_file_argument) {
+void XSim::parse_command_line(int argc, wxChar** argv) {
 
   using namespace ::mcrl2::utilities;
 
@@ -183,29 +211,19 @@ bool XSim::OnInit()
   this_xsim = this;
 
   /* Whether to replace free variables in the LPS with dummies */
-  bool dummies = false;
+  dummies = false;
  
   /* The rewrite strategy that will be used */
-  RewriteStrategy rewrite_strategy = GS_REWR_JITTY;
+  rewrite_strategy = GS_REWR_JITTY;
  
-  std::string command_line_error;
-
-  try {
-    parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument);
-  }
-  catch (std::exception& e) {
-    command_line_error = e.what();
-  }
-
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
   frame->simulator->use_dummies = dummies;
   frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
 
-  if (!command_line_error.empty()) {
-    wxMessageDialog(frame, wxString(command_line_error.
-           append("\n\nNote that other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
-                       wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
+  if (!parse_error.empty()) {
+    wxMessageDialog(frame, wxString(parse_error.c_str(), wxConvLocal),
+         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
   }
 
   if (!lps_file_argument.empty()) {

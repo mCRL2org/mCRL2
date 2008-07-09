@@ -53,7 +53,17 @@ wxAboutDialogInfo get_about_info() {
 
 class grape_app: public wxApp
 {
+  private:
+
+    std::string parse_error;
+
+    // the filename is the first parameter
+    wxString    filename;
+
+  public:
+
   virtual bool OnInit();
+  bool Initialize(int& argc, wxChar** argv);
   void show_window();
 };
 
@@ -64,26 +74,15 @@ void grape_app::show_window()
 
 bool grape_app::OnInit()
 {
-  using namespace mcrl2::utilities;
-
-  try // parsing successful
+  try
   {
-    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
-        NAME, AUTHOR, "[OPTION]... [INFILE]",
-        "Graphical editing environment for mCRL2 process specifications. "
-        "If INFILE is supplied, it is loaded as a GraPE specification."); 
-
-    command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
- 
-    // the filename is the first parameter
-    wxString filename;
-
-    if (1 < parser.arguments.size()) {
-      filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
-    }
-
     grape_frame *frame = new grape_frame( filename );
     SetTopWindow(frame);
+
+    if (!parse_error.empty()) {
+      wxMessageDialog(GetTopWindow(), wxString(parse_error.c_str(), wxConvLocal),
+                         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
+    }
 
     wxInitAllImageHandlers();
   }
@@ -93,6 +92,38 @@ bool grape_app::OnInit()
   }
 
   return true;
+}
+
+bool grape_app::Initialize(int& argc, wxChar** argv) {
+  using namespace mcrl2::utilities;
+
+  try {
+    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
+        NAME, AUTHOR, "[OPTION]... [INFILE]",
+        "Graphical editing environment for mCRL2 process specifications. "
+        "If INFILE is supplied, it is loaded as a GraPE specification."); 
+
+    command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
+ 
+    if (1 < parser.arguments.size()) {
+      filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
+    }
+  }
+  catch (std::exception& e) {
+    if (wxApp::Initialize(argc, argv)) {
+      parse_error = std::string(e.what()).
+        append("\n\nNote that other command line options may have been ignored because of this error.");
+    }
+    else {
+      std::cerr << e.what() << std::endl;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  return wxApp::Initialize(argc, argv);
 }
 
 int main(int argc, char** argv)

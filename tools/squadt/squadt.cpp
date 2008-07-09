@@ -60,19 +60,47 @@ class SQuADt : public wxApp {
     boost::function < void (squadt::GUI::main*) > action;
 
     // Port number to listen on for incoming TCP connections
-    tipi::tcp_port tcp_port_number;
+    tipi::tcp_port                                tcp_port_number;
 
-    void parse_command_line();
+    std::string                                   parse_error;
+
+  private:
+
+    void parse_command_line(int& argc, wxChar** argv);
 
   public:
 
     bool OnInit();
-    int  OnExit();
+
+    bool Initialize(int& argc, wxChar** argv) {
+      try {
+        parse_command_line(argc, argv);
+      }
+      catch (std::exception& e) {
+        if (wxApp::Initialize(argc, argv)) {
+          parse_error = std::string(e.what()).
+            append("\n\nNote that other command line options may have been ignored because of this error.");
+        }
+        else {
+          std::cerr << e.what() << std::endl;
+
+          return false;
+        }
+
+        return true;
+      }
+
+      return wxApp::Initialize(argc, argv);
+    }
+
+    int OnExit() {
+      return wxApp::OnExit();
+    }
 };
 
 IMPLEMENT_APP(SQuADt)
 
-void SQuADt::parse_command_line() {
+void SQuADt::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
   if (0 < argc) {
@@ -143,15 +171,6 @@ void SQuADt::parse_command_line() {
 bool SQuADt::OnInit() {
   using namespace squadt;
   using namespace squadt::GUI;
-
-  std::string command_line_error;
-
-  try {
-    parse_command_line();
-  }
-  catch (std::exception& e) {
-    command_line_error = e.what();
-  }
 
   wxInitAllImageHandlers();
 
@@ -277,9 +296,8 @@ bool SQuADt::OnInit() {
     /* Initialise main application window */
     SetTopWindow(new squadt::GUI::main());
 
-    if (!command_line_error.empty()) {
-      wxMessageDialog(GetTopWindow(), wxString(command_line_error.
-             append("\n\nNote that other other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
+    if (!parse_error.empty()) {
+      wxMessageDialog(GetTopWindow(), wxString(parse_error.c_str(), wxConvLocal),
                          wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
     }
     else if (action) {
@@ -299,8 +317,4 @@ bool SQuADt::OnInit() {
   }
 
   return true;
-}
-
-int SQuADt::OnExit() {
-  return wxApp::OnExit();
 }

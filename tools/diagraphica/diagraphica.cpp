@@ -49,7 +49,8 @@ string get_about_message() {
   return version_information;
 }
 
-string fsm_file_argument;
+std::string fsm_file_argument;
+std::string parse_error;
 
 // -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -161,19 +162,6 @@ bool parse_command_line(int argc, wxChar** argv) {
 bool DiaGraph::OnInit()
 // --------------------
 {
-    bool parse_error = false;
-    wxString error_string = wxEmptyString;
-
-    try
-    {
-      parse_command_line(argc, argv);
-    }
-    catch (std::exception &e)
-    {
-      parse_error = true;
-      error_string = wxString(e.what(),wxConvLocal);
-    }
-
     // windows debugging
     #ifdef _MSC_VER
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -194,11 +182,9 @@ bool DiaGraph::OnInit()
 	clustered = false;
     critSect = false;
 
-    if ( parse_error )
+    if ( !parse_error.empty() )
     {
-      wxMessageDialog msg_dlg(frame, error_string,
-        wxT("Command line error"), wxOK | wxICON_ERROR);
-      msg_dlg.ShowModal();
+      wxMessageDialog(frame, wxString(parse_error.c_str(), wxConvLocal), wxT("Command line error"), wxOK | wxICON_ERROR).ShowModal();
     }
    
     if (!fsm_file_argument.empty()) {
@@ -209,6 +195,26 @@ bool DiaGraph::OnInit()
     return true;
 }
 
+bool DiaGraph::Initialize(int& argc, wxChar** argv) {
+  try {
+    parse_command_line(argc, argv);
+  }
+  catch (std::exception& e) {
+    if (wxApp::Initialize(argc, argv)) {
+      parse_error = std::string(e.what()).
+        append("\n\nNote that other command line options may have been ignored because of this error.");
+    }
+    else {
+      std::cerr << e.what() << std::endl;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  return wxApp::Initialize(argc, argv);
+}
 
 // -------------------
 int DiaGraph::OnExit()

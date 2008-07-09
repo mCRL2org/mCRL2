@@ -50,6 +50,7 @@ class DiaGraph : public wxApp, public Mediator
 public:
 	// -- functions inherited from wxApp ----------------------------
 	virtual bool OnInit();
+        bool Initialize(int& argc, wxChar** argv);
 	virtual int OnExit();
 	
 	// -- load & save data ------------------------------------------

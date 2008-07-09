@@ -121,21 +121,10 @@ void parse_command_line(int argc, wxChar** argv) {
   }
 }
 
+std::string parse_error;
+
 bool LTSView::OnInit()
 {
-  bool parse_error = false;
-  wxString error_string = wxEmptyString;
-
-  try
-  {
-    parse_command_line(argc, argv);
-  }
-  catch (std::exception &e)
-  {
-    parse_error = true;
-    error_string = wxString(e.what(),wxConvLocal);
-  }
-
   lts = NULL;
   rankStyle = ITERATIVE;
   fsmStyle = false;
@@ -154,9 +143,9 @@ bool LTSView::OnInit()
 
   wxInitAllImageHandlers();
 
-  if ( parse_error )
+  if ( !parse_error.empty() )
   {
-    wxMessageDialog msg_dlg(mainFrame, error_string,
+    wxMessageDialog msg_dlg(mainFrame, wxString(parse_error.c_str(), wxConvLocal),
         wxT("Command line error"), wxOK | wxICON_ERROR);
     msg_dlg.ShowModal();
   }
@@ -169,6 +158,28 @@ bool LTSView::OnInit()
   }
   return true;
 }
+
+bool LTSView::Initialize(int& argc, wxChar** argv) {
+  try {
+    parse_command_line(argc, argv);
+  }
+  catch (std::exception& e) {
+    if (wxApp::Initialize(argc, argv)) {
+      parse_error = std::string(e.what()).
+        append("\n\nNote that other command line options may have been ignored because of this error.");
+    }
+    else {
+      std::cerr << e.what() << std::endl;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  return wxApp::Initialize(argc, argv);
+}
+
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    

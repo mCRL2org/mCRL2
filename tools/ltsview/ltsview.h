@@ -37,6 +37,7 @@ class LTSView : public wxApp, public Mediator {
   public:
     virtual int OnExit();
     virtual bool OnInit();
+    bool Initialize(int& argc, wxChar** argv);
     void activateMarkRule(int index,bool activate);
     void addMarkRule();
     void editMarkRule(int index);
