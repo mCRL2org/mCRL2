@@ -51,9 +51,9 @@ t_tool_options parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
     "is not present, stdout is used. If INFILE is not present, stdin is used.",
-    "The LPS printed in the default format might not be a well-formed mCRL2 specification,"
-    "because the proc and init sections could be preceded by declarations of free variables"
-    "denoted by var");
+    "The LPS printed in the default format might not be a well-formed mCRL2 specification, "
+    "because the proc and init sections could be preceded by declarations of free variables "
+    "denoted by var.");
 
   clinterface.
     add_option("format", make_mandatory_argument("FORMAT"),
