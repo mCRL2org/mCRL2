@@ -526,7 +526,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
 //    gsDebugMsg("Reconstructing implementation of %T\n", Part);
     Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
   } else if ((gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part))
-            && (ATisEqual(gsGetSort(Part), gsMakeSortExprPos()))) {
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprPos()))) {
 //    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
@@ -543,7 +543,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
 //    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
     Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
   } else if ((gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part))
-            && (ATisEqual(gsGetSort(Part), gsMakeSortExprNat()))) {
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprNat()))) {
 //    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
@@ -555,7 +555,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       }
     }
   } else if ((gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part))
-            && (ATisEqual(gsGetSort(Part), gsMakeSortExprInt()))) {
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprInt()))) {
 //    gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
