@@ -14,6 +14,7 @@
 #include <string>
 #include <cassert>
 #include <aterm2.h>
+#include <boost/lexical_cast.hpp>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "lps2lts.h"
