@@ -15,6 +15,7 @@ Changes between toolset releases January 2008 and July 2008:
    - changed SVC library license from the
      GNU General Public License, version 2 (or newer), to the
      GNU Lesser General Public License, version 2.1 (or newer).
+   - libraries and header files are installed
    - improvements to existing tool and library documentation
    - improved regression testing
    - lots of bug fixes

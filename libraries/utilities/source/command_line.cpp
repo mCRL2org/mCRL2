@@ -493,6 +493,12 @@ namespace mcrl2 {
         return;
       }
 
+#if defined(__APPLE__)
+      if (arguments[1].substr(0, 7) == "-psn_0_") { // Skip Apple serial number
+        ++i;
+      }
+#endif
+
       while (++i != arguments.end()) {
         std::string const& argument(*i);
 
@@ -606,9 +612,11 @@ namespace mcrl2 {
               }
             }
             catch (std::runtime_error&) { // parse error
-              if (argument.substr(1, 4) != "at-") { // does not match option pattern for ATerm library
-                throw;
+              if (argument.substr(1, 3) == "at-") { // does not match option pattern for ATerm library
+                continue;
               }
+
+              throw;
             }
             
             continue;

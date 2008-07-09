@@ -25,7 +25,7 @@ namespace mcrl2 {
   namespace utilities {
 
     /** \brief toolset version tag */
-    const std::string version_tag("July 2008 (development)");
+    const std::string version_tag("July 2008 (release)");
 
     /** \brief toolset copyright period description */
     const std::string copyright_period("2008");
