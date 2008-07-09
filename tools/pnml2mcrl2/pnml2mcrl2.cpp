@@ -28,6 +28,8 @@
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 
+#include "workarounds.h" // for DECL_A
+
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

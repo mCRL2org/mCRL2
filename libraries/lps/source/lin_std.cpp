@@ -24,10 +24,9 @@
    the use of this software. 
 */
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <string.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
@@ -36,6 +35,8 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
+
+#include "workarounds.h" // DECL_A
 
 // For Aterm library extension functions
 using namespace mcrl2::utilities;

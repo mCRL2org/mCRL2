@@ -12,10 +12,11 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
+#include <boost/shared_array.hpp>
+
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "workarounds.h" // DECL_A
 
 namespace atermpp {
 
@@ -68,7 +69,7 @@ namespace detail {
     if (n > 0)
     {
       bool term_changed = false;
-      DECL_A(t, ATerm, n);
+      boost::shared_array< ATerm > t(new ATerm[n]);
       for (unsigned int i = 0; i < n; i++)
       {
         t[i] = f(a(i));
@@ -79,9 +80,8 @@ namespace detail {
       }
       if (term_changed)
       {
-        a = ATmakeApplArray(a.function(), t);
+        a = ATmakeApplArray(a.function(), t.get());
       }
-      FREE_A(t);
     }
     return a;
   }

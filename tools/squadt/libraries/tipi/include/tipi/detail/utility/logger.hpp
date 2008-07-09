@@ -19,10 +19,6 @@
 #include <boost/format.hpp>
 #include <boost/filesystem/path.hpp>
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-# include <workarounds.h>
-#endif // _MSC_VER
-
 namespace tipi {
   namespace utility {
 

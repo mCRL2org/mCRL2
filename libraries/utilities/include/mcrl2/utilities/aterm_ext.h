@@ -16,8 +16,6 @@
 #include <cassert>
 #include <aterm2.h>
 
-#include "workarounds.h"
-
 namespace mcrl2 {
   namespace utilities {
 

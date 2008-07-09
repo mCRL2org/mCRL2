@@ -13,6 +13,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
 
+#include "workarounds.h"
+
 using namespace mcrl2::core;
 
 #define EMPTY_SET (-1)

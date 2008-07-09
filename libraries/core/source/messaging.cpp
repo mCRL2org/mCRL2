@@ -11,6 +11,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 
+#include "workarounds.h"
+
 namespace mcrl2 {
   namespace core {
 
@@ -187,13 +189,6 @@ namespace mcrl2 {
       gsvfprintf(stderr, Format, Args); \
       va_end(Args); \
     }
-
-#  ifndef __func__
-    void gsDebugMsg(const char *Format,...)
-    {
-      GS_DEBUG_MSG_FUNC("unknown",Format)
-    }
-#  endif
 
     //Post: If the printing of debug messages is enabled, the name of the current
     //      function is printed to stderr, followed by the first parameter with the

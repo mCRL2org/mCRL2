@@ -20,6 +20,8 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
+#include "workarounds.h" // DECL_A
+
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 

@@ -16,12 +16,9 @@
 #include <cassert>
 #include <aterm2.h>
 
-#include <workarounds.h>
-
 namespace mcrl2 {
   /// \brief The main namespace for the Core library.
   namespace core {
-
   
       //Message printing options
       //------------------------
@@ -71,16 +68,20 @@ namespace mcrl2 {
       void gsWarningMsg(const char *Format, ...);
       /// \brief Function for printing debug messages.
       void gsDebugMsg(const char *Format, ...);
-  
+
+      void gsDebugMsgFunc(const char *FuncName, const char *Format, ...);
+
+      /// \brief Function for printing debug messages.
+#if defined(__func__)
+# define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
+#elif defined(__FUNCTION__)
+# define gsDebugMsg(...)        gsDebugMsgFunc(__FUNCTION__, __VA_ARGS__)
+#else
+# define gsDebugMsg(...)        gsDebugMsgFunc(__FILE__, __VA_ARGS__)
+#endif
+
       /// \brief Replaces message_handler by the function pointer passed as argument.
       void gsSetCustomMessageHandler(void (*)(messageType, const char*));
-
-#  ifdef __func__
-    void gsDebugMsgFunc(const char *FuncName, const char *Format, ...);
-
-#   define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
-#  endif
-
   }
 }
 

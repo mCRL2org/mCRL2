@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
@@ -15,6 +15,8 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/detail/enum/standard.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

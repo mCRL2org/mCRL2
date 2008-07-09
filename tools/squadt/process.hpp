@@ -17,6 +17,8 @@
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include "workarounds.h" // pid_t
+
 #include "command.hpp"
 
 namespace squadt {

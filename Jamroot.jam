@@ -337,6 +337,9 @@ rule install-tools ( executables * : requirements * ) {
     rule-name   = stage ;
     destination = $(TOP)/build/stage ;
   }
+  else { # install man pages
+    targets += $(executables).1 ;
+  }
 
   # OS X bundle installation
   if [ modules.peek : OS ] = MACOSX && $(WX_CPPFLAGS) {
@@ -359,10 +362,6 @@ rule install-tools ( executables * : requirements * ) {
     }
 
     targets += other ;
-
-    if $(rule-name) = install {
-      targets += $(executables).1 ;
-    }
   }
 
   alias $(rule-name) : $(targets) ;

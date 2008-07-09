@@ -8,16 +8,18 @@
 //
 /// \file libstruct.cpp
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <limits.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <climits>
 
 #include "mcrl2/core/detail/struct.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::utilities;
 

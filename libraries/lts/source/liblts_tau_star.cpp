@@ -11,6 +11,8 @@
 #include "mcrl2/core/messaging.h"
 #include <mcrl2/lts/liblts.h>
 
+#include "workarounds.h" // DECL_A
+
 using namespace std;
 
 namespace mcrl2

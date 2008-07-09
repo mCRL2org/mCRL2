@@ -16,6 +16,8 @@
 #define USE_INT2ATERM_VALUE 1
 #define USE_REWRAPPL_VALUE 1
 
+#include "workarounds.h" // DECL_A
+
 #ifdef NO_DYNLOAD
 
 #include "mcrl2/data/detail/rewrite/jittyc.h"

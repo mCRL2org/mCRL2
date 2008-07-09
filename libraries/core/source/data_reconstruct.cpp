@@ -11,7 +11,7 @@
 //This file contains the implementation of data reconstruction. I.e.
 //it attempts to revert the data implementation.
 
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/map.h"
@@ -24,6 +24,8 @@
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/core/messaging.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

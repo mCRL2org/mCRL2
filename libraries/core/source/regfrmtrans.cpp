@@ -8,10 +8,10 @@
 //
 /// \file regfrmtrans.cpp
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <limits.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <climits>
 
 #ifdef _MSC_VER
 #include <boost/format.hpp>
@@ -21,6 +21,8 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+
+#include "workarounds.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

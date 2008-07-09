@@ -1,17 +1,25 @@
-#define NAME "libalpha"
+// Author(s): Yaroslav Usenko
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pnml2mcrl2.cpp
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/numeric_string.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;

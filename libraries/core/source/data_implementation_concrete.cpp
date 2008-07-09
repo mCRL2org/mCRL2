@@ -8,16 +8,18 @@
 //
 /// \file dataimpl.cpp
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <limits.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <climits>
 
 #include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace ::mcrl2::utilities;
 namespace mcrl2 {
