@@ -330,9 +330,9 @@ rule get-absolute-tool-path ( command )
 
 # Attempts to find tool (binary) named 'name' in PATH and in 'additional-paths'.
 # If found in PATH, returns 'name' and if found in additional paths, returns
-# absolute name. If the tool is found in several directories, returns all paths.
-# Otherwise, returns an empty string. If 'path-last' is specified, PATH is
-# searched after 'additional-paths'.
+# absolute name. If the tool is found in several directories, returns the
+# first path found.  Otherwise, returns an empty string. If 'path-last' is
+# specified, PATH is searched after 'additional-paths'.
 #
 rule find-tool ( name : additional-paths * : path-last ? )
 {
@@ -376,9 +376,9 @@ rule check-tool-aux ( command )
     {
         if [ path.exists $(command) ]
             # Both NT and Cygwin will run .exe files by their unqualified names.
-            || [ os.on-windows ] && [ path.exists $(command).exe ]
+            || ( [ os.on-windows ] && [ path.exists $(command).exe ] )
             # Only NT will run .bat files by their unqualified names.
-            || [ os.name ] = NT && [ path.exists $(command).bat ]
+            || ( ( [ os.name ] = NT ) && [ path.exists $(command).bat ] )
         {
             return $(command) ;
         }
@@ -409,11 +409,12 @@ rule check-tool ( xcommand + )
 
 # Handle common options for toolset, specifically sets the following flag
 # variables:
-# - CONFIG_COMMAND to 'command'
-# - OPTIONS for compile.c   to the value of <cflags>       in options
-# - OPTIONS for compile.c++ to the value of <cxxflags>     in options
-# - OPTIONS for compile     to the value of <compileflags> in options
-# - OPTIONS for link        to the value of <linkflags>    in options
+# - CONFIG_COMMAND to $(command)
+# - OPTIONS for compile         to the value of <compileflags> in $(options)
+# - OPTIONS for compile.c       to the value of <cflags>       in $(options)
+# - OPTIONS for compile.c++     to the value of <cxxflags>     in $(options)
+# - OPTIONS for compile.fortran to the value of <fflags>       in $(options)
+# - OPTIONS for link            to the value of <linkflags>    in $(options)
 #
 rule handle-options ( toolset : condition * : command * : options * )
 {
@@ -422,18 +423,25 @@ rule handle-options ( toolset : condition * : command * : options * )
         ECHO "notice: will use '$(command)' for $(toolset), condition $(condition:E=(empty))" ;
     }
 
-    # The last parameter ('true') says it's OK to set flags for another module.
-    toolset.flags $(toolset) CONFIG_COMMAND $(condition) : $(command) : unchecked ;
-    toolset.flags $(toolset).compile OPTIONS $(condition) :
+    #   The last parameter ('unchecked') says it is OK to set flags for another
+    # module.
+    toolset.flags $(toolset) CONFIG_COMMAND $(condition) : $(command)
+        : unchecked ;
+
+    toolset.flags $(toolset).compile         OPTIONS $(condition) :
         [ feature.get-values <compileflags> : $(options) ] : unchecked ;
-    toolset.flags $(toolset).compile.c OPTIONS $(condition) :
-        [ feature.get-values <cflags> : $(options) ] : unchecked ;
-    toolset.flags $(toolset).compile.c++ OPTIONS $(condition) :
-        [ feature.get-values <cxxflags> : $(options) ] : unchecked ;
+
+    toolset.flags $(toolset).compile.c       OPTIONS $(condition) :
+        [ feature.get-values <cflags>       : $(options) ] : unchecked ;
+
+    toolset.flags $(toolset).compile.c++     OPTIONS $(condition) :
+        [ feature.get-values <cxxflags>     : $(options) ] : unchecked ;
+
     toolset.flags $(toolset).compile.fortran OPTIONS $(condition) :
-        [ feature.get-values <fflags> : $(options) ] : unchecked ;
-    toolset.flags $(toolset).link OPTIONS $(condition) :
-        [ feature.get-values <linkflags> : $(options) ] : unchecked ;
+        [ feature.get-values <fflags>       : $(options) ] : unchecked ;
+
+    toolset.flags $(toolset).link            OPTIONS $(condition) :
+        [ feature.get-values <linkflags>    : $(options) ] : unchecked ;
 }
 
 
@@ -498,6 +506,34 @@ rule variable-setting-command ( variable : value )
     }
     else
     {
+        # (todo)
+        #   The following does not work on CYGWIN and needs to be fixed. On
+        # CYGWIN the $(nl) variable holds a Windows new-line \r\n sequence that
+        # messes up the executed export command which then reports that the
+        # passed variable name is incorrect. This is most likely due to the
+        # extra \r character getting interpreted as a part of the variable name.
+        #
+        #   Several ideas pop to mind on how to fix this:
+        #     * One way would be to separate the commands using the ; shell
+        #       command separator. This seems like the quickest possible
+        #       solution but I do not know whether this would break code on any
+        #       platforms I I have no access to.
+        #     * Another would be to not use the terminating $(nl) but that would
+        #       require updating all the using code so it does not simply
+        #       prepend this variable to its own commands.
+        #     * I guess the cleanest solution would be to update Boost Jam to
+        #       allow explicitly specifying \n & \r characters in its scripts
+        #       instead of always relying only on the 'current OS native newline
+        #       sequence'.
+        #
+        #   Some code found to depend on this behaviour:
+        #     * This Boost Build module.
+        #         * __test__ rule.
+        #         * path-variable-setting-command rule.
+        #     * python.jam toolset.
+        #     * xsltproc.jam toolset.
+        #     * fop.jam toolset.
+        #                                     (todo) (07.07.2008.) (Jurko)
         return "$(variable)=$(value)$(nl)export $(variable)$(nl)" ;
     }
 }
@@ -529,7 +565,7 @@ rule prepend-path-variable-command ( variable : paths * )
 #
 rule file-creation-command ( )
 {
-    if [ modules.peek : NT ]
+    if [ os.name ] = NT
     {
         return "echo. > " ;
     }
@@ -546,7 +582,7 @@ rule file-creation-command ( )
 #
 rule file-touch-command ( )
 {
-    if [ os.name ] in NT
+    if [ os.name ] = NT
     {
         return "echo. >> " ;
     }
@@ -559,14 +595,23 @@ rule file-touch-command ( )
 
 rule MkDir
 {
-    # If dir exists, don't update it. Do this even for $(DOT).
+    # If dir exists, do not update it. Do this even for $(DOT).
     NOUPDATE $(<) ;
 
     if $(<) != $(DOT) && ! $($(<)-mkdir)
     {
         # Cheesy gate to prevent multiple invocations on same dir.
         $(<)-mkdir = true ;
-        MkDir1 $(<) ;
+
+        # Schedule the mkdir build action.
+        if [ os.name ] = NT
+        {
+            MkDir1-quick-fix-for-windows $(<) ;
+        }
+        else
+        {
+            MkDir1-quick-fix-for-unix $(<) ;
+        }
 
         # Prepare a Jam 'dirs' target that can be used to make the build only
         # construct all the target directories.
@@ -576,8 +621,7 @@ rule MkDir
         # recurse until root.
 
         local s = $(<:P) ;
-
-        if $(NT)
+        if [ os.name ] = NT
         {
             switch $(s)
             {
@@ -586,14 +630,17 @@ rule MkDir
             }
         }
 
-        if $(s) && $(s) != $(<)
+        if $(s)
         {
-            DEPENDS $(<) : $(s) ;
-            MkDir $(s) ;
-        }
-        else if $(s)
-        {
-            NOTFILE $(s) ;
+            if $(s) != $(<)
+            {
+                DEPENDS $(<) : $(s) ;
+                MkDir $(s) ;
+            }
+            else
+            {
+                NOTFILE $(s) ;
+            }
         }
     }
 }
@@ -602,6 +649,21 @@ rule MkDir
 actions MkDir1
 {
     mkdir "$(<)"
+}
+
+
+# (todo)
+#   The following quick-fix actions should be replaced using the original MkDir1
+# action once Boost Jam gets updated to correctly detect different paths leading
+# up to the same filesystem target and triggers their build action only once.
+#                                             (todo) (04.07.2008.) (Jurko)
+actions MkDir1-quick-fix-for-unix
+{
+    mkdir -p "$(<)"
+}
+actions MkDir1-quick-fix-for-windows
+{
+    if not exist "$(<)\\" mkdir "$(<)"
 }
 
 
@@ -752,7 +814,7 @@ local rule toolset-tag ( name : type ? : property-set )
         case borland* : tag += bcb ;
         case como* : tag += como ;
         case cw : tag += cw ;
-        case darwin* : tag += ;
+        case darwin* : tag += xgcc ;
         case edg* : tag += edg ;
         case gcc* :
         {
