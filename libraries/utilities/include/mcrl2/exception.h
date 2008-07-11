@@ -13,6 +13,7 @@
 #define __MCRL2_EXCEPTION_H__
 
 #include <stdexcept>
+#include <cassert>
 
 namespace mcrl2 {
 
@@ -30,6 +31,7 @@ namespace mcrl2 {
       /// \brief Constructor
       /// \param[in] message the exception message
       runtime_error(std::string const& message) : std::runtime_error(message), m_message(std::string("error: ").append(message)) {
+        assert(false);
       }
 
       /// \brief error: to message

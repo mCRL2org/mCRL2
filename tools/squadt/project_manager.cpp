@@ -56,11 +56,11 @@ namespace squadt {
 
     assert(!l.empty());
 
-    if (l.leaf() == settings_manager::project_definition_base_name) {
-      store = l.branch_path();
+    if (l.filename() == settings_manager::project_definition_base_name) {
+      store = l.parent_path();
     }
     else {
-      store = (exists(l) && !is_directory(l)) ? l.branch_path() : l;
+      store = (exists(l) && !is_directory(l)) ? l.parent_path() : l;
     }
 
     filesystem::path project_file = store / filesystem::path(settings_manager::project_definition_base_name);
@@ -201,7 +201,7 @@ namespace squadt {
 
     for (bf::directory_iterator i(l); i != end; ++i) {
       if (!is_directory(*i) && !symbolic_link_exists(*i)) {
-        if ((*i).leaf() != settings_manager::project_definition_base_name) {
+        if ((*i).filename() != settings_manager::project_definition_base_name) {
           import_file(*i);
         }
       }
@@ -458,7 +458,7 @@ namespace squadt {
 
     assert(exists(s) && !is_directory(s));
 
-    path           destination_path  = store / path(d.empty() ? s.leaf() : d);
+    path           destination_path  = store / path(d.empty() ? s.filename() : d);
     boost::shared_ptr< processor > p = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
@@ -466,8 +466,8 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(destination_path.leaf()),
-                                destination_path.leaf(), processor::object_descriptor::original);
+    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(destination_path.filename()),
+                                destination_path.filename(), processor::object_descriptor::original);
 
     processors.push_back(p);
 
@@ -618,14 +618,14 @@ namespace squadt {
       boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
       BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-        objects.insert(bf::path(object->get_location()).leaf());
+        objects.insert(bf::path(object->get_location()).filename());
       }
     }
 
     for (bf::directory_iterator i(store); i != bf::directory_iterator(); ++i) {
-      if (objects.find((*i).leaf()) == objects.end()) {
-        if (bf::exists((*i).leaf()) && !bf::is_directory((*i).leaf()) && !bf::symbolic_link_exists((*i).leaf())) {
-          bf::remove((*i).leaf());
+      if (objects.find((*i).filename()) == objects.end()) {
+        if (bf::exists((*i).filename()) && !bf::is_directory((*i).filename()) && !bf::symbolic_link_exists((*i).filename())) {
+          bf::remove((*i).filename());
         }
       }
     }
@@ -664,7 +664,7 @@ namespace squadt {
   }
 
   std::string project_manager::get_name() const {
-    return (impl->store.leaf());
+    return (impl->store.filename());
   }
 
   void project_manager_impl::write() const {

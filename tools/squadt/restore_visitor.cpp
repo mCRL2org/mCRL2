@@ -23,11 +23,10 @@
 #include "executor.ipp"
 #include "processor.ipp"
 
-#include <tipi/detail/utility/generic_visitor.hpp>
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
 
 #include "visitors.hpp"
-
-#include "tipi/visitors.hpp"
 
 #include "ticpp.h"
 

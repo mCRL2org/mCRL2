@@ -20,7 +20,7 @@
 #include <boost/foreach.hpp>
 
 #include "tipi/detail/utility/generic_visitor.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 #include "tipi/detail/controller.ipp"
 

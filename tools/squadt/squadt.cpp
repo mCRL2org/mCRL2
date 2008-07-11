@@ -257,7 +257,7 @@ bool SQuADt::OnInit() {
           }
         };
 
-        boost::filesystem::path path_to_try(retry_list[0]->get_location().branch_path());
+        boost::filesystem::path path_to_try(retry_list[0]->get_location().parent_path());
 
         // Perform initialisation
         for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {

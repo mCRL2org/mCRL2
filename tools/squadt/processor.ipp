@@ -18,8 +18,6 @@
 #include <boost/bind.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include "tipi/visitors.hpp"
-
 #include "task_monitor.hpp"
 #include "processor.hpp"
 #include "project_manager.hpp"

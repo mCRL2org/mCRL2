@@ -420,7 +420,7 @@ namespace squadt {
       for (tipi::configuration::const_iterator_input_range::const_iterator i = input_range.begin(); i != input_range.end(); ++i) {
         tipi::configuration::object const& object(static_cast < tipi::configuration::object& > (*i));
 
-        if (!boost::filesystem::path(object.get_location()).has_branch_path()) {
+        if (!boost::filesystem::path(object.get_location()).has_parent_path()) {
           // Assume that the object is located in the project directory
           boost::shared_ptr < processor::object_descriptor > descriptor(g->impl->search_object_descriptor(object.get_location()));
 

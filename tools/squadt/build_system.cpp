@@ -52,7 +52,7 @@ namespace squadt {
         path_to_binary = default_path / path_to_binary;
       }
       else {
-        path_to_binary = default_path.branch_path() / path_to_binary;
+        path_to_binary = default_path.parent_path() / path_to_binary;
       }
 #else
       path path_to_binary(basename(*t));
