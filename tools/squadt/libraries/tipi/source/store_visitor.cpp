@@ -14,15 +14,15 @@
 #include <boost/foreach.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 
-#include <tipi/report.hpp>
-#include <tipi/visitors.hpp>
-#include <tipi/controller/capabilities.hpp>
-#include <tipi/tool/capabilities.hpp>
-#include <tipi/layout_elements.hpp>
-#include <tipi/layout_manager.hpp>
-#include <tipi/detail/utility/generic_visitor.hpp>
-#include <tipi/tool_display.hpp>
-#include <tipi/common.hpp>
+#include "tipi/report.hpp"
+#include "tipi/detail/visitors.hpp"
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/layout_elements.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/tool_display.hpp"
+#include "tipi/common.hpp"
 
 namespace tipi {
 

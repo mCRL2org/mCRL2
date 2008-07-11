@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/controller.hpp
+/// \file tipi/controller/communicator.hpp
 /// \brief Main interface for the controller (protocol communication partner)
 
 #ifndef TIPI_CONTROLLER_H
@@ -14,15 +14,12 @@
 
 #include <vector>
 
-#include "tipi/detail/utility/logger.hpp"
-
-#include "tipi/common.hpp"
-#include "tipi/tool/capabilities.hpp"
-#include "tipi/controller/capabilities.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool_display.hpp"
 #include "tipi/layout_elements.hpp"
 #include "tipi/detail/basic_messenger.hpp"
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/tool/capabilities.hpp"
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace tipi {
@@ -52,13 +49,13 @@ namespace tipi {
       public:
 
         /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (boost::shared_ptr< tipi::tool_display >) >                     display_layout_handler_function;
+        typedef boost::function < void (boost::shared_ptr< tipi::tool_display >) >              display_layout_handler_function;
 
         /** \brief Function type that for communicating display layouts */
         typedef boost::function < void (std::vector < tipi::layout::element const* > const&) >  display_update_handler_function;
 
         /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (boost::shared_ptr< tipi::report >) >                                   status_message_handler_function;
+        typedef boost::function < void (boost::shared_ptr< tipi::report >) >                    status_message_handler_function;
 
       protected:
 

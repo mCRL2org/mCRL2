@@ -6,18 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/tool.hpp
+/// \file tipi/tool/communicator.hpp
 /// \brief Main interface for a tool (protocol communication partner)
 
 #ifndef TIPI_TOOL_H
 #define TIPI_TOOL_H
 
 #include "tipi/tool_display.hpp"
-#include "tipi/layout_elements.hpp"
-#include "tipi/detail/utility/logger.hpp"
+#include "tipi/configuration.hpp"
 #include "tipi/report.hpp"
-#include "tipi/tool/capabilities.hpp"
-#include "tipi/tool/category.hpp"
 
 /* Interface classes for the tool side */
 namespace tipi {
@@ -80,7 +77,7 @@ namespace tipi {
         void send_configuration(tipi::configuration&);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(tool_display&);
+        void send_display_layout(tipi::tool_display&);
  
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();

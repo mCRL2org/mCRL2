@@ -14,7 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "tipi/tool.hpp"
+#include "tipi/tool/communicator.hpp"
 #include "tipi/detail/schemes.hpp"
 
 /// \cond INTERNAL_DOCS

@@ -17,7 +17,7 @@
 #include <ostream>
 #include <sstream>
 
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace transport {
   namespace transceiver {

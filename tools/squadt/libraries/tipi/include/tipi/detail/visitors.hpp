@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tipi/visitors.hpp
+/// \file tipi/detail/visitors.hpp
 /// \brief Visitor types and functions for (de)serialisation
 
 #ifndef TIPI_VISITORS_H__

@@ -148,6 +148,7 @@ namespace tipi {
                 boost::static_pointer_cast< communicator_impl >(impl), d);
     }
 
+    /// \cond INTERNAL
     void communicator_impl::send_display_layout(boost::shared_ptr< communicator_impl > p, tool_display& d) {
       struct trampoline {
         static void receive_data(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < display > d) {
@@ -200,6 +201,7 @@ namespace tipi {
 
       send_message(tipi::message(tipi::visitors::store(d), tipi::message_display_layout));
     }
+    /// \endcond
 
     void communicator::send_clear_display() {
       boost::static_pointer_cast < communicator_impl > (impl)->send_clear_display();

@@ -41,6 +41,7 @@ namespace tipi {
      * \param[in] v value of the chosen carrier type
      * \param[in] s any string
      * \return *this
+     * \throws std::runtime_error if s contains characters other than those in [0-9a-zA-Z_\\-]
      **/
     enumeration< size_t >& enumeration< size_t >::add(const size_t v, std::string const& s) {
       using namespace boost::xpressive;
@@ -59,6 +60,7 @@ namespace tipi {
  
     /**
      * \param[in] s the string to evaluate
+     * \return the associated value of the enumerated type
      **/
     size_t enumeration< size_t >::evaluate(std::string const& s) const {
       for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
@@ -72,6 +74,7 @@ namespace tipi {
  
     /** \brief Converts to a string representation
      * \param[in] s the string to convert (value must be in the domain)
+     * \return the string representation of the value of the enumerated type
      **/
     std::string enumeration< size_t >::convert(size_t const& s) const {
       std::map< size_t, std::string >::const_iterator i =
@@ -86,6 +89,7 @@ namespace tipi {
 
     /**
      * \param[in] s any string to be checked as a valid instance of this type
+     * \return whether s represents a string associated to a value of the enumerated type
      **/
     bool enumeration< size_t >::validate(std::string const& s) const {
       for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
@@ -97,6 +101,7 @@ namespace tipi {
       return false;
     }
  
+    /// \cond INTERNAL_DOCS
     std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
       std::auto_ptr < basic_integer_range > new_range;
  
@@ -116,6 +121,7 @@ namespace tipi {
  
       return new_range;
     }
+    /// \endcond
   }
 }
 

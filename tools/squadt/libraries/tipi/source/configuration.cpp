@@ -11,7 +11,7 @@
 #include <boost/filesystem/convenience.hpp>
 
 #include "tipi/configuration.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace tipi {
 

@@ -14,8 +14,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <tipi/detail/utility/generic_visitor.hpp>
-#include "tipi/visitors.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/controller/capabilities.hpp"

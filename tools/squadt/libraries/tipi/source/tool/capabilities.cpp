@@ -14,7 +14,7 @@
 
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/tool/capabilities.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace tipi {
   namespace tool {

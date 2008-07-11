@@ -8,14 +8,14 @@
 //
 /// \file include/tipi/detail/tool.ipp
 
-#include "tipi/common.hpp"
-#include "tipi/detail/basic_messenger.ipp"
-#include "tipi/tool.hpp"
+#include "tipi/tool/communicator.hpp"
 #include "tipi/tool/capabilities.hpp"
-#include "tipi/layout_base.hpp"
-#include "tipi/detail/message.hpp"
+#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/detail/command_line_interface.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/message.hpp"
+#include "tipi/detail/visitors.hpp"
+#include "tipi/layout_base.hpp"
+#include "tipi/common.hpp"
 
 namespace tipi {
   namespace tool {

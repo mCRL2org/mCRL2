@@ -107,19 +107,22 @@ namespace tipi {
 
     protected:
 
+      /** \brief Pointer to implementation object (handle body idiom) */
       boost::shared_ptr< display_impl > impl;
 
-    protected:
-
+      /** \brief Factory function for layout elements */
       template < typename T >
       T& create(const display::element_identifier);
 
+      /** \brief Factory function for layout elements */
       template < typename T >
       void create(boost::shared_ptr < ::tipi::layout::element >&, element_identifier const&);
 
+      /** \brief Copy constructor */
       display(display const& other) : impl(other.impl) {
       }
 
+      /** \brief Standard constructor */
       display() : impl(new display_impl) {
       }
 

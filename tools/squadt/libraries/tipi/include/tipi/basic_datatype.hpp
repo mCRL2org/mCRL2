@@ -24,7 +24,7 @@
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_pod.hpp>
 
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace tipi {
 
@@ -43,12 +43,13 @@ namespace tipi {
 
       public:
 
-        /** \brief Converts a value of an arbitrary type to its string representation */
+        /** \brief Converts a value of an arbitrary non-pod-type to its string representation */
         template < typename T >
         inline typename boost::disable_if< typename boost::is_pod< T >::type, std::string >::type convert(T const& t) const {
           return specialised_convert(boost::any(t));
         }
 
+        /** \brief Converts a value of an arbitrary pod-type to its string representation */
         template < typename T >
         inline typename boost::enable_if< typename boost::is_pod< T >::type, std::string >::type convert(T t) const {
           return specialised_convert(boost::any(t));
@@ -96,6 +97,7 @@ namespace tipi {
     template < typename T >
     class enumeration;
 
+    /// \cond INTERNAL_DOCS
     /**
      * \brief Derived data type specifier for enumerations
      *
@@ -125,6 +127,7 @@ namespace tipi {
         /** \brief Constructor */
         virtual ~basic_enumeration() { }
     };
+    /// \endcond
 
     template < typename C = size_t >
     class enumeration;
@@ -170,6 +173,7 @@ namespace tipi {
           return convert(boost::any_cast< size_t >(v));
         }
 
+        /** \brief Returns an iterator over the values of the enumerated type */
         inline basic_enumeration::const_iterator_range values() const {
           return std::make_pair(m_values.begin(), m_values.end());
         }
@@ -237,6 +241,7 @@ namespace tipi {
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
         }
 
+        /** \brief Returns an iterator over the values of the enumerated type */
         basic_enumeration::const_iterator_range values() const {
           return get_single_instance().values();
         }
@@ -259,7 +264,9 @@ namespace tipi {
           return get_single_instance().convert(static_cast< const size_t > (s));
         }
 
-        /// \brief validates whether a string is a value of the enumerated type
+        /**
+         * \brief validates whether a string is a value of the enumerated type
+         **/
         bool validate(std::string const& s) const {
           return get_single_instance().validate(s);
         }
@@ -272,6 +279,7 @@ namespace tipi {
         }
     };
 
+    /// \cond INTERNAL_DOCS
     /**
      * \brief Base class for ranges of integers
      **/
@@ -290,7 +298,6 @@ namespace tipi {
         static std::auto_ptr < basic_integer_range > reconstruct(std::string const&);
     };
 
-    /// \cond INTERNAL_DOCS
     inline std::ostream& operator<<(std::ostream& o, tipi::datatype::basic_integer_range const& e) {
       return e.print(o);
     }
@@ -338,7 +345,7 @@ namespace tipi {
          * \param[in] minimum the minimum value that specifies the range
          * \param[in] maximum the maximum value that specifies the range
          **/
-        integer_range(C minimum = boost::integer_traits< C >::const_min, C max = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(max) {
+        integer_range(C minimum = boost::integer_traits< C >::const_min, C maximum = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(maximum) {
           assert(m_minimum < m_maximum);
         }
 
@@ -381,6 +388,7 @@ namespace tipi {
         }
     };
 
+    /// \cond INTERNAL_DOCS
     /**
      * \brief Base class for ranges of reals
      **/
@@ -399,7 +407,6 @@ namespace tipi {
         static std::auto_ptr < basic_real_range > reconstruct(std::string const& s);
     };
 
-    /// \cond INTERNAL_DOCS
     inline std::ostream& operator<<(std::ostream& o, tipi::datatype::basic_real_range const& e) {
       return e.print(o);
     }

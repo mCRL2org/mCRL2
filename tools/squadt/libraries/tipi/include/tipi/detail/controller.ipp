@@ -14,12 +14,12 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "tipi/controller.hpp"
-#include "tipi/configuration.hpp"
+#include "tipi/controller/communicator.hpp"
 #include "tipi/controller/capabilities.hpp"
+#include "tipi/configuration.hpp"
 #include "tipi/detail/basic_messenger.ipp"
+#include "tipi/detail/visitors.hpp"
 #include "tipi/common.hpp"
-#include "tipi/visitors.hpp"
 
 namespace tipi {
   namespace controller {
