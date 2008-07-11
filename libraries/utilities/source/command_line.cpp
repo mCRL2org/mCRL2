@@ -494,7 +494,7 @@ namespace mcrl2 {
       }
 
 #if defined(__APPLE__)
-      if (arguments[1].substr(0, 7) == "-psn_0_") { // Skip Apple serial number
+      if (1 < arguments[1] && arguments[1].substr(0, 7) == "-psn_0_") { // Skip Apple serial number
         ++i;
       }
 #endif
