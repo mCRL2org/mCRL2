@@ -17,6 +17,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <boost/integer.hpp> // workaround, must come before adjacency_list.hpp
 #include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
@@ -24,7 +25,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -94,7 +94,7 @@ specification parelm(const specification& spec)
   std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
     
   // logging statements
-  mcrl2::core::gsVerboseMsg("lpsparelm removed %d process parameters: ", to_be_removed.size());
+  mcrl2::core::gsVerboseMsg("parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
@@ -176,7 +176,7 @@ specification parelm2(const specification& spec)
   }
 
   // logging statements
-  mcrl2::core::gsVerboseMsg("lpsparelm removed %d process parameters: ", to_be_removed.size());
+  mcrl2::core::gsVerboseMsg("parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());

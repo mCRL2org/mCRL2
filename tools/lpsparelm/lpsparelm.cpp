@@ -11,12 +11,11 @@
 #define NAME "lpsparelm"
 #define AUTHOR "Jeroen van der Wulp and Wieger Wesselink"
 
-#include <exception>
+#include <stdexcept>
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parelm.h"
 
-#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 struct tool_configuration {
@@ -115,7 +114,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
