@@ -30,7 +30,7 @@ install: $(BJAM) config.status
 	$(BOOST_BUILD) --install
 
 test: $(BJAM) config.status
-	$(BJAM) ./status -l300
+	$(BJAM) ./status -l300 --disable-squadt-support --enable-experimental --enable-deprecated --tool-tests
 
 # Build boost build tool
 bjam: $(BJAM)

@@ -8,4 +8,5 @@ project tr
 
 obj tr
        : source/tr.c
+       : <library>/site-config//opengl
        ;

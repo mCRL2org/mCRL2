@@ -43,11 +43,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include "tr.h"
 
 
