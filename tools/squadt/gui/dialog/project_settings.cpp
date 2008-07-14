@@ -147,26 +147,31 @@ namespace squadt {
           default: { /* wxID_OK */
               using namespace boost::filesystem;
              
-              path target(std::string(location->GetValue().fn_str()));
-             
-              if (exists(target)) {
-                if (is_directory(target)) {
-                  if (directory_iterator(target) != directory_iterator()) {
-                    if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
-                                          wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+              try {
+                path target(std::string(location->GetValue().fn_str()));
+
+                if (exists(target)) {
+                  if (is_directory(target)) {
+                    if (directory_iterator(target) != directory_iterator()) {
+                      if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
+                                            wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                        EndModal(1);
+                      }
+                    }
+                    else {
                       EndModal(1);
                     }
                   }
                   else {
-                    EndModal(1);
+                    wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"), wxT("Error"), wxOK).ShowModal();
                   }
                 }
                 else {
-                  wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
+                  EndModal(1);
                 }
               }
-              else {
-                EndModal(1);
+              catch (...) {
+                wxMessageDialog(0, wxT("Invalid file or directory.`"), wxT("Error"), wxOK).ShowModal();
               }
             } break;
         }
@@ -177,17 +182,21 @@ namespace squadt {
 
         button_accept->Enable(false);
 
-        if (!location->GetValue().IsEmpty()) {
-          using namespace boost::filesystem;
-
-          path target(std::string(location->GetValue().fn_str()));
-
-          if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
-            /* Directory contains a directory with the name of this project */
-            screen0->Show(open_project_instead, true);
-          } else {
-            button_accept->Enable(true);
+        try {
+          if (!location->GetValue().IsEmpty()) {
+            using namespace boost::filesystem;
+  
+            path target(std::string(location->GetValue().fn_str()));
+  
+            if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
+              /* Directory contains a directory with the name of this project */
+              screen0->Show(open_project_instead, true);
+            } else {
+              button_accept->Enable(true);
+            }
           }
+        }
+        catch (...) {
         }
          
         screen0->Layout();

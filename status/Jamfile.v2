@@ -1,11 +1,10 @@
 # mCRL2 regression-testing Jamfile
 
 project status
-    : source-location ../test
+    : source-location .
     : requirements <hardcode-dll-paths>true  
       <dependency>/site-config//boost_headers
       <define>BOOST_ALL_NO_LIB
-      <define>MCRL2_NO_EXIT_ON_EXCEPTION
     ;
         
 # Tests from Jamfiles in individual library test subdirectories
