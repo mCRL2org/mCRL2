@@ -31,7 +31,9 @@ namespace mcrl2 {
       /// \brief Constructor
       /// \param[in] message the exception message
       runtime_error(std::string const& message) : std::runtime_error(message), m_message(std::string("error: ").append(message)) {
+#if !defined(MCRL2_NO_EXIT_ON_EXCEPTION)
         assert(false);
+#endif
       }
 
       /// \brief error: to message
