@@ -13,5 +13,6 @@ test-suite data
       [ run sort_expression_test.cpp ]
       [ run data_expression_test.cpp ]
       [ run data_equation_test.cpp ]
+      [ run data_specification_test.cpp ]
       [ compile-headers ../include ]
     ;

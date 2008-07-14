@@ -13,6 +13,7 @@
 #define MCRL2_DATA_ALIAS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/sort_expression.h"
 
@@ -66,7 +67,10 @@ namespace mcrl2 {
           return atermpp::arg2(*this);
         }
         
-    }; // class sort_expression
+    }; // class alias
+
+    /// List of aliases
+    typedef atermpp::vector<alias> alias_list;
 
   } // namespace data
 
