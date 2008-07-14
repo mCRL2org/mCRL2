@@ -15,7 +15,7 @@ for library in $(libraries) {
 }
 
 # some 3rd-party libraries
-for library in aterm svc ticpp {
+for library in aterm svc ticpp tr {
   use-project /libraries/$(library) : $(TOP)/3rd-party/$(library)/build ;
 
   alias $(library)

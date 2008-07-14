@@ -755,3 +755,7 @@ void LTSView::generateBackTrace()
   lts->generateBackTrace();
 }
 
+void LTSView::exportToText(std::string filename)
+{
+  visualizer->exportToText(filename);
+}

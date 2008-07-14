@@ -23,6 +23,7 @@ class Mediator {
     virtual void activateMarkRule(int index,bool activate) = 0;
     virtual void addMarkRule() = 0;
     virtual void editMarkRule(int index) = 0;
+    virtual void exportToText(std::string filename) = 0;
     virtual std::string getVersionString() = 0;
     virtual Utils::RGB_Color getMarkRuleColor(int mr) = 0;
     virtual Utils::RGB_Color getNewRuleColour() = 0;

@@ -12,6 +12,7 @@
 #include "savepicdialog.h"
 #include <algorithm>
 #include <wx/statline.h>
+#include "utils.h"
 using namespace std;
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -20,21 +21,30 @@ using namespace std;
 #endif
 
 BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
-  EVT_COMMAND_SCROLL_THUMBTRACK(myID_R_SLIDER,SavePicDialog::onSlider)
-  EVT_COMMAND_SCROLL_CHANGED(myID_R_SLIDER,SavePicDialog::onSlider)
+  EVT_SPINCTRL(myID_W_SPIN,SavePicDialog::onSpin)
+  EVT_SPINCTRL(myID_H_SPIN,SavePicDialog::onSpin)
+  EVT_CHECKBOX(myID_AR_CHECK,SavePicDialog::onARCheck)
+  EVT_BUTTON(wxID_OK,SavePicDialog::OnOK)
   EVT_BUTTON(myID_F_BUTTON,SavePicDialog::onChangeFile)
   EVT_CHOICE(myID_FT_CHOICE,SavePicDialog::onChoice)
-  EVT_BUTTON(wxID_OK,SavePicDialog::OnOK)
 END_EVENT_TABLE()
 
 SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
     wxFileName filename)
-: wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition) {
+  : wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition)
+{
   statusbar = sb;
   glcanvas = glc;
-  r_slider = new wxSlider(this,myID_R_SLIDER,0,0,1);
-  r_text = new wxStaticText(this,-1,wxT("0x0"));
-  updateSlider();
+
+  w_spin = new wxSpinCtrl(this,myID_W_SPIN);
+  h_spin = new wxSpinCtrl(this,myID_H_SPIN);
+  w_spin->SetRange(0,100000);
+  h_spin->SetRange(0,100000);
+  updateAspectRatio();
+
+  ar_check = new wxCheckBox(this, myID_AR_CHECK,
+      wxT("Maintain aspect ratio"));
+  ar_check->SetValue(true);
 
   wxArrayString fts;
 
@@ -42,13 +52,16 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 
   wxList handlers = wxImage::GetHandlers();
 #if (wxUSE_STL == 1)
-  for (wxList::const_iterator i = handlers.begin(); i != handlers.end(); ++i) {
+  for (wxList::const_iterator i = handlers.begin(); i != handlers.end(); ++i)
+  {
     const wxString extension = static_cast < wxImageHandler* > (*i)->GetExtension();
 #else
-  for (wxNode* node = handlers.GetFirst(); node != NULL; node = node->GetNext()) {
+  for (wxNode* node = handlers.GetFirst(); node != NULL; node = node->GetNext())
+  {
     const wxString extension = static_cast < wxImageHandler* > (node->GetData())->GetExtension();
 #endif
-    if (extension != wxT("ani") && extension != wxT("cur") && extension != wxT("ico")) {
+    if (extension != wxT("ani") && extension != wxT("cur") && extension != wxT("ico"))
+    {
 #if (wxUSE_STL == 1)
       const wxString name = static_cast < wxImageHandler* > (*i)->GetName();
       const long int type = static_cast < wxImageHandler* > (*i)->GetType();
@@ -56,17 +69,21 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
       const wxString name = static_cast < wxImageHandler* > (node->GetData())->GetName();
       const long int type = static_cast < wxImageHandler* > (node->GetData())->GetType();
 #endif
-
-      if (extension == wxT("jpg")) {
+      if (extension == wxT("jpg"))
+      {
         fts.Add(name + wxT(" (.jpg .jpeg)"));
       }
-      else if (extension == wxT("tif")) {
+      else if (extension == wxT("tif"))
+      {
         fts.Add(name + wxT(" (.tif .tiff)"));
       }
-      else {
+      else
+      {
         fts.Add(name + wxT(" (.") + extension + wxT(")"));
       }
-      if (extension == wxT("png")) {
+      
+      if (extension == wxT("png"))
+      {
         png_id = f_exts.Count();
       }
 
@@ -80,39 +97,39 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   ft_choice->SetSelection(png_id);
   
   f_name.Assign(filename);
-  /*if (dir == wxEmptyString) {
-    f_name.AssignHomeDir();
-  }
-  else {
-    f_name.AssignDir(dir);
-  }
-  if (filename == wxEmptyString) {
-    f_name.SetName(wxT("picture"));
-  }
-  else {
-    f_name.SetFullName(filename);
-  }*/
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
   f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
   f_text->SetLabel(f_name.GetFullName());
   d_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
   d_text->SetLabel(f_name.GetPath());
-  
   f_button = new wxButton(this,myID_F_BUTTON,wxT("Change..."));
 
-  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(3,3,0,0);
-  controlSizer->Add(new wxStaticText(this,-1,wxT("Image size:")),0,
+  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(6,3,0,0);
+  // Row 0
+  controlSizer->Add(new wxStaticText(this,-1,wxT("Width:")),0,
     wxEXPAND|wxALL,5);
-  controlSizer->Add(r_slider,0,wxEXPAND|wxALL,5);
-  controlSizer->Add(r_text,0,wxEXPAND|wxALL,5);
+  controlSizer->Add(w_spin,0,wxEXPAND|wxALL,5);
+  controlSizer->AddSpacer(0);
+  // Row 1
+  controlSizer->Add(new wxStaticText(this,-1,wxT("Height:")),0,
+    wxEXPAND|wxALL,5);
+  controlSizer->Add(h_spin,0,wxEXPAND|wxALL,5);
+  controlSizer->AddSpacer(0);
+  // Row 2
+  controlSizer->Add(ar_check,0,wxEXPAND|wxALL,5);
+  controlSizer->AddSpacer(0);
+  controlSizer->AddSpacer(0);
+  // Row 3
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Directory:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(d_text,0,wxEXPAND|wxALL,5);
   controlSizer->AddSpacer(0);
+  // Row 4
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File name:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(f_text,0,wxEXPAND|wxALL,5);
   controlSizer->Add(f_button,0,wxEXPAND|wxALL,5);
+  // Row 5
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File type:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(ft_choice,0,wxEXPAND|wxALL,5);
@@ -128,52 +145,92 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   Layout();
 }
 
-SavePicDialog::~SavePicDialog() {
+SavePicDialog::~SavePicDialog()
+{
 }
 
-void SavePicDialog::updateSlider() {
-  int w,h,w_max,h_max,w_curr;
-  glcanvas->GetClientSize(&w,&h);
-  glcanvas->getMaxViewportDims(&w_max,&h_max);
-  ar = float(w)/float(h);
-  w_max = min(w_max,int(ar*h_max));
-  w_curr = r_slider->GetValue();
-  if (w_curr == 0) {
-    w_curr = w;
+void SavePicDialog::updateAspectRatio()
+{
+  if (w_spin->GetValue() == 0)
+  {
+    int w,h;
+    glcanvas->GetClientSize(&w,&h);
+    w_spin->SetValue(w);
+    h_spin->SetValue(h);
   }
-  w_curr = min(w_curr,w_max);
-
-  r_slider->SetRange(1,w_max);
-  r_slider->SetValue(w_curr);
-  r_text->SetLabel(wxString::Format(wxT("%dx%d"),w_curr,int(w_curr/ar)));
+  else if (ar_check->IsChecked())
+  {
+    update_h_spin();
+  }
 }
 
-void SavePicDialog::onSlider(wxScrollEvent& /*event*/) {
-  r_text->SetLabel(wxString::Format(wxT("%dx%d"),r_slider->GetValue(),
-    int(r_slider->GetValue()/ar)));
+void SavePicDialog::update_h_spin()
+{
+  int w,h;
+  glcanvas->GetClientSize(&w,&h);
+  double ar = double(h)/double(w);
+  h_spin->SetValue(Utils::round_to_int(w_spin->GetValue() * ar));
 }
 
-void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
+void SavePicDialog::update_w_spin()
+{
+  int w,h;
+  glcanvas->GetClientSize(&w,&h);
+  double ar = double(w)/double(h);
+  w_spin->SetValue(Utils::round_to_int(h_spin->GetValue() * ar));
+}
+
+void SavePicDialog::onARCheck(wxCommandEvent &event) 
+{
+  if (event.IsChecked())
+  {
+    update_h_spin();
+  }
+}
+
+void SavePicDialog::onSpin(wxSpinEvent& event)
+{
+  if (ar_check->IsChecked())
+  {
+    if (event.GetId() == myID_W_SPIN)
+    {
+      update_h_spin();
+    }
+    else
+    {
+      update_w_spin();
+    }
+  }
+}
+
+
+void SavePicDialog::onChangeFile(wxCommandEvent& event)
+{
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
     f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
-  if (!new_file.empty()) {
+  if (!new_file.empty())
+  {
     f_name.Assign(new_file);
     // if extension of new filename indicates a supported file type, set the
     // choice control to that file type (the user apparently wants that file
     // type)
     wxString ext = f_name.GetExt();
     // allow some aliases
-    if (ext.Lower() == wxT("jpeg")) {
+    if (ext.Lower() == wxT("jpeg"))
+    {
       ext = wxT("jpg");
     }
-    if (ext.Lower() == wxT("tiff")) {
+    if (ext.Lower() == wxT("tiff"))
+    {
       ext = wxT("tif");
     }
     int index = f_exts.Index(ext,false);
-    if (index != wxNOT_FOUND) {
+    if (index != wxNOT_FOUND)
+    {
       ft_choice->SetSelection(index);
     }
-    else {
+    else
+    {
       // extension is not supported, so make the user-defined extension part of
       // the base filename and append the extension of the currently selected
       // file type
@@ -185,34 +242,37 @@ void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/) {
   }
 }
 
-void SavePicDialog::onChoice(wxCommandEvent& event) {
+void SavePicDialog::onChoice(wxCommandEvent& event)
+{
   wxString newext = f_exts.Item(event.GetSelection());
   wxString oldext = f_name.GetExt().Lower();
   if (newext != oldext &&
       !(newext == wxT("jpg") && oldext == wxT("jpeg")) &&
-      !(newext == wxT("tif") && oldext == wxT("tiff"))) {
+      !(newext == wxT("tif") && oldext == wxT("tiff")))
+  {
     f_name.SetExt(newext);
     f_text->SetLabel(f_name.GetFullName());
   }
 }
 
-int SavePicDialog::getImageWidth() {
-  return r_slider->GetValue();
+
+int SavePicDialog::getImageWidth()
+{
+  return w_spin->GetValue();
 }
 
-int SavePicDialog::getImageHeight() {
-  return int(r_slider->GetValue()/ar);
+int SavePicDialog::getImageHeight()
+{
+  return h_spin->GetValue();
 }
 
-wxString SavePicDialog::getFileName() {
+wxString SavePicDialog::getFileName()
+{
   return f_name.GetFullPath();
 }
 
-long SavePicDialog::getFileType() {
-  return f_types[ft_choice->GetSelection()];
-}
-
-void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
+void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
+{
   Hide();
   GetParent()->SetCursor(wxCursor(wxCURSOR_WAIT));
   GetParent()->Disable();
@@ -220,8 +280,8 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
   GetParent()->Update();
   glcanvas->display();
 
-  int w = r_slider->GetValue();
-  int h = int(w/ar);
+  int w = w_spin->GetValue();
+  int h = h_spin->GetValue();
   
   statusbar->SetStatusText(wxT("Collecting picture data..."));
   statusbar->Update();
@@ -236,10 +296,13 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/) {
 
   statusbar->SetStatusText(wxT("Saving image to file..."));
   statusbar->Update();
-  if (!img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()])) {
+  if (!img.SaveFile(f_name.GetFullPath(),f_types[ft_choice->GetSelection()]))
+  {
     statusbar->SetStatusText(wxT("Save picture failed"));
     statusbar->Update();
-  } else {
+  }
+  else
+  {
     statusbar->SetStatusText(wxT("Done"));
     statusbar->Update();
     wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") + 

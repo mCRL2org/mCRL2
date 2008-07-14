@@ -1,0 +1,11 @@
+project tr
+       : source-location ..
+       : requirements
+          <include>../include/tr
+       : usage-requirements
+          <include>../include/tr
+       ;
+
+obj tr
+       : source/tr.c
+       ;

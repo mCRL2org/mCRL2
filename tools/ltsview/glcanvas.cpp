@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file glcanvas.cpp
-/// \brief Add your file description here.
+/// \brief Implements the OpenGL canvas
 
 #include <cmath>
 #include <wx/image.h>
@@ -19,6 +19,7 @@
 #include "icons/pan_cursor_mask.xpm"
 #include "icons/rotate_cursor.xpm"
 #include "icons/rotate_cursor_mask.xpm"
+#include "tr/tr.h"
 
 using namespace Utils;
 using namespace IDs;
@@ -65,7 +66,7 @@ GLCanvas::~GLCanvas() {
 }
 
 void GLCanvas::initialize() {
-  setCurrent();
+  SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
   glLoadIdentity();
@@ -140,39 +141,36 @@ void GLCanvas::notify(SettingID s) {
   }
 }
 
-void GLCanvas::setActiveTool(int t) {
+void GLCanvas::setActiveTool(int t)
+{
   activeTool = t;
   currentTool = t;
   setMouseCursor();
 }
 
-void GLCanvas::setCurrent()
+void GLCanvas::display(bool coll_caller, bool selecting)
 {
-  if (GetParent()->IsShown())
-  {
-    SetCurrent();
-  }
-}
-
-void GLCanvas::display(bool coll_caller, bool selecting) {
   // coll_caller indicates whether the caller of display() is the 
   // getPictureData() method. While collecting data, only this method is allowed
   // to call display(); else the collected data may be corrupted.
-  if (collectingData && !coll_caller) {
+  if (collectingData && !coll_caller)
+  {
     return;
   }
   
   // next check is for preventing infinite recursive calls to display(), which 
   // happened on the Mac during startup of the application
-  if (displayAllowed) {
+  if (displayAllowed)
+  {
     displayAllowed = false;
-    if (!collectingData) {
+    if (!collectingData)
+    {
       mediator->notifyRenderingStarted();
     }
 
     if (!selecting)
     {
-      setCurrent();
+      SetCurrent();
     }
     
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -305,7 +303,7 @@ void GLCanvas::reshape() {
   if (GetContext()) {
     int width,height;
     GetClientSize(&width,&height);
-    setCurrent();
+    SetCurrent();
     glViewport(0,0,width,height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -457,112 +455,48 @@ void GLCanvas::onMouseWheel(wxMouseEvent& event) {
   display();
 }
 
-unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
-  /* collect the contents of the GLCanvas in an array of bytes; every byte is
-   * the R-, G-, or B-value of a pixel; order of returned data is from
-   * bottomleft to topright corner of canvas, row major.
-   *
-   * The user wants a picture of w_res * h_res pixels, but the canvas is w_block
-   * * h_block pixels and we can only read the contents of the canvas. So, we
-   * resize the viewport to w_res * h_res and read the viewport data in blocks
-   * of size w_block * h_block. Because in general (w_res MOD w_block) and
-   * (h_res MOD h_block) need not be 0, we also have to read a few remaining strips
-   * of viewport data. Afterwards, we "stitch" all these blocks of data together
-   * to obtain one big picture.
-   */
+unsigned char* GLCanvas::getPictureData(int w_res,int h_res)
+{
   int w_block,h_block;
   GetClientSize(&w_block,&h_block);
-
-  int W = w_res / w_block;     /* number of blocks in X direction */
-  int H = h_res / h_block;     /* number of blocks in Y direction */
-  int w_rem = w_res % w_block; /* number of pixels remaining in X direction */
-  int h_rem = h_res % h_block; /* number of pixels remaining in Y direction */
-
-  int M = W;		       /* number of blocks in X incl.remaining strip */
-  if (w_rem > 0) ++M;
-  int N = H;		       /* number of blocks in Y incl.remaining strip */
-  if (h_rem > 0) ++N;
-  unsigned char** pixel_ptrs = (unsigned char**)malloc(M*N*sizeof(unsigned
-        char*)); /* pointers to the blocks of data */
 
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-  /* COLLECT ALL DATA */
+  TRcontext *tr_context = trNew();
+  trTileSize(tr_context, w_block, h_block, 0);
+  trImageSize(tr_context, w_res, h_res);
+
+  unsigned char* pixdata = (unsigned char*)malloc(w_res * h_res * 3 *
+      sizeof(unsigned char));
+  if (pixdata == NULL)
+  {
+    trDelete(tr_context);
+    return NULL;
+  }
+
+  trImageBuffer(tr_context, GL_RGB, GL_UNSIGNED_BYTE, pixdata);
+  trRowOrder(tr_context, TR_TOP_TO_BOTTOM);
+  trPerspective(tr_context, 60.0f,
+      (GLfloat)(w_block)/(GLfloat)(h_block), nearPlane, farPlane);
   
-  // calling display() first seems to solve the problem that sometimes the
-  // collected data gets corrupted because of a pending repaint of the part of 
-  // the canvas that was underneath the Save Picture dialog window...
-  //display();
-  
-  // ... still, just to be sure, it's wise to apply mutual exclusion here
   collectingData = true;
-  int bx,by; /* x and y coordinate of lower left corner of current block */
-  int bw,bh; /* width and height of current block */
-  int i,j;
-  by = 0;
-  bh = h_block;
-  for (j = 0; j < N; ++j) {
-    if (j == H) {
-      bh = h_rem;
-    }
-    bx = 0;
-    bw = w_block;
-    for (i = 0; i < M; ++i) {
-      if (i == W) {
-        bw = w_rem;
-      }
-      pixel_ptrs[i*N+j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
-      glViewport(-bx,-by,w_res,h_res);
-      // we do not want other methods to call display() while collecting data, 
-      // so we call display(true): 'true' indicates that we are the method that 
-      // is collecting data and are thus allowed to call display() 
-      display(true);
-      glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i*N+j]);
-      bx += w_block;
-    }
-    by += h_block;
+  int more = 1;
+  while (more)
+  {
+    trBeginTile(tr_context);
+    display(true);
+    more = trEndTile(tr_context);
   }
   collectingData = false;
   
-  /* RESET VIEW */
+  // RESET VIEW
 
   glViewport(0,0,w_block,h_block);
+  reshape();
   display();
 
-  /* STITCH COLLECTED DATA TOGETHER */
-  
-  unsigned char* pixels = 
-    (unsigned char*)malloc(3*w_res*h_res*sizeof(unsigned char));
-  
-  int r,offset;
-  offset = 0;
-  bh = h_block;
-  for (j = 0; j < N; ++j) {
-    if (j == H) {
-      bh = h_rem;
-    }
-    for (r = 0; r < bh; ++r) {
-      bw = w_block;
-      for (i = 0; i < M; ++i) {
-	      if (i == W) {
-          bw = w_rem;
-        }
-        memcpy(pixels+offset,pixel_ptrs[i*N+j]+3*r*bw,3*bw);
-        offset += 3*bw;
-      }
-    }
-  }
-  
-  /* CLEAN UP */
-
-  for (int j=0; j<N; ++j) {
-    for (int i=0; i<M; ++i) {
-      free(pixel_ptrs[i*N+j]);
-    }
-  }
-  free(pixel_ptrs);
-  return pixels;
+  return pixdata;
 }
 
 // Implementation of simulation header
@@ -744,7 +678,7 @@ void GLCanvas::startForceDirected() {
   visualizer->forceDirectedInit();
   while (!stop_force_directed) {
     if (GetContext()) {
-      setCurrent();
+      SetCurrent();
     }
     visualizer->forceDirectedStep();
     display();
@@ -754,7 +688,7 @@ void GLCanvas::startForceDirected() {
   int n = 0;
   while (n < 10) {
     if (GetContext()) {
-      setCurrent();
+      SetCurrent();
     }
     #include <iostream>
     using namespace std;

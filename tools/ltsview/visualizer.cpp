@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream> 
+#include <fstream> 
 #include "visualizer.h"
 using namespace std;
 using namespace Utils;
@@ -1450,3 +1451,57 @@ void Visualizer::drawLoop(State* state) {
 bool Visualizer::isMarked(Transition* t) {
   return markStyle == MARK_TRANSITIONS && t->isMarked();
 }*/
+
+void Visualizer::exportToText(std::string filename)
+{
+  if (lts == NULL)
+  {
+    return ;
+  }
+  std::map< Cluster*, unsigned int > clus_id;
+  unsigned int N = 0;
+  float ch = settings->getFloat(ClusterHeight);
+  Cluster_iterator ci(lts,false);
+  std::ofstream file(filename.c_str());
+  if (!file)
+  {
+    return ;
+  }
+
+  file << "Legend:\n";
+  file << "  cone(x,y,z): a cone with top radius x, base radius y and height z\n";
+  file << "  sphere(x):   a sphere with radius x\n";
+  file << "  at angle(x): cluster is on the rim of the base of its parent cluster at angle x\n";
+  file << "               If cluster is a cone, the center of its top side is placed there.\n";
+  file << "               If cluster is a sphere, the center of the sphere is placed there.\n";
+  file << "---------------------------------------------------------------------------------\n";
+
+  for ( ; !ci.is_end(); ++ci)
+  {
+    file << "rank " << (*ci)->getRank() << ": cluster " << N << " ";
+    if ((*ci)->hasDescendants())
+    {
+      file << "cone(" << (*ci)->getTopRadius() << "," << (*ci)->getBaseRadius()
+      << "," << ch << ") ";
+    }
+    else
+    {
+      file << "sphere(" << (*ci)->getTopRadius() << ") ";
+    }
+    if ((*ci)->isCentered())
+    {
+      file << "centered";
+    }
+    else
+    {
+      file << "at angle(" << (*ci)->getPosition() << ")";
+    }
+    if ((*ci)->getAncestor() != NULL)
+    {
+      file << " below parent cluster " << clus_id[(*ci)->getAncestor()];
+    }
+    file << std::endl;
+    clus_id[*ci] = N;
+    ++N;
+  }
+}

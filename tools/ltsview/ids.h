@@ -15,7 +15,9 @@
 
 namespace IDs
 {
-  enum { myID_SAVEPIC = wxID_HIGHEST + 1, 
+  enum {
+    myID_SAVEPIC = wxID_HIGHEST + 1,
+    myID_SAVETXT,
     // Tool identifiers
     myID_SELECT,
     myID_ZOOM,

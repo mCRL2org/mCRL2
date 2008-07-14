@@ -41,6 +41,7 @@ class LTSView : public wxApp, public Mediator {
     void activateMarkRule(int index,bool activate);
     void addMarkRule();
     void editMarkRule(int index);
+    void exportToText(std::string filename);
     Utils::MarkStyle getMarkStyle();
     Utils::MatchStyle getMatchStyle();
     bool isMarked(State *s);

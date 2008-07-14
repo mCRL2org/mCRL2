@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
   EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)
+  EVT_MENU  (myID_SAVETXT, MainFrame::onSaveText)
   EVT_MENU  (wxID_EXIT, MainFrame::onExit)
   EVT_MENU  (wxID_RESET, MainFrame::onResetView)
   EVT_MENU  (myID_DISPLAY_STATES,MainFrame::onDisplay)
@@ -95,16 +96,21 @@ void MainFrame::setupMenuBar() {
   // Set up the menu bar
   wxMenuBar* menuBar = new wxMenuBar;
   wxMenu* fileMenu = new wxMenu;
+  wxMenu* exportMenu = new wxMenu;
   wxMenu* viewMenu = new wxMenu;
   toolMenu = new wxMenu;
   wxMenu* helpMenu = new wxMenu;
   
   fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
     wxT("Load an LTS from file"));
-  fileMenu->Append(myID_SAVEPIC,wxT("Save &Picture...\tCtrl+P"),
-      wxT("Save current picture to file"));
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
     wxT("Open a trace for this file"));
+  fileMenu->AppendSeparator();
+  exportMenu->Append(myID_SAVEPIC,wxT("&Bitmap..."),
+      wxT("Export picture to bitmap"));
+  exportMenu->Append(myID_SAVETXT,wxT("&Text..."),
+      wxT("Export picture to text"));
+  fileMenu->AppendSubMenu(exportMenu,wxT("Export"),wxT("Export picture"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
     
@@ -242,12 +248,25 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 }
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
-  if (savePicDialog == NULL) {
+  if (savePicDialog == NULL)
+  {
     savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
-  } else {
-    savePicDialog->updateSlider();
+  }
+  else
+  {
+    savePicDialog->updateAspectRatio();
   }
   savePicDialog->ShowModal();
+}
+
+void MainFrame::onSaveText(wxCommandEvent& /*event*/)
+{
+  wxString new_file = wxFileSelector(wxT("Select a file"),filename.GetPath(),
+    wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
+  if (!new_file.empty())
+  {
+    mediator->exportToText(static_cast<std::string>(new_file.fn_str()));
+  }
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {

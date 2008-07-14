@@ -82,6 +82,7 @@ class Visualizer: public Subscriber {
     void forceDirectedInit();
     void forceDirectedStep();
     void resetStatePositions();
+    void exportToText(std::string filename);
 };
 
 #endif

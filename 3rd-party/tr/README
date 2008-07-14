@@ -1,0 +1,356 @@
+                     TR - OpenGL Tile Rendering Library
+
+                                 Version 1.1
+
+                        Copyright (C) 1997 Brian Paul
+
+Introduction
+
+The TR (Tile Rendering) library is an OpenGL utility library for doing tiled
+rendering. Tiled rendering is a technique for generating large images in
+pieces (tiles).
+
+TR is memory efficient; arbitrarily large image files may be generated
+without allocating a full-sized image buffer in main memory.
+
+The TR library is copyrighted by Brian Paul. See the LICENSE file for
+details.
+
+You may download TR 1.1 from by SHIFT-clicking on one of the following:
+
+   * tr-1.1.tar.gz (10Kbytes)
+   * tr-1.1.zip (10Kbytes)
+
+Prerequisites
+
+TR works with any version of OpenGL or Mesa. No extensions are necessary and
+there are no dependencies on GLX, WGL or any other window system interface.
+
+TR is written in ANSI C and may be used from C or C++.
+
+The TR demo programs require Mark Kilgard's GLUT.
+
+Users should have intermediate experience with OpenGL.
+
+Example
+
+The following image is divided into four rows and three columns of tiles.
+Note that the image size is not an exact multiple of the tile size. The TR
+library handles the situation in which the top row and right column are a
+fraction of the full tile size.
+
+Also note that the tiles do not have to be square.
+
+                                  [Image]
+
+This is a small example. In reality, one may use tiles of 512 by 512 pixels
+and the final image may be 4000 by 3000 pixels (or larger!).
+
+Using the Library
+
+Ordinarily, OpenGL can't render arbitrarily large images. The maximum
+viewport size is typically 2K pixels or less and the window system usually
+imposes a maximum color buffer size.
+
+To overcome this limitation we can render large images in pieces (tiles).
+
+To render each tile we must carefully set the viewport and projection matrix
+and render the entire scene. The TR library hides the details involved in
+doing this. Also, TR can either automatically assemble the final image or
+allow the client to write the image, row by row, to a file.
+
+The basic steps in using TR are as follows:
+
+1. Determine where you'll render the tiles
+
+Tiles may be rendered either in a window (front or back buffer) or in an
+off-screen buffer. The choice depends on your application. It doesn't matter
+to the TR library since TR just retrieves image tiles with glReadPixels.
+Just be sure glDrawBuffer and glReadBuffer are set to the same buffer.
+
+2. Determine the destination for the final image
+
+The final, large image may either be automatically assembed in main memory
+by TR or you may elect to process tiles yourself, perhaps writing them to an
+image file.
+
+3. Isolate your drawing code
+
+It should be a simple matter to completely re-render your OpenGL scene.
+Ideally, inside the tile rendering loop you should be able to make one
+function call which clears the color (and depth, etc) buffer(s) and draws
+your scene. If you're using a double buffered window you should not call
+SwapBuffers since glReadBuffer, by default, specifies the back buffer.
+
+4. Allocate a TR context
+
+Every TR function takes a TRcontext pointer. A TR context encapsulates the
+state of the library and allows one to have several TR contexts
+simultaneously. TR contexts are allocated with trNew.
+
+5. Set the image and tile sizes
+
+Call trImageSize to set the final image size, in pixels. Optionally, call
+trTileSize to set the tile size. The default tile size is 256 by 256 pixels
+with 0 border. Generally, larger tiles are better since fewer tiles (and
+rendering passes) will be needed.
+
+6. Specify an image or tile buffer
+
+If you want TR to automatically assemble the final image you must call
+trImageBuffer to specify an image buffer, format, and pixel type. The format
+and type parameters directly correspond to those used by glReadPixels.
+
+Otherwise, if you want to process image tiles yourself you must call
+trTileBuffer to specify a tile buffer, format, and pixel type. The trEndTile
+function will copy the tile image into your buffer. You may then use or
+write the tile to a file, for example.
+
+7. Optional: set tile rendering order
+
+Since OpenGL specifies that image data are stored in bottom-to-top order TR
+follows the same model. However, when incrementally writing tiles to a file
+we usually want to do it in top-to-bottom order since that's the order used
+by most file formats.
+
+The trRowOrder function allows you to specify that tiles are to be rendering
+in TR_TOP_TO_BOTTOM order or TR_BOTTOM_TO_TOP order. The later is the
+default.
+
+8. Specify the projection
+
+The projection matrix must be carefully controlled by TR in order to produce
+a final image which has no cracks or edge artifacts.
+
+OpenGL programs typically call glFrustum, glOrtho or gluPerspective to setup
+the projection matrix. There are three corresponding functions in the TR
+library. One of them must be called to specify the projection to use. The
+arguments to the TR projection functions exactly match the arguments to the
+corresponding OpenGL functions.
+
+9. Tile rendering loop
+
+After the tile size and image size are specified the TR library computes how
+many tiles will be needed to produce the final image.
+
+The tiles are rendered inside a loop similar to this:
+
+int more = 1;
+while (more)
+{
+        trBeginTile(tr);
+        DrawScene();
+        more = trEndTile(tr);
+}
+
+This should be self-explanatory. Simply call trBeginTile, render your entire
+scene, and call trEndTile inside a loop until trEndTile returns zero.
+
+10. Query functions
+
+The trGet function can be called to query a number of TR state variables
+such as the number of rows and columns of tiles, tile size, image size,
+currently rendered tile, etc. See the detailed description of trGet below.
+
+11. glRasterPos problem
+
+The glRasterPos function is troublesome. The problem is that the current
+raster position is invalidated if glRasterPos results in a coordinate
+outside of the window. Subsequent glDrawPixels and glBitmap functions are
+ignored. This will frequently happen during tiled rendering resulting in
+flawed images.
+
+TR includes a substitute function: trRasterPos3f which doesn't have this
+problem. Basically, replace calls to glRasterPos with trRasterPos. See the
+included demo programs for example usage.
+
+12. Compilation
+
+Include the tr.h header file in your client code.
+
+Compile and link with the tr.c library source file. There is no need to
+compile TR as a separate library file.
+
+API Functions
+
+Creating and Destroying Contexts
+
+TRcontext *trNew(void)
+     Return a pointer to a new TR context and initialize it. Returns NULL if
+     out of memory.
+
+void trDelete(TRcontext *tr)
+     Deallocate a TR context.
+
+Image and Tile Setup Functions
+
+void trTileSize(TRcontext *tr, GLint width, GLint height, GLint border)
+     width and height specifies size of tiles to generate. This should be no
+     larger than the size of your window or off-screen image buffer.
+     border specifies how many pixels along each edge are to be uses as a
+     border.
+     Borders provide overlap between adjacent tiles and are needed when
+     drawing wide lines (width > 1) or large points (size > 1). The
+     effective tile size is therefore width - 2 * border by height - 2 *
+     border pixels.
+
+void trImageSize(TRcontext *tr, GLint width, GLint height)
+     Specifies size of final image to generate.
+
+void trTileBuffer(TRcontext *tr, GLenum format, GLenum type, GLvoid *image);
+     This is an optional function. After a tile is rendered (after trEnd) it
+     will be copied into the buffer specified by this function.
+     image must point to a buffer large enough to hold an image equal to the
+     tile size specified by trTileSize, minus any border.
+     format and type are interpreted in the same way as glReadPixels.
+
+void trImageBuffer(TRcontext *tr, GLenum format, GLenum type, GLvoid
+*image);
+     This is an optional function. This specifies a buffer into which the
+     final image is assembled.
+     As tiles are generated they will automatically be copied into this
+     buffer. The image will be complete after the last tile has been
+     rendered.
+     image must point to a buffer large enough to hold an image equal to the
+     size specified by trImageSize.
+     format and type are interpreted in the same way as glReadPixels.
+
+Note: trImageBuffer and trTileBuffer are the means by which image data is
+obtained from the TR library. You must call one (or both) of these functions
+in order to get output from TR.
+
+void trRowOrder(TRcontext *tr, TRenum order)
+     Specifies the order in which tiles are generated.
+     order may take one of two values:
+        o TR_BOTTOM_TO_TOP - render tiles in bottom to top order (the
+          default)
+        o TR_TOP_TO_BOTTOM - render tiles in top to bottom order
+
+Projection Setup Functions
+
+void trOrtho(TRcontext *tr, GLdouble left, GLdouble right, GLdouble bottom,
+GLdouble top, GLdouble near, GLdouble far)
+     Specify an orthographic projection as with glOrtho.
+     Must be called before rendering first tile.
+
+void trFrustum(TRcontext *tr, GLdouble left, GLdouble right, GLdouble
+bottom, GLdouble top, GLdouble near, GLdouble far)
+     Specify a perspective projection as with glFrustum.
+     Must be called before rendering first tile.
+
+void trPerspective(TRcontext *tr, GLdouble fovy, GLdouble aspect, GLdouble
+zNear, GLdouble zFar );
+     Specify a perspective projection as with gluPerspective.
+     Must be called before rendering first tile.
+
+Tile Rendering Functions
+
+trBeginTile(TRcontext *tr)
+     Begin rendering a tile.
+
+int trEndTile(TRcontext *tr)
+     End rendering a tile.
+     Return 0 if finished rendering image.
+     Return 1 if more tiles remain to be rendered.
+
+The trBeginTile and trEndTile functions are meant to be used in a loop like
+this:
+
+int more = 1;
+while (more)
+{
+        trBeginTile(tr);
+        DrawScene();
+        more = trEndTile(tr);
+}
+
+DrawScene is a function which renders your OpenGL scene. It should include
+glClear but not SwapBuffers.
+
+Miscellaneous Functions
+
+GLint trGet(TRcontext *tr, TRenum param)
+     Query TR state. param may be one of the following:
+        o TR_TILE_WIDTH - returns tile buffer width including border
+        o TR_TILE_HEIGHT - returns tile buffer height including border
+        o TR_TILE_BORDER - returns tile border size
+        o TR_IMAGE_WIDTH - returns image buffer width
+        o TR_IMAGE_HEIGHT - returns image buffer height
+        o TR_ROW_ORDER - returns TR_TOP_TO_BOTTOM or TR_BOTTOM_TO_TOP
+        o TR_ROWS - returns number of rows of tiles in image
+        o TR_COLUMNS - returns number of columns of tiles in image
+        o TR_CURRENT_ROW - returns current tile row. The bottom row is row
+          zero.
+        o TR_CURRENT_COLUMN - returns current tile column The left column is
+          column zero.
+        o TR_CURRENT_TILE_WIDTH - returns width of current tile
+        o TR_CURRENT_TILE_HEIGHT - returns height of current tile
+
+     Note the difference between TR_TILE_WIDTH/HEIGHT and
+     TR_CURRENT_TILE_WIDTH/HEIGHT. The former is the size of the tile
+     buffer. The later is the size of the current tile which can be less
+     than or equal to the TR_TILE_WIDTH/HEIGHT. Unless the final image size
+     is an exact multiple of the tile size, the last tile in each row and
+     column will be smaller than TR_TILE_WIDTH/HEIGHT.
+
+void trRasterPos3f(TRcontext *tr, GLfloat x, GLfloat y, GLfloat z)
+     This function is a replacement for glRasterPos3f. The problem with the
+     OpenGL RasterPos functions is that if the resulting window coordinate
+     is outside the view frustum then the raster position is invalidated and
+     glBitmap becomes a no-op.
+
+     This function avoids that problem.
+
+     You should replace calls to glRasterPos with this function. Otherwise,
+     glRasterPos/glBitmap sequences won't work correctly during tiled
+     rendering.
+
+     Unfortunately, trRasterPos3f can't be saved in a display list.
+
+Notes
+
+More on Tile Borders
+
+A tile border should be used when drawing any of:
+
+   * wide lines (width > 1)
+   * large points (width > 1)
+   * antialiased lines or points
+   * GL_POINT or GL_LINE polygon modes
+
+By using a tile border, rendering artifacts (pixel drop-outs) at tile
+boundaries can be eliminated.
+
+Suppose you call glTileSize(tr, W, H, B). TR will render tiles of W by H
+pixels of which B pixels along each edge overlap the adjacent tiles.
+Therefore, the image buffer specified by calling glTileBuffer() must only be
+large enough to hold an image of W-2*B by H-2*B pixels.
+
+Demonstration Programs
+
+The TR distribution includes two GLUT-based demo programs:
+
+   * trdemo1 - renders a window-size image in tiles
+   * trdemo2 - produces a large PPM file incrementally
+
+You'll probably have to edit the Makefile for your computer. Compiling the
+demos is very simple though since they only require OpenGL and GLUT.
+
+Contributors
+
+   * Robin Syllwasschy - provided much helpful feedback for the initial
+     version of TR.
+
+Version History
+
+Version 1.0 - April 1997
+
+   * Initial version
+
+Version 1.1 - July 1997
+
+   * Added tile border support
+   * Fixed a few compilation problems
+
+----------------------------------------------------------------------------
+Document created on April 19, 1997. Last edited on January 24, 1999.

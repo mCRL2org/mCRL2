@@ -27,6 +27,7 @@ tool ltsview
         utils.cpp
         visobjectfactory.cpp
         visualizer.cpp
+        /libraries//tr
         /libraries/utilities//colorbutton
         /libraries//trace
         /libraries//core
