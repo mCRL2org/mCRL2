@@ -137,7 +137,7 @@ if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
 }
 
-rule boost-library ( name : use-local-boost ? : use-system-boost ? ) {
+rule boost-library ( name : requirements * : use-local-boost ? : use-system-boost ? ) {
   if $(use-local-boost) {
     alias boost_$(name) : /boost//$(name) : <threading>multi ;
   }
@@ -159,7 +159,7 @@ rule boost-library ( name : use-local-boost ? : use-system-boost ? ) {
     }
   }
   else {
-    alias boost_$(name) : /boost//$(name) : <threading>multi ;
+    alias boost_$(name) : /boost//$(name) : $(requirements) <threading>multi ;
   }
 
   explicit boost_$(name) ;
@@ -179,10 +179,10 @@ boost-library filesystem ;
 boost-library program_options ;
 boost-library regex ;
 boost-library thread ;
-boost-library signals ;
+boost-library signals : <link>static ;
 boost-library test ;
 boost-library system : ;
-boost-library md5 : local ;
+boost-library md5 : : local ;
 
 if $(DL) {
   lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;

@@ -156,7 +156,9 @@ for option in $(BUILD_OPTIONS) {
       local value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
      
       if ! [ MATCH ^(-).* : $(option) ] {
-        build-options += $(value:G=<$(temporary)>) ;
+        if $(temporary) != link {
+          build-options += $(value:G=<$(temporary)>) ;
+        }
       }
     }
   }
@@ -309,18 +311,13 @@ if [ path.exists ./tools ] {
     }
     else {
       # Complete install
-      targets = /tools/$(tools)//install /libraries//install-all install-examples install-remaining-boost ;
+      targets = /tools/$(tools)//install /libraries//install-all install-examples ;
 
       # General examples
       install install-examples
               : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
               : <location>$(datadir)
                 <install-source-root>.
-              ;
-
-      install install-remaining-boost
-              : /site-config//boost_signals
-              : <location>$(libdir)
               ;
     }
 
@@ -505,7 +502,7 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
     exe $(name) : $(sources) : $(requirements) $(additional-requirements) : $(defaults) : $(usage-requirements) ;
 
     if [ feature.defaults <install> ] = <install>yes {
-      man $(name).1 : $(name) : <location>$(mandir)/man1 ;
+      man $(name).1 : $(name) : <dependency>/libraries//install-all <location>$(mandir)/man1 ;
     }
   }
 
@@ -538,7 +535,7 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
       alias $(name).alias : $(sources) : $(requirements) : $(defaults) : $(requirements) ;
 
       # shared library target
-      alias $(name) : /libraries//mcrl2 : <link>shared : : $(requirements) ;
+      alias $(name) : /libraries//mcrl2 : : <link>shared : $(requirements) ;
     }
     else {
       # static library target
