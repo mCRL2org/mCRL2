@@ -444,9 +444,8 @@ ATermAppl rename(
   summand_list lps_summands = summand_list(); //for changes in lps_old_summands
   action_list lps_new_actions = action_list();;
 
-  std::set<identifier_string> s;
   postfix_identifier_generator generator("");
-  generator.add_identifiers(s);
+  generator.add_to_context(lps_old_spec);
 
   bool to_tau=false;
   bool to_delta=false;
@@ -495,7 +494,7 @@ ATermAppl rename(
     { if ((!is_data_variable(*rule_old_argument_i)) &&
           (!(find_all_data_variables(*rule_old_argument_i).empty())))
       { std::cerr << "The arguments of the lhs " << pp(rule_old_action) << 
-                          " are not a variables or closed expressions\n";
+                          " are not variables or closed expressions\n";
         exit(1);
       }
     }
@@ -589,12 +588,13 @@ ATermAppl rename(
                        rule_old_argument_i != renamed_rule_old_action.arguments().end();
                        rule_old_argument_i++)
           { if (is_data_variable(*rule_old_argument_i))
-            { new_equalities_condition=optimized::and_(new_equalities_condition,
+            { 
+              new_equalities_condition=optimized::and_(new_equalities_condition,
                                data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else 
             { assert((find_all_data_variables(*rule_old_argument_i).empty())); // the argument must be closed, 
-                                                                             // which is checked above.
+                                                                               // which is checked above.
               renamed_rule_condition=
                         optimized::and_(renamed_rule_condition,
                              data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
