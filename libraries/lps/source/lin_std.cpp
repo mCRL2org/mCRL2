@@ -8109,7 +8109,8 @@ static ATermAppl generateLPEmCRLterm(
                    ATermAppl t,
                    int canterminate,
                    specificationbasictype *spec,
-                   int regular)
+                   int regular,
+                   const bool rename_variables)
 {  
   if (gsIsProcess(t)) 
   { 
@@ -8127,7 +8128,9 @@ static ATermAppl generateLPEmCRLterm(
     { t3=make_parameters_and_sum_variables_unique(t3,ATSgetArgument(objectdata[n].objectname,0)); 
     }
     else
-    { t3=make_parameters_and_sum_variables_unique(t3);
+    { if (rename_variables) 
+      { t3=make_parameters_and_sum_variables_unique(t3);
+      }
     }
     return t3;
   }
@@ -8137,12 +8140,14 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,0),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
     ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          true);
     return parallelcomposition(t1,t2,spec);
   }
   
@@ -8151,7 +8156,8 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
      return hidecomposition(ATLgetArgument(t,0),t2);
   }
 
@@ -8160,7 +8166,8 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
     return allowblockcomposition(ATLgetArgument(t,0),t2,true);
   }
 
@@ -8169,7 +8176,8 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
     return allowblockcomposition(ATLgetArgument(t,0),t2,false);
   }
   
@@ -8178,7 +8186,8 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
 
     return renamecomposition(ATLgetArgument(t,0),t2);
   }
@@ -8188,7 +8197,8 @@ static ATermAppl generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
                           spec,
-                          regular);
+                          regular,
+                          rename_variables);
 
     return communicationcomposition(ATLgetArgument(t,0),t1);
   }
@@ -8296,7 +8306,7 @@ static ATermAppl generateLPEmCRL(
   { objectdata[n].processstatus=mCRLlin;
     ATermAppl t3=generateLPEmCRLterm(objectdata[n].processbody,
                     (canterminate&&objectdata[n].canterminate),spec,
-                     regular); 
+                     regular,false); 
     return t3;
   }
 
