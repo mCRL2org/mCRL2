@@ -500,6 +500,11 @@ Utils::RGB_Color LTSView::getNewRuleColour()
        result.b = 153;
        break;
      }
+    default: //does not occur for modulo, but keep compiler happy
+    {  result.r = 0;
+       result.g = 0;
+       result.b = 0;
+    }
   }
   return result;
 }
