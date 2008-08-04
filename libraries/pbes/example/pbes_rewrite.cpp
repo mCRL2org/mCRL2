@@ -24,7 +24,7 @@ using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-typedef simplify_rewriter<data::rewriter> my_simplify_rewriter;
+typedef simplifying_rewriter<data::rewriter> my_simplify_rewriter;
 typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
       "Reads a file containing pbes expressions, and applies the rewriter to it.\n"
       "\n"
       "The following choices of the pbes rewriter are available:\n"
-      "  0 : simplify_rewriter\n"
+      "  0 : simplifying_rewriter\n"
       "  1 : enumerate_quantifiers_rewriter\n"
       "  2 : simplify_rewriter_jfg\n"
       "  3 : substitute_rewriter_jfg\n"

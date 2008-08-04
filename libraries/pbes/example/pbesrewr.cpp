@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   typedef data::rewriter my_data_rewriter;
-  typedef simplify_rewriter<data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<data::rewriter> my_pbes_rewriter;
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result

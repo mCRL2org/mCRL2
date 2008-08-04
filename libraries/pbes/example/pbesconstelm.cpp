@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
   typedef data::rewriter my_data_rewriter;
   typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef simplify_rewriter<data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<data::rewriter> my_pbes_rewriter;
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result

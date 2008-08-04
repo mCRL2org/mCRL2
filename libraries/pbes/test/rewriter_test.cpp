@@ -191,7 +191,7 @@ void test_simplify_rewriter()
 
   specification spec = mcrl22lps(SPECIFICATION);
   mcrl2::data::rewriter datar(spec.data());
-  mcrl2::pbes_system::simplify_rewriter<data::rewriter> pbesr(datar);
+  mcrl2::pbes_system::simplifying_rewriter<data::rewriter> pbesr(datar);
 
   data_variable b  = bool_("b");
   data_variable b1 = bool_("b1");

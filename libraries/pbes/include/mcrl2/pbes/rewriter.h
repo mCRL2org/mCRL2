@@ -31,13 +31,13 @@ namespace pbes_system {
   /// A rewriter that simplifies expressions.
   ///
   template <typename DataRewriter>
-  class simplify_rewriter
+  class simplifying_rewriter
   {
     protected:
       DataRewriter& m_rewriter;
     
     public:
-      simplify_rewriter(DataRewriter& rewriter)
+      simplifying_rewriter(DataRewriter& rewriter)
         : m_rewriter(rewriter)
       {}
       
