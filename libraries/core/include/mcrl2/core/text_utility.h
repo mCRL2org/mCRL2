@@ -49,6 +49,15 @@ namespace core {
     return result;
   }
 
+  /// Split the text.
+  inline
+  std::vector<std::string> split(const std::string& line, const std::string& separators)
+  {
+    std::vector<std::string> result;
+    boost::algorithm::split(result, line, boost::algorithm::is_any_of(separators));
+    return result;
+  }
+
   /// \brief Read text from a file.
   inline
   std::string read_text(const std::string& filename, bool warn=false)
@@ -81,6 +90,22 @@ namespace core {
 
     std::string dest( "\n" );
     return boost::xpressive::regex_replace(text, src, dest);
+  }
+
+  /// \brief Removes whitespace from a string.
+  inline
+  std::string remove_whitespace(const std::string& text)
+  {
+    boost::xpressive::sregex src = boost::xpressive::sregex::compile("\\s");
+    std::string dest("");
+    return boost::xpressive::regex_replace(text, src, dest);
+  }
+
+  /// \brief Regular expression replacement in a string.
+  inline
+  std::string regex_replace(const std::string& src, const std::string& dest, const std::string& text)
+  {
+    return boost::xpressive::regex_replace(text, boost::xpressive::sregex::compile(src), dest);
   }
 
 } // namespace core

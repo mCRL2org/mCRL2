@@ -1,6 +1,6 @@
-#include <iostream>
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -13,7 +13,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/parser.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace std;

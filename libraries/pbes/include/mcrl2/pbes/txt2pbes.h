@@ -13,11 +13,8 @@
 #define MCRL2_PBES_TXT2PBES_H
 
 #include <sstream>
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/parse.h"
 
 namespace mcrl2 {
 
@@ -30,22 +27,15 @@ namespace pbes_system {
   pbes<> txt2pbes(const std::string& text)
   {
     std::stringstream from(text);
-    ATermAppl result = core::parse_pbes_spec(from);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("parsing failed");
+    pbes<> result;
+    from >> result;
+    try {
+      result.normalize();
     }
-
-    result = core::type_check_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("type checking failed");
+    catch (std::exception& e) {
+      throw mcrl2::runtime_error("PBES is not monotonic");
     }
-
-    result = core::implement_data_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("data implementation failed");
-    }
-
-    return pbes<>(result);
+    return result;
   }
 
 } // namespace pbes_system
