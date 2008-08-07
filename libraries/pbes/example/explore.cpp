@@ -23,7 +23,7 @@ using namespace mcrl2::pbes_system::pbes_expr;
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   // load a pbes.
   pbes<> pbes_spec;

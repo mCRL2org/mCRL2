@@ -145,19 +145,23 @@ namespace pbes_system {
     std::string datavar_text = var_spec.substr(k, j - k);
     std::string predvar_text = var_spec.substr(j + separator2.size());
 
+    // the generated pbes specification
     std::string pbesspec = "pbes";
 
     std::vector<std::string> pwords = core::split(predvar_text, ";");
     for (std::vector<std::string>::iterator i = pwords.begin(); i != pwords.end(); ++i)
     {
-      std::vector<std::string> words = core::split(*i, ":");
-      if (words.size() != 2)
+      if (boost::trim_copy(*i).empty())
       {
-        // throw std::runtime_error("Error in parse_pbes_expression: '" + *i + "' has wrong number of : characters");
         continue;
       }
-      std::string var  = boost::trim_copy(words[0]);
-      std::vector<std::string> args = core::split(boost::trim_copy(words[1]), "#");
+      std::vector<std::string> args;
+      std::vector<std::string> words = core::split(*i, ":");
+      std::string var = boost::trim_copy(words[0]);
+      if (words.size() >= 2 && !boost::trim_copy(words[1]).empty())
+      {
+        args = core::split(boost::trim_copy(words[1]), "#");
+      }
       for (std::vector<std::string>::iterator j = args.begin(); j != args.end(); ++j)
       {
         std::vector<std::string> w = core::split(*j, ",");
@@ -191,7 +195,17 @@ namespace pbes_system {
 
     pbes<> p;
     std::stringstream in(pbesspec);
-    in >> p;
+    try
+    {
+      in >> p;
+    }
+    catch (std::runtime_error e)
+    {
+      std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
+                << pbesspec
+                << std::endl;
+      throw e;
+    }
     return p.equations().back().formula();    
   }
 

@@ -32,7 +32,8 @@ namespace pbes_system {
     try {
       result.normalize();
     }
-    catch (std::exception& e) {
+    catch (std::exception& /* e */)
+    {
       throw mcrl2::runtime_error("PBES is not monotonic");
     }
     return result;
