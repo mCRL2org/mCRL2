@@ -79,9 +79,9 @@ namespace detail {
   struct simplify_rewrite_builder: public pbes_builder<std::pair<DataSubstitutionRange, bool> >
   {
     // argument type of visit functions
-    typedef pbes_builder<std::pair<DataSubstitutionRange, bool> > super;   
+    typedef pbes_builder<std::pair<DataSubstitutionRange, bool> > super;
     typedef typename super::argument_type argument_type;
-      
+
     DataRewriter& m_data_rewriter;
 
     /// Constructor.
@@ -89,7 +89,7 @@ namespace detail {
     simplify_rewrite_builder(DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
-  
+
     /// Visit data expression node.
     ///
     pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, argument_type& arg)
@@ -102,6 +102,7 @@ namespace detail {
     ///
     pbes_expression visit_true(const pbes_expression& x, argument_type& arg)
     {
+      using namespace pbes_expr;
       return true_();
     }
 
@@ -109,9 +110,10 @@ namespace detail {
     ///
     pbes_expression visit_false(const pbes_expression& x, argument_type& arg)
     {
+      using namespace pbes_expr;
       return false_();
     }
-  
+
     /// Visit not node.
     ///
     pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, argument_type& arg)
@@ -129,7 +131,7 @@ namespace detail {
       }
       return pbes_expression(); // continue recursion
     }
-  
+
     /// Visit and node.
     ///
     pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
@@ -159,7 +161,7 @@ namespace detail {
       }
       return pbes_expression(); // continue recursion
     }
-  
+
     /// Visit or node.
     ///
     pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
@@ -188,14 +190,13 @@ namespace detail {
         return super::visit(left, arg);
       }
       return pbes_expression(); // continue recursion
-    }    
-  
+    }
+
     /// Visit imp node.
     ///
     pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
     {
       using namespace pbes_expr_optimized;
-  
       if (is_true(left))
       {
         return super::visit(right, arg);
@@ -229,7 +230,7 @@ namespace detail {
       using namespace pbes_expr_optimized;
       return forall(variables, visit(phi, arg));
     }
-  
+
     /// Visit exists node.
     ///
     pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
@@ -237,7 +238,7 @@ namespace detail {
       using namespace pbes_expr_optimized;
       return exists(variables, visit(phi, arg));
     }
-  
+
     /// Visit propositional variable node.
     ///
     pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, argument_type& arg)
