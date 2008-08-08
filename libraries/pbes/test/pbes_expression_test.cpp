@@ -32,12 +32,15 @@ using namespace mcrl2::pbes_system::detail;
 using mcrl2::core::pp;
 
 std::string EXPRESSIONS =
-"variables                                \n"
+"datavar                                  \n"
+"  n: Nat;                                \n"
+"                                         \n"
+"predvar                                  \n"
 "                                         \n"
 "expressions                              \n"
-"nu X. nu Y. nu Z. X && Y && Z            \n"
+"  val(n > 2)                             \n"
 "                                         \n"
-"nu Y. X || Y                             \n"
+"  val(n > 3)                             \n"
 ;
 
 void print(atermpp::set<pbes_expression> q)

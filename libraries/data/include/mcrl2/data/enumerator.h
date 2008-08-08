@@ -22,7 +22,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/data/identifier_generator.h"
 
 namespace mcrl2 {
 
@@ -124,7 +124,7 @@ namespace detail {
 /// \endcond
 
 /// A class that enumerates data expressions.
-template <typename DataRewriter, typename IdentifierGenerator>
+template <typename DataRewriter = data::rewriter, typename IdentifierGenerator = number_postfix_generator>
 class data_enumerator
 {
   protected:

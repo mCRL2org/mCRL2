@@ -207,6 +207,8 @@ class pbes
     }
 
   public:
+    typedef Container container_type;
+    
     /// Constructor.
     ///
     pbes()

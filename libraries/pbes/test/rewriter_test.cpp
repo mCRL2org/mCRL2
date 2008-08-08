@@ -10,29 +10,12 @@
 /// \brief Test for the pbes rewriters.
 
 #include <iostream>
-#include <iterator>
-#include <utility>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
-
-//const std::string SPECIFICATION =
-//"act a:Nat;                               \n"
-//"                                         \n"
-//"map smaller: Nat#Nat -> Bool;            \n"
-//"                                         \n"
-//"var x,y : Nat;                           \n"
-//"                                         \n"
-//"eqn smaller(x,y) = x < y;                \n"
-//"                                         \n"
-//"proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-//"                                         \n"
-//"init P(0);                               \n";
-
-const std::string SPECIFICATION = "init delta;";
 
 const std::string VARIABLE_SPECIFICATION =
   "datavar         \n"
@@ -52,7 +35,7 @@ const std::string VARIABLE_SPECIFICATION =
   "  p3: Pos;      \n"
   "                \n"
   "predvar         \n"
-  "  X: ;          \n"
+  "  X;            \n"
   "  Y: Nat;       \n"
   "  Z: Bool, Pos; \n"
   ;
@@ -63,30 +46,53 @@ pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_simplify_rewriter()
+void test_simplifying_rewriter()
 {
-  using namespace pbes_expr;
-
-  specification spec = mcrl22lps(SPECIFICATION);
+  // create a simplifying rewriter R
+  specification spec = mcrl22lps(
+    "map MCRL2_DUMMY_1:Pos;  \n"
+    "var MCRL2_DUMMY_2:Bool; \n"
+    "    MCRL2_DUMMY_3:Pos;  \n"
+    "    MCRL2_DUMMY_4:Nat;  \n"
+    "    MCRL2_DUMMY_5:Int;  \n"
+    "    MCRL2_DUMMY_6:Real; \n"
+    "eqn MCRL2_DUMMY_1 = 1;  \n"
+    "init delta;"
+  );
   data::rewriter datar(spec.data());
-  pbes_system::simplifying_rewriter<data::rewriter> pbesr(datar);
+  pbes_system::simplifying_rewriter<data::rewriter> R(datar);
 
-  BOOST_CHECK(pbesr(expr("true && true"))           == expr("true"));
-  BOOST_CHECK(pbesr(expr("(true && true) && true")) == expr("true"));
-  BOOST_CHECK(pbesr(expr("true && false"))          == expr("false"));
-  BOOST_CHECK(pbesr(expr("true => val(b)"))         == expr("val(b)"));
-  BOOST_CHECK(pbesr(expr("X && true"))              == expr("X"));
-  BOOST_CHECK(pbesr(expr("true && X"))              == expr("X"));
-  BOOST_CHECK(pbesr(expr("X && false"))             == expr("false"));
-  BOOST_CHECK(pbesr(expr("false && X"))             == expr("false"));
-  BOOST_CHECK(pbesr(expr("X && (false && X)"))      == expr("false"));
+  BOOST_CHECK(R(expr("true && true"))           == expr("true"));
+  BOOST_CHECK(R(expr("(true && true) && true")) == expr("true"));
+  BOOST_CHECK(R(expr("true && false"))          == expr("false"));
+  BOOST_CHECK(R(expr("true => val(b)"))         == expr("val(b)"));
+  BOOST_CHECK(R(expr("X && true"))              == expr("X"));
+  BOOST_CHECK(R(expr("true && X"))              == expr("X"));
+  BOOST_CHECK(R(expr("X && false"))             == expr("false"));
+  BOOST_CHECK(R(expr("false && X"))             == expr("false"));
+  BOOST_CHECK(R(expr("X && (false && X)"))      == expr("false"));
+  BOOST_CHECK(R(expr("exists m:Nat.true"))      == expr("true"));
+  BOOST_CHECK(R(expr("Y(1+2)"))                 == expr("Y(3)"));
+}
+
+void test_enumerate_quantifiers_rewriter()
+{
+  // create an enumerate quantifiers rewriter R
+  specification spec = mcrl22lps("init delta;");
+  data::rewriter datar(spec.data());
+  data::number_postfix_generator name_generator;
+  data::data_enumerator<> datae(spec.data(), datar, name_generator);
+  pbes_system::enumerate_quantifiers_rewriter<data::rewriter, data::data_enumerator<> > R(datar, datae);
+
+  BOOST_CHECK(R(expr("true && true")) == expr("true"));
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_simplify_rewriter();
+  test_simplifying_rewriter();
+  test_enumerate_quantifiers_rewriter();
 
   return 0;
 }

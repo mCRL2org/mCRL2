@@ -64,6 +64,9 @@ void test_rewriter()
   data_variable y = nat("y");
   data_variable z = nat("z"); 
   data_expression t = datar(greater(min_(x,y), z));
+
+  std::cout << "NAT3" << core::pp(datar(plus(nat(1), nat(2)))) << std::endl;
+  BOOST_CHECK(datar(plus(nat(1), nat(2))) == nat(3));
   
   // copy a rewriter
   data::rewriter datar1 = datar;
