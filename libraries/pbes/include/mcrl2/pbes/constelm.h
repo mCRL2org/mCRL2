@@ -577,7 +577,17 @@ std::cout << "  <source vertex       >" << u.to_string() << std::endl;
 std::cout << "  <target vertex before>" << v.to_string() << std::endl;
 #endif
 
-            if (m_pbes_rewriter(data::data_variable_map_replace(e.condition, u.constraints)) != false_())
+            pbes_expression value = m_pbes_rewriter(data::data_variable_map_replace(e.condition, u.constraints));
+#ifdef MCRL2_PBES_CONSTELM_DEBUG
+std::cout << "\nEvaluated condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
+#endif
+            if (value != true_() && value != false_())
+            {
+#ifdef MCRL2_PBES_CONSTELM_DEBUG
+std::cout << "\nCould not evaluate condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to true or false";
+#endif
+            }
+            if (value != false_())
             {              
               bool changed = v.update(e.right.parameters(), u.constraints, m_data_rewriter, name_generator);
               if (changed)

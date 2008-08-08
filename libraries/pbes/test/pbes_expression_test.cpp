@@ -38,8 +38,7 @@ std::string EXPRESSIONS =
 "predvar                                  \n"
 "                                         \n"
 "expressions                              \n"
-"  val(n > 2)                             \n"
-"                                         \n"
+"  val(n > 2);                            \n"
 "  val(n > 3)                             \n"
 ;
 

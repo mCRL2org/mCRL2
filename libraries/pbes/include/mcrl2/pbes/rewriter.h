@@ -34,10 +34,10 @@ namespace pbes_system {
   class simplifying_rewriter
   {
     protected:
-      DataRewriter& m_rewriter;
+      DataRewriter m_rewriter;
     
     public:
-      simplifying_rewriter(DataRewriter& rewriter)
+      simplifying_rewriter(const DataRewriter& rewriter)
         : m_rewriter(rewriter)
       {}
       
@@ -74,11 +74,11 @@ namespace pbes_system {
   class enumerate_quantifiers_rewriter
   {
     protected:
-      DataRewriter& m_rewriter;
-      DataEnumerator& m_enumerator;
+      DataRewriter m_rewriter;
+      DataEnumerator m_enumerator;
 
     public:
-      enumerate_quantifiers_rewriter(DataRewriter& r, DataEnumerator& e)
+      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r), m_enumerator(e)
       {}
       
@@ -147,14 +147,14 @@ namespace pbes_system {
   /// A pbes rewriter that uses a bdd based prover internally.
   class pbessolve_rewriter
   {
-    data::rewriter& datar_;
+    data::rewriter datar_;
     const data::data_specification& data_spec;
     int n;
     data_variable_list fv;
     boost::shared_ptr<BDD_Prover> prover;
    
     public:
-      pbessolve_rewriter(data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
+      pbessolve_rewriter(const data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
         : datar_(datar),
           data_spec(data),
           n(0),
