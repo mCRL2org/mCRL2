@@ -12,9 +12,11 @@ include $(TOP)/build/config.jam ;
 
 alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
+alias font_renderer : font_renderer.o ;
 
 obj spinctrlfloat.o : source/spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 obj colorbutton.o   : source/colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+obj font_renderer.o : source/font_renderer.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 
 # mCRL2 Tool for SQuADt interface
 obj squadt_interface
