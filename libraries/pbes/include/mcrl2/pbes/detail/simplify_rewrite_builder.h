@@ -97,6 +97,20 @@ namespace detail {
       data::data_expression result = data_rewrite(m_data_rewriter, d, arg.first, arg.second);
       return result;
     }
+
+    /// Visit true node.
+    ///
+    pbes_expression visit_true(const pbes_expression& x, argument_type& arg)
+    {
+      return true_();
+    }
+
+    /// Visit false node.
+    ///
+    pbes_expression visit_false(const pbes_expression& x, argument_type& arg)
+    {
+      return false_();
+    }
   
     /// Visit not node.
     ///

@@ -46,6 +46,22 @@ pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
+template <typename Rewriter>
+void test_expressions(Rewriter R, std::string expr1, std::string expr2)
+{
+  if (R(expr(expr1)) != R(expr(expr2)))
+  {
+    BOOST_CHECK(R(expr(expr1)) == R(expr(expr2)));
+    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    std::cout << "expr1    " << core::pp(expr(expr1)) << std::endl;
+    std::cout << "expr2    " << core::pp(expr(expr2)) << std::endl;
+    std::cout << "R(expr1) " << core::pp(R(expr(expr1))) << std::endl;
+    std::cout << "R(expr2) " << core::pp(R(expr(expr2))) << std::endl;
+    std::cout << "R(expr1) " << R(expr(expr1)) << std::endl;
+    std::cout << "R(expr2) " << R(expr(expr2)) << std::endl;
+  }
+}
+
 void test_simplifying_rewriter()
 {
   // create a simplifying rewriter R
@@ -62,17 +78,36 @@ void test_simplifying_rewriter()
   data::rewriter datar(spec.data());
   pbes_system::simplifying_rewriter<data::rewriter> R(datar);
 
-  BOOST_CHECK(R(expr("true && true"))           == expr("true"));
-  BOOST_CHECK(R(expr("(true && true) && true")) == expr("true"));
-  BOOST_CHECK(R(expr("true && false"))          == expr("false"));
-  BOOST_CHECK(R(expr("true => val(b)"))         == expr("val(b)"));
-  BOOST_CHECK(R(expr("X && true"))              == expr("X"));
-  BOOST_CHECK(R(expr("true && X"))              == expr("X"));
-  BOOST_CHECK(R(expr("X && false"))             == expr("false"));
-  BOOST_CHECK(R(expr("false && X"))             == expr("false"));
-  BOOST_CHECK(R(expr("X && (false && X)"))      == expr("false"));
-  BOOST_CHECK(R(expr("exists m:Nat.true"))      == expr("true"));
-  BOOST_CHECK(R(expr("Y(1+2)"))                 == expr("Y(3)"));
+  test_expressions(R, "false"                                                           , "val(false)");
+  test_expressions(R, "true"                                                            , "val(true)");
+  test_expressions(R, "true && true"                                                    , "val(true)");
+  test_expressions(R, "(true && true) && true"                                          , "val(true)");
+  test_expressions(R, "true && false"                                                   , "val(false)");
+  test_expressions(R, "true => val(b)"                                                  , "val(b)");
+  test_expressions(R, "X && true"                                                       , "X");
+  test_expressions(R, "true && X"                                                       , "X");
+  test_expressions(R, "X && false"                                                      , "val(false)");
+  test_expressions(R, "X && val(false)"                                                 , "val(false)");
+  test_expressions(R, "false && X"                                                      , "val(false)");
+  test_expressions(R, "X && (false && X)"                                               , "val(false)");
+  test_expressions(R, "exists m:Nat.true"                                               , "true");
+  test_expressions(R, "Y(1+2)"                                                          , "Y(3)");
+  test_expressions(R, "true || true"                                                    , "true");
+  test_expressions(R, "(true || true) || true"                                          , "true");
+  test_expressions(R, "true || false"                                                   , "true");
+  test_expressions(R, "false => X"                                                      , "true");
+  test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
+  test_expressions(R, "Y(n+n)"                                                          , "Y(n+n)");
+  test_expressions(R, "Y(n+p)"                                                          , "Y(n+p)");
+  test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
+  test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
+  test_expressions(R, "forall m:Nat. false"                                             , "false");
+  test_expressions(R, "X && X"                                                          , "X");
+  test_expressions(R, "X && (Y(p) || X)"                                                , "X");
+  test_expressions(R, "X || (Y(p) && X)"                                                , "X");
+  test_expressions(R, "val(b || !b)"                                                    , "val(true)");
+  test_expressions(R, "val(true)"                                                       , "true");  
+  test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
 }
 
 void test_enumerate_quantifiers_rewriter()

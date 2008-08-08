@@ -213,14 +213,16 @@ namespace pbes_expr {
   inline
   pbes_expression true_()
   {
-    return pbes_expression(core::detail::gsMakePBESTrue());
+    return data::data_expr::true_();
+    // return pbes_expression(core::detail::gsMakePBESTrue());
   }
 
   /// \brief Returns the expression false
   inline
   pbes_expression false_()
   {
-    return pbes_expression(core::detail::gsMakePBESFalse());
+    return data::data_expr::false_();
+    // return pbes_expression(core::detail::gsMakePBESFalse());
   }
 
   /// \brief Returns not applied to p
