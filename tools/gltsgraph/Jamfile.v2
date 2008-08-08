@@ -1,0 +1,17 @@
+project toolset/gltsgraph
+       : build-dir $(BUILD_TOP)/gltsgraph
+       ;
+
+tool gltsgraph
+       : [ glob *.cpp ]
+         /libraries/utilities//spinctrlfloat
+         /libraries/utilities//font_renderer
+         /libraries//core
+         /libraries//lts
+         /site-config//wx_base
+         /site-config//wx_gl
+       : <wx>yes
+         <squadt-connectivity>implemented
+       ;
+
+install-tools gltsgraph ;

@@ -1,0 +1,325 @@
+#define NAME "ltsgraph"
+#define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
+
+#include "ltsgraph.h"
+#include "ltsimporter.h"
+#include "springlayout.h"
+
+#include <mcrl2/lts/liblts.h>
+#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+
+
+std::string lts_file_argument;
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+// SQuADT protocol interface
+# include <mcrl2/utilities/squadt_interface.h>
+using namespace mcrl2::utilities::squadt;
+using namespace mcrl2::lts;
+const char* lts_file_for_input  = "lts_in";
+
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+  
+  public:
+    // Configures tool capabilities.
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::visualisation);
+#ifdef MCRL2_BCG
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
+#endif  
+    }
+
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(tipi::configuration&) { }
+
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(tipi::configuration const& c) const {
+      if (c.input_exists(lts_file_for_input)) {
+        /* The input object is present, verify whether the specified format is supported */
+        if (lts::parse_format(c.get_input(lts_file_for_input).get_mime_type().get_sub_type().c_str()) == lts_none) {
+          send_error("Invalid configuration: unsupported type `" +
+              c.get_input(lts_file_for_input).get_mime_type().get_sub_type() + "' for main input");
+        }
+        else {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    bool perform_task(tipi::configuration& c) {
+      lts_file_argument = c.get_input(lts_file_for_input).get_location();
+
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
+};
+#endif
+
+void parse_command_line(int argc, wxChar** argv)
+{
+  using namespace ::mcrl2::utilities;
+
+  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
+        NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+    "Draw graphs and optimize their layout in a graphical environment. "
+    "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file as input for drawing.");
+   
+  command_line_parser parser(clinterface, argc, argv);
+
+  if (0 < parser.arguments.size()) {
+    lts_file_argument = parser.arguments[0];
+  }
+  if (1 < parser.arguments.size()) {
+    parser.error("too many file arguments");
+  }
+ 
+}
+
+
+bool LTSGraph::OnInit()
+{
+  parse_command_line(argc, argv);
+
+  SpringLayout* springLayout = new SpringLayout(this);
+  algorithms.push_back(springLayout);
+/*  GemLayout* gemLayout = new GemLayout(this);
+  algorithms.push_back(gemLayout);*/
+
+  mainFrame = new MainFrame(this);
+  visualizer = new Visualizer(this);
+
+  glCanvas = mainFrame->getGLCanvas();
+  glCanvas->setVisualizer(visualizer);
+  
+  // Load a provided file.
+  if (!lts_file_argument.empty())
+  {
+    openFile(lts_file_argument);
+  }
+
+  SetTopWindow(mainFrame);
+  mainFrame->Show();
+  glCanvas->initialize();
+  mainFrame->Layout();
+
+  return true;
+}
+
+int LTSGraph::OnExit() {
+ 
+  return (wxApp::OnExit());
+}
+
+/*  private:	
+    void init_frame(std::string lts_file_argument) {
+      GraphFrame *frame;
+	
+      wxSize maximum_size = wxGetClientDisplayRect().GetSize();
+
+      frame = new GraphFrame(wxT(NAME), wxPoint(150, 150),
+                     wxSize((std::min)(maximum_size.GetWidth(),INITIAL_WIN_WIDTH), (std::min)(maximum_size.GetHeight(),INITIAL_WIN_HEIGHT)));
+      frame->Show(true);
+      frame->GetSizer()->RecalcSizes();
+      if (!lts_file_argument.empty()) {
+        frame->Init(wxString(lts_file_argument.c_str(), wxConvLocal));
+      }
+    }
+*/
+
+
+void LTSGraph::printHelp(std::string const &name) {
+  std::cout << "Usage: " << name << " [INFILE]" << std::endl 
+       << "Draw graphs and optimize their layout in a graphical environment."
+       << "If INFILE (LTS file: *.aut or *.svc) is supplied," 
+       << "the tool will use this file" << std::endl
+       << "as input for drawing." << std::endl << std::endl
+       << "Use left click to drag the nodes and right click to fix the nodes."
+       << std::endl
+       << std::endl 
+       << "Options:" << std::endl 
+       << "  -h, --help            display this help message and terminate"
+       << std::endl 
+
+       << "      --version         displays version information and terminate"
+       << std::endl
+       << std::endl 
+       << "Report bugs at <http://www.mcrl2.org/issuetracker>."
+       << std::endl;
+}
+
+IMPLEMENT_APP_NO_MAIN(LTSGraph)
+IMPLEMENT_WX_THEME_SUPPORT
+
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow) {
+
+  int local_var;
+  MCRL2_ATERM_INIT(local_var, lpCmdLine)
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  using namespace mcrl2::utilities::squadt;
+
+  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+#endif
+      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    }
+
+    return 0;
+#endif
+}
+#else
+int main(int argc, char **argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
+
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+  using namespace mcrl2::utilities::squadt;
+
+  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
+# endif
+    return wxEntry(argc, argv);
+# ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+
+  return 0;
+# endif
+}
+#endif
+
+void LTSGraph::openFile(std::string const &path)
+{
+  // Find out file format based on extension
+  std::string ext = path.substr(path.find_last_of( '.' ) + 1);
+
+  
+  // Create (on stack) appropriate importer imp
+  if ( ext == "ltsgraph")
+  {
+    // path points to an ltsgraph file, so create an LTSgraph importer
+    // TODO: File format not yet revised
+  }
+  else
+  {
+    // Assume we have an LTS file, so create an LTS importer
+    LTSImporter imp;
+    graph = imp.importFile(path);
+
+    int is = graph->getInitial();
+    int ns = graph->getNumStates();
+    int nt = graph->getNumTrans();
+    int nl = graph->getNumLabels();
+
+    mainFrame->setLTSInfo(is, ns, nt, nl);
+    
+  }
+
+  // Setup graph in rest of tool.
+}
+
+Graph* LTSGraph::getGraph()
+{
+  return graph;
+}
+
+size_t LTSGraph::getNumberOfAlgorithms() const
+{
+  return algorithms.size();
+}
+
+LayoutAlgorithm* LTSGraph::getAlgorithm(size_t i) const
+{
+  return algorithms[i];
+}
+
+void LTSGraph::display()
+{
+  if(glCanvas)
+  {
+    // Create display event
+    wxPaintEvent evt;
+
+    wxEvtHandler* eh = glCanvas->GetEventHandler();
+    
+    if(eh)
+    {
+      eh->ProcessEvent(evt);
+    }
+  }
+}
+
+void LTSGraph::moveObject(double x, double y)
+{
+  if(selectedState != NULL)
+  {
+    selectedState->setX(selectedState->getX() + x);
+    selectedState->setY(selectedState->getY() + y);
+  }
+
+  if(selectedTransition != NULL)
+  {
+    double prevX, prevY;
+    selectedTransition->getControl(prevX, prevY);
+
+    selectedTransition->setControl(prevX + x, prevY + y);
+  }
+}
+
+void LTSGraph::lockObject()
+{
+  if(selectedState != NULL)
+  {
+    selectedState->lock();
+  }
+}
+
+
+size_t LTSGraph::getNumberOfObjects()
+{
+  // TODO: needs to be adapted when new types of selectable objects are added
+  return graph->getNumberOfStates();
+}
+
+void LTSGraph::deselect()
+{
+  if(selectedState != NULL)
+  {
+    selectedState->deselect();
+  }
+
+  if(selectedTransition != NULL)
+  {
+    selectedTransition->deselect();
+  }
+  
+  selectedState = NULL;
+  selectedTransition = NULL;
+}
+
+void LTSGraph::selectState(size_t selectedObject)
+{
+  selectedState = graph->selectState(selectedObject);
+}
+
+void LTSGraph::selectTransition(size_t state, size_t transition)
+{
+  selectedTransition = graph->selectTransition(state, transition);
+}
+
+void LTSGraph::selectSelfLoop(size_t state, size_t transition)
+{
+  selectedTransition = graph->selectSelfLoop(state, transition);
+}
