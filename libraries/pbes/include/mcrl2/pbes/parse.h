@@ -150,8 +150,12 @@ namespace pbes_system {
     pbesspec = pbesspec + "\nmu dummy1 = true;";
 
     // for each expression add an equation to the pbes
-    std::vector<std::string> paragraphs = core::split_paragraphs(expressions_text);
-    for (std::vector<std::string>::iterator i = paragraphs.begin(); i != paragraphs.end(); ++i)
+    std::vector<std::string> expressions = core::split(expressions_text, ";");
+    if (!expressions.empty() && boost::trim_copy(expressions.back()).empty())
+    {
+      expressions.pop_back();
+    }
+    for (std::vector<std::string>::iterator i = expressions.begin(); i != expressions.end(); ++i)
     {
       pbesspec = pbesspec
         + "\nmu "
@@ -182,7 +186,7 @@ namespace pbes_system {
     }
 
     atermpp::vector<pbes_expression> result;
-    for (pbes<>::container_type::iterator i = p.equations().end() - paragraphs.size(); i != p.equations().end(); ++i)
+    for (pbes<>::container_type::iterator i = p.equations().end() - expressions.size(); i != p.equations().end(); ++i)
     {
       result.push_back(i->formula());
     }
@@ -210,165 +214,6 @@ namespace pbes_system {
   {
     return parse_pbes_expressions(var_spec + "\nexpressions\n" + text).first.front();
   }
-
-/*
-  /// Parses a sequence of pbes expressions. The format of the text is as
-  /// follows:
-  /// <ul>
-  /// <li>an mCRL2 data specification</li>
-  /// <li><tt>"variables"</tt>, followed by a comma-separated list of variable declarations</li>
-  /// <li><tt>"expressions"</tt>, followed by a sequence of modal formulas separated by newlines</li>
-  /// </ul>
-  inline
-  std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text)
-  {
-    text = core::remove_comments(text);
-    std::vector<pbes_expression> result;
-    const std::string separator1 = "variables";
-    const std::string separator2 = "expressions";
-
-    std::string::size_type i = text.find(separator1);
-    std::string::size_type j = text.find(separator2);
-
-    if (i == std::string::npos) {
-      std::cout << "Error in parse_pbes_expressions: could not find keyword '" << separator1 << "'." << std::endl;
-      return std::make_pair(result, data::data_specification());
-    }
-    if (j == std::string::npos) {
-      std::cout << "Error in parse_pbes_expressions: could not find keyword '" << separator2 << "'." << std::endl;
-      return std::make_pair(result, data::data_specification());
-    }
-
-    std::string data_text = text.substr(0, i);
-    std::string::size_type k = i + separator1.size();
-    std::string variables_text = text.substr(k, j - k);
-    std::string expressions_text = text.substr(j + separator2.size());
-
-    std::string spec_text = data_text + "\ninit delta;\n";
-    data::data_specification data_spec = data::parse_data_specification(data_text);
-
-    boost::trim(variables_text);
-    if (variables_text.size() > 0)
-    {
-      variables_text = "(" + variables_text + ")";
-    }
-
-    std::vector<std::string> paragraphs = core::split_paragraphs(expressions_text);
-    for (std::vector<std::string>::iterator i = paragraphs.begin(); i != paragraphs.end(); ++i)
-    {
-      std::string formula_text = "nu X" + variables_text + "." + *i;
-      pbes<> p = lps2pbes(spec_text, formula_text, false);
-      pbes_expression e = p.equations().front().formula();
-      result.push_back(e);
-    }
-
-    return std::make_pair(result, data_spec);
-  }
-*/
-
-/*
-  /// Parses a pbes expression.
-  /// \param[in] text The text that is parsed.
-  /// \param[in] var_spec An optional specification of data variables and predicate variables
-  /// with their types.<br>
-  /// An example of this is:
-  /// \code
-  /// datavar
-  ///   n: Nat;
-  ///
-  /// predvar
-  ///   X: Pos;
-  ///   Y: Nat, Bool;
-  ///
-  /// \endcode
-  /// \result the parsed expression
-  inline
-  pbes_expression parse_pbes_expression(std::string text, std::string var_spec)
-  {
-    std::string unique_prefix("UNIQUE_PREFIX_4123478");
-    int index = 0;
-    
-    var_spec = core::remove_comments(var_spec);
-    const std::string separator1 = "datavar";
-    const std::string separator2 = "predvar";
-
-    std::string::size_type i = var_spec.find(separator1);
-    std::string::size_type j = var_spec.find(separator2);
-    if (i == std::string::npos) {
-      throw std::runtime_error("Error in parse_pbes_expression: could not find keyword " + separator1);
-    }
-    if (j == std::string::npos) {
-      throw std::runtime_error("Error in parse_pbes_expression: could not find keyword " + separator2);
-    }
-
-    std::string::size_type k = i + separator1.size();
-    std::string datavar_text = var_spec.substr(k, j - k);
-    std::string predvar_text = var_spec.substr(j + separator2.size());
-
-    // the generated pbes specification
-    std::string pbesspec = "pbes";
-
-    std::vector<std::string> pwords = core::split(predvar_text, ";");
-    for (std::vector<std::string>::iterator i = pwords.begin(); i != pwords.end(); ++i)
-    {
-      if (boost::trim_copy(*i).empty())
-      {
-        continue;
-      }
-      std::vector<std::string> args;
-      std::vector<std::string> words = core::split(*i, ":");
-      std::string var = boost::trim_copy(words[0]);
-      if (words.size() >= 2 && !boost::trim_copy(words[1]).empty())
-      {
-        args = core::split(boost::trim_copy(words[1]), "#");
-      }
-      for (std::vector<std::string>::iterator j = args.begin(); j != args.end(); ++j)
-      {
-        std::vector<std::string> w = core::split(*j, ",");
-        for (std::vector<std::string>::iterator k = w.begin(); k != w.end(); ++k)
-        {
-          *k = unique_prefix + boost::lexical_cast<std::string>(index++) + ": " + *k;
-        }
-        *j = boost::algorithm::join(w, ", ");
-      }
-      std::string arg;
-      if (!args.empty())
-      {
-        arg = "(" + boost::algorithm::join(args, ", ") + ")";
-      }
-      pbesspec = pbesspec + "\nmu " + var + arg + " = true;";
-    }
-
-    datavar_text = core::remove_whitespace(datavar_text);
-    if (datavar_text[datavar_text.size() - 1] == ';')
-    {
-      datavar_text = datavar_text.erase(datavar_text.size() - 1);
-    }
-    else
-    {
-      throw std::runtime_error("Error in parse_pbes_expression: '" + datavar_text + "' has no trailing semicolon");
-    }
-    datavar_text = core::regex_replace(";", ", ", datavar_text);
-    pbesspec = pbesspec + "\nmu dummy1 = true;";
-    pbesspec = pbesspec + "\nmu dummy2(" + datavar_text + ") = " + text + ";";
-    pbesspec = pbesspec + "\ninit dummy1;";
-
-    pbes<> p;
-    std::stringstream in(pbesspec);
-    try
-    {
-      in >> p;
-    }
-    catch (std::runtime_error e)
-    {
-      std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
-                << pbesspec
-                << std::endl;
-      throw e;
-    }
-    return p.equations().back().formula();    
-  }
-*/
 
 } // namespace pbes_system
 
