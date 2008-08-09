@@ -36,7 +36,7 @@ class State
     double getY() const;
 
     std::string getLabel() const;
-    unsigned int getValue() const;
+    size_t getValue() const;
 
     size_t getNumberOfTransitions() const;
     size_t getNumberOfInTransitions() const;
