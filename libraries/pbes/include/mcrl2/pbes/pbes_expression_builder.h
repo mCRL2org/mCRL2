@@ -131,7 +131,7 @@ struct pbes_builder
     using namespace accessors;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << pp(e) << " " << e << std::endl;
+std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
 #endif
 
     pbes_expression result;
@@ -206,8 +206,18 @@ std::cout << "<visit>" << pp(e) << " " << e << std::endl;
       }
     }
 
+    // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
+    if (is_pbes_true(result))
+    {
+      result = data::data_expr::true_();
+    }
+    if (is_pbes_false(result))
+    {
+      result = data::data_expr::false_();
+    }
+
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << pp(result) << std::endl;
+std::cout << "<visit result>" << core::pp(result) << " " << result << std::endl;
 #endif
 
     return result;

@@ -18,8 +18,8 @@ namespace core {
 
 namespace detail {
 
-  template <typename T, typename UnaryFunction, typename UnaryPredicate>
-  T optimized_not(T arg, UnaryFunction not_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  template <typename T1, typename T2, typename UnaryFunction, typename UnaryPredicate>
+  T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(arg))
       return false_;
@@ -29,8 +29,8 @@ namespace detail {
       return not_(arg);
   }
 
-  template <typename T, typename UnaryPredicate, typename BinaryFunction>
-  T optimized_and(T left, T right, BinaryFunction and_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;
@@ -46,8 +46,8 @@ namespace detail {
       return and_(left, right);
   }
 
-  template <typename T, typename UnaryPredicate, typename BinaryFunction>
-  T optimized_or(T left, T right, BinaryFunction or_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return true_;
@@ -63,8 +63,8 @@ namespace detail {
       return or_(left, right);
   }
 
-  template <typename T, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
-  T optimized_imp(T left, T right, BinaryFunction imp, UnaryFunction not_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
+  T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;

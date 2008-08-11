@@ -155,7 +155,7 @@ namespace detail {
         }
         catch (enumerate_quantifier_stop_early /* a */) {
           A.clear();
-          A.insert(pbes_expr::false_());
+          A.insert(data::data_expr::false_());
           break;
         }
       }
@@ -196,7 +196,7 @@ namespace detail {
                                            super::m_data_rewriter,
                                            m_data_enumerator,
                                            *this,
-                                           pbes_expr::false_(),
+                                           data::data_expr::false_(),
                                            enumerate_quantifiers_join_and()
                                           ).first;
     }
@@ -211,7 +211,7 @@ namespace detail {
                                            super::m_data_rewriter,
                                            m_data_enumerator,
                                            *this,
-                                           pbes_expr::true_(),
+                                           data::data_expr::true_(),
                                            enumerate_quantifiers_join_or()
                                           ).first;
     }

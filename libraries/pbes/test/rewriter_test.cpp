@@ -9,6 +9,8 @@
 /// \file rewriter_test.cpp
 /// \brief Test for the pbes rewriters.
 
+// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/parse.h"

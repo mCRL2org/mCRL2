@@ -102,16 +102,14 @@ namespace detail {
     ///
     pbes_expression visit_true(const pbes_expression& x, argument_type& arg)
     {
-      using namespace pbes_expr;
-      return true_();
+      return data::data_expr::true_();
     }
 
     /// Visit false node.
     ///
     pbes_expression visit_false(const pbes_expression& x, argument_type& arg)
     {
-      using namespace pbes_expr;
-      return false_();
+      return data::data_expr::false_();
     }
 
     /// Visit not node.
@@ -122,12 +120,12 @@ namespace detail {
       if (is_true(n))
       {
         arg.second = false;
-        return false_();
+        return data::data_expr::false_();
       }
       if (is_false(n))
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       return pbes_expression(); // continue recursion
     }
@@ -148,12 +146,12 @@ namespace detail {
       if (is_false(left))
       {
         arg.second = false;
-        return false_();
+        return data::data_expr::false_();
       }
       if (is_false(right))
       {
         arg.second = false;
-        return false_();
+        return data::data_expr::false_();
       }
       if (left == right)
       {
@@ -170,12 +168,12 @@ namespace detail {
       if (is_true(left))
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       if (is_true(right))
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       if (is_false(left))
       {
@@ -204,17 +202,17 @@ namespace detail {
       if (is_false(left))
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       if (is_true(right))
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       if (left == right)
       {
         arg.second = false;
-        return true_();
+        return data::data_expr::true_();
       }
       if (is_false(right))
       {
