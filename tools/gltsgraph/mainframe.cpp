@@ -11,8 +11,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-MainFrame::MainFrame(LTSGraph* owner)
-  : wxFrame(NULL, wxID_ANY, wxT("LTSGraph"))
+MainFrame::MainFrame(GLTSGraph* owner)
+  : wxFrame(NULL, wxID_ANY, wxT("GLTSGraph"))
 {
   app = owner;
 
@@ -40,7 +40,7 @@ void MainFrame::setupMenuBar()
   fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"), 
                wxT("Export this LTS to file."));
 
-  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph."));
+  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit GLTSGraph."));
   
   // View menu
   wxMenu* viewMenu = new wxMenu;

@@ -1,13 +1,13 @@
 #ifndef SPRING_LAYOUT_H
 #define SPRING_LAYOUT_H
 #include "layoutalgo.h"
-#include "ltsgraph.h"
+#include "gltsgraph.h"
 
 // This class defines the "spring layout" algorithm of the original LTSgraph
 class SpringLayout : public LayoutAlgorithm 
 {
   public:
-    SpringLayout(LTSGraph* owner);
+    SpringLayout(GLTSGraph* owner);
     void setupPane(wxPanel* pane);
     void stop();
 
@@ -21,7 +21,7 @@ class SpringLayout : public LayoutAlgorithm
     bool stopped;
 
     wxPanel* pane;
-    LTSGraph* app;
+    GLTSGraph* app;
 
     void layoutGraph(Graph* g);
 

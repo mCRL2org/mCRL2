@@ -9,11 +9,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>ltsgraph</string>
+	<string>gltsgraph</string>
 	<key>CFBundleIconFile</key>
-	<string>ltsgraph.icns</string>
+	<string>gltsgraph.icns</string>
 	<key>CFBundleName</key>
-	<string>ltsgraph</string>
+	<string>gltsgraph</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
@@ -23,7 +23,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>ltsgraph January 2008, (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
+	<string>gltsgraph January 2008, (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
 	<key>CFBundleLongVersionString</key>
 	<string>January 2008 release, (c) 2005-2008 OAS, TUE, NL</string>
 	<key>NSHumanReadableCopyright</key>

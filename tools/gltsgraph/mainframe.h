@@ -4,9 +4,9 @@
 #include <wx/frame.h>
 
 #ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+  #include "gltsgraph.h"
 #else
-  class LTSGraph; // Forward declaration
+  class GLTSGraph; // Forward declaration
 #endif
 
 #ifndef GLCANVAS_H
@@ -26,13 +26,13 @@
 class MainFrame : public wxFrame
 {
   public:
-    MainFrame(LTSGraph *owner);
+    MainFrame(GLTSGraph *owner);
     GLCanvas* getGLCanvas(); 
     
     void setLTSInfo(int is, int ns, int nt, int nl);
 
   private:
-    LTSGraph *app;
+    GLTSGraph *app;
     GLCanvas *glCanvas;
     AlgoDialog *algoDlg;
     InfoDialog *infoDlg;

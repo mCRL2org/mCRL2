@@ -13,6 +13,12 @@
 #include "font/character_set.xpm"
 #include <wx/image.h>
 
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+
 namespace mcrl2 {
   namespace utilities {
     

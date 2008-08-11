@@ -3,15 +3,15 @@
 
 #include <wx/dialog.h>
 
-#include "ltsgraph.h"
+#include "gltsgraph.h"
 
 class AlgoDialog : public wxDialog 
 {
   public:
-    AlgoDialog(LTSGraph* owner, wxWindow* parent);
+    AlgoDialog(GLTSGraph* owner, wxWindow* parent);
   
   private:
-    LTSGraph* app;
+    GLTSGraph* app;
 
 };
 

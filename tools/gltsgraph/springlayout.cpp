@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE(SpringLayout, wxEvtHandler)
 END_EVENT_TABLE()
 
 
-SpringLayout::SpringLayout(LTSGraph* owner)
+SpringLayout::SpringLayout(GLTSGraph* owner)
 {
   app = owner;
   edgeStiffness = 1;

@@ -3,7 +3,7 @@
 #include <sstream>
 #include "ids.h"
 
-Visualizer::Visualizer(LTSGraph* app)
+Visualizer::Visualizer(GLTSGraph* app)
 {
   owner = app;
   width = 0;

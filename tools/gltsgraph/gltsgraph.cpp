@@ -1,7 +1,7 @@
 #define NAME "ltsgraph"
 #define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
 
-#include "ltsgraph.h"
+#include "gltsgraph.h"
 #include "ltsimporter.h"
 #include "springlayout.h"
 
@@ -86,7 +86,7 @@ void parse_command_line(int argc, wxChar** argv)
 }
 
 
-bool LTSGraph::OnInit()
+bool GLTSGraph::OnInit()
 {
   parse_command_line(argc, argv);
 
@@ -115,7 +115,7 @@ bool LTSGraph::OnInit()
   return true;
 }
 
-int LTSGraph::OnExit() {
+int GLTSGraph::OnExit() {
  
   return (wxApp::OnExit());
 }
@@ -137,7 +137,7 @@ int LTSGraph::OnExit() {
 */
 
 
-void LTSGraph::printHelp(std::string const &name) {
+void GLTSGraph::printHelp(std::string const &name) {
   std::cout << "Usage: " << name << " [INFILE]" << std::endl 
        << "Draw graphs and optimize their layout in a graphical environment."
        << "If INFILE (LTS file: *.aut or *.svc) is supplied," 
@@ -157,7 +157,7 @@ void LTSGraph::printHelp(std::string const &name) {
        << std::endl;
 }
 
-IMPLEMENT_APP_NO_MAIN(LTSGraph)
+IMPLEMENT_APP_NO_MAIN(GLTSGraph)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 }
 #endif
 
-void LTSGraph::openFile(std::string const &path)
+void GLTSGraph::openFile(std::string const &path)
 {
   // Find out file format based on extension
   std::string ext = path.substr(path.find_last_of( '.' ) + 1);
@@ -230,22 +230,22 @@ void LTSGraph::openFile(std::string const &path)
   // Setup graph in rest of tool.
 }
 
-Graph* LTSGraph::getGraph()
+Graph* GLTSGraph::getGraph()
 {
   return graph;
 }
 
-size_t LTSGraph::getNumberOfAlgorithms() const
+size_t GLTSGraph::getNumberOfAlgorithms() const
 {
   return algorithms.size();
 }
 
-LayoutAlgorithm* LTSGraph::getAlgorithm(size_t i) const
+LayoutAlgorithm* GLTSGraph::getAlgorithm(size_t i) const
 {
   return algorithms[i];
 }
 
-void LTSGraph::display()
+void GLTSGraph::display()
 {
   if(glCanvas)
   {
@@ -261,7 +261,7 @@ void LTSGraph::display()
   }
 }
 
-void LTSGraph::moveObject(double x, double y)
+void GLTSGraph::moveObject(double x, double y)
 {
   if(selectedState != NULL)
   {
@@ -278,7 +278,7 @@ void LTSGraph::moveObject(double x, double y)
   }
 }
 
-void LTSGraph::lockObject()
+void GLTSGraph::lockObject()
 {
   if(selectedState != NULL)
   {
@@ -287,13 +287,13 @@ void LTSGraph::lockObject()
 }
 
 
-size_t LTSGraph::getNumberOfObjects()
+size_t GLTSGraph::getNumberOfObjects()
 {
   // TODO: needs to be adapted when new types of selectable objects are added
   return graph->getNumberOfStates();
 }
 
-void LTSGraph::deselect()
+void GLTSGraph::deselect()
 {
   if(selectedState != NULL)
   {
@@ -309,17 +309,17 @@ void LTSGraph::deselect()
   selectedTransition = NULL;
 }
 
-void LTSGraph::selectState(size_t selectedObject)
+void GLTSGraph::selectState(size_t selectedObject)
 {
   selectedState = graph->selectState(selectedObject);
 }
 
-void LTSGraph::selectTransition(size_t state, size_t transition)
+void GLTSGraph::selectTransition(size_t state, size_t transition)
 {
   selectedTransition = graph->selectTransition(state, transition);
 }
 
-void LTSGraph::selectSelfLoop(size_t state, size_t transition)
+void GLTSGraph::selectSelfLoop(size_t state, size_t transition)
 {
   selectedTransition = graph->selectSelfLoop(state, transition);
 }

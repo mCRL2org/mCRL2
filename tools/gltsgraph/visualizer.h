@@ -2,16 +2,16 @@
 #define VISUALIZER_H
 
 #ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+  #include "gltsgraph.h"
 #else
-  class LTSGraph;
+  class GLTSGraph;
 #endif
 #include "state.h"
 #include "mcrl2/utilities/font_renderer.h"
 class Visualizer
 {
   public:
-    Visualizer(LTSGraph* app);
+    Visualizer(GLTSGraph* app);
     ~Visualizer();
     
     void visualize(double width, double height, double pixelSize, 
@@ -25,7 +25,7 @@ class Visualizer
     void setPixelSize(double size);
     // Getters
   private:
-    LTSGraph* owner;
+    GLTSGraph* owner;
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height

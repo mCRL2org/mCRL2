@@ -15,7 +15,7 @@
 
 #include <wx/app.h>
 
-class LTSGraph : public wxApp
+class GLTSGraph : public wxApp
 {
   private:
     Graph *graph; // The labeled transition system (graph) that we work on

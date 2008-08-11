@@ -3,6 +3,12 @@
 #include <iostream>
 #include "ids.h"
 
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+
 BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_PAINT(GLCanvas::onPaint)
   EVT_SIZE(GLCanvas::onSize)
@@ -14,10 +20,10 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_MOTION(GLCanvas::onMouseMove)
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
+GLCanvas::GLCanvas(GLTSGraph* app, wxWindow* parent,
                    const wxSize &size, int* attribList)
   : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER,
-               wxT(""), attribList)
+               wxEmptyString, attribList)
 {
   owner = app;
   displayAllowed = false;

@@ -4,9 +4,9 @@
 #include <wx/glcanvas.h>
 
 #ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+  #include "gltsgraph.h"
 #else
-  class LTSGraph;
+  class GLTSGraph;
 #endif
 
 #ifndef VISUALIZER_H
@@ -19,7 +19,7 @@ class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          LTSGraph* app, 
+          GLTSGraph* app, 
           wxWindow* parent, 
           const wxSize &size = wxDefaultSize, 
           int* attribList = NULL);
@@ -45,7 +45,7 @@ class GLCanvas : public wxGLCanvas
     double getPixelSize();
 
   private:
-    LTSGraph* owner;
+    GLTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
     double scaleFactor; 
