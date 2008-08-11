@@ -13,7 +13,7 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 

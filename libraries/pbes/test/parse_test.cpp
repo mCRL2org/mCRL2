@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes_parse.h"
 
 using namespace mcrl2::pbes_system;
 

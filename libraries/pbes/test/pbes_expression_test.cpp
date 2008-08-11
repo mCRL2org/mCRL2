@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes_parse.h"
 
 using namespace std;
 using namespace atermpp;
