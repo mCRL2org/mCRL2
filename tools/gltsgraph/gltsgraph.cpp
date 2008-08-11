@@ -88,8 +88,8 @@ void parse_command_line(int argc, wxChar** argv)
 
 bool GLTSGraph::OnInit()
 {
-  parse_command_line(argc, argv);
-
+  selectedState = NULL;
+  selectedTransition = NULL;
   SpringLayout* springLayout = new SpringLayout(this);
   algorithms.push_back(springLayout);
 /*  GemLayout* gemLayout = new GemLayout(this);
@@ -115,27 +115,36 @@ bool GLTSGraph::OnInit()
   return true;
 }
 
+bool GLTSGraph::Initialize(int& argc, wxChar** argv) 
+{
+  try {
+    parse_command_line(argc, argv);
+  }
+  catch (std::exception &e)
+  {
+    if(wxApp::Initialize(argc, argv)) 
+    {
+      parse_error = std::string(e.what()).
+        append("\n\nNote that other command line options may have been ignored because of this error.");
+    }
+    else
+    {
+      std::cerr << e.what() <<std::endl;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  return wxApp::Initialize(argc, argv);
+}
+
+
 int GLTSGraph::OnExit() {
  
   return (wxApp::OnExit());
 }
-
-/*  private:	
-    void init_frame(std::string lts_file_argument) {
-      GraphFrame *frame;
-	
-      wxSize maximum_size = wxGetClientDisplayRect().GetSize();
-
-      frame = new GraphFrame(wxT(NAME), wxPoint(150, 150),
-                     wxSize((std::min)(maximum_size.GetWidth(),INITIAL_WIN_WIDTH), (std::min)(maximum_size.GetHeight(),INITIAL_WIN_HEIGHT)));
-      frame->Show(true);
-      frame->GetSizer()->RecalcSizes();
-      if (!lts_file_argument.empty()) {
-        frame->Init(wxString(lts_file_argument.c_str(), wxConvLocal));
-      }
-    }
-*/
-
 
 void GLTSGraph::printHelp(std::string const &name) {
   std::cout << "Usage: " << name << " [INFILE]" << std::endl 

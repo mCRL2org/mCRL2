@@ -30,9 +30,12 @@ class GLTSGraph : public wxApp
     State* selectedState;
     Transition* selectedTransition;
 
+    std::string parse_error;
+
   public:
     virtual int OnExit();   
     virtual bool OnInit();
+    bool Initialize(int& argc, wxChar** argv);
     
     void openFile(std::string const &path);
     void display();
