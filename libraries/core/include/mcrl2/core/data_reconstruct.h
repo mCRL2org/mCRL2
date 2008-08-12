@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_reconstruct.h
+/// \file mcrl2/core/data_reconstruct.h
 ///
 /// \brief Reconstruct data types from mCRL2 specification and expressions.
 

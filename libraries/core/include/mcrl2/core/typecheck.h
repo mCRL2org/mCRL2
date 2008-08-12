@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file typecheck.h
+/// \file mcrl2/core/typecheck.h
 /// \brief Type check parsed mCRL2 specifications and expressions.
 
 #ifndef PARSER_TYPECHECK_H

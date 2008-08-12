@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file print.h
+/// \file mcrl2/core/print.h
 /// \brief Functions for pretty printing ATerms.
 
 #ifndef MCRL2_PRINT_H

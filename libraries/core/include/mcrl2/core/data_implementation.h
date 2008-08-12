@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_implementation.h
+/// \file mcrl2/core/data_implementation.h
 ///
 /// \brief Implement data types in type checked mCRL2 specifications and expressions.
 

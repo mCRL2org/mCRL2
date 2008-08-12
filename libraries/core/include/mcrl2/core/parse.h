@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parse.h
+/// \file mcrl2/core/parse.h
 ///
 /// \brief Parse mCRL2 specifications and expressions.
 
