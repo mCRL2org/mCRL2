@@ -13,7 +13,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace std;

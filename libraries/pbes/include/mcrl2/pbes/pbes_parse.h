@@ -196,7 +196,7 @@ namespace pbes_system {
 
   /// Parses a single pbes expression.
   /// \param[in] text The text that is parsed.
-  /// \param[in] var_spec An optional specification of data variables and predicate variables
+  /// \param[in] var_spec An optional declaration of data variables and predicate variables
   /// with their types.<br>
   /// An example of this is:
   /// \code
@@ -210,9 +210,9 @@ namespace pbes_system {
   /// \endcode
   /// \result the parsed expression
   inline
-  pbes_expression parse_pbes_expression(std::string text, std::string var_spec)
+  pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n")
   {
-    return parse_pbes_expressions(var_spec + "\nexpressions\n" + text).first.front();
+    return parse_pbes_expressions(var_decl + "\nexpressions\n" + text).first.front();
   }
 
 } // namespace pbes_system

@@ -16,6 +16,7 @@ exe pbes_rewrite : pbes_rewrite.cpp : ;
 exe pbesparelm   : pbesparelm.cpp : ;
 exe pbesconstelm : pbesconstelm.cpp : ;
 exe pbesrewr     : pbesrewr.cpp : ;
+exe datarewrite  : datarewrite.cpp : ;
 
 install dist
    :
@@ -26,5 +27,6 @@ install dist
      pbesparelm
      pbesconstelm
      pbesrewr
+     datarewrite
    :
    ;
