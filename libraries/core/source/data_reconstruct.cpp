@@ -1690,7 +1690,6 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
 {
   assert(p_ctx != NULL);
 
-//  gsDebugMsg("Calculating recogniser and projection functions\n");
   ATermList struct_sorts = p_ctx->sorts_table.table_keys();
 
   // Check for equations that have sufficient equations to be a recogniser
@@ -1714,25 +1713,26 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
     ATermList maps = p_ctx->sort_mappings[sort].elements();
     // determine for each of the mappings whether it could be a recogniser or a
     // projection function.
-    while(!ATisEmpty(maps)) {
+    while(!ATisEmpty(maps))
+    {
       ATermAppl map = ATAgetFirst(maps);
       assert(gsIsOpId(map));
       if (!ATisEqual(gsMakeOpIdNameIf(), gsGetName(map)) &&
           !ATisEqual(gsMakeOpIdNameEq(), gsGetName(map)) &&
-          !ATisEqual(gsMakeOpIdNameNeq(), gsGetName(map))) { // ==. if. != cannot be recogniser/projection
-
+          !ATisEqual(gsMakeOpIdNameNeq(), gsGetName(map)))
+      { // ==. if. != cannot be recogniser/projection
         // map is possibly a recogniser or a projection function.
         ATermAppl map_sort = gsGetSort(map);
         if (gsIsSortArrow(map_sort))
         { // A recogniser or projection function always has a function type...
           if(ATgetLength(ATLgetArgument(map_sort, 0)) == 1)
           { //... with exactly one argument
-          if(ATisEqual(gsGetSortExprResult(map_sort), gsMakeSortExprBool()))
-          { // if the result sort is a boolean map might be a recogniser
-            // a recogniser satisfies #equations = #constructors, and there must
-            // be constructors because it belongs to a structured sort.
-            if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]
-              || p_ctx->num_sort_constructors[sort] == 0)
+            if(ATisEqual(gsGetSortExprResult(map_sort), gsMakeSortExprBool()))
+            { // if the result sort is a boolean map might be a recogniser
+              // a recogniser satisfies #equations = #constructors, and there must
+              // be constructors because it belongs to a structured sort.
+              if(p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]
+                || p_ctx->num_sort_constructors[sort] == 0)
               { // If this is not the case, map could still be a projection function,
                 // but then it has to have 1 equation.
                 if (p_ctx->num_map_equations[map] != 1)
@@ -1746,7 +1746,7 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
                   {
                     remove_mapping_not_list(map, sort, p_ctx);
                   }
-                }
+                } // end if (p_ctx->num_map_equations[map] != 1)
               } else {
                 // map has the right form to be a recogniser, but beware, it
                 // might as well be a projection function in some degenerate
@@ -1781,28 +1781,31 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
                   }
                   else
                   {
-                  remove_mapping_not_list(map, sort, p_ctx);
-                  }
-                }
+                    remove_mapping_not_list(map, sort, p_ctx);
+                  } // end if r
+                } // end if (p_ctx->num_map_equations[map] == 1)
+              } // end if (p_ctx->num_map_equations[map] != p_ctx->num_sort_constructors[sort]
+                //        || p_ctx->num_sort_constructors[sort] == 0)
+            } // end if (ATisEqual(gsGetSortExprResult(map_sort), gsMakeSortExprBool()))
+            else if (p_ctx->num_map_equations[map] == 1)
+            { // (ATgetLength(ATLgetArgument(map_sort, 0)) != 1)
+              // This might be a projection function, check the signature
+              ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
+              if (!is_projection_equation(eqn))
+              {
+                remove_mapping_not_list(map, sort, p_ctx);
               }
             }
-          }
-          else if (p_ctx->num_map_equations[map] == 1)
-          {
-            // This might be a projection function, check the signature
-            ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
-            if (!is_projection_equation(eqn))
-            {
+            else
+            { // This is neither a recogniser, nor a projection function
+              // (ATgetLength(ATLgetArgument(map_sort, 0)) == 1) && #equations != 1
               remove_mapping_not_list(map, sort, p_ctx);
             }
-          }
-          else
-          { // This is neither a recogniser, nor a projection function
-            remove_mapping_not_list(map, sort, p_ctx);
-          }
+          } // end if (ATgetLength(ATLgetArgument(map_sort, 0)) == 1)
         } //endif gsIsSortArrow
         else
         { // A constant function is also not a recogniser, nor a projection function
+          // !gsIsSortArrow(sort)
           remove_mapping_not_list(map, sort, p_ctx);
         }
       } // endif if, ==, !=
@@ -1823,29 +1826,43 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
 //  gsDebugMsg("Flatten mappings and equations\n");
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
-    // Mappings
-    ATermList elts = p_ctx->sort_mappings[ATAgetFirst(l)].elements();
-    while (!ATisEmpty(elts)) {
-      mappings->put(ATAgetFirst(elts), (ATerm) ATtrue);
-      elts = ATgetNext(elts);
-    }
-    // Constructor induced equations
-    elts = p_ctx->sort_cons_equations[ATAgetFirst(l)].elements();
-    while(!ATisEmpty(elts)) {
-      equations->put(ATgetFirst(elts), (ATerm) ATtrue);
-      elts = ATgetNext(elts);
-    }
-    // Per mapping equations for sort
-    ATermList mappings = p_ctx->sort_mappings[ATAgetFirst(l)].elements();
-    while(!ATisEmpty(mappings)) {
-      elts = p_ctx->map_equations[ATAgetFirst(mappings)].elements();
+    ATermAppl sort = ATAgetFirst(l);
+      // Mappings
+      ATermList elts = p_ctx->sort_mappings[ATAgetFirst(l)].elements();
       while (!ATisEmpty(elts)) {
-        equations->put(ATgetFirst(elts), (ATerm) ATtrue);
+        ATermAppl elt = ATAgetFirst(elts);
+        if (ATisEqual(elt, gsMakeOpIdIf(sort)) || ATisEqual(elt, gsMakeOpIdEq(sort)) ||
+            ATisEqual(elt, gsMakeOpIdNeq(sort)) || p_ctx->composite_sorts.get(sort) == sort)
+        {
+          mappings->put(ATAgetFirst(elts), (ATerm) ATtrue);
+        }
         elts = ATgetNext(elts);
       }
-      mappings = ATgetNext(mappings);
+      // Constructor induced equations
+      elts = p_ctx->sort_cons_equations[ATAgetFirst(l)].elements();
+      while(!ATisEmpty(elts)) {
+        ATermAppl elt = ATAgetFirst(elts);
+        if (is_system_defined_equation(elt) || p_ctx->composite_sorts.get(sort) == sort)
+        {
+          equations->put(ATgetFirst(elts), (ATerm) ATtrue);
+        }
+        elts = ATgetNext(elts);
+      }
+      // Per mapping equations for sort
+      ATermList mappings = p_ctx->sort_mappings[ATAgetFirst(l)].elements();
+      while(!ATisEmpty(mappings)) {
+        elts = p_ctx->map_equations[ATAgetFirst(mappings)].elements();
+        while (!ATisEmpty(elts)) {
+          ATermAppl elt = ATAgetFirst(elts);
+          if (is_system_defined_equation(elt) || p_ctx->composite_sorts.get(sort) == sort)
+          {
+            equations->put(ATgetFirst(elts), (ATerm) ATtrue);
+          }
+          elts = ATgetNext(elts);
+        }
+        mappings = ATgetNext(mappings);
+      }
     }
-  }
 }
 
 void remove_constructors(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
@@ -1882,7 +1899,7 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
     if (!ATisEqual(p_mappings->get(op), ATtrue) &&
         !is_lambda_op_id(op)) {
       mappings = ATinsert(mappings, (ATerm) op);
-    } 
+    }
     p_data_decls->ops = ATgetNext(p_data_decls->ops);
   }
   p_data_decls->ops = ATreverse(mappings);
