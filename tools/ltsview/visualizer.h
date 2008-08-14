@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visualizer.h
-/// \brief Add your file description here.
+/// \brief Header file for the visualizer
 
 #ifndef VISUALIZER_H
 #define VISUALIZER_H

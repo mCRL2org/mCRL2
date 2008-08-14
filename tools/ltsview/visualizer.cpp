@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visualizer.cpp
-/// \brief Add your file description here.
+/// \brief Implements the visualizer
 
 #include <cmath>
 #include <cstdlib>
@@ -25,6 +25,7 @@ Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   settings = ss;
   settings->subscribe(BranchRotation,this);
   settings->subscribe(BranchTilt,this);
+  settings->subscribe(ClusterHeight,this);
   settings->subscribe(InterpolateColor1,this);
   settings->subscribe(InterpolateColor2,this);
   settings->subscribe(LongInterpolation,this);
@@ -90,6 +91,7 @@ void Visualizer::notify(SettingID s) {
       update_abs = true;
       break;
     case BranchRotation:
+    case ClusterHeight:
       update_matrices = true;
       update_abs = true;
       break;

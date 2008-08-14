@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settings.cpp
-/// \brief Add your file description here.
+/// \brief Implements the settings store
 
 #include <vector>
 #include "settings.h"

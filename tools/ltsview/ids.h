@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ids.h
-/// \brief Add your file description here.
+/// \brief Defines IDs for wxWidget controls
 
 #ifndef IDS_H
 #define IDS_H
@@ -81,6 +81,7 @@ namespace IDs
     myID_SIM_PREV_CLR,
     myID_BRANCH_ROTATION,
     myID_STATE_SIZE,
+    myID_CLUSTER_HEIGHT,
     myID_BRANCH_TILT,
     myID_QUALITY,
     myID_TRANSPARENCY,

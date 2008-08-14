@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settingsdialog.cpp
-/// \brief Add your file description here.
+/// \brief Implements the settings dialog
 
 #include "settingsdialog.h"
 #include <wx/notebook.h>
@@ -36,6 +36,7 @@ BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
   EVT_BUTTON(myID_SIM_PREV_CLR,SettingsDialog::onSimPrevClrButton)
   EVT_SPINCTRL(myID_BRANCH_ROTATION,SettingsDialog::onBranchRotationSpin)
   EVT_SPINCTRL(myID_STATE_SIZE,SettingsDialog::onStateSizeSpin)
+  EVT_SPINCTRL(myID_CLUSTER_HEIGHT,SettingsDialog::onClusterHeightSpin)
   EVT_SPINCTRL(myID_BRANCH_TILT,SettingsDialog::onBranchTiltSpin)
   EVT_SPINCTRL(myID_QUALITY,SettingsDialog::onQualitySpin)
   EVT_SPINCTRL(myID_TRANSPARENCY,SettingsDialog::onTransparencySpin)
@@ -57,9 +58,13 @@ BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
-  : wxDialog(parent,wxID_ANY,wxT("Settings"),wxDefaultPosition) {
+  : wxDialog(parent,wxID_ANY,wxT("Settings"),wxDefaultPosition)
+{
   glCanvas = glc;
   settings = ss;
+
+  settings->subscribe(ClusterHeight,this);
+
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   wxNotebook* nb = new wxNotebook(this,wxID_ANY);
   wxPanel* parPanel = new wxPanel(nb,wxID_ANY);
@@ -83,7 +88,8 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
   SetSize(wxSize(350,-1));
 }
 
-void SettingsDialog::setupParPanel(wxPanel* panel) {
+void SettingsDialog::setupParPanel(wxPanel* panel)
+{
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
@@ -92,15 +98,21 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   long spinStyle = wxSP_ARROW_KEYS;
   long sliderStyle = wxSL_HORIZONTAL|wxSL_AUTOTICKS|wxSL_LABELS;
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(8,2,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(9,2,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(7);
+  sizer->AddGrowableRow(8);
 
   wxSpinCtrl *ssSpin = new wxSpinCtrl(panel,myID_STATE_SIZE,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle,0,1000,
       int(10*settings->getFloat(StateSize)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State size:")),0,lf,bd);
   sizer->Add(ssSpin,0,rf,bd);
+
+  wxSpinCtrl *chSpin = new wxSpinCtrl(panel,myID_CLUSTER_HEIGHT,wxEmptyString,
+      wxDefaultPosition,spinSize,spinStyle,0,1000000,
+      int(10*settings->getFloat(ClusterHeight)));
+  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Cluster height:")),0,lf,bd);
+  sizer->Add(chSpin,0,rf,bd);
   
   wxSpinCtrl *brSpin = new wxSpinCtrl(panel,myID_BRANCH_ROTATION,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle|wxSP_WRAP,0,359,
@@ -142,7 +154,8 @@ void SettingsDialog::setupParPanel(wxPanel* panel) {
   panel->Layout();
 }
 
-void SettingsDialog::setupClrPanel(wxPanel* panel) {
+void SettingsDialog::setupClrPanel(wxPanel* panel)
+{
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
@@ -218,7 +231,8 @@ void SettingsDialog::setupClrPanel(wxPanel* panel) {
   panel->Layout();
 }
 
-void SettingsDialog::setupSimPanel(wxPanel* panel) {   
+void SettingsDialog::setupSimPanel(wxPanel* panel)
+{   
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
@@ -260,7 +274,8 @@ void SettingsDialog::setupSimPanel(wxPanel* panel) {
   panel->Layout();
 }
 
-void SettingsDialog::setupPfmPanel(wxPanel* panel) {
+void SettingsDialog::setupPfmPanel(wxPanel* panel)
+{
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
   int bd = 5;
 
@@ -303,134 +318,182 @@ void SettingsDialog::setupPfmPanel(wxPanel* panel) {
   panel->Layout();
 }
 
-void SettingsDialog::onBackgroundClrButton(wxCommandEvent& event) {
+void SettingsDialog::notify(SettingID s)
+{
+  switch (s)
+  {
+    case ClusterHeight:
+      {
+      wxSpinCtrl* chSpin = static_cast<wxSpinCtrl*>(
+          FindWindowById(myID_CLUSTER_HEIGHT,this));
+      chSpin->SetValue(Utils::round_to_int(10*settings->getFloat(ClusterHeight)));
+      break;
+      }
+    default:
+      break;
+  }
+}
+
+void SettingsDialog::onBackgroundClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(BackgroundColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onDownEdgeClrButton(wxCommandEvent& event) {
+void SettingsDialog::onDownEdgeClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(DownEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onInterpolateClr1Button(wxCommandEvent& event) {
+void SettingsDialog::onInterpolateClr1Button(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(InterpolateColor1,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onInterpolateClr2Button(wxCommandEvent& event) {
+void SettingsDialog::onInterpolateClr2Button(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(InterpolateColor2,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onMarkClrButton(wxCommandEvent& event) {
+void SettingsDialog::onMarkClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(MarkedColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onStateClrButton(wxCommandEvent& event) {
+void SettingsDialog::onStateClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(StateColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onUpEdgeClrButton(wxCommandEvent& event) {
+void SettingsDialog::onUpEdgeClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(UpEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onSimCurrClrButton(wxCommandEvent& event) {
+void SettingsDialog::onSimCurrClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(SimCurrColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onSimPosClrButton(wxCommandEvent& event) {
+void SettingsDialog::onSimPosClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(SimPosColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onSimSelClrButton(wxCommandEvent& event) {
+void SettingsDialog::onSimSelClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(SimSelColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onSimPrevClrButton(wxCommandEvent& event) {
+void SettingsDialog::onSimPrevClrButton(wxCommandEvent& event)
+{
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
   settings->setRGB(SimPrevColor,wxC_to_RGB(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
-void SettingsDialog::onLongInterpolationCheck(wxCommandEvent& event) {
+void SettingsDialog::onLongInterpolationCheck(wxCommandEvent& event)
+{
   settings->setBool(LongInterpolation,event.IsChecked());
   glCanvas->display();
 }
 
-void SettingsDialog::onNavShowBackpointersCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavShowBackpointersCheck(wxCommandEvent& event)
+{
   settings->setBool(NavShowBackpointers,event.IsChecked());
 }
 
-void SettingsDialog::onNavShowStatesCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavShowStatesCheck(wxCommandEvent& event)
+{
   settings->setBool(NavShowStates,event.IsChecked());
 }
 
-void SettingsDialog::onNavShowTransitionsCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavShowTransitionsCheck(wxCommandEvent& event)
+{
   settings->setBool(NavShowTransitions,event.IsChecked());
 }
 
-void SettingsDialog::onNavSmoothShadingCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavSmoothShadingCheck(wxCommandEvent& event)
+{
   settings->setBool(NavSmoothShading,event.IsChecked());
 }
 
-void SettingsDialog::onNavLightingCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavLightingCheck(wxCommandEvent& event)
+{
   settings->setBool(NavLighting,event.IsChecked());
 }
 
-void SettingsDialog::onNavTransparencyCheck(wxCommandEvent& event) {
+void SettingsDialog::onNavTransparencyCheck(wxCommandEvent& event)
+{
   settings->setBool(NavTransparency,event.IsChecked());
 }
 
-void SettingsDialog::onBranchRotationSpin(wxSpinEvent& event) {
+void SettingsDialog::onBranchRotationSpin(wxSpinEvent& event)
+{
   settings->setInt(BranchRotation,event.GetPosition());
   glCanvas->display();
 }
 
-void SettingsDialog::onStateSizeSpin(wxSpinEvent& event) {
+void SettingsDialog::onStateSizeSpin(wxSpinEvent& event)
+{
   settings->setFloat(StateSize,event.GetPosition()/10.0f);
   glCanvas->display();
 }
 
-void SettingsDialog::onBranchTiltSpin(wxSpinEvent& event) {
+void SettingsDialog::onClusterHeightSpin(wxSpinEvent& event)
+{
+  settings->setFloat(ClusterHeight,event.GetPosition()/10.0f);
+  glCanvas->display();
+}
+
+void SettingsDialog::onBranchTiltSpin(wxSpinEvent& event)
+{
   settings->setInt(BranchTilt,event.GetPosition());
   glCanvas->display();
 }
 
-void SettingsDialog::onQualitySpin(wxSpinEvent& event) {
+void SettingsDialog::onQualitySpin(wxSpinEvent& event)
+{
   settings->setInt(Quality,2*event.GetPosition());
   glCanvas->display();
 }
 
-void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event) {
+void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event)
+{
   settings->setFloat(TransitionAttraction,float(event.GetPosition()));
 }
 
-void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event) {
+void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event)
+{
   settings->setFloat(TransitionLength,float(event.GetPosition()));
 }
 
-void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event) {
+void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event)
+{
   settings->setFloat(StateRepulsion,float(event.GetPosition()));
 }
 
-void SettingsDialog::onTransparencySpin(wxSpinEvent& event) {
+void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
+{
   settings->setUByte(Alpha,
       static_cast<unsigned char>((100-event.GetPosition())*2.55f));
   glCanvas->display();

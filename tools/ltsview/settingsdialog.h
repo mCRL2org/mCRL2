@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settingsdialog.h
-/// \brief Add your file description here.
+/// \brief Header file for the settings dialog
 
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
@@ -17,9 +17,10 @@
 #include "settings.h"
 #include "utils.h"
 
-class SettingsDialog: public wxDialog {
+class SettingsDialog: public wxDialog, public Subscriber {
   public:
     SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss);
+    void notify(SettingID s);
     void onBackgroundClrButton(wxCommandEvent& event);
     void onDownEdgeClrButton(wxCommandEvent& event);
     void onInterpolateClr1Button(wxCommandEvent& event);
@@ -40,6 +41,7 @@ class SettingsDialog: public wxDialog {
     void onNavTransparencyCheck(wxCommandEvent& event);
     void onBranchRotationSpin(wxSpinEvent& event);
     void onStateSizeSpin(wxSpinEvent& event);
+    void onClusterHeightSpin(wxSpinEvent& event);
     void onBranchTiltSpin(wxSpinEvent& event);
     void onQualitySpin(wxSpinEvent& event);
     void onTransparencySpin(wxSpinEvent& event);
