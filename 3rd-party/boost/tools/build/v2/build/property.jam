@@ -28,7 +28,7 @@ rule refine ( properties * : requirements * )
     # them so that we can handle 'properties'.
     for local r in $(requirements)
     {
-        # Don't consider conditional requirements.
+        # Do not consider conditional requirements.
         if ! [ MATCH (:) : $(r:G=) ]
         {
             # Note: cannot use a local variable here, so use an ugly name.
@@ -149,15 +149,17 @@ rule expand-subfeatures-in-conditions ( properties * )
                 # passing 'true' as the second parameter.
                 e += [ feature.expand-subfeatures $(c) : true ] ;
             }
-
             if $(e) = $(condition)
             {
+                # (todo)
+                #   This is just an optimization and possibly a premature one at
+                # that.
+                #                             (todo) (12.07.2008.) (Jurko)
                 result += $(p) ;
             }
             else
             {
-                local individual-subfeatures = [ set.difference $(e) : $(condition) ] ;
-                result += $(individual-subfeatures:J=,):$(value) ;
+                result += $(e:J=,):$(value) ;
             }
         }
     }
@@ -229,10 +231,10 @@ rule as-path ( properties * )
 
     if ! $($(entry))
     {
-        # trim redundancy
+        # Trim redundancy.
         properties = [ feature.minimize $(properties) ] ;
 
-        # sort according to path-order
+        # Sort according to path-order.
         properties = [ sequence.insertion-sort $(properties) : path-order ] ;
 
         local components ;
@@ -467,7 +469,8 @@ rule translate-paths ( properties * : path )
 # Assumes that all feature values that start with '@' are names of rules, used
 # in 'context-module'. Such rules can be either local to the module or global.
 # Converts such values into 'indirect-rule' format (see indirect.jam), so they
-# can be called from other modules.
+# can be called from other modules. Does nothing for such values that are
+# already in the 'indirect-rule' format.
 #
 rule translate-indirect ( specification * : context-module )
 {
@@ -480,7 +483,7 @@ rule translate-indirect ( specification * : context-module )
             local v ;
             if [ MATCH "^([^%]*)%([^%]+)$" : $(m) ]
             {
-                # Rule is already in indirect format.
+                # Rule is already in the 'indirect-rule' format.
                 v = $(m) ;
             }
             else
@@ -510,7 +513,7 @@ rule translate-indirect ( specification * : context-module )
 }
 
 
-# Class which maintains a property set -> string mapping.
+# Class maintaining a property set -> string mapping.
 #
 class property-map
 {
@@ -536,7 +539,7 @@ class property-map
 
     # Returns the value associated with 'properties' or any subset of it. If
     # more than one subset has a value assigned to it, returns the value for the
-    # longest subset, if it's unique.
+    # longest subset, if it is unique.
     #
     rule find ( properties + )
     {
@@ -548,7 +551,7 @@ class property-map
     #
     rule find-replace ( properties + : value ? )
     {
-        # First find all matches
+        # First find all matches.
         local matches ;
         local match-ranks ;
         for local i in $(self.all-flags)

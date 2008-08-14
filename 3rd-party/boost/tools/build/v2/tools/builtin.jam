@@ -15,6 +15,7 @@ import toolset : flags ;
 import errors : error ;
 import generate ;
 import generators ;
+import numbers ;
 import os ;
 import print ;
 import project ;
@@ -125,12 +126,12 @@ feature.feature location-prefix : : free ;
 #    unit-test a : a.cpp : <use>b ;
 #    lib b : a.cpp b ;
 #
-# Here, if <use> is not incidental, we'll decide we have two targets for a.obj
-# with different properties, and will complain.
+# Here, if <use> is not incidental, we would decide we have two targets for
+# a.obj with different properties and complain about it.
 #
-# Note that making feature incidental does not mean it's ignored. It may be
-# ignored when creating the virtual target, but the rest of build process will
-# use them.
+# Note that making a feature incidental does not mean it is ignored. It may be
+# ignored when creating a virtual target, but the rest of build process will use
+# them.
 feature.feature use                 : : free dependency incidental ;
 feature.feature dependency          : : free dependency incidental ;
 feature.feature implicit-dependency : : free dependency incidental ;
@@ -145,6 +146,29 @@ feature.feature warnings-as-errors :
     off        # Do not fail the compilation if there are warnings.
     on         # Fail the compilation if there are warnings.
   : incidental propagated ;
+
+# Feature that allows us to configure the maximal template instantiation depth
+# level allowed by a C++ compiler. Applies only to C++ toolsets whose compilers
+# actually support this configuration setting.
+#
+# Note that Boost Build currently does not allow defining features that take any
+# positive integral value as a parameter, which is what we need here, so we just
+# define some of the values here and leave it up to the user to extend this set
+# as he needs using the feature.extend rule.
+#
+# TODO: This should be upgraded as soon as Boost Build adds support for custom
+# validated feature values or at least features allowing any positive integral
+# value. See related Boost Build related trac ticket #194.
+#
+feature.feature c++-template-depth
+    :
+        [ numbers.range 64 1024 : 64 ]
+        [ numbers.range 20 1000 : 10 ]
+        #   Maximum template instantiation depth guaranteed for ANSI/ISO C++
+        # conforming programs.
+        17
+    :
+        incidental optional propagated ;
 
 feature.feature source              :            : free dependency incidental ;
 feature.feature library             :            : free dependency incidental ;
@@ -165,8 +189,8 @@ feature.feature hardcode-dll-paths  : true false : incidental ;
 
 
 # An internal feature that holds the paths of all dependency shared libraries.
-# On Windows, it's needed so that we can add all those paths to PATH when
-# running applications. On Linux, it's needed to add proper -rpath-link command
+# On Windows, it is needed so that we can add all those paths to PATH when
+# running applications. On Linux, it is needed to add proper -rpath-link command
 # line options.
 feature.feature xdll-path : : free path ;
 
@@ -207,7 +231,7 @@ feature.feature architecture :
 
     # HP/PA-RISC
     parisc
-    
+
     # Advanced RISC Machines
     arm
 
@@ -247,7 +271,7 @@ feature.feature instruction-set :
 
     # HP/PA-RISC
     700 7100 7100lc 7200 7300 8000
-    
+
     # Advanced RISC Machines
     armv2 armv2a armv3 armv3m armv4 armv4t armv5 armv5t armv5te armv6 armv6j iwmmxt ep9312
 
@@ -386,6 +410,7 @@ class c-scanner : scanner
     import path ;
     import regex ;
     import scanner ;
+    import sequence ;
     import virtual-target ;
 
     rule __init__ ( includes * )
@@ -394,7 +419,8 @@ class c-scanner : scanner
 
         for local i in $(includes)
         {
-            self.includes += [ path.native $(i:G=) ] ;
+            self.includes += [ sequence.transform path.native
+                                : [ regex.split $(i:G=) "&&" ] ] ;
         }
     }
 

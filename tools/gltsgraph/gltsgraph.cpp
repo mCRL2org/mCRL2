@@ -5,14 +5,17 @@
 #include "ltsimporter.h"
 #include "springlayout.h"
 
-#include <mcrl2/lts/liblts.h>
+#include "mcrl2/lts/liblts.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
-
 
 std::string lts_file_argument;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+// On OS X, a macro called `check' is imported with one of the include directives above
+// which causes compilation failures in Boost header files.
+#undef check
+
 // SQuADT protocol interface
 # include <mcrl2/utilities/squadt_interface.h>
 using namespace mcrl2::utilities::squadt;

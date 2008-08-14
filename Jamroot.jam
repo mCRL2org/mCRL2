@@ -139,7 +139,9 @@ for option in [ modules.peek : ARGV ] {
     local values = [ regex.split $(value) "," ] ;
 
     if ! [ MATCH ^(-).* : $(option) ] {
-      build-options += <$(temporary)>$(values) ;
+      if $(temporary) != link {
+        build-options += <$(temporary)>$(values) ;
+      }
     }
   }
   else if $(option) in debug profile release {
@@ -228,7 +230,7 @@ else {
         : <squadt-interface>disabled
         ;
 }
-   
+
 # Top project
 project toolset
        : build-dir $(BUILD_TOP)

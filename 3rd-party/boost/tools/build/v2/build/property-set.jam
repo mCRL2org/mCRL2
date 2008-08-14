@@ -5,6 +5,8 @@
 
 import "class" : new ;
 import feature ;
+import path ;
+import project ;
 import property ;
 import sequence ;
 import set ;
