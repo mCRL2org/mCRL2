@@ -10,7 +10,7 @@ tool squadt
       : [ sequence.insertion-sort $(source_files) ]
         /site-config//wx_base
         /site-config//boost_md5
-        /libraries/tipi//controller_interface
+        /libraries/tipi//controller-interface
         /libraries/utilities//command_line_interfacing
       : <dependency>/libraries//ticpp
         <define>USING_WX
@@ -20,7 +20,7 @@ tool squadt
 
 exe squadt_proxy
       : squadt_proxy.cpp
-      : <library>/libraries/tipi//tool_interface
+      : <library>/libraries/tipi//tool-interface
       ;
 
 explicit squadt_proxy ;

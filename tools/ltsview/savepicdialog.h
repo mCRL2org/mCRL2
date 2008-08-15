@@ -52,7 +52,7 @@ class SavePicDialog : public wxDialog {
     wxButton*     f_button;
     wxFileName    f_name;
     wxArrayString f_exts;
-    std::vector<long>  f_types;
+    std::vector< wxString >  f_types;
 
     void update_h_spin();
     void update_w_spin();

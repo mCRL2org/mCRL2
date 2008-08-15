@@ -34,6 +34,7 @@ alias configuration : : <os>NT <toolset>msvc :
          <define>_HAS_ITERATOR_DEBUGGING=0
          <define>_SECURE_SCL=0
          <include>$(TOP)/build/workarounds/msvc
+         <exception-handling>on
        ;
 
 # Mac OS X, darwin

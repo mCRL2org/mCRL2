@@ -83,9 +83,9 @@ lib tipi-tool
       <link>static
     ;
 
-alias tool_interface       : tipi            : <link>shared ;
-alias tool_interface       : tipi-tool       : <link>static ;
-alias controller_interface : tipi            : <link>shared ;
+alias tool-interface       : tipi            : <link>shared ;
+alias tool-interface       : tipi-tool       : <link>static ;
+alias controller-interface : tipi            : <link>shared ;
 alias controller_interface : tipi-controller : <link>static ;
 
-install-libraries tool_interface controller_interface ;
+install-libraries tool-interface controller-interface ;

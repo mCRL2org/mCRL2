@@ -22,10 +22,10 @@ obj font_renderer.o : source/font_renderer.cpp : <cxxflags>"$(WX_CPPFLAGS)" <inc
 obj squadt_interface
       : source/squadt_interface.cpp
       : <threading>multi
-        <use>/libraries/tipi//tool_interface
+        <use>/libraries/tipi//tool-interface
         <define>ENABLE_SQUADT_CONNECTIVITY
       :
-      : <library>/libraries/tipi//tool_interface
+      : <library>/libraries/tipi//tool-interface
         <toolset>darwin:<framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
       ;

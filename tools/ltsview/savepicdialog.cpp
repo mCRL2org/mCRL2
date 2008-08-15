@@ -64,10 +64,10 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
     {
 #if (wxUSE_STL == 1)
       const wxString name = static_cast < wxImageHandler* > (*i)->GetName();
-      const long int type = static_cast < wxImageHandler* > (*i)->GetType();
+      const wxString type = static_cast < wxImageHandler* > (*i)->GetMimeType();
 #else
       const wxString name = static_cast < wxImageHandler* > (node->GetData())->GetName();
-      const long int type = static_cast < wxImageHandler* > (node->GetData())->GetType();
+      const wxString type = static_cast < wxImageHandler* > (node->GetData())->GetMimeType();
 #endif
       if (extension == wxT("jpg"))
       {

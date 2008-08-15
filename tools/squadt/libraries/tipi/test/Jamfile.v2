@@ -19,7 +19,7 @@ include $(TOP)/build/testing/header_test.jam ;
 #        /site-config//boost_test ;
 
 test-suite tipi
-         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool_interface ]
-#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool_interface ]
+         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool-interface ]
+#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool-interface ]
            [ compile-headers ../include ]
          ;
