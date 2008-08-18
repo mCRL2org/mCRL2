@@ -139,9 +139,9 @@ if $(BOOST_LIBRARY_PATH) {
 
 rule boost-library ( name : requirements * : use-local-boost ? : use-system-boost ? ) {
   if $(use-local-boost) {
-    alias boost_$(name) : /boost//$(name) : <threading>multi ;
+    alias boost_$(name) : $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) : $(requirements) <threading>multi : : $(requirements) ;
   }
-  else if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) || $(use-system-boost) {
+  else if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) {
     if $(BOOST_INCLUDE_PATH) {
       lib boost_$(name)
              :
@@ -177,12 +177,11 @@ else {
 
 boost-library filesystem ;
 boost-library program_options ;
-boost-library regex ;
 boost-library thread ;
 boost-library signals : <link>static ;
 boost-library test ;
 boost-library system : ;
-boost-library md5 : : local ;
+boost-library md5 : <include>$(BOOST_ROOT)/boost/md5 : local ;  # not part of Boost 1.36
 
 if $(DL) {
   lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;

@@ -23,7 +23,7 @@
     and/or software.
 */
 
-#include <boost/md5.hpp>
+#include <md5.hpp>
 #include <cstdio>  // sprintf, sscanf
 #include <cassert>
 #include <iostream>

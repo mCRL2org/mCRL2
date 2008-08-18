@@ -4,7 +4,7 @@ import set ;
 import package ;
 import common ;
 
-constant BOOST_VERSION : 1.35.0 ;
+constant BOOST_VERSION : 1.36.0 ;
 constant BOOST_JAMROOT_MODULE : $(__name__) ;
 
 local version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(BOOST_VERSION) ] ; 
@@ -16,13 +16,11 @@ constant BOOST_VERSION_TAG : $(version-tag:J="_") ;
 
 project boost
        : requirements
-          <include>.
           <toolset>gcc:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <toolset>darwin:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
           <tag>@$(__name__).tag
        : usage-requirements
-          <include>.
           <toolset>gcc:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <toolset>darwin:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
@@ -59,7 +57,7 @@ libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 for local l in $(libraries) {
   use-project /boost/$(l) : libs/$(l)/build ;
 
-  alias $(l) : libs/$(l)/build//boost_$(l) : : : ;
+  alias $(l) : libs/$(l)/build//boost_$(l) : <include>. : : <include>. ;
 }
 
 rule boost-install ( libraries * ) {

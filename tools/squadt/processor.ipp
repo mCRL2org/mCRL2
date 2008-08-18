@@ -9,8 +9,8 @@
 /// \file processor.ipp
 /// \brief Add your file description here.
 
-#ifndef PROCESSOR_TCC
-#define PROCESSOR_TCC
+#ifndef PROCESSOR_IPP
+#define PROCESSOR_IPP
 
 #include <algorithm>
 #include <functional>
@@ -23,6 +23,7 @@
 #include "project_manager.hpp"
 #include "executor.hpp"
 #include "tool_manager.ipp"
+#include "md5.hpp" // boost vault md5 library
 
 namespace squadt {
   /// \cond INTERNAL_DOCS
