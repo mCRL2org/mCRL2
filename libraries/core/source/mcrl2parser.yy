@@ -31,10 +31,10 @@ using namespace mcrl2::core::detail;
 
 //Global precondition: the ATerm library has been initialised
 
-//external declarations from mcrl2lexer.l
+//external declarations from mcrl2lexer.ll
 void mcrl2yyerror(const char *s);
 int mcrl2yylex(void);
-extern ATermAppl spec_tree;
+extern ATerm spec_tree;
 extern ATermIndexedSet parser_protect_table;
 
 #ifdef _MSC_VER
@@ -78,6 +78,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %}
 
 %union {
+  ATerm term;
   ATermAppl appl;
   ATermList list;
 }
@@ -99,6 +100,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 %token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_DATA_SPEC TAG_MULT_ACT
 %token <appl> TAG_PROC_EXPR TAG_PROC_SPEC TAG_PBES_SPEC TAG_STATE_FRM
+%token <appl> TAG_DATA_VARS
 %token <appl> TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
@@ -116,7 +118,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //-------------
 
 //start
-%type <appl> start
+%type <term> start
+
 //sort expressions
 %type <appl> sort_expr sort_expr_arrow domain_no_arrow_elt sort_expr_struct
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
@@ -203,47 +206,52 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 start:
   TAG_SORT_EXPR sort_expr
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_DATA_EXPR data_expr
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_DATA_SPEC data_spec
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_MULT_ACT mult_act
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_PROC_SPEC proc_spec
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_STATE_FRM state_frm
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_ACTION_RENAME action_rename_spec
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   | TAG_PBES_SPEC pbes_spec
     {
-      safe_assign($$, $2);
+      safe_assign($$, (ATerm) $2);
+      spec_tree = $$;
+    }
+  | TAG_DATA_VARS data_vars_decls_scs
+    {
+      safe_assign($$, (ATerm) $2);
       spec_tree = $$;
     }
   ;

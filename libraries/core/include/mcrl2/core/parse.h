@@ -104,6 +104,17 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
 **/ 
 ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
 
+
+/** \brief  Parse mCRL2 data variables, according to the syntax of
+  *         data variable declarations following the var keyword
+  * \param[in] sf_stream An input stream from which can be read.
+  * \post   The content of sf_stream is parsed as a list of mCRL2 data
+  *         variables
+  * \return The parsed list of data variables, if everything went well;
+  *         NULL, otherwise.
+**/ 
+ATermList parse_data_vars(std::istream &sf_stream);
+
   }
 }
 

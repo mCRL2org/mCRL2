@@ -42,7 +42,7 @@ int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
 extern "C" int mcrl2yywrap(void);/* wrap function */
 //Note: C linkage is needed for older versions of flex (2.5.4)
-ATermAppl spec_tree = NULL;      /* the parse tree */
+ATerm spec_tree = NULL;      /* the parse tree */
 ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
@@ -52,7 +52,7 @@ public:
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
-  ATermAppl parse_streams(std::vector<std::istream*> &streams);
+  ATerm parse_streams(std::vector<std::istream*> &streams);
 protected:
   std::vector<std::istream*> *cur_streams;/* current input streams */
   int cur_index;                 /* current index in current streams */
@@ -93,6 +93,7 @@ Number     "0"|([1-9][0-9]*)
 "state_frm"     { process_string(); return TAG_STATE_FRM; }
 "action_rename" { process_string(); return TAG_ACTION_RENAME; }
 "pbes_spec"     { process_string(); return TAG_PBES_SPEC; }
+"data_vars"     { process_string(); return TAG_DATA_VARS; }
 
 "||_"      { process_string(); return LMERGE; }
 "->"       { process_string(); return ARROW; }
@@ -192,9 +193,9 @@ nil        { process_string(); return NIL; }
 
 //Implementation of parse_streams
 
-ATermAppl parse_streams(std::vector<std::istream*> &streams) {
+ATerm parse_streams(std::vector<std::istream*> &streams) {
   lexer = new mcrl2_lexer();
-  ATermAppl result = lexer->parse_streams(streams);
+  ATerm result = lexer->parse_streams(streams);
   delete lexer;
   return result;
 }
@@ -256,16 +257,16 @@ void mcrl2_lexer::process_string(void) {
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
 }
 
-ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   //uncomment the line below to let bison generate debug information 
   //mcrl2yydebug = 1;
-  ATermAppl result = NULL;
+  ATerm result = NULL;
   if (streams.size() == 0) {
     return result;
   }
   //streams.size() > 0
   spec_tree = NULL;
-  ATprotectAppl(&spec_tree);
+  ATprotect(&spec_tree);
   parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
@@ -280,6 +281,6 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
     spec_tree = NULL;
   }
   ATindexedSetDestroy(parser_protect_table);
-  ATunprotectAppl(&spec_tree);
+  ATunprotect(&spec_tree);
   return result;
 }

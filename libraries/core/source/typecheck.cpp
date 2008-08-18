@@ -741,6 +741,14 @@ finally:
   return Result;
 }
 
+ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
+{
+  //check correctness of the data variable declaration in sort_expr
+  //using the specification in spec
+  gsErrorMsg("type checking of data variables is not yet implemented\n");
+  return NULL;
+}
+
 //local functions
 //---------------
 
