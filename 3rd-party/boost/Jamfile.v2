@@ -16,6 +16,7 @@ constant BOOST_VERSION_TAG : $(version-tag:J="_") ;
 
 project boost
        : requirements
+          <include>. 
           <toolset>gcc:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <toolset>darwin:<define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
           <define>BOOST_ALL_NO_LIB=1
@@ -57,10 +58,10 @@ libraries = [ MATCH .*libs/(.*)/build/.* : [ glob libs/*/build/Jamfile.v2 ] ] ;
 for local l in $(libraries) {
   use-project /boost/$(l) : libs/$(l)/build ;
 
-  alias $(l) : libs/$(l)/build//boost_$(l) : <include>. : : <include>. ;
+  alias $(l) : libs/$(l)/build//boost_$(l) : : <include>. ;
 }
 
 rule boost-install ( libraries * ) {
 }
 
-alias headers : : : : ;
+alias headers : : : : <include>. ;
