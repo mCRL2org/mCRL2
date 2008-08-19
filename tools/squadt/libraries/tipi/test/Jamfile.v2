@@ -1,7 +1,7 @@
 project libraries/tipi/test
     : requirements
        <use>/site-config//boost_headers
-       <use>/libraries/tipi
+       <use>/libraries/tipi//tool-interface
     ;
 
 include $(TOP)/build/testing/header_test.jam ;
