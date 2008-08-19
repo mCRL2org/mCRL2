@@ -14,6 +14,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/parser.h"
 
 namespace mcrl2 {
 
@@ -119,6 +120,22 @@ class rewriter
 		  return result;
 		}
 
+/*
+TODO: 
+		/// \brief Rewrites the data expression d, and on the fly applies a substitution
+		/// function.
+		/// \param[in] d The data expression that is being rewrittten
+		/// \param[in] sigma A substitution function to data variables, that is applied on the fly
+		/// \return The normal form of d.
+		///
+		template <typename SubstitutionFunction>
+		data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
+		{
+		  data_expression result = m_rewriter.get()->rewrite(d, sigma);
+		  return result;
+		}
+*/
+
     /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.
     ///
     bool add_rule(const data_equation& eq)
@@ -139,6 +156,27 @@ class rewriter
       return m_rewriter.get();
     }
 };
+
+/// Creates a rewriter that contains rewrite rules for the standard data types like
+/// Pos, Nat and Int.
+/// \param[in] strategy The rewriter strategy
+/// \return The created rewriter
+inline
+rewriter default_data_rewriter(rewriter::strategy strategy = rewriter::jitty)
+{ 
+  // Add dummy variables for standard types, to make sure that
+  // rewrite rules are created for them.
+  data_specification data_spec = parse_data_specification(
+    "map dummy1:Pos;  \n"
+    "var dummy2:Bool; \n"
+    "    dummy3:Pos;  \n"
+    "    dummy4:Nat;  \n"
+    "    dummy5:Int;  \n"
+    "    dummy6:Real; \n"
+    "eqn dummy1 = 1;  \n"
+  );
+  return data::rewriter(data_spec, strategy);
+}
 
 /// Rewriter for rewriting a single term multiple times with different substitutions.
 /// For this special case, this rewriter is more efficient than the default rewriter.

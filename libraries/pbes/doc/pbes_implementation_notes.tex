@@ -18,20 +18,20 @@
 %TCIDATA{CSTFile=40 LaTeX article.cst}
 
 %--- From tcilatex.tex ---%
-\def\dsum{\mathop{\displaystyle \sum }}%
-\def\dprod{\mathop{\displaystyle \prod }}%
-\def\dbigcap{\mathop{\displaystyle \bigcap }}%
-\def\dbigwedge{\mathop{\displaystyle \bigwedge }}%
-\def\dbigoplus{\mathop{\displaystyle \bigoplus }}%
-\def\dbigodot{\mathop{\displaystyle \bigodot }}%
-\def\dbigsqcup{\mathop{\displaystyle \bigsqcup }}%
-\def\dcoprod{\mathop{\displaystyle \coprod }}%
-\def\dbigcup{\mathop{\displaystyle \bigcup }}%
-\def\dbigvee{\mathop{\displaystyle \bigvee }}%
-\def\dbigotimes{\mathop{\displaystyle \bigotimes }}%
-\def\dbiguplus{\mathop{\displaystyle \biguplus }}%
-\def\QQfnmark#1{\footnotemark}
-\def\QQfntext#1#2{\addtocounter{footnote}{#1}\footnotetext{#2}}
+%\def\dsum{\mathop{\displaystyle \sum }}%
+%\def\dprod{\mathop{\displaystyle \prod }}%
+%\def\dbigcap{\mathop{\displaystyle \bigcap }}%
+%\def\dbigwedge{\mathop{\displaystyle \bigwedge }}%
+%\def\dbigoplus{\mathop{\displaystyle \bigoplus }}%
+%\def\dbigodot{\mathop{\displaystyle \bigodot }}%
+%\def\dbigsqcup{\mathop{\displaystyle \bigsqcup }}%
+%\def\dcoprod{\mathop{\displaystyle \coprod }}%
+%\def\dbigcup{\mathop{\displaystyle \bigcup }}%
+%\def\dbigvee{\mathop{\displaystyle \bigvee }}%
+%\def\dbigotimes{\mathop{\displaystyle \bigotimes }}%
+%\def\dbiguplus{\mathop{\displaystyle \biguplus }}%
+%\def\QQfnmark#1{\footnotemark}
+%\def\QQfntext#1#2{\addtocounter{footnote}{#1}\footnotetext{#2}}
 %--------------------------%
 
 \font \aap cmmi10
@@ -60,7 +60,7 @@
 \newtheorem{solution}[theorem]{Solution}
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
-%\input{tcilatex}
+\input{tcilatex}
 
 \title{PBES Implementation Notes}
 \author{Wieger Wesselink}
@@ -383,14 +383,14 @@ l & \mathsf{if\ }Y=X \\
 {\mathbf{RHS}}(\exists {x{:}D}.\varphi ) & =_{def} & \exists {x{:}D}.{%
 \mathbf{RHS}}(\varphi ) \\
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
-{:}E_{i}}((\mathbf{Sat}_{\top }(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
+{:}E_{i}}((\mathbf{Sat}_{true }(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
 t_{i}(x_{p},y),\alpha )\ \wedge \\
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
 \wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T:=t_{i}(x_{p},y)][x_{p}:=g_{i}(x_{p},y)]) \\
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
-I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{\top }(a_{i}(f_{i}(x_{p},y))%
+I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true }(a_{i}(f_{i}(x_{p},y))%
 \mbox{\aap
 ,}t_{i}(x_{p},y),\alpha )\ \wedge \\
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
@@ -626,21 +626,19 @@ bisimulation.
 
 We define a PBES rewriter inductively using a function $\mathsf{pbesr}$
 denoting the PBES rewriter and $\mathsf{datar}$ denoting the data rewriter.
-In the remainder $\top $ represents the value $true$, and $\bot $ represents
-the value $false$.%
 \begin{equation*}
 \begin{array}{ccl}
 \mathsf{pbesr}(b) & = & \mathsf{datar}(b) \\
-\mathsf{pbesr}(\top ) & = & \top  \\
-\mathsf{pbesr}(\bot ) & = & \bot  \\
+\mathsf{pbesr}(true ) & = & true  \\
+\mathsf{pbesr}(false ) & = & false  \\
 \mathsf{pbesr}(\lnot \varphi ) & = & \lnot \mathsf{pbesr}(\varphi ) \\
 &  &  \\
 \mathsf{pbesr}(\varphi \wedge \psi ) & = & \left\{
 \begin{array}{lcl}
-\bot  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot \vee \mathsf{pbesr}(\psi
-)=\bot  \\
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\top  \\
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\top  \\
+false  &  & \text{if }\mathsf{pbesr}(\varphi )=false \vee \mathsf{pbesr}(\psi
+)=false  \\
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=true  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=true  \\
 \mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
 pbesr}(\psi ) \\
 \mathsf{pbesr}(\varphi )\wedge \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
@@ -649,10 +647,10 @@ pbesr}(\psi ) \\
 &  &  \\
 \mathsf{pbesr}(\varphi \vee \psi ) & = & \left\{
 \begin{array}{lcl}
-\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\top \vee \mathsf{pbesr}(\psi
-)=\top  \\
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\bot  \\
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\bot  \\
+true  &  & \text{if }\mathsf{pbesr}(\varphi )=true \vee \mathsf{pbesr}(\psi
+)=true  \\
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=false  \\
+\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=false  \\
 \mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
 pbesr}(\psi ) \\
 \mathsf{pbesr}(\varphi )\vee \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
@@ -661,11 +659,11 @@ pbesr}(\psi ) \\
 &  &  \\
 \mathsf{pbesr}(\varphi \rightarrow \psi ) & = & \left\{
 \begin{array}{lcl}
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\top  \\
-\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot  \\
-\top  &  & \text{if }\mathsf{pbesr}(\psi )=\top  \\
-\mathsf{pbesr}(\lnot \varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=\bot  \\
-\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{pbesr}(\psi ) \\
+\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=true  \\
+true  &  & \text{if }\mathsf{pbesr}(\varphi )=false  \\
+true  &  & \text{if }\mathsf{pbesr}(\psi )=true  \\
+\mathsf{pbesr}(\lnot \varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=false  \\
+true  &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{pbesr}(\psi ) \\
 \mathsf{pbesr}(\varphi )\rightarrow \mathsf{pbesr}(\psi ) &  & \text{%
 otherwise}%
 \end{array}%
@@ -673,8 +671,8 @@ otherwise}%
 &  &  \\
 \mathsf{pbesr}(\forall _{d:D}.\varphi ) & = & \left\{
 \begin{array}{lcl}
-\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\top  \\
-\bot  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot \text{ and }D\text{ is
+true  &  & \text{if }\mathsf{pbesr}(\varphi )=true  \\
+false  &  & \text{if }\mathsf{pbesr}(\varphi )=false \text{ and }D\text{ is
 non-empty} \\
 \mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
 \\
@@ -688,9 +686,9 @@ enumerate\_quantifiers\_rewriter.}} \\
 &  &  \\
 \mathsf{pbesr}(\exists _{d:D}.\varphi ) & = & \left\{
 \begin{array}{lcl}
-\top  &  & \text{if }\mathsf{pbesr}(\varphi )=\top \text{ and }D\text{ is
+true  &  & \text{if }\mathsf{pbesr}(\varphi )=true \text{ and }D\text{ is
 non-empty} \\
-\bot  &  & \text{if }\mathsf{pbesr}(\varphi )=\bot  \\
+false  &  & \text{if }\mathsf{pbesr}(\varphi )=false  \\
 \mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
 \\
 \bigvee \{\varphi \lbrack d:=e]|e\in D\} &  & \text{if it is a finite set
@@ -705,7 +703,7 @@ that can be enumerated}\footnotemark[\value{footnote}] \\
 This behavior is implemented in the rewriter called
 enumerate\_quantifiers\_rewriter.}
 \end{equation*}%
-where $b$ is a data term of data sort $\mathbb{B}$, $\top $ and $\bot $ are
+where $b$ is a data term of data sort $\mathbb{B}$, $true $ and $false $ are
 elements of data sort $\mathbb{B}$, $X$ is a predicate variable, $e$consists
 of zero or more data sorts and $d,d_{1},d_{2}$ are data variables of sort $D$%
 .
@@ -718,11 +716,11 @@ A predicate formula $\varphi $ is defined by the following grammar:%
 \begin{equation*}
 \varphi ::=b|X(e)|\lnot \varphi |\varphi \wedge \varphi |\varphi \vee
 \varphi |\varphi \rightarrow \varphi |\forall d:D.\varphi |\exists
-d:D.\varphi |\top |\bot
+d:D.\varphi |true |false
 \end{equation*}%
 where $b$ is a data term of sort $\mathbb{B}$, $X$ is a predicate variable, $%
-d$ is a data variable of sort $D$, $e$ is a data term, $\top $ represents $%
-true$, and $\bot $ represents $false$.
+d$ is a data variable of sort $D$, $e$ is a data term, $true $ represents $%
+true$, and $false $ represents $false$.
 
 \begin{definition}
 (Predicate Variable Substitution) Let $\varphi ,\psi $ be predicate formulae
@@ -759,9 +757,9 @@ substituting $\varphi $ for $X$ in $\psi $.
 (Approximants as Solutions) Let $\varphi $ be a predicate formula and $k\in
 \mathbb{N}$ be a natural number. Then%
 \begin{eqnarray*}
-(\mu X(d &:&D)=\varphi \lbrack \bot /X]^{k})\Rrightarrow (\mu X(d:D)=\varphi
+(\mu X(d &:&D)=\varphi \lbrack false /X]^{k})\Rrightarrow (\mu X(d:D)=\varphi
 ) \\
-(\nu X(d &:&D)=\varphi )\Rrightarrow (\nu X(d:D)=\varphi \lbrack \top
+(\nu X(d &:&D)=\varphi )\Rrightarrow (\nu X(d:D)=\varphi \lbrack true
 /X]^{k})
 \end{eqnarray*}
 \end{lemma}
@@ -770,11 +768,11 @@ substituting $\varphi $ for $X$ in $\psi $.
 (Stable Approximants as Solutions) Let $\varphi $ be a predicate formula and
 $k\in \mathbb{N}$ be a natural number. Then%
 \begin{eqnarray*}
-\text{if }\varphi \lbrack \bot /X]^{k} &\longleftrightarrow &\varphi \lbrack
-\bot /X]^{k+1}\text{ then }(\mu X(d:D)=\varphi \lbrack \bot /X]^{k})\equiv
+\text{if }\varphi \lbrack false /X]^{k} &\longleftrightarrow &\varphi \lbrack
+false /X]^{k+1}\text{ then }(\mu X(d:D)=\varphi \lbrack false /X]^{k})\equiv
 (\mu X(d:D)=\varphi ) \\
-\text{if }\varphi \lbrack \top /X]^{k} &\longleftrightarrow &\varphi \lbrack
-\top /X]^{k+1}\text{ then }(\nu X(d:D)=\varphi \lbrack \top /X]^{k})\equiv
+\text{if }\varphi \lbrack true /X]^{k} &\longleftrightarrow &\varphi \lbrack
+true /X]^{k+1}\text{ then }(\nu X(d:D)=\varphi \lbrack true /X]^{k})\equiv
 (\nu X(d:D)=\varphi )
 \end{eqnarray*}
 \end{lemma}
@@ -820,8 +818,8 @@ in its right hand side. An example of such a solve equation algorithm is
 \begin{array}{l}
 \text{\textsc{Approximate(}}\sigma X=\varphi \text{\textsc{)}} \\
 j:=0 \\
-\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=\top \text{
-\textbf{else} }\psi _{0}:=\bot \\
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true \text{
+\textbf{else} }\psi _{0}:=false \\
 \text{\textbf{repeat}} \\
 \qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\
 \qquad j:=j+1 \\
@@ -861,8 +859,8 @@ used to solve it:%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Approximate-BES(}}\sigma X=\varphi \text{\textsc{)}} \\
-\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=\top \text{
-\textbf{else} }\psi _{0}:=\bot \\
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true \text{
+\textbf{else} }\psi _{0}:=false \\
 \text{\textbf{return} \textsc{Simplify}(}\sigma X=\varphi \lbrack \psi
 _{0}/X]\text{)}%
 \end{array}%

@@ -1,0 +1,17 @@
+project libraries/data/example
+   : requirements
+       <use>/site-config//boost_headers
+       <source>/libraries//core
+       <source>/libraries//data
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+exe rewriter  : rewriter.cpp : ;
+exe parse_data  : parse_data.cpp : ;
+
+install dist
+   :
+     rewriter
+     parse_data
+   :
+   ;
