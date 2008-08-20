@@ -526,116 +526,122 @@ namespace squadt {
       boost::shared_ptr< processor >                    p = node_data->get_processor();
       boost::shared_ptr< processor::object_descriptor > object = node_data->get_object();
 
-      type_registry& registry(global_build_system.get_type_registry());
-
-      switch (e.GetId()) {
-        case cmID_EDIT:
-          p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
-          break;
-        case cmID_REMOVE:
-          if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
-                           wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
-
-            manager->remove(p);
-
-            object_view->Delete(selection);
-          }
-          break;
-        case cmID_RENAME:
-          object_view->EditLabel(selection);
-          break;
-        case cmID_REFRESH:
-          p->flush_outputs();
-
-          /* Register handler to on update the object view after process termination */
-          p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
-
-          /* Attach tool display */
-          manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
-          break;
-        case cmID_CLEAN:
-          p->flush_outputs();
-          break;
-        case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
-
-            dialog.set_name(object_view->GetItemText(selection));
-
-            if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
-              dialog.show_tool_selector(false);
-              dialog.show_input_objects(false);
+      try {
+        type_registry& registry(global_build_system.get_type_registry());
+       
+        switch (e.GetId()) {
+          case cmID_EDIT:
+            p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
+            break;
+          case cmID_REMOVE:
+            if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
+                             wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
+       
+              manager->remove(p);
+       
+              object_view->Delete(selection);
             }
-            else {
-              boost::shared_ptr< const tool > selected_tool = p->get_tool();
-
-              if (p->has_input_configuration()) {
-                /* Add the main input (must exist) */
-                dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
-               
-                if (selected_tool) {
-                  dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());
-                }
-               
-                dialog.allow_tool_selection(false);
-              }
-              else {
-                if (selected_tool) {
-                  wxMessageDialog(this, wxString(boost::str(
-                           boost::format("Tool %s is improperly initialised!") %
-                             selected_tool->get_name()).c_str(), wxConvLocal),
-                           wxT("Warning: tool problem"), wxOK).ShowModal();
-                }
-                else {
-                  wxMessageDialog(this, wxT("Tool is unknown!"),
-                           wxT("Warning: tool problem"), wxOK).ShowModal();
-                }
-              }
-            }
-
-            if (dialog.ShowModal()) {
-            }
-          }
-          break;
-        case cmID_CONFIGURE:
-            /* Attach tool display */
-            install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
-
+            break;
+          case cmID_RENAME:
+            object_view->EditLabel(selection);
+            break;
+          case cmID_REFRESH:
+            p->flush_outputs();
+       
             /* Register handler to on update the object view after process termination */
             p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
-             
-            /* Start tool configuration phase */
-            p->reconfigure();
-          break;
-        default: {
-            /* Assume that a tool was selected */
-            wxMenu*     menu      = reinterpret_cast < wxMenu* > (e.GetEventObject());
-            cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
-
-            boost::shared_ptr< const tool::input_configuration > icon(menu_item->input_configuration.lock());
-
-            if (icon.get()) {
-              /* Create a temporary processor */
-              boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
-             
-              /* Attach the new processor by relating it to t */
-              tp->register_input(icon->get_primary_object_descriptor().first, object);
-             
+       
+            /* Attach tool display */
+            manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
+            break;
+          case cmID_CLEAN:
+            p->flush_outputs();
+            break;
+          case cmID_DETAILS: {
+              dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
+       
+              dialog.set_name(object_view->GetItemText(selection));
+       
+              if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
+                dialog.show_tool_selector(false);
+                dialog.show_input_objects(false);
+              }
+              else {
+                boost::shared_ptr< const tool > selected_tool = p->get_tool();
+       
+                if (p->has_input_configuration()) {
+                  /* Add the main input (must exist) */
+                  dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
+                 
+                  if (selected_tool) {
+                    dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());
+                  }
+                 
+                  dialog.allow_tool_selection(false);
+                }
+                else {
+                  if (selected_tool) {
+                    wxMessageDialog(this, wxString(boost::str(
+                             boost::format("Tool %s is improperly initialised!") %
+                               selected_tool->get_name()).c_str(), wxConvLocal),
+                             wxT("Warning: tool problem"), wxOK).ShowModal();
+                  }
+                  else {
+                    wxMessageDialog(this, wxT("Tool is unknown!"),
+                             wxT("Warning: tool problem"), wxOK).ShowModal();
+                  }
+                }
+              }
+       
+              if (dialog.ShowModal()) {
+              }
+            }
+            break;
+          case cmID_CONFIGURE:
               /* Attach tool display */
-              install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
-             
+              install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
+       
               /* Register handler to on update the object view after process termination */
-              tp->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, tp, true));
-             
+              p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
+               
               /* Start tool configuration phase */
-              tp->configure(icon, boost::filesystem::path(object->get_location()));
+              p->reconfigure();
+            break;
+          default: {
+              /* Assume that a tool was selected */
+              wxMenu*     menu      = reinterpret_cast < wxMenu* > (e.GetEventObject());
+              cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
+       
+              boost::shared_ptr< const tool::input_configuration > icon(menu_item->input_configuration.lock());
+       
+              if (icon.get()) {
+                /* Create a temporary processor */
+                boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
+               
+                /* Attach the new processor by relating it to t */
+                tp->register_input(icon->get_primary_object_descriptor().first, object);
+               
+                /* Attach tool display */
+                install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
+               
+                /* Register handler to on update the object view after process termination */
+                tp->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, tp, true));
+               
+                /* Start tool configuration phase */
+                tp->configure(icon, boost::filesystem::path(object->get_location()));
+              }
+              else {
+                wxMessageDialog(0, wxT("Selected tool configuration is not available.\n\nTool (") +
+                                    wxString(menu_item->the_tool->get_name().c_str(), wxConvLocal) +
+                                    wxT(") initialisation problem?"), wxT("Error"), wxOK).ShowModal();
+              }
             }
-            else {
-              wxMessageDialog(0, wxT("Selected tool configuration is not available.\n\nTool (") +
-                                  wxString(menu_item->the_tool->get_name().c_str(), wxConvLocal) +
-                                  wxT(") initialisation problem?"), wxT("Error"), wxOK).ShowModal();
-            }
-          }
-          break;
+            break;
+        }
+      }
+      catch (std::exception& e) {
+        wxMessageDialog(0, wxT("Error in command execution: \n") +
+                                    wxString(e.what(), wxConvLocal), wxT("Error"), wxOK).ShowModal();
       }
     }
 

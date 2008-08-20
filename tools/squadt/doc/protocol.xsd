@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
- <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="structures.xsd (wd-20070830)">
+ <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        version="structures.xsd (wd-20070830)">
  <!-- A version specification type -->
  <xs:simpleType name="message-type">
   <xs:restriction base="xs:token">
@@ -42,7 +43,8 @@
  <xs:complexType name="capabilities-type">
   <xs:sequence>
    <xs:element name="protocol-version" type="protocol-version-type" />
-   <xs:element name="input-configuration" type="input-configuration-type" minOccurs="1" maxOccurs="unbounded" />
+   <xs:element name="input-configuration" type="input-configuration-type"
+                                        minOccurs="1" maxOccurs="unbounded" />
   </xs:sequence>
  </xs:complexType>
 

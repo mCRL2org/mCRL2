@@ -1,5 +1,5 @@
 % Type that represents a configuration
-sort Configuration = struct configuration(non_empty : Bool);
+sort Configuration = struct configuration(valid : Bool);
 
 % Type used for identifying messages sent by the controller
 sort MessageType = struct
@@ -55,28 +55,22 @@ proc tool(a : Nat, c : Configuration, in_configuration : Bool, in_task : Bool) =
    (!in_task) ->
      receive(message(a, task_start, empty)).          % task start signal
      tool(a, c, in_configuration,
-             (non_empty(c) && !in_configuration)) <>
+             (valid(c) && !in_configuration)) <>
      (sum b : Bool.
        send(message(a, task_stop, result(b))).        % task finished or aborted
        tool(a, c, false, false));
 
 % Workaround until proper support for finite sets is implemented
-map in_set : Nat # List(Nat) -> Bool ;
-    as_set : List(Nat) -> Set(Nat) ;
-    add    : Nat # List(Nat) -> List(Nat);
-    remove : Nat # List(Nat) -> List(Nat);
+map set_add    : Nat # List(Nat) -> List(Nat);
+    set_erase : Nat # List(Nat) -> List(Nat);
 
-var m,x : Nat;
-    xs : List(Nat);
+var x,xx : Nat;
+    xs   : List(Nat);
 
-eqn in_set(m, []) = false;
-    in_set(m, x|>xs) = x == m || in_set(m, xs);
-    as_set([]) = {};
-    as_set(x|>xs) = {x} + as_set(xs);
-    add(m,[]) = [m];
-    add(m,x|>xs) = if(m < x, x|>add(m, xs), if(m == x, x|>xs, m|> xs));
-    remove(m,[]) = [];
-    remove(m,x|>xs) = if(x != m,x|>res,res) whr res = remove(m,xs) end;
+eqn set_add(x,[]) = [x];
+    set_add(xx,x|>xs) = if(xx in xs,xs,if(xx < x,xx|>x|>xs,x|>set_add(xx,xs)));
+    set_erase(x,[]) = [];
+    set_erase(xx,x|>xs) = if(xx == x,xs,x|>if(xx in xs,set_erase(xx,xs),xs));
 
 % m: the maximum address of a running tool
 % r: the set of active tools
@@ -85,10 +79,11 @@ eqn in_set(m, []) = false;
 % s: the set of active tools that are executing a task
 proc controller(m : Nat, r : List(Nat), c : List(Nat), l : List(Nat), s : List(Nat)) =
  (sum a : Nat. (a <= m) -> (
-   start_tool(a).controller(m,add(a,r),c,l,s) +       % starts a new tool instance
+   start_tool(a).controller(m,set_add(a,r),c,l,s) +   % starts a new tool instance
    (a in r) -> (                                      % for tool a:
      tool_terminate(a).
-       controller(m,remove(a,r), remove(a,c), remove(a,l), remove(a,s)) +
+       controller(m,set_erase(a,r), set_erase(a,c),
+                    set_erase(a,l), set_erase(a,s)) +
      receive(message(a, identification, other)).      % received instance identifier
        controller(max(m,a),r,c,l,s) +
      (receive(message(a, capabilities, empty)).       % received request for capabilities
@@ -105,24 +100,26 @@ proc controller(m : Nat, r : List(Nat), c : List(Nat), l : List(Nat), s : List(N
       send(message(a, termination, empty))).          %  sent termination request
      controller(m,r,c,l,s) +
      receive(message(a, display_layout, other)).      %  display layout delivered
-       controller(m,r,c,add(a,l),s) +
+       controller(m,r,c,set_add(a,l),s) +
      receive(message(a, task_configuration, other)).  %  configuration was accepted
-       controller(m,r,add(a,c),l,s) +
+       controller(m,r,set_add(a,c),l,s) +
     (sum b : Bool.
       receive(message(a, task_stop, result(b)))).
       ((a in s && a in c) ->
-         controller(m,r,c,l,remove(a,s)) <>
+         controller(m,r,c,l,set_erase(a,s)) <>
          error.controller(m,r,c,l,s)) +              % task completed
     (a in c) ->                                      % for tool a:
       send(message(a, task_start, empty)).
-        controller(m,r,c,l,add(a,s)) +               %  task start command
+        controller(m,r,c,l,set_add(a,s)) +           %  task start command
     receive(message(a, termination, other)).         %  termination signal
-      controller(m,remove(a,r),remove(a,c),remove(a,l),remove(a,s))) <>
+      controller(m,set_erase(a,r),set_erase(a,c),
+                   set_erase(a,l),set_erase(a,s))) <>
       waiting.controller(m,r,c,l,s)));
 
-  % Execution component (starts tools)
-%  E(n : Nat) = start_tool(n).(E(n + 1) || unidentified_tool(n));
-   E(n : Nat, m : Nat) = (n < m) -> start_tool(n).E(n + 1, m) <> waiting.E(n, m);
+% Execution component (starts tools)
+proc E(current : Nat, maximum : Nat) =
+  (current < maximum) ->
+        start_tool(current).E(current + 1, maximum);
 
 init
 
@@ -131,4 +128,3 @@ init
                         error, waiting, execute_task, update_display},
       comm({send|receive -> communicate,start_tool|start_tool -> tool_start},
         controller(0,[],[],[],[]) || unidentified_tool(0) || E(0, 1))));
-
