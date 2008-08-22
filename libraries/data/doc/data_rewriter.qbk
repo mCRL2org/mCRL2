@@ -1,9 +1,10 @@
-[section: Data Rewriters]
+[section: Data rewriters]
 
-A data rewriter is a function that rewrites =data_expression='s using a number of rewrite rules.
+A data rewriter is a function that rewrites data expressions using a number of rewrite rules.
 In the mCRL2 toolset a class =data::rewriter= is available that is initialized using a
-=data_specification=. The data specification is used to create proper rewrite rules. A
-simple example is given below.
+data specification. The equations of the data specification are used as rewrite rules from
+left to right. An example is given below. The function `default_data_rewriter` returns a
+rewriter containing rewrite rules for all predefined data types.
 
     // rewrite two data expressions, and check if they are the same
     rewriter r = default_data_rewriter();
@@ -20,14 +21,20 @@ and =d2= are equivalent, otherwise the answer is unknown.
 
 For efficiency reasons a rewriter can be invoked with an optional substitution function
 __sigma as a second argument, where __sigma maps data variables to data expressions. The
-function __sigma must satisfy [^r(d,__sigma) == r(__sigma(d))]. Not that in general the
+function __sigma must satisfy the property
+
+    r(d,__sigma) == r(__sigma(d)).
+
+Note that in general the
 computation of [^r(d,__sigma)] can be done much more efficiently than the computation of
 [^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
 
-The =rewriter= class only supports a limited version of substitutions. Instead of a generic
-substitution function the user can pass a sequence of substitutions in a limited format.
-This is because of limitations of the =Rewriter= class that is used in the implementation
-of =rewriter=. Below an example is given:
+[important
+The class `data::rewriter` does not truly support substitution functions.
+Instead one can pass a sequence of substitutions as a second argument. Limitations of the
+=Rewriter= class that is used for the implementation of =rewriter= prevent to make __sigma
+a generic substitution function. Below an example of the current interface is given:
+]
 
   rewriter r = default_data_rewriter();
 
@@ -71,36 +78,9 @@ of =rewriter=. Below an example is given:
 ]
 
 [caution
-The current implementation of rewriting with substitutions to data variables is severely
-limited. Moreover, a lot of unnecessary copying takes place. The underlying =Rewriter=
-class needs to be adapted to overcome these problems.
+The current implementation of rewriting with substitutions to data variables is
+inefficient, since a lot of unnecessary copying takes place. The interface of the
+underlying =Rewriter= class needs to be improved to get rid of these inefficiencies.
 ]
 
-A common operation on data expressions is to rewrite them into normal
-form. There is a rewriter available that uses the equations of a data
-specification as rewrite rules. An example is given below:
-
-    data_specification data_spec;
-    rewriter r(data_spec);
-    data_expression x = plus(int_(1), int_(2));
-    data_expression y = int_(3);
-    assert(r(x) == r(y));
-
-A common pattern is to rewrite terms after applying a sequence of
-substitutions of the form ['data-variable := data-expression]. The
-rewriter has a special interface for this that allows the user to
-pass the substitutions as a parameter. This is more efficient, since
-the substitutions are only translated once. An example of this is:
-
-    data_specification data_spec;
-    rewriter r(data_spec);
-    std::vector<rewriter::substitution> substitutions;
-    data_variable x("x", int_());
-    data_variable y("y", int_());
-    data_variable z("z", int_());
-    substitutions.push_back(r.make_substitution(x, int_(1))); // x := 1
-    substitutions.push_back(r.make_substitution(y, int_(2))); // y := 2
-    data_expression z = r(plus(x, y), substitutions.begin(), substitutions.end());
-    assert(z == r(int_(3)));
-
-[endsect] [/ Data Rewriters]
+[endsect] [/ Data rewriters]

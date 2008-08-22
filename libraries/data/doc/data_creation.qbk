@@ -1,33 +1,44 @@
 [section: Creating data expressions]
 
-This section describes how to create data expressions.
-Data expressions and sort expressions can be created using a parser,
-or directly using constructors.
+Data expressions can be created in two ways: directly using constructors,
+or using a parser.
 
-[h6 Parsing data expressions]
-There is a parser available for linear process specifications
-(see the __lps_library__). A linear process specification
-contains a data specification. To parse a data specification, it
-has to be embedded in a linear process specification.
-
-[h6 Constructing data expressions]
-An example of constructing data expressions is given below.
+Constructing data expressions directly can be quite tedious:
 
     sort_identifier X("X");
     sort_identifier Y("Y");
     sort_identifier Z("Z");
-    sort_expression XY   = sort_arrow(X, Y);
-    sort_expression XYZ  = sort_arrow(XY, Z); 
-    data_variable x("x", X);
-    data_variable three("3", pos());
-    data_variable zero("0", nat());
-    data_expression e = x;
-    data_expression F = false_();
+    sort_expression XYZ = sort_arrow(sort_arrow(X, Y), Z);
+    data_variable x("x", XYZ);
 
-The functions `int_` [footnote If a function name clashes with a `C++` keyword,
-a trailing underscore is added.], `nat`, `pos` and `real` return predefined sorts
-for types integer, natural number, positive natural number and real
-respectively. The functions `true_` and `false_` return predefined
-boolean data expressions representing true and false.
+    data_variable three("3", sort_expr::pos());
+    data_variable zero("0", sort_expr::nat());
+
+For convenience a function `parse_data_expression` is available. This function
+takes a variable declaration as optional second argument, that can be used to
+specify unbound variables that appear in the expression. An example of this
+is:
+
+    #include "mcrl2/data/data.h"
+    #include "mcrl2/data/parser.h"
+    
+    using namespace mcrl2::data;
+    
+    int main(int argc, char* argv[])
+    {
+      MCRL2_ATERMPP_INIT(argc, argv)
+    
+      using namespace data_expr;
+    
+      // two ways to create the expression m + n
+      std::string var_decl = "m, n: Pos;\n";
+      data_expression d1 = parse_data_expression("m+n", var_decl);
+
+      data_variable m = parse_data_expression("m", var_decl);
+      data_variable n = parse_data_expression("n", var_decl);
+      data_expression d2 = plus(m, n);
+    
+      return 0;
+    }
 
 [endsect] [/ Creating data expressions]

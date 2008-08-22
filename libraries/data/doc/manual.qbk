@@ -1,4 +1,4 @@
-[library mCRL2.data
+[library The mCRL2 Data Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
     [copyright 2005-2008 Technische Universiteit Eindhoven]
@@ -52,6 +52,8 @@ Data Library is inside the namespace =mcrl2::data=. Let's look at a simple examp
 
 [include predefined_sorts.qbk]
 
+[include sort_expressions.qbk]
+
 [include data_operations.qbk]
 
 [include data_creation.qbk]
@@ -60,13 +62,6 @@ Data Library is inside the namespace =mcrl2::data=. Let's look at a simple examp
 
 [endsect]
 
-[include data_rewriter.qbk]
-
 [include data_specifications.qbk]
 
-[/section: Algorithms]
-[/There are a few algorithms available in the file =mcrl2/data/utility.h=.]
-[/The function `identifiers` returns all identifiers appearing in an arbitrary term.]
-[/include ../example/utility.cpp]
-[/data_utility_example]
-[/endsect]
+[include data_rewriter.qbk]
