@@ -1,0 +1,106 @@
+[section: Data Rewriters]
+
+A data rewriter is a function that rewrites =data_expression='s using a number of rewrite rules.
+In the mCRL2 toolset a class =data::rewriter= is available that is initialized using a
+=data_specification=. The data specification is used to create proper rewrite rules. A
+simple example is given below.
+
+    // rewrite two data expressions, and check if they are the same
+    rewriter r = default_data_rewriter();
+    data_expression d1 = parse_data_expression("2+7");
+    data_expression d2 = parse_data_expression("4+5");
+    assert(d1 != d2);
+    assert(r(d1) == r(d2));
+
+[tip
+Rewriters can be used to determine equivalence between data expressions. In general this
+problem is undecidable. Only if [^r(d1) == r(d2)] one can conclude that the expressions =d1=
+and =d2= are equivalent, otherwise the answer is unknown.
+]
+
+For efficiency reasons a rewriter can be invoked with an optional substitution function
+__sigma as a second argument, where __sigma maps data variables to data expressions. The
+function __sigma must satisfy [^r(d,__sigma) == r(__sigma(d))]. Not that in general the
+computation of [^r(d,__sigma)] can be done much more efficiently than the computation of
+[^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
+
+The =rewriter= class only supports a limited version of substitutions. Instead of a generic
+substitution function the user can pass a sequence of substitutions in a limited format.
+This is because of limitations of the =Rewriter= class that is used in the implementation
+of =rewriter=. Below an example is given:
+
+  rewriter r = default_data_rewriter();
+
+  // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
+  std::string var_decl = "datavar m, n: Pos;\n";
+  atermpp::vector<rewriter::substitution> sigma;
+  sigma.push_back(rewriter::substitution(r, parse_data_expression("m", var_decl), parse_data_expression("3")));
+  sigma.push_back(rewriter::substitution(r, parse_data_expression("n", var_decl), parse_data_expression("4")));
+
+  // Rewrite two data expressions, and check if they are the same
+  data::data_expression d1 = parse_data_expression("m+n", var_decl);
+  data::data_expression d2 = parse_data_expression("7");
+  assert(r(d1, sigma) == r(d2));
+
+[/
+  struct substitution_function
+  {
+    const std::map<data::data_variable, data::data_expression>& s; 
+
+    substitution_function(const std::map<data::data_variable, data::data_expression>& s_)
+      : s(s_)
+    {}
+  
+    data::data_expression operator()(data::data_variable v) const
+    {
+      std::map<data::data_variable, data::data_expression>::const_iterator i = s.find(v);
+      return i == s.end() ? v : *i;
+    }
+  };
+
+  // precompute substitutions
+  std::string var_decl = "var m, n: Pos;\n";
+  std::map<data::data_variable, data::data_expression> m;
+  m[parse_data_expression("m", var_decl)] = parse_data_expression("3"));
+  m[parse_data_expression("n", var_decl)] = parse_data_expression("4"));
+  substitution_function sigma(m);
+
+  data::data_expression d1 = r(parse_data_expression("m+n"), sigma);
+  data::data_expression d2 = r(parse_data_expression("7"));
+  assert(d1 == d2);
+]
+
+[caution
+The current implementation of rewriting with substitutions to data variables is severely
+limited. Moreover, a lot of unnecessary copying takes place. The underlying =Rewriter=
+class needs to be adapted to overcome these problems.
+]
+
+A common operation on data expressions is to rewrite them into normal
+form. There is a rewriter available that uses the equations of a data
+specification as rewrite rules. An example is given below:
+
+    data_specification data_spec;
+    rewriter r(data_spec);
+    data_expression x = plus(int_(1), int_(2));
+    data_expression y = int_(3);
+    assert(r(x) == r(y));
+
+A common pattern is to rewrite terms after applying a sequence of
+substitutions of the form ['data-variable := data-expression]. The
+rewriter has a special interface for this that allows the user to
+pass the substitutions as a parameter. This is more efficient, since
+the substitutions are only translated once. An example of this is:
+
+    data_specification data_spec;
+    rewriter r(data_spec);
+    std::vector<rewriter::substitution> substitutions;
+    data_variable x("x", int_());
+    data_variable y("y", int_());
+    data_variable z("z", int_());
+    substitutions.push_back(r.make_substitution(x, int_(1))); // x := 1
+    substitutions.push_back(r.make_substitution(y, int_(2))); // y := 2
+    data_expression z = r(plus(x, y), substitutions.begin(), substitutions.end());
+    assert(z == r(int_(3)));
+
+[endsect] [/ Data Rewriters]
