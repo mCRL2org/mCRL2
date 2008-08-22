@@ -37,7 +37,7 @@ void rewrite2()
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv);
 
   rewrite1();
   rewrite2();
