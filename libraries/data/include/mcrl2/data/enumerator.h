@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/sequence.h"
+#include "mcrl2/data/data_expression_with_variables.h"
 #include "mcrl2/data/enum.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
@@ -28,52 +29,17 @@ namespace mcrl2 {
 
 namespace data {
 
-/// A data expression that contains additional information for the enumerator.
-class enumerator_expression
-{
-  protected:
-    data_expression m_expression;
-    data_variable_list m_variables;
-  
-  public:
-    /// Constructor.
-    enumerator_expression()
-    {}
-    
-    /// Constructor.
-    enumerator_expression(data_expression expression, data_variable_list variables)
-      : m_expression(expression),  m_variables(variables)
-    {}
-    
-    /// The contained data expression.
-    data_expression expression() const
-    {
-      return m_expression;
-    }
-    
-    /// The unbound variables of the contained expression.
-    data_variable_list variables() const
-    {
-      return m_variables;
-    }
-    
-    bool is_constant() const
-    {
-      return m_variables.empty();
-    }
-};
-
 /// \cond INTERNAL_DOCS
 namespace detail {
 
-  template <typename VariableContainer, typename EnumeratorExpressionContainer>
+  template <typename VariableContainer, typename ExpressionContainer>
   struct data_enumerator_replace_helper
   {
     const VariableContainer& variables_;
-    const EnumeratorExpressionContainer& replacements_;
+    const ExpressionContainer& replacements_;
     
     data_enumerator_replace_helper(const VariableContainer& variables,
-                                   const EnumeratorExpressionContainer& replacements
+                                   const ExpressionContainer& replacements
                                   )
       : variables_(variables), replacements_(replacements)
     {
@@ -83,12 +49,12 @@ namespace detail {
     data_expression operator()(data_variable t) const
     {
       typename VariableContainer::const_iterator i = variables_.begin();
-      typename EnumeratorExpressionContainer::const_iterator j = replacements_.begin();
+      typename ExpressionContainer::const_iterator j = replacements_.begin();
       for (; i != variables_.end(); ++i, ++j)
       {
         if (*i == t)
         {
-          return j->expression();
+          return ATermAppl(*j);
         }
       }
       return t;
@@ -97,26 +63,26 @@ namespace detail {
 
   struct data_enumerator_helper
   {
-    const enumerator_expression& e_;
-    const atermpp::vector<enumerator_expression>& values_;
-    atermpp::vector<enumerator_expression>& result_;
+    const data_expression_with_variables& e_;
+    const atermpp::vector<data_expression_with_variables>& values_;
+    atermpp::vector<data_expression_with_variables>& result_;
 
-    data_enumerator_helper(const enumerator_expression& e,
-                           const atermpp::vector<enumerator_expression>& values,
-                           atermpp::vector<enumerator_expression>& result
+    data_enumerator_helper(const data_expression_with_variables& e,
+                           const atermpp::vector<data_expression_with_variables>& values,
+                           atermpp::vector<data_expression_with_variables>& result
                           )
      : e_(e), values_(values), result_(result)
     {}
     
     void operator()()
     {
-      data_expression d = replace_data_variables(e_.expression(), data_enumerator_replace_helper<data_variable_list, atermpp::vector<enumerator_expression> >(e_.variables(), values_));
+      data_expression d = replace_data_variables(e_, data_enumerator_replace_helper<data_variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_));
       std::vector<data_variable> v;
-      for (atermpp::vector<enumerator_expression>::const_iterator i = values_.begin(); i != values_.end(); ++i)
+      for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
       {
         v.insert(v.end(), i->variables().begin(), i->variables().end());
       }       
-      result_.push_back(enumerator_expression(d, data_variable_list(v.begin(), v.end())));
+      result_.push_back(data_expression_with_variables(d, data_variable_list(v.begin(), v.end())));
     }
   };
 
@@ -158,9 +124,9 @@ class data_enumerator
     {}
 
     /// Enumerates a data variable.
-    atermpp::vector<enumerator_expression> enumerate(const data_variable& v)
+    atermpp::vector<data_expression_with_variables> enumerate(const data_variable& v)
     {
-      atermpp::vector<enumerator_expression> result;
+      atermpp::vector<data_expression_with_variables> result;
       const std::vector<data_operation>& c = constructors(v.sort());
 
       for (std::vector<data_operation>::const_iterator i = c.begin(); i != c.end(); ++i)
@@ -173,7 +139,7 @@ class data_enumerator
         }
         data_variable_list w(variables.begin(), variables.end());
         data_expression_list w1 = make_data_expression_list(w);
-        result.push_back(enumerator_expression((*m_rewriter)((*i)(w1)), w));
+        result.push_back(data_expression_with_variables((*m_rewriter)((*i)(w1)), w));
       }
 
       return result;
@@ -182,18 +148,18 @@ class data_enumerator
     /// Enumerates a data expression. Only the variables of the enumerator
     /// expression are expanded. Fresh variables are created using the
     /// identifier generator that was passed in the constructor.
-    atermpp::vector<enumerator_expression> enumerate(const enumerator_expression& e)
+    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e)
     {
-      atermpp::vector<enumerator_expression> result;
+      atermpp::vector<data_expression_with_variables> result;
 
       // Compute the instantiations for each variable of e.
-      std::vector<atermpp::vector<enumerator_expression> > enumerated_values;
+      std::vector<atermpp::vector<data_expression_with_variables> > enumerated_values;
       for (data_variable_list::iterator i = e.variables().begin(); i != e.variables().end(); ++i)
       {
         enumerated_values.push_back(enumerate(*i));     
       }
       
-      atermpp::vector<enumerator_expression> values(enumerated_values.size());
+      atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
       core::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;
     }

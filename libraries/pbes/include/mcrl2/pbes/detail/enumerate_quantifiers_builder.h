@@ -136,8 +136,8 @@ namespace detail {
   
       // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
       atermpp::vector<pbes_rewriter_substitution> Dk = D[k];
-      atermpp::vector<data::enumerator_expression> z = datae.enumerate(y);
-      for (atermpp::vector<data::enumerator_expression>::iterator i = z.begin(); i != z.end(); ++i)
+      atermpp::vector<data::data_expression_with_variables> z = datae.enumerate(y);
+      for (atermpp::vector<data::data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
       {
         pbes_rewriter_substitution e(x_[k], *i, datar);
         try {

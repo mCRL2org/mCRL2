@@ -15,32 +15,34 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/data_expression_with_variables.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  struct pbes_rewriter_substitution: public data::rewriter::substitution, public data::enumerator_expression
+  struct pbes_rewriter_substitution: public data::rewriter::substitution, public data::data_expression_with_variables
   {
     pbes_rewriter_substitution()
     {}
    
     pbes_rewriter_substitution(const data::data_variable& variable, data::rewriter& datar)
       : data::rewriter::substitution(datar, variable, variable),
-        data::enumerator_expression(ATermAppl(variable), make_list(variable))
+        data::data_expression_with_variables(ATermAppl(variable), make_list(variable))
     {}
     
     pbes_rewriter_substitution(const data::data_variable& variable,
-                             const data::enumerator_expression& t,
+                             const data::data_expression_with_variables& t,
                              data::rewriter& datar
                             )
-      : data::rewriter::substitution(datar, variable, t.expression()),
-        data::enumerator_expression(t)
+      : data::rewriter::substitution(datar, variable, t),
+        data::data_expression_with_variables(t)
     {}
     
     std::string to_string() const
     {
-      return core::pp(expression()) + " " + core::pp(variables());
+      const data::data_expression_with_variables& d = *this;
+      return core::pp(d) + " " + core::pp(variables());
     }
   };
 
