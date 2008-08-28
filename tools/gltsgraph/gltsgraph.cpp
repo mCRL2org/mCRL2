@@ -237,7 +237,11 @@ void GLTSGraph::openFile(std::string const &path)
     int nl = graph->getNumLabels();
 
     mainFrame->setLTSInfo(is, ns, nt, nl);
-    
+
+    // Call the display routines. This is necessary to make sure the graph is 
+    // rendered on the Mac
+    display();
+
   }
 
   // Setup graph in rest of tool.
