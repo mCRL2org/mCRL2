@@ -6,6 +6,7 @@ using namespace IDS;
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MainFrame::onOpen)
+  EVT_MENU(wxID_EXIT, MainFrame::onQuit)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
 END_EVENT_TABLE()
@@ -107,6 +108,10 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
   }
 }
 
+void MainFrame::onQuit(wxCommandEvent& /*event */)
+{
+  Close(TRUE);
+}
 GLCanvas* MainFrame::getGLCanvas()
 {
   return glCanvas;

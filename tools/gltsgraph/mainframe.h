@@ -42,6 +42,7 @@ class MainFrame : public wxFrame
 
 
     void onOpen(wxCommandEvent& event);
+    void onQuit(wxCommandEvent& event);
     void onAlgo(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
 

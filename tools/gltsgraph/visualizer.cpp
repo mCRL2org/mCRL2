@@ -49,9 +49,7 @@ void Visualizer::drawStates(bool inSelectMode)
       for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
       {
         Transition* t = s->getTransition(j);
-        glPushName(IDS::TRANSITION);
         drawTransition(t, j);
-        glPopName();
       }
 
       for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
@@ -68,17 +66,7 @@ void Visualizer::drawStates(bool inSelectMode)
       
       //glPushMatrix();
       
-      if (inSelectMode)
-      {
-      }
-     
-
       drawState(s);
-      
-
-      if (inSelectMode)
-      {
-      }  
       
       //glPopMatrix();
     }
@@ -269,6 +257,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
   
   // Transitions are uniquely identified by their from state and the identifier
   // within this state
+  glPushName(IDS::TRANSITION);
   glPushName(from->getValue());
   glPushName(trid);
 
@@ -287,15 +276,17 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
     glVertex2d(xVirtual, yVirtual + .015);
     glVertex2d(xVirtual + .015, yVirtual); 
   glEnd();
-  
+ 
+  glPopName();
+  glPopName();
+  glPopName();  
+
   // Draw label near the control point (for the moment, fixed above the control 
   // point
   fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
-  glPopName();
-  glPopName();
-  
+ 
   
   glColor3ub(0, 0, 0); 
 

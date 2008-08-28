@@ -342,7 +342,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
 
   GLuint *ptr;
 
-  int number;
+  int number = 0;
   int selectedType = -1;
   size_t selectedObject;
 
@@ -350,11 +350,16 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
 
   if (hits > 0)
   {
-    number = *ptr;
-    ++ptr; // number;
-    ++ptr; // z1
-    ++ptr; // z2
+    while(number == 0)
+    {
 
+      number = *ptr;
+      ++ptr; // number;
+      ++ptr; // z1
+      ++ptr; // z2
+      // There are no names on the stack, so skip over them.
+    }
+    // Number != 0 => *ptr is the first name on the stack.
     selectedType = *ptr;
 
     ++ptr; // ID;
@@ -385,5 +390,9 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
       default: break;
     }
   }
+  else
+  {
+  }
+
   ptr = NULL; 
 }
