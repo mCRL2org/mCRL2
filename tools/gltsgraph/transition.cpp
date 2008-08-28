@@ -1,6 +1,5 @@
 #include "transition.h"
 #include <math.h>
-#include <iostream>
 Transition::Transition(State* from, State* to, std::string lbl)
 {
   fromState = from;

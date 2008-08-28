@@ -28,7 +28,6 @@
 #include <wx/textdlg.h>
 
 #include <vector>
-#include <iostream>
 #include <string>
 #include "stdlib.h"
 

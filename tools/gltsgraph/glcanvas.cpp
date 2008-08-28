@@ -1,6 +1,7 @@
 #include "glcanvas.h"
 #include <wx/dcclient.h>
 #include <iostream>
+
 #include "ids.h"
 
 #ifdef __APPLE__
@@ -323,6 +324,7 @@ void GLCanvas::pickObjects(int x, int y)
     glFlush();
 
     hits = glRenderMode(GL_RENDER);
+    
     processHits(hits, selectBuf);
     reshape();
     display();

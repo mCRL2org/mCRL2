@@ -1,6 +1,5 @@
 #include "state.h"
 #include "workarounds.h"
-#include <iostream>
 
 State::State(unsigned int _value, bool _isInitialState)
 {

@@ -93,6 +93,7 @@ bool GLTSGraph::OnInit()
 {
   selectedState = NULL;
   selectedTransition = NULL;
+  graph = NULL;
   SpringLayout* springLayout = new SpringLayout(this);
   algorithms.push_back(springLayout);
 /*  GemLayout* gemLayout = new GemLayout(this);

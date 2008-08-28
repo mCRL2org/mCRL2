@@ -1,5 +1,4 @@
 #include "visualizer.h"
-#include <iostream>
 #include <sstream>
 #include "ids.h"
 
