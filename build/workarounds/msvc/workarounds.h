@@ -49,6 +49,10 @@ inline double round(double d) {
   return (std::floor(d));
 }
 
+#ifndef M_PI
+# define M_PI 3.141592653589793238462643383280
+#endif 
+
 #include "../workarounds.h"
 
 #endif

@@ -386,7 +386,8 @@ namespace squadt {
       command::argument_sequence s = p->get_arguments();
 
       for (command::argument_sequence::iterator i = s.begin(); i != s.end(); ++i) {
-        *i = regex_replace(*i, sregex(bos >> '$' >> eos), f);
+        *i = regex_replace(*i, sregex(bos >> !(set = '\'','"')
+                              >> '$' >> !(set = '\'','"') >> eos), f);
       }
     }
 

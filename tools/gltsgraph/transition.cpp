@@ -1,5 +1,8 @@
 #include "transition.h"
-#include <math.h>
+#include <cmath>
+
+#include "workarounds.h" // for M_PI on Windows with MSVC
+
 Transition::Transition(State* from, State* to, std::string lbl)
 {
   fromState = from;

@@ -14,6 +14,7 @@
 #include <map>
 #include <iostream>
 #include <cassert>
+#include <cstdlib>
 #include <sstream>
 #include <memory>
 

@@ -1,5 +1,6 @@
 #include "visualizer.h"
 #include <sstream>
+#include <cmath>
 #include "ids.h"
 
 Visualizer::Visualizer(GLTSGraph* app)

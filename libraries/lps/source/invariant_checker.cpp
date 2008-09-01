@@ -13,6 +13,7 @@
 // file: invariant_checker.cpp
 
 #include <sstream>
+#include <cstring>
 
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"

@@ -83,8 +83,8 @@ void Attribute::clusterValues(
 
 // -----------------------
 void Attribute::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // ------------------------
 {}
 

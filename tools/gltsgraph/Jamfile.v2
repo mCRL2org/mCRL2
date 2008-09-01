@@ -8,9 +8,9 @@ tool gltsgraph
          /libraries/utilities//font_renderer
          /libraries//core
          /libraries//lts
-         /site-config//wx_base
          /site-config//wx_gl
        : <wx>yes
+         <opengl>yes
          <squadt-connectivity>implemented
        ;
 

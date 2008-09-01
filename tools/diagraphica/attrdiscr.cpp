@@ -156,8 +156,8 @@ void AttrDiscr::clusterValues(
 
 // -----------------------
 void AttrDiscr::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------
 {
     try

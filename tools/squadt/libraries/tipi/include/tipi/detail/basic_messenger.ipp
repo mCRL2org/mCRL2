@@ -257,10 +257,10 @@ namespace tipi {
         void remove_message(boost::shared_ptr < const M >& p);
 
         /** \brief Queues incoming messages */
-        virtual void deliver(std::istream&, typename M::end_point);
+        virtual void deliver(std::istream&, transport::basic_transceiver const*);
  
         /** \brief Queues incoming messages */
-        virtual void deliver(std::string const&, typename M::end_point);
+        virtual void deliver(std::string const&, transport::basic_transceiver const*);
  
       public:
 
@@ -419,7 +419,7 @@ namespace tipi {
      * \param o a pointer to the transceiver on which the data was received
      **/
     template < class M >
-    void basic_messenger_impl< M >::deliver(std::istream& d, typename M::end_point o) {
+    void basic_messenger_impl< M >::deliver(std::istream& d, transport::basic_transceiver const* o) {
       std::ostringstream s;
  
       s << d.rdbuf() << std::flush;
@@ -487,7 +487,7 @@ namespace tipi {
      * \attention Works under the assumption that tag_message_close.size() < data.size()
      **/
     template < class M >
-    void basic_messenger_impl< M >::deliver(const std::string& data, typename M::end_point o) {
+    void basic_messenger_impl< M >::deliver(const std::string& data, transport::basic_transceiver const* o) {
       static const std::string tag_message_open("<message ");
       static const std::string tag_message_close("</message>");
 

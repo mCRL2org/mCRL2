@@ -30,6 +30,20 @@ alias configuration : : <os>NT <toolset>msvc :
        : <define>WIN32
          <define>__WIN32__
          <define>_CRT_SECURE_NO_DEPRECATE
+         <define>_SCL_SECURE_NO_WARNINGS
+         <define>_SCL_SECURE_NO_DEPRECATE
+         <define>_HAS_ITERATOR_DEBUGGING=0
+         <define>_SECURE_SCL=0
+         <include>$(TOP)/build/workarounds/msvc
+         <exception-handling>on
+       ;
+
+# Intel compiler on Windows
+alias configuration : : <os>NT <toolset>intel :
+       : <define>WIN32
+         <define>__WIN32__
+         <define>_CRT_SECURE_NO_DEPRECATE
+         <define>_SCL_SECURE_NO_WARNINGS
          <define>_SCL_SECURE_NO_DEPRECATE
          <define>_HAS_ITERATOR_DEBUGGING=0
          <define>_SECURE_SCL=0
@@ -60,3 +74,6 @@ alias configuration : : <toolset>gcc :
          <link>static:<linkflags>-export-dynamic
        ;
 
+alias configuration : : :
+       : <include>$(TOP)/build/workarounds
+       ;

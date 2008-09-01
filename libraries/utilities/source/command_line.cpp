@@ -17,6 +17,7 @@
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/compare.hpp"
+#include "boost/algorithm/string/std/string_traits.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 /// \cond DUMMY
@@ -174,8 +175,11 @@ namespace mcrl2 {
               "=\\fI" + m_argument->get_name() + "\\fR");
       }
 
-      s << std::endl
-        << boost::replace_all_copy(word_wrap(m_description, 80), "'", "\\&'") << std::endl;
+      std::string description(word_wrap(m_description, 80));
+
+      boost::replace_all(description, "'", "\\&'");
+
+      s << std::endl << description << std::endl;
 
       return s.str();
     }

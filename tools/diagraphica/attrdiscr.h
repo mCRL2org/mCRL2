@@ -37,8 +37,8 @@ public:
         const std::vector< int > &indices,
         const std::string &newValue );
     void moveValue(
-        const int &idxFr,
-        const int &idxTo );
+        const size_t &idxFr,
+        const size_t &idxTo );
     void configValues(
         const std::vector< std::string > &curDomain,
         std::map< int, int  > &origToCurDomain );

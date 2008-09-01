@@ -9,6 +9,7 @@
 /// \file confluence_checker.cpp
 
 #include <cstdlib>
+#include <cstring>
 #include <string>
 
 #include "mcrl2/lps/confluence_checker.h"
