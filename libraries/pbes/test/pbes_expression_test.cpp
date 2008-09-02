@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/pbes_expression_with_variables.h"
 
 using namespace std;
 using namespace atermpp;
@@ -161,11 +162,33 @@ void test_accessors()
   } 
 }
 
+void test_pbes_expression_with_variables()
+{
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  m: Nat;       \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+    ;
+
+  pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
+  pbes_expression_with_variables y(x);
+  BOOST_CHECK(y.variables().size() == 2);
+  
+  x = parse_pbes_expression("forall k:Nat.X(true, 2) && Y(n+1) && Y(k)", VARSPEC);
+  pbes_expression_with_variables z(x);
+  BOOST_CHECK(z.variables().size() == 1);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_accessors();
+  test_pbes_expression_with_variables();
 
   return 0;
 }

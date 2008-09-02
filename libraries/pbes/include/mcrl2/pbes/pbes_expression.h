@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/term_traits.h"
 
 namespace mcrl2 {
 
@@ -71,7 +72,7 @@ class pbes_expression: public atermpp::aterm_appl
     bool is_bes() const
     {
       return mcrl2::pbes_system::is_bes(*this);
-    }
+    }   
 };
 
 /// \brief singly linked list of data expressions
@@ -453,6 +454,64 @@ bool is_bes(atermpp::aterm_appl t)
 
   return false;
 }
+
+  template <>
+  struct term_traits<pbes_expression>
+  {
+    static inline
+    pbes_expression true_() { return pbes_expr_optimized::true_(); }
+    
+    static inline
+    pbes_expression false_() { return pbes_expr_optimized::false_(); }
+    
+    static inline
+    pbes_expression not_(pbes_expression p) { return pbes_expr_optimized::not_(p); }
+    
+    static inline
+    pbes_expression and_(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::and_(p, q); }
+    
+    static inline
+    pbes_expression or_(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::or_(p, q); }
+    
+    static inline
+    pbes_expression imp(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::imp(p, q); }
+    
+    static inline
+    pbes_expression forall(data::data_variable_list l, pbes_expression p) { return pbes_expr_optimized::forall(l, p); }
+    
+    static inline
+    pbes_expression exists(data::data_variable_list l, pbes_expression p) { return pbes_expr_optimized::exists(l, p); }
+
+    static inline
+    bool is_true(pbes_expression t) { return pbes_expr::is_true(t); }
+    
+    static inline 
+    bool is_false(pbes_expression t) { return pbes_expr::is_false(t); }
+    
+    static inline 
+    bool is_not(pbes_expression t) { return pbes_expr::is_not(t); }
+    
+    static inline 
+    bool is_and(pbes_expression t) { return pbes_expr::is_and(t); }
+    
+    static inline 
+    bool is_or(pbes_expression t) { return pbes_expr::is_or(t); }
+    
+    static inline 
+    bool is_imp(pbes_expression t) { return pbes_expr::is_imp(t); }
+    
+    static inline 
+    bool is_forall(pbes_expression t) { return pbes_expr::is_forall(t); }
+    
+    static inline 
+    bool is_exists(pbes_expression t) { return pbes_expr::is_exists(t); }
+    
+    static inline 
+    bool is_data(pbes_expression t) { return pbes_expr::is_data(t); }
+    
+    static inline 
+    bool is_prop_var(pbes_expression t) { return pbes_expr::is_propositional_variable_instantiation(t); }
+  };
 
 } // namespace pbes_system
 

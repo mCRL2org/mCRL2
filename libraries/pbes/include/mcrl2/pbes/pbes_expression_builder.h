@@ -224,12 +224,15 @@ std::cout << "<visit result>" << core::pp(result) << " " << result << std::endl;
   }
 };
 
+struct no_arguments
+{};
+
 // for backwards compatibility
-struct pbes_expression_builder: public pbes_builder<int>
+struct pbes_expression_builder: public pbes_builder<no_arguments>
 {
-  typedef pbes_builder<int> super;
-  
-  int dummy;
+  typedef pbes_builder<no_arguments> super;
+
+  no_arguments dummy;
   
   /// Visit data expression node.
   ///
@@ -312,70 +315,70 @@ struct pbes_expression_builder: public pbes_builder<int>
 
   /// Visit data expression node.
   ///
-  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, int&)
+  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, no_arguments&)
   {
     return visit_data_expression(x, d);
   }
 
   /// Visit true node.
   ///
-  pbes_expression visit_true(const pbes_expression& x, int&)
+  pbes_expression visit_true(const pbes_expression& x, no_arguments&)
   {
     return visit_true(x);
   }
 
   /// Visit false node.
   ///
-  pbes_expression visit_false(const pbes_expression& x, int&)
+  pbes_expression visit_false(const pbes_expression& x, no_arguments&)
   {
     return visit_false(x);
   }
 
   /// Visit not node.
   ///
-  pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, int&)
+  pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, no_arguments&)
   {
     return visit_not(x, n);
   }
 
   /// Visit and node.
   ///
-  pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, no_arguments&)
   {
     return visit_and(x, left, right);
   }
 
   /// Visit or node.
   ///
-  pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, no_arguments&)
   {
     return visit_or(x, left, right);
   }    
 
   /// Visit imp node.
   ///
-  pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
+  pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, no_arguments&)
   {
     return visit_imp(x, left, right);
   }
 
   /// Visit forall node.
   ///
-  pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, no_arguments&)
   {
     return visit_forall(x, variables, expression);
   }
 
   /// Visit exists node.
   ///
-  pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
+  pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, no_arguments&)
   {
     return visit_exists(x, variables, expression);
   }
 
   /// Visit propositional variable node.
   ///
-  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, int&)
+  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, no_arguments&)
   {
     return visit_propositional_variable(x, v);
   }
@@ -383,7 +386,7 @@ struct pbes_expression_builder: public pbes_builder<int>
   /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
   /// By default a mcrl2::runtime_error exception will be generated.
   ///
-  pbes_expression visit_unknown(const pbes_expression& e, int&)
+  pbes_expression visit_unknown(const pbes_expression& e, no_arguments&)
   {
     throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
     return visit_unknown(e);
