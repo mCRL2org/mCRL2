@@ -110,7 +110,7 @@ namespace detail {
     }
   };
 
-  struct edge_condition_visitor: public pbes_visitor<edge_condition>
+  struct edge_condition_visitor: public pbes_expression_visitor<pbes_expression, edge_condition>
   {
     // N.B. As a side effect ec1 and ec2 are changed!!!
     void merge_conditions(edge_condition& ec1,

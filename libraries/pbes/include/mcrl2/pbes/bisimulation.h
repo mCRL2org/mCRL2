@@ -117,7 +117,7 @@ class bisimulation_algorithm
     ///
     void check_expression(pbes_expression expr, const linear_process& p, const linear_process& q, std::string msg) const
     {
-      detail::free_variable_visitor visitor;
+      detail::free_variable_visitor<pbes_expression> visitor;
       visitor.bound_variables = p.process_parameters() + q.process_parameters();
       visitor.visit(expr);
       std::set<data_variable> w = visitor.result;

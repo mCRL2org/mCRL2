@@ -13,7 +13,6 @@
 #define MCRL2_PBES_NORMALIZE_H
 
 #include "mcrl2/pbes/pbes_expression_visitor.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2 {
@@ -21,7 +20,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// Visitor for checking if a pbes expression is normalized.
-struct is_normalized_visitor : public pbes_expression_visitor
+struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 {
   bool result;
   

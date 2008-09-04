@@ -22,7 +22,7 @@ namespace pbes_system {
 namespace detail {
 
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
-struct quantifier_visitor: public pbes_expression_visitor
+struct quantifier_visitor: public pbes_expression_visitor<pbes_expression>
 {
   std::set<data::data_variable> variables;
 
@@ -41,7 +41,7 @@ struct quantifier_visitor: public pbes_expression_visitor
 
 /// Visitor for determining if within the scope of a quantifier there are quantifier
 /// variables of free variables with the same name.
-struct quantifier_name_clash_visitor: public pbes_expression_visitor
+struct quantifier_name_clash_visitor: public pbes_expression_visitor<pbes_expression>
 {
   std::vector<data::data_variable_list> quantifier_stack;
   bool result;

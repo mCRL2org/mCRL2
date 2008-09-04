@@ -87,7 +87,7 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
   return remove_parameters(v, i->second);
 }
 
-struct pbes_remove_parameters_builder: public pbes_expression_builder
+struct pbes_remove_parameters_builder: public pbes_expression_builder<pbes_expression>
 {
   const std::map<core::identifier_string, std::vector<int> >& to_be_removed_;
 

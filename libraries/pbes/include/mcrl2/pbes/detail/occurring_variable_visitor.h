@@ -22,7 +22,7 @@ namespace pbes_system {
 namespace detail {
 
 /// Visitor for collecting the propositional variables that occur in a pbes expression.
-struct occurring_variable_visitor: public pbes_expression_visitor
+struct occurring_variable_visitor: public pbes_expression_visitor<pbes_expression>
 {
   std::set<propositional_variable_instantiation> variables;
 

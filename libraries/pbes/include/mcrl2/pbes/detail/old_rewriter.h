@@ -39,6 +39,44 @@ namespace mcrl2 {
 
 namespace data {
 
+/*
+  /// Rewriter for rewriting a single term multiple times with different substitutions.
+  /// For this special case, this rewriter is more efficient than the default rewriter.
+  class single_term_rewriter
+  {
+    rewriter& m_rewriter;
+    ATerm m_phi; // expression in internal rewriter format
+
+    public:
+      /// Constructor.
+      /// \param phi The term to be rewritten.
+      single_term_rewriter(rewriter& r, const data_expression& phi)
+        : m_rewriter(r)
+      {
+        m_phi = m_rewriter.m_rewriter.get()->toRewriteFormat(phi);
+      }
+
+  		/// \brief Rewrites the data expression phi that has been passed through the constructor,
+  		/// and on the fly applies the substitutions in the given sequence.
+  		/// \return The normal form of phi.
+  		///
+  		template <typename SubstitutionFunction>
+  		data_expression operator()(const SubstitutionFunction& sigma) const
+  		{
+  		  Rewriter* r = m_rewriter.m_rewriter.get();
+
+  		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
+  		  for (typename SubstitutionFunction::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  		  {
+  		    r->setSubstitution(i->m_variable, i->m_value);
+  		  }
+  		  data_expression result = r->fromRewriteFormat(r->rewriteInternal(m_phi));
+  		  r->clearSubstitutions();
+  		  return result;
+  		}
+  };
+*/
+
 /// \cond INTERNAL_DOCS
 
 namespace detail {
@@ -227,7 +265,7 @@ namespace detail {
   }
 
   template <class DataRewriter>
-  struct pbes_simplify_expression_builder: public pbes_expression_builder
+  struct pbes_simplify_expression_builder: public pbes_expression_builder<pbes_expression>
   {
     DataRewriter& m_rewriter;
     const data::data_specification& m_data;

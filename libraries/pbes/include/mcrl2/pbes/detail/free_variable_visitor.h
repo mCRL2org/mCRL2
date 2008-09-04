@@ -22,8 +22,13 @@ namespace pbes_system {
 
 namespace detail {
 
-struct free_variable_visitor: public pbes_expression_visitor
+template <typename Term>
+struct free_variable_visitor: public pbes_expression_visitor<Term>
 {
+  typedef pbes_expression_visitor<Term> super;
+  typedef typename super::term_type term_type;
+  typedef typename super::data_term_type data_term_type;
+  
   data::data_variable_list bound_variables;
   std::vector<data::data_variable_list> quantifier_stack;
   std::set<data::data_variable> result;
@@ -64,7 +69,7 @@ struct free_variable_visitor: public pbes_expression_visitor
     quantifier_stack.pop_back();
   }
 
-  bool visit_forall(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
+  bool visit_forall(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -75,7 +80,7 @@ struct free_variable_visitor: public pbes_expression_visitor
     pop();
   }
 
-  bool visit_exists(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
+  bool visit_exists(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -86,7 +91,7 @@ struct free_variable_visitor: public pbes_expression_visitor
     pop();
   }
 
-  bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+  bool visit_propositional_variable(const term_type& e, const propositional_variable_instantiation& v)
   {
     if (search_propositional_variables)
     {
@@ -102,7 +107,7 @@ struct free_variable_visitor: public pbes_expression_visitor
     return true;
   }
 
-  bool visit_data_expression(const pbes_expression& e, const data::data_expression& d)
+  bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
     std::set<data::data_variable> variables = data::find_all_data_variables(d);
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)

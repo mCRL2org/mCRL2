@@ -45,7 +45,7 @@ namespace pbes_system {
 
 /// Visitor that pushes a negation in a PBES expression as far as possible
 /// inwards towards a data expression.
-struct complement_builder: public pbes_expression_builder
+struct complement_builder: public pbes_expression_builder<pbes_expression>
 {
   /// \overload
   ///

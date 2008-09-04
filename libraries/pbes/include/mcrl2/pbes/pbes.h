@@ -67,7 +67,7 @@ std::set<data::data_variable> compute_free_variables(Iterator first, Iterator la
 {
   using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-  detail::free_variable_visitor visitor;
+  detail::free_variable_visitor<pbes_expression> visitor;
 
   for (Iterator i = first; i != last; ++i)
   {

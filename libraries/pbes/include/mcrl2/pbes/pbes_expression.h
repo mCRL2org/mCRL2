@@ -458,6 +458,12 @@ bool is_bes(atermpp::aterm_appl t)
   template <>
   struct term_traits<pbes_expression>
   {
+    typedef pbes_expression term_type;
+    typedef data::data_variable variable_type;
+    typedef data::data_expression data_term_type;
+    typedef data::data_variable_list data_variable_sequence_type;
+    typedef propositional_variable_instantiation propositional_variable_type;   
+    
     static inline
     pbes_expression true_() { return pbes_expr_optimized::true_(); }
     
@@ -511,6 +517,30 @@ bool is_bes(atermpp::aterm_appl t)
     
     static inline 
     bool is_prop_var(pbes_expression t) { return pbes_expr::is_propositional_variable_instantiation(t); }
+      
+    static inline
+    data_term_type val(pbes_expression t) { return accessors::val(t); }
+    
+    static inline
+    pbes_expression arg(pbes_expression t) { return accessors::arg(t); }
+    
+    static inline
+    pbes_expression left(pbes_expression t) { return accessors::left(t); }
+    
+    static inline
+    pbes_expression right(pbes_expression t) { return accessors::right(t); }
+    
+    static inline
+    data::data_variable_list var(pbes_expression t) { return accessors::var(t); }
+    
+    static inline
+    core::identifier_string name(pbes_expression t) { return accessors::name(t); }
+    
+    static inline
+    data::data_expression_list param(pbes_expression t) { return accessors::param(t); }
+
+    static inline
+    propositional_variable_type prop_var(pbes_expression t) { return propositional_variable_type(t); }
   };
 
 } // namespace pbes_system

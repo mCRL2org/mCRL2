@@ -47,7 +47,7 @@ static pbes_expression join
 /// Precondition for the input pbes_expression:
 /// - normalized form (no ! or ->)
 /// - no variable should occur both free and bounded!
-struct pbes_expression_prenex_builder: public pbes_expression_builder
+struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expression>
 {
 
   pbes_expression_prenex_builder(){}

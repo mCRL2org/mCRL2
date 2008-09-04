@@ -230,7 +230,7 @@ void test_pbes_expression_builder()
   for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     const pbes_expression& q = i->formula();
-    pbes_expression_builder builder;
+    pbes_expression_builder<pbes_expression> builder;
     pbes_expression q1 = builder.visit(q);
     BOOST_CHECK(q == q1);
   }

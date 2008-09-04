@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_VARIABLES_H
 
 #include <set>
+#include "mcrl2/data/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
@@ -78,7 +79,7 @@ namespace pbes_system {
       pbes_expression_with_variables(atermpp::aterm_appl term)
         : pbes_expression(term)
       {
-        pbes_system::detail::free_variable_visitor visitor;
+        pbes_system::detail::free_variable_visitor<pbes_expression> visitor;
         visitor.visit(term);
         m_variables = data::data_variable_list(visitor.result.begin(), visitor.result.end());
       }
@@ -88,7 +89,7 @@ namespace pbes_system {
       pbes_expression_with_variables(ATermAppl term)
         : pbes_expression(term)
       {
-        pbes_system::detail::free_variable_visitor visitor;
+        pbes_system::detail::free_variable_visitor<pbes_expression> visitor;
         visitor.visit(pbes_expression(term));
         m_variables = data::data_variable_list(visitor.result.begin(), visitor.result.end());
       }
@@ -123,6 +124,12 @@ namespace pbes_system {
   template <>
   struct term_traits<pbes_expression_with_variables>
   {
+    typedef pbes_expression_with_variables term_type;
+    typedef data::data_variable variable_type;
+    typedef data::data_expression_with_variables data_term_type;
+    typedef data::data_variable_list data_variable_sequence_type;
+    typedef propositional_variable_instantiation propositional_variable_type;
+
     static inline
     bool is_true(pbes_expression_with_variables t) { return pbes_expr::is_true(t); }
     

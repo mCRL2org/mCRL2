@@ -76,10 +76,10 @@ namespace detail {
   // If DataSubstitutionRange is of type int, then the rewriter is called without
   // a substitution range.
   template <typename DataRewriter, typename DataSubstitutionRange>
-  struct simplify_rewrite_builder: public pbes_builder<std::pair<DataSubstitutionRange, bool> >
+  struct simplify_rewrite_builder: public pbes_expression_builder<pbes_expression, std::pair<DataSubstitutionRange, bool> >
   {
     // argument type of visit functions
-    typedef pbes_builder<std::pair<DataSubstitutionRange, bool> > super;
+    typedef pbes_expression_builder<pbes_expression, std::pair<DataSubstitutionRange, bool> > super;
     typedef typename super::argument_type argument_type;
 
     DataRewriter& m_data_rewriter;

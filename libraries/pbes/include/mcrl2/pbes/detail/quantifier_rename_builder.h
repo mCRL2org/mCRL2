@@ -33,7 +33,7 @@ namespace detail {
 /// variable, no other quantifier variables or free variables with the same name occur.
 /// The identifier generator that is supplied via the constructor is used to choose new names.
 template <typename IdentifierGenerator>
-struct quantifier_rename_builder: public pbes_expression_builder
+struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression>
 {
   IdentifierGenerator& generator;
   std::vector<data::data_variable_list> quantifier_stack;

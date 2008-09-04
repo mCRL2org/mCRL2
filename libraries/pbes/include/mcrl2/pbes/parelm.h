@@ -55,7 +55,7 @@ class pbes_parelm_algorithm
     std::set<data::data_variable> unbound_variables(pbes_expression t, data::data_variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
-      detail::free_variable_visitor visitor(bound_variables, search_propositional_variables);
+      detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
       visitor.visit(t);
       return visitor.result;      
     }

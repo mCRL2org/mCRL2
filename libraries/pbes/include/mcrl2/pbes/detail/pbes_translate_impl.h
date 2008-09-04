@@ -51,7 +51,7 @@ std::string pp(std::set<data::data_variable> s)
 inline
 std::set<data::data_variable> compute_free_pbes_expression_variables(const pbes_expression& e)
 {
-  free_variable_visitor visitor;
+  free_variable_visitor<pbes_expression> visitor;
   visitor.visit(e);
   return visitor.result;
 }
