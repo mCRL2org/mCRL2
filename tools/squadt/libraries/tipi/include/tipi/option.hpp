@@ -17,13 +17,67 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_pod.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/remove_const.hpp>
+#include <boost/type_traits/remove_reference.hpp>
 #include <boost/range/iterator_range.hpp>
+
+#include "tipi/basic_datatype.hpp"
 
 #ifndef NDEBUG
 # include <typeinfo>
 #endif
 
 namespace tipi {
+
+  /// \cond INTERNAL_DOCS
+  namespace detail {
+    template < typename S, typename E = void >
+    struct guess_type {
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_enum< S >::type >::type > {
+      typedef datatype::enumeration< S > type;
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_floating_point< S >::type >::type > {
+      typedef datatype::real_range< S, true, true > type;
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_integral< S >::type >::type > {
+      typedef datatype::integer_range< S > type;
+    };
+
+    template < >
+    struct guess_type< bool, void > {
+      typedef datatype::boolean type;
+    };
+
+    template < >
+    struct guess_type< std::string, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< const char*, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< char*, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< char* const, void > {
+      typedef datatype::string type;
+    };
+  }
+  /// \endcond
 
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
   class configuration::option : public configuration::parameter {
@@ -159,15 +213,37 @@ namespace tipi {
         }
       }
 
+      /**
+       * \brief Special function to set/replace the value of an argument ...
+       * \param[in] t pointer to the data type definition
+       * \param[in] b whether or not to add if the argument is already present
+       **/
+      template < unsigned int n, typename T >
+      inline void set_argument_value(const T t, bool b = true) {
+        typedef typename detail::guess_type< typename boost::remove_const<
+                typename boost::remove_reference< T >::type >::type >::type guessed_type;
+
+        if (n < m_arguments.size()) {
+          if (b) {
+            if (dynamic_cast< guessed_type const* > (m_arguments[n].first.get())) {
+              m_arguments[n].second = m_arguments[n].first->convert(t);
+            }
+            else {
+              boost::shared_ptr< guessed_type > a_type(new guessed_type);
+       
+              m_arguments[n] = std::make_pair(a_type, a_type->convert(t));
+            }
+          }
+        }
+        else {
+          append_argument< guessed_type, T >(boost::shared_ptr< guessed_type >(new guessed_type), t);
+        }
+      }
+
       /** \brief Special function to set/replace the value of an argument ... */
       template < unsigned int n, typename S, typename T >
       inline typename boost::disable_if< typename boost::is_pod< T >::type, void >::type
       set_argument_value(T const&, bool = true);
-
-      /** \brief Special function to set/replace the value of an argument ... */
-      template < unsigned int n, typename T >
-      inline typename boost::enable_if< typename boost::is_enum< T >::type, void >::type
-      set_argument_value(const T);
 
       /** \brief Clears the list of arguments */
       void clear();
@@ -217,19 +293,6 @@ namespace tipi {
     else {
       append_argument< S, T >(boost::shared_ptr< S >(new S), t);
     }
-  }
-
-  /**
-   * \param[in] t pointer to the data type definition
-   * \pre n <= m_arguments.size()
-   **/
-  template < unsigned int n, typename T >
-  inline typename boost::enable_if< typename boost::is_enum< T >::type, void >::type
-  configuration::option::set_argument_value(const T t) {
-
-    assert(n <= m_arguments.size());
-
-    set_argument_value< n, datatype::enumeration< T >, T >(t, true);
   }
 
   inline void configuration::option::clear() {

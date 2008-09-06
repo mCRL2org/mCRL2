@@ -85,7 +85,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   /* Set defaults where the supplied configuration does not have values */
@@ -148,7 +147,6 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   tool_options options;

@@ -11,7 +11,8 @@
 #include <tipi/detail/utility/standard_utility.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewrite.h"                // for RewriteStrategy 
+#include "mcrl2/lts/liblts.h"                  // for lts_equivalence
 
 #if defined(__APPLE__)
 # include <Carbon/Carbon.h>
@@ -250,6 +251,17 @@ namespace mcrl2 {
           add(GS_REWR_INNERC, "innerc").
           add(GS_REWR_JITTY, "jitty").
           add(GS_REWR_JITTYC, "jittyc");
+
+        tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
+
+        transformation_methods.
+          add(mcrl2::lts::lts_eq_none, "none").
+          add(mcrl2::lts::lts_eq_bisim, "modulo_strong_bisimulation").
+          add(mcrl2::lts::lts_eq_branching_bisim, "modulo_branching_bisimulation").
+          add(mcrl2::lts::lts_eq_sim, "strong_simulation_equivalence").
+          add(mcrl2::lts::lts_eq_trace, "modulo_trace_equivalence").
+          add(mcrl2::lts::lts_eq_weak_trace, "modulo_weak_trace_equivalence").
+          add(mcrl2::lts::lts_eq_isomorph, "isomorphism");
 
         return true;
       }

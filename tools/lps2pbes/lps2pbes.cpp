@@ -184,8 +184,13 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values for configuration
   if (!c.option_exists(option_timed)) {
-    c.add_option(option_timed, false).
-        set_argument_value< 0, tipi::datatype::boolean >(false, false);
+    c.add_option(option_timed).set_argument_value< 0 >(false);
+  }
+  if (!c.option_exists(option_selected_output_format)) {
+    c.add_option(option_selected_output_format).set_argument_value< 0 >(normal);
+  }
+  if (!c.option_exists(option_end_phase)) {
+    c.add_option(option_end_phase).set_argument_value< 0 >(PH_NONE);
   }
 
   /* Create display */
@@ -224,13 +229,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     append(okay_button, layout::right);
 
   // Set default values if the configuration specifies them
-  if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(
-        c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
-  }
-  if (c.option_exists(option_end_phase)) {
-    phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase));
-  }
+  format_selector.set_selection(
+      c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
+  phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase));
+
   if (c.input_exists(formula_file_for_input)) {
     formula_field.set_text(c.get_input(formula_file_for_input).get_location());
   }
@@ -262,9 +264,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     }
   }
 
-  c.add_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
-  c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-  c.add_option(option_end_phase).set_argument_value< 0 >(phase_selector.get_selection());
+  c.get_option(option_timed).set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
+  c.get_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
+  c.get_option(option_end_phase).set_argument_value< 0 >(phase_selector.get_selection());
 
   send_clear_display();
 }

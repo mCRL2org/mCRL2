@@ -288,6 +288,9 @@ namespace tipi {
         /** \brief Set the handler for a type */
         void add_handler(const typename M::type_identifier_t, handler_type);
 
+        /** \brief Clears the message queue */
+        void clear_queue();
+
         /** \brief Clears the handlers for a message type */
         void clear_handlers(const typename M::type_identifier_t);
 
@@ -453,6 +456,16 @@ namespace tipi {
       }
 
       handlers[t].insert(h);
+    }
+
+    /**
+     * \param[in] t the message type for which to clear the event handler
+     **/
+    template < class M >
+    inline void basic_messenger_impl< M >::clear_queue() {
+      boost::recursive_mutex::scoped_lock w(waiter_lock);
+
+      message_queue.clear();
     }
 
     /**

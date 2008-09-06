@@ -91,7 +91,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   /* Set defaults where the supplied configuration does not have values */
@@ -100,11 +99,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   }
   if (!configuration.option_exists(option_tau_only)) {
     configuration.add_option(option_tau_only).
-       set_argument_value< 0, tipi::datatype::boolean >(true, false);
+       set_argument_value< 0 >(true, false);
   }
   if (!configuration.option_exists(option_finite_only)) {
     configuration.add_option(option_finite_only).
-       set_argument_value< 0, tipi::datatype::boolean >(true, false);
+       set_argument_value< 0 >(true, false);
   }
 
   /* Create display */
@@ -146,9 +145,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   
   /* Update configuration */
   configuration.get_option(option_tau_only).
-     set_argument_value< 0, tipi::datatype::boolean >(tau_only.get_status());
+     set_argument_value< 0 >(tau_only.get_status());
   configuration.get_option(option_finite_only).
-     set_argument_value< 0, tipi::datatype::boolean >(finite_only.get_status());
+     set_argument_value< 0 >(finite_only.get_status());
 
   configuration.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
 }
@@ -167,7 +166,6 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   tool_options options;

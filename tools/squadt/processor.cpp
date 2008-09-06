@@ -960,7 +960,7 @@ namespace squadt {
       if (await_connection()) {
         /* Make sure that the task_monitor state is not cleaned up if the tool quits unexpectedly */
         send_configuration(c);
-     
+
         /* Wait until configuration is accepted, or the tool has terminated */
         if (await_message(tipi::message_configuration).get() != 0) {
           boost::shared_ptr < tipi::configuration > configuration(get_configuration());

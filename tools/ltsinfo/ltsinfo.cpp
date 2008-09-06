@@ -100,7 +100,6 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   std::string infilename = c.get_input(lts_file_for_input).get_location();

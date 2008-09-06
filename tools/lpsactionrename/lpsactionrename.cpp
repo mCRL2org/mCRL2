@@ -156,13 +156,13 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::layout::elements;//
+  using namespace tipi::layout::elements;
 
   if (!c.option_exists(option_no_rewrite)) {
-    c.add_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_rewrite).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_sumelm)) {
-    c.add_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_sumelm).set_argument_value< 0 >(false);
   }
 
   /* Create display */

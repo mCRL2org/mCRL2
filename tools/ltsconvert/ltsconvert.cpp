@@ -409,27 +409,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       dot          ///< dot
     };
 
-    enum transformation_options {
-      no_transformation,                          ///< copies from one format to the other without transformation
-      minimisation_modulo_strong_bisimulation,    ///< minimisation modulo strong bisimulation equivalence
-      minimisation_modulo_branching_bisimulation, ///< minimisation modulo branching bisimulation equivalence
-      minimisation_modulo_strong_simulation,      ///< minimisation modulo strong simulation equivalence
-      minimisation_modulo_trace_equivalence,      ///< determinisation and then minimisation modulo trace equivalence
-      minimisation_modulo_weak_trace_equivalence, ///< determinisation and then minimisation modulo weak trace equivalence
-      determinisation                             ///< determinisation
-    };
-
     static bool initialise_types() {
-      tipi::datatype::enumeration< transformation_options > transformation_method_enumeration;
-
-      transformation_method_enumeration.
-        add(no_transformation, "none").
-        add(minimisation_modulo_strong_bisimulation, "modulo_strong_bisimulation").
-        add(minimisation_modulo_branching_bisimulation, "modulo_branching_bisimulation").
-        add(minimisation_modulo_trace_equivalence, "modulo_trace_equivalence").
-        add(minimisation_modulo_weak_trace_equivalence, "modulo_weak_trace_equivalence").
-        add(determinisation, "determinise");
-
       tipi::datatype::enumeration< lts_output_format > output_format_enumeration;
 
       output_format_enumeration.
@@ -518,16 +498,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 //  format_selector.get_button(dot).on_change(boost::bind(::mcrl2::utilities::squadt::change_visibility_on_toggle, format_selector.get_button(dot), top.get(), add_state_information));
 
   /* Helper for transformation selection */
-  mcrl2::utilities::squadt::radio_button_helper < transformation_options > transformation_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < lts_equivalence > transformation_selector(d);
 
   m.append(d.create< label >().set_text("LTS transformation:")).
-    append(transformation_selector.associate(no_transformation, "none", true)).
-    append(transformation_selector.associate(minimisation_modulo_strong_bisimulation, "reduction modulo strong bisimulation equivalence")).
-    append(transformation_selector.associate(minimisation_modulo_branching_bisimulation, "reduction modulo branching bisimulation equivalence")).
-    append(transformation_selector.associate(minimisation_modulo_strong_simulation, "reduction modulo strong simulation equivalence")).
-    append(transformation_selector.associate(minimisation_modulo_trace_equivalence, "determinisation and reduction modulo trace equivalence")).
-    append(transformation_selector.associate(minimisation_modulo_weak_trace_equivalence, "determinisation and reduction modulo weak trace equivalence")).
-    append(transformation_selector.associate(determinisation, "determinisation"));
+    append(transformation_selector.associate(lts_eq_none, "none", true)).
+    append(transformation_selector.associate(lts_eq_bisim, "reduction modulo strong bisimulation equivalence")).
+    append(transformation_selector.associate(lts_eq_branching_bisim, "reduction modulo branching bisimulation equivalence")).
+    append(transformation_selector.associate(lts_eq_sim, "reduction modulo strong simulation equivalence")).
+    append(transformation_selector.associate(lts_eq_trace, "determinisation and reduction modulo trace equivalence")).
+    append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).
+    append(transformation_selector.associate(lts_eq_isomorph, "determinisation"));
   
   checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
   text_field& tau_field                   = d.create< text_field >();
@@ -556,7 +536,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     format_selector.set_selection(c.get_option_argument< lts_output_format >(option_selected_output_format, 0));
   }
   if (c.option_exists(option_selected_transformation)) {
-    transformation_selector.set_selection(c.get_option_argument< transformation_options >(option_selected_transformation, 0));
+    transformation_selector.set_selection(c.get_option_argument< lts_equivalence >(option_selected_transformation, 0));
   }
   if (c.input_exists(lps_file_auxiliary)) {
       lps_file_field.set_text(c.get_input(lps_file_auxiliary).get_location());
@@ -625,33 +605,32 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.remove_input(lps_file_auxiliary);
   }
 
-  transformation_options selected_transformation = transformation_selector.get_selection();
+  lts_equivalence selected_transformation = transformation_selector.get_selection();
 
   c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
   
-  if ((selected_transformation == minimisation_modulo_strong_bisimulation ||
-       selected_transformation == minimisation_modulo_branching_bisimulation)) {
+  if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
 
     c.add_option(option_add_bisimulation_equivalence_class).
-        set_argument_value< 0, tipi::datatype::boolean >(bisimulation_add_eq_classes.get_status());
+        set_argument_value< 0 >(bisimulation_add_eq_classes.get_status());
   }
   else {
     c.remove_option(option_add_bisimulation_equivalence_class);
   }
 
-  c.add_option(option_no_reachability_check).set_argument_value< 0, tipi::datatype::boolean >(check_reachability.get_status());
+  c.add_option(option_no_reachability_check).set_argument_value< 0 >(check_reachability.get_status());
 
   if (format_selector.get_selection() == dot) {
     c.add_option(option_no_state_information).
-       set_argument_value< 0, tipi::datatype::boolean >(add_state_information.get_status());
+       set_argument_value< 0 >(add_state_information.get_status());
   }
   else {
     c.remove_option(option_no_state_information);
   }
 
   if (!tau_field.get_text().empty()) {
-    c.add_option(option_tau_actions).set_argument_value< 0, tipi::datatype::string >(tau_field.get_text());
+    c.add_option(option_tau_actions).set_argument_value< 0 >(tau_field.get_text());
   }
   else {
     c.remove_option(option_tau_actions);
@@ -695,32 +674,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.set_source(c.get_input(lts_file_for_input).get_location());
   tool_options.set_target(c.get_output(lts_file_for_output).get_location());
 
-  transformation_options method = c.get_option_argument< transformation_options >(option_selected_transformation);
+  lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
 
-  if (method != no_transformation) {
-    switch (method) {
-      case minimisation_modulo_strong_bisimulation:
-        tool_options.equivalence = lts_eq_bisim;
-        break;
-      case minimisation_modulo_branching_bisimulation:
-        tool_options.equivalence = lts_eq_branching_bisim;
-        break;
-      case minimisation_modulo_strong_simulation:
-        tool_options.equivalence = lts_eq_sim;
-        break;
-      case minimisation_modulo_trace_equivalence:
-        tool_options.equivalence = lts_eq_trace;
-        break;
-      case minimisation_modulo_weak_trace_equivalence:
-        tool_options.equivalence = lts_eq_weak_trace;
-        break;
-      case determinisation:
-        tool_options.determinise = true;
-        break;
-      default:
-        break;
-    }
-
+  if (method != lts_eq_none) {
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {
       tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }

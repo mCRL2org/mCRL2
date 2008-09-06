@@ -153,19 +153,19 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout::elements;
 
   if (!c.option_exists(option_precompile)) {
-    c.add_option(option_precompile).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_precompile).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_counter)) {
-    c.add_option(option_counter).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_counter).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_hash_table)) {
-    c.add_option(option_hash_table).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_hash_table).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_tree)) {
-    c.add_option(option_tree).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_tree).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_unused_data)) {
-    c.add_option(option_unused_data).set_argument_value< 0, datatype::boolean >(true);
+    c.add_option(option_unused_data).set_argument_value< 0 >(true);
   }
   if (!c.option_exists(option_rewrite_strategy)) {
     c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);

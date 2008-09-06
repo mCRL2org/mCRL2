@@ -127,37 +127,37 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set defaults for options
   if (!c.option_exists(option_final_cluster)) {
-    c.add_option(option_final_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_final_cluster).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_intermediate_cluster)) {
-    c.add_option(option_no_intermediate_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_intermediate_cluster).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_alpha)) {
-    c.add_option(option_no_alpha).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_alpha).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_newstate)) {
-    c.add_option(option_newstate).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_newstate).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_binary)) {
-    c.add_option(option_binary).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_binary).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_statenames)) {
-    c.add_option(option_statenames).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_statenames).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_rewrite)) {
-    c.add_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_rewrite).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_freevars)) {
-    c.add_option(option_no_freevars).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_freevars).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_sumelm)) {
-    c.add_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_sumelm).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_deltaelm)) {
-    c.add_option(option_no_deltaelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_deltaelm).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_add_delta)) {
-    c.add_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_add_delta).set_argument_value< 0 >(false);
   }
 
   /* Create display */
@@ -250,19 +250,17 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.remove_output(lps_file_for_output);
   }
 
-  using tipi::datatype::boolean;
-
-  c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal.get_status());
-  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, boolean >(!clusterintermediate.get_status());
-  c.get_option(option_no_alpha).set_argument_value< 0, boolean >(!alpha.get_status());
-  c.get_option(option_newstate).set_argument_value< 0, boolean >(newstate.get_status());
-  c.get_option(option_binary).set_argument_value< 0, boolean >(binary.get_status());
-  c.get_option(option_statenames).set_argument_value< 0, boolean >(statenames.get_status());
-  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite.get_status());
-  c.get_option(option_no_freevars).set_argument_value< 0, boolean >(!freevars.get_status());
-  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm.get_status());
-  c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm.get_status());
-  c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta.get_status());
+  c.get_option(option_final_cluster).set_argument_value< 0 >(clusterfinal.get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0 >(!clusterintermediate.get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0 >(!alpha.get_status());
+  c.get_option(option_newstate).set_argument_value< 0 >(newstate.get_status());
+  c.get_option(option_binary).set_argument_value< 0 >(binary.get_status());
+  c.get_option(option_statenames).set_argument_value< 0 >(statenames.get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0 >(!rewrite.get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0 >(!freevars.get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0 >(!sumelm.get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0 >(!deltaelm.get_status());
+  c.get_option(option_add_delta).set_argument_value< 0 >(add_delta.get_status());
 
   send_clear_display();
 }

@@ -18,10 +18,12 @@ obj spinctrlfloat.o : source/spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <inc
 obj colorbutton.o   : source/colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 obj font_renderer.o : source/font_renderer.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
 
-# mCRL2 Tool for SQuADt interface
+# mCRL2 specific tool for SQuADt interface
 obj squadt_interface
       : source/squadt_interface.cpp
       : <threading>multi
+        <use>/libraries/lts                  # interface dependency for lts_equivalence
+        <use>/libraries/data                 # interface dependency for RewriteStrategy
         <use>/libraries/tipi//tool-interface
         <define>ENABLE_SQUADT_CONNECTIVITY
       :

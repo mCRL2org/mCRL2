@@ -133,20 +133,18 @@ class squadt_interactor::storage_configuration {
     }
 
     void set_defaults(tipi::configuration& c) {
-      using tipi::datatype::boolean;
-
       /* Set default configuration, for unspecified options */
       if (!c.option_exists(option_out_info)) {
-        c.add_option(option_out_info).set_argument_value< 0, ::tipi::datatype::boolean >(true);
+        c.add_option(option_out_info).set_argument_value< 0 >(true);
       }
       if (!c.option_exists(option_usedummies)) {
-        c.add_option(option_usedummies).set_argument_value< 0, boolean >(true);
+        c.add_option(option_usedummies).set_argument_value< 0 >(true);
       }
       if (!c.option_exists(option_state_format_tree)) {
-        c.add_option(option_state_format_tree).set_argument_value< 0, boolean >(false);
+        c.add_option(option_state_format_tree).set_argument_value< 0 >(false);
       }
       if (!c.option_exists(option_removeunused)) {
-        c.add_option(option_removeunused).set_argument_value< 0, boolean >(true);
+        c.add_option(option_removeunused).set_argument_value< 0 >(true);
       }
     }
 
@@ -201,11 +199,11 @@ class squadt_interactor::storage_configuration {
         c.add_output(lts_file_for_output, mt, outfile);
       }
       
-      c.add_option(option_out_info).set_argument_value< 0, tipi::datatype::boolean >(cb_out_info.get_status());
+      c.add_option(option_out_info).set_argument_value< 0 >(cb_out_info.get_status());
       
-      c.add_option(option_usedummies).set_argument_value< 0, tipi::datatype::boolean >(cb_usedummies.get_status());
-      c.add_option(option_state_format_tree).set_argument_value< 0, tipi::datatype::boolean >(cb_state_format_tree.get_status());
-      c.add_option(option_removeunused).set_argument_value< 0, tipi::datatype::boolean >(cb_removeunused.get_status());
+      c.add_option(option_usedummies).set_argument_value< 0 >(cb_usedummies.get_status());
+      c.add_option(option_state_format_tree).set_argument_value< 0 >(cb_state_format_tree.get_status());
+      c.add_option(option_removeunused).set_argument_value< 0 >(cb_removeunused.get_status());
     }
 };
 
@@ -219,31 +217,31 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   /* Set default configuration, for unspecified options */
   if (!c.option_exists(option_detect_deadlock)) {
-    c.add_option(option_detect_deadlock).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_detect_deadlock).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_trace)) {
-    c.add_option(option_trace).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_trace).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_max_traces)) {
-    c.add_option(option_max_traces).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_MAX_TRACES));
+    c.add_option(option_max_traces).set_argument_value< 0 >(boost::lexical_cast< std::string > (DEFAULT_MAX_TRACES));
   }
   if (!c.option_exists(option_error_trace)) {
-    c.add_option(option_error_trace).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_error_trace).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_confluence_reduction)) {
-    c.add_option(option_confluence_reduction).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_confluence_reduction).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_confluent_tau)) {
-    c.add_option(option_confluent_tau).set_argument_value< 0, tipi::datatype::string >("ctau");
+    c.add_option(option_confluent_tau).set_argument_value< 0 >("ctau");
   }
   if (!c.option_exists(option_bithashing)) {
-    c.add_option(option_bithashing).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_bithashing).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_bithashsize)) {
-    c.add_option(option_bithashsize).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_BITHASHSIZE));
+    c.add_option(option_bithashsize).set_argument_value< 0 >(boost::lexical_cast< std::string > (DEFAULT_BITHASHSIZE));
   }
   if (!c.option_exists(option_init_tsize)) {
-    c.add_option(option_init_tsize).set_argument_value< 0, tipi::datatype::string >(boost::lexical_cast< std::string > (DEFAULT_INIT_TSIZE));
+    c.add_option(option_init_tsize).set_argument_value< 0 >(boost::lexical_cast< std::string > (DEFAULT_INIT_TSIZE));
   }
 
   /* Function for updating the configuration (specifics for state space storage) */
@@ -374,33 +372,33 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   c.get_option(option_rewrite_strategy).set_argument_value< 0 >(rewrite_strategy_selector.get_selection());
   c.get_option(option_exploration_strategy).set_argument_value< 0 >(exploration_strategy_selector.get_selection());
-  c.add_option(option_detect_deadlock).set_argument_value< 0, tipi::datatype::boolean >(cb_deadlock.get_status());
+  c.add_option(option_detect_deadlock).set_argument_value< 0 >(cb_deadlock.get_status());
 
   if (cb_actions.get_status() && !tf_actions.get_text().empty()) {
-    c.add_option(option_detect_actions).set_argument_value< 0, tipi::datatype::string >(tf_actions.get_text());
+    c.add_option(option_detect_actions).set_argument_value< 0 >(tf_actions.get_text());
   }
 
-  c.add_option(option_trace).set_argument_value< 0, tipi::datatype::boolean >(cb_trace.get_status());
-  c.add_option(option_error_trace).set_argument_value< 0, tipi::datatype::boolean >(cb_error_trace.get_status());
+  c.add_option(option_trace).set_argument_value< 0 >(cb_trace.get_status());
+  c.add_option(option_error_trace).set_argument_value< 0 >(cb_error_trace.get_status());
 
   if (cb_trace.get_status() || cb_error_trace.get_status()) {
-    c.add_option(option_max_traces).set_argument_value< 0, tipi::datatype::string >(tf_max_traces.get_text());
+    c.add_option(option_max_traces).set_argument_value< 0 >(tf_max_traces.get_text());
   }
   
-  c.add_option(option_confluence_reduction).set_argument_value< 0, tipi::datatype::boolean >(cb_confluence.get_status());
+  c.add_option(option_confluence_reduction).set_argument_value< 0 >(cb_confluence.get_status());
 
   if (cb_confluence.get_status()) {
-    c.add_option(option_confluent_tau).set_argument_value< 0, tipi::datatype::string >(tf_conf_tau.get_text());
+    c.add_option(option_confluent_tau).set_argument_value< 0 >(tf_conf_tau.get_text());
   }
   
   if (cb_max_states.get_status() && !tf_max_states.get_text().empty()) {
-    c.add_option(option_max_states).set_argument_value< 0, tipi::datatype::string >(tf_max_states.get_text());
+    c.add_option(option_max_states).set_argument_value< 0 >(tf_max_states.get_text());
   }
   
-  c.add_option(option_bithashing).set_argument_value< 0, tipi::datatype::boolean >(cb_bithashing.get_status());
-  c.add_option(option_bithashsize).set_argument_value< 0, tipi::datatype::string >(tf_bithashsize.get_text());
+  c.add_option(option_bithashing).set_argument_value< 0 >(cb_bithashing.get_status());
+  c.add_option(option_bithashsize).set_argument_value< 0 >(tf_bithashsize.get_text());
 
-  c.add_option(option_init_tsize).set_argument_value< 0, tipi::datatype::string >(tf_init_tsize.get_text());
+  c.add_option(option_init_tsize).set_argument_value< 0 >(tf_init_tsize.get_text());
   
   send_clear_display();
 }

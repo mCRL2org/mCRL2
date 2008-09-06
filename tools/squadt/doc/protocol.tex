@@ -82,7 +82,7 @@
   are used for software development. In the project context \squadt manages a
   collection of files and a collection of tools that can be used to add new
   files to a project. The user observes and directs this process through a
-  graphical user interface.  The core of that user interface is focussed around
+  graphical user interface.  The core of that user interface is focused around
   an interactive visual overview of all data dependencies within a project.
   Every dependency represents an application of a tool on a set of files with
   another (disjoint) set of files as the result (where output depends on
@@ -117,7 +117,7 @@
   
   Monitoring consistency can help the user to find problems that result from
   the changes made to files in the project. This is not a novel idea. In much
-  the same way IDE's monitor changes to files in project in order to
+  the same way IDEs monitor changes to files in project in order to
   conservatively rebuild executables from source files. The main difference
   between the two is that an IDE takes care of generation and maintenance of
   all derived files, whereas in our case the user is expected to actively do
@@ -289,8 +289,8 @@
 
    \noindent A task specification consists of a description of the task
    input/output and it specifies the specific combination of functions that
-   define the task. The task input is a set of URI's that all identify an
-   existing resource. The task output is a set of URI's that is disjoint from
+   define the task. The task input is a set of URIs that all identify an
+   existing resource. The task output is a set of URIs that is disjoint from
    the task input. Every input as well as output is associated with a MIME
    type, if the actual resource identified by the URI does not match the type, a
    tool is expected to fail in completing the task.
@@ -304,7 +304,7 @@
 
    % creation and manipulation (tool and system)
  
-   A tool creates its own task specification and communicates it afterward
+   A tool creates its own task specification and communicates it afterwards
    with the integration framework. The framework can read and modify the part
    that specifies the task input and output, e.g. it can rename input files.
    The remainder of the task specification is tool-specific, the framework can
@@ -390,7 +390,7 @@
 %   There are some more but these are the most significant ones and all have
 %   directly affected the design of the tool control interface.
 
- \section{Communication Protocol (high level)} \label{s:message_definitions}
+ \section{Communication Protocol (high level)} \label{s:high_level_specification}
 
   The \squadt application is built on top of a portable tool integration
   framework built in C++. At the heart of this framework is the communication
@@ -461,7 +461,7 @@
    precise representation (which is established in the next section).  The
    names of types hint at both the purpose and data inter-dependencies (between
    messages) and help to form an intuition about how this data is used to
-   fulfill the purpose.  There is a small number of predefined types. The first
+   fulfil the purpose.  There is a small number of predefined types. The first
    type is \texttt{Id} representing a textual identifier (scope is determined
    at use).  The other types are \texttt{URI}, \texttt{MIME-type},
    $\mathbb{B}$, $\mathbb{N}$, and \texttt{String}, with the usual meaning.
@@ -520,7 +520,7 @@
    communication action occurs between the partners. Subsequently an example
    response must occur, after which a state is reached from which a start
    notification can occur. A start notification can only be followed by a stop
-   notification and vice versa. The starting and stopping can be repeated ad
+   notification and vice-versa. The starting and stopping can be repeated ad
    infinitum.
 
   \subsection{Instance identification} \label{s:instance_identification}
@@ -1157,53 +1157,58 @@
    
  \section{Implementation details} \label{s:protocol_implementation}
 
-   The previous section specified a high level view of the protocol. At this
-   point it should be clear what concepts are involved and how those concepts
-   fit together. Communication is based on typed messages. And message
-   interpretation depends on the type, and the partner that receives the
-   message. This section focusses on implementation details and addresses
-   important design decisions.
+   Above, we presented a high level view of the communication protocol for
+   controlling tools in our integration framework. This section focuses on the
+   implementation details and addresses important design decisions.
    
-   An important design goal was to create a communication interface that can be
-   used from a wide variety of programming languages. Meaning that we looked
-   only at standardized inter-process communication mechanisms available as
-   operating system resource such as sockets and pipes. To further simplify
-   the use of the interface from other programming languages it was decided
-   to make the protocol text-based using XML \cite{XML-1_0-4}.
+   The communication protocol is the interface between a tool and the tool
+   integration framework. An important design goal was to make the use of this
+   interface as simple as possible e.g. to not restrict it's use to specific
+   operating systems or programming languages. So for implementation we
+   have only looked at established inter-process communication mechanisms
+   available as part of standard facilities provided by operating system such
+   as sockets and pipes.  To further simplify the use of the interface from
+   other programming languages it was decided to create a text-based message
+   format based on XML \cite{XML-1_0-4}.
 
 %   Not explicitly mentioned so far, but very important in this section is that
 %   we rely on the property that the order in which messages are sent is the
 %   same as the order in which those messages are received (or actually
 %   delivered). Another such property is that communication between partners
 %   uses a notion of connection.
-   Another important general design decision was to not put focus on protocol
+   Another important general design decision was to put little focus on protocol
    security aspects. We feel that security as well as performance are key
-   aspects in the design of any system. By this we mean that as with
-   performance it is often not possible to implement or to simply extend a
-   design to add security at a later stage. Putting a focus on security would
-   slow down the development process too much. The main goal has been on
-   getting a proof-of-concept implementation of a protocol stack on which to
-   build the \squadt application.
+   aspects in the design of any system. By this we mean that, as is the case with
+   performance, it is often not possible or very difficult to implement or to
+   simply extend a design to add security at a later stage. Putting a focus on
+   security would have slowed down the development process too much. The main
+   goal has been on getting a proof-of-concept implementation of a
+   communication interface on top of which to build the \squadt application.
 
    The OSI model \cite{Day1983} is a popular way of analysing and describing
    communication protocols. Our use of this model only serves to provide a
    frame of reference. The OSI model divides the communication into subproblems
    (using seven layers) that can be solved independently. Layers 1 through 5
    represent basic functionality covered by widely available standard
-   communication protocols. The \squadt application covers the 7th
-   (application) layer and our communication protocol covers the 6th
-   (presentation) layer.
+   communication protocols. Those five layers provide a data communication
+   connection between applications along which data can be transported.  Our
+   communication protocol covers the $6^{th}$ (presentation) layer. The
+   integration framework that is used as part of the \squadt application covers
+   the $7^{th}$ (application) layer.
    
   \subsection{Transport} \label{ss:transport}
 
    For transport of data layers 1 through 5 of the OSI model the internet (or
    TCP/IP) protocol suite is used (see \cite{rfc793} and \cite{rfc791} for
-   TCP(-v4) respectively IP). The TCP/IP protocol provides (bi-directional)
-   reliable order preserving delivery of a byte stream (layers 1 through 4 of
-   OSI). In addition it creates session functionality, or a stateful connection
-   between communication peers which allows one-time identification for tools
-   (section \ref{s:instance_identification}).  The use of TCP/IP is ubiquitous
-   and usable from a wide variety of programming languages.
+   TCP(-v4) respectively IP). The TCP/IP protocol provides reliable
+   bi-directional order-preserving delivery of a byte stream (layers 1 through
+   4 of OSI). TCP/IP also offers session functionality ($5^{th}$ layer OSI) or a
+   connection between applications on top of which a messaging context can be
+   implemented. As a result one-time tool identification (section
+   \ref{s:instance_identification}) is possible, i.e. when a new messaging
+   context is established. % The use of TCP/IP is widespread and modern
+%   operating systems have built-in support. As a result usable from a wide variety of
+%   programming languages.
 
 %   An alternative is to use
 %   standard input/output streams (or piping).  But the main disadvantage of
@@ -1226,8 +1231,9 @@
    The presentation layer of the OSI model is about mapping between application
    level concepts (with their own syntax and semantics) and data representation
    in communication (data in messages). The topic of this subsection is the
-   representation of messages (see section \ref{s:message_definitions}) and
-   their interpretation in the domain of the application.
+   representation of the messages presented in section
+   \ref{s:high_level_specification} and their interpretation in the domain of the
+   application.
    
 %   XMPP has the notion of a message that can be sent from client to client, on
 %   top of it our protocol can be implemented.   Unfortunately no single
@@ -1271,7 +1277,7 @@
     \noindent Below the message structure is specified for all the
     message types and for some interesting variations. Usually the structure
     of an XML document is (formally) specified using XML Document Type
-    Declaration (\cite{Sperberg-McQueen:06:EML}) or the XML Schema standard
+    Definition (\cite{Sperberg-McQueen:06:EML}) or the XML Schema standard
     \cite{Malhotra:06:XSP}. An XML Schema specification for the complete set of
     messages is available in appendix \ref{subsection:xml_schema_messages}. Many people
     find DTD and XML schema difficult to read and understand; so here we use 
@@ -1294,8 +1300,16 @@
 
   \subsubsection{Capabilities}
 
-   Messages for communicating the capabilities of each of the communication
-   partners contain at the very least the version of the protocol. For example:
+   Capabilities are exchanged to inform each of the communication partners
+   about the precise capabilities of the other. A request for capabilities
+   looks is a message with type `\texttt{capabilities}' and no content.
+
+   \small \begin{verbatim}
+  <message type="capabilities"></message>\end{verbatim}
+  \normalsize
+
+   The response is a message with type `\texttt{capabilities}' and at least the
+   following content when the request was made by a tool.
 
    \small \begin{verbatim}
   <capabilities>
@@ -1303,12 +1317,12 @@
   </capabilities>\end{verbatim}
   \normalsize
 
-   \noindent A capabilities response message sent in reply to a request for
-   capabilities by the controller in addition must contain the set of
-   input-configurations. An input-configuration is represented by means of the
-   \textit{input-configuration} element. The non-empty set is modelled as an
-   non-empty ordered list without duplicates, meaning that elements with the
-   same values for the category and format attributes are ignored. For example:
+   \noindent When the request was made by the controller, the response must
+   also contain the set of input-configurations. An input-configuration is
+   represented by means of the \textit{input-configuration} element. The
+   non-empty set is modelled as an non-empty ordered list without duplicates,
+   meaning that elements with the same values for the category and format
+   attributes are ignored. For example:
 
    \small \begin{verbatim}
   <capabilities>
@@ -1341,28 +1355,28 @@
 
   \subsubsection{Configuration} \label{ss:implementation_configuration}
 
-   The purpose of a configuration specification is to differentiate between
-   behaviours of a tool in order to allow for selection of behaviour. Depending
-   on the developer of a tool different behaviour can be observed from the
-   outside. It also depends on the developer to what extend this behaviour can
-   be selected before task execution is started.
+%   The purpose of a configuration specification is to differentiate between
+%   behaviours of a tool in order to allow for selection of behaviour. Depending
+%   on the developer of a tool different behaviour can be observed from the
+%   outside. It also depends on the developer to what extend this behaviour can
+%   be selected before task execution is started.
 
    Traditionally most programs with a command line interface take arguments
-   that are used to (re)produce this state non-interactively by means of a
-   command which is a single specially formatted string. The model behind this
-   method of expressing a task-specification is based on the idea that tasks
-   consist of a sequence of operations or sub tasks each of which can be
+   that are used to (re)produce a configured state non-interactively by means
+   of a command which is a single specially formatted string. The model behind
+   this method of expressing a task-specification is based on the idea that
+   tasks consist of a sequence of operations or sub tasks each of which can be
    parametrised.  A configuration is a selection between available operations
    and values for the parameters for operations or the combinations thereof. On
    the command line such a configuration is represented as a string that
    consists of so-called options followed by values for the arguments of this
-   option. We chose to reuse this model but will not use the same
-   implementation.
+   option. Our approach of expressing a configuration follows the same pattern
+   of options with arguments.
 
-   The controller is assumed to be oblivious to any data that is produced by
-   tools other than the fact that there is a name associated to this data and
-   the `type' of the data.  In particular the controller cannot inspect the
-   data in order to obtain more knowledge about the data.
+   The integration framework is oblivious to any data that is produced by tools
+   other than a name (specified as URI) and storage format or the `type' of
+   this data.  In particular the controller cannot inspect data in order to
+   obtain more knowledge about the data.
 
    The integration framework is the only party with knowledge about available
    data sources. This knowledge is obtained from configurations and
@@ -1370,9 +1384,8 @@
    framework on what data (and its type) are produced by the task. To represent
    the type of the data the MIME standard is used. The use of MIME is
    wide-spread among desktop applications and in other communication protocols.
-   The application of a tool to do a specific task is restricted by the kind of
-   data the task requires as input. An example of an initial configuration
-   looks as follows.
+   A configuration request sent by the controller is a message with type
+   `\texttt{configuration}' and the following content:
 
    \small \begin{verbatim}
   <configuration interactive="true" category="debugging">
@@ -1384,11 +1397,14 @@
   </configuration>\end{verbatim}
   \normalsize
 
-   \noindent The \textit{category} attribute is mandatory, the interactive
-   attribute must be true when it is part of a message that serves as a request
-   for interactive configuration.  A \textit{configuration} element may contain
-   an arbitrary number of \textit{object} and \textit{option} elements in any
-   order, they represent data sources and options respectively.
+   \noindent The \textit{category} attribute is mandatory and should contain a
+   short string that identifies a category that characterises the functionality
+   of the tool that is used when a tool is configured accordingly.  The
+   interactive attribute is optional and signifies a request for user
+   interactive configuration when it is set to `true' . A
+   \textit{configuration} element may contain an arbitrary number of
+   \textit{object} and \textit{option} elements in any order, they represent
+   data sources and options respectively.
    
    The \textit{id} attributes of \textit{option} and \textit{object} elements
    represent the identifiers and all must be unique within the context of a
@@ -1402,6 +1418,8 @@
    the option. A number of predefined types is available for arguments to
    options: string, integer, natural, positive, real.
 
+   A configuration response is similar to the request but it has the interactive 
+
    A valid (initial) configuration can be obtained from an input configuration
    as follows.  Create an empty \textit{configuration} section and add an
    attribute \textit{interactive} set to true and add the contents of an
@@ -1409,13 +1427,12 @@
 
   \subsubsection{Display}
 
-   Design of a good user interface may require more flexibility such as
-   separate manipulation of layout properties. In the previous section display
-   manipulation was restricted to replacing the entire content of the display
-   at once or modifying the state of individual widgets on the display.  In
-   particular it is not possible to manipulate the layout itself. More complete
-   manipulation capabilities rapidly increase complexity. A conservative
-   approach was chosen to save on implementation time. 
+   Display manipulation was restricted to replacing the entire content of the
+   display at once or modifying the state of individual widgets on the display.
+   In particular it is not possible to manipulate the layout itself. More
+   complete manipulation capabilities rapidly increase complexity. A
+   conservative approach was chosen to keep initial complexity low and save on
+   development time.
 
 %%   A good example is the combination of HTML,
 %%   CSS, and JavaScript because it essentially offers this flexibility by means
@@ -1423,14 +1440,13 @@
 %%   standard portable implementations make them unsuitable to directly rely on
 %%   at this time.
 
-   We have preselected a limited set of widgets that are available to tools to
-   construct display layouts. Again the reason is to limit complexity although
-   the display layout construction and manipulation by itself are by far the
-   most complex functionality the protocol has to offer.  The downside of this
-   limitation of choice is that a tool developer has less control over the
-   exact layout of widgets on the display. Instead we have aimed to make it
-   easy to implement new widgets and hope to extend the protocol when there is
-   a specific demand.
+   A small set of widgets is available for tool developers to choose from for
+   constructing display layouts. Display layout construction and manipulation
+   by itself are by far the most complex functionality the protocol has to
+   offer.  The downside of this limited choice is that a tool developer has
+   less means layout widgets on the display. Adding new widgets when need
+   arises should be easy however. The protocol will have to be refined in order
+   to support this.
    
 %   The available elements are: \textit{box-layout-manager}, \textit{progress-bar},
 %   \textit{radio-button}, \textit{button}, \textit{label}, \textit{checkbox},
@@ -1440,13 +1456,13 @@
 
    \paragraph{Widgets}
 
-    Because the use of graphical user interfaces today is so ubiquitous it is
-    assumed that the reader is familiar with the purpose and basic functions of
-    each of the widgets presented earlier. The name and function of widgets 
-    and the way a layout is built are based on concepts and terminology used in
-    Java Swing.  Every widget has a mandatory \textit{id} attribute that must
-    be unique within the scope of the containing \textit{display-layout} section
-    (introduced shortly).
+    We assume that the reader is familiar with the purpose and basic functions
+    of each of the widgets presented earlier. Nowadays the use of graphical
+    user interfaces today is ubiquitous that no further introduction should be
+    needed.  The name and function of widgets and the way a layout is built are
+    based on concepts and terminology used in Java Swing.  Every widget has a
+    mandatory \textit{id} attribute that must be unique within the scope of the
+    containing \textit{display-layout} section (introduced shortly).
    
     The following example shows a specification for a label, a button and a
     checkbox with text Cancel.
@@ -1641,7 +1657,7 @@
    capabilities of individual tools as well as file formats seems to be
    integrated. Such coupling is very tight and limits its applicability. We set
    our target somewhat higher. We have chosen to avoid building in knowledge
-   about particular file formats or tools.
+   about particular tools or even file formats.
    
    Other approaches we know of are the electronic tool integration platform
    (ETI) \cite{RICVT} and repository (\cite{SFAV}). The former is a platform
@@ -1651,37 +1667,36 @@
    that represents the tools' interface.  This is very similar to the XML
    formatted message on tools capabilities. Connected tools are aware of the
    integration context and ETI offers facilities that are usable to tools via
-   Java specific remote procedure calls.
+   Java-specific remote procedure calls.
    
    Repository also uses web-services but in contrast to ETI, the connection
-   between tool and framework is ad-hoc by means of scripts. This puts it
+   between tool and framework is through specialised scripts. This puts it
    somewhere in between Eucalyptus and ETI. The tools are not aware of the
    integration context so a script is needed to make a tool behave properly in
    the integration context.
  
    For all of the above approaches it seems that tools communicate through
    files.  A serious consideration on our side was that files could grow very
-   big and that you do not want to copy those unnecessarily across a network.
-   For this reason the use of web-services as interface between tool was not
-   really considered until a protocol implementation was already available.
+   big and that you do not want to copy those files unnecessarily across a
+   network. This does not necessarily preclude the use of web-services as
+   interface between tools and an integration framework. But it does not make
+   it the most logical candidate either. Truthfully the use of web-services was
+   not considered until a protocol implementation was already available.
 
   \section{Afterthoughts}
 
-   After implementation work had started on a implementation of a protocol
-   stack, an existing XML-based protocol called XMPP core came into the view.
-   This protocol offers basic messaging functionality including a request
-   response mechanism and little more than that.  Quickly summarised: is a
-   relatively compact open communication protocol that that relies on TCP/IP to
-   transport two XML streams (one for each direction), also see
-   \cite{Sperberg-McQueen:06:EML}.  At some point XMPP core (Extensible
-   Messaging and Presence Protocol, \cite{rfc3920}) even became an official
-   standard. In hind-sight we would have liked to consider the use of XMPP
-   core.
-
-   Our messaging functionality is very similar in approach to XMPP. We would
-   like to conclude with the message that with a little effort a future
-   possible reimplementation of the protocol stack can be based on an XMPP-core
-   implementation.
+   After work had started on implementation an new XML-based protocol called
+   XMPP core came into view.  Quickly summarised: is a relatively compact open
+   communication protocol that that relies on TCP/IP to transport two XML
+   streams (one for each direction), also see \cite{Sperberg-McQueen:06:EML}.
+   At some point XMPP core (Extensible Messaging and Presence Protocol,
+   \cite{rfc3920}) even became an official standard. This protocol offers basic
+   messaging functionality including a request-response and publish-subscribe
+   mechanisms.
+   
+   In hind-sight we would have liked to take XMPP core as a basis and extend it
+   to meet our purposes. It seems to be a perfect match and could have saved a
+   lot of development work.
 
   \enlargethispage*{4pt}
   \bibliography{references}
@@ -1690,27 +1705,37 @@
   \pagestyle{empty}
 
   \subsection{Behavioural model}
-  The following listing shows an mCRL2 model of the combined communication
-  behaviour of the protocol. Besides communication tool start and termination
-  only communications actions are visible. The model features a single
-  controller and a single tool.
+   The following listing shows an mCRL2 model of the combined communication
+   behaviour of the protocol. Besides communication tool start and termination
+   only communications actions are visible. The model features a single
+   controller and a single tool.
 
   \small \verbatiminput{protocol.mcrl2} \normalsize
 %  \rotatebox{90}{\verbatiminput{protocol.mcrl2}}
 
   \pagebreak
 
-  The following figure is a graphical representation of the communication
-  behaviour using the mCRL2 model presented previously. The picture was created
-  automatically by first linearising and instantiating to create a labelled
-  transition system and minimising that modulo branching bisimulation. The
-  minimised labelled transition system then was visualised as a labelled graph
-  and the resulting picture is the result of some manual polishing.
+  \subsection{Graphical Representation of Communication Behaviour}
+
+   The following figure shows a graphical representation of the communication
+   behaviour using the mCRL2 model presented previously. For presentation
+   purposes the communication actions have been replaced by the names of the
+   message they communicate.  The picture was generated with the ltsgraph tool
+   after instantiating the state-space and and minimising modulo
+   branching-bisimulation. The final result took some manual polishing.
 
   \begin{figure}[H]
-   \includegraphics[width=\textheight-3.5cm,angle=90]{protocol.eps}
+   \includegraphics[width=\textwidth]{protocol.eps}
    \caption{Graphical representation of the state-space}
   \end{figure}
+
+   The constraints as they are found in section
+   \ref{s:high_level_specification} together make up the behaviour depicted
+   above. What is visible is the intended pattern of communication. A protocol
+   implementation must abort with an error condition for message sequences
+   outside those allowed by the model.
+
+  \pagebreak
 
   \subsection{XML Schema for Messages}
   \label{subsection:xml_schema_messages}

@@ -684,14 +684,18 @@ namespace squadt {
      * \param[in] l the layout specification
      **/
     void tool_display::schedule_layout_change(boost::shared_ptr < tipi::tool_display > l) {
-      if (m_layout) {
-        m_project->schedule_update(boost::bind(&tool_display::instantiate, this, boost::weak_ptr< tipi::tool_display >(m_layout), l));
+      boost::weak_ptr< tipi::tool_display > guard(m_layout);
+
+      if (!guard.expired()) {
+        m_project->schedule_update(boost::bind(&tool_display::instantiate, this, guard, l));
       }
     }
 
     void tool_display::schedule_layout_update(std::vector < tipi::layout::element const* > const& l) {
-      if (m_layout) {
-        m_project->schedule_update(boost::bind(&tool_display::update, this, boost::weak_ptr< tipi::tool_display >(m_layout), l));
+      boost::weak_ptr< tipi::tool_display > guard(m_layout);
+
+      if (!guard.expired()) {
+        m_project->schedule_update(boost::bind(&tool_display::update, this, guard, l));
       }
     }
   }

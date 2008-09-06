@@ -191,15 +191,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   if (!c.option_exists(option_remove_single_element_sorts)) {
     c.add_option(option_remove_single_element_sorts, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
   if (!c.option_exists(option_remove_unvisited_summands)) {
     c.add_option(option_remove_unvisited_summands, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
   if (!c.option_exists(option_ignore_summand_conditions)) {
     c.add_option(option_ignore_summand_conditions, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
 
   /* Create display */
@@ -245,13 +245,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Update configuration */
   c.get_option(option_remove_single_element_sorts).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_single_element_sorts.get_status());
+      set_argument_value< 0 >(remove_single_element_sorts.get_status());
   c.get_option(option_remove_unvisited_summands).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands.get_status());
+      set_argument_value< 0 >(remove_unvisited_summands.get_status());
   c.get_option(option_ignore_summand_conditions).
-      set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions.get_status());
+      set_argument_value< 0 >(ignore_summand_conditions.get_status());
   c.get_option(option_rewrite_strategy).
       set_argument_value< 0 >(strategy_selector.get_selection());
+
+  send_clear_display();
 }
 
 bool squadt_interactor::check_configuration(tipi::configuration const& c) const {

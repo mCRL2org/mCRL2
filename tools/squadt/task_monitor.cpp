@@ -385,6 +385,9 @@ namespace squadt {
      **/
     void task_monitor_impl::terminate_process(boost::shared_ptr < task_monitor_impl > g, boost::shared_ptr < execution::process > p) {
 
+      // remove messages from queue
+      clear_queue();
+
       if (disconnect(p)) {
         boost::this_thread::sleep(boost::posix_time::seconds(5));
       }
