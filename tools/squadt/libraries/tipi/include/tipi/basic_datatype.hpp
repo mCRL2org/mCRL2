@@ -310,7 +310,7 @@ namespace tipi {
      * course, must be smaller than the maximum.
      **/
     template < typename C >
-    class integer_range : protected basic_integer_range {
+    class integer_range : public basic_integer_range {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
@@ -422,7 +422,7 @@ namespace tipi {
      * representations (double).
      **/
     template < typename C, bool minimum_included = true, bool maximum_included = true >
-    class real_range : protected basic_real_range {
+    class real_range : public basic_real_range {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
