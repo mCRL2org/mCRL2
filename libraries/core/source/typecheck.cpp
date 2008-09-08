@@ -745,8 +745,43 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
 {
   //check correctness of the data variable declaration in sort_expr
   //using the specification in spec
-  gsErrorMsg("type checking of data variables is not yet implemented\n");
-  return NULL;
+  
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
+
+  ATermAppl Result=NULL;
+
+  gsDebugMsg ("type checking phase started\n");
+
+  gstcDataInit();
+
+  gsDebugMsg ("type checking of data variables read-in phase started\n");
+
+  ATermAppl data_spec = NULL;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
+  ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+
+  //XXX read-in from spec (not finished)
+  if (gstcReadInSorts(sorts,false)) {
+    gsDebugMsg ("type checking of data variables read-in phase finished\n");
+
+    ATermTable Vars=ATtableCreate(63,50);
+    ATermTable NewVars=gstcAddVars2Table(Vars,data_vars);
+    if(!NewVars) {
+      ATtableDestroy(Vars);
+      gsErrorMsg("type error while typechecking data variables\n");
+      return NULL;
+    }
+    ATtableDestroy(Vars);
+  } else {
+    gsErrorMsg("reading from LPS failed\n");
+  }
+  gstcDataDestroy();
+
+  return data_vars;
 }
 
 //local functions
