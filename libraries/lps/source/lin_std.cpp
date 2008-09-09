@@ -7688,6 +7688,10 @@ static ATermAppl getUltimateDelayCondition(
                  ATermAppl timevariable,
                  specificationbasictype *spec)
 {  
+  if (!existsort(realsort))
+    { insertsort(realsort,spec);
+    }
+
   for (ATermList walker=sumlist; (walker!=ATempty);
                                walker=ATgetNext(walker))
   { /* First walk through the summands to see whether
@@ -7845,6 +7849,7 @@ static ATermList combine_summand_lists(
   resultsumlist=ATempty;
 
   /* first we enumerate the summands of t1 */
+
 
   ATermAppl timevar=getfreshvariable(
                        "timevar",realsort);
