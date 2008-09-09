@@ -83,6 +83,9 @@ void function_sort_test()
   BOOST_CHECK(fs_e_ == fs);
   BOOST_CHECK(fs_e_.domain() == fs.domain());
   BOOST_CHECK(fs_e_.codomain() == fs.codomain());
+
+  BOOST_CHECK(fs == function_sort(s0, s1, s));
+  BOOST_CHECK(fs.domain() == function_sort(s0, s1, s).domain());
 }
 
 void alias_test()

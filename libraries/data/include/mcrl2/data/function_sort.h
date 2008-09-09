@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/detail/convert.h"
+#include "mcrl2/data/utility.h"
 
 namespace mcrl2 {
   
@@ -65,6 +66,45 @@ namespace mcrl2 {
         {
           assert(!domain.empty());
         }
+
+        /// \brief Convenience constructor for function sort with domain size 1
+        ///
+        /// \param[in] dom1 The first sort of the domain.
+        /// \param[in] codomain The codomain of the sort.
+        /// \post \this represents dom1 -> codomain
+        function_sort(const sort_expression& dom1,
+                      const sort_expression& codomain)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1)), codomain)),
+            m_domain (make_vector(dom1))
+        {}
+
+        /// \brief Convenience constructor for function sort with domain size 2
+        ///
+        /// \param[in] dom1 The first sort of the domain.
+        /// \param[in] dom2 The second sort of the domain.
+        /// \param[in] codomain The codomain of the sort.
+        /// \post \this represents dom1 # dom2 -> codomain
+        function_sort(const sort_expression& dom1,
+                      const sort_expression& dom2,
+                      const sort_expression& codomain)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2)), codomain)),
+            m_domain (make_vector(dom1, dom2))
+        {}
+
+        /// \brief Convenience constructor for function sort with domain size 3
+        ///
+        /// \param[in] dom1 The first sort of the domain.
+        /// \param[in] dom2 The second sort of the domain.
+        /// \param[in] dom3 The third sort of the domain.
+        /// \param[in] codomain The codomain of the sort.
+        /// \post \this represents dom1 # dom2 # dom3 -> codomain
+        function_sort(const sort_expression& dom1,
+                      const sort_expression& dom2,
+                      const sort_expression& dom3,
+                      const sort_expression& codomain)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3)), codomain)),
+            m_domain (make_vector(dom1, dom2, dom3))
+        {}
 
         /// \overload
         ///

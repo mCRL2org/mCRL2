@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -63,6 +64,45 @@ namespace mcrl2 {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());
         }
+
+        /// \brief Convenience constructor for application with one argument
+        ///
+        /// \param[in] head The data expression that is applied
+        /// \param[in] arg1 The argument head is applied to
+        /// \post \this represents head(arg1)
+        application(const data_expression& head,
+                    const data_expression& arg1)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1)))),
+            m_arguments(make_vector(arg1))
+        { }
+
+        /// \brief Convenience constructor for application with two arguments
+        ///
+        /// \param[in] head The data expression that is applied
+        /// \param[in] arg1 The first argument head is applied to
+        /// \param[in] arg2 The second argument head is applied to
+        /// \post \this represents head(arg1, arg2)
+        application(const data_expression& head,
+                    const data_expression& arg1,
+                    const data_expression& arg2)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2)))),
+            m_arguments(make_vector(arg1, arg2))
+        { }
+
+        /// \brief Convenience constructor for application with three arguments
+        ///
+        /// \param[in] head The data expression that is applied
+        /// \param[in] arg1 The first argument head is applied to
+        /// \param[in] arg2 The second argument head is applied to
+        /// \param[in] arg3 The third argument head is applied to
+        /// \post \this represents head(arg1, arg2, arg3)
+        application(const data_expression& head,
+                    const data_expression& arg1,
+                    const data_expression& arg2,
+                    const data_expression& arg3)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3)))),
+            m_arguments(make_vector(arg1, arg2, arg3))
+        { }
 
         /* Should be enabled when the implementation in data_expression is
          * removed

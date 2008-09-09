@@ -150,6 +150,8 @@ void application_test()
   BOOST_CHECK(fxy.head() == fxy_e_.head());
   BOOST_CHECK(fxy.arguments() == fxy_e_.arguments());
 
+  BOOST_CHECK(fxy == application(f,x,y));
+
 }
 
 void abstraction_test()
