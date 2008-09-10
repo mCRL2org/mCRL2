@@ -265,10 +265,10 @@ void grape_glcanvas::event_size(wxSizeEvent &p_event)
     float new_x = (((float)m_viewport_width)/((float)300));
     float new_y = (((float)m_viewport_height)/((float)300));
     gluOrtho2D(0, new_x, -new_y, 0);
+
+    glMatrixMode(GL_MODELVIEW);
   }
-
-  glMatrixMode(GL_MODELVIEW);
-
+  
   update_scrollbars();
 
   Refresh();

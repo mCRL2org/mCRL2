@@ -146,6 +146,9 @@ bool grape_event_rename_diagram::Do( void )
       wxListBox *proc_list = m_main_frame->get_process_diagram_listbox();
       proc_list->SetString( proc_list->FindString( m_orig_name ), m_new_name );
       proc_list->SetStringSelection( m_new_name );
+      // show selected diagram
+      grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
+      m_main_frame->get_event_handler()->Submit(event, false);
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
@@ -156,6 +159,9 @@ bool grape_event_rename_diagram::Do( void )
       wxListBox *arch_list = m_main_frame->get_architecture_diagram_listbox();
       arch_list->SetString( arch_list->FindString( m_orig_name ), m_new_name );
       arch_list->SetStringSelection( m_new_name );
+      // show selected diagram
+      grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
+      m_main_frame->get_event_handler()->Submit(event, false);
       break;
     }
     default: m_main_frame->set_mode( GRAPE_MODE_SPEC ); break;
