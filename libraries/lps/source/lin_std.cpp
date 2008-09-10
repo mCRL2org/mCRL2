@@ -102,7 +102,10 @@ static ATermAppl storeinit(ATermAppl init);
 static void storeprocs(ATermList procs);
 static ATermList getsorts(ATermList l);
 static ATermList sortActionLabels(ATermList actionlabels);
-static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec,int max_nesting_depth=3);
+static ATermAppl dummyterm(ATermAppl sort,
+                           specificationbasictype *spec,
+                           int max_nesting_depth=3,
+                           bool allow_dummy_term=true);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
 static void filter_vars_by_term(
@@ -4530,10 +4533,44 @@ static int occursin(ATermAppl name,ATermList pars)
   return 0;
 }
 
+static ATermAppl dummyterm_rec(
+                    ATermAppl targetsort,
+                    specificationbasictype *spec,
+                    int max_nesting_depth=3,
+                    bool allow_dummy_term=true)
+{
+  if (max_nesting_depth>0)
+  { for (int i=0 ; (i<maxobject) ; i++ )
+    { // ATfprintf(stderr,"BBB %t\n",objectdata[i].objectname);
+      if (((objectdata[i].object==func)||(objectdata[i].object==_map))&&
+           (objectdata[i].targetsort==targetsort))
+      { /* The function found cannot be a constant */
+        // ATfprintf(stderr,"AAA %t\n",objectdata[i].objectname);
+        ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
+        unsigned int arity=ATgetLength(argumentsorts);
+        ATermList arguments=ATempty;
+        for(unsigned int j=0; j<arity; j++)
+        { ATermAppl t=dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1,allow_dummy_term);
+          if (t==NULL)
+          { goto next_term;
+          }
+          arguments=ATinsertA(arguments,t);
+          argumentsorts=ATgetNext(argumentsorts);
+        }
+        arguments=ATreverse(arguments);
+        return gsMakeDataApplList(objectdata[i].objectname,arguments);
+      }
+    }
+    next_term: ;
+  } 
+  return NULL;
+}
+
 static ATermAppl dummyterm(
                     ATermAppl targetsort, 
                     specificationbasictype *spec,
-                    int max_nesting_depth)
+                    int max_nesting_depth,
+                    bool allow_dummy_term)
 { /* This procedure yields a term of the requested sort.
      First, it tries to find a constant constructor. If it cannot
      be found, a constant mapping is sought. If this cannot be
@@ -4569,36 +4606,20 @@ static ATermAppl dummyterm(
      dummyterms of the appropriate sort, with a smaller nesting
      depth */
 
-  if (max_nesting_depth>0)
-  { for (int i=0 ; (i<maxobject) ; i++ )
-    { if (((objectdata[i].object==func)||(objectdata[i].object==_map))&&
-           (objectdata[i].targetsort==targetsort))
-      { /* The function found cannot be a constant */
-        ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
-        unsigned int arity=ATgetLength(argumentsorts);
-        ATermList arguments=ATempty;
-        for(unsigned int j=0; j<arity; j++)
-        { ATerm t=(ATerm)dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1);
-          if (t==NULL)
-          { goto FAIL;
-          }
-          arguments=ATinsert(arguments,t);
-          argumentsorts=ATgetNext(argumentsorts);
-        }
-        arguments=ATreverse(arguments);
-        return gsMakeDataApplList(objectdata[i].objectname,arguments);
-      }
-    }
+  ATermAppl term=dummyterm_rec(targetsort,spec,max_nesting_depth,false);
+  if (term!=NULL)
+  { return term;
   } 
 
-  FAIL:
-
   /* Third construct a new constant, and yield it. */
-
-  snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
-  ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
-  insertmapping(dummymapping,spec);
-  return dummymapping;
+  if (allow_dummy_term)
+  {
+    snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
+    ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
+    insertmapping(dummymapping,spec);
+    return dummymapping;
+  }
+  return NULL;
   
 }
 
@@ -7614,6 +7635,29 @@ static ATermAppl communicationcomposition(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
 }
 
+static bool check_real_variable_occurrence(
+                     ATermList sumvars,
+                     ATermAppl actiontime,
+                     ATermAppl condition) 
+{ /* Check whether actiontime is an expression 
+     of the form t1 +...+ tn, where one of the
+     ti is a variable in sumvars that does not occur in condition */
+
+  if (gsIsDataVarId(actiontime))
+  { if (occursintermlist(actiontime,sumvars) && !occursinterm(actiontime,condition))
+    { return true;
+    }
+  }
+
+  if (gsIsDataExprAdd(actiontime))
+  { ATermList l=ATLgetArgument(actiontime,1);
+    return (check_real_variable_occurrence(sumvars,ATAgetFirst(l),condition) ||
+            check_real_variable_occurrence(sumvars,ATAgetFirst(ATgetNext(l)),condition));
+  }
+
+  return false;
+}
+
 static ATermAppl makesingleultimatedelaycondition(
                      ATermList sumvars,
                      ATermList freevars,
@@ -7621,11 +7665,27 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl timevariable,
                      ATermAppl actiontime,
                      specificationbasictype *spec)
-{ 
+{ /* Generate a condition of the form:
+
+       exists sumvars. condition && timevariable<actiontime
+
+     Currently, the existential quantifier must use an equation,
+     which represents a higher order function. The existential 
+     quantifier is namely of type exists:sorts1->Bool, where sorts1
+     are the sorts of the quantified variables.
+
+     If the sum variables do not occur in the expression, they
+     are not quantified. 
+
+     If the actiontime is of the form t1+t2+...+tn where one
+     of the ti is a quantified real variable in sumvars, and this
+     variable does not occur in the condition, then the expression
+     of the form timevariable < actiontime is omitted.
+  */
 
   ATermAppl result;
   ATermList variables=ATempty;
-  if (gsIsNil(actiontime))
+  if (gsIsNil(actiontime) || check_real_variable_occurrence(sumvars,actiontime,condition))
   { result=condition;
   }
   else
@@ -7660,8 +7720,8 @@ static ATermAppl makesingleultimatedelaycondition(
   }
   used_sumvars = ATreverse(used_sumvars);
 
-  if(!ATisEmpty(used_sumvars)) {
-    // Make a new data equation.
+  if(!ATisEmpty(used_sumvars)) 
+  { // Make a new data equation.
     if (!existsort(realsort))
     { insertsort(realsort,spec);
     }
