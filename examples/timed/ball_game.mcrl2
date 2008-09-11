@@ -1,4 +1,4 @@
-% This file describes a simple bal game. 
+% This file describes a simple ball game. 
 % It is necessary to put as many balls into a bucket in 
 % a finite amount of time (10 seconds). But if a player fails
 % to put a bal into the bucket within one second, the player
