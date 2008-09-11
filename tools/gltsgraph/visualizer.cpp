@@ -96,9 +96,19 @@ void Visualizer::drawState(State* s)
   int prec = 50;  // TODO: Make parameterisable
   float step = 1.0 / prec;
 
+  
+  if(s->isLocked())
+  {
+    // Grey out a locked state
+    glColor3ub(170, 170, 170);
+  }
 
-  // Draw inside of states in white, for now
-  glColor3ub(255, 255, 255);  // TODO: Parameterisable, background color
+  else
+  {
+    // Draw inside of states in white, for now
+    glColor3ub(255, 255, 255);  // TODO: Parameterisable, background color
+  }
+
   
   glPushName(IDS::STATE);
   glPushName(s->getValue());

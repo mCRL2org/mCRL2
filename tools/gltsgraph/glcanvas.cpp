@@ -18,6 +18,8 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
   EVT_LEFT_DOWN(GLCanvas::onMouseLftDown)
   EVT_RIGHT_DOWN(GLCanvas::onMouseRgtDown)
+  EVT_LEFT_UP(GLCanvas::onMouseLftUp)
+  EVT_RIGHT_UP(GLCanvas::onMouseRgtUp)
   EVT_MOTION(GLCanvas::onMouseMove)
 END_EVENT_TABLE()
 
@@ -228,6 +230,13 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
   oldX = event.GetX();
   oldY = event.GetY();
   pickObjects(oldX, oldY);
+  owner->dragObject();
+  display();
+}
+
+void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
+{
+  owner->stopDrag();
   display();
 }
 
@@ -237,8 +246,12 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldY = event.GetY();
 
   pickObjects(oldX, oldY);
-  display();
   owner->lockObject(); 
+  display();
+}
+
+void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
+{
 }
 
 void GLCanvas::onMouseMove(wxMouseEvent& event)

@@ -303,6 +303,21 @@ void GLTSGraph::lockObject()
   }
 }
 
+void GLTSGraph::dragObject()
+{
+  if(selectedState != NULL)
+  {
+    selectedState->drag();
+  }
+}
+
+void GLTSGraph::stopDrag()
+{
+  if(selectedState != NULL)
+  {
+    selectedState->stopDrag();
+  }
+}
 
 size_t GLTSGraph::getNumberOfObjects()
 {

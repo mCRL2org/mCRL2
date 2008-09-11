@@ -42,6 +42,8 @@ class GLTSGraph : public wxApp
 
     void moveObject(double x, double y);
     void lockObject();
+    void dragObject();
+    void stopDrag();
     void deselect();
     void selectState(size_t state);
     void selectTransition(size_t state, size_t trans);

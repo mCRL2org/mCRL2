@@ -6,6 +6,7 @@ State::State(unsigned int _value, bool _isInitialState)
   value = _value;
   isInitial = _isInitialState;
   selected = false;
+  dragged = false;
   locked = false;
   
   pos.x = 0;
@@ -197,6 +198,17 @@ void State::lock()
   locked = !locked;
 }
 
+void State::drag()
+{
+  dragged = true;
+}
+
+void State::stopDrag()
+{
+  dragged = false;
+}
+
+
 void State::select()
 {
   selected = true;
@@ -216,3 +228,9 @@ bool State::isLocked() const
 {
   return locked;
 }
+
+bool State::isDragged() const
+{
+  return dragged;
+}
+

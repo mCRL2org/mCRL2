@@ -40,6 +40,8 @@ class GLCanvas : public wxGLCanvas
     void onMouseLftDown(wxMouseEvent& event);
     void onMouseRgtDown(wxMouseEvent& event);
     void onMouseMove(wxMouseEvent& event);
+    void onMouseLftUp(wxMouseEvent& event);
+    void onMouseRgtUp(wxMouseEvent& event);
 
 
     double getPixelSize();

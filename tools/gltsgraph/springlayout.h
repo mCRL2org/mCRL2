@@ -21,6 +21,8 @@ class SpringLayout : public LayoutAlgorithm
     bool stopped;
 
     wxPanel* pane;
+    wxButton* optimizeBtn;
+    wxButton* stopBtn;
     GLTSGraph* app;
 
     void layoutGraph(Graph* g);

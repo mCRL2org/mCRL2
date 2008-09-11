@@ -49,8 +49,9 @@ void SpringLayout::setupPane(wxPanel* pane)
                                         wxDefaultPosition, wxDefaultSize,
                                         wxSL_HORIZONTAL|wxSL_LABELS);
 
-  wxButton* optimizeBtn = new wxButton(pane, myID_START_OPTI, wxT("Start"));
-  wxButton* stopBtn = new wxButton(pane, myID_STOP_OPTI, wxT("Stop"));
+  optimizeBtn = new wxButton(pane, myID_START_OPTI, wxT("Start"));
+  stopBtn = new wxButton(pane, myID_STOP_OPTI, wxT("Stop")); 
+  stopBtn->Enable(false);
   
   sizer->Add( 
     new wxStaticText(pane, wxID_ANY, wxT("State repulsion")), 
@@ -86,7 +87,8 @@ void SpringLayout::setupPane(wxPanel* pane)
 void SpringLayout::onStart(wxCommandEvent& /* event */)
 {
   Graph* g = app->getGraph();
-  
+  optimizeBtn->Enable(false);
+  stopBtn->Enable(true);
   stopOpti = false;
   stopped = false;
 
@@ -103,11 +105,21 @@ void SpringLayout::onStart(wxCommandEvent& /* event */)
   }
   
   stopped = true;
+  
+
 }
 
 
 void SpringLayout::onStop(wxCommandEvent& /* event */)
 {
+  if(optimizeBtn)
+  {
+    optimizeBtn->Enable(true);
+  }
+  if(stopBtn)
+  {  
+    stopBtn->Enable(false);
+  }
   stopOpti = true;
 }
 
@@ -218,7 +230,7 @@ void SpringLayout::layoutGraph(Graph* graph)
     double newX = 0;
     double newY = 0;
     State* s = graph->getState(i);
-    if (!s->isLocked())
+    if (!(s->isLocked() || s->isDragged()))
     {
       newX = s->getX() + sumFX[i];
       newY = s->getY() + sumFY[i];

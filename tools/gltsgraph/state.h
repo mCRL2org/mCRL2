@@ -25,11 +25,14 @@ class State
     void select(); 
     void deselect();
     void lock();
-   
+    void drag();
+    void stopDrag();
+
     // Getters
     bool isInitialState() const;
     bool isSelected() const;
     bool isLocked() const;
+    bool isDragged() const;
 
     Utils::Vect getPosition() const;
     double getX() const;
@@ -74,6 +77,7 @@ class State
     bool isInitial;
     bool selected;
     bool locked;
+    bool dragged;
 
     unsigned int value;
     Utils::Vect pos;  // Current position, Y
