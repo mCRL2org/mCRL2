@@ -113,7 +113,7 @@ class specification: public atermpp::aterm_appl
     /// \brief Reads the specification from file.
     /// \param[in] filename
     /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from stdin.
+    /// If filename is empty, input is read from standard input.
     ///
     void load(const std::string& filename)
     {

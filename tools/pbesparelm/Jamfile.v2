@@ -1,0 +1,9 @@
+project toolset/pbesparelm ;
+
+tool pbesparelm
+       : pbesparelm.cpp
+         /libraries//pbes
+       : <status>experimental
+       ;
+
+install-tools pbesparelm ;

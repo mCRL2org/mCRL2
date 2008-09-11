@@ -1,0 +1,9 @@
+project toolset/pbesconstelm ;
+
+tool pbesconstelm
+       : pbesconstelm.cpp
+         /libraries//pbes
+       : <status>experimental
+       ;
+
+install-tools pbesconstelm ;

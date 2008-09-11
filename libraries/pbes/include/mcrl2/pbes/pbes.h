@@ -306,7 +306,10 @@ class pbes
       return m_initial_state;
     }
 
-    /// Reads the pbes from file. Returns true if the operation succeeded.
+    /// \brief Reads the pbes from file.
+    /// \param[in] filename
+    /// If filename is nonempty, input is read from the file named filename.
+    /// If filename is empty, input is read from standard input.
     ///
     void load(const std::string& filename)
     {
