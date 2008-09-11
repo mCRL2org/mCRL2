@@ -22,6 +22,7 @@
 #endif
 
 #include "infodialog.h"
+#include "export_svg.h"
 
 class MainFrame : public wxFrame
 {
@@ -45,6 +46,7 @@ class MainFrame : public wxFrame
     void onQuit(wxCommandEvent& event);
     void onAlgo(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
+    void onExport(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()
 };

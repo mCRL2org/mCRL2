@@ -6,6 +6,7 @@ using namespace IDS;
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MainFrame::onOpen)
+  EVT_MENU(myID_MENU_EXPORT, MainFrame::onExport)
   EVT_MENU(wxID_EXIT, MainFrame::onQuit)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
@@ -107,6 +108,62 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
     app->openFile(stPath);
   }
 }
+
+void MainFrame::onExport(wxCommandEvent& /*event*/)
+{
+  //TODO: Default file name, input file name
+  
+  wxString caption = wxT("Export layout as");
+  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg");
+  wxString defaultDir = wxEmptyString; // Empty string -> cwd
+  wxString defaultFileName = wxEmptyString;
+
+  wxFileDialog dialog(this, caption, defaultDir, defaultFileName, wildcard,
+                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+  if(dialog.ShowModal() == wxID_OK)
+  {
+    Exporter* exporter;
+    wxString fileName = dialog.GetPath();
+    wxString extension = fileName.AfterLast('.');
+    if(extension == fileName)
+    {
+      // No extension given, get it from the filter index and append it.
+      switch(dialog.GetFilterIndex())
+      {
+        case 0: // SVG item
+          fileName.Append(wxT(".svg"));
+          exporter = new ExporterSVG(app->getGraph());
+          break;
+      }
+    }
+    else
+    {
+      // An extension was given
+      if (extension == wxT("svg"))
+      {
+        exporter = new ExporterSVG(app->getGraph());
+      }
+      else 
+      {
+        // Unknown file format, export to svg.
+        fileName.Append(wxT(".svg"));
+        exporter = new ExporterSVG(app->getGraph());
+      }
+    }
+    
+    if(exporter->export_to(fileName))
+    {
+      wxMessageDialog msgDlg(
+        this,
+        wxT("The layout was exported to file:\n\n") + fileName,
+        wxT("Layout exported"),
+        wxOK | wxICON_INFORMATION);
+      msgDlg.ShowModal();
+    }
+  }
+}
+
 
 void MainFrame::onQuit(wxCommandEvent& /*event */)
 {

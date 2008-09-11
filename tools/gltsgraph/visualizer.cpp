@@ -358,8 +358,8 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
   if(fabs(sinGamma + sinDelta) <= 0.01)
   {
     float additive = tan(beta) * (xControl1 - xState);
-    yControl1 = yState - additive;
-    yControl2 = yState + additive;
+    yControl1 = yState + additive;
+    yControl2 = yState - additive;
   }
   else
   {
@@ -458,7 +458,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
 
   float ang = atan2(yControl2 - yState, xControl2 - xState) 
               * 180.0f / M_PI;
-  
+
   glTranslatef(xState, yState, 0.0f);
   glRotatef(90 + ang, 0.0, 0.0, 1.0f);
   glTranslatef(0.0f, -rad * 2, 0.0f);

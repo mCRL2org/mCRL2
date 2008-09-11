@@ -4,199 +4,272 @@
 //
 /// \file ./export_svg.cpp
 
-#include "export_svg.h"
-
-#include <fstream>
-#include <wx/textfile.h> 
-#include <wx/dc.h>
-#include <math.h>
+#include "export_svg.h"  
 #include <boost/format.hpp>
+#include <wx/textfile.h>
+#include <iostream>
+#include <sstream>
+#include <math.h>
 
-#define PI 3.14159265
-const std::string default_border_colour = "black";
-const std::string init_border_colour = "red";
+ExporterSVG::ExporterSVG(Graph* g) : Exporter(g) {};
 
-std::string make_wx_spline(wxPoint *points)
+
+ExporterSVG::~ExporterSVG() {};
+
+
+bool ExporterSVG::export_to(wxString filename)
 {
-    double cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4;
-    double x1, y1, x2, y2;
-    std::string r;
+  // SVG header
+  svg_code  = "<?xml version = \"1.0\" standalone=\"no\"?>\n\n";
+  svg_code += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://w3c.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n\n";
+  
+  // For the size of the viewBox (canvas), we stick to the virtual size of 
+  // the graph's model, which is 2000 by 2000.
+  svg_code += "<svg viewBox=\"0 0 2000 2000\" width = \"100%\" height=\"100%\" version=\"1.1.\" \n";
 
-    x1 = points[0].x;
-    y1 = points[0].y;
-    x2 = points[1].x;
-    y2 = points[1].y;
-    cx1 = (double)((x1 + x2) / 2);
-    cy1 = (double)((y1 + y2) / 2);
-    cx2 = (double)((cx1 + x2) / 2);
-    cy2 = (double)((cy1 + y2) / 2);
-
-    boost::format p1("M %1% %2% L %3% %4%");
-    p1 % points[0].x % points[0].y % cx1 % cy1;
-    r = boost::str(p1);
-
-    x1 = x2;
-    y1 = y2;
-    x2 = points[2].x;
-    y2 = points[2].y;
-    cx4 = (double)(x1 + x2) / 2;
-    cy4 = (double)(y1 + y2) / 2;
-    cx3 = (double)(x1 + cx4) / 2;
-    cy3 = (double)(y1 + cy4) / 2;
-    boost::format p2(" C %1% %2% %3% %4% %5% %6%");
-    p2 % cx2 % cy2 % cx3 % cy3 % cx4 % cy4;
-    r += boost::str(p2);
-
-    cx1 = cx4;
-    cy1 = cy4;
-    cx2 = (double)(cx1 + x2) / 2;
-    cy2 = (double)(cy1 + y2) / 2;
-    x1 = x2;
-    y1 = y2;
-    x2 = points[3].x;
-    y2 = points[3].y;
-    cx4 = (double)(x1 + x2) / 2;
-    cy4 = (double)(y1 + y2) / 2;
-    cx3 = (double)(x1 + cx4) / 2;
-    cy3 = (double)(y1 + cy4) / 2;
-    boost::format p3(" C %1% %2% %3% %4% %5% %6%");
-    p3 % cx2 % cy2 % cx3 % cy3 % cx4 % cy4;
-    r += boost::str(p3);
-
-    boost::format p4(" L %1% %2%");
-    p4 % points[3].x % points[3].y;
-    r += boost::str(p4);
-
-    return r;
-}
-
-export_to_svg::export_to_svg(wxString _filename, vector<node_svg> _nodes, vector<edge_svg> _edges, double _height, double _width) :
-  filename(_filename) , nodes(_nodes), edges(_edges), height(_height), width(_width) {
-}
-
-bool export_to_svg::generate() {
-
-  //Create the svg header
-  svg_code  = "<?xml version=\"1.0\" standalone=\"no\"?>\n\n";
-  svg_code += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n\n";
-
-  boost::format header("<svg viewBox=\"0 0 %1% %2%\" width=\"100%%\" height=\"100%%\" version=\"1.1.\" \n");;
-  header%width
-        %height;
-
-  svg_code += boost::str(header);
   svg_code += "xmlns=\"http://www.w3.org/2000/svg\">\n\n";
 
-  // Draw edges first (body and arrow heads)
-  for (unsigned int i = 0; i < edges.size(); i++) {
+  // Add a "marker" definition for arrow heads,
+  svg_code += "<defs>\n";
+  svg_code += "<marker id = \"Arrowhead\" viewBox = \"0 0 20 10\" \n";
+  svg_code += " refX=\"20\" refY = \"5\" \n";
+  svg_code += " markerUnits = \"strokeWidth\" orient = \"auto\" \n";
+  svg_code += " markerWidth = \"40\" markerHeight = \"40\">\n";
+  svg_code += " <polyline points = \"0,0 10,5 0,10 1,5\" fill = \"black\" />\n";
+  svg_code += "</marker></defs>\n\n";
 
-    /* Draw the splines that form the edge bodies */
-    svg_code += "<path d=\"";
-    svg_code += make_wx_spline(edges[i].spline_control_points);
-    svg_code += "\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>\n";
-
-    /* Draw the arrowheads of the edges */
-    boost::format arrow_f("<polygon points=\"%1% %2% %3% %4% %5% %6%\" fill=\"black\" stroke=\"black\"/>\n");
-    arrow_f%edges[i].arrow_points[0].x
-           %edges[i].arrow_points[0].y
-           %edges[i].arrow_points[1].x
-           %edges[i].arrow_points[1].y
-           %edges[i].arrow_points[2].x
-           %edges[i].arrow_points[2].y;
-
-
-
-    svg_code += boost::str(arrow_f);
+  // First put in the transitions, since transitions move from/to the centers
+  // of states, instead of borders.
+  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  {
+    State* from = graph->getState(i);
+    for(size_t j = 0; j < from->getNumberOfTransitions(); ++j)
+    {
+      Transition* tr = from->getTransition(j);
+      // Interpolate and draw the path
+      drawBezier(tr);
+    }
     
- 
-    /* Draw the edge labels */
-    boost::format label_f("<text x =\"%1%\" y=\"%2%\" fill=\"rgb(%3%, %4%, %5%)\" font-size=\"12\">\n");
-    label_f%edges[i].lbl_x
-           %edges[i].lbl_y
-           %edges[i].red
-           %edges[i].green
-           %edges[i].blue;
-    
-    svg_code += boost::str(label_f);
-    svg_code += edges[i].lbl + "\n";
-    svg_code += "</text>\n";
+    for(size_t j = 0; j < from->getNumberOfSelfLoops(); ++j)
+    {
+      Transition* tr = from->getSelfLoop(j);
+      // draw the loop. We do this in a seperate function to avoid clutter
+      drawSelfLoop(tr);
+    }
   }
-  
-  // Draw nodes
-  for (unsigned int i = 0; i < nodes.size(); i++) {
-    boost::format f("<circle cx=\"%1%\" cy=\"%2%\" r=\"%3%\" stroke=\"%4%\" stroke-width=\"%5%\" fill=\"rgb(%6%, %7%, %8%)\"/>\n");
-    
-    double node_x = nodes[i].x;
-    double node_y = nodes[i].y;
-    double radius = nodes[i].radius;
-    
-    int stroke_width;
+
+  // Go through all the states again, to make sure that no transitions are seen 
+  // on top of them (SVG uses the painter's algorithm to render)
+  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  {
+    State* from = graph->getState(i);
+    boost::format f("<circle cx = \"%1%\" cy =\"%2%\" r=\"%3%\" stroke=\"%4%\" stroke-width=\"%5%\" fill=\"rgb(%6%, %7%, %8%)\"/>\n\n");
+
+    double fromX = 1000 + from->getX();
+    double fromY = 1000 - from->getY();
+    double radius = 20; // TODO
+
+    unsigned int stroke_width;
     std::string stroke;
 
-    if (nodes[i].num == 0) {
-      stroke = init_border_colour;
+    if(from->isInitialState())
+    {
+      stroke = "green";
       stroke_width = 2;
     }
-    else {
-      stroke = default_border_colour;
+    else
+    {
+      stroke = "black";
       stroke_width = 1;
     }
-    int node_red = nodes[i].red;
-    int node_green = nodes[i].green;
-    int node_blue = nodes[i].blue;
-    f%node_x
-     %node_y
+
+    int red = 255;
+    int green = 255;
+    int blue = 255;
+
+    f%fromX
+     %fromY
      %radius
      %stroke
      %stroke_width
-     %node_red
-     %node_green
-     %node_blue;
+     %red
+     %green
+     %blue;
+
     svg_code += boost::str(f);
 
-    /* Draw node label onto node */
-    string label = nodes[i].label;
-
-    boost::format label_f("<text x=\"%1%\" y=\"%2%\" fill=\"black\" font-size=\"12\">\n");
-    label_f%nodes[i].label_x%nodes[i].label_y;
+    // Draw state label.
+    boost::format label_f("<text x=\"%1%\" y=\"%2%\" fill=\"black\" font-size=\"24\">\n");
+    label_f%(fromX - 7)%(fromY + 5);
     svg_code += boost::str(label_f);
-    svg_code += label + "\n";
-    svg_code += "</text> \n";
+    std::stringstream labelstr;
+    labelstr << from->getValue();
+    svg_code += "  " + labelstr.str() + "\n</text> \n\n";
   }
-  // End svg file
-  svg_code += "</svg>";
-  
-  //Create the file
-  wxTextFile svg_export(filename);
 
-  if (svg_export.Exists()) {
-    if (!svg_export.Open(filename)) {
+  
+
+  // End svg code
+  svg_code += "</svg>\n";
+ 
+  // Create the file
+
+  wxTextFile svgFile(filename);
+
+  if(svgFile.Exists())
+  {
+    if(!svgFile.Open(filename))
+    {
       return false;
     }
-    else {
-      svg_export.Clear();
+    else
+    {
+      svgFile.Clear();
     }
   }
-  else {
-    if (!svg_export.Create(filename)) {
+  else
+  {
+    if (!svgFile.Create(filename))
+    {
       return false;
     }
   }
 
-  // Write code to file
-  wxString svg_code_wx(svg_code.c_str(), wxConvLocal);
-  svg_export.AddLine(svg_code_wx);
-  
-  svg_export.AddLine(wxEmptyString);
+  wxString svgCodeWX(svg_code.c_str(), wxConvLocal);
+  svgFile.AddLine(svgCodeWX);
+  svgFile.AddLine(wxEmptyString);
 
-  if (!svg_export.Write()) {
+  if(!svgFile.Write())
+  {
+    return false;
+  }
+
+  if(!svgFile.Close())
+  {
     return false;
   }
   
-  if (!svg_export.Close()) {
-    return false;
+  // TODO: Proper return
+  return true;
+}
+
+void ExporterSVG::drawBezier(Transition* tr)
+{
+  State *from, *to;
+  double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, xControl, yControl;
+  
+  from = tr->getFrom();
+  to = tr->getTo();
+  
+  xFrom = 1000.0 + from->getX();
+  yFrom = 1000.0 - from->getY();
+
+  xTo = 1000.0 + to->getX();
+  yTo = 1000.0 - to->getY();
+  
+  tr->getControl(xVirtual, yVirtual);
+  
+  xVirtual += 1000.0;
+  yVirtual = 1000.0 - yVirtual;
+  // For a justification of the xControl, yControl computations, see the 
+  // drawTransition method in visualizer.cpp
+  xControl = 2.0 * xVirtual - .5 * (xFrom + xTo);
+  yControl = 2.0 * yVirtual - .5 * (yFrom + yTo);
+    
+  svg_code += "<path d = \"";
+  
+  boost::format p1("M%1%,%2% Q%3%,%4% %5%,%6%\"\n");
+  p1 % xFrom    % yFrom
+     % xControl % yControl
+     % xTo      % yTo;
+
+  svg_code += boost::str(p1);
+
+  svg_code += " stroke = \"black\" stroke-width=\"1\" fill=\"none\"\n";
+  svg_code += " marker-end=\"url(#Arrowhead)\"/>\n";
+
+
+  // Draw the transition's label
+  std::string label = tr->getLabel();
+
+  boost::format label_f("<text x =\"%1%\" y=\"%2%\" fill=\"black\" font-size=\"24\">\n");
+  label_f%xVirtual%(yVirtual - 5);
+
+  svg_code += boost::str(label_f);
+  svg_code += "  " + label + "\n</text>\n\n";
+
+}
+
+void ExporterSVG::drawSelfLoop(Transition* tr)
+{
+  // For a self-loop, t.to == t.from
+  State* s = tr->getFrom();
+  
+  double alpha = tr->getControlAlpha();
+  double beta = .25 * M_PI;
+  double dist = tr->getControlDist();
+
+  double xState = 1000 + s->getX();
+  double yState = 1000 - s->getY();
+
+  double xVirtual = xState + cos(alpha) * dist * 200.0f;
+  double yVirtual = yState - sin(alpha) * dist * 200.0f;
+  
+  double gamma = alpha + beta;
+  double delta = alpha - beta;
+
+  double xFactor, yFactor; 
+  double xControl1, yControl1;
+  double xControl2, yControl2;
+  double cosGamma = cos(gamma);
+  double cosDelta = cos(delta);
+  double sinGamma = sin(gamma);
+  double sinDelta = sin(delta);
+
+  if(fabs(cosGamma + cosDelta) > 0.01)
+  {
+    xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
+    xControl1 = xState + xFactor * cosGamma;
+    xControl2 = xState + xFactor * cosDelta;
+  }
+  
+  if(fabs(sinGamma + sinDelta) <= 0.01)
+  {
+    float additive = tan(beta) * (xControl1 - xState);
+    yControl1 = yState + additive;
+    yControl2 = yState - additive;
+  }
+  else
+  {
+    yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
+    yControl1 = yState + yFactor * sinGamma;
+    yControl2 = yState + yFactor * sinDelta;
+
+    if(fabs(cosGamma + cosDelta) <= .01)
+    {
+      float additive = tan(beta)* (yControl1 - yState);
+      xControl1 = xState - additive;
+      xControl2 = xState + additive;
+    }
   }
 
-  return true; 
-} 
+  boost::format f("<path d=\"M%1%,%2% C%3%,%4% %5%,%6% %7%,%8%\"\n");
+  f%xState%yState
+   %xControl1%yControl1
+   %xControl2%yControl2
+   %xState%yState;
+
+  svg_code += boost::str(f);
+  svg_code += " stroke = \"black\" stroke-width=\"1\" fill=\"none\"\n";
+  svg_code += " marker-end=\"url(#Arrowhead)\"/>\n";
   
+  // Draw the transition's label
+  std::string label = tr->getLabel();
+
+  boost::format label_f("<text x =\"%1%\" y=\"%2%\" fill=\"black\" font-size=\"24\">\n");
+  label_f%xVirtual%(yVirtual - 5);
+
+  svg_code += boost::str(label_f);
+  svg_code += "  " + label + "\n</text>\n\n";
+}
+

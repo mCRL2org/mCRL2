@@ -1,62 +1,21 @@
-//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file ./export_svg.h
+#ifndef SVG_EXPORT_H
+#define SVG_EXPORT_H
 
-#ifndef svg_h
-#define svg_h
+#include "exporter.h"
 
-#include <string>
-#include <vector>
-#include <wx/string.h>
-#include <wx/gdicmn.h>
-using namespace std;
-
-typedef struct {
-  unsigned int num; // Identifier of the node
-
-  double x, y; // Position of center
-  double radius; //Radius of node
-
-
-  std::string label; // Node label text
-  double label_x, label_y; //Node label position
-
-  int red, green, blue; // Node colour RGB values
-} node_svg;
-
-typedef struct {
-  double start_x, start_y; // The position of the edge start
-  double end_x, end_y; // The position of the edge end.
-  double end_radius; // Radius of the node that forms the end of the edge
-
-  wxPoint spline_control_points[8];
-  wxPoint arrow_points[6];
-
-  std::string lbl; // The edge's label.
-  double lbl_x, lbl_y; // The position of the label.
-  int red, green, blue; // Label colour RGB values
-} edge_svg;
-
-
-class export_to_svg {
+class ExporterSVG : public Exporter
+{
   public:
-    export_to_svg(wxString _filename, vector<node_svg> _nodes, 
-                vector<edge_svg> _edges, double _height, double _width);
-    bool generate();
+    ExporterSVG(Graph* g);
+    ~ExporterSVG();
+    bool export_to(wxString _filename);
 
   private:
-    wxString filename;
-    string svg_code;
+    std::string svg_code;
 
-    vector<node_svg> nodes;
-    vector<edge_svg> edges;
-
-    double height;
-    double width;
+    void drawBezier(Transition* tr);
+    void drawSelfLoop(Transition* tr);
 };
 
-
-#endif //svg_h
+#endif //svg_export_h
 
