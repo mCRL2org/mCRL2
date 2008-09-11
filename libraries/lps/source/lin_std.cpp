@@ -105,7 +105,7 @@ static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl dummyterm(ATermAppl sort,
                            specificationbasictype *spec,
                            int max_nesting_depth=3,
-                           bool allow_dummy_term=true);
+                           bool allow_the_introduction_of_a_dummy_mapping=true);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
 static void filter_vars_by_term(
@@ -4537,31 +4537,34 @@ static ATermAppl dummyterm_rec(
                     ATermAppl targetsort,
                     specificationbasictype *spec,
                     int max_nesting_depth=3,
-                    bool allow_dummy_term=true)
+                    bool allow_the_introduction_of_a_dummy_mapping=true)
 {
   if (max_nesting_depth>0)
   { for (int i=0 ; (i<maxobject) ; i++ )
-    { // ATfprintf(stderr,"BBB %t\n",objectdata[i].objectname);
+    { 
       if (((objectdata[i].object==func)||(objectdata[i].object==_map))&&
            (objectdata[i].targetsort==targetsort))
       { /* The function found cannot be a constant */
-        // ATfprintf(stderr,"AAA %t\n",objectdata[i].objectname);
         ATermList argumentsorts=ATLgetArgument(ATAgetArgument(objectdata[i].objectname,1),0);
-        unsigned int arity=ATgetLength(argumentsorts);
-        ATermList arguments=ATempty;
-        for(unsigned int j=0; j<arity; j++)
-        { ATermAppl t=dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1,allow_dummy_term);
-          if (t==NULL)
-          { goto next_term;
+        /* If the targetsort occurs in the arguments, we still have to find a dummy_term
+           of sort target_sort, and we do not make progress. Therefore we skip such a case. */
+        if (ATindexOf(argumentsorts,(ATerm)targetsort,0)<0)
+        { unsigned int arity=ATgetLength(argumentsorts);
+          ATermList arguments=ATempty;
+          for(unsigned int j=0; j<arity; j++)
+          { ATermAppl t=dummyterm(ATAgetFirst(argumentsorts),spec,max_nesting_depth-1,allow_the_introduction_of_a_dummy_mapping);
+            if (t==NULL)
+            { goto next_function_symbol;
+            }
+            arguments=ATinsertA(arguments,t);
+            argumentsorts=ATgetNext(argumentsorts);
           }
-          arguments=ATinsertA(arguments,t);
-          argumentsorts=ATgetNext(argumentsorts);
+          arguments=ATreverse(arguments);
+          return gsMakeDataApplList(objectdata[i].objectname,arguments);
         }
-        arguments=ATreverse(arguments);
-        return gsMakeDataApplList(objectdata[i].objectname,arguments);
       }
+      next_function_symbol: ;
     }
-    next_term: ;
   } 
   return NULL;
 }
@@ -4570,7 +4573,7 @@ static ATermAppl dummyterm(
                     ATermAppl targetsort, 
                     specificationbasictype *spec,
                     int max_nesting_depth,
-                    bool allow_dummy_term)
+                    bool allow_the_introduction_of_a_dummy_mapping)
 { /* This procedure yields a term of the requested sort.
      First, it tries to find a constant constructor. If it cannot
      be found, a constant mapping is sought. If this cannot be
@@ -4612,7 +4615,7 @@ static ATermAppl dummyterm(
   } 
 
   /* Third construct a new constant, and yield it. */
-  if (allow_dummy_term)
+  if (allow_the_introduction_of_a_dummy_mapping)
   {
     snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
     ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
