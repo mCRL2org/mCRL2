@@ -163,9 +163,8 @@ void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
   // draw objects
   draw_visual_objects();
 
-  // flush GL pipeline and swap buffers
+  // flush GL pipeline and don't swap the buffers (hiding this action)
   glFlush();
-  SwapBuffers();
 }
 
 void grape_glcanvas::paint( wxDC &dc )

@@ -9,6 +9,7 @@
 // Defines GraPE events for diagrams
 
 #include <wx/xml/xml.h>
+#include <sstream>
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -23,8 +24,14 @@
 #include "libgrape/xml.h"
 #include "../../mcrl2gen.h"
 
+
+
+using namespace grape::libgrape;
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
+
+using namespace std;
+
 
 grape_event_select_diagram::grape_event_select_diagram(grape_frame *p_main_frame, const wxString &p_diagram_name)
 : grape_event_base(p_main_frame, false, _T("diagram select"))
@@ -722,9 +729,11 @@ grape_event_export_current_diagram_image::~grape_event_export_current_diagram_im
 
 bool grape_event_export_current_diagram_image::Do( void )
 {
+
   // display save dialog
   wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
   int result = save_dialog.ShowModal();
+
   if ( result == wxID_OK )
   {
     // get filename
@@ -749,13 +758,41 @@ bool grape_event_export_current_diagram_image::Do( void )
         int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
         if ( result == wxNO )
         {
+          cerr << "Exporting Aborted" << endl;
           return false;
         }
       }
     }
 
+    //calculate max (x,y) position of objects
+    uint count = m_main_frame->get_glcanvas()->count_visual_object();
+    float maxx = 0;
+    float maxy = 0;
+    for ( uint i = 0; i < count; ++i )
+    {
+      visual_object* vis_obj = m_main_frame->get_glcanvas()->get_visual_object(i);
+      if (vis_obj != 0)  
+      {
+        object* obj = vis_obj->get_selectable_object();
+        if (obj != 0) 
+        {
+          float coordx = (obj->get_coordinate().m_x+obj->get_width())*300;
+          float coordy = (-obj->get_coordinate().m_y+obj->get_height())*300;
+          if (maxx < coordx) 
+          {
+            maxx = coordx;
+          }
+          if (maxy < coordy) 
+          {
+            maxy = coordy;
+          }
+        }
+      }
+    }
+
     //create image for saving
-    wxImage save_image(3000, 3000);
+    wxImage save_image(maxx, maxy);
+
     //get width of sub image
     int sub_image_width = m_main_frame->get_glcanvas()->get_image().GetWidth();
     //get height of sub image
@@ -769,12 +806,22 @@ bool grape_event_export_current_diagram_image::Do( void )
     }
     else
     {
+      //clear log
+      m_main_frame->get_logpanel()->Clear();
+      //display message
+      cerr << "Exporting Image..." << endl;
+      //update application
+      wxSafeYield();
+
       grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
       m_main_frame->get_event_handler()->Submit(event, false);
 
-      for (int x = 0; x < 3000; x+=sub_image_width)
+      for (int x = 0; x < maxx; x+=sub_image_width)
       {
-        for (int y = 0; y < 3000; y+=sub_image_height)
+        //update application
+        wxSafeYield();
+
+        for (int y = 0; y < maxy; y+=sub_image_height)
         { 
           //set translation coordinate
           coordinate translation_coordinate = {-(float)x/300.0f, (float)y/300.0f};
@@ -787,14 +834,25 @@ bool grape_event_export_current_diagram_image::Do( void )
         }
       }
    
+      //display message
+      cerr << "Saving image" << endl;
+      //update application
+      wxSafeYield();
+   
+      bool save_success;
+
       if ( filename.GetExt().Lower() == _T("bmp") )
       {
-        return save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_BMP);
+        save_success = save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_BMP);
       }
       else
       {
-        return save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_PNG);
+        save_success = save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_PNG);
       }
+      //display message
+      cerr << "Done" << endl;
+
+      return save_success;
     }
   }
   return false;
