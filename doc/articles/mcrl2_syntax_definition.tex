@@ -521,7 +521,11 @@ ar  & \mb{::=} & a \to a\\
 ac  & \mb{::=} & a\sync\f{as} \to a\ \mb{|}\ a\sync\f{as} \to \tau\ \mb{|}\ a\sync\f{as}\\
 \end{tightarray}\]
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
-respectively. $\f{as}$ represents an action sequence, $\f{ar}$ an action
+respectively.
+For technical reasons, $c$ and $t$ may not have an infix operator, a
+where clause or a quantifier at the top-level (parentheses should be
+used instead).
+$\f{as}$ represents an action sequence, $\f{ar}$ an action
 renaming, and $\f{ac}$ an action communication. The descending order of
 precedence of the operators is: $\mid, \at, \seq, \set{\pinit, \pbefore}, \to,
 \set{\pmerge,\lmerge},\sum,\alt$. Of these operators $\alt$, $\pmerge$,
@@ -565,7 +569,11 @@ Action formulae $\alpha$:
                     \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\\
 \end{tightarray}\]
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
-respectively.  The descending order of precedence of the operators is: $\neg,
+respectively.
+For technical reasons, $t$ may not have an infix operator, a where
+clause or a quantifier at the top-level (parentheses should be used
+instead).
+The descending order of precedence of the operators is: $\neg,
 \at, \set{\land,\lor}, \limp, \set{\forall, \exists}$.  Of the infix operators
 $\at$ associates to the left and $\land$, $\lor$ and $\limp$ associate to the
 right.
@@ -610,11 +618,15 @@ State formulae $\varphi_s$:
 \f{vdi}  & \mb{::=} & x: s = d\\
 \end{tightarray}\]
 Here $\f{vdi}$ stands for a data variable declaration and initialisation,
-and $c$ and $t$ stand for data expressions of
-sort $\sbool$ and $\sreal$, respectively.  The descending order of precedence
-of the operators is: $\set{\neg, \_[\_], \_\langle\_\rangle},
-\set{\land,\lor}, \limp, \set{\forall, \exists, \mu, \nu}$.  The infix
-operators $\land$, $\lor$ and $\limp$ associate to the right.
+and $c$ and $t$ stand for data expressions of sort $\sbool$ and
+$\sreal$, respectively.
+For technical reasons, $t$ may not have an infix operator, a where
+clause or a quantifier at the top-level (parentheses should be used
+instead).
+The descending order of precedence of the operators is: $\set{\neg,
+\_[\_], \_\langle\_\rangle}, \set{\land,\lor}, \limp, \set{\forall,
+\exists, \mu, \nu}$.  The infix operators $\land$, $\lor$ and $\limp$
+associate to the right.
 
 %%%%%%%%%%%%%%%%
 \section{PBES's}
