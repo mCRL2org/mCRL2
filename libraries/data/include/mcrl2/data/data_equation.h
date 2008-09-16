@@ -20,6 +20,8 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_symbol.h"
 
 namespace mcrl2 {
   
@@ -58,6 +60,24 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
               atermpp::term_list<variable>(variables.begin(), variables.end()),
               condition, lhs, rhs)),
+            m_variables(variables.begin(), variables.end())
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] variables The free variables of the data_equation.
+        /// \param[in] lhs The left hand side of the data_equation.
+        /// \param[in] rhs The right hand side of the data_equation.
+        /// \post this is the data equation representing the input, with
+        //        condition true
+        //
+        //TODO: Fix true
+        data_equation(const boost::iterator_range<variable_list::const_iterator>& variables,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+              atermpp::term_list<variable>(variables.begin(), variables.end()),
+              function_symbol("true", basic_sort("Bool")), lhs, rhs)),
             m_variables(variables.begin(), variables.end())
         {}
 

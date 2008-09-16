@@ -128,6 +128,25 @@ namespace mcrl2 {
           return boost::make_iterator_range(m_arguments);
         }
 
+        /// \brief Returns the first argument of the application
+        /// \pre head() is a binary operator
+        /// \ret arguments()
+        inline
+        data_expression left() const
+        {
+          assert(m_arguments.size() == 2);
+          return m_arguments[0];
+        }
+
+        /// \brief Returns the second argument of the application
+        /// \pre head() is a binary operator
+        inline
+        data_expression right() const
+        {
+          assert(m_arguments.size() == 2);
+          return m_arguments[1];
+        }
+
     }; // class application
 
     /// \brief list of applications
