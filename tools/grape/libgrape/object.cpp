@@ -82,7 +82,6 @@ uint object::get_id( void ) const
 
 void object::set_id( uint p_id )
 {
-  assert( m_selected );
   m_id = p_id;
 }
 
