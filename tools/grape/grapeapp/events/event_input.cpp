@@ -373,6 +373,14 @@ bool grape_event_click::Do( void )
     }
   } // end switch
 
+  //if we added a object
+  if ((state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
+  {
+    //deselect all objects
+    grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
+    m_main_frame->get_event_handler()->Submit(event, false);
+  }
+
   return true;
 }
 

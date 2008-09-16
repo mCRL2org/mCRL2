@@ -27,7 +27,7 @@ object::object( object_type p_type )
 void object::init()
 {
   m_id = -1;
-  m_selected = true;
+  m_selected = false;
   m_width = 0.25f;
   m_height = 0.25f;
   m_comments.Clear();
