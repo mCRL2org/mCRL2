@@ -16,6 +16,7 @@
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
+#include "event_diagram.h"
 #include "event_file.h"
 
 using namespace grape::libgrape;
@@ -122,11 +123,35 @@ bool grape_event_open::Do( void )
 
   // set grape specification
   m_main_frame->set_grape_specification( new_spec );
+
+  // update process listbox
+  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  if ( arch_listbox->GetCount() >= 1 )
+  {
+    arch_listbox->Select( 0 );
+  }
+  else
+  {
+    // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
+    m_main_frame->get_process_diagram_listbox()->Select( 0 );
+  }
+
+  // update grape mode
+  wxString m_selected_diagram = arch_listbox->GetStringSelection();
+  if ( m_selected_diagram == wxEmptyString )
+  {
+    // if this is also empty there will be no selection; grape_event_select_diagram will process according to that.
+    m_selected_diagram = m_main_frame->get_process_diagram_listbox()->GetStringSelection();
+  }
+
+  // select new diagram
+  grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
+  m_main_frame->get_event_handler()->Submit(event, false);
+
   // set filename
   m_main_frame->set_filename( m_filename );
 
   m_main_frame->set_is_modified( false );
-  m_main_frame->set_mode( GRAPE_MODE_SPEC );
 
   return true;
 }

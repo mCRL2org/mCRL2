@@ -105,8 +105,11 @@ bool grape_app::Initialize(int& argc, wxChar** argv) {
 
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
  
-    if (1 < parser.arguments.size()) {
+    if (0 < parser.arguments.size()) {
       filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
   }
   catch (std::exception& e) {
