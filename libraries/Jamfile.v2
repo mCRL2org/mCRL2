@@ -10,15 +10,13 @@ for library in $(libraries) {
 }
 
 # some 3rd-party libraries
-for library in aterm svc tr {
+for library in aterm ticpp svc tr {
   use-project /libraries/$(library) : $(TOP)/3rd-party/$(library)/build ;
 
   alias $(library) : $(TOP)/3rd-party/$(library)/build//$(library) ;
 }
 
 # Additional library
-alias ticpp : : : : <library>$(TOP)/3rd-party/ticpp/build//ticpp ;
-
 use-project /libraries/tipi : ../tools/squadt/libraries/tipi/build ;
 
 # Shared build large large mcrl2 library

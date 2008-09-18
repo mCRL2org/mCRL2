@@ -10,6 +10,7 @@ lib ticpp
          <threading>single
        :
        : <define>TIXML_USE_TICPP
+         <include>../include
        ;
 
 install-libraries ticpp ;
