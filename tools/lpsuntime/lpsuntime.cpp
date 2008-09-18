@@ -36,7 +36,7 @@ struct tool_options {
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration needed for use within squadt_interactor class
 int do_untime(const tool_options& options);

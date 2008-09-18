@@ -11,7 +11,7 @@ mcrl2-library lts
        : <use>/libraries/svc//headers
          <use>/libraries/lps//headers
          <library>/site-config//BCG
-       : <threading>single
+       :
        : <library>/site-config//BCG
          <library>/libraries//lps
          <library>/libraries//svc

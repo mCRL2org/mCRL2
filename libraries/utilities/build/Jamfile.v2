@@ -2,8 +2,6 @@ project libraries/utilities
        : source-location ..
        : requirements
           <include>../include
-          <include>../../core/include      # Circular dependency
-          <include>../../data/include      # Circular dependency
        : usage-requirements
           <include>../include
        ;
@@ -22,10 +20,7 @@ obj font_renderer.o : source/font_renderer.cpp : <cxxflags>"$(WX_CPPFLAGS)" <inc
 obj squadt_interface
       : source/squadt_interface.cpp
       : <threading>multi
-        <use>/libraries/lts                  # interface dependency for lts_equivalence
-        <use>/libraries/data                 # interface dependency for RewriteStrategy
         <use>/libraries/tipi//tool-interface
-        <define>ENABLE_SQUADT_CONNECTIVITY
       :
       : <library>/libraries/tipi//tool-interface
         <toolset>darwin:<framework>Carbon
@@ -46,6 +41,8 @@ mcrl2-library utilities
         /libraries/utilities//command_line_interfacing
       : <use>/site-config//boost_headers
         <use>/libraries/atermpp//headers
+        <include>../../core/include      # Circular dependency
+        <include>../../data/include      # Circular dependency
       :
       : <library>/libraries//aterm
       ;

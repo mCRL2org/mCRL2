@@ -19,13 +19,13 @@ std::string lts_file_argument;
 #undef check
 
 // SQuADT protocol interface
-# include <mcrl2/utilities/squadt_interface.h>
+# include <mcrl2/utilities/mcrl2_squadt_interface.h>
 using namespace mcrl2::utilities::squadt;
 using namespace mcrl2::lts;
 const char* lts_file_for_input  = "lts_in";
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
-  
+
   public:
     // Configures tool capabilities.
     void set_capabilities(tipi::tool::capabilities& c) const {
@@ -40,7 +40,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 #ifdef MCRL2_BCG
       c.add_input_configuration(lts_file_for_input,
                  tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
-#endif  
+#endif
     }
 
     // Queries the user via SQuADt if needed to obtain configuration information
@@ -78,7 +78,7 @@ void parse_command_line(int argc, wxChar** argv)
         NAME, AUTHOR, "[OPTION]... [INFILE]\n",
     "Draw graphs and optimize their layout in a graphical environment. "
     "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file as input for drawing.");
-   
+
   command_line_parser parser(clinterface, argc, argv);
 
   if (0 < parser.arguments.size()) {
@@ -87,7 +87,6 @@ void parse_command_line(int argc, wxChar** argv)
   if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
- 
 }
 
 

@@ -124,22 +124,22 @@ bool perform_task(tool_options_type const& tool_options) {
 
   if (!tool_options.outfilename.empty()) {
     OutStream = fopen(tool_options.outfilename.c_str(),"w");
-  
+
     if (OutStream == 0) {
       throw mcrl2::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
     }
   }
-  
+
   bool result = perform_task(tool_options.infilename.c_str(), OutStream);
-  
+
   fclose(OutStream);
-  
+
   return (result);
 }
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 static const char* pnml_file_for_input   = "pnml_in";
 static const char* mcrl2_file_for_output = "mcrl2_out";

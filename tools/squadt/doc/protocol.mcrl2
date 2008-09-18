@@ -15,51 +15,53 @@ sort MessageType = struct
 
 sort MessageData = struct empty | result(Bool) | other;
 
+sort Address = Nat;
+
 % Messages travel between a controller (address 0) and a tool instance (address 0 <)
-sort Message = struct message(address : Nat, type : MessageType, data : MessageData);
+sort Message = struct message(type : MessageType, data : MessageData);
 
 act
 
-   send, receive, communicate: Message;    % send or receive a message
-   start_tool, tool_start: Nat;            % create a new tool instance
-   terminate_tool,tool_terminate: Nat;     % terminate a tool
-   execute_task: Configuration;            % perform the configured operation
-   error;                                  % error action
-   update_display, waiting;                % other non-communication actions
+   send, receive, communicate: Address#Message; % send or receive a message
+   start_tool, tool_start: Nat;                 % create a new tool instance
+   terminate_tool,tool_terminate: Nat;          % terminate a tool
+   execute_task: Configuration;                 % perform the configured operation
+   error;                                       % error action
+   update_display, waiting;                     % other non-communication actions
 
 % a: the tool id
 proc unidentified_tool(a : Nat) =
-      send(message(a, identification, other)).
+      send(a, message(identification, other)).
         tool(a, configuration(false), false, false);
 
 % a: the tool id
 % c: configuration object
 proc tool(a : Nat, c : Configuration, in_configuration : Bool, in_task : Bool) =
    terminate_tool(a).delta +
-   receive(message(a, termination, empty)).           % received termination request
-     send(message(a, termination, other)) +           % sends termination signal
-   (receive(message(a, capabilities, empty)).         % received request for capabilities
-      send(message(a, capabilities, other)) +         % response capabilities (tool)
-    send(message(a, capabilities, empty)) +           % requested controller capabilities
-    receive(message(a, capabilities, other)) +        % response capabilities (controller)
-    send(message(a, display_layout, other)) +         % sent display layout
-    send(message(a, display_data, other)) +           % sent display data
-    receive(message(a, display_data, other)) +        % sent display data
-    send(message(a, report, other))).
+   receive(a, message(termination, empty)).           % received termination request
+     send(a, message(termination, other)) +           % sends termination signal
+   (receive(a, message(capabilities, empty)).         % received request for capabilities
+      send(a, message(capabilities, other)) +         % response capabilities (tool)
+    send(a, message(capabilities, empty)) +           % requested controller capabilities
+    receive(a, message(capabilities, other)) +        % response capabilities (controller)
+    send(a, message(display_layout, other)) +         % sent display layout
+    send(a, message(display_data, other)) +           % sent display data
+    receive(a, message(display_data, other)) +        % sent display data
+    send(a, message(report, other))).
    tool(a, c, in_configuration, in_task) +
    (!in_configuration) ->
      ((!in_task) ->
-       receive(message(a, configuration, empty)).
+       receive(a, message(configuration, empty)).
          tool(a, c, true, false)) <>                  % received a task specification
-     (send(message(a, configuration, other)) +
-       send(message(a, configuration, empty))).
+     (send(a, message(configuration, other)) +
+       send(a, message(configuration, empty))).
          tool(a, configuration(true), false, false) +   % accepted task specification
    (!in_task) ->
-     receive(message(a, task_start, empty)).          % task start signal
+     receive(a, message(task_start, empty)).          % task start signal
      tool(a, c, in_configuration,
              (valid(c) && !in_configuration)) <>
      (sum b : Bool.
-       send(message(a, task_stop, result(b))).        % task finished or aborted
+       send(a, message(task_stop, result(b))).        % task finished or aborted
        tool(a, c, false, false));
 
 % Workaround until proper support for finite sets is implemented
@@ -82,37 +84,37 @@ proc controller(m : Nat, r : List(Nat), c : List(Nat), s : List(Nat)) =
  (sum a : Nat. (a <= m) -> (
    start_tool(a).controller(m,set_add(a,r),c,s) +   % starts a new tool instance
    (a in r) -> (                                    % for tool a:
-     receive(message(a, identification, other)).    % received instance identifier
+     receive(a, message(identification, other)).    % received instance identifier
        controller(max(m,a),r,c,s) +
-     (receive(message(a, capabilities, empty)).     % received request for capabilities
-        send(message(a, capabilities, other)) +
-      send(message(a, capabilities, empty)).        % sent request for capabilities of
-        receive(message(a, capabilities, other)) +
-      receive(message(a, report, other)) +          % report delivered
-      receive(message(a, display_data, other)).     % update for display data
+     (receive(a, message(capabilities, empty)).     % received request for capabilities
+        send(a, message(capabilities, other)) +
+      send(a, message(capabilities, empty)).        % sent request for capabilities of
+        receive(a, message(capabilities, other)) +
+      receive(a, message(report, other)) +          % report delivered
+      receive(a, message(display_data, other)).     % update for display data
         update_display +
-      send(message(a, display_data, other))).       % data from user interaction
+      send(a, message(display_data, other))).       % data from user interaction
      controller(m,r,c,s) +
-     send(message(a, configuration, empty)).        % configuration request
+     send(a, message(configuration, empty)).        % configuration request
        controller(m,r,set_erase(a,c),set_erase(a,s)) +
-     send(message(a, termination, empty)).          % sent termination command
-     receive(message(a, termination, other)).       % termination signal
+     send(a, message(termination, empty)).          % sent termination command
+     receive(a, message(termination, other)).       % termination signal
       terminate_tool(a).
       controller(m,set_erase(a,r), set_erase(a,c),
                    set_erase(a,s)) +
-     receive(message(a, display_layout, other)).    % display layout delivered
+     receive(a, message(display_layout, other)).    % display layout delivered
        controller(m,r,c,s) +
-     receive(message(a, configuration, other)).     % configuration was accepted
+     receive(a, message(configuration, other)).     % configuration was accepted
        controller(m,r,set_add(a,c),s) +
-     receive(message(a, configuration, empty)).     % configuration was rejected
+     receive(a, message(configuration, empty)).     % configuration was rejected
        controller(m,r,c,s) +
     (sum b : Bool.
-      receive(message(a, task_stop, result(b)))).
+      receive(a, message(task_stop, result(b)))).
       ((a in s && a in c) ->
          controller(m,r,c,set_erase(a,s)) <>
          error.controller(m,r,c,s)) +               % task completed
     ((a in c) ->                                    % for tool a:
-      send(message(a, task_start, empty)).
+      send(a, message(task_start, empty)).
         controller(m,r,c,set_add(a,s))))));         % task start command
 
 % Execution component (starts tools)

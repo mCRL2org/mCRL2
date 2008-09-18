@@ -14,4 +14,6 @@ tool grape
         <status>experimental
       ;
 
-install-tools grape ;
+install-data manual : grapeapp/help/grapehelp.zip : <data-sub-location>grape ;
+
+install-tools grape : <dependency>manual ;

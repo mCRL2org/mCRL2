@@ -28,6 +28,6 @@ mcrl2-library lps
          source/invariant_eliminator.cpp
        : <use>/libraries/data//headers
          <use>/libraries/atermpp//headers
-       : <threading>single
+       :
        : <library>/libraries//data
        ;

@@ -3,7 +3,7 @@ project tr
        : requirements
           <include>../include/tr
        : usage-requirements
-          <include>../include/tr
+          <include>../include
        ;
 
 obj tr

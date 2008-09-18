@@ -80,6 +80,9 @@ feature.feature wx : yes no : optional incidental ;
 # Feature for building/installing optional tools/libraries
 feature.feature install : no yes ;
 
+# Feature for data installation in subdirectory
+feature.feature data-sub-location : : free ;
+
 # Feature to mark tools as basic experimental or deprecated
 feature.feature status : basic experimental deprecated : composite ;
 
@@ -88,6 +91,13 @@ feature.feature squadt-connectivity : none implemented : incidental composite ;
 
 include $(TOP)/build/config.jam ;
 
+if ! $(OPENGL_NAME) {
+  feature.set-default opengl : no ;
+}
+if ! $(WX_CPPFLAGS) {
+  feature.set-default wx : no ;
+}
+
 # Install when requested
 if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
   feature.set-default install : yes ;
@@ -95,7 +105,7 @@ if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
 
 # Gets option arguments from options passed on the command line primarily and
 # otherwise the BUILD_OPTIONS variable
-rule get-option ( name : default ) {
+local rule get-option ( name : default ) {
   local result = [ MATCH --$(name)=(.*) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
 
   if $(result) {
@@ -106,7 +116,7 @@ rule get-option ( name : default ) {
   }
 }
 
-rule is-option ( name : default ) {
+local rule is-option ( name : default ) {
   local result = [ MATCH --($(name)) : [ modules.peek : ARGV ] $(BUILD_OPTIONS) ] ;
 
   if $(result) {
@@ -118,17 +128,17 @@ rule is-option ( name : default ) {
 }
 
 # Prints message
-rule print-notice ( message ) {
+local rule print-notice ( message ) {
   if [ is-option no-display-notice : no ] = no {
     ECHO "Notice: $(message)" ;
   }
 }
 
+
 # The known sub projects
 use-project /site-config               : build ;
 use-project /boost                     : 3rd-party/boost ;
 use-project /libraries                 : libraries ;
-use-project /workarounds               : build/workarounds ;
 
 # Extract build requirements from command line options
 for option in [ modules.peek : ARGV ] {
@@ -139,9 +149,7 @@ for option in [ modules.peek : ARGV ] {
     local values = [ regex.split $(value) "," ] ;
 
     if ! [ MATCH ^(-).* : $(option) ] {
-      if $(temporary) != link {
-        build-options += <$(temporary)>$(values) ;
-      }
+      build-options += <$(temporary)>$(values) ;
     }
   }
   else if $(option) in debug profile release {
@@ -156,17 +164,16 @@ for option in $(BUILD_OPTIONS) {
   if $(temporary) {
     if ! [ feature.get-values $(temporary) : $(build-options) ] {
       local value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-     
+
       if ! [ MATCH ^(-).* : $(option) ] {
-        if $(temporary) != link {
-          build-options += $(value:G=<$(temporary)>) ;
-        }
+        build-options += $(value:G=<$(temporary)>) ;
       }
     }
   }
 }
 
-local link-variant = [ feature.get-values link : $(build-options) <link>shared ] ;
+link-variant = [ feature.get-values link : $(build-options) <link>shared ] ;
+link-variant = $(link-variant[1]) ;
 
 # Make sure the build tag variable is defined
 if ! $(BUILD_TAG) {
@@ -178,7 +185,7 @@ if ! $(BUILD_TAG) {
 
   BUILD_TAG = "$(revision)-$(link-variant[1])" ;
 }
- 
+
 if [ get-option prefix : no ] = no {
   ECHO "Warning: missing final installation path!" ;
   ECHO "" ;
@@ -211,6 +218,14 @@ if [ modules.peek : NT ] && [ feature.get-values link : $(build-options) ] != st
   libdir = $(bindir) ;
 }
 
+if [ feature.defaults <opengl> ] = <opengl>no {
+  print-notice "Not building tools that depend on OpenGL!" ;
+}
+if [ feature.defaults <wx> ] = <wx>no {
+  print-notice "Not building tools that depend on wxWidgets!" ;
+}
+
+
 if [ is-option disable-squadt-support : no ] = no {
   feature.feature squadt-interface : enabled disabled : symmetric optional ;
 
@@ -231,32 +246,36 @@ else {
         ;
 }
 
+include ./build/Jamfile.v2 ;
+
 # Top project
 project toolset
        : build-dir $(BUILD_TOP)
        : requirements
-          <use>/workarounds//configuration
+          <conditional>@select-configuration
           <define>_FILE_OFFSET_BITS=64
           <dll-path>$(libdir)
           $(build-options)
        : default-build
           <link>$(link-variant)
+       : usage-requirements
+          <include>./build/workarounds/all
        ;
 
 # Only from the root of the source tree
 if [ path.exists ./tools ] {
   if [ is-option enable-experimental : no ] = no {
     print-notice "not building experimental tools!" ;
-  
+
     feature.compose <status>experimental : <install>no ;
   }
   if [ is-option enable-deprecated : no ] = no {
     print-notice "not building deprecated tools!" ;
-  
+
     feature.compose <status>deprecated : <install>no ;
   }
-  
-  root  = [ path.make $(TOP) ] ; 
+
+  root  = [ path.make $(TOP) ] ;
   tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
 
   local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
@@ -293,7 +312,7 @@ if [ path.exists ./tools ] {
     # Add prefix for packaging
     if [ get-option destdir : no ] != no {
       local destdir  = [ get-option destdir : "" ] ;
- 
+
       prefix     = $(destdir)$(prefix) ;
       bindir     = $(destdir)$(bindir) ;
       libdir     = $(destdir)$(libdir) ;
@@ -327,6 +346,17 @@ if [ path.exists ./tools ] {
   }
 }
 
+rule install-data ( name : targets * : requirements ) {
+  local data-sub-location = [ feature.get-values data-sub-location : $(requirements) ] ;
+
+  if $(data-sub-location) {
+    install $(name) : $(targets) : <location>$(datadir)/$(data-sub-location) ;
+  }
+  else {
+    error "missing feature <data-sub-location>directory-name" ;
+  }
+}
+
 rule install-tools ( executables * : requirements * ) {
   local rule-name   = install ;
   local destination = $(bindir) ;
@@ -352,7 +382,7 @@ rule install-tools ( executables * : requirements * ) {
   }
 
   if $(executables) {
-    install other : $(executables) : $(requirements) <install-dependencies>off <install-type>EXE <location>$(destination) ;
+    install install-executables : $(executables) : $(requirements) <install-dependencies>off <install-type>EXE <location>$(destination) ;
 
     if [ property.select source : $(requirements) ] && [ feature.get-values link : $(build-options) ] != static {
       local plugin-targets = [ feature.get-values source : $(requirements) ] ;
@@ -360,7 +390,7 @@ rule install-tools ( executables * : requirements * ) {
       targets += $(plugin-targets)//$(rule-name) ;
     }
 
-    targets += other ;
+    targets += install-executables ;
   }
 
   alias $(rule-name) : $(targets) ;
@@ -368,7 +398,7 @@ rule install-tools ( executables * : requirements * ) {
   local c = [ project.current ] ;
 
   module [ $(c).project-module ] {
-    explicit stage install ;
+    explicit $(rule-name) ;
   }
 }
 
@@ -529,29 +559,37 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
   }
 }
 
-# Target for a library that is part of the big mcrl2 library when link=static
+# Target for a library that is part of the big mcrl2 library when link=shared
 rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+  alias headers : : [ property.select use include : $(requirements) ]
+                : : [ property.select use include : $(usage-requirements) ] ;
+
   if $(sources) {
-    if [ feature.get-values link : $(build-options) ] != static {
+    if $(link-variant) != static {
+      local external = [ feature.get-values library : $(requirements) $(usage-requirements) ] ;
+
+      external = [ set.difference $(external) : [ MATCH (/libraries/.*) : $(external) ] ] ;
+
       # build target for inclusion by mcrl2 library
-      alias $(name).alias : $(sources) : $(requirements) : $(defaults) : $(requirements) ;
+      alias $(name).alias : $(sources) : <link>shared $(requirements) : $(defaults) :
+                      [ property.change $(usage-requirements) : <library> ]
+                      <library>$(external)
+                      ;
 
       # shared library target
-      alias $(name) : /libraries//mcrl2 : : <link>shared : $(requirements) ;
+      alias $(name) : /libraries//mcrl2 : <link>shared : : <use>headers ;
     }
     else {
       # static library target
-      lib $(name) : $(sources) : $(requirements) : $(defaults) : $(requirements) $(usage-requirements) ;
+      lib $(name) : $(sources) : <link>static $(requirements) : $(defaults) : $(requirements) $(usage-requirements) ;
 
-      alias $(name).alias ;
+      alias $(name).alias : : <link>static ;
     }
   }
   else {
-    alias $(name) : : : : $(requirements) ;
-    alias $(name).alias ;
+    alias $(name) : : <link>static : : $(usage-requirements) ;
+    alias $(name).alias : : <link>static ;
   }
-
-  alias headers : : $(requirements) : : $(requirements) ;
 
   install-libraries $(name) ;
 

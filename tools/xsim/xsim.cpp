@@ -49,19 +49,19 @@ std::string get_about_message() {
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
- 
+
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 using namespace mcrl2::utilities::squadt;
 
 const char* lps_file_for_input = "lps_in";
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
-  
+
   public:
 
     // Special initialisation
@@ -82,7 +82,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
     // Check an existing configuration object to see if it is usable
     bool check_configuration(tipi::configuration const& c) const {
       bool valid = c.input_exists(lps_file_for_input);
-  
+
       if (!valid) {
         send_error("Invalid input combination!");
       }

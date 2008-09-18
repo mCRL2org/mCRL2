@@ -44,7 +44,7 @@ std::string lts_file_argument;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //SQuADT protocol interface
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 using namespace mcrl2::utilities::squadt;
 
@@ -66,7 +66,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 
     bool check_configuration(tipi::configuration const& c) const {
       bool valid = c.input_exists(fsm_file_for_input);
-    
+
       if (!valid) {
         send_error("Invalid input combination!");
       }

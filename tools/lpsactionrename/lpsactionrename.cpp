@@ -124,7 +124,7 @@ int process(t_tool_options const& tool_options)
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 

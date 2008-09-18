@@ -10,7 +10,7 @@ mcrl2-library aterm
        : [ glob source/*.c ]
          source/protaterm.cpp
        : <address-model>64:<define>AT_64BIT
-       : <threading>single
+       :
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin:<cflags>"-fPIC -fno-common"
          <toolset>gcc,<os>NT:<cflags>""

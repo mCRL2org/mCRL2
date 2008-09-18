@@ -11,8 +11,6 @@
 #include <tipi/detail/utility/standard_utility.hpp>
 
 #include "mcrl2/utilities/squadt_interface.h"
-#include "mcrl2/data/rewrite.h"                // for RewriteStrategy 
-#include "mcrl2/lts/liblts.h"                  // for lts_equivalence
 
 #if defined(__APPLE__)
 # include <Carbon/Carbon.h>
@@ -25,7 +23,7 @@ namespace mcrl2 {
     namespace squadt {
       tool_interface::tool_interface() : m_communicator(new tipi::tool::communicator) {
       }
-  
+
       tool_interface::~tool_interface() {
         delete m_communicator;
       }
@@ -34,9 +32,9 @@ namespace mcrl2 {
         if (active) {
           bool valid_configuration_present = false;
           bool termination_requested       = false;
-  
+
           initialise();
-  
+
           try {
             while (!termination_requested) {
               boost::shared_ptr< const tipi::message > new_message(m_communicator->await_message(tipi::message_any, 5));
@@ -104,7 +102,7 @@ namespace mcrl2 {
             /* Handle standard exceptions */
             send_error(std::string("Caught exception: ") + e.what());
           }
-  
+
           finalise();
 
           m_communicator->send_signal_termination();
@@ -115,10 +113,10 @@ namespace mcrl2 {
 
           return true;
         }
-  
+
         return false;
       }
-  
+
       /**
        * \param[in] av command line arguments (Windows specific)
        **/
@@ -129,7 +127,7 @@ namespace mcrl2 {
 
         return try_run();
       }
-  
+
       /**
        * The connection is built using information such as a socket identifier when
        * found among the command line arguments. The command line arguments that
@@ -141,9 +139,9 @@ namespace mcrl2 {
        * \return whether or not SQuADT interaction was successful
        **/
       bool tool_interface::try_interaction(int& ac, char** const av) {
-  
+
         set_capabilities(m_communicator->get_capabilities());
-  
+
         active = m_communicator->activate(ac,av);
 
 #if defined (__APPLE__)
@@ -189,28 +187,28 @@ namespace mcrl2 {
           }
         }
 #endif
-  
+
         return try_run();
       }
-  
+
       bool tool_interface::is_active() const {
         return (active);
       }
-  
+
       /**
        * \param[in] m descriptive message
        **/
       void tool_interface::send_notification(std::string const& m) const {
         m_communicator->send_status_report(tipi::report::notice, m);
       }
-  
+
       /**
        * \param[in] m descriptive message
        **/
       void tool_interface::send_warning(std::string const& m) const {
         m_communicator->send_status_report(tipi::report::warning, m);
       }
-  
+
       /**
        * \param[in] m descriptive message
        **/
@@ -241,33 +239,6 @@ namespace mcrl2 {
       void tool_interface::send_display_layout(tipi::tool_display& d) {
         m_communicator->send_display_layout(d);
       }
-
-      /// \cond INTERNAL_DOCS
-      static bool initialise() {
-        tipi::datatype::enumeration< RewriteStrategy > strategy_enumeration;
-
-        strategy_enumeration.
-          add(GS_REWR_INNER, "inner").
-          add(GS_REWR_INNERC, "innerc").
-          add(GS_REWR_JITTY, "jitty").
-          add(GS_REWR_JITTYC, "jittyc");
-
-        tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
-
-        transformation_methods.
-          add(mcrl2::lts::lts_eq_none, "none").
-          add(mcrl2::lts::lts_eq_bisim, "modulo_strong_bisimulation").
-          add(mcrl2::lts::lts_eq_branching_bisim, "modulo_branching_bisimulation").
-          add(mcrl2::lts::lts_eq_sim, "strong_simulation_equivalence").
-          add(mcrl2::lts::lts_eq_trace, "modulo_trace_equivalence").
-          add(mcrl2::lts::lts_eq_weak_trace, "modulo_weak_trace_equivalence").
-          add(mcrl2::lts::lts_eq_isomorph, "isomorphism");
-
-        return true;
-      }
-
-      static bool initialised = initialise();
-      /// \endcond
     }
   }
 }

@@ -30,7 +30,7 @@ mcrl2-library core
          source/alpha.cpp
        : <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
-       : <threading>single
+       :
        : <library>/libraries//atermpp
          <library>/libraries//utilities
          <toolset>gcc,<link>static:<linkflags>-export-dynamic

@@ -62,8 +62,8 @@
             <xs:restriction base="xs:string">
              <xs:enumeration value="boolean" />
              <xs:enumeration value="string" />
-             <xs:enumeration value="integer" />
-             <xs:enumeration value="real" />
+             <xs:enumeration value="integer_range" />
+             <xs:enumeration value="real_range" />
             </xs:restriction>
            </xs:simpleType>
           </xs:attribute>

@@ -3,11 +3,11 @@ project pbes
        : requirements
           <include>../include
           <dependency>/site-config//boost_headers
-          <dependency>/libraries//atermpp
+          <dependency>/libraries/atermpp//headers
        : usage-requirements
           <include>../include
           <dependency>/site-config//boost_headers
-          <dependency>/libraries//atermpp
+          <dependency>/libraries/atermpp//headers
        ;
 
 obj pbes_data_elimination.o
@@ -24,7 +24,7 @@ mcrl2-library pbes
          pbes_data_elimination.o
        : <use>/libraries/data//headers
          <use>/libraries/lps//headers
-       : <threading>single
+       :
        : <library>/libraries//data
          <library>/libraries//lps
        ;

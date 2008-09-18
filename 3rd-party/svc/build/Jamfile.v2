@@ -20,7 +20,7 @@ mcrl2-library svc
          svc2.c
        : <toolset>darwin:<cflags>"-fno-common"
          <use>/libraries/aterm//headers
-       : <threading>single
+       :
        : <library>/libraries//aterm
        ;
 

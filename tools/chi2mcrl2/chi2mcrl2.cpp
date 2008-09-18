@@ -37,7 +37,7 @@ static ATermAppl translate_file(t_options &options);
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 const char* chi_file_for_input = "chi_in";
 const char* mcrl2_file_for_output  = "mcrl2_out";

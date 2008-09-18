@@ -41,7 +41,7 @@ struct tool_options {
 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration because do_binary() is called within squadt_interactor class
 int do_binary(const tool_options& options);

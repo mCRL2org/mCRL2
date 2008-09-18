@@ -33,10 +33,10 @@ struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
 };
-  
+
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);

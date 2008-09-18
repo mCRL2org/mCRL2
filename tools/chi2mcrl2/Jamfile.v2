@@ -7,7 +7,6 @@ tool chi2mcrl2
          translate.cpp
          /libraries//core
        : <squadt-connectivity>implemented
-         <define>NO_MCRL2_TOOL_FACILITIES
        ;
 
 install-tools chi2mcrl2 ;

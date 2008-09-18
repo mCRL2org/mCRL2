@@ -294,7 +294,7 @@ namespace utility {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
     o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
-    
+
     tree->GetAttribute("location", &o.m_location, false);
   }
 
@@ -332,6 +332,7 @@ namespace utility {
     c.m_positions.clear();
 
     tree->GetAttributeOrDefault("interactive", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("valid", &c.m_fresh, c.m_fresh);
     tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
 
     std::string category;

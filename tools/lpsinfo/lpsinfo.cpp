@@ -13,7 +13,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 #endif
 
 //C++
@@ -77,7 +77,7 @@ static inline int get_number_of_used_actions(linear_process lps){
 void parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
                            "Print basic information on the linear process specification (LPS) in INFILE.");
-      
+
   command_line_parser parser(clinterface, ac, av);
 
   if (0 < parser.arguments.size()) {
@@ -87,7 +87,7 @@ void parse_command_line(int ac, char** av) {
     parser.error("too many file arguments");
   }
 }
-        
+
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 

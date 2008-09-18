@@ -37,13 +37,13 @@ struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
   t_suminst_options suminst_opts; ///< Options of the algorithm
-  
+
   tool_options() {}
 };
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration because do_suminst() is called within squadt_interactor class
 int do_suminst(const tool_options& options);
@@ -60,7 +60,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
     static const char*  option_rewrite_strategy;
 
   public:
-    
+
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
 

@@ -60,7 +60,7 @@ std::string parse_error;
 
   const char* fsm_file_for_input = "fsm_in";
 
-  class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+  class squadt_interactor : public mcrl2::utilities::squadt::wx_tool_interface {
 
     public:
 
@@ -70,26 +70,26 @@ std::string parse_error;
         c.add_input_configuration(fsm_file_for_input,
              tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
       }
-     
+
       // Queries the user via SQuADt if needed to obtain configuration information
       void user_interactive_configuration(tipi::configuration&) {}
-     
+
       // Check an existing configuration object to see if it is usable
       bool check_configuration(tipi::configuration const& c) const {
         bool valid = c.input_exists(fsm_file_for_input);
-     
+
         if (!valid) {
           send_error("Invalid input combination");
         }
-     
+
         return valid;
       }
-     
+
       // Performs the task specified by a configuration
       bool perform_task(tipi::configuration& c) {
         fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
-    
-        return mcrl2_wx_tool_interface::perform_task(c);
+
+        return wx_tool_interface::perform_task(c);
       }
   };
 #endif
@@ -103,10 +103,10 @@ IMPLEMENT_APP( DiaGraph )
 IMPLEMENT_APP_NO_MAIN( DiaGraph )
 
 # ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   HINSTANCE hPrevInstance,
                                   wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {                                                                     
+                                  int nCmdShow) {
 
   if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
     return EXIT_SUCCESS;

@@ -35,7 +35,7 @@ struct tool_options {
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
@@ -46,9 +46,9 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static bool initialise_types() {
       using namespace mcrl2::lts;
-  
+
       tipi::datatype::enumeration< lts_equivalence > determinism_equivalence_enumeration;
-  
+
       determinism_equivalence_enumeration.
         add(lts_eq_none, "none").
         add(lts_eq_bisim, "bisimilarity").

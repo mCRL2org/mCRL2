@@ -77,7 +77,7 @@ static t_tool_options parse_command_line(int argc, char** argv);
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
@@ -91,15 +91,15 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static bool initialise_types() {
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-    
+
       transformation_strategy_enumeration.
         add(lazy, "lazy").
         add(optimize, "optimize").
         add(on_the_fly, "on-the-fly").
         add(on_the_fly_with_fixed_points, "on-the-fly-with-fixed-points");
-    
+
       tipi::datatype::enumeration< bes_output_format > output_format_enumeration;
-    
+
       output_format_enumeration.
         add(none, "none").
         add(vasy, "vasy").

@@ -1,13 +1,62 @@
 project site-config ;
 
-include $(TOP)/build/config.jam ;
-
 import os ;
 import regex ;
-import feature ;
+
+include $(TOP)/build/config.jam ;
+
+rule select-configuration ( properties * ) {
+  # versions of gcc without signed overflow (breaks ATerm library)
+  local gcc-no-overflow = 4.3.0 4.3.1 ;
+
+  if <target-os>windows in $(properties) {
+    if <toolset>msvc || <toolset>intel {
+      return <define>WIN32
+             <define>__WIN32__
+             <define>_CRT_SECURE_NO_DEPRECATE
+             <define>_SCL_SECURE_NO_WARNINGS
+             <define>_SCL_SECURE_NO_DEPRECATE
+             <define>_HAS_ITERATOR_DEBUGGING=0
+             <define>_SECURE_SCL=0
+             <include>$(TOP)/build/workarounds/msvc
+             <exception-handling>on ;
+    }
+    else if <toolset>gcc in $(properties) { # MinGW
+      <include>$(TOP)/build/workarounds/mingw
+      <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
+      <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow" ;
+    }
+  }
+  else if <target-os>darwin in $(properties) {
+    if <toolset>darwin in $(properties) { # XCode toolset on OS X
+      return <define>__darwin__
+            <include>$(TOP)/build/workarounds
+            <cxxflags>"-std=c++98"
+            <cflags>"-std=c99"
+            <debug-symbols>on:<cxxflags>"-ggdb"
+            <linkflags>"-undefined dynamic_lookup" ;
+    }
+  }
+  if <target-os>cygwin in $(properties) { # Cygwin
+    return <include>$(TOP)/build/workarounds/cygwin
+           <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
+           <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow" ;
+  }
+  else if <target-os>solaris in $(properties) {
+    return <include>$(TOP)/build/workarounds ;
+  }
+
+  if <toolset>gcc in $(properties) { # GCC
+    return <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-std=c++98 -fno-strict-overflow"
+           <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
+           <link>static:<linkflags>-export-dynamic ;
+  }
+
+  return <include>$(TOP)/build/workarounds ;
+}
 
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
-rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
+local rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
   local splitted ;
   local library_search_paths ;
   local library_link_paths ;
@@ -98,20 +147,13 @@ if $(OPENGL_NAME) {
 
   explicit opengl GLU ;
 }
-else {
-  print-notice "Not building tools that depend on OpenGL!" ;
-
-  feature.set-default opengl : no ;
-}
 
 if $(WX_CPPFLAGS) {
-
   libraries_from_string wx_base
 	: $(WX_BASE_LDFLAGS)
         : <threading>multi
         :
         : <cxxflags>$(WX_CPPFLAGS)
-          <define>USING_WX
           <wx>yes
           <toolset>msvc:<user-interface>gui
         ;
@@ -121,23 +163,17 @@ if $(WX_CPPFLAGS) {
       : <threading>multi
       :
       : <cxxflags>$(WX_CPPFLAGS)
-        <define>USING_WX
         <wx>yes
         <opengl>yes
         <toolset>msvc:<user-interface>gui
       ;
-}
-else {
-  print-notice "Not building tools that depend on wxWidgets!" ;
-
-  feature.set-default wx : no ;
 }
 
 if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
 }
 
-rule boost-library ( name : requirements * : use-local-boost ? : use-system-boost ? ) {
+local rule boost-library ( name : requirements * : use-local-boost ? : use-system-boost ? ) {
   if $(use-local-boost) {
     alias boost_$(name) : $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) : $(requirements) <threading>multi : : $(requirements) ;
   }
@@ -225,8 +261,6 @@ if $(CADP_HEADERS) {
   alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) <define>USE_BCG ;
 }
 else {
-  print-notice "BCG format support for LTS library disabled!" ;
-
   alias BCG : : : : ;
 }
 
@@ -252,5 +286,4 @@ else {
   alias cvc ;
 }
 
-IMPORT $(__name__) : get-option is-option
-                   : : get-option is-option ;
+IMPORT $(__name__) : select-configuration : : select-configuration ;

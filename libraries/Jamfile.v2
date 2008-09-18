@@ -1,46 +1,39 @@
 project libraries ;
 
-libraries = [ MATCH .*/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
+local libraries = [ MATCH .*/libraries/(.*)/build/.* : [ glob */build/Jamfile.v2 ] ] ;
 
 # Register library projects
 for library in $(libraries) {
   use-project /libraries/$(library) : $(TOP)/libraries/$(library)/build ;
 
-  alias $(library)
-        : $(library)/build//$(library)
-        : <include>$(library)/include
-        :
-        : <include>$(library)/include
-        ;
+  alias $(library) : $(TOP)/libraries/$(library)/build//$(library) ;
 }
 
 # some 3rd-party libraries
-for library in aterm svc ticpp tr {
+for library in aterm svc tr {
   use-project /libraries/$(library) : $(TOP)/3rd-party/$(library)/build ;
 
-  alias $(library)
-        : $(TOP)/3rd-party/$(library)/build//$(library)
-        : <include>../3rd-party/$(library)/include
-        :
-        : <include>../3rd-party/$(library)/include
-        ;
+  alias $(library) : $(TOP)/3rd-party/$(library)/build//$(library) ;
 }
 
 # Additional library
-use-project /libraries/tipi : $(TOP)/tools/squadt/libraries/tipi/build ;
+alias ticpp : : : : <library>$(TOP)/3rd-party/ticpp/build//ticpp ;
+
+use-project /libraries/tipi : ../tools/squadt/libraries/tipi/build ;
 
 # Shared build large large mcrl2 library
 lib mcrl2
-        : /libraries/lps//lps.alias
-          /libraries/pbes//pbes.alias
-          /libraries/lts//lts.alias
-          /libraries/svc//svc.alias
-          /libraries/aterm//aterm.alias
-          /libraries/data//data.alias
-          /libraries/core//core.alias
-          /libraries/trace//trace.alias
-          /libraries/utilities//utilities.alias
+        : /libraries/lps//lps.alias/<link>shared
+          /libraries/pbes//pbes.alias/<link>shared
+          /libraries/lts//lts.alias/<link>shared
+          /libraries/svc//svc.alias/<link>shared
+          /libraries/aterm//aterm.alias/<link>shared
+          /libraries/data//data.alias/<link>shared
+          /libraries/core//core.alias/<link>shared
+          /libraries/trace//trace.alias/<link>shared
+          /libraries/utilities//utilities.alias/<link>shared
         : <threading>multi
+          <link>shared
           <toolset>darwin:<cflags>"-fPIC -fno-common"
           <toolset>darwin:<cxxflags>"-fPIC -fno-common"
           <toolset>darwin:<linkflags>"-undefined dynamic_lookup"

@@ -3,7 +3,6 @@ project squadt/libraries/tipi
        ../source
     : requirements
        <use>/site-config//boost_headers
-       <use>/libraries/utilities//headers
        <c++-template-depth>512
        <include>../include
     : usage-requirements
@@ -11,34 +10,14 @@ project squadt/libraries/tipi
        <include>../include
     ;
 
-transport_sources = [ glob ../source/transport/*.cpp ] ;
-
-alias transport
-    : $(transport_sources)
-    : <library>/site-config//boost_thread
-      <library>/site-config//boost_system
-      <threading>multi
-      <os>NT:<use>/site-config//winsock
-      <os>CYGWIN:<use>/site-config//winsock
-    :
-    : <library>/site-config//boost_thread
-      <library>/site-config//boost_system
-      <os>SOLARIS:<library>/site-config//socket
-      <os>NT:<library>/site-config//winsock
-      <os>CYGWIN:<library>/site-config//winsock
-    ;
-
 obj restore_visitor.o
     : restore_visitor.cpp
-    : <use>/libraries//ticpp
-      <use>/site-config//boost_filesystem
-    :
-    : <library>/libraries//ticpp
-      <library>/site-config//boost_filesystem
+    : <dependency>/libraries//ticpp
+      <dependency>/site-config//boost_filesystem
     ;
 
 alias messenger
-    :
+    : [ glob ../source/transport/*.cpp ]
       [ obj tool_capabilities.o : tool/capabilities.cpp ]
       [ obj controller_capabilities.o : controller/capabilities.cpp ]
       basic_datatype.cpp
@@ -47,19 +26,22 @@ alias messenger
       configuration.cpp
       display.cpp
       mime_type.cpp
-      transport
       store_visitor.cpp
       restore_visitor.o
       detail/event_handlers.cpp
     : <threading>multi
-      <use>/libraries/utilities//headers
-      <dependency>/site-config//boost_filesystem
     : # no default build
     : <library>/site-config//boost_filesystem
+      <library>/site-config//boost_thread
+      <library>/libraries//ticpp
+      <library>/site-config//boost_system
+      <os>SOLARIS:<library>/site-config//socket
+      <os>NT:<library>/site-config//winsock
+      <os>CYGWIN:<library>/site-config//winsock
     ;
 
-obj tool_communicator.o       : tool/communicator.cpp       : <use>transport ;
-obj controller_communicator.o : controller/communicator.cpp : <use>transport ;
+obj tool_communicator.o       : tool/communicator.cpp ;
+obj controller_communicator.o : controller/communicator.cpp ;
 
 lib tipi-controller
     : controller_communicator.o
@@ -83,9 +65,9 @@ lib tipi-tool
       <link>static
     ;
 
-alias tool-interface       : tipi            : <link>shared ;
-alias tool-interface       : tipi-tool       : <link>static ;
-alias controller-interface : tipi            : <link>shared ;
-alias controller-interface : tipi-controller : <link>static ;
+alias tool-interface       : tipi/<link>shared            : <link>shared ;
+alias tool-interface       : tipi-tool/<link>static       : <link>static ;
+alias controller-interface : tipi/<link>shared            : <link>shared ;
+alias controller-interface : tipi-controller/<link>static : <link>static ;
 
 install-libraries tool-interface controller-interface ;
