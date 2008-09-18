@@ -3,6 +3,8 @@
 
 #include "gltsgraph.h"
 #include "ltsimporter.h"
+#include "xmlimporter.h"
+
 #include "springlayout.h"
 
 #include "mcrl2/lts/liblts.h"
@@ -218,31 +220,31 @@ void GLTSGraph::openFile(std::string const &path)
   // Find out file format based on extension
   std::string ext = path.substr(path.find_last_of( '.' ) + 1);
 
-  
+  Importer* imp;
   // Create (on stack) appropriate importer imp
-  if ( ext == "ltsgraph")
+  if ( ext == "xml")
   {
-    // path points to an ltsgraph file, so create an LTSgraph importer
-    // TODO: File format not yet revised
+    // path points to an XML layout file, so create an XML importer
+    imp = new XMLImporter();
   }
   else
   {
     // Assume we have an LTS file, so create an LTS importer
-    LTSImporter imp;
-    graph = imp.importFile(path);
-
-    int is = graph->getInitial();
-    int ns = graph->getNumStates();
-    int nt = graph->getNumTrans();
-    int nl = graph->getNumLabels();
-
-    mainFrame->setLTSInfo(is, ns, nt, nl);
-
-    // Call the display routines. This is necessary to make sure the graph is 
-    // rendered on the Mac
-    display();
-
+    imp = new LTSImporter;
   }
+
+  graph = imp->importFile(path);
+
+  int is = graph->getInitial();
+  int ns = graph->getNumStates();
+  int nt = graph->getNumTrans();
+  int nl = graph->getNumLabels();
+
+  mainFrame->setLTSInfo(is, ns, nt, nl);
+
+  // Call the display routines. This is necessary to make sure the graph is 
+  // rendered on the Mac
+  display();
 
   // Setup graph in rest of tool.
 }

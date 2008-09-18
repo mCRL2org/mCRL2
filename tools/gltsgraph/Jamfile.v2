@@ -12,6 +12,7 @@ tool gltsgraph
        : <wx>yes
          <opengl>yes
          <squadt-connectivity>implemented
+         <dependency>/libraries//ticpp
        ;
 
 install-tools gltsgraph ;

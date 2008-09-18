@@ -1,6 +1,8 @@
 #include "mainframe.h"
 #include "ids.h"
 #include <wx/menu.h>
+#include "export_svg.h"
+#include "export_xml.h"
 
 using namespace IDS;
 
@@ -98,7 +100,7 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats(*.ltsgraph;*.aut;*.svc)|*.ltsgraph;*.aut;*.svc|Position data (*.ltsgraph)|*.ltsgraph|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
+    wxT("All supported formats(*.xml;*.aut;*.svc)|*.xml;*.aut;*.svc|XML layout file (*.xml)|*.xml|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
   
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -114,7 +116,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   //TODO: Default file name, input file name
   
   wxString caption = wxT("Export layout as");
-  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg");
+  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml");
   wxString defaultDir = wxEmptyString; // Empty string -> cwd
   wxString defaultFileName = wxEmptyString;
 
@@ -135,6 +137,10 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
           fileName.Append(wxT(".svg"));
           exporter = new ExporterSVG(app->getGraph());
           break;
+        case 1: // XML item
+          fileName.Append(wxT(".xml"));
+          exporter = new ExporterXML(app->getGraph());
+          break;
       }
     }
     else
@@ -143,6 +149,10 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       if (extension == wxT("svg"))
       {
         exporter = new ExporterSVG(app->getGraph());
+      }
+      else if (extension == wxT("xml"))
+      {
+        exporter = new ExporterXML(app->getGraph());
       }
       else 
       {

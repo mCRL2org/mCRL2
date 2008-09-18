@@ -22,7 +22,6 @@
 #endif
 
 #include "infodialog.h"
-#include "export_svg.h"
 
 class MainFrame : public wxFrame
 {

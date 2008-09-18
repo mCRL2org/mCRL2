@@ -36,7 +36,6 @@ void Visualizer::drawStates(bool inSelectMode)
 
   glClear(GL_COLOR_BUFFER_BIT);
   
-  glColor3ub(255, 0, 0);
   Graph* graph = owner->getGraph();
 
   
@@ -256,15 +255,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
     }
   glEnd(); 
   
-  if(tr->isSelected())
-  {
-    glColor3ub(0, 255, 0);
-  }
-  else
-  {
-    glColor3ub(255, 0, 0);
-  }
-  
+ 
   // Transitions are uniquely identified by their from state and the identifier
   // within this state
   glPushName(IDS::TRANSITION);
@@ -279,7 +270,15 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
     glVertex2d(xVirtual + .015, yVirtual);
   glEnd();
    
-  glColor3ub(0, 0, 0);
+   if(tr->isSelected())
+  {
+    glColor3ub(255, 0, 0);
+  }
+  else
+  {
+    glColor3ub(0, 0, 0);
+  }
+ 
   glBegin(GL_LINE_LOOP);
     glVertex2d(xVirtual , yVirtual - .015);
     glVertex2d(xVirtual - .015, yVirtual);
