@@ -642,33 +642,27 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
           }
         }
         remove_parameters(p, to_be_removed_variables);
+
+        // Apply the constraints to the equations.
+        // TODO: The equations without constraints may be removed, but then the references
+        // to the propositional variables of this equations should be removed as well.
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           core::identifier_string name = i->variable().name();
           vertex& v = m_vertices[name];
+          
+          // do not apply NaC constraints
           v.remove_nac_constraints();
-          if (v.constraints.empty())
+
+          if (!v.constraints.empty())
           {
-            continue;
-          }
-          *i = pbes_equation(
-            i->symbol(),
-            i->variable(),
-            data::data_variable_map_replace(i->formula(), v.constraints)
-          );
-        }
-        
-        // remove the equations corresponding to unused predicate variables
-        Container result;
-        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-        {
-          const vertex& u = m_vertices[i->variable().name()];
-          if (!u.constraints.empty())
-          {
-            result.push_back(*i);
+            *i = pbes_equation(
+              i->symbol(),
+              i->variable(),
+              data::data_variable_map_replace(i->formula(), v.constraints)
+            );
           }
         }
-        std::swap(p.equations(), result);
       }
   };
 
