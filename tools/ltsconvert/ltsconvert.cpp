@@ -35,7 +35,7 @@ static ATermAppl get_lps(std::string const& filename)
     if ( file ) {
       ATerm t = ATreadFromFile(file);
       fclose(file);
-      
+
       if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(mcrl2::core::detail::gsIsLinProcSpec((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
       {
         gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
@@ -48,7 +48,7 @@ static ATermAppl get_lps(std::string const& filename)
       gsErrorMsg("unable to open LPS-file '%s'\n",filename.c_str());
     }
   }
-    
+
   return 0;
 }
 
@@ -70,17 +70,17 @@ class t_tool_options {
     inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
                        print_dot_state(true), determinise(false), check_reach(true) {
     }
-  
+
     inline std::string source_string() const {
       return (infilename.empty()) ? std::string("standard input") :
                                     std::string("'" + infilename + "'");
     }
-  
+
     inline std::string target_string() const {
       return (outfilename.empty()) ? std::string("standard output") :
                                      std::string("'" + outfilename + "'");
     }
-  
+
     inline lts_extra get_extra(lts_type type, std::string const &base_name = "") const {
       if ( type == lts_dot )
       {
@@ -92,7 +92,7 @@ class t_tool_options {
         if ( !lpsfile.empty() )
         {
           ATermAppl spec = get_lps(lpsfile);
-    
+
           if ( spec != NULL )
           {
             if ( mcrl2::core::detail::gsIsLinProcSpec(spec) )
@@ -106,56 +106,56 @@ class t_tool_options {
         return lts_extra();
       }
     }
-  
+
     void read_lts(lts& l) const {
       bool success = false;
-    
+
       gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
-      
+
       lts_extra extra = get_extra(intype);
-     
+
       if (infilename.empty()) {
         success = l.read_from(std::cin,intype,extra);
       }
       else {
         success = l.read_from(infilename,intype,extra);
-        
+
         if (!success && (intype == lts_none)) {
           gsVerboseMsg("reading failed; trying to force format by extension...\n");
 
           lts_type guessed_type(lts::guess_format(infilename));
-        
+
           if ( guessed_type == lts_none ) {
             gsVerboseMsg("unsupported input format extension\n");
           }
           else {
             success = l.read_from(infilename,guessed_type, get_extra(guessed_type));
-         
+
             if (!success) {
               gsVerboseMsg("reading based on format extension failed as well\n");
             }
           }
         }
       }
-    
+
       if (!success) {
         throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
                                                "\nretry with -v/--verbose for more information");
       }
-    
+
       if ( check_reach ) {
         gsVerboseMsg("checking reachability of input LTS...\n");
-    
+
         if ( !l.reachability_check(true) ) {
           gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
         }
       }
     }
-  
+
     void set_source(std::string const& filename) {
       infilename = filename;
     }
-  
+
     void set_target(std::string const& filename) {
       outfilename = filename;
 
@@ -177,20 +177,20 @@ class t_tool_options {
         }
       }
     }
-  
+
     void write_lts(lts& l) const {
       bool success = false;
-  
+
       gsVerboseMsg("writing LTS to %s...\n", target_string().c_str());
-  
+
       if (outfilename.empty()) {
         success = l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
       }
       else {
         success = l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
       }
-    
-      if (!success) { 
+
+      if (!success) {
         throw mcrl2::runtime_error("cannot write LTS to " + target_string() +
                                                "\nretry with -v/--verbose for more information");
       }
@@ -262,10 +262,10 @@ t_tool_options parse_command_line(int ac, char** av) {
             + "' minimise modulo "
             + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
       "  '" + lts::string_for_equivalence(lts_eq_branching_bisim)
-            + "' minimise modulo " 
+            + "' minimise modulo "
             + lts::name_of_equivalence(lts_eq_branching_bisim) + ",\n"
       "  '" + lts::string_for_equivalence(lts_eq_sim)
-            + "' minimise modulo " 
+            + "' minimise modulo "
             + lts::name_of_equivalence(lts_eq_sim) + ",\n"
       "  '" + lts::string_for_equivalence(lts_eq_trace)
             + "' determinise and then minimise modulo "
@@ -381,7 +381,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 static const char* lts_file_for_input  = "lts_in";  ///< file containing an LTS that can be imported using the LTS library
 static const char* lts_file_for_output = "lts_out"; ///< file used to write the output to
@@ -482,7 +482,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(fsm, "FSM")).
                 append(format_selector.associate(dot, "dot")),
            margins(0,5,0,5));
-  
+
   text_field& lps_file_field        = d.create< text_field >();
   checkbox&   check_reachability    = d.create< checkbox >();
   checkbox&   add_state_information = d.create< checkbox >();
@@ -507,8 +507,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(lts_eq_sim, "reduction modulo strong simulation equivalence")).
     append(transformation_selector.associate(lts_eq_trace, "determinisation and reduction modulo trace equivalence")).
     append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).
-    append(transformation_selector.associate(lts_eq_isomorph, "determinisation"));
-  
+    append(transformation_selector.associate(lts_eq_isomorph, "determinisation")); // abusing lts_eq_isomorph for determinisation
+
   checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
   text_field& tau_field                   = d.create< text_field >();
 
@@ -558,7 +558,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
-  
+
   static std::string extensions[6] = {
     lts::extension_for_type(lts_aut),
     lts::extension_for_type(lts_mcrl),
@@ -574,7 +574,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   if (c.output_exists(lts_file_for_output)) {
     std::string  extension(extensions[format_selector.get_selection()]);
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
- 
+
     output_file.set_mime_type(tipi::mime_type(extension));
     output_file.set_location(c.get_output_name("." + extension));
   }
@@ -609,7 +609,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-  
+
   if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
 
     c.add_option(option_add_bisimulation_equivalence_class).
@@ -677,6 +677,13 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
 
   if (method != lts_eq_none) {
+    if (method == mcrl2::lts::lts_eq_isomorph) {
+      tool_options.determinise = true;
+    }
+    else {
+      tool_options.equivalence = method;
+    }
+
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {
       tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }
@@ -684,7 +691,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       lts_reduce_add_tau_actions(tool_options.eq_opts, c.get_option_argument< std::string >(option_tau_actions));
     }
   }
- 
+
   process(tool_options);
 
   send_clear_display();
