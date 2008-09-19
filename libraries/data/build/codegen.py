@@ -42,6 +42,8 @@ sorts_table = {}
 functions_table = {}
 variables_table = {}
 recognisers = {}
+includes_table = {}
+current_sort = "" # current sort, to map include file to sort
 # Global string to collect the generated code
 outputcode = ""
 
@@ -56,6 +58,7 @@ FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
+%(includes)s
 
 namespace mcrl2 {
 
@@ -183,8 +186,6 @@ def generate_function_constructors(id, label, sortexpr):
       'name'      : label.label
     }
     arguments = sortexpr.argumentcode.split(", ")
-    print "ARGUMENTS: "
-    print arguments
     index = 0
     formalparameters = ""
     actualparameters = ""
@@ -224,8 +225,6 @@ def store_projection_arguments(id, label, sortexpr):
             else:
                 recognisers[id] = [(label.label, index)]
             index += 1    
-    print "recognisers: %s" % recognisers
-
 
 #--------------------------------------------------------------#
 # generate_projection_functions
@@ -258,16 +257,16 @@ def generate_projection_functions():
 
     return code
 
-def generate_equation_code(vars, lhs, rhs):
+def generate_equation_code(vars, condition, lhs, rhs):
     var_code = ''
     for var in vars:
         if var_code <> '':
             var_code += ", "
         var_code += "variable(\"%s\", %s())" % (var, sorts_table[variables_table[var]])
     if var_code == '':
-        eqn_code = "data_equation(variable_list(), %s, %s)" % (lhs.inlinecode, rhs.inlinecode)
+        eqn_code = "data_equation(variable_list(), %s, %s, %s)" % (condition.inlinecode, lhs.inlinecode, rhs.inlinecode)
     else:
-        eqn_code = "data_equation(make_vector(%s), %s, %s)" % (var_code, lhs.inlinecode, rhs.inlinecode)
+        eqn_code = "data_equation(make_vector(%s), %s, %s, %s)" % (var_code, condition.inlinecode, lhs.inlinecode, rhs.inlinecode)
     return eqn_code
     
 def generate_equations_code(sortlabel, equations):
@@ -285,8 +284,6 @@ def generate_equations_code(sortlabel, equations):
 
 '''
     return code
-
-    
 
 #===============================================================================
 # Tokens/precedences. 
@@ -337,6 +334,7 @@ class TokenID(Parsing.Token):
     def __init__(self, parser, s):
         Parsing.Token.__init__(self, parser)
         self.string = s
+        print "Parsed identifier %s" % s
 
 #===============================================================================
 # Nonterminals, with associated productions.  In traditional BNF, the following
@@ -380,7 +378,8 @@ class Result(Parsing.Nonterm):
         self.code = spec.code
         file_header = FILE_HEADER % {
           'uppercasename' : sorts_table[spec.sort].upper(),
-          'name'          : sorts_table[spec.sort]
+          'name'          : sorts_table[spec.sort],
+          'includes'      : ""
         }
         file_footer = FILE_FOOTER % {
           'uppercasename' : sorts_table[spec.sort].upper(),
@@ -398,19 +397,31 @@ class Result(Parsing.Nonterm):
 
     def reduceIncludesResult(self, includes, spec):
         "%reduce Includes Spec"
-        global outputcode
+        global outputcode # needed in order to modify outputcode
         self.code = spec.code
-        outputcode = outputcode + spec.code
+        file_header = FILE_HEADER % {
+          'uppercasename' : sorts_table[spec.sort].upper(),
+          'name'          : sorts_table[spec.sort],
+          'includes'      : includes.code
+        }
+        file_footer = FILE_FOOTER % {
+          'uppercasename' : sorts_table[spec.sort].upper(),
+          'name'          : sorts_table[spec.sort]
+        }
+        outputcode = outputcode + file_header + spec.code + file_footer
 
         # Debugging
         self.string = includes.string + "\n\n" + spec.string
         print "Parsed specification with include(s):\n%s" % (self.string)
+        print "sorts_table: %s" % (sorts_table)
+        print "functions_table: %s" % (functions_table)
+        print "recognisers: %s" % (recognisers)
 
 class Includes(Parsing.Nonterm):
     "%nonterm"
-    def reduceInclude(self, includes, id):
+    def reduceInclude(self, include, id):
         "%reduce include id"
-        # TODO: Process included file
+        self.code = "#include \"mcrl2/data/%s.h\"\n" % (sorts_table[includes_table[id.string]])
 
         # Debugging
         self.string = "#include %s" % (id.string)
@@ -418,7 +429,7 @@ class Includes(Parsing.Nonterm):
 
     def reduceIncludes(self, includes, include, id):
         "%reduce Includes include id"
-        # TODO: Process included files
+        self.code = includes.code + "#include \"mcrl2/data/%s.h\"\n" % (sorts_table[includes_table[id.string]])
 
         # Debugging
         self.string = "%s\n#include %s" % (includes.string, id.string)
@@ -445,9 +456,11 @@ class SortSpec(Parsing.Nonterm):
     def reduceSortSpec(self, sort, sortexpr, label, semicolon):
 #        "%reduce sort SortExpr Label semicolon" This causes ambiguity
         "%reduce sort id Label semicolon"
+        global current_sort
         sorts_table[sortexpr.string] = label.label # Register sort for usage in substitution
         self.code = generate_sort_expression_constructors(label, sortexpr)
         self.sort = sortexpr.string
+        current_sort = sortexpr.string
 
         # Debugging
         self.string = "sort %s %s;" % (sortexpr.string, label.string)
@@ -457,6 +470,7 @@ class ConsSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceConsSpec(self, cons, opdecls):
         "%reduce cons OpDecls"
+        print "parsing ConsSpec"
         self.code = opdecls.code
         
         # Debugging
@@ -518,6 +532,7 @@ class OpDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceOpDecl(self, id, label, colon, sortexpr, semicolon):
         "%reduce id Label colon SortExpr semicolon"
+        print "Parsing opdecl"
         self.code = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
         store_projection_arguments(id, label, sortexpr)
@@ -528,7 +543,7 @@ class OpDecls(Parsing.Nonterm):
 
     def reduceOpDecls(self, opdecls, id, label, colon, sortexpr, semicolon):
         "%reduce OpDecls id Label colon SortExpr semicolon"
-        print "argumentcode " + sortexpr.argumentcode
+        print "Parsing opdecls"
         self.lastcode = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
         store_projection_arguments(id, label, sortexpr)
@@ -545,11 +560,25 @@ class EqnDecls(Parsing.Nonterm):
         self.code = ""
         self.variables = lhs.variables
         self.variables= self.variables.union(rhs.variables)
-        self.inlinecode = generate_equation_code(self.variables, lhs, rhs)
+        self.condition = TokenID(parser, "true")
+        self.condition.inlinecode = "%s()" % (functions_table[self.condition.string])
+        self.inlinecode = generate_equation_code(self.variables, self.condition, lhs, rhs)
         self.equations = [self.inlinecode]
 
         # Debugging
         self.string = lhs.string + " = " + rhs.string
+        print "Parsed single data equation: %s" % (self.string)
+
+    def reduceDataEqnCondition(self, condition, arrow, lhs, equals, rhs, semicolon):
+        "%reduce DataExpr arrow DataExpr equals DataExpr semicolon"
+        self.code = ""
+        self.variables = lhs.variables
+        self.variables= self.variables.union(rhs.variables)
+        self.inlinecode = generate_equation_code(self.variables, condition, lhs, rhs)
+        self.equations = [self.inlinecode]
+
+        # Debugging
+        self.string = condition.string + " -> " + lhs.string + " = " + rhs.string
         print "Parsed single data equation: %s" % (self.string)
 
     def reduceDataEqns(self, dataeqns, lhs, equals, rhs, semicolon):
@@ -557,13 +586,29 @@ class EqnDecls(Parsing.Nonterm):
         self.code = ""
         self.variables = lhs.variables
         self.variables = self.variables.union(rhs.variables)
-        self.eqncode = generate_equation_code(self.variables, lhs, rhs)
+        self.condition = TokenID(parser, "true")
+        self.condition.inlinecode = "%s()" % (functions_table[self.condition.string])
+        self.eqncode = generate_equation_code(self.variables, self.condition, lhs, rhs)
         self.inlinecode = dataeqns.inlinecode + "\n" + self.eqncode
         self.equations = dataeqns.equations
         self.equations.append(self.eqncode)
 
         # Debugging
         self.string = dataeqns.string + '\n' + lhs.string + " = " + rhs.string
+        print "Parsed data equations: %s" % (self.string)
+
+    def reduceDataEqnsCondition(self, dataeqns, condition, arrow, lhs, equals, rhs, semicolon):
+        "%reduce EqnDecls DataExpr arrow DataExpr equals DataExpr semicolon"
+        self.code = ""
+        self.variables = lhs.variables
+        self.variables = self.variables.union(rhs.variables)
+        self.eqncode = generate_equation_code(self.variables, condition, lhs, rhs)
+        self.inlinecode = dataeqns.inlinecode + "\n" + self.eqncode
+        self.equations = dataeqns.equations
+        self.equations.append(self.eqncode)
+
+        # Debugging
+        self.string = dataeqns.string + '\n' + condition.string + " -> " + lhs.string + " = " + rhs.string
         print "Parsed data equations: %s" % (self.string)
 
 class DataExpr(Parsing.Nonterm):
@@ -652,6 +697,7 @@ class SortExpr(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, sortexpr):
         "%reduce SortExprPrimary"
+        print "Parsing SortExprPrimary"
         self.inlinecode = sortexpr.inlinecode
         self.argumentcode = sortexpr.argumentcode
         self.recogniserstring = sortexpr.recogniserstring
@@ -663,6 +709,7 @@ class SortExpr(Parsing.Nonterm):
 
     def reduceSortExprArrow(self, domain, arrow, sortexpr):
         "%reduce Domain arrow SortExpr"
+        print "Parsing sort arrow"
         self.inlinecode = "function_sort(%s, %s)" % (domain.inlinecode, sortexpr.inlinecode)
         self.argumentcode = domain.argumentcode
         self.recogniserstring = domain.recogniserstring
@@ -676,6 +723,7 @@ class Domain(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, expr, label):
         "%reduce SortExprPrimary Label"
+        print "Parsing singular domain"
         self.inlinecode = "%s()" % (sorts_table[expr.string])
         self.argumentcode = "%s" % (sorts_table[expr.string])
         self.recogniserstring = "%s" % (label.label)
@@ -686,6 +734,7 @@ class Domain(Parsing.Nonterm):
 
     def reduceHashedDomain(self, Domain, hash, SortExprPrimary, label):
         "%reduce Domain hash SortExprPrimary Label"
+        print "Parsing domain"
         self.inlinecode = "%s, %s" % (Domain.inlinecode, SortExprPrimary.inlinecode)
         self.argumentcode = "%s, %s" % (Domain.argumentcode, SortExprPrimary.argumentcode)
         self.recogniserstring = "%s, %s" % (Domain.recogniserstring, label.label)
@@ -698,16 +747,18 @@ class SortExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceId(self, expr):
         "%reduce id"
+        print "Parsing id"
         self.inlinecode = "%s()" % (sorts_table[expr.string])
         self.argumentcode = "%s" % (sorts_table[expr.string])
         self.recogniserstring = ""
 
         # Debugging
         self.string = expr.string
-        print "Parsed identifier: %s" % (self.string)
+        print "Parsed sort identifier: %s" % (self.string)
 
     def reduceParen(self, lbrack, SortExpr, rbrack):
         "%reduce lbrack SortExpr rbrack"
+        print "parsing Paren"
         self.inlinecode = SortExpr.inlinecode
         self.argumentcode = SortExpr.argumentscode
         self.recogniserstring = SortExpr.recogniserstring
@@ -752,8 +803,8 @@ class Parser(Parsing.Lr):
                 ",":  TokenComma,
                 "(":  TokenLBrack,
                 ")":  TokenRBrack,
-                "<":  TokenLAng,
-                ">":  TokenRAng,
+                "<\"":  TokenLAng,
+                "\">":  TokenRAng,
                 "=":  TokenEquals,
                 "sort": TokenSort,
                 "cons": TokenCons,
@@ -768,9 +819,9 @@ class Parser(Parsing.Lr):
         # # needs to get whitespace if it is not followed by "include"
         input = re.sub('(#)(?!include)', r" \1 ", input)
         # < needs to get whitespace if it starts a label
-        input = re.sub('(<)(?=\w)', r"\1 ", input)
+        input = re.sub('(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label
-        input = re.sub('(?<=\w)(>)', r" \1", input)
+        input = re.sub('(?<=\w)(\">)', r" \1", input)
 
         # Split the input at whitespace, producing the tokens
         p=re.compile(r'\s+')
@@ -823,7 +874,7 @@ def read_paragraphs(file):
 #-------------------------------------------------------#
 # This parser the input file and removes comment lines from it
 
-def parse_spec(filename):
+def filter_comments(filename):
     paragraphs = read_paragraphs(filename)
     clines = [] # comment lines
     glines = [] # grammar lines
@@ -838,6 +889,35 @@ def parse_spec(filename):
     comment = string.join(clines, '\n')
     spec = string.join(glines, '\n')
     return spec
+
+def get_includes(input):
+    lines = string.split(input, '\n')
+    includes = []
+    for line in lines:
+        if re.match('#include.*', line):
+            includes.append(line.lstrip('#include '))
+        else:
+            break
+    return includes
+
+def parse_spec(infilename):
+    global outputcode
+    input = filter_comments(infilename)
+    includes = get_includes(input)
+
+    parser.reset()
+
+    # Now first process the includes:
+    for include in includes:
+        includeinput = parse_spec(include)
+        includes_table[include] = current_sort
+
+    outputcode = ""
+    recognisers = {}
+    print "table of includes: %s" % (includes_table)
+    parser.reset()
+    parser.scan(input)
+
 
 # -------------------------------------------------------#
 # main
@@ -862,8 +942,7 @@ def main():
             print "Unable to open file ", filename, " ", e
             return
 
-        input = parse_spec(infilename)
-        parser.scan(input)
+        parse_spec(infilename)
         
         outfile.write(outputcode)
 

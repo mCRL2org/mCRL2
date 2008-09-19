@@ -1,17 +1,17 @@
 % specification for booleans
 
-sort Bool <bool_>;
+sort Bool <"bool_">;
 
-cons true <true_> : Bool;
-     false <false_> : Bool;
+cons true <"true_"> : Bool;
+     false <"false_"> : Bool;
 
-map == <equal_to> : Bool <left> # Bool <right> -> Bool;
-    != <not_equal_to> : Bool <left> # Bool <right> -> Bool;
-    if <if_> : Bool <condition> # Bool <ifcase> # Bool <elsecase> -> Bool;
-    ! <not_> : Bool <arg> -> Bool;
-    && <and_> : Bool <left> # Bool <right> -> Bool;
-    || <or_> : Bool <left> # Bool <right> -> Bool;
-    => <implies> : Bool <left> # Bool <right> -> Bool;
+map == <"equal_to"> : Bool <"left"> # Bool <"right"> -> Bool;
+    != <"not_equal_to"> : Bool <"left"> # Bool <"right"> -> Bool;
+    if <"if_"> : Bool <"condition"> # Bool <"ifcase"> # Bool <"elsecase"> -> Bool;
+    ! <"not_"> : Bool <"arg"> -> Bool;
+    && <"and_"> : Bool <"left"> # Bool <"right"> -> Bool;
+    || <"or_"> : Bool <"left"> # Bool <"right"> -> Bool;
+    => <"implies"> : Bool <"left"> # Bool <"right"> -> Bool;
 
 var b:Bool;
     c:Bool;
