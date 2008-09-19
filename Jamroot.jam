@@ -246,7 +246,7 @@ else {
         ;
 }
 
-include ./build/Jamfile.v2 ;
+include $(TOP)/build/Jamfile.v2 ;
 
 # Top project
 project toolset

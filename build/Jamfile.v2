@@ -10,7 +10,7 @@ rule select-configuration ( properties * ) {
   local gcc-no-overflow = 4.3.0 4.3.1 ;
 
   if <target-os>windows in $(properties) {
-    if <toolset>msvc || <toolset>intel {
+    if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
       return <define>WIN32
              <define>__WIN32__
              <define>_CRT_SECURE_NO_DEPRECATE
@@ -37,7 +37,7 @@ rule select-configuration ( properties * ) {
             <linkflags>"-undefined dynamic_lookup" ;
     }
   }
-  if <target-os>cygwin in $(properties) { # Cygwin
+  else if <target-os>cygwin in $(properties) { # Cygwin
     return <include>$(TOP)/build/workarounds/cygwin
            <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
            <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow" ;
@@ -45,14 +45,14 @@ rule select-configuration ( properties * ) {
   else if <target-os>solaris in $(properties) {
     return <include>$(TOP)/build/workarounds ;
   }
-
-  if <toolset>gcc in $(properties) { # GCC
+  else if <toolset>gcc in $(properties) { # GCC
     return <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-std=c++98 -fno-strict-overflow"
            <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
            <link>static:<linkflags>-export-dynamic ;
   }
-
-  return <include>$(TOP)/build/workarounds ;
+  else {
+    return <include>$(TOP)/build/workarounds ;
+  }
 }
 
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
