@@ -17,6 +17,7 @@
 #include <boost/program_options.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/constelm.h"
@@ -32,7 +33,7 @@ int main(int argc, char* argv[])
 
   typedef data::rewriter my_data_rewriter;
   typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef simplifying_rewriter<data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
@@ -109,7 +110,7 @@ int main(int argc, char* argv[])
     my_pbes_rewriter pbesr(datar);    
 
     // constelm algorithm
-    pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+    pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
     // run the algorithm
     algorithm.run(p, p.initial_state(), name_generator, compute_conditions);

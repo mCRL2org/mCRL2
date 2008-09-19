@@ -11,6 +11,7 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/core/text_utility.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_parse.h"
@@ -24,8 +25,8 @@ using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-typedef simplifying_rewriter<data::rewriter> my_simplify_rewriter;
-typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
+typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_simplify_rewriter;
+typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
 typedef boost::variant<my_simplify_rewriter,

@@ -8,7 +8,7 @@
 //
 /// \file pbesconstelm.cpp
 
-// #define MCRL2_PBES_CONSTELM_DEBUG
+#define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include <iostream>
@@ -65,7 +65,7 @@ class pbes_constelm_tool: public core::filter_tool
       my_pbes_rewriter pbesr(datar);    
       
       // constelm algorithm
-      pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
       
       // run the algorithm
       algorithm.run(p, p.initial_state(), name_generator, m_compute_conditions);

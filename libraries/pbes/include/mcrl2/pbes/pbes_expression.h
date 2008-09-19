@@ -467,6 +467,7 @@ namespace core {
     typedef data::data_expression_list data_term_sequence_type;
     typedef data::data_variable variable_type;
     typedef data::data_variable_list variable_sequence_type;
+    typedef pbes_system::propositional_variable propositional_variable_decl_type;   
     typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
     typedef core::identifier_string string_type;
    
